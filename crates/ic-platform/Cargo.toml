@@ -1,0 +1,29 @@
+[package]
+name = "ic-platform"
+description = "Controlled Candid and IC runtime dependency boundary"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+publish = ["crates-io"]
+include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+
+[features]
+default = []
+candid = ["dep:candid", "dep:serde"]
+executor = ["dep:ic-cdk-executor"]
+
+[dependencies]
+candid = { workspace = true, optional = true }
+ic-cdk-executor = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+
+[[test]]
+name = "candid_consumer"
+path = "tests/candid_consumer.rs"
+required-features = ["candid"]
+
+[lints]
+workspace = true

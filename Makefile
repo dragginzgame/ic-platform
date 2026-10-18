@@ -1,0 +1,59 @@
+.DEFAULT_GOAL := help
+SHARED_TOOLING_RUST := 1
+export RELEASE_DELIVERY := direct
+export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
+include make/consumer.mk
+export YQ := $(CURDIR)/.tools/host/bin/yq
+release-patch release-minor release-major release-resume: export IC_PLATFORM_RELEASE_PREPARE := 1
+
+.PHONY: help check test clippy docs-check wasm-check msrv check-boundary check-doc-links check-pins ci check-consumer check-features
+.PHONY: version release-version release-preflight release-verify release-prepare-version release-files
+.PHONY: release-prepared-check release-commit-check release-committed-check release-tagged-check release-push-check
+.PHONY: check-release-commands
+
+help:
+	@echo 'Setup: install-tools, tools-check, install-hooks'
+	@echo 'Focused: check, test, clippy, docs-check, wasm-check, msrv, check-boundary'
+	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
+
+check:
+	cargo check -p ic-platform --all-targets --all-features --locked
+test:
+	cargo test -p ic-platform --all-features --locked
+clippy:
+	cargo clippy -p ic-platform --all-targets --all-features --locked -- -D warnings
+docs-check:
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform --all-features --no-deps --locked
+wasm-check:
+	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
+msrv:
+	cargo +1.88.0 test -p ic-platform --all-features --locked
+check-boundary:
+	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)"
+check-consumer:
+	bash scripts/ci/check-platform-consumer.sh
+check-features:
+	bash scripts/ci/check-platform-features.sh
+check-doc-links:
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md crates/ic-platform/README.md
+check-pins:
+	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance
+check-release-commands:
+	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
+ci:
+	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-release-commands fmt-check check test clippy docs-check check-consumer check-features wasm-check msrv
+
+version release-version:
+	@bash scripts/release/adapter.sh version
+release-preflight:
+	@bash scripts/release/adapter.sh preflight
+release-verify:
+	+VALIDATION_FAILURE_LOG_DIR="$$(git rev-parse --git-path release-state)/validation-failures" bash scripts/ci/run-validation-targets.sh ci
+release-prepare-version:
+	@bash scripts/release/adapter.sh prepare
+release-prepared-check release-committed-check release-tagged-check release-push-check:
+	@bash scripts/release/adapter.sh check
+release-commit-check:
+	@bash scripts/release/adapter.sh commit-check
+release-files:
+	@printf 'Cargo.toml\0Cargo.lock\0CHANGELOG.md\0'
