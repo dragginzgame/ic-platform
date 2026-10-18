@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.14]
+
+### Added
+
+- Prepare caller-bounded Candid sequences and strict reserved-marker admission
+  under the existing `candid` feature, preserving external wire bytes and
+  caller-selected quotas. Includes standalone Platform-only consumer coverage;
+  [PR #26](https://github.com/dragginzgame/ic-platform/pull/26) addresses
+  [#24](https://github.com/dragginzgame/ic-platform/issues/24) and awaits integration.
+
+### Testing
+
+- Reduce feature graph queries with guarded native-only leaf equivalence on
+  Wasm from 9,218 to 5,186, retaining all 16,386 selection checks. Validate cached
+  graphs in one process per target and remove redundant graph copies
+  ([#23](https://github.com/dragginzgame/ic-platform/issues/23),
+  [PR #25](https://github.com/dragginzgame/ic-platform/pull/25)). Query reduction
+  does not establish a measured wall-clock speedup.
+
 ## [0.1.13] - 2026-10-18
 
 ### Added

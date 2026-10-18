@@ -76,105 +76,23 @@ for capability in bls canister-sig-creation signature-verification cdk secp256k1
 done
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
 cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"
-printf "%s\n" "${all_selections[@]}" | "$root/.tools/host/bin/jq" -R -s 'split("\n") | map(select(length > 0))' |
-    "$root/.tools/host/bin/jq" -r --slurpfile metadata target/feature-graphs/metadata.json \
-    -f scripts/ci/platform-feature-closures.jq > "$cache/selections.tsv"
 for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+    mapping="$cache/$target.tsv"
+    printf "%s\n" "${all_selections[@]}" | "$root/.tools/host/bin/jq" -R -s 'split("\n") | map(select(length > 0))' |
+        "$root/.tools/host/bin/jq" -r --arg target "$target" --slurpfile metadata target/feature-graphs/metadata.json \
+        -f scripts/ci/platform-feature-closures.jq > "$mapping"
     while IFS=$'\t' read -r selection key; do
-        graph="target/feature-graphs/$target-$selection.txt"
+        cached="$cache/$target-$key.txt"
+        if [[ -f "$cached" ]]; then continue; fi
         args=(tree -p ic-platform --locked --target "$target" --edges normal,build --prefix none)
         if [[ "$selection" != default ]]; then args+=(--no-default-features); fi
         if [[ "$selection" != none && "$selection" != default ]]; then args+=(--features "$selection"); fi
-        cached="$cache/$target-$key.txt"
-        if [[ ! -f "$cached" ]]; then
-            cargo "${args[@]}" > "$cached"
-        fi
-        cp "$cached" "$graph"
-        parser=false
-        if [[ "$target" != wasm* && "$selection" == *candid-parser* ]]; then parser=true; fi
-        agent=false
-        if [[ "$target" != wasm* && ",$selection," == *,agent,* ]]; then agent=true; fi
-        secp=false
-        if [[ "$target" != wasm* && ",$selection," == *,secp256k1,* ]]; then secp=true; fi
-        if ! awk -v selected="$secp" '
-            $1 == "ic-secp256k1" {
-                if (selected != "true" || $2 != "v0.3.0" || !(NF == 2 || (NF == 3 && $3 == "(*)"))) exit 1
-                found = 1
-            }
-            END { if (selected == "true" && !found) exit 1 }
-        ' "$graph"; then
-            echo "secp256k1 must retain its qualified native-only identity: $graph" >&2; exit 1
-        fi
-        if grep -Eq '^(pocket-ic|ic-testkit|ic-testkit-candid) ' "$graph"; then
-            echo "Production graph contains Testkit transport: $graph" >&2; exit 1
-        fi
-        if [[ "$parser" == false ]] && grep -Eq '^candid_parser ' "$graph"; then
-            echo "Parser must remain native host opt-in only: $graph" >&2; exit 1
-        fi
-        if [[ "$agent" == false ]] && grep -Eq '^ic-agent ' "$graph"; then
-            echo "Agent must remain native host opt-in only: $graph" >&2; exit 1
-        fi
-        executor=false
-        cdk=false
-        if [[ ",$selection," == *,cdk,* ]]; then cdk=true; fi
-        if [[ "$cdk" == true || ",$selection," == *,executor,* ]]; then executor=true; fi
-        raw_system=false
-        verification=false
-        if [[ ",$selection," == *,signature-verification,* ]]; then verification=true; fi
-        creation=false
-        if [[ "$verification" == true || ",$selection," == *,canister-sig-creation,* ]]; then creation=true; fi
-        bls=false
-        if [[ "$verification" == true || "$agent" == true || ",$selection," == *,bls,* ]]; then bls=true; fi
-        if [[ "$executor" == true || "$creation" == true || ",$selection," == *,ic0,* ]]; then raw_system=true; fi
-        certification=false
-        if [[ "$creation" == true || "$agent" == true || ",$selection," == *,certification,* ]]; then certification=true; fi
-        # Exact direct requirements do not exclude a second transitive version.
-        # Only explicit CDK selection admits the qualified SDK frontend/macros.
-        if ! awk -v executor="$executor" -v raw_system="$raw_system" -v cdk="$cdk" \
-            -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" '
-            $1 ~ /^ic-cdk/ {
-                if ($1 == "ic-cdk-executor") { if ($2 != "v2.0.0" || executor != "true") exit 1 }
-                else if ($1 == "ic-cdk" || $1 == "ic-cdk-macros") { if ($2 != "v0.20.3" || cdk != "true") exit 1 }
-                else exit 1
-            }
-            $1 == "ic0" && ($2 != "v1.2.0" || raw_system != "true") { exit 1 }
-            $1 == "ic-cdk-macros" && !(NF == 3 && $3 == "(proc-macro)" || NF == 4 && $3 == "(proc-macro)" && $4 == "(*)") { exit 1 }
-            ($1 ~ /^ic-cdk/ && $1 != "ic-cdk-macros" || $1 == "ic0") && !(NF == 2 || (NF == 3 && $3 == "(*)")) { exit 1 }
-            $1 == "ic-platform-macros" && (cdk != "true" || ($0 != generator && $0 != generator " (*)")) { exit 1 }
-        ' "$graph"; then
-            echo "Graph contains an unselected or unqualified CDK/system dependency: $graph" >&2; exit 1
-        fi
-        if [[ "$cdk" == false ]] && grep -Eq '^ic-platform-macros ' "$graph"; then
-            echo "Platform generator must remain CDK opt-in only: $graph" >&2; exit 1
-        fi
-        if ! awk -v creation="$creation" -v verification="$verification" -v bls="$bls" -v certification="$certification" '
-            $1 == "ic-canister-sig-creation" && ($2 != "v1.3.1" || creation != "true") { exit 1 }
-            $1 == "ic-signature-verification" && ($2 != "v0.3.0" || verification != "true") { exit 1 }
-            $1 == "ic-verify-bls-signature" && ($2 != "v0.6.0" || bls != "true") { exit 1 }
-            $1 == "ic_bls12_381" && ($2 != "v0.10.1" || bls != "true") { exit 1 }
-            $1 == "ic-certification" && ($2 != "v3.2.0" || certification != "true") { exit 1 }
-            ($1 == "ic-canister-sig-creation" || $1 == "ic-signature-verification" || $1 == "ic-verify-bls-signature" || $1 == "ic_bls12_381" || $1 == "ic-certification") && !(NF == 2 || (NF == 3 && $3 == "(*)")) { exit 1 }
-        ' "$graph"; then
-            echo "Graph contains an unselected or unqualified signature dependency: $graph" >&2; exit 1
-        fi
-        management=false
-        if [[ ",$selection," == *,management-canister-types,* ]]; then management=true; fi
-        if [[ "$management" == false ]] && grep -Eq '^ic-management-canister-types ' "$graph"; then
-            echo "Management types must remain opt-in only: $graph" >&2; exit 1
-        fi
-        ledger=false
-        if [[ ",$selection," == *,icrc-ledger-types,* ]]; then ledger=true; fi
-        if [[ "$ledger" == false ]] && grep -Eq '^icrc-ledger-types ' "$graph"; then
-            echo "Ledger types must remain opt-in only: $graph" >&2; exit 1
-        fi
-        if grep -Eq '^ic-stable-structures ' "$graph"; then
-            echo "Ledger storage integration is outside the Platform contract: $graph" >&2; exit 1
-        fi
-        # Protocol DTOs, host parser and Agent depend on upstream Candid independently.
-        if [[ ",$selection," != *,candid,* && "$cdk" == false && "$parser" == false && "$agent" == false && "$management" == false && "$ledger" == false && "$creation" == false ]] && grep -Eq '^(candid|candid_derive) ' "$graph"; then
-            echo "Graph without candid must remain Candid-free: $graph" >&2; exit 1
-        fi
-    done < "$cache/selections.tsv"
+        cargo "${args[@]}" > "$cached"
+    done < "$mapping"
+    awk -v target="$target" -v cache="$cache" \
+        -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" \
+        -f scripts/ci/check-platform-feature-graphs.awk "$mapping"
 done
+printf 'Feature selections, mappings and Cargo graphs retained at %s\n' "$cache"
 cargo check -p ic-platform --lib --locked --no-default-features
 cargo check -p ic-platform --lib --locked --no-default-features --features executor --target wasm32-unknown-unknown

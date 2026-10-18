@@ -1,13 +1,23 @@
-# Only local feature implication proves equivalence. Target-filtered optional
-# dependencies are deliberately not collapsed: their exclusion must be tested.
+# Collapse only local implications and strictly admitted native-only leaves.
+# A changed leaf contract fails closed, rather than reusing a possibly wrong graph.
+def native_leaves($package):
+  {agent: "ic-agent", "candid-parser": "candid_parser", secp256k1: "ic-secp256k1"} |
+  to_entries | map(. as $leaf |
+    [$package.dependencies[] | select((.rename // .name) == $leaf.value)] as $deps |
+    if $package.features[$leaf.key] == ["dep:" + $leaf.value] and
+       ($deps | length) == 1 and $deps[0].optional and
+       $deps[0].target == "cfg(not(target_family = \"wasm\"))"
+    then $leaf.key else error("native-only cache contract changed: " + $leaf.key) end);
 def closure($features):
   . as $before |
   (. + [ .[] as $name | $features[$name][]? |
           select($features[.] != null) ]) | unique |
   if . == $before then . else closure($features) end;
-($metadata[0].packages[] | select(.name == "ic-platform") | .features) as $features |
+($metadata[0].packages[] | select(.name == "ic-platform")) as $package |
+$package.features as $features |
+(if $target == "wasm32-unknown-unknown" then native_leaves($package) else [] end) as $ignored |
 .[] as $selection |
 (if $selection == "default" then "default"
  else (if $selection == "none" then [] else $selection | split(",") end |
-       closure($features) | join(",")) end) as $key |
+       closure($features) | . - $ignored | join(",")) end) as $key |
 [$selection, (if $key == "" then "none" else $key end)] | @tsv

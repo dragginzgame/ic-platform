@@ -1,5 +1,33 @@
 # Current handoff
 
+The feature-gate optimization starts from clean release `07e3835` (0.1.13).
+The local 0.1.14 draft changes validation only; package versions are unchanged.
+Wasm keys omit Agent/parser/secp256k1 leaves only after checking their exact
+single optional native-dependency contracts. Changed feature edges, target
+conditions, optionality, aliases or duplicate dependency declarations fail closed.
+Defaults remain distinct. Every original selection is still admitted against its
+Cargo graph, now by one AWK process per target rather than repeated subprocesses
+and graph copies. Attempts retain target-specific TSV maps and canonical graphs.
+
+Full selection enumeration confirms 8,193 selections per target and 4,609 native
+plus 577 Wasm keys: 5,186 Cargo queries versus 9,218 before (43.7% fewer), with
+all 16,386 checks retained. Forty-six adversarial/control cases agree with the
+previous validator; shared-key reuse and missing graphs fail as intended. Seven
+changed native-leaf contracts are refused. Sixty fresh native/Wasm observations
+across default-free, executor, CDK, verifier, management and ledger selections
+with individual/combined host features pass old/new admission and key-equivalence
+comparison. Evidence is under `target/feature-optimization-proof/`.
+
+The previous turn's exhaustive artifacts are absent from this checkout. A fresh
+full-matrix trial was stopped before completion to limit package-cache contention;
+its partial outputs are not a pass. Full matrix/full CI remain release-owned.
+No measured wall-clock speedup, new Rust compilation, installed-canister or native
+macOS qualification is claimed. Shell syntax, formatting, documentation links,
+pins, direct boundaries and unchanged snapshot checks pass. No shared snapshot,
+sibling, release version, staging, commit, remote or publication was changed.
+
+## Previous secp256k1 qualification
+
 The secp256k1 addition starts from clean `a6bbc2d` (the committed 0.1.13 draft;
 package metadata is still 0.1.12). It adds the maintainer's exact
 `ic-secp256k1 =0.3.0` behind independent native-only `secp256k1`, with explicit

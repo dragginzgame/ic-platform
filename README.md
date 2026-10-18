@@ -126,6 +126,15 @@ rejects `pocket-ic`, `ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
 direct dependency ownership; role comments themselves are not executable policy.
+The current matrix retains 16,386 selection checks while requiring 5,186 Cargo
+graph queries instead of 9,218. Wasm cache keys omit the three native-only leaves
+only after their exact feature/dependency/target contracts pass validation.
+Changed contracts fail closed. Defaults remain a separate observation. One batch
+validator per target checks every original selection against its graph; cached
+graphs are not copied per selection. Each `target/feature-graphs/attempt.*`
+directory retains target-specific TSV mappings and the actual Cargo graphs.
+This reduces cache-lock acquisitions; it does not eliminate contention with
+other Cargo processes or claim a measured wall-clock speedup.
 Certification-only builds are Candid/CDK-free. Native Agent itself requires
 transitive Candid and certification; it does not select those Platform features.
 Management DTOs also require transitive Candid and are admitted only when selected.

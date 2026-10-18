@@ -885,10 +885,16 @@ error downcasting, and independent Candid wire vectors for nat 2^128 and int -65
 This is representative boundary evidence, not a build of migrated siblings.
 
 `make check-features` checks all 8,192 feature combinations plus actual defaults on native/Wasm.
-It derives local feature closures from Cargo metadata and reuses identical graph
-queries only within the same invocation. All 16,386 selection-specific admission
-checks still run; defaults and target-filtered host features stay distinct.
-The number of reused graph queries follows the current local feature closures:
+It derives local feature closures from Cargo metadata and reuses graph queries
+only within the same invocation. On Wasm, Agent/parser/secp256k1 leaves may share
+a key only while each feature activates exactly its single optional native-only
+dependency; a changed contract fails closed. Defaults keep a separate key.
+All 16,386 selection-specific admission checks still run in one validator process
+per target, including target exclusion checks. The current contract requires
+4,609 native and 577 Wasm Cargo queries (5,186 total, previously 9,218).
+Target-specific TSV mappings and canonical graphs remain in each attempt directory.
+Neither post-hoc package-list equality nor reuse of previous runs establishes
+feature equivalence. The supported graph properties remain:
 
 Candid/CDK-free defaults and certification-only selection, Candid-free executor
 selection, optional certification isolation, explicit native-only parser/Agent and no
