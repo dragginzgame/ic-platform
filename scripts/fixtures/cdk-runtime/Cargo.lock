@@ -842,7 +842,7 @@ checksum = "8e8586a09ef26a61beaccd1187f5d7ecc442c04b592959332662c29f8f5a76cd"
 
 [[package]]
 name = "ic-platform"
-version = "0.1.14"
+version = "0.1.15"
 dependencies = [
  "candid",
  "ic-cdk",
@@ -856,7 +856,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.1.14"
+version = "0.1.15"
 dependencies = [
  "darling",
  "proc-macro2",
