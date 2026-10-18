@@ -13,8 +13,9 @@ The `candid` feature supplies `decode_one`, `decode_exactly_one`, `decode_args`,
 `CandidType`, `Principal`, `Nat`, `Int`, `Reserved`, `Error`, `ArgumentEncoder`,
 `ArgumentDecoder`, `encode_one`, `encode_args`, Serde, and the machinery needed
 by Candid derives. These are upstream identities, not independent codec types.
-Arbitrary-precision integers enable Candid's `bignum` feature only with `candid`.
-No default features, parser, automatic limits or second executor are introduced.
+Arbitrary-precision integers enable Candid's `bignum` feature with `candid`;
+the separate native parser also enables it through upstream Candid's `all` feature.
+No default features, automatic limits or second executor are introduced.
 
 `ic_platform::Principal` is available unconditionally from `ic_principal` 0.1.5,
 with its standard conversion, self-authenticating and Serde support. Consumers
@@ -195,6 +196,59 @@ or blanket upstream re-export is an acceptable shortcut.
 
 ## Host parsing and aggregate admission
 
+The optional `candid-parser` feature now exposes `ic_platform::candid_parser`
+on native hosts, selecting upstream `candid_parser` 0.4.1. The dependency and
+module are target-gated out of Wasm, including all-feature builds. No Candid,
+executor or certification feature enables host parsing. Parser-only native
+selection does pull transitive Candid with the parser's upstream `all` feature;
+it does not select Platform's `candid` feature. This is dependency isolation,
+not transitive removal or a Wasm-size measurement.
+
+The explicit surface covers the reviewed Host service inspector and Canic's
+frontend bindings, protocol argument helpers and service/type comparisons:
+`IDLProg`, `check_prog`, `TypeEnv`, `Type`, `TypeInner`, `FuncMode`, `Dec`,
+`IDLMergedProg`, `Error`, `Result`, `IDLArgs`, `parse_idl_args`, `CandidSource`,
+`instantiate_candid`, `service_equal`, `TypeContainer`, `type_equal`,
+`compile_javascript` and `compile_typescript`. These directly preserve upstream
+identities; there is no blanket crate/module export or new parser implementation.
+
+To adopt, enable `features = ["candid-parser"]` on the existing inherited
+Platform dependency in host members, or `ic-platform/candid-parser` from an
+optional product capability. Remove direct `candid_parser` declarations from
+members and the unused root catalog; update locks and dependency-boundary rules.
+Canister libraries that use parser helpers only in integration tests must select
+the host feature through their dev-dependency rather than runtime features.
+Replace `candid_parser::` imports with `ic_platform::candid_parser::` and flatten
+`syntax::{Dec, IDLMergedProg}` and `utils::{CandidSource, instantiate_candid,
+service_equal}` imports. Use root `FuncMode`, `Type`, `TypeInner`, `TypeEnv`,
+`TypeContainer` and `type_equal` for those host type operations. Replace
+`bindings::javascript::compile` with `compile_javascript` and
+`bindings::typescript::compile` with `compile_typescript`, preserving the merged
+program supplied to TypeScript generation. Move ordinary DTO/encode/decode uses
+of the parser's blanket Candid export to Platform's `candid` contract/decoder
+instead; this host surface deliberately provides no `candid` crate alias.
+
+Retain consumer source/output byte admission, method bounds, import rejection,
+artifact hashes, expected service/type rules, aggregate budgets and error
+projection. Parsing/type checking has no automatic stack, heap or work ceiling.
+`check_prog` ignores imports rather than rejecting or resolving them; consumers
+requiring self-contained text must inspect `Dec` first. `CandidSource::File`
+reads files/imports and the upstream pretty loaders can print diagnostics;
+`CandidSource::Text` and `service_equal` can print parse diagnostics too. Canic's
+silent `parse_text` path must continue parsing `IDLProg` and using `check_prog`
+directly. Do not replace it with `CandidSource::load`.
+
+The standalone parser-only consumer requires no direct Candid/parser dependency.
+It exercises constructor typing, generated browser bindings, malformed grammar,
+undefined types, import detection, service drift, Rust type equality and a fixed
+nat64 argument wire vector. Host's service inspector and existing tests are also
+qualified from a disposable copy with only imports changed; source hashes and
+fixture evidence are under `target/parser-before/host-source.sha256` and
+`target/parser-host/`. These are focused proofs, not migrated sibling workspaces.
+Actual Host/Canic adoption must still compare service inventories, generated
+binding bytes, argument bytes and existing protocol/effect/retry tests. Neither
+consumer product code nor external Candid formats or persisted data change here.
+
 Host's pending decoder first rejects oversized replies, then atomically subtracts
 admitted bytes from the caller's remaining budget before decoding. Malformed
 admitted replies still consume budget; failed admission does not. Consolidation
@@ -205,24 +259,24 @@ that diagnostic policy and needs explicit caller qualification.
 Host's service inspector uses `IDLProg`, type checking and `TypeEnv` to project
 bounded method facts, rejects imports, and leaves Wasm export identities to Host.
 Canic additionally consumes parser bindings, textual arguments and service equality;
-method inventory alone cannot replace those uses. A future explicit host-only
-feature must cover the justified parser operations and their limits. It must not
-be enabled by canister/runtime features or pull Host/Testkit back into Platform.
-No host parser has been relocated in this batch.
+method inventory alone cannot replace those uses. The new explicit host surface
+covers those operations; Host and Canic retain the surrounding implementation.
 
 ## Evidence and isolation
 
 `make test` and `make msrv` exercise the retained six decoder cases and expanded
-DTO fixture. `make check-consumer` builds a separate workspace with only Platform
-as a direct dependency: native tests on Rust 1.99 and 1.88 plus Wasm compilation.
+DTO fixture. `make check-consumer` builds separate workspaces with only Platform
+as a direct dependency: native tests on Rust 1.99 and 1.88, plus Wasm compilation
+for Candid and certification consumers. The parser consumer is native-only.
 It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.
 
-`make check-features` checks all eight feature combinations on native/Wasm:
+`make check-features` checks all sixteen feature combinations plus actual defaults on native/Wasm:
 Candid/CDK-free defaults and certification-only selection, Candid-free executor
-selection, optional certification isolation, and no host parser or Testkit transport.
-`make wasm-check` compiles both supported features together. Consumer adoption
+selection, optional certification isolation, explicit native-only parsing and no
+Testkit transport. Empty default features are checked from Cargo metadata too.
+`make wasm-check` compiles all features together while excluding the host parser. Consumer adoption
 must also run the shared dependency-boundary checker on every workspace, including
 independent fixtures and unused root catalog declarations; aliases are not escapes.
 

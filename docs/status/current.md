@@ -1,22 +1,23 @@
 # Current handoff
 
-The maintainer released 0.1.2 locally at `02183b0`; package metadata is 0.1.2.
+The maintainer released 0.1.3 locally at `b22481d`; package metadata is 0.1.3.
 The public `dragginzgame/ic-platform` remote exists. The publication-target work
 has not uploaded a crate or created commits. Testkit, Query, Canic, Timers and Host sibling checkouts were
 inspected read-only; their pending work is preserved. Storage and ic-memory remain
 out of scope.
 
 The Candid boundary now supplies the real Testkit/Query argument traits plus
-`Nat`, `Int` and `Reserved`. Big-number support is confined to the `candid` feature;
-no default features or host parser are selected. The decoder and its six tests
+`Nat`, `Int` and `Reserved`. The `candid` feature selects big-number support;
+the optional native parser also enables it upstream. Runtime features never
+select host parsing and defaults remain empty. The decoder and its six tests
 still match Testkit's reviewed working-tree owner; behavior and limits are not
-changed. Pending 0.1.3 adds unconditional `ic_platform::Principal` with upstream
+changed. Release 0.1.3 adds unconditional `ic_platform::Principal` with upstream
 conversion, self-authenticating and Serde support. There is no principal feature;
 the root and Candid contract exports share one upstream type identity. The package
-version remains 0.1.2. Default builds now include Principal's dependencies while
+version remains 0.1.3. Default builds now include Principal's dependencies while
 remaining Candid/CDK-free; executor-only builds remain Candid-free.
 
-Pending 0.1.3 also adds optional `ic_platform::certification`: explicit upstream
+Release 0.1.3 also adds optional `ic_platform::certification`: explicit upstream
 certificate, delegation, hash-tree and label identities, lookup results, tree
 constructors and `fork_hash`. It selects ic-certification 3.2.0 with Serde and is
 independent of Candid and executor features. Host retains its strict bounded CBOR
@@ -35,6 +36,31 @@ flows. The next certification step is coordinated Host/Query/Canic adoption and
 their certificate, receipt and signature verification tests against one resolved
 upstream type identity. Native macOS and installed-canister qualification remain
 outstanding; no Wasm-size reduction is claimed.
+
+Pending 0.1.4 adds an optional native `candid-parser` feature and explicit
+`ic_platform::candid_parser` APIs for parsing/checking, service/type equality,
+constructor/textual arguments and JavaScript/TypeScript generation. This is a
+compatible additive surface; package versions remain 0.1.3. The parser dependency
+and module are absent on Wasm even with all features. Runtime features never
+enable parsing. Host retains service inventories, admission bounds and aggregate
+decoder accounting; consumers retain import, artifact, diagnostic and retry policy.
+Upstream `check_prog` ignores imports, and pretty loaders can print diagnostics;
+the migration contract records the required caller distinctions.
+
+Parser-only tests and the separate Platform-only consumer pass on Rust 1.99 and
+1.88. Host's four existing service-inspection tests pass from a disposable copy
+with only imports changed, including import refusal and caller bounds. All-feature
+native tests, MSRV, Wasm compilation, Clippy and Rustdoc pass. Graph admission
+now checks all sixteen combinations plus actual defaults on native/Wasm and
+enforces empty defaults from Cargo metadata. Negative fixtures reject nonempty
+defaults, runtime-enabled parsing and an unconditional parser dependency leaking
+into Wasm. Evidence is in `target/parser-tests.log`, `target/parser-checks.log`,
+`target/parser-consumers.log`, `target/parser-host/` and `target/parser-negative/`;
+Host source hashes are in `target/parser-before/host-source.sha256`.
+
+The next parser step is actual Host/Canic adoption and their service, binding-byte,
+argument-byte and protocol tests. Existing siblings remain read-only. These local
+proofs do not qualify complete consumer builds, native macOS or installed canisters.
 
 Principal qualification passes no-feature tests on Rust 1.99/1.88, no-feature
 Wasm test compilation, all-feature tests and Wasm compilation, standalone Candid
@@ -65,7 +91,8 @@ isolation. External wire formats, persisted data and consumer policy are unchang
 
 Runtime investigation traced Canic's generated absolute Candid references and raw
 calls, CDK's entrypoint/callback/recovery contexts, and Timers' shared executor
-identity. No full CDK call/macro surface or parser relocation is implemented.
+identity. No full CDK call/macro surface is implemented. The native parser
+dependency boundary is now available; consumer parser implementation stays local.
 Host aggregate byte debiting must remain caller-owned when its pending decoder
 is consolidated. The next consequential step is real Testkit/Query host adoption
 qualification; runtime work needs a standalone generated-entrypoint fixture and
@@ -77,7 +104,7 @@ passes on both native compilers and compiles for Wasm; it covers recursive/renam
 DTOs, generic arguments, big-number wire vectors and typed source downcasting.
 All-feature Wasm compilation, strict Clippy and warning-denied Rustdoc pass.
 Earlier normal/build graphs established empty defaults, Candid-free native/Wasm executor
-selection, and no host parser in current all-feature selection. Logs are retained
+selection, and no host parser in that historical all-feature selection. Logs are retained
 under `target/candid-boundary-checks.log`; disposable consumer evidence is under
 `target/boundary-consumer.*`. These are local checks, not migrated sibling builds.
 Native macOS Intel/Apple Silicon and installed-canister behavior are unqualified.
@@ -90,22 +117,23 @@ All 96 snapshot payloads verify; none were hand-edited. The common Rust tools
 were activated with the new two-tool selection. The migration document's older
 Shared revision identifies its historical consumer audit, not the current pin.
 
-The sole library and all five dependencies are labelled production; no catalog
-entry is tests/tooling-only. Global manifest ordering is retained with inline
-dependency labels. Release metadata checks now enforce that same order during
+The sole library and all six dependencies serve production capabilities; no catalog
+entry is tests/tooling-only. Global manifest ordering is retained; inline
+dependency role labels do not enforce admission. Release metadata checks enforce the same order during
 preparation, current checks and selected-commit checks. Disposable qualification
 proves formatter idempotence, unsorted-input rejection, hook repair, and committed
 source selection despite an unsorted working manifest. The hook is shipped and
 qualified but is not activated in this checkout (`core.hooksPath` is unset).
 
-The dependency gate now checks all eight supported feature selections on Linux
+Before the parser extension, the dependency gate checked all eight supported feature selections on Linux
 x86-64 and Wasm, including transitive normal/build paths; forbidden parser and
 Testkit packages are rejected in negative substitute checks. Tools, formatting,
 snapshot and substitute release-command checks pass. Evidence, including failed
 fixture attempts before correction, is retained under `target/adoption-0.24.0/`.
 Snapshot adoption left lockfile and package versions unchanged. The certification
 extension adds ic-certification and serde_bytes to the lockfile; package versions
-remain unchanged. No full CI or release was run.
+remain unchanged. The native parser extension adds its upstream dependency graph
+to the lockfile while preserving Wasm exclusions. No full CI or release was run.
 
 Remaining enforcement boundary: comments do not classify future dependencies
 automatically, publication does not run the graph gate, and this library has no

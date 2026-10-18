@@ -13,8 +13,12 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 [features]
 default = []
 candid = ["dep:candid", "candid/bignum", "dep:serde"]
+candid-parser = ["dep:candid_parser"]
 certification = ["dep:ic-certification"]
 executor = ["dep:ic-cdk-executor"]
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+candid_parser = { workspace = true, optional = true }
 
 [dependencies]
 candid = { workspace = true, optional = true }
@@ -27,6 +31,11 @@ serde = { workspace = true, optional = true }
 name = "candid_consumer"
 path = "tests/candid_consumer.rs"
 required-features = ["candid"]
+
+[[test]]
+name = "parser_consumer"
+path = "tests/parser_consumer.rs"
+required-features = ["candid-parser"]
 
 [[test]]
 name = "certification_consumer"

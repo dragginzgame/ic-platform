@@ -13,10 +13,11 @@ Principal and its dependencies, but neither Candid nor CDK.
 | Feature | Implemented contract |
 | --- | --- |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
+| `candid-parser` | Native host parsing/type checking, service equality, textual arguments and JavaScript/TypeScript generation |
 | `certification` | Upstream certificate/hash-tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 
-The full CDK call/entrypoint boundary and host parser migration are not implemented.
+The full CDK call/entrypoint boundary and consumer migrations are not implemented.
 See [the migration contract](docs/migration.md) for ownership and adoption conditions.
 The public GitHub repository exists; the crate remains unpublished and consumers
 have not yet adopted it.
@@ -36,10 +37,14 @@ development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains and th
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
 `make shared-tooling-check`. `make ci` is the full release gate.
-`make check-consumer` tests separate Candid-only and certification-only consumers
-with only Platform declared, on Rust 1.99 and 1.88, and compiles each for Wasm.
+`make check-consumer` tests separate Candid-only, certification-only and parser-only consumers
+with only Platform declared, on Rust 1.99 and 1.88. Candid and certification
+consumers also compile for Wasm.
 It covers DTOs, argument helpers and wire vectors, plus hash-tree constructors,
-lookup outcomes, witness hashes and certificate/delegation fields.
+lookup outcomes, witness hashes and certificate/delegation fields. The parser
+consumer runs natively and covers checking, binding generation, service drift
+and typed textual-argument encoding. Parser dependencies and APIs are absent on
+Wasm, including with all features enabled.
 `make check-features` verifies default, executor and parser-isolation graphs.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
@@ -66,9 +71,10 @@ checks establish target compatibility, not installed executor/trap behavior.
 ## Dependency roles and deployment admission
 
 Shared Tooling 0.24.0 is pinned at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`.
-`ic-platform` is the sole production package. Principal, Candid, certification,
+`ic-platform` is the sole production package. Principal, Candid, the host parser, certification,
 the executor and Serde are production dependencies, including optional and derive use; there are no
-tests/tooling-only catalog entries or build/dev/target-specific declarations.
+tests/tooling-only catalog entries or build/dev declarations. The optional parser
+dependency is restricted to non-Wasm targets.
 Inline role labels retain global Cargo ordering: `fmt`, `fmt-check`, the shared
 hook and release metadata checks all use the same ungrouped ordering policy.
 The common Rust tool set now contains only cargo-sort and cargo-sort-derives;
@@ -76,14 +82,15 @@ this repository has no Candid extraction command requiring a selected extractor.
 
 `make check-features`, included in CI/release validation, checks normal/build
 transitive graphs for the native host and `wasm32-unknown-unknown`, with no
-features and all combinations of `candid`, `executor`, and `certification`.
-It rejects `candid_parser`, `pocket-ic`,
-`ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK-free defaults and Candid-free
+features and all combinations of `candid`, `executor`, `certification` and
+`candid-parser`, plus the actual default selection. It enforces empty defaults,
+rejects `pocket-ic`, `ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK-free defaults and Candid-free
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
 direct dependency ownership; role comments themselves are not executable policy.
 Certification-only builds are Candid/CDK-free; builds without the certification
-feature exclude `ic-certification`. Host retains strict bounded CBOR decoding;
+feature exclude `ic-certification`. `candid_parser` is admitted only with explicit
+native host selection; no runtime feature enables it. Host retains strict bounded CBOR decoding;
 trust roots, authentication and application interpretation remain consumer-owned.
 
 This library has no deployment entrypoint. Missing deployment enforcement belongs

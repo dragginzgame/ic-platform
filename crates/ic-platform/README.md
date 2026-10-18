@@ -28,6 +28,19 @@ Neither construction nor deserialization authenticates a certificate. This
 centralizes dependency control without removing upstream code or promising
 smaller Wasm artifacts.
 
+Enable `candid-parser` on native hosts for `ic_platform::candid_parser`. It
+explicitly exports `IDLProg`, `check_prog`, `TypeEnv`, `Type`, `TypeInner`,
+`FuncMode`, `Dec`, `IDLMergedProg`, `Error`, `Result`, `IDLArgs`, `parse_idl_args`,
+`CandidSource`, `instantiate_candid`, `service_equal`, `TypeContainer`, `type_equal`,
+`compile_javascript` and `compile_typescript`. These retain upstream identities
+and semantics. The feature does not enable Platform's `candid` or `executor`;
+the upstream parser itself depends on Candid with full type/value support.
+On Wasm this module and parser dependency are absent even with all features.
+Callers own source/output limits, imports and diagnostics. `check_prog` ignores
+imports; inspect `Dec` first when requiring self-contained source. Parse `IDLProg`
+and call `check_prog` for silent in-memory checking. `CandidSource::File` reads
+files/imports; its loaders and service comparison can print parser diagnostics.
+
 The contract also exports `ArgumentEncoder`/`ArgumentDecoder` for generic call
 helpers, `Nat`/`Int` for arbitrary-precision external values, and `Reserved` for
 partial projections. The `candid` feature includes upstream big-number support.
@@ -37,5 +50,5 @@ decoding failures. Existing wire labels and caller-owned limits remain unchanged
 `executor` exports the exact selected task/context types and operations. It owns
 no independent task registry. Callers must preserve context placement, callbacks
 and trap cleanup; native compilation does not qualify installed IC behavior.
-No full CDK entrypoint macros, call facade, parser, scheduler or transport exists
-in this initial package. Both upstream dependencies remain transitive dependencies.
+No full CDK entrypoint macros, call facade, scheduler or transport exists.
+Selected upstream dependencies remain transitive dependencies.

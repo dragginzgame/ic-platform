@@ -4,7 +4,7 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target
-for capability in candid certification; do
+for capability in candid certification candid-parser; do
 fixture="$(mktemp -d "$root/target/boundary-consumer.XXXXXX")"
 mkdir -p "$fixture/crates/consumer/src"
 cat > "$fixture/Cargo.toml" <<MANIFEST
@@ -26,12 +26,16 @@ publish = false
 [dependencies]
 ic-platform.workspace = true
 MANIFEST
-cp "crates/ic-platform/tests/${capability}_consumer.rs" "$fixture/crates/consumer/src/lib.rs"
+source="$capability"
+if [[ "$capability" == candid-parser ]]; then source=parser; fi
+cp "crates/ic-platform/tests/${source}_consumer.rs" "$fixture/crates/consumer/src/lib.rs"
 cp Cargo.lock "$fixture/Cargo.lock"
 # Only the disposable local package identity is added to an already selected graph.
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --format-version 1 > "$fixture/metadata.json"
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --locked
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --locked
-CARGO_TARGET_DIR="$root/target/consumer-build" cargo check --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
+if [[ "$capability" != candid-parser ]]; then
+    CARGO_TARGET_DIR="$root/target/consumer-build" cargo check --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
+fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
 done

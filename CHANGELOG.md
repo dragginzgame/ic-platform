@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.4]
+
+### Added
+
+- Add optional native `candid-parser` support for explicit upstream parsing,
+  checking, service equality, textual arguments and browser binding generation.
+  Keep parser dependencies out of Wasm and runtime-only builds; callers retain
+  admission limits, import resolution and diagnostic policy.
+
+### Fixed
+
+- Enforce empty default features and check the actual default dependency graph.
+
 ## [0.1.3] - 2026-10-18
 
 ### Added
