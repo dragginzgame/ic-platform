@@ -12,8 +12,8 @@ features, PocketIC, transport, host tooling or storage dependency.
 
 The full CDK call/entrypoint boundary and host parser migration are not implemented.
 See [the migration contract](docs/migration.md) for ownership and adoption conditions.
-This local repository is unpublished; its GitHub repository URL is an intended
-destination, not evidence that a remote has been created.
+The public GitHub repository exists; the crate remains unpublished and consumers
+have not yet adopted it.
 
 Consumers own schemas, authentication, byte/work budgets, deadlines, retries and
 recovery. IC Wire owns controlled application protocols. Candid remains required
@@ -30,8 +30,10 @@ development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains and th
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
 `make shared-tooling-check`. `make ci` is the full release gate.
-`make check-consumer` compiles a standalone consumer without direct Candid/Serde
-dependencies; `make check-features` verifies default and executor dependency graphs.
+`make check-consumer` tests a standalone consumer without direct Candid/Serde
+dependencies on Rust 1.99 and 1.88 and compiles it for Wasm. It covers generic
+argument helpers, recursive DTOs, arbitrary-precision values and wire vectors.
+`make check-features` verifies default, executor and parser-isolation graphs.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.

@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.1]
+
+### Added
+
+- Support Testkit/Query generic argument helpers and external arbitrary-precision
+  and reserved values through the explicit Candid boundary.
+- Extend standalone consumer qualification to Rust 1.88, recursive DTOs,
+  independent wire vectors and typed decoder causes, with Wasm compilation.
+
+### Changed
+
+- Document consumer migration and decoder retirement requirements, including
+  the remaining CDK runtime and host-parser adoption boundaries.
+- Check native/Wasm executor dependency graphs and parser isolation while
+  preserving empty default features and Candid-free executor-only builds.
+
 ## [0.1.0]
 
 ### Added

@@ -12,7 +12,7 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [features]
 default = []
-candid = ["dep:candid", "dep:serde"]
+candid = ["dep:candid", "candid/bignum", "dep:serde"]
 executor = ["dep:ic-cdk-executor"]
 
 [dependencies]

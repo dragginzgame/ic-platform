@@ -1,25 +1,52 @@
 # Current handoff
 
-Local initial 0.1.0 candidate; no commit, remote or publication yet. The maintainer
-authorized creation of `../ic-platform` as the fleet boundary. Existing sibling
-repositories remain read-only. Storage work is deferred.
+Pending 0.1.1 notes, based on local 0.1.0 commit `9ada261`. The public
+`dragginzgame/ic-platform` remote now exists. This task has not committed, pushed
+or published changes. Testkit, Query, Canic, Timers and Host sibling checkouts were
+inspected read-only; their pending work is preserved. Storage and ic-memory remain
+out of scope.
 
-The initial crate contains Testkit's bounded Candid decoder and an independent
-executor capability. See [the migration contract](../migration.md). Full CDK
-entrypoints/calls and host parser relocation are not implemented; current consumers
-still select their existing packages. Source and check evidence do not establish
-registry availability or adoption. The root changelog records the candidate.
+The Candid boundary now supplies the real Testkit/Query argument traits plus
+`Nat`, `Int` and `Reserved`. Big-number support is confined to the `candid` feature;
+no default features or host parser are selected. The decoder and its six tests
+still match Testkit's reviewed working-tree owner; behavior and limits are not
+changed. The maintainer selected a 0.1.1 changelog for these compatible additions;
+the package and lockfile version remain 0.1.0 pending release preparation.
 
-Shared source `4eabe7f771907ccebfebceafffe10657b911c0eb` combines released 0.23.0
-with the reviewed Cargo source-evidence contribution. The snapshot records exact
-selected payloads; it is not a claim of current upstream main. Setup and release
-commands use the pinned export, never a moving sibling at execution time.
+The requested `make publish` failed before dispatch: no publication target exists.
+No upload was attempted. The README requires clean committed source and native
+qualification before initial publication; the current changes remain uncommitted
+and macOS qualification is outstanding. Release targets do not publish crates.
 
-Initial Linux qualification passes six imported decoder tests and one DTO consumer
-test on Rust 1.99 and 1.88, strict Clippy, warning-denied Rustdoc, all-feature Wasm
-compilation, empty-default and Candid-free executor graphs. A separate consumer
-with only Platform declared passes its native test and Wasm compilation. Snapshot,
-documentation links, formatting, dependency boundaries, shell checks and substitute
-release-command routing pass. Pin checks used an isolated temporary index to admit
-the new lockfile; the real index remains empty. Native macOS and installed IC runtime
-behavior are not qualified. No full release gate or publication was executed.
+See [the migration contract](../migration.md) for source identities, actual callers,
+import/manifest/generator changes, tests and coordinated retirement of
+`ic-testkit-candid`. Local host-side Candid integration is ready for consumer
+qualification. Registry availability and real consumer adoption remain unproven.
+Testkit's canister probe and Query's canister feature still require the unfinished
+CDK boundary; the broader workspaces cannot yet claim full direct-dependency
+isolation. External wire formats, persisted data and consumer policy are unchanged.
+
+Runtime investigation traced Canic's generated absolute Candid references and raw
+calls, CDK's entrypoint/callback/recovery contexts, and Timers' shared executor
+identity. No full CDK call/macro surface or parser relocation is implemented.
+Host aggregate byte debiting must remain caller-owned when its pending decoder
+is consolidated. The next consequential step is real Testkit/Query host adoption
+qualification; runtime work needs a standalone generated-entrypoint fixture and
+installed mixed CDK/Timers trap-cleanup proof.
+
+Focused Linux x86-64 validation on Rust 1.99.0 and 1.88.0 passes all six retained
+decoder tests and the expanded DTO test. The separate Platform-only consumer
+passes on both native compilers and compiles for Wasm; it covers recursive/renamed
+DTOs, generic arguments, big-number wire vectors and typed source downcasting.
+All-feature Wasm compilation, strict Clippy and warning-denied Rustdoc pass.
+Normal/build graphs establish empty defaults, Candid-free native/Wasm executor
+selection, and no host parser in current all-feature selection. Logs are retained
+under `target/candid-boundary-checks.log`; disposable consumer evidence is under
+`target/boundary-consumer.*`. These are local checks, not migrated sibling builds.
+Native macOS Intel/Apple Silicon and installed-canister behavior are unqualified.
+No full release gate or Wasm-size measurement was run. Direct dependency isolation
+is not transitive Candid removal or evidence of reduced Wasm size.
+
+Shared Tooling remains pinned at `4eabe7f771907ccebfebceafffe10657b911c0eb`.
+Snapshot payloads remain unchanged. The migration contract retains the original
+Testkit source hashes; the snapshot records shared payload provenance separately.

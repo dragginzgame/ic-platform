@@ -17,6 +17,12 @@ Use `ic_platform::candid::contract` for Candid DTO derives and encoding. Add
 through the boundary's Serde export. These are external protocol types, not an
 application-wide requirement. Principal-only users can select `ic_principal`.
 
+The contract also exports `ArgumentEncoder`/`ArgumentDecoder` for generic call
+helpers, `Nat`/`Int` for arbitrary-precision external values, and `Reserved` for
+partial projections. The `candid` feature includes upstream big-number support.
+Use `Result<T, contract::Error>` for encoding errors and `DecodeError` for bounded
+decoding failures. Existing wire labels and caller-owned limits remain unchanged.
+
 `executor` exports the exact selected task/context types and operations. It owns
 no independent task registry. Callers must preserve context placement, callbacks
 and trap cleanup; native compilation does not qualify installed IC behavior.
