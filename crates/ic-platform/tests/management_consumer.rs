@@ -4,13 +4,14 @@ use ic_platform::candid::{DecodeError, DecodeLimits, contract, decode_exactly_on
 use ic_platform::management_canister_types::{
     CanisterIdRecord, CanisterInfoArgs, CanisterInfoResult, CanisterStatusResult,
     CanisterStatusType, CanisterTimer, ChangeDetails, ChunkHash, CodeDeploymentMode,
-    DefiniteCanisterSettings, HttpHeader, HttpMethod, HttpRequestArgs, HttpRequestResult,
-    LoadCanisterSnapshotArgs, MemoryMetrics, OnLowWasmMemoryHookStatus, QueryStats,
-    ReadCanisterSnapshotDataArgs, ReadCanisterSnapshotDataResult, ReadCanisterSnapshotMetadataArgs,
-    ReadCanisterSnapshotMetadataResult, Snapshot, SnapshotDataKind, SnapshotDataOffset,
-    SnapshotMetadataGlobal, SnapshotSource, StatusVisibility, TakeCanisterSnapshotArgs,
-    TransformArgs, TransformContext, TransformFunc, UploadCanisterSnapshotDataArgs,
-    UploadCanisterSnapshotMetadataArgs, UploadCanisterSnapshotMetadataResult,
+    DefiniteCanisterSettings, DeleteCanisterSnapshotArgs, HttpHeader, HttpMethod, HttpRequestArgs,
+    HttpRequestResult, LoadCanisterSnapshotArgs, MemoryMetrics, OnLowWasmMemoryHookStatus,
+    QueryStats, ReadCanisterSnapshotDataArgs, ReadCanisterSnapshotDataResult,
+    ReadCanisterSnapshotMetadataArgs, ReadCanisterSnapshotMetadataResult, Snapshot,
+    SnapshotDataKind, SnapshotDataOffset, SnapshotMetadataGlobal, SnapshotSource, StatusVisibility,
+    TakeCanisterSnapshotArgs, TransformArgs, TransformContext, TransformFunc,
+    UploadCanisterSnapshotDataArgs, UploadCanisterSnapshotMetadataArgs,
+    UploadCanisterSnapshotMetadataResult,
 };
 
 /// Preserve the probe's request bytes, transform references and caller admission.
@@ -248,7 +249,7 @@ where
     value
 }
 
-/// Preserve Backup's external snapshot/status identities and original-owner wire vectors.
+/// Preserve external snapshot/status identities and original-owner wire vectors.
 pub fn snapshot_status_roundtrip() {
     macro_rules! original {
         ($ty:ty, $name:literal) => {
@@ -269,6 +270,12 @@ pub fn snapshot_status_roundtrip() {
     assert_eq!(take.sender_canister_version, Some(u64::MAX));
     let load = original!(LoadCanisterSnapshotArgs, "load");
     assert_eq!(load.snapshot_id, [0, 255, 17]);
+    let delete = original!(DeleteCanisterSnapshotArgs, "delete");
+    assert_eq!(delete.canister_id, target.canister_id);
+    assert_eq!(delete.snapshot_id, load.snapshot_id);
+    let empty_delete = original!(DeleteCanisterSnapshotArgs, "delete-empty");
+    assert_eq!(empty_delete.canister_id, target.canister_id);
+    assert!(empty_delete.snapshot_id.is_empty());
     let snapshots = original!(Vec<Snapshot>, "list");
     assert_eq!(snapshots[0].taken_at_timestamp, u64::MAX);
     let read = original!(ReadCanisterSnapshotMetadataArgs, "read-metadata");

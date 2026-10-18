@@ -34,15 +34,18 @@ does not itself remove upstream code or shrink a canister.
 
 Prepare common tools explicitly with `make install-tools`; `make tools-check`
 verifies them offline. Checks never install executables. Rust 1.99.0 is the
-development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains and the
-`wasm32-unknown-unknown` target before their checks.
+development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains with the
+`wasm32-unknown-unknown` target for each compiler before their checks. For an
+existing MSRV toolchain, use `rustup target add --toolchain 1.88.0 wasm32-unknown-unknown`.
 
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
 `make shared-tooling-check`. `make ci` is the full release gate.
 `make check-consumer` tests separate Candid-only, certification-only, parser-only, management/Candid, ledger/Candid, ic0-only and Agent/certification consumers
 with only Platform declared, on Rust 1.99 and 1.88. Candid and certification
-consumers also compile for Wasm, as do the management, ledger and raw-system consumers.
+consumers also compile for Wasm on both compilers, as do the management, ledger
+and raw-system consumers. `make msrv` runs native all-feature tests and checks
+the all-feature Wasm library at Rust 1.88.
 The ic0-only caller compiles without executing a system call on native hosts.
 Management qualification covers fixed HTTP/history wire bytes and change variants.
 Ledger qualification covers account semantics, fixed account/block wire bytes,

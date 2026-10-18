@@ -37,6 +37,7 @@ wasm-check:
 	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 msrv:
 	cargo +1.88.0 test -p ic-platform --all-features --locked
+	cargo +1.88.0 check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)"
 check-consumer:

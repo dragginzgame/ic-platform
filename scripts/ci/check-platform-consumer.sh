@@ -55,6 +55,7 @@ CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixt
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --locked
 if [[ "$capability" != candid-parser && "$capability" != dynamic && "$capability" != agent ]]; then
     CARGO_TARGET_DIR="$root/target/consumer-build" cargo check --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
+    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 check --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
 fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
 done

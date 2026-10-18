@@ -4,6 +4,14 @@
 
 ### Added
 
+- Export upstream `DeleteCanisterSnapshotArgs` through the existing management
+  feature, preserving Canic's current snapshot-delete request bytes
+  ([#13 — Complete snapshot/status management DTOs](https://github.com/dragginzgame/ic-platform/issues/13)).
+- Expose upstream `contract::{DecoderConfig, decode_args_with_config}` for
+  generated Candid contracts, retaining existing configuration and diagnostics.
+  Include a qualified upstream CDK Candid-path patch proposal; published CDK
+  macro support remains a separate adoption prerequisite
+  ([#1 — Support Query’s CDK call and entrypoint boundary](https://github.com/dragginzgame/ic-platform/issues/1)).
 - Expose the existing raw replicated-execution flag, controller check, reply
   append and reject operations through the independent `ic0` boundary. Preserve
   upstream integer/signature identities and caller-owned byte/authentication policy
@@ -11,6 +19,9 @@
 
 ### Fixed
 
+- Check supported Wasm consumers and the all-feature library at Rust 1.88 in
+  maintained CI/release validation, with explicit MSRV target preparation
+  ([#15 — Qualify the Rust 1.88 floor on Wasm](https://github.com/dragginzgame/ic-platform/issues/15)).
 - Reject unreviewed features, unsupported CDK frontend packages and additional
   executor/system versions or sources in feature-graph validation, including
   graphs that select the executor

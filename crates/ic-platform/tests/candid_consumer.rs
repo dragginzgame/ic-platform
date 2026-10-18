@@ -63,6 +63,11 @@ pub fn roundtrip() {
         (42,)
     );
     let config = DecoderConfig::new();
+    let generated_config: contract::DecoderConfig = config.clone();
+    assert_eq!(
+        contract::decode_args_with_config::<(u64,)>(&bytes, &generated_config).unwrap(),
+        (42,)
+    );
     assert_eq!(decode_one_with_config::<u64>(&bytes, &config).unwrap(), 42);
     assert_eq!(
         decode_args_with_config::<(u64,)>(&bytes, &config).unwrap(),

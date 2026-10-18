@@ -399,6 +399,63 @@ in the installed fixture to verify cleanup, single ownership of timer exports an
 one executor graph. Preserve CDK semantics; no alternative executor implementation
 or blanket upstream re-export is an acceptable shortcut.
 
+### CDK Candid-path correction
+
+The [upstream patch proposal](../patches/cdk-rs-candid-path.patch) is based on
+CDK revision `070233b9c2820032b37ccf60ad9643eeb22b63a7`. It adds a parsed
+`candid = "module::path"` entrypoint option, defaults to `::candid`, and routes
+default decoding, encoding and `candid_method` through that path. It uses Candid's
+existing root codec functions, preserving their identities. `export_candid!(path)`
+uses the same path for both macro resolution and generated service code; its
+previous hardcoded outer `::candid::export_service!` is corrected too.
+
+Platform's contract now explicitly exposes upstream `DecoderConfig` and
+`decode_args_with_config`, alongside its existing encoders and service machinery.
+They retain upstream configuration/diagnostics, not the parent helper's finite
+limits. The candidate generator still selects CDK's existing skipping quota
+10,000 and leaves zero-argument handling, guards, tuples/unit, custom codecs,
+manual/hidden behavior, exports, executor contexts and protected spawning intact.
+
+With the candidate macro and this Platform source, the relevant syntax is:
+
+```rust,ignore
+#[ic_cdk::update(candid = "ic_platform::candid::contract")]
+async fn report(kind: String) -> String { kind }
+
+ic_cdk::export_candid!(ic_platform::candid::contract);
+```
+
+Published CDK 0.20.3 rejects this new option. The patch is an upstream contribution
+artifact, not an installed fork, build override or supported Platform frontend.
+Apply/check it only in an independently admitted CDK checkout, then run that
+owner's tests. No production manifest, lock or feature selects the candidate.
+Retire the patch artifact once a reviewed upstream release owns the correction.
+Until then, keep the documented published CDK/Candid exception. After upstream
+delivery, consumers must update their exact CDK/macro selection and generators,
+set the Candid path on every affected typed/lifecycle entrypoint and service
+export, retain DTO derive/Serde paths, remove unused direct Candid declarations,
+update locks/ownership rules and rerun their existing wire/DID/runtime tests.
+This removes the generated Candid path blocker in the proof; removing direct CDK
+still needs Platform's separately qualified runtime surface.
+
+Focused candidate evidence is retained under `target/candid-path/`: 13 macro
+tests pass on Rust 1.99/1.88; a standalone Platform/CDK canister with no direct
+Candid passes native tests and actual release Wasm builds at Rust 1.88. The
+unmodified macro reproduces the missing-`::candid` failure without that dependency.
+An original-CDK comparison with direct Candid produces byte-identical DID.
+The patched default path with `export_candid!()` also preserves that DID on
+Rust 1.88, without requiring callers to select the new option.
+Both canisters pass Linux/PocketIC 16.1.0 comparisons for scalar/tuple/unit/DTO
+bytes, composite queries, custom/manual codecs, guard rejects, awaited self-calls,
+callback-trap cleanup and subsequent success, malformed/skipping-quota traps,
+init and post-upgrade arguments. Testkit owns server admission/startup/cleanup;
+its refusal to overwrite earlier server logs is retained with the corrected
+fresh-attempt evidence. The separate Platform-only Candid fixture passes native
+MSRV tests and Wasm compilation without direct Candid or CDK. These are focused package/source-copy
+proofs, not full upstream CI, native macOS, combined Timers or live-IC acceptance.
+No transitive Candid removal or Wasm-size reduction is claimed. See
+[the runtime boundary](https://github.com/dragginzgame/ic-platform/issues/1).
+
 ## Host parsing and aggregate admission
 
 The optional `candid-parser` feature now exposes `ic_platform::candid_parser`
@@ -524,6 +581,28 @@ operations. Read-only review used Backup's working tree at base `3317b4e6`;
 `target/management-snapshot-before/backup.sha256` binds the reviewed source and
 golden files. It is not a clean-source or released-consumer claim.
 
+Canic's existing snapshot-delete call additionally requires the now-exported
+`DeleteCanisterSnapshotArgs` from exactly 0.11.0. After published qualification,
+replace `InfraDeleteCanisterSnapshotArgs` in `infra/ic/mgmt/snapshots/mod.rs`
+with `ic_platform::management_canister_types::DeleteCanisterSnapshotArgs` and
+remove that local request DTO from `types.rs`; no new feature/dependency is
+needed. Update generators/tests that emit the old request name. Keep intentional
+partial status/history response projections and their admission policies.
+Preserve `Call::unbounded_wait`, the management target/method, original canister
+and snapshot IDs, journal/authority checks, retry and recovery behavior.
+
+Read-only Canic review used dirty source at base `5583496b`; reviewed inputs and
+their hashes are retained under `target/delete-snapshot/`. A disposable copy of
+its actual two-field DTO and the original upstream encoder produce identical
+empty/nonempty snapshot-ID vectors and cross-decode in both directions. The
+Platform-only management consumer preserves those vectors, truncation/arity/byte
+refusals and zero-skipping admission on native/MSRV/Wasm. A separate native/Wasm
+Rust 1.88 proof establishes bidirectional Rust identity with the upstream type.
+No snapshot deletion or consumer lifecycle qualification is inferred from DTO
+tests; Canic retains those operations. The published 0.1.8 import still fails,
+so adoption requires delivery of this addition under the
+[management boundary](https://github.com/dragginzgame/ic-platform/issues/13).
+
 To adopt in Backup, enable `management-canister-types` on its existing inherited
 Platform dependency in Core and Agent/test selections, replace every
 `ic_management_canister_types::` import with
@@ -626,7 +705,11 @@ adoption qualification. No transitive Candid removal or Wasm-size reduction is c
 `make test` and `make msrv` exercise the retained six decoder cases and expanded
 DTO fixture. `make check-consumer` builds separate workspaces with only Platform
 as a direct dependency: native tests on Rust 1.99 and 1.88, plus Wasm compilation
-for Candid, certification, management and ledger consumers. Parser and Agent consumers are native-only.
+on both compilers for Candid, certification, management, raw-system and ledger
+consumers. Parser/dynamic and Agent consumers are native-only. `make msrv` also
+checks the all-feature library for Wasm at Rust 1.88. CI prepares the Wasm target
+for both toolchains; local validation never installs it. See
+[Wasm MSRV enforcement](https://github.com/dragginzgame/ic-platform/issues/15).
 It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.

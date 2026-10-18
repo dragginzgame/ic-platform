@@ -15,18 +15,22 @@ use std::{error::Error, fmt};
 
 pub mod decoder;
 
-/// External Candid contract types and encoders supported by this boundary.
+/// External Candid contract types, encoders and configured decoding.
 ///
 /// Derive through `contract::CandidType` with
 /// `#[candid_path("ic_platform::candid::contract")]`. Serde derives need
 /// `#[serde(crate = "ic_platform::candid::contract::serde")]` when Serde is
 /// reached only through this boundary. No upstream crate alias is required.
+///
+/// `DecoderConfig` and `decode_args_with_config` retain upstream configuration;
+/// they do not select the parent module's finite-limit helper policy.
 pub mod contract {
     pub use crate::Principal;
+    pub use candid::de::DecoderConfig;
     pub use candid::utils::{ArgumentDecoder, ArgumentEncoder};
     pub use candid::{
-        CandidType, Decode, Encode, Error, Int, Nat, Reserved, TypeEnv, candid_method, encode_args,
-        encode_one, export_service, idl_hash,
+        CandidType, Decode, Encode, Error, Int, Nat, Reserved, TypeEnv, candid_method,
+        decode_args_with_config, encode_args, encode_one, export_service, idl_hash,
     };
     pub use serde;
 

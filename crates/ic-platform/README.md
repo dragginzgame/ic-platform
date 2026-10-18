@@ -31,6 +31,8 @@ Backup's snapshot and status contract also exports `CanisterIdRecord`,
 `SnapshotDataOffset`, `SnapshotMetadataGlobal`, `SnapshotSource`, `StatusVisibility`,
 `TakeCanisterSnapshotArgs`, `UploadCanisterSnapshotDataArgs`,
 `UploadCanisterSnapshotMetadataArgs` and `UploadCanisterSnapshotMetadataResult`.
+Canic's snapshot-delete request additionally uses the same feature's explicit
+`DeleteCanisterSnapshotArgs` export, with the original canister/snapshot fields.
 These retain the external Candid format and upstream type identity on native and
 Wasm targets. This feature brings transitive Candid; select Platform's `candid`
 feature separately for encoders/decoders. It selects no executor, Agent or parser.
@@ -96,6 +98,10 @@ existing caller byte admission; do not confuse them with the parent helpers.
 
 The contract explicitly exports `candid_method`, `export_service`, `Encode`,
 `Decode`, `TypeEnv`, `idl_hash`, reflection/type equality/subtyping and printer machinery.
+It also exports `DecoderConfig` and `decode_args_with_config` with their original
+upstream identities for generated-code contracts. These preserve upstream defaults
+and selected configuration, independently of the finite-limit parent helpers.
+CDK 0.20.3 still hardcodes `::candid`; these exports alone do not fix its macros.
 `contract::types::subtype::subtype` preserves upstream structural subtyping for
 narrowed reply projections; equality is a different relation.
 For service generation, write `contract::export_service!(ic_platform::candid::contract)`;

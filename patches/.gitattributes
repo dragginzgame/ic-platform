@@ -1,0 +1,2 @@
+# Unified-diff context prefixes are significant; git apply checks source whitespace.
+*.patch -whitespace
