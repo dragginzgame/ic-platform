@@ -2,22 +2,25 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
-mkdir -p target
-cargo tree -p ic-platform --locked --no-default-features --edges normal,build --prefix none > target/default-graph.txt
-[[ "$(wc -l < target/default-graph.txt)" -eq 1 ]] || {
-    echo 'Default Platform graph must have no dependencies' >&2; exit 1;
-}
-cargo tree -p ic-platform --locked --no-default-features --features executor --edges normal,build --prefix none > target/executor-graph.txt
-if grep -Eq '^(candid|candid_derive|candid_parser) ' target/executor-graph.txt; then
-    echo 'Executor graph must remain Candid-free' >&2; exit 1
-fi
-cargo tree -p ic-platform --locked --no-default-features --features executor --target wasm32-unknown-unknown --edges normal,build --prefix none > target/executor-wasm-graph.txt
-if grep -Eq '^(candid|candid_derive|candid_parser) ' target/executor-wasm-graph.txt; then
-    echo 'Wasm executor graph must remain Candid-free' >&2; exit 1
-fi
-cargo tree -p ic-platform --locked --all-features --edges normal,build --prefix none > target/all-features-graph.txt
-if grep -Eq '^candid_parser ' target/all-features-graph.txt; then
-    echo 'Runtime features must not select the host parser' >&2; exit 1
-fi
+mkdir -p target/feature-graphs
+# These are production package graphs, including build dependencies but not dev
+# dependencies. Cargo tree prints canonical package names even for renamed deps.
+for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+    for selection in none candid executor candid,executor; do
+        graph="target/feature-graphs/$target-$selection.txt"
+        args=(tree -p ic-platform --locked --no-default-features --target "$target" --edges normal,build --prefix none)
+        if [[ "$selection" != none ]]; then args+=(--features "$selection"); fi
+        cargo "${args[@]}" > "$graph"
+        if grep -Eq '^(candid_parser|pocket-ic|ic-testkit|ic-testkit-candid) ' "$graph"; then
+            echo "Production graph contains host parsing or Testkit transport: $graph" >&2; exit 1
+        fi
+        if [[ "$selection" == none && "$(wc -l < "$graph")" -ne 1 ]]; then
+            echo "Default Platform graph must have no dependencies: $graph" >&2; exit 1
+        fi
+        if [[ "$selection" == executor ]] && grep -Eq '^(candid|candid_derive) ' "$graph"; then
+            echo "Executor graph must remain Candid-free: $graph" >&2; exit 1
+        fi
+    done
+done
 cargo check -p ic-platform --lib --locked --no-default-features
 cargo check -p ic-platform --lib --locked --no-default-features --features executor --target wasm32-unknown-unknown

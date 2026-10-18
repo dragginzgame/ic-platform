@@ -56,4 +56,32 @@ Linux x86-64 and macOS 15 on Intel and Apple Silicon are supported hosts.
 CI configures all three; native execution qualifies each separately. Wasm compile
 checks establish target compatibility, not installed executor/trap behavior.
 
+## Dependency roles and deployment admission
+
+Shared Tooling 0.24.0 is pinned at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`.
+`ic-platform` is the sole production package. Candid, the executor and Serde are
+production dependencies, including their optional and derive use; there are no
+tests/tooling-only catalog entries or build/dev/target-specific declarations.
+Inline role labels retain global Cargo ordering: `fmt`, `fmt-check`, the shared
+hook and release metadata checks all use the same ungrouped ordering policy.
+The common Rust tool set now contains only cargo-sort and cargo-sort-derives;
+this repository has no Candid extraction command requiring a selected extractor.
+
+`make check-features`, included in CI/release validation, checks normal/build
+transitive graphs for the native host and `wasm32-unknown-unknown`, with no
+features, `candid`, `executor`, and both. It rejects `candid_parser`, `pocket-ic`,
+`ic-testkit` and `ic-testkit-candid`, and checks empty defaults and Candid-free
+executor-only graphs. Cargo reports canonical package names, so dependency
+aliases do not bypass these exclusions. `check-boundary` independently checks
+direct dependency ownership; role comments themselves are not executable policy.
+
+This library has no deployment entrypoint. Missing deployment enforcement belongs
+at each consuming application: run exclusions against its exact final feature,
+target and lockfile selection, retain successful builds, and bind source/lockfile
+identity and artifact digest to deployed bytes. This repository does not provide
+that artifact admission or infer new exclusions automatically from role comments.
+`make publish` does not run the graph gate; registry publication is separate from
+the release gate and from deployment qualification. Native macOS must run its own
+checks; Linux/Wasm graph results do not qualify macOS or installed canisters.
+
 MIT licensed. The imported decoder retains IC Testkit's copyright notice.

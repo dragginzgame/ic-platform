@@ -1,8 +1,8 @@
 # Current handoff
 
-Pending 0.1.1 notes, based on local 0.1.0 commit `9ada261`. The public
-`dragginzgame/ic-platform` remote now exists. This task has not committed, pushed
-or published changes. Testkit, Query, Canic, Timers and Host sibling checkouts were
+The maintainer released 0.1.1 locally at `ba7202c`; package metadata is 0.1.1.
+The public `dragginzgame/ic-platform` remote exists. The publication-target work
+has not uploaded a crate or created commits. Testkit, Query, Canic, Timers and Host sibling checkouts were
 inspected read-only; their pending work is preserved. Storage and ic-memory remain
 out of scope.
 
@@ -10,13 +10,20 @@ The Candid boundary now supplies the real Testkit/Query argument traits plus
 `Nat`, `Int` and `Reserved`. Big-number support is confined to the `candid` feature;
 no default features or host parser are selected. The decoder and its six tests
 still match Testkit's reviewed working-tree owner; behavior and limits are not
-changed. The maintainer selected a 0.1.1 changelog for these compatible additions;
-the package and lockfile version remain 0.1.0 pending release preparation.
+changed. Compatible publication tooling is recorded under pending 0.1.2 notes;
+the package version remains 0.1.1.
 
-The requested `make publish` failed before dispatch: no publication target exists.
-No upload was attempted. The README requires clean committed source and native
-qualification before initial publication; the current changes remain uncommitted
-and macOS qualification is outstanding. Release targets do not publish crates.
+`make publish` now uploads the current committed package version to crates.io
+with locked dependencies and all features, requiring a clean checkout.
+`make publish-check` permits dirty source and runs Cargo's dry run. The real 0.1.1
+dry run packaged and verified successfully; Cargo aborted upload as requested.
+An earlier sandboxed attempt failed on registry DNS access. Evidence remains under
+`target/publication/`. Substitute checks verified exact arguments and failure
+status retention; the real dirty-checkout guard refused before Cargo dispatch.
+The selected snapshot does not include the shared publication runner; the local
+adapter uses shared source/version checks and Cargo directly. Publication behavior
+was preserved during snapshot adoption. Native macOS qualification remains outstanding. Release targets do
+not publish crates; publication still requires that separate qualification.
 
 See [the migration contract](../migration.md) for source identities, actual callers,
 import/manifest/generator changes, tests and coordinated retirement of
@@ -47,6 +54,29 @@ Native macOS Intel/Apple Silicon and installed-canister behavior are unqualified
 No full release gate or Wasm-size measurement was run. Direct dependency isolation
 is not transitive Candid removal or evidence of reduced Wasm size.
 
-Shared Tooling remains pinned at `4eabe7f771907ccebfebceafffe10657b911c0eb`.
-Snapshot payloads remain unchanged. The migration contract retains the original
-Testkit source hashes; the snapshot records shared payload provenance separately.
+Shared Tooling 0.24.0 is adopted at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`
+through its canonical exporter, including the previously missing shared hook.
+All 96 snapshot payloads verify; none were hand-edited. The common Rust tools
+were activated with the new two-tool selection. The migration document's older
+Shared revision identifies its historical consumer audit, not the current pin.
+
+The sole library and all three dependencies are labelled production; no catalog
+entry is tests/tooling-only. Global manifest ordering is retained with inline
+dependency labels. Release metadata checks now enforce that same order during
+preparation, current checks and selected-commit checks. Disposable qualification
+proves formatter idempotence, unsorted-input rejection, hook repair, and committed
+source selection despite an unsorted working manifest. The hook is shipped and
+qualified but is not activated in this checkout (`core.hooksPath` is unset).
+
+The dependency gate now checks all four supported feature selections on Linux
+x86-64 and Wasm, including transitive normal/build paths; forbidden parser and
+Testkit packages are rejected in negative substitute checks. Tools, formatting,
+snapshot and substitute release-command checks pass. Evidence, including failed
+fixture attempts before correction, is retained under `target/adoption-0.24.0/`.
+The lockfile and package versions are unchanged. No full CI or release was run.
+
+Remaining enforcement boundary: comments do not classify future dependencies
+automatically, publication does not run the graph gate, and this library has no
+deployment entrypoint binding a final application's graph/build to an artifact
+digest. Consuming applications must enforce that admission for their exact
+deployment selections. Native macOS and installed IC behavior remain unqualified.

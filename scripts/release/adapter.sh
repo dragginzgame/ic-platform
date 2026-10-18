@@ -21,14 +21,15 @@ case "$operation" in
         bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
         current="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
         if [[ "$current" == "${RELEASE_VERSION:?}" ]]; then
-            bash scripts/ci/cargo-release-metadata.sh check ic-platform
+            bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order
         else
             bash scripts/ci/cargo-release-metadata.sh prepare ic-platform
+            bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order
         fi
         ;;
     check|commit-check)
         bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
-        bash scripts/ci/cargo-release-metadata.sh check ic-platform
+        bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order
         if [[ "$operation" == commit-check ]]; then
             [[ -z "${RELEASE_COMMIT:-}" ]] || exit 1
             git diff --quiet -- Cargo.toml Cargo.lock CHANGELOG.md

@@ -8,6 +8,14 @@
   package version, and `make publish-check` for an all-feature Cargo dry run.
   Retain command output and source identity for each attempt.
 
+### Changed
+
+- Adopt Shared Tooling 0.24.0 with production dependency-role labels, matching
+  formatter/release ordering checks and the shared formatting hook payload.
+- Check host-parser and Testkit exclusions transitively across every supported
+  feature selection on native and Wasm targets. Deployment artifact admission
+  remains the responsibility of consuming applications.
+
 ## [0.1.1] - 2026-10-18
 
 ### Added

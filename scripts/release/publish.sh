@@ -15,7 +15,7 @@ printf 'Publication evidence: %s\n' "$attempt"
 printf '%s\n' "$1" "$commit" "ic-platform@$version" crates-io > "$attempt/intent"
 git status --porcelain=v1 > "$attempt/working-status"
 args=(publish --locked --registry crates-io --package "ic-platform@$version" --all-features)
-args+=("${options[@]}")
+args+=(${options[@]+"${options[@]}"})
 printf '%s\0' cargo "${args[@]}" > "$attempt/arguments"
 if [[ "$1" == publish ]]; then
     bash scripts/ci/check-release-source.sh
