@@ -24,12 +24,14 @@ ic0 = ["dep:ic0"]
 icrc-ledger-types = ["dep:icrc-ledger-types"]
 management-canister-types = ["dep:ic-management-canister-types"]
 signature-verification = ["dep:ic-signature-verification"]
+pocket-ic = ["dep:pocket-ic"]
 secp256k1 = ["dep:ic-secp256k1"]
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }
 ic-agent = { workspace = true, optional = true }
 ic-secp256k1 = { workspace = true, optional = true }
+pocket-ic = { workspace = true, optional = true }
 
 [dependencies]
 candid = { workspace = true, optional = true }
@@ -120,6 +122,11 @@ required-features = ["certification"]
 name = "cdk_identity"
 path = "tests/cdk_identity.rs"
 required-features = ["cdk"]
+
+[[test]]
+name = "pocket_ic_consumer"
+path = "tests/pocket_ic_consumer.rs"
+required-features = ["pocket-ic"]
 
 [lints]
 workspace = true

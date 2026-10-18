@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.15]
+
+### Added
+
+- Add an optional native-only `pocket-ic` maintenance boundary with explicit
+  client, error and fixture DTO exports. Testkit retains server lifecycle and
+  compatibility policy. Keep PocketIC out of default, executor and Wasm graphs.
+
 ## [0.1.14] - 2026-10-18
 
 ### Added

@@ -256,3 +256,9 @@ decoder finalization. Consumers own layouts, limits, retries and certification
 policy. Use `api::global_timer_set` (the upstream 0.20.3 name) only under the
 consumer's timer ownership, and `api::msg_method_name` in `inspect_message`.
 This isolates direct CDK dependencies; CDK and Candid remain transitive.
+
+Enable `pocket-ic` for explicit native client, typed error and fixture DTO exports
+through `ic_platform::pocket_ic`, including `nonblocking::PocketIc`. Testkit retains
+server installation, compatibility admission and lifecycle policy. This feature
+is absent on Wasm; default and executor-only builds do not select PocketIC.
+PocketIC's management DTOs retain their own upstream 0.8.0 identity.

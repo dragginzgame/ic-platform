@@ -24,6 +24,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 | `signature-verification` | Upstream canister-signature verification; transitive Candid/ic0/certification/BLS, no executor or host transport |
+| `pocket-ic` | Native PocketIC client identities; Testkit retains server lifecycle and policy |
 | `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |
 
 The optional CDK surface uses a maintained generator fork with Platform paths and
@@ -118,16 +119,15 @@ this repository has no Candid extraction command requiring a selected extractor.
 transitive graphs for the native host and `wasm32-unknown-unknown`, with no
 features and all combinations of `candid`, `executor`, `certification` and
 `candid-parser`, `agent`, `ic0`, `management-canister-types`, `icrc-ledger-types`,
-`bls`, `canister-sig-creation`, `signature-verification`, `cdk` and `secp256k1`, plus the actual default selection. It enforces empty defaults
+`bls`, `canister-sig-creation`, `signature-verification`, `cdk`, `secp256k1` and `pocket-ic`, plus the actual default selection. It enforces empty defaults
 and exact qualified executor/system requirements. It rejects unreviewed feature
 names until the matrix and isolation policy are updated, admits the selected CDK runtime/generators only with `cdk`, and rejects additional executor/
 system versions or non-registry sources in the transitive graph. It also
-rejects `pocket-ic`, `ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK-free defaults and Candid-free
+admits PocketIC only with its explicit native feature, rejects `ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK-free defaults and Candid-free
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
 direct dependency ownership; role comments themselves are not executable policy.
-The current matrix retains 16,386 selection checks while requiring 5,186 Cargo
-graph queries instead of 9,218. Wasm cache keys omit the three native-only leaves
+The matrix includes every PocketIC combination. Wasm cache keys omit the four native-only leaves
 only after their exact feature/dependency/target contracts pass validation.
 Changed contracts fail closed. Defaults remain a separate observation. One batch
 validator per target checks every original selection against its graph; cached

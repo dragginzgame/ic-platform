@@ -6,6 +6,33 @@ protocols whose producers and consumers we control. External management-canister
 NNS/SNS and ledger interfaces retain their required Candid formats. Storage and
 ic-memory changes are out of scope; no persisted representation is changed here.
 
+## PocketIC maintenance boundary
+
+The optional native-only `pocket-ic` feature exposes `ic_platform::pocket_ic`.
+Platform owns the reviewed PocketIC 16.1.0 dependency and explicit client, error,
+settings/snapshot and fixture REST identities. No replacement structs, runtime,
+server launcher or automatic client/server acceptance policy are introduced.
+Testkit retains provisioning, checksums, supported server versions, lifecycle,
+transport, retry behavior and product qualification.
+
+Testkit should replace its native `pocket-ic` declaration with Platform plus
+`features = ["pocket-ic"]`, and import `ic_platform::pocket_ic`. Its public
+`pocket_ic` module can forward the Platform module; do not retain a second direct
+upstream declaration. Its current blanket upstream export becomes this explicit
+surface, so downstream usages must be audited before delivery. Consumers continue
+using Testkit workflows. Direct-dependency policies should allow upstream PocketIC
+only in Platform, while deployment graphs must exclude PocketIC and Testkit.
+
+The feature does not enable Platform Candid, executor or parser features, but
+PocketIC brings Candid, certification and native HTTP dependencies transitively.
+Its management DTOs are upstream 0.8.0 and must not be substituted with Platform
+management-canister-types 0.11.0. PocketIC 16.1.0 also requires thiserror 2.0.18;
+the lock selects that compatible version for existing 2.x consumers. These are
+dependency-control changes, not transitive removal or Wasm-size claims.
+
+Standalone checks cover building without a server; Testkit adoption, actual
+client/server execution and native macOS qualification remain separate gates.
+
 ## Qualified Candid surface
 
 The `candid` feature supplies `decode_one`, `decode_exactly_one`, `decode_args`,

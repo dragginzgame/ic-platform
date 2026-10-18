@@ -12,7 +12,7 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1)
+capabilities=(candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic)
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in
@@ -53,6 +53,7 @@ ic-platform.workspace = true
 MANIFEST
 source="$capability"
 if [[ "$capability" == candid-parser ]]; then source=parser; fi
+if [[ "$capability" == pocket-ic ]]; then source=pocket_ic; fi
 if [[ "$capability" == canister-sig-creation ]]; then source=canister_sig; fi
 if [[ "$capability" == signature-verification ]]; then source=signature; fi
 cp "crates/ic-platform/tests/${source}_consumer.rs" "$fixture/crates/consumer/src/lib.rs"

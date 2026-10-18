@@ -4,7 +4,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/metadata.json
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "secp256k1", "signature-verification"]' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "secp256k1", "signature-verification"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
 }
@@ -67,7 +67,7 @@ all_selections+=(icrc-ledger-types)
 for selection in "${without_ledger[@]}"; do
     if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,icrc-ledger-types"); fi
 done
-for capability in bls canister-sig-creation signature-verification cdk secp256k1; do
+for capability in bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic; do
     previous=("${all_selections[@]}")
     all_selections+=("$capability")
     for selection in "${previous[@]}"; do

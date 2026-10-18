@@ -13,13 +13,13 @@ expected="$(printf 'none\tnone\ndefault\tdefault\ncdk\tcandid,cdk,executor,ic0\n
 echo 'Feature closure equivalence and isolation cases passed'
 # Native-only leaves may be removed from a Wasm key only after exact admission.
 native_metadata="$(printf '%s' "$metadata" | "$jq" '
-  .[0].packages[0] |= (.features += {"candid-parser":["dep:candid_parser"],secp256k1:["dep:ic-secp256k1"]} |
-  .dependencies = ["ic-agent","candid_parser","ic-secp256k1"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
-selections='["none","default","agent","agent,candid-parser,secp256k1","agent,cdk"]'
+  .[0].packages[0] |= (.features += {"candid-parser":["dep:candid_parser"],secp256k1:["dep:ic-secp256k1"],"pocket-ic":["dep:pocket-ic"]} |
+  .dependencies = ["ic-agent","candid_parser","ic-secp256k1","pocket-ic"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
+selections='["none","default","agent","agent,candid-parser,secp256k1,pocket-ic","agent,cdk"]'
 actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" -f scripts/ci/platform-feature-closures.jq)"
-expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tnone\nagent,candid-parser,secp256k1\tnone\nagent,cdk\tcandid,cdk,executor,ic0')"
+expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tnone\nagent,candid-parser,secp256k1,pocket-ic\tnone\nagent,cdk\tcandid,cdk,executor,ic0')"
 [[ "$actual" == "$expected" ]] || { echo 'Unexpected target-aware closure' >&2; exit 1; }
-for feature in agent candid-parser secp256k1; do
+for feature in agent candid-parser secp256k1 pocket-ic; do
     changed="$(printf '%s' "$native_metadata" | "$jq" --arg feature "$feature" '.[0].packages[0].features[$feature] += ["candid"]')"
     if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$changed" -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
         echo "Admitted non-leaf feature $feature" >&2; exit 1
@@ -31,4 +31,4 @@ for change in '.dependencies[0].target = null' '.dependencies[1].optional = fals
         echo "Admitted changed dependency contract: $change" >&2; exit 1
     fi
 done
-echo 'Native-only Wasm equivalence and seven fail-closed contract cases passed'
+echo 'Native-only Wasm equivalence and eight fail-closed contract cases passed'

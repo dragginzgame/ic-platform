@@ -54,3 +54,11 @@ requested by the maintainer. Preserve upstream type identities and external
 Candid bytes, including HTTP pricing/replication fields. Changing this constraint
 requires renewed consumer DTO/wire qualification; do not replace it with a
 lockfile-only constraint or a blanket upstream export.
+
+## PocketIC maintenance boundary
+
+The optional native-only `pocket-ic` feature owns explicit upstream client and DTO
+identities. Testkit retains server provisioning, compatibility admission,
+lifecycle, transport and retry policy. Keep PocketIC out of defaults, executor-only
+and canister deployment graphs; do not replace its management DTOs with the
+independently selected external management DTO surface.

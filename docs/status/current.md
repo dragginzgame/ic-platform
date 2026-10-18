@@ -1,5 +1,36 @@
 # Current handoff
 
+The PocketIC maintenance boundary starts at `fb797b5` (0.1.14), with package
+versions unchanged and notes under the 0.1.15 draft. The optional native-only
+`pocket-ic` feature exports the original blocking/async clients, rejection types,
+settings/snapshot and REST fixture identities used by Testkit. Platform owns the
+upstream dependency; Testkit retains server provisioning, compatibility, lifecycle,
+transport and retry policy. See the [migration contract](../migration.md#pocketic-maintenance-boundary).
+
+PocketIC 16.1.0 retains management DTOs 0.8.0 alongside Platform's independent
+0.11.0 surface. Its exact thiserror requirement selects 2.0.18 instead of 2.0.21
+(and matching derive); no unrelated dependency upgrade was requested. Default,
+executor and canister deployment selections must remain PocketIC-free. The
+feature gate now admits only selected native registry PocketIC 16.1.0, retains
+the original deployment exclusion, and includes the new native leaf in guarded
+Wasm cache equivalence. Full feature-matrix enumeration remains release-owned.
+
+The normal Testkit checkout is unchanged. Before adoption, replace its direct
+PocketIC dependency and upstream re-export with the Platform module, audit users
+of its formerly blanket surface, then qualify its unchanged client/server policy.
+No server is started by the new standalone consumer or type-identity tests.
+Focused Linux qualification passes: original upstream type identities and the
+standalone Platform-only consumer at Rust 1.88, plus the standalone consumer on
+Rust 1.99. Both consumer Wasm checks and the Rust 1.88 Wasm library build pass.
+Ten actual native/Wasm dependency graphs, native-leaf guard refusals and PocketIC
+admission/exclusion regressions pass. Strict selected Clippy, warning-denied
+Rustdoc, formatting, pins, boundaries, local documentation links and unchanged
+shared snapshot checks pass. Evidence is under `target/pocket-boundary-proof`
+and `target/boundary-consumer.K4DTeR`.
+Native macOS, installed-canister behavior and publication require separate evidence.
+
+## Previous feature-gate qualification
+
 The feature-gate optimization starts from clean release `07e3835` (0.1.13).
 The local 0.1.14 draft changes validation only; package versions are unchanged.
 Wasm keys omit Agent/parser/secp256k1 leaves only after checking their exact

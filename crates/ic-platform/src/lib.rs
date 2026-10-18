@@ -4,6 +4,7 @@
 //! `executor` selects the shared CDK executor without a Candid dependency.
 //! `candid-parser` selects native host parsing and binding generation only.
 //! `agent` selects native IC transport and identities, with consumer-owned policy.
+//! `pocket-ic` selects native simulator client identities; Testkit owns lifecycle policy.
 //! `secp256k1` selects native offline public-key derivation with upstream identities.
 //! `bls` selects BLS keys, signatures and verification with upstream allocation support.
 //! `canister-sig-creation` selects canister public-key formats and hashing.
@@ -43,3 +44,6 @@ pub mod management_canister_types;
 pub mod secp256k1;
 #[cfg(feature = "signature-verification")]
 pub mod signature_verification;
+
+#[cfg(all(feature = "pocket-ic", not(target_family = "wasm")))]
+pub mod pocket_ic;

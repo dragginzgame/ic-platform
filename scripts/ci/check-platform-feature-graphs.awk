@@ -28,6 +28,7 @@ function reject(reason) {
     native = target !~ /^wasm/
     parser = native && enabled("candid-parser")
     agent = native && enabled("agent")
+    pocket = native && enabled("pocket-ic")
     secp = native && enabled("secp256k1")
     cdk = enabled("cdk")
     executor = cdk || enabled("executor")
@@ -35,11 +36,12 @@ function reject(reason) {
     creation = verification || enabled("canister-sig-creation")
     bls = verification || agent || enabled("bls")
     raw_system = executor || creation || enabled("ic0")
-    certification = creation || agent || enabled("certification")
+    certification = pocket || creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
-    candid = enabled("candid") || cdk || parser || agent || management || ledger || creation
+    candid = pocket || enabled("candid") || cdk || parser || agent || management || ledger || creation
     found_secp = 0
+    found_pocket = 0
     for (i = 1; i <= count[key]; i++) {
         line = lines[key, i]
         n = split(line, f, " ")
@@ -49,7 +51,11 @@ function reject(reason) {
             if (!secp || version != "v0.3.0" || !registry) reject("unqualified secp256k1")
             found_secp = 1
         }
-        if (name == "pocket-ic" || name == "ic-testkit" || name == "ic-testkit-candid") reject("Testkit in production")
+        if (name == "pocket-ic") {
+            if (!pocket || version != "v16.1.0" || !registry) reject("unqualified PocketIC")
+            found_pocket = 1
+        }
+        if (name == "ic-testkit" || name == "ic-testkit-candid") reject("Testkit in production")
         if (name == "candid_parser" && !parser) reject("unselected host parser")
         if (name == "ic-agent" && !agent) reject("unselected host Agent")
         if (name ~ /^ic-cdk/) {
@@ -69,10 +75,11 @@ function reject(reason) {
         if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified BLS")
         if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified BLS curve")
         if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
-        if (name == "ic-management-canister-types" && !management) reject("unselected management types")
+        if (name == "ic-management-canister-types" && !(registry && ((management && version == "v0.11.0") || (pocket && version == "v0.8.0")))) reject("unselected management types")
         if (name == "icrc-ledger-types" && !ledger) reject("unselected ledger types")
         if (name == "ic-stable-structures") reject("storage integration")
         if ((name == "candid" || name == "candid_derive") && !candid) reject("unexpected Candid")
     }
+    if (pocket && !found_pocket) reject("missing selected PocketIC")
     if (secp && !found_secp) reject("missing selected secp256k1")
 }

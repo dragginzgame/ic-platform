@@ -68,3 +68,21 @@ if awk -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-
 rm "$fixture/native-case.txt"
 if awk -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 printf 'Batch graph admission: %s cases plus shared-key and missing-graph refusals passed\n' "$count"
+# PocketIC is admitted only as a selected native dependency with its own DTOs.
+for target in native wasm32-unknown-unknown; do
+    for selection in pocket-ic none executor; do
+        printf 'pocket-ic v16.1.0\nic-management-canister-types v0.8.0\ncandid v0.10.38\nic-certification v3.2.0\n' > "$fixture/$target-pocket.txt"
+        printf '%s\tpocket\n' "$selection" > "$fixture/mapping"
+        actual=reject
+        if awk -v target="$target" -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
+        expected=reject
+        if [[ "$target" == native && "$selection" == pocket-ic ]]; then expected=pass; fi
+        [[ "$actual" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
+    done
+done
+for package in 'pocket-ic v16.0.0' 'pocket-ic v16.1.0 (/local)' 'ic-management-canister-types v0.8.0'; do
+    printf '%s\n' "$package" > "$fixture/native-pocket.txt"
+    printf 'pocket-ic\tpocket\n' > "$fixture/mapping"
+    if awk -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
+done
+echo 'PocketIC native selection, Wasm exclusion and identity refusals passed'
