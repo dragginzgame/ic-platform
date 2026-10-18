@@ -16,6 +16,7 @@ mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 # Inherit the reviewed test dependency selections from the root catalog.
 testkit="$("$root/.tools/host/bin/yq" -p toml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
 timers="$("$root/.tools/host/bin/yq" -p toml -r '.workspace.dependencies.ic-timers' Cargo.toml)"
+cbor="$("$root/.tools/host/bin/yq" -p toml -r '.workspace.dependencies.serde_cbor' Cargo.toml)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 members = ["crates/canister", "apps/driver"]
@@ -28,6 +29,7 @@ publish = false
 ic-platform = { path = "../../crates/ic-platform", features = ["cdk"] }
 ic-testkit = "$testkit"
 ic-timers = "$timers"
+serde_cbor = "$cbor"
 [patch.crates-io]
 ic-platform = { path = "../../crates/ic-platform" }
 MANIFEST
@@ -52,8 +54,9 @@ edition.workspace = true
 publish.workspace = true
 rust-version = "1.91"
 [dependencies]
-ic-platform.workspace = true
+ic-platform = { workspace = true, features = ["certification"] }
 ic-testkit.workspace = true
+serde_cbor.workspace = true
 MANIFEST
 sed '/VALUE.set(value);/a\
     ic_timers::initialize_runtime().unwrap();' crates/ic-platform/tests/cdk_consumer.rs > "$fixture/crates/canister/src/lib.rs"

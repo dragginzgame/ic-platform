@@ -12,7 +12,9 @@ Read [the current handoff](docs/status/current.md), then
   Explicit upstream-coupled exports belong to the documented contract.
 - No default features. Executor-only builds must remain Candid-free; host parser
   features must never be enabled by canister/runtime features.
-- Storage and allocation are out of scope. Wire, Testkit, Host, Canic and Query
+- Storage implementation and allocation are out of scope. The reviewed CDK
+  stable/checkpoint passthroughs preserve upstream bytes and semantics; they do
+  not transfer storage ownership. Wire, Testkit, Host, Canic and Query
   retain their product responsibilities; existing siblings remain read-only.
 - Preserve dirty work and check for Cargo/rustc processes sharing target/ before
   editing or compiling. Use focused checks from README; full CI is release-owned.

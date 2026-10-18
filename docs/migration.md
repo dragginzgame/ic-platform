@@ -490,6 +490,55 @@ exact executor-context wrappers used by generated code. There are no blanket
 upstream modules or replacement convenience implementations. Runtime APIs retain
 the original upstream identities and CDK's controller 0/1/panic behavior.
 
+#### Remaining consumer CDK helpers
+
+The requests in [#19](https://github.com/dragginzgame/ic-platform/issues/19),
+[#20](https://github.com/dragginzgame/ic-platform/issues/20),
+[#21](https://github.com/dragginzgame/ic-platform/issues/21) and
+[#22](https://github.com/dragginzgame/ic-platform/issues/22) extend this same `cdk`
+feature with explicit upstream identities. No extra feature is needed.
+
+- `storage::{stable_save, stable_restore}` preserves the original Candid tuple
+  format, error types and restore behavior, including no decoder finalization.
+  Timers retains its `(bool, bool, u64, u64)` checkpoint and upgrade policy.
+  This narrow passthrough adds no storage implementation, layout or limits.
+- `stable::{stable_grow, stable_read, stable_write, StableMemoryError}` retains
+  `u64` pages/offsets, grow's previous-page result, bounds traps and rollback.
+  Wire retains page admission and its rollback test. `api::stable_size` supplies
+  Canic's existing observation without transferring memory ownership.
+- `api::{certified_data_set, data_certificate}` retains generic `AsRef<[u8]>`
+  input and `Option<Vec<u8>>` certificates. Auth owns tree roots, certification
+  policy and Wire payloads. Passive `certification` remains independent of CDK.
+- `call::{Error, CandidDecodeFailed, CallPerformFailed, CallRejected, RejectCode,
+  InsufficientLiquidCycleBalance}` preserves typed matching and conversions.
+  Canic keeps rejection classification, bounded/unbounded waits and retry policy.
+- `api::{cycles_burn, cost_sign_with_ecdsa, SignCostError, canister_version,
+  canister_cycle_balance, canister_liquid_cycle_balance, cost_create_canister,
+  cost_http_request, subnet_self, root_key, msg_method_name, performance_counter,
+  PerformanceCounterType, global_timer_set, debug_print}` and `cdk::println!`
+  preserve upstream signatures and execution-context restrictions. In particular,
+  use `msg_method_name` in `inspect_message`. The 0.20.3 name is
+  `global_timer_set`, not `set_global_timer`; no speculative alias is supplied.
+  Setting a timer does not install another timer entrypoint: Timers retains its
+  sole runtime export. Existing instruction/context counters remain available.
+
+For adoption, replace these paths with `ic_platform::cdk`, enable `cdk` in each
+actual canister/probe manifest, and remove exhausted direct CDK declarations and
+feature edges. Update generated paths and negative ownership tests as described
+below. Auth's hidden/custom-Wire canister needs a narrowly reviewed dependency
+gate allowance for this runtime bundle: `cdk` includes Candid transitively even
+when the application protocol is Wire. Preserve its custom codecs and hidden
+exports; do not introduce Candid protocol fallback. Executor-only libraries keep
+their independent feature selection. Host parser and Agent stay host-only.
+
+Qualify original checkpoint bytes, growth/write trap rollback, certificate tree
+lookup and typed error identity, then run the consumer's own installed tests.
+Captured consumer compilation is evidence about those captured sources, not
+published adoption. The maintained standalone and PocketIC fixture exercise
+these paths; native system-call execution is not simulated by a library test.
+
+#### Existing cycle helpers
+
 Blob's funding and resource consumers additionally use the explicit
 `cdk::api::{msg_cycles_available, msg_cycles_accept, msg_cycles_refunded,
 instruction_counter, call_context_instruction_counter}` exports. These are the

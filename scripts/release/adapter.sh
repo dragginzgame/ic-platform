@@ -8,7 +8,8 @@ unset IC_PLATFORM_RELEASE_PREPARE
 case "$operation" in
     version) bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml ;;
     preflight)
-        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
+        bash scripts/release/runtime-lock.sh check
+        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock
         current="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
         [[ "$current" == "${RELEASE_PREVIOUS:?}" ]] || exit 1
         awk -v version="${RELEASE_VERSION:?}" -v previous="$current" -v date="${RELEASE_DATE:?}" \
@@ -18,7 +19,7 @@ case "$operation" in
             --check tools-check --prepare install-tools --prepare tools-check
         ;;
     prepare)
-        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
+        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock
         current="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
         if [[ "$current" == "${RELEASE_VERSION:?}" ]]; then
             bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order-grouped
@@ -26,14 +27,16 @@ case "$operation" in
             bash scripts/ci/cargo-release-metadata.sh prepare ic-platform
             bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order-grouped
         fi
+        bash scripts/release/runtime-lock.sh prepare "${RELEASE_PREVIOUS:?}"
         ;;
     check|commit-check)
-        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md
+        bash scripts/release/runtime-lock.sh check
+        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock
         bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order-grouped
         if [[ "$operation" == commit-check ]]; then
             [[ -z "${RELEASE_COMMIT:-}" ]] || exit 1
-            git diff --quiet -- Cargo.toml Cargo.lock CHANGELOG.md
-            for path in Cargo.toml Cargo.lock CHANGELOG.md; do git cat-file -e ":$path"; done
+            git diff --quiet -- Cargo.toml Cargo.lock CHANGELOG.md scripts/fixtures/cdk-runtime/Cargo.lock
+            for path in Cargo.toml Cargo.lock CHANGELOG.md scripts/fixtures/cdk-runtime/Cargo.lock; do git cat-file -e ":$path"; done
         fi
         ;;
     *) echo 'usage: adapter.sh version|preflight|prepare|check|commit-check' >&2; exit 2 ;;

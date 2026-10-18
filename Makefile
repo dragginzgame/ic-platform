@@ -52,7 +52,7 @@ check-pins:
 check-release-commands:
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 ci:
-	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-release-commands fmt-check check test clippy docs-check check-consumer check-features wasm-check msrv
+	+bash scripts/ci/run-validation-targets.sh --fail-fast check-runtime-lock shared-tooling-check check-doc-links check-pins check-boundary check-release-commands fmt-check check test clippy docs-check check-consumer check-features wasm-check msrv
 
 version release-version:
 	@bash scripts/release/adapter.sh version
@@ -67,8 +67,13 @@ release-prepared-check release-committed-check release-tagged-check release-push
 release-commit-check:
 	@bash scripts/release/adapter.sh commit-check
 release-files:
-	@printf 'Cargo.toml\0Cargo.lock\0CHANGELOG.md\0'
+	@printf 'Cargo.toml\0Cargo.lock\0CHANGELOG.md\0scripts/fixtures/cdk-runtime/Cargo.lock\0'
 
 .PHONY: check-runtime
 check-runtime:
 	bash scripts/ci/check-platform-runtime.sh
+
+.PHONY: check-runtime-lock
+check-runtime-lock:
+	bash scripts/release/runtime-lock.sh check
+	bash scripts/ci/test-runtime-lock.sh

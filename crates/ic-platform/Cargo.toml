@@ -104,5 +104,10 @@ name = "certification_consumer"
 path = "tests/certification_consumer.rs"
 required-features = ["certification"]
 
+[[test]]
+name = "cdk_identity"
+path = "tests/cdk_identity.rs"
+required-features = ["cdk"]
+
 [lints]
 workspace = true

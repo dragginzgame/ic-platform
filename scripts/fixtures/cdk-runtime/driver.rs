@@ -151,6 +151,16 @@ fn main() {
     pic.upgrade_canister(id, wasm, contract::encode_args((30u64,)).unwrap(), None)
         .unwrap();
     assert_eq!(number(pic, id, "value"), 30);
+    assert_eq!(
+        query(pic, id, "checkpoint", ()),
+        contract::encode_args((true, false, 13u64, 2u64)).unwrap()
+    );
+    let checkpoint_bytes: Vec<u8> =
+        ic_platform::candid::decoder::decode_one(&query(pic, id, "checkpoint_bytes", ())).unwrap();
+    assert_eq!(
+        checkpoint_bytes,
+        contract::encode_args((true, false, 13u64, 2u64)).unwrap()
+    );
     update(pic, id, "timer_start", (false, false));
     advance(pic);
     assert_eq!(number(pic, id, "value"), 31);
@@ -211,5 +221,63 @@ fn main() {
         ic_platform::candid::decoder::decode_one(&query(pic, receiver, "cycle_total", ())).unwrap();
     assert_eq!(total, 1_900_000_000);
     assert_eq!(number(pic, id, "cleaned"), 1);
-    println!("CDK calls, callback cleanup, timers, upgrade, cycle refunds and counters passed");
+    // A fresh receiver has zero stable pages; a failed read must remain a trap.
+    assert_eq!(
+        pic.query_call(
+            receiver,
+            Principal::anonymous(),
+            "stable_value",
+            contract::encode_args(()).unwrap()
+        )
+        .unwrap_err()
+        .reject_code,
+        RejectCode::CanisterError
+    );
+    assert_eq!(
+        update(pic, receiver, "stable_edit", (123u64, false, false)),
+        contract::encode_args((0u64, 1u64)).unwrap()
+    );
+    let failure = pic
+        .update_call(
+            receiver,
+            Principal::anonymous(),
+            "stable_edit",
+            contract::encode_args((999u64, true, true)).unwrap(),
+        )
+        .unwrap_err();
+    assert!(failure.reject_message.contains("fixture stable rollback"));
+    assert_eq!(
+        query(pic, receiver, "stable_value", ()),
+        contract::encode_args((1u64, 123u64)).unwrap()
+    );
+    assert_eq!(
+        update(pic, receiver, "stable_edit", (456u64, true, false)),
+        contract::encode_args((1u64, 2u64)).unwrap()
+    );
+    let root = vec![42u8; 32];
+    assert_eq!(
+        update(pic, receiver, "publish_root", (root.clone(),)),
+        contract::encode_args((true,)).unwrap()
+    );
+    let certificate: Option<Vec<u8>> =
+        ic_platform::candid::decoder::decode_one(&query(pic, receiver, "certificate", ())).unwrap();
+    let certificate: ic_platform::certification::Certificate =
+        serde_cbor::from_slice(&certificate.unwrap()).unwrap();
+    assert_eq!(
+        certificate.tree.lookup_path([
+            b"canister".as_slice(),
+            receiver.as_slice(),
+            b"certified_data".as_slice()
+        ]),
+        ic_platform::certification::LookupResult::Found(root.as_slice())
+    );
+    let (version, burned, absent): (u64, u128, bool) =
+        ic_platform::candid::decoder::decode_args(&update(pic, receiver, "system_helpers", ()))
+            .unwrap();
+    assert!(version > 0);
+    assert_eq!(burned, 123);
+    assert!(absent);
+    println!(
+        "CDK runtime, checkpoint bytes, stable rollback, certificates and system helpers passed"
+    );
 }

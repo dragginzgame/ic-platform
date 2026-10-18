@@ -239,3 +239,13 @@ their published Testkit upgrade is qualified
 ([producer coordination](https://github.com/dragginzgame/ic-platform/issues/2)).
 Do not add conversion/re-export packages or replacement simulator transport.
 Selected upstream dependencies remain transitive dependencies.
+
+The same `cdk` feature includes explicit typed call failures, signing/HTTP/creation
+costs, balances, certificate publication, counters and `println!`, plus the
+reviewed `stable::{stable_grow, stable_read, stable_write, StableMemoryError}` and
+`storage::{stable_save, stable_restore}` helpers. These retain upstream type
+identity, checkpoint bytes, errors and traps; restore retains upstream's lack of
+decoder finalization. Consumers own layouts, limits, retries and certification
+policy. Use `api::global_timer_set` (the upstream 0.20.3 name) only under the
+consumer's timer ownership, and `api::msg_method_name` in `inspect_message`.
+This isolates direct CDK dependencies; CDK and Candid remain transitive.

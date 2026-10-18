@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.12]
+
+### Added
+
+- Complete explicit CDK checkpoint and cycle-burn exports for
+  [Timers #19](https://github.com/dragginzgame/ic-platform/issues/19), stable-memory
+  passthroughs for [Wire #20](https://github.com/dragginzgame/ic-platform/issues/20),
+  certificate publication for [Auth #21](https://github.com/dragginzgame/ic-platform/issues/21),
+  and typed call errors, costs, counters and system helpers for
+  [Canic #22](https://github.com/dragginzgame/ic-platform/issues/22).
+
+### Fixed
+
+- Coordinate runtime qualification lock identities with release preparation,
+  without resolving or changing external dependencies; reject stale locks.
+
+### Testing
+
+- Extend standalone MSRV/Wasm and installed PocketIC checks for upstream type
+  identity, checkpoint bytes, stable rollback, certificates and system contexts.
+
 ## [0.1.11] - 2026-10-18
 
 ### Added

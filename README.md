@@ -178,11 +178,17 @@ qualification live in the root's tests/tooling catalog, outside production graph
 The generated workspace, lock, metadata and isolated build outputs remain under
 `target/cdk-runtime.*`; concurrent attempts cannot replace one another's artifacts.
 Normal runs use the maintained `scripts/fixtures/cdk-runtime/Cargo.lock` with
-`--locked`. To refresh it after dependency or coordinated package-version changes,
+`--locked`. Release preparation updates only the two local Platform identities;
+`make check-runtime-lock` checks drift and tests that external selections stay fixed.
+To refresh it after dependency changes,
 explicitly run `bash scripts/ci/check-platform-runtime.sh --refresh-lock`, review
 the lock diff, and rerun qualification. Refresh seeds from the production lock and
 resolves the test-only additions; it may access the registry. For cached inputs,
 set `CARGO_NET_OFFLINE=true`. Normal validation never refreshes the selection.
+
+The runtime fixture also checks exact checkpoint bytes across upgrade, stable
+write/growth rollback after a trap, certified-data publication and certificate
+lookup, cycle burning, costs and system helpers in their supported contexts.
 
 Prepare and admit PocketIC with the published Testkit server setup/check workflow,
 then set `POCKET_IC_BIN` to that admitted binary, or set `IC_TESTKIT_POCKET_IC_URL`
