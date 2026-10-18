@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.14]
+
+### Testing
+
+- Reduce feature graph queries with guarded native-only leaf equivalence on
+  Wasm, while retaining every selection's dependency checks. Validate cached
+  graphs in one process per target and remove redundant graph copies.
+
 ## [0.1.13] - 2026-10-18
 
 ### Added

@@ -44,6 +44,7 @@ check-consumer:
 	bash scripts/ci/check-platform-consumer.sh
 check-features:
 	bash scripts/ci/test-platform-feature-closures.sh
+	bash scripts/ci/test-platform-feature-graphs.sh
 	bash scripts/ci/check-platform-features.sh
 check-doc-links:
 	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
