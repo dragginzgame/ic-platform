@@ -1,5 +1,22 @@
 # Current handoff
 
+The strict Candid helper change starts at `07e3835` (0.1.13), with package
+versions unchanged. It imports Testkit PR #123 source `97df333a` into the
+canonical `candid` boundary: caller-bounded sequence decoding and strict reserved
+markers. No application ceilings, endpoint DTOs, storage policy or executor
+behavior move. See the [migration contract](../migration.md#caller-selected-strict-reply-helpers)
+for provenance and consumer paths. This source change is not a supplying release
+or completed Backup adoption.
+
+Focused Linux evidence: all twelve helper/decoder library tests pass on Rust
+1.88; the standalone Platform-only Candid consumer passes native tests and Wasm
+checks on Rust 1.88, 1.91 and 1.99. A Rust 1.88 Wasm library build, strict selected
+Clippy, warning-denied Rustdoc, formatting, pins, direct boundaries, documentation
+links and unchanged snapshot checks pass. Six native/Wasm production graphs
+retain default/executor Candid isolation and Candid-only runtime/host exclusions.
+No native macOS or installed-canister qualification was performed locally; the
+required hosted matrix remains the integration gate.
+
 The secp256k1 addition starts from clean `a6bbc2d` (the committed 0.1.13 draft;
 package metadata is still 0.1.12). It adds the maintainer's exact
 `ic-secp256k1 =0.3.0` behind independent native-only `secp256k1`, with explicit

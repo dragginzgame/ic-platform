@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.14]
+
+### Added
+
+- Add caller-bounded Candid sequence deserialization and strict reserved-marker
+  admission under `candid`, preserving caller quotas and external wire bytes.
+  Qualify the migrated helpers and a standalone Platform-only consumer.
+
 ## [0.1.13] - 2026-10-18
 
 ### Added

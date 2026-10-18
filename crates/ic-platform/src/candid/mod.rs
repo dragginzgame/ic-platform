@@ -14,6 +14,8 @@ use serde::Deserialize;
 use std::{error::Error, fmt};
 
 pub mod decoder;
+pub mod reserved;
+pub mod sequence;
 
 /// External Candid contract types, encoders and configured decoding.
 ///

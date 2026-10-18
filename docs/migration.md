@@ -41,6 +41,30 @@ real limit. These limits do not promise heap, stack or elapsed-time bounds.
   small inputs. Raw bytes, authentication, disclosure and aggregate budgets stay
   with callers.
 
+## Caller-selected strict reply helpers
+
+Under the existing `candid` feature, use
+`ic_platform::candid::sequence::deserialize::<D, T, LIMIT>` inside a caller-owned
+Serde deserializer. It rejects excessive size hints before reading, never reserves
+from hints, and reads at most one typed excess element. The caller supplies
+expected-shape and overflow diagnostics; element errors propagate unchanged.
+Application aggregate bounds and all five `DecodeLimits` remain caller-owned.
+
+`ic_platform::candid::reserved::StrictReserved` preserves the Candid reserved
+wire type and encoding. It accepts only the owned decoder marker `[3]`. Use
+`DecodeLimits.skipping_quota = 0` for strict payload refusal; this type alone
+does not impose a quota or replace variant-tag and schema-evolution policies.
+
+These helpers are migrated from Testkit PR
+[#123](https://github.com/dragginzgame/ic-testkit/pull/123), source
+`97df333a0aa57a056eb3bfe443a7365c4314b361`, originally extracted from Backup
+0.30.0 (`3992e15`). Platform owns the imported implementation and regression
+tests. Do not restore `ic-testkit-candid` or add a compatibility package. Select
+Platform with `features = ["candid"]`, change the helper import paths above,
+and retain endpoint DTOs, ceilings and tests in the consumer. Derive and Serde
+paths follow the qualified contract described above. Publication and Backup
+adoption require their own subsequent qualification.
+
 ## Consumer audit evidence
 
 ### Existing decoder and service contracts
