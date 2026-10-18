@@ -23,3 +23,22 @@ Read [the current handoff](docs/status/current.md), then
   authorized; no remote, commit or publication is implied.
 - GitHub issues are the follow-up tracker once a remote exists. Migration and
   provenance documents specify contracts and evidence, not a second issue queue.
+
+## Executor identity
+
+The published boundary constrains `ic-cdk-executor` to `=2.0.0` to preserve
+Timers' existing qualified callback/trap identity in downstream resolution.
+Any change requires renewed combined CDK/Timers await, callback-trap,
+cancellation and upgrade qualification; a lockfile-only check is insufficient.
+See [the executor constraint issue](https://github.com/dragginzgame/ic-platform/issues/7).
+The optional `ic0` boundary similarly preserves `=1.2.0` and upstream safe/unsafe
+signatures. It installs no timer entrypoint and transfers no storage ownership.
+Changes require renewed Timers submission/callback/trap/upgrade qualification.
+
+## Management contract
+
+The optional management-canister DTO boundary uses `=0.11.0`, as explicitly
+requested by the maintainer. Preserve upstream type identities and external
+Candid bytes, including HTTP pricing/replication fields. Changing this constraint
+requires renewed consumer DTO/wire qualification; do not replace it with a
+lockfile-only constraint or a blanket upstream export.

@@ -1,7 +1,7 @@
 //! A standalone consumer of the explicit certification surface.
 use ic_platform::certification::{
-    Certificate, Delegation, HashTree, Label, LookupResult, empty, fork, fork_hash, labeled, leaf,
-    pruned,
+    Certificate, Delegation, HashTree, Label, LookupResult, SubtreeLookupResult, empty, fork,
+    fork_hash, labeled, labeled_hash, leaf, pruned,
 };
 
 /// Exercise receipt lookup, witness hashes and certificate field identities.
@@ -18,6 +18,27 @@ pub fn roundtrip() {
     );
     let label = Label::from_bytes(b"receipt");
     let tree: HashTree = labeled(label, payload);
+    // Independent SHA-256 vector: labelled domain, label, then the leaf digest.
+    assert_eq!(
+        tree.digest(),
+        [
+            0xb3, 0x79, 0x22, 0xaa, 0xcb, 0x6f, 0x56, 0x70, 0x85, 0x23, 0x2a, 0x2f, 0x3d, 0x2f,
+            0xd6, 0x68, 0x7a, 0x93, 0x9c, 0x5f, 0x79, 0xba, 0xc0, 0x67, 0x35, 0x5d, 0x37, 0xfe,
+            0xc7, 0x1e, 0xfe, 0x7c,
+        ]
+    );
+    assert_eq!(
+        tree.digest(),
+        labeled_hash(b"receipt", &leaf(b"payload".to_vec()).digest())
+    );
+    assert!(matches!(
+        tree.lookup_subtree([b"receipt"]),
+        SubtreeLookupResult::Found(_)
+    ));
+    assert!(matches!(
+        tree.lookup_subtree([b"absent"]),
+        SubtreeLookupResult::Absent
+    ));
     assert!(matches!(
         tree.lookup_path([b"receipt"]),
         LookupResult::Found(b"payload")
@@ -27,6 +48,10 @@ pub fn roundtrip() {
         LookupResult::Absent
     ));
     let hidden = pruned(tree.digest());
+    assert!(matches!(
+        hidden.lookup_subtree([b"receipt"]),
+        SubtreeLookupResult::Unknown
+    ));
     assert!(matches!(
         hidden.lookup_path([b"receipt"]),
         LookupResult::Unknown

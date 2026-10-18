@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.1.5]
+
+### Added
+
+- Add optional management-canister HTTP outcall DTOs from exactly 0.11.0,
+  preserving upstream types and external Candid formats without selecting an
+  executor or host transport. Callers retain bounds, pricing and retry policy.
+- Add optional native `agent` support for explicit upstream Agent builders,
+  PEM identities, transport errors, signed updates and request-status APIs.
+  Keep transport out of Wasm and runtime-only builds; consumers retain endpoint,
+  trust-root, response-bound, retry and reconciliation policies.
+  [#9 — Publish Agent boundary needed to finish Query dependency adoption](https://github.com/dragginzgame/ic-platform/issues/9).
+- Expose subtree lookup results and labelled hashing through certification for
+  Agent consumers without introducing another hash-tree owner.
+  [#4 — Complete certification exports for Query subtree lookup and witness fixtures](https://github.com/dragginzgame/ic-platform/issues/4).
+- Expose upstream staged decoding/configuration and Candid service generation,
+  reflection and encoding macros without changing existing decoder policies.
+  [#3 — Preserve staged Candid decoder failures](https://github.com/dragginzgame/ic-platform/issues/3),
+  [#5 — Support Canic Candid service generation, reflection and existing decoder contracts](https://github.com/dragginzgame/ic-platform/issues/5).
+- Add an independent `ic0` feature for Timers' qualified raw system calls,
+  retaining upstream callback signatures and caller-owned timer/recovery policy.
+  [#8 — Expose Timers’ qualified raw IC system-call boundary](https://github.com/dragginzgame/ic-platform/issues/8).
+
+### Fixed
+
+- Constrain the shared executor to qualified 2.0.0 and raw system ABI to 1.2.0
+  in downstream dependency resolution.
+  [#7 — Preserve Timers’ exact qualified executor selection](https://github.com/dragginzgame/ic-platform/issues/7).
+- Filter standalone-consumer metadata to its native target so fresh CI caches
+  do not require unrelated foreign-target sources while offline.
+  [#10 — Scope standalone consumer metadata to the native target in fresh CI caches](https://github.com/dragginzgame/ic-platform/issues/10).
+
 ## [0.1.4] - 2026-10-18
 
 ### Added

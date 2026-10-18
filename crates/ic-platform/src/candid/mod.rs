@@ -13,6 +13,8 @@ use candid::{
 use serde::Deserialize;
 use std::{error::Error, fmt};
 
+pub mod decoder;
+
 /// External Candid contract types and encoders supported by this boundary.
 ///
 /// Derive through `contract::CandidType` with
@@ -22,15 +24,22 @@ use std::{error::Error, fmt};
 pub mod contract {
     pub use crate::Principal;
     pub use candid::utils::{ArgumentDecoder, ArgumentEncoder};
-    pub use candid::{CandidType, Error, Int, Nat, Reserved, encode_args, encode_one};
+    pub use candid::{
+        CandidType, Decode, Encode, Error, Int, Nat, Reserved, TypeEnv, candid_method, encode_args,
+        encode_one, export_service, idl_hash,
+    };
     pub use serde;
+
+    pub mod pretty;
 
     /// Trait machinery required by the qualified upstream Candid derive.
     /// This is an explicit upstream-coupled contract, not an independent codec.
     pub mod types {
+        pub mod internal;
+        pub mod subtype;
         pub use candid::types::{
-            CandidType, Compound, Field, FieldDoc, Label, Serializer, Type, TypeDoc, TypeId,
-            TypeInner,
+            CandidType, Compound, Field, FieldDoc, FuncMode, Function, Label, Serializer, Type,
+            TypeDoc, TypeId, TypeInner,
         };
     }
 }

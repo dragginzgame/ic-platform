@@ -1,0 +1,26 @@
+[
+  {
+    "rule": "cargo-exact",
+    "file": "Cargo.toml",
+    "subject": "ic-cdk-executor",
+    "value": "=2.0.0",
+    "reason": "Preserve Timers' qualified callback/trap executor identity in every downstream graph.",
+    "evidence": "AGENTS.md#executor-identity"
+  },
+  {
+    "rule": "cargo-exact",
+    "file": "Cargo.toml",
+    "subject": "ic0",
+    "value": "=1.2.0",
+    "reason": "Preserve Timers' qualified raw system-call signatures, callback ABI and traps.",
+    "evidence": "AGENTS.md#executor-identity"
+  },
+  {
+    "rule": "cargo-exact",
+    "file": "Cargo.toml",
+    "subject": "ic-management-canister-types",
+    "value": "=0.11.0",
+    "reason": "Maintainer-selected external management DTO version; preserve qualified Candid formats and upstream type identities.",
+    "evidence": "AGENTS.md#management-contract"
+  }
+]

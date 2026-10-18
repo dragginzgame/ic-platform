@@ -4,6 +4,31 @@ Controlled Candid and executor dependencies. Enable `candid` for external
 protocol DTOs and bounded replies; enable `executor` for the selected CDK executor.
 `ic_platform::Principal` is unconditional; no features are enabled by default.
 
+Enable `management-canister-types` for `ic_platform::management_canister_types`:
+upstream `HttpRequestArgs`, `HttpRequestResult`, `HttpMethod`, `HttpHeader`,
+`TransformContext`, `TransformFunc` and `TransformArgs` from exactly 0.11.0.
+These retain the external Candid format and upstream type identity on native and
+Wasm targets. This feature brings transitive Candid; select Platform's `candid`
+feature separately for encoders/decoders. It selects no executor, Agent or parser.
+Consumers retain HTTP bounds, cycle pricing, transforms, call execution and retry
+policy. Other management DTOs and call helpers are outside this explicit surface.
+
+Enable `agent` on native hosts for `ic_platform::agent`: upstream `Agent`,
+`AgentBuilder`, `AgentError`, `Identity`, `BasicIdentity`, `Secp256k1Identity`,
+`Prime256v1Identity`, `TransportError`, `HttpErrorPayload`, `Envelope`,
+`EnvelopeContent`, `SignedUpdate`, `RequestId`, `RequestStatusResponse`,
+`RejectCode`, `RejectResponse`, `ReplyResponse`, `lookup_value`, `to_request_id`
+and `signed_update_inspect`, with PEM support. The module and Agent dependency
+are absent on Wasm, including all-feature builds. No other Platform feature
+enables Agent, and Agent does not enable other Platform features. Its upstream
+Candid/certification dependencies remain transitive. Consumers own runtime,
+endpoint admission, TLS/client configuration, identity/root-key selection,
+query verification, byte limits, expiry, retries and durable effect policy.
+Use `certification` for certificate/hash-tree types, including
+`SubtreeLookupResult` and `labeled_hash`. Certificate lookup does not authenticate;
+signed-update inspection compares envelope fields without verifying signatures
+or authorizing replay. Existing Agent internal HTTP retries remain upstream.
+
 `ic_platform::candid::{DecodeLimits, DecodeError, decode_one, decode_args,
 decode_exactly_one}` preserves Testkit's explicit limits and typed failures.
 `decode_one` and `decode_args` allow bounded skipping of additional arguments;
@@ -18,6 +43,24 @@ through the boundary's Serde export. These are external protocol types, not an
 application-wide requirement. Principal-only users import `ic_platform::Principal`
 without selecting a feature or declaring `ic_principal` directly. The root and
 Candid contract exports have the same upstream type identity.
+
+`ic_platform::PrincipalError` is also unconditional and retains the upstream
+Principal parse-error identity used by public host APIs.
+
+Use `candid::decoder::{DecoderConfig, IDLDeserialize, decode_one_with_config,
+decode_args_with_config}` for existing low-level configuration and staged
+decoding. These are direct upstream identities: optional/default ceilings,
+diagnostics, construction/value/finalization/drop boundaries and typed errors
+are unchanged. Callers retain pre-decoder byte admission and canonical re-encoding;
+the finite `DecodeLimits` helpers continue selecting compact diagnostics.
+
+The contract explicitly exports `candid_method`, `export_service`, `Encode`,
+`Decode`, `TypeEnv`, `idl_hash`, reflection/type equality and printer machinery.
+For service generation, write `contract::export_service!(ic_platform::candid::contract)`;
+the upstream macro accepts this explicit generated path. Update generators too.
+Import `contract::{Encode, Decode}` by those names so their recursive macro calls
+resolve without a direct Candid crate. The `candid` feature selects upstream
+`bignum` and `printer`; it does not enable an executor or host parser.
 
 Enable `certification` for `ic_platform::certification`: upstream `Certificate`,
 `Delegation`, `HashTree`, `Label`, `LookupResult`, `empty`, `fork`, `labeled`,
@@ -50,5 +93,28 @@ decoding failures. Existing wire labels and caller-owned limits remain unchanged
 `executor` exports the exact selected task/context types and operations. It owns
 no independent task registry. Callers must preserve context placement, callbacks
 and trap cleanup; native compilation does not qualify installed IC behavior.
-No full CDK entrypoint macros, call facade, scheduler or transport exists.
+Its published dependency constraint is `ic-cdk-executor = "=2.0.0"`.
+
+Enable `ic0` for `ic_platform::ic0`: the explicit IC 1.2.0 calls used by Timers
+for time/version/counters/stable page count, one timer, self/caller/argument
+copying, replies/reject codes, cycles/costs and call submission/cleanup. The exact
+`=1.2.0` dependency preserves upstream safe/unsafe callback signatures and traps.
+It selects neither Candid nor an executor and installs no exports, timer or storage
+owner. Timers must select both `executor` and `ic0`; changing either qualified
+identity requires renewed combined callback/trap/cancellation/upgrade evidence.
+
+Until the full CDK frontend is qualified, existing canisters/probes may retain
+narrow direct `ic-cdk` 0.20.3 and macro-required Candid declarations for entrypoint,
+lifecycle, call/system and spawn APIs ([runtime contract](https://github.com/dragginzgame/ic-platform/issues/1)).
+Upstream CDK expansion still emits absolute Candid paths. Re-exporting its macros
+or changing imports does not fix that expansion. CDK `futures::spawn` adds an
+unfinished-task drop panic outside trap recovery; `executor::spawn_protected`
+alone does not preserve that policy and must not replace it.
+
+Published Testkit 0.52/0.53 call helpers still own distinct limits/error types.
+Existing native tests may retain `ic-testkit-candid` solely for that API until a
+published Testkit adopts Platform's identities and consumers qualify it
+([producer coordination](https://github.com/dragginzgame/ic-platform/issues/2)).
+Do not add conversion/re-export packages or replacement simulator transport.
+CDK entrypoint macros and a full CDK call facade remain unsupported.
 Selected upstream dependencies remain transitive dependencies.

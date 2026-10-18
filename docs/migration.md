@@ -43,6 +43,39 @@ real limit. These limits do not promise heap, stack or elapsed-time bounds.
 
 ## Consumer audit evidence
 
+### Existing decoder and service contracts
+
+`ic_platform::candid::decoder` explicitly exports upstream `DecoderConfig`,
+`IDLDeserialize`, `decode_one_with_config` and `decode_args_with_config`. Preserve
+caller byte admission before construction, exact optional/default ceilings,
+full/compact diagnostics and error mappings at `new_with_config`, `get_value`,
+`done` and canonical re-encoding. Callers can observe/drop the decoder between
+stages and inspect its remaining configuration without a wrapper. These operations
+do not impose the finite `DecodeLimits` helper's policy. Replay/checkpoint consumers
+may change imports only while retaining existing behavior; this authorizes no
+storage/schema change. See [staged decoding](https://github.com/dragginzgame/ic-platform/issues/3).
+
+The Candid contract now explicitly supports `candid_method`, `export_service`,
+`Encode`, `Decode`, `TypeEnv`, `idl_hash`, `types::internal::TypeContainer` and
+`types::subtype::equal`, plus printer machinery required by service export.
+The `candid` feature enables upstream `printer` alongside `bignum`. Change
+generators to emit `ic_platform::candid::decoder` for configured decoding and
+`ic_platform::candid::contract::candid_method` for service registration. Invoke
+`contract::export_service!(ic_platform::candid::contract)` with the explicit path;
+upstream's no-argument form still emits `::candid`. Import `Encode` and `Decode`
+by those names from the contract to preserve their recursive expansion. Root
+`ic_platform::PrincipalError` preserves Canic's public Principal parse-error type.
+Standalone Candid-only native/MSRV/Wasm qualification covers those paths, fixed DID,
+reflection/equality, configured decoding, typed stage mapping and macro wire bytes.
+See [Canic's contract](https://github.com/dragginzgame/ic-platform/issues/5).
+
+These service-generation capabilities do not change CDK's separate entrypoint
+expansion or qualify generated Fleet actors. Keep the narrow existing CDK and
+macro-required Candid declarations for unsupported frontend APIs until the
+[runtime boundary](https://github.com/dragginzgame/ic-platform/issues/1) is qualified.
+The packaged README records this supported exception and the distinct protected
+spawn semantics; no aliases or local runtime implementation are introduced.
+
 Read-only working-tree review on 2026-10-18 used the shared code-hygiene method at
 `4eabe7f771907ccebfebceafffe10657b911c0eb` and this repository's AGENTS.md overlay.
 Platform started at `9ada261`. Sibling HEADs below identify bases, not clean-source
@@ -106,6 +139,70 @@ and protocol packages to confirm one upstream certification identity. Native mac
 and installed canisters are separate qualification. Dependency control alone
 does not remove `ic-certification` or establish a smaller Wasm artifact.
 
+## Native Agent extension
+
+The optional `agent` feature exposes `ic_platform::agent` on native hosts only.
+It currently locks `ic-agent` 0.49.2, matching Query's requirement and Canic's
+exact selection, with upstream defaults disabled and PEM enabled for Canic's
+exported identities. Agent and its module are absent on Wasm even with all
+features; neither runtime nor parser features enable it. Agent does not enable
+Platform's Candid, certification or parser features, though upstream Agent itself
+depends on Candid and certification. Select `certification` for shared certificate
+types and `candid` for DTOs/decoding when needed. No browser Agent is qualified.
+
+The read-only Agent audit used working trees at Query `8982c2a4`, Canic
+`5583496bf` and Host `8b458763`; these bases do not imply clean source. Copied
+certificate/decoder source hashes bind the local integration proof below.
+
+The explicit exports cover reviewed Query host transport/certificate paths and
+Canic's ICP management/query and signed-receipt/capacity-import paths: `Agent`,
+`AgentBuilder`, `AgentError`, `Identity`, `BasicIdentity`, `Secp256k1Identity`,
+`Prime256v1Identity`, `TransportError`, `HttpErrorPayload`, `Envelope`,
+`EnvelopeContent`, `SignedUpdate`, `RequestId`, `RequestStatusResponse`,
+`RejectCode`, `RejectResponse`, `ReplyResponse`, `lookup_value`, `to_request_id`
+and `signed_update_inspect`. They are upstream identities, not replacement
+clients, request records or error projections. The certification surface also
+explicitly supplies observed `SubtreeLookupResult` and `labeled_hash` operations.
+
+For adoption, enable `agent` on the existing inherited Platform dependency in
+host members and CLI packages. Product host features should select
+`ic-platform/agent` in place of `dep:ic-agent`; test-only Agent use belongs in
+dev-dependencies. Remove direct upstream member/catalog declarations, update
+locks and boundary rules. Replace `ic_agent::` imports with
+`ic_platform::agent::`, flattening `agent::AgentBuilder`,
+`agent_error::{TransportError, HttpErrorPayload}`, `agent::RequestStatusResponse`,
+`agent::signed::SignedUpdate`, identity and envelope paths to the explicit root
+exports. Use `ic_platform::certification::Certificate`, `SubtreeLookupResult`
+and `labeled_hash` instead of Agent's upstream certificate/hash-tree re-exports.
+Preserve the same resolved Agent, Principal, certification and transport package
+identities across Query, Canic, Agent and other protocol crates.
+
+Keep endpoint parsing before upstream infallible URL-builder paths, selected
+identities, PEM error mapping and secret handling, TLS/HTTP middleware, root-key
+admission, query-signature verification, historical/live certificate policy,
+response-body ceilings, ingress expiry and effective canister IDs unchanged.
+Query's body/aggregate admission and outer logical retry categories remain
+Query-owned; Canic retains exact signed envelope bytes, request IDs, issuance,
+submission/reconciliation and effect retry policy. Upstream Agent's internal
+HTTP retries still apply; do not add a Platform retry layer or reset identities
+between attempts. Consumers may keep independent Reqwest/Tokio dependencies for
+their own client/runtime configuration. Agent performs transport protocol work,
+not parser or application ownership. `lookup_value` reads an unauthenticated tree;
+`signed_update_inspect` checks envelope content without verifying its signature,
+freshness or replay authorization.
+
+The standalone Agent/certification consumer declares only Platform. It exercises
+offline signing, exact raw payload/effective-ID preservation, canonical request
+identity, mismatch errors, PEM identities, typed HTTP/transport/reject errors and
+shared certificate types. Query's five certificate tests and Host's six decoder
+tests run in a disposable combined copy with only import paths adapted. Evidence
+and original source hashes are under `target/agent-query/`; this is not a migrated
+or fully built sibling workspace. Real adoption must still run Query/Canic's
+bounded HTTP, authentication, signed-request, retry and effect-reconciliation
+tests. Native macOS, live gateway and installed-canister qualification remain
+separate. Centralizing direct dependencies does not remove Agent's transitive
+Candid/crypto/HTTP dependencies or establish any Wasm-size reduction.
+
 ## Testkit and Query migration
 
 The Candid surface is usable for local integration qualification now. Registry
@@ -119,6 +216,12 @@ exists, but consumers have not been migrated by this work.
    Platform path. Replace direct Candid and `ic-testkit-candid` dependencies in
    normal/dev/build/target tables, CLI and development packages too. Remove unused
    root catalog entries and regenerate each affected lockfile deliberately.
+   Exception: published Testkit 0.52/0.53 still accepts its old limits/error
+   identities. Retain only the necessary native development dependency for those
+   calls until Testkit publishes its producer adoption and each consumer qualifies
+   it. Pending Testkit 0.54 source is not publication. Preserve tuple arity and all
+   five limits without conversions, re-export packages or replacement transport
+   ([published producer coordination](https://github.com/dragginzgame/ic-platform/issues/2)).
 2. Replace `ic_testkit_candid` paths with `ic_platform::candid`. Import DTO types,
    encoders and generic argument bounds from `ic_platform::candid::contract`.
    Replace `candid::Result<T>` with `Result<T, contract::Error>`. Use
@@ -133,7 +236,9 @@ exists, but consumers have not been migrated by this work.
    `contract::encode_args((&request,))`, and multi-argument macros with tuples.
    Replace test `Decode!` and unbounded decoders with the intended bounded API
    and explicit test-owned limits. Do not replace argument tuples with records.
-   No compatibility macro or blanket Candid crate alias is required.
+   Existing configured/staged policies instead use `candid::decoder` unchanged;
+   imported contract macros support existing macro contracts. No blanket crate
+   alias or arbitrary new resource/diagnostic policy is required.
 5. Preserve Query's `candid_decode.rs` policy: transport-owned byte admission,
    `min(bytes.len() * 32 + 1_000_000, 256_000_000)` using saturating arithmetic,
    skipping quota 100_000, 4_096 type entries and 64 KiB header limit. Preserve its
@@ -161,9 +266,30 @@ workspace migrated while such manifests or independent fixture workspaces remain
 ## Runtime trace and required qualification
 
 The existing `executor` feature explicitly exports upstream task/context APIs.
-Platform, Canic and Timers currently lock `ic-cdk-executor` 2.0.0. Matching version
-text is source evidence only: the combined final dependency graph must resolve
+Platform now requires `ic-cdk-executor = "=2.0.0"`, preserving Timers' exact
+qualified downstream constraint, not just this lockfile. A standalone Platform-only
+fixture rejects a candidate 2.0.1 package and compiles on native/MSRV/Wasm. The
+combined final dependency graph must still resolve
 one executor package identity (version and source), including its method handles.
+
+The independent `ic0` feature explicitly exports the raw IC 1.2.0 operations used
+by Timers' platform/backend/FFI modules. It requires `ic0 = "=1.2.0"`, selects
+neither Candid nor an executor, and preserves upstream safe/unsafe callback ABI.
+Select both `executor` and `ic0` in Timers; replace every `ic0::` path with
+`ic_platform::ic0::` and remove its direct ic0 and constraint-only executor
+declarations after qualifying a published Platform selection. Timers retains
+its sole global-timer/dispatch exports, callback environments, contexts, call
+failure/retry and trap cleanup. `stable64_size` is observation, not storage or
+allocation ownership. The exact-pin exceptions are recorded in AGENTS.md and
+the declaration checker; changes require renewed combined installed qualification.
+
+A disposable copy of the actual Timers library removes those two declarations
+and changes only system-call paths. Its 160 native tests pass at Timers' Rust
+1.91 floor; the production Wasm library compiles with one executor 2.0.0 and
+ic0 1.2.0 identity and no Candid/CDK frontend/parser. Source hashes and evidence
+are under `target/issues-timers/`; Platform-only resolver proof is under
+`target/issues-executor/`. These are source-copy/native/Wasm proofs, not actual
+sibling migration, publication or installed callback/trap/upgrade execution.
 
 CDK 0.20.3's `futures/internals.rs` delegates entrypoint contexts to
 `in_tracking_executor_context` and `in_tracking_query_executor_context`.
@@ -262,25 +388,58 @@ Canic additionally consumes parser bindings, textual arguments and service equal
 method inventory alone cannot replace those uses. The new explicit host surface
 covers those operations; Host and Canic retain the surrounding implementation.
 
+## Management-canister DTOs
+
+The optional `management-canister-types` feature exports
+`ic_platform::management_canister_types::{HttpRequestArgs, HttpRequestResult,
+HttpMethod, HttpHeader, TransformContext, TransformFunc, TransformArgs}` directly
+from `ic-management-canister-types = "=0.11.0"`. This explicit surface covers
+Canic's observed `canisters/test/runtime_probe/src/perf_context/mod.rs` HTTP
+request use and its nested/header/transform and response types. The read-only
+review used Canic HEAD `5583496` and probe SHA-256
+`4615d604316eaf4dbbc17baf9f985742c2b8533bfdcc50c8e04e1eb2c6d8616c`;
+the working tree has pending changes, so HEAD is not a clean-source claim. Other upstream
+management DTOs are not exported speculatively. No call facade is introduced.
+
+To adopt, add `management-canister-types` to the inherited Platform dependency's
+features and replace `ic_management_canister_types::` with
+`ic_platform::management_canister_types::` for these symbols. Select `candid`
+separately when encoding/decoding through Platform. Remove the member's direct
+management-types declaration and the workspace catalog entry once unused; update
+the consumer lockfile and dependency-boundary rules. Update any generator that
+emits the old DTO imports. Preserve pricing_version, is_replicated, response
+ceilings, transform references/context, attached cycles, raw call semantics and
+existing retries. No generated service format or persisted data changes here.
+
+The feature is supported on native and Wasm and necessarily brings upstream
+Candid; it does not enable Platform's Candid, executor, parser or Agent features.
+Default/executor-only graphs still exclude both management DTOs and Candid.
+The standalone management/Candid consumer declares only Platform. It compares
+the existing probe request against a byte vector generated by the original
+0.11.0 owner and exercises response/transform roundtrips and caller byte refusal.
+Actual probe migration must still qualify its CDK call/entrypoint paths and
+installed scheduling/cycle behavior; DTO qualification supplies no runtime proof.
+
 ## Evidence and isolation
 
 `make test` and `make msrv` exercise the retained six decoder cases and expanded
 DTO fixture. `make check-consumer` builds separate workspaces with only Platform
 as a direct dependency: native tests on Rust 1.99 and 1.88, plus Wasm compilation
-for Candid and certification consumers. The parser consumer is native-only.
+for Candid, certification and management consumers. Parser and Agent consumers are native-only.
 It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.
 
-`make check-features` checks all sixteen feature combinations plus actual defaults on native/Wasm:
+`make check-features` checks all 128 feature combinations plus actual defaults on native/Wasm:
 Candid/CDK-free defaults and certification-only selection, Candid-free executor
-selection, optional certification isolation, explicit native-only parsing and no
-Testkit transport. Empty default features are checked from Cargo metadata too.
-`make wasm-check` compiles all features together while excluding the host parser. Consumer adoption
+selection, optional certification isolation, explicit native-only parser/Agent and no
+Testkit transport. Management DTOs are admitted only when selected, with an exact
+optional dependency requirement. Empty default features are checked from Cargo metadata too.
+`make wasm-check` compiles all features together while excluding parser and Agent. Consumer adoption
 must also run the shared dependency-boundary checker on every workspace, including
 independent fixtures and unused root catalog declarations; aliases are not escapes.
 
-Direct dependency isolation does not remove transitive Candid from Agent, PocketIC,
+Direct dependency isolation does not remove transitive Candid from management DTOs, Agent, PocketIC,
 protocol DTO packages or full CDK. No Wasm-size reduction has been measured.
 Native Linux, native macOS Intel/Apple Silicon, Wasm compilation and installed IC
 behavior are separate evidence categories. This batch does not qualify native

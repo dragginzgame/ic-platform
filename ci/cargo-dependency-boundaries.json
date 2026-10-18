@@ -1,5 +1,8 @@
 [
+  {"dependency": "ic0", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic-agent", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-certification", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic-management-canister-types", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic_principal", "allowed_packages": ["ic-platform"]},
   {"dependency": "candid", "allowed_packages": ["ic-platform"]},
   {"dependency": "candid_derive", "allowed_packages": []},

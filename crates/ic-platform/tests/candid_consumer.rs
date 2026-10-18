@@ -1,5 +1,17 @@
 //! Consumer imports only the boundary, including both derive macros.
+#[cfg(test)]
+use ic_platform::candid::decoder::IDLDeserialize;
+use ic_platform::candid::decoder::{
+    DecoderConfig, decode_args_with_config, decode_one_with_config,
+};
 use ic_platform::candid::{DecodeLimits, contract, decode_args, decode_exactly_one};
+
+#[contract::candid_method(query, rename = "value")]
+fn declared_value() -> u64 {
+    1
+}
+
+contract::export_service!(ic_platform::candid::contract);
 
 #[derive(Debug, PartialEq, contract::CandidType, contract::serde::Deserialize)]
 #[candid_path("ic_platform::candid::contract")]
@@ -34,6 +46,25 @@ fn decode<T: for<'de> contract::ArgumentDecoder<'de>>(
 
 /// Exercise the complete DTO and decoder path on native and Wasm builds.
 pub fn roundtrip() {
+    use contract::{Decode, Encode};
+    assert_eq!(declared_value(), 1);
+    assert_eq!(
+        __export_service(),
+        "service : { value : () -> (nat64) query }"
+    );
+    let bytes = Encode!(&42_u64).unwrap();
+    assert_eq!(Decode!(&bytes, u64).unwrap(), 42);
+    let config = DecoderConfig::new();
+    assert_eq!(decode_one_with_config::<u64>(&bytes, &config).unwrap(), 42);
+    assert_eq!(
+        decode_args_with_config::<(u64,)>(&bytes, &config).unwrap(),
+        (42,)
+    );
+    let mut reflection = contract::types::internal::TypeContainer::new();
+    let ty = reflection.add::<Reply>();
+    let env: contract::TypeEnv = reflection.env;
+    contract::types::subtype::equal(&mut std::collections::HashSet::new(), &env, &ty, &ty).unwrap();
+    assert_eq!(contract::idl_hash("a"), 97);
     let reply = Reply {
         owner: contract::Principal::anonymous(),
         result: Ok(42),
@@ -87,4 +118,59 @@ pub fn roundtrip() {
 #[test]
 fn boundary_derives_preserve_external_wire_bytes() {
     roundtrip();
+}
+
+#[cfg(test)]
+#[derive(Debug, PartialEq)]
+enum Stage {
+    Decode,
+    Trailing,
+    Noncanonical,
+    Limit,
+}
+
+// The Wire benchmark's caller-owned admission and stage mapping, on a scalar.
+#[cfg(test)]
+fn staged_value(bytes: &[u8]) -> Result<u64, Stage> {
+    if bytes.len() > 5120 {
+        return Err(Stage::Limit);
+    }
+    let mut config = DecoderConfig::new();
+    config
+        .set_decoding_quota(100_000)
+        .set_skipping_quota(1000)
+        .set_max_type_len(64)
+        .set_max_header_len(1024);
+    let value = {
+        let mut decoder =
+            IDLDeserialize::new_with_config(bytes, &config).map_err(|_| Stage::Decode)?;
+        let value = decoder.get_value::<u64>().map_err(|_| Stage::Decode)?;
+        decoder.done().map_err(|_| Stage::Trailing)?;
+        value
+    };
+    if contract::encode_one(value).unwrap() != bytes {
+        return Err(Stage::Noncanonical);
+    }
+    Ok(value)
+}
+
+#[test]
+fn staged_decoding_preserves_caller_failures_and_optional_configuration() {
+    let wire = contract::encode_one(42_u64).unwrap();
+    assert_eq!(staged_value(&wire), Ok(42));
+    assert_eq!(staged_value(b"bad header"), Err(Stage::Decode));
+    assert_eq!(staged_value(&wire[..wire.len() - 1]), Err(Stage::Decode));
+    let mut trailing = wire.clone();
+    trailing.push(0);
+    assert_eq!(staged_value(&trailing), Err(Stage::Trailing));
+    let extra = contract::encode_args((42_u64, true)).unwrap();
+    assert_eq!(staged_value(&extra), Err(Stage::Noncanonical));
+    assert_eq!(staged_value(&vec![0; 5121]), Err(Stage::Limit));
+    let mut config = DecoderConfig::new();
+    config.set_full_error_message(false).set_skipping_quota(0);
+    // Retain upstream header defaults by omitting that setter entirely.
+    assert_eq!(decode_one_with_config::<u64>(&wire, &config).unwrap(), 42);
+    assert!(decode_one_with_config::<u64>(&extra, &config).is_err());
+    config.set_max_header_len(0);
+    let _: contract::Error = decode_one_with_config::<u64>(&wire, &config).unwrap_err();
 }

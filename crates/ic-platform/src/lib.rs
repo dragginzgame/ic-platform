@@ -3,9 +3,15 @@
 //! [`Principal`] is always available. `candid` selects bounded decoding;
 //! `executor` selects the shared CDK executor without a Candid dependency.
 //! `candid-parser` selects native host parsing and binding generation only.
+//! `agent` selects native IC transport and identities, with consumer-owned policy.
+//! `ic0` selects qualified raw system calls without Candid or an executor.
+//! `management-canister-types` selects external management HTTP outcall DTOs.
 //! Consumers retain protocol schemas, resource limits and lifecycle policy.
 
-pub use ic_principal::Principal;
+pub use ic_principal::{Principal, PrincipalError};
+
+#[cfg(all(feature = "agent", not(target_family = "wasm")))]
+pub mod agent;
 
 #[cfg(feature = "candid")]
 pub mod candid;
@@ -15,3 +21,7 @@ pub mod candid_parser;
 pub mod certification;
 #[cfg(feature = "executor")]
 pub mod executor;
+#[cfg(feature = "ic0")]
+pub mod ic0;
+#[cfg(feature = "management-canister-types")]
+pub mod management_canister_types;

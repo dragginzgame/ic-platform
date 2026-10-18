@@ -13,8 +13,11 @@ repository = "https://github.com/dragginzgame/ic-platform"
 [workspace.dependencies]
 candid = { version = "0.10.38", default-features = false }
 candid_parser = { version = "0.4.1", default-features = false } # Production dependency, native host capability only
-ic-cdk-executor = "2.0.0"
+ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] } # Production dependency, native host capability only
+ic-cdk-executor = "=2.0.0"
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
+ic-management-canister-types = "=0.11.0" # Production dependency, external management DTO contract
+ic0 = "=1.2.0" # Production dependency, qualified raw system ABI
 ic_principal = "0.1.5" # Production dependencies
 serde = { version = "1.0", default-features = false, features = ["derive"] } # Production dependencies
 

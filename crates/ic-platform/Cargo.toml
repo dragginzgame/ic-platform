@@ -12,25 +12,41 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [features]
 default = []
-candid = ["dep:candid", "candid/bignum", "dep:serde"]
+agent = ["dep:ic-agent"]
+candid = ["dep:candid", "candid/bignum", "candid/printer", "dep:serde"]
 candid-parser = ["dep:candid_parser"]
 certification = ["dep:ic-certification"]
 executor = ["dep:ic-cdk-executor"]
+ic0 = ["dep:ic0"]
+management-canister-types = ["dep:ic-management-canister-types"]
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }
+ic-agent = { workspace = true, optional = true }
 
 [dependencies]
 candid = { workspace = true, optional = true }
 ic-cdk-executor = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
+ic-management-canister-types = { workspace = true, optional = true }
+ic0 = { workspace = true, optional = true }
 ic_principal.workspace = true
 serde = { workspace = true, optional = true }
+
+[[test]]
+name = "agent_consumer"
+path = "tests/agent_consumer.rs"
+required-features = ["agent", "certification"]
 
 [[test]]
 name = "candid_consumer"
 path = "tests/candid_consumer.rs"
 required-features = ["candid"]
+
+[[test]]
+name = "management_consumer"
+path = "tests/management_consumer.rs"
+required-features = ["management-canister-types", "candid"]
 
 [[test]]
 name = "parser_consumer"

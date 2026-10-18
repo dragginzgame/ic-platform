@@ -6,6 +6,7 @@
 //! resource budgets, freshness, witness admission and application leaf meanings.
 //! Constructing or decoding a certificate does not authenticate it.
 
+pub use ic_certification::hash_tree::{SubtreeLookupResult, labeled_hash};
 pub use ic_certification::{
     Certificate, Delegation, HashTree, Label, LookupResult, empty, fork, fork_hash, labeled, leaf,
     pruned,

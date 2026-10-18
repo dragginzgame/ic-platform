@@ -3,6 +3,7 @@ use ic_platform::Principal;
 
 #[test]
 fn principal_is_available_without_features() {
+    let _: ic_platform::PrincipalError = Principal::from_text("invalid").unwrap_err();
     let principal = Principal::from_text("aaaaa-aa").unwrap();
     assert_eq!(principal, Principal::management_canister());
     assert_eq!(principal.to_text(), "aaaaa-aa");
