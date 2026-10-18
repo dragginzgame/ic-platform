@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.1.10]
+
+### Added
+
+- Add optional Platform-owned CDK entrypoint/service macros and explicit upstream
+  runtime calls, helpers and spawning. Consumers can generate Platform Candid paths
+  without upstream changes; adopt the paired generator/facade release and update
+  consumer generators before removing direct declarations
+  ([#1 — Support Query’s CDK call and entrypoint boundary](https://github.com/dragginzgame/ic-platform/issues/1)).
+- Expose canister-signature public-key formats, root-key constants and hashing
+  through an independent optional feature, preserving upstream DER/domain bytes
+  ([#16 — Expose canister-signature key and hashing APIs](https://github.com/dragginzgame/ic-platform/issues/16)).
+- Complete the certification surface with upstream mutable tree and hash/trait
+  identities needed by Auth's signature store, without adding store policy
+  ([#17 — Complete certification exports for Auth signature-store trees](https://github.com/dragginzgame/ic-platform/issues/17)).
+- Add independent canister-signature verification and BLS features, preserving
+  upstream results, typed key/signature errors and allocation support. BLS alone
+  stays Candid-free; the complete canister verifier still brings transitive Candid
+  ([#18 — Expose IC signature verification and isolated BLS capabilities](https://github.com/dragginzgame/ic-platform/issues/18)).
+
+### Changed
+
+- Update migration guidance for published Testkit 0.54's canonical decoder
+  identities; older Testkit selections retain their narrow native exception
+  until their driver upgrade is qualified
+  ([#2 — Coordinate published Testkit limits identity](https://github.com/dragginzgame/ic-platform/issues/2)).
+
 ## [0.1.9] - 2026-10-18
 
 ### Added

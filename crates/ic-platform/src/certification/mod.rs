@@ -8,6 +8,6 @@
 
 pub use ic_certification::hash_tree::{SubtreeLookupResult, labeled_hash};
 pub use ic_certification::{
-    Certificate, Delegation, HashTree, Label, LookupResult, empty, fork, fork_hash, labeled, leaf,
-    pruned,
+    AsHashTree, Certificate, Delegation, Hash, HashTree, Label, LookupResult, RbTree, empty, fork,
+    fork_hash, labeled, leaf, pruned,
 };

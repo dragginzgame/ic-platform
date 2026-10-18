@@ -4,7 +4,7 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target
-for capability in candid certification candid-parser dynamic agent management ic0 icrc; do
+for capability in candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk; do
 features="\"$capability\""
 if [[ "$capability" == agent ]]; then features='"agent", "certification"'; fi
 if [[ "$capability" == dynamic ]]; then features='"candid", "candid-parser"'; fi
@@ -33,6 +33,8 @@ ic-platform.workspace = true
 MANIFEST
 source="$capability"
 if [[ "$capability" == candid-parser ]]; then source=parser; fi
+if [[ "$capability" == canister-sig-creation ]]; then source=canister_sig; fi
+if [[ "$capability" == signature-verification ]]; then source=signature; fi
 cp "crates/ic-platform/tests/${source}_consumer.rs" "$fixture/crates/consumer/src/lib.rs"
 if [[ "$capability" == management ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
@@ -45,6 +47,17 @@ fi
 if [[ "$capability" == dynamic || "$capability" == agent ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
     cp "crates/ic-platform/tests/fixtures/$capability-"*.hex "$fixture/crates/consumer/src/fixtures/"
+fi
+if [[ "$capability" == bls || "$capability" == signature-verification ]]; then
+    mkdir -p "$fixture/crates/consumer/src/fixtures"
+    cp crates/ic-platform/tests/fixtures/bls-*.hex "$fixture/crates/consumer/src/fixtures/"
+fi
+if [[ "$capability" == signature-verification ]]; then
+    cp crates/ic-platform/tests/fixtures/signature-*.hex "$fixture/crates/consumer/src/fixtures/"
+fi
+if [[ "$capability" == cdk ]]; then
+    mkdir -p "$fixture/crates/consumer/src/fixtures"
+    cp crates/ic-platform/tests/fixtures/cdk-service.did "$fixture/crates/consumer/src/fixtures/"
 fi
 cp Cargo.lock "$fixture/Cargo.lock"
 # Only the disposable local package identity is added to an already selected graph.

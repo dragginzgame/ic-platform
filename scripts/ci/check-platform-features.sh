@@ -4,7 +4,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/metadata.json
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "candid", "candid-parser", "certification", "default", "executor", "ic0", "icrc-ledger-types", "management-canister-types"]' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "signature-verification"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
 }
@@ -16,6 +16,11 @@ cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/met
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve the exact qualified executor =2.0.0' >&2; exit 1;
 }
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | . as $p | .features.cdk == ["candid", "executor", "ic0", "dep:ic-cdk", "dep:ic-platform-macros"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 1 and .[0].optional and .[0].req == "=0.20.3") and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))' \
+    target/feature-graphs/metadata.json > /dev/null || {
+    echo 'CDK must select the qualified runtime and coordinated generator' >&2; exit 1;
+}
+generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform") | .version' target/feature-graphs/metadata.json)"
 "$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .dependencies[] | select(.name == "ic0") | .req == "=1.2.0"' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve the exact qualified ic0 =1.2.0' >&2; exit 1;
@@ -27,6 +32,10 @@ cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/met
 "$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["icrc-ledger-types"] == ["dep:icrc-ledger-types"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == [])' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Ledger types must be optional without upstream default/storage features' >&2; exit 1;
+}
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.bls == ["dep:ic-verify-bls-signature"] and ([.dependencies[] | select(.name == "ic-verify-bls-signature")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["alloc"])' \
+    target/feature-graphs/metadata.json > /dev/null || {
+    echo 'BLS must be optional with alloc and no upstream default/RNG features' >&2; exit 1;
 }
 # These are production package graphs, including build dependencies but not dev
 # dependencies. Cargo tree prints canonical package names even for renamed deps.
@@ -54,6 +63,13 @@ all_selections+=(icrc-ledger-types)
 for selection in "${without_ledger[@]}"; do
     if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,icrc-ledger-types"); fi
 done
+for capability in bls canister-sig-creation signature-verification cdk; do
+    previous=("${all_selections[@]}")
+    all_selections+=("$capability")
+    for selection in "${previous[@]}"; do
+        if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,$capability"); fi
+    done
+done
 for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     for selection in "${all_selections[@]}"; do
         graph="target/feature-graphs/$target-$selection.txt"
@@ -75,17 +91,47 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
             echo "Agent must remain native host opt-in only: $graph" >&2; exit 1
         fi
         executor=false
-        if [[ ",$selection," == *,executor,* ]]; then executor=true; fi
+        cdk=false
+        if [[ ",$selection," == *,cdk,* ]]; then cdk=true; fi
+        if [[ "$cdk" == true || ",$selection," == *,executor,* ]]; then executor=true; fi
         raw_system=false
-        if [[ "$executor" == true || ",$selection," == *,ic0,* ]]; then raw_system=true; fi
+        verification=false
+        if [[ ",$selection," == *,signature-verification,* ]]; then verification=true; fi
+        creation=false
+        if [[ "$verification" == true || ",$selection," == *,canister-sig-creation,* ]]; then creation=true; fi
+        bls=false
+        if [[ "$verification" == true || "$agent" == true || ",$selection," == *,bls,* ]]; then bls=true; fi
+        if [[ "$executor" == true || "$creation" == true || ",$selection," == *,ic0,* ]]; then raw_system=true; fi
+        certification=false
+        if [[ "$creation" == true || "$agent" == true || ",$selection," == *,certification,* ]]; then certification=true; fi
         # Exact direct requirements do not exclude a second transitive version.
-        # Selecting the executor never admits the unqualified CDK frontend.
-        if ! awk -v executor="$executor" -v raw_system="$raw_system" '
-            $1 ~ /^ic-cdk/ && ($1 != "ic-cdk-executor" || $2 != "v2.0.0" || executor != "true") { exit 1 }
+        # Only explicit CDK selection admits the qualified SDK frontend/macros.
+        if ! awk -v executor="$executor" -v raw_system="$raw_system" -v cdk="$cdk" \
+            -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" '
+            $1 ~ /^ic-cdk/ {
+                if ($1 == "ic-cdk-executor") { if ($2 != "v2.0.0" || executor != "true") exit 1 }
+                else if ($1 == "ic-cdk" || $1 == "ic-cdk-macros") { if ($2 != "v0.20.3" || cdk != "true") exit 1 }
+                else exit 1
+            }
             $1 == "ic0" && ($2 != "v1.2.0" || raw_system != "true") { exit 1 }
-            ($1 ~ /^ic-cdk/ || $1 == "ic0") && !(NF == 2 || (NF == 3 && $3 == "(*)")) { exit 1 }
+            $1 == "ic-cdk-macros" && !(NF == 3 && $3 == "(proc-macro)" || NF == 4 && $3 == "(proc-macro)" && $4 == "(*)") { exit 1 }
+            ($1 ~ /^ic-cdk/ && $1 != "ic-cdk-macros" || $1 == "ic0") && !(NF == 2 || (NF == 3 && $3 == "(*)")) { exit 1 }
+            $1 == "ic-platform-macros" && (cdk != "true" || ($0 != generator && $0 != generator " (*)")) { exit 1 }
         ' "$graph"; then
             echo "Graph contains an unselected or unqualified CDK/system dependency: $graph" >&2; exit 1
+        fi
+        if [[ "$cdk" == false ]] && grep -Eq '^ic-platform-macros ' "$graph"; then
+            echo "Platform generator must remain CDK opt-in only: $graph" >&2; exit 1
+        fi
+        if ! awk -v creation="$creation" -v verification="$verification" -v bls="$bls" -v certification="$certification" '
+            $1 == "ic-canister-sig-creation" && ($2 != "v1.3.1" || creation != "true") { exit 1 }
+            $1 == "ic-signature-verification" && ($2 != "v0.3.0" || verification != "true") { exit 1 }
+            $1 == "ic-verify-bls-signature" && ($2 != "v0.6.0" || bls != "true") { exit 1 }
+            $1 == "ic_bls12_381" && ($2 != "v0.10.1" || bls != "true") { exit 1 }
+            $1 == "ic-certification" && ($2 != "v3.2.0" || certification != "true") { exit 1 }
+            ($1 == "ic-canister-sig-creation" || $1 == "ic-signature-verification" || $1 == "ic-verify-bls-signature" || $1 == "ic_bls12_381" || $1 == "ic-certification") && !(NF == 2 || (NF == 3 && $3 == "(*)")) { exit 1 }
+        ' "$graph"; then
+            echo "Graph contains an unselected or unqualified signature dependency: $graph" >&2; exit 1
         fi
         management=false
         if [[ ",$selection," == *,management-canister-types,* ]]; then management=true; fi
@@ -101,11 +147,8 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
             echo "Ledger storage integration is outside the Platform contract: $graph" >&2; exit 1
         fi
         # Protocol DTOs, host parser and Agent depend on upstream Candid independently.
-        if [[ ",$selection," != *,candid,* && "$parser" == false && "$agent" == false && "$management" == false && "$ledger" == false ]] && grep -Eq '^(candid|candid_derive) ' "$graph"; then
+        if [[ ",$selection," != *,candid,* && "$cdk" == false && "$parser" == false && "$agent" == false && "$management" == false && "$ledger" == false && "$creation" == false ]] && grep -Eq '^(candid|candid_derive) ' "$graph"; then
             echo "Graph without candid must remain Candid-free: $graph" >&2; exit 1
-        fi
-        if [[ "$selection" != *certification* && "$agent" == false ]] && grep -Eq '^ic-certification ' "$graph"; then
-            echo "Certification must remain optional: $graph" >&2; exit 1
         fi
     done
 done

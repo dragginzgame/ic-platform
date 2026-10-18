@@ -101,7 +101,8 @@ The contract explicitly exports `candid_method`, `export_service`, `Encode`,
 It also exports `DecoderConfig` and `decode_args_with_config` with their original
 upstream identities for generated-code contracts. These preserve upstream defaults
 and selected configuration, independently of the finite-limit parent helpers.
-CDK 0.20.3 still hardcodes `::candid`; these exports alone do not fix its macros.
+Published upstream CDK macros 0.20.3 still hardcode `::candid`. Platform's optional
+`cdk` surface uses its own maintained generator to resolve these paths.
 `contract::types::subtype::subtype` preserves upstream structural subtyping for
 narrowed reply projections; equality is a different relation.
 For service generation, write `contract::export_service!(ic_platform::candid::contract)`;
@@ -112,12 +113,42 @@ resolve without a direct Candid crate. The `candid` feature selects upstream
 
 Enable `certification` for `ic_platform::certification`: upstream `Certificate`,
 `Delegation`, `HashTree`, `Label`, `LookupResult`, `empty`, `fork`, `labeled`,
-`leaf`, `pruned` and `fork_hash`, with upstream Serde support. This feature is
+`leaf`, `pruned`, `fork_hash`, `AsHashTree`, `RbTree` and `Hash`, with upstream Serde support. This feature is
 independent of Candid and the executor. Host retains its strict bounded CBOR
 decoder; consumers own trust roots, authentication, budgets and leaf meanings.
 Neither construction nor deserialization authenticates a certificate. This
 centralizes dependency control without removing upstream code or promising
 smaller Wasm artifacts.
+
+Enable `canister-sig-creation` for `ic_platform::canister_sig_creation`:
+`CanisterSigPublicKey`, `hash_bytes`, `hash_with_domain`,
+`extract_raw_root_pk_from_der`, `IC_ROOT_PK_DER` and `IC_ROOT_PK_DER_PREFIX`
+from upstream 1.3.1. Constructor/DER/raw methods, Principal identity, domain
+separators and `String` errors stay upstream. No signature store, root publication
+or clock API is exposed. Upstream still depends on Candid for Principal and on
+raw ic0 internally; selecting this feature does not select Platform's Candid,
+certification, ic0 or executor surfaces.
+
+Enable `signature-verification` for
+`ic_platform::signature_verification::verify_canister_sig`, preserving upstream
+0.3.0's four byte-slice arguments and `Result<(), String>`. This checks supplied
+signature/certificate bytes against the supplied root. It does not select a
+trusted issuer, seed, network root, freshness window, resource ceiling or grant
+application authority. Keep those checks in the consumer. Both public-key and
+verification paths retain upstream's short-DER panic risk: retain pre-validation
+and canonical re-encoding. Hash/domain lengths likewise retain upstream behavior.
+The verifier brings creation, certification, BLS, Candid and ic0 transitively,
+without exposing those Platform modules or enabling CDK, parser or Agent.
+
+Enable `bls` independently for `ic_platform::bls::{PublicKey, Signature,
+PrivateKey, InvalidPublicKey, InvalidSignature, InvalidPrivateKey,
+verify_bls_signature}` from upstream 0.6.0. This retains typed deserialization
+errors, serialized bytes and verification results. Upstream defaults are off
+and alloc is on, matching the IC verifier and Auth fixtures. Deterministic keys
+can be deserialized from caller-supplied bytes and used for signing; no RNG feature
+or entropy source is selected. Key generation/custody and domain/trust policy
+stay with callers. BLS alone brings neither Candid, creation, certification,
+CDK/executor nor host tooling. Native and Wasm are supported by all three features.
 
 Enable `candid-parser` on native hosts for `ic_platform::candid_parser`. It
 explicitly exports `IDLProg`, `check_prog`, `TypeEnv`, `Type`, `TypeInner`,
@@ -165,22 +196,41 @@ slice order and still requires `msg_reply()` to finalize. Keep rejection bytes,
 early size refusal and authentication ordering unchanged. These exports do not
 replace CDK's Principal/Vec convenience helpers, macros or call/task lifecycle.
 
-Until the full CDK frontend is qualified, existing canisters/probes may retain
-narrow direct `ic-cdk` 0.20.3 and macro-required Candid declarations for entrypoint,
-lifecycle, call/system and spawn APIs ([runtime contract](https://github.com/dragginzgame/ic-platform/issues/1)).
-Typed/default CDK expansion still emits absolute Candid paths. Re-exporting its macros
-or changing imports does not fix that expansion. CDK `futures::spawn` adds an
-unfinished-task drop panic outside trap recovery; `executor::spawn_protected`
-alone does not preserve that policy and must not replace it.
-Existing raw CDK 0.20.3 methods with zero Rust arguments, `manual_reply = true`
-and `hidden = true` avoid generated Candid references. `hidden` preserves callable
-exports but omits Candid service registration; retain supported DID metadata when
-required. This subset still uses direct CDK and is not a Platform runtime facade.
+Enable `cdk` for `ic_platform::cdk`. Use its `query`, `update`, `init`,
+`pre_upgrade`, `post_upgrade`, `heartbeat`, `inspect_message`,
+`on_low_wasm_memory` and `export_candid!()` macros. Their default generated
+runtime and codec paths go through Platform; DTOs still need their explicit
+`candid_path` and Serde crate attributes. Rename overrides use
+`crate = "platform::cdk", candid = "platform::candid::contract"` on each
+entrypoint and `platform::cdk::export_candid!(platform::candid::contract)`.
 
-Published Testkit 0.52/0.53 call helpers still own distinct limits/error types.
-Existing native tests may retain `ic-testkit-candid` solely for that API until a
-published Testkit adopts Platform's identities and consumers qualify it
+The support generator is an Apache-2.0 fork of upstream macros 0.20.3, maintained
+here and released at the coordinated facade version. Consumers declare only Platform.
+The published runtime remains `ic-cdk = "=0.20.3"`; its own upstream macros
+remain transitive. Runtime calls and contexts use one executor 2.0.0 identity.
+Explicit `cdk::api`, `cdk::call` and `cdk::futures` exports cover the reviewed
+consumers and generated code; they are not blanket upstream module exports.
+`Call`, `CallFailed`, `Response`, controller 0/1/panic handling, argument
+allocation, caller Principal construction, trap cleanup and protected spawning
+retain their upstream implementations. `executor::spawn_protected` alone lacks
+CDK's unfinished-task drop panic and must not replace `cdk::futures::spawn`.
+
+Generator behavior preserves guards, lifecycle restrictions, tuple/unit replies,
+zero-argument decode omission, custom codecs, manual/hidden methods and skipping
+quota 10,000. Hidden methods retain Wasm exports but omit DID registration.
+No finite Platform limits are silently substituted for upstream generator policy.
+Select independent `executor`/`ic0` for Candid-free runtime-only consumers.
+The `cdk` feature selects Candid and the exact-pinned `executor`/`ic0`
+capabilities, but never host parser or Agent. Consumers must
+qualify their existing calls, wire/DID, task/timer and upgrade behavior against
+the published selection before removing direct declarations; see the repository
+migration contract and [runtime boundary](https://github.com/dragginzgame/ic-platform/issues/1).
+
+Published Testkit 0.54.0 call helpers use Platform's canonical limits/error types.
+Upgrade and qualify actual drivers before removing the old decoder declaration.
+Consumers still selecting Testkit 0.52/0.53 need its distinct limits/error types.
+Those native tests may retain `ic-testkit-candid` solely for that older API until
+their published Testkit upgrade is qualified
 ([producer coordination](https://github.com/dragginzgame/ic-platform/issues/2)).
 Do not add conversion/re-export packages or replacement simulator transport.
-CDK entrypoint macros and a full CDK call facade remain unsupported.
 Selected upstream dependencies remain transitive dependencies.

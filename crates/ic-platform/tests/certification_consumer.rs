@@ -1,7 +1,7 @@
 //! A standalone consumer of the explicit certification surface.
 use ic_platform::certification::{
-    Certificate, Delegation, HashTree, Label, LookupResult, SubtreeLookupResult, empty, fork,
-    fork_hash, labeled, labeled_hash, leaf, pruned,
+    AsHashTree, Certificate, Delegation, Hash, HashTree, Label, LookupResult, RbTree,
+    SubtreeLookupResult, empty, fork, fork_hash, labeled, labeled_hash, leaf, pruned,
 };
 
 /// Exercise receipt lookup, witness hashes and certificate field identities.
@@ -70,6 +70,32 @@ pub fn roundtrip() {
     };
     assert_eq!(certificate.signature, [1, 2, 3]);
     assert_eq!(certificate.delegation.unwrap().subnet_id, [4]);
+
+    // Auth's store uses nested mutable trees and witnesses with this exact identity.
+    let seed: Hash = [1; 32];
+    let message: Hash = [2; 32];
+    let mut messages: RbTree<Hash, Vec<u8>> = RbTree::new();
+    messages.insert(message, Vec::new());
+    let mut store: RbTree<Hash, RbTree<Hash, Vec<u8>>> = RbTree::new();
+    store.insert(seed, messages);
+    let root = store.root_hash();
+    assert_eq!(
+        root,
+        labeled(seed, labeled(message, leaf(Vec::new()))).digest()
+    );
+    assert_eq!(store.as_hash_tree().digest(), root);
+    let witness = store.nested_witness(&seed, |messages| messages.witness(&message));
+    assert_eq!(witness.digest(), root);
+    assert_eq!(
+        witness.lookup_path([&seed, &message]),
+        LookupResult::Found(&[])
+    );
+    store.modify(&seed, |messages| messages.insert([3; 32], vec![4]));
+    assert_ne!(store.root_hash(), root);
+    store.modify(&seed, |messages| messages.delete(&[3; 32]));
+    assert_eq!(store.root_hash(), root);
+    store.delete(&seed);
+    assert_eq!(store.root_hash(), empty().digest());
 }
 
 #[test]

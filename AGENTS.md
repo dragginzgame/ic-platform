@@ -24,6 +24,16 @@ Read [the current handoff](docs/status/current.md), then
 - GitHub issues are the follow-up tracker once a remote exists. Migration and
   provenance documents specify contracts and evidence, not a second issue queue.
 
+## Owned entrypoint generator
+
+`ic-platform-macros` is the implementation proc-macro crate behind the sole
+consumer library's optional `cdk` surface. The maintainer authorized maintaining
+the generator independently of upstream acceptance. Preserve its imported
+Apache-2.0 license (the necessary exception to the workspace's MIT metadata),
+coordinated package version, original generator semantics and explicit paths.
+The runtime remains registry `ic-cdk =0.20.3`; no executor implementation is
+forked. Runtime-only raw/executor consumers retain their independent features.
+
 ## Executor identity
 
 The published boundary constrains `ic-cdk-executor` to `=2.0.0` to preserve

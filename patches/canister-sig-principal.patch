@@ -1,0 +1,25 @@
+Subject: [PATCH] Use ic_principal for canister-signature public keys
+Upstream: https://github.com/dfinity/ic-canister-sig-creation
+Base: 3e5786bb06f94e898d3f8371ec088be23abec987
+
+Review proposal only. No production build selects this patch.
+
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -15,7 +15,7 @@
+ 
+ [dependencies]
+ # ic dependencies
+-candid = "0.10"
++ic_principal = "0.1"
+ ic0 = "1.0.1"
+ ic-certification = "3.0"
+ ic-representation-independent-hash = "3.0"
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -1,4 +1,4 @@
+-use candid::Principal;
++use ic_principal::Principal;
+ use ic_certification::{Hash, HashTree};
+ use ic_representation_independent_hash::{representation_independent_hash, Value};
+ use lazy_static::lazy_static;

@@ -1,15 +1,19 @@
 [
   {"dependency": "ic0", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-agent", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic-canister-sig-creation", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-certification", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-management-canister-types", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic-signature-verification", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic-verify-bls-signature", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic_principal", "allowed_packages": ["ic-platform"]},
   {"dependency": "icrc-ledger-types", "allowed_packages": ["ic-platform"]},
   {"dependency": "candid", "allowed_packages": ["ic-platform"]},
   {"dependency": "candid_derive", "allowed_packages": []},
   {"dependency": "candid_parser", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-cdk", "allowed_packages": []},
+  {"dependency": "ic-cdk", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-cdk-executor", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-cdk-macros", "allowed_packages": []},
+  {"dependency": "ic-platform-macros", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-cdk-timers", "allowed_packages": []}
 ]

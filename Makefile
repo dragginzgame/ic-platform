@@ -26,17 +26,17 @@ publish-check: host-tools-check
 	bash scripts/release/publish.sh check
 
 check:
-	cargo check -p ic-platform --all-targets --all-features --locked
+	cargo check -p ic-platform -p ic-platform-macros --all-targets --all-features --locked
 test:
-	cargo test -p ic-platform --all-features --locked
+	cargo test -p ic-platform -p ic-platform-macros --all-features --locked
 clippy:
-	cargo clippy -p ic-platform --all-targets --all-features --locked -- -D warnings
+	cargo clippy -p ic-platform -p ic-platform-macros --all-targets --all-features --locked -- -D warnings
 docs-check:
-	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform --all-features --no-deps --locked
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-macros --all-features --no-deps --locked
 wasm-check:
 	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 msrv:
-	cargo +1.88.0 test -p ic-platform --all-features --locked
+	cargo +1.88.0 test -p ic-platform -p ic-platform-macros --all-features --locked
 	cargo +1.88.0 check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)"
@@ -45,7 +45,7 @@ check-consumer:
 check-features:
 	bash scripts/ci/check-platform-features.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md crates/ic-platform/README.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
 check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance
 check-release-commands:
