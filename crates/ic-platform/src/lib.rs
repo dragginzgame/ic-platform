@@ -5,7 +5,7 @@
 //! `candid-parser` selects native host parsing and binding generation only.
 //! `agent` selects native IC transport and identities, with consumer-owned policy.
 //! `ic0` selects qualified raw system calls without Candid or an executor.
-//! `management-canister-types` selects external management HTTP/history DTOs.
+//! `management-canister-types` selects external management HTTP/history/snapshot/status DTOs.
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
 //! Consumers retain protocol schemas, resource limits and lifecycle policy.
 

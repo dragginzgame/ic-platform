@@ -36,7 +36,7 @@ if [[ "$capability" == candid-parser ]]; then source=parser; fi
 cp "crates/ic-platform/tests/${source}_consumer.rs" "$fixture/crates/consumer/src/lib.rs"
 if [[ "$capability" == management ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
-    cp crates/ic-platform/tests/fixtures/management-info-*.hex "$fixture/crates/consumer/src/fixtures/"
+    cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/consumer/src/fixtures/"
 fi
 if [[ "$capability" == icrc ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"

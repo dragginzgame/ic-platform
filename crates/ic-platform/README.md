@@ -22,6 +22,15 @@ upstream `HttpRequestArgs`, `HttpRequestResult`, `HttpMethod`, `HttpHeader`,
 `TransformContext`, `TransformFunc` and `TransformArgs` from exactly 0.11.0.
 The same feature explicitly exports Blob's history types: `CanisterInfoArgs`,
 `CanisterInfoResult`, `ChangeDetails` and `CodeDeploymentMode`.
+Backup's snapshot and status contract also exports `CanisterIdRecord`,
+`CanisterStatusResult`, `CanisterStatusType`, `CanisterTimer`, `ChunkHash`,
+`DefiniteCanisterSettings`, `LoadCanisterSnapshotArgs`, `MemoryMetrics`,
+`OnLowWasmMemoryHookStatus`, `QueryStats`, `ReadCanisterSnapshotDataArgs`,
+`ReadCanisterSnapshotDataResult`, `ReadCanisterSnapshotMetadataArgs`,
+`ReadCanisterSnapshotMetadataResult`, `Snapshot`, `SnapshotDataKind`,
+`SnapshotDataOffset`, `SnapshotMetadataGlobal`, `SnapshotSource`, `StatusVisibility`,
+`TakeCanisterSnapshotArgs`, `UploadCanisterSnapshotDataArgs`,
+`UploadCanisterSnapshotMetadataArgs` and `UploadCanisterSnapshotMetadataResult`.
 These retain the external Candid format and upstream type identity on native and
 Wasm targets. This feature brings transitive Candid; select Platform's `candid`
 feature separately for encoders/decoders. It selects no executor, Agent or parser.
@@ -29,6 +38,11 @@ Consumers retain HTTP bounds, cycle pricing, transforms, call execution and retr
 policy. History consumers retain bounded calls, reply/work limits, change counts,
 instance-version checks and recovery fences. Decoding history does not establish
 continuity. Other management DTOs and call helpers are outside this explicit surface.
+Snapshot/status consumers retain target IDs, exact arity, controller/global/chunk
+bounds, reserved-marker refusal, journal evidence, finite spending and restore
+safety. These DTOs add no snapshot execution or storage/allocation owner. Upstream
+`Reserved` source payloads can consume skipping work: preserve zero-quota refusals
+and existing bounded projections instead of increasing quotas to decode a full DTO.
 
 Enable `agent` on native hosts for `ic_platform::agent`: upstream `Agent`,
 `AgentBuilder`, `AgentError`, `Identity`, `BasicIdentity`, `Secp256k1Identity`,

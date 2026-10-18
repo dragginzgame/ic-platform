@@ -1,7 +1,47 @@
 # Current handoff
 
-The maintainer released 0.1.6 at `d6edec2`. Package metadata remains 0.1.6;
-the compatible 0.1.7 changelog draft covers additive APIs and contributor tooling.
+The maintainer released 0.1.7 at `726728e`. Package metadata remains 0.1.7.
+The compatible 0.1.8 draft adds Backup's required snapshot/status DTOs for
+[#13 — Expose Backup snapshot and status management DTOs](https://github.com/dragginzgame/ic-platform/issues/13).
+All 24 are explicit direct exports from the existing optional management feature
+and exactly 0.11.0. No dependency/version/feature selection, executor, call,
+storage/allocation or recovery policy changes. Released entries are preserved.
+
+The Platform-only management/Candid consumer covers all 24 names with twelve
+fixed wire vectors generated independently by upstream 0.11.0. It covers all
+snapshot data/offset/global/source/timer/hook/status/visibility variants, large
+amounts, original bytes, truncation, exact arity and caller byte refusal. Full
+metadata's upstream `Reserved` source payloads consume skipping work: the corpus
+checks separately admitted decoding and zero-quota refusal, preserving Backup's
+existing projection/admission policy. The initial zero-quota positive-test
+assumption and its correction are retained in the evidence.
+
+Read-only Backup review used base `3317b4e6`; the working tree is dirty.
+`target/management-snapshot-before/backup.sha256` binds original source and goldens.
+A disposable Core/Agent workspace changes only Platform selection, DTO imports
+and declarations. All 169 current model cases pass on Rust 1.91, including its
+original codec/hash goldens and refusals; workspace/all-target checks pass too.
+The copied ownership policy forbids direct management declarations and rejects
+an injected aliased target-specific dev dependency. Both production normal/build
+graphs retain one management 0.11.0 identity through Platform. Testkit's existing
+development graph also contains 0.8.0; this task removes no transitive dependency.
+A separate proof checks bidirectional upstream identity for all 24 exports on
+native/Wasm Rust 1.88. The original encoder/lock, identity fixture, copied workspace,
+source before-images and logs are under `target/management-snapshot-*`.
+Standalone native Rust 1.99/1.88 tests and Wasm compilation pass. Focused
+all-feature management tests/MSRV, strict Clippy/Rustdoc, all 256 native/Wasm
+feature combinations plus defaults, the actual all-feature Wasm build, formatting,
+ShellCheck, pins, direct boundaries, documentation and snapshot checks pass.
+The first strict Clippy run rejected an allocating test comparison; its correction
+and reruns are retained. Incoming Cargo.lock and sibling source hashes remain
+unchanged. No full CI or release was run for this new working tree.
+Native macOS, registry-only adoption and actual Core/Agent PocketIC or live-IC
+snapshot/status/lifecycle journeys remain separate consumer acceptance. This task
+does not publish, commit, push or edit siblings. Migration and package docs retain
+target IDs, signed/journal evidence, finite spending and consumer-owned limits.
+
+The evidence below records the preceding implementation and qualification before
+the 0.1.7 release, including its then-pending consumer and native-host acceptance.
 The registry's non-yanked 0.1.6 archive is now verified: SHA-256
 `4c2a6b9c458b47f2913811998a9f6cc49394deaebb9a11e9d0a1bffb6b169cf2`, VCS
 `d6edec2661f510297c8c9c77c5b9fa01741092e8`. Its ic0 and management modules match

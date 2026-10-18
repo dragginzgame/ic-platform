@@ -482,6 +482,44 @@ and Blob `55d70cb` recovery source SHA-256
 `0135a9c284e713a23880bfc3134d344a773c22122df2c63d5f8bc4eb1ab4168c`.
 Both are working-tree observations; the commit IDs do not claim clean source.
 
+Backup's current snapshot/status consumers additionally require 24 upstream
+identities now exported by this same feature: `CanisterIdRecord`,
+`CanisterStatusResult`, `CanisterStatusType`, `CanisterTimer`, `ChunkHash`,
+`DefiniteCanisterSettings`, `LoadCanisterSnapshotArgs`, `MemoryMetrics`,
+`OnLowWasmMemoryHookStatus`, `QueryStats`, `ReadCanisterSnapshotDataArgs`,
+`ReadCanisterSnapshotDataResult`, `ReadCanisterSnapshotMetadataArgs`,
+`ReadCanisterSnapshotMetadataResult`, `Snapshot`, `SnapshotDataKind`,
+`SnapshotDataOffset`, `SnapshotMetadataGlobal`, `SnapshotSource`, `StatusVisibility`,
+`TakeCanisterSnapshotArgs`, `UploadCanisterSnapshotDataArgs`,
+`UploadCanisterSnapshotMetadataArgs` and `UploadCanisterSnapshotMetadataResult`.
+These are explicit direct exports from exactly 0.11.0, not local DTOs or storage
+operations. Read-only review used Backup's working tree at base `3317b4e6`;
+`target/management-snapshot-before/backup.sha256` binds the reviewed source and
+golden files. It is not a clean-source or released-consumer claim.
+
+To adopt in Backup, enable `management-canister-types` on its existing inherited
+Platform dependency in Core and Agent/test selections, replace every
+`ic_management_canister_types::` import with
+`ic_platform::management_canister_types::`, including native tests and generated
+imports, and remove direct root/member DTO declarations plus the obsolete local
+exact-pin exception. Update the lock and direct-dependency policy; Platform still
+constrains the same upstream package to `=0.11.0`. Keep exported public Rust types
+as those upstream identities and retain existing Candid feature selections.
+
+Retain capture/load/status/upload wire/hash goldens, exact arity, zero skipped
+work, reserved-marker refusal, byte/work/type/header ceilings, controller/global/
+chunk bounds, redacted errors, target IDs, original signed/byte/journal evidence,
+finite spending and recovery classification. In particular, decoding the full
+upstream metadata DTO with `Reserved` source payloads may consume skipping quota;
+the new standalone vector test preserves zero-quota refusal. Do not replace
+Backup's admitted projections or loosen quotas merely to change dependencies.
+No snapshot execution, retry, polling, authority reset, settlement inference,
+storage representation or allocation responsibility moves into Platform.
+Registry-only adoption must rerun Backup's model/codec goldens and real Core/Agent
+PocketIC snapshot/status/lifecycle journeys. Native macOS and installed-IC
+acceptance are separate from Linux source-copy tests and Wasm compilation.
+See [Backup's management boundary](https://github.com/dragginzgame/ic-platform/issues/13).
+
 To adopt, add `management-canister-types` to the inherited Platform dependency's
 features and replace `ic_management_canister_types::` with
 `ic_platform::management_canister_types::` for these symbols. Select `candid`

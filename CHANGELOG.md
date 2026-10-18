@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.8]
+
+### Added
+
+- Expose Backup's existing management snapshot and status DTOs through the
+  optional management boundary, preserving upstream 0.11.0 identities and Candid
+  bytes. Snapshot execution, limits, restore safety and recovery remain consumer-owned
+  ([#13 — Expose Backup snapshot and status management DTOs](https://github.com/dragginzgame/ic-platform/issues/13)).
+
 ## [0.1.7] - 2026-10-18
 
 ### Added

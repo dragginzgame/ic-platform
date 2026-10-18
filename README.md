@@ -19,7 +19,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 system calls used by Timers and Testkit, including debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
-| `management-canister-types` | Upstream 0.11.0 HTTP outcall and canister history DTOs; transitive Candid, no executor or host transport |
+| `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 
 The full CDK call/entrypoint boundary remains unfinished; consumer migration is incomplete.
 See [the migration contract](docs/migration.md) for ownership and adoption conditions.
