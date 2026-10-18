@@ -324,6 +324,33 @@ native compilation does not execute IC debug output. Testkit's private probe
 retains its existing CDK/Candid exception until the full frontend is qualified.
 See [benchmark markers](https://github.com/dragginzgame/ic-platform/issues/11).
 
+IcyDB's metrics/entropy and codec-query adapter additionally need direct upstream
+`in_replicated_execution`, `msg_reply_data_append` and `msg_reject` exports;
+IC Wire's controller path also needs `is_controller`. All four are now explicit
+exports under the existing `ic0` feature, preserving IC 1.2.0's safe signatures:
+the predicates return `u32`, and controller/reply/reject arguments are byte slices.
+Replace only the corresponding `ic0::` paths with `ic_platform::ic0::`, remove
+unused member/root declarations and their exceptions, then update locks and
+ownership policies after a published selection is qualified. Generators emitting
+these raw paths must change too. No new feature or Candid selection is needed.
+
+Retain `!= 0` / `== 0` replicated/query predicates, existing entropy admission and
+metrics decisions, Principal bytes, early 64-byte request/reply limits, rejection
+bytes, append order and explicit reply finalization. Rejection is not a successful
+empty reply. Authentication, byte limits, retry/effect authority and controller
+policy stay in consumers. These direct raw identities do not supply CDK's
+Principal/Vec convenience implementation or entrypoint/call/protected-spawn
+integration; those remain the supported runtime exception in #1. Storage and
+allocation APIs remain outside this work.
+
+Read-only review used IcyDB base `c93a7440` and IC Wire base `ce56d5eb`, including
+dirty source; hashes are retained in `target/raw-boundary-before/consumers.sha256`.
+The standalone ic0-only consumer compiles safe caller code natively and for Wasm
+on Rust 1.88 without executing system calls on native hosts. A disposable copy of
+IcyDB's actual codec-query adapter changes only raw-call imports and its manifest;
+runtime qualification belongs to the retained `target/raw-runtime/` fixture.
+This does not migrate the sibling workspace or qualify its entire database.
+
 A disposable copy of the actual Timers library removes those two declarations
 and changes only system-call paths. Its 160 native tests pass at Timers' Rust
 1.91 floor; the production Wasm library compiles with one executor 2.0.0 and
@@ -614,6 +641,12 @@ default/storage features disabled and storage packages refused in every selectio
 `make wasm-check` compiles all features together while excluding parser and Agent. Consumer adoption
 must also run the shared dependency-boundary checker on every workspace, including
 independent fixtures and unused root catalog declarations; aliases are not escapes.
+
+The declared feature inventory must match the reviewed matrix; adding a feature
+requires an explicit matrix and isolation-policy update. Every graph rejects CDK
+frontend packages even with `executor` selected, additional executor/system
+versions and alternate sources of those runtime identities. See
+[graph admission](https://github.com/dragginzgame/ic-platform/issues/14).
 
 Direct dependency isolation does not remove transitive Candid from management DTOs, Agent, PocketIC,
 protocol DTO packages or full CDK. No Wasm-size reduction has been measured.

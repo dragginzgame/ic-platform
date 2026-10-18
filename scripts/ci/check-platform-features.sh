@@ -4,6 +4,10 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/metadata.json
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "candid", "candid-parser", "certification", "default", "executor", "ic0", "icrc-ledger-types", "management-canister-types"]' \
+    target/feature-graphs/metadata.json > /dev/null || {
+    echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
+}
 "$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.default == []' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must declare empty default features' >&2; exit 1;
@@ -70,8 +74,18 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         if [[ "$agent" == false ]] && grep -Eq '^ic-agent ' "$graph"; then
             echo "Agent must remain native host opt-in only: $graph" >&2; exit 1
         fi
-        if [[ "$selection" != *executor* ]] && grep -Eq '^ic-cdk[^ ]* ' "$graph"; then
-            echo "Graph without executor must remain CDK-free: $graph" >&2; exit 1
+        executor=false
+        if [[ ",$selection," == *,executor,* ]]; then executor=true; fi
+        raw_system=false
+        if [[ "$executor" == true || ",$selection," == *,ic0,* ]]; then raw_system=true; fi
+        # Exact direct requirements do not exclude a second transitive version.
+        # Selecting the executor never admits the unqualified CDK frontend.
+        if ! awk -v executor="$executor" -v raw_system="$raw_system" '
+            $1 ~ /^ic-cdk/ && ($1 != "ic-cdk-executor" || $2 != "v2.0.0" || executor != "true") { exit 1 }
+            $1 == "ic0" && ($2 != "v1.2.0" || raw_system != "true") { exit 1 }
+            ($1 ~ /^ic-cdk/ || $1 == "ic0") && !(NF == 2 || (NF == 3 && $3 == "(*)")) { exit 1 }
+        ' "$graph"; then
+            echo "Graph contains an unselected or unqualified CDK/system dependency: $graph" >&2; exit 1
         fi
         management=false
         if [[ ",$selection," == *,management-canister-types,* ]]; then management=true; fi

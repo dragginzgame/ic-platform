@@ -151,6 +151,14 @@ It selects neither Candid nor an executor and installs no exports, timer or stor
 owner. Timers must select both `executor` and `ic0`; changing either qualified
 identity requires renewed combined callback/trap/cancellation/upgrade evidence.
 
+The same feature explicitly exports `in_replicated_execution() -> u32`,
+`is_controller(&[u8]) -> u32`, `msg_reply_data_append(&[u8])` and
+`msg_reject(&[u8])`. These are the upstream safe signatures and integer results.
+Pass existing Principal bytes to the controller operation; append preserves
+slice order and still requires `msg_reply()` to finalize. Keep rejection bytes,
+early size refusal and authentication ordering unchanged. These exports do not
+replace CDK's Principal/Vec convenience helpers, macros or call/task lifecycle.
+
 Until the full CDK frontend is qualified, existing canisters/probes may retain
 narrow direct `ic-cdk` 0.20.3 and macro-required Candid declarations for entrypoint,
 lifecycle, call/system and spawn APIs ([runtime contract](https://github.com/dragginzgame/ic-platform/issues/1)).

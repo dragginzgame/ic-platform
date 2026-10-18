@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.9]
+
+### Added
+
+- Expose the existing raw replicated-execution flag, controller check, reply
+  append and reject operations through the independent `ic0` boundary. Preserve
+  upstream integer/signature identities and caller-owned byte/authentication policy
+  ([#1 — Support Query’s CDK call and entrypoint boundary](https://github.com/dragginzgame/ic-platform/issues/1)).
+
+### Fixed
+
+- Reject unreviewed features, unsupported CDK frontend packages and additional
+  executor/system versions or sources in feature-graph validation, including
+  graphs that select the executor
+  ([#14 — Close feature-graph admission gaps](https://github.com/dragginzgame/ic-platform/issues/14)).
+
 ## [0.1.8] - 2026-10-18
 
 ### Added

@@ -17,7 +17,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `candid-parser` | Native host parsing/type checking, service equality, dynamic refusal fixtures and JavaScript/TypeScript generation |
 | `certification` | Upstream certificate/hash-tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
-| `ic0` | Qualified raw IC 1.2.0 system calls used by Timers and Testkit, including debug output; independent of Candid and executor |
+| `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 
@@ -97,7 +97,10 @@ this repository has no Candid extraction command requiring a selected extractor.
 transitive graphs for the native host and `wasm32-unknown-unknown`, with no
 features and all combinations of `candid`, `executor`, `certification` and
 `candid-parser`, `agent`, `ic0`, `management-canister-types` and `icrc-ledger-types`, plus the actual default selection. It enforces empty defaults
-and exact qualified executor/system requirements,
+and exact qualified executor/system requirements. It rejects unreviewed feature
+names until the matrix and isolation policy are updated, rejects CDK frontend
+packages even when the executor is selected, and rejects additional executor/
+system versions or non-registry sources in the transitive graph. It also
 rejects `pocket-ic`, `ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK-free defaults and Candid-free
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
