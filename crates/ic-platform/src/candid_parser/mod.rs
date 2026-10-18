@@ -7,13 +7,19 @@
 //! Parse an [`IDLProg`] and use [`check_prog`] for silent in-memory checking.
 //! Host retains service inventories and aggregate decoding budgets. This module
 //! and its parser dependency are absent on Wasm, even with all features selected.
+//! Dynamic values and type/value serializers support native refusal fixtures;
+//! callers retain fixture admission and production decoding policy.
 
 pub use candid_parser::bindings::{
     javascript::compile as compile_javascript, typescript::compile as compile_typescript,
 };
+pub use candid_parser::ser::{TypeSerialize, ValueSerializer};
 pub use candid_parser::syntax::{Dec, IDLMergedProg};
 pub use candid_parser::types::{
     FuncMode, Type, TypeInner, internal::TypeContainer, subtype::equal as type_equal,
+    value::IDLField,
 };
 pub use candid_parser::utils::{CandidSource, instantiate_candid, service_equal};
-pub use candid_parser::{Error, IDLArgs, IDLProg, Result, TypeEnv, check_prog, parse_idl_args};
+pub use candid_parser::{
+    Error, IDLArgs, IDLProg, IDLValue, Result, TypeEnv, check_prog, parse_idl_args,
+};

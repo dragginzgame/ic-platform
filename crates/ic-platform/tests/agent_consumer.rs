@@ -5,10 +5,11 @@
 use ic_platform::{
     Principal,
     agent::{
-        Agent, AgentBuilder, AgentError, BasicIdentity, EnvelopeContent, HttpErrorPayload,
-        Identity, Prime256v1Identity, RejectCode, RejectResponse, ReplyResponse, RequestId,
-        RequestStatusResponse, Secp256k1Identity, SignedUpdate, TransportError, lookup_value,
-        signed_update_inspect, to_request_id,
+        Agent, AgentBuilder, AgentError, AnonymousIdentity, BasicIdentity, CallResponse,
+        DelegatedIdentity, Delegation, EnvelopeContent, HttpErrorPayload, Identity,
+        Prime256v1Identity, RejectCode, RejectResponse, ReplyResponse, RequestId,
+        RequestStatusResponse, Secp256k1Identity, SignedDelegation, SignedUpdate,
+        TransportCallResponse, TransportError, lookup_value, signed_update_inspect, to_request_id,
     },
     certification::{Certificate, SubtreeLookupResult, labeled, labeled_hash, leaf},
 };
@@ -73,6 +74,117 @@ fn signing_preserves_effective_id_payload_and_request_identity() {
     // Type-check the asynchronous call API without dispatching network traffic.
     let _query = agent.query(&effective, "read").with_arg(arg).call();
     let _status = agent.request_status_raw(&request_id, effective);
+}
+
+#[test]
+fn anonymous_and_delegated_identities_preserve_sender_and_signed_chain() {
+    let anonymous = AnonymousIdentity;
+    assert_eq!(anonymous.sender().unwrap(), Principal::anonymous());
+    assert!(anonymous.public_key().is_none());
+    let unsigned = anonymous.sign_arbitrary(b"fixture").unwrap();
+    assert!(unsigned.signature.is_none() && unsigned.delegations.is_none());
+
+    let root = BasicIdentity::from_raw_key(&[7; 32]);
+    let session = BasicIdentity::from_raw_key(&[8; 32]);
+    let target = Principal::from_slice(&[1]);
+    let delegation = Delegation {
+        pubkey: session.public_key().unwrap(),
+        expiration: 1_000_000,
+        targets: Some(vec![target]),
+        permissions: None,
+    };
+    let signature = root.sign_delegation(&delegation).unwrap();
+    let from_hex = |hex: &str| -> Vec<u8> {
+        let (pairs, remainder) = hex.trim().as_bytes().as_chunks::<2>();
+        assert!(remainder.is_empty());
+        pairs
+            .iter()
+            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
+            .collect()
+    };
+    assert_eq!(
+        delegation.signable(),
+        from_hex(include_str!("fixtures/agent-delegation-signable.hex"))
+    );
+    assert_eq!(
+        signature.signature.as_ref().unwrap(),
+        &from_hex(include_str!("fixtures/agent-delegation-signature.hex"))
+    );
+    let signed = SignedDelegation {
+        delegation,
+        signature: signature.signature.unwrap(),
+    };
+    // No canister signatures occur in this chain, so no network root key is needed.
+    let delegated = DelegatedIdentity::new_with_root_key(
+        root.public_key().unwrap(),
+        Box::new(session),
+        vec![signed.clone()],
+        &[],
+    )
+    .unwrap();
+    assert_eq!(delegated.sender().unwrap(), root.sender().unwrap());
+    let signature = delegated.sign_arbitrary(b"fixture").unwrap();
+    assert_eq!(signature.public_key, root.public_key());
+    let chain = signature.delegations.unwrap();
+    assert_eq!(chain[0].signature, signed.signature);
+    assert_eq!(chain[0].delegation.targets, Some(vec![target]));
+    assert_eq!(chain[0].delegation.expiration, 1_000_000);
+
+    let mut invalid = signed;
+    invalid.delegation.expiration += 1;
+    assert!(
+        DelegatedIdentity::new_with_root_key(
+            root.public_key().unwrap(),
+            Box::new(BasicIdentity::from_raw_key(&[8; 32])),
+            vec![invalid.clone()],
+            &[],
+        )
+        .is_err()
+    );
+    // This constructor intentionally leaves replica admission to the caller's fixture.
+    let unchecked = DelegatedIdentity::new_unchecked(
+        root.public_key().unwrap(),
+        Box::new(BasicIdentity::from_raw_key(&[8; 32])),
+        vec![invalid],
+    );
+    assert_eq!(unchecked.sender().unwrap(), root.sender().unwrap());
+}
+
+#[test]
+fn signed_update_response_variants_do_not_supply_a_retry_policy() {
+    let request_id = RequestId::new(&[7; 32]);
+    let pending: CallResponse<Vec<u8>> = CallResponse::Poll(request_id);
+    assert!(matches!(pending, CallResponse::Poll(id) if id == request_id));
+    let immediate: CallResponse<Vec<u8>> = CallResponse::Response(vec![0, 255]);
+    assert!(matches!(immediate, CallResponse::Response(bytes) if bytes == [0, 255]));
+    let response = TransportCallResponse::Replied {
+        certificate: vec![1, 2, 3],
+    };
+    assert!(
+        matches!(response, TransportCallResponse::Replied { certificate } if certificate == [1, 2, 3])
+    );
+    assert!(matches!(
+        TransportCallResponse::Accepted,
+        TransportCallResponse::Accepted
+    ));
+    let rejected = TransportCallResponse::NonReplicatedRejection(RejectResponse {
+        reject_code: RejectCode::CanisterReject,
+        reject_message: "fixture".into(),
+        error_code: None,
+    });
+    assert!(matches!(
+        rejected,
+        TransportCallResponse::NonReplicatedRejection(_)
+    ));
+
+    let agent = Agent::builder()
+        .with_url("http://127.0.0.1:1")
+        .build()
+        .unwrap();
+    let call = agent.update_signed(Principal::anonymous(), vec![]);
+    // Check the real return identity without dispatching any request or polling it.
+    let _: Box<dyn std::future::Future<Output = Result<CallResponse<Vec<u8>>, AgentError>> + '_> =
+        Box::new(call);
 }
 
 #[test]

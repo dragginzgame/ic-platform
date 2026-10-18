@@ -35,8 +35,14 @@ Enable `agent` on native hosts for `ic_platform::agent`: upstream `Agent`,
 `Prime256v1Identity`, `TransportError`, `HttpErrorPayload`, `Envelope`,
 `EnvelopeContent`, `SignedUpdate`, `RequestId`, `RequestStatusResponse`,
 `RejectCode`, `RejectResponse`, `ReplyResponse`, `lookup_value`, `to_request_id`
-and `signed_update_inspect`, with PEM support. The module and Agent dependency
-are absent on Wasm, including all-feature builds. No other Platform feature
+and `signed_update_inspect`, with PEM support. The module also exposes
+`AnonymousIdentity`, `DelegatedIdentity`, `Delegation`,
+`SignedDelegation`, `CallResponse` and `TransportCallResponse`. These retain
+upstream signed-chain validation and immediate/pending/rejected response formats.
+Unchecked delegation construction does not authenticate a chain or enforce
+expiry/target policy. Pending responses do not authorize polling or resubmission.
+The module and Agent dependency are absent on Wasm, including all-feature builds.
+No other Platform feature
 enables Agent, and Agent does not enable other Platform features. Its upstream
 Candid/certification dependencies remain transitive. Consumers own runtime,
 endpoint admission, TLS/client configuration, identity/root-key selection,
@@ -65,14 +71,19 @@ Candid contract exports have the same upstream type identity.
 Principal parse-error identity used by public host APIs.
 
 Use `candid::decoder::{DecoderConfig, IDLDeserialize, decode_one_with_config,
-decode_args_with_config}` for existing low-level configuration and staged
+decode_args_with_config, decode_one, decode_args}` for existing low-level configuration and staged
 decoding. These are direct upstream identities: optional/default ceilings,
 diagnostics, construction/value/finalization/drop boundaries and typed errors
 are unchanged. Callers retain pre-decoder byte admission and canonical re-encoding;
 the finite `DecodeLimits` helpers continue selecting compact diagnostics.
+The decoder module's `decode_one` and `decode_args` use upstream defaults,
+including diagnostics, and take no Platform `DecodeLimits` argument. Preserve
+existing caller byte admission; do not confuse them with the parent helpers.
 
 The contract explicitly exports `candid_method`, `export_service`, `Encode`,
-`Decode`, `TypeEnv`, `idl_hash`, reflection/type equality and printer machinery.
+`Decode`, `TypeEnv`, `idl_hash`, reflection/type equality/subtyping and printer machinery.
+`contract::types::subtype::subtype` preserves upstream structural subtyping for
+narrowed reply projections; equality is a different relation.
 For service generation, write `contract::export_service!(ic_platform::candid::contract)`;
 the upstream macro accepts this explicit generated path. Update generators too.
 Import `contract::{Encode, Decode}` by those names so their recursive macro calls
@@ -100,6 +111,10 @@ Callers own source/output limits, imports and diagnostics. `check_prog` ignores
 imports; inspect `Dec` first when requiring self-contained source. Parse `IDLProg`
 and call `check_prog` for silent in-memory checking. `CandidSource::File` reads
 files/imports; its loaders and service comparison can print parser diagnostics.
+Native refusal fixtures can also import `IDLValue`, `IDLField`, `TypeSerialize`
+and `ValueSerializer` from this module. Select `candid` too when using the
+contract's derives/reflection or configured decoders. These exports impose no
+automatic bounds and do not expose dynamic fixture APIs on Wasm.
 
 The contract also exports `ArgumentEncoder`/`ArgumentDecoder` for generic call
 helpers, `Nat`/`Int` for arbitrary-precision external values, and `Reserved` for
@@ -125,10 +140,14 @@ identity requires renewed combined callback/trap/cancellation/upgrade evidence.
 Until the full CDK frontend is qualified, existing canisters/probes may retain
 narrow direct `ic-cdk` 0.20.3 and macro-required Candid declarations for entrypoint,
 lifecycle, call/system and spawn APIs ([runtime contract](https://github.com/dragginzgame/ic-platform/issues/1)).
-Upstream CDK expansion still emits absolute Candid paths. Re-exporting its macros
+Typed/default CDK expansion still emits absolute Candid paths. Re-exporting its macros
 or changing imports does not fix that expansion. CDK `futures::spawn` adds an
 unfinished-task drop panic outside trap recovery; `executor::spawn_protected`
 alone does not preserve that policy and must not replace it.
+Existing raw CDK 0.20.3 methods with zero Rust arguments, `manual_reply = true`
+and `hidden = true` avoid generated Candid references. `hidden` preserves callable
+exports but omits Candid service registration; retain supported DID metadata when
+required. This subset still uses direct CDK and is not a Platform runtime facade.
 
 Published Testkit 0.52/0.53 call helpers still own distinct limits/error types.
 Existing native tests may retain `ic-testkit-candid` solely for that API until a

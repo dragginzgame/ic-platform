@@ -54,6 +54,14 @@ pub fn roundtrip() {
     );
     let bytes = Encode!(&42_u64).unwrap();
     assert_eq!(Decode!(&bytes, u64).unwrap(), 42);
+    assert_eq!(
+        ic_platform::candid::decoder::decode_one::<u64>(&bytes).unwrap(),
+        42
+    );
+    assert_eq!(
+        ic_platform::candid::decoder::decode_args::<(u64,)>(&bytes).unwrap(),
+        (42,)
+    );
     let config = DecoderConfig::new();
     assert_eq!(decode_one_with_config::<u64>(&bytes, &config).unwrap(), 42);
     assert_eq!(
@@ -65,6 +73,36 @@ pub fn roundtrip() {
     let env: contract::TypeEnv = reflection.env;
     contract::types::subtype::equal(&mut std::collections::HashSet::new(), &env, &ty, &ty).unwrap();
     assert_eq!(contract::idl_hash("a"), 97);
+    // Canic's narrowed reply projections require subtyping, not equality.
+    use contract::types::{Field, Label, Type, TypeInner};
+    let projected: Type = TypeInner::Record(vec![Field {
+        id: Label::Named("owner".into()).into(),
+        ty: TypeInner::Principal.into(),
+    }])
+    .into();
+    contract::types::subtype::subtype(&mut std::collections::HashSet::new(), &env, &ty, &projected)
+        .unwrap();
+    assert!(
+        contract::types::subtype::equal(
+            &mut std::collections::HashSet::new(),
+            &env,
+            &ty,
+            &projected,
+        )
+        .is_err()
+    );
+    let invalid: Type = TypeInner::Record(vec![Field {
+        id: Label::Named("owner".into()).into(),
+        ty: TypeInner::Nat64.into(),
+    }])
+    .into();
+    let _: contract::Error = contract::types::subtype::subtype(
+        &mut std::collections::HashSet::new(),
+        &env,
+        &ty,
+        &invalid,
+    )
+    .unwrap_err();
     let reply = Reply {
         owner: contract::Principal::anonymous(),
         result: Ok(42),
@@ -165,6 +203,21 @@ fn staged_decoding_preserves_caller_failures_and_optional_configuration() {
     assert_eq!(staged_value(&trailing), Err(Stage::Trailing));
     let extra = contract::encode_args((42_u64, true)).unwrap();
     assert_eq!(staged_value(&extra), Err(Stage::Noncanonical));
+    assert_eq!(
+        ic_platform::candid::decoder::decode_one::<u64>(&extra).unwrap(),
+        42
+    );
+    assert_eq!(
+        ic_platform::candid::decoder::decode_args::<(u64,)>(&extra).unwrap(),
+        (42,)
+    );
+    let missing = contract::encode_args(()).unwrap();
+    assert_eq!(
+        ic_platform::candid::decoder::decode_one::<Option<u64>>(&missing).unwrap(),
+        None
+    );
+    let _: contract::Error =
+        ic_platform::candid::decoder::decode_one::<u64>(b"bad header").unwrap_err();
     assert_eq!(staged_value(&vec![0; 5121]), Err(Stage::Limit));
     let mut config = DecoderConfig::new();
     config.set_full_error_message(false).set_skipping_quota(0);

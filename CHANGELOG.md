@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.7]
+
+### Added
+
+- Complete the explicit Candid boundary with structural subtyping, upstream
+  default decoders, and native dynamic values/type-value serializers for refusal
+  fixtures. Existing limits, diagnostics and wire bytes remain caller-owned
+  ([#5 — Support Canic Candid service generation and decoder contracts](https://github.com/dragginzgame/ic-platform/issues/5)).
+- Expose native Agent anonymous/delegated identities and signed-update response
+  enums without introducing polling, retry or trust policy
+  ([#9 — Complete the Agent boundary for consumer adoption](https://github.com/dragginzgame/ic-platform/issues/9)).
+
+### Changed
+
+- Organize the dependency catalog into production and tests/tooling sections,
+  preserving them consistently through formatting, hooks and release checks.
+- Clarify the existing raw CDK macro subset that avoids generated Candid paths;
+  typed entrypoints and the full runtime boundary remain unsupported
+  ([#1 — Support Query’s CDK call and entrypoint boundary](https://github.com/dragginzgame/ic-platform/issues/1)).
+
 ## [0.1.6] - 2026-10-18
 
 ### Added

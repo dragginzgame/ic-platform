@@ -8,12 +8,20 @@
 //! [`lookup_value`] only reads a certificate tree; it does not authenticate it.
 //! [`signed_update_inspect`] compares envelope content; it does not verify its
 //! signature or authorize replay. This module and Agent are absent on Wasm.
+//! Delegated identity constructors retain upstream chain validation; unchecked
+//! construction does not authenticate a chain or enforce expiry/target policy.
+//! Call response variants grant no permission to poll, retry or resubmit.
 
 pub use ic_agent::agent::agent_error::{HttpErrorPayload, TransportError};
 pub use ic_agent::agent::signed::SignedUpdate;
 pub use ic_agent::agent::{
-    AgentBuilder, Envelope, EnvelopeContent, RejectCode, RejectResponse, ReplyResponse,
-    RequestStatusResponse, signed_update_inspect,
+    AgentBuilder, CallResponse, Envelope, EnvelopeContent, RejectCode, RejectResponse,
+    ReplyResponse, RequestStatusResponse, signed_update_inspect,
 };
-pub use ic_agent::identity::{BasicIdentity, Prime256v1Identity, Secp256k1Identity};
-pub use ic_agent::{Agent, AgentError, Identity, RequestId, lookup_value, to_request_id};
+pub use ic_agent::identity::{
+    AnonymousIdentity, BasicIdentity, DelegatedIdentity, Delegation, Prime256v1Identity,
+    Secp256k1Identity, SignedDelegation,
+};
+pub use ic_agent::{
+    Agent, AgentError, Identity, RequestId, TransportCallResponse, lookup_value, to_request_id,
+};

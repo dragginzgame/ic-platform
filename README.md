@@ -3,7 +3,7 @@
 One controlled dependency boundary for external Candid protocols and IC runtime
 integration. The initial library adopts Testkit's bounded Candid decoders and
 exposes the selected executor through an explicit surface. It has no default
-features, PocketIC, transport, host tooling or storage dependency.
+features or PocketIC/storage dependency. Transport and parsing are native opt-ins.
 
 `ic_platform::Principal` is always available, without enabling a feature or
 depending directly on `ic_principal`. It preserves the upstream type identity,
@@ -14,7 +14,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | --- | --- |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
-| `candid-parser` | Native host parsing/type checking, service equality, textual arguments and JavaScript/TypeScript generation |
+| `candid-parser` | Native host parsing/type checking, service equality, dynamic refusal fixtures and JavaScript/TypeScript generation |
 | `certification` | Upstream certificate/hash-tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 system calls used by Timers and Testkit, including debug output; independent of Candid and executor |
@@ -84,8 +84,12 @@ Shared Tooling 0.24.0 is pinned at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`.
 management/ledger DTOs, the executor and Serde are production dependencies, including optional and derive use; there are no
 tests/tooling-only catalog entries or build/dev declarations. Optional parser
 and Agent dependencies are restricted to non-Wasm targets.
-Inline role labels retain global Cargo ordering: `fmt`, `fmt-check`, the shared
-hook and release metadata checks all use the same ungrouped ordering policy.
+The root catalog has `Production dependencies` and `Tests and tooling only`
+sections. All current entries serve production, so the second section is empty.
+`fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
+sections with grouped ordering. Shared 0.24.0 supports this through the paired
+local formatting commands; newer uncommitted Shared defaults are not adopted.
+Keep a blank line after each section heading so sorting preserves its position.
 The common Rust tool set now contains only cargo-sort and cargo-sort-derives;
 this repository has no Candid extraction command requiring a selected extractor.
 

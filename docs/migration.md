@@ -69,6 +69,21 @@ Standalone Candid-only native/MSRV/Wasm qualification covers those paths, fixed 
 reflection/equality, configured decoding, typed stage mapping and macro wire bytes.
 See [Canic's contract](https://github.com/dragginzgame/ic-platform/issues/5).
 
+The decoder module additionally exports upstream default `decode_one` and
+`decode_args`. Replace `candid::decode_one` / `candid::decode_args` with
+`ic_platform::candid::decoder::{decode_one, decode_args}` when preserving that
+existing policy. They take no `DecodeLimits` argument and retain upstream default
+quotas and diagnostics. The parent `candid::{decode_one, decode_args}` helpers
+still require caller-selected finite limits and select compact diagnostics.
+Do not switch between those policies merely to change imports.
+
+Canic's reply projection checks can now use
+`ic_platform::candid::contract::types::subtype::subtype` in place of the upstream
+path, retaining its `HashSet`, `TypeEnv`, sent/received direction and typed error.
+Subtyping permits valid narrower record projections that structural equality
+rejects. Preserve Canic's surrounding selector/field compatibility policy and
+its positive/invalid projection corpus; update generators emitting these paths.
+
 These service-generation capabilities do not change CDK's separate entrypoint
 expansion or qualify generated Fleet actors. Keep the narrow existing CDK and
 macro-required Candid declarations for unsupported frontend APIs until the
@@ -163,6 +178,20 @@ Canic's ICP management/query and signed-receipt/capacity-import paths: `Agent`,
 and `signed_update_inspect`. They are upstream identities, not replacement
 clients, request records or error projections. The certification surface also
 explicitly supplies observed `SubtreeLookupResult` and `labeled_hash` operations.
+
+The same native Agent feature also exports `CallResponse`,
+`TransportCallResponse`, `AnonymousIdentity`, `DelegatedIdentity`, `Delegation`
+and `SignedDelegation`, covering Backup's submission and anonymous fixtures,
+Auth's delegated ingress fixtures and Blob's retained signed-update/certificate
+responses. Flatten `ic_agent::agent::CallResponse`, `ic_agent::identity::{...}`
+and `ic_agent::TransportCallResponse` to `ic_platform::agent::{...}`. Retain
+single-dispatch response bounds and pending/lost-reply spending: `Poll` and
+`Accepted` do not grant authority to poll or resubmit. Keep exact delegation
+keys, targets, expiration, permissions, signatures and selected root keys;
+unchecked construction deliberately leaves authentication to the receiving IC.
+Consumers configure Reqwest/middleware through their own explicit compatible
+Reqwest dependency, not an Agent blanket export. Keep no-redirect/proxy/retry
+middleware settings and actual transport type identity unchanged.
 
 For adoption, enable `agent` on the existing inherited Platform dependency in
 host members and CLI packages. Product host features should select
@@ -317,12 +346,23 @@ callback rollback. Timers' `platform/ffi.rs` follows the same identity through
 self-dispatch, response and cleanup; its own flight table, retry and rearm policy
 stay in Timers. Replacing this with another executor would break that contract.
 
-CDK macros 0.20.3 accept a runtime `crate` path override but still generate
-`::candid::DecoderConfig`, decode/encode helpers and `candid_method` attributes.
+CDK macros 0.20.3 accept a runtime `crate` path override, but typed/default
+entrypoints still generate `::candid::DecoderConfig`, decode/encode helpers and
+`candid_method` attributes.
 Canic separately generates these absolute Candid references and service exports.
 Changing imports or re-exporting an attribute macro alone cannot eliminate the
 consumer dependency. Full runtime APIs and generators are deliberately not exposed
 as supported here until a concrete generated-path solution is qualified.
+
+The existing raw subset is narrower: zero Rust arguments skip automatic decoding,
+`manual_reply = true` skips encoding, and `hidden = true` skips service registration.
+Together these let CDK 0.20.3 raw entrypoints avoid generated Candid references.
+`hidden` keeps callable Wasm exports but omits them from Candid service metadata;
+do not apply it to methods whose supported DID needs that registration. IC Wire
+has [qualified this existing subset](https://github.com/dragginzgame/ic-platform/issues/1#issuecomment-6248220059)
+and retired its former staged benchmark consumer. It still uses direct CDK;
+this does not establish a Platform runtime/macro replacement or remove transitive
+Candid. The retained staged decoder corpus remains useful boundary evidence.
 
 The next runtime proof must use a standalone canister with only Platform at this
 boundary: query/composite query/update/init/post-upgrade exports, DTO/service
@@ -349,6 +389,19 @@ frontend bindings, protocol argument helpers and service/type comparisons:
 `instantiate_candid`, `service_equal`, `TypeContainer`, `type_equal`,
 `compile_javascript` and `compile_typescript`. These directly preserve upstream
 identities; there is no blanket crate/module export or new parser implementation.
+
+Native dynamic refusal fixtures additionally use explicit `IDLValue`, `IDLField`,
+`TypeSerialize` and `ValueSerializer` exports from `ic_platform::candid_parser`.
+Replace upstream `IDLValue`, `types::value::IDLField` and
+`ser::{TypeSerialize, ValueSerializer}` imports with those flat paths. Existing
+`IDLArgs` and contract `types::{Field, Label, Type, TypeInner}` remain the same
+identities; select `candid` alongside `candid-parser` for contract derives and
+configured decoding. Blob should retain these selections in native development
+dependencies, remove its now-unused direct native Candid declaration, update the
+lock and boundary policy, and rerun its existing old-field, oversized-header,
+refusal/rollback fixtures. No hand-built type headers or independent serializer
+are required. The module is still absent on Wasm; the production `candid` feature
+alone does not activate upstream dynamic values or the host parser.
 
 To adopt, enable `features = ["candid-parser"]` on the existing inherited
 Platform dependency in host members, or `ic-platform/candid-parser` from an

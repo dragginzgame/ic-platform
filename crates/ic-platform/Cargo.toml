@@ -46,6 +46,11 @@ path = "tests/candid_consumer.rs"
 required-features = ["candid"]
 
 [[test]]
+name = "dynamic_consumer"
+path = "tests/dynamic_consumer.rs"
+required-features = ["candid", "candid-parser"]
+
+[[test]]
 name = "ic0_consumer"
 path = "tests/ic0_consumer.rs"
 required-features = ["ic0"]

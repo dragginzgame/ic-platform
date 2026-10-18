@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := help
 SHARED_TOOLING_RUST := 1
+FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all' -- "$(FORMAT_CARGO)"
+FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check' -- "$(FORMAT_CARGO)"
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 include make/consumer.mk
