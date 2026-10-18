@@ -18,6 +18,7 @@ candid-parser = ["dep:candid_parser"]
 certification = ["dep:ic-certification"]
 executor = ["dep:ic-cdk-executor"]
 ic0 = ["dep:ic0"]
+icrc-ledger-types = ["dep:icrc-ledger-types"]
 management-canister-types = ["dep:ic-management-canister-types"]
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
@@ -31,6 +32,7 @@ ic-certification = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic0 = { workspace = true, optional = true }
 ic_principal.workspace = true
+icrc-ledger-types = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 
 [[test]]
@@ -42,6 +44,16 @@ required-features = ["agent", "certification"]
 name = "candid_consumer"
 path = "tests/candid_consumer.rs"
 required-features = ["candid"]
+
+[[test]]
+name = "ic0_consumer"
+path = "tests/ic0_consumer.rs"
+required-features = ["ic0"]
+
+[[test]]
+name = "icrc_consumer"
+path = "tests/icrc_consumer.rs"
+required-features = ["icrc-ledger-types", "candid"]
 
 [[test]]
 name = "management_consumer"

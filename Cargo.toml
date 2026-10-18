@@ -19,6 +19,7 @@ ic-certification = { version = "3.2.0", default-features = false, features = ["s
 ic-management-canister-types = "=0.11.0" # Production dependency, external management DTO contract
 ic0 = "=1.2.0" # Production dependency, qualified raw system ABI
 ic_principal = "0.1.5" # Production dependencies
+icrc-ledger-types = { version = "0.2.0", default-features = false } # Production dependency, external ledger DTO contract
 serde = { version = "1.0", default-features = false, features = ["derive"] } # Production dependencies
 
 [workspace.lints.rust]

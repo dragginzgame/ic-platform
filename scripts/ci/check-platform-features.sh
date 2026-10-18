@@ -20,6 +20,10 @@ cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/met
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve optional management types =0.11.0' >&2; exit 1;
 }
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["icrc-ledger-types"] == ["dep:icrc-ledger-types"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == [])' \
+    target/feature-graphs/metadata.json > /dev/null || {
+    echo 'Ledger types must be optional without upstream default/storage features' >&2; exit 1;
+}
 # These are production package graphs, including build dependencies but not dev
 # dependencies. Cargo tree prints canonical package names even for renamed deps.
 selections=(none candid executor certification
@@ -40,6 +44,11 @@ without_management=("${all_selections[@]}")
 all_selections+=(management-canister-types)
 for selection in "${without_management[@]}"; do
     if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,management-canister-types"); fi
+done
+without_ledger=("${all_selections[@]}")
+all_selections+=(icrc-ledger-types)
+for selection in "${without_ledger[@]}"; do
+    if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,icrc-ledger-types"); fi
 done
 for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     for selection in "${all_selections[@]}"; do
@@ -69,8 +78,16 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         if [[ "$management" == false ]] && grep -Eq '^ic-management-canister-types ' "$graph"; then
             echo "Management types must remain opt-in only: $graph" >&2; exit 1
         fi
-        # Host parser, Agent and management DTOs depend on upstream Candid independently.
-        if [[ ",$selection," != *,candid,* && "$parser" == false && "$agent" == false && "$management" == false ]] && grep -Eq '^(candid|candid_derive) ' "$graph"; then
+        ledger=false
+        if [[ ",$selection," == *,icrc-ledger-types,* ]]; then ledger=true; fi
+        if [[ "$ledger" == false ]] && grep -Eq '^icrc-ledger-types ' "$graph"; then
+            echo "Ledger types must remain opt-in only: $graph" >&2; exit 1
+        fi
+        if grep -Eq '^ic-stable-structures ' "$graph"; then
+            echo "Ledger storage integration is outside the Platform contract: $graph" >&2; exit 1
+        fi
+        # Protocol DTOs, host parser and Agent depend on upstream Candid independently.
+        if [[ ",$selection," != *,candid,* && "$parser" == false && "$agent" == false && "$management" == false && "$ledger" == false ]] && grep -Eq '^(candid|candid_derive) ' "$graph"; then
             echo "Graph without candid must remain Candid-free: $graph" >&2; exit 1
         fi
         if [[ "$selection" != *certification* && "$agent" == false ]] && grep -Eq '^ic-certification ' "$graph"; then

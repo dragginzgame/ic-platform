@@ -4,10 +4,11 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target
-for capability in candid certification candid-parser agent management; do
+for capability in candid certification candid-parser agent management ic0 icrc; do
 features="\"$capability\""
 if [[ "$capability" == agent ]]; then features='"agent", "certification"'; fi
 if [[ "$capability" == management ]]; then features='"management-canister-types", "candid"'; fi
+if [[ "$capability" == icrc ]]; then features='"icrc-ledger-types", "candid"'; fi
 fixture="$(mktemp -d "$root/target/boundary-consumer.XXXXXX")"
 mkdir -p "$fixture/crates/consumer/src"
 cat > "$fixture/Cargo.toml" <<MANIFEST
@@ -32,6 +33,14 @@ MANIFEST
 source="$capability"
 if [[ "$capability" == candid-parser ]]; then source=parser; fi
 cp "crates/ic-platform/tests/${source}_consumer.rs" "$fixture/crates/consumer/src/lib.rs"
+if [[ "$capability" == management ]]; then
+    mkdir -p "$fixture/crates/consumer/src/fixtures"
+    cp crates/ic-platform/tests/fixtures/management-info-*.hex "$fixture/crates/consumer/src/fixtures/"
+fi
+if [[ "$capability" == icrc ]]; then
+    mkdir -p "$fixture/crates/consumer/src/fixtures"
+    cp crates/ic-platform/tests/fixtures/icrc-*.hex "$fixture/crates/consumer/src/fixtures/"
+fi
 cp Cargo.lock "$fixture/Cargo.lock"
 # Only the disposable local package identity is added to an already selected graph.
 # Filter metadata to the selected host: unfiltered offline metadata otherwise

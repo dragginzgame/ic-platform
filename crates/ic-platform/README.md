@@ -4,14 +4,31 @@ Controlled Candid and executor dependencies. Enable `candid` for external
 protocol DTOs and bounded replies; enable `executor` for the selected CDK executor.
 `ic_platform::Principal` is unconditional; no features are enabled by default.
 
+Enable `icrc-ledger-types` for `ic_platform::icrc_ledger_types`, selecting upstream
+0.2.0 without default/storage features. The explicit flat surface is `Account`,
+`MetadataValue`, `Value`, `ICRC3Value`, `TransferError`, `AllowanceArgs`, `Allowance`,
+`GetArchivesArgs`, `ICRC3ArchiveInfo`, `QueryArchiveFn`, `ArchivedBlocks`,
+`BlockWithId`, `GetBlocksRequest`, `GetBlocksResult`, `ICRC3DataCertificate` and
+`SupportedBlockType`. These preserve upstream identities, external Candid formats,
+account/text semantics and value hashes. Select `candid` separately for Platform
+encoding/decoding; the ledger dependency itself brings transitive Candid. Native
+and Wasm are supported, without selecting an executor, parser, Agent or storage
+implementation. Consumers retain amount/fee policy, byte/work limits, ledger and
+archive admission, certificate verification, interpretation, deadlines and retries.
+Hashing a block or decoding certificate bytes does not authenticate either.
+
 Enable `management-canister-types` for `ic_platform::management_canister_types`:
 upstream `HttpRequestArgs`, `HttpRequestResult`, `HttpMethod`, `HttpHeader`,
 `TransformContext`, `TransformFunc` and `TransformArgs` from exactly 0.11.0.
+The same feature explicitly exports Blob's history types: `CanisterInfoArgs`,
+`CanisterInfoResult`, `ChangeDetails` and `CodeDeploymentMode`.
 These retain the external Candid format and upstream type identity on native and
 Wasm targets. This feature brings transitive Candid; select Platform's `candid`
 feature separately for encoders/decoders. It selects no executor, Agent or parser.
 Consumers retain HTTP bounds, cycle pricing, transforms, call execution and retry
-policy. Other management DTOs and call helpers are outside this explicit surface.
+policy. History consumers retain bounded calls, reply/work limits, change counts,
+instance-version checks and recovery fences. Decoding history does not establish
+continuity. Other management DTOs and call helpers are outside this explicit surface.
 
 Enable `agent` on native hosts for `ic_platform::agent`: upstream `Agent`,
 `AgentBuilder`, `AgentError`, `Identity`, `BasicIdentity`, `Secp256k1Identity`,
@@ -97,7 +114,9 @@ Its published dependency constraint is `ic-cdk-executor = "=2.0.0"`.
 
 Enable `ic0` for `ic_platform::ic0`: the explicit IC 1.2.0 calls used by Timers
 for time/version/counters/stable page count, one timer, self/caller/argument
-copying, replies/reject codes, cycles/costs and call submission/cleanup. The exact
+copying, replies/reject codes, cycles/costs and call submission/cleanup, plus
+Testkit's `debug_print(&[u8])`. Debug output retains upstream byte/trap behavior;
+marker formatting, labels and byte limits belong to the caller. The exact
 `=1.2.0` dependency preserves upstream safe/unsafe callback signatures and traps.
 It selects neither Candid nor an executor and installs no exports, timer or storage
 owner. Timers must select both `executor` and `ic0`; changing either qualified

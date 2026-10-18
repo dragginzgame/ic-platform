@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.6]
+
+### Added
+
+- Add optional ICRC ledger types used by Query and Canic, preserving upstream
+  account, metadata, allowance and block/archive/certificate identities and wire
+  formats without enabling storage, executor or host transport features.
+- Expose the existing raw IC debug-print operation for Testkit benchmark markers,
+  preserving caller-formatted bytes without adding a logger or runtime dependency.
+  [#11 — Expose debug_print for Testkit benchmark marker emission](https://github.com/dragginzgame/ic-platform/issues/11).
+- Expose management-canister history DTOs used by Blob continuity recovery,
+  preserving upstream identities and Candid formats while consumers retain
+  bounded calls, history admission and recovery policy.
+  [#12 — Expose management canister history DTOs for Blob continuity recovery](https://github.com/dragginzgame/ic-platform/issues/12).
+
 ## [0.1.5] - 2026-10-18
 
 ### Added

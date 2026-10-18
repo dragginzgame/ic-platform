@@ -4,6 +4,7 @@
   {"dependency": "ic-certification", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-management-canister-types", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic_principal", "allowed_packages": ["ic-platform"]},
+  {"dependency": "icrc-ledger-types", "allowed_packages": ["ic-platform"]},
   {"dependency": "candid", "allowed_packages": ["ic-platform"]},
   {"dependency": "candid_derive", "allowed_packages": []},
   {"dependency": "candid_parser", "allowed_packages": ["ic-platform"]},
