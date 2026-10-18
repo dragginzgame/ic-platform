@@ -98,11 +98,14 @@ Shared Tooling 0.24.0 is pinned at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`.
 `ic-platform` is the sole consumer library; `ic-platform-macros` is its production
 proc-macro support package. Its Syn/Quote/Darling dependencies generate consumer
 entrypoints. Principal, Candid, the host parser, Agent, certification, raw IC calls,
-management/ledger DTOs, signature/BLS APIs, the executor and Serde are production dependencies, including optional and derive use; there are no
-tests/tooling-only catalog entries or build/dev declarations. Optional parser
+management/ledger DTOs, signature/BLS APIs, the executor and Serde are production
+dependencies, including optional and derive use. Testkit, Timers and the runtime
+driver's CBOR decoder are tests/tooling entries used by the independent fixture.
+Optional parser
 and Agent dependencies are restricted to non-Wasm targets.
 The root catalog has `Production dependencies` and `Tests and tooling only`
-sections. All current entries serve production, so the second section is empty.
+sections. Fixture-only selections stay in the second section and outside the
+consumer library's production graph.
 `fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
 sections with grouped ordering. Shared 0.24.0 supports this through the paired
 local formatting commands; newer uncommitted Shared defaults are not adopted.
@@ -186,6 +189,14 @@ the lock diff, and rerun qualification. Refresh seeds from the production lock a
 resolves the test-only additions; it may access the registry. For cached inputs,
 set `CARGO_NET_OFFLINE=true`. Normal validation never refreshes the selection.
 
+`bash scripts/ci/check-platform-runtime.sh --check-graph` validates the combined
+canister's native/Wasm dependency graphs without compiling or starting PocketIC.
+Every runtime mode except lock refresh rejects host parser, Agent and Testkit
+dependencies in those normal/build graphs, and enforces the qualified CDK and
+single executor/system identities. `make check-runtime-lock` also runs adversarial
+graph admission tests. This covers the combined consumer graph in addition to
+the separate Platform feature matrix; it does not inspect a Wasm binary's size.
+
 The runtime fixture also checks exact checkpoint bytes across upgrade, stable
 write/growth rollback after a trap, certified-data publication and certificate
 lookup, cycle burning, costs and system helpers in their supported contexts.
@@ -205,3 +216,13 @@ The Platform-only fixture remains a Rust 1.88 gate: `make check-consumer` now
 links its `cdylib` on both compilers. For focused work, run
 `bash scripts/ci/check-platform-consumer.sh cdk`. Full CI still selects every
 consumer. PocketIC success is separate from native macOS and live-IC acceptance.
+
+For published-selection evidence, run
+`bash scripts/ci/check-platform-consumer.sh --published 0.1.12 cdk`.
+This selects exactly that crates.io facade and rejects path/Git replacements of
+the facade or generator. The same maintained consumer tests and native/MSRV/Wasm
+builds run with only Platform declared. Metadata and the resolved lock remain
+in the printed attempt directory. Registry inputs must already be cached for
+the offline metadata step; this command never publishes or changes the repository
+lock. Omit `--published` to qualify local source. This is archive consumption
+evidence, separate from consumer application tests and installed-canister behavior.

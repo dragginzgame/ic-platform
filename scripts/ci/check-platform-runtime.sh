@@ -5,7 +5,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mode="${1:-run}"
 [[ $# -le 1 ]] || { echo "Expected at most one mode" >&2; exit 2; }
-case "$mode" in run|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--build-only|--refresh-lock]" >&2; exit 2 ;; esac
+case "$mode" in run|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
 if [[ "$mode" == run && -z "${POCKET_IC_BIN:-}" && -z "${IC_TESTKIT_POCKET_IC_URL:-}" ]]; then
     echo 'Set POCKET_IC_BIN (Testkit-admitted binary) or IC_TESTKIT_POCKET_IC_URL first' >&2
     exit 1
@@ -14,9 +14,9 @@ mkdir -p target
 fixture="$(mktemp -d "$root/target/cdk-runtime.XXXXXX")"
 mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 # Inherit the reviewed test dependency selections from the root catalog.
-testkit="$("$root/.tools/host/bin/yq" -p toml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
-timers="$("$root/.tools/host/bin/yq" -p toml -r '.workspace.dependencies.ic-timers' Cargo.toml)"
-cbor="$("$root/.tools/host/bin/yq" -p toml -r '.workspace.dependencies.serde_cbor' Cargo.toml)"
+testkit="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
+timers="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-timers' Cargo.toml)"
+cbor="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde_cbor' Cargo.toml)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 members = ["crates/canister", "apps/driver"]
@@ -77,9 +77,12 @@ cp "$lock" "$fixture/Cargo.lock"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     cargo tree --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
-    identities="$(awk '$1 == "ic-cdk-executor" || $1 == "ic0"' "$fixture/$graph_target.graph" | sed 's/ (\*)$//' | LC_ALL=C sort -u)"
-    [[ "$identities" == $'ic-cdk-executor v2.0.0\nic0 v1.2.0' ]] || { echo "Unqualified runtime identities: $identities" >&2; exit 1; }
+    bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph"
 done
+if [[ "$mode" == --check-graph ]]; then
+    printf 'Runtime graph evidence retained at %s\n' "$fixture"
+    exit 0
+fi
 CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
 CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
 for toolchain in 1.99.0 1.91.0; do

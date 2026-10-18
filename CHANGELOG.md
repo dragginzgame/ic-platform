@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.13]
+
+### Testing
+
+- Add an exact-version registry-only standalone consumer mode, rejecting local
+  facade/generator overrides, to qualify published adoption separately from source.
+
+### Fixed
+
+- Enforce host parser, Agent and Testkit exclusions in the combined CDK/Timers
+  canister graph, alongside qualified runtime identities. Add twelve rejection
+  cases and a graph-only qualification mode without compiler or server startup.
+
 ## [0.1.12] - 2026-10-18
 
 ### Added

@@ -1,5 +1,61 @@
 # Current handoff
 
+This pass started clean at `338b14b` (release 0.1.12); package versions remain
+0.1.12. The undated 0.1.13 changelog describes the new local enforcement fix.
+No staging, commit, publication, remote or sibling checkout changes were made.
+
+Review of the open producer issues found no additional requested API missing
+from the current source. Canic now reports
+[published 0.1.12 adoption](https://github.com/dragginzgame/ic-platform/issues/22#issuecomment-6251010946),
+resolving #22's import blocker; its Memory/Storage failures remain separate.
+Query and Timers report adoption of Testkit 0.54's canonical limits in
+[#2](https://github.com/dragginzgame/ic-platform/issues/2), and Query/Blob report
+removal of direct CDK dependencies in
+[#1](https://github.com/dragginzgame/ic-platform/issues/1). These are consumer
+reports, not new sibling qualification performed here. No open PR overlaps this
+pass. The [0.1.12 CI run](https://github.com/dragginzgame/ic-platform/actions/runs/39135409911)
+was still in progress when inspected; it does not yet establish producer closure.
+
+The combined CDK/Timers fixture previously checked executor/system identities
+without rejecting native parser, Agent or Testkit reachability. It now rejects
+those packages and unqualified CDK runtime/macros in both native/Wasm canister
+normal/build graphs. The host driver remains outside that selection. Twelve
+adversarial rejection cases and a passing control are part of
+`make check-runtime-lock`, which is included in CI. `--check-graph` runs the real
+locked graph admission without requiring compilation or a server.
+
+Fresh Linux native/Wasm graphs pass at `target/cdk-runtime.tgeJv0`; the regression
+cases, release-lock checks, release adapters, formatting, documentation links and
+unchanged shared snapshot checks pass. This change affects qualification scripts only, with no Rust API,
+protocol, storage, decoder policy or runtime implementation change. Full CI,
+Rust/MSRV compilation and installed-canister execution were not repeated for
+this script-only change. Native macOS and live IC acceptance remain separate.
+The next consequential step is the completed 0.1.12 producer CI evidence and
+published-selection consumer qualification, rather than further speculative APIs.
+
+The subsequent issue pass preserved the pending graph changes and added
+`check-platform-consumer.sh --published X.Y.Z`. Its exact registry selection
+rejects facade/generator path or Git replacements before compilation. Published
+0.1.12 now passes all three standalone CDK tests and linked Wasm on Rust 1.99
+and 1.88 with only Platform declared, retaining the existing DID fixture and
+system/error import checks. Both selected packages are registry 0.1.12. Evidence
+is under `target/boundary-consumer.2qKcg1` (metadata, lock and both target graphs).
+Those graphs pass the runtime identity and host-dependency exclusions. Four
+injected facade/generator path/Git replacements and five malformed version
+arguments are rejected; shell syntax, formatting and document links pass.
+No Rust implementation or sibling was changed, and no new installed test was run.
+
+The open-issue refresh also shows #19 closed; Auth reports published adoption of
+the signature/tree APIs in #16–#18. This pass did not change issue status. Release
+CI still had all three native hosts validating when inspected. Auth/Wire's own
+published-runtime application acceptance remains separate from this standalone
+archive proof. The README now correctly describes the nonempty tooling catalog.
+
+## 0.1.12 implementation record
+
+The following report predates the maintainer's 0.1.12 release. Its temporary
+artifact paths are historical and are not current proof files in this checkout.
+
 This task started clean at `ffc36b6` (0.1.11). Package versions remain 0.1.11;
 `CHANGELOG.md` contains the undated 0.1.12 draft. No staging, commit, publication,
 remote or sibling checkout change was made. The shared snapshot is unchanged.

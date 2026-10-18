@@ -77,3 +77,4 @@ check-runtime:
 check-runtime-lock:
 	bash scripts/release/runtime-lock.sh check
 	bash scripts/ci/test-runtime-lock.sh
+	bash scripts/ci/test-platform-runtime-graph.sh
