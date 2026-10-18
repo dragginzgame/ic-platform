@@ -4,6 +4,7 @@
 //! `executor` selects the shared CDK executor without a Candid dependency.
 //! `candid-parser` selects native host parsing and binding generation only.
 //! `agent` selects native IC transport and identities, with consumer-owned policy.
+//! `secp256k1` selects native offline public-key derivation with upstream identities.
 //! `bls` selects BLS keys, signatures and verification with upstream allocation support.
 //! `canister-sig-creation` selects canister public-key formats and hashing.
 //! `signature-verification` selects upstream canister-signature verification.
@@ -38,5 +39,7 @@ pub mod ic0;
 pub mod icrc_ledger_types;
 #[cfg(feature = "management-canister-types")]
 pub mod management_canister_types;
+#[cfg(all(feature = "secp256k1", not(target_family = "wasm")))]
+pub mod secp256k1;
 #[cfg(feature = "signature-verification")]
 pub mod signature_verification;

@@ -1,5 +1,12 @@
 # ic-platform
 
+Enable `secp256k1` for native offline public-key derivation through
+`ic_platform::secp256k1::{PublicKey, MasterPublicKeyId, PocketIcMasterPublicKeyId,
+KeyDecodingError}`. The dependency is exactly `ic-secp256k1 =0.3.0`; types and
+derivation bytes remain upstream. This feature is independent of Candid/CDK and
+excluded from Wasm because upstream unconditionally selects native RNG support.
+Consumers retain network/key choice, path validation and authorization policy.
+
 Controlled Candid and executor dependencies. Enable `candid` for external
 protocol DTOs and bounded replies; enable `executor` for the selected CDK executor.
 `ic_platform::Principal` is unconditional; no features are enabled by default.

@@ -884,11 +884,11 @@ It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.
 
-`make check-features` checks all 4,096 feature combinations plus actual defaults on native/Wasm.
+`make check-features` checks all 8,192 feature combinations plus actual defaults on native/Wasm.
 It derives local feature closures from Cargo metadata and reuses identical graph
-queries only within the same invocation. All 8,194 selection-specific admission
+queries only within the same invocation. All 16,386 selection-specific admission
 checks still run; defaults and target-filtered host features stay distinct.
-This reduces Cargo graph queries to 4,610 for the current feature contract:
+The number of reused graph queries follows the current local feature closures:
 
 Candid/CDK-free defaults and certification-only selection, Candid-free executor
 selection, optional certification isolation, explicit native-only parser/Agent and no
@@ -930,3 +930,29 @@ The decoder and tests match the Testkit working tree at HEAD `55ac397`, reviewed
 
 Working-tree provenance does not claim publication. Shared Tooling owns release
 execution; the local adapter remains a thin consumer of its reviewed snapshot.
+
+## Native secp256k1 public derivation
+
+The optional `secp256k1` feature pins `ic-secp256k1 =0.3.0` at the maintainer's
+request and explicitly exports `PublicKey`, `MasterPublicKeyId`,
+`PocketIcMasterPublicKeyId` and `KeyDecodingError`. These are upstream identities,
+including SEC1 encoding, chain codes, parsing errors and derivation methods.
+Canic's `ops/config/chain_key` host operation uses mainnet `EcdsaKey1` and
+PocketIC `EcdsaKey1`, `EcdsaTestKey1` and `EcdsaDfxTestKey` with Platform's existing
+Principal identity. No private-key API or cryptographic implementation is copied.
+
+Select `ic-platform` with `features = ["secp256k1"]` in the native consumer's
+inherited dependency, replace `ic_secp256k1` imports with
+`ic_platform::secp256k1`, then remove the exhausted upstream declaration from
+member/root catalogs and update ownership guards. Preserve network selection,
+allowed key IDs, path limits, root validation and existing-value mismatch checks.
+Test the consumer's existing derivation and role-rendering behavior after the
+paired release; source compilation here does not qualify the whole Canic workspace.
+
+This surface is deliberately native-only, like Agent and the host parser.
+Upstream 0.3.0 unconditionally selects Rand/getrandom and exposes no feature to
+remove that dependency. Platform does not install a Wasm entropy backend or
+substitute an RNG. Enabling this feature on Wasm exposes no module and adds no
+secp256k1 dependency. Native selection stays Candid/CDK/executor-free; default
+builds do not select it. It centralizes direct dependency ownership, without
+claiming transitive dependency removal or measured Wasm savings.

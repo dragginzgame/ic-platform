@@ -12,7 +12,7 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk)
+capabilities=(candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1)
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in

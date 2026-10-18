@@ -3,7 +3,7 @@ set -euo pipefail
 # Input: cargo tree --edges normal,build --prefix none for the canister package.
 [[ $# -eq 1 && -s "$1" ]] || { echo 'Expected a nonempty canister graph' >&2; exit 2; }
 graph="$1"
-if grep -Eq '^(candid_parser|ic-agent|pocket-ic|ic-testkit|ic-testkit-candid) ' "$graph"; then
+if grep -Eq '^(candid_parser|ic-agent|ic-secp256k1|pocket-ic|ic-testkit|ic-testkit-candid) ' "$graph"; then
     echo "Canister graph contains host parsing, Agent or Testkit: $graph" >&2
     exit 1
 fi

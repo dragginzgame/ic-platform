@@ -1,5 +1,33 @@
 # Current handoff
 
+The secp256k1 addition starts from clean `a6bbc2d` (the committed 0.1.13 draft;
+package metadata is still 0.1.12). It adds the maintainer's exact
+`ic-secp256k1 =0.3.0` behind independent native-only `secp256k1`, with explicit
+public key, master-key identifiers and decoding-error exports. Canic's read-only
+`ops/config/chain_key` consumer establishes the scope: offline mainnet/PocketIC
+public derivation. Consumers retain allowed key IDs, root/path admission and
+configuration policy. Upstream RNG dependencies are not made available to Wasm;
+no entropy backend, private-key owner or cryptographic implementation is added.
+See [the migration contract](../migration.md#native-secp256k1-public-derivation).
+
+The Platform-only consumer passes native Rust 1.99/1.88 tests and Wasm checks
+(`target/boundary-consumer.ZSDBka`). Native original-owner type/byte identity
+passes at 1.88. Six fresh production graphs under `target/secp256k1-proof` verify
+default/executor isolation and native-only 0.3.0 selection without Candid/CDK or
+host transport. The feature matrix admits the new optional native feature and
+rejects unselected/non-registry/wrong-version instances; full enumeration remains
+release-owned. Combined runtime graphs still pass with the unchanged maintained
+lock (`target/cdk-runtime.AHxztv`). Clippy, Rustdoc, pins, boundaries, doc links,
+runtime graph rejection cases and unchanged shared snapshot checks pass.
+
+The root lock adds only secp256k1 and its missing PEM/base64/ASN.1 dependencies;
+existing package versions are unchanged. This is local source qualification, not
+publication, full Canic adoption, native macOS or installed-canister acceptance.
+No staging, commit, remote, publication or sibling edit was performed. Earlier
+issue/registry qualification records below describe the already committed work.
+
+## Previous issue qualification
+
 This pass started clean at `338b14b` (release 0.1.12); package versions remain
 0.1.12. The undated 0.1.13 changelog describes the new local enforcement fix.
 No staging, commit, publication, remote or sibling checkout changes were made.

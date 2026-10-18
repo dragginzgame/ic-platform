@@ -24,6 +24,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 | `signature-verification` | Upstream canister-signature verification; transitive Candid/ic0/certification/BLS, no executor or host transport |
+| `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |
 
 The optional CDK surface uses a maintained generator fork with Platform paths and
 the published upstream runtime. Consumer runtime adoption still requires its own
@@ -117,7 +118,7 @@ this repository has no Candid extraction command requiring a selected extractor.
 transitive graphs for the native host and `wasm32-unknown-unknown`, with no
 features and all combinations of `candid`, `executor`, `certification` and
 `candid-parser`, `agent`, `ic0`, `management-canister-types`, `icrc-ledger-types`,
-`bls`, `canister-sig-creation`, `signature-verification` and `cdk`, plus the actual default selection. It enforces empty defaults
+`bls`, `canister-sig-creation`, `signature-verification`, `cdk` and `secp256k1`, plus the actual default selection. It enforces empty defaults
 and exact qualified executor/system requirements. It rejects unreviewed feature
 names until the matrix and isolation policy are updated, admits the selected CDK runtime/generators only with `cdk`, and rejects additional executor/
 system versions or non-registry sources in the transitive graph. It also

@@ -2,6 +2,12 @@
 
 ## [0.1.13]
 
+### Added
+
+- Add optional native `secp256k1` public-key derivation exports pinned to
+  `ic-secp256k1 =0.3.0`, preserving upstream identities and excluding its RNG
+  dependencies from Wasm. Cover standalone MSRV usage and original-owner bytes.
+
 ### Testing
 
 - Add an exact-version registry-only standalone consumer mode, rejecting local

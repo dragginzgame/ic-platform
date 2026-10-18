@@ -22,6 +22,7 @@ ic-cdk-executor = "=2.0.0"
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
 ic-management-canister-types = "=0.11.0"
 ic-platform-macros = { version = "0.1.12", path = "crates/ic-platform-macros" }
+ic-secp256k1 = "=0.3.0"
 ic-signature-verification = "0.3.0"
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
 ic0 = "=1.2.0"

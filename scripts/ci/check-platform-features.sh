@@ -4,7 +4,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/metadata.json
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "signature-verification"]' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "secp256k1", "signature-verification"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
 }
@@ -21,6 +21,10 @@ cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/met
     echo 'CDK must select the qualified runtime and coordinated generator' >&2; exit 1;
 }
 generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform") | .version' target/feature-graphs/metadata.json)"
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.secp256k1 == ["dep:ic-secp256k1"] and ([.dependencies[] | select(.name == "ic-secp256k1")] | length == 1 and .[0].optional and .[0].req == "=0.3.0" and .[0].target == "cfg(not(target_family = \"wasm\"))")' \
+    target/feature-graphs/metadata.json > /dev/null || {
+    echo 'secp256k1 must remain exact, optional and native-only' >&2; exit 1;
+}
 "$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .dependencies[] | select(.name == "ic0") | .req == "=1.2.0"' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve the exact qualified ic0 =1.2.0' >&2; exit 1;
@@ -63,7 +67,7 @@ all_selections+=(icrc-ledger-types)
 for selection in "${without_ledger[@]}"; do
     if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,icrc-ledger-types"); fi
 done
-for capability in bls canister-sig-creation signature-verification cdk; do
+for capability in bls canister-sig-creation signature-verification cdk secp256k1; do
     previous=("${all_selections[@]}")
     all_selections+=("$capability")
     for selection in "${previous[@]}"; do
@@ -90,6 +94,17 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         if [[ "$target" != wasm* && "$selection" == *candid-parser* ]]; then parser=true; fi
         agent=false
         if [[ "$target" != wasm* && ",$selection," == *,agent,* ]]; then agent=true; fi
+        secp=false
+        if [[ "$target" != wasm* && ",$selection," == *,secp256k1,* ]]; then secp=true; fi
+        if ! awk -v selected="$secp" '
+            $1 == "ic-secp256k1" {
+                if (selected != "true" || $2 != "v0.3.0" || !(NF == 2 || (NF == 3 && $3 == "(*)"))) exit 1
+                found = 1
+            }
+            END { if (selected == "true" && !found) exit 1 }
+        ' "$graph"; then
+            echo "secp256k1 must retain its qualified native-only identity: $graph" >&2; exit 1
+        fi
         if grep -Eq '^(pocket-ic|ic-testkit|ic-testkit-candid) ' "$graph"; then
             echo "Production graph contains Testkit transport: $graph" >&2; exit 1
         fi
