@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 SHARED_TOOLING_RUST := 1
-FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all' -- "$(FORMAT_CARGO)"
-FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check' -- "$(FORMAT_CARGO)"
+FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all; rustfmt --edition 2024 scripts/fixtures/cdk-runtime/*.rs' -- "$(FORMAT_CARGO)"
+FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check; rustfmt --edition 2024 --check scripts/fixtures/cdk-runtime/*.rs' -- "$(FORMAT_CARGO)"
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 include make/consumer.mk
@@ -43,6 +43,7 @@ check-boundary:
 check-consumer:
 	bash scripts/ci/check-platform-consumer.sh
 check-features:
+	bash scripts/ci/test-platform-feature-closures.sh
 	bash scripts/ci/check-platform-features.sh
 check-doc-links:
 	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
@@ -67,3 +68,7 @@ release-commit-check:
 	@bash scripts/release/adapter.sh commit-check
 release-files:
 	@printf 'Cargo.toml\0Cargo.lock\0CHANGELOG.md\0'
+
+.PHONY: check-runtime
+check-runtime:
+	bash scripts/ci/check-platform-runtime.sh

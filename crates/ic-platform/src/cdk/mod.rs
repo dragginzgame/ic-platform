@@ -18,8 +18,10 @@ pub use ic_platform_macros::{
 /// Argument copying is not a substitute for consumer admission before allocation.
 pub mod api {
     pub use ic_cdk::api::{
-        accept_message, canister_self, cost_call, in_replicated_execution, is_controller,
-        msg_arg_data, msg_caller, msg_reject, msg_reply, time, trap,
+        accept_message, call_context_instruction_counter, canister_self, cost_call,
+        in_replicated_execution, instruction_counter, is_controller, msg_arg_data, msg_caller,
+        msg_cycles_accept, msg_cycles_available, msg_cycles_refunded, msg_reject, msg_reply, time,
+        trap,
     };
 }
 

@@ -163,3 +163,79 @@ pub fn service() -> String {
 fn service_preserves_original_cdk_schema() {
     assert_eq!(service(), include_str!("fixtures/cdk-service.did"));
 }
+
+thread_local! {
+    static RECEIVED: Cell<u128> = const { Cell::new(0) };
+}
+
+// Hidden qualification endpoints do not change the fixed public service fixture.
+#[ic_platform::cdk::update(manual_reply = true, hidden = true)]
+fn cycle_receiver(limit: u128, mode: u8) {
+    let available = api::msg_cycles_available();
+    let accepted = api::msg_cycles_accept(limit);
+    let remaining = api::msg_cycles_available();
+    RECEIVED.set(RECEIVED.get() + accepted);
+    match mode {
+        1 => api::msg_reject("fixture cycle rejection"),
+        2 => api::trap("fixture cycle receiver trap"),
+        _ => api::msg_reply(contract::encode_args((available, accepted, remaining)).unwrap()),
+    }
+}
+
+#[ic_platform::cdk::query(hidden = true)]
+fn cycle_total() -> u128 {
+    RECEIVED.get()
+}
+
+#[ic_platform::cdk::update(hidden = true)]
+async fn cycle_roundtrip(
+    receiver: Principal,
+    offered: u128,
+    limit: u128,
+    mode: u8,
+    trap_callback: bool,
+) -> (bool, u128, Vec<u128>, Vec<u64>) {
+    let _cleanup = Cleanup;
+    let before_message = api::instruction_counter();
+    let before_context = api::call_context_instruction_counter();
+    let result = Call::unbounded_wait(receiver, "cycle_receiver")
+        .with_args(&(limit, mode))
+        .with_cycles(offered)
+        .await;
+    // Match Blob's policy: only an actual reply/reject callback owns a refund.
+    let refunded = match &result {
+        Ok(_) | Err(ic_platform::cdk::call::CallFailed::CallRejected(_)) => {
+            api::msg_cycles_refunded()
+        }
+        Err(error) => panic!("fixture did not reach a callback: {error}"),
+    };
+    let after_message = api::instruction_counter();
+    let after_context = api::call_context_instruction_counter();
+    if trap_callback {
+        VALUE.set(999);
+        api::trap("fixture cycle callback write trap");
+    }
+    let reply = match &result {
+        Ok(response) => {
+            let (available, accepted, remaining): (u128, u128, u128) =
+                response.candid_tuple().unwrap();
+            vec![available, accepted, remaining]
+        }
+        Err(_) => Vec::new(),
+    };
+    (
+        result.is_ok(),
+        refunded,
+        reply,
+        vec![before_message, before_context, after_message, after_context],
+    )
+}
+
+#[test]
+fn cycle_and_counter_helper_signatures() {
+    let _: fn() -> u128 = api::msg_cycles_available;
+    let _: fn(u128) -> u128 = api::msg_cycles_accept;
+    let _: fn() -> u128 = api::msg_cycles_refunded;
+    let _: fn() -> u64 = api::instruction_counter;
+    let _: fn() -> u64 = api::call_context_instruction_counter;
+}

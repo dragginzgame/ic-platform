@@ -162,3 +162,40 @@ checks; Linux/Wasm graph results do not qualify macOS or installed canisters.
 
 The facade is MIT licensed; its imported decoder retains IC Testkit's copyright
 notice. The maintained CDK generator retains upstream's Apache-2.0 license.
+
+### Maintained CDK runtime regression
+
+`make check-runtime` builds and installs a small canister in PocketIC and checks
+bounded/unbounded calls, raw replies, guard/malformed-input refusal, callback-trap
+cleanup, timer await/trap cleanup, cancellation, subsequent scheduling and upgrade
+reinitialization. It also checks partial cycle acceptance, reject/receiver-trap
+refunds, callback-write rollback and instruction counters across awaits. Guard
+refusal requires its exact rejection code and message; negative unit cases reject
+missing methods and unrelated errors. Sources are maintained under `scripts/fixtures/cdk-runtime/`,
+reusing the standalone CDK consumer. It declares Platform and published Timers;
+the native driver declares Platform and published Testkit. Dependencies for this
+qualification live in the root's tests/tooling catalog, outside production graphs.
+The generated workspace, lock, metadata and isolated build outputs remain under
+`target/cdk-runtime.*`; concurrent attempts cannot replace one another's artifacts.
+Normal runs use the maintained `scripts/fixtures/cdk-runtime/Cargo.lock` with
+`--locked`. To refresh it after dependency or coordinated package-version changes,
+explicitly run `bash scripts/ci/check-platform-runtime.sh --refresh-lock`, review
+the lock diff, and rerun qualification. Refresh seeds from the production lock and
+resolves the test-only additions; it may access the registry. For cached inputs,
+set `CARGO_NET_OFFLINE=true`. Normal validation never refreshes the selection.
+
+Prepare and admit PocketIC with the published Testkit server setup/check workflow,
+then set `POCKET_IC_BIN` to that admitted binary, or set `IC_TESTKIT_POCKET_IC_URL`
+to an already managed local server. No sibling checkout is required by the target.
+The harness uses Testkit's bounded startup and owned teardown; it never installs
+a server implicitly. Its offline locked metadata check requires cached registry inputs.
+Published Timers and Testkit require Rust 1.91, so install that toolchain with the
+Wasm target before running this separate qualification. The combined fixture
+builds on 1.99 and 1.91; `bash scripts/ci/check-platform-runtime.sh --build-only`
+compiles without starting a server. Runtime qualification is an explicit target,
+not silently skipped when a server is unavailable and not part of `make ci`.
+
+The Platform-only fixture remains a Rust 1.88 gate: `make check-consumer` now
+links its `cdylib` on both compilers. For focused work, run
+`bash scripts/ci/check-platform-consumer.sh cdk`. Full CI still selects every
+consumer. PocketIC success is separate from native macOS and live-IC acceptance.

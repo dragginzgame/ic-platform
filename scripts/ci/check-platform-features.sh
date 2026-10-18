@@ -70,13 +70,22 @@ for capability in bls canister-sig-creation signature-verification cdk; do
         if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,$capability"); fi
     done
 done
+# Cache only within this invocation; never reuse graphs from a previous lockfile.
+cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"
+printf "%s\n" "${all_selections[@]}" | "$root/.tools/host/bin/jq" -R -s 'split("\n") | map(select(length > 0))' |
+    "$root/.tools/host/bin/jq" -r --slurpfile metadata target/feature-graphs/metadata.json \
+    -f scripts/ci/platform-feature-closures.jq > "$cache/selections.tsv"
 for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
-    for selection in "${all_selections[@]}"; do
+    while IFS=$'\t' read -r selection key; do
         graph="target/feature-graphs/$target-$selection.txt"
         args=(tree -p ic-platform --locked --target "$target" --edges normal,build --prefix none)
         if [[ "$selection" != default ]]; then args+=(--no-default-features); fi
         if [[ "$selection" != none && "$selection" != default ]]; then args+=(--features "$selection"); fi
-        cargo "${args[@]}" > "$graph"
+        cached="$cache/$target-$key.txt"
+        if [[ ! -f "$cached" ]]; then
+            cargo "${args[@]}" > "$cached"
+        fi
+        cp "$cached" "$graph"
         parser=false
         if [[ "$target" != wasm* && "$selection" == *candid-parser* ]]; then parser=true; fi
         agent=false
@@ -150,7 +159,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         if [[ ",$selection," != *,candid,* && "$cdk" == false && "$parser" == false && "$agent" == false && "$management" == false && "$ledger" == false && "$creation" == false ]] && grep -Eq '^(candid|candid_derive) ' "$graph"; then
             echo "Graph without candid must remain Candid-free: $graph" >&2; exit 1
         fi
-    done
+    done < "$cache/selections.tsv"
 done
 cargo check -p ic-platform --lib --locked --no-default-features
 cargo check -p ic-platform --lib --locked --no-default-features --features executor --target wasm32-unknown-unknown

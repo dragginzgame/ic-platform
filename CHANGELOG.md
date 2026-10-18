@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.11]
+
+### Added
+
+- Expose the original CDK cycle availability, acceptance and refund helpers plus
+  instruction/context counters, completing Blob's remaining helper imports
+  ([#1 — Runtime boundary](https://github.com/dragginzgame/ic-platform/issues/1#issuecomment-6250276514)).
+
+### Testing
+
+- Add an explicit PocketIC regression target for CDK callbacks, trap cleanup,
+  timer cancellation and upgrade reinitialization. The Platform-only consumer
+  gate now links Wasm on both the development compiler and Rust 1.88.
+- Reuse equivalent feature graphs within each validation run, reducing Cargo
+  graph queries while retaining every feature-selection admission check.
+- Freeze runtime qualification dependencies behind an explicit lock refresh,
+  isolate concurrent build artifacts, and require the exact guard rejection.
+  Add installed cycle-refund, callback rollback and counter checks.
+
 ## [0.1.10] - 2026-10-18
 
 ### Added

@@ -208,6 +208,11 @@ The support generator is an Apache-2.0 fork of upstream macros 0.20.3, maintaine
 here and released at the coordinated facade version. Consumers declare only Platform.
 The published runtime remains `ic-cdk = "=0.20.3"`; its own upstream macros
 remain transitive. Runtime calls and contexts use one executor 2.0.0 identity.
+The explicit `cdk::api` helpers include `msg_cycles_available`, `msg_cycles_accept`,
+`msg_cycles_refunded`, `instruction_counter` and `call_context_instruction_counter`
+with their original CDK 0.20.3 identities. Sample refunds only in the matching
+reply/reject callback; submission failures have no callback refund. Preserve
+consumer funding, counter-attribution and retry policies across awaits and traps.
 Explicit `cdk::api`, `cdk::call` and `cdk::futures` exports cover the reviewed
 consumers and generated code; they are not blanket upstream module exports.
 `Call`, `CallFailed`, `Response`, controller 0/1/panic handling, argument

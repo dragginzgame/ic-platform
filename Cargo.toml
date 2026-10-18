@@ -34,7 +34,8 @@ syn = { version = "2", features = ["full", "extra-traits"] }
 
 # Tests and tooling only
 
-# None; tests reuse the production dependency catalog.
+ic-testkit = "0.54.0"
+ic-timers = "0.28.0"
 
 [workspace.lints.rust]
 missing_docs = "warn"

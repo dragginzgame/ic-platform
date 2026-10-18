@@ -1,21 +1,75 @@
 # Current handoff
 
-The maintainer released and published 0.1.9 from
-`491c63d2d94ffd225d6dd7de35f04c6c4a78ff67`. This task preserves the incoming
-dirty 0.1.10 work at that base. The registry record is non-yanked, the cached
-archive matches its SHA-256
-`bdfb66170e95bae421449fbd50e3e2a26196fbd6277ae13556026bf3001974c3`,
-and archive VCS identifies that exact commit. Published Rust sources match the
-released base, with the pending changes below separate. This continuation
-preserves the incoming migration/handoff edits and adds the maintained CDK
-generator to the 0.1.10 signature draft. Package metadata remains 0.1.9; no version
-change, staging, commit, push or publication was performed. Siblings remain read-only.
+This checkout started clean at maintainer release commit `4bf7341` (0.1.10),
+following implementation commit `7595e21`. Both package versions are 0.1.10.
+This task does not establish registry publication or native CI for that release.
+No staging, commit, version change, publication or sibling modification was made.
+
+The current changes add a maintained CDK/Timers runtime regression harness and
+make the existing Platform-only consumer gate link Wasm at Rust 1.99 and 1.88.
+`make check-runtime` is an explicit PocketIC qualification target; published
+Timers/Testkit require 1.91, so the combined canister runs at 1.99 and 1.91.
+Testkit owns server admission, bounded startup and teardown. The target requires
+a prepared binary or server URL and never installs one implicitly. See
+[setup and scope](../../README.md#maintained-cdk-runtime-regression).
+
+The follow-up fixes the three harness findings: the maintained qualification lock
+is immutable during validation, `--refresh-lock` is the explicit update path, and
+each attempt owns its build outputs. Guard rejection requires its exact code and
+message, with negative tests for missing methods and unrelated rejections.
+
+The updated [Blob report on issue #1](https://github.com/dragginzgame/ic-platform/issues/1#issuecomment-6250276514)
+is addressed by five direct upstream CDK cycle/counter helper exports. Platform-only
+native tests and linked Wasm pass at 1.99/1.88. The maintained combined fixture passes
+at 1.99/1.91 on PocketIC 16.1, including exact partial/over-limit acceptance,
+reject/receiver-trap refunds, callback-write rollback and counters across awaits.
+The maintained lock matches the run's lock byte-for-byte; guard negative tests pass.
+An intentionally stale disposable lock is refused by `--locked`. Strict fixture/
+driver Clippy, CDK Rustdoc, formatting, pins, boundaries and doc links pass.
+
+A captured copy of dirty Blob at base `67b20989ebdb555e9fac6022685be51ba866fb4a`
+changes only the five import paths, removes the now-unused direct CDK declarations,
+and selects this local Platform for qualification. Core and all five affected
+probes pass Rust 1.91 native/Wasm all-feature checks. The before archive, metadata
+and logs are retained under `target/blob-issue1/`. The real sibling remains untouched;
+this is source-copy compilation, not published consumer installation acceptance.
+Captured workspace metadata has no direct Candid/CDK declarations. Its standalone
+normal/build Wasm graph excludes parser/Agent/Testkit and has exactly CDK 0.20.3,
+executor 2.0.0 and ic0 1.2.0. Platform default/executor graphs remain Candid-free.
+Issue #1 remains the consumer coordination tracker; other reports' separate
+storage-helper requests are outside this change.
+
+The feature gate now caches graph queries by metadata-derived local feature
+closure within one invocation. It preserves every selection-specific admission
+check and separate defaults/host feature cases. Focused closure regression cases
+cover transitive implications and dependency-feature edges. The full matrix
+remains release-owned; these changes do not claim a new full CI pass.
+
+Focused Linux validation passes: standalone service tests and linked Wasm at
+Rust 1.99/1.88; combined runtime builds at 1.99/1.91; installed PocketIC 16.1
+regressions for both combined artifacts; closure cases; six real native/Wasm
+graph observations; formatting, dependency pins/boundaries, doc links and the
+unchanged shared snapshot. Enumeration confirms 4,097 selections map to 2,305
+unique queries per target (4,610 total), while all 8,194 admissions remain.
+Native macOS and live installed-IC qualification remain separate and unrun here.
+The initial sandbox refused PocketIC localhost binding; a permitted local retry
+passed. The latest runtime sources/lock/metadata and isolated artifacts are in
+`target/cdk-runtime.1G0CIy`; standalone evidence is in
+`target/boundary-consumer.mD8Lhr`. Focused cache graphs remain in
+`target/feature-cache-proof`. No protocol or runtime implementation changed.
+
+## Previous qualification record
+
+The following records describe earlier work and its then-current evidence.
+Temporary evidence directories cited below are absent from this checkout; their
+paths are historical, not newly verified artifacts. The maintained sources above
+replace reliance on temporary runtime fixtures.
 
 [The 0.1.9 native CI run](https://github.com/dragginzgame/ic-platform/actions/runs/39122716825)
 passes Linux x86_64, macOS 15 Intel and Apple Silicon. Delivered DTO, feature-graph
 admission and Rust 1.88 Wasm enforcement issues are closed with that evidence.
 Earlier cancelled runs are historical, not additional gates to rerun. This run
-does not qualify the new uncommitted 0.1.10 draft. Full local CI was not run.
+does not qualify the then-uncommitted 0.1.10 draft. Full local CI was not run.
 
 The draft adds independent `bls`, `canister-sig-creation` and
 `signature-verification` features and the missing certification `AsHashTree`,
@@ -135,7 +189,7 @@ IC qualification. Early fixture tuple/diagnostic expectation failures and their
 fresh-attempt corrections are retained; generator behavior was not altered to
 make those expectations pass.
 
-The maintained feature matrix now has 4,096 combinations plus defaults (8,194
+The pre-optimization feature matrix had 4,096 combinations plus defaults (8,194
 native/Wasm observations). This continuation ran 30 real focused graph
 observations, default/executor compilation and 14 adversarial admission replays
 with a passing control. A separate CDK-only resolver control retains the qualified
@@ -147,7 +201,7 @@ host/Wasm exclusions. The full release CI was deliberately not run locally.
 
 Workspace checks now cover the helper. Coordinated metadata preparation/checks
 pass in a disposable copy from 0.1.9 to 0.1.10, including both package versions
-and the compatible helper declaration. Real release metadata stays 0.1.9.
+and the compatible helper declaration. Metadata was 0.1.9 at that earlier qualification.
 `make publish-check` successfully packages/verifies both packages with all
 features and explicitly aborts both uploads as a dry run. Cargo owns dependency
 ordering; publication intent records both identities. Offline workspace

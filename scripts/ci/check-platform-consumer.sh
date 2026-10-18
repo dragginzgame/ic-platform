@@ -4,7 +4,17 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target
-for capability in candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk; do
+capabilities=(candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk)
+if [[ $# -gt 0 ]]; then
+    for requested in "$@"; do
+        case " ${capabilities[*]} " in
+            *" $requested "*) ;;
+            *) echo "Unknown consumer capability: $requested" >&2; exit 2 ;;
+        esac
+    done
+    capabilities=("$@")
+fi
+for capability in "${capabilities[@]}"; do
 features="\"$capability\""
 if [[ "$capability" == agent ]]; then features='"agent", "certification"'; fi
 if [[ "$capability" == dynamic ]]; then features='"candid", "candid-parser"'; fi
@@ -59,6 +69,9 @@ if [[ "$capability" == cdk ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
     cp crates/ic-platform/tests/fixtures/cdk-service.did "$fixture/crates/consumer/src/fixtures/"
 fi
+if [[ "$capability" == cdk ]]; then
+    printf '\n[lib]\ncrate-type = ["cdylib", "rlib"]\n' >> "$fixture/crates/consumer/Cargo.toml"
+fi
 cp Cargo.lock "$fixture/Cargo.lock"
 # Only the disposable local package identity is added to an already selected graph.
 # Filter metadata to the selected host: unfiltered offline metadata otherwise
@@ -67,8 +80,10 @@ cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --locked
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --locked
 if [[ "$capability" != candid-parser && "$capability" != dynamic && "$capability" != agent ]]; then
-    CARGO_TARGET_DIR="$root/target/consumer-build" cargo check --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
-    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 check --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
+    command=check
+    if [[ "$capability" == cdk ]]; then command=build; fi
+    CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
+    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
 fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
 done

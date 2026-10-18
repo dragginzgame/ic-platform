@@ -490,6 +490,25 @@ exact executor-context wrappers used by generated code. There are no blanket
 upstream modules or replacement convenience implementations. Runtime APIs retain
 the original upstream identities and CDK's controller 0/1/panic behavior.
 
+Blob's funding and resource consumers additionally use the explicit
+`cdk::api::{msg_cycles_available, msg_cycles_accept, msg_cycles_refunded,
+instruction_counter, call_context_instruction_counter}` exports. These are the
+unchanged CDK 0.20.3 functions: cycle amounts are `u128`, instruction counters are
+`u64`, and the selectors remain owned by CDK. No wrapper, new feature, cycle policy
+or counter implementation is introduced. See the
+[consumer report](https://github.com/dragginzgame/ic-platform/issues/1#issuecomment-6250276514).
+
+Replace only these `ic_cdk::api` imports in Blob core and its funding, admission,
+authority, gateway-source and storage probes. Keep their current `cdk` selection;
+remove the exhausted direct CDK member/catalog declarations and narrow the
+dependency allowlists. Preserve exact attached/accepted/refunded amounts, zero-cycle
+admission and counter attribution across awaits. Refunds belong to the matching
+reply/reject callback, before decoding or another await; submission failures have
+no callback refund, and callback traps still leave application settlement uncertain.
+Consumer restore fences, retry authority, Wire/CBOR/provider Candid and decoder
+limits are unchanged. The maintained fixture checks those upstream helper paths;
+actual published consumer funding/rollback tests remain adoption qualification.
+
 The generator preserves upstream export naming, guards and their order,
 lifecycle restrictions, async/sync contexts, protected spawning, tuple/unit
 reply shape, custom codecs, manual/hidden behavior and skipping quota 10,000.
@@ -803,7 +822,11 @@ DTO fixture. `make check-consumer` builds separate workspaces with only Platform
 as a direct dependency: native tests on Rust 1.99 and 1.88, plus Wasm compilation
 on both compilers for Candid, certification, management, raw-system and ledger
 consumers, plus canister-signature creation, signature verification, BLS and the CDK
-canister/service fixture.
+canister/service fixture (linked as a Wasm cdylib on both compilers).
+The maintained `make check-runtime` harness separately installs the combined
+CDK/Timers fixture, exercising callbacks, trap cleanup, cancellation and upgrade.
+It uses published Timers/Testkit at their Rust 1.91 floor; it does not raise
+Platform's 1.88 floor. See [runtime setup](../README.md#maintained-cdk-runtime-regression).
 Parser/dynamic and Agent consumers are native-only. `make msrv` also
 checks the all-feature library for Wasm at Rust 1.88. CI prepares the Wasm target
 for both toolchains; local validation never installs it. See
@@ -812,7 +835,12 @@ It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.
 
-`make check-features` checks all 4,096 feature combinations plus actual defaults on native/Wasm:
+`make check-features` checks all 4,096 feature combinations plus actual defaults on native/Wasm.
+It derives local feature closures from Cargo metadata and reuses identical graph
+queries only within the same invocation. All 8,194 selection-specific admission
+checks still run; defaults and target-filtered host features stay distinct.
+This reduces Cargo graph queries to 4,610 for the current feature contract:
+
 Candid/CDK-free defaults and certification-only selection, Candid-free executor
 selection, optional certification isolation, explicit native-only parser/Agent and no
 Testkit transport. Management DTOs are admitted only when selected, with an exact
