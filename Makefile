@@ -10,11 +10,18 @@ release-patch release-minor release-major release-resume: export IC_PLATFORM_REL
 .PHONY: version release-version release-preflight release-verify release-prepare-version release-files
 .PHONY: release-prepared-check release-commit-check release-committed-check release-tagged-check release-push-check
 .PHONY: check-release-commands
+.PHONY: publish publish-check
 
 help:
 	@echo 'Setup: install-tools, tools-check, install-hooks'
 	@echo 'Focused: check, test, clippy, docs-check, wasm-check, msrv, check-boundary'
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
+	@echo 'Registry: publish-check (dry run), publish (upload current committed version)'
+
+publish: host-tools-check
+	bash scripts/release/publish.sh publish
+publish-check: host-tools-check
+	bash scripts/release/publish.sh check
 
 check:
 	cargo check -p ic-platform --all-targets --all-features --locked

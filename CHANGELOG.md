@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2]
+
+### Added
+
+- Add `make publish` for explicit crates.io publication of the current committed
+  package version, and `make publish-check` for an all-feature Cargo dry run.
+  Retain command output and source identity for each attempt.
+
 ## [0.1.1] - 2026-10-18
 
 ### Added

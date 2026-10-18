@@ -40,6 +40,18 @@ checks Rust and manifest formatting. Authorized releases use the shared
 They do not publish crates. Initial registry publication remains a separately
 authorized operation after a clean committed source and native qualification.
 
+Run `make publish-check` to package and verify the current version with all
+features without uploading; this dry run allows working-tree changes. After
+release and native qualification, `make publish` uploads the current committed
+`ic-platform` version to crates.io using Cargo's configured credentials. It
+requires a clean checkout and does not bump versions, commit, tag or push.
+Both commands use the lockfile and retain evidence under `target/publication/`.
+They require the pinned host tools (`make install-host-tools`). Cargo verification
+is not the full release gate or native macOS qualification. No upload retries are
+automatic: after an interrupted dispatch, reconcile the exact registry version
+before invoking publication again. A successful upload command alone does not
+prove registry visibility or consumer adoption.
+
 Linux x86-64 and macOS 15 on Intel and Apple Silicon are supported hosts.
 CI configures all three; native execution qualifies each separately. Wasm compile
 checks establish target compatibility, not installed executor/trap behavior.
