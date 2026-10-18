@@ -5,9 +5,15 @@ integration. The initial library adopts Testkit's bounded Candid decoders and
 exposes the selected executor through an explicit surface. It has no default
 features, PocketIC, transport, host tooling or storage dependency.
 
+`ic_platform::Principal` is always available, without enabling a feature or
+depending directly on `ic_principal`. It preserves the upstream type identity,
+including the Principal exported by the Candid contract. Default builds include
+Principal and its dependencies, but neither Candid nor CDK.
+
 | Feature | Implemented contract |
 | --- | --- |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
+| `certification` | Upstream certificate/hash-tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 
 The full CDK call/entrypoint boundary and host parser migration are not implemented.
@@ -30,9 +36,10 @@ development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains and th
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
 `make shared-tooling-check`. `make ci` is the full release gate.
-`make check-consumer` tests a standalone consumer without direct Candid/Serde
-dependencies on Rust 1.99 and 1.88 and compiles it for Wasm. It covers generic
-argument helpers, recursive DTOs, arbitrary-precision values and wire vectors.
+`make check-consumer` tests separate Candid-only and certification-only consumers
+with only Platform declared, on Rust 1.99 and 1.88, and compiles each for Wasm.
+It covers DTOs, argument helpers and wire vectors, plus hash-tree constructors,
+lookup outcomes, witness hashes and certificate/delegation fields.
 `make check-features` verifies default, executor and parser-isolation graphs.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
@@ -59,8 +66,8 @@ checks establish target compatibility, not installed executor/trap behavior.
 ## Dependency roles and deployment admission
 
 Shared Tooling 0.24.0 is pinned at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`.
-`ic-platform` is the sole production package. Candid, the executor and Serde are
-production dependencies, including their optional and derive use; there are no
+`ic-platform` is the sole production package. Principal, Candid, certification,
+the executor and Serde are production dependencies, including optional and derive use; there are no
 tests/tooling-only catalog entries or build/dev/target-specific declarations.
 Inline role labels retain global Cargo ordering: `fmt`, `fmt-check`, the shared
 hook and release metadata checks all use the same ungrouped ordering policy.
@@ -69,11 +76,15 @@ this repository has no Candid extraction command requiring a selected extractor.
 
 `make check-features`, included in CI/release validation, checks normal/build
 transitive graphs for the native host and `wasm32-unknown-unknown`, with no
-features, `candid`, `executor`, and both. It rejects `candid_parser`, `pocket-ic`,
-`ic-testkit` and `ic-testkit-candid`, and checks empty defaults and Candid-free
+features and all combinations of `candid`, `executor`, and `certification`.
+It rejects `candid_parser`, `pocket-ic`,
+`ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK-free defaults and Candid-free
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
 direct dependency ownership; role comments themselves are not executable policy.
+Certification-only builds are Candid/CDK-free; builds without the certification
+feature exclude `ic-certification`. Host retains strict bounded CBOR decoding;
+trust roots, authentication and application interpretation remain consumer-owned.
 
 This library has no deployment entrypoint. Missing deployment enforcement belongs
 at each consuming application: run exclusions against its exact final feature,

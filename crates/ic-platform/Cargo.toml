@@ -13,17 +13,25 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 [features]
 default = []
 candid = ["dep:candid", "candid/bignum", "dep:serde"]
+certification = ["dep:ic-certification"]
 executor = ["dep:ic-cdk-executor"]
 
 [dependencies]
 candid = { workspace = true, optional = true }
 ic-cdk-executor = { workspace = true, optional = true }
+ic-certification = { workspace = true, optional = true }
+ic_principal.workspace = true
 serde = { workspace = true, optional = true }
 
 [[test]]
 name = "candid_consumer"
 path = "tests/candid_consumer.rs"
 required-features = ["candid"]
+
+[[test]]
+name = "certification_consumer"
+path = "tests/certification_consumer.rs"
+required-features = ["certification"]
 
 [lints]
 workspace = true

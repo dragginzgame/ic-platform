@@ -16,6 +16,12 @@ by Candid derives. These are upstream identities, not independent codec types.
 Arbitrary-precision integers enable Candid's `bignum` feature only with `candid`.
 No default features, parser, automatic limits or second executor are introduced.
 
+`ic_platform::Principal` is available unconditionally from `ic_principal` 0.1.5,
+with its standard conversion, self-authenticating and Serde support. Consumers
+can remove direct `ic_principal` declarations and use this root export without
+selecting Candid or executor features. The existing contract export uses the
+same type. Default builds are Candid/CDK-free, not dependency-free.
+
 The decoder implementation and six tests match Testkit's current owner byte for
 byte after excluding the added contract module. Reply length is admitted before
 constructing the decoder. All five caller limits are forwarded: reply bytes,
@@ -50,6 +56,55 @@ Query was clean. No sibling builds or edits were performed.
 | Timers `194204d` | `crates/ic-timers/src/platform/{ffi,backend}.rs` use executor method handles, callbacks and trap recovery. Production uses raw IC system calls; unpublished testing packages also use Candid/CDK. |
 | Host `c8cd434` | `crates/ic-host-tools/src/candid/service/mod.rs` parses service facts; pending `candid/decode/mod.rs` adds aggregate byte accounting. That accounting differs from Testkit and must survive consolidation. |
 
+## Certification extension
+
+The optional `certification` feature extends this boundary explicitly beyond
+Candid/CDK. It selects `ic-certification` 3.2.0 with upstream Serde support and
+exports only the observed consumer surface: `Certificate`, `Delegation`,
+`HashTree`, `Label`, `LookupResult`, `empty`, `fork`, `labeled`, `leaf`, `pruned`
+and `fork_hash`. These are direct upstream exports, with no replacement structs
+or conversion wrappers. Inherent lookup/digest operations remain upstream.
+Certification selects neither Candid nor the executor and is absent by default.
+
+The follow-up read-only review used pending working trees at Host `c8cd434`,
+Query `8982c2a4` and Canic `5583496bf`; all three were dirty. Host's
+`crates/ic-host-tools/src/certificate/mod.rs` constructs owned upstream values;
+Query's `crates/ic-query/src/certificate/mod.rs` passes those certificates to
+Agent verification and checks witness digests. Canic's `certified_custody` and
+`operator_mint/receipts` modules consume labels, lookups and certificates, while
+`canic-core/src/ops/auth/signature_store/mod.rs` uses `fork_hash` for signature trees.
+
+For adoption, add/inherit Platform and replace `ic_certification::` paths with
+`ic_platform::certification::`, including tests. Host's `certificate` feature
+must select Platform's `certification` while retaining `ciborium`. Query's
+`certificate-host` and Canic's signature capabilities must enable the same
+Platform feature in place of `dep:ic-certification`. If Platform is already
+non-optional for Candid or Principal, use `ic-platform/certification` rather than
+introducing a second dependency alias. Remove the direct upstream declaration
+from each member and the unused workspace catalog; update locks and dependency
+ownership rules. Do not remove transitive dependencies of Agent or other upstream
+consumers, or claim full workspace isolation before runtime/parser migration.
+
+Host retains its strict bounded CBOR decoder, errors, complete-input byte limit,
+nesting limit, duplicate/unknown-field refusal, byte-string admission, exact tree
+tag/arity checks and trailing-data refusal. Do not replace it with generic upstream
+Serde decoding. Consumers retain combined budgets, trust roots, signature and
+delegation verification, time policy, witness admission, retry semantics and
+application leaf interpretation. No certificate CBOR, hash commitments or persisted
+data change. Constructed or decoded values remain untrusted until authenticated.
+
+The standalone certification consumer has no direct upstream dependency and tests
+lookup outcomes, pruned witnesses, fork hashing, a fixed leaf digest and certificate
+fields on native/MSRV with Wasm compilation. A disposable copy of Host's actual
+decoder and tests changes only import paths; its retained lockfile and source hashes
+bind that focused proof. It is not a migrated or built Host/Query/Canic workspace.
+Source hashes are recorded under `target/certification-host/source.sha256` and
+fixture evidence under `target/certification-host/`. Consumer qualification must
+still run actual authentication/receipt/signature tests against the selected Agent
+and protocol packages to confirm one upstream certification identity. Native macOS
+and installed canisters are separate qualification. Dependency control alone
+does not remove `ic-certification` or establish a smaller Wasm artifact.
+
 ## Testkit and Query migration
 
 The Candid surface is usable for local integration qualification now. Registry
@@ -67,7 +122,7 @@ exists, but consumers have not been migrated by this work.
    encoders and generic argument bounds from `ic_platform::candid::contract`.
    Replace `candid::Result<T>` with `Result<T, contract::Error>`. Use
    `contract::serde::Deserialize` (and its `de` traits) where appropriate;
-   independent Serde use need not move. Principal-only code may use `ic_principal`.
+   independent Serde use need not move. Principal-only code uses `ic_platform::Principal`.
 3. Add `#[candid_path("ic_platform::candid::contract")]` to every Candid-derived
    type. When deriving Serde through Platform, also add
    `#[serde(crate = "ic_platform::candid::contract::serde")]`. Preserve field and
@@ -164,8 +219,9 @@ It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.
 
-`make check-features` checks normal/build graphs for empty defaults, Candid-free
-native/Wasm executor selection and no parser in current all-feature selection.
+`make check-features` checks all eight feature combinations on native/Wasm:
+Candid/CDK-free defaults and certification-only selection, Candid-free executor
+selection, optional certification isolation, and no host parser or Testkit transport.
 `make wasm-check` compiles both supported features together. Consumer adoption
 must also run the shared dependency-boundary checker on every workspace, including
 independent fixtures and unused root catalog declarations; aliases are not escapes.

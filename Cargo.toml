@@ -14,6 +14,8 @@ repository = "https://github.com/dragginzgame/ic-platform"
 [workspace.dependencies]
 candid = { version = "0.10.38", default-features = false } # Production dependencies
 ic-cdk-executor = "2.0.0" # Production dependencies
+ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] } # Production dependencies
+ic_principal = "0.1.5" # Production dependencies
 serde = { version = "1.0", default-features = false, features = ["derive"] } # Production dependencies
 
 [workspace.lints.rust]

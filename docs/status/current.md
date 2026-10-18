@@ -1,6 +1,6 @@
 # Current handoff
 
-The maintainer released 0.1.1 locally at `ba7202c`; package metadata is 0.1.1.
+The maintainer released 0.1.2 locally at `02183b0`; package metadata is 0.1.2.
 The public `dragginzgame/ic-platform` remote exists. The publication-target work
 has not uploaded a crate or created commits. Testkit, Query, Canic, Timers and Host sibling checkouts were
 inspected read-only; their pending work is preserved. Storage and ic-memory remain
@@ -10,8 +10,38 @@ The Candid boundary now supplies the real Testkit/Query argument traits plus
 `Nat`, `Int` and `Reserved`. Big-number support is confined to the `candid` feature;
 no default features or host parser are selected. The decoder and its six tests
 still match Testkit's reviewed working-tree owner; behavior and limits are not
-changed. Compatible publication tooling is recorded under pending 0.1.2 notes;
-the package version remains 0.1.1.
+changed. Pending 0.1.3 adds unconditional `ic_platform::Principal` with upstream
+conversion, self-authenticating and Serde support. There is no principal feature;
+the root and Candid contract exports share one upstream type identity. The package
+version remains 0.1.2. Default builds now include Principal's dependencies while
+remaining Candid/CDK-free; executor-only builds remain Candid-free.
+
+Pending 0.1.3 also adds optional `ic_platform::certification`: explicit upstream
+certificate, delegation, hash-tree and label identities, lookup results, tree
+constructors and `fork_hash`. It selects ic-certification 3.2.0 with Serde and is
+independent of Candid and executor features. Host retains its strict bounded CBOR
+decoder; trust roots, verification and application policy stay with consumers.
+The migration contract records the reviewed Host, Query and Canic working trees
+and exact import/manifest changes. Those sibling checkouts remain untouched.
+
+Certification-only standalone consumer tests pass on Rust 1.99 and 1.88, with
+Wasm compilation. All eight feature combinations pass native/Wasm graph checks;
+all-feature tests, MSRV, Wasm, Clippy and Rustdoc pass. Host's six decoder tests
+also pass on both compilers from a disposable source copy with only certification
+imports changed. Logs are `target/certification-checks.log` and
+`target/certification-host/checks.log`; copied source hashes are retained beside
+the latter. These checks do not qualify complete sibling builds or authentication
+flows. The next certification step is coordinated Host/Query/Canic adoption and
+their certificate, receipt and signature verification tests against one resolved
+upstream type identity. Native macOS and installed-canister qualification remain
+outstanding; no Wasm-size reduction is claimed.
+
+Principal qualification passes no-feature tests on Rust 1.99/1.88, no-feature
+Wasm test compilation, all-feature tests and Wasm compilation, standalone Candid
+consumer tests, feature graphs, Clippy and Rustdoc. Logs are retained in
+`target/principal-checks.log` and `target/principal-final-checks.log`; the first
+Clippy run caught missing test-crate documentation, corrected before the passing
+rerun. The lockfile only adds the already-selected Principal dependency edge.
 
 `make publish` now uploads the current committed package version to crates.io
 with locked dependencies and all features, requiring a clean checkout.
@@ -46,7 +76,7 @@ decoder tests and the expanded DTO test. The separate Platform-only consumer
 passes on both native compilers and compiles for Wasm; it covers recursive/renamed
 DTOs, generic arguments, big-number wire vectors and typed source downcasting.
 All-feature Wasm compilation, strict Clippy and warning-denied Rustdoc pass.
-Normal/build graphs establish empty defaults, Candid-free native/Wasm executor
+Earlier normal/build graphs established empty defaults, Candid-free native/Wasm executor
 selection, and no host parser in current all-feature selection. Logs are retained
 under `target/candid-boundary-checks.log`; disposable consumer evidence is under
 `target/boundary-consumer.*`. These are local checks, not migrated sibling builds.
@@ -60,7 +90,7 @@ All 96 snapshot payloads verify; none were hand-edited. The common Rust tools
 were activated with the new two-tool selection. The migration document's older
 Shared revision identifies its historical consumer audit, not the current pin.
 
-The sole library and all three dependencies are labelled production; no catalog
+The sole library and all five dependencies are labelled production; no catalog
 entry is tests/tooling-only. Global manifest ordering is retained with inline
 dependency labels. Release metadata checks now enforce that same order during
 preparation, current checks and selected-commit checks. Disposable qualification
@@ -68,12 +98,14 @@ proves formatter idempotence, unsorted-input rejection, hook repair, and committ
 source selection despite an unsorted working manifest. The hook is shipped and
 qualified but is not activated in this checkout (`core.hooksPath` is unset).
 
-The dependency gate now checks all four supported feature selections on Linux
+The dependency gate now checks all eight supported feature selections on Linux
 x86-64 and Wasm, including transitive normal/build paths; forbidden parser and
 Testkit packages are rejected in negative substitute checks. Tools, formatting,
 snapshot and substitute release-command checks pass. Evidence, including failed
 fixture attempts before correction, is retained under `target/adoption-0.24.0/`.
-The lockfile and package versions are unchanged. No full CI or release was run.
+Snapshot adoption left lockfile and package versions unchanged. The certification
+extension adds ic-certification and serde_bytes to the lockfile; package versions
+remain unchanged. No full CI or release was run.
 
 Remaining enforcement boundary: comments do not classify future dependencies
 automatically, publication does not run the graph gate, and this library has no

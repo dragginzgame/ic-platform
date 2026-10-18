@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.3]
+
+### Added
+
+- Export `ic_platform::Principal` unconditionally, preserving the Candid
+  contract's upstream type identity. Identity-only consumers need no feature or
+  direct `ic_principal` dependency; default builds remain Candid/CDK-free.
+- Add an independent optional `certification` surface for upstream certificate
+  and hash-tree types and operations used by Host, Query and Canic. Preserve
+  upstream type identity and Serde support; bounded decoding and verification
+  policy remain consumer-owned. Qualify a standalone certification consumer.
+
 ## [0.1.2] - 2026-10-18
 
 ### Added

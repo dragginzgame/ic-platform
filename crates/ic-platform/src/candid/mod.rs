@@ -20,8 +20,9 @@ use std::{error::Error, fmt};
 /// `#[serde(crate = "ic_platform::candid::contract::serde")]` when Serde is
 /// reached only through this boundary. No upstream crate alias is required.
 pub mod contract {
+    pub use crate::Principal;
     pub use candid::utils::{ArgumentDecoder, ArgumentEncoder};
-    pub use candid::{CandidType, Error, Int, Nat, Principal, Reserved, encode_args, encode_one};
+    pub use candid::{CandidType, Error, Int, Nat, Reserved, encode_args, encode_one};
     pub use serde;
 
     /// Trait machinery required by the qualified upstream Candid derive.
