@@ -117,10 +117,22 @@ The common Rust tool set now contains only cargo-sort and cargo-sort-derives;
 this repository has no Candid extraction command requiring a selected extractor.
 
 `make check-features`, included in CI/release validation, checks normal/build
+graphs offline (`--frozen`, preserving the lockfile). Prepare missing registry
+inputs once with `cargo fetch --locked --target <host-triple> --target wasm32-unknown-unknown`.
+Both matrix modes report unique query counts and progress every 100 queries.
+Standalone consumer compilation
+also stays offline after its existing offline metadata resolution. Offline mode
+prevents repeated network work but does not bypass Cargo cache locks held by
+another process. Publication still uses the network normally.
+
+The feature gate checks normal/build
 transitive graphs for the native host and `wasm32-unknown-unknown`, with no
-features and all combinations of `candid`, `executor`, `certification` and
-`candid-parser`, `agent`, `ic0`, `management-canister-types`, `icrc-ledger-types`,
-`ed25519`, `bls`, `canister-sig-creation`, `signature-verification`, `cdk`, `secp256k1` and `pocket-ic`, plus the actual default selection. It enforces empty defaults
+features, actual defaults, every individual feature, every feature pair, all
+features together and explicit critical groups. Those groups cover the runtime
+with its prerequisites, runtime with management/ledger/certificate DTOs, combined
+signature capabilities, runtime with all native-only leaves, and all canister
+features without host leaves. The separate CDK/Timers runtime qualification and
+release runtime-lock checks are unchanged. It enforces empty defaults
 and exact qualified executor/system requirements. It rejects unreviewed feature
 names until the matrix and isolation policy are updated, admits the selected CDK runtime/generators only with `cdk`, and rejects additional executor/
 system versions or non-registry sources in the transitive graph. It also
@@ -128,7 +140,11 @@ admits PocketIC only with its explicit native feature, rejects `ic-testkit` and 
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
 direct dependency ownership; role comments themselves are not executable policy.
-The matrix includes every PocketIC combination. Wasm cache keys omit the four native-only leaves
+`make check-features-exhaustive` manually audits every feature combination and
+actual defaults using the same admission rules. It is not invoked by routine
+CI or release validation. The routine matrix deliberately does not cover every
+higher-order interaction; the exhaustive audit remains available for that scope.
+Wasm cache keys omit the four native-only leaves
 only after their exact feature/dependency/target contracts pass validation.
 Changed contracts fail closed. Defaults remain a separate observation. One batch
 validator per target checks every original selection against its graph; cached

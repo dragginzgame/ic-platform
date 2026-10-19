@@ -18,6 +18,7 @@ help:
 	@echo 'Setup: install-tools, tools-check, install-hooks'
 	@echo 'Focused: check, test, clippy, docs-check, wasm-check, msrv, check-boundary'
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
+	@echo 'Feature graphs: check-features (routine); check-features-exhaustive (manual audit)'
 	@echo 'Registry: publish-check (dry run), publish (upload current committed version)'
 
 publish: host-tools-check
@@ -43,9 +44,16 @@ check-boundary:
 check-consumer:
 	bash scripts/ci/check-platform-consumer.sh
 check-features:
+	bash scripts/ci/test-platform-feature-selections.sh
 	bash scripts/ci/test-platform-feature-closures.sh
 	bash scripts/ci/test-platform-feature-graphs.sh
 	bash scripts/ci/check-platform-features.sh
+.PHONY: check-features-exhaustive
+check-features-exhaustive:
+	bash scripts/ci/test-platform-feature-selections.sh
+	bash scripts/ci/test-platform-feature-closures.sh
+	bash scripts/ci/test-platform-feature-graphs.sh
+	bash scripts/ci/check-platform-features.sh --exhaustive
 check-doc-links:
 	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
 check-pins:

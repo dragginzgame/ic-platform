@@ -8,6 +8,17 @@
   no default or RNG features, and standalone RFC 8032 verification coverage.
   Consumers retain strict verification, key custody and admission policy.
 
+### Changed
+
+- Replace routine exhaustive feature enumeration with defaults, singles, all
+  pairs, all features and critical integration groups. Retain the full power set
+  under `make check-features-exhaustive` as a separate manual audit; routine
+  validation no longer claims every higher-order combination.
+- Keep feature queries and resolved standalone consumer builds offline
+  with frozen lockfiles, avoiding repeated network work during release validation.
+  Report graph query counts and progress; both modes use the same admission rules.
+  Cargo cache locks held by other processes can still block offline commands.
+
 ## [0.1.15] - 2026-10-18
 
 ### Added

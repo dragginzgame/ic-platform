@@ -1,5 +1,23 @@
 # Current handoff
 
+Routine release validation now checks defaults, singles, every pair, all features
+and explicit runtime/DTO/signature/host groups. `make check-features-exhaustive`
+retains the full power set as a manual audit; routine CI/release does not run it.
+This deliberately reduces higher-order combination coverage with maintainer
+authorization. Admission rules and separate CDK/Timers runtime qualification are
+unchanged. Both modes retain frozen queries and progress output; Cargo can still
+wait for another cache owner. No lock was removed or process killed.
+
+The complete routine gate passes on Linux: 128 selections per target, 124 native
+and 68 Wasm queries (192 total, versus the prior 19,586). Evidence is retained at
+`target/feature-graphs/attempt.UYauA6`. Selection tests prove every single/pair,
+critical group and complete exhaustive enumeration (32,769 selections including
+defaults for 15 optional features). Admission/closure regressions, default-native
+and executor-Wasm compilation, documentation links and release-adapter checks
+pass. The exhaustive Cargo audit was not run. Native macOS, installed-canister
+and full release timing remain unqualified; query reduction is not a measured
+end-to-end speedup. Package versions, publication and sibling checkouts are unchanged.
+
 The optional `ed25519` boundary exports original Dalek keys, signatures, errors,
 signing trait and canonical scalar identity on native/Wasm. Defaults remain empty;
 no RNG, Candid or executor is selected by this feature. Auth retains verification

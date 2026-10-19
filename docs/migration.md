@@ -911,13 +911,19 @@ It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.
 
-`make check-features` enumerates all declared feature combinations plus actual defaults on native/Wasm.
+`make check-features` checks no features, actual defaults, every single feature,
+every pair, all features and explicit critical runtime/DTO/signature/host groups
+on native/Wasm. `make check-features-exhaustive` retains the complete power set
+as a separate manual audit, outside routine CI/release validation. Routine
+coverage deliberately omits other higher-order combinations; this is not an
+equivalent exhaustive proof. Combined CDK/Timers qualification remains separate.
 It derives local feature closures from Cargo metadata and reuses graph queries
 only within the same invocation. On Wasm, Agent/parser/secp256k1 leaves may share
 a key only while each feature activates exactly its single optional native-only
 dependency; a changed contract fails closed. Defaults keep a separate key.
 All selection-specific admission checks still run in one validator process
-per target, including target exclusion checks. Query counts depend on the declared feature inventory; full enumeration remains release-owned.
+per target, including target exclusion checks. Query counts depend on the declared
+feature inventory and selected mode; full enumeration requires the explicit audit.
 Target-specific TSV mappings and canonical graphs remain in each attempt directory.
 Neither post-hoc package-list equality nor reuse of previous runs establishes
 feature equivalence. The supported graph properties remain:

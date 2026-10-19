@@ -2,8 +2,14 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
+mode=routine
+case "${1:-}" in
+    "") [[ $# == 0 ]] || exit 2 ;;
+    --exhaustive) [[ $# == 1 ]] || exit 2; mode=exhaustive ;;
+    *) echo 'usage: check-platform-features.sh [--exhaustive]' >&2; exit 2 ;;
+esac
 mkdir -p target/feature-graphs
-cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/metadata.json
+cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/metadata.json
 "$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "secp256k1", "signature-verification"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
@@ -47,56 +53,41 @@ generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name =
 }
 # These are production graphs including normal/build, excluding dev dependencies.
 # Cargo tree prints canonical package names even for renamed deps.
-selections=(none candid executor certification
-    candid,executor candid,certification executor,certification candid,executor,certification
-    candid-parser candid,candid-parser executor,candid-parser certification,candid-parser
-    candid,executor,candid-parser candid,certification,candid-parser
-    executor,certification,candid-parser candid,executor,certification,candid-parser)
-all_selections=(default "${selections[@]}" agent)
-for selection in "${selections[@]}"; do
-    if [[ "$selection" != none ]]; then all_selections+=("$selection,agent"); fi
-done
-without_system=("${all_selections[@]}")
-all_selections+=(ic0)
-for selection in "${without_system[@]}"; do
-    if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,ic0"); fi
-done
-without_management=("${all_selections[@]}")
-all_selections+=(management-canister-types)
-for selection in "${without_management[@]}"; do
-    if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,management-canister-types"); fi
-done
-without_ledger=("${all_selections[@]}")
-all_selections+=(icrc-ledger-types)
-for selection in "${without_ledger[@]}"; do
-    if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,icrc-ledger-types"); fi
-done
-for capability in ed25519 bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic; do
-    previous=("${all_selections[@]}")
-    all_selections+=("$capability")
-    for selection in "${previous[@]}"; do
-        if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,$capability"); fi
-    done
-done
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
 cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"
+"$root/.tools/host/bin/jq" '.packages[] | select(.name == "ic-platform") | .features | keys - ["default"]' target/feature-graphs/metadata.json |
+    "$root/.tools/host/bin/jq" --arg mode "$mode" -f scripts/ci/platform-feature-selections.jq > "$cache/selections.json"
+selection_count="$("$root/.tools/host/bin/jq" length "$cache/selections.json")"
+printf 'Feature matrix mode: %s\n' "$mode"
 for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     mapping="$cache/$target.tsv"
-    printf "%s\n" "${all_selections[@]}" | "$root/.tools/host/bin/jq" -R -s 'split("\n") | map(select(length > 0))' |
-        "$root/.tools/host/bin/jq" -r --arg target "$target" --slurpfile metadata target/feature-graphs/metadata.json \
-        -f scripts/ci/platform-feature-closures.jq > "$mapping"
+    "$root/.tools/host/bin/jq" -r --arg target "$target" --slurpfile metadata target/feature-graphs/metadata.json \
+        -f scripts/ci/platform-feature-closures.jq "$cache/selections.json" > "$mapping"
+    # Resolve/download once during setup, not in every exhaustive graph query.
+    # Keep all selection admissions, including those sharing an equivalent key.
+    queries="$(cut -f2 "$mapping" | LC_ALL=C sort -u | wc -l | tr -d ' ')"
+    completed=0
+    printf 'Feature graphs: %s, %s unique offline queries (%s selections). Evidence: %s\n' \
+        "$target" "$queries" "$selection_count" "$cache"
     while IFS=$'\t' read -r selection key; do
         cached="$cache/$target-$key.txt"
         if [[ -f "$cached" ]]; then continue; fi
-        args=(tree -p ic-platform --locked --target "$target" --edges normal,build --prefix none)
+        args=(tree -p ic-platform --frozen --target "$target" --edges normal,build --prefix none)
         if [[ "$selection" != default ]]; then args+=(--no-default-features); fi
         if [[ "$selection" != none && "$selection" != default ]]; then args+=(--features "$selection"); fi
-        cargo "${args[@]}" > "$cached"
+        if ! cargo "${args[@]}" > "$cached"; then
+            printf 'Feature query failed: %s / %s. If registry inputs are missing, run cargo fetch --locked --target %s before retrying.\n' "$target" "$selection" "$target" >&2
+            exit 1
+        fi
+        completed=$((completed + 1))
+        if (( completed % 100 == 0 || completed == queries )); then
+            printf 'Feature graphs: %s %s/%s complete\n' "$target" "$completed" "$queries"
+        fi
     done < "$mapping"
     awk -v target="$target" -v cache="$cache" \
         -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" \
         -f scripts/ci/check-platform-feature-graphs.awk "$mapping"
 done
 printf 'Feature selections, mappings and Cargo graphs retained at %s\n' "$cache"
-cargo check -p ic-platform --lib --locked --no-default-features
-cargo check -p ic-platform --lib --locked --no-default-features --features executor --target wasm32-unknown-unknown
+cargo check -p ic-platform --lib --frozen --no-default-features
+cargo check -p ic-platform --lib --frozen --no-default-features --features executor --target wasm32-unknown-unknown

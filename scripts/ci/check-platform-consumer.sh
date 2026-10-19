@@ -100,13 +100,13 @@ if [[ -n "$published" ]]; then
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
 fi
-CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --locked
-CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --locked
+CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
+CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --frozen
 if [[ "$capability" != candid-parser && "$capability" != dynamic && "$capability" != agent ]]; then
     command=check
     if [[ "$capability" == cdk ]]; then command=build; fi
-    CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
-    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
+    CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
+    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
 fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
 done
