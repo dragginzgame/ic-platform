@@ -39,8 +39,10 @@ license/provenance. The facade's mixed-source license is MIT AND Apache-2.0.
 Only the imported callback and legacy byte-copy modules permit reviewed unsafe
 code; other modules retain the workspace deny lint. No executor is forked.
 Preserve registry executor =2.0.0 and ic0 =1.2.0 identities. Endpoint macros require
-explicit consumer-owned codecs; all controlled endpoints use Wire. Candid is an
-explicit adapter for management/system-canister calls. Existing Candid checkpoint
+explicit consumer-owned codecs; all owned application endpoints use Wire, including
+public endpoints called by third parties. Candid is an explicit adapter for required
+management/system, NNS/SNS, ledger and other pre-existing Candid interfaces. Caller
+location or visibility never selects Candid. Existing Candid checkpoint
 bytes are a legacy compatibility exception, never a new storage format or owner.
 Runtime-only raw/executor consumers retain their independent features.
 

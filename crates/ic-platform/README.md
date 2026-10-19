@@ -7,8 +7,11 @@ derivation bytes remain upstream. This feature is independent of Candid/CDK and
 excluded from Wasm because upstream unconditionally selects native RNG support.
 Consumers retain network/key choice, path validation and authorization policy.
 
-Controlled Candid and executor dependencies. Enable `candid` for external
-protocol DTOs and bounded replies; enable `executor` for the selected CDK executor.
+All owned application endpoints use IC Wire, including public endpoints called by
+third parties. Enable `cdk` for explicit-codec entrypoints and the Candid-free
+runtime, or `executor` for the shared executor alone. Enable `candid` only for
+required management/system, NNS/SNS, ledger and other Candid interfaces, or legacy
+persisted checkpoints. Caller location does not select Candid.
 `ic_platform::Principal` is unconditional; no features are enabled by default.
 
 Enable `icrc-ledger-types` for `ic_platform::icrc_ledger_types`, selecting upstream

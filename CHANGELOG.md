@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.1]
+
+### Changed
+
+- Specify Wire for all owned application endpoints, including public endpoints;
+  reserve Candid for required IC interfaces and legacy checkpoint compatibility.
+- Document runtime maintenance, reviewed source-fingerprint changes and clean-cache
+  recovery acceptance without claiming dependency independence or a completed drill.
+- Correct stale 0.1.18 candidate guidance for the released 0.2.0 runtime boundary.
+
 ## [0.2.0] - 2026-10-19
 
 ### Breaking

@@ -1,24 +1,34 @@
 # Current handoff
 
-The maintainer authorized replacing the full CDK with maintained
-non-cryptographic adapters inside Platform. The candidate extends
-[PR #35](https://github.com/dragginzgame/ic-platform/pull/35), starting at
-`40f1d8a`, in isolated `feat/owned-candid-free-runtime`. Pending local dependency
-scaffolding work is preserved; sibling checkouts remain read-only. Package versions stay
-0.1.18 for qualification only. Breaking notes target **0.2.0**, requiring coordinated
-Platform/generator publication; do not publish this candidate as 0.1.19.
-The reviewed source is now applied in the normal checkout with pending scaffolding
-edits preserved. GitHub integration awaits the current native CI results. No
-release, tag or publication is performed here.
+The checkout at `c7da516` declares **0.2.0** for Platform and its generator and
+contains the maintained non-cryptographic runtime introduced through
+[PR #35](https://github.com/dragginzgame/ic-platform/pull/35). The earlier 0.1.18
+candidate identity below describes historical qualification, not the current
+package version. This documentation pass does not establish registry publication
+or current GitHub CI status. Sibling checkouts remain read-only.
 
-The combined local tree passes Rust 1.88 generator/runtime tests and Candid-free
+The protocol contract explicitly includes public, third-party callers: all owned
+application endpoints use Wire. Candid is only an adapter for required IC service
+interfaces, plus legacy persisted checkpoints. The [maintenance and recovery
+contract](../migration.md#runtime-maintenance-and-recovery) defines remaining
+upstream responsibilities, intentional runtime-change admission and recovery
+acceptance. A clean-cache recovery drill and actual Canic consumer qualification
+are not established by the existing fixture evidence. No new dependency fork,
+cryptographic change, release or publication is part of this pass.
+
+This contract pass passes formatting, documentation links, runtime source and
+mutation checks, lock/graph regressions and all five generator tests on Rust 1.88.
+It changes no runtime behavior and does not rerun installed or macOS qualification.
+
+The prior runtime integration passed Rust 1.88 generator/runtime tests and Candid-free
 Wasm compilation, 24 actual native/Wasm production graphs, 66 admission cases,
 feature selection/closure regressions, formatting, runtime provenance/lock checks,
 dependency pins/ownership and documentation links. The three remaining scaffolding
 source/license checks pass at `target/upstream-scaffolding.dayzwB`. The original
 pending work is backed up at `/tmp/platform-runtime-local-integration.msFBme`.
-All Rust implementation files match the reviewed PR source; the integration only
-reconciles pending tooling/docs and removes its superseded CDK proposal branch.
+That integration reconciled pending tooling/docs and removed its superseded CDK
+proposal branch. Temporary paths below are historical evidence locations, not
+durable recovery artifacts.
 
 ## Runtime and protocol contract
 
@@ -110,7 +120,8 @@ omission and successful unfiltered preparation at
 [PR #34](https://github.com/dragginzgame/ic-platform/pull/34), linked to
 [#33](https://github.com/dragginzgame/ic-platform/issues/33); PR #35 includes the
 same prerequisite. Consumer validation remains frozen, with no per-consumer
-fetch loops or lock-resolution changes. New three-host CI must qualify each head.
+fetch loops or lock-resolution changes. Those PR-head observations are historical; this pass does not recheck GitHub
+status. Native results must be tied to the actual supplying revision.
 
 Consumer adoption requires the supplying next-minor registry release, actual
 consumer generator/manifest/import migration, and its own wire/retry/storage

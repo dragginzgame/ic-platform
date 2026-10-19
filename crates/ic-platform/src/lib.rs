@@ -1,4 +1,9 @@
-//! Controlled dependencies for external Candid protocols and IC runtime integration.
+//! Controlled dependencies for IC runtime integration and required IC Candid interfaces.
+//!
+//! All owned application endpoints use IC Wire, including public endpoints.
+//! Candid adapts required management/system, NNS/SNS, ledger and other Candid
+//! interfaces; caller location does not select the codec. Existing Candid
+//! checkpoints remain a legacy persisted-data compatibility exception.
 //!
 //! [`Principal`] is always available. `candid` selects bounded decoding;
 //! `executor` selects the shared CDK executor without a Candid dependency.

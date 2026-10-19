@@ -9,7 +9,9 @@ The default runtime path is `::ic_platform::cdk`; a parsed `crate = "module::pat
 override supports renamed dependencies. Every query/update explicitly supplies
 `decode_with` and `encode_with` (or `manual_reply`); even unit RPCs run their
 explicit decoder. Lifecycle argument decoding is explicit. Wire owns controlled
-application encoding and framing. Consumers own identities, guards and budgets.
+application encoding and framing, including public endpoints called by third
+parties. Consumers own identities, guards and budgets. Explicit hooks do not prove
+Wire conformance: consumers must qualify their generated bindings and wire bytes.
 No implicit Candid endpoint codec, dummy service registration, Candid path option
 or service-export macro is retained. `hidden = true` remains accepted on existing
 Wire hook declarations and has no service-registration effect.

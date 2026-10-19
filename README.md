@@ -1,9 +1,15 @@
 # IC Platform
 
-One controlled dependency boundary for external Candid protocols and IC runtime
-integration. The initial library adopts Testkit's bounded Candid decoders and
-exposes the selected executor through an explicit surface. It has no default
-features or PocketIC/storage dependency. Transport and parsing are native opt-ins.
+One controlled dependency boundary for IC runtime integration and required IC
+Candid interfaces. All application endpoints we own use IC Wire, including public
+endpoints called by third parties. Candid is the adapter for management canisters,
+NNS/SNS, ledgers and other interfaces that require it; caller location does not
+select a codec. Existing Candid checkpoints remain a legacy compatibility exception.
+
+Platform has no default features. Its owned runtime is Candid-free; transport,
+parsing and PocketIC are native opt-ins. Consumers retain their Wire schemas,
+authentication, budgets and retry policy. See the [maintenance and recovery
+contract](docs/migration.md#runtime-maintenance-and-recovery).
 
 `ic_platform::Principal` is always available, without enabling a feature or
 depending directly on `ic_principal`. It preserves the upstream type identity,

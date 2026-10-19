@@ -38,4 +38,4 @@ Changes from the import:
 Call, response, cost/error and stable-error types now have Platform identities.
 `Principal`, `RejectCode`, external DTOs, certification and crypto types retain
 registry identities. This is a breaking source migration requiring the next
-minor release; the current package version is unchanged for local qualification.
+minor release, 0.2.0. The declared version does not establish registry publication.

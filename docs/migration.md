@@ -499,17 +499,24 @@ The imported adapters retain their Apache-2.0 license and provenance in
 MIT AND Apache-2.0. Unsafe code is confined to imported call ownership/callbacks
 and the existing initialized stable-byte copy, under a workspace deny lint.
 
-This is a **breaking next-minor migration**, prepared under 0.2.0 notes without
-changing package versions. Do not publish these changes as 0.1.19. The local
-0.1.18 identity is a qualification stand-in, not a supplying registry release.
+This is the **breaking 0.2.0 migration**. The workspace and generator declare
+0.2.0; consumers must verify both supplying registry packages before adoption.
+A local version declaration alone does not establish publication or qualification.
 
 #### Protocol and feature selection
 
-All controlled application endpoints use Wire. Platform owns their IC export
-names, sync/query/async contexts and protected spawning; Wire owns serialization,
+All application endpoints we own use Wire, including public endpoints called by
+third parties. Here, a required external Candid interface means an independently
+defined protocol such as management, NNS/SNS or ledger APIs, never simply a caller
+outside our team or network. Candid is our interoperability adapter to those IC
+services, not an application endpoint option. Platform owns IC export names,
+sync/query/async contexts and protected spawning; Wire owns serialization,
 method/direction frames and caller-selected byte/allocation/node/depth budgets.
 Consumers own endpoint IDs, authentication, semantic validation and retry policy.
 Platform has no Wire dependency and does not invent a default message codec.
+Explicit hooks enforce codec selection, not Wire conformance; consumer tests must
+verify Wire framing and bindings. Codec performance claims require measurements
+for the stated workload and are not part of this compatibility contract.
 
 Callable `query`/`update` macros require `decode_with`, including zero-Rust-argument
 RPCs, and require `encode_with` unless the handler uses `manual_reply`. Lifecycle
@@ -568,10 +575,71 @@ compatibility exception, not permission to introduce new Candid application
 messages or storage formats. Storage implementation/allocation work remains out
 of scope. No layout, retry policy, trust root or cryptographic primitive changes.
 
+#### Runtime maintenance and recovery
+
+The maintained boundary must let us build, diagnose and update our applications
+if upstream Rust tooling stops receiving releases. It still depends on the IC
+protocol and established cryptographic implementations. Dependency isolation,
+source availability and demonstrated recovery are separate claims.
+
+| Component | Maintenance responsibility and qualification |
+| --- | --- |
+| Owned generator and runtime adapters | Platform reviews upstream CDK fixes for applicability and maintains entrypoints, call ownership and cleanup. Preserve Apache provenance and qualify installed behavior. |
+| Registry executor =2.0.0 and ic0 =1.2.0 | Preserve source, licenses and their single package identities. Review executor fixes and IC System API changes; any replacement or version change requires combined entrypoint/call/Timers qualification. No second executor. |
+| Candid, parser and required IC DTOs | Platform controls dependency exposure; retain external wire fixtures, bounded decoder behavior and host-only parser separation. Consumers own protocol selection and limits. |
+| Agent and PocketIC | Platform controls explicit client/type exposure. Host/Query retain transport and verification policy; Testkit retains simulator provisioning and admission. Archive required binaries as well as Rust sources for recovery. |
+| Certification and cryptographic implementations | Preserve upstream implementations, vectors and licenses. Platform may maintain scaffolding; algorithm or primitive changes require qualified external cryptographic expertise. |
+
+For each runtime change, inspect relevant upstream fixes and IC interface changes
+and record the source revision, applicability and validation in the PR. An unchanged
+upstream version is not evidence that no fix is needed. Track unresolved findings
+in GitHub issues rather than a second queue in this document.
+
+The qualified call and protected-spawn fingerprints are admission controls, not
+an instruction to freeze bugs forever. To intentionally change a protected region:
+
+1. Explain the concrete defect and before/after behavior; review ownership,
+   callback contexts, trap rollback and cancellation against the IC contract.
+2. Preserve the original import revision/license. Record the reviewed deviation
+   beside the import provenance; never relabel modified code as unchanged upstream.
+3. Add behavior coverage for the defect and run the installed runtime suite with
+   both Wire-only and required-Candid selections, including Timers and upgrade.
+4. Run native/MSRV/Wasm consumer checks, graph identity checks and source-mutation
+   refusal checks. Update the expected fingerprint only as part of that reviewed
+   change, after behavioral evidence; changing the hash alone is not validation.
+
+Recovery evidence must survive the development machine. For an authorized release,
+retain the exact committed Platform/generator source, both maintained lockfiles,
+dependency sources with checksums/licenses, toolchain and target identities,
+prepared host tools, Testkit-admitted PocketIC binary and qualification logs/Wasm.
+Include dependencies from the generated installed-runtime fixture, not just the
+root workspace. Cargo source vendoring can capture the root and fixture manifests
+in one operation; it does not capture toolchains, host utilities or the simulator.
+Store the resulting artifact and its checksum in durable release storage. Exclude
+credentials, Cargo configuration containing secrets and unrelated user caches.
+
+A recovery drill uses an isolated copy, a fresh Cargo home and target directory,
+restored source-replacement configuration and disabled network access. It must
+build the standalone Wire and required-Candid consumers, check one executor/ic0
+identity, and run installed callback/trap/cancellation/upgrade qualification using
+the restored simulator. Use the existing runtime fixture's generated manifest and
+lock at its recorded relative location; do not resolve new dependencies during the
+drill. Also verify the pinned build tools and supported toolchains are recoverable.
+Passing with an existing developer cache is not clean-cache recovery evidence.
+
+Routine CI currently checks source fingerprints, mutation refusal and dependency
+graphs; it does not provision a simulator or run the installed suite. Run
+`make check-runtime` with a Testkit-admitted `POCKET_IC_BIN` or
+`IC_TESTKIT_POCKET_IC_URL` for installed qualification. A remote server is useful
+for behavior tests but cannot establish recovery of the simulator itself. Native
+macOS and live IC results remain separately reported. The recovery procedure above
+is an acceptance contract; no completed recovery drill is claimed here.
+
 #### Consumer migration and qualification
 
 1. Publish the coordinated next-minor Platform/generator packages before adopting
-   their registry version. The current development version is not that release.
+   their registry version. Verify registry availability rather than inferring it
+   from the workspace version.
 2. Select `cdk` for Wire canisters/probes; retain `executor,ic0` for executor-only
    libraries. Add `candid` explicitly only for required external calls or existing
    Candid checkpoints. Preserve the exact selected external DTO versions.
