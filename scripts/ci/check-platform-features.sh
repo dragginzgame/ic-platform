@@ -10,7 +10,7 @@ case "${1:-}" in
 esac
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/metadata.json
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "secp256k1", "signature-verification"]' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "ecdsa", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "secp256k1", "signature-verification"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
 }
@@ -52,6 +52,10 @@ generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name =
     echo 'Ed25519 must remain optional on native/Wasm without upstream default/RNG features' >&2; exit 1;
 }
 # These are production graphs including normal/build, excluding dev dependencies.
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.ecdsa == ["dep:k256"] and ([.dependencies[] | select(.name == "k256")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["ecdsa"] and .[0].target == null)' \
+    target/feature-graphs/metadata.json > /dev/null || {
+    echo 'ECDSA must remain optional on native/Wasm without default/RNG features' >&2; exit 1;
+}
 # Cargo tree prints canonical package names even for renamed deps.
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
 cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"

@@ -30,6 +30,7 @@ ic-verify-bls-signature = { version = "0.6.0", default-features = false, feature
 ic0 = "=1.2.0"
 ic_principal = "0.1.5"
 icrc-ledger-types = { version = "0.2.0", default-features = false }
+k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"] }
 pocket-ic = "16.1.0"
 proc-macro2 = "1.0.106"
 quote = "1"

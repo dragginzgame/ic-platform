@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.17]
+
+### Added
+
+- Add optional native/Wasm `ecdsa` exports for K256 signatures, keys and prehash
+  traits, preserving upstream identities without RNG or runtime integration.
+  Qualify strict consumer rejection and explicit normalization with standalone
+  tests and a source-copy Auth migration.
+
 ## [0.1.16] - 2026-10-19
 
 ### Added

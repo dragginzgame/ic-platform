@@ -25,6 +25,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 | `signature-verification` | Upstream canister-signature verification; transitive Candid/ic0/certification/BLS, no executor or host transport |
 | `pocket-ic` | Native PocketIC client identities; Testkit retains server lifecycle and policy |
+| `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
 | `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |
 

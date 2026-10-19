@@ -1,5 +1,31 @@
 # Current handoff
 
+The optional native/Wasm `ecdsa` feature now exposes original K256 signature,
+key, error and prehash-trait identities. It selects K256 0.13.4 with only `ecdsa`
+and defaults disabled; it is independent of native IC public derivation. Auth
+retains high-S refusal, normalization, prehash semantics and typed error policy.
+No dependency version changed in the root lock: only Platform's K256 edge was added.
+Package versions remain 0.1.16; notes are under the next 0.1.17 draft.
+
+The Platform-only consumer passes native tests and Wasm checks on development
+Rust and 1.88 (`target/boundary-consumer.anSTCE`). An isolated source copy of
+Auth's actual chain-key implementation/tests, with only import substitutions,
+passes all nine tests and Wasm checking at 1.88 (`/tmp/platform-auth-ecdsa.p7qMmK`).
+This is source-copy evidence, not sibling adoption or publication. Selected MSRV
+Clippy and warning-denied Rustdoc pass. The full routine graph gate passes 144
+selections per target with 220 queries (`target/feature-graphs/attempt.SDAh9N`),
+including default/executor exclusions and new K256 admission regressions.
+Native macOS, installed-canister and exhaustive audit evidence remain separate.
+
+Relay's existing CDK/ic0/Principal imports are migrated in isolated
+[draft PR #5](https://github.com/dragginzgame/ic-relay/pull/5) against published
+Platform 0.1.16. Nine native tests, Wasm/codec-benchmark checks and selected Clippy
+pass at Rust 1.91; installed rollback/callback/upgrade qualification remains.
+Normal sibling checkouts and Toko are untouched. IC Crates' existing runtime
+alignment is tracked by [PR #7](https://github.com/dragginzgame/ic-crates/pull/7);
+its split Memory/Timers graph is not qualified by changing dependency imports.
+Auth/Canic ECDSA adoption requires a supplying Platform release first.
+
 Routine release validation now checks defaults, singles, every pair, all features
 and explicit runtime/DTO/signature/host groups. `make check-features-exhaustive`
 retains the full power set as a manual audit; routine CI/release does not run it.

@@ -1049,7 +1049,33 @@ member/workspace declarations. Preserve canonical-S checks, weak-key rejection,
 `verify_strict`, message hashing, budget charging and admission policy. Tests
 can import `Signer` and `SigningKey` from the same module. Update generators,
 locks and direct-dependency guards and rerun consumer acceptance tests.
-Canic's test declaration currently requests Dalek 3.0; adopting this 2.2 surface
-requires explicit test migration and qualification, not an automatic version swap.
-Sibling checkouts are unchanged. This controls direct ownership, not all transitive
+The subsequent read-only audit found Auth and Canic selecting Platform's Ed25519
+surface. Auth deliberately retains a direct Dalek dev dependency in its adversarial
+feature-unification fixture; preserve that test. This controls direct ownership, not all transitive
 versions, cryptographic policy or measured Wasm size.
+
+## Standard secp256k1 ECDSA maintenance boundary
+
+The optional native/Wasm `ecdsa` feature exposes original K256 0.13.4 identities
+as `ic_platform::ecdsa::{Signature, SigningKey, VerifyingKey, SignatureError,
+PrehashSigner, PrehashVerifier}`. The compatible registry requirement disables
+upstream defaults and selects only `ecdsa`; no RNG backend, Candid or executor
+is enabled. This is independent of the existing native-only `secp256k1` IC public
+key derivation surface. Agent/public derivation may unify additional K256 features.
+
+Auth's `chain-key-verification` should select `dep:ic-platform` and
+`ic-platform/ecdsa` instead of `dep:k256`. Replace K256 imports in production,
+tests and qualification tooling with the flat Platform module; select `ecdsa`
+in the qualification runner too. Canic's K256 imports are test-only: select
+Platform's `ecdsa` in its dev dependency and remove the K256 dev declaration.
+Remove workspace catalog declarations only after all members migrate; update
+consumer locks and dependency guards after publication. Retain Auth's explicit
+high-S refusal, normalization operation, exact prehash bytes, typed errors,
+malformed-key-first ordering, trust decisions and key custody.
+
+An isolated copy of Auth's actual chain-key implementation and tests, changing
+only its two imports, passes Rust 1.88 tests and Wasm checking against local
+Platform. The separate Platform-only consumer covers signing, compressed and
+uncompressed keys, malformed/wrong-message rejection and explicit high-S
+normalization. These proofs do not establish published consumer adoption,
+installed-canister behavior, macOS qualification or smaller Wasm.

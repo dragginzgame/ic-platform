@@ -268,3 +268,10 @@ SignatureError, Signer, SigningKey, VerifyingKey, Scalar}`. These are original
 Dalek identities with upstream defaults disabled; no RNG is selected. Consumers
 retain strict verification, canonical-scalar checks, message construction and key
 custody. This feature is independent of Candid, executor and host features.
+
+Enable `ecdsa` for native/Wasm secp256k1 ECDSA through
+`ic_platform::ecdsa::{Signature, SigningKey, VerifyingKey, SignatureError,
+PrehashSigner, PrehashVerifier}`. K256 retains type identities and cryptography;
+consumers retain prehash construction, high-S policy, normalization and custody.
+No RNG backend is selected. This is independent of native IC key derivation
+under `secp256k1`.

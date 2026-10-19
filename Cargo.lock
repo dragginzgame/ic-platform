@@ -1498,6 +1498,7 @@ dependencies = [
  "ic0",
  "ic_principal",
  "icrc-ledger-types",
+ "k256",
  "pocket-ic",
  "serde",
 ]
