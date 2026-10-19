@@ -136,7 +136,8 @@ this repository has no Candid extraction command requiring a selected extractor.
 
 `make check-features`, included in CI/release validation, checks normal/build
 graphs offline (`--frozen`, preserving the lockfile). Prepare missing registry
-inputs once with `cargo fetch --locked --target <host-triple> --target wasm32-unknown-unknown`.
+inputs once with unfiltered `cargo fetch --locked`. Target filters can omit
+foreign-target dependencies of native-only clients needed by frozen consumer checks.
 Both matrix modes report unique query counts and progress every 100 queries.
 Standalone consumer compilation
 also stays offline after its existing offline metadata resolution. Offline mode

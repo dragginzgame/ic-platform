@@ -52,10 +52,7 @@ jobs:
         run: make install-tools
       - name: Verify tools
         run: make tools-check
-      - name: Prepare locked native and Wasm dependencies
-        run: |
-          host="$(rustc -vV | sed -n 's/^host: //p')"
-          cargo fetch --locked --target "$host"
-          cargo fetch --locked --target wasm32-unknown-unknown
+      - name: Prepare all locked dependency targets
+        run: cargo fetch --locked
       - name: Validate
         run: make ci

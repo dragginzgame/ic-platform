@@ -4,8 +4,8 @@
 
 ### Fixed
 
-- Prepare locked native and Wasm dependency caches before CI's frozen standalone
-  consumer checks, avoiding missing target-specific package failures
+- Prepare all locked dependency targets once before CI's frozen standalone
+  consumer checks, including foreign-target dependencies of native-only clients
   ([#33 — Prepare Wasm dependencies before frozen consumer checks](https://github.com/dragginzgame/ic-platform/issues/33)).
 
 ## [0.1.18] - 2026-10-19

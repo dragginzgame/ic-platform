@@ -1,19 +1,20 @@
 # Current handoff
 
-Fresh CI at released 0.1.18 `392032a` fails the frozen standalone consumer
-Wasm check on Linux and both macOS hosts because `bumpalo 3.20.3` is absent
-from the cache. The pending 0.1.19 workflow now explicitly prepares the selected
-native and Wasm locked dependencies once before validation. Consumer commands
-remain frozen; no per-consumer fetches, lock changes or release effects are added.
-An isolated registry cache reproduces successful native fetch followed by the
-same frozen Wasm refusal for locked bumpalo 3.20.3. Explicit Wasm fetch then
-allows frozen checks on development Rust and 1.88, preserving lock bytes.
-Actionlint, documentation links and whitespace checks pass. Evidence:
-`/tmp/testkit-issue-30/cache-*.log` and `target/wasm-cache-proof`.
-[Issue #33](https://github.com/dragginzgame/ic-platform/issues/33) owns this repair;
-refreshed three-host CI remains required. The older API issues' current CI gate
-is still failing; do not close them based on previous queued-run descriptions.
+CI at released 0.1.18 `392032a` first failed frozen standalone Wasm checks
+for missing `bumpalo 3.20.3`. The first repair fetched native and Wasm targets;
+fresh Linux and both macOS jobs then exposed another missing archive,
+`wasm-bindgen-futures 0.4.79`, for the native-only PocketIC consumer. Those
+target filters omit foreign-target dependencies from the root selection.
 
+The workflow now runs unfiltered `cargo fetch --locked` once before frozen
+validation. An isolated public registry cache, with only that archive removed,
+proves both filtered offline fetches succeed while leaving it absent; unfiltered
+offline fetch refuses, then explicit unfiltered online preparation restores it
+and offline admission passes. Evidence: `/tmp/platform-all-target-cache.vyrGZl`.
+No lock changes, per-consumer downloads or release effects are added.
+[Issue #33](https://github.com/dragginzgame/ic-platform/issues/33) and
+[PR #34](https://github.com/dragginzgame/ic-platform/pull/34) own the repair;
+new native three-host CI remains required. Earlier failed runs do not qualify it.
 
 Shared Tooling 0.25.1 is adopted at verified remote-main revision
 `d57c631206e3618755e45bebf2c88c673564ddc1` through the canonical snapshot exporter.
