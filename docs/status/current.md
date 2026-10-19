@@ -1,5 +1,33 @@
 # Current handoff
 
+Dependency audit refresh: the runtime-only fixture now selects Testkit 0.54.1
+and Timers 0.29.1, with compatible Host 0.27.6 and Metrics 0.14.5 lock updates.
+Timers is a qualification dependency, not a dependency of the consumer library:
+it proves the combined CDK/call/timer executor identity and trap behavior.
+Both locks select crypto-common 0.1.7 and its intentional generic-array =0.14.7
+compatibility pin (RustCrypto/traits PR #2088). Package versions are unchanged.
+
+The isolated source copy passed nine focused Candid/crypto tests on Rust 1.88.
+The installed Linux PocketIC 16.0.0 harness passed with Wasm built on Rust 1.99
+and 1.91, including callback traps, cancellation, upgrade, checkpoint/stable
+rollback and certificate checks. Evidence is in
+`/tmp/platform-upgrade-proof/target/cdk-runtime.KG7MAI` and
+`/tmp/platform-upgrade-msrv.log`; this tested the pre-release-bump 0.1.16 source
+copy. Native macOS and live-network qualification were not run.
+After transferring only dependency changes to the current 0.1.17 checkout,
+runtime-lock/graph regressions, dependency pins/boundaries, documentation links
+and formatting checks pass. Notes are under the next 0.1.18 draft.
+
+Remaining version decisions: certification 3.x preserves shared Agent/verifier
+type identities; Dalek 2/4 and K256 0.13 match IC crypto consumers; Darling 0.23
+and Syn 2 match the imported generator. Their newer major versions need explicit
+migration and qualification, rather than a lock refresh. PocketIC pins thiserror
+2.0.18. Pest 2.9.4 requires psm =0.1.24, conflicting with locked 0.1.32 during
+the targeted update; that coordinated downgrade was not qualified or applied.
+The exact CDK/executor/ic0/management/secp256k1 pins already match latest stable
+versions checked in this audit. Older compatible lock entries alone are not
+evidence of an upstream IC alignment requirement.
+
 The optional native/Wasm `ecdsa` feature now exposes original K256 signature,
 key, error and prehash-trait identities. It selects K256 0.13.4 with only `ecdsa`
 and defaults disabled; it is independent of native IC public derivation. Auth

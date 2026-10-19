@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.18] - Unreleased
+
+### Changed
+
+- Refresh the runtime qualification fixture to Testkit 0.54.1 and Timers 0.29.1,
+  with compatible Host, Metrics and build-tool lock updates. Qualify combined
+  callback, cancellation and upgrade behavior on installed Linux PocketIC.
+- Refresh crypto-common to 0.1.7 with its upstream generic-array =0.14.7
+  compatibility pin; verify focused Candid and crypto tests on Rust 1.88.
+
 ## [0.1.17] - 2026-10-19
 
 ### Added
