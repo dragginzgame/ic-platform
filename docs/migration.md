@@ -38,7 +38,8 @@ Backup, Canic and Blob's existing Testkit workflows additionally use placement,
 effective-principal routing, pending messages, HTTP gateway configuration,
 mock HTTP responses and chunked installation. The root `CanisterInstallMode`
 retains PocketIC's own management 0.8 identity and `skip_pre_upgrade` flags;
-Platform's independent management 0.11 type cannot replace that method parameter. Their explicit root and REST exports retain the original
+Platform's independent management 0.11 type cannot replace that method parameter.
+Their explicit root and REST exports retain the original
 PocketIC identities, including method parameter/result compatibility. These
 exports add no gateway startup, pending-call polling, retries or outcall policy.
 
