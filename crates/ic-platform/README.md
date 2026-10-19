@@ -275,3 +275,9 @@ PrehashSigner, PrehashVerifier}`. K256 retains type identities and cryptography;
 consumers retain prehash construction, high-S policy, normalization and custody.
 No RNG backend is selected. This is independent of native IC key derivation
 under `secp256k1`.
+
+Enable `stable-structures` for the explicit upstream substrate used by IC Storage.
+`ic_platform::stable_structures` preserves collection, Memory/Storable, iterator,
+log-error and restricted-view identities at 0.7.2. This enables no Candid or CDK;
+Memory retains allocation authority and applications use governed Storage
+constructors. See the [substrate contract](../../docs/migration.md#stable-structures-substrate).

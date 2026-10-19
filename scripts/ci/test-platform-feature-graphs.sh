@@ -68,6 +68,11 @@ management-canister-types|ic-management-canister-types v0.11.0|pass
 none|icrc-ledger-types v0.2.0|reject
 icrc-ledger-types|icrc-ledger-types v0.2.0|pass
 icrc-ledger-types|ic-stable-structures v0.7.2|reject
+stable-structures|ic-stable-structures v0.7.2|pass
+stable-structures|ic-stable-structures v0.7.3|reject
+stable-structures|ic-stable-structures v0.7.2 (/tmp/override)|reject
+stable-structures|ic-platform v0.1.18|reject
+stable-structures|candid v0.10.38|reject
 CASES
 # A shared key must still be admitted separately for each original selection.
 printf 'ic-platform v0.1.13\nic-agent v0.49.2\n' > "$fixture/native-case.txt"

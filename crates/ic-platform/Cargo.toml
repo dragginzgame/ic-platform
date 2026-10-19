@@ -28,6 +28,7 @@ management-canister-types = ["dep:ic-management-canister-types"]
 signature-verification = ["dep:ic-signature-verification"]
 pocket-ic = ["dep:pocket-ic"]
 secp256k1 = ["dep:ic-secp256k1"]
+stable-structures = ["dep:ic-stable-structures"]
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }
@@ -46,6 +47,7 @@ ic-certification = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-signature-verification = { workspace = true, optional = true }
+ic-stable-structures = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 ic0 = { workspace = true, optional = true }
 ic_principal.workspace = true
@@ -142,6 +144,11 @@ required-features = ["cdk"]
 name = "pocket_ic_consumer"
 path = "tests/pocket_ic_consumer.rs"
 required-features = ["pocket-ic"]
+
+[[test]]
+name = "stable_structures_consumer"
+path = "tests/stable_structures_consumer.rs"
+required-features = ["stable-structures"]
 
 [lints]
 workspace = true

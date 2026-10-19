@@ -1,5 +1,32 @@
 # Current handoff
 
+The optional stable-structures boundary is qualified locally against released 0.1.18
+at `392032a`, under pending 0.1.19. It retains the exact upstream 0.7.2
+collection/trait identities shared with Memory 0.48.2 and required by
+[Storage's prerequisite #30](https://github.com/dragginzgame/ic-platform/issues/30).
+No collection implementation, allocation authority or sibling source is changed.
+Platform identity/collection tests and the standalone Platform-only consumer pass
+on Linux Rust 1.99 and actual Rust 1.88; Rust 1.91 native tests and Wasm codegen
+also pass. Sixteen selected native/Wasm normal/build graphs pass admission,
+including default/executor exclusions and combined runtime/ledger selections.
+Sixty graph fixtures, feature-declaration guards and selection generation pass;
+this is not a full 161-selection Cargo matrix run. Strict selected Clippy,
+warning-denied Rustdoc, grouped formatting, pins, boundaries and links pass.
+
+A disposable archive of Storage `a8a9c99` (0.5.6) changes only its substrate
+declarations/private alias to candidate Platform. All ten adapter tests pass
+on Rust 1.91 with registry Memory 0.48.2, including original restricted-region
+bytes, corruption refusal and reopening. Strict Storage lint passes on its
+selected Rust 1.99.1; its MSRV Clippy attempt cannot recognize the existing
+`manual_assert_eq` development lint. Rust 1.91 Wasm compilation passes.
+The graph retains one substrate 0.7.2 identity and no Candid/CDK. Evidence:
+`/tmp/testkit-issue-30/`, `target/substrate-graphs` and
+`/tmp/platform-substrate.nlJMSA/storage-proof`. The supplying interface adds
+no collection implementation or allocation policy. Native macOS, installed
+upgrade qualification, publication and ordinary Storage adoption remain separate.
+No sibling working tree or package version was changed.
+
+
 Shared Tooling 0.25.1 is adopted at verified remote-main revision
 `d57c631206e3618755e45bebf2c88c673564ddc1` through the canonical snapshot exporter.
 The invalid `- Unreleased` suffix added to 0.1.18 notes is removed; latest Shared

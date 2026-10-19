@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.19]
+
+### Added
+
+- Add an optional stable-structures substrate boundary for governed IC Storage,
+  retaining upstream 0.7.2 collections, codecs, memory and iterator identities
+  ([#30 — Expose stable-structures substrate identities](https://github.com/dragginzgame/ic-platform/issues/30)).
+
 ## [0.1.18] - 2026-10-19
 
 ### Changed

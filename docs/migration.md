@@ -6,6 +6,30 @@ protocols whose producers and consumers we control. External management-canister
 NNS/SNS and ledger interfaces retain their required Candid formats. Storage and
 ic-memory changes are out of scope; no persisted representation is changed here.
 
+## Stable-structures substrate
+
+The optional `stable-structures` feature exposes `ic_platform::stable_structures`
+on native and Wasm targets. It explicitly exports the upstream collection,
+`Memory`, `Storable`, default backing, restricted-memory view, iterator and
+log-error identities used by IC Storage. There are no replacement types,
+formats, manager exports or collection implementations.
+
+The exact `=0.7.2` selection matches IC Memory 0.48.2's substrate and preserves
+its shared trait and persisted-format identities. Changing it requires renewed
+Memory/Storage interoperability and retained-byte qualification. Defaults and
+executor-only graphs exclude this dependency. Selecting this feature adds no
+Candid, parser, CDK or executor dependency.
+
+IC Storage retains governed collection constructors and its private substrate
+alias; applications continue using Storage. IC Memory retains allocation and
+committed runtime-handle authority. Default backing and restricted views are
+infrastructure/testing interfaces, not permission to bypass governed handles.
+After publication, Storage can replace its direct substrate declaration with
+Platform plus this feature and change its private import to
+`use ic_platform::stable_structures as substrate`. Preserve its existing record
+codecs, recovery and region behavior. Consumer adoption and installed upgrade
+qualification remain separate from Platform export qualification.
+
 ## PocketIC maintenance boundary
 
 The optional native-only `pocket-ic` feature exposes `ic_platform::pocket_ic`.

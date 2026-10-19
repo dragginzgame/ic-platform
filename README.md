@@ -24,6 +24,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 | `signature-verification` | Upstream canister-signature verification; transitive Candid/ic0/certification/BLS, no executor or host transport |
+| `stable-structures` | Explicit upstream 0.7.2 substrate identities for IC Storage; Memory retains allocation authority |
 | `pocket-ic` | Native PocketIC client identities; Testkit retains server lifecycle and policy |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
@@ -166,7 +167,7 @@ Their `=0.11.0` requirement preserves the maintainer-selected external type cont
 enable `candid` separately when using Platform's encoding and bounded decoding.
 Ledger DTOs similarly bring transitive Candid without selecting Platform's codec,
 executor, parser or Agent. Upstream defaults/storage integration are disabled;
-the graph gate rejects `ic-stable-structures` and unselected ledger dependencies.
+the graph gate rejects unselected stable-structures and ledger dependencies.
 Canister-signature creation and verification also bring upstream certification,
 Candid and raw ic0; only verification brings BLS. They do not select the related
 Platform surfaces. BLS alone excludes creation, Candid, certification, CDK and

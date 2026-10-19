@@ -13,6 +13,7 @@
 //! `ic0` selects qualified raw system calls without Candid or an executor.
 //! `management-canister-types` selects external management HTTP/history/snapshot/status DTOs.
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
+//! `stable-structures` selects substrate identities; Storage and Memory retain governance.
 //! Consumers retain protocol schemas, resource limits and lifecycle policy.
 
 pub use ic_principal::{Principal, PrincipalError};
@@ -51,3 +52,6 @@ pub mod signature_verification;
 
 #[cfg(all(feature = "pocket-ic", not(target_family = "wasm")))]
 pub mod pocket_ic;
+
+#[cfg(feature = "stable-structures")]
+pub mod stable_structures;
