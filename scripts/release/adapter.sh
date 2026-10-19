@@ -12,10 +12,9 @@ case "$operation" in
         bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock
         current="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
         [[ "$current" == "${RELEASE_PREVIOUS:?}" ]] || exit 1
-        awk -v version="${RELEASE_VERSION:?}" -v previous="$current" -v date="${RELEASE_DATE:?}" \
-            -f scripts/ci/finalize-release-changelog.awk CHANGELOG.md > /dev/null
+        bash scripts/ci/check-release-changelog.sh "${RELEASE_VERSION:?}" "$current" "${RELEASE_DATE:?}" CHANGELOG.md
         bash scripts/ci/cargo-release-preflight.sh "$PWD" "$prepare" \
-            --pin ci/tool-versions.env \
+            --pin ci/tool-versions.env --pin ci/release-editor.env \
             --check tools-check --prepare install-tools --prepare tools-check
         ;;
     prepare)
@@ -24,6 +23,11 @@ case "$operation" in
         if [[ "$current" == "${RELEASE_VERSION:?}" ]]; then
             bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order-grouped
         else
+            # Explicit setup belongs to admitted preflight; rendering is offline.
+            source ci/release-editor.env
+            CARGO_RELEASE_METADATA_EDITOR="$(bash scripts/release/editor.sh check)"
+            export CARGO_RELEASE_METADATA_EDITOR
+            export CARGO_RELEASE_METADATA_MAX_BYTES="$PLATFORM_RELEASE_EDITOR_MAX_BYTES"
             bash scripts/ci/cargo-release-metadata.sh prepare ic-platform
             bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order-grouped
         fi

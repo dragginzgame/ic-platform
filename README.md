@@ -48,6 +48,12 @@ development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains with t
 `wasm32-unknown-unknown` target for each compiler before their checks. For an
 existing MSRV toolchain, use `rustup target add --toolchain 1.88.0 wasm32-unknown-unknown`.
 
+Tool setup includes the pinned IC Build 0.18.0 release editor, which requires
+Rust 1.91 or later to build. `make install-release-editor` prepares it separately;
+`make release-editor-check` admits it offline. Standard release commands prepare
+tools during admitted preflight; standalone metadata checks never install them.
+Pending changelog notes use `## [X.Y.Z]` without a date or `Unreleased` suffix.
+
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
 `make shared-tooling-check`. `make ci` is the full release gate.

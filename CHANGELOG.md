@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.18] - Unreleased
+## [0.1.18]
 
 ### Changed
 
@@ -9,6 +9,13 @@
   callback, cancellation and upgrade behavior on installed Linux PocketIC.
 - Refresh crypto-common to 0.1.7 with its upstream generic-array =0.14.7
   compatibility pin; verify focused Candid and crypto tests on Rust 1.88.
+- Adopt Shared Tooling 0.25.1 and the pinned IC Build release editor. Standard
+  release commands prepare the editor; standalone checks remain offline.
+
+### Fixed
+
+- Use the supported numbered, undated pending heading so release preflight can
+  admit the 0.1.18 notes.
 
 ## [0.1.17] - 2026-10-19
 

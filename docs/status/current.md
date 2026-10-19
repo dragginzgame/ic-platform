@@ -1,5 +1,29 @@
 # Current handoff
 
+Shared Tooling 0.25.1 is adopted at verified remote-main revision
+`d57c631206e3618755e45bebf2c88c673564ddc1` through the canonical snapshot exporter.
+The invalid `- Unreleased` suffix added to 0.1.18 notes is removed; latest Shared
+still requires numbered undated pending headings. The adapter uses its canonical
+read-only changelog checker before setup. No release entrypoint, commit, tag,
+push or publication was executed. An initially misdirected metadata test changed
+local versions/date; those changes were restored and version files match HEAD.
+
+Shared's retired Perl manifest/lock renderers are replaced by the pinned published
+IC Build 0.18.0 editor for both root metadata and the runtime qualification lock.
+`install-tools` includes editor setup; `tools-check` and standalone preparation
+admit it offline. Standard release requests authorize setup only after source
+and changelog admission. Both catalogs are checked for drift during setup.
+The editor's 8 MiB per-document allowance is local contributor tooling policy;
+building it requires Rust 1.91+, without changing Platform's Rust 1.88 contract.
+Pending notes remain 0.1.18 because this changes contributor tooling only.
+
+Focused checks pass: 99-file snapshot integrity, runtime-lock/graph regressions,
+pins/boundaries, documentation links, release-command/changelog fixtures,
+formatting and offline tools admission. Disposable candidate preparation and
+checks pass at `/tmp/platform-release-0251.1ATdaR`; both locks change only the two
+owned package versions. Full CI/release and native macOS qualification were not
+run for this tooling adoption.
+
 Dependency audit refresh: the runtime-only fixture now selects Testkit 0.54.1
 and Timers 0.29.1, with compatible Host 0.27.6 and Metrics 0.14.5 lock updates.
 Timers is a qualification dependency, not a dependency of the consumer library:

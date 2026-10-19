@@ -4,6 +4,8 @@ FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --a
 FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check; rustfmt --edition 2024 --check scripts/fixtures/cdk-runtime/*.rs' -- "$(FORMAT_CARGO)"
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
+LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
+LOCAL_TOOL_CHECK_TARGETS += release-editor-check
 include make/consumer.mk
 export YQ := $(CURDIR)/.tools/host/bin/yq
 release-patch release-minor release-major release-resume: export IC_PLATFORM_RELEASE_PREPARE := 1
@@ -20,6 +22,13 @@ help:
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Feature graphs: check-features (routine); check-features-exhaustive (manual audit)'
 	@echo 'Registry: publish-check (dry run), publish (upload current committed version)'
+	@echo 'Release editor: install-release-editor; release-editor-check (offline)'
+
+.PHONY: install-release-editor release-editor-check
+install-release-editor:
+	+bash scripts/release/editor.sh install
+release-editor-check:
+	+bash scripts/release/editor.sh check
 
 publish: host-tools-check
 	bash scripts/release/publish.sh publish
@@ -60,6 +69,7 @@ check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance
 check-release-commands:
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
+	bash scripts/ci/test-release-changelog.sh
 ci:
 	+bash scripts/ci/run-validation-targets.sh --fail-fast check-runtime-lock shared-tooling-check check-doc-links check-pins check-boundary check-release-commands fmt-check check test clippy docs-check check-consumer check-features wasm-check msrv
 
