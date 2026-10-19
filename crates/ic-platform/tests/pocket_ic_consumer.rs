@@ -1,11 +1,12 @@
 //! Standalone host consumer with only Platform declared; no server is started.
 #![cfg(not(target_family = "wasm"))]
 use ic_platform::pocket_ic::{
-    CanisterSettings, CreateCanisterParams, ErrorCode, LATEST_SERVER_VERSION, PocketIc,
-    PocketIcBuilder, RejectCode, RejectResponse, Snapshot,
+    CanisterSettings, CreateCanisterParams, CreateCanisterPlacement, ErrorCode,
+    LATEST_SERVER_VERSION, PocketIc, PocketIcBuilder, RejectCode, RejectResponse, Snapshot,
     common::rest::{
-        BlobCompression, CreateInstanceResponse, IcpFeatures, IcpFeaturesConfig, RawCanisterId,
-        Topology,
+        BlobCompression, CanisterHttpReply, CanisterHttpResponse, CreateInstanceResponse,
+        IcpFeatures, IcpFeaturesConfig, InstanceHttpGatewayConfig, MockCanisterHttpResponse,
+        RawCanisterId, RawEffectivePrincipal, RawMessageId, Topology,
     },
     nonblocking,
 };
@@ -36,6 +37,51 @@ pub fn client_contract() {
     };
     assert!(rejection.to_string().contains("caller policy"));
     assert_eq!(LATEST_SERVER_VERSION, "16.1.0");
+
+    let canister = ic_platform::Principal::management_canister();
+    let params = CreateCanisterParams {
+        placement: Some(CreateCanisterPlacement::SubnetId(canister)),
+        ..CreateCanisterParams::default()
+    };
+    assert!(matches!(
+        params.placement,
+        Some(CreateCanisterPlacement::SubnetId(id)) if id == canister
+    ));
+    let _builder = PocketIcBuilder::new().with_http_gateway(InstanceHttpGatewayConfig {
+        ip_addr: Some("127.0.0.1".into()),
+        port: Some(8080),
+        domains: None,
+        https_config: None,
+        domain_custom_provider_local_file: None,
+    });
+    let message = RawMessageId {
+        effective_principal: RawEffectivePrincipal::CanisterId(canister.as_slice().into()),
+        message_id: vec![7; 32],
+    };
+    assert_eq!(message.message_id.len(), 32);
+    let response = MockCanisterHttpResponse {
+        subnet_id: canister,
+        request_id: 7,
+        response: CanisterHttpResponse::CanisterHttpReply(CanisterHttpReply {
+            status: 200,
+            headers: vec![],
+            body: b"fixture reply".to_vec(),
+        }),
+        additional_responses: vec![],
+    };
+    assert_eq!(response.request_id, 7);
+
+    let _: fn(&PocketIc, RawMessageId) -> Result<Vec<u8>, RejectResponse> = PocketIc::await_call;
+    let _: fn(&PocketIc, MockCanisterHttpResponse) = PocketIc::mock_canister_http_response;
+    let _update = |client: &PocketIc| -> Result<Vec<u8>, RejectResponse> {
+        client.update_call_with_effective_principal(
+            canister,
+            message.effective_principal,
+            canister,
+            "fixture",
+            vec![],
+        )
+    };
 }
 
 #[test]

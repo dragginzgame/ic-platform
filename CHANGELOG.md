@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.16]
+
+### Added
+
+- Complete the explicit PocketIC placement, effective-principal, pending-message,
+  HTTP gateway and HTTP response fixture exports used by Testkit consumers in
+  Backup and Canic. Preserve upstream type identities and native-only selection
+  ([#27 — Complete PocketIC exports used by Testkit consumers in Backup and Canic](https://github.com/dragginzgame/ic-platform/issues/27)).
+
 ## [0.1.15] - 2026-10-18
 
 ### Added

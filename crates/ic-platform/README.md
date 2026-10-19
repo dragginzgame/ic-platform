@@ -262,3 +262,8 @@ through `ic_platform::pocket_ic`, including `nonblocking::PocketIc`. Testkit ret
 server installation, compatibility admission and lifecycle policy. This feature
 is absent on Wasm; default and executor-only builds do not select PocketIC.
 PocketIC's management DTOs retain their own upstream 0.8.0 identity.
+The root exports include `CreateCanisterPlacement`; `common::rest` includes
+`RawEffectivePrincipal`, `RawMessageId`, `InstanceHttpGatewayConfig`,
+`CanisterHttpReply`, `CanisterHttpResponse` and `MockCanisterHttpResponse` for
+caller-selected placement, management ingress, pending calls, local gateways and
+HTTP fixtures. These are upstream identities, not Platform DTO replicas.

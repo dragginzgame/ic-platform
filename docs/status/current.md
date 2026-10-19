@@ -1,5 +1,24 @@
 # Current handoff
 
+The PocketIC export completion starts from released `980811c` (0.1.15).
+Pending 0.1.16 adds the seven original upstream placement, effective-principal,
+message, gateway and HTTP response identities required by Backup and Canic
+through Testkit's forwarded Platform surface. See
+[#27 — Complete PocketIC exports used by Testkit consumers in Backup and Canic](https://github.com/dragginzgame/ic-platform/issues/27).
+Package versions, dependencies, features and selected lockfile remain unchanged.
+
+Focused Linux identity tests and the Platform-only consumer pass on Rust 1.99
+and actual Rust 1.88. The consumer also checks for Wasm on both compilers.
+Ten actual native/Wasm graphs pass canonical admission, including PocketIC plus
+the independent management DTO feature. Graph rejection tests, strict selected
+Clippy, warning-denied Rustdoc, formatting, direct boundaries and documentation
+links pass. Proofs remain in `target/pocket-exports-proof` and
+`target/boundary-consumer.E4pkJZ`. No server is started by these checks.
+Publication, normal Testkit/sibling adoption, native macOS and installed-IC
+qualification remain separate; the issue is not closed by source preparation.
+
+## Previous PocketIC boundary qualification
+
 The PocketIC maintenance boundary starts at `fb797b5` (0.1.14), with package
 versions unchanged and notes under the 0.1.15 draft. The optional native-only
 `pocket-ic` feature exports the original blocking/async clients, rejection types,

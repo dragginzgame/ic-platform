@@ -33,6 +33,12 @@ dependency-control changes, not transitive removal or Wasm-size claims.
 Standalone checks cover building without a server; Testkit adoption, actual
 client/server execution and native macOS qualification remain separate gates.
 
+Backup and Canic's existing Testkit workflows additionally use placement,
+effective-principal routing, pending messages, HTTP gateway configuration and
+mock HTTP responses. Their explicit root and REST exports retain the original
+PocketIC identities, including method parameter/result compatibility. These
+exports add no gateway startup, pending-call polling, retries or outcall policy.
+
 ## Qualified Candid surface
 
 The `candid` feature supplies `decode_one`, `decode_exactly_one`, `decode_args`,
