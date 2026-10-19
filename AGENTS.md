@@ -33,8 +33,26 @@ consumer library's optional `cdk` surface. The maintainer authorized maintaining
 the generator independently of upstream acceptance. Preserve its imported
 Apache-2.0 license (the necessary exception to the workspace's MIT metadata),
 coordinated package version, original generator semantics and explicit paths.
-The runtime remains registry `ic-cdk =0.20.3`; no executor implementation is
-forked. Runtime-only raw/executor consumers retain their independent features.
+The maintainer authorized adopting the reviewed non-cryptographic CDK 0.20.3
+adapters inside Platform and removing the `ic-cdk` package. Keep their Apache-2.0
+license/provenance. The facade's mixed-source license is MIT AND Apache-2.0.
+Only the imported callback and legacy byte-copy modules permit reviewed unsafe
+code; other modules retain the workspace deny lint. No executor is forked.
+Preserve registry executor =2.0.0 and ic0 =1.2.0 identities. Endpoint macros require
+explicit consumer-owned codecs; all controlled endpoints use Wire. Candid is an
+explicit adapter for management/system-canister calls. Existing Candid checkpoint
+bytes are a legacy compatibility exception, never a new storage format or owner.
+Runtime-only raw/executor consumers retain their independent features.
+
+## Cryptographic boundary
+
+Our team does not include cryptographers. Do not implement, replace or alter
+cryptographic primitives or algorithms, including public-key derivation,
+signature verification, cryptographic key encoding or hash/domain-separation
+behavior. Retain upstream-authored cryptographic implementations and test vectors.
+Dependency scaffolding and non-cryptographic runtime integration may be simplified
+when they preserve cryptographic behavior. Do not adopt the earlier replacement
+public-derivation or BLS prototypes.
 
 ## Executor identity
 

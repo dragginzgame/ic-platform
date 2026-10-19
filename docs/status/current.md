@@ -1,544 +1,111 @@
 # Current handoff
 
-Issue #31 qualification starts at `392032a` (released 0.1.18) in an isolated
-branch; the normal checkout's scaffolding work and sibling checkouts are
-preserved. Production features, runtime source identities and root lock are
-unchanged. Wire 0.4.7 is added only to the installed-runtime qualification
-workspace and its lock; the lock selects Timers 0.29.2 to match the reporting
-consumer. No cryptographic dependency selection or implementation changed.
-
-The registry-runtime contract does not supply a Candid-free raw/Wire entrypoint
-bundle. Hidden custom codecs avoid generated Candid operations, but both Platform
-and registry CDK 0.20.3 still select Candid. The migration contract now records
-that explicit exception and Timers' separate production/probe graph admission.
-The runtime graph gate now rejects same-version path/Git CDK replacements.
-Removing Candid requires a supported Candid-optional runtime distribution and a
-maintainer decision changing the registry-runtime contract, then qualification
-and publication; no local patch, new executor or codec policy is adopted here.
-
-Focused generator tests (15) and the standalone opaque-DTO CDK consumer pass
-on Rust 1.99 and 1.88, including actual Wasm builds and an unchanged service DID.
-The installed Linux PocketIC 16.0.0 fixture passes with Rust 1.99/1.91 Wasm,
-Testkit 0.54.1, Timers 0.29.2 and Wire 0.4.7. It verifies all four explicit
-request budgets, method/direction and unit-frame refusal, raw awaits, encoding
-trap rollback/cleanup and subsequent calls, plus the existing timer/cancellation,
-upgrade, checkpoint, stable rollback and certificate cases. Executor =2.0.0
-and ic0 =1.2.0 retain one registry identity. Evidence is under
-`/tmp/platform-wire-entrypoints.gHUb3t/platform/target/cdk-runtime.RT5bnD`.
-Native macOS, live-network qualification and publication were not performed;
-this is not evidence of Candid removal or a measured Wasm-size reduction.
-Eight selected native/Wasm production graphs and both combined runtime graphs
-pass admission, with Candid confined to the selected CDK bundle. Seventeen
-runtime graph refusal cases, strict library/generator and driver/Wasm Clippy,
-warning-denied Rustdoc, formatting, lock, pin, boundary and documentation checks
-pass. Full local CI remains release-owned.
-
-Shared Tooling 0.25.1 is adopted at verified remote-main revision
-`d57c631206e3618755e45bebf2c88c673564ddc1` through the canonical snapshot exporter.
-The invalid `- Unreleased` suffix added to 0.1.18 notes is removed; latest Shared
-still requires numbered undated pending headings. The adapter uses its canonical
-read-only changelog checker before setup. No release entrypoint, commit, tag,
-push or publication was executed. An initially misdirected metadata test changed
-local versions/date; those changes were restored and version files match HEAD.
-
-Shared's retired Perl manifest/lock renderers are replaced by the pinned published
-IC Build 0.18.0 editor for both root metadata and the runtime qualification lock.
-`install-tools` includes editor setup; `tools-check` and standalone preparation
-admit it offline. Standard release requests authorize setup only after source
-and changelog admission. Both catalogs are checked for drift during setup.
-The editor's 8 MiB per-document allowance is local contributor tooling policy;
-building it requires Rust 1.91+, without changing Platform's Rust 1.88 contract.
-Pending notes remain 0.1.18 because this changes contributor tooling only.
-
-Focused checks pass: 99-file snapshot integrity, runtime-lock/graph regressions,
-pins/boundaries, documentation links, release-command/changelog fixtures,
-formatting and offline tools admission. Disposable candidate preparation and
-checks pass at `/tmp/platform-release-0251.1ATdaR`; both locks change only the two
-owned package versions. Full CI/release and native macOS qualification were not
-run for this tooling adoption.
-
-Dependency audit refresh: the runtime-only fixture now selects Testkit 0.54.1
-and Timers 0.29.1, with compatible Host 0.27.6 and Metrics 0.14.5 lock updates.
-Timers is a qualification dependency, not a dependency of the consumer library:
-it proves the combined CDK/call/timer executor identity and trap behavior.
-Both locks select crypto-common 0.1.7 and its intentional generic-array =0.14.7
-compatibility pin (RustCrypto/traits PR #2088). Package versions are unchanged.
-
-The isolated source copy passed nine focused Candid/crypto tests on Rust 1.88.
-The installed Linux PocketIC 16.0.0 harness passed with Wasm built on Rust 1.99
-and 1.91, including callback traps, cancellation, upgrade, checkpoint/stable
-rollback and certificate checks. Evidence is in
-`/tmp/platform-upgrade-proof/target/cdk-runtime.KG7MAI` and
-`/tmp/platform-upgrade-msrv.log`; this tested the pre-release-bump 0.1.16 source
-copy. Native macOS and live-network qualification were not run.
-After transferring only dependency changes to the current 0.1.17 checkout,
-runtime-lock/graph regressions, dependency pins/boundaries, documentation links
-and formatting checks pass. Notes are under the next 0.1.18 draft.
-
-Remaining version decisions: certification 3.x preserves shared Agent/verifier
-type identities; Dalek 2/4 and K256 0.13 match IC crypto consumers; Darling 0.23
-and Syn 2 match the imported generator. Their newer major versions need explicit
-migration and qualification, rather than a lock refresh. PocketIC pins thiserror
-2.0.18. Pest 2.9.4 requires psm =0.1.24, conflicting with locked 0.1.32 during
-the targeted update; that coordinated downgrade was not qualified or applied.
-The exact CDK/executor/ic0/management/secp256k1 pins already match latest stable
-versions checked in this audit. Older compatible lock entries alone are not
-evidence of an upstream IC alignment requirement.
-
-The optional native/Wasm `ecdsa` feature now exposes original K256 signature,
-key, error and prehash-trait identities. It selects K256 0.13.4 with only `ecdsa`
-and defaults disabled; it is independent of native IC public derivation. Auth
-retains high-S refusal, normalization, prehash semantics and typed error policy.
-No dependency version changed in the root lock: only Platform's K256 edge was added.
-Package versions remain 0.1.16; notes are under the next 0.1.17 draft.
-
-The Platform-only consumer passes native tests and Wasm checks on development
-Rust and 1.88 (`target/boundary-consumer.anSTCE`). An isolated source copy of
-Auth's actual chain-key implementation/tests, with only import substitutions,
-passes all nine tests and Wasm checking at 1.88 (`/tmp/platform-auth-ecdsa.p7qMmK`).
-This is source-copy evidence, not sibling adoption or publication. Selected MSRV
-Clippy and warning-denied Rustdoc pass. The full routine graph gate passes 144
-selections per target with 220 queries (`target/feature-graphs/attempt.SDAh9N`),
-including default/executor exclusions and new K256 admission regressions.
-Native macOS, installed-canister and exhaustive audit evidence remain separate.
-
-Relay's existing CDK/ic0/Principal imports are migrated in isolated
-[draft PR #5](https://github.com/dragginzgame/ic-relay/pull/5) against published
-Platform 0.1.16. Nine native tests, Wasm/codec-benchmark checks and selected Clippy
-pass at Rust 1.91; installed rollback/callback/upgrade qualification remains.
-Normal sibling checkouts and Toko are untouched. IC Crates' existing runtime
-alignment is tracked by [PR #7](https://github.com/dragginzgame/ic-crates/pull/7);
-its split Memory/Timers graph is not qualified by changing dependency imports.
-Auth/Canic ECDSA adoption requires a supplying Platform release first.
-
-Routine release validation now checks defaults, singles, every pair, all features
-and explicit runtime/DTO/signature/host groups. `make check-features-exhaustive`
-retains the full power set as a manual audit; routine CI/release does not run it.
-This deliberately reduces higher-order combination coverage with maintainer
-authorization. Admission rules and separate CDK/Timers runtime qualification are
-unchanged. Both modes retain frozen queries and progress output; Cargo can still
-wait for another cache owner. No lock was removed or process killed.
-
-The complete routine gate passes on Linux: 128 selections per target, 124 native
-and 68 Wasm queries (192 total, versus the prior 19,586). Evidence is retained at
-`target/feature-graphs/attempt.UYauA6`. Selection tests prove every single/pair,
-critical group and complete exhaustive enumeration (32,769 selections including
-defaults for 15 optional features). Admission/closure regressions, default-native
-and executor-Wasm compilation, documentation links and release-adapter checks
-pass. The exhaustive Cargo audit was not run. Native macOS, installed-canister
-and full release timing remain unqualified; query reduction is not a measured
-end-to-end speedup. Package versions, publication and sibling checkouts are unchanged.
-
-The optional `ed25519` boundary exports original Dalek keys, signatures, errors,
-signing trait and canonical scalar identity on native/Wasm. Defaults remain empty;
-no RNG, Candid or executor is selected by this feature. Auth retains verification
-and admission policies; Canic's Dalek 3.0 test selection needs explicit migration.
-Sibling checkouts and package versions are unchanged. Existing dependency-reduction
-patches, documentation and unrelated lock updates were preserved. This task adds
-only the two direct dependency edges to the incoming lockfile.
-
-The Platform-only consumer passes RFC 8032 and malformed/weak/noncanonical
-rejection checks on development Rust and 1.88, plus Wasm checks on both.
-Evidence: `target/boundary-consumer.mOQAL6`, `target/ed25519-proof` (ten actual
-normal/build graphs). Feature admission/closure regressions, selected MSRV Clippy,
-warning-denied Rustdoc, dependency boundaries, pins and documentation links pass.
-Full feature enumeration remains release-owned; native macOS, installed-canister
-and published-consumer adoption have not been qualified by this change.
-See the [migration contract](../migration.md#standard-ed25519-maintenance-boundary).
-
-The dependency-reduction pass starts at `980811c` (0.1.15). Production dependency
-selection is unchanged by this pass. A concurrent Cargo.toml formatting change
-was observed and preserved. Three applicable review patches and their evidence
-are described in the [migration contract](../migration.md#qualified-dependency-reduction-experiments).
-They qualify narrower signature/verifier, public derivation and CDK macro graphs;
-they are not production replacements, a Candid-free runtime, native macOS proof
-or measured Wasm-size reductions.
-
-The maintainer explicitly authorized edits in Host and Query. Host now gates
-Candid APIs behind `candid`, leaving certificate and Wasm-interface features
-independent. Its next draft is 0.28.0 because this changes the public feature
-contract; existing duration and CI work is preserved. Query requires Host 0.28
-and rejects parser leakage. Its registry lock remains at the prior release and
-must be refreshed after Host publication; normal locked Query validation is
-therefore not claimed. A captured-source Host 0.28 release rehearsal passes
-Query's five certificate tests and complete dependency graph gate at Rust 1.91.
-Host passes Rust 1.88 default/certificate/all-feature tests, native feature graphs,
-strict Clippy, Rustdoc and Rust formatting. No sibling versions, indexes, commits,
-releases or permanent path overrides were changed. Other siblings were read-only.
-
-## Previous PocketIC qualification
-
-The PocketIC maintenance boundary starts at `fb797b5` (0.1.14), with package
-versions unchanged and notes under the 0.1.15 draft. The optional native-only
-`pocket-ic` feature exports the original blocking/async clients, rejection types,
-settings/snapshot and REST fixture identities used by Testkit. Platform owns the
-upstream dependency; Testkit retains server provisioning, compatibility, lifecycle,
-transport and retry policy. See the [migration contract](../migration.md#pocketic-maintenance-boundary).
-
-PocketIC 16.1.0 retains management DTOs 0.8.0 alongside Platform's independent
-0.11.0 surface. Its exact thiserror requirement selects 2.0.18 instead of 2.0.21
-(and matching derive); no unrelated dependency upgrade was requested. Default,
-executor and canister deployment selections must remain PocketIC-free. The
-feature gate now admits only selected native registry PocketIC 16.1.0, retains
-the original deployment exclusion, and includes the new native leaf in guarded
-Wasm cache equivalence. Full feature-matrix enumeration remains release-owned.
-
-The normal Testkit checkout is unchanged. Before adoption, replace its direct
-PocketIC dependency and upstream re-export with the Platform module, audit users
-of its formerly blanket surface, then qualify its unchanged client/server policy.
-No server is started by the new standalone consumer or type-identity tests.
-Focused Linux qualification passes: original upstream type identities and the
-standalone Platform-only consumer at Rust 1.88, plus the standalone consumer on
-Rust 1.99. Both consumer Wasm checks and the Rust 1.88 Wasm library build pass.
-Ten actual native/Wasm dependency graphs, native-leaf guard refusals and PocketIC
-admission/exclusion regressions pass. Strict selected Clippy, warning-denied
-Rustdoc, formatting, pins, boundaries, local documentation links and unchanged
-shared snapshot checks pass. Evidence is under `target/pocket-boundary-proof`
-and `target/boundary-consumer.K4DTeR`.
-Native macOS, installed-canister behavior and publication require separate evidence.
-
-## Previous feature-gate qualification
-
-The feature-gate optimization starts from clean release `07e3835` (0.1.13).
-The local 0.1.14 draft changes validation only; package versions are unchanged.
-Wasm keys omit Agent/parser/secp256k1 leaves only after checking their exact
-single optional native-dependency contracts. Changed feature edges, target
-conditions, optionality, aliases or duplicate dependency declarations fail closed.
-Defaults remain distinct. Every original selection is still admitted against its
-Cargo graph, now by one AWK process per target rather than repeated subprocesses
-and graph copies. Attempts retain target-specific TSV maps and canonical graphs.
-
-Full selection enumeration confirms 8,193 selections per target and 4,609 native
-plus 577 Wasm keys: 5,186 Cargo queries versus 9,218 before (43.7% fewer), with
-all 16,386 checks retained. Forty-six adversarial/control cases agree with the
-previous validator; shared-key reuse and missing graphs fail as intended. Seven
-changed native-leaf contracts are refused. Sixty fresh native/Wasm observations
-across default-free, executor, CDK, verifier, management and ledger selections
-with individual/combined host features pass old/new admission and key-equivalence
-comparison. Evidence is under `target/feature-optimization-proof/`.
-
-The previous turn's exhaustive artifacts are absent from this checkout. A fresh
-full-matrix trial was stopped before completion to limit package-cache contention;
-its partial outputs are not a pass. Full matrix/full CI remain release-owned.
-No measured wall-clock speedup, new Rust compilation, installed-canister or native
-macOS qualification is claimed. Shell syntax, formatting, documentation links,
-pins, direct boundaries and unchanged snapshot checks pass. No shared snapshot,
-sibling, release version, staging, commit, remote or publication was changed.
-
-## Previous secp256k1 qualification
-
-The secp256k1 addition starts from clean `a6bbc2d` (the committed 0.1.13 draft;
-package metadata is still 0.1.12). It adds the maintainer's exact
-`ic-secp256k1 =0.3.0` behind independent native-only `secp256k1`, with explicit
-public key, master-key identifiers and decoding-error exports. Canic's read-only
-`ops/config/chain_key` consumer establishes the scope: offline mainnet/PocketIC
-public derivation. Consumers retain allowed key IDs, root/path admission and
-configuration policy. Upstream RNG dependencies are not made available to Wasm;
-no entropy backend, private-key owner or cryptographic implementation is added.
-See [the migration contract](../migration.md#native-secp256k1-public-derivation).
-
-The Platform-only consumer passes native Rust 1.99/1.88 tests and Wasm checks
-(`target/boundary-consumer.ZSDBka`). Native original-owner type/byte identity
-passes at 1.88. Six fresh production graphs under `target/secp256k1-proof` verify
-default/executor isolation and native-only 0.3.0 selection without Candid/CDK or
-host transport. The feature matrix admits the new optional native feature and
-rejects unselected/non-registry/wrong-version instances; full enumeration remains
-release-owned. Combined runtime graphs still pass with the unchanged maintained
-lock (`target/cdk-runtime.AHxztv`). Clippy, Rustdoc, pins, boundaries, doc links,
-runtime graph rejection cases and unchanged shared snapshot checks pass.
-
-The root lock adds only secp256k1 and its missing PEM/base64/ASN.1 dependencies;
-existing package versions are unchanged. This is local source qualification, not
-publication, full Canic adoption, native macOS or installed-canister acceptance.
-No staging, commit, remote, publication or sibling edit was performed. Earlier
-issue/registry qualification records below describe the already committed work.
-
-## Previous issue qualification
-
-This pass started clean at `338b14b` (release 0.1.12); package versions remain
-0.1.12. The undated 0.1.13 changelog describes the new local enforcement fix.
-No staging, commit, publication, remote or sibling checkout changes were made.
-
-Review of the open producer issues found no additional requested API missing
-from the current source. Canic now reports
-[published 0.1.12 adoption](https://github.com/dragginzgame/ic-platform/issues/22#issuecomment-6251010946),
-resolving #22's import blocker; its Memory/Storage failures remain separate.
-Query and Timers report adoption of Testkit 0.54's canonical limits in
-[#2](https://github.com/dragginzgame/ic-platform/issues/2), and Query/Blob report
-removal of direct CDK dependencies in
-[#1](https://github.com/dragginzgame/ic-platform/issues/1). These are consumer
-reports, not new sibling qualification performed here. No open PR overlaps this
-pass. The [0.1.12 CI run](https://github.com/dragginzgame/ic-platform/actions/runs/39135409911)
-was still in progress when inspected; it does not yet establish producer closure.
-
-The combined CDK/Timers fixture previously checked executor/system identities
-without rejecting native parser, Agent or Testkit reachability. It now rejects
-those packages and unqualified CDK runtime/macros in both native/Wasm canister
-normal/build graphs. The host driver remains outside that selection. Twelve
-adversarial rejection cases and a passing control are part of
-`make check-runtime-lock`, which is included in CI. `--check-graph` runs the real
-locked graph admission without requiring compilation or a server.
-
-Fresh Linux native/Wasm graphs pass at `target/cdk-runtime.tgeJv0`; the regression
-cases, release-lock checks, release adapters, formatting, documentation links and
-unchanged shared snapshot checks pass. This change affects qualification scripts only, with no Rust API,
-protocol, storage, decoder policy or runtime implementation change. Full CI,
-Rust/MSRV compilation and installed-canister execution were not repeated for
-this script-only change. Native macOS and live IC acceptance remain separate.
-The next consequential step is the completed 0.1.12 producer CI evidence and
-published-selection consumer qualification, rather than further speculative APIs.
-
-The subsequent issue pass preserved the pending graph changes and added
-`check-platform-consumer.sh --published X.Y.Z`. Its exact registry selection
-rejects facade/generator path or Git replacements before compilation. Published
-0.1.12 now passes all three standalone CDK tests and linked Wasm on Rust 1.99
-and 1.88 with only Platform declared, retaining the existing DID fixture and
-system/error import checks. Both selected packages are registry 0.1.12. Evidence
-is under `target/boundary-consumer.2qKcg1` (metadata, lock and both target graphs).
-Those graphs pass the runtime identity and host-dependency exclusions. Four
-injected facade/generator path/Git replacements and five malformed version
-arguments are rejected; shell syntax, formatting and document links pass.
-No Rust implementation or sibling was changed, and no new installed test was run.
-
-The open-issue refresh also shows #19 closed; Auth reports published adoption of
-the signature/tree APIs in #16–#18. This pass did not change issue status. Release
-CI still had all three native hosts validating when inspected. Auth/Wire's own
-published-runtime application acceptance remains separate from this standalone
-archive proof. The README now correctly describes the nonempty tooling catalog.
-
-## 0.1.12 implementation record
-
-The following report predates the maintainer's 0.1.12 release. Its temporary
-artifact paths are historical and are not current proof files in this checkout.
-
-This task started clean at `ffc36b6` (0.1.11). Package versions remain 0.1.11;
-`CHANGELOG.md` contains the undated 0.1.12 draft. No staging, commit, publication,
-remote or sibling checkout change was made. The shared snapshot is unchanged.
-
-The local CDK extension addresses the reviewed Platform surface requested in
-[#19](https://github.com/dragginzgame/ic-platform/issues/19),
-[#20](https://github.com/dragginzgame/ic-platform/issues/20),
-[#21](https://github.com/dragginzgame/ic-platform/issues/21) and
-[#22](https://github.com/dragginzgame/ic-platform/issues/22): checkpoint/stable
-passthroughs, certificate publication, typed call errors and system/cost helpers.
-All are explicit original upstream identities under the existing `cdk` feature.
-No storage implementation, protocol, retry policy or executor is replaced.
-See [the adoption contract](../migration.md#remaining-consumer-cdk-helpers).
-
-The maintained runtime lock had retained 0.1.10 local identities after release
-0.1.11. It now matches the workspace. Release preparation updates only those two
-local identities and includes this lock in release files; normal validation
-rejects drift. A disposable regression proves wrong-base refusal, unchanged
-external selections and idempotent retry. Dependency refresh remains explicit.
-
-Focused Linux evidence: standalone Platform-only CDK tests and linked Wasm pass
-on Rust 1.99/1.88 (`target/boundary-consumer.pOWkHD`); exact function/error identity
-tests pass on both compilers. The expanded maintained PocketIC 16.1 fixture passes
-for Rust 1.99/1.91 optimized canisters (`target/cdk-runtime.x7mkc4`), preserving
-checkpoint bytes across upgrade, stable write/growth trap rollback, certified
-root lookup, cycle burning and costs, alongside previous callback/timer/refund
-regressions. The initial attempt caught a test using `msg_method_name` outside
-`inspect_message`; the fixture was corrected without changing upstream behavior.
-
-Captured dirty Auth, Timers and Wire source copies compile natively and to Wasm
-on Rust 1.91 with their direct CDK declarations/imports removed. Archives, base
-revisions, source status, metadata and logs are under `target/cdk-completion/`.
-Canic's captured copy fails on `ic_memory::ic_stable_structures` imports and
-associated Memory/Storage generic errors; its full adoption is not qualified.
-These are captured-source checks, not changes to or acceptance of sibling trees.
-Auth must review its runtime-bundle dependency allowance while retaining Wire
-codecs; Canic must resolve its separate Memory/Storage migration. Existing
-consumer generators and installed policies remain their owners' responsibility.
-
-The next delivery step is the maintainer's paired facade/generator release,
-followed by published consumer adoption and consumer-owned installed tests.
-No transitive CDK/Candid removal or Wasm-size reduction is claimed. Full CI,
-native macOS and live installed-IC qualification have not been run for this draft.
-
-Strict CDK fixture/identity and runtime-driver Clippy, CDK Rustdoc, formatting,
-pins, direct boundaries, document links and unchanged-snapshot checks pass.
-Six focused native/Wasm production graphs confirm Candid-free defaults/executor,
-no host parser/Agent/Testkit and one CDK executor 2.0.0/ic0 1.2.0 identity.
-The combined canister's deployment graph also excludes those host dependencies.
-A disposable 0.1.11-to-0.1.12 metadata preparation passes coordinated package,
-manifest ordering and runtime-lock checks (`target/release-lock-proof.orzQX6`).
-
-## Previous qualification record
-
-The following records describe earlier work and its then-current evidence.
-Temporary evidence directories cited below are absent from this checkout; their
-paths are historical, not newly verified artifacts. The maintained sources above
-replace reliance on temporary runtime fixtures.
-
-[The 0.1.9 native CI run](https://github.com/dragginzgame/ic-platform/actions/runs/39122716825)
-passes Linux x86_64, macOS 15 Intel and Apple Silicon. Delivered DTO, feature-graph
-admission and Rust 1.88 Wasm enforcement issues are closed with that evidence.
-Earlier cancelled runs are historical, not additional gates to rerun. This run
-does not qualify the then-uncommitted 0.1.10 draft. Full local CI was not run.
-
-The draft adds independent `bls`, `canister-sig-creation` and
-`signature-verification` features and the missing certification `AsHashTree`,
-`RbTree` and `Hash` exports. All are explicit upstream identities, with no store,
-trust/freshness policy, clock, root publication, wrapper or custom cryptography.
-Defaults remain empty. BLS selects alloc without RNG defaults and stays free of
-creation, certification, Candid, ic0, executor and host tooling. Creation and the
-full verifier retain upstream Candid/ic0; direct isolation does not remove them.
-See [the signature contract](../migration.md#canister-signature-and-bls-extension).
-
-Four Platform-only consumers pass native and Wasm checks on Rust 1.99/1.88,
-preserving original DER/hash/BLS/certificate bytes, typed failures and nested
-mutable tree/witness operations. Separate Rust 1.88 native/Wasm function-pointer
-proofs establish bidirectional key/signature/error/tree and trait identity.
-The four focused library subjects, existing decoder cases with signatures enabled,
-all-feature Wasm checks and actual optimized Wasm library compilation pass at
-1.88. Strict all-feature Clippy/Rustdoc and formatting/pin/direct-boundary/docs/
-unchanged-snapshot checks pass. Clippy's initial fixture-loop lint and its MSRV-
-compatible correction are retained; no production behavior changed in that fix.
-
-A captured copy of dirty Auth at base `2da4dc0e` changes only dependency selection
-and imports. All 49 signature-store, verifier and certified-proof tests pass on
-Rust 1.91, with combined-feature Wasm library checking. Auth's implementation,
-tests and lock inputs remain unchanged by this task; its root manifest changed
-concurrently. These results qualify the captured copy, not its evolving checkout,
-installed qualification canister, upgrade or ingress workflows.
-
-Before the CDK addition, the signature feature gate covered all 2,048
-combinations plus defaults on native/Wasm and preserved reviewed runtime/crypto
-identities. Those 4,098 graph observations passed, followed by default-native and
-executor-Wasm compilation.
-Nine adversarial admission replays fail with an unchanged passing control.
-Four aliased inactive-target direct-dependency cases likewise fail with a passing
-Platform-only control. These replays qualify enforcement, not cryptographic or
-canister execution. Focused sources, locks, vectors, graph/identity/rejection
-proofs and logs are under `target/auth-boundary/`; incoming before-images are
-under `target/auth-boundary-before/`. Native macOS qualification of this draft
-requires its own delivered CI result.
-
-`patches/canister-sig-principal.patch` proposes the canonical Principal-only
-dependency correction at upstream `3e5786bb`. It applies to exact reviewed main
-preimages. All 24 upstream library tests pass on Rust 1.99/1.88, plus Wasm at 1.88;
-disposable downstream creation/verifier probes preserve fixed vectors and lose
-Candid on native/Wasm only with the candidate selected. ic0 remains 1.2.0.
-The patch is not submitted or selected in production. Existing package versions
-stay selected; the lock adds only creation 1.3.1, verifier 0.3.0 and their
-representation-independent-hash 3.2.0 dependency. No Wasm-size claim is made.
-
-Fresh registry-only `=0.1.9` standalone Candid, management and raw-system
-consumers pass native tests and Wasm checks on Rust 1.99/1.88. Candid preserves
-configured/default/staged decoding, derives and external service/wire formats.
-Management imports all 24 Backup snapshot/status identities plus Canic's
-`DeleteCanisterSnapshotArgs`; fourteen original-owner snapshot/status/delete
-vectors preserve bytes, exact arity, truncation, byte and skipping refusals.
-Raw-system checks compile caller code without executing IC system calls on a
-native host. Each production graph excludes CDK frontends, executor, Agent,
-parser and storage; raw-system selection also excludes Candid.
-
-A separate management-only registry proof, without Platform's Candid feature,
-preserves bidirectional Rust identity with original management types 0.11.0 on
-native/Wasm Rust 1.88. A registry-only executor consumer also compiles on both
-targets at 1.88; its graph retains only executor 2.0.0 and ic0 1.2.0 among runtime
-packages, with no Candid, frontend, Agent, parser or storage. Evidence is under
-`target/registry-019/`: fresh index records, fixture sources/manifests/locks,
-metadata, native/Wasm graphs and qualification logs. These are retained 0.1.9
-publication proofs, separate from the new draft's source-based qualification.
-The Shared snapshot remains unchanged.
-
-Canic reports [local adoption of the published delete DTO](https://github.com/dragginzgame/ic-platform/issues/13#issuecomment-6249299659),
-removing its obsolete local request type while preserving unbounded wait,
-target/method, IDs and authority/recovery behavior. Its type/byte/cross-decoding
-proof and Wasm checks pass; this is not an installed snapshot deletion result.
-The original Backup surface was already accepted against published 0.1.8.
-The migration contract now reflects delivery and preserves intentional partial
-response projections and all consumer-owned limits, retries and recovery.
-
-The new optional `cdk` feature supplies Platform-owned entrypoint/service macros
-and explicit upstream call/system/future exports. The maintained helper is an
-Apache-2.0 fork of published macros 0.20.3 at
-`624606f7fd1ecd6668e9608594946486aec29167`; runtime `ic-cdk =0.20.3` remains
-published upstream code, with one executor 2.0.0 and ic0 1.2.0 identity. CDK
-activates the exact executor/raw capabilities in downstream resolution.
-Executor-only selection remains Candid-free, and no runtime feature enables the
-host parser or Agent. The old CDK contribution patch is retired; this generator
-has one maintained local owner and needs no upstream acceptance. The independent
-crypto proposal and incoming signature implementation remain unchanged.
-
-The helper defaults generated runtime/Candid paths to Platform and retains parsed
-overrides for renamed dependencies. It preserves upstream quotas, zero-argument
-handling, guards, tuple/unit replies, custom/manual/hidden methods, contexts and
-protected spawning. Explicit helpers preserve upstream allocating argument/caller
-Principal construction and controller 0/1/panic behavior. No unchecked raw flag
-comparison, copied runtime, automatic limit or alternative executor is introduced.
-Consumers retain admission, call wait mode, cycles, deadlines, retries and policy.
-
-Fourteen generator tests and all-feature facade/helper tests pass on Rust
-1.99/1.88, with all-feature Wasm library checking at 1.88. A standalone consumer
-with only Platform declared preserves the original CDK's exact DID and compiles
-to optimized Wasm at 1.88. A renamed-dependency proof passes native/MSRV and
-release Wasm with explicit runtime/Candid/derive/Serde/service paths. Strict
-all-feature Clippy/Rustdoc pass. The upstream-derived Darling expansion needs
-one narrowly documented redundant-field lint allowance in the generator module;
-initial failure/correction logs are retained.
-
-Linux/PocketIC 16.1.0 comparisons use published Testkit 0.54 for byte admission,
-managed startup and teardown. Original CDK and Platform-only canisters each pass
-20 matching observations: scalar/tuple/unit/DTO/raw replies, composite queries,
-controller helper, guards, malformed/arity/skipping traps, bounded/unbounded
-awaits, original call rejection, callback trap cleanup and subsequent success,
-protected-task outliving panic, migratory work and init/post-upgrade arguments.
-Original-CDK and Platform fixtures combined with published Timers 0.28 each pass
-25 observations, adding timer callback await/trap cleanup, cancellation, later
-scheduling and post-upgrade runtime reinitialization. Timers owns the sole timer
-export; final native/Wasm graphs resolve one executor/system identity. This is
-focused simulator evidence, not full Timers, Query or Canic adoption and not live
-IC qualification. Early fixture tuple/diagnostic expectation failures and their
-fresh-attempt corrections are retained; generator behavior was not altered to
-make those expectations pass.
-
-The pre-optimization feature matrix had 4,096 combinations plus defaults (8,194
-native/Wasm observations). This continuation ran 30 real focused graph
-observations, default/executor compilation and 14 adversarial admission replays
-with a passing control. A separate CDK-only resolver control retains the qualified
-versions and refuses synthetic executor 2.0.1 and ic0 1.2.1 candidates. The
-complete expanded matrix remains a release gate.
-It admits runtime/generator packages only with CDK selected, rejects additional
-or alternate-source executor/system/frontend/generator identities and preserves
-host/Wasm exclusions. The full release CI was deliberately not run locally.
-
-Workspace checks now cover the helper. Coordinated metadata preparation/checks
-pass in a disposable copy from 0.1.9 to 0.1.10, including both package versions
-and the compatible helper declaration. Metadata was 0.1.9 at that earlier qualification.
-`make publish-check` successfully packages/verifies both packages with all
-features and explicitly aborts both uploads as a dry run. Cargo owns dependency
-ordering; publication intent records both identities. Offline workspace
-verification triggers Cargo 1.99's temporary-registry checksum error (also on
-1.99.1); the normal index-enabled package/dry run passes. No offline publication
-support or upload success is claimed. Reconcile both registry identities after
-an interrupted dispatch; partial publication is not transactional.
-
-Focused inputs, source copies, locks, graphs, macro tests, packaging, release and
-simulator logs are under `target/cdk-generator/`; incoming content is retained
-in `target/cdk-generator-before/source.tar`. The migration contract gives
-imports/manifests/generator/test changes. Runtime adoption still requires the
-paired published release, actual consumer wire/task/timer qualification, native
-macOS CI and installed-IC acceptance. See
-[the runtime boundary](https://github.com/dragginzgame/ic-platform/issues/1).
-
-Testkit 0.54.0 is now non-yanked and published at
-`ff88087d6757121ac92e0dec4705ecaccfd8ebed`, archive checksum
-`787c2ea232d8dd36586d7bd2fb72d78d098a2b892cedd1a319450b2ecea7347d`.
-The index/archive agree; published calls/errors directly use Platform's canonical
-identities without the former decoder dependency. Its
-[release CI](https://github.com/dragginzgame/ic-testkit/actions/runs/39124256235)
-passes all Linux x86_64, macOS 15 Intel and Apple Silicon jobs at this inspection. Query's dirty manifest/driver already select
-0.54 and Platform limits, but no new Governance simulator run was performed here.
-Qualify actual published-selection drivers before retiring their old declaration;
-consumers still selecting Testkit 0.52/0.53 retain the narrow native exception.
-See [producer coordination](https://github.com/dragginzgame/ic-platform/issues/2)
-and [the migration contract](../migration.md).
-
-Native macOS producer CI, Linux simulator results, Wasm compilation and live IC
-are separate qualification categories. The new runtime fixtures were installed only in local PocketIC; callback/trap
-comparisons above do not qualify live IC or snapshot operations. Direct dependency isolation does not prove
-transitive removal or measured Wasm-size reduction. Deployment admission remains
-consumer-owned. Shared Tooling stays pinned to 0.24.0 at `cab12cd`; no snapshot
-payload, runtime policy, external wire bytes or persisted data changed.
+The maintainer authorized replacing the full CDK with maintained
+non-cryptographic adapters inside Platform. The candidate extends
+[PR #35](https://github.com/dragginzgame/ic-platform/pull/35), starting at
+`40f1d8a`, in isolated `feat/owned-candid-free-runtime`. Normal dirty dependency
+scaffolding work and sibling checkouts remain untouched. Package versions stay
+0.1.18 for qualification only. Breaking notes target **0.2.0**, requiring coordinated
+Platform/generator publication; do not publish this candidate as 0.1.19.
+No release, tag, publication or default-branch integration is performed here.
+
+## Runtime and protocol contract
+
+`cdk` selects owned explicit-codec entrypoints, system adapters, raw calls and
+protected spawning. Its normal/build graph contains neither Candid nor full
+`ic-cdk`/`ic-cdk-macros`. Every controlled application endpoint uses Wire;
+Platform has no Wire dependency and installs no default codec or resource policy.
+Query/update macros require explicit decoding even for unit requests, and explicit
+encoding unless manually replying. Argument-bearing lifecycle hooks also require
+a decoder; no-argument IC lifecycle hooks retain raw no-input behavior.
+Implicit Candid endpoint/service generation is retired.
+
+The sole executor remains registry `ic-cdk-executor =2.0.0`; raw system calls
+retain `ic0 =1.2.0`. Imported call submission, callback/trap cleanup, protected
+spawn semantics and the upstream multithreading refusal are preserved. No executor
+implementation is copied. Call/response/cost/performance/error/stable-error types
+now have Platform identities; Principal, RejectCode, external DTOs, certification
+and cryptographic types retain their registry identities. See
+[the migration contract](../migration.md#maintained-runtime-and-wire-entrypoint-adoption).
+
+Raw call constructors begin with empty transport bytes. Every Wire call supplies
+its request frame; required external no-argument Candid calls explicitly use
+`with_args(&())`. Bounded calls still default to 300 seconds. Callers retain
+cycles, deadlines, retries, budgets, authentication and application interpretation.
+Select `candid` separately for management/system and standard ledger/NNS/SNS calls.
+Existing Candid checkpoints remain an explicit legacy persisted-data exception,
+with original bytes and restore behavior. No storage implementation, allocation,
+retry policy, cryptographic primitive or trust root changes.
+
+Imported maintained adapters retain the original Apache-2.0 license and provenance
+under `crates/ic-platform/src/cdk/upstream/`; the combined library declares
+MIT AND Apache-2.0. Reviewed unsafe callback/legacy byte-copy modules are narrowly
+allowed under the workspace deny lint. The superseded CDK macro-gating patch and
+obsolete Candid service fixture are retired. Pending crypto-scaffolding patches in
+the normal checkout are not included or overwritten.
+
+## Qualification evidence
+
+Focused Linux checks pass at Rust 1.99 and MSRV 1.88: generator diagnostics/context
+coverage, raw constructor and explicit external-unit tests, bounded Candid decoder
+regressions, and the separate Platform-only native/Wasm consumer. This standalone
+consumer declares no direct Candid/CDK dependencies. Evidence is in
+`/tmp/platform-owned-runtime.kzhHt0/platform/target/boundary-consumer.P8ZOXK`.
+Strict selected Clippy, warning-denied raw/external Rustdoc, formatting,
+dependency pins/ownership, documentation links and runtime-lock checks pass.
+Source fingerprints match the original CDK 0.20.3 callback/submission and protected
+spawn regions; mutated cleanup predicates/diagnostics and licenses are refused.
+Feature selection/closure/admission regressions and 34 focused actual native/Wasm
+production graphs pass. The routine full matrix and local `make ci` are release-owned
+and were not run for this task.
+
+The actual committed Timers 0.29.2 source at
+`41ebd6c3d29681e61be5b9b223333a6499930f87` was archived into
+`/tmp/platform-runtime-timers-proof`. Both real runtime and size probes compile
+for Wasm at Rust 1.91 with only a disposable Platform override and no source edits.
+Their native/Wasm normal/build graphs are Candid-free and resolve the sole
+qualified executor/ic0 identities. This capture selects Wire 0.4.6; the maintained
+installed fixture selects Wire 0.4.7. Neither is a sibling migration or publication.
+
+Installed Linux PocketIC **16.0.0** qualification passes for all four selections:
+Wasm from Rust **1.91 and 1.99**, each pure Wire and explicit external Candid.
+All application RPCs and installation/upgrade arguments use Wire in both modes.
+The latter additionally calls management `raw_rand` with required Candid bytes
+and checks original legacy checkpoint bytes across upgrade. Tests cover awaited
+and composite calls, typed rejection/submission-pressure/insufficient-cycle
+failures, guards, malformed/unit frames, all four Wire allowances, response-encode
+and callback traps, protected/weak/migratory tasks, Timers await/trap/cancellation/
+rearm, upgrade, cycles/refunds, stable bounds/rollback and certificate lookup.
+
+Sources, frozen locks, metadata and four distinct Wasm artifacts are retained at
+`/tmp/platform-owned-runtime.kzhHt0/platform/target/cdk-runtime.eNOQ6w`;
+logs are `/tmp/platform-installed-{1.91.0,1.99.0}-{wire,external-candid}.log`.
+Testkit owns the admitted server lifecycle and transport. These are installed
+local simulator results, **not native macOS or live IC qualification**.
+No measured Wasm-size reduction is claimed.
+
+## Contributor tooling and adoption
+
+Shared Tooling remains the reviewed **0.25.1** snapshot at
+`d57c631206e3618755e45bebf2c88c673564ddc1`; no snapshot payload changes here.
+Use numbered undated pending changelog headings. The pinned IC Build 0.18.0
+release editor and two dependency-role catalog sections remain in place.
+
+Frozen CI consumers need one unfiltered `cargo fetch --locked` during explicit
+setup. Native plus Wasm target filters still missed `wasm-bindgen-futures 0.4.79`
+for the native-only PocketIC client. A disposable public cache reproduces the
+omission and successful unfiltered preparation at
+`/tmp/platform-all-target-cache.vyrGZl`. The focused repair is in
+[PR #34](https://github.com/dragginzgame/ic-platform/pull/34), linked to
+[#33](https://github.com/dragginzgame/ic-platform/issues/33); PR #35 includes the
+same prerequisite. Consumer validation remains frozen, with no per-consumer
+fetch loops or lock-resolution changes. New three-host CI must qualify each head.
+
+Consumer adoption requires the supplying next-minor registry release, actual
+consumer generator/manifest/import migration, and its own wire/retry/storage
+qualification. No compatibility re-export package or permanent duplicate owner is
+introduced. Existing Testkit external Candid decoder/DTO responsibility remains
+at Platform; Testkit owns transport/server policy. Parser, Agent and PocketIC stay
+native opt-ins and are excluded from canister deployment graphs. Product artifact
+admission remains consumer-owned; dependency-role labels do not enforce deployment
+exclusions by themselves. Native macOS and live IC acceptance remain separate.

@@ -77,10 +77,6 @@ if [[ "$capability" == signature-verification ]]; then
     cp crates/ic-platform/tests/fixtures/signature-*.hex "$fixture/crates/consumer/src/fixtures/"
 fi
 if [[ "$capability" == cdk ]]; then
-    mkdir -p "$fixture/crates/consumer/src/fixtures"
-    cp crates/ic-platform/tests/fixtures/cdk-service.did "$fixture/crates/consumer/src/fixtures/"
-fi
-if [[ "$capability" == cdk ]]; then
     printf '\n[lib]\ncrate-type = ["cdylib", "rlib"]\n' >> "$fixture/crates/consumer/Cargo.toml"
 fi
 cp Cargo.lock "$fixture/Cargo.lock"
@@ -99,6 +95,12 @@ if [[ -n "$published" ]]; then
     ' "$fixture/metadata.json" > /dev/null || {
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
+fi
+if [[ "$capability" == cdk ]]; then
+    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
+        bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph"
+    done
 fi
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --frozen

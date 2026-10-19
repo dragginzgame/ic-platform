@@ -52,5 +52,7 @@ jobs:
         run: make install-tools
       - name: Verify tools
         run: make tools-check
+      - name: Prepare all locked dependency targets
+        run: cargo fetch --locked
       - name: Validate
         run: make ci

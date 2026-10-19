@@ -39,7 +39,7 @@ function reject(reason) {
     certification = pocket || creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
-    candid = pocket || enabled("candid") || cdk || parser || agent || management || ledger || creation
+    candid = pocket || enabled("candid") || parser || agent || management || ledger || creation
     found_ed = 0
     found_curve = 0
     found_secp = 0
@@ -73,12 +73,8 @@ function reject(reason) {
         if (name ~ /^ic-cdk/) {
             if (name == "ic-cdk-executor") {
                 if (!executor || version != "v2.0.0") reject("unqualified executor")
-            } else if (name == "ic-cdk" || name == "ic-cdk-macros") {
-                if (!cdk || version != "v0.20.3") reject("unqualified CDK")
-            } else reject("unknown CDK package")
-            if (name == "ic-cdk-macros") {
-                if (!(n == 3 && f[3] == "(proc-macro)" || n == 4 && f[3] == "(proc-macro)" && f[4] == "(*)")) reject("non-registry CDK macros")
-            } else if (!registry) reject("non-registry CDK")
+            } else reject("full CDK runtime/generator is retired")
+            if (!registry) reject("non-registry executor")
         }
         if (name == "ic0" && (!raw_system || version != "v1.2.0" || !registry)) reject("unqualified ic0")
         if (name == "ic-platform-macros" && (!cdk || (line != generator && line != generator " (*)"))) reject("unqualified generator")

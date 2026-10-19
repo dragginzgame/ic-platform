@@ -748,22 +748,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-cdk"
-version = "0.20.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc6ad46670baa42b9d802e46cb0741e5da2d747b5b74b9ac8019aec9388b05b2"
-dependencies = [
- "candid",
- "ic-cdk-executor",
- "ic-cdk-macros",
- "ic-error-types",
- "ic0",
- "pin-project-lite",
- "serde",
- "thiserror 2.0.18",
-]
-
-[[package]]
 name = "ic-cdk-executor"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -772,19 +756,6 @@ dependencies = [
  "ic0",
  "slotmap",
  "smallvec",
-]
-
-[[package]]
-name = "ic-cdk-macros"
-version = "0.20.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9583454462627a6a816ffa91422c8ab7e6a21f75f63eb255d03f710248d45453"
-dependencies = [
- "candid",
- "darling",
- "proc-macro2",
- "quote",
- "syn 2.0.119",
 ]
 
 [[package]]
@@ -866,13 +837,15 @@ name = "ic-platform"
 version = "0.1.18"
 dependencies = [
  "candid",
- "ic-cdk",
  "ic-cdk-executor",
  "ic-certification",
+ "ic-error-types",
  "ic-platform-macros",
  "ic0",
  "ic_principal",
+ "pin-project-lite",
  "serde",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -1419,6 +1392,7 @@ dependencies = [
  "ic-platform",
  "ic-testkit",
  "ic-wire",
+ "serde",
  "serde_cbor",
 ]
 

@@ -94,6 +94,8 @@ check-runtime:
 
 .PHONY: check-runtime-lock
 check-runtime-lock:
+	bash scripts/ci/check-owned-runtime-source.sh
+	bash scripts/ci/test-owned-runtime-source.sh
 	bash scripts/release/runtime-lock.sh check
 	bash scripts/ci/test-runtime-lock.sh
 	bash scripts/ci/test-platform-runtime-graph.sh

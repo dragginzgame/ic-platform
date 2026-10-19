@@ -30,13 +30,5 @@
     "value": "=0.11.0",
     "reason": "Maintainer-selected external management DTO version; preserve qualified Candid formats and upstream type identities.",
     "evidence": "AGENTS.md#management-contract"
-  },
-  {
-    "rule": "cargo-exact",
-    "file": "Cargo.toml",
-    "subject": "ic-cdk",
-    "value": "=0.20.3",
-    "reason": "Preserve the reviewed runtime implementation and context/spawn contract coupled to the maintained entrypoint generator.",
-    "evidence": "AGENTS.md#owned-entrypoint-generator"
   }
 ]

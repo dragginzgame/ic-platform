@@ -24,6 +24,9 @@ executor|curve25519-dalek v4.1.3|reject
 ed25519||reject
 ed25519|ed25519-dalek v2.2.0|reject
 none|candid v0.10.38|reject
+cdk|candid v0.10.38|reject
+cdk|candid_derive v0.10.38|reject
+cdk,candid|candid v0.10.38|pass
 none|candid_derive v0.10.38|reject
 candid|candid v0.10.38|pass
 none|candid_parser v0.4.1|reject
@@ -42,10 +45,10 @@ none|ic-cdk-executor v2.0.0|reject
 executor|ic-cdk-executor v2.0.0|pass
 executor|ic-cdk-executor v1.0.2|reject
 executor|ic-cdk-executor v2.0.0 (/local)|reject
-cdk|ic-cdk v0.20.3|pass
+cdk|ic-cdk v0.20.3|reject
 cdk|ic-cdk v0.19.0|reject
 cdk|ic-cdk-timers v1.0.0|reject
-cdk|ic-cdk-macros v0.20.3 (proc-macro)|pass
+cdk|ic-cdk-macros v0.20.3 (proc-macro)|reject
 cdk|ic-cdk-macros v0.20.3 (proc-macro) (/local)|reject
 cdk|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
 none|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject

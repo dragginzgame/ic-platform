@@ -35,70 +35,49 @@ where
     result.map_or_else(|e| e.to_compile_error().into(), Into::into)
 }
 
-/// Export the service using the Platform Candid contract or an explicit path.
-#[proc_macro]
-pub fn export_candid(input: TokenStream) -> TokenStream {
-    let candid: syn::Path = if input.is_empty() {
-        syn::parse_quote!(::ic_platform::candid::contract)
-    } else {
-        syn::parse_macro_input!(input as syn::Path)
-    };
-    quote::quote! {
-        #candid::export_service!(#candid);
-
-        /// Return the owned service C string for the Candid extractor.
-        #[unsafe(no_mangle)]
-        pub fn get_candid_pointer() -> *mut std::os::raw::c_char {
-            let c_string = std::ffi::CString::new(__export_service()).unwrap();
-            c_string.into_raw()
-        }
-    }
-    .into()
-}
-
-/// Generate an upstream-compatible query or composite-query entrypoint.
+/// Generate an explicit-codec query or composite-query entrypoint.
 #[proc_macro_attribute]
 pub fn query(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(export::ic_query, "ic_query", attr, item)
 }
 
-/// Generate an upstream-compatible update entrypoint.
+/// Generate an explicit-codec update entrypoint.
 #[proc_macro_attribute]
 pub fn update(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(export::ic_update, "ic_update", attr, item)
 }
 
-/// Generate an upstream-compatible initialization entrypoint.
+/// Generate an initialization entrypoint with explicit argument decoding.
 #[proc_macro_attribute]
 pub fn init(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(export::ic_init, "ic_init", attr, item)
 }
 
-/// Generate an upstream-compatible pre-upgrade entrypoint.
+/// Generate a pre-upgrade entrypoint in the shared runtime context.
 #[proc_macro_attribute]
 pub fn pre_upgrade(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(export::ic_pre_upgrade, "ic_pre_upgrade", attr, item)
 }
 
-/// Generate an upstream-compatible post-upgrade entrypoint.
+/// Generate a post-upgrade entrypoint with explicit argument decoding.
 #[proc_macro_attribute]
 pub fn post_upgrade(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(export::ic_post_upgrade, "ic_post_upgrade", attr, item)
 }
 
-/// Generate an upstream-compatible heartbeat entrypoint.
+/// Generate a heartbeat entrypoint in the shared runtime context.
 #[proc_macro_attribute]
 pub fn heartbeat(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(export::ic_heartbeat, "ic_heartbeat", attr, item)
 }
 
-/// Generate an upstream-compatible message inspection entrypoint.
+/// Generate a message inspection entrypoint in the shared runtime context.
 #[proc_macro_attribute]
 pub fn inspect_message(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(export::ic_inspect_message, "ic_inspect_message", attr, item)
 }
 
-/// Generate an upstream-compatible low-Wasm-memory entrypoint.
+/// Generate a low-Wasm-memory entrypoint in the shared runtime context.
 #[proc_macro_attribute]
 pub fn on_low_wasm_memory(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(
