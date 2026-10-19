@@ -15,6 +15,9 @@ codecs, manual/hidden methods, CDK contexts and spawning preserve upstream
 0.20.3 behavior, including skipping quota 10,000. `IC_CDK_DEBUG` retains the
 upstream opt-in expansion diagnostics. Caller resource and disclosure policy
 remain outside the generator. Inherent runtime dependencies stay upstream.
+`hidden = true` with custom codecs removes generated Candid operations, not the
+`cdk` feature's transitive Candid dependency. There is no Candid-free entrypoint
+bundle under the current registry-runtime contract.
 
 Imported source: `dfinity/cdk-rs` release revision
 `624606f7fd1ecd6668e9608594946486aec29167`, package `ic-cdk-macros` 0.20.3.

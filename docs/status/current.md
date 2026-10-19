@@ -1,5 +1,38 @@
 # Current handoff
 
+Issue #31 qualification starts at `392032a` (released 0.1.18) in an isolated
+branch; the normal checkout's scaffolding work and sibling checkouts are
+preserved. Production features, runtime source identities and root lock are
+unchanged. Wire 0.4.7 is added only to the installed-runtime qualification
+workspace and its lock; the lock selects Timers 0.29.2 to match the reporting
+consumer. No cryptographic dependency selection or implementation changed.
+
+The registry-runtime contract does not supply a Candid-free raw/Wire entrypoint
+bundle. Hidden custom codecs avoid generated Candid operations, but both Platform
+and registry CDK 0.20.3 still select Candid. The migration contract now records
+that explicit exception and Timers' separate production/probe graph admission.
+The runtime graph gate now rejects same-version path/Git CDK replacements.
+Removing Candid requires a supported Candid-optional runtime distribution and a
+maintainer decision changing the registry-runtime contract, then qualification
+and publication; no local patch, new executor or codec policy is adopted here.
+
+Focused generator tests (15) and the standalone opaque-DTO CDK consumer pass
+on Rust 1.99 and 1.88, including actual Wasm builds and an unchanged service DID.
+The installed Linux PocketIC 16.0.0 fixture passes with Rust 1.99/1.91 Wasm,
+Testkit 0.54.1, Timers 0.29.2 and Wire 0.4.7. It verifies all four explicit
+request budgets, method/direction and unit-frame refusal, raw awaits, encoding
+trap rollback/cleanup and subsequent calls, plus the existing timer/cancellation,
+upgrade, checkpoint, stable rollback and certificate cases. Executor =2.0.0
+and ic0 =1.2.0 retain one registry identity. Evidence is under
+`/tmp/platform-wire-entrypoints.gHUb3t/platform/target/cdk-runtime.RT5bnD`.
+Native macOS, live-network qualification and publication were not performed;
+this is not evidence of Candid removal or a measured Wasm-size reduction.
+Eight selected native/Wasm production graphs and both combined runtime graphs
+pass admission, with Candid confined to the selected CDK bundle. Seventeen
+runtime graph refusal cases, strict library/generator and driver/Wasm Clippy,
+warning-denied Rustdoc, formatting, lock, pin, boundary and documentation checks
+pass. Full local CI remains release-owned.
+
 Shared Tooling 0.25.1 is adopted at verified remote-main revision
 `d57c631206e3618755e45bebf2c88c673564ddc1` through the canonical snapshot exporter.
 The invalid `- Unreleased` suffix added to 0.1.18 notes is removed; latest Shared

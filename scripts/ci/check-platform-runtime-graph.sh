@@ -10,6 +10,11 @@ fi
 if ! awk '
     $1 ~ /^ic-cdk/ && $1 != "ic-cdk-executor" {
         if (($1 != "ic-cdk" && $1 != "ic-cdk-macros") || $2 != "v0.20.3") exit 1
+        # cargo tree annotates path/Git sources after the version. The qualified
+        # runtime is registry source, even when a replacement keeps its version.
+        for (i = 3; i <= NF; i++) {
+            if ($i != "(*)" && !($1 == "ic-cdk-macros" && $i == "(proc-macro)")) exit 1
+        }
     }
 ' "$graph"; then
     echo "Unqualified CDK runtime: $graph" >&2

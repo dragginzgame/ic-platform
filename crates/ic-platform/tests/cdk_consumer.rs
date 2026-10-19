@@ -98,6 +98,27 @@ fn custom(bytes: Vec<u8>) -> Vec<u8> {
     bytes
 }
 
+// Deliberately has no Candid/Serde traits: hidden custom codecs must not add
+// generated DTO/service bounds. The standalone consumer compiles this on 1.88.
+struct Opaque(Vec<u8>);
+
+fn decode_opaque(bytes: Vec<u8>) -> Opaque {
+    Opaque(bytes)
+}
+
+fn encode_opaque(value: Opaque) -> Vec<u8> {
+    value.0
+}
+
+#[ic_platform::cdk::query(
+    decode_with = "decode_opaque",
+    encode_with = "encode_opaque",
+    hidden = true
+)]
+fn custom_opaque(value: Opaque) -> Opaque {
+    value
+}
+
 #[ic_platform::cdk::query(manual_reply = true, hidden = true)]
 fn manual() {
     api::msg_reply(b"\0manual\xff");

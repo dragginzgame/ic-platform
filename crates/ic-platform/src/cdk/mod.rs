@@ -5,6 +5,7 @@
 //! CDK 0.20.3's implementation and executor 2.0.0 identity. This feature selects
 //! Candid and the exact-pinned `executor`/`ic0` capabilities; executor-only users
 //! keep the independent `executor` capability.
+//! Hidden/raw/custom-codec entrypoints still select this Candid-dependent runtime.
 //! Callers retain byte admission, bounded/unbounded waits, cycles and retries.
 
 pub use ic_cdk::println;

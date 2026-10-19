@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.19]
+
+### Fixed
+
+- Reject unqualified path/Git CDK runtimes in installed-runtime graph admission,
+  including replacements that retain the accepted version number.
+
+### Testing
+
+- Qualify hidden custom-codec entries with opaque non-Candid DTOs and Wire
+  admission, frame identity, raw awaits and response-encoding trap cleanup.
+  Document the transitive-Candid exception of the unchanged registry CDK runtime;
+  no Candid-free entrypoint bundle is supplied.
+
 ## [0.1.18] - 2026-10-19
 
 ### Changed

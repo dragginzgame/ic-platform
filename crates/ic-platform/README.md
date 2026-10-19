@@ -228,7 +228,7 @@ retain their upstream implementations. `executor::spawn_protected` alone lacks
 CDK's unfinished-task drop panic and must not replace `cdk::futures::spawn`.
 
 Generator behavior preserves guards, lifecycle restrictions, tuple/unit replies,
-zero-argument decode omission, custom codecs, manual/hidden methods and skipping
+default zero-argument decode omission, custom codecs, manual/hidden methods and skipping
 quota 10,000. Hidden methods retain Wasm exports but omit DID registration.
 No finite Platform limits are silently substituted for upstream generator policy.
 Select independent `executor`/`ic0` for Candid-free runtime-only consumers.
@@ -237,6 +237,12 @@ capabilities, but never host parser or Agent. Consumers must
 qualify their existing calls, wire/DID, task/timer and upgrade behavior against
 the published selection before removing direct declarations; see the repository
 migration contract and [runtime boundary](https://github.com/dragginzgame/ic-platform/issues/1).
+Custom decoders still run for zero-Rust-argument endpoints. Preserve their unit
+request-frame validation and a pre-copy byte-admission guard. Hidden Wire/raw
+endpoints still select transitive Candid through registry CDK 0.20.3; there is no
+Candid-free complete entrypoint/call/spawn bundle under the current contract.
+The independent executor/ic0 primitives do not replace that bundle. See
+[#31](https://github.com/dragginzgame/ic-platform/issues/31).
 
 Published Testkit 0.54.0 call helpers use Platform's canonical limits/error types.
 Upgrade and qualify actual drivers before removing the old decoder declaration.

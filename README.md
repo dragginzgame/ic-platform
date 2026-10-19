@@ -17,7 +17,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
 | `candid-parser` | Native host parsing/type checking, service equality, dynamic refusal fixtures and JavaScript/TypeScript generation |
 | `canister-sig-creation` | Canister-signature public-key formats, root-key constants and hashing; transitive Candid/ic0, no store API |
-| `cdk` | Platform-owned entrypoint/service macros with upstream CDK 0.20.3 calls, system helpers and protected spawning |
+| `cdk` | Platform-owned entrypoint/service macros with upstream CDK 0.20.3 calls, system helpers and protected spawning; includes Candid even with raw/Wire codecs |
 | `certification` | Upstream certificate/hash-tree and mutable tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
@@ -32,6 +32,9 @@ Principal and its dependencies, but neither Candid nor CDK.
 The optional CDK surface uses a maintained generator fork with Platform paths and
 the published upstream runtime. Consumer runtime adoption still requires its own
 qualification; no upstream generator change is required.
+Raw/Wire entrypoints retain a documented
+[transitive-Candid exception](docs/migration.md#raw-and-wire-entrypoints-transitive-candid-exception).
+Only the independent `executor`/`ic0` runtime primitives are Candid-free.
 See [the migration contract](docs/migration.md) for ownership and adoption conditions.
 The public GitHub repository exists; registry availability requires separate verification.
 
@@ -209,8 +212,8 @@ reinitialization. It also checks partial cycle acceptance, reject/receiver-trap
 refunds, callback-write rollback and instruction counters across awaits. Guard
 refusal requires its exact rejection code and message; negative unit cases reject
 missing methods and unrelated errors. Sources are maintained under `scripts/fixtures/cdk-runtime/`,
-reusing the standalone CDK consumer. It declares Platform and published Timers;
-the native driver declares Platform and published Testkit. Dependencies for this
+reusing the standalone CDK consumer. It declares Platform, published Timers and
+Wire; the native driver declares Platform, published Testkit and Wire. Dependencies for this
 qualification live in the root's tests/tooling catalog, outside production graphs.
 The generated workspace, lock, metadata and isolated build outputs remain under
 `target/cdk-runtime.*`; concurrent attempts cannot replace one another's artifacts.
@@ -227,13 +230,18 @@ set `CARGO_NET_OFFLINE=true`. Normal validation never refreshes the selection.
 canister's native/Wasm dependency graphs without compiling or starting PocketIC.
 Every runtime mode except lock refresh rejects host parser, Agent and Testkit
 dependencies in those normal/build graphs, and enforces the qualified CDK and
-single executor/system identities. `make check-runtime-lock` also runs adversarial
+single executor/system identities, including refusal of same-version path/Git
+CDK replacements. `make check-runtime-lock` also runs adversarial
 graph admission tests. This covers the combined consumer graph in addition to
 the separate Platform feature matrix; it does not inspect a Wasm binary's size.
 
 The runtime fixture also checks exact checkpoint bytes across upgrade, stable
 write/growth rollback after a trap, certified-data publication and certificate
 lookup, cycle burning, costs and system helpers in their supported contexts.
+Its Wire endpoints exercise pre-copy admission, method/direction and unit-frame
+validation, caller-selected decoder limits, raw awaits and encoding-failure
+rollback/cleanup. Installed checks cover each explicit budget dimension.
+These checks retain registry CDK and its transitive Candid dependency.
 
 Prepare and admit PocketIC with the published Testkit server setup/check workflow,
 then set `POCKET_IC_BIN` to that admitted binary, or set `IC_TESTKIT_POCKET_IC_URL`

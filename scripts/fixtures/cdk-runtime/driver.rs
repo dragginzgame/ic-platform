@@ -1,4 +1,7 @@
 //! Installed runtime regression checks; Testkit owns bounded server startup.
+mod wire_driver;
+mod wire_protocol;
+
 use ic_platform::{
     Principal,
     candid::contract::{self, ArgumentEncoder},
@@ -277,6 +280,7 @@ fn main() {
     assert!(version > 0);
     assert_eq!(burned, 123);
     assert!(absent);
+    wire_driver::run(pic, receiver);
     println!(
         "CDK runtime, checkpoint bytes, stable rollback, certificates and system helpers passed"
     );

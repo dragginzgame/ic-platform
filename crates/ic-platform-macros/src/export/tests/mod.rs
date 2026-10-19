@@ -1,6 +1,50 @@
 use super::*;
 
 #[test]
+fn custom_codec_preserves_admission_and_runtime_contexts() {
+    for method in [MethodType::Query, MethodType::Update] {
+        for function in [
+            quote! { fn entry() {} },
+            quote! { fn entry(input: Opaque) -> Opaque { input } },
+            quote! { async fn entry() -> Opaque { awaited().await } },
+            quote! { async fn entry(a: Opaque, b: Opaque) -> (Opaque, Opaque) { (a, b) } },
+        ] {
+            let generated = dfn_macro(
+                method,
+                quote! {
+                    hidden = true,
+                    guard = "codec::admit",
+                    decode_with = "codec::decode::<_, { Method::Start as u64 }>",
+                    encode_with = "codec::encode"
+                },
+                function,
+            )
+            .unwrap()
+            .to_string();
+            // These statements cross the allocation/effect boundary. In particular,
+            // zero Rust arguments must not elide explicit request-frame validation.
+            let guard = generated.find("codec :: admit").unwrap();
+            let copy = generated.find("api :: msg_arg_data").unwrap();
+            let decode = generated.find("codec :: decode").unwrap();
+            let handler = generated.find("let result = entry").unwrap();
+            let encode = generated.find("codec :: encode").unwrap();
+            let reply = generated.find("api :: msg_reply").unwrap();
+            assert!(guard < copy && copy < decode && decode < handler);
+            assert!(handler < encode && encode < reply);
+            assert!(!generated.contains("candid"));
+            assert!(!generated.contains(":: ic_cdk ::"));
+            assert!(!generated.contains("spawn_protected"));
+            let context = if method.is_state_persistent() {
+                "in_executor_context"
+            } else {
+                "in_query_executor_context"
+            };
+            assert!(generated.contains(&format!("internals :: {context}")));
+        }
+    }
+}
+
+#[test]
 fn platform_contexts_and_lifecycle_restrictions() {
     for method in [
         MethodType::Init,

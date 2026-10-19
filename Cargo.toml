@@ -40,6 +40,7 @@ syn = { version = "2", features = ["full", "extra-traits"] }
 # Tests and tooling only
 ic-testkit = "0.54.1"
 ic-timers = "0.29.1"
+ic-wire = "0.4.7"
 serde_cbor = "0.11.2"
 
 [workspace.lints.rust]

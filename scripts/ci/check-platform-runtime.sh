@@ -16,6 +16,8 @@ mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 # Inherit the reviewed test dependency selections from the root catalog.
 testkit="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
 timers="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-timers' Cargo.toml)"
+wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
+serde="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde.version' Cargo.toml)"
 cbor="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde_cbor' Cargo.toml)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
@@ -29,6 +31,8 @@ publish = false
 ic-platform = { path = "../../crates/ic-platform", features = ["cdk"] }
 ic-testkit = "$testkit"
 ic-timers = "$timers"
+ic-wire = "$wire"
+serde = { version = "$serde", default-features = false }
 serde_cbor = "$cbor"
 [patch.crates-io]
 ic-platform = { path = "../../crates/ic-platform" }
@@ -45,6 +49,8 @@ crate-type = ["cdylib"]
 [dependencies]
 ic-platform.workspace = true
 ic-timers.workspace = true
+ic-wire.workspace = true
+serde.workspace = true
 MANIFEST
 cat > "$fixture/apps/driver/Cargo.toml" <<'MANIFEST'
 [package]
@@ -57,12 +63,16 @@ rust-version = "1.91"
 ic-platform = { workspace = true, features = ["certification"] }
 ic-testkit.workspace = true
 serde_cbor.workspace = true
+ic-wire.workspace = true
 MANIFEST
 sed '/VALUE.set(value);/a\
     ic_timers::initialize_runtime().unwrap();' crates/ic-platform/tests/cdk_consumer.rs > "$fixture/crates/canister/src/lib.rs"
 cat scripts/fixtures/cdk-runtime/timers.rs >> "$fixture/crates/canister/src/lib.rs"
+printf '\nmod wire_canister;\nmod wire_protocol;\n' >> "$fixture/crates/canister/src/lib.rs"
+cp -R scripts/fixtures/cdk-runtime/wire_canister scripts/fixtures/cdk-runtime/wire_protocol "$fixture/crates/canister/src/"
 cp crates/ic-platform/tests/fixtures/cdk-service.did "$fixture/crates/canister/src/fixtures/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
+cp -R scripts/fixtures/cdk-runtime/wire_driver scripts/fixtures/cdk-runtime/wire_protocol "$fixture/apps/driver/src/"
 lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
 if [[ "$mode" == --refresh-lock ]]; then
     # Explicitly rebase on the production lock, resolving the test-only additions.
