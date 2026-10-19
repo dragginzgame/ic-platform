@@ -14,6 +14,14 @@ while IFS='|' read -r selection package expected; do
     count=$((count + 1))
 done <<'CASES'
 none||pass
+none|rand v0.8.5|reject
+executor|rand_chacha v0.3.1|reject
+cdk|getrandom v0.2.17|reject
+bls|rand v0.8.5|reject
+signature-verification|rand v0.8.5|reject
+none|rand_core v0.6.4|pass
+agent|rand v0.8.5|pass
+candid-parser|getrandom v0.2.17|pass
 none|k256 v0.13.4|reject
 executor|k256 v0.13.4|reject
 ecdsa|k256 v0.13.4|pass
@@ -24,6 +32,9 @@ executor|curve25519-dalek v4.1.3|reject
 ed25519||reject
 ed25519|ed25519-dalek v2.2.0|reject
 none|candid v0.10.38|reject
+cdk|candid v0.10.38|reject
+cdk|candid_derive v0.10.38|reject
+cdk,candid|candid v0.10.38|pass
 none|candid_derive v0.10.38|reject
 candid|candid v0.10.38|pass
 none|candid_parser v0.4.1|reject
@@ -42,10 +53,10 @@ none|ic-cdk-executor v2.0.0|reject
 executor|ic-cdk-executor v2.0.0|pass
 executor|ic-cdk-executor v1.0.2|reject
 executor|ic-cdk-executor v2.0.0 (/local)|reject
-cdk|ic-cdk v0.20.3|pass
+cdk|ic-cdk v0.20.3|reject
 cdk|ic-cdk v0.19.0|reject
 cdk|ic-cdk-timers v1.0.0|reject
-cdk|ic-cdk-macros v0.20.3 (proc-macro)|pass
+cdk|ic-cdk-macros v0.20.3 (proc-macro)|reject
 cdk|ic-cdk-macros v0.20.3 (proc-macro) (/local)|reject
 cdk|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
 none|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
@@ -95,3 +106,14 @@ for package in 'pocket-ic v16.0.0' 'pocket-ic v16.1.0 (/local)' 'ic-management-c
     if awk -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 done
 echo 'PocketIC native selection, Wasm exclusion and identity refusals passed'
+# Native host selections cannot authorize entropy dependencies in a Wasm graph.
+for selection in agent candid-parser pocket-ic secp256k1; do
+    printf 'getrandom v0.2.17\n' > "$fixture/wasm32-unknown-unknown-entropy.txt"
+    printf '%s\tentropy\n' "$selection" > "$fixture/mapping"
+    if awk -v target=wasm32-unknown-unknown -v cache="$fixture" \
+        -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then
+        echo "Unexpected Wasm entropy admission for $selection" >&2; exit 1
+    fi
+    rg -q 'unselected RNG/entropy scaffolding' "$fixture/log"
+done
+echo 'Native-only feature names cannot admit Wasm entropy dependencies'

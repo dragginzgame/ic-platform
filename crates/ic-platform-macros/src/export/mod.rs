@@ -5,9 +5,8 @@
 use darling::FromMeta;
 use darling::ast::NestedMeta;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{ToTokens, format_ident, quote};
+use quote::{format_ident, quote};
 use std::fmt::Formatter;
-use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{
     Error, FnArg, ItemFn, Pat, PatIdent, PatType, Path, ReturnType, Signature, Type, parse_str,
@@ -19,12 +18,12 @@ struct ExportAttributes {
     #[darling(multiple)]
     pub guard: Vec<String>,
     /// The name of the function to use for decoding arguments.
-    /// If not provided, the arguments are decoded as Candid.
+    /// Required for callable entries, including unit requests.
     ///
     /// Even if the argument type is empty, the specified function will still be executed.
     pub decode_with: Option<String>,
     /// The name of the function to use for encoding the return value.
-    /// If not provided, the return value is encoded as Candid.
+    /// Required for automatic replies. No default protocol is selected.
     ///
     /// If the method returns a tuple, this custom encoder function should take the tuple as an argument.
     pub encode_with: Option<String>,
@@ -36,8 +35,6 @@ struct ExportAttributes {
     pub hidden: bool,
     #[darling(rename = "crate")]
     pub cratename: Option<String>,
-    /// Path to the Candid crate or an equivalent explicitly supported facade.
-    pub candid: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -170,17 +167,10 @@ fn dfn_macro(
     }
     let cratename: Path =
         syn::parse_str(attrs.cratename.as_deref().unwrap_or("::ic_platform::cdk"))?;
-    let candid: Path = syn::parse_str(
-        attrs
-            .candid
-            .as_deref()
-            .unwrap_or("::ic_platform::candid::contract"),
-    )?;
 
     // 1. function name(s)
     let name = &signature.ident;
     let outer_function_ident = format_ident!("__canister_method_{name}");
-    let candid_method_name = format_ident!("__candid_method_{name}");
     let function_name = if let Some(custom_name) = attrs.name {
         if method.is_lifecycle() {
             return Err(Error::new(
@@ -262,16 +252,13 @@ fn dfn_macro(
             let arg_bytes = #cratename::api::msg_arg_data();
             let ( #( #arg_tuple, )* ) = #decode_with_ident(arg_bytes); }
         }
-    } else if arg_tuple.is_empty() {
-        quote! {}
+    } else if method.can_have_args() && (!method.is_lifecycle() || !arg_tuple.is_empty()) {
+        return Err(Error::new(
+            attr_span,
+            "endpoint requires decode_with, including unit RPC requests; use the consumer-owned Wire decoder",
+        ));
     } else {
-        quote! {
-            let arg_bytes = #cratename::api::msg_arg_data();
-            let arg_bytes: &[u8] = if arg_bytes.is_empty() { b"DIDL\x00\x00" } else { &arg_bytes };
-            let mut decoder_config = #candid::DecoderConfig::new();
-            decoder_config.set_skipping_quota(10000);
-            let ( #( #arg_tuple, )* ) = #candid::decode_args_with_config(arg_bytes, &decoder_config).unwrap();
-        }
+        quote! {}
     };
 
     // 4. function call
@@ -313,11 +300,10 @@ fn dfn_macro(
                 _ => quote! { #encode_with_ident(result)},
             }
         } else {
-            match return_length {
-                0 => quote! { #candid::encode_one(()).unwrap() },
-                1 => quote! { #candid::encode_one(result).unwrap() },
-                _ => quote! { #candid::encode_args(result).unwrap() },
-            }
+            return Err(Error::new(
+                attr_span,
+                "endpoint requires encode_with or manual_reply; no default Candid codec is supplied",
+            ));
         };
         quote! {
             let bytes: Vec<u8> = #return_bytes;
@@ -325,43 +311,8 @@ fn dfn_macro(
         }
     };
 
-    // 6. candid attributes for export_candid!()
-    let candid_method_attr = if attrs.hidden {
-        quote! {}
-    } else {
-        let annotation = match method {
-            MethodType::Query if attrs.composite => {
-                quote! { #[#candid::candid_method(composite_query, rename = #function_name)] }
-            }
-            MethodType::Query => {
-                quote! { #[#candid::candid_method(query, rename = #function_name)] }
-            }
-            MethodType::Update => {
-                quote! { #[#candid::candid_method(update, rename = #function_name)] }
-            }
-            MethodType::Init => quote! { #[#candid::candid_method(init)] },
-            _ => quote! {},
-        };
-        let mut dummy_fun = fun.clone();
-        dummy_fun.sig.ident = candid_method_name;
-        dummy_fun.block = Box::new(syn::parse_quote!({
-            panic!("candid dummy function called")
-        }));
-        if attrs.decode_with.is_some() {
-            let mut inputs = Punctuated::new();
-            inputs.push(syn::parse_quote!(arg_bytes: Vec<u8>));
-            dummy_fun.sig.inputs = inputs;
-        }
-        if attrs.encode_with.is_some() {
-            dummy_fun.sig.output = syn::parse_quote!(-> Vec<u8>);
-        }
-        let dummy_fun = dummy_fun.into_token_stream();
-        quote! {
-            #annotation
-            #[allow(unused_variables)]
-            #dummy_fun
-        }
-    };
+    // Codec-defined endpoints are never registered as Candid services.
+    let _ = attrs.hidden; // Accepted for existing explicit Wire hook declarations.
 
     // 7. exported function body
     let async_context_name = if method.is_state_persistent() {
@@ -399,7 +350,6 @@ fn dfn_macro(
             #body
         }
 
-        #candid_method_attr
 
         #item
     })

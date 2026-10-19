@@ -203,40 +203,33 @@ slice order and still requires `msg_reply()` to finalize. Keep rejection bytes,
 early size refusal and authentication ordering unchanged. These exports do not
 replace CDK's Principal/Vec convenience helpers, macros or call/task lifecycle.
 
-Enable `cdk` for `ic_platform::cdk`. Use its `query`, `update`, `init`,
-`pre_upgrade`, `post_upgrade`, `heartbeat`, `inspect_message`,
-`on_low_wasm_memory` and `export_candid!()` macros. Their default generated
-runtime and codec paths go through Platform; DTOs still need their explicit
-`candid_path` and Serde crate attributes. Rename overrides use
-`crate = "platform::cdk", candid = "platform::candid::contract"` on each
-entrypoint and `platform::cdk::export_candid!(platform::candid::contract)`.
+Enable `cdk` for the Candid-free `ic_platform::cdk` runtime: explicit-codec
+entrypoints, raw calls, system helpers, protected spawning and raw stable-byte
+operations. Full `ic-cdk` and upstream macros are not dependencies. Registry
+executor =2.0.0 and ic0 =1.2.0 remain shared with Timers.
 
-The support generator is an Apache-2.0 fork of upstream macros 0.20.3, maintained
-here and released at the coordinated facade version. Consumers declare only Platform.
-The published runtime remains `ic-cdk = "=0.20.3"`; its own upstream macros
-remain transitive. Runtime calls and contexts use one executor 2.0.0 identity.
-The explicit `cdk::api` helpers include `msg_cycles_available`, `msg_cycles_accept`,
-`msg_cycles_refunded`, `instruction_counter` and `call_context_instruction_counter`
-with their original CDK 0.20.3 identities. Sample refunds only in the matching
-reply/reject callback; submission failures have no callback refund. Preserve
-consumer funding, counter-attribution and retry policies across awaits and traps.
-Explicit `cdk::api`, `cdk::call` and `cdk::futures` exports cover the reviewed
-consumers and generated code; they are not blanket upstream module exports.
-`Call`, `CallFailed`, `Response`, controller 0/1/panic handling, argument
-allocation, caller Principal construction, trap cleanup and protected spawning
-retain their upstream implementations. `executor::spawn_protected` alone lacks
-CDK's unfinished-task drop panic and must not replace `cdk::futures::spawn`.
+All controlled endpoints use Wire. Query/update macros require `decode_with`
+(including unit RPCs) and `encode_with` or `manual_reply`. Use a guard for
+pre-copy byte admission. Caller code retains endpoint IDs, decoder budgets,
+authentication and retry policy. No Candid endpoint fallback, service-registration
+macro or Candid path option is supplied. Lifecycle hooks with arguments require
+explicit decoding; no-argument hooks may omit it. A renamed dependency can use
+`crate = "platform::cdk"`. Existing `hidden = true` remains accepted but redundant.
 
-Generator behavior preserves guards, lifecycle restrictions, tuple/unit replies,
-zero-argument decode omission, custom codecs, manual/hidden methods and skipping
-quota 10,000. Hidden methods retain Wasm exports but omit DID registration.
-No finite Platform limits are silently substituted for upstream generator policy.
-Select independent `executor`/`ic0` for Candid-free runtime-only consumers.
-The `cdk` feature selects Candid and the exact-pinned `executor`/`ic0`
-capabilities, but never host parser or Agent. Consumers must
-qualify their existing calls, wire/DID, task/timer and upgrade behavior against
-the published selection before removing direct declarations; see the repository
-migration contract and [runtime boundary](https://github.com/dragginzgame/ic-platform/issues/1).
+Select `cdk,candid` explicitly for required external management/system-canister
+calls. These add the original Candid `Call::{with_arg,with_args}` and
+`Response::{candid,candid_tuple}` adapters. Raw constructors start with empty
+transport bytes; Wire callers always supply a request frame, and external
+no-argument Candid calls explicitly use `with_args(&())`. Bounded calls retain
+their 300-second default and original cycle/timeout/error behavior.
+
+Call/response/future, cost/performance/error and stable-error types now have
+Platform identities; upstream direct-type equality is not retained. Principal,
+RejectCode, external DTO and crypto identities stay upstream. This is a breaking
+next-minor migration; existing versions have not been changed for qualification.
+The generator and imported non-cryptographic runtime source retain Apache-2.0
+with provenance; the combined package is MIT AND Apache-2.0. No executor or
+cryptographic implementation is forked.
 
 Published Testkit 0.54.0 call helpers use Platform's canonical limits/error types.
 Upgrade and qualify actual drivers before removing the old decoder declaration.
@@ -250,12 +243,13 @@ Selected upstream dependencies remain transitive dependencies.
 The same `cdk` feature includes explicit typed call failures, signing/HTTP/creation
 costs, balances, certificate publication, counters and `println!`, plus the
 reviewed `stable::{stable_grow, stable_read, stable_write, StableMemoryError}` and
-`storage::{stable_save, stable_restore}` helpers. These retain upstream type
-identity, checkpoint bytes, errors and traps; restore retains upstream's lack of
+`storage::{stable_save, stable_restore}` helpers. These retain checkpoint bytes, errors and traps; restore retains upstream's lack of
 decoder finalization. Consumers own layouts, limits, retries and certification
 policy. Use `api::global_timer_set` (the upstream 0.20.3 name) only under the
 consumer's timer ownership, and `api::msg_method_name` in `inspect_message`.
-This isolates direct CDK dependencies; CDK and Candid remain transitive.
+The base runtime removes full CDK and Candid from its normal/build graph.
+`storage::{stable_save,stable_restore}` additionally requires `candid` solely
+for existing persisted bytes; it is not a new storage format or allocation owner.
 
 Enable `pocket-ic` for explicit native client, typed error and fixture DTO exports
 through `ic_platform::pocket_ic`, including `nonblocking::PocketIc`. Testkit retains

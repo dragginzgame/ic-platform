@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 SHARED_TOOLING_RUST := 1
-FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all; rustfmt --edition 2024 scripts/fixtures/cdk-runtime/*.rs' -- "$(FORMAT_CARGO)"
-FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check; rustfmt --edition 2024 --check scripts/fixtures/cdk-runtime/*.rs' -- "$(FORMAT_CARGO)"
+FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all; rustfmt --edition 2024 scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/secp-scaffolding/main.rs' -- "$(FORMAT_CARGO)"
+FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check; rustfmt --edition 2024 --check scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/secp-scaffolding/main.rs' -- "$(FORMAT_CARGO)"
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
@@ -63,6 +63,9 @@ check-features-exhaustive:
 	bash scripts/ci/test-platform-feature-closures.sh
 	bash scripts/ci/test-platform-feature-graphs.sh
 	bash scripts/ci/check-platform-features.sh --exhaustive
+.PHONY: check-upstream-scaffolding
+check-upstream-scaffolding:
+	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
 	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
 check-pins:
@@ -94,6 +97,8 @@ check-runtime:
 
 .PHONY: check-runtime-lock
 check-runtime-lock:
+	bash scripts/ci/check-owned-runtime-source.sh
+	bash scripts/ci/test-owned-runtime-source.sh
 	bash scripts/release/runtime-lock.sh check
 	bash scripts/ci/test-runtime-lock.sh
 	bash scripts/ci/test-platform-runtime-graph.sh

@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.2.0]
+
+### Breaking
+
+- Replace the full CDK dependency with maintained non-cryptographic adapters
+  inside Platform. Keep the registry executor =2.0.0 and ic0 =1.2.0 identities.
+  Call/response, cost/error and stable-error types now have Platform identities.
+- Make `cdk` Candid-free. Require explicit Wire endpoint codecs, including unit
+  RPC decoding; remove default Candid endpoints and service export generation.
+  Raw calls start with empty bytes; supply Wire frames or explicit external
+  Candid arguments. Select `candid` separately for management/system calls and
+  existing persisted checkpoint helpers. No stored bytes or crypto are changed.
+- Preserve Apache-2.0 provenance for imported runtime code; the combined consumer
+  package declares MIT AND Apache-2.0. No executor implementation is copied.
+
+### Testing
+
+- Qualify standalone native/MSRV/Wasm consumers, real Timers probe compilation,
+  graph isolation and imported callback/spawn source fidelity. Installed Wire
+  fixtures cover raw awaits, submission/cycle failures, protected/weak/migratory
+  spawning, traps, timer cancellation, upgrade and external Candid/checkpoints.
+
+### Changed
+
+- Reject unintended RNG and entropy dependencies in portable crypto, runtime and
+  Wasm feature graphs. Cover the combined BLS, ECDSA and Ed25519 selection.
+- Add source-preservation checks for dependency scaffolding proposals, retaining
+  upstream cryptographic bodies and licenses. Qualify optional signature-store
+  and secp256k1 scaffolding without selecting production replacements.
+
 ## [0.1.18] - 2026-10-19
 
 ### Changed

@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-macros"
-description = "IC Platform entrypoint generator with explicit runtime and Candid paths"
+description = "IC Platform entrypoint generator with explicit runtime and consumer codecs"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
