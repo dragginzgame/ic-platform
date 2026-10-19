@@ -1,13 +1,58 @@
 # Changelog
 
-## [0.1.16]
+## [0.1.19]
 
 ### Added
 
-- Complete the explicit PocketIC placement, effective-principal, pending-message,
-  HTTP gateway and HTTP response fixture exports used by Testkit consumers in
-  Backup and Canic. Preserve upstream type identities and native-only selection
-  ([#27 — Complete PocketIC exports used by Testkit consumers in Backup and Canic](https://github.com/dragginzgame/ic-platform/issues/27)).
+- Complete PocketIC placement, pending-message, gateway, HTTP fixture and chunked
+  install-mode exports used through Testkit by Backup, Canic and Blob. Preserve
+  original upstream identities and native-only selection
+  ([#27](https://github.com/dragginzgame/ic-platform/issues/27)).
+
+## [0.1.18] - 2026-10-19
+
+### Changed
+
+- Refresh the runtime qualification fixture to Testkit 0.54.1 and Timers 0.29.1,
+  with compatible Host, Metrics and build-tool lock updates. Qualify combined
+  callback, cancellation and upgrade behavior on installed Linux PocketIC.
+- Refresh crypto-common to 0.1.7 with its upstream generic-array =0.14.7
+  compatibility pin; verify focused Candid and crypto tests on Rust 1.88.
+- Adopt Shared Tooling 0.25.1 and the pinned IC Build release editor. Standard
+  release commands prepare the editor; standalone checks remain offline.
+
+### Fixed
+
+- Use the supported numbered, undated pending heading so release preflight can
+  admit the 0.1.18 notes.
+
+## [0.1.17] - 2026-10-19
+
+### Added
+
+- Add optional native/Wasm `ecdsa` exports for K256 signatures, keys and prehash
+  traits, preserving upstream identities without RNG or runtime integration.
+  Qualify strict consumer rejection and explicit normalization with standalone
+  tests and a source-copy Auth migration.
+
+## [0.1.16] - 2026-10-19
+
+### Added
+
+- Add optional native/Wasm `ed25519` exports with original Dalek identities,
+  no default or RNG features, and standalone RFC 8032 verification coverage.
+  Consumers retain strict verification, key custody and admission policy.
+
+### Changed
+
+- Replace routine exhaustive feature enumeration with defaults, singles, all
+  pairs, all features and critical integration groups. Retain the full power set
+  under `make check-features-exhaustive` as a separate manual audit; routine
+  validation no longer claims every higher-order combination.
+- Keep feature queries and resolved standalone consumer builds offline
+  with frozen lockfiles, avoiding repeated network work during release validation.
+  Report graph query counts and progress; both modes use the same admission rules.
+  Cargo cache locks held by other processes can still block offline commands.
 
 ## [0.1.15] - 2026-10-18
 

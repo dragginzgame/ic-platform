@@ -16,7 +16,7 @@ function reject(reason) {
             # Only retain policy-relevant lines; ordinary transitive nodes cannot
             # affect admission. Keep complete lines for source/identity checks.
             split(line, fields, " ")
-            if (fields[1] ~ /^(ic|candid|pocket-ic)/)
+            if (fields[1] ~ /^(ic|candid|pocket-ic|ed25519-dalek|curve25519-dalek|k256)/)
                 lines[key, ++count[key]] = line
             nonempty = 1
         }
@@ -40,13 +40,25 @@ function reject(reason) {
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
     candid = pocket || enabled("candid") || cdk || parser || agent || management || ledger || creation
+    found_ed = 0
+    found_curve = 0
     found_secp = 0
+    found_k256 = 0
     found_pocket = 0
     for (i = 1; i <= count[key]; i++) {
         line = lines[key, i]
         n = split(line, f, " ")
         name = f[1]; version = f[2]
         registry = n == 2 || (n == 3 && f[3] == "(*)")
+        if (name == "k256") {
+            if (!(enabled("ecdsa") || agent || secp) || !registry) reject("unselected K256")
+            found_k256 = 1
+        }
+        if (name == "ed25519-dalek" || name == "curve25519-dalek") {
+            if (!(enabled("ed25519") || agent) || !registry) reject("unselected Dalek")
+            if (name == "ed25519-dalek") found_ed = 1
+            else found_curve = 1
+        }
         if (name == "ic-secp256k1") {
             if (!secp || version != "v0.3.0" || !registry) reject("unqualified secp256k1")
             found_secp = 1
@@ -80,6 +92,8 @@ function reject(reason) {
         if (name == "ic-stable-structures") reject("storage integration")
         if ((name == "candid" || name == "candid_derive") && !candid) reject("unexpected Candid")
     }
+    if (enabled("ed25519") && (!found_ed || !found_curve)) reject("missing selected Dalek")
     if (pocket && !found_pocket) reject("missing selected PocketIC")
     if (secp && !found_secp) reject("missing selected secp256k1")
+    if (enabled("ecdsa") && !found_k256) reject("missing selected K256")
 }

@@ -3,10 +3,14 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-runtime-lock.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
-mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/fixtures/cdk-runtime" "$fixture/.tools"
+mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/fixtures/cdk-runtime" "$fixture/.tools" "$fixture/ci"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 cp "$root/scripts/release/runtime-lock.sh" "$fixture/scripts/release/"
-cp "$root/scripts/ci/"{read-cargo-workspace-version.sh,rewrite-local-lock-versions.pl,StableVersion.pm} "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{read-cargo-workspace-version.sh,StableVersion.pm} "$fixture/scripts/ci/"
+cp "$root/ci/release-editor.env" "$fixture/ci/"
+# Admit the real prepared editor once; the disposable fixture owns no tool store.
+editor="$(bash "$root/scripts/release/editor.sh" check)"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" %q\n' "$editor" > "$fixture/scripts/release/editor.sh"
 cp "$root/scripts/fixtures/cdk-runtime/Cargo.lock" "$fixture/scripts/fixtures/cdk-runtime/"
 export YQ="$root/.tools/host/bin/yq"
 export PATH="$root/.tools/host/bin:$PATH"

@@ -1,8 +1,9 @@
 //! Standalone host consumer with only Platform declared; no server is started.
 #![cfg(not(target_family = "wasm"))]
 use ic_platform::pocket_ic::{
-    CanisterSettings, CreateCanisterParams, CreateCanisterPlacement, ErrorCode,
-    LATEST_SERVER_VERSION, PocketIc, PocketIcBuilder, RejectCode, RejectResponse, Snapshot,
+    CanisterInstallMode, CanisterSettings, CreateCanisterParams, CreateCanisterPlacement,
+    ErrorCode, LATEST_SERVER_VERSION, PocketIc, PocketIcBuilder, RejectCode, RejectResponse,
+    Snapshot,
     common::rest::{
         BlobCompression, CanisterHttpReply, CanisterHttpResponse, CreateInstanceResponse,
         IcpFeatures, IcpFeaturesConfig, InstanceHttpGatewayConfig, MockCanisterHttpResponse,
@@ -18,6 +19,7 @@ pub fn client_contract() {
         PocketIc,
         nonblocking::PocketIc,
         CanisterSettings,
+        CanisterInstallMode,
         CreateCanisterParams,
         Snapshot,
     )> = None;
@@ -87,4 +89,36 @@ pub fn client_contract() {
 #[test]
 fn native_client_surface() {
     client_contract();
+}
+
+#[test]
+fn chunked_upgrade_preserves_pocketic_management_identity() {
+    #[expect(
+        clippy::default_trait_access,
+        reason = "PocketIC exports the mode but not the contained upgrade flags"
+    )]
+    let mut mode = CanisterInstallMode::Upgrade(Some(Default::default()));
+    let CanisterInstallMode::Upgrade(Some(flags)) = &mut mode else {
+        panic!("expected upgrade flags");
+    };
+    flags.skip_pre_upgrade = Some(true);
+    assert_eq!(flags.skip_pre_upgrade, Some(true));
+
+    // Compile the real client parameter without starting a server or installing.
+    let _install = |client: &PocketIc, mode: CanisterInstallMode| -> Result<(), RejectResponse> {
+        let canister = ic_platform::Principal::management_canister();
+        client.install_chunked_canister(canister, None, mode, canister, vec![], vec![], vec![])
+    };
+}
+
+#[test]
+fn pending_ingress_preserves_the_submitted_message_identity() {
+    let _status =
+        |client: &PocketIc, message: RawMessageId| -> Option<Result<Vec<u8>, RejectResponse>> {
+            client.ingress_status(message)
+        };
+    let _submit = |client: &PocketIc| -> Result<RawMessageId, RejectResponse> {
+        let canister = ic_platform::Principal::management_canister();
+        client.submit_call(canister, canister, "fixture", vec![])
+    };
 }

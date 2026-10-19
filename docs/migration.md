@@ -15,12 +15,13 @@ server launcher or automatic client/server acceptance policy are introduced.
 Testkit retains provisioning, checksums, supported server versions, lifecycle,
 transport, retry behavior and product qualification.
 
-Testkit should replace its native `pocket-ic` declaration with Platform plus
-`features = ["pocket-ic"]`, and import `ic_platform::pocket_ic`. Its public
-`pocket_ic` module can forward the Platform module; do not retain a second direct
-upstream declaration. Its current blanket upstream export becomes this explicit
-surface, so downstream usages must be audited before delivery. Consumers continue
-using Testkit workflows. Direct-dependency policies should allow upstream PocketIC
+Published Testkit 0.55.2 uses Platform with `features = ["candid", "pocket-ic"]`
+on native targets and forwards `ic_platform::pocket_ic` at its public module path.
+After these fixture exports are published, raise Testkit's minimum Platform
+requirement to the supplying release; an older compatible lock selection can
+otherwise retain the incomplete surface. Do not restore a second direct upstream
+declaration or DTO owner. Audit downstream use of the formerly blanket export
+against this explicit surface. Consumers continue using Testkit workflows. Direct-dependency policies should allow upstream PocketIC
 only in Platform, while deployment graphs must exclude PocketIC and Testkit.
 
 The feature does not enable Platform Candid, executor or parser features, but
@@ -33,9 +34,11 @@ dependency-control changes, not transitive removal or Wasm-size claims.
 Standalone checks cover building without a server; Testkit adoption, actual
 client/server execution and native macOS qualification remain separate gates.
 
-Backup and Canic's existing Testkit workflows additionally use placement,
-effective-principal routing, pending messages, HTTP gateway configuration and
-mock HTTP responses. Their explicit root and REST exports retain the original
+Backup, Canic and Blob's existing Testkit workflows additionally use placement,
+effective-principal routing, pending messages, HTTP gateway configuration,
+mock HTTP responses and chunked installation. The root `CanisterInstallMode`
+retains PocketIC's own management 0.8 identity and `skip_pre_upgrade` flags;
+Platform's independent management 0.11 type cannot replace that method parameter. Their explicit root and REST exports retain the original
 PocketIC identities, including method parameter/result compatibility. These
 exports add no gateway startup, pending-call polling, retries or outcall policy.
 
@@ -917,14 +920,19 @@ It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.
 
-`make check-features` checks all 8,192 feature combinations plus actual defaults on native/Wasm.
+`make check-features` checks no features, actual defaults, every single feature,
+every pair, all features and explicit critical runtime/DTO/signature/host groups
+on native/Wasm. `make check-features-exhaustive` retains the complete power set
+as a separate manual audit, outside routine CI/release validation. Routine
+coverage deliberately omits other higher-order combinations; this is not an
+equivalent exhaustive proof. Combined CDK/Timers qualification remains separate.
 It derives local feature closures from Cargo metadata and reuses graph queries
 only within the same invocation. On Wasm, Agent/parser/secp256k1 leaves may share
 a key only while each feature activates exactly its single optional native-only
 dependency; a changed contract fails closed. Defaults keep a separate key.
-All 16,386 selection-specific admission checks still run in one validator process
-per target, including target exclusion checks. The current contract requires
-4,609 native and 577 Wasm Cargo queries (5,186 total, previously 9,218).
+All selection-specific admission checks still run in one validator process
+per target, including target exclusion checks. Query counts depend on the declared
+feature inventory and selected mode; full enumeration requires the explicit audit.
 Target-specific TSV mappings and canonical graphs remain in each attempt directory.
 Neither post-hoc package-list equality nor reuse of previous runs establishes
 feature equivalence. The supported graph properties remain:
@@ -995,3 +1003,88 @@ substitute an RNG. Enabling this feature on Wasm exposes no module and adds no
 secp256k1 dependency. Native selection stays Candid/CDK/executor-free; default
 builds do not select it. It centralizes direct dependency ownership, without
 claiming transitive dependency removal or measured Wasm savings.
+
+## Qualified dependency-reduction experiments
+
+The following patches are review experiments against exact registry sources,
+not dependencies selected by Platform. They retain their upstream Apache-2.0
+provenance and do not change the supported type-identity/runtime contracts above.
+No new production fork, compatibility package or alternate executor is selected.
+
+- `patches/canister-sig-no-store.patch` targets creation 1.3.1: use canonical
+  `ic_principal` and omit the unused signature-map module and its `ic0` dependency.
+  With verifier 0.3.0 selecting this candidate, all 17 retained creation and 12
+  verifier library tests pass on Rust 1.88, as does Wasm checking. Its normal/build
+  graph loses Candid and ic0. This does not qualify a production owner migration,
+  altered malformed-DER behavior or Auth's installed application policies.
+- `patches/secp256k1-public-only.patch` is a standalone public-derivation experiment
+  from secp256k1 0.3.0, including its manifest and differential fixture. Rust 1.88
+  native tests compare mainnet ECDSA key_1 and three PocketIC ECDSA keys across
+  four Principals and four paths (64 pairs), including empty and 255-component
+  paths; compressed/uncompressed outputs and chain codes match the original.
+  Native and Wasm library checks pass. Its normal graph excludes upstream
+  secp256k1, rand, rand_chacha, getrandom, PEM and simple_asn1; rand_core remains
+  through curve arithmetic. The prototype omits broader methods/traits and has
+  an inherited deprecated generic-array call: it is not public API parity or
+  strict-lint qualification, and its owned types cannot silently replace current
+  upstream identities. No new curve arithmetic or signing implementation exists.
+- `patches/cdk-optional-macros.patch` targets CDK 0.20.3, preserving its default
+  macro API while permitting Platform's owned generator to disable that feature.
+  Three standalone Platform CDK consumer tests pass on Rust 1.99/1.88, with linked
+  Wasm on both. The selected Wasm graph omits upstream ic-cdk-macros and retains
+  executor 2.0.0, ic0 1.2.0 and Candid. This is not a Candid-free raw-call runtime
+  or new callback/trap/timer qualification; those runtime contracts stay intact.
+
+Each patch applies to its exact registry source. Disposable evidence is retained
+under `/tmp/platform-signature-split`, `/tmp/platform-public-secp` and
+`/tmp/platform-cdk-split`. These package-graph observations do not measure Wasm
+size or wall-clock performance. Existing management/ledger DTOs remain selected:
+owning their definitions would change Rust identity without removing external
+Candid requirements. Public ownership changes require an explicit migration and
+renewed consumer qualification; no supplying release is implied by these proofs.
+
+## Standard Ed25519 maintenance boundary
+
+The optional native/Wasm `ed25519` feature explicitly exports `Signature`,
+`SignatureError`, `Signer`, `SigningKey`, `VerifyingKey` and `Scalar` under
+`ic_platform::ed25519`. The owners remain ed25519-dalek 2.2 and curve25519-dalek
+4.1.3 with defaults disabled. These are compatible registry requirements, not
+new exact pins. No crypto implementation, RNG, Candid or executor is added.
+Agent can independently bring these dependencies and broader unified features.
+
+Auth can select `ic-platform/ed25519` through its existing portable-signature
+feature, replace its two Dalek imports with this module, and remove exhausted
+member/workspace declarations. Preserve canonical-S checks, weak-key rejection,
+`verify_strict`, message hashing, budget charging and admission policy. Tests
+can import `Signer` and `SigningKey` from the same module. Update generators,
+locks and direct-dependency guards and rerun consumer acceptance tests.
+The subsequent read-only audit found Auth and Canic selecting Platform's Ed25519
+surface. Auth deliberately retains a direct Dalek dev dependency in its adversarial
+feature-unification fixture; preserve that test. This controls direct ownership, not all transitive
+versions, cryptographic policy or measured Wasm size.
+
+## Standard secp256k1 ECDSA maintenance boundary
+
+The optional native/Wasm `ecdsa` feature exposes original K256 0.13.4 identities
+as `ic_platform::ecdsa::{Signature, SigningKey, VerifyingKey, SignatureError,
+PrehashSigner, PrehashVerifier}`. The compatible registry requirement disables
+upstream defaults and selects only `ecdsa`; no RNG backend, Candid or executor
+is enabled. This is independent of the existing native-only `secp256k1` IC public
+key derivation surface. Agent/public derivation may unify additional K256 features.
+
+Auth's `chain-key-verification` should select `dep:ic-platform` and
+`ic-platform/ecdsa` instead of `dep:k256`. Replace K256 imports in production,
+tests and qualification tooling with the flat Platform module; select `ecdsa`
+in the qualification runner too. Canic's K256 imports are test-only: select
+Platform's `ecdsa` in its dev dependency and remove the K256 dev declaration.
+Remove workspace catalog declarations only after all members migrate; update
+consumer locks and dependency guards after publication. Retain Auth's explicit
+high-S refusal, normalization operation, exact prehash bytes, typed errors,
+malformed-key-first ordering, trust decisions and key custody.
+
+An isolated copy of Auth's actual chain-key implementation and tests, changing
+only its two imports, passes Rust 1.88 tests and Wasm checking against local
+Platform. The separate Platform-only consumer covers signing, compressed and
+uncompressed keys, malformed/wrong-message rejection and explicit high-S
+normalization. These proofs do not establish published consumer adoption,
+installed-canister behavior, macOS qualification or smaller Wasm.

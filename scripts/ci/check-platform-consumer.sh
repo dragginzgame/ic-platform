@@ -12,7 +12,7 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic)
+capabilities=(ecdsa ed25519 candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic)
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in
@@ -100,13 +100,13 @@ if [[ -n "$published" ]]; then
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
 fi
-CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --locked
-CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --locked
+CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
+CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --frozen
 if [[ "$capability" != candid-parser && "$capability" != dynamic && "$capability" != agent ]]; then
     command=check
     if [[ "$capability" == cdk ]]; then command=build; fi
-    CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
-    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --locked
+    CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
+    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
 fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
 done

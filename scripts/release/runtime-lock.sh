@@ -22,7 +22,9 @@ if [[ "$observed" != "$version" ]]; then
     fi
     temporary="$(mktemp "$root/$lock.XXXXXX")"
     trap 'rm -f "$temporary"' EXIT
-    perl scripts/ci/rewrite-local-lock-versions.pl "$lock" "$observed" "$version" \
+    source "$root/ci/release-editor.env"
+    editor="$(bash "$root/scripts/release/editor.sh" check)"
+    "$editor" --max-input-bytes "$PLATFORM_RELEASE_EDITOR_MAX_BYTES" lock "$lock" "$observed" "$version" \
         ic-platform ic-platform-macros > "$temporary"
     cat "$temporary" > "$lock"
 fi

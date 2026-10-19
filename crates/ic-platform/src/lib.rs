@@ -32,6 +32,10 @@ pub mod canister_sig_creation;
 pub mod cdk;
 #[cfg(feature = "certification")]
 pub mod certification;
+#[cfg(feature = "ecdsa")]
+pub mod ecdsa;
+#[cfg(feature = "ed25519")]
+pub mod ed25519;
 #[cfg(feature = "executor")]
 pub mod executor;
 #[cfg(feature = "ic0")]

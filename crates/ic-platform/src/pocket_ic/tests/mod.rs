@@ -14,6 +14,7 @@ fn original_client_and_dto_identities() {
     identity!(RejectCode);
     identity!(ErrorCode);
     identity!(CanisterSettings);
+    identity!(CanisterInstallMode);
     identity!(CanisterStatusResult);
     identity!(CanisterLogRecord);
     identity!(Snapshot);

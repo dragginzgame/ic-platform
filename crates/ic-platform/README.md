@@ -262,8 +262,23 @@ through `ic_platform::pocket_ic`, including `nonblocking::PocketIc`. Testkit ret
 server installation, compatibility admission and lifecycle policy. This feature
 is absent on Wasm; default and executor-only builds do not select PocketIC.
 PocketIC's management DTOs retain their own upstream 0.8.0 identity.
-The root exports include `CreateCanisterPlacement`; `common::rest` includes
-`RawEffectivePrincipal`, `RawMessageId`, `InstanceHttpGatewayConfig`,
-`CanisterHttpReply`, `CanisterHttpResponse` and `MockCanisterHttpResponse` for
-caller-selected placement, management ingress, pending calls, local gateways and
-HTTP fixtures. These are upstream identities, not Platform DTO replicas.
+
+PocketIC fixture exports include root `CreateCanisterPlacement` and
+`CanisterInstallMode`, plus REST `RawEffectivePrincipal`, `RawMessageId`,
+`InstanceHttpGatewayConfig`, `CanisterHttpReply`, `CanisterHttpResponse` and
+`MockCanisterHttpResponse`. The install mode retains PocketIC's management 0.8
+identity, including upgrade flags, independently of Platform's management 0.11
+surface. Testkit forwards these identities without owning another client or DTO.
+
+Enable `ed25519` for native/Wasm `ic_platform::ed25519::{Signature,
+SignatureError, Signer, SigningKey, VerifyingKey, Scalar}`. These are original
+Dalek identities with upstream defaults disabled; no RNG is selected. Consumers
+retain strict verification, canonical-scalar checks, message construction and key
+custody. This feature is independent of Candid, executor and host features.
+
+Enable `ecdsa` for native/Wasm secp256k1 ECDSA through
+`ic_platform::ecdsa::{Signature, SigningKey, VerifyingKey, SignatureError,
+PrehashSigner, PrehashVerifier}`. K256 retains type identities and cryptography;
+consumers retain prehash construction, high-S policy, normalization and custody.
+No RNG backend is selected. This is independent of native IC key derivation
+under `secp256k1`.

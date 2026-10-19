@@ -1,23 +1,164 @@
 # Current handoff
 
-The PocketIC export completion starts from released `980811c` (0.1.15).
-Pending 0.1.16 adds the seven original upstream placement, effective-principal,
-message, gateway and HTTP response identities required by Backup and Canic
-through Testkit's forwarded Platform surface. See
-[#27 — Complete PocketIC exports used by Testkit consumers in Backup and Canic](https://github.com/dragginzgame/ic-platform/issues/27).
-Package versions, dependencies, features and selected lockfile remain unchanged.
+PocketIC export completion is refreshed against released 0.1.18. Pending 0.1.19
+adds the eight original placement, pending-ingress, effective-principal, gateway,
+HTTP fixture and install-mode identities used through Testkit by Backup, Canic
+and Blob. The existing [PR #28](https://github.com/dragginzgame/ic-platform/pull/28)
+now includes Blob's chunked upgrade flags; see
+[issue #27](https://github.com/dragginzgame/ic-platform/issues/27).
+Package versions, dependencies and locks match main. Platform-only identity and
+consumer tests pass on Linux Rust 1.99.0 and actual Rust 1.88, including Wasm
+exclusion. All ten selected normal/build graphs and graph refusal regressions
+pass; PocketIC's management 0.8 and the external 0.11 surface coexist unchanged.
+Selected strict Clippy, warning-denied Rustdoc, formatting, dependency boundaries
+and documentation links pass. Published 0.1.18 reproduces both missing Blob imports.
 
-Focused Linux identity tests and the Platform-only consumer pass on Rust 1.99
-and actual Rust 1.88. The consumer also checks for Wasm on both compilers.
-Ten actual native/Wasm graphs pass canonical admission, including PocketIC plus
-the independent management DTO feature. Graph rejection tests, strict selected
-Clippy, warning-denied Rustdoc, formatting, direct boundaries and documentation
-links pass. Proofs remain in `target/pocket-exports-proof` and
-`target/boundary-consumer.E4pkJZ`. No server is started by these checks.
-Publication, normal Testkit/sibling adoption, native macOS and installed-IC
-qualification remain separate; the issue is not closed by source preparation.
+A consumer declaring only registry Testkit 0.55.2 passes three native contract
+tests, strict lint and Wasm checking on Rust 1.91 with an explicit disposable
+Platform source patch. Its Wasm graph excludes PocketIC, Candid and the CDK.
+This qualifies forwarding against candidate source, not published adoption or
+installed-canister behavior. Evidence: `/tmp/testkit-type-review/` and this
+isolated checkout's `target/pocket-exports-proof` plus
+`target/testkit-forwarding-proof`. The prior PR head passed native macOS CI;
+refreshed-source hosted qualification remains pending. No server was started.
+Merge/publication, Testkit's minimum supplying Platform version, and ordinary
+Canic/Backup/Blob installed qualification remain outstanding.
 
-## Previous PocketIC boundary qualification
+
+Shared Tooling 0.25.1 is adopted at verified remote-main revision
+`d57c631206e3618755e45bebf2c88c673564ddc1` through the canonical snapshot exporter.
+The invalid `- Unreleased` suffix added to 0.1.18 notes is removed; latest Shared
+still requires numbered undated pending headings. The adapter uses its canonical
+read-only changelog checker before setup. No release entrypoint, commit, tag,
+push or publication was executed. An initially misdirected metadata test changed
+local versions/date; those changes were restored and version files match HEAD.
+
+Shared's retired Perl manifest/lock renderers are replaced by the pinned published
+IC Build 0.18.0 editor for both root metadata and the runtime qualification lock.
+`install-tools` includes editor setup; `tools-check` and standalone preparation
+admit it offline. Standard release requests authorize setup only after source
+and changelog admission. Both catalogs are checked for drift during setup.
+The editor's 8 MiB per-document allowance is local contributor tooling policy;
+building it requires Rust 1.91+, without changing Platform's Rust 1.88 contract.
+Pending notes remain 0.1.18 because this changes contributor tooling only.
+
+Focused checks pass: 99-file snapshot integrity, runtime-lock/graph regressions,
+pins/boundaries, documentation links, release-command/changelog fixtures,
+formatting and offline tools admission. Disposable candidate preparation and
+checks pass at `/tmp/platform-release-0251.1ATdaR`; both locks change only the two
+owned package versions. Full CI/release and native macOS qualification were not
+run for this tooling adoption.
+
+Dependency audit refresh: the runtime-only fixture now selects Testkit 0.54.1
+and Timers 0.29.1, with compatible Host 0.27.6 and Metrics 0.14.5 lock updates.
+Timers is a qualification dependency, not a dependency of the consumer library:
+it proves the combined CDK/call/timer executor identity and trap behavior.
+Both locks select crypto-common 0.1.7 and its intentional generic-array =0.14.7
+compatibility pin (RustCrypto/traits PR #2088). Package versions are unchanged.
+
+The isolated source copy passed nine focused Candid/crypto tests on Rust 1.88.
+The installed Linux PocketIC 16.0.0 harness passed with Wasm built on Rust 1.99
+and 1.91, including callback traps, cancellation, upgrade, checkpoint/stable
+rollback and certificate checks. Evidence is in
+`/tmp/platform-upgrade-proof/target/cdk-runtime.KG7MAI` and
+`/tmp/platform-upgrade-msrv.log`; this tested the pre-release-bump 0.1.16 source
+copy. Native macOS and live-network qualification were not run.
+After transferring only dependency changes to the current 0.1.17 checkout,
+runtime-lock/graph regressions, dependency pins/boundaries, documentation links
+and formatting checks pass. Notes are under the next 0.1.18 draft.
+
+Remaining version decisions: certification 3.x preserves shared Agent/verifier
+type identities; Dalek 2/4 and K256 0.13 match IC crypto consumers; Darling 0.23
+and Syn 2 match the imported generator. Their newer major versions need explicit
+migration and qualification, rather than a lock refresh. PocketIC pins thiserror
+2.0.18. Pest 2.9.4 requires psm =0.1.24, conflicting with locked 0.1.32 during
+the targeted update; that coordinated downgrade was not qualified or applied.
+The exact CDK/executor/ic0/management/secp256k1 pins already match latest stable
+versions checked in this audit. Older compatible lock entries alone are not
+evidence of an upstream IC alignment requirement.
+
+The optional native/Wasm `ecdsa` feature now exposes original K256 signature,
+key, error and prehash-trait identities. It selects K256 0.13.4 with only `ecdsa`
+and defaults disabled; it is independent of native IC public derivation. Auth
+retains high-S refusal, normalization, prehash semantics and typed error policy.
+No dependency version changed in the root lock: only Platform's K256 edge was added.
+Package versions remain 0.1.16; notes are under the next 0.1.17 draft.
+
+The Platform-only consumer passes native tests and Wasm checks on development
+Rust and 1.88 (`target/boundary-consumer.anSTCE`). An isolated source copy of
+Auth's actual chain-key implementation/tests, with only import substitutions,
+passes all nine tests and Wasm checking at 1.88 (`/tmp/platform-auth-ecdsa.p7qMmK`).
+This is source-copy evidence, not sibling adoption or publication. Selected MSRV
+Clippy and warning-denied Rustdoc pass. The full routine graph gate passes 144
+selections per target with 220 queries (`target/feature-graphs/attempt.SDAh9N`),
+including default/executor exclusions and new K256 admission regressions.
+Native macOS, installed-canister and exhaustive audit evidence remain separate.
+
+Relay's existing CDK/ic0/Principal imports are migrated in isolated
+[draft PR #5](https://github.com/dragginzgame/ic-relay/pull/5) against published
+Platform 0.1.16. Nine native tests, Wasm/codec-benchmark checks and selected Clippy
+pass at Rust 1.91; installed rollback/callback/upgrade qualification remains.
+Normal sibling checkouts and Toko are untouched. IC Crates' existing runtime
+alignment is tracked by [PR #7](https://github.com/dragginzgame/ic-crates/pull/7);
+its split Memory/Timers graph is not qualified by changing dependency imports.
+Auth/Canic ECDSA adoption requires a supplying Platform release first.
+
+Routine release validation now checks defaults, singles, every pair, all features
+and explicit runtime/DTO/signature/host groups. `make check-features-exhaustive`
+retains the full power set as a manual audit; routine CI/release does not run it.
+This deliberately reduces higher-order combination coverage with maintainer
+authorization. Admission rules and separate CDK/Timers runtime qualification are
+unchanged. Both modes retain frozen queries and progress output; Cargo can still
+wait for another cache owner. No lock was removed or process killed.
+
+The complete routine gate passes on Linux: 128 selections per target, 124 native
+and 68 Wasm queries (192 total, versus the prior 19,586). Evidence is retained at
+`target/feature-graphs/attempt.UYauA6`. Selection tests prove every single/pair,
+critical group and complete exhaustive enumeration (32,769 selections including
+defaults for 15 optional features). Admission/closure regressions, default-native
+and executor-Wasm compilation, documentation links and release-adapter checks
+pass. The exhaustive Cargo audit was not run. Native macOS, installed-canister
+and full release timing remain unqualified; query reduction is not a measured
+end-to-end speedup. Package versions, publication and sibling checkouts are unchanged.
+
+The optional `ed25519` boundary exports original Dalek keys, signatures, errors,
+signing trait and canonical scalar identity on native/Wasm. Defaults remain empty;
+no RNG, Candid or executor is selected by this feature. Auth retains verification
+and admission policies; Canic's Dalek 3.0 test selection needs explicit migration.
+Sibling checkouts and package versions are unchanged. Existing dependency-reduction
+patches, documentation and unrelated lock updates were preserved. This task adds
+only the two direct dependency edges to the incoming lockfile.
+
+The Platform-only consumer passes RFC 8032 and malformed/weak/noncanonical
+rejection checks on development Rust and 1.88, plus Wasm checks on both.
+Evidence: `target/boundary-consumer.mOQAL6`, `target/ed25519-proof` (ten actual
+normal/build graphs). Feature admission/closure regressions, selected MSRV Clippy,
+warning-denied Rustdoc, dependency boundaries, pins and documentation links pass.
+Full feature enumeration remains release-owned; native macOS, installed-canister
+and published-consumer adoption have not been qualified by this change.
+See the [migration contract](../migration.md#standard-ed25519-maintenance-boundary).
+
+The dependency-reduction pass starts at `980811c` (0.1.15). Production dependency
+selection is unchanged by this pass. A concurrent Cargo.toml formatting change
+was observed and preserved. Three applicable review patches and their evidence
+are described in the [migration contract](../migration.md#qualified-dependency-reduction-experiments).
+They qualify narrower signature/verifier, public derivation and CDK macro graphs;
+they are not production replacements, a Candid-free runtime, native macOS proof
+or measured Wasm-size reductions.
+
+The maintainer explicitly authorized edits in Host and Query. Host now gates
+Candid APIs behind `candid`, leaving certificate and Wasm-interface features
+independent. Its next draft is 0.28.0 because this changes the public feature
+contract; existing duration and CI work is preserved. Query requires Host 0.28
+and rejects parser leakage. Its registry lock remains at the prior release and
+must be refreshed after Host publication; normal locked Query validation is
+therefore not claimed. A captured-source Host 0.28 release rehearsal passes
+Query's five certificate tests and complete dependency graph gate at Rust 1.91.
+Host passes Rust 1.88 default/certificate/all-feature tests, native feature graphs,
+strict Clippy, Rustdoc and Rust formatting. No sibling versions, indexes, commits,
+releases or permanent path overrides were changed. Other siblings were read-only.
+
+## Previous PocketIC qualification
 
 The PocketIC maintenance boundary starts at `fb797b5` (0.1.14), with package
 versions unchanged and notes under the 0.1.15 draft. The optional native-only
