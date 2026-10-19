@@ -1,5 +1,20 @@
 # Current handoff
 
+Fresh CI at released 0.1.18 `392032a` fails the frozen standalone consumer
+Wasm check on Linux and both macOS hosts because `bumpalo 3.20.3` is absent
+from the cache. The pending 0.1.19 workflow now explicitly prepares the selected
+native and Wasm locked dependencies once before validation. Consumer commands
+remain frozen; no per-consumer fetches, lock changes or release effects are added.
+An isolated registry cache reproduces successful native fetch followed by the
+same frozen Wasm refusal for locked bumpalo 3.20.3. Explicit Wasm fetch then
+allows frozen checks on development Rust and 1.88, preserving lock bytes.
+Actionlint, documentation links and whitespace checks pass. Evidence:
+`/tmp/testkit-issue-30/cache-*.log` and `target/wasm-cache-proof`.
+[Issue #33](https://github.com/dragginzgame/ic-platform/issues/33) owns this repair;
+refreshed three-host CI remains required. The older API issues' current CI gate
+is still failing; do not close them based on previous queued-run descriptions.
+
+
 Shared Tooling 0.25.1 is adopted at verified remote-main revision
 `d57c631206e3618755e45bebf2c88c673564ddc1` through the canonical snapshot exporter.
 The invalid `- Unreleased` suffix added to 0.1.18 notes is removed; latest Shared

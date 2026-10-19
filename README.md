@@ -54,6 +54,17 @@ Rust 1.91 or later to build. `make install-release-editor` prepares it separatel
 tools during admitted preflight; standalone metadata checks never install them.
 Pending changelog notes use `## [X.Y.Z]` without a date or `Unreleased` suffix.
 
+Prepare both dependency target caches once before frozen consumer qualification
+on a fresh checkout, as CI does before validation:
+
+```bash
+cargo fetch --locked --target "$(rustc -vV | sed -n 's/^host: //p')"
+cargo fetch --locked --target wasm32-unknown-unknown
+```
+
+These fetches preserve the lockfile. Consumer builds remain frozen and do not
+perform implicit network preparation.
+
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
 `make shared-tooling-check`. `make ci` is the full release gate.
