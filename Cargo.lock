@@ -1450,7 +1450,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "candid",
  "candid_parser",
@@ -1478,7 +1478,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "darling 0.23.0",
  "proc-macro2",
