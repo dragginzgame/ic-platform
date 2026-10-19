@@ -1,5 +1,6 @@
 //! Explicit upstream configuration and teardown response types.
 pub use pocket_ic::common::rest::{
-    BlobCompression, CreateInstanceResponse, IcpFeatures, IcpFeaturesConfig, RawCanisterId,
-    Topology,
+    BlobCompression, CanisterHttpReply, CanisterHttpResponse, CreateInstanceResponse, IcpFeatures,
+    IcpFeaturesConfig, InstanceHttpGatewayConfig, MockCanisterHttpResponse, RawCanisterId,
+    RawEffectivePrincipal, RawMessageId, Topology,
 };

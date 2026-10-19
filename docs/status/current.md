@@ -1,5 +1,25 @@
 # Current handoff
 
+Issue [#27](https://github.com/dragginzgame/ic-platform/issues/27)'s existing
+[PR #28](https://github.com/dragginzgame/ic-platform/pull/28) implementation is now
+applied locally on released 0.2.1 (`de1c469`), with pending 0.2.2 notes. It adds
+eight original PocketIC root/REST identities, including effective-principal
+routing, pending ingress and the management 0.8 chunked-install mode. It changes
+no client behavior, server ownership or retries. The pre-existing Tokio lockfile
+update is preserved unchanged and is not part of this fix.
+
+Focused Linux validation passes: upstream identity coverage on Rust 1.88, all
+three Platform-only consumer tests and Wasm checks on development Rust and Rust
+1.88, eight native/Wasm dependency graphs, admission refusal tests, formatting,
+pins, boundaries and documentation links. Evidence is retained at
+`target/boundary-consumer.6tXBv4` and `target/issue27-graphs`.
+This is local source qualification, not a supplying publication, native macOS or
+installed consumer qualification. Keep #27 open through delivery; Testkit must
+require the supplying release before Backup/Canic/Blob can adopt its forwarded
+surface through ordinary registry resolution. Existing PR #28 remains the delivery
+vehicle; no replacement PR, release or sibling edit was made in this pass.
+
+
 The checkout at `c7da516` declares **0.2.0** for Platform and its generator and
 contains the maintained non-cryptographic runtime introduced through
 [PR #35](https://github.com/dragginzgame/ic-platform/pull/35). The earlier 0.1.18

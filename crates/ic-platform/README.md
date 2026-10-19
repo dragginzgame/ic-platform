@@ -260,6 +260,13 @@ server installation, compatibility admission and lifecycle policy. This feature
 is absent on Wasm; default and executor-only builds do not select PocketIC.
 PocketIC's management DTOs retain their own upstream 0.8.0 identity.
 
+PocketIC fixture exports include root `CreateCanisterPlacement` and
+`CanisterInstallMode`, plus REST `RawEffectivePrincipal`, `RawMessageId`,
+`InstanceHttpGatewayConfig`, `CanisterHttpReply`, `CanisterHttpResponse` and
+`MockCanisterHttpResponse`. The install mode retains PocketIC's management 0.8
+identity, including upgrade flags, independently of Platform's management 0.11
+surface. Testkit forwards these identities without owning another client or DTO.
+
 Enable `ed25519` for native/Wasm `ic_platform::ed25519::{Signature,
 SignatureError, Signer, SigningKey, VerifyingKey, Scalar}`. These are original
 Dalek identities with upstream defaults disabled; no RNG is selected. Consumers

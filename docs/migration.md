@@ -15,12 +15,13 @@ server launcher or automatic client/server acceptance policy are introduced.
 Testkit retains provisioning, checksums, supported server versions, lifecycle,
 transport, retry behavior and product qualification.
 
-Testkit should replace its native `pocket-ic` declaration with Platform plus
-`features = ["pocket-ic"]`, and import `ic_platform::pocket_ic`. Its public
-`pocket_ic` module can forward the Platform module; do not retain a second direct
-upstream declaration. Its current blanket upstream export becomes this explicit
-surface, so downstream usages must be audited before delivery. Consumers continue
-using Testkit workflows. Direct-dependency policies should allow upstream PocketIC
+Published Testkit 0.55.2 uses Platform with `features = ["candid", "pocket-ic"]`
+on native targets and forwards `ic_platform::pocket_ic` at its public module path.
+After these fixture exports are published, raise Testkit's minimum Platform
+requirement to the supplying release; an older compatible lock selection can
+otherwise retain the incomplete surface. Do not restore a second direct upstream
+declaration or DTO owner. Audit downstream use of the formerly blanket export
+against this explicit surface. Consumers continue using Testkit workflows. Direct-dependency policies should allow upstream PocketIC
 only in Platform, while deployment graphs must exclude PocketIC and Testkit.
 
 The feature does not enable Platform Candid, executor or parser features, but
@@ -32,6 +33,15 @@ dependency-control changes, not transitive removal or Wasm-size claims.
 
 Standalone checks cover building without a server; Testkit adoption, actual
 client/server execution and native macOS qualification remain separate gates.
+
+Backup, Canic and Blob's existing Testkit workflows additionally use placement,
+effective-principal routing, pending messages, HTTP gateway configuration,
+mock HTTP responses and chunked installation. The root `CanisterInstallMode`
+retains PocketIC's own management 0.8 identity and `skip_pre_upgrade` flags;
+Platform's independent management 0.11 type cannot replace that method parameter.
+Their explicit root and REST exports retain the original
+PocketIC identities, including method parameter/result compatibility. These
+exports add no gateway startup, pending-call polling, retries or outcall policy.
 
 ## Qualified Candid surface
 

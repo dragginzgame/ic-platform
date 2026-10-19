@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.2]
+
+### Added
+
+- Complete PocketIC placement, pending-message, gateway, HTTP fixture and chunked
+  install-mode exports used through Testkit by Backup, Canic and Blob. Preserve
+  original upstream identities and native-only selection
+  ([#27 — Complete PocketIC exports used by Testkit consumers in Backup and Canic](https://github.com/dragginzgame/ic-platform/issues/27)).
+
 ## [0.2.1] - 2026-10-19
 
 ### Changed
