@@ -6,6 +6,11 @@ HTTP fixture and install-mode identities used through Testkit by Backup, Canic
 and Blob. The existing [PR #28](https://github.com/dragginzgame/ic-platform/pull/28)
 now includes Blob's chunked upgrade flags; see
 [issue #27](https://github.com/dragginzgame/ic-platform/issues/27).
+The refreshed hosted jobs exposed missing `bumpalo` source during frozen Wasm
+consumer checking on Linux and macOS. CI now explicitly runs `cargo fetch
+--locked` before validation, preparing the root lock's full target closure without
+changing selection or adding a download to the offline check. Fresh hosted
+acceptance remains separate.
 Package versions, dependencies and locks match main. Platform-only identity and
 consumer tests pass on Linux Rust 1.99.0 and actual Rust 1.88, including Wasm
 exclusion. All ten selected normal/build graphs and graph refusal regressions

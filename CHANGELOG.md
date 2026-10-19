@@ -9,6 +9,12 @@
   original upstream identities and native-only selection
   ([#27](https://github.com/dragginzgame/ic-platform/issues/27)).
 
+### Fixed
+
+- Prepare the locked dependency cache before CI, including Wasm-only sources
+  needed by frozen standalone consumer checks. Validation remains offline where
+  selected and does not resolve dependency upgrades.
+
 ## [0.1.18] - 2026-10-19
 
 ### Changed
