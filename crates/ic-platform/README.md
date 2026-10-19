@@ -262,3 +262,9 @@ through `ic_platform::pocket_ic`, including `nonblocking::PocketIc`. Testkit ret
 server installation, compatibility admission and lifecycle policy. This feature
 is absent on Wasm; default and executor-only builds do not select PocketIC.
 PocketIC's management DTOs retain their own upstream 0.8.0 identity.
+
+Enable `ed25519` for native/Wasm `ic_platform::ed25519::{Signature,
+SignatureError, Signer, SigningKey, VerifyingKey, Scalar}`. These are original
+Dalek identities with upstream defaults disabled; no RNG is selected. Consumers
+retain strict verification, canonical-scalar checks, message construction and key
+custody. This feature is independent of Candid, executor and host features.

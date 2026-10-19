@@ -19,6 +19,7 @@ candid-parser = ["dep:candid_parser"]
 canister-sig-creation = ["dep:ic-canister-sig-creation"]
 cdk = ["candid", "executor", "ic0", "dep:ic-cdk", "dep:ic-platform-macros"]
 certification = ["dep:ic-certification"]
+ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["dep:ic-cdk-executor"]
 ic0 = ["dep:ic0"]
 icrc-ledger-types = ["dep:icrc-ledger-types"]
@@ -35,6 +36,8 @@ pocket-ic = { workspace = true, optional = true }
 
 [dependencies]
 candid = { workspace = true, optional = true }
+curve25519-dalek = { workspace = true, optional = true }
+ed25519-dalek = { workspace = true, optional = true }
 ic-canister-sig-creation = { workspace = true, optional = true }
 ic-cdk = { workspace = true, optional = true }
 ic-cdk-executor = { workspace = true, optional = true }
@@ -47,6 +50,11 @@ ic0 = { workspace = true, optional = true }
 ic_principal.workspace = true
 icrc-ledger-types = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
+
+[[test]]
+name = "ed25519_consumer"
+path = "tests/ed25519_consumer.rs"
+required-features = ["ed25519"]
 
 [[test]]
 name = "cdk_consumer"

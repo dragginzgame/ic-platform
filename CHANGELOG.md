@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.16]
+
+### Added
+
+- Add optional native/Wasm `ed25519` exports with original Dalek identities,
+  no default or RNG features, and standalone RFC 8032 verification coverage.
+  Consumers retain strict verification, key custody and admission policy.
+
 ## [0.1.15] - 2026-10-18
 
 ### Added

@@ -4,7 +4,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --locked > target/feature-graphs/metadata.json
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "secp256k1", "signature-verification"]' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "canister-sig-creation", "cdk", "certification", "default", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "secp256k1", "signature-verification"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
 }
@@ -41,8 +41,12 @@ generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name =
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'BLS must be optional with alloc and no upstream default/RNG features' >&2; exit 1;
 }
-# These are production package graphs, including build dependencies but not dev
-# dependencies. Cargo tree prints canonical package names even for renamed deps.
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.ed25519 == ["dep:curve25519-dalek", "dep:ed25519-dalek"] and ([.dependencies[] | select(.name == "curve25519-dalek" or .name == "ed25519-dalek")] | length == 2 and all(.[]; .optional and (.uses_default_features | not) and .features == [] and .target == null))' \
+    target/feature-graphs/metadata.json > /dev/null || {
+    echo 'Ed25519 must remain optional on native/Wasm without upstream default/RNG features' >&2; exit 1;
+}
+# These are production graphs including normal/build, excluding dev dependencies.
+# Cargo tree prints canonical package names even for renamed deps.
 selections=(none candid executor certification
     candid,executor candid,certification executor,certification candid,executor,certification
     candid-parser candid,candid-parser executor,candid-parser certification,candid-parser
@@ -67,7 +71,7 @@ all_selections+=(icrc-ledger-types)
 for selection in "${without_ledger[@]}"; do
     if [[ "$selection" != none && "$selection" != default ]]; then all_selections+=("$selection,icrc-ledger-types"); fi
 done
-for capability in bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic; do
+for capability in ed25519 bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic; do
     previous=("${all_selections[@]}")
     all_selections+=("$capability")
     for selection in "${previous[@]}"; do

@@ -1,5 +1,44 @@
 # Current handoff
 
+The optional `ed25519` boundary exports original Dalek keys, signatures, errors,
+signing trait and canonical scalar identity on native/Wasm. Defaults remain empty;
+no RNG, Candid or executor is selected by this feature. Auth retains verification
+and admission policies; Canic's Dalek 3.0 test selection needs explicit migration.
+Sibling checkouts and package versions are unchanged. Existing dependency-reduction
+patches, documentation and unrelated lock updates were preserved. This task adds
+only the two direct dependency edges to the incoming lockfile.
+
+The Platform-only consumer passes RFC 8032 and malformed/weak/noncanonical
+rejection checks on development Rust and 1.88, plus Wasm checks on both.
+Evidence: `target/boundary-consumer.mOQAL6`, `target/ed25519-proof` (ten actual
+normal/build graphs). Feature admission/closure regressions, selected MSRV Clippy,
+warning-denied Rustdoc, dependency boundaries, pins and documentation links pass.
+Full feature enumeration remains release-owned; native macOS, installed-canister
+and published-consumer adoption have not been qualified by this change.
+See the [migration contract](../migration.md#standard-ed25519-maintenance-boundary).
+
+The dependency-reduction pass starts at `980811c` (0.1.15). Production dependency
+selection is unchanged by this pass. A concurrent Cargo.toml formatting change
+was observed and preserved. Three applicable review patches and their evidence
+are described in the [migration contract](../migration.md#qualified-dependency-reduction-experiments).
+They qualify narrower signature/verifier, public derivation and CDK macro graphs;
+they are not production replacements, a Candid-free runtime, native macOS proof
+or measured Wasm-size reductions.
+
+The maintainer explicitly authorized edits in Host and Query. Host now gates
+Candid APIs behind `candid`, leaving certificate and Wasm-interface features
+independent. Its next draft is 0.28.0 because this changes the public feature
+contract; existing duration and CI work is preserved. Query requires Host 0.28
+and rejects parser leakage. Its registry lock remains at the prior release and
+must be refreshed after Host publication; normal locked Query validation is
+therefore not claimed. A captured-source Host 0.28 release rehearsal passes
+Query's five certificate tests and complete dependency graph gate at Rust 1.91.
+Host passes Rust 1.88 default/certificate/all-feature tests, native feature graphs,
+strict Clippy, Rustdoc and Rust formatting. No sibling versions, indexes, commits,
+releases or permanent path overrides were changed. Other siblings were read-only.
+
+## Previous PocketIC qualification
+
 The PocketIC maintenance boundary starts at `fb797b5` (0.1.14), with package
 versions unchanged and notes under the 0.1.15 draft. The optional native-only
 `pocket-ic` feature exports the original blocking/async clients, rejection types,

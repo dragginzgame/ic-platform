@@ -14,6 +14,10 @@ while IFS='|' read -r selection package expected; do
     count=$((count + 1))
 done <<'CASES'
 none||pass
+none|ed25519-dalek v2.2.0|reject
+executor|curve25519-dalek v4.1.3|reject
+ed25519||reject
+ed25519|ed25519-dalek v2.2.0|reject
 none|candid v0.10.38|reject
 none|candid_derive v0.10.38|reject
 candid|candid v0.10.38|pass

@@ -25,6 +25,7 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 | `signature-verification` | Upstream canister-signature verification; transitive Candid/ic0/certification/BLS, no executor or host transport |
 | `pocket-ic` | Native PocketIC client identities; Testkit retains server lifecycle and policy |
+| `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
 | `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |
 
 The optional CDK surface uses a maintained generator fork with Platform paths and
@@ -119,7 +120,7 @@ this repository has no Candid extraction command requiring a selected extractor.
 transitive graphs for the native host and `wasm32-unknown-unknown`, with no
 features and all combinations of `candid`, `executor`, `certification` and
 `candid-parser`, `agent`, `ic0`, `management-canister-types`, `icrc-ledger-types`,
-`bls`, `canister-sig-creation`, `signature-verification`, `cdk`, `secp256k1` and `pocket-ic`, plus the actual default selection. It enforces empty defaults
+`ed25519`, `bls`, `canister-sig-creation`, `signature-verification`, `cdk`, `secp256k1` and `pocket-ic`, plus the actual default selection. It enforces empty defaults
 and exact qualified executor/system requirements. It rejects unreviewed feature
 names until the matrix and isolation policy are updated, admits the selected CDK runtime/generators only with `cdk`, and rejects additional executor/
 system versions or non-registry sources in the transitive graph. It also

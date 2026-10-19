@@ -14,7 +14,9 @@ repository = "https://github.com/dragginzgame/ic-platform"
 
 candid = { version = "0.10.38", default-features = false }
 candid_parser = { version = "0.4.1", default-features = false }
+curve25519-dalek = { version = "4.1.3", default-features = false }
 darling = "0.23.0"
+ed25519-dalek = { version = "2.2", default-features = false }
 ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
 ic-canister-sig-creation = "1.3.1"
 ic-cdk = "=0.20.3"

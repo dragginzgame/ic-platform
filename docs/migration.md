@@ -911,14 +911,13 @@ It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
 This is representative boundary evidence, not a build of migrated siblings.
 
-`make check-features` checks all 8,192 feature combinations plus actual defaults on native/Wasm.
+`make check-features` enumerates all declared feature combinations plus actual defaults on native/Wasm.
 It derives local feature closures from Cargo metadata and reuses graph queries
 only within the same invocation. On Wasm, Agent/parser/secp256k1 leaves may share
 a key only while each feature activates exactly its single optional native-only
 dependency; a changed contract fails closed. Defaults keep a separate key.
-All 16,386 selection-specific admission checks still run in one validator process
-per target, including target exclusion checks. The current contract requires
-4,609 native and 577 Wasm Cargo queries (5,186 total, previously 9,218).
+All selection-specific admission checks still run in one validator process
+per target, including target exclusion checks. Query counts depend on the declared feature inventory; full enumeration remains release-owned.
 Target-specific TSV mappings and canonical graphs remain in each attempt directory.
 Neither post-hoc package-list equality nor reuse of previous runs establishes
 feature equivalence. The supported graph properties remain:
@@ -989,3 +988,62 @@ substitute an RNG. Enabling this feature on Wasm exposes no module and adds no
 secp256k1 dependency. Native selection stays Candid/CDK/executor-free; default
 builds do not select it. It centralizes direct dependency ownership, without
 claiming transitive dependency removal or measured Wasm savings.
+
+## Qualified dependency-reduction experiments
+
+The following patches are review experiments against exact registry sources,
+not dependencies selected by Platform. They retain their upstream Apache-2.0
+provenance and do not change the supported type-identity/runtime contracts above.
+No new production fork, compatibility package or alternate executor is selected.
+
+- `patches/canister-sig-no-store.patch` targets creation 1.3.1: use canonical
+  `ic_principal` and omit the unused signature-map module and its `ic0` dependency.
+  With verifier 0.3.0 selecting this candidate, all 17 retained creation and 12
+  verifier library tests pass on Rust 1.88, as does Wasm checking. Its normal/build
+  graph loses Candid and ic0. This does not qualify a production owner migration,
+  altered malformed-DER behavior or Auth's installed application policies.
+- `patches/secp256k1-public-only.patch` is a standalone public-derivation experiment
+  from secp256k1 0.3.0, including its manifest and differential fixture. Rust 1.88
+  native tests compare mainnet ECDSA key_1 and three PocketIC ECDSA keys across
+  four Principals and four paths (64 pairs), including empty and 255-component
+  paths; compressed/uncompressed outputs and chain codes match the original.
+  Native and Wasm library checks pass. Its normal graph excludes upstream
+  secp256k1, rand, rand_chacha, getrandom, PEM and simple_asn1; rand_core remains
+  through curve arithmetic. The prototype omits broader methods/traits and has
+  an inherited deprecated generic-array call: it is not public API parity or
+  strict-lint qualification, and its owned types cannot silently replace current
+  upstream identities. No new curve arithmetic or signing implementation exists.
+- `patches/cdk-optional-macros.patch` targets CDK 0.20.3, preserving its default
+  macro API while permitting Platform's owned generator to disable that feature.
+  Three standalone Platform CDK consumer tests pass on Rust 1.99/1.88, with linked
+  Wasm on both. The selected Wasm graph omits upstream ic-cdk-macros and retains
+  executor 2.0.0, ic0 1.2.0 and Candid. This is not a Candid-free raw-call runtime
+  or new callback/trap/timer qualification; those runtime contracts stay intact.
+
+Each patch applies to its exact registry source. Disposable evidence is retained
+under `/tmp/platform-signature-split`, `/tmp/platform-public-secp` and
+`/tmp/platform-cdk-split`. These package-graph observations do not measure Wasm
+size or wall-clock performance. Existing management/ledger DTOs remain selected:
+owning their definitions would change Rust identity without removing external
+Candid requirements. Public ownership changes require an explicit migration and
+renewed consumer qualification; no supplying release is implied by these proofs.
+
+## Standard Ed25519 maintenance boundary
+
+The optional native/Wasm `ed25519` feature explicitly exports `Signature`,
+`SignatureError`, `Signer`, `SigningKey`, `VerifyingKey` and `Scalar` under
+`ic_platform::ed25519`. The owners remain ed25519-dalek 2.2 and curve25519-dalek
+4.1.3 with defaults disabled. These are compatible registry requirements, not
+new exact pins. No crypto implementation, RNG, Candid or executor is added.
+Agent can independently bring these dependencies and broader unified features.
+
+Auth can select `ic-platform/ed25519` through its existing portable-signature
+feature, replace its two Dalek imports with this module, and remove exhausted
+member/workspace declarations. Preserve canonical-S checks, weak-key rejection,
+`verify_strict`, message hashing, budget charging and admission policy. Tests
+can import `Signer` and `SigningKey` from the same module. Update generators,
+locks and direct-dependency guards and rerun consumer acceptance tests.
+Canic's test declaration currently requests Dalek 3.0; adopting this 2.2 surface
+requires explicit test migration and qualification, not an automatic version swap.
+Sibling checkouts are unchanged. This controls direct ownership, not all transitive
+versions, cryptographic policy or measured Wasm size.
