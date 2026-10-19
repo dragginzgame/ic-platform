@@ -1,4 +1,9 @@
-//! Controlled dependencies for external Candid protocols and IC runtime integration.
+//! Controlled dependencies for IC runtime integration and required IC Candid interfaces.
+//!
+//! All owned application endpoints use IC Wire, including public endpoints.
+//! Candid adapts required management/system, NNS/SNS, ledger and other Candid
+//! interfaces; caller location does not select the codec. Existing Candid
+//! checkpoints remain a legacy persisted-data compatibility exception.
 //!
 //! [`Principal`] is always available. `candid` selects bounded decoding;
 //! `executor` selects the shared CDK executor without a Candid dependency.
@@ -9,7 +14,7 @@
 //! `bls` selects BLS keys, signatures and verification with upstream allocation support.
 //! `canister-sig-creation` selects canister public-key formats and hashing.
 //! `signature-verification` selects upstream canister-signature verification.
-//! `cdk` selects Platform entrypoint macros and the qualified upstream CDK runtime.
+//! `cdk` selects owned explicit-codec entrypoints and a Candid-free runtime.
 //! `ic0` selects qualified raw system calls without Candid or an executor.
 //! `management-canister-types` selects external management HTTP/history/snapshot/status DTOs.
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.

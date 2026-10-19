@@ -1,0 +1,51 @@
+Packaging qualification against registry ic-canister-sig-creation-1.3.1. Upstream Apache-2.0 license applies. Cryptographic function bodies are unchanged. Not selected in production.
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 72bd90a..aec72ba 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -46,12 +46,16 @@ categories = [
+ license = "Apache-2.0"
+ repository = "https://github.com/dfinity/ic-canister-sig-creation"
+ 
++[features]
++default = ["signature-map"]
++signature-map = ["dep:ic0"]
++
+ [lib]
+ name = "ic_canister_sig_creation"
+ path = "src/lib.rs"
+ 
+-[dependencies.candid]
+-version = "0.10"
++[dependencies.ic_principal]
++version = "0.1"
+ 
+ [dependencies.hex]
+ version = "0.4"
+@@ -64,6 +68,7 @@ version = "3.0"
+ 
+ [dependencies.ic0]
+ version = "1.0.1"
++optional = true
+ 
+ [dependencies.lazy_static]
+ version = "1.4"
+diff --git a/src/lib.rs b/src/lib.rs
+index 588dfe3..e218812 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -1,4 +1,4 @@
+-use candid::Principal;
++use ic_principal::Principal;
+ use ic_certification::{Hash, HashTree};
+ use ic_representation_independent_hash::{representation_independent_hash, Value};
+ use lazy_static::lazy_static;
+@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
+ use serde_bytes::ByteBuf;
+ use sha2::{Digest, Sha256};
+ 
++#[cfg(feature = "signature-map")]
+ pub mod signature_map;
+ 
+ pub const IC_ROOT_PK_DER_PREFIX: &[u8; 37] = b"\x30\x81\x82\x30\x1d\x06\x0d\x2b\x06\x01\x04\x01\x82\xdc\x7c\x05\x03\x01\x02\x01\x06\x0c\x2b\x06\x01\x04\x01\x82\xdc\x7c\x05\x03\x02\x01\x03\x61\x00";

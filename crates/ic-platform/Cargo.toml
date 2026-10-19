@@ -4,7 +4,7 @@ description = "Controlled Candid and IC runtime dependency boundary"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-license.workspace = true
+license = "MIT AND Apache-2.0"
 repository.workspace = true
 readme = "README.md"
 publish = ["crates-io"]
@@ -17,7 +17,14 @@ bls = ["dep:ic-verify-bls-signature"]
 candid = ["dep:candid", "candid/bignum", "candid/printer", "dep:serde"]
 candid-parser = ["dep:candid_parser"]
 canister-sig-creation = ["dep:ic-canister-sig-creation"]
-cdk = ["candid", "executor", "ic0", "dep:ic-cdk", "dep:ic-platform-macros"]
+cdk = [
+    "executor",
+    "ic0",
+    "dep:ic-platform-macros",
+    "dep:ic-error-types",
+    "dep:pin-project-lite",
+    "dep:thiserror",
+]
 certification = ["dep:ic-certification"]
 ecdsa = ["dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
@@ -40,9 +47,9 @@ candid = { workspace = true, optional = true }
 curve25519-dalek = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true, optional = true }
 ic-canister-sig-creation = { workspace = true, optional = true }
-ic-cdk = { workspace = true, optional = true }
 ic-cdk-executor = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
+ic-error-types = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-signature-verification = { workspace = true, optional = true }
@@ -51,7 +58,9 @@ ic0 = { workspace = true, optional = true }
 ic_principal.workspace = true
 icrc-ledger-types = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
+pin-project-lite = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
+thiserror = { workspace = true, optional = true }
 
 [[test]]
 name = "ecdsa_consumer"
@@ -132,11 +141,6 @@ required-features = ["candid-parser"]
 name = "certification_consumer"
 path = "tests/certification_consumer.rs"
 required-features = ["certification"]
-
-[[test]]
-name = "cdk_identity"
-path = "tests/cdk_identity.rs"
-required-features = ["cdk"]
 
 [[test]]
 name = "pocket_ic_consumer"

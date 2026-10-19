@@ -3,7 +3,7 @@ members = ["crates/ic-platform", "crates/ic-platform-macros"]
 resolver = "3"
 
 [workspace.package]
-version = "0.1.18"
+version = "0.2.1"
 edition = "2024"
 rust-version = "1.88.0"
 license = "MIT"
@@ -19,11 +19,11 @@ darling = "0.23.0"
 ed25519-dalek = { version = "2.2", default-features = false }
 ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
 ic-canister-sig-creation = "1.3.1"
-ic-cdk = "=0.20.3"
 ic-cdk-executor = "=2.0.0"
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
+ic-error-types = "0.2.0"
 ic-management-canister-types = "=0.11.0"
-ic-platform-macros = { version = "0.1.18", path = "crates/ic-platform-macros" }
+ic-platform-macros = { version = "0.2.1", path = "crates/ic-platform-macros" }
 ic-secp256k1 = "=0.3.0"
 ic-signature-verification = "0.3.0"
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
@@ -31,20 +31,23 @@ ic0 = "=1.2.0"
 ic_principal = "0.1.5"
 icrc-ledger-types = { version = "0.2.0", default-features = false }
 k256 = { version = "0.13.4", default-features = false, features = ["ecdsa"] }
+pin-project-lite = "0.2.17"
 pocket-ic = "16.1.0"
 proc-macro2 = "1.0.106"
 quote = "1"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 syn = { version = "2", features = ["full", "extra-traits"] }
+thiserror = "2.0.18"
 
 # Tests and tooling only
 ic-testkit = "0.54.1"
 ic-timers = "0.29.1"
+ic-wire = "0.4.7"
 serde_cbor = "0.11.2"
 
 [workspace.lints.rust]
 missing_docs = "warn"
-unsafe_code = "forbid"
+unsafe_code = "deny"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }

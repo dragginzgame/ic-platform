@@ -1,19 +1,53 @@
 # Changelog
 
-## [0.1.19]
+## [0.2.2]
 
 ### Added
 
 - Complete PocketIC placement, pending-message, gateway, HTTP fixture and chunked
   install-mode exports used through Testkit by Backup, Canic and Blob. Preserve
   original upstream identities and native-only selection
-  ([#27](https://github.com/dragginzgame/ic-platform/issues/27)).
+  ([#27 — Complete PocketIC exports used by Testkit consumers in Backup and Canic](https://github.com/dragginzgame/ic-platform/issues/27)).
 
-### Fixed
+## [0.2.1] - 2026-10-19
 
-- Prepare the locked dependency cache before CI, including Wasm-only sources
-  needed by frozen standalone consumer checks. Validation remains offline where
-  selected and does not resolve dependency upgrades.
+### Changed
+
+- Specify Wire for all owned application endpoints, including public endpoints;
+  reserve Candid for required IC interfaces and legacy checkpoint compatibility.
+- Document runtime maintenance, reviewed source-fingerprint changes and clean-cache
+  recovery acceptance without claiming dependency independence or a completed drill.
+- Correct stale 0.1.18 candidate guidance for the released 0.2.0 runtime boundary.
+
+## [0.2.0] - 2026-10-19
+
+### Breaking
+
+- Replace the full CDK dependency with maintained non-cryptographic adapters
+  inside Platform. Keep the registry executor =2.0.0 and ic0 =1.2.0 identities.
+  Call/response, cost/error and stable-error types now have Platform identities.
+- Make `cdk` Candid-free. Require explicit Wire endpoint codecs, including unit
+  RPC decoding; remove default Candid endpoints and service export generation.
+  Raw calls start with empty bytes; supply Wire frames or explicit external
+  Candid arguments. Select `candid` separately for management/system calls and
+  existing persisted checkpoint helpers. No stored bytes or crypto are changed.
+- Preserve Apache-2.0 provenance for imported runtime code; the combined consumer
+  package declares MIT AND Apache-2.0. No executor implementation is copied.
+
+### Testing
+
+- Qualify standalone native/MSRV/Wasm consumers, real Timers probe compilation,
+  graph isolation and imported callback/spawn source fidelity. Installed Wire
+  fixtures cover raw awaits, submission/cycle failures, protected/weak/migratory
+  spawning, traps, timer cancellation, upgrade and external Candid/checkpoints.
+
+### Changed
+
+- Reject unintended RNG and entropy dependencies in portable crypto, runtime and
+  Wasm feature graphs. Cover the combined BLS, ECDSA and Ed25519 selection.
+- Add source-preservation checks for dependency scaffolding proposals, retaining
+  upstream cryptographic bodies and licenses. Qualify optional signature-store
+  and secp256k1 scaffolding without selecting production replacements.
 
 ## [0.1.18] - 2026-10-19
 
