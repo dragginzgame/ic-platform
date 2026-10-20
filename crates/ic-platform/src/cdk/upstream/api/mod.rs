@@ -4,10 +4,15 @@
 use crate::Principal;
 
 /// Gets the message argument data.
+#[allow(unsafe_code)] // Reviewed initialization after the IC's all-or-trap copy.
 pub fn msg_arg_data() -> Vec<u8> {
     let len = ic0::msg_arg_data_size();
-    let mut buf = vec![0u8; len];
-    ic0::msg_arg_data_copy(&mut buf, 0);
+    let mut buf = Vec::<u8>::with_capacity(len);
+    ic0::msg_arg_data_copy_uninit(&mut buf.spare_capacity_mut()[..len], 0);
+    // SAFETY: capacity is at least len. The pinned ic0 API initializes the entire
+    // supplied prefix or traps without returning; no uninitialized byte becomes
+    // observable. This also holds for an empty message.
+    unsafe { buf.set_len(len) };
     buf
 }
 

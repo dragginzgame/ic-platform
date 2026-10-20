@@ -1,6 +1,63 @@
 # Current handoff
 
-## Pending 0.5 hard cut
+## Pending 0.5.1
+
+The native Agent request-copy experiment qualifies a one-line ownership change
+in an isolated copy of registry ic-agent 0.49.2; production still uses the
+unchanged registry package. Each nonempty request saves one allocation and its
+body length in allocated bytes. Rust 1.88 byte/replay/status probes and real
+loopback HTTP retry/response-limit checks pass before and after the patch.
+[Evidence and reproduction](../benchmarks/0.5.1/agent-copy/README.md) distinguish
+local timings from network performance and record unqualified paths.
+[Platform #39](https://github.com/dragginzgame/ic-platform/issues/39) tracks the
+distribution decision: a wrapper cannot fix this private clone, and a consumer
+Cargo patch is not a published solution. No Agent fork or adoption is implied.
+
+The message-buffer reader now uses pinned ic0's all-or-trap spare-capacity copy
+and a function-local unsafe length update. Other API functions retain the deny
+lint; submission, callback/cleanup and protected-spawn fingerprints are unchanged.
+The installed fixture compares the old zero-filled allocation against the actual
+production helper and checks exact frames and binary awaited replies.
+
+Rust 1.88 passes 12 native runtime/library consumer tests and Wasm compilation;
+strict runtime Clippy, source/mutation guards and native/Wasm runtime graphs pass.
+Four driver tests qualify rejection classification and the new fixture budgets.
+All four installed Rust 1.99.1/1.91.0 × Wire/external-Candid combinations pass,
+including callback traps, cancellation, upgrades and stable rollback.
+[Retained measurements](../benchmarks/0.5.1/README.md) show about 30% fewer
+instructions for the isolated read at 1 KiB and 37% at 2 KiB, not whole-RPC gains.
+Evidence: `target/cdk-runtime.UsGpFZ`, `/tmp/platform051-input-*.log`.
+Native macOS and live IC qualification were not performed. No executor,
+cryptographic code, consumer policy, package version or sibling checkout changed.
+
+Starting from released 0.5.0 (`b840423`), remove the generator's unused
+`syn/extra-traits` feature while retaining full syntax parsing. Ten Rust 1.88
+generator tests and standalone CDK consumer native/MSRV/Wasm checks pass, with
+no `extra-traits` in the generator's resolved feature graph. Evidence:
+`/tmp/platform051-syn-*.log`, `target/boundary-consumer.dI5NLx`.
+That feature reduction changed no Rust implementation or lockfile.
+Native macOS and installed-canister execution were not rerun for this build-only
+feature reduction.
+
+The maintainer subsequently authorized deleting the unused, unexported lazy
+root-public-key cache and Platform's direct `lazy_static` dependency. No internal
+code reads the cache; external consumers cannot reach it through the private
+signature module. The public DER constant and extraction function remain.
+An exact before/after comparison verified that only the cache and its import
+were removed from the fingerprinted source before updating its creation hash.
+All cryptographic bodies, constants, vectors, verification source and licenses
+are unchanged. Source and mutation-refusal guards pass.
+
+Rust 1.88 passes 39 focused library/consumer tests, and standalone creation and
+verification consumers pass native/MSRV/Wasm checks. Evidence:
+`/tmp/platform051-lazy-*`, including the expected deletion-only source copy.
+Creation graphs on native/Wasm no longer contain `lazy_static`; verification
+still receives it from unchanged upstream `ic-verify-bls-signature`.
+Package versions and thiserror remain unchanged. No sibling edits, commits or
+publication occurred. Native macOS and installed-canister qualification were not
+rerun for this unused-cache removal.
+
+## 0.5 hard cut (historical)
 
 The raw-identifier audit reproduced a proc-macro panic for `fn r#match`.
 Generated wrapper/default export names now use the unescaped identifier, while

@@ -12,6 +12,27 @@ thread_local! {
     static CLEANED: Cell<u64> = const { Cell::new(0) };
 }
 
+// Compare just the message-buffer read, excluding Wire decoding/encoding.
+// Both variants remain in this qualification fixture, not the production API.
+#[ic_platform::cdk::query(
+    guard = "codec::admit",
+    decode_with = "codec::decode::<_, { protocol::Method::BufferCopy as u64 }>",
+    encode_with = "codec::encode::<_, { protocol::Method::BufferCopy as u64 }>"
+)]
+fn buffer_copy(baseline: bool, _payload: Vec<u8>) -> (u64, Vec<u8>) {
+    let start = api::instruction_counter();
+    let bytes = if baseline {
+        let len = ic_platform::ic0::msg_arg_data_size();
+        let mut bytes = vec![0; len];
+        ic_platform::ic0::msg_arg_data_copy(&mut bytes, 0);
+        bytes
+    } else {
+        api::msg_arg_data()
+    };
+    let instructions = api::instruction_counter() - start;
+    (instructions, bytes)
+}
+
 #[ic_platform::cdk::init(
     decode_with = "codec::decode::<_, { protocol::Method::Initialize as u64 }>"
 )]

@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.1]
+
+### Documentation
+
+- Record an isolated Agent request-copy benchmark and retry qualification.
+  The candidate saves one payload-sized allocation; production Agent remains
+  unchanged pending a supported distribution decision.
+
+### Improved
+
+- Read message bytes directly into vector spare capacity, avoiding zero
+  initialization immediately before the IC overwrites the buffer. Installed
+  fixture read costs fall about 30% at 1 KiB and 37% at 2 KiB; these are not
+  whole-RPC speedups. Preserve exact bytes, caller admission and trap behavior.
+- Remove the unused, unexported lazy root-key cache and Platform's direct
+  `lazy_static` dependency. Root-key constants, parsing and cryptography remain
+  unchanged; no consumer migration is needed.
+- Stop enabling Syn's unused `extra-traits` feature in the entrypoint generator.
+  Retain full syntax parsing and existing generated endpoint behavior.
+
 ## [0.5.0] - 2026-10-20
 
 ### Breaking

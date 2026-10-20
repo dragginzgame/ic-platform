@@ -1,7 +1,6 @@
 use ic_principal::Principal;
 use ic_certification::{Hash, HashTree};
 use ic_representation_independent_hash::{representation_independent_hash, Value};
-use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
@@ -20,12 +19,6 @@ pub const CANISTER_SIG_PK_DER_OID: &[u8; 14] =
 /// Signature domain for IC request auth delegations as specified in the IC interface specification:
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#authentication
 pub const DELEGATION_SIG_DOMAIN: &[u8] = b"ic-request-auth-delegation";
-
-lazy_static! {
-    /// The IC root public key used when verifying canister signatures.
-    pub static ref IC_ROOT_PUBLIC_KEY: Vec<u8> =
-        extract_raw_root_pk_from_der(IC_ROOT_PK_DER).expect("Failed decoding IC root key.");
-}
 
 /// A public key of canister signatures,
 /// see https://internetcomputer.org/docs/current/references/ic-interface-spec#canister-signatures

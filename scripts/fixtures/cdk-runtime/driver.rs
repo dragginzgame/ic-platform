@@ -10,6 +10,9 @@ use protocol::{LIMITS, method_id};
 use serde::{Serialize, de::DeserializeOwned};
 use std::time::Duration;
 
+// Native Serde admission charges four nodes per byte; leave room for framing.
+const BUFFER_COPY_SIZES: [usize; 5] = [0, 1, 63, 1024, 2048];
+
 fn request(method: &str, args: impl Serialize) -> Vec<u8> {
     ic_wire::native::encode_request(method_id(method), &args, LIMITS).unwrap()
 }
@@ -72,6 +75,21 @@ fn unrelated_rejection_is_not_guard_rejection() {
     });
 }
 
+#[test]
+fn buffer_copy_frames_fit_fixture_budget() {
+    for size in BUFFER_COPY_SIZES {
+        let bytes = request("buffer_copy", (false, vec![255u8; size]));
+        let reply = ic_wire::native::encode_response(
+            method_id("buffer_copy"),
+            &(0u64, bytes.clone()),
+            LIMITS,
+        )
+        .unwrap();
+        let decoded: (u64, Vec<u8>) = response("buffer_copy", &reply);
+        assert_eq!(decoded.1, bytes);
+    }
+}
+
 fn main() {
     let wasm = std::fs::read(std::env::args().nth(1).expect("canister Wasm path")).unwrap();
     let legacy = std::env::var_os("PLATFORM_EXTERNAL_CANDID").is_some();
@@ -83,6 +101,36 @@ fn main() {
     let id = pic.create_canister();
     pic.add_cycles(id, 10_000_000_000_000);
     pic.install_canister(id, wasm.clone(), request("initialize", 10u64), None);
+    for size in BUFFER_COPY_SIZES {
+        let payload: Vec<u8> = (0..size).map(|i| (i % 256) as u8).collect();
+        let mut baseline = Vec::new();
+        let mut candidate = Vec::new();
+        for round in 0..6 {
+            for old in if round % 2 == 0 {
+                [true, false]
+            } else {
+                [false, true]
+            } {
+                let args = (old, payload.clone());
+                let expected = request("buffer_copy", &args);
+                let (instructions, bytes): (u64, Vec<u8>) = query(pic, id, "buffer_copy", args);
+                assert_eq!(bytes, expected);
+                if round != 0 {
+                    if old {
+                        baseline.push(instructions);
+                    } else {
+                        candidate.push(instructions);
+                    }
+                }
+            }
+        }
+        baseline.sort_unstable();
+        candidate.sort_unstable();
+        println!(
+            "buffer-copy payload={size} baseline={} candidate={} instructions",
+            baseline[2], candidate[2]
+        );
+    }
     assert_eq!(query::<u64>(pic, id, "value", ()), 10);
     assert_eq!(query::<u64>(pic, id, "scalar", 5u64), 6);
     assert_eq!(query::<(u64, bool)>(pic, id, "tuple", ()), (7, true));
@@ -98,10 +146,13 @@ fn main() {
         )
         .unwrap_err(),
     );
-    assert!(
-        pic.query_call(id, Principal::anonymous(), "scalar", vec![0, 1])
-            .is_err()
-    );
+    for bytes in [vec![], vec![0, 1]] {
+        let error = pic
+            .query_call(id, Principal::anonymous(), "scalar", bytes)
+            .unwrap_err();
+        // Empty input must reach the decoder, not fail in buffer initialization.
+        assert!(error.reject_message.contains("fixture request:"));
+    }
     assert_eq!(query::<Vec<u8>>(pic, id, "manual", ()), vec![0, 255]);
     assert!(update::<bool>(pic, id, "missing", ()));
     assert!(update::<bool>(pic, id, "insufficient_cycles", ()));

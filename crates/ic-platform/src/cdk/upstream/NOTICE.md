@@ -21,6 +21,10 @@ adapter retains its upstream bytes and construction unchanged.
 
 Changes from the import:
 
+- In 0.5.1 copy message bytes directly into vector spare capacity using ic0
+  1.2.0's all-or-trap initialization contract, then set the initialized length.
+  This avoids requesting zero initialization before overwriting the same bytes.
+  Caller admission, returned bytes and callback/trap machinery are unchanged.
 - In 0.5 replace panic-prone timeout mutation with explicit WaitPolicy selection.
   The stored timeout and submission path retain their original representation
   and semantics; bounded constructors still select 300 seconds.

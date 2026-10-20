@@ -4,6 +4,24 @@ use crate::wire_protocol::*;
 use ic_platform::principal::ExternalPrincipal as Principal;
 use ic_testkit::{pic::PocketIc, pocket_ic::RejectCode};
 
+const ROUNDTRIP_SIZES: [usize; 4] = [0, 1, 7, 15];
+
+#[test]
+fn binary_roundtrip_frames_fit_fixture_budget() {
+    for size in ROUNDTRIP_SIZES {
+        let input = vec![255u8; size];
+        for id in [AWAIT, ECHO] {
+            let request = ic_wire::native::encode_request(id, &input, REQUEST).unwrap();
+            let decoded: (Vec<u8>,) =
+                ic_wire::native::decode_request(id, &request, REQUEST).unwrap();
+            assert_eq!(decoded.0, input);
+            let reply = ic_wire::native::encode_response(id, &input, RESPONSE).unwrap();
+            let decoded: Vec<u8> = ic_wire::native::decode_response(id, &reply, RESPONSE).unwrap();
+            assert_eq!(decoded, input);
+        }
+    }
+}
+
 fn observe(pic: &PocketIc, id: Principal) -> (u64, u64) {
     let response = pic
         .query_call(
@@ -18,6 +36,22 @@ fn observe(pic: &PocketIc, id: Principal) -> (u64, u64) {
 
 pub fn run(pic: &PocketIc, id: Principal) {
     assert_eq!(observe(pic, id), (0, 0));
+    // Exact binary round trips through generated ingress and awaited reply reads.
+    for size in ROUNDTRIP_SIZES {
+        let input: Vec<u8> = (0..size).map(|i| (i * 73) as u8).collect();
+        let response = pic
+            .update_call(
+                id,
+                Principal::anonymous(),
+                "wire_await",
+                ic_wire::native::encode_request(AWAIT, &input, REQUEST).unwrap(),
+            )
+            .unwrap();
+        assert_eq!(
+            response,
+            ic_wire::native::encode_response(AWAIT, &input, RESPONSE).unwrap()
+        );
+    }
     let input = vec![0u8, 255, 3];
     for (method, frame_id) in [("wire_set", SET), ("wire_await", AWAIT)] {
         let response = pic

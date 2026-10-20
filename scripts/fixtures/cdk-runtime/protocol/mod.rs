@@ -40,6 +40,7 @@ pub enum Method {
     SubmissionPressure = 0x2000,
     InsufficientCycles = 0x2001,
     WeakPending = 0x2002,
+    BufferCopy = 0x2003,
     Absent = 0xffff,
 }
 pub fn method_id(name: &str) -> u64 {
@@ -75,6 +76,7 @@ pub fn method_id(name: &str) -> u64 {
         "submission_pressure" => Method::SubmissionPressure as u64,
         "insufficient_cycles" => Method::InsufficientCycles as u64,
         "weak_pending" => Method::WeakPending as u64,
+        "buffer_copy" => Method::BufferCopy as u64,
         "no_such_method" => Method::Absent as u64,
         _ => panic!("unknown fixture endpoint: {name}"),
     }

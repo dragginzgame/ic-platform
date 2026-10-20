@@ -36,8 +36,10 @@ coordinated package version, original generator semantics and explicit paths.
 The maintainer authorized adopting the reviewed non-cryptographic CDK 0.20.3
 adapters inside Platform and removing the `ic-cdk` package. Keep their Apache-2.0
 license/provenance. The facade's mixed-source license is MIT AND Apache-2.0.
-Only the imported callback module permits reviewed unsafe
-code; other modules retain the workspace deny lint. No executor is forked.
+The imported callback module permits reviewed unsafe code. The maintainer also
+authorized the function-local `msg_arg_data` exception: set the vector length
+only after pinned ic0's all-or-trap uninitialized-buffer copy returns.
+Other functions retain the workspace deny lint. No executor is forked.
 Preserve registry executor =2.0.0 and ic0 =1.2.0 identities. Endpoint macros require
 explicit consumer-owned codecs; all owned application endpoints use Wire, including
 public endpoints called by third parties. Candid is an explicit adapter for required
@@ -47,6 +49,12 @@ bytes are a legacy compatibility exception, never a new storage format or owner.
 Runtime-only raw/executor consumers retain their independent features.
 
 ## Cryptographic boundary
+
+The maintainer authorized the 0.5.1 deletion of the unused, unexported
+`IC_ROOT_PUBLIC_KEY` lazy cache and its import/dependency. This narrow scaffolding
+exception does not authorize changes to root-key bytes, DER extraction,
+cryptographic function bodies or test vectors. The creation-source fingerprint
+records only that deletion; the remaining source/license guards stay exact.
 
 Our team does not include cryptographers. Do not implement, replace or alter
 cryptographic primitives or algorithms, including public-key derivation,
