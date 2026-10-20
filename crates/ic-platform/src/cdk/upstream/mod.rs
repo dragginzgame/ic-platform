@@ -10,8 +10,4 @@ pub mod api;
 #[allow(unsafe_code)]
 pub mod call;
 pub mod futures;
-// Legacy whole-memory copying retains its original initialized-length proof.
-#[allow(unsafe_code)]
 pub mod stable;
-#[cfg(feature = "candid")]
-pub mod storage;

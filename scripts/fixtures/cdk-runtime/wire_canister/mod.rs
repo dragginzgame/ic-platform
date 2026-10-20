@@ -28,7 +28,6 @@ fn encode<T: Serialize, const ID: u64>(value: T) -> Vec<u8> {
 }
 
 #[ic_platform::cdk::query(
-    hidden = true,
     guard = "admit",
     decode_with = "decode::<_, ECHO>",
     encode_with = "encode::<_, ECHO>"
@@ -38,7 +37,6 @@ fn wire_echo(input: Vec<u8>) -> Vec<u8> {
 }
 
 #[ic_platform::cdk::update(
-    hidden = true,
     guard = "admit",
     decode_with = "decode::<_, SET>",
     encode_with = "encode::<_, SET>"
@@ -49,7 +47,6 @@ fn wire_set(input: Vec<u8>) -> Vec<u8> {
 }
 
 #[ic_platform::cdk::update(
-    hidden = true,
     guard = "admit",
     decode_with = "decode::<_, TIGHT>",
     encode_with = "encode::<_, TIGHT>"
@@ -60,7 +57,6 @@ fn wire_tight(input: Vec<u8>) -> Vec<u8> {
 }
 
 #[ic_platform::cdk::update(
-    hidden = true,
     guard = "admit",
     decode_with = "decode::<_, ALLOCATION>",
     encode_with = "encode::<_, ALLOCATION>"
@@ -71,7 +67,6 @@ fn wire_allocation(input: Vec<u8>) -> Vec<u8> {
 }
 
 #[ic_platform::cdk::update(
-    hidden = true,
     guard = "admit",
     decode_with = "decode::<_, DEPTH>",
     encode_with = "encode::<_, DEPTH>"
@@ -82,7 +77,6 @@ fn wire_depth(input: Vec<u8>) -> Vec<u8> {
 }
 
 #[ic_platform::cdk::query(
-    hidden = true,
     guard = "admit",
     decode_with = "decode::<_, OBSERVE>",
     encode_with = "encode::<_, OBSERVE>"
@@ -102,7 +96,6 @@ impl Drop for Cleanup {
 }
 
 #[ic_platform::cdk::update(
-    hidden = true,
     guard = "admit",
     decode_with = "decode::<_, AWAIT>",
     encode_with = "encode::<_, AWAIT>"
@@ -118,7 +111,6 @@ async fn wire_await(input: Vec<u8>) -> Vec<u8> {
 }
 
 #[ic_platform::cdk::update(
-    hidden = true,
     guard = "admit",
     decode_with = "decode::<_, ENCODE_TRAP>",
     encode_with = "encode::<_, ENCODE_TRAP>"

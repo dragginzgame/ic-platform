@@ -8,6 +8,7 @@
 //! [`Principal`] is always available. `candid` selects bounded decoding;
 //! `executor` selects the shared CDK executor without a Candid dependency.
 //! `candid-parser` selects native host parsing and binding generation only.
+//! `candid-service` separately selects Candid service declaration generation.
 //! `agent` selects native IC transport and identities, with consumer-owned policy.
 //! `pocket-ic` selects native simulator client identities; Testkit owns lifecycle policy.
 //! `secp256k1` selects native offline public-key derivation with upstream identities.
@@ -15,6 +16,7 @@
 //! `canister-sig-creation` selects canister public-key formats and hashing.
 //! `signature-verification` selects upstream canister-signature verification.
 //! `cdk` selects owned explicit-codec entrypoints and a Candid-free runtime.
+//! `runtime` selects those same runtime adapters without the entrypoint generator.
 //! `ic0` selects qualified raw system calls without Candid or an executor.
 //! `management-canister-types` selects external management HTTP/history/snapshot/status DTOs.
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
@@ -40,7 +42,7 @@ pub mod candid;
 pub mod candid_parser;
 #[cfg(feature = "canister-sig-creation")]
 pub mod canister_sig_creation;
-#[cfg(feature = "cdk")]
+#[cfg(feature = "runtime")]
 pub mod cdk;
 #[cfg(feature = "certification")]
 pub mod certification;

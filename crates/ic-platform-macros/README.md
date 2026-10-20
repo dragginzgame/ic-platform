@@ -13,8 +13,21 @@ application encoding and framing, including public endpoints called by third
 parties. Consumers own identities, guards and budgets. Explicit hooks do not prove
 Wire conformance: consumers must qualify their generated bindings and wire bytes.
 No implicit Candid endpoint codec, dummy service registration, Candid path option
-or service-export macro is retained. `hidden = true` remains accepted on existing
-Wire hook declarations and has no service-registration effect.
+or service-export macro is retained. The no-op `hidden` option is retired in 0.5;
+remove it from declarations and generators. Options are parsed directly with Syn:
+string literals for names/paths, boolean literals or bare flags for
+`manual_reply`/`composite`, ordered repeated `guard` options, and no duplicate
+single-value options. String-encoded booleans are rejected.
+`composite` is query-only; lifecycle hooks cannot select `manual_reply`.
+Generated bindings use positional names and mixed-site hygiene so they do not
+capture handler names or user-supplied codec paths. Generated standard-library
+types use absolute paths and do not depend on the consumer's prelude imports.
+Native build symbols encode the full IC export name as UTF-8 hexadecimal with
+an `__ic_export_` prefix, avoiding punctuation collisions across host object
+formats. Wasm exports retain the original IC names. Native symbols are build
+scaffolding, not an IC endpoint or a supported native invocation interface.
+Raw Rust identifiers are supported: `fn r#match` defaults to endpoint name
+`match`. Explicit `name` strings remain verbatim.
 
 Export names, lifecycle restrictions, guard order, tuple/unit custom-encoder
 arity and sync/async/query contexts retain the reviewed generator behavior.

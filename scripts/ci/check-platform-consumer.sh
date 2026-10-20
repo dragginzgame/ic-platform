@@ -12,7 +12,7 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(principal ecdsa ed25519 candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic)
+capabilities=(principal ecdsa ed25519 candid candid-service certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk runtime secp256k1 pocket-ic)
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in
@@ -57,6 +57,7 @@ if [[ "$capability" == principal ]]; then
 fi
 source="$capability"
 if [[ "$capability" == candid-parser ]]; then source=parser; fi
+if [[ "$capability" == candid-service ]]; then source=service; fi
 if [[ "$capability" == pocket-ic ]]; then source=pocket_ic; fi
 if [[ "$capability" == canister-sig-creation ]]; then source=canister_sig; fi
 if [[ "$capability" == signature-verification ]]; then source=signature; fi
@@ -101,10 +102,16 @@ if [[ -n "$published" ]]; then
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
 fi
-if [[ "$capability" == cdk ]]; then
+if [[ "$capability" == cdk || "$capability" == runtime ]]; then
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
         bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph"
+        if grep -Eq '^(darling|darling_core|darling_macro) ' "$fixture/$graph_target.graph"; then
+            echo 'Runtime/entrypoint consumer acquired retired Darling scaffolding' >&2; exit 1
+        fi
+        if [[ "$capability" == runtime ]] && grep -q '^ic-platform-macros ' "$fixture/$graph_target.graph"; then
+            echo 'Runtime-only consumer acquired the entrypoint generator' >&2; exit 1
+        fi
     done
 fi
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen

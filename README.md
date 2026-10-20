@@ -6,6 +6,10 @@ endpoints called by third parties. Candid is the adapter for management canister
 NNS/SNS, ledgers and other interfaces that require it; caller location does not
 select a codec. Existing Candid checkpoints remain a legacy compatibility exception.
 
+The pending 0.5 hard cut removes the unused `cdk::storage` checkpoint helpers;
+existing data stays with its consumer and raw stable-memory passthroughs remain.
+See [the retirement contract](docs/migration.md#pending-05-retirement).
+
 Platform has no default features. Its owned runtime is Candid-free; transport,
 parsing and PocketIC are native opt-ins. Consumers retain their Wire schemas,
 authentication, budgets and retry policy. See the [maintenance and recovery
@@ -23,6 +27,8 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
+| `candid-service` | Candid service declaration macros and printer; implies `candid` |
+| `runtime` | Raw calls, system and task adapters at `cdk::*`, without entrypoint macros |
 | `candid-parser` | Native host parsing/type checking, service equality, dynamic refusal fixtures and JavaScript/TypeScript generation |
 | `canister-sig-creation` | Imported signature public-key formats, root-key constants and hashing; no Candid/ic0 or store API |
 | `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one registry executor |

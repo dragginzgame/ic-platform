@@ -13,17 +13,20 @@ registry `ic-cdk-executor =2.0.0`; raw calls use registry `ic0 =1.2.0`.
 
 The reviewed import retains selected System API functions; raw call submission,
 response/error handling and callback/trap cleanup; protected/weak/migratory
-spawning; and the existing stable-byte and Candid-checkpoint adapters. Private
-stable IO exists only to preserve the pre-existing checkpoint behavior. It is
-not a new allocator, storage layout, manager or general public memory API.
+spawning; and raw stable-byte passthroughs. The unused Candid checkpoint adapters
+and private stable IO machinery are retired in the 0.5 hard cut. No allocator,
+storage layout, manager or replacement checkpoint owner is introduced.
 No cryptographic implementation is imported or altered. The root-key system
 adapter retains its upstream bytes and construction unchanged.
 
 Changes from the import:
 
+- In 0.5 replace panic-prone timeout mutation with explicit WaitPolicy selection.
+  The stored timeout and submission path retain their original representation
+  and semantics; bounded constructors still select 300 seconds.
 - Retarget module/Principal paths; expose only the reviewed facade surface.
 - Retire Candid argument/response methods in 0.4; encode/decode at the separate
-  explicit Candid boundary. Legacy checkpoints remain gated on `candid`.
+  explicit Candid boundary.
   Remove the combined transport/codec Error and string-only CandidDecodeFailed;
   preserve CallFailed, OnewayError and all call submission/cleanup behavior.
 - Begin raw call builders with empty transport bytes instead of implicit Candid
@@ -32,6 +35,12 @@ Changes from the import:
   caller-owned.
 - Omit unexposed retry-classification extensions, obsolete spawning compatibility,
   unused system helpers and unused stable readers/buffers/seek APIs.
+- Retire `stable_save`/`stable_restore`, whole-memory copying, StableIO/StableWriter
+  and their private StableMemory abstraction in 0.5. Raw grow/read/write calls
+  retain the original ic0 behavior and error identity.
+- Copy caller, canister and subnet principal bytes into fixed 29-byte stack
+  buffers instead of allocating Vecs. Valid IC identities are unchanged;
+  malformed system lengths still trap before a principal can escape.
 - Retain the imported call state machine and protected-spawn wrapper. The recorded
   upstream fingerprints in `provenance.json` are checked by
   `scripts/ci/check-owned-runtime-source.sh`, preserving strings while ignoring

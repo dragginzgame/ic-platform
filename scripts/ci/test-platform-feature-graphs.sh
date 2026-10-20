@@ -33,10 +33,20 @@ ed25519||reject
 ed25519|ed25519-dalek v2.2.0|reject
 none|candid v0.10.38|reject
 cdk|candid v0.10.38|reject
+runtime|candid v0.10.38|reject
+runtime|ic-cdk-executor v2.0.0|pass
+runtime|ic0 v1.2.0|pass
+runtime|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
 cdk|candid_derive v0.10.38|reject
 cdk,candid|candid v0.10.38|pass
 none|candid_derive v0.10.38|reject
 candid|candid v0.10.38|pass
+candid-service|candid v0.10.38|pass
+candid|pretty v0.12.5|reject
+cdk,candid|pretty v0.12.5|reject
+candid-service|pretty v0.12.5|pass
+candid-parser|pretty v0.12.5|pass
+management-canister-types|pretty v0.12.5|pass
 none|candid_parser v0.4.1|reject
 candid-parser|candid_parser v0.4.1|pass
 none|ic-agent v0.49.2|reject

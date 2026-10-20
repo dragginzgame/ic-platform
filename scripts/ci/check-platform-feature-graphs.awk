@@ -17,7 +17,7 @@ function reject(reason) {
             # affect admission. Keep complete lines for source/identity checks.
             split(line, fields, " ")
             if (fields[1] ~ /^(ic|candid|pocket-ic|ed25519-dalek|curve25519-dalek|k256)/ ||
-                fields[1] ~ /^(rand|rand_chacha|getrandom)$/)
+                fields[1] ~ /^(rand|rand_chacha|getrandom|pretty)$/)
                 lines[key, ++count[key]] = line
             nonempty = 1
         }
@@ -32,7 +32,8 @@ function reject(reason) {
     pocket = native && enabled("pocket-ic")
     secp = native && enabled("secp256k1")
     cdk = enabled("cdk")
-    executor = cdk || enabled("executor")
+    runtime = cdk || enabled("runtime")
+    executor = runtime || enabled("executor")
     verification = enabled("signature-verification")
     creation = verification || enabled("canister-sig-creation")
     bls = verification || agent || enabled("bls")
@@ -40,7 +41,7 @@ function reject(reason) {
     certification = pocket || creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
-    candid = pocket || enabled("candid") || parser || agent || management || ledger
+    candid = pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger
     found_ed = 0
     found_curve = 0
     found_secp = 0
@@ -50,6 +51,8 @@ function reject(reason) {
         line = lines[key, i]
         n = split(line, f, " ")
         name = f[1]; version = f[2]
+        if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || management || ledger))
+            reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         # rand_core supplies traits and is permitted. Entropy/RNG implementations
         # belong only to the selected native host capabilities that require them.

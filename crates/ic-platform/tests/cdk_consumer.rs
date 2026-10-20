@@ -1,6 +1,43 @@
 //! Standalone Candid-free runtime ABI proof; installed RPC fixtures use Wire.
 use ic_platform::cdk::{api, call};
 
+mod binding_collisions {
+    type Vec = ();
+    type String = ();
+    type Result = ();
+
+    fn decode(_: std::vec::Vec<u8>) -> (u64, u64) {
+        (1, 2)
+    }
+    fn result(value: u64) -> std::vec::Vec<u8> {
+        value.to_le_bytes().to_vec()
+    }
+    fn admit() -> std::result::Result<(), std::string::String> {
+        let _: (Vec, String, Result) = ((), (), ());
+        Ok(())
+    }
+
+    #[ic_platform::cdk::query(decode_with = "decode", encode_with = "result")]
+    fn entry(entry: u64, __arg_entry: u64) -> u64 {
+        entry + __arg_entry
+    }
+
+    #[ic_platform::cdk::query(decode_with = "decode", encode_with = "result")]
+    fn arg_bytes((left, right): (u64, u64)) -> u64 {
+        left + right
+    }
+
+    #[ic_platform::cdk::update(guard = "admit", decode_with = "decode", encode_with = "result")]
+    async fn r((left, right): (u64, u64)) -> u64 {
+        left + right
+    }
+
+    #[ic_platform::cdk::query(decode_with = "decode", encode_with = "result")]
+    fn __platform_arg_0((left, right): (u64, u64)) -> u64 {
+        left + right
+    }
+}
+
 struct Opaque(Vec<u8>);
 fn decode_opaque(bytes: Vec<u8>) -> Opaque {
     Opaque(bytes)
@@ -14,6 +51,35 @@ fn decode_unit(bytes: Vec<u8>) {
 
 #[ic_platform::cdk::query(decode_with = "decode_opaque", encode_with = "encode_opaque")]
 fn echo(value: Opaque) -> Opaque {
+    value
+}
+
+#[ic_platform::cdk::query(
+    name = "native-name",
+    decode_with = "decode_opaque",
+    encode_with = "encode_opaque"
+)]
+fn native_hyphen(value: Opaque) -> Opaque {
+    value
+}
+
+#[ic_platform::cdk::query(
+    name = "native_name",
+    decode_with = "decode_opaque",
+    encode_with = "encode_opaque"
+)]
+fn native_underscore(value: Opaque) -> Opaque {
+    value
+}
+
+#[ic_platform::cdk::query(decode_with = "decode_opaque", encode_with = "encode_opaque")]
+fn r#match(value: Opaque) -> Opaque {
+    value
+}
+
+#[ic_platform::cdk::query(decode_with = "missing_decoder", encode_with = "missing_encoder")]
+#[cfg(any())]
+fn disabled_after_macro(value: MissingType) -> MissingType {
     value
 }
 

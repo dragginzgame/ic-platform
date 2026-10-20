@@ -6,13 +6,6 @@ use ic_platform::candid::decoder::{
 };
 use ic_platform::candid::{DecodeLimits, contract, decode_args, decode_exactly_one};
 
-#[contract::candid_method(query, rename = "value")]
-fn declared_value() -> u64 {
-    1
-}
-
-contract::export_service!(ic_platform::candid::contract);
-
 #[derive(Debug, PartialEq, contract::CandidType, contract::serde::Deserialize)]
 #[candid_path("ic_platform::candid::contract")]
 #[serde(crate = "ic_platform::candid::contract::serde")]
@@ -47,11 +40,6 @@ fn decode<T: for<'de> contract::ArgumentDecoder<'de>>(
 /// Exercise the complete DTO and decoder path on native and Wasm builds.
 pub fn roundtrip() {
     use contract::{Decode, Encode};
-    assert_eq!(declared_value(), 1);
-    assert_eq!(
-        __export_service(),
-        "service : { value : () -> (nat64) query }"
-    );
     let bytes = Encode!(&42_u64).unwrap();
     assert_eq!(Decode!(&bytes, u64).unwrap(), 42);
     assert_eq!(

@@ -1,6 +1,126 @@
 use super::*;
 
 #[test]
+fn raw_rust_identifiers_do_not_leak_into_default_wire_names() {
+    let generated = ic_query(
+        quote! { decode_with = "decode", encode_with = "encode" },
+        quote! { fn r#match(value: u64) -> u64 { value } },
+    )
+    .unwrap()
+    .to_string();
+    assert!(generated.contains("\"canister_query match\""));
+    assert!(!generated.contains("canister_query r#match"));
+    let renamed = ic_query(
+        quote! { name = "r#explicit", decode_with = "decode", encode_with = "encode" },
+        quote! { fn r#match(value: u64) -> u64 { value } },
+    )
+    .unwrap()
+    .to_string();
+    assert!(renamed.contains("\"canister_query r#explicit\""));
+}
+
+#[test]
+fn native_symbols_preserve_distinct_export_names() {
+    let names = [
+        "canister_query a-b",
+        "canister_query a_b",
+        "canister_query a b",
+        "canister_query a.b",
+        "canister_query a<b",
+        "canister_query a>b",
+        "canister_query café",
+        "canister_query cafe",
+        "canister_update a-b",
+    ];
+    let symbols: std::collections::BTreeSet<_> =
+        names.iter().map(|name| host_export_name(name)).collect();
+    assert_eq!(symbols.len(), names.len());
+    assert!(symbols.iter().all(|symbol| {
+        symbol.starts_with("__ic_export_")
+            && symbol
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
+    }));
+    let generated = ic_query(
+        quote! { name = "a-b", decode_with = "decode", encode_with = "encode" },
+        quote! { fn entry(value: u64) -> u64 { value } },
+    )
+    .unwrap()
+    .to_string();
+    assert!(generated.contains("canister_query a-b"));
+    assert!(generated.contains(&host_export_name("canister_query a-b")));
+}
+
+#[test]
+fn options_preserve_flags_and_reject_ambiguous_or_retired_syntax() {
+    for tokens in [
+        quote! { manual_reply, composite, guard = "a", guard = "b", },
+        quote! { manual_reply = true, composite = true, guard = "a", guard = "b" },
+    ] {
+        let attrs = ExportAttributes::parse(tokens).unwrap();
+        assert!(attrs.manual_reply && attrs.composite);
+        assert_eq!(attrs.guard, ["a", "b"]);
+    }
+    let attrs = ExportAttributes::parse(quote! {
+        manual_reply = false, composite = false, crate = "::renamed::cdk"
+    })
+    .unwrap();
+    assert!(!attrs.manual_reply && !attrs.composite);
+    assert_eq!(attrs.cratename.as_deref(), Some("::renamed::cdk"));
+    for (tokens, diagnostic) in [
+        (quote! { hidden = true }, "hidden is retired"),
+        (quote! { hidden = false }, "hidden is retired"),
+        (quote! { name = "a", name = "b" }, "duplicate"),
+        (quote! { manual_reply, manual_reply = false }, "duplicate"),
+        (quote! { decode_with = "a", decode_with = "b" }, "duplicate"),
+        (quote! { unknown = true }, "unknown"),
+        (quote! { guard = 7 }, "string literal"),
+        (quote! { composite = "true" }, "boolean literal"),
+    ] {
+        let error = ExportAttributes::parse(tokens).err().expect("must reject");
+        assert!(error.to_string().contains(diagnostic), "{error}");
+    }
+}
+
+#[test]
+fn argument_patterns_need_only_binding_names() {
+    let generated = ic_update(
+        quote! { decode_with = "decode", encode_with = "encode" },
+        quote! { fn entry(entry: Vec<Option<u64>>, (left, right): (u64, u64)) {} },
+    )
+    .unwrap()
+    .to_string();
+    assert!(generated.contains("__platform_arg_0"));
+    assert!(generated.contains("__platform_arg_1"));
+}
+
+#[test]
+fn misplaced_execution_options_are_not_silently_ignored() {
+    for method in [
+        MethodType::Update,
+        MethodType::Init,
+        MethodType::PreUpgrade,
+        MethodType::PostUpgrade,
+        MethodType::Heartbeat,
+        MethodType::InspectMessage,
+        MethodType::OnLowWasmMemory,
+    ] {
+        let error = dfn_macro(
+            method,
+            quote! { composite = true },
+            quote! { fn entry() {} },
+        )
+        .unwrap_err();
+        assert!(error.to_string().contains("only supported on query"));
+        if method.is_lifecycle() {
+            let error =
+                dfn_macro(method, quote! { manual_reply }, quote! { fn entry() {} }).unwrap_err();
+            assert!(error.to_string().contains("not supported on lifecycle"));
+        }
+    }
+}
+
+#[test]
 fn custom_codec_preserves_admission_and_runtime_contexts() {
     for method in [MethodType::Query, MethodType::Update] {
         for function in [
@@ -12,7 +132,6 @@ fn custom_codec_preserves_admission_and_runtime_contexts() {
             let generated = dfn_macro(
                 method,
                 quote! {
-                    hidden = true,
                     guard = "codec::admit",
                     decode_with = "codec::decode::<_, { Method::Start as u64 }>",
                     encode_with = "codec::encode"

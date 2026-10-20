@@ -1,6 +1,146 @@
 # Current handoff
 
-## Pending 0.4.1 Account formatting
+## Pending 0.5 hard cut
+
+The raw-identifier audit reproduced a proc-macro panic for `fn r#match`.
+Generated wrapper/default export names now use the unescaped identifier, while
+the handler call retains the original Rust identifier and explicit `name` values
+remain verbatim. The standalone consumer also qualifies a disabled conditional
+endpoint with unavailable types/codecs; Rust removes it correctly, so that
+inspection found no additional conditional-compilation defect.
+Ten generator tests, standalone native/MSRV/Wasm compilation, strict Clippy and
+all four installed compiler/protocol combinations pass. The installed fixture
+now implements its unchanged `scalar` method with a raw Rust handler identifier.
+Evidence: `/tmp/platform05-final-audit-*.log` and `target/cdk-runtime.oL3rKY`.
+No sibling edits, version changes, commits or publication occurred; native macOS
+and live IC qualification remain outstanding.
+
+The native export audit reproduced a duplicate-symbol compilation failure for
+distinct endpoint names `native-name` and `native_name`. The generator's lossy
+punctuation substitution is replaced with full UTF-8 hexadecimal encoding under
+an `__ic_export_` prefix. Tests cover punctuation, Unicode and query/update
+distinctions; the Wasm branch retains its exact IC export name.
+Nine generator tests, standalone CDK native/MSRV 1.88/Wasm compilation, strict
+Clippy, formatting and boundary checks pass. Evidence:
+`/tmp/platform05-host-symbol-*.log`, `target/boundary-consumer.590IOE`.
+Host symbol-inspection tools must update their expectations; ordinary consumer
+imports and external wire names are unchanged. Native macOS qualification is
+still outstanding; installed execution was not rerun for this native-only
+symbol change. No runtime bodies, dependencies or sibling files changed.
+
+The latest generator audit reproduced five compilation errors for valid handler
+names, codec names and argument bindings before fixing local-variable hygiene.
+Arguments now use positional mixed-site bindings; generated guard/input/result
+locals cannot capture caller paths. Generated Result/String/Vec references are
+absolute standard-library paths, qualified against shadowing consumer aliases.
+The standalone CDK consumer includes both synchronous and asynchronous collision
+cases, including a handler named exactly like a generated positional binding.
+The generator also rejects previously ignored `composite` on non-query methods
+and `manual_reply` on lifecycle hooks. Migration notes include IcyDB's handwritten
+endpoint fixtures, which still use the separately retired `hidden` option.
+Eight generator tests, the standalone native/MSRV/Wasm CDK consumer, strict
+Clippy and all four rebuilt installed compiler/protocol combinations pass.
+Evidence: `/tmp/platform05-hygiene-*.log` and `target/cdk-runtime.oL3rKY`.
+The before-fix compile log is `/tmp/platform05-hygiene-before.log`.
+No runtime/crypto bodies, dependency selections or sibling files changed in
+this pass; native macOS and live IC qualification remain separate.
+
+The subsequent generator/call cleanup retires `hidden` and `change_timeout`.
+Entrypoint options now use Syn directly, with targeted retirement, duplicate and
+unknown-option errors; ordered guards, explicit codec paths and boolean flags
+remain supported. String-encoded booleans are rejected. Argument processing no
+longer clones discarded type syntax. Darling 0.23 and its generator dependency
+edge are removed, without changing unrelated dependency versions.
+
+`with_wait_policy(WaitPolicy::{Bounded { timeout_seconds }, Unbounded})` replaces
+the timeout mutator that panicked on unbounded calls. Constructor defaults and
+stored/submitted timeout values are unchanged. Blob has three old-method users;
+Testkit performance probes still supply `hidden`. Both migrations are documented,
+and siblings remain untouched. Runtime fixtures exercise both mode transitions.
+
+The callback ownership audit found one Arc allocation for the shared call state;
+cloning the Arc for submission shares that allocation. Immediate submission
+failure reclaims the raw reference; successful submission transfers it to the
+callback/cleanup path. Trap rollback is essential to that ownership argument.
+Callbacks release the state lock before waking the task. Removing synchronization
+would also require checking native auto-trait behavior and executor assumptions,
+not merely assuming single-threaded Wasm makes it redundant. No callback/lock
+rewrite or measured speed improvement is claimed; source fingerprints remain
+unchanged for submission, callback cleanup and protected spawning.
+
+This cleanup passes seven generator tests and 22 focused runtime tests on Rust
+1.88, standalone runtime/CDK native and Wasm checks, strict Clippy, source and
+mutation guards, and all 180 routine feature selections on native/Wasm.
+Evidence: `/tmp/platform05-macro-*.log`, `/tmp/platform05-wait-tests.log` and
+`target/feature-graphs/attempt.ku8S0D`. The reused installed fixture
+`target/cdk-runtime.oL3rKY` passes all four compiler/protocol combinations after
+rebuilding its canisters with the new parser and wait-policy transitions;
+`/tmp/platform05-macro-installed.log` records the run. Native macOS and live IC
+qualification remain outstanding. No cryptographic source or executor changed.
+
+The checkout started clean at released 0.4.1 (`30058e1`). The maintainer authorized
+retiring unused surface and auditing frequently used IC paths, with siblings
+read-only and cryptographic implementations unchanged. The checkpoint API has no
+live calls in the searched sibling Rust trees outside Platform's own fixture.
+Its public module, private stable IO abstraction/writer and whole-memory copy are
+removed. Raw stable grow/read/write retain their signatures and ic0 behavior.
+The unreachable OutOfBounds error variant is removed: raw bounds violations
+already trap, while failed growth returns OutOfMemory.
+The fixture explicitly owns its existing fixed Candid record and preserves
+no-finalization restore; no production checkpoint replacement is introduced.
+
+The usage audit included app/test canisters before deciding removals: Timers and
+Canic use cycle burning, and Canic uses HTTP cost estimation, so those remain.
+Common principal/call paths, clock/counter passthroughs and decoder policy were
+reviewed. Caller/canister/subnet ID construction had a temporary Vec despite the
+29-byte identity bound; it now uses stack buffers. Clock/counter wrappers already
+delegate directly; callback/trap state-machine and cryptographic bodies remain
+unchanged. Source reference counts are prioritization evidence, not runtime
+profiling. Audit revisions and searches are retained at `/tmp/platform05-audit`.
+
+The [0.5 migration contract](../migration.md#pending-05-retirement) documents
+unknown downstream checkpoint users, preserved data policies and retirement.
+Package versions remain 0.4.1; the pending changelog is 0.5.0. No dependency
+elimination across the fleet or measured speed/Wasm saving is claimed. No sibling edits, commits,
+pushes or publication were performed.
+
+The expanded audit separates two independently consumed capabilities.
+`candid-service` now owns service registration/export macros and their printer;
+plain `candid` retains external DTO encoding, decoding, big numbers and reflection.
+Canic and Blob still generate Candid declarations, so their macro/test owners must
+select the new feature before adoption. `runtime` exposes the existing `cdk::*`
+adapters without entrypoint macros; `cdk` includes it and keeps the generator.
+Canic Core's raw-call use can select `runtime`, while Canic's entrypoint owner
+keeps `cdk`. No sibling manifests were changed.
+
+At the preceding feature-split stage, native/Wasm isolated graph comparisons removed four packages from plain Candid
+(`pretty`, `typed-arena`, `arrayvec`, `unicode-width`) and six from runtime-only
+versus CDK (`ic-platform-macros`, `darling`, `darling_core`, `darling_macro`,
+`ident_case`, `strsim`). Other selected features can unify these back in.
+That graph checker admitted all 180 routine selections on native and Wasm and rejected
+an unselected printer or entrypoint generator. Evidence:
+`target/feature-graphs/attempt.K9Wcl3`, `/tmp/platform05-expanded-graphs.log`.
+Standalone Candid, service, runtime and CDK consumers pass development/MSRV 1.88
+native tests and Wasm compilation; 26 focused MSRV tests pass. The runtime bodies,
+executor identity and cryptographic code did not change in this expansion.
+The installed qualification below predates these feature separations; neither
+native macOS nor installed-canister execution was rerun for this expansion.
+
+Rust 1.88 runtime/Candid tests, standalone CDK consumer native/MSRV/Wasm checks,
+compile-fail retirement documentation, strict selected Clippy, source-fingerprint
+and mutation guards, dependency graphs, formatting and changelog admission pass.
+All four installed PocketIC 16.0.0 compiler/protocol combinations pass on the
+candidate, retaining original fixture checkpoint bytes. Evidence:
+`target/cdk-runtime.oL3rKY`, `target/boundary-consumer.tjAOD6` and
+`/tmp/platform05-*.log`. Native macOS and live IC qualification of this candidate
+remain separate.
+
+Released 0.4.1's [installed-runtime CI](https://github.com/dragginzgame/ic-platform/actions/runs/39405021699)
+now passes, resolving the earlier fresh-runner provisioning uncertainty. It does
+not qualify these uncommitted changes. The older sections below are historical
+qualification records, not current branch status.
+
+## 0.4.1 Account formatting qualification (historical)
 
 Account Display now encodes subaccount hexadecimal text into one fixed 64-byte
 buffer rather than repeatedly invoking integer formatting. No public identity,
@@ -26,7 +166,7 @@ therefore remain outstanding. No commit, push or publication was performed.
 
 ## 0.4 post-release qualification
 
-HEAD is the maintainer's 0.4.0 release (`26a07c5`). The follow-up adds a separate
+That audit started at the maintainer's 0.4.0 release (`26a07c5`). The follow-up added a separate
 Linux installed-runtime workflow using Testkit-owned setup/check, and an exact
 registry mode for the installed fixture. Published mode rejects local facade or
 generator replacements, retains its disposable resolved lock, and applies the

@@ -13,7 +13,7 @@ Read [the current handoff](docs/status/current.md), then
 - No default features. Executor-only builds must remain Candid-free; host parser
   features must never be enabled by canister/runtime features.
 - Storage implementation and allocation are out of scope. The reviewed CDK
-  stable/checkpoint passthroughs preserve upstream bytes and semantics; they do
+  stable passthroughs preserve upstream bytes and semantics; they do
   not transfer storage ownership. Wire, Testkit, Host, Canic and Query
   retain their product responsibilities; existing siblings remain read-only.
 - Preserve dirty work and check for Cargo/rustc processes sharing target/ before
@@ -36,7 +36,7 @@ coordinated package version, original generator semantics and explicit paths.
 The maintainer authorized adopting the reviewed non-cryptographic CDK 0.20.3
 adapters inside Platform and removing the `ic-cdk` package. Keep their Apache-2.0
 license/provenance. The facade's mixed-source license is MIT AND Apache-2.0.
-Only the imported callback and legacy byte-copy modules permit reviewed unsafe
+Only the imported callback module permits reviewed unsafe
 code; other modules retain the workspace deny lint. No executor is forked.
 Preserve registry executor =2.0.0 and ic0 =1.2.0 identities. Endpoint macros require
 explicit consumer-owned codecs; all owned application endpoints use Wire, including
@@ -119,5 +119,13 @@ subaccount allocation policy belongs in the owned account surface.
 The 0.4 runtime accepts/returns raw transport bytes only. Do not restore implicit
 Candid request/response helpers or a combined transport/codec error union. Use the
 separate Candid boundary for required external IC interfaces; consumers retain
-encoding-failure, decoding, arity, resource, diagnostics and retry policy. Legacy
-Candid checkpoint adapters remain unchanged and outside new storage ownership.
+encoding-failure, decoding, arity, resource, diagnostics and retry policy.
+The maintainer authorized retiring unused `cdk::storage` helpers in the 0.5 hard
+cut. Do not restore a compatibility owner. Raw stable passthroughs remain;
+existing checkpoint formats and migrations belong to their consumers. The
+installed fixture alone retains explicit legacy-byte qualification.
+The 0.5 cut also retires the no-op `hidden` entrypoint option and replaces
+`Call::change_timeout` with explicit `WaitPolicy` selection. Keep the Syn-based
+option parser's ordered guards and strict duplicate/type errors; do not restore
+Darling solely for compatibility. Submission, callback and cleanup source
+fingerprints remain unchanged.

@@ -18,6 +18,19 @@ use thiserror::Error;
 
 pub use crate::cdk::reject_code::RejectCode;
 
+/// Consumer-selected response waiting; this does not configure retries.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum WaitPolicy {
+    /// Request a best-effort response with the supplied timeout in seconds.
+    /// Zero remains bounded; the IC applies its own maximum.
+    Bounded {
+        /// Requested timeout, forwarded unchanged to the IC.
+        timeout_seconds: u32,
+    },
+    /// Wait without a best-effort response timeout.
+    Unbounded,
+}
+
 /// Raw inter-canister call builder.
 ///
 /// Bounded waits default to 300 seconds. Constructors start with empty transport
@@ -41,7 +54,7 @@ impl<'m> Call<'m, '_> {
     ///
     /// The bounded waiting is set with a default 300-second timeout.
     /// It aligns with the `MAX_CALL_TIMEOUT` constant in the current IC implementation.
-    /// The timeout can be changed using the [`change_timeout`][Self::change_timeout] method.
+    /// The timeout can be changed using the [`with_wait_policy`][Self::with_wait_policy] method.
     ///
     /// To unboundedly wait for response, use the [`Call::unbounded_wait`] constructor instead.
     #[must_use]
@@ -125,33 +138,17 @@ impl<'a> Call<'_, 'a> {
         self
     }
 
-    /// Changes the timeout for bounded response waiting.
+    /// Selects bounded or unbounded response waiting explicitly.
     ///
-    /// If invoked multiple times, the last value takes effect.
-    ///
-    /// The timeout value is silently capped by the `MAX_CALL_TIMEOUT` constant which is currently set to 300 seconds.
-    /// Therefore, setting a timeout greater than 300 seconds will actually result in a 300-second timeout.
-    ///
-    /// # Panics
-    ///
-    /// This method will panic if invoked on an unbounded response waiting call constructed by [`Call::unbounded_wait`] .
-    ///
-    /// # Note
-    ///
-    /// A timeout of 0 second **DOES NOT** mean unbounded response waiting.
-    /// The call would most likely time out (result in a [`SysUnknown`](RejectCode::SysUnknown) reject).
-    /// Unless it's a call to the canister on the same subnet,
-    /// and the execution manages to schedule both the request and the response in the same round.
-    ///
-    /// To unboundedly wait for response, use the [`Call::unbounded_wait`] constructor instead.
+    /// Replaces the previous wait policy without changing payload, cycles or retry
+    /// behavior. Values are forwarded unchanged to the IC; zero is bounded, not
+    /// unbounded. The IC applies its own maximum timeout.
     #[must_use]
-    pub fn change_timeout(mut self, timeout_seconds: u32) -> Self {
-        match self.timeout_seconds {
-            Some(_) => self.timeout_seconds = Some(timeout_seconds),
-            None => {
-                panic!("Cannot set a timeout for an instance created with Call::unbounded_wait")
-            }
-        }
+    pub fn with_wait_policy(mut self, policy: WaitPolicy) -> Self {
+        self.timeout_seconds = match policy {
+            WaitPolicy::Bounded { timeout_seconds } => Some(timeout_seconds),
+            WaitPolicy::Unbounded => None,
+        };
         self
     }
 
@@ -665,6 +662,36 @@ unsafe extern "C" fn cleanup(env: usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn wait_policy_replaces_mode_without_changing_payload_or_payment() {
+        for initial in [
+            Call::bounded_wait(Principal::anonymous(), "probe"),
+            Call::unbounded_wait(Principal::anonymous(), "probe"),
+        ] {
+            let initial = initial.take_raw_args(vec![1, 2]).with_cycles(123);
+            for timeout_seconds in [0, 1, 300, u32::MAX] {
+                let call = initial
+                    .clone()
+                    .with_wait_policy(WaitPolicy::Bounded { timeout_seconds });
+                assert_eq!(call.timeout_seconds, Some(timeout_seconds));
+                assert_eq!(call.encoded_args.as_ref(), [1, 2]);
+                assert_eq!(call.cycles, 123);
+                assert_eq!(call.method, "probe");
+                assert_eq!(call.canister_id, Principal::anonymous());
+                let call = call.with_wait_policy(WaitPolicy::Unbounded);
+                assert_eq!(call.timeout_seconds, None);
+            }
+        }
+        assert_eq!(
+            Call::bounded_wait(Principal::anonymous(), "probe").timeout_seconds,
+            Some(300)
+        );
+        assert_eq!(
+            Call::unbounded_wait(Principal::anonymous(), "probe").timeout_seconds,
+            None
+        );
+    }
 
     #[test]
     fn raw_constructors_do_not_choose_a_codec() {

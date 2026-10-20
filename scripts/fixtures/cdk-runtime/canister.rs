@@ -25,7 +25,14 @@ fn initialize(value: u64) {
 )]
 fn after_upgrade(value: u64) {
     #[cfg(feature = "external-candid")]
-    CHECKPOINT.set(ic_platform::cdk::storage::stable_restore().unwrap());
+    {
+        // Fixture-owned legacy bytes: deliberately retain the old no-finalization
+        // decoding policy. Platform no longer owns a checkpoint API.
+        let mut bytes = vec![0; (api::stable_size() * 65_536) as usize];
+        ic_platform::cdk::stable::stable_read(0, &mut bytes);
+        let mut decoder = ic_platform::candid::decoder::IDLDeserialize::new(&bytes).unwrap();
+        CHECKPOINT.set(contract::ArgumentDecoder::decode(&mut decoder).unwrap());
+    }
     VALUE.set(value);
     ic_timers::initialize_runtime().unwrap();
 }
@@ -40,11 +47,12 @@ fn value() -> u64 {
 }
 
 #[ic_platform::cdk::query(
+    name = "scalar",
     guard = "codec::admit",
     decode_with = "codec::decode::<_, { protocol::Method::Scalar as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::Scalar as u64 }>"
 )]
-fn scalar(input: u64) -> u64 {
+fn r#match(input: u64) -> u64 {
     input + 1
 }
 
@@ -70,7 +78,10 @@ fn unit() {}
     encode_with = "codec::encode::<_, { protocol::Method::Awaited as u64 }>"
 )]
 async fn awaited(input: u64) -> u64 {
-    let bytes = Call::bounded_wait(api::canister_self(), "scalar")
+    let bytes = Call::unbounded_wait(api::canister_self(), "scalar")
+        .with_wait_policy(ic_platform::cdk::call::WaitPolicy::Bounded {
+            timeout_seconds: 300,
+        })
         .take_raw_args(codec::request("scalar", &input))
         .await
         .unwrap()
@@ -85,7 +96,8 @@ async fn awaited(input: u64) -> u64 {
     encode_with = "codec::encode::<_, { protocol::Method::Composite as u64 }>"
 )]
 async fn composite(input: u64) -> u64 {
-    let bytes = Call::unbounded_wait(api::canister_self(), "scalar")
+    let bytes = Call::bounded_wait(api::canister_self(), "scalar")
+        .with_wait_policy(ic_platform::cdk::call::WaitPolicy::Unbounded)
         .take_raw_args(codec::request("scalar", &input))
         .await
         .unwrap()
@@ -110,7 +122,6 @@ fn guarded() -> u64 {
 #[ic_platform::cdk::query(
     guard = "codec::admit",
     manual_reply = true,
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::Manual as u64 }>"
 )]
 fn manual() {
@@ -201,7 +212,6 @@ thread_local! {
 #[ic_platform::cdk::update(
     guard = "codec::admit",
     manual_reply = true,
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::CycleReceiver as u64 }>"
 )]
 fn cycle_receiver(limit: u128, mode: u8) {
@@ -222,7 +232,6 @@ fn cycle_receiver(limit: u128, mode: u8) {
 
 #[ic_platform::cdk::query(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::CycleTotal as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::CycleTotal as u64 }>"
 )]
@@ -232,7 +241,6 @@ fn cycle_total() -> u128 {
 
 #[ic_platform::cdk::update(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::CycleRoundtrip as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::CycleRoundtrip as u64 }>"
 )]
@@ -295,12 +303,20 @@ thread_local! {
 #[ic_platform::cdk::pre_upgrade]
 fn save_checkpoint() {
     #[cfg(feature = "external-candid")]
-    ic_platform::cdk::storage::stable_save((true, false, VALUE.get(), CLEANED.get())).unwrap();
+    {
+        // This fixed fixture record fits one page. Preserve its original Candid
+        // bytes without introducing a production checkpoint replacement.
+        let bytes = contract::encode_args((true, false, VALUE.get(), CLEANED.get())).unwrap();
+        assert!(bytes.len() <= 65_536);
+        if api::stable_size() == 0 {
+            ic_platform::cdk::stable::stable_grow(1).unwrap();
+        }
+        ic_platform::cdk::stable::stable_write(0, &bytes);
+    }
 }
 
 #[ic_platform::cdk::query(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::Checkpoint as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::Checkpoint as u64 }>"
 )]
@@ -310,7 +326,6 @@ fn checkpoint() -> (bool, bool, u64, u64) {
 
 #[ic_platform::cdk::update(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::StableEdit as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::StableEdit as u64 }>"
 )]
@@ -328,7 +343,6 @@ fn stable_edit(value: u64, grow: bool, fail: bool) -> (u64, u64) {
 
 #[ic_platform::cdk::query(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::StableValue as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::StableValue as u64 }>"
 )]
@@ -340,7 +354,6 @@ fn stable_value() -> (u64, u64) {
 
 #[ic_platform::cdk::query(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::CheckpointBytes as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::CheckpointBytes as u64 }>"
 )]
@@ -359,7 +372,6 @@ fn checkpoint_bytes() -> Vec<u8> {
 
 #[ic_platform::cdk::update(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::PublishRoot as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::PublishRoot as u64 }>"
 )]
@@ -370,7 +382,6 @@ fn publish_root(root: Vec<u8>) -> bool {
 
 #[ic_platform::cdk::query(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::Certificate as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::Certificate as u64 }>"
 )]
@@ -380,7 +391,6 @@ fn certificate() -> Option<Vec<u8>> {
 
 #[ic_platform::cdk::update(
     guard = "codec::admit",
-    hidden = true,
     decode_with = "codec::decode::<_, { protocol::Method::SystemHelpers as u64 }>",
     encode_with = "codec::encode::<_, { protocol::Method::SystemHelpers as u64 }>"
 )]

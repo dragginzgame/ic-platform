@@ -1,21 +1,15 @@
 // Derived from ic-cdk-macros 0.20.3; see README.md and LICENSE.
-// Darling's generated FromMeta impl spells out the multiple field `guard: guard`.
-#![allow(clippy::redundant_field_names)]
-
-use darling::FromMeta;
-use darling::ast::NestedMeta;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
 use std::fmt::Formatter;
+use syn::ext::IdentExt;
+use syn::parse::Parser;
 use syn::spanned::Spanned;
-use syn::{
-    Error, FnArg, ItemFn, Pat, PatIdent, PatType, Path, ReturnType, Signature, Type, parse_str,
-};
+use syn::{Error, FnArg, ItemFn, Path, ReturnType, Signature, Type, parse_str};
 
-#[derive(Default, FromMeta)]
+#[derive(Default)]
 struct ExportAttributes {
     pub name: Option<String>,
-    #[darling(multiple)]
     pub guard: Vec<String>,
     /// The name of the function to use for decoding arguments.
     /// Required for callable entries, including unit requests.
@@ -27,14 +21,57 @@ struct ExportAttributes {
     ///
     /// If the method returns a tuple, this custom encoder function should take the tuple as an argument.
     pub encode_with: Option<String>,
-    #[darling(default)]
     pub manual_reply: bool,
-    #[darling(default)]
     pub composite: bool,
-    #[darling(default)]
-    pub hidden: bool,
-    #[darling(rename = "crate")]
     pub cratename: Option<String>,
+}
+
+impl ExportAttributes {
+    fn parse(tokens: TokenStream) -> syn::Result<Self> {
+        let mut attrs = Self::default();
+        let mut seen = std::collections::BTreeSet::new();
+        syn::meta::parser(|meta| {
+            let Some(ident) = meta.path.get_ident() else {
+                return Err(meta.error("expected a single entrypoint option name"));
+            };
+            let name = ident.to_string();
+            if name == "hidden" {
+                return Err(meta.error("hidden is retired; remove it (it had no effect)"));
+            }
+            if name != "guard" && !seen.insert(name.clone()) {
+                return Err(meta.error(format!("duplicate entrypoint option `{name}`")));
+            }
+            match name.as_str() {
+                "name" | "guard" | "decode_with" | "encode_with" | "crate" => {
+                    let value = meta.value()?.parse::<syn::LitStr>()?.value();
+                    match name.as_str() {
+                        "name" => attrs.name = Some(value),
+                        "guard" => attrs.guard.push(value),
+                        "decode_with" => attrs.decode_with = Some(value),
+                        "encode_with" => attrs.encode_with = Some(value),
+                        "crate" => attrs.cratename = Some(value),
+                        _ => unreachable!(),
+                    }
+                }
+                "manual_reply" | "composite" => {
+                    let value = if meta.input.peek(syn::Token![=]) {
+                        meta.value()?.parse::<syn::LitBool>()?.value
+                    } else {
+                        true
+                    };
+                    if name == "manual_reply" {
+                        attrs.manual_reply = value;
+                    } else {
+                        attrs.composite = value;
+                    }
+                }
+                _ => return Err(meta.error(format!("unknown entrypoint option `{name}`"))),
+            }
+            Ok(())
+        })
+        .parse2(tokens)?;
+        Ok(attrs)
+    }
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -109,36 +146,37 @@ impl std::fmt::Display for MethodType {
     }
 }
 
-fn get_args(method: MethodType, signature: &Signature) -> Result<Vec<(Ident, Box<Type>)>, Error> {
-    // We only need the tuple of arguments, not their types. Magic of type inference.
+fn get_args(method: MethodType, signature: &Signature) -> Result<Vec<Ident>, Error> {
+    // Fresh positional bindings avoid collisions with user patterns and paths.
     let mut args = vec![];
     for (i, arg) in signature.inputs.iter().enumerate() {
-        let (ident, ty) = match arg {
+        let ident = match arg {
             FnArg::Receiver(r) => {
                 return Err(Error::new(
                     r.span(),
                     format!("#[{method}] cannot be above functions with `self` as a parameter."),
                 ));
             }
-            FnArg::Typed(PatType { pat, ty, .. }) => {
-                let ident = if let Pat::Ident(PatIdent { ident, .. }) = pat.as_ref() {
-                    // If the argument is named the same as the function, we need to rename it.
-                    if ident == &signature.ident {
-                        format_ident!("__arg_{}", ident, span = pat.span())
-                    } else {
-                        ident.clone()
-                    }
-                } else {
-                    format_ident!("__unnamed_arg_{i}", span = pat.span())
-                };
-                (ident, ty.clone())
-            }
+            FnArg::Typed(_) => format_ident!("__platform_arg_{i}", span = Span::mixed_site()),
         };
 
-        args.push((ident, ty));
+        args.push(ident);
     }
 
     Ok(args)
+}
+
+// Native object formats need portable symbols, but replacing punctuation can
+// merge distinct IC export names. Hex encodes every UTF-8 byte without loss.
+fn host_export_name(export_name: &str) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut symbol = String::with_capacity(12 + export_name.len() * 2);
+    symbol.push_str("__ic_export_");
+    for byte in export_name.bytes() {
+        symbol.push(HEX[usize::from(byte >> 4)] as char);
+        symbol.push(HEX[usize::from(byte & 15)] as char);
+    }
+    symbol
 }
 
 fn dfn_macro(
@@ -147,8 +185,24 @@ fn dfn_macro(
     item: TokenStream,
 ) -> Result<TokenStream, Error> {
     let attr_span = attr.span();
-    let attr_args = NestedMeta::parse_meta_list(attr)?;
-    let attrs = ExportAttributes::from_list(&attr_args)?;
+    let attrs = ExportAttributes::parse(attr)?;
+    if attrs.composite && method != MethodType::Query {
+        return Err(Error::new(
+            attr_span,
+            "composite is only supported on query methods",
+        ));
+    }
+    if attrs.manual_reply && method.is_lifecycle() {
+        return Err(Error::new(
+            attr_span,
+            "manual_reply is not supported on lifecycle hooks",
+        ));
+    }
+    // User-supplied function/codec paths retain their own spans. Generated locals
+    // must not capture those paths, even when they have the same spelling.
+    let guard_result = Ident::new("r", Span::mixed_site());
+    let argument_bytes = Ident::new("arg_bytes", Span::mixed_site());
+    let result = Ident::new("result", Span::mixed_site());
 
     let fun: ItemFn = syn::parse2::<syn::ItemFn>(item.clone()).map_err(|e| {
         Error::new(
@@ -170,7 +224,8 @@ fn dfn_macro(
 
     // 1. function name(s)
     let name = &signature.ident;
-    let outer_function_ident = format_ident!("__canister_method_{name}");
+    let plain_name = name.unraw();
+    let outer_function_ident = format_ident!("__canister_method_{plain_name}");
     let function_name = if let Some(custom_name) = attrs.name {
         if method.is_lifecycle() {
             return Err(Error::new(
@@ -186,7 +241,7 @@ fn dfn_macro(
         }
         custom_name
     } else {
-        name.to_string()
+        plain_name.to_string()
     };
     let export_name = if method.is_lifecycle() {
         format!("canister_{method}")
@@ -195,7 +250,7 @@ fn dfn_macro(
     } else {
         format!("canister_{method} {function_name}")
     };
-    let host_compatible_name = export_name.replace(' ', ".").replace(['-', '<', '>'], "_");
+    let host_compatible_name = host_export_name(&export_name);
 
     // 2. guard(s)
     if !attrs.guard.is_empty() && method.is_lifecycle() {
@@ -210,8 +265,8 @@ fn dfn_macro(
         .map(|guard_name| -> Result<_, Error> {
             let guard_path = parse_str::<Path>(guard_name)?;
             Ok(quote! {
-                let r: Result<(), String> = #guard_path ();
-                if let Err(e) = r {
+                let #guard_result: ::std::result::Result<(), ::std::string::String> = #guard_path ();
+                if let ::std::result::Result::Err(e) = #guard_result {
                     #cratename::api::msg_reject(&e);
                     return;
                 }
@@ -223,8 +278,7 @@ fn dfn_macro(
     };
 
     // 3. decode arguments
-    let (arg_tuple, _): (Vec<Ident>, Vec<Box<Type>>) =
-        get_args(method, signature)?.iter().cloned().unzip();
+    let arg_tuple = get_args(method, signature)?;
     if !method.can_have_args() {
         if !arg_tuple.is_empty() {
             return Err(Error::new(
@@ -244,13 +298,13 @@ fn dfn_macro(
         if arg_tuple.len() == 1 {
             let arg_one = &arg_tuple[0];
             quote! {
-                let arg_bytes = #cratename::api::msg_arg_data();
-                let #arg_one = #decode_with_ident(arg_bytes);
+                let #argument_bytes = #cratename::api::msg_arg_data();
+                let #arg_one = #decode_with_ident(#argument_bytes);
             }
         } else {
             quote! {
-            let arg_bytes = #cratename::api::msg_arg_data();
-            let ( #( #arg_tuple, )* ) = #decode_with_ident(arg_bytes); }
+            let #argument_bytes = #cratename::api::msg_arg_data();
+            let ( #( #arg_tuple, )* ) = #decode_with_ident(#argument_bytes); }
         }
     } else if method.can_have_args() && (!method.is_lifecycle() || !arg_tuple.is_empty()) {
         return Err(Error::new(
@@ -297,7 +351,7 @@ fn dfn_macro(
             let encode_with_ident = parse_str::<Path>(encode_with)?;
             match return_length {
                 0 => quote! { #encode_with_ident()},
-                _ => quote! { #encode_with_ident(result)},
+                _ => quote! { #encode_with_ident(#result)},
             }
         } else {
             return Err(Error::new(
@@ -306,13 +360,12 @@ fn dfn_macro(
             ));
         };
         quote! {
-            let bytes: Vec<u8> = #return_bytes;
+            let bytes: ::std::vec::Vec<u8> = #return_bytes;
             #cratename::api::msg_reply(bytes);
         }
     };
 
     // Codec-defined endpoints are never registered as Candid services.
-    let _ = attrs.hidden; // Accepted for existing explicit Wire hook declarations.
 
     // 7. exported function body
     let async_context_name = if method.is_state_persistent() {
@@ -327,7 +380,7 @@ fn dfn_macro(
                 #[allow(clippy::disallowed_methods)]
                 #cratename::futures::spawn(async {
                     #arg_decode
-                    let result = #function_call;
+                    let #result = #function_call;
                     #return_encode
                 });
             });
@@ -337,7 +390,7 @@ fn dfn_macro(
             #guard
             #cratename::futures::internals::#async_context_name(|| {
                 #arg_decode
-                let result = #function_call;
+                let #result = #function_call;
                 #return_encode
             });
         }

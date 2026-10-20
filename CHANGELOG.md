@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.5.0]
+
+### Breaking
+
+- Reject `composite` on non-query entrypoints and `manual_reply` on lifecycle
+  hooks instead of silently ignoring those options.
+
+- Reject the retired no-op `hidden` entrypoint option.
+- Replace panic-prone `Call::change_timeout` with explicit
+  `with_wait_policy(WaitPolicy)` selection of bounded or unbounded waiting.
+  Preserve constructor defaults, cycle payments, raw payloads and retry policy.
+
+- Require `candid-service` for `candid_method`, `export_service` and their printer.
+  Plain `candid` retains external DTO derives, arbitrary-precision numbers and
+  decoding, without selecting service-generation printer dependencies.
+
+- Retire unused `cdk::storage::{stable_save, stable_restore}` and their private
+  stable-memory writer/copy machinery. Raw stable-memory passthroughs remain.
+  Existing persisted formats remain consumer-owned; no data is rewritten.
+- Remove the unreachable `StableMemoryError::OutOfBounds` variant. Raw reads and
+  writes still trap on bounds violations; failed growth returns `OutOfMemory`.
+
+### Improved
+
+- Support raw Rust handler identifiers such as `r#match` without a macro panic.
+  Default endpoint names omit Rust's `r#` escape; explicit names stay verbatim.
+
+- Encode native entrypoint export symbols without lossy punctuation replacement,
+  allowing distinct names such as `native-name` and `native_name` to coexist in
+  host builds. Wasm export names remain unchanged.
+
+- Generate hygienic entrypoint locals and positional argument bindings, fixing
+  valid handler/codec names and argument patterns that previously collided with
+  generated variables. Qualify generated standard-library types so consumer
+  aliases cannot change guard/reply typing.
+
+- Parse entrypoint options directly with Syn, removing the generator's Darling
+  dependency and redundant argument-type clones. Preserve ordered guards and
+  explicit codecs; reject duplicate options and string-encoded boolean flags.
+
+- Separate `runtime` from `cdk` entrypoint generation. Raw-call libraries can use
+  the same `cdk::*` APIs and executor without selecting `ic-platform-macros`.
+
+- Copy caller, canister and subnet Principal identities through fixed stack
+  buffers, removing their temporary Vec allocation without changing valid bytes.
+
 ## [0.4.1] - 2026-10-20
 
 ### Fixed

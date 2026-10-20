@@ -17,10 +17,11 @@ pub fn msg_arg_data() -> Vec<u8> {
 /// During a system task (heartbeat or global timer), this is the id of the management canister.
 pub fn msg_caller() -> Principal {
     let len = ic0::msg_caller_size();
-    let mut buf = vec![0u8; len];
-    ic0::msg_caller_copy(&mut buf, 0);
-    // Trust that the system always returns a valid principal.
-    Principal::try_from(&buf).unwrap()
+    let mut buf = [0u8; Principal::MAX_LENGTH_IN_BYTES];
+    let bytes = &mut buf[..len];
+    ic0::msg_caller_copy(bytes, 0);
+    // The IC supplies at most 29 identity bytes; malformed lengths still trap.
+    Principal::from_slice(bytes)
 }
 
 /// Returns the reject code, if the current function is invoked as a reject callback.
@@ -87,10 +88,11 @@ pub fn cycles_burn(amount: u128) -> u128 {
 /// Gets canister's own identity.
 pub fn canister_self() -> Principal {
     let len = ic0::canister_self_size();
-    let mut buf = vec![0u8; len];
-    ic0::canister_self_copy(&mut buf, 0);
-    // Trust that the system always returns a valid principal.
-    Principal::try_from(&buf).unwrap()
+    let mut buf = [0u8; Principal::MAX_LENGTH_IN_BYTES];
+    let bytes = &mut buf[..len];
+    ic0::canister_self_copy(bytes, 0);
+    // The IC supplies at most 29 identity bytes; malformed lengths still trap.
+    Principal::from_slice(bytes)
 }
 
 /// Gets the current cycle balance of the canister.
@@ -113,10 +115,11 @@ pub fn canister_version() -> u64 {
 /// Gets the ID of the subnet on which the canister is running.
 pub fn subnet_self() -> Principal {
     let len = ic0::subnet_self_size();
-    let mut buf = vec![0u8; len];
-    ic0::subnet_self_copy(&mut buf, 0);
-    // Trust that the system always returns a valid principal.
-    Principal::try_from(&buf).unwrap()
+    let mut buf = [0u8; Principal::MAX_LENGTH_IN_BYTES];
+    let bytes = &mut buf[..len];
+    ic0::subnet_self_copy(bytes, 0);
+    // The IC supplies at most 29 identity bytes; malformed lengths still trap.
+    Principal::from_slice(bytes)
 }
 
 /// Gets the name of the method to be inspected.

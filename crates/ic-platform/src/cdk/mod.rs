@@ -1,22 +1,29 @@
 //! Owned non-cryptographic runtime adapters and explicit-codec entrypoints.
 //!
-//! `cdk` is Candid-free. Select `candid` explicitly for required external
-//! management/system calls and existing Candid checkpoints. Controlled RPCs use
+//! `runtime` exposes this module without entrypoint macros; `cdk` adds them.
+//! Both are Candid-free. Select `candid` explicitly for required external
+//! management/system calls and consumer-owned legacy data. Controlled RPCs use
 //! consumer-owned Wire hooks. Registry executor 2.0.0 and ic0 1.2.0 stay shared.
 //! See the imported Apache-2.0 source provenance under `upstream/NOTICE.md`.
+//!
+//! The 0.5 hard cut retires the unused checkpoint API:
+//! ```compile_fail
+//! use ic_platform::cdk::storage::{stable_save, stable_restore};
+//! ```
 
 pub mod reject_code;
 mod upstream;
 
 /// Print with the original native/canister debug behavior.
 pub use crate::__platform_println as println;
+#[cfg(feature = "cdk")]
 pub use ic_platform_macros::{
     heartbeat, init, inspect_message, on_low_wasm_memory, post_upgrade, pre_upgrade, query, update,
 };
 
 /// Explicit reviewed system adapters used by reviewed canisters and the generator.
 ///
-/// Principal/Vec construction and controller 0/1/panic behavior retain the imported implementation.
+/// Principal copies use bounded stack buffers; controller 0/1/panic behavior is retained.
 /// Argument copying is not a substitute for consumer admission before allocation.
 pub mod api {
     pub use super::upstream::api::{
@@ -37,7 +44,7 @@ pub mod api {
 pub mod call {
     pub use super::upstream::call::{
         Call, CallFailed, CallPerformFailed, CallRejected, InsufficientLiquidCycleBalance,
-        OnewayError, RejectCode, Response, UnrecognizedRejectCode,
+        OnewayError, RejectCode, Response, UnrecognizedRejectCode, WaitPolicy,
     };
 }
 
@@ -45,13 +52,6 @@ pub mod call {
 /// Consumers retain offsets, page admission, layout and rollback policy.
 pub mod stable {
     pub use super::upstream::stable::{StableMemoryError, stable_grow, stable_read, stable_write};
-}
-
-/// Existing CDK Candid checkpoint helpers; no new storage format or policy.
-/// Restore retains upstream decoding behavior, including its lack of finalization.
-#[cfg(feature = "candid")]
-pub mod storage {
-    pub use super::upstream::storage::{stable_restore, stable_save};
 }
 
 /// Imported protected spawning, without substituting raw executor protected tasks.

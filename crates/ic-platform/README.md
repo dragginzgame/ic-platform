@@ -1,5 +1,11 @@
 # ic-platform
 
+For raw calls and system/task adapters, select `runtime` and keep the existing
+`ic_platform::cdk::{api, call, futures, stable}` imports. Select `cdk` when the
+package also owns generated entrypoints; it includes `runtime`. Both use the
+same executor and remain Candid-free. This avoids the Platform entrypoint
+generator in runtime-only graphs, not every transitive proc-macro dependency.
+
 Enable `secp256k1` for native offline public-key derivation through
 `ic_platform::secp256k1::{PublicKey, MasterPublicKeyId, PocketIcMasterPublicKeyId,
 KeyDecodingError}`. The dependency is exactly `ic-secp256k1 =0.3.0`; types and
@@ -126,7 +132,10 @@ For service generation, write `contract::export_service!(ic_platform::candid::co
 the upstream macro accepts this explicit generated path. Update generators too.
 Import `contract::{Encode, Decode}` by those names so their recursive macro calls
 resolve without a direct Candid crate. The `candid` feature selects upstream
-`bignum` and `printer`; it does not enable an executor or host parser.
+`bignum`; it does not enable an executor or host parser. Service declaration
+macros (`candid_method`, `export_service`) and their printer require the separate
+`candid-service` feature. External DTO encoding/decoding needs only `candid`;
+native parsing still selects `candid-parser`.
 
 Enable `certification` for `ic_platform::certification`: upstream `Certificate`,
 `Delegation`, `HashTree`, `Label`, `LookupResult`, `empty`, `fork`, `labeled`,
@@ -225,7 +234,11 @@ pre-copy byte admission. Caller code retains endpoint IDs, decoder budgets,
 authentication and retry policy. No Candid endpoint fallback, service-registration
 macro or Candid path option is supplied. Lifecycle hooks with arguments require
 explicit decoding; no-argument hooks may omit it. A renamed dependency can use
-`crate = "platform::cdk"`. Existing `hidden = true` remains accepted but redundant.
+`crate = "platform::cdk"`. Remove the retired no-op `hidden` option.
+`Call::change_timeout(seconds)` is retired; use
+`Call::with_wait_policy(call::WaitPolicy::Bounded { timeout_seconds: seconds })`.
+`WaitPolicy::Unbounded` explicitly selects unbounded waiting. Neither choice
+configures retries; bounded constructors still default to 300 seconds.
 
 Select `cdk,candid` explicitly for required external management/system-canister
 calls. Encode with `candid::contract::{encode_one,encode_args,encode_args_ref}`,
@@ -256,14 +269,13 @@ Selected upstream dependencies remain transitive dependencies.
 
 The same `cdk` feature includes explicit typed call failures, signing/HTTP/creation
 costs, balances, certificate publication, counters and `println!`, plus the
-reviewed `stable::{stable_grow, stable_read, stable_write, StableMemoryError}` and
-`storage::{stable_save, stable_restore}` helpers. These retain checkpoint bytes, errors and traps; restore retains upstream's lack of
-decoder finalization. Consumers own layouts, limits, retries and certification
+reviewed `stable::{stable_grow, stable_read, stable_write, StableMemoryError}`
+passthroughs. The 0.5 hard cut retires unused `cdk::storage` checkpoint helpers.
+Consumers own existing checkpoint bytes, layouts, limits, retries and certification
 policy. Use `api::global_timer_set` (the upstream 0.20.3 name) only under the
 consumer's timer ownership, and `api::msg_method_name` in `inspect_message`.
 The base runtime removes full CDK and Candid from its normal/build graph.
-`storage::{stable_save,stable_restore}` additionally requires `candid` solely
-for existing persisted bytes; it is not a new storage format or allocation owner.
+There is no replacement checkpoint implementation or automatic data migration.
 
 Enable `pocket-ic` for explicit native client, typed error and fixture DTO exports
 through `ic_platform::pocket_ic`, including `nonblocking::PocketIc`. Testkit retains

@@ -1,5 +1,90 @@
 # Candid and runtime ownership
 
+## Pending 0.5 retirement
+
+The maintainer authorized a hard cut of unused compatibility surface after 0.4.1.
+This section supersedes older checkpoint-retention descriptions below.
+
+- Remove `hidden` from entrypoint attributes, including generated attributes and
+  Testkit performance probes and IcyDB's handwritten endpoint test fixtures.
+  It had no effect and now produces a targeted error.
+  Other supported options retain their names; `manual_reply` and `composite`
+  accept bare flags or boolean literals, not string-encoded booleans.
+  Repeated `guard` options retain order; duplicate single-value options fail.
+  `composite = true` is query-only; `manual_reply = true` is invalid on lifecycle
+  hooks. These combinations previously had no effect and now fail explicitly.
+  Handler and codec names no longer collide with generated local bindings;
+  argument names and destructuring patterns need no migration.
+  Native export symbols now use an injective UTF-8 hexadecimal encoding instead
+  of punctuation replacement. Host tooling inspecting those symbols must update
+  its expectations; ordinary Rust consumers and Wasm endpoint names are unchanged.
+  Raw Rust handler identifiers such as `r#match` now compile. Their default
+  endpoint name is `match`; an explicit `name = "..."` is always used verbatim.
+  This repairs an expansion panic, not a change to a previously working raw-name
+  endpoint. Conditional declarations remain compiler-controlled.
+- Replace `.change_timeout(seconds)` with
+  `.with_wait_policy(ic_platform::cdk::call::WaitPolicy::Bounded {
+  timeout_seconds: seconds })`. Blob currently uses the old method in its client
+  transport, replicated caffeine transport and service recovery. Keep each
+  caller's existing timeout value. Select `WaitPolicy::Unbounded` explicitly
+  when changing to unbounded waiting; neither option changes retry policy.
+  Constructors retain their current defaults, zero remains bounded, and values
+  are forwarded unchanged to the IC's own timeout admission.
+- Raw-call/system libraries can replace `features = ["cdk"]` with
+  `features = ["runtime"]`, retaining their `ic_platform::cdk::*` imports.
+  Entrypoint owners keep `cdk`, which includes `runtime` and the generator.
+  Canic Core's runtime usage is a candidate; Canic's entrypoint/start generator
+  still requires `cdk`. If a workspace enables `cdk` centrally, move that
+  selection to the packages that generate entrypoints before claiming a smaller
+  library graph. Cargo feature unification may legitimately retain the generator
+  in the final canister. Executor identity, callback behavior and codecs do not
+  change. This separation removes neither the executor nor all proc macros.
+- Service declaration generation now requires `features = ["candid-service"]`.
+  That feature implies `candid` and exposes the existing `contract::candid_method`,
+  `contract::export_service` and `contract::pretty` paths. No import or generated
+  path changes are required. Plain `candid` still supports external DTO derives,
+  arbitrary-precision values, reflection and configured decoding.
+  Canic's adapter/start generators and Blob's standalone/service-export tests
+  currently use these macros: add the feature at the workspace dependency and
+  forward it from any optional consumer feature that generates declarations.
+  Keep their existing generated declarations and contract tests during migration.
+  Native parser users continue selecting `candid-parser`; parser selection does
+  not implicitly expose Platform's service macros.
+  To retire service generation entirely, consumers must first remove its actual
+  generator and test uses. Removing Candid from management/ledger calls is not
+  part of that migration.
+- Remove `ic_platform::cdk::storage::{stable_save, stable_restore}`. There is no
+  replacement Platform checkpoint module or compatibility package.
+- Remove the unexported StableMemory/CanisterStableMemory abstraction,
+  StableIO/StableWriter, whole-memory copying and its unsafe-code exception.
+  Keep the existing raw stable grow/read/write signatures and error type.
+  Remove `StableMemoryError::OutOfBounds`, which none of these functions returns:
+  raw read/write bounds violations trap, while grow returns only `OutOfMemory`.
+- Caller, canister and subnet identity APIs now copy into fixed 29-byte stack
+  buffers. They still return the same owned Principal bytes; invalid system
+  lengths trap. No executor, callback, timeout, retry or cryptographic code changes.
+
+A source audit of current sibling Rust checkouts, including application and test
+canister directories, found no calls to the checkpoint helpers outside Platform's
+own fixture. Toko was excluded per the maintainer's existing scope. This is not a
+claim about unknown downstream users or generated code unavailable in those trees.
+External users of the removed API must remain on 0.4 while moving their existing
+checkpoint codec into their application/storage owner, preserving its layout,
+Candid argument encoding, error policy and restore behavior. In particular the
+old restore decoder did not finalize the input; replacing it with a decoder that
+rejects trailing stable-page bytes is not an equivalent migration. No automatic
+data conversion or new persisted format is authorized.
+
+The installed fixture now explicitly owns its fixed checkpoint record: it writes
+the same Candid tuple bytes and decodes without finalization after upgrade. This
+is test code, not a general checkpoint implementation offered to consumers.
+Management/ledger DTOs, external Candid adapters and cryptographic dependencies
+remain upstream. This cut reduces maintained source and temporary identity
+allocations. Plain `candid` no longer selects the upstream printer; combined
+graphs may still select it through Agent, PocketIC, parser or external DTO
+packages. Feature separation alone establishes neither fleet-wide dependency
+removal nor measured Wasm-size or execution-speed improvement.
+
 IC Platform owns the controlled Candid/CDK dependency boundary. Consumers declare
 `ic-platform`, not `candid`, `candid_parser` or `ic-cdk*` directly. IC Wire owns
 protocols whose producers and consumers we control. External management-canister,
@@ -153,7 +238,8 @@ storage/schema change. See [staged decoding](https://github.com/dragginzgame/ic-
 The Candid contract now explicitly supports `candid_method`, `export_service`,
 `Encode`, `Decode`, `TypeEnv`, `idl_hash`, `types::internal::TypeContainer` and
 `types::subtype::equal`, plus printer machinery required by service export.
-The `candid` feature enables upstream `printer` alongside `bignum`. Change
+From 0.5, `candid-service` enables upstream `printer` alongside `candid`'s
+`bignum`; plain `candid` no longer provides service generation. Change
 generators to emit `ic_platform::candid::decoder` for configured decoding and
 `ic_platform::candid::contract::candid_method` for service registration. Invoke
 `contract::export_service!(ic_platform::candid::contract)` with the explicit path;
@@ -595,7 +681,7 @@ hooks may omit it. Use an admission guard to check argument size before copying.
 Failed decoding must trap/reject before handler effects; response-encoding failure
 must trap. There is no Candid fallback, dummy Candid service registration,
 `export_candid!` macro or `candid = "path"` entrypoint option. Existing explicit
-Wire hooks may retain the now-redundant `hidden = true` spelling.
+From 0.5, remove the retired no-op `hidden` option from Wire hooks and generators.
 
 ```rust,ignore
 #[ic_platform::cdk::update(

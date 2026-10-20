@@ -14,8 +14,9 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 default = []
 agent = ["dep:ic-agent"]
 bls = ["dep:ic-verify-bls-signature"]
-candid = ["dep:candid", "candid/bignum", "candid/printer"]
+candid = ["dep:candid", "candid/bignum"]
 candid-parser = ["dep:candid_parser"]
+candid-service = ["candid", "candid/printer"]
 canister-sig-creation = [
     "dep:ic-certification",
     "dep:ic-representation-independent-hash",
@@ -24,13 +25,8 @@ canister-sig-creation = [
     "dep:serde_cbor",
     "dep:sha2",
 ]
-cdk = [
-    "executor",
-    "ic0",
-    "dep:ic-platform-macros",
-    "dep:pin-project-lite",
-    "dep:thiserror",
-]
+cdk = ["runtime", "dep:ic-platform-macros"]
+runtime = ["executor", "ic0", "dep:pin-project-lite", "dep:thiserror"]
 certification = ["dep:ic-certification"]
 ecdsa = ["dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
@@ -92,6 +88,11 @@ path = "tests/cdk_consumer.rs"
 required-features = ["cdk"]
 
 [[test]]
+name = "runtime_consumer"
+path = "tests/runtime_consumer.rs"
+required-features = ["runtime"]
+
+[[test]]
 name = "secp256k1_consumer"
 path = "tests/secp256k1_consumer.rs"
 required-features = ["secp256k1"]
@@ -125,6 +126,11 @@ required-features = ["agent", "certification"]
 name = "candid_consumer"
 path = "tests/candid_consumer.rs"
 required-features = ["candid"]
+
+[[test]]
+name = "service_consumer"
+path = "tests/service_consumer.rs"
+required-features = ["candid-service"]
 
 [[test]]
 name = "dynamic_consumer"
