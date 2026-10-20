@@ -1426,7 +1426,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "assert_matches",
  "candid",
@@ -1460,7 +1460,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "darling 0.23.0",
  "proc-macro2",
