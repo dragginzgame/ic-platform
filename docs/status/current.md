@@ -1,6 +1,83 @@
 # Current handoff
 
-## Pending 0.4 transport-only calls
+## Pending 0.4.1 Account formatting
+
+Account Display now encodes subaccount hexadecimal text into one fixed 64-byte
+buffer rather than repeatedly invoking integer formatting. No public identity,
+checksum, cryptographic body, persisted bytes or feature selection changes.
+The [follow-up measurements](../benchmarks/0.4.1/README.md) put nonzero-subaccount
+formatting at 234.7/289.6 ns for 10/29-byte owners, versus 377.7/491.5 ns for the
+external implementation in the same run. Prior owned measurements were
+540.7/613.0 ns in a separate run; these are native timings, not Wasm/cycle claims.
+
+Rust 1.88 passes 14 library, three ledger differential and two generated parser
+tests plus ledger-feature Wasm checking. Strict selected Clippy and formatting
+pass. Evidence: `/tmp/platform041-{tests,wasm,clippy}.log`,
+`target/type-benchmark.6cMHAN`, and the retained benchmark trials. The 0.4.1
+changelog includes the preceding qualification work; package versions remain
+0.4.0 for the maintainer's release tooling.
+
+GitHub [CI run 39392859266](https://github.com/dragginzgame/ic-platform/actions/runs/39392859266)
+passed Linux, macOS Intel and macOS ARM for released `26a07c5`. It does not qualify
+the pending changes. The new installed-runtime workflow is still an untracked
+local file and cannot be dispatched on GitHub before the maintainer pushes it.
+Fresh-runner Testkit provisioning and native macOS qualification of this patch
+therefore remain outstanding. No commit, push or publication was performed.
+
+## 0.4 post-release qualification
+
+HEAD is the maintainer's 0.4.0 release (`26a07c5`). The follow-up adds a separate
+Linux installed-runtime workflow using Testkit-owned setup/check, and an exact
+registry mode for the installed fixture. Published mode rejects local facade or
+generator replacements, retains its disposable resolved lock, and applies the
+existing single-executor/ic0 graph admission. Local `--prepare` is the explicit
+cache setup step; ordinary qualification does not provision a server.
+
+Published 0.4.0 passes all four installed PocketIC 16.0.0 combinations (Rust 1.91
+and 1.99.1; Wire-only and external Candid), including traps, timers, upgrades,
+cycles, stable rollback and certificates. Evidence: `target/cdk-runtime.UaFe6A`
+and `/tmp/platform-registry-installed-unrestricted.log`. The first sandboxed run
+could not bind loopback; the admitted rerun passed. This is Linux local-simulator
+evidence, not a completed GitHub workflow run, native macOS or live IC acceptance.
+
+The [benchmark evidence](../benchmarks/0.4/README.md) now retains previous trials,
+reproduction tooling and new Account/type-layout measurements. Account parsing
+improves, but that initial run found a nonzero-subaccount formatting regression;
+the pending fix above addresses it without cryptographic changes. Generated Unicode/boundary/round-trip parser
+tests pass Rust 1.88. Coverage-guided fuzzing is a separate explicit tooling command.
+The incoming rustls-webpki lock update is preserved; no release or publication
+was performed.
+
+Isolated sibling snapshots at `/tmp/platform-adoption-audit` passed Auth's 11
+canister-signature tests (`24bbad5`, clean source), IcyDB's 17 Account stored-byte
+and ordering tests (`07a5964` plus pending work), and Canic's four call-adapter
+tests (`8c2dda4` plus pending work). A disposable test added only to the Wire
+snapshot (`fe7ab95`, incoming lock changes) compares 120 Principal and 360 Account
+encodings against registry external types and decodes the owned values, preserving
+absent/explicit-zero fields. It passes against registry Platform 0.4.0.
+Snapshot HEAD/status records and logs are retained alongside the copies. This
+qualifies the selected tests, not all sibling endpoints or historical database
+upgrades. No sibling checkout was edited.
+
+Canic's frozen Wasm normal/build graph still includes Platform 0.2.2 through
+`ic-auth-protocol-types 0.10.7` and `ic-timers 0.29.4`, alongside 0.4.0.
+Executor 2.0.0 and ic0 1.2.0 remain single identities. This is not a complete
+consumer cutover; dependency adoption belongs to those consumers. IcyDB Core
+and Auth default graphs select Platform 0.4.0 without Candid. Retained graphs and
+the Canic reverse-dependency trace are in the snapshot evidence directory.
+
+The coverage-guided parser campaign passes 1,441,163 executions in 61 seconds
+with AddressSanitizer and seed 42. Evidence: `target/parser-fuzz.WPlyho` and
+`/tmp/platform-parser-fuzz-asan.log`. The first campaign completed 1,543,528
+executions but LeakSanitizer failed at shutdown under sandbox process inspection;
+the successful rerun set `ASAN_OPTIONS=detect_leaks=0`. Leak detection is not
+qualified, and the initial empty crash artifact records that tooling failure.
+Rust 1.88 generated parser tests and CDK/ledger Wasm checking, strict selected
+Clippy, registry-admission refusal tests, source fingerprints, pins/boundaries,
+formatting, shell/YAML parsing and documentation links pass. Full CI remains
+release-owned; the new GitHub workflow itself has not yet run.
+
+## Released 0.4 transport-only calls
 
 The maintainer requested further justified breaking cuts in the same migration.
 Raw Call/Response no longer implement Candid request/response methods, and the
@@ -14,8 +91,7 @@ See [the transport migration](../migration.md#transport-and-codec-separation-04)
 Canic's request builder already encodes explicitly; its response helpers and
 obsolete combined-error mapping are the targeted migration points. No sibling
 files were edited. Checkpoint implementation/bytes, system calls, executor identity,
-callback/trap cleanup, timeouts and cycles remain unchanged. Package versions
-remain 0.3.0; all breaking work stays in the pending 0.4 changelog.
+callback/trap cleanup, timeouts and cycles remain unchanged. The maintainer released this work as 0.4.0 at `26a07c5`.
 
 Linux validation passes: Rust 1.88 all-feature tests/Wasm, standalone CDK and Candid
 native/MSRV/Wasm consumers, strict Clippy, warning-denied Rustdoc, source/license
@@ -27,7 +103,7 @@ Evidence: `target/cdk-runtime.oau1gn` and `/tmp/platform04-transport-*.log`.
 Actual consumer migration, native macOS and live IC qualification remain separate.
 No new feature, dependency, publication, measured size claim or crypto change.
 
-## Pending 0.4 runtime codes and signature packaging
+## Released 0.4 runtime codes and signature packaging
 
 The maintainer authorized both changes after the 0.3 audit. Runtime RejectCode
 is owned, preserving codes 1–6, Display/Serde spelling and raw unknown-code
@@ -39,8 +115,7 @@ and license fingerprints plus mutation refusals guard the imported modules.
 BLS, certificate and hash algorithms are unchanged. See the
 [0.4 migration](../migration.md#runtime-codes-and-signature-packaging-04).
 
-Package versions remain 0.3.0; these public identity changes require the pending
-0.4 release, not a patch. No commits, publication or sibling edits were made.
+These public identity changes shipped in the maintainer’s 0.4.0 release. No commits, publication or sibling edits were made.
 The prior handoff correction is preserved. The root lock removes the retired
 packages and adds only the imported test helper; the runtime fixture lock removes
 its obsolete runtime error-catalogue edge without changing other selections.
@@ -64,7 +139,7 @@ migration or installed signature-policy qualification remain separate work.
 
 ## Released 0.3 owned account
 
-The checkout is released 0.3.0 at `390644f`, following implementation commit
+The historical 0.3.0 release was `390644f`, following implementation commit
 `80a81e8`. The maintainer reports it pushed; this pass does not independently
 establish crates.io publication. Qualification below records the implementation
 checks, not completed sibling adoption.

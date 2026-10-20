@@ -99,11 +99,20 @@ impl fmt::Display for Account {
             .iter()
             .position(|byte| *byte != 0)
             .ok_or(fmt::Error)?;
-        write!(f, "{:x}", subaccount[first])?;
-        for byte in &subaccount[first + 1..] {
-            write!(f, "{byte:02x}")?;
+        // Encode once into a fixed buffer, omitting only the first leading nibble.
+        // Repeated integer formatting here dominates non-default account Display.
+        const HEX: &[u8; 16] = b"0123456789abcdef";
+        let mut hex = [0u8; 64];
+        let mut written = 0;
+        for (index, &byte) in subaccount[first..].iter().enumerate() {
+            if index != 0 || byte >= 16 {
+                hex[written] = HEX[(byte >> 4) as usize];
+                written += 1;
+            }
+            hex[written] = HEX[(byte & 15) as usize];
+            written += 1;
         }
-        Ok(())
+        f.write_str(std::str::from_utf8(&hex[..written]).map_err(|_| fmt::Error)?)
     }
 }
 

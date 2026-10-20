@@ -1,0 +1,8 @@
+0eea4f9ae995db9d76c2c7ae1aa34497db9a274c9839c1b02600ef1702d0720a  /tmp/platform04-benchmark/results/creation-base-1.wasm
+705bd9a50319a7f5c67a617a118fdd02b6604f066af92c13e750a39b099aeca9  /tmp/platform04-benchmark/results/creation-candidate-1.wasm
+bc92f315b72f4dd5e5c053635b9946dbc072f0f2218d04a3aa09ac041f7ed7cf  /tmp/platform04-benchmark/results/external-candid-base-1.wasm
+ee9af670949167c859bba98df156ee4b14a7d6f4aebe675b2726e9b1c2c63140  /tmp/platform04-benchmark/results/external-candid-candidate-1.wasm
+16794d986d312f6e09f39db5fa8e4b9d23924cdf4369d44ae5bbee8a23063553  /tmp/platform04-benchmark/results/verification-base-1.wasm
+8c122dbe2404b8c81b0a92e3b19e095662124f228587907e1be9dd40b1217b80  /tmp/platform04-benchmark/results/verification-candidate-1.wasm
+921a5e20f347f46fe7bbcff5541a12b3c9c2e247ca21850da1e1ba4c1242193a  /tmp/platform04-benchmark/results/wire-base-1.wasm
+5e89fb6fe2e0ac8d74cb12b9cda6c8608f0282ff6ee7fbd60ac870b4307a258b  /tmp/platform04-benchmark/results/wire-candidate-1.wasm

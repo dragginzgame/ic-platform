@@ -3,9 +3,18 @@ set -euo pipefail
 # Requires an explicitly prepared Testkit server or server URL; never installs it.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
+published=""
+if [[ "${1:-}" == --published ]]; then
+    [[ $# -ge 2 && "$2" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 2
+    published="$2"
+    shift 2
+fi
 mode="${1:-run}"
-[[ $# -le 1 ]] || { echo "Expected at most one mode" >&2; exit 2; }
-case "$mode" in run|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
+[[ $# -le 1 ]] || { echo "Expected [--published X.Y.Z] [mode]" >&2; exit 2; }
+case "$mode" in run|--prepare|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--published X.Y.Z] [run|--prepare|--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
+[[ -z "$published" || "$mode" != --refresh-lock ]] || {
+    echo 'Published qualification cannot rewrite the maintained local lock' >&2; exit 2;
+}
 if [[ "$mode" == run && -z "${POCKET_IC_BIN:-}" && -z "${IC_TESTKIT_POCKET_IC_URL:-}" ]]; then
     echo 'Set POCKET_IC_BIN (Testkit-admitted binary) or IC_TESTKIT_POCKET_IC_URL first' >&2
     exit 1
@@ -19,6 +28,8 @@ timers="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies
 wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
 serde="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde.version' Cargo.toml)"
 cbor="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde_cbor' Cargo.toml)"
+selection='path = "../../crates/ic-platform"'
+if [[ -n "$published" ]]; then selection="version = \"=$published\""; fi
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 members = ["crates/canister", "apps/driver"]
@@ -28,15 +39,19 @@ version = "0.0.0"
 edition = "2024"
 publish = false
 [workspace.dependencies]
-ic-platform = { path = "../../crates/ic-platform", features = ["cdk"] }
+ic-platform = { $selection, default-features = false, features = ["cdk"] }
 ic-testkit = "$testkit"
 ic-timers = "$timers"
 ic-wire = "$wire"
 serde = { version = "$serde", default-features = false }
 serde_cbor = "$cbor"
+MANIFEST
+if [[ -z "$published" ]]; then
+    cat >> "$fixture/Cargo.toml" <<'MANIFEST'
 [patch.crates-io]
 ic-platform = { path = "../../crates/ic-platform" }
 MANIFEST
+fi
 cat > "$fixture/crates/canister/Cargo.toml" <<'MANIFEST'
 [package]
 name = "platform-runtime-canister"
@@ -83,6 +98,19 @@ if [[ "$mode" == --refresh-lock ]]; then
     exit 0
 fi
 cp "$lock" "$fixture/Cargo.lock"
+if [[ "$mode" == --prepare ]]; then
+    [[ -z "$published" ]] || { echo "Prepare published caches explicitly before qualification" >&2; exit 2; }
+    cargo fetch --manifest-path "$fixture/Cargo.toml" --locked
+    exit 0
+fi
+if [[ -n "$published" ]]; then
+    # Resolve only the disposable lock from explicitly prepared registry caches.
+    cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
+    "$root/.tools/host/bin/jq" -e --arg version "$published" -f "$root/scripts/ci/published-runtime.jq" "$fixture/metadata.json" > /dev/null || {
+        echo 'Published runtime requires the exact registry facade/generator and no local replacements' >&2
+        exit 1
+    }
+fi
 cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     for protocol in wire external-candid; do

@@ -48,6 +48,7 @@ assert_matches = "1.5"
 ic-testkit = "0.54.1"
 ic-timers = "0.29.1"
 ic-wire = "0.4.7"
+libfuzzer-sys = "0.4.13"
 serde_test = "1.0.177"
 
 [workspace.lints.rust]

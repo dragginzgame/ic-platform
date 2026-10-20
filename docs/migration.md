@@ -113,7 +113,7 @@ Arbitrary-precision integers enable Candid's `bignum` feature with `candid`;
 the separate native parser also enables it through upstream Candid's `all` feature.
 No default features, automatic limits or second executor are introduced.
 
-`ic_platform::Principal` is unconditional and Platform-owned for the pending 0.3
+`ic_platform::Principal` is unconditional and Platform-owned for the 0.3
 migration. The Candid contract keeps the original registry identity; see
 [the migration below](#owned-principal-migration-03). Default builds remain
 Candid/CDK-free, not dependency-free.

@@ -90,7 +90,7 @@ Use `ic_platform::candid::contract` for Candid DTO derives and encoding. Add
 `#[serde(crate = "ic_platform::candid::contract::serde")]` when deriving Deserialize
 through the boundary's Serde export. These are external protocol types, not an
 application-wide requirement. Principal-only users import `ic_platform::Principal`
-without selecting a feature or declaring `ic_principal` directly. In the pending
+without selecting a feature or declaring `ic_principal` directly. In the released
 0.3 migration the root type and `PrincipalError` are Platform-owned. Required
 Candid DTOs use `candid::contract::Principal`, which remains the original registry
 type. `principal::{ExternalPrincipal, ExternalPrincipalError}` provides that
@@ -239,8 +239,8 @@ their 300-second default and original cycle/timeout/error behavior.
 Call/response/future, cost/performance/error and stable-error types now have
 Platform identities; upstream direct-type equality is not retained. Principal
 and runtime RejectCode are owned too. External DTO/Principal, BLS and certification
-identities remain upstream. The 0.4 candidate changes signature-key identity as
-documented above; package versions remain at 0.3.0 until maintainer release.
+identities remain upstream. The 0.4 release changes signature-key identity as
+documented above.
 The generator and imported non-cryptographic runtime source retain Apache-2.0
 with provenance; the combined package is MIT AND Apache-2.0. No executor or
 cryptographic implementation is forked.

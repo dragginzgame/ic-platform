@@ -12,7 +12,7 @@ authentication, budgets and retry policy. See the [maintenance and recovery
 contract](docs/migration.md#runtime-maintenance-and-recovery).
 
 `ic_platform::Principal` is always available, without enabling a feature or
-depending directly on `ic_principal`. The pending 0.3 type is Platform-owned;
+depending directly on `ic_principal`. The 0.3 type is Platform-owned;
 external clients and DTOs retain `principal::ExternalPrincipal`. Convert explicitly
 with `.into()` at those boundaries. Default builds include Principal and its
 dependencies, but neither Candid nor CDK. Self-authentication continues to delegate
@@ -41,9 +41,26 @@ The optional `cdk` surface uses maintained, non-cryptographic runtime adapters
 and the owned generator. It does not depend on the full `ic-cdk` package.
 All controlled endpoints use explicit Wire hooks; select `candid` separately
 for required external management/system interfaces and existing checkpoint bytes.
-This is a breaking next-minor candidate; package versions are unchanged.
+These breaking runtime and transport changes are released in the 0.4 line.
 See [the migration contract](docs/migration.md) for ownership and adoption conditions.
 The public GitHub repository exists; registry availability requires separate verification.
+
+Installed-runtime qualification runs separately in `.github/workflows/runtime.yml`,
+using Testkit's explicit server setup/admission and both compiler/protocol modes.
+For a prepared registry cache and admitted server, run
+`bash scripts/ci/check-platform-runtime.sh --published 0.4.0` to exercise the exact
+published facade and generator without a local override. Append `--check-graph`
+for graph-only admission. Local CI cache preparation uses `--prepare`; ordinary
+qualification never installs a server. Native macOS and live IC acceptance remain
+separate from this Linux workflow.
+
+Historical measurements and reproduction instructions are in
+[the benchmark report](docs/benchmarks/0.4/README.md).
+`bash scripts/ci/fuzz-parsers.sh` runs a separate 60-second coverage-guided
+Principal/Account differential campaign. Prepare nightly-2026-07-29, a C++
+compiler and registry sources explicitly first; the command installs nothing.
+It retains its corpus, crash artifacts and disposable lock under `target/`.
+This tooling-only libFuzzer selection does not enter consumer dependency graphs.
 
 Consumers own schemas, authentication, byte/work budgets, deadlines, retries and
 recovery. IC Wire owns controlled application protocols. Candid remains required

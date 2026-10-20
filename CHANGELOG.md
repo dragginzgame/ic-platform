@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.1]
+
+### Fixed
+
+- Format nonzero Account subaccounts through a fixed hex buffer, avoiding repeated
+  integer formatting while preserving canonical text, checksums and external bytes.
+
+### Qualification
+
+- Add a separate installed-runtime workflow with Testkit-owned server provisioning,
+  and exact-registry runtime qualification with source/version admission tests.
+- Add generated parser properties and an opt-in coverage-guided Principal/Account
+  fuzz harness; keep fuzz dependencies confined to disposable tooling fixtures.
+- Retain reproducible benchmarks, Account timing and type-layout evidence, and
+  update the release handoff and consumer qualification records.
+
 ## [0.4.0] - 2026-10-20
 
 ### Breaking
