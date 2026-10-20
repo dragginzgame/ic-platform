@@ -1,16 +1,12 @@
 // Imported from ic-cdk 0.20.3; Apache-2.0. See ../NOTICE.md.
 //! Raw inter-canister calls with the imported CDK 0.20.3 callback state machine.
 //!
-//! Callers supply explicit Wire frames. Optional Candid adapters serve required
-//! external management/system interfaces. The registry executor remains shared.
+//! Callers supply explicit Wire frames or separately encoded external Candid.
+//! The registry executor remains shared; this module performs no codec work.
 
 use super::api::{cost_call, msg_arg_data, msg_reject_code, msg_reject_msg};
 use super::{api::trap, futures::is_recovering_from_trap};
 use crate::Principal;
-#[cfg(feature = "candid")]
-use candid::utils::{ArgumentDecoder, ArgumentEncoder, encode_args_ref};
-#[cfg(feature = "candid")]
-use candid::{CandidType, Deserialize, decode_args, decode_one, encode_one};
 use ic_cdk_executor::{MethodHandle, TaskHandle};
 use std::borrow::Cow;
 use std::future::IntoFuture;
@@ -20,7 +16,7 @@ use std::sync::{Arc, RwLock};
 use std::task::{Context, Poll, Waker};
 use thiserror::Error;
 
-pub use ic_error_types::RejectCode;
+pub use crate::cdk::reject_code::RejectCode;
 
 /// Raw inter-canister call builder.
 ///
@@ -79,30 +75,6 @@ impl<'m> Call<'m, '_> {
 
 // Configuration
 impl<'a> Call<'_, 'a> {
-    /// Sets the argument for the call.
-    ///
-    /// The argument must implement [`CandidType`].
-    #[must_use]
-    #[cfg(feature = "candid")]
-    pub fn with_arg<A: CandidType>(self, arg: A) -> Self {
-        Self {
-            encoded_args: Cow::Owned(encode_one(&arg).unwrap_or_else(panic_when_encode_fails)),
-            ..self
-        }
-    }
-
-    /// Sets the arguments for the call.
-    ///
-    /// The arguments are a tuple of types, each implementing [`CandidType`].
-    #[must_use]
-    #[cfg(feature = "candid")]
-    pub fn with_args<A: ArgumentEncoder>(self, args: &A) -> Self {
-        Self {
-            encoded_args: Cow::Owned(encode_args_ref(args).unwrap_or_else(panic_when_encode_fails)),
-            ..self
-        }
-    }
-
     /// Sets the arguments for the call as raw bytes.
     ///
     /// # Note
@@ -209,30 +181,6 @@ impl Response {
     pub fn into_bytes(self) -> Vec<u8> {
         self.0
     }
-
-    /// Decodes the response as a single Candid type.
-    #[cfg(feature = "candid")]
-    pub fn candid<R>(&self) -> Result<R, CandidDecodeFailed>
-    where
-        R: CandidType + for<'de> Deserialize<'de>,
-    {
-        decode_one(&self.0).map_err(|e| CandidDecodeFailed {
-            type_name: std::any::type_name::<R>().to_string(),
-            candid_error: e.to_string(),
-        })
-    }
-
-    /// Decodes the response as a tuple of Candid types.
-    #[cfg(feature = "candid")]
-    pub fn candid_tuple<R>(&self) -> Result<R, CandidDecodeFailed>
-    where
-        R: for<'de> ArgumentDecoder<'de>,
-    {
-        decode_args(&self.0).map_err(|e| CandidDecodeFailed {
-            type_name: std::any::type_name::<R>().to_string(),
-            candid_error: e.to_string(),
-        })
-    }
 }
 
 impl PartialEq<&[u8]> for Response {
@@ -275,40 +223,9 @@ impl std::borrow::Borrow<[u8]> for Response {
 
 // Errors ---------------------------------------------------------------------
 
-/// Represents errors that can occur during inter-canister calls.
-///
-/// This is the top-level error type for the inter-canister call API.
-///
-/// This encapsulates all possible errors that can arise, including:
-/// - Insufficient liquid cycle balance.
-/// - `ic0.call_perform` failed.
-/// - Asynchronously rejected.
-/// - Candid decoding of the response failed.
-#[derive(Error, Debug, Clone)]
-pub enum Error {
-    /// The liquid cycle balance is insufficient to perform the call.
-    #[error(transparent)]
-    InsufficientLiquidCycleBalance(#[from] InsufficientLiquidCycleBalance),
-
-    /// The `ic0.call_perform` operation failed.
-    #[error(transparent)]
-    CallPerformFailed(#[from] CallPerformFailed),
-
-    /// The inter-canister call is rejected.
-    #[error(transparent)]
-    CallRejected(#[from] CallRejected),
-
-    /// The response from the inter-canister call could not be decoded as Candid.
-    ///
-    /// This variant wraps errors that occur when attempting to decode the response
-    /// into the expected Candid type.
-    #[error(transparent)]
-    CandidDecodeFailed(#[from] CandidDecodeFailed),
-}
-
 /// The error type when awaiting a `CallFuture`.
 ///
-/// This encapsulates all possible [`enum@Error`] except for the `CandidDecodeFailed` variant.
+/// Only transport failures belong here; codecs retain their own typed errors.
 #[derive(Error, Debug, Clone)]
 pub enum CallFailed {
     /// The liquid cycle balance is insufficient to perform the call.
@@ -336,29 +253,6 @@ pub enum OnewayError {
     /// The `ic0.call_perform` operation failed.
     #[error(transparent)]
     CallPerformFailed(#[from] CallPerformFailed),
-}
-
-impl From<OnewayError> for Error {
-    fn from(e: OnewayError) -> Self {
-        match e {
-            OnewayError::InsufficientLiquidCycleBalance(e) => {
-                Error::InsufficientLiquidCycleBalance(e)
-            }
-            OnewayError::CallPerformFailed(e) => Error::CallPerformFailed(e),
-        }
-    }
-}
-
-impl From<CallFailed> for Error {
-    fn from(e: CallFailed) -> Self {
-        match e {
-            CallFailed::InsufficientLiquidCycleBalance(e) => {
-                Error::InsufficientLiquidCycleBalance(e)
-            }
-            CallFailed::CallPerformFailed(e) => Error::CallPerformFailed(e),
-            CallFailed::CallRejected(e) => Error::CallRejected(e),
-        }
-    }
 }
 
 /// Represents an error that occurs when the liquid cycle balance is insufficient to perform the call.
@@ -429,7 +323,7 @@ impl CallRejected {
     /// # Errors
     ///
     /// If the raw reject code is not recognized, this method will return an `UnrecognizedRejectCode` error.
-    /// This can happen if the IC produces a new reject code that hasn't been included in [`ic_error_types::RejectCode`].
+    /// This can happen if the IC produces a new reject code that hasn't been included in [`RejectCode`].
     /// Please check if your `ic-error-types` dependency is up-to-date.
     /// If the latest version of `ic-error-types` doesn't include the new reject code, please report it to the `ic-cdk` maintainers.
     pub fn reject_code(&self) -> Result<RejectCode, UnrecognizedRejectCode> {
@@ -450,22 +344,6 @@ impl CallRejected {
     pub fn reject_message(&self) -> &str {
         &self.reject_message
     }
-}
-
-/// Represents an error that occurs when the response from an inter-canister call
-/// cannot be decoded as Candid.
-///
-/// This error type provides details about the Candid decoding failure, including
-/// the type that was being decoded and the specific Candid error that occurred.
-///
-/// This is the error returned by the optional external Candid response adapters.
-///
-/// It is wrapped by the top-level [`Error::CandidDecodeFailed`] variant.
-#[derive(Error, Debug, Clone)]
-#[error("candid decode failed for type: {type_name}, candid error: {candid_error}")]
-pub struct CandidDecodeFailed {
-    type_name: String,
-    candid_error: String,
 }
 
 // Errors END -----------------------------------------------------------------
@@ -784,18 +662,6 @@ unsafe extern "C" fn cleanup(env: usize) {
 
 // # Internal END =============================================================
 
-/// Panics with an informative message when argument encoding fails.
-///
-/// Currently, Candid encoding only fails when heap memory is exhausted,
-/// in which case execution would trap before reaching the unwrap.
-///
-/// However, since future implementations might introduce other failure cases,
-/// we provide an informative panic message for better debuggability.
-#[cfg(feature = "candid")]
-fn panic_when_encode_fails(err: candid::error::Error) -> Vec<u8> {
-    panic!("failed to encode args: {err}")
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -814,8 +680,9 @@ mod tests {
     #[cfg(feature = "candid")]
     #[test]
     fn external_unit_arguments_are_explicit() {
+        let args = crate::candid::contract::encode_args(()).unwrap();
         let call =
-            Call::unbounded_wait(Principal::management_canister(), "raw_rand").with_args(&());
+            Call::unbounded_wait(Principal::management_canister(), "raw_rand").with_raw_args(&args);
         assert_eq!(call.encoded_args.as_ref(), candid::encode_args(()).unwrap());
     }
 }

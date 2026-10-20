@@ -24,14 +24,14 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
 | `candid-parser` | Native host parsing/type checking, service equality, dynamic refusal fixtures and JavaScript/TypeScript generation |
-| `canister-sig-creation` | Canister-signature public-key formats, root-key constants and hashing; transitive Candid/ic0, no store API |
+| `canister-sig-creation` | Imported signature public-key formats, root-key constants and hashing; no Candid/ic0 or store API |
 | `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one registry executor |
 | `certification` | Upstream certificate/hash-tree and mutable tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
-| `signature-verification` | Upstream canister-signature verification; transitive Candid/ic0/certification/BLS, no executor or host transport |
+| `signature-verification` | Imported canister-signature verification; certification/BLS, no Candid/ic0, executor or host transport |
 | `pocket-ic` | Native PocketIC client identities; Testkit retains server lifecycle and policy |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
@@ -186,12 +186,12 @@ enable `candid` separately when using Platform's encoding and bounded decoding.
 Ledger DTOs similarly bring transitive Candid without selecting Platform's codec,
 executor, parser or Agent. Upstream defaults/storage integration are disabled;
 the graph gate rejects `ic-stable-structures` and unselected ledger dependencies.
-Canister-signature creation and verification also bring upstream certification,
-Candid and raw ic0; only verification brings BLS. They do not select the related
-Platform surfaces. BLS alone excludes creation, Candid, certification, CDK and
+Canister-signature creation and verification bring upstream certification but
+no Candid or raw ic0; only verification brings BLS and selects the creation surface.
+BLS alone excludes creation, Candid, certification, CDK and
 host tooling. Its upstream defaults/RNG are disabled and alloc is explicit.
-Graph admission checks the reviewed signature, BLS and certification package
-identities; other consumer graphs still need their own qualification.
+Graph admission rejects retired registry signature packages and checks BLS and
+certification identities; other consumer graphs still need their own qualification.
 Without certification, native Agent or canister-signature capabilities, builds exclude `ic-certification`.
 `candid_parser` and `ic-agent` are admitted only with explicit native host
 selection; no runtime feature enables them. Host retains strict bounded CBOR decoding;

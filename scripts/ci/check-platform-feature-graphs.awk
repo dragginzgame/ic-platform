@@ -36,11 +36,11 @@ function reject(reason) {
     verification = enabled("signature-verification")
     creation = verification || enabled("canister-sig-creation")
     bls = verification || agent || enabled("bls")
-    raw_system = executor || creation || enabled("ic0")
+    raw_system = executor || enabled("ic0")
     certification = pocket || creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
-    candid = pocket || enabled("candid") || parser || agent || management || ledger || creation
+    candid = pocket || enabled("candid") || parser || agent || management || ledger
     found_ed = 0
     found_curve = 0
     found_secp = 0
@@ -83,13 +83,13 @@ function reject(reason) {
         }
         if (name == "ic0" && (!raw_system || version != "v1.2.0" || !registry)) reject("unqualified ic0")
         if (name == "ic-platform-macros" && (!cdk || (line != generator && line != generator " (*)"))) reject("unqualified generator")
-        if (name == "ic-canister-sig-creation" && (!creation || version != "v1.3.1" || !registry)) reject("unqualified signature creation")
-        if (name == "ic-signature-verification" && (!verification || version != "v0.3.0" || !registry)) reject("unqualified signature verification")
+        if (name == "ic-canister-sig-creation" || name == "ic-signature-verification") reject("retired signature package")
         if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified BLS")
         if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified BLS curve")
         if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
         if (name == "ic-management-canister-types" && !(registry && ((management && version == "v0.11.0") || (pocket && version == "v0.8.0")))) reject("unselected management types")
         if (name == "icrc-ledger-types" && !ledger) reject("unselected ledger types")
+        if (name == "ic-error-types" && !(agent || pocket)) reject("runtime error catalogue")
         if (name == "ic-stable-structures") reject("storage integration")
         if ((name == "candid" || name == "candid_derive") && !candid) reject("unexpected Candid")
     }

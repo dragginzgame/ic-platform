@@ -140,11 +140,11 @@ smaller Wasm artifacts.
 Enable `canister-sig-creation` for `ic_platform::canister_sig_creation`:
 `CanisterSigPublicKey`, `hash_bytes`, `hash_with_domain`,
 `extract_raw_root_pk_from_der`, `IC_ROOT_PK_DER` and `IC_ROOT_PK_DER_PREFIX`
-from upstream 1.3.1. Constructor/DER/raw methods, Principal identity, domain
-separators and `String` errors stay upstream. No signature store, root publication
-or clock API is exposed. Upstream still depends on Candid for Principal and on
-raw ic0 internally; selecting this feature does not select Platform's Candid,
-certification, ic0 or executor surfaces.
+from the unchanged upstream 1.3.1 implementation packaged inside Platform.
+CanisterSigPublicKey now has a Platform identity; its Principal field, DER/raw
+methods, domain separators and `String` errors preserve upstream behavior.
+The unused store and Candid import are omitted. No signature store, root
+publication or clock API is exposed, and no Candid/ic0/executor is selected.
 
 Enable `signature-verification` for
 `ic_platform::signature_verification::verify_canister_sig`, preserving upstream
@@ -154,8 +154,9 @@ trusted issuer, seed, network root, freshness window, resource ceiling or grant
 application authority. Keep those checks in the consumer. Both public-key and
 verification paths retain upstream's short-DER panic risk: retain pre-validation
 and canonical re-encoding. Hash/domain lengths likewise retain upstream behavior.
-The verifier brings creation, certification, BLS, Candid and ic0 transitively,
-without exposing those Platform modules or enabling CDK, parser or Agent.
+The verifier selects creation, certification and BLS, exposing the creation
+surface without enabling Candid, ic0, CDK, parser or Agent. Both imported source
+modules and their vectors/licenses are protected by exact fingerprints.
 
 Enable `bls` independently for `ic_platform::bls::{PublicKey, Signature,
 PrivateKey, InvalidPublicKey, InvalidSignature, InvalidPrivateKey,
@@ -227,16 +228,19 @@ explicit decoding; no-argument hooks may omit it. A renamed dependency can use
 `crate = "platform::cdk"`. Existing `hidden = true` remains accepted but redundant.
 
 Select `cdk,candid` explicitly for required external management/system-canister
-calls. These add the original Candid `Call::{with_arg,with_args}` and
-`Response::{candid,candid_tuple}` adapters. Raw constructors start with empty
-transport bytes; Wire callers always supply a request frame, and external
-no-argument Candid calls explicitly use `with_args(&())`. Bounded calls retain
+calls. Encode with `candid::contract::{encode_one,encode_args,encode_args_ref}`,
+then supply `with_raw_args` or `take_raw_args`. Decode `Response::as_ref()` through
+the separate Candid decoder, choosing existing admission/arity policy explicitly.
+Raw constructors start with empty transport bytes; Wire callers always supply
+a request frame. External no-argument Candid calls encode `()` explicitly.
+`CallFailed` and `OnewayError` describe transport failures only. Bounded calls retain
 their 300-second default and original cycle/timeout/error behavior.
 
 Call/response/future, cost/performance/error and stable-error types now have
-Platform identities; upstream direct-type equality is not retained. Principal,
-RejectCode, external DTO and crypto identities stay upstream. This is a breaking
-next-minor migration; existing versions have not been changed for qualification.
+Platform identities; upstream direct-type equality is not retained. Principal
+and runtime RejectCode are owned too. External DTO/Principal, BLS and certification
+identities remain upstream. The 0.4 candidate changes signature-key identity as
+documented above; package versions remain at 0.3.0 until maintainer release.
 The generator and imported non-cryptographic runtime source retain Apache-2.0
 with provenance; the combined package is MIT AND Apache-2.0. No executor or
 cryptographic implementation is forked.

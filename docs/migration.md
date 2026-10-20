@@ -256,18 +256,20 @@ does not remove `ic-certification` or establish a smaller Wasm artifact.
 
 ## Canister signature and BLS extension
 
-Three independent optional features serve Auth's reviewed signature-store and
+Three optional features serve Auth's reviewed signature-store and
 verification consumers. They are supported on native and Wasm, have no defaults,
 and do not enable Platform's Candid, executor, parser, Agent or certification
 surfaces. Their actual transitive dependencies differ:
 
 | Feature / module | Explicit upstream contract | Transitive boundary |
 | --- | --- | --- |
-| `canister-sig-creation` / `canister_sig_creation` | 1.3.1 `CanisterSigPublicKey`, `hash_bytes`, `hash_with_domain`, `extract_raw_root_pk_from_der`, `IC_ROOT_PK_DER`, `IC_ROOT_PK_DER_PREFIX` | Candid, certification and raw ic0; no BLS or executor |
-| `signature-verification` / `signature_verification` | 0.3.0 `verify_canister_sig` | Creation, Candid, certification, raw ic0 and BLS; no executor |
+| `canister-sig-creation` / `canister_sig_creation` | Imported 1.3.1 `CanisterSigPublicKey`, `hash_bytes`, `hash_with_domain`, `extract_raw_root_pk_from_der`, `IC_ROOT_PK_DER`, `IC_ROOT_PK_DER_PREFIX` | Certification; no Candid, ic0, BLS or executor |
+| `signature-verification` / `signature_verification` | Imported 0.3.0 `verify_canister_sig` | Creation surface, certification and BLS; no Candid, ic0 or executor |
 | `bls` / `bls` | 0.6.0 `PublicKey`, `Signature`, `PrivateKey`, `InvalidPublicKey`, `InvalidSignature`, `InvalidPrivateKey`, `verify_bls_signature` | Upstream alloc enabled; no creation, Candid, certification, ic0 or executor |
 
-These are direct upstream exports. Public-key constructor/DER/raw methods and
+The signature implementation is packaged in Platform for 0.4; BLS remains a direct
+upstream export. See [the identity migration](#runtime-codes-and-signature-packaging-04).
+Public-key constructor/DER/raw methods and
 Principal identities, root constants, domain/hash bytes, serialized BLS keys and
 signatures, typed BLS errors and unit verification errors remain upstream.
 `verify_canister_sig` retains four byte-slice arguments and `Result<(), String>`;
@@ -606,15 +608,18 @@ fn start() -> bool { true }
 
 Select `cdk,candid` only when the canister calls a required external Candid
 interface, such as management/system canisters and standard NNS/SNS/ledger APIs.
-`Call::{with_arg, with_args}` and `Response::{candid, candid_tuple}` exist under
-that explicit Candid selection. The DTO features retain their original registry
+The 0.4 runtime no longer exposes codec methods, even under that explicit Candid
+selection. Use the separate Candid encoders/decoders as described in the
+[transport migration](#transport-and-codec-separation-04).
+The DTO features retain their original registry
 identities and external bytes; they do not implicitly select Platform's codec API.
 Native parser, Agent and PocketIC features stay separate from canister features.
 
 Raw `Call` constructors now start with **empty transport bytes**, not implicit
 Candid unit arguments. Always supply a Wire request frame, including unit requests,
 using `with_raw_args`/`take_raw_args`. External no-argument Candid calls explicitly
-use `with_args(&())`. Preserve exact retained request/retry bytes, bounded/unbounded
+encode `()` with `candid::contract::encode_args` and supply those raw bytes.
+Preserve exact retained request/retry bytes, bounded/unbounded
 wait choices, the bounded 300-second default, cycle amounts and reply error policy.
 
 #### Runtime ownership and compatibility
@@ -630,8 +635,9 @@ rearm, cancellation and retry ownership.
 Call/response/future, cost/performance/error and stable-error types are now
 Platform-owned identities. Their corresponding re-exported identities are not
 maintained through aliases, conversion packages or a second CDK dependency.
-`RejectCode`, ExternalPrincipal, external DTO, certification and cryptographic identities
-remain upstream. Replace direct `ic_cdk` identity assertions with reviewed
+The 0.4 runtime RejectCode and signature-key identities are also Platform-owned.
+ExternalPrincipal, external DTO, certification and BLS identities remain upstream.
+Replace direct `ic_cdk` identity assertions with reviewed
 behavior/signature tests and compile actual consumers against the new owner.
 
 `stable::{stable_grow,stable_read,stable_write,StableMemoryError}` preserves raw
@@ -1037,15 +1043,15 @@ requires an explicit matrix and isolation-policy update. Graphs admit the qualif
 executor-only builds reject those frontends. Every graph rejects additional
 executor/system versions and alternate sources of those runtime identities. See
 [graph admission](https://github.com/dragginzgame/ic-platform/issues/14).
-The signature extension admits the reviewed creation/verifier/BLS/certification
-identities only through their selected or required transitive capabilities. BLS
-alone cannot admit creation, Candid or raw IC calls; the two canister-signature
-features explicitly retain those upstream dependencies. Default/executor and
+The signature extension admits the reviewed BLS/certification identities only
+through their selected or required transitive capabilities and rejects the retired
+creation/verifier packages. Signature-only selections reject Candid and raw IC
+calls. Default/executor and
 certification-only isolation remain unchanged. These are workspace graph gates,
 not guarantees about feature unification in every downstream application.
 
 Direct dependency isolation does not remove transitive Candid from management DTOs, Agent, PocketIC,
-protocol DTO packages or full CDK. No Wasm-size reduction has been measured.
+protocol DTO packages. No Wasm-size reduction has been measured.
 Native Linux, native macOS Intel/Apple Silicon, Wasm compilation and installed IC
 behavior are separate evidence categories. Current delivered-source CI and
 registry qualification are recorded in [the current handoff](status/current.md).
@@ -1250,3 +1256,87 @@ ledger DTO imports intact. Remove direct ledger dependencies only where no
 remaining external use requires them. Test consumer Wire codecs, map/set identity,
 text vectors and existing persisted records before adoption. No automatic storage
 migration, account-identifier hashing or principal-to-subaccount mapping is supplied.
+
+## Runtime codes and signature packaging (0.4)
+
+The 0.4 candidate replaces the runtime `cdk::call::RejectCode` with a Platform
+identity. Existing variant paths, integer casts, Display spelling and Serde enum
+names are preserved. `TryFrom<u64>` retains unknown numbers in
+`cdk::reject_code::UnknownRejectCode`; `CallRejected::reject_code()` still returns
+its existing `UnrecognizedRejectCode`, and `raw_reject_code()` remains available.
+Strum iteration and `From<ic_error_types::ErrorCode>` are not retained. External
+Agent and PocketIC enums are unchanged. Compare documented numeric codes when
+crossing those boundaries; do not cast an unrecognized number into a known enum.
+Consumers retain retry classification, deadlines and best-effort outcome policy.
+
+Signature features now select upstream-authored code packaged inside Platform.
+This supersedes the signature portions of the packaging experiments above.
+`canister_sig_creation::CanisterSigPublicKey` has a new Platform Rust identity;
+its Principal field remains `principal::ExternalPrincipal`. Existing explicit
+creation and verifier imports through Platform continue to work. Remove direct
+registry creation/verifier declarations only after every consumer uses Platform's
+surface, including tests, generated imports and helper signatures. No conversion
+between duplicate creation-package identities is supplied. No root Cargo patch,
+extra published crate, signature store or alternative cryptographic primitive is
+introduced. The coordinated Platform package carries the supported implementation.
+
+Both imported modules retain all upstream function bodies and test vectors.
+Only the canonical registry Principal import, the sibling creation import and
+omission of the unused store declaration differ. Exact source/license admission
+runs with the runtime source check. Short-DER panic behavior and domain/DER length
+conversion behavior remain upstream; keep Auth's pre-admission, canonical DER
+re-encoding, issuer/seed, freshness and trust-root checks. BLS, certificates and
+hash/domain separation use their existing upstream implementations.
+
+Creation/verifier-only normal/build graphs no longer contain Candid, ic0 or the
+two registry signature packages. CDK-only graphs no longer contain ic-error-types
+or Strum. Host Agent/PocketIC and other selected interfaces can independently
+bring Candid/error catalogues. These are graph observations, not measured Wasm
+savings. Native/macOS, installed verification and actual consumer migration remain
+separate qualifications; unchanged source does not prove all application policy.
+
+## Transport and codec separation (0.4)
+
+Raw `cdk::call::Call` now only configures and submits transport bytes. The Candid
+feature no longer adds `Call::with_arg/with_args` or
+`Response::candid/candid_tuple`. This avoids a second codec/error owner inside
+the runtime. Awaiting returns `Result<Response, CallFailed>` as before; oneway
+submission returns the now-explicit `OnewayError`. The existing
+`UnrecognizedRejectCode` is also nameable through `cdk::call`.
+
+For required external Candid calls, migrate deliberately:
+
+| Previous runtime helper | Explicit boundary operation |
+| --- | --- |
+| `call.with_arg(arg)` | `contract::encode_one(&arg)`, then `call.take_raw_args(bytes)` |
+| `call.with_args(&args)` | `contract::encode_args_ref(&args)`, then `call.take_raw_args(bytes)` |
+| `response.candid::<T>()` | `decoder::decode_one::<T>(response.as_ref())` to preserve upstream defaults |
+| `response.candid_tuple::<T>()` | `decoder::decode_args::<T>(response.as_ref())` to preserve upstream defaults |
+
+Here `contract` and `decoder` are under `ic_platform::candid`. Existing callers
+using finite limits continue using the parent module's bounded helpers, including
+`decode_exactly_one` where exact arity is their policy. Do not silently replace
+ordinary decoding with exact decoding, impose new budgets, change checkpoint
+bytes or select a retry on codec failure. Encoding now exposes its ordinary typed
+Result explicitly; callers decide whether to propagate failure or retain their
+previous trap behavior. No automatic encoding panic is installed by the runtime.
+Where a direct builder caller must preserve the former trap and diagnostic, use
+`unwrap_or_else(|err| panic!("failed to encode args: {err}"))` on encoding. Canic's
+existing fallible request builder already has its own error policy; retain it.
+
+Remove imports and conversions for retired `cdk::call::{Error, CandidDecodeFailed}`.
+Keep transport and codec errors distinct in the consumer's existing error enum.
+The explicit decoder retains the upstream typed Candid cause rather than reducing
+it to the old type-name/error strings. Preserve diagnostics disclosure policy.
+No compatibility alias or second transport/codec union replaces those types.
+
+The read-only Canic review found the affected layer at
+`crates/canic-core/src/infra/ic/{call.rs,mod.rs}`: its request builder already uses
+explicit encoding. Update response helpers and remove the obsolete combined-error
+mapping. Agent's separate `with_arg` methods and external host flows are unaffected;
+do not apply an unqualified global method-name replacement. Update consumer tests
+and generators only where they emit these retired Platform call APIs, then run
+external management/ledger request-byte, response-arity, error and retry tests.
+Manifests continue selecting `cdk` and explicit `candid`; no new feature is needed.
+Legacy `cdk::storage` Candid checkpoints are untouched and remain a compatibility
+exception, not a new storage format.

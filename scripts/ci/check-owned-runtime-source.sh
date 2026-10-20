@@ -2,6 +2,7 @@
 set -euo pipefail
 # Compare the imported non-cryptographic call/cleanup machinery, not an executor fork.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
+if [[ $# == 0 ]]; then bash "$root/scripts/ci/check-signature-source.sh"; fi
 source_root="${1:-$root/crates/ic-platform/src/cdk/upstream}"
 [[ $# -le 1 ]] || exit 2
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-runtime-source.XXXXXX")"

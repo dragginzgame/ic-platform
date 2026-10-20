@@ -1,6 +1,73 @@
 # Current handoff
 
-## Pending 0.3 owned account
+## Pending 0.4 transport-only calls
+
+The maintainer requested further justified breaking cuts in the same migration.
+Raw Call/Response no longer implement Candid request/response methods, and the
+combined call Error and string-only CandidDecodeFailed are retired. Use explicit
+Candid encoders/decoders around raw bytes; encoding traps, decoding/arity limits,
+diagnostics and retry decisions remain caller-owned. Existing oneway and unknown
+reject-code error types are now explicitly nameable through the facade. The
+borrowed `encode_args_ref` helper preserves the previous borrowed-argument use.
+See [the transport migration](../migration.md#transport-and-codec-separation-04).
+
+Canic's request builder already encodes explicitly; its response helpers and
+obsolete combined-error mapping are the targeted migration points. No sibling
+files were edited. Checkpoint implementation/bytes, system calls, executor identity,
+callback/trap cleanup, timeouts and cycles remain unchanged. Package versions
+remain 0.3.0; all breaking work stays in the pending 0.4 changelog.
+
+Linux validation passes: Rust 1.88 all-feature tests/Wasm, standalone CDK and Candid
+native/MSRV/Wasm consumers, strict Clippy, warning-denied Rustdoc, source/license
+and mutation guards, formatting and documentation checks. The new installed
+fixture explicitly encodes management arguments and uses its original upstream
+decoding policy. All four PocketIC 16.0.0 runs pass (Rust 1.91 and 1.99.1, Wire-only
+and external-Candid), including original checkpoint bytes and upgrade/rollback.
+Evidence: `target/cdk-runtime.oau1gn` and `/tmp/platform04-transport-*.log`.
+Actual consumer migration, native macOS and live IC qualification remain separate.
+No new feature, dependency, publication, measured size claim or crypto change.
+
+## Pending 0.4 runtime codes and signature packaging
+
+The maintainer authorized both changes after the 0.3 audit. Runtime RejectCode
+is owned, preserving codes 1–6, Display/Serde spelling and raw unknown-code
+refusal. Agent/PocketIC enums remain external. Its Strum iteration and external
+ErrorCode conversion are intentionally not retained. Signature creation/verifier
+source is packaged inside Platform with unchanged upstream bodies and 29 tests;
+only documented imports and the unused store declaration differ. Exact source
+and license fingerprints plus mutation refusals guard the imported modules.
+BLS, certificate and hash algorithms are unchanged. See the
+[0.4 migration](../migration.md#runtime-codes-and-signature-packaging-04).
+
+Package versions remain 0.3.0; these public identity changes require the pending
+0.4 release, not a patch. No commits, publication or sibling edits were made.
+The prior handoff correction is preserved. The root lock removes the retired
+packages and adds only the imported test helper; the runtime fixture lock removes
+its obsolete runtime error-catalogue edge without changing other selections.
+
+Linux qualification passes: Rust 1.88 all-feature tests and Wasm checking,
+standalone CDK/creation/verifier native/MSRV/Wasm consumers, strict all-feature
+Clippy and warning-denied Rustdoc. Eighteen native/Wasm production graphs confirm
+signature-only selections exclude Candid/ic0 and both registry signature packages;
+CDK-only excludes ic-error-types/Strum. Graph admission includes 71 regression
+cases. Feature closures/selections, runtime source/mutation/lock checks, dependency
+ownership/pins, formatting and documentation checks pass. Signature fingerprints
+also retain the original tests and licenses. This is not a measured Wasm saving.
+
+Four installed PocketIC 16.0.0 runs pass: Rust 1.91 and 1.99.1 Wasm, each Wire-only
+and external-Candid mode, covering callback/trap cleanup, timer cancellation,
+upgrade, cycles, stable rollback and certificates. Artifacts are retained at
+`target/cdk-runtime.0tbMOx`; logs at `/tmp/platform04-installed-*.log`. Other focused
+logs are `/tmp/platform04-{msrv,consumers,all-msrv,all-wasm,final-clippy,doc}.log`;
+graphs are in `target/platform04-graphs`. Native macOS, live IC and actual Auth/Canic
+migration or installed signature-policy qualification remain separate work.
+
+## Released 0.3 owned account
+
+The checkout is released 0.3.0 at `390644f`, following implementation commit
+`80a81e8`. The maintainer reports it pushed; this pass does not independently
+establish crates.io publication. Qualification below records the implementation
+checks, not completed sibling adoption.
 
 The unconditional `Account`, `Subaccount` and `AccountError` now accompany owned
 Principal. Effective-zero equality, ordering and hashing match upstream; Serde
@@ -32,7 +99,7 @@ malformed array lengths. Rust 1.88's 14 unit/3 ledger integration tests, standal
 native/MSRV/Wasm consumer and strict selected Clippy pass. Evidence is retained
 in `/tmp/platform-account-review-{tests,consumer,clippy}.log`.
 
-## Pending 0.3 owned Principal
+## Released 0.3 owned Principal
 
 The maintainer authorized an owned Principal inside Platform, retaining Apache
 provenance and unchanged upstream cryptography. Source now exposes owned root
@@ -45,10 +112,10 @@ buffers. Original bytes, padding and length-first ordering are preserved.
 Self-authentication delegates to registry ic_principal; this is not dependency
 removal. See [the migration](../migration.md#owned-principal-migration-03).
 
-Workspace versions remain 0.2.2. These breaking changes belong to **0.3.0**, not a
-patch publication. No version bump, commit, publication or sibling edit was made.
-The incoming webpki-root-certs lock update remains intact. Added lock entries are
-only the direct dependency edges and the Serde test helper.
+Workspace versions are now 0.3.0. The implementation pass preserved the incoming
+webpki-root-certs lock update and added direct dependency edges and the Serde test
+helper; the maintainer subsequently committed and released that work. It did not
+qualify sibling migration.
 
 Qualification passes on Linux: all-feature native tests and strict Clippy;
 Rust 1.88 Principal/runtime/Candid tests; standalone Principal, Candid and CDK
@@ -143,13 +210,14 @@ The sole executor remains registry `ic-cdk-executor =2.0.0`; raw system calls
 retain `ic0 =1.2.0`. Imported call submission, callback/trap cleanup, protected
 spawn semantics and the upstream multithreading refusal are preserved. No executor
 implementation is copied. Call/response/cost/performance/error/stable-error types
-now have Platform identities; ExternalPrincipal, RejectCode, external DTOs, certification
-and cryptographic types retain their registry identities. See
+now have Platform identities. The 0.4 candidate also owns runtime RejectCode and
+signature-key identity; ExternalPrincipal, external DTOs, certification and BLS
+retain registry identities. See
 [the migration contract](../migration.md#maintained-runtime-and-wire-entrypoint-adoption).
 
 Raw call constructors begin with empty transport bytes. Every Wire call supplies
 its request frame; required external no-argument Candid calls explicitly use
-`with_args(&())`. Bounded calls still default to 300 seconds. Callers retain
+`candid::contract::encode_args(())` and supply the resulting raw bytes. Bounded calls still default to 300 seconds. Callers retain
 cycles, deadlines, retries, budgets, authentication and application interpretation.
 Select `candid` separately for management/system and standard ledger/NNS/SNS calls.
 Existing Candid checkpoints remain an explicit legacy persisted-data exception,

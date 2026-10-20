@@ -27,7 +27,7 @@ pub mod decoder;
 pub mod contract {
     pub use crate::principal::ExternalPrincipal as Principal;
     pub use candid::de::DecoderConfig;
-    pub use candid::utils::{ArgumentDecoder, ArgumentEncoder};
+    pub use candid::utils::{ArgumentDecoder, ArgumentEncoder, encode_args_ref};
     pub use candid::{
         CandidType, Decode, Encode, Error, Int, Nat, Reserved, TypeEnv, candid_method,
         decode_args_with_config, encode_args, encode_one, export_service, idl_hash,

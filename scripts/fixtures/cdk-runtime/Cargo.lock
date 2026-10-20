@@ -771,17 +771,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-error-types"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbeeb3d91aa179d6496d7293becdacedfc413c825cac79fd54ea1906f003ee55"
-dependencies = [
- "serde",
- "strum",
- "strum_macros",
-]
-
-[[package]]
 name = "ic-host-artifacts"
 version = "0.27.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -854,7 +843,6 @@ dependencies = [
  "data-encoding",
  "ic-cdk-executor",
  "ic-certification",
- "ic-error-types",
  "ic-platform-macros",
  "ic0",
  "ic_principal",

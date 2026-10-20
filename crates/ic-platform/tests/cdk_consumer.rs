@@ -59,3 +59,37 @@ fn error_and_system_contracts() {
     let _: fn() -> bool = futures::is_recovering_from_trap;
     ic_platform::cdk::println!("native debug adapter");
 }
+
+#[test]
+fn owned_reject_codes_preserve_numbers_and_diagnostics() {
+    use ic_platform::cdk::call::RejectCode;
+    for (raw, name) in [
+        (1, "SYS_FATAL"),
+        (2, "SYS_TRANSIENT"),
+        (3, "DESTINATION_INVALID"),
+        (4, "CANISTER_REJECT"),
+        (5, "CANISTER_ERROR"),
+        (6, "SYS_UNKNOWN"),
+    ] {
+        let code = RejectCode::try_from(raw).unwrap();
+        assert_eq!(code as u64, raw);
+        assert_eq!(code.to_string(), name);
+    }
+    for raw in [0, 7, u32::MAX as u64, u64::MAX] {
+        assert_eq!(RejectCode::try_from(raw).unwrap_err().0, raw);
+    }
+}
+
+#[test]
+fn transport_failures_are_named_without_a_codec_error_union() {
+    use ic_platform::cdk::call::{
+        CallFailed, CallPerformFailed, CallRejected, OnewayError, RejectCode,
+        UnrecognizedRejectCode,
+    };
+    let failure: CallFailed = CallPerformFailed.into();
+    assert!(matches!(failure, CallFailed::CallPerformFailed(_)));
+    let failure: OnewayError = CallPerformFailed.into();
+    assert!(matches!(failure, OnewayError::CallPerformFailed(_)));
+    let _: fn(&CallRejected) -> Result<RejectCode, UnrecognizedRejectCode> =
+        CallRejected::reject_code;
+}

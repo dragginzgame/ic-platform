@@ -61,6 +61,13 @@ and unchanged cryptographic function bodies. Qualify their actual consumer graph
 type/source identities and wire bytes; a dependency-local Cargo patch is not a
 supported distribution mechanism for downstream consumers.
 
+The maintainer authorized the 0.4 signature packaging migration: retain the
+upstream creation/verifier bodies and vectors inside `signature_upstream`, changing
+only the documented imports and omitting the unexposed store module. Enforce exact
+source/license fingerprints; do not refresh hashes to permit algorithm changes.
+The owned runtime RejectCode similarly replaces only its external catalogue
+dependency; Agent/PocketIC codes keep their external identities.
+
 ## Owned Principal
 
 The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
@@ -106,3 +113,11 @@ absent versus explicit zero fields during serialization and external conversion.
 Retain Apache provenance and the existing external ledger DTO identity. No Candid,
 storage implementation, cryptographic account-identifier derivation or application
 subaccount allocation policy belongs in the owned account surface.
+
+## Transport and codecs
+
+The 0.4 runtime accepts/returns raw transport bytes only. Do not restore implicit
+Candid request/response helpers or a combined transport/codec error union. Use the
+separate Candid boundary for required external IC interfaces; consumers retain
+encoding-failure, decoding, arity, resource, diagnostics and retry policy. Legacy
+Candid checkpoint adapters remain unchanged and outside new storage ownership.

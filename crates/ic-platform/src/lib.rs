@@ -23,6 +23,9 @@
 pub mod account;
 pub use account::{Account, AccountError, Subaccount};
 
+#[cfg(any(feature = "canister-sig-creation", feature = "signature-verification"))]
+mod signature_upstream;
+
 pub mod principal;
 pub use principal::{Principal, PrincipalError};
 

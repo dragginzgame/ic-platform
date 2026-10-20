@@ -16,12 +16,18 @@ agent = ["dep:ic-agent"]
 bls = ["dep:ic-verify-bls-signature"]
 candid = ["dep:candid", "candid/bignum", "candid/printer"]
 candid-parser = ["dep:candid_parser"]
-canister-sig-creation = ["dep:ic-canister-sig-creation"]
+canister-sig-creation = [
+    "dep:ic-certification",
+    "dep:ic-representation-independent-hash",
+    "dep:lazy_static",
+    "dep:serde_bytes",
+    "dep:serde_cbor",
+    "dep:sha2",
+]
 cdk = [
     "executor",
     "ic0",
     "dep:ic-platform-macros",
-    "dep:ic-error-types",
     "dep:pin-project-lite",
     "dep:thiserror",
 ]
@@ -32,7 +38,7 @@ executor = ["dep:ic-cdk-executor"]
 ic0 = ["dep:ic0"]
 icrc-ledger-types = ["dep:icrc-ledger-types"]
 management-canister-types = ["dep:ic-management-canister-types"]
-signature-verification = ["dep:ic-signature-verification"]
+signature-verification = ["canister-sig-creation", "dep:ic-verify-bls-signature"]
 pocket-ic = ["dep:pocket-ic"]
 secp256k1 = ["dep:ic-secp256k1"]
 
@@ -48,23 +54,26 @@ crc32fast.workspace = true
 curve25519-dalek = { workspace = true, optional = true }
 data-encoding.workspace = true
 ed25519-dalek = { workspace = true, optional = true }
-ic-canister-sig-creation = { workspace = true, optional = true }
 ic-cdk-executor = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
-ic-error-types = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
-ic-signature-verification = { workspace = true, optional = true }
+ic-representation-independent-hash = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 ic0 = { workspace = true, optional = true }
 ic_principal.workspace = true
 icrc-ledger-types = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
+lazy_static = { workspace = true, optional = true }
 pin-project-lite = { workspace = true, optional = true }
 serde = { workspace = true, features = ["alloc"] }
+serde_bytes = { workspace = true, optional = true }
+serde_cbor = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
 thiserror = { workspace = true, optional = true }
 
 [dev-dependencies]
+assert_matches.workspace = true
 serde_test.workspace = true
 
 [[test]]

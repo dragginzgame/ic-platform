@@ -64,9 +64,14 @@ cdk|ic-platform-macros v0.1.12 (proc-macro) (/fixture)|reject
 ic0|ic0 v1.2.0|pass
 ic0|ic0 v1.1.0|reject
 ic0|ic0 v1.2.0 (/local)|reject
-canister-sig-creation|ic-canister-sig-creation v1.3.1|pass
+canister-sig-creation|ic-canister-sig-creation v1.3.1|reject
+canister-sig-creation|candid v0.10.38|reject
+signature-verification|candid v0.10.38|reject
+canister-sig-creation|ic0 v1.2.0|reject
+signature-verification|ic0 v1.2.0|reject
+cdk|ic-error-types v0.2.0|reject
 canister-sig-creation|ic-canister-sig-creation v1.3.2|reject
-signature-verification|ic-signature-verification v0.3.0|pass
+signature-verification|ic-signature-verification v0.3.0|reject
 signature-verification|ic-signature-verification v0.2.0|reject
 bls|ic-verify-bls-signature v0.6.0|pass
 bls|ic_bls12_381 v0.10.1|pass

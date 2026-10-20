@@ -22,7 +22,7 @@ cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/met
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve the exact qualified executor =2.0.0' >&2; exit 1;
 }
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | . as $p | .features.cdk == ["executor", "ic0", "dep:ic-platform-macros", "dep:ic-error-types", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | . as $p | .features.cdk == ["executor", "ic0", "dep:ic-platform-macros", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'CDK must select only the owned adapters, qualified executor/ic0 and coordinated generator' >&2; exit 1;
 }

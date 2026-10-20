@@ -244,3 +244,13 @@ fn owned_principal_converts_at_the_external_candid_boundary() {
     let decoded: contract::Principal = ic_platform::candid::decoder::decode_one(&bytes).unwrap();
     assert_eq!(ic_platform::Principal::from(decoded), owned);
 }
+#[test]
+fn borrowed_argument_encoding_keeps_original_external_bytes() {
+    use ic_platform::candid::contract::{encode_args, encode_args_ref};
+    let arguments = (42_u64, String::from("external"));
+    assert_eq!(
+        encode_args_ref(&arguments).unwrap(),
+        encode_args(arguments.clone()).unwrap()
+    );
+    assert_eq!(arguments.1, "external");
+}

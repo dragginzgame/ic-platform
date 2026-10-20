@@ -11,8 +11,6 @@ jq="$root/.tools/host/bin/jq"
 host="$(rustc -vV | sed -n 's/^host: //p')"
 cargo metadata --all-features --format-version 1 --filter-platform "$host" --frozen --offline > "$attempt/metadata.json"
 for selection in \
-    'creation ic-canister-sig-creation 1.3.1 canister-sig-optional-store' \
-    'verifier ic-signature-verification 0.3.0 verifier-optional-store' \
     'secp ic-secp256k1 0.3.0 secp256k1-optional-scaffolding'; do
     read -r directory package version proposal <<< "$selection"
     manifest="$("$jq" -er --arg package "$package" --arg version "$version" '

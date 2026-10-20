@@ -15,3 +15,14 @@ for mutation in cleanup protected license; do
     fi
 done
 printf 'Cleanup, protected-spawn and license mutation refusals passed.\n'
+for part in creation verification; do
+    for file in mod.rs LICENSE; do
+        destination="$fixture/signature-$part-${file//./-}"
+        cp -R "$root/crates/ic-platform/src/signature_upstream" "$destination"
+        printf '\nmutated source\n' >> "$destination/$part/$file"
+        if bash "$root/scripts/ci/check-signature-source.sh" "$destination" > "$fixture/log" 2>&1; then
+            echo "Unexpectedly admitted signature mutation: $part/$file" >&2; exit 1
+        fi
+    done
+done
+printf 'Signature source, vector and license mutation refusals passed.\n'

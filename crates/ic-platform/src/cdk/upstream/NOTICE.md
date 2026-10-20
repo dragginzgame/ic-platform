@@ -22,7 +22,10 @@ adapter retains its upstream bytes and construction unchanged.
 Changes from the import:
 
 - Retarget module/Principal paths; expose only the reviewed facade surface.
-- Gate Candid argument/response methods and legacy checkpoints on `candid`.
+- Retire Candid argument/response methods in 0.4; encode/decode at the separate
+  explicit Candid boundary. Legacy checkpoints remain gated on `candid`.
+  Remove the combined transport/codec Error and string-only CandidDecodeFailed;
+  preserve CallFailed, OnewayError and all call submission/cleanup behavior.
 - Begin raw call builders with empty transport bytes instead of implicit Candid
   unit arguments. Both Wire and external Candid callers supply explicit payloads.
   Bounded calls still default to 300 seconds; cycle and timeout policies remain
@@ -36,6 +39,7 @@ Changes from the import:
   admission evidence, not a substitute for installed recovery tests.
 
 Call, response, cost/error and stable-error types now have Platform identities.
-`Principal` becomes Platform-owned for the 0.3 migration; `ExternalPrincipal`,
-`RejectCode`, external DTOs, certification and crypto types retain registry identities. This is a breaking source migration requiring the next
-minor release, 0.2.0. The declared version does not establish registry publication.
+`Principal` became Platform-owned in 0.3; the 0.4 runtime RejectCode is owned too.
+ExternalPrincipal, external DTOs and certification retain registry identities.
+The initial runtime migration shipped in 0.2; these further breaking changes
+require 0.4. The declared version does not establish registry publication.

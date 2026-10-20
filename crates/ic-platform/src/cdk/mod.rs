@@ -5,6 +5,7 @@
 //! consumer-owned Wire hooks. Registry executor 2.0.0 and ic0 1.2.0 stay shared.
 //! See the imported Apache-2.0 source provenance under `upstream/NOTICE.md`.
 
+pub mod reject_code;
 mod upstream;
 
 /// Print with the original native/canister debug behavior.
@@ -31,12 +32,12 @@ pub mod api {
 
 /// Reviewed call builders, raw replies and preserved call failure semantics.
 ///
-/// Candid response convenience methods retain upstream defaults; callers using
-/// finite budgets must retain their explicit decoder and original reply bytes.
+/// Encode and decode required external Candid messages through the separate
+/// Candid boundary. Transport failures never erase typed codec errors.
 pub mod call {
     pub use super::upstream::call::{
-        Call, CallFailed, CallPerformFailed, CallRejected, CandidDecodeFailed, Error,
-        InsufficientLiquidCycleBalance, RejectCode, Response,
+        Call, CallFailed, CallPerformFailed, CallRejected, InsufficientLiquidCycleBalance,
+        OnewayError, RejectCode, Response, UnrecognizedRejectCode,
     };
 }
 

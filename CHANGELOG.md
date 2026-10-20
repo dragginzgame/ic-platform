@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0]
+
+### Breaking
+
+- Own the runtime RejectCode identity while preserving numeric codes, Serde names,
+  Display spelling and unknown-code refusal. Retire its Strum iteration and
+  external ErrorCode conversion; Agent/PocketIC DTO identities remain unchanged.
+- Package the original signature creation/verifier implementations inside Platform.
+  CanisterSigPublicKey now has a Platform identity. Preserve cryptographic bodies
+  and vectors; remove the unused store, Candid import and registry package edges.
+  Signature-only production graphs no longer require Candid or raw IC calls.
+- Make raw calls transport-only: retire Candid argument/response convenience
+  methods and their combined Error/CandidDecodeFailed model. Encode/decode required
+  external messages through the explicit Candid boundary, retaining typed errors
+  and caller-selected policies. Expose the existing oneway/unknown-code errors.
+
 ## [0.3.0] - 2026-10-20
 
 ### Changed
