@@ -20,7 +20,11 @@
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
 //! Consumers retain protocol schemas, resource limits and lifecycle policy.
 
-pub use ic_principal::{Principal, PrincipalError};
+pub mod account;
+pub use account::{Account, AccountError, Subaccount};
+
+pub mod principal;
+pub use principal::{Principal, PrincipalError};
 
 #[cfg(all(feature = "agent", not(target_family = "wasm")))]
 pub mod agent;

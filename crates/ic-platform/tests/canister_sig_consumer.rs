@@ -6,7 +6,9 @@ use ic_platform::canister_sig_creation::{
 
 /// Preserve the original owner's key format, domain bytes and error identities.
 pub fn roundtrip() {
-    let issuer = ic_platform::Principal::from_text("rwlgt-iiaaa-aaaaa-aaaaa-cai").unwrap();
+    let issuer =
+        ic_platform::principal::ExternalPrincipal::from_text("rwlgt-iiaaa-aaaaa-aaaaa-cai")
+            .unwrap();
     let key = CanisterSigPublicKey::new(issuer, vec![42, 72, 44]);
     // Original 1.3.1 public-key vector, independent of Platform's exports.
     let der = b"\x30\x1f\x30\x0c\x06\x0a\x2b\x06\x01\x04\x01\x83\xb8\x43\x01\x02\x03\x0f\x00\x0a\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01\x2a\x48\x2c";

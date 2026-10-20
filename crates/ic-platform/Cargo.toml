@@ -14,7 +14,7 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 default = []
 agent = ["dep:ic-agent"]
 bls = ["dep:ic-verify-bls-signature"]
-candid = ["dep:candid", "candid/bignum", "candid/printer", "dep:serde"]
+candid = ["dep:candid", "candid/bignum", "candid/printer"]
 candid-parser = ["dep:candid_parser"]
 canister-sig-creation = ["dep:ic-canister-sig-creation"]
 cdk = [
@@ -44,7 +44,9 @@ pocket-ic = { workspace = true, optional = true }
 
 [dependencies]
 candid = { workspace = true, optional = true }
+crc32fast.workspace = true
 curve25519-dalek = { workspace = true, optional = true }
+data-encoding.workspace = true
 ed25519-dalek = { workspace = true, optional = true }
 ic-canister-sig-creation = { workspace = true, optional = true }
 ic-cdk-executor = { workspace = true, optional = true }
@@ -59,8 +61,11 @@ ic_principal.workspace = true
 icrc-ledger-types = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
 pin-project-lite = { workspace = true, optional = true }
-serde = { workspace = true, optional = true }
+serde = { workspace = true, features = ["alloc"] }
 thiserror = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde_test.workspace = true
 
 [[test]]
 name = "ecdsa_consumer"

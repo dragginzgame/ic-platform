@@ -25,7 +25,7 @@ pub mod decoder;
 /// `DecoderConfig` and `decode_args_with_config` retain upstream configuration;
 /// they do not select the parent module's finite-limit helper policy.
 pub mod contract {
-    pub use crate::Principal;
+    pub use crate::principal::ExternalPrincipal as Principal;
     pub use candid::de::DecoderConfig;
     pub use candid::utils::{ArgumentDecoder, ArgumentEncoder};
     pub use candid::{

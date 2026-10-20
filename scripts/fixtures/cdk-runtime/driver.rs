@@ -3,7 +3,7 @@ mod protocol;
 mod wire_driver;
 mod wire_protocol;
 
-use ic_platform::Principal;
+use ic_platform::principal::ExternalPrincipal as Principal;
 use ic_testkit::pic::{PocketIc, PocketIcBuilder, PocketIcStartupConfig};
 use ic_testkit::pocket_ic::{RejectCode, RejectResponse};
 use protocol::{LIMITS, method_id};

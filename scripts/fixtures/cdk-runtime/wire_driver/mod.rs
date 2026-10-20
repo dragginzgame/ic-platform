@@ -1,7 +1,7 @@
 //! Installed checks for explicit Wire frames, rejection and callback cleanup.
 
 use crate::wire_protocol::*;
-use ic_platform::Principal;
+use ic_platform::principal::ExternalPrincipal as Principal;
 use ic_testkit::{pic::PocketIc, pocket_ic::RejectCode};
 
 fn observe(pic: &PocketIc, id: Principal) -> (u64, u64) {

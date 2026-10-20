@@ -1,11 +1,11 @@
 //! Standalone Platform-only consumer of the explicit external ledger surface.
-use ic_platform::Principal;
 use ic_platform::candid::{DecodeLimits, contract, decode_exactly_one};
 use ic_platform::icrc_ledger_types::{
     Account, Allowance, AllowanceArgs, ArchivedBlocks, BlockWithId, GetArchivesArgs,
     GetBlocksRequest, GetBlocksResult, ICRC3ArchiveInfo, ICRC3DataCertificate, ICRC3Value,
     MetadataValue, QueryArchiveFn, SupportedBlockType, TransferError, Value,
 };
+use ic_platform::principal::ExternalPrincipal as Principal;
 
 fn wire_hex(text: &str) -> Vec<u8> {
     let (pairs, remainder) = text.trim().as_bytes().as_chunks::<2>();
@@ -133,4 +133,81 @@ pub fn roundtrip() {
 #[test]
 fn ledger_dtos_preserve_wire_hashes_and_type_identities() {
     roundtrip();
+}
+
+#[test]
+fn owned_accounts_preserve_external_semantics_and_wire() {
+    use ic_platform::account::{Account as OwnedAccount, ExternalAccount};
+    for len in 0..=29 {
+        for seed in 0..=255u8 {
+            let owner = Principal::from_slice(&vec![seed; len]);
+            for subaccount in [None, Some([0; 32]), Some([seed; 32])] {
+                let external = ExternalAccount { owner, subaccount };
+                let owned: OwnedAccount = external.into();
+                assert_eq!(owned.to_string(), external.to_string());
+                assert_eq!(owned.to_string().parse::<OwnedAccount>().unwrap(), owned);
+                let restored: ExternalAccount = owned.into();
+                assert_eq!(restored.subaccount, external.subaccount);
+                assert_eq!(
+                    contract::encode_one(restored).unwrap(),
+                    contract::encode_one(external).unwrap()
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn owned_account_parser_and_order_match_external_owner() {
+    use ic_platform::account::{Account as OwnedAccount, ExternalAccount};
+    use std::hash::{Hash, Hasher};
+    let mut accounts = Vec::new();
+    // Every possible trimmed hex length, odd/even nibble offsets and mixed bytes.
+    for digits in 1..=64 {
+        let mut subaccount = [0; 32];
+        for (index, byte) in subaccount.iter_mut().enumerate().skip((64 - digits) / 2) {
+            *byte = (index as u8).wrapping_mul(37).wrapping_add(19);
+        }
+        subaccount[(64 - digits) / 2] = if digits % 2 == 0 { 0xa1 } else { 1 };
+        let external = ExternalAccount {
+            owner: Principal::from_slice(&[digits as u8; 29]),
+            subaccount: Some(subaccount),
+        };
+        let text = external.to_string();
+        assert_eq!(text.split_once('.').unwrap().1.len(), digits);
+        assert_eq!(text.len(), 72 + digits);
+        let owned: OwnedAccount = text.parse().unwrap();
+        assert_eq!(owned.owner.as_slice(), external.owner.as_slice());
+        assert_eq!(owned.subaccount, external.subaccount);
+        assert_eq!(owned.to_string(), text);
+        let mut original_hash = std::collections::hash_map::DefaultHasher::new();
+        let mut owned_hash = std::collections::hash_map::DefaultHasher::new();
+        external.hash(&mut original_hash);
+        owned.hash(&mut owned_hash);
+        assert_eq!(original_hash.finish(), owned_hash.finish());
+        accounts.push((external, owned));
+        // Admission parity, not error spelling: mutate every byte including separators.
+        for index in 0..text.len() {
+            for replacement in [b'0', b'1', b'a', b'F', b'-', b'.', b' ', 0] {
+                let mut bytes = text.as_bytes().to_vec();
+                bytes[index] = replacement;
+                let mutated = String::from_utf8(bytes).unwrap();
+                let original = mutated.parse::<ExternalAccount>();
+                let candidate = mutated.parse::<OwnedAccount>();
+                assert_eq!(original.is_ok(), candidate.is_ok(), "{mutated:?}");
+                if let (Ok(original), Ok(candidate)) = (original, candidate) {
+                    assert_eq!(original.owner.as_slice(), candidate.owner.as_slice());
+                    assert_eq!(original.subaccount, candidate.subaccount);
+                }
+            }
+        }
+        for suffix in ["é", "😀", ".", "\n"] {
+            assert!(format!("{text}{suffix}").parse::<OwnedAccount>().is_err());
+        }
+    }
+    for (external, owned) in &accounts {
+        for (other_external, other_owned) in &accounts {
+            assert_eq!(external.cmp(other_external), owned.cmp(other_owned));
+        }
+    }
 }

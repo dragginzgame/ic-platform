@@ -26,11 +26,19 @@ if bash "$fixture/scripts/release/runtime-lock.sh" prepare 98.0.0 2> "$fixture/w
 cmp "$fixture/before.lock" "$lock"
 bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
 bash "$fixture/scripts/release/runtime-lock.sh" check
-# No external package or fixture-local identity may change during release preparation.
+# Only local package versions and their version-qualified dependency references
+# may change. Registry versions (including an older Platform) remain untouched.
 for side in before after; do
     source="$lock"
     if [[ "$side" == before ]]; then source="$fixture/before.lock"; fi
-    "$YQ" -p toml -o json '.' "$source" | jq -S '[.package[] | select(.source != null or (.name != "ic-platform" and .name != "ic-platform-macros"))]' > "$fixture/$side.json"
+    "$YQ" -p toml -o json '.' "$source" | jq -S --arg before "$version" '
+        [.package[] | select(.source != null or (.name != "ic-platform" and .name != "ic-platform-macros")) |
+            if .source == null and .dependencies != null then
+                .dependencies |= map(
+                    if . == "ic-platform 99.0.0" then "ic-platform " + $before
+                    elif . == "ic-platform-macros 99.0.0" then "ic-platform-macros " + $before
+                    else . end)
+            else . end]' > "$fixture/$side.json"
 done
 cmp "$fixture/before.json" "$fixture/after.json"
 cp "$lock" "$fixture/prepared.lock"

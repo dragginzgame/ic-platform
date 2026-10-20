@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.3.0]
+
+### Changed
+
+- Select Rust 1.99.1 for development and matching CI checks, retaining existing
+  package MSRVs.
+
+### Added
+
+- Own Candid-free Account and Subaccount identities with bounded text parsing,
+  original effective-zero equality and explicit external ledger DTO conversions.
+  Preserve optional subaccount representation and ledger text checksums.
+
+### Breaking
+
+- Own the unconditional Principal and parse-error types. Convert explicitly to
+  the retained external Principal for Agent, PocketIC, Candid DTOs and crypto APIs.
+  Preserve original identity bytes and ordering; delegate self-authentication to
+  the original cryptographic implementation.
+- Bound principal text admission and remove intermediate formatting allocations.
+  Treat owned/borrowed binary Serde bytes identically; do not inherit Candid marker
+  handling or generic range stepping. See the [Principal migration](docs/migration.md#owned-principal-migration-03).
+
 ## [0.2.2] - 2026-10-19
 
 ### Added

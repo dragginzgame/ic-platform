@@ -1,5 +1,83 @@
 # Current handoff
 
+## Pending 0.3 owned account
+
+The unconditional `Account`, `Subaccount` and `AccountError` now accompany owned
+Principal. Effective-zero equality, ordering and hashing match upstream; Serde
+and conversions preserve absent versus explicit zero fields. Text parsing admits
+at most 136 bytes, decoding subaccounts into a fixed array. Formatting preserves
+the ledger CRC32/Base32/hex spelling with no intermediate strings. No cryptographic
+implementation, dependency, feature or storage integration is added.
+
+The existing external ledger DTO is unchanged, also named
+`account::ExternalAccount` under `icrc-ledger-types`. Explicit conversions preserve
+owner bytes and optional subaccount fields. Owned Account has no Candid trait.
+Apache source/license provenance is retained under `src/account`. See the
+[account migration](../migration.md#owned-account-migration-03).
+
+Linux qualification passes: Rust 1.88 unit tests, Platform-only standalone native
+and Wasm consumers on Rust 1.88 and the development toolchain, strict selected
+Clippy, formatting, documentation links and six native/Wasm production graphs.
+Differential coverage checks 23,040 account cases against upstream text and Candid
+bytes, plus marker-free owned/borrowed Serde and effective-zero identity tests.
+Logs: `/tmp/platform-account-{consumers,clippy}.log`; graphs: `target/account-graphs`.
+These are source/codec checks, not sibling Wire integration, persisted-data,
+native macOS or installed-canister qualification. No sibling files, release
+versions, commits or publication changed; prior Principal work remains intact.
+
+The follow-up account sanity review found no production defect. Expanded tests
+cover all 64 trimmed hex lengths, 53,504 text mutations against upstream admission,
+4,096 ordering comparisons, upstream hash parity, explicit-zero Serde tokens and
+malformed array lengths. Rust 1.88's 14 unit/3 ledger integration tests, standalone
+native/MSRV/Wasm consumer and strict selected Clippy pass. Evidence is retained
+in `/tmp/platform-account-review-{tests,consumer,clippy}.log`.
+
+## Pending 0.3 owned Principal
+
+The maintainer authorized an owned Principal inside Platform, retaining Apache
+provenance and unchanged upstream cryptography. Source now exposes owned root
+`Principal`/`PrincipalError`, with explicit registry
+`principal::{ExternalPrincipal, ExternalPrincipalError}` for external DTO/client
+boundaries. Candid's contract still exports the registry type. The owned type
+has no Candid trait or marker handling and no generic range-step implementation.
+Parsing admits at most 63 text bytes before work; parsing/Display use stack
+buffers. Original bytes, padding and length-first ordering are preserved.
+Self-authentication delegates to registry ic_principal; this is not dependency
+removal. See [the migration](../migration.md#owned-principal-migration-03).
+
+Workspace versions remain 0.2.2. These breaking changes belong to **0.3.0**, not a
+patch publication. No version bump, commit, publication or sibling edit was made.
+The incoming webpki-root-certs lock update remains intact. Added lock entries are
+only the direct dependency edges and the Serde test helper.
+
+Qualification passes on Linux: all-feature native tests and strict Clippy;
+Rust 1.88 Principal/runtime/Candid tests; standalone Principal, Candid and CDK
+native/MSRV/Wasm consumers; sixteen native/Wasm production graphs; warning-denied
+Rustdoc; formatting, pins, boundary, documentation and runtime provenance checks.
+Principal regressions compare 7,680 byte/text values with the upstream owner,
+check both owned/borrowed Serde bytes and preserve self-authentication vectors.
+A disposable Rust 1.88 allocation probe confirms zero allocation/reallocation
+calls for parsing, oversized rejection and Display into a prepared destination;
+`to_text` performs one result allocation. This is not a speed or Wasm-size claim.
+Probe evidence: `/tmp/platform-principal-measure/run.log`.
+
+Installed Testkit/PocketIC 16.0.0 qualification passes for Rust 1.91 and 1.99 Wasm,
+each Wire-only and external-Candid mode: RPCs, raw awaits, traps, timer cancellation,
+upgrade, cycles, stable rollback and certificates. External mode additionally
+preserves management-call and checkpoint bytes. Sources/artifacts are retained in
+`target/cdk-runtime.Jy8nvl`; logs are
+`/tmp/platform-principal-installed-{1.91.0,1.99.0}-{wire,external-candid}.log`.
+
+The maintained runtime fixture's older Testkit/Timers require registry Platform
+0.1.18. Its previously rewritten lock omitted that compatible version; it is now
+resolved explicitly beside the local candidate. The graph still has one registry
+executor 2.0.0 and ic0 1.2.0. Release-lock regression permits only the necessary
+local version-qualified dependency-reference updates, preserving registry nodes.
+This fixture is compatibility evidence, not actual next-minor sibling adoption.
+Native macOS, live IC and consumer migration qualification remain outstanding.
+
+## Prior delivery evidence
+
 Issue [#27](https://github.com/dragginzgame/ic-platform/issues/27)'s existing
 [PR #28](https://github.com/dragginzgame/ic-platform/pull/28) implementation is now
 applied locally on released 0.2.1 (`de1c469`), with pending 0.2.2 notes. It adds
@@ -65,7 +143,7 @@ The sole executor remains registry `ic-cdk-executor =2.0.0`; raw system calls
 retain `ic0 =1.2.0`. Imported call submission, callback/trap cleanup, protected
 spawn semantics and the upstream multithreading refusal are preserved. No executor
 implementation is copied. Call/response/cost/performance/error/stable-error types
-now have Platform identities; Principal, RejectCode, external DTOs, certification
+now have Platform identities; ExternalPrincipal, RejectCode, external DTOs, certification
 and cryptographic types retain their registry identities. See
 [the migration contract](../migration.md#maintained-runtime-and-wire-entrypoint-adoption).
 

@@ -90,11 +90,18 @@ Use `ic_platform::candid::contract` for Candid DTO derives and encoding. Add
 `#[serde(crate = "ic_platform::candid::contract::serde")]` when deriving Deserialize
 through the boundary's Serde export. These are external protocol types, not an
 application-wide requirement. Principal-only users import `ic_platform::Principal`
-without selecting a feature or declaring `ic_principal` directly. The root and
-Candid contract exports have the same upstream type identity.
+without selecting a feature or declaring `ic_principal` directly. In the pending
+0.3 migration the root type and `PrincipalError` are Platform-owned. Required
+Candid DTOs use `candid::contract::Principal`, which remains the original registry
+type. `principal::{ExternalPrincipal, ExternalPrincipalError}` provides that
+explicit external identity without requiring Candid. Convert principals with
+`.into()` at the client/DTO boundary; errors are distinct types.
 
-`ic_platform::PrincipalError` is also unconditional and retains the upstream
-Principal parse-error identity used by public host APIs.
+Owned parsing rejects text longer than 63 bytes before copying, retains uppercase
+acceptance and dash validation, and formats using stack buffers. Binary Serde
+uses identical raw bytes for borrowed and owned buffers. No generic range-step
+implementation or Candid trait/marker handling is provided. Self-authentication
+delegates to the original upstream implementation; no cryptographic code changes.
 
 Use `candid::decoder::{DecoderConfig, IDLDeserialize, decode_one_with_config,
 decode_args_with_config, decode_one, decode_args}` for existing low-level configuration and staged

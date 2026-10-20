@@ -834,9 +834,24 @@ checksum = "b7e25938776b03b0b716b3cf6cc5dc0e7088c118f483cefb1583f3fbc4fc5cdb"
 
 [[package]]
 name = "ic-platform"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "227ba911212a849bd24263879c289c58eecf1e4775d729443df7acb9810e1469"
+dependencies = [
+ "candid",
+ "ic-cdk-executor",
+ "ic0",
+ "ic_principal",
+ "serde",
+]
+
+[[package]]
+name = "ic-platform"
 version = "0.2.2"
 dependencies = [
  "candid",
+ "crc32fast",
+ "data-encoding",
  "ic-cdk-executor",
  "ic-certification",
  "ic-error-types",
@@ -868,7 +883,7 @@ dependencies = [
  "ic-host-fs",
  "ic-host-process",
  "ic-metrics",
- "ic-platform",
+ "ic-platform 0.1.18",
  "libc",
  "pocket-ic",
  "tempfile",
@@ -883,7 +898,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "244027ce4a14872e86883fcd87e9d2cb7112ca7b20e4cd4c82a3416a41204f19"
 dependencies = [
  "ic-metrics",
- "ic-platform",
+ "ic-platform 0.1.18",
  "thiserror 2.0.18",
 ]
 
@@ -1379,7 +1394,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
- "ic-platform",
+ "ic-platform 0.2.2",
  "ic-timers",
  "ic-wire",
  "serde",
@@ -1389,7 +1404,7 @@ dependencies = [
 name = "platform-runtime-driver"
 version = "0.0.0"
 dependencies = [
- "ic-platform",
+ "ic-platform 0.2.2",
  "ic-testkit",
  "ic-wire",
  "serde",

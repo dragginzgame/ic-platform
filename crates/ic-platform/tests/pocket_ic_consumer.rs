@@ -40,7 +40,7 @@ pub fn client_contract() {
     assert!(rejection.to_string().contains("caller policy"));
     assert_eq!(LATEST_SERVER_VERSION, "16.1.0");
 
-    let canister = ic_platform::Principal::management_canister();
+    let canister = ic_platform::principal::ExternalPrincipal::management_canister();
     let params = CreateCanisterParams {
         placement: Some(CreateCanisterPlacement::SubnetId(canister)),
         ..CreateCanisterParams::default()
@@ -106,7 +106,7 @@ fn chunked_upgrade_preserves_pocketic_management_identity() {
 
     // Compile the real client parameter without starting a server or installing.
     let _install = |client: &PocketIc, mode: CanisterInstallMode| -> Result<(), RejectResponse> {
-        let canister = ic_platform::Principal::management_canister();
+        let canister = ic_platform::principal::ExternalPrincipal::management_canister();
         client.install_chunked_canister(canister, None, mode, canister, vec![], vec![], vec![])
     };
 }
@@ -118,7 +118,7 @@ fn pending_ingress_preserves_the_submitted_message_identity() {
             client.ingress_status(message)
         };
     let _submit = |client: &PocketIc| -> Result<RawMessageId, RejectResponse> {
-        let canister = ic_platform::Principal::management_canister();
+        let canister = ic_platform::principal::ExternalPrincipal::management_canister();
         client.submit_call(canister, canister, "fixture", vec![])
     };
 }

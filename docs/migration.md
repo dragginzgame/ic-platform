@@ -43,6 +43,65 @@ Their explicit root and REST exports retain the original
 PocketIC identities, including method parameter/result compatibility. These
 exports add no gateway startup, pending-call polling, retries or outcall policy.
 
+## Owned Principal migration (0.3)
+
+This is a breaking next-minor change. Package versions remain at the maintainer's
+current release until the coordinated release process; do not publish this source
+as a 0.2 patch. The root `Principal` and `PrincipalError` now belong to Platform.
+The implementation is adapted from ic_principal 0.1.5 under Apache-2.0, with
+provenance/license retained in `src/principal/`. It is not a clean-room rewrite.
+
+Application and runtime identities use the owned type. Agent, PocketIC, management,
+ledger, parser and cryptographic APIs retain their original parameter/DTO types.
+`principal::{ExternalPrincipal, ExternalPrincipalError}` names those original
+identities without requiring Candid; `candid::contract::Principal` names the same
+external principal when Candid is selected. Both principal conversions use only
+the original significant bytes and are infallible:
+
+```rust
+let application = ic_platform::Principal::anonymous();
+let external: ic_platform::principal::ExternalPrincipal = application.into();
+let restored = ic_platform::Principal::from(external);
+assert_eq!(restored, application);
+```
+
+Use external principals in required Candid DTOs and existing Candid checkpoints;
+convert the result into an owned principal afterwards. The owned type implements
+no Candid trait, even with all features selected. Do not decode Candid's internal
+Serde byte-buffer marker as application data. Native owned Serde accepts borrowed
+and owned bytes identically, including a leading 0x02. Existing byte/text values,
+length-first ordering and padding are preserved; no stored layout is rewritten.
+Only decoder paths that previously depended on Candid's special visitor behavior
+need explicit external DTO decoding. Consumer persistence and migration policy
+remain with their owners.
+
+Text parsing now rejects more than 63 input bytes as `TextTooLong` before any
+normalization or allocation. Other normal-size spelling/checksum diagnostics are
+retained. Parsing/Display use stack buffers; `to_text` allocates its result only.
+Uppercase remains accepted, while missing/misplaced dashes remain an error. This
+bound follows the identity grammar, not a caller-specific resource policy.
+Use `try_from_slice` for untrusted bytes; `from_slice` retains its documented
+panic above 29 bytes. Constructors accept opaque 0..=29-byte identities; successful parsing is
+not authentication or proof of canister existence. Compare both length and bytes
+when using fixed backing arrays; padding alone is not identity.
+
+Generic `rangemap::StepLite`, upstream arbitrary generation and schema traits are
+not inherited by the new type. Consumers needing ranges must define their valid
+key domain rather than treating tag-skipping as a successor for all principals.
+Do not change existing ordering to repair that integration. There is no second
+executor, timer owner, transport or retry implementation.
+
+Self-authentication delegates to registry ic_principal with its original SHA-224
+implementation. This dependency remains both for cryptography and external type
+identity; its features are explicit. No cryptographic primitive, key encoding or
+hashing algorithm is rewritten. This change does not establish upstream removal
+or a measured Wasm-size reduction.
+
+Adoption must update API/error annotations, DTO construction and equality tests at
+external boundaries. Qualify actual Wire frames, Candid bytes, persistence and
+client calls with the published next-minor selection. Native macOS, installed
+runtime and individual consumer acceptance remain separate from source tests.
+
 ## Qualified Candid surface
 
 The `candid` feature supplies `decode_one`, `decode_exactly_one`, `decode_args`,
@@ -54,11 +113,10 @@ Arbitrary-precision integers enable Candid's `bignum` feature with `candid`;
 the separate native parser also enables it through upstream Candid's `all` feature.
 No default features, automatic limits or second executor are introduced.
 
-`ic_platform::Principal` is available unconditionally from `ic_principal` 0.1.5,
-with its standard conversion, self-authenticating and Serde support. Consumers
-can remove direct `ic_principal` declarations and use this root export without
-selecting Candid or executor features. The existing contract export uses the
-same type. Default builds are Candid/CDK-free, not dependency-free.
+`ic_platform::Principal` is unconditional and Platform-owned for the pending 0.3
+migration. The Candid contract keeps the original registry identity; see
+[the migration below](#owned-principal-migration-03). Default builds remain
+Candid/CDK-free, not dependency-free.
 
 The decoder implementation and six tests match Testkit's current owner byte for
 byte after excluding the added contract module. Reply length is admitted before
@@ -572,7 +630,7 @@ rearm, cancellation and retry ownership.
 Call/response/future, cost/performance/error and stable-error types are now
 Platform-owned identities. Their corresponding re-exported identities are not
 maintained through aliases, conversion packages or a second CDK dependency.
-`RejectCode`, Principal, external DTO, certification and cryptographic identities
+`RejectCode`, ExternalPrincipal, external DTO, certification and cryptographic identities
 remain upstream. Replace direct `ic_cdk` identity assertions with reviewed
 behavior/signature tests and compile actual consumers against the new owner.
 
@@ -1163,3 +1221,32 @@ Platform. The separate Platform-only consumer covers signing, compressed and
 uncompressed keys, malformed/wrong-message rejection and explicit high-S
 normalization. These proofs do not establish published consumer adoption,
 installed-canister behavior, macOS qualification or smaller Wasm.
+
+## Owned account migration (0.3)
+
+Use unconditional `ic_platform::{Account, Subaccount, AccountError}` for owned
+application identities. `Account` contains the owned `Principal` and
+`Option<[u8; 32]>`; it has Serde but no Candid or storage/CBOR trait. Wire owns its
+codec integration; this addition does not establish a Wire trait implementation.
+No new feature, dependency or cryptographic implementation is added.
+
+For external ledger calls, select the existing `icrc-ledger-types` feature and
+convert with `.into()` between owned `Account` and
+`ic_platform::account::ExternalAccount`. The latter is exactly the existing
+`ic_platform::icrc_ledger_types::Account` registry DTO. Keep external DTO fields
+and Candid derives on that type. Conversions preserve both owner bytes and the
+original optional subaccount, including `None` versus explicit all-zero bytes.
+
+Equality, ordering and hashing treat absent and zero subaccounts alike; Serde
+preserves their distinct fields. Never use serialized-byte equality as account
+identity equality. Display omits default subaccounts and retains the upstream
+CRC32/Base32 and trimmed-hex text format. Parsing rejects more than 136 input
+bytes before processing, and more than 64 subaccount hex digits before decoding.
+Errors are owned bounded diagnostics; they do not retain arbitrary input or an
+expected-checksum string. Principal parsing uses the owned bounded parser.
+
+Change application imports and generated types deliberately; leave external
+ledger DTO imports intact. Remove direct ledger dependencies only where no
+remaining external use requires them. Test consumer Wire codecs, map/set identity,
+text vectors and existing persisted records before adoption. No automatic storage
+migration, account-identifier hashing or principal-to-subaccount mapping is supplied.

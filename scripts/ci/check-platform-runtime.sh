@@ -99,7 +99,7 @@ if [[ "$mode" == --check-graph ]]; then
 fi
 CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
 CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
-for toolchain in 1.99.0 1.91.0; do
+for toolchain in 1.99.1 1.91.0; do
     for protocol in wire external-candid; do
         features=()
         if [[ "$protocol" == external-candid ]]; then features=(--features external-candid); fi

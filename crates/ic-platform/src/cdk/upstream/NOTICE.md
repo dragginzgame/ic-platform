@@ -36,6 +36,6 @@ Changes from the import:
   admission evidence, not a substitute for installed recovery tests.
 
 Call, response, cost/error and stable-error types now have Platform identities.
-`Principal`, `RejectCode`, external DTOs, certification and crypto types retain
-registry identities. This is a breaking source migration requiring the next
+`Principal` becomes Platform-owned for the 0.3 migration; `ExternalPrincipal`,
+`RejectCode`, external DTOs, certification and crypto types retain registry identities. This is a breaking source migration requiring the next
 minor release, 0.2.0. The declared version does not establish registry publication.

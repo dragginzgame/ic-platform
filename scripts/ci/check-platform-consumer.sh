@@ -12,7 +12,7 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(ecdsa ed25519 candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic)
+capabilities=(principal ecdsa ed25519 candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic)
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in
@@ -24,6 +24,7 @@ if [[ $# -gt 0 ]]; then
 fi
 for capability in "${capabilities[@]}"; do
 features="\"$capability\""
+if [[ "$capability" == principal ]]; then features=""; fi
 if [[ "$capability" == agent ]]; then features='"agent", "certification"'; fi
 if [[ "$capability" == dynamic ]]; then features='"candid", "candid-parser"'; fi
 if [[ "$capability" == management ]]; then features='"management-canister-types", "candid"'; fi
@@ -51,12 +52,16 @@ publish = false
 [dependencies]
 ic-platform.workspace = true
 MANIFEST
+if [[ "$capability" == principal ]]; then
+    printf '\n[features]\ncandid = ["ic-platform/candid"]\n' >> "$fixture/crates/consumer/Cargo.toml"
+fi
 source="$capability"
 if [[ "$capability" == candid-parser ]]; then source=parser; fi
 if [[ "$capability" == pocket-ic ]]; then source=pocket_ic; fi
 if [[ "$capability" == canister-sig-creation ]]; then source=canister_sig; fi
 if [[ "$capability" == signature-verification ]]; then source=signature; fi
-cp "crates/ic-platform/tests/${source}_consumer.rs" "$fixture/crates/consumer/src/lib.rs"
+if [[ "$capability" == principal ]]; then source=principal; else source="${source}_consumer"; fi
+cp "crates/ic-platform/tests/${source}.rs" "$fixture/crates/consumer/src/lib.rs"
 if [[ "$capability" == management ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
     cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/consumer/src/fixtures/"

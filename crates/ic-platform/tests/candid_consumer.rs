@@ -232,3 +232,15 @@ fn staged_decoding_preserves_caller_failures_and_optional_configuration() {
     config.set_max_header_len(0);
     let _: contract::Error = decode_one_with_config::<u64>(&wire, &config).unwrap_err();
 }
+
+#[test]
+fn owned_principal_converts_at_the_external_candid_boundary() {
+    let owned = ic_platform::Principal::from_slice(&[2, 1]);
+    let external: contract::Principal = owned.into();
+    let bytes = contract::encode_one(external).unwrap();
+    // DIDL, zero type-table entries, one principal argument, reference marker,
+    // two significant bytes. This is external Candid, never a Wire payload.
+    assert_eq!(bytes, [68, 73, 68, 76, 0, 1, 104, 1, 2, 2, 1]);
+    let decoded: contract::Principal = ic_platform::candid::decoder::decode_one(&bytes).unwrap();
+    assert_eq!(ic_platform::Principal::from(decoded), owned);
+}

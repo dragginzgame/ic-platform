@@ -61,6 +61,16 @@ and unchanged cryptographic function bodies. Qualify their actual consumer graph
 type/source identities and wire bytes; a dependency-local Cargo patch is not a
 supported distribution mechanism for downstream consumers.
 
+## Owned Principal
+
+The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
+Retain its Apache-2.0 provenance, raw bytes and length-first ordering. Keep parsing
+bounded by the 63-byte text grammar, binary Serde marker-free and range policy
+consumer-owned. Delegate self-authentication to the unchanged upstream crypto
+implementation. External DTO/client principal and error identities remain registry
+types, named explicitly through principal::ExternalPrincipal/ExternalPrincipalError;
+Candid contract types stay external. Do not add Candid to the owned type.
+
 ## Executor identity
 
 The published boundary constrains `ic-cdk-executor` to `=2.0.0` to preserve
@@ -87,3 +97,12 @@ identities. Testkit retains server provisioning, compatibility admission,
 lifecycle, transport and retry policy. Keep PocketIC out of defaults, executor-only
 and canister deployment graphs; do not replace its management DTOs with the
 independently selected external management DTO surface.
+
+## Owned account
+
+The maintainer authorized unconditional owned Account/Subaccount alongside owned
+Principal. Preserve effective-zero equality, ordering and hashing, and preserve
+absent versus explicit zero fields during serialization and external conversion.
+Retain Apache provenance and the existing external ledger DTO identity. No Candid,
+storage implementation, cryptographic account-identifier derivation or application
+subaccount allocation policy belongs in the owned account surface.

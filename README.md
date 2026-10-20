@@ -12,9 +12,11 @@ authentication, budgets and retry policy. See the [maintenance and recovery
 contract](docs/migration.md#runtime-maintenance-and-recovery).
 
 `ic_platform::Principal` is always available, without enabling a feature or
-depending directly on `ic_principal`. It preserves the upstream type identity,
-including the Principal exported by the Candid contract. Default builds include
-Principal and its dependencies, but neither Candid nor CDK.
+depending directly on `ic_principal`. The pending 0.3 type is Platform-owned;
+external clients and DTOs retain `principal::ExternalPrincipal`. Convert explicitly
+with `.into()` at those boundaries. Default builds include Principal and its
+dependencies, but neither Candid nor CDK. Self-authentication continues to delegate
+to the original upstream implementation. See the [Principal migration](docs/migration.md#owned-principal-migration-03).
 
 | Feature | Implemented contract |
 | --- | --- |
@@ -53,7 +55,7 @@ does not itself remove upstream code or shrink a canister.
 Prepare common tools explicitly with `make install-tools`; `make tools-check`
 verifies them offline. Prepare locked dependency sources with
 `cargo fetch --locked` before validation, including the Wasm target dependencies
-used by frozen standalone consumer checks. Checks never install executables. Rust 1.99.0 is the
+used by frozen standalone consumer checks. Checks never install executables. Rust 1.99.1 is the
 development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains with the
 `wasm32-unknown-unknown` target for each compiler before their checks. For an
 existing MSRV toolchain, use `rustup target add --toolchain 1.88.0 wasm32-unknown-unknown`.
