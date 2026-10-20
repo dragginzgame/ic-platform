@@ -2,7 +2,7 @@
 #![cfg(not(target_family = "wasm"))]
 
 use ic_platform::{
-    Principal,
+    principal::ExternalPrincipal as Principal,
     secp256k1::{KeyDecodingError, MasterPublicKeyId, PocketIcMasterPublicKeyId, PublicKey},
 };
 

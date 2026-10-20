@@ -22,6 +22,7 @@ done
   all($f[]; . as $a | ($r | index($a)) != null and
     all($f[] | select(. != $a); . as $b | ($r | index([$a,$b] | sort | join(","))) != null)) and
   (["candid,cdk,executor,ic0",
+    "bls,ecdsa,ed25519",
     "cdk,certification,icrc-ledger-types,management-canister-types",
     "agent,candid-parser,cdk,pocket-ic,secp256k1",
     "bls,canister-sig-creation,certification,ed25519,signature-verification",

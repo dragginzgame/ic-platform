@@ -34,17 +34,9 @@
   {
     "rule": "cargo-exact",
     "file": "Cargo.toml",
-    "subject": "ic-cdk",
-    "value": "=0.20.3",
-    "reason": "Preserve the reviewed runtime implementation and context/spawn contract coupled to the maintained entrypoint generator.",
-    "evidence": "AGENTS.md#owned-entrypoint-generator"
-  },
-  {
-    "rule": "cargo-exact",
-    "file": "Cargo.toml",
     "subject": "ic-stable-structures",
     "value": "=0.7.2",
-    "reason": "Preserve the exact Memory/Storable trait and persisted collection identities shared with IC Memory 0.48.2 and IC Storage.",
+    "reason": "Preserve the Memory/Storable and persisted collection identities shared with IC Memory, IC Storage and Testkit instrumentation.",
     "evidence": "docs/migration.md#stable-structures-substrate"
   }
 ]

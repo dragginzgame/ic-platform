@@ -6,8 +6,9 @@
 //! for Platform's independently selected management-canister DTO surface.
 
 pub use pocket_ic::{
-    CanisterLogRecord, CanisterSettings, CanisterStatusResult, CreateCanisterParams, ErrorCode,
-    LATEST_SERVER_VERSION, PocketIc, PocketIcBuilder, RejectCode, RejectResponse, Snapshot, Time,
+    CanisterInstallMode, CanisterLogRecord, CanisterSettings, CanisterStatusResult,
+    CreateCanisterParams, CreateCanisterPlacement, ErrorCode, LATEST_SERVER_VERSION, PocketIc,
+    PocketIcBuilder, RejectCode, RejectResponse, Snapshot, Time,
 };
 
 pub mod common;

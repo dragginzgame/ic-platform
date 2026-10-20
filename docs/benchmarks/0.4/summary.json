@@ -1,0 +1,159 @@
+{
+   "builds" : {
+      "creation" : {
+         "base" : {
+            "code_section_bytes" : 127715,
+            "custom_section_bytes" : 18540,
+            "gzip_bytes" : 57382,
+            "max_seconds" : 8.04,
+            "median_seconds" : 7.55,
+            "min_seconds" : 7.41,
+            "packages" : 52,
+            "wasm_bytes" : 173530
+         },
+         "candidate" : {
+            "code_section_bytes" : 127578,
+            "custom_section_bytes" : 18651,
+            "gzip_bytes" : 57395,
+            "max_seconds" : 3.36,
+            "median_seconds" : 3.32,
+            "min_seconds" : 3.19,
+            "packages" : 30,
+            "wasm_bytes" : 173463
+         }
+      },
+      "external-candid" : {
+         "base" : {
+            "code_section_bytes" : 621511,
+            "custom_section_bytes" : 204899,
+            "gzip_bytes" : 239663,
+            "max_seconds" : 9.43,
+            "median_seconds" : 8.98,
+            "min_seconds" : 8.52,
+            "packages" : 68,
+            "wasm_bytes" : 891748
+         },
+         "candidate" : {
+            "code_section_bytes" : 621511,
+            "custom_section_bytes" : 204912,
+            "gzip_bytes" : 239675,
+            "max_seconds" : 8.95,
+            "median_seconds" : 8.79,
+            "min_seconds" : 8.58,
+            "packages" : 63,
+            "wasm_bytes" : 891761
+         }
+      },
+      "verification" : {
+         "base" : {
+            "code_section_bytes" : 576639,
+            "custom_section_bytes" : 91946,
+            "gzip_bytes" : 174493,
+            "max_seconds" : 8.02,
+            "median_seconds" : 7.87,
+            "min_seconds" : 7.66,
+            "packages" : 60,
+            "wasm_bytes" : 710373
+         },
+         "candidate" : {
+            "code_section_bytes" : 576511,
+            "custom_section_bytes" : 89367,
+            "gzip_bytes" : 174432,
+            "max_seconds" : 4.69,
+            "median_seconds" : 4.5,
+            "min_seconds" : 4.38,
+            "packages" : 37,
+            "wasm_bytes" : 707634
+         }
+      },
+      "wire" : {
+         "base" : {
+            "code_section_bytes" : 229769,
+            "custom_section_bytes" : 85564,
+            "gzip_bytes" : 85401,
+            "max_seconds" : 5.13,
+            "median_seconds" : 4.87,
+            "min_seconds" : 4.76,
+            "packages" : 47,
+            "wasm_bytes" : 338370
+         },
+         "candidate" : {
+            "code_section_bytes" : 229769,
+            "custom_section_bytes" : 85571,
+            "gzip_bytes" : 85397,
+            "max_seconds" : 5,
+            "median_seconds" : 4.54,
+            "min_seconds" : 4.51,
+            "packages" : 42,
+            "wasm_bytes" : 338393
+         }
+      }
+   },
+   "method" : {
+      "base" : "390644f",
+      "build_cache" : "fresh target directory, cached registry, offline; serial, alternating revision order",
+      "build_jobs" : 4,
+      "build_runs" : 3,
+      "candidate" : "9a661f7",
+      "limitations" : "Single Linux machine. Native Principal timings are not IC instruction measurements. Runtime fixture includes registry Platform 0.1.18 through its historical Timers/Wire dependencies. Signature probes are exported qualification functions, not complete deployed Auth applications.",
+      "principal_base" : "f105386",
+      "principal_iterations" : 500000,
+      "principal_runs" : 5,
+      "profile" : "release opt-level=3, lto=false, codegen-units=16, panic=abort; Wasm strip=debuginfo",
+      "rust" : "1.99.1"
+   },
+   "principal" : {
+      "10" : {
+         "format" : {
+            "candidate" : {
+               "max_ns" : 71.160364,
+               "median_ns" : 66.327184,
+               "min_ns" : 65.887722
+            },
+            "pre-principal" : {
+               "max_ns" : 134.12294,
+               "median_ns" : 133.002152,
+               "min_ns" : 127.890812
+            }
+         },
+         "parse" : {
+            "candidate" : {
+               "max_ns" : 130.382066,
+               "median_ns" : 120.273616,
+               "min_ns" : 116.9316
+            },
+            "pre-principal" : {
+               "max_ns" : 238.964608,
+               "median_ns" : 232.05628,
+               "min_ns" : 219.49083
+            }
+         }
+      },
+      "29" : {
+         "format" : {
+            "candidate" : {
+               "max_ns" : 115.209628,
+               "median_ns" : 103.539626,
+               "min_ns" : 101.257066
+            },
+            "pre-principal" : {
+               "max_ns" : 200.44694,
+               "median_ns" : 197.2355,
+               "min_ns" : 190.59562
+            }
+         },
+         "parse" : {
+            "candidate" : {
+               "max_ns" : 195.901672,
+               "median_ns" : 177.651496,
+               "min_ns" : 173.851372
+            },
+            "pre-principal" : {
+               "max_ns" : 343.964274,
+               "median_ns" : 340.109366,
+               "min_ns" : 323.814778
+            }
+         }
+      }
+   }
+}

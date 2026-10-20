@@ -12,7 +12,7 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(ecdsa ed25519 candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic stable-structures)
+capabilities=(principal ecdsa ed25519 candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk secp256k1 pocket-ic stable-structures)
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in
@@ -24,6 +24,7 @@ if [[ $# -gt 0 ]]; then
 fi
 for capability in "${capabilities[@]}"; do
 features="\"$capability\""
+if [[ "$capability" == principal ]]; then features=""; fi
 if [[ "$capability" == agent ]]; then features='"agent", "certification"'; fi
 if [[ "$capability" == dynamic ]]; then features='"candid", "candid-parser"'; fi
 if [[ "$capability" == management ]]; then features='"management-canister-types", "candid"'; fi
@@ -51,13 +52,17 @@ publish = false
 [dependencies]
 ic-platform.workspace = true
 MANIFEST
+if [[ "$capability" == principal ]]; then
+    printf '\n[features]\ncandid = ["ic-platform/candid"]\n' >> "$fixture/crates/consumer/Cargo.toml"
+fi
 source="$capability"
 if [[ "$capability" == candid-parser ]]; then source=parser; fi
 if [[ "$capability" == pocket-ic ]]; then source=pocket_ic; fi
 if [[ "$capability" == stable-structures ]]; then source=stable_structures; fi
 if [[ "$capability" == canister-sig-creation ]]; then source=canister_sig; fi
 if [[ "$capability" == signature-verification ]]; then source=signature; fi
-cp "crates/ic-platform/tests/${source}_consumer.rs" "$fixture/crates/consumer/src/lib.rs"
+if [[ "$capability" == principal ]]; then source=principal; else source="${source}_consumer"; fi
+cp "crates/ic-platform/tests/${source}.rs" "$fixture/crates/consumer/src/lib.rs"
 if [[ "$capability" == management ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
     cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/consumer/src/fixtures/"
@@ -78,10 +83,6 @@ if [[ "$capability" == signature-verification ]]; then
     cp crates/ic-platform/tests/fixtures/signature-*.hex "$fixture/crates/consumer/src/fixtures/"
 fi
 if [[ "$capability" == cdk ]]; then
-    mkdir -p "$fixture/crates/consumer/src/fixtures"
-    cp crates/ic-platform/tests/fixtures/cdk-service.did "$fixture/crates/consumer/src/fixtures/"
-fi
-if [[ "$capability" == cdk ]]; then
     printf '\n[lib]\ncrate-type = ["cdylib", "rlib"]\n' >> "$fixture/crates/consumer/Cargo.toml"
 fi
 cp Cargo.lock "$fixture/Cargo.lock"
@@ -92,6 +93,7 @@ cp Cargo.lock "$fixture/Cargo.lock"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 if [[ -n "$published" ]]; then
     # Refuse path/Git replacement of either the facade or its generator.
+    # shellcheck disable=SC2016 # jq owns the variables in this expression.
     "$root/.tools/host/bin/jq" -e --arg version "$published" '
         [.packages[] | select(.name == "ic-platform")] as $facades |
         ($facades | length) == 1 and $facades[0].version == $version and
@@ -100,6 +102,12 @@ if [[ -n "$published" ]]; then
     ' "$fixture/metadata.json" > /dev/null || {
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
+fi
+if [[ "$capability" == cdk ]]; then
+    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
+        bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph"
+    done
 fi
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --frozen

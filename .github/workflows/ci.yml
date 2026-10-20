@@ -46,11 +46,13 @@ jobs:
           bash scripts/ci/check-native-host.sh "${args[@]}"
       - name: Prepare toolchains
         run: |
-          rustup toolchain install 1.99.0 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
+          rustup toolchain install 1.99.1 --profile minimal --component rustfmt --component clippy --target wasm32-unknown-unknown
           rustup toolchain install 1.88.0 --profile minimal --target wasm32-unknown-unknown
       - name: Prepare shared tools
         run: make install-tools
       - name: Verify tools
         run: make tools-check
+      - name: Prepare all locked dependency targets
+        run: cargo fetch --locked
       - name: Validate
         run: make ci

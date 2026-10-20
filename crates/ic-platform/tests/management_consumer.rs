@@ -1,5 +1,4 @@
 //! Platform-only consumer of external management DTOs and Candid formats.
-use ic_platform::Principal;
 use ic_platform::candid::{DecodeError, DecodeLimits, contract, decode_exactly_one};
 use ic_platform::management_canister_types::{
     CanisterIdRecord, CanisterInfoArgs, CanisterInfoResult, CanisterStatusResult,
@@ -13,6 +12,7 @@ use ic_platform::management_canister_types::{
     UploadCanisterSnapshotDataArgs, UploadCanisterSnapshotMetadataArgs,
     UploadCanisterSnapshotMetadataResult,
 };
+use ic_platform::principal::ExternalPrincipal as Principal;
 
 /// Preserve the probe's request bytes, transform references and caller admission.
 pub fn roundtrip() {

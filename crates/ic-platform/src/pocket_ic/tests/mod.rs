@@ -14,10 +14,12 @@ fn original_client_and_dto_identities() {
     identity!(RejectCode);
     identity!(ErrorCode);
     identity!(CanisterSettings);
+    identity!(CanisterInstallMode);
     identity!(CanisterStatusResult);
     identity!(CanisterLogRecord);
     identity!(Snapshot);
     identity!(CreateCanisterParams);
+    identity!(CreateCanisterPlacement);
     identity!(Time);
     identity!(common::rest::BlobCompression);
     identity!(common::rest::CreateInstanceResponse);
@@ -25,4 +27,10 @@ fn original_client_and_dto_identities() {
     identity!(common::rest::IcpFeaturesConfig);
     identity!(common::rest::RawCanisterId);
     identity!(common::rest::Topology);
+    identity!(common::rest::RawEffectivePrincipal);
+    identity!(common::rest::RawMessageId);
+    identity!(common::rest::InstanceHttpGatewayConfig);
+    identity!(common::rest::CanisterHttpReply);
+    identity!(common::rest::CanisterHttpResponse);
+    identity!(common::rest::MockCanisterHttpResponse);
 }

@@ -1,0 +1,14 @@
+Packaging qualification against registry ic-signature-verification-0.3.0. Upstream Apache-2.0 license applies. Cryptographic function bodies are unchanged. Not selected in production.
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 0e94827..34ed462 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -40,6 +40,7 @@ path = "src/lib.rs"
+ 
+ [dependencies.ic-canister-sig-creation]
+ version = "1.3.1"
++default-features = false
+ 
+ [dependencies.ic-certification]
+ version = "3"

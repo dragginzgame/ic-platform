@@ -3,7 +3,6 @@
 
 #[cfg(test)]
 use ic_platform::{
-    Principal,
     candid::{
         contract::{
             self, CandidType,
@@ -12,6 +11,7 @@ use ic_platform::{
         decoder::{DecoderConfig, decode_one_with_config},
     },
     candid_parser::{IDLArgs, IDLField, IDLValue, TypeSerialize, ValueSerializer},
+    principal::ExternalPrincipal as Principal,
 };
 
 #[cfg(test)]

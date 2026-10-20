@@ -8,7 +8,7 @@
 
 pub use ic_stable_structures::{
     BTreeMap, BTreeSet, Cell, DefaultMemoryImpl, Log, Memory, MinHeap, RestrictedMemory, Storable,
-    Vec,
+    Vec, VectorMemory,
 };
 
 pub mod btreemap;

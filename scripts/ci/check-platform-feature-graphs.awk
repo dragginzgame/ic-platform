@@ -16,7 +16,8 @@ function reject(reason) {
             # Only retain policy-relevant lines; ordinary transitive nodes cannot
             # affect admission. Keep complete lines for source/identity checks.
             split(line, fields, " ")
-            if (fields[1] ~ /^(ic|candid|pocket-ic|ed25519-dalek|curve25519-dalek|k256)/)
+            if (fields[1] ~ /^(ic|candid|pocket-ic|ed25519-dalek|curve25519-dalek|k256)/ ||
+                fields[1] ~ /^(rand|rand_chacha|getrandom)$/)
                 lines[key, ++count[key]] = line
             nonempty = 1
         }
@@ -35,11 +36,11 @@ function reject(reason) {
     verification = enabled("signature-verification")
     creation = verification || enabled("canister-sig-creation")
     bls = verification || agent || enabled("bls")
-    raw_system = executor || creation || enabled("ic0")
+    raw_system = executor || enabled("ic0")
     certification = pocket || creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
-    candid = pocket || enabled("candid") || cdk || parser || agent || management || ledger || creation
+    candid = pocket || enabled("candid") || parser || agent || management || ledger
     found_storage = 0
     found_ed = 0
     found_curve = 0
@@ -51,6 +52,10 @@ function reject(reason) {
         n = split(line, f, " ")
         name = f[1]; version = f[2]
         registry = n == 2 || (n == 3 && f[3] == "(*)")
+        # rand_core supplies traits and is permitted. Entropy/RNG implementations
+        # belong only to the selected native host capabilities that require them.
+        if (name ~ /^(rand|rand_chacha|getrandom)$/ && !(agent || pocket || secp || parser))
+            reject("unselected RNG/entropy scaffolding")
         if (name == "k256") {
             if (!(enabled("ecdsa") || agent || secp) || !registry) reject("unselected K256")
             found_k256 = 1
@@ -74,22 +79,18 @@ function reject(reason) {
         if (name ~ /^ic-cdk/) {
             if (name == "ic-cdk-executor") {
                 if (!executor || version != "v2.0.0") reject("unqualified executor")
-            } else if (name == "ic-cdk" || name == "ic-cdk-macros") {
-                if (!cdk || version != "v0.20.3") reject("unqualified CDK")
-            } else reject("unknown CDK package")
-            if (name == "ic-cdk-macros") {
-                if (!(n == 3 && f[3] == "(proc-macro)" || n == 4 && f[3] == "(proc-macro)" && f[4] == "(*)")) reject("non-registry CDK macros")
-            } else if (!registry) reject("non-registry CDK")
+            } else reject("full CDK runtime/generator is retired")
+            if (!registry) reject("non-registry executor")
         }
         if (name == "ic0" && (!raw_system || version != "v1.2.0" || !registry)) reject("unqualified ic0")
         if (name == "ic-platform-macros" && (!cdk || (line != generator && line != generator " (*)"))) reject("unqualified generator")
-        if (name == "ic-canister-sig-creation" && (!creation || version != "v1.3.1" || !registry)) reject("unqualified signature creation")
-        if (name == "ic-signature-verification" && (!verification || version != "v0.3.0" || !registry)) reject("unqualified signature verification")
+        if (name == "ic-canister-sig-creation" || name == "ic-signature-verification") reject("retired signature package")
         if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified BLS")
         if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified BLS curve")
         if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
         if (name == "ic-management-canister-types" && !(registry && ((management && version == "v0.11.0") || (pocket && version == "v0.8.0")))) reject("unselected management types")
         if (name == "icrc-ledger-types" && !ledger) reject("unselected ledger types")
+        if (name == "ic-error-types" && !(agent || pocket)) reject("runtime error catalogue")
         if (name == "ic-stable-structures") {
             if (!enabled("stable-structures") || version != "v0.7.2" || !registry) reject("unqualified storage substrate")
             found_storage = 1

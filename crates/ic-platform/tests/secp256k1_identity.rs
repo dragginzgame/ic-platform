@@ -3,7 +3,7 @@
 
 #[test]
 fn original_types_and_derivation_bytes() {
-    use ic_platform::{Principal, secp256k1::*};
+    use ic_platform::{principal::ExternalPrincipal as Principal, secp256k1::*};
     let _: fn(PublicKey) -> ic_secp256k1::PublicKey = |key| key;
     let _: fn(ic_secp256k1::PublicKey) -> PublicKey = |key| key;
     let _: fn(KeyDecodingError) -> ic_secp256k1::KeyDecodingError = |error| error;

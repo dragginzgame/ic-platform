@@ -3,7 +3,6 @@
 
 #[cfg(test)]
 use ic_platform::{
-    Principal,
     agent::{
         Agent, AgentBuilder, AgentError, AnonymousIdentity, BasicIdentity, CallResponse,
         DelegatedIdentity, Delegation, EnvelopeContent, HttpErrorPayload, Identity,
@@ -12,6 +11,7 @@ use ic_platform::{
         TransportCallResponse, TransportError, lookup_value, signed_update_inspect, to_request_id,
     },
     certification::{Certificate, SubtreeLookupResult, labeled, labeled_hash, leaf},
+    principal::ExternalPrincipal as Principal,
 };
 
 #[test]

@@ -1,14 +1,22 @@
 # IC Platform
 
-One controlled dependency boundary for external Candid protocols and IC runtime
-integration. The initial library adopts Testkit's bounded Candid decoders and
-exposes the selected executor through an explicit surface. It has no default
-features or PocketIC/storage dependency. Transport and parsing are native opt-ins.
+One controlled dependency boundary for IC runtime integration and required IC
+Candid interfaces. All application endpoints we own use IC Wire, including public
+endpoints called by third parties. Candid is the adapter for management canisters,
+NNS/SNS, ledgers and other interfaces that require it; caller location does not
+select a codec. Existing Candid checkpoints remain a legacy compatibility exception.
+
+Platform has no default features. Its owned runtime is Candid-free; transport,
+parsing and PocketIC are native opt-ins. Consumers retain their Wire schemas,
+authentication, budgets and retry policy. See the [maintenance and recovery
+contract](docs/migration.md#runtime-maintenance-and-recovery).
 
 `ic_platform::Principal` is always available, without enabling a feature or
-depending directly on `ic_principal`. It preserves the upstream type identity,
-including the Principal exported by the Candid contract. Default builds include
-Principal and its dependencies, but neither Candid nor CDK.
+depending directly on `ic_principal`. The 0.3 type is Platform-owned;
+external clients and DTOs retain `principal::ExternalPrincipal`. Convert explicitly
+with `.into()` at those boundaries. Default builds include Principal and its
+dependencies, but neither Candid nor CDK. Self-authentication continues to delegate
+to the original upstream implementation. See the [Principal migration](docs/migration.md#owned-principal-migration-03).
 
 | Feature | Implemented contract |
 | --- | --- |
@@ -16,35 +24,59 @@ Principal and its dependencies, but neither Candid nor CDK.
 | `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
 | `candid-parser` | Native host parsing/type checking, service equality, dynamic refusal fixtures and JavaScript/TypeScript generation |
-| `canister-sig-creation` | Canister-signature public-key formats, root-key constants and hashing; transitive Candid/ic0, no store API |
-| `cdk` | Platform-owned entrypoint/service macros with upstream CDK 0.20.3 calls, system helpers and protected spawning |
+| `canister-sig-creation` | Imported signature public-key formats, root-key constants and hashing; no Candid/ic0 or store API |
+| `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one registry executor |
 | `certification` | Upstream certificate/hash-tree and mutable tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
-| `signature-verification` | Upstream canister-signature verification; transitive Candid/ic0/certification/BLS, no executor or host transport |
-| `stable-structures` | Explicit upstream 0.7.2 substrate identities for IC Storage; Memory retains allocation authority |
+| `signature-verification` | Imported canister-signature verification; certification/BLS, no Candid/ic0, executor or host transport |
 | `pocket-ic` | Native PocketIC client identities; Testkit retains server lifecycle and policy |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
 | `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |
 
-The optional CDK surface uses a maintained generator fork with Platform paths and
-the published upstream runtime. Consumer runtime adoption still requires its own
-qualification; no upstream generator change is required.
+The optional `cdk` surface uses maintained, non-cryptographic runtime adapters
+and the owned generator. It does not depend on the full `ic-cdk` package.
+All controlled endpoints use explicit Wire hooks; select `candid` separately
+for required external management/system interfaces and existing checkpoint bytes.
+These breaking runtime and transport changes are released in the 0.4 line.
 See [the migration contract](docs/migration.md) for ownership and adoption conditions.
 The public GitHub repository exists; registry availability requires separate verification.
+
+Installed-runtime qualification runs separately in `.github/workflows/runtime.yml`,
+using Testkit's explicit server setup/admission and both compiler/protocol modes.
+For a prepared registry cache and admitted server, run
+`bash scripts/ci/check-platform-runtime.sh --published 0.4.0` to exercise the exact
+published facade and generator without a local override. Append `--check-graph`
+for graph-only admission. Local CI cache preparation uses `--prepare`; ordinary
+qualification never installs a server. Native macOS and live IC acceptance remain
+separate from this Linux workflow.
+
+Historical measurements and reproduction instructions are in
+[the benchmark report](docs/benchmarks/0.4/README.md).
+`bash scripts/ci/fuzz-parsers.sh` runs a separate 60-second coverage-guided
+Principal/Account differential campaign. Prepare nightly-2026-07-29, a C++
+compiler and registry sources explicitly first; the command installs nothing.
+It retains its corpus, crash artifacts and disposable lock under `target/`.
+This tooling-only libFuzzer selection does not enter consumer dependency graphs.
 
 Consumers own schemas, authentication, byte/work budgets, deadlines, retries and
 recovery. IC Wire owns controlled application protocols. Candid remains required
 where external protocols specify it. Moving a dependency behind this boundary
 does not itself remove upstream code or shrink a canister.
 
+Enable `stable-structures` for the exact upstream 0.7.2 substrate, including
+`Memory` and target-neutral `VectorMemory` used by Testkit instrumentation.
+Storage and Memory retain governance; see the [substrate contract](docs/migration.md#stable-structures-substrate).
+
 ## Development
 
 Prepare common tools explicitly with `make install-tools`; `make tools-check`
-verifies them offline. Checks never install executables. Rust 1.99.0 is the
+verifies them offline. Prepare locked dependency sources with
+`cargo fetch --locked` before validation, including the Wasm target dependencies
+used by frozen standalone consumer checks. Checks never install executables. Rust 1.99.1 is the
 development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains with the
 `wasm32-unknown-unknown` target for each compiler before their checks. For an
 existing MSRV toolchain, use `rustup target add --toolchain 1.88.0 wasm32-unknown-unknown`.
@@ -58,9 +90,14 @@ Pending changelog notes use `## [X.Y.Z]` without a date or `Unreleased` suffix.
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
 `make shared-tooling-check`. `make ci` is the full release gate.
+`make check-upstream-scaffolding` applies the experimental packaging patches to
+disposable registry-source copies and checks source preservation and licenses.
+It performs no dependency adoption, publication or runtime qualification.
 `make check-consumer` tests separate Candid-only, certification-only, parser-only,
 dynamic, management/Candid, ledger/Candid, ic0-only, Agent/certification three signature/BLS consumers and a CDK canister
-with only Platform declared, on Rust 1.99 and 1.88. Candid and certification
+with only Platform declared, on Rust 1.99 and 1.88. The CDK standalone
+consumer proves raw entrypoints/calls without Candid or full CDK dependencies.
+Candid and certification
 consumers also compile for Wasm on both compilers, as do the management, ledger
 and raw-system consumers all three signature/BLS selections and the CDK canister. `make msrv` runs native all-feature tests and checks
 the all-feature Wasm library at Rust 1.88.
@@ -118,15 +155,16 @@ The root catalog has `Production dependencies` and `Tests and tooling only`
 sections. Fixture-only selections stay in the second section and outside the
 consumer library's production graph.
 `fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
-sections with grouped ordering. Shared 0.24.0 supports this through the paired
-local formatting commands; newer uncommitted Shared defaults are not adopted.
+sections with grouped ordering. The reviewed Shared 0.25.1 snapshot supports
+this through the paired local formatting commands.
 Keep a blank line after each section heading so sorting preserves its position.
 The common Rust tool set now contains only cargo-sort and cargo-sort-derives;
 this repository has no Candid extraction command requiring a selected extractor.
 
 `make check-features`, included in CI/release validation, checks normal/build
 graphs offline (`--frozen`, preserving the lockfile). Prepare missing registry
-inputs once with `cargo fetch --locked --target <host-triple> --target wasm32-unknown-unknown`.
+inputs once with unfiltered `cargo fetch --locked`. Target filters can omit
+foreign-target dependencies of native-only clients needed by frozen consumer checks.
 Both matrix modes report unique query counts and progress every 100 queries.
 Standalone consumer compilation
 also stays offline after its existing offline metadata resolution. Offline mode
@@ -142,7 +180,8 @@ signature capabilities, runtime with all native-only leaves, and all canister
 features without host leaves. The separate CDK/Timers runtime qualification and
 release runtime-lock checks are unchanged. It enforces empty defaults
 and exact qualified executor/system requirements. It rejects unreviewed feature
-names until the matrix and isolation policy are updated, admits the selected CDK runtime/generators only with `cdk`, and rejects additional executor/
+names until the matrix and isolation policy are updated, admits the owned
+generator only with `cdk`, rejects full CDK packages, and rejects additional executor/
 system versions or non-registry sources in the transitive graph. It also
 admits PocketIC only with its explicit native feature, rejects `ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK-free defaults and Candid-free
 executor-only graphs. Cargo reports canonical package names, so dependency
@@ -167,13 +206,13 @@ Their `=0.11.0` requirement preserves the maintainer-selected external type cont
 enable `candid` separately when using Platform's encoding and bounded decoding.
 Ledger DTOs similarly bring transitive Candid without selecting Platform's codec,
 executor, parser or Agent. Upstream defaults/storage integration are disabled;
-the graph gate rejects unselected stable-structures and ledger dependencies.
-Canister-signature creation and verification also bring upstream certification,
-Candid and raw ic0; only verification brings BLS. They do not select the related
-Platform surfaces. BLS alone excludes creation, Candid, certification, CDK and
+the graph gate rejects `ic-stable-structures` and unselected ledger dependencies.
+Canister-signature creation and verification bring upstream certification but
+no Candid or raw ic0; only verification brings BLS and selects the creation surface.
+BLS alone excludes creation, Candid, certification, CDK and
 host tooling. Its upstream defaults/RNG are disabled and alloc is explicit.
-Graph admission checks the reviewed signature, BLS and certification package
-identities; other consumer graphs still need their own qualification.
+Graph admission rejects retired registry signature packages and checks BLS and
+certification identities; other consumer graphs still need their own qualification.
 Without certification, native Agent or canister-signature capabilities, builds exclude `ic-certification`.
 `candid_parser` and `ic-agent` are admitted only with explicit native host
 selection; no runtime feature enables them. Host retains strict bounded CBOR decoding;
@@ -198,66 +237,46 @@ that artifact admission or infer new exclusions automatically from role comments
 the release gate and from deployment qualification. Native macOS must run its own
 checks; Linux/Wasm graph results do not qualify macOS or installed canisters.
 
-The facade is MIT licensed; its imported decoder retains IC Testkit's copyright
-notice. The maintained CDK generator retains upstream's Apache-2.0 license.
+The facade combines MIT and Apache-2.0 sources; its imported decoder retains
+IC Testkit's copyright notice. The maintained generator is Apache-2.0.
 
-### Maintained CDK runtime regression
+### Maintained runtime regression
 
-`make check-runtime` builds and installs a small canister in PocketIC and checks
-bounded/unbounded calls, raw replies, guard/malformed-input refusal, callback-trap
-cleanup, timer await/trap cleanup, cancellation, subsequent scheduling and upgrade
-reinitialization. It also checks partial cycle acceptance, reject/receiver-trap
-refunds, callback-write rollback and instruction counters across awaits. Guard
-refusal requires its exact rejection code and message; negative unit cases reject
-missing methods and unrelated errors. Sources are maintained under `scripts/fixtures/cdk-runtime/`,
-reusing the standalone CDK consumer. It declares Platform and published Timers;
-the native driver declares Platform and published Testkit. Dependencies for this
-qualification live in the root's tests/tooling catalog, outside production graphs.
-The generated workspace, lock, metadata and isolated build outputs remain under
-`target/cdk-runtime.*`; concurrent attempts cannot replace one another's artifacts.
-Normal runs use the maintained `scripts/fixtures/cdk-runtime/Cargo.lock` with
-`--locked`. Release preparation updates only the two local Platform identities;
-`make check-runtime-lock` checks drift and tests that external selections stay fixed.
-To refresh it after dependency changes,
-explicitly run `bash scripts/ci/check-platform-runtime.sh --refresh-lock`, review
-the lock diff, and rerun qualification. Refresh seeds from the production lock and
-resolves the test-only additions; it may access the registry. For cached inputs,
-set `CARGO_NET_OFFLINE=true`. Normal validation never refreshes the selection.
+`make check-runtime` builds and installs Wire canisters through Testkit-managed
+PocketIC on Rust 1.99 and 1.91. The pure `cdk` selection rejects Candid, parser,
+full CDK and native host clients in its canister graph. A separate
+`external-candid` selection tests an outbound management `raw_rand` call with
+explicit Candid arguments and preserves the original persisted checkpoint bytes.
+All RPCs and installation/upgrade arguments use Wire in both selections.
 
-`bash scripts/ci/check-platform-runtime.sh --check-graph` validates the combined
-canister's native/Wasm dependency graphs without compiling or starting PocketIC.
-Every runtime mode except lock refresh rejects host parser, Agent and Testkit
-dependencies in those normal/build graphs, and enforces the qualified CDK and
-single executor/system identities. `make check-runtime-lock` also runs adversarial
-graph admission tests. This covers the combined consumer graph in addition to
-the separate Platform feature matrix; it does not inspect a Wasm binary's size.
+The fixture checks raw awaits, composite queries, guard/malformed-frame refusal,
+all four explicit request allowances, response-encoding traps, callback cleanup,
+weak/protected/migratory spawning, submission-pressure and insufficient-cycle
+errors, timer cancellation/rearm, upgrade, cycle/refund counters, stable-byte
+rollback and certificate lookup. It installs no alternative executor.
 
-The runtime fixture also checks exact checkpoint bytes across upgrade, stable
-write/growth rollback after a trap, certified-data publication and certificate
-lookup, cycle burning, costs and system helpers in their supported contexts.
+Run `make check-runtime-lock` for coordinated lock, graph and imported-source
+checks, or `bash scripts/ci/check-platform-runtime.sh --check-graph` without
+compiling/starting a server. Source fingerprints protect the imported call,
+callback/trap cleanup and protected-spawn regions; mutation cases test refusal.
+The sole registry executor remains =2.0.0 and ic0 remains =1.2.0.
 
-Prepare and admit PocketIC with the published Testkit server setup/check workflow,
-then set `POCKET_IC_BIN` to that admitted binary, or set `IC_TESTKIT_POCKET_IC_URL`
-to an already managed local server. No sibling checkout is required by the target.
-The harness uses Testkit's bounded startup and owned teardown; it never installs
-a server implicitly. Its offline locked metadata check requires cached registry inputs.
-Published Timers and Testkit require Rust 1.91, so install that toolchain with the
-Wasm target before running this separate qualification. The combined fixture
-builds on 1.99 and 1.91; `bash scripts/ci/check-platform-runtime.sh --build-only`
-compiles without starting a server. Runtime qualification is an explicit target,
-not silently skipped when a server is unavailable and not part of `make ci`.
+Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
+`IC_TESTKIT_POCKET_IC_URL`. The harness retains Testkit's bounded startup and
+teardown. It never installs a server implicitly. Artifacts, sources and metadata
+remain in `target/cdk-runtime.*`. Normal runs use the maintained frozen selection
+in `scripts/fixtures/cdk-runtime/Cargo.lock`; explicit `--refresh-lock` is a
+reviewed dependency refresh, not normal validation. `--build-only` compiles both
+protocol selections without starting a server. Runtime qualification remains an
+explicit target outside local full CI. Native macOS and live IC are separate
+qualification from Linux PocketIC or Wasm compilation.
 
-The Platform-only fixture remains a Rust 1.88 gate: `make check-consumer` now
-links its `cdylib` on both compilers. For focused work, run
-`bash scripts/ci/check-platform-consumer.sh cdk`. Full CI still selects every
-consumer. PocketIC success is separate from native macOS and live-IC acceptance.
+The Platform-only fixture remains a Rust 1.88 gate with no Wire-version MSRV
+requirement. The installed Wire/Timers/Testkit fixture has Rust 1.91 inputs.
+No measured Wasm-size reduction is claimed.
 
-For published-selection evidence, run
-`bash scripts/ci/check-platform-consumer.sh --published 0.1.12 cdk`.
-This selects exactly that crates.io facade and rejects path/Git replacements of
-the facade or generator. The same maintained consumer tests and native/MSRV/Wasm
-builds run with only Platform declared. Metadata and the resolved lock remain
-in the printed attempt directory. Registry inputs must already be cached for
-the offline metadata step; this command never publishes or changes the repository
-lock. Omit `--published` to qualify local source. This is archive consumption
-evidence, separate from consumer application tests and installed-canister behavior.
+## Source licenses
+
+Original Platform code is MIT. Imported non-cryptographic runtime adapters and
+the generator retain Apache-2.0. The combined `ic-platform` package declares
+MIT AND Apache-2.0; included source notices identify the upstream owner/version.

@@ -1,10 +1,20 @@
 //! Platform-only substrate consumer; raw backing is confined to isolated tests.
 use ic_platform::stable_structures::{
     self, BTreeMap, BTreeSet, Cell, Log, Memory, MinHeap, RestrictedMemory, Vec as StableVec,
+    VectorMemory,
 };
 
 /// Compile every collection with the caller's memory and retain its bytes on reopen.
 pub fn collection_contract<M: Memory + Clone>(memory: [M; 8]) {
+    // VectorMemory retains the same target-neutral, clone-shared byte backing.
+    let vector = VectorMemory::default();
+    let shared = vector.clone();
+    assert_eq!(vector.grow(1), 0);
+    assert_eq!(shared.size(), 1);
+    vector.write(65_532, &[1, 2, 3, 4]);
+    let mut bytes = [0; 4];
+    shared.read(65_532, &mut bytes);
+    assert_eq!(bytes, [1, 2, 3, 4]);
     let mut map = BTreeMap::<u64, u64, _>::init(memory[0].clone());
     assert_eq!(map.insert(1, 2), None);
     let entries: stable_structures::btreemap::Iter<'_, u64, u64, M> = map.iter();
@@ -56,6 +66,5 @@ pub fn collection_contract<M: Memory + Clone>(memory: [M; 8]) {
 #[cfg(not(target_family = "wasm"))]
 #[test]
 fn collections_reopen_on_original_backing() {
-    use ic_platform::stable_structures::DefaultMemoryImpl;
-    collection_contract(std::array::from_fn(|_| DefaultMemoryImpl::default()));
+    collection_contract(std::array::from_fn(|_| VectorMemory::default()));
 }

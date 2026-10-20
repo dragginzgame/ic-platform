@@ -1,12 +1,116 @@
 # Changelog
 
-## [0.1.19]
+## [0.4.2]
 
 ### Added
 
-- Add an optional stable-structures substrate boundary for governed IC Storage,
-  retaining upstream 0.7.2 collections, codecs, memory and iterator identities
+- Add optional stable-structures substrate identities for governed Storage and
+  target-neutral Testkit instrumentation, preserving upstream 0.7.2 contracts
   ([#30 — Expose stable-structures substrate identities](https://github.com/dragginzgame/ic-platform/issues/30)).
+
+## [0.4.1] - 2026-10-20
+
+### Fixed
+
+- Format nonzero Account subaccounts through a fixed hex buffer, avoiding repeated
+  integer formatting while preserving canonical text, checksums and external bytes.
+
+### Qualification
+
+- Add a separate installed-runtime workflow with Testkit-owned server provisioning,
+  and exact-registry runtime qualification with source/version admission tests.
+- Add generated parser properties and an opt-in coverage-guided Principal/Account
+  fuzz harness; keep fuzz dependencies confined to disposable tooling fixtures.
+- Retain reproducible benchmarks, Account timing and type-layout evidence, and
+  update the release handoff and consumer qualification records.
+
+## [0.4.0] - 2026-10-20
+
+### Breaking
+
+- Own the runtime RejectCode identity while preserving numeric codes, Serde names,
+  Display spelling and unknown-code refusal. Retire its Strum iteration and
+  external ErrorCode conversion; Agent/PocketIC DTO identities remain unchanged.
+- Package the original signature creation/verifier implementations inside Platform.
+  CanisterSigPublicKey now has a Platform identity. Preserve cryptographic bodies
+  and vectors; remove the unused store, Candid import and registry package edges.
+  Signature-only production graphs no longer require Candid or raw IC calls.
+- Make raw calls transport-only: retire Candid argument/response convenience
+  methods and their combined Error/CandidDecodeFailed model. Encode/decode required
+  external messages through the explicit Candid boundary, retaining typed errors
+  and caller-selected policies. Expose the existing oneway/unknown-code errors.
+
+## [0.3.0] - 2026-10-20
+
+### Changed
+
+- Select Rust 1.99.1 for development and matching CI checks, retaining existing
+  package MSRVs.
+
+### Added
+
+- Own Candid-free Account and Subaccount identities with bounded text parsing,
+  original effective-zero equality and explicit external ledger DTO conversions.
+  Preserve optional subaccount representation and ledger text checksums.
+
+### Breaking
+
+- Own the unconditional Principal and parse-error types. Convert explicitly to
+  the retained external Principal for Agent, PocketIC, Candid DTOs and crypto APIs.
+  Preserve original identity bytes and ordering; delegate self-authentication to
+  the original cryptographic implementation.
+- Bound principal text admission and remove intermediate formatting allocations.
+  Treat owned/borrowed binary Serde bytes identically; do not inherit Candid marker
+  handling or generic range stepping. See the [Principal migration](docs/migration.md#owned-principal-migration-03).
+
+## [0.2.2] - 2026-10-19
+
+### Added
+
+- Complete PocketIC placement, pending-message, gateway, HTTP fixture and chunked
+  install-mode exports used through Testkit by Backup, Canic and Blob. Preserve
+  original upstream identities and native-only selection
+  ([#27 — Complete PocketIC exports used by Testkit consumers in Backup and Canic](https://github.com/dragginzgame/ic-platform/issues/27)).
+
+## [0.2.1] - 2026-10-19
+
+### Changed
+
+- Specify Wire for all owned application endpoints, including public endpoints;
+  reserve Candid for required IC interfaces and legacy checkpoint compatibility.
+- Document runtime maintenance, reviewed source-fingerprint changes and clean-cache
+  recovery acceptance without claiming dependency independence or a completed drill.
+- Correct stale 0.1.18 candidate guidance for the released 0.2.0 runtime boundary.
+
+## [0.2.0] - 2026-10-19
+
+### Breaking
+
+- Replace the full CDK dependency with maintained non-cryptographic adapters
+  inside Platform. Keep the registry executor =2.0.0 and ic0 =1.2.0 identities.
+  Call/response, cost/error and stable-error types now have Platform identities.
+- Make `cdk` Candid-free. Require explicit Wire endpoint codecs, including unit
+  RPC decoding; remove default Candid endpoints and service export generation.
+  Raw calls start with empty bytes; supply Wire frames or explicit external
+  Candid arguments. Select `candid` separately for management/system calls and
+  existing persisted checkpoint helpers. No stored bytes or crypto are changed.
+- Preserve Apache-2.0 provenance for imported runtime code; the combined consumer
+  package declares MIT AND Apache-2.0. No executor implementation is copied.
+
+### Testing
+
+- Qualify standalone native/MSRV/Wasm consumers, real Timers probe compilation,
+  graph isolation and imported callback/spawn source fidelity. Installed Wire
+  fixtures cover raw awaits, submission/cycle failures, protected/weak/migratory
+  spawning, traps, timer cancellation, upgrade and external Candid/checkpoints.
+
+### Changed
+
+- Reject unintended RNG and entropy dependencies in portable crypto, runtime and
+  Wasm feature graphs. Cover the combined BLS, ECDSA and Ed25519 selection.
+- Add source-preservation checks for dependency scaffolding proposals, retaining
+  upstream cryptographic bodies and licenses. Qualify optional signature-store
+  and secp256k1 scaffolding without selecting production replacements.
 
 ## [0.1.18] - 2026-10-19
 

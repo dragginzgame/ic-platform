@@ -7,8 +7,11 @@ derivation bytes remain upstream. This feature is independent of Candid/CDK and
 excluded from Wasm because upstream unconditionally selects native RNG support.
 Consumers retain network/key choice, path validation and authorization policy.
 
-Controlled Candid and executor dependencies. Enable `candid` for external
-protocol DTOs and bounded replies; enable `executor` for the selected CDK executor.
+All owned application endpoints use IC Wire, including public endpoints called by
+third parties. Enable `cdk` for explicit-codec entrypoints and the Candid-free
+runtime, or `executor` for the shared executor alone. Enable `candid` only for
+required management/system, NNS/SNS, ledger and other Candid interfaces, or legacy
+persisted checkpoints. Caller location does not select Candid.
 `ic_platform::Principal` is unconditional; no features are enabled by default.
 
 Enable `icrc-ledger-types` for `ic_platform::icrc_ledger_types`, selecting upstream
@@ -87,11 +90,18 @@ Use `ic_platform::candid::contract` for Candid DTO derives and encoding. Add
 `#[serde(crate = "ic_platform::candid::contract::serde")]` when deriving Deserialize
 through the boundary's Serde export. These are external protocol types, not an
 application-wide requirement. Principal-only users import `ic_platform::Principal`
-without selecting a feature or declaring `ic_principal` directly. The root and
-Candid contract exports have the same upstream type identity.
+without selecting a feature or declaring `ic_principal` directly. In the released
+0.3 migration the root type and `PrincipalError` are Platform-owned. Required
+Candid DTOs use `candid::contract::Principal`, which remains the original registry
+type. `principal::{ExternalPrincipal, ExternalPrincipalError}` provides that
+explicit external identity without requiring Candid. Convert principals with
+`.into()` at the client/DTO boundary; errors are distinct types.
 
-`ic_platform::PrincipalError` is also unconditional and retains the upstream
-Principal parse-error identity used by public host APIs.
+Owned parsing rejects text longer than 63 bytes before copying, retains uppercase
+acceptance and dash validation, and formats using stack buffers. Binary Serde
+uses identical raw bytes for borrowed and owned buffers. No generic range-step
+implementation or Candid trait/marker handling is provided. Self-authentication
+delegates to the original upstream implementation; no cryptographic code changes.
 
 Use `candid::decoder::{DecoderConfig, IDLDeserialize, decode_one_with_config,
 decode_args_with_config, decode_one, decode_args}` for existing low-level configuration and staged
@@ -130,11 +140,11 @@ smaller Wasm artifacts.
 Enable `canister-sig-creation` for `ic_platform::canister_sig_creation`:
 `CanisterSigPublicKey`, `hash_bytes`, `hash_with_domain`,
 `extract_raw_root_pk_from_der`, `IC_ROOT_PK_DER` and `IC_ROOT_PK_DER_PREFIX`
-from upstream 1.3.1. Constructor/DER/raw methods, Principal identity, domain
-separators and `String` errors stay upstream. No signature store, root publication
-or clock API is exposed. Upstream still depends on Candid for Principal and on
-raw ic0 internally; selecting this feature does not select Platform's Candid,
-certification, ic0 or executor surfaces.
+from the unchanged upstream 1.3.1 implementation packaged inside Platform.
+CanisterSigPublicKey now has a Platform identity; its Principal field, DER/raw
+methods, domain separators and `String` errors preserve upstream behavior.
+The unused store and Candid import are omitted. No signature store, root
+publication or clock API is exposed, and no Candid/ic0/executor is selected.
 
 Enable `signature-verification` for
 `ic_platform::signature_verification::verify_canister_sig`, preserving upstream
@@ -144,8 +154,9 @@ trusted issuer, seed, network root, freshness window, resource ceiling or grant
 application authority. Keep those checks in the consumer. Both public-key and
 verification paths retain upstream's short-DER panic risk: retain pre-validation
 and canonical re-encoding. Hash/domain lengths likewise retain upstream behavior.
-The verifier brings creation, certification, BLS, Candid and ic0 transitively,
-without exposing those Platform modules or enabling CDK, parser or Agent.
+The verifier selects creation, certification and BLS, exposing the creation
+surface without enabling Candid, ic0, CDK, parser or Agent. Both imported source
+modules and their vectors/licenses are protected by exact fingerprints.
 
 Enable `bls` independently for `ic_platform::bls::{PublicKey, Signature,
 PrivateKey, InvalidPublicKey, InvalidSignature, InvalidPrivateKey,
@@ -203,40 +214,36 @@ slice order and still requires `msg_reply()` to finalize. Keep rejection bytes,
 early size refusal and authentication ordering unchanged. These exports do not
 replace CDK's Principal/Vec convenience helpers, macros or call/task lifecycle.
 
-Enable `cdk` for `ic_platform::cdk`. Use its `query`, `update`, `init`,
-`pre_upgrade`, `post_upgrade`, `heartbeat`, `inspect_message`,
-`on_low_wasm_memory` and `export_candid!()` macros. Their default generated
-runtime and codec paths go through Platform; DTOs still need their explicit
-`candid_path` and Serde crate attributes. Rename overrides use
-`crate = "platform::cdk", candid = "platform::candid::contract"` on each
-entrypoint and `platform::cdk::export_candid!(platform::candid::contract)`.
+Enable `cdk` for the Candid-free `ic_platform::cdk` runtime: explicit-codec
+entrypoints, raw calls, system helpers, protected spawning and raw stable-byte
+operations. Full `ic-cdk` and upstream macros are not dependencies. Registry
+executor =2.0.0 and ic0 =1.2.0 remain shared with Timers.
 
-The support generator is an Apache-2.0 fork of upstream macros 0.20.3, maintained
-here and released at the coordinated facade version. Consumers declare only Platform.
-The published runtime remains `ic-cdk = "=0.20.3"`; its own upstream macros
-remain transitive. Runtime calls and contexts use one executor 2.0.0 identity.
-The explicit `cdk::api` helpers include `msg_cycles_available`, `msg_cycles_accept`,
-`msg_cycles_refunded`, `instruction_counter` and `call_context_instruction_counter`
-with their original CDK 0.20.3 identities. Sample refunds only in the matching
-reply/reject callback; submission failures have no callback refund. Preserve
-consumer funding, counter-attribution and retry policies across awaits and traps.
-Explicit `cdk::api`, `cdk::call` and `cdk::futures` exports cover the reviewed
-consumers and generated code; they are not blanket upstream module exports.
-`Call`, `CallFailed`, `Response`, controller 0/1/panic handling, argument
-allocation, caller Principal construction, trap cleanup and protected spawning
-retain their upstream implementations. `executor::spawn_protected` alone lacks
-CDK's unfinished-task drop panic and must not replace `cdk::futures::spawn`.
+All controlled endpoints use Wire. Query/update macros require `decode_with`
+(including unit RPCs) and `encode_with` or `manual_reply`. Use a guard for
+pre-copy byte admission. Caller code retains endpoint IDs, decoder budgets,
+authentication and retry policy. No Candid endpoint fallback, service-registration
+macro or Candid path option is supplied. Lifecycle hooks with arguments require
+explicit decoding; no-argument hooks may omit it. A renamed dependency can use
+`crate = "platform::cdk"`. Existing `hidden = true` remains accepted but redundant.
 
-Generator behavior preserves guards, lifecycle restrictions, tuple/unit replies,
-zero-argument decode omission, custom codecs, manual/hidden methods and skipping
-quota 10,000. Hidden methods retain Wasm exports but omit DID registration.
-No finite Platform limits are silently substituted for upstream generator policy.
-Select independent `executor`/`ic0` for Candid-free runtime-only consumers.
-The `cdk` feature selects Candid and the exact-pinned `executor`/`ic0`
-capabilities, but never host parser or Agent. Consumers must
-qualify their existing calls, wire/DID, task/timer and upgrade behavior against
-the published selection before removing direct declarations; see the repository
-migration contract and [runtime boundary](https://github.com/dragginzgame/ic-platform/issues/1).
+Select `cdk,candid` explicitly for required external management/system-canister
+calls. Encode with `candid::contract::{encode_one,encode_args,encode_args_ref}`,
+then supply `with_raw_args` or `take_raw_args`. Decode `Response::as_ref()` through
+the separate Candid decoder, choosing existing admission/arity policy explicitly.
+Raw constructors start with empty transport bytes; Wire callers always supply
+a request frame. External no-argument Candid calls encode `()` explicitly.
+`CallFailed` and `OnewayError` describe transport failures only. Bounded calls retain
+their 300-second default and original cycle/timeout/error behavior.
+
+Call/response/future, cost/performance/error and stable-error types now have
+Platform identities; upstream direct-type equality is not retained. Principal
+and runtime RejectCode are owned too. External DTO/Principal, BLS and certification
+identities remain upstream. The 0.4 release changes signature-key identity as
+documented above.
+The generator and imported non-cryptographic runtime source retain Apache-2.0
+with provenance; the combined package is MIT AND Apache-2.0. No executor or
+cryptographic implementation is forked.
 
 Published Testkit 0.54.0 call helpers use Platform's canonical limits/error types.
 Upgrade and qualify actual drivers before removing the old decoder declaration.
@@ -250,18 +257,26 @@ Selected upstream dependencies remain transitive dependencies.
 The same `cdk` feature includes explicit typed call failures, signing/HTTP/creation
 costs, balances, certificate publication, counters and `println!`, plus the
 reviewed `stable::{stable_grow, stable_read, stable_write, StableMemoryError}` and
-`storage::{stable_save, stable_restore}` helpers. These retain upstream type
-identity, checkpoint bytes, errors and traps; restore retains upstream's lack of
+`storage::{stable_save, stable_restore}` helpers. These retain checkpoint bytes, errors and traps; restore retains upstream's lack of
 decoder finalization. Consumers own layouts, limits, retries and certification
 policy. Use `api::global_timer_set` (the upstream 0.20.3 name) only under the
 consumer's timer ownership, and `api::msg_method_name` in `inspect_message`.
-This isolates direct CDK dependencies; CDK and Candid remain transitive.
+The base runtime removes full CDK and Candid from its normal/build graph.
+`storage::{stable_save,stable_restore}` additionally requires `candid` solely
+for existing persisted bytes; it is not a new storage format or allocation owner.
 
 Enable `pocket-ic` for explicit native client, typed error and fixture DTO exports
 through `ic_platform::pocket_ic`, including `nonblocking::PocketIc`. Testkit retains
 server installation, compatibility admission and lifecycle policy. This feature
 is absent on Wasm; default and executor-only builds do not select PocketIC.
 PocketIC's management DTOs retain their own upstream 0.8.0 identity.
+
+PocketIC fixture exports include root `CreateCanisterPlacement` and
+`CanisterInstallMode`, plus REST `RawEffectivePrincipal`, `RawMessageId`,
+`InstanceHttpGatewayConfig`, `CanisterHttpReply`, `CanisterHttpResponse` and
+`MockCanisterHttpResponse`. The install mode retains PocketIC's management 0.8
+identity, including upgrade flags, independently of Platform's management 0.11
+surface. Testkit forwards these identities without owning another client or DTO.
 
 Enable `ed25519` for native/Wasm `ic_platform::ed25519::{Signature,
 SignatureError, Signer, SigningKey, VerifyingKey, Scalar}`. These are original
@@ -278,6 +293,6 @@ under `secp256k1`.
 
 Enable `stable-structures` for the explicit upstream substrate used by IC Storage.
 `ic_platform::stable_structures` preserves collection, Memory/Storable, iterator,
-log-error and restricted-view identities at 0.7.2. This enables no Candid or CDK;
+log-error, vector backing and restricted-view identities at 0.7.2. This enables no Candid or CDK;
 Memory retains allocation authority and applications use governed Storage
 constructors. See the [substrate contract](../../docs/migration.md#stable-structures-substrate).

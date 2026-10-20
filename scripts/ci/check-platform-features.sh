@@ -22,9 +22,10 @@ cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/met
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve the exact qualified executor =2.0.0' >&2; exit 1;
 }
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | . as $p | .features.cdk == ["candid", "executor", "ic0", "dep:ic-cdk", "dep:ic-platform-macros"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 1 and .[0].optional and .[0].req == "=0.20.3") and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))' \
+# shellcheck disable=SC2016 # jq owns the package variable in this expression.
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | . as $p | .features.cdk == ["executor", "ic0", "dep:ic-platform-macros", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))' \
     target/feature-graphs/metadata.json > /dev/null || {
-    echo 'CDK must select the qualified runtime and coordinated generator' >&2; exit 1;
+    echo 'CDK must select only the owned adapters, qualified executor/ic0 and coordinated generator' >&2; exit 1;
 }
 generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform") | .version' target/feature-graphs/metadata.json)"
 "$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.secp256k1 == ["dep:ic-secp256k1"] and ([.dependencies[] | select(.name == "ic-secp256k1")] | length == 1 and .[0].optional and .[0].req == "=0.3.0" and .[0].target == "cfg(not(target_family = \"wasm\"))")' \
@@ -80,7 +81,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     while IFS=$'\t' read -r selection key; do
         cached="$cache/$target-$key.txt"
         if [[ -f "$cached" ]]; then continue; fi
-        args=(tree -p ic-platform --frozen --target "$target" --edges normal,build --prefix none)
+        args=(tree -p ic-platform --frozen --target "$target" --edges "normal,build" --prefix none)
         if [[ "$selection" != default ]]; then args+=(--no-default-features); fi
         if [[ "$selection" != none && "$selection" != default ]]; then args+=(--features "$selection"); fi
         if ! cargo "${args[@]}" > "$cached"; then

@@ -14,6 +14,8 @@ def powerset:
      ["cdk", "candid", "executor", "ic0"],
      # Combined canister DTO and certificate integrations without host features.
      ["cdk", "management-canister-types", "icrc-ledger-types", "certification"],
+     # Auth's portable crypto combination must not acquire host/runtime scaffolding.
+     ["bls", "ecdsa", "ed25519"],
      # Certificate/signature dependency paths and portable verification together.
      ["canister-sig-creation", "signature-verification", "bls", "certification", "ed25519"],
      # Host-feature exclusion on Wasm alongside the full runtime.

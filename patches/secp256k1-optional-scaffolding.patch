@@ -1,0 +1,305 @@
+Packaging qualification against registry ic-secp256k1-0.3.0. Upstream Apache-2.0 license applies. Cryptographic function bodies are unchanged. Not selected in production.
+
+diff --git a/Cargo.toml b/Cargo.toml
+index dff8ffc..3fe9bb3 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -34,6 +34,10 @@ license = "Apache-2.0"
+ repository = "https://github.com/dfinity/ic"
+ resolver = "2"
+ 
++[features]
++default = ["full"]
++full = ["k256/precomputed-tables", "k256/ecdsa", "k256/pem", "k256/pkcs8", "k256/schnorr", "k256/std", "dep:num-bigint", "dep:pem", "dep:rand", "dep:rand_chacha", "dep:simple_asn1", "dep:zeroize"]
++
+ [lib]
+ name = "ic_secp256k1"
+ path = "src/lib.rs"
+@@ -50,37 +54,35 @@ default-features = false
+ 
+ [dependencies.k256]
+ version = "0.13.4"
+-features = [
+-    "arithmetic",
+-    "ecdsa",
+-    "pem",
+-    "pkcs8",
+-    "precomputed-tables",
+-    "schnorr",
+-    "std",
+-]
++features = ["arithmetic", "sha2"]
+ default-features = false
+ 
+ [dependencies.num-bigint]
++optional = true
+ version = "0.4.6"
+ 
+ [dependencies.pem]
++optional = true
+ version = "1.1.0"
+ 
+ [dependencies.rand]
++optional = true
+ version = "0.8.5"
+ features = ["small_rng"]
+ 
+ [dependencies.rand_chacha]
++optional = true
+ version = "0.3.1"
+ 
+ [dependencies.sha2]
+ version = "0.10.9"
+ 
+ [dependencies.simple_asn1]
++optional = true
+ version = "0.6.2"
+ 
+ [dependencies.zeroize]
++optional = true
+ version = "1.8.1"
+ features = ["zeroize_derive"]
+ 
+diff --git a/src/lib.rs b/src/lib.rs
+index f96d9ce..01ec7b2 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -13,8 +13,11 @@ use k256::{
+         generic_array::{GenericArray, typenum::Unsigned},
+     },
+ };
++#[cfg(feature = "full")]
+ use rand::{CryptoRng, Rng, RngCore, SeedableRng};
++#[cfg(feature = "full")]
+ use std::sync::LazyLock;
++#[cfg(feature = "full")]
+ use zeroize::ZeroizeOnDrop;
+ 
+ pub use ic_principal::Principal as CanisterId;
+@@ -49,12 +52,14 @@ impl std::fmt::Display for KeyDecodingError {
+ impl std::error::Error for KeyDecodingError {}
+ 
+ /// See RFC 3279 section 2.3.5
++#[cfg(feature = "full")]
+ static ECDSA_OID: LazyLock<simple_asn1::OID> =
+     LazyLock::new(|| simple_asn1::oid!(1, 2, 840, 10045, 2, 1));
+ 
+ /// See "SEC 2: Recommended Elliptic Curve Domain Parameters"
+ /// Section A.2.1
+ /// https://www.secg.org/sec2-v2.pdf
++#[cfg(feature = "full")]
+ static SECP256K1_OID: LazyLock<simple_asn1::OID> =
+     LazyLock::new(|| simple_asn1::oid!(1, 3, 132, 0, 10));
+ 
+@@ -188,7 +193,9 @@ impl DerivationPath {
+     }
+ }
+ 
++#[cfg(feature = "full")]
+ const PEM_HEADER_PKCS8: &str = "PRIVATE KEY";
++#[cfg(feature = "full")]
+ const PEM_HEADER_RFC5915: &str = "EC PRIVATE KEY";
+ 
+ /*
+@@ -210,6 +217,7 @@ parameter.
+ The public key can be optionally specified in the ECPrivateKey structure;
+ if the `public_key` argument is `Some` then it is included.
+ */
++#[cfg(feature = "full")]
+ fn der_encode_rfc5915_privatekey(
+     secret_key: &[u8],
+     include_curve: bool,
+@@ -246,6 +254,7 @@ fn der_encode_rfc5915_privatekey(
+         .expect("Failed to encode ECDSA private key as RFC 5915 DER")
+ }
+ 
++#[cfg(feature = "full")]
+ fn der_decode_rfc5915_privatekey(der: &[u8]) -> Result<Vec<u8>, KeyDecodingError> {
+     use simple_asn1::*;
+ 
+@@ -293,6 +302,7 @@ fn der_decode_rfc5915_privatekey(der: &[u8]) -> Result<Vec<u8>, KeyDecodingError
+     }
+ }
+ 
++#[cfg(feature = "full")]
+ fn der_encode_pkcs8_rfc5208_private_key(secret_key: &[u8]) -> Vec<u8> {
+     use simple_asn1::*;
+ 
+@@ -317,6 +327,7 @@ fn der_encode_pkcs8_rfc5208_private_key(secret_key: &[u8]) -> Vec<u8> {
+ /// DER encode the public point into a SubjectPublicKeyInfo
+ ///
+ /// The public_point can be either the compressed or uncompressed format
++#[cfg(feature = "full")]
+ fn der_encode_ecdsa_spki_pubkey(public_point: &[u8]) -> Vec<u8> {
+     use simple_asn1::*;
+ 
+@@ -335,6 +346,7 @@ fn der_encode_ecdsa_spki_pubkey(public_point: &[u8]) -> Vec<u8> {
+         .expect("Failed to encode ECDSA private key as DER")
+ }
+ 
++#[cfg(feature = "full")]
+ fn pem_encode(raw: &[u8], label: &'static str) -> String {
+     pem::encode(&pem::Pem {
+         tag: label.to_string(),
+@@ -351,6 +363,7 @@ fn pem_encode(raw: &[u8], label: &'static str) -> String {
+ ///
+ /// * pk_x is the x coordinate of the public key (even y coordinate is assumed)
+ /// * ttr is the Taproot Tree Root, referred to as `h` in BIP341
++#[cfg(feature = "full")]
+ fn bip341_generate_tweak(pk_x: &[u8], ttr: &[u8]) -> Result<Scalar, InvalidTaprootHash> {
+     // The caller should have already validated these but let's double check...
+     if pk_x.len() != 32 {
+@@ -385,11 +398,13 @@ fn bip341_generate_tweak(pk_x: &[u8], ttr: &[u8]) -> Result<Scalar, InvalidTapro
+ }
+ 
+ /// A secp256k1 public key, suitable for generating ECDSA and BIP340 signatures
++#[cfg(feature = "full")]
+ #[derive(Clone, ZeroizeOnDrop)]
+ pub struct PrivateKey {
+     key: k256::SecretKey,
+ }
+ 
++#[cfg(feature = "full")]
+ impl PrivateKey {
+     /// Generate a new random private key
+     pub fn generate() -> Self {
+@@ -591,6 +606,7 @@ impl PrivateKey {
+     }
+ 
+     /// BIP341 derivation
++    #[cfg(feature = "full")]
+     fn derive_bip341(&self, ttr: &[u8]) -> Result<Self, InvalidTaprootHash> {
+         let pk = self.public_key().serialize_sec1(true);
+ 
+@@ -871,6 +887,7 @@ impl PublicKey {
+     }
+ 
+     /// Deserialize a public key stored in DER SubjectPublicKeyInfo format
++    #[cfg(feature = "full")]
+     pub fn deserialize_der(bytes: &[u8]) -> Result<Self, KeyDecodingError> {
+         use k256::pkcs8::DecodePublicKey;
+         let key = k256::PublicKey::from_public_key_der(bytes)
+@@ -879,6 +896,7 @@ impl PublicKey {
+     }
+ 
+     /// Deserialize a public key stored in PEM SubjectPublicKeyInfo format
++    #[cfg(feature = "full")]
+     pub fn deserialize_pem(pem: &str) -> Result<Self, KeyDecodingError> {
+         let der =
+             pem::parse(pem).map_err(|e| KeyDecodingError::InvalidPemEncoding(format!("{e:?}")))?;
+@@ -914,31 +932,37 @@ impl PublicKey {
+     }
+ 
+     /// Serialize a public key in DER as a SubjectPublicKeyInfo
++    #[cfg(feature = "full")]
+     pub fn serialize_der(&self) -> Vec<u8> {
+         der_encode_ecdsa_spki_pubkey(&self.serialize_sec1(false))
+     }
+ 
+     /// Serialize a public key in PEM encoding of a SubjectPublicKeyInfo
++    #[cfg(feature = "full")]
+     pub fn serialize_pem(&self) -> String {
+         pem_encode(&self.serialize_der(), "PUBLIC KEY")
+     }
+ 
+     /// Deprecated alias of verify_ecdsa_signature
++    #[cfg(feature = "full")]
+     pub fn verify_signature(&self, message: &[u8], signature: &[u8]) -> bool {
+         self.verify_ecdsa_signature(message, signature)
+     }
+ 
+     /// Deprecated alias of verify_ecdsa_signature_with_malleability
++    #[cfg(feature = "full")]
+     pub fn verify_signature_with_malleability(&self, message: &[u8], signature: &[u8]) -> bool {
+         self.verify_ecdsa_signature_with_malleability(message, signature)
+     }
+ 
+     /// Deprecated alias of verify_ecdsa_signature_prehashed
++    #[cfg(feature = "full")]
+     pub fn verify_signature_prehashed(&self, digest: &[u8], signature: &[u8]) -> bool {
+         self.verify_ecdsa_signature_prehashed(digest, signature)
+     }
+ 
+     /// Deprecated alias of verify_ecdsa_signature_prehashed_with_malleability
++    #[cfg(feature = "full")]
+     pub fn verify_signature_prehashed_with_malleability(
+         &self,
+         digest: &[u8],
+@@ -952,6 +976,7 @@ impl PublicKey {
+     /// If used to verify signatures generated by a library that does not
+     /// perform s-normalization, this function will reject roughly half of all
+     /// signatures.
++    #[cfg(feature = "full")]
+     pub fn verify_ecdsa_signature(&self, message: &[u8], signature: &[u8]) -> bool {
+         use k256::ecdsa::signature::Verifier;
+         let signature = match k256::ecdsa::Signature::try_from(signature) {
+@@ -977,6 +1002,7 @@ impl PublicKey {
+     /// This means that given a valid ECDSA signature, it is possible to create
+     /// a "new" ECDSA signature that is also valid, without having access to the
+     /// key. Unlike `verify_signature`, this function accepts either `s` value.
++    #[cfg(feature = "full")]
+     pub fn verify_ecdsa_signature_with_malleability(
+         &self,
+         message: &[u8],
+@@ -997,6 +1023,7 @@ impl PublicKey {
+     }
+ 
+     /// Verify a (message digest,signature) pair
++    #[cfg(feature = "full")]
+     pub fn verify_ecdsa_signature_prehashed(&self, digest: &[u8], signature: &[u8]) -> bool {
+         if digest.len() < 16 {
+             let mut zdigest = [0u8; 32];
+@@ -1028,6 +1055,7 @@ impl PublicKey {
+     /// This means that given a valid ECDSA signature, it is possible to create
+     /// a "new" ECDSA signature, without having access to the key. Unlike
+     /// `verify_signature_prehashed`, this function accepts either `s` value.
++    #[cfg(feature = "full")]
+     pub fn verify_ecdsa_signature_prehashed_with_malleability(
+         &self,
+         digest: &[u8],
+@@ -1056,6 +1084,7 @@ impl PublicKey {
+     }
+ 
+     /// Verify a BIP340 (message,signature) pair
++    #[cfg(feature = "full")]
+     pub fn verify_bip340_signature(&self, message: &[u8], signature: &[u8]) -> bool {
+         use k256::schnorr::signature::hazmat::PrehashVerifier;
+ 
+@@ -1074,6 +1103,7 @@ impl PublicKey {
+     }
+ 
+     /// BIP341 derivation
++    #[cfg(feature = "full")]
+     fn derive_bip341(&self, ttr: &[u8]) -> Result<Self, InvalidTaprootHash> {
+         use k256::elliptic_curve::ops::MulByGenerator;
+ 
+@@ -1096,6 +1126,7 @@ impl PublicKey {
+     }
+ 
+     /// Verify a BIP341 (message,signature) pair
++    #[cfg(feature = "full")]
+     pub fn verify_bip341_signature(
+         &self,
+         message: &[u8],
+@@ -1118,6 +1149,7 @@ impl PublicKey {
+     ///
+     /// # Errors
+     /// See [`RecoveryError`] for details.
++    #[cfg(feature = "full")]
+     pub fn try_recovery_from_digest(
+         &self,
+         digest: &[u8],
+@@ -1196,11 +1228,13 @@ pub enum RecoveryError {
+ /// where `y`, `y'` are computed from the affine x-coordinate together with the curve equation and `n` is the order of the curve.
+ /// Note that because the affine coordinates are over `𝔽ₚ`, where `p > n` but `p` and `n` are somewhat close from each other,
+ /// the last 2 possibilities often do not exist, see [`RecoveryId::is_x_reduced`].
++#[cfg(feature = "full")]
+ #[derive(Clone, Eq, PartialEq, Debug)]
+ pub struct RecoveryId {
+     recid: k256::ecdsa::RecoveryId,
+ }
+ 
++#[cfg(feature = "full")]
+ impl RecoveryId {
+     /// True iff the affine y-coordinate of `𝑘×𝑮` odd.
+     pub const fn is_y_odd(&self) -> bool {

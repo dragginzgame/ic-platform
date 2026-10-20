@@ -33,8 +33,50 @@ consumer library's optional `cdk` surface. The maintainer authorized maintaining
 the generator independently of upstream acceptance. Preserve its imported
 Apache-2.0 license (the necessary exception to the workspace's MIT metadata),
 coordinated package version, original generator semantics and explicit paths.
-The runtime remains registry `ic-cdk =0.20.3`; no executor implementation is
-forked. Runtime-only raw/executor consumers retain their independent features.
+The maintainer authorized adopting the reviewed non-cryptographic CDK 0.20.3
+adapters inside Platform and removing the `ic-cdk` package. Keep their Apache-2.0
+license/provenance. The facade's mixed-source license is MIT AND Apache-2.0.
+Only the imported callback and legacy byte-copy modules permit reviewed unsafe
+code; other modules retain the workspace deny lint. No executor is forked.
+Preserve registry executor =2.0.0 and ic0 =1.2.0 identities. Endpoint macros require
+explicit consumer-owned codecs; all owned application endpoints use Wire, including
+public endpoints called by third parties. Candid is an explicit adapter for required
+management/system, NNS/SNS, ledger and other pre-existing Candid interfaces. Caller
+location or visibility never selects Candid. Existing Candid checkpoint
+bytes are a legacy compatibility exception, never a new storage format or owner.
+Runtime-only raw/executor consumers retain their independent features.
+
+## Cryptographic boundary
+
+Our team does not include cryptographers. Do not implement, replace or alter
+cryptographic primitives or algorithms, including public-key derivation,
+signature verification, cryptographic key encoding or hash/domain-separation
+behavior. Retain upstream-authored cryptographic implementations and test vectors;
+do not substitute the earlier public-derivation or BLS replacement prototypes.
+
+Dependency scaffolding may be simplified: manifests, feature gates, unused
+modules, duplicate generators and integration plumbing are in scope when they
+preserve cryptographic behavior. Source variants must retain provenance/licenses
+and unchanged cryptographic function bodies. Qualify their actual consumer graphs,
+type/source identities and wire bytes; a dependency-local Cargo patch is not a
+supported distribution mechanism for downstream consumers.
+
+The maintainer authorized the 0.4 signature packaging migration: retain the
+upstream creation/verifier bodies and vectors inside `signature_upstream`, changing
+only the documented imports and omitting the unexposed store module. Enforce exact
+source/license fingerprints; do not refresh hashes to permit algorithm changes.
+The owned runtime RejectCode similarly replaces only its external catalogue
+dependency; Agent/PocketIC codes keep their external identities.
+
+## Owned Principal
+
+The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
+Retain its Apache-2.0 provenance, raw bytes and length-first ordering. Keep parsing
+bounded by the 63-byte text grammar, binary Serde marker-free and range policy
+consumer-owned. Delegate self-authentication to the unchanged upstream crypto
+implementation. External DTO/client principal and error identities remain registry
+types, named explicitly through principal::ExternalPrincipal/ExternalPrincipalError;
+Candid contract types stay external. Do not add Candid to the owned type.
 
 ## Executor identity
 
@@ -62,3 +104,20 @@ identities. Testkit retains server provisioning, compatibility admission,
 lifecycle, transport and retry policy. Keep PocketIC out of defaults, executor-only
 and canister deployment graphs; do not replace its management DTOs with the
 independently selected external management DTO surface.
+
+## Owned account
+
+The maintainer authorized unconditional owned Account/Subaccount alongside owned
+Principal. Preserve effective-zero equality, ordering and hashing, and preserve
+absent versus explicit zero fields during serialization and external conversion.
+Retain Apache provenance and the existing external ledger DTO identity. No Candid,
+storage implementation, cryptographic account-identifier derivation or application
+subaccount allocation policy belongs in the owned account surface.
+
+## Transport and codecs
+
+The 0.4 runtime accepts/returns raw transport bytes only. Do not restore implicit
+Candid request/response helpers or a combined transport/codec error union. Use the
+separate Candid boundary for required external IC interfaces; consumers retain
+encoding-failure, decoding, arity, resource, diagnostics and retry policy. Legacy
+Candid checkpoint adapters remain unchanged and outside new storage ownership.

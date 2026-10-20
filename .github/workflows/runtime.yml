@@ -1,0 +1,45 @@
+name: Installed runtime
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CARGO_BUILD_JOBS: 4
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Prepare compilers and tools
+        run: |
+          rustup toolchain install 1.99.1 --profile minimal --target wasm32-unknown-unknown
+          rustup toolchain install 1.91.0 --profile minimal --target wasm32-unknown-unknown
+          make install-tools
+          cargo fetch --locked
+          bash scripts/ci/check-platform-runtime.sh --prepare
+      - name: Prepare Testkit-owned server
+        run: |
+          version="$(.tools/host/bin/yq -p toml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
+          cargo +1.91.0 install --locked --version "=$version" --root target/testkit-cli ic-testkit --bin ic-testkit-server
+          target/testkit-cli/bin/ic-testkit-server setup
+          binary="$(target/testkit-cli/bin/ic-testkit-server check)"
+          printf 'POCKET_IC_BIN=%s\n' "$binary" >> "$GITHUB_ENV"
+      - name: Qualify both protocols and compiler versions
+        run: make check-runtime
