@@ -3,7 +3,7 @@ members = ["crates/ic-platform", "crates/ic-platform-macros"]
 resolver = "3"
 
 [workspace.package]
-version = "0.2.2"
+version = "0.3.0"
 edition = "2024"
 rust-version = "1.88.0"
 license = "MIT"
@@ -25,7 +25,7 @@ ic-cdk-executor = "=2.0.0"
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
 ic-error-types = "0.2.0"
 ic-management-canister-types = "=0.11.0"
-ic-platform-macros = { version = "0.2.2", path = "crates/ic-platform-macros" }
+ic-platform-macros = { version = "0.3.0", path = "crates/ic-platform-macros" }
 ic-secp256k1 = "=0.3.0"
 ic-signature-verification = "0.3.0"
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
