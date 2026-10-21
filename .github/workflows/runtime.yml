@@ -29,7 +29,8 @@ jobs:
           persist-credentials: false
       - name: Prepare compilers and tools
         run: |
-          rustup toolchain install 1.99.1 --profile minimal --target wasm32-unknown-unknown
+          rustup toolchain install --profile minimal --no-self-update
+          rustup target add wasm32-unknown-unknown
           rustup toolchain install 1.91.0 --profile minimal --target wasm32-unknown-unknown
           make install-tools
           cargo fetch --locked
