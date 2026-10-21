@@ -6,7 +6,7 @@ endpoints called by third parties. Candid is the adapter for management canister
 NNS/SNS, ledgers and other interfaces that require it; caller location does not
 select a codec. Existing Candid checkpoints remain a legacy compatibility exception.
 
-The pending 0.5 hard cut removes the unused `cdk::storage` checkpoint helpers;
+The released 0.5 hard cut removed the unused `cdk::storage` checkpoint helpers;
 existing data stays with its consumer and raw stable-memory passthroughs remain.
 See [the retirement contract](docs/migration.md#pending-05-retirement).
 
@@ -19,8 +19,8 @@ Select `principal` for owned Principal/Account types without depending directly
 on `ic_principal`. Runtime, Candid and external client/DTO features include it;
 executor/IC0-only builds omit application types. The 0.3 type is Platform-owned;
 external clients and DTOs retain `principal::ExternalPrincipal`. Convert explicitly
-with `.into()` at those boundaries. Default builds include Principal and its
-dependencies, but neither Candid nor CDK. Self-authentication continues to delegate
+with `.into()` at those boundaries. Default builds exclude Principal and its
+dependencies, Candid and CDK. Self-authentication continues to delegate
 to the original upstream implementation. See the [Principal migration](docs/migration.md#owned-principal-migration-03).
 
 | Feature | Implemented contract |
@@ -44,6 +44,12 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
 | `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |
+| `stable-structures` | Exact upstream collections, Memory/Storable and memory-manager identities; consumers retain storage/allocation policy |
+
+The [IC inventory](docs/ic-inventory.md) maps upstream code to exposed APIs,
+observed consumers and maintenance ownership. `make check-inventory` rejects
+drift in its complete workspace feature and direct-dependency tables; consumer
+usage evidence is dated and reviewed separately.
 
 The optional `cdk` surface uses maintained, non-cryptographic runtime adapters
 and the owned generator. It does not depend on the full `ic-cdk` package.

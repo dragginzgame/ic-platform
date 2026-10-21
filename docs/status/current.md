@@ -1,6 +1,30 @@
 # Current handoff
 
-## Pending 0.6.6
+## Pending 0.6.7
+
+The [individual export audit](../audits/export-usage-2026-10-21.md) records 393
+named exports/owned methods against 7,156 sibling Rust files. Generated Candid
+and entrypoint support, Storage's substrate alias and receiver calls were reviewed
+separately. Thirty-three names have only Platform fixture evidence or no resolved
+sibling reference; this is not proof of safe removal. Public type contracts and
+upstream inherited members retain the report's explicit scope limits. No API was
+removed, no sibling was built/edited and existing inventory work was preserved.
+
+The [IC inventory](../ic-inventory.md) maps public capability groups to upstream
+or imported implementations, observed sibling usage and maintenance ownership.
+Sibling observations are dated, include dirty-state caveats and are not released
+adoption evidence. CI now checks all workspace feature/direct-dependency facts
+and complete README feature coverage without network access or sibling scans.
+API semantics and continuing sibling usage still need source review; this does
+not replace dependency graphs, imported-source guards or runtime qualification.
+
+Full Clippy passed before regression tests. Inventory checks and mutation tests,
+formatting, documentation links, boundary/pin checks and snapshot integrity pass
+on Linux. Evidence: `/tmp/platform-inventory-clippy.log` and
+`/tmp/platform-inventory-checks.log`. No Rust, dependency, API or crypto changes;
+no sibling edits. Native macOS and installed-canister checks were not rerun.
+
+## Released 0.6.6
 
 Adopted Shared Tooling 0.26.4 at
 `dc1ced7e240e90f0c6daa89fb6248fcb074164eb` through its canonical exporter.

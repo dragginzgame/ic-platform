@@ -1,0 +1,160 @@
+# IC dependency and maintenance inventory
+
+This is Platform's boundary inventory, not a fleet adoption tracker. Manifest
+facts below are checked by `make check-inventory` in CI. Requirements are declared
+ranges/pins, not resolved versions; Cargo.lock and the existing feature-graph
+checks own resolution and isolation. No default features are enabled.
+
+The [individual export audit](audits/export-usage-2026-10-21.md) adds dated
+per-symbol evidence for 393 facade exports and owned methods/constants. It
+distinguishes sibling references, generated-code requirements, public contracts
+and exports with only Platform fixture evidence or no resolved consumer.
+Upstream type members are not individually covered; this is not removal approval.
+
+## APIs, consumers and maintenance ownership
+
+Paths are relative to `crates/ic-platform/src` unless otherwise stated. Each
+module's explicit exports are authoritative; this table summarizes capabilities,
+not every symbol. Additions to exports require reviewing this table and the
+[migration contract](migration.md). The manifest check does not detect semantic
+API changes or automatically establish whether sibling source still uses an API.
+
+| Upstream / owned code | Public surface and source | Observed consumers | Maintenance responsibility |
+| --- | --- | --- | --- |
+| `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting, account semantics and conversions. External principal identity and self-authentication crypto remain upstream. |
+| `ic0`, `ic-cdk-executor`; imported CDK adapters and owned generator | `ic0`, `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters | Platform maintains non-crypto adapters/generator. Registry executor and system ABI stay pinned; callback/trap semantics require installed qualification. No full `ic-cdk` dependency. |
+| `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
+| `candid_parser`; Candid printer | native `candid_parser`, optional `candid-service` exports | Tooling Host's Candid parsing; Canic host/testing and service generation | Upstream parser/compiler remains external. Retirement requires consumer migration, not a manifest-only deletion. |
+| `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
+| `pocket-ic` | native `pocket_ic` client/DTO identities | Tooling Testkit `src/{lib.rs,pic/transport.rs}` | Upstream simulator client; Testkit owns server provisioning, compatibility, lifecycle and transport policy. |
+| `ic-management-canister-types` | `management_canister_types` | Canic Core; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
+| `icrc-ledger-types` | `icrc_ledger_types` account/metadata/transfer/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Upstream external ledger formats, distinct from owned Account. No ledger/storage policy in Platform. |
+| `ic-certification` | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Upstream tree/hash implementations. Host owns bounded CBOR decoding; consumers own trust roots and verification policy. |
+| `ic-verify-bls-signature` | `bls`; imported verifier dependency | Auth and Canic test keys; Auth canister verification | Upstream cryptography unchanged. No in-house primitive replacement. |
+| `k256`, `curve25519-dalek`, `ed25519-dalek` | `ecdsa`, `ed25519` | Auth `src/{chain_key_signature,portable_signature}.rs`; Canic tests | General-purpose upstream crypto, not DFINITY-only code. Platform controls selected identities/features, not algorithms. |
+| `ic-secp256k1` | native `secp256k1` public derivation/types | Canic Core native chain-key configuration and public-key fixtures | Upstream key derivation and encoding remain unchanged. Native-only explicit boundary. |
+| Imported `ic-canister-sig-creation` / `ic-signature-verification` | `canister_sig_creation`, `signature_verification`; private `signature_upstream` | Auth `src/{signature_store,canister_signature}.rs` | Platform owns packaging/import scaffolding only. Exact crypto bodies, vectors and licenses remain protected. |
+| `ic-stable-structures` | `stable_structures` collections, Memory/Storable and `memory_manager::{MemoryId,MemoryManager,VirtualMemory}` | Persistence Storage `src/lib.rs`; Memory runtime and stable-cell modules | Upstream substrate implementation. Memory owns layout validation, growth preflight, allocation and exclusive leases; Storage owns adapters. |
+| `ic-representation-independent-hash` | development dependency, signature reference tests only | Platform's own tests | Upstream comparison oracle; not a normal dependency. |
+
+Generic support dependencies (Serde, SHA-2, encoding/checksum helpers, error and
+proc-macro libraries) are also included in the manifest inventory so additions
+cannot escape review by having a non-IC name. SHA-2 and upstream cryptographic
+primitives remain outside our implementation authority. Tooling-only fixture
+workspaces additionally use owned Wire, Timers and Testkit; their locks and runtime
+graph admission remain separate from the two-package workspace inventory.
+
+Imported-source ownership is recorded beside the code in
+[signature notices](../crates/ic-platform/src/signature_upstream/NOTICE.md),
+[runtime notices](../crates/ic-platform/src/cdk/upstream/NOTICE.md),
+[Principal notices](../crates/ic-platform/src/principal/NOTICE.md) and
+[Account notices](../crates/ic-platform/src/account/NOTICE.md).
+Existing signature/runtime fingerprint checks enforce their respective admitted
+source changes. Do not refresh fingerprints to approve cryptographic changes.
+
+## Consumer evidence and its limits
+
+Read-only source/manifest review on 2026-10-21. Revisions identify HEAD; **dirty**
+means observed working-tree contents can differ from that commit. These are
+usage examples, including tests and optional paths, not frequency measurements,
+proof of deployment, or a claim that every downstream consumer was discovered.
+
+| Checkout | HEAD | State at inspection |
+| --- | --- | --- |
+| ic-tooling (current Host/Testkit owner) | e5b40951 | dirty |
+| ic-persistence | fbe1208 | dirty; inspected local Memory/Storage adoption |
+| ic-auth | 5d7da69 | dirty |
+| ic-query | d5ea7b77 | clean |
+| ic-timers | 6c3aa21 | dirty |
+| canic | c63bdca65 | dirty |
+| icydb | 2a3e1efa5 | dirty |
+| ic-backup | 35f2d03 | clean |
+| ic-blob-storage | 0050490 | clean |
+| ic-relay | d7c1915 | clean |
+
+Also inspected Jobs `7d1f808` (Principal in canister tests), Metrics `b6bd4e3`
+and Wire `83f90a4` (no Platform imports found in their searched crate sources).
+The older Host checkout `80cc30a` is dirty and still declares Platform 0.5;
+it is not evidence that current Tooling requires that old selection. Toko was
+excluded as previously requested. No sibling was built, edited or qualified here.
+
+Repeat consumer review with `rg -n 'ic-platform|ic_platform::'` over the chosen
+root/member Cargo.toml and Rust source files, recording HEAD and dirty state.
+Review aliases, forwarded feature selections and test-only tables before calling
+an API unused. Repository CI checks only local facts; periodic sibling re-audits
+remain necessary and should update this dated evidence rather than imply live
+fleet monitoring. GitHub remains the only follow-up issue tracker.
+
+## Checked manifest facts
+
+Run `bash scripts/ci/check-platform-inventory.sh --print` after reviewing a
+manifest change and replace only the marked block. Check mode is read-only and
+uses offline, locked, no-dependency Cargo metadata. It covers both workspace
+packages, every feature edge and every direct dependency's requirement, kind,
+target, optional/default status and selected features. It also checks that the
+README feature table lists every non-default feature exactly once. Local package release
+versions are deliberately represented as `workspace-owned` to avoid release-only
+document churn. This is not a transitive dependency, source-integrity or Wasm-size
+report; retain the existing graph, pin and imported-source gates.
+
+<!-- BEGIN MANIFEST INVENTORY -->
+| Package | Feature | Enables |
+| --- | --- | --- |
+| ic-platform | agent | dep:ic-agent, principal |
+| ic-platform | bls | dep:ic-verify-bls-signature |
+| ic-platform | candid | candid/bignum, dep:candid, principal |
+| ic-platform | candid-parser | dep:candid_parser, principal |
+| ic-platform | candid-service | candid, candid/printer |
+| ic-platform | canister-sig-creation | dep:ic-certification, dep:sha2, principal |
+| ic-platform | cdk | dep:ic-platform-macros, runtime |
+| ic-platform | certification | dep:ic-certification |
+| ic-platform | default |  |
+| ic-platform | ecdsa | dep:k256 |
+| ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
+| ic-platform | executor | dep:ic-cdk-executor |
+| ic-platform | ic0 | dep:ic0 |
+| ic-platform | icrc-ledger-types | dep:icrc-ledger-types, principal |
+| ic-platform | management-canister-types | dep:ic-management-canister-types, principal |
+| ic-platform | pocket-ic | dep:pocket-ic, principal |
+| ic-platform | principal | dep:crc32fast, dep:data-encoding, dep:ic_principal, dep:serde |
+| ic-platform | runtime | dep:pin-project-lite, dep:thiserror, executor, ic0, principal |
+| ic-platform | secp256k1 | dep:ic-secp256k1, principal |
+| ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor |
+| ic-platform | stable-structures | dep:ic-stable-structures |
+
+| Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ic-platform | assert_matches | ^1.5 | dev | all | false | true |  |
+| ic-platform | candid | ^0.10.38 | normal | all | true | false |  |
+| ic-platform | candid_parser | ^0.4.1 | normal | cfg(not(target_family = "wasm")) | true | false |  |
+| ic-platform | crc32fast | ^1.5 | normal | all | true | true |  |
+| ic-platform | curve25519-dalek | ^4.1.3 | normal | all | true | false |  |
+| ic-platform | data-encoding | ^2.11 | normal | all | true | true |  |
+| ic-platform | ed25519-dalek | ^2.2 | normal | all | true | false |  |
+| ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
+| ic-platform | ic-cdk-executor | =2.0.0 | normal | all | true | true |  |
+| ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
+| ic-platform | ic-management-canister-types | =0.11.0 | normal | all | true | true |  |
+| ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
+| ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |
+| ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
+| ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |
+| ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
+| ic-platform | ic0 | =1.2.0 | normal | all | true | true |  |
+| ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert, self_authenticating, serde |
+| ic-platform | icrc-ledger-types | ^0.2.0 | normal | all | true | false |  |
+| ic-platform | k256 | ^0.13.4 | normal | all | true | false | ecdsa |
+| ic-platform | pin-project-lite | ^0.2.17 | normal | all | true | true |  |
+| ic-platform | pocket-ic | ^16.1.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
+| ic-platform | serde | ^1.0 | normal | all | true | false | alloc, derive |
+| ic-platform | serde_bytes | ^0.11 | normal | all | true | true |  |
+| ic-platform | serde_bytes | ^0.11 | dev | all | false | true |  |
+| ic-platform | serde_cbor | ^0.11.2 | normal | all | true | true |  |
+| ic-platform | serde_cbor | ^0.11.2 | dev | all | false | true |  |
+| ic-platform | serde_test | ^1.0.177 | dev | all | false | true |  |
+| ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
+| ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
+| ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
+| ic-platform-macros | quote | ^1 | normal | all | false | true |  |
+| ic-platform-macros | syn | ^2 | normal | all | false | true | full |
+<!-- END MANIFEST INVENTORY -->

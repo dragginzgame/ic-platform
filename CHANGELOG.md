@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.7]
+
+- Record an individual export usage audit, separating observed sibling use,
+  generated-code/type contracts and unproven consumer demand without removing APIs.
+- Document IC dependency/API ownership and dated sibling usage; enforce feature
+  and direct-dependency inventory consistency in CI without scanning siblings.
+- Correct README default-feature and stable-structures coverage.
+
 ## [0.6.6] - 2026-10-21
 
 - Adopt Shared Tooling 0.26.4, including numbered `Unreleased` heading support,

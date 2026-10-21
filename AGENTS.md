@@ -7,6 +7,8 @@ Read [the current handoff](docs/status/current.md), then
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
+  Keep [the IC inventory](docs/ic-inventory.md) aligned with dependency, feature,
+  export and ownership changes; `make check-inventory` checks manifest facts.
 - Keep one consumer library under `crates/ic-platform`. Add no blanket upstream
   re-exports, automatic resource limits or alternative executor implementation.
   Explicit upstream-coupled exports belong to the documented contract.

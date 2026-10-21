@@ -38,6 +38,7 @@ publish-check: host-tools-check
 check:
 	cargo check -p ic-platform -p ic-platform-macros --all-targets --all-features --locked
 test:
+	bash scripts/ci/test-platform-inventory.sh
 	cargo test -p ic-platform -p ic-platform-macros --all-features --locked
 clippy:
 	cargo clippy -p ic-platform -p ic-platform-macros --all-targets --all-features --locked -- -D warnings
@@ -68,14 +69,17 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
+.PHONY: check-inventory
+check-inventory:
+	bash scripts/ci/check-platform-inventory.sh
 check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance
 check-release-commands:
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 	bash scripts/ci/test-release-changelog.sh
 ci:
-	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary fmt-check clippy check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
+	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check clippy check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
 
 version release-version:
 	@bash scripts/release/adapter.sh version
