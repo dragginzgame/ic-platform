@@ -1,6 +1,21 @@
 # Current handoff
 
-## Pending 0.6.5
+## Pending 0.6.6
+
+Adopted Shared Tooling 0.26.4 at
+`dc1ced7e240e90f0c6daa89fb6248fcb074164eb` through its canonical exporter.
+No library API, dependency selection, lockfile or package version changed.
+The release gate runs Clippy before runtime fixtures; publication runs it before
+packaging. Shared IC executables remain optional and require explicit selection.
+
+Full Clippy, explicit tool setup/offline admission, snapshot integrity, formatting,
+dependency boundaries/pins, documentation links and release-adapter/changelog
+regressions pass on Linux. A substituted failing Clippy command stops publication
+with its original status before packaging. Evidence: `/tmp/platform-tooling-*.log`
+and `/tmp/platform-publish-lint.TnDMER`. Native macOS and complete release/runtime
+qualification were not rerun. No release, publication or sibling edits occurred.
+
+## Released 0.6.5
 
 Compatible addition for [#45](https://github.com/dragginzgame/ic-platform/issues/45):
 `stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory}`
@@ -23,8 +38,8 @@ exclude the substrate by default; the selected graph contains only Platform,
 stable-structures 0.7.2 and upstream Principal. Declaration/pin, formatting,
 documentation-link and diff checks pass. Native macOS,
 installed-canister qualification and published Persistence adoption are separate
-acceptance steps; no new supplying release is claimed. The implementation stays
-local for maintainer integration. Package versions remain 0.6.4.
+acceptance steps. The maintainer integrated the implementation in release 0.6.5
+at `14a670c`; registry publication and downstream adoption were not checked here.
 
 ## Released 0.6.4 and earlier qualification
 
@@ -667,9 +682,9 @@ No measured Wasm-size reduction is claimed.
 
 ## Contributor tooling and adoption
 
-Shared Tooling remains the reviewed **0.25.1** snapshot at
-`d57c631206e3618755e45bebf2c88c673564ddc1`; no snapshot payload changes here.
-Use numbered undated pending changelog headings. The pinned IC Build 0.18.0
+Shared Tooling is the reviewed **0.26.4** snapshot at
+`dc1ced7e240e90f0c6daa89fb6248fcb074164eb`.
+Numbered pending headings also accept `- Unreleased`. The pinned IC Build 0.18.0
 release editor and two dependency-role catalog sections remain in place.
 
 Frozen CI consumers need one unfiltered `cargo fetch --locked` during explicit

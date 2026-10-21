@@ -63,6 +63,7 @@ tools extend the aggregate through existing consumer-owned targets:
 
 ```make
 # Select only when this repository uses IC executables.
+IC_TOOLS := ic-wasm wasm-opt
 LOCAL_TOOL_INSTALL_TARGETS += install-ic-tools
 LOCAL_TOOL_CHECK_TARGETS += ic-tools-check
 include make/consumer.mk
@@ -157,6 +158,12 @@ and supplies its path and allowance to the suite. CI uses these same setup and
 test targets. The cache key includes the owning Makefile, so a changed selection
 cannot keep reusing a cache key for an older tool set. Cache presence never
 replaces installed-byte admission.
+
+Direct suite and prerequisite-helper calls must also supply
+`CARGO_RELEASE_METADATA_EDITOR` (an absolute executable file) and
+`CARGO_RELEASE_METADATA_MAX_BYTES` (a positive decimal integer). The prerequisite
+helper checks those inputs before fixture allocation without executing the
+editor. Prefer `make test-portable`, which supplies the offline-admitted values.
 
 This editor is a Shared-local requirement, not an addition to every consumer's
 common Cargo tools. Consumer release adapters retain the explicit selections in
@@ -438,8 +445,16 @@ For a tool selected by a consumer lockfile, replace `--version` with `--lockfile
 
 ```bash
 bash scripts/dev/install-rust-tools.sh --consumer "$PWD" \
-  --package ic-testkit --lockfile Cargo.lock --bin ic-testkit-server --profile release
+  --package ic-testkit --lockfile Cargo.lock --bin ic-testkit-server \
+  --profile release --features cli
+bash scripts/dev/install-rust-tools.sh --consumer "$PWD" \
+  --package ic-testkit --lockfile Cargo.lock --bin ic-testkit-server \
+  --profile release --features cli --check
 ```
+
+Testkit 0.63 requires `cli` for the server binary. Setup and offline admission
+must request the same feature set, which is part of the tool's identity.
+Library-only Testkit dependencies should omit `cli`.
 
 Relative lockfile paths resolve beneath `--consumer`; absolute paths select an
 explicit independent graph. The prepared host yq/jq tools read TOML without Cargo
@@ -453,6 +468,26 @@ Selection is read again before candidate activation and before returning a path;
 a changed selection fails and retains any build attempt. Retry against the new
 lock selection; prior installations remain intact. Consumers still own the
 selected graph, package, target/profile and Testkit's separate server setup/check.
+
+For a target gated by Cargo features, pass `--features NAME[,NAME]...` on both
+setup and check. For example, Host's file CLI requires its `cli` feature:
+
+```bash
+bash scripts/dev/install-rust-tools.sh --consumer "$PWD" \
+  --package ic-host-fs --lockfile Cargo.lock --bin ic-host-file --profile debug \
+  --features cli
+# Repeat the same arguments with --check for offline admission.
+```
+
+Feature lists use comma-separated ASCII names, optionally `dependency/feature`;
+repeat `--features` to combine lists. Ordering and duplicates normalize to one
+requested set. Empty lists, whitespace and malformed names refuse before setup.
+Cargo validates whether the published package supports the requested features;
+its refusal retains the attempt without activating it. Package defaults stay
+enabled; this interface does not accept `--all-features` or `--no-default-features`.
+Feature sets select separate immutable installations and must match the Cargo
+receipt. Featureless requests keep their existing input shape. Ambient Cargo
+flags cannot supply features, and checks never repair a mismatching selection.
 
 Consumer extensions such as cargo-audit and cargo-machete use this same owner.
 Keep their exact pins in the consumer and register their existing setup/check
@@ -525,8 +560,13 @@ selected host and Cargo identity, but never build or download. Digests detect lo
 are not publisher signatures. The consumer still owns compiler compatibility.
 
 Missing or invalid selected-installation diagnostics identify the package, exact
-version, target kind/name, profile and destination. The caller supplies its own
-setup command; successful selection still prints only the executable path.
+version, target kind/name, profile and failing path. Source admission distinguishes
+missing archives from ambiguous cached sources; receipt and byte checks identify
+the rejected file. Refusals include a shell-quoted explicit installer command
+retaining the consumer's catalog or package/lockfile selection, target and profile.
+For feature-selected tools, the repair command also retains the requested set.
+An ambiguous cache still requires inspecting the named archives; rerunning setup
+does not choose between them. Successful selection prints only the executable path.
 Dependency updates that change the selected CLI must prepare and check it before
 preparation is complete. Authorized releases use the existing setup/check targets
 in [preflight](releases.md#selected-executable-tools-before-validation); fetching
@@ -622,6 +662,27 @@ manager updates; they are not claimed to be checksum-pinned shared binaries.
 Shared setup never invokes sudo or installs a package manager implicitly.
 The pinned local host set supplies ripgrep and cloc; neither is a bootstrap dependency.
 
+### Shared Tooling's own compiler
+
+Shared pins its development and Cargo-tool-build compiler in its own root
+`rust-toolchain.toml`. With Rustup and native build prerequisites available,
+prepare the host parser tools, then the selected compiler:
+
+```bash
+make install-host-tools
+export PATH="$PWD/.tools/host/bin:$PATH"
+bash scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
+```
+
+Then run `make install-tools` and `make tools-check`. CI prepares this same file
+before computing Cargo build-cache identity or qualifying registry builds. The
+separate Rust 1.88.0 runtime-scanner qualification remains independent. This pin
+is Shared's local policy; adopting a snapshot does not change consumer compilers.
+After changing the pin or the shared build-helper policy, rerun explicit setup;
+prior tool generations and evidence remain retained.
+
+### Portable suite prerequisites
+
 Every repository prepares its declared Rust/Cargo toolchain and native build
 prerequisites before the common tool setup. Rust development and Shared Tooling's
 portable fixtures also need rustfmt. After that bootstrap, use the common setup
@@ -634,10 +695,12 @@ export PATH="$PWD/.tools/host/bin:$PWD/.tools/rust/common/bin:$PATH"
 ```
 
 Before starting portable fixtures, `test-portable-tools.sh` checks the required
-commands on PATH (including cloc, shasum, jq, Mike Farah yq and ripgrep) and reuses
-the offline formatter prerequisite check. Run this admission independently with
-`bash scripts/ci/check-portable-prerequisites.sh`. It reports missing commands
-together and points back here; it never installs tools or replaces the individual
+commands on PATH (including cloc, shasum, jq, Mike Farah yq and ripgrep), the editor
+inputs described [above](#shared-toolings-integration-editor), and reuses
+the offline formatter prerequisite check. With those inputs supplied, run this
+admission independently with `bash scripts/ci/check-portable-prerequisites.sh`.
+It reports missing commands together and points back here; it never installs
+tools or replaces the individual
 fixtures' version, feature and behavior checks. Standard Unix utilities from the
 bootstrap environment are still required. This is Shared Tooling's own suite
 setup, not a new prerequisite gate for every consumer.
@@ -673,8 +736,9 @@ Version reporting defaults to host/Cargo selections. To include an explicitly
 selected IC bundle, pass both catalogs:
 
 ```bash
-bash scripts/ci/report-tool-versions.sh "$PWD" ci/tool-versions.env ci/ic-tools.tsv
+bash scripts/ci/report-tool-versions.sh "$PWD" ci/tool-versions.env ci/ic-tools.tsv 'ic-wasm wasm-opt'
 ```
 
-The IC install/check commands continue to verify all five executable selections
-and their reviewed native-host digests. Product ownership does not weaken admission.
+IC setup/check requires the product's explicit `IC_TOOLS` selection and verifies
+its reviewed native-host digests. The complete pin catalog is still validated;
+unselected tools need no installation. Product ownership does not weaken admission.

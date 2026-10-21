@@ -7,6 +7,7 @@ case "$1" in
     publish) options=(); bash scripts/ci/check-release-source.sh ;;
     *) echo 'usage: publish.sh check|publish' >&2; exit 2 ;;
 esac
+make --no-print-directory clippy
 version="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
 commit="$(git rev-parse --verify HEAD)"
 mkdir -p target/publication

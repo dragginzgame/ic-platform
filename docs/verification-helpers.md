@@ -114,7 +114,7 @@ shared Cargo generations. Both directories must
 already exist; diagnostics must be a regular directory. The neutral archiver
 continues to own path admission, namespace collision checks and tar creation.
 
-`select-tool-evidence.sh compact REPOSITORY DIAGNOSTICS HOST-VERSIONS IC-PINS`
+`select-tool-evidence.sh compact REPOSITORY DIAGNOSTICS HOST-VERSIONS IC-PINS IC-TOOLS`
 opts into smaller successful-installation evidence. For each managed relative
 active link independently, it runs the existing installer in offline `--check`
 mode against a retained copy of the caller's pins. Host checking includes jq,
@@ -124,8 +124,11 @@ A changed selection, bundle directory identity or caller pin file refuses
 compaction. This is a fresh observation, not authority derived from an earlier
 successful installation; stop concurrent toolset mutation during collection.
 
+`IC-TOOLS` is one quoted, space-separated list of requested executable names.
+An empty list retains full IC bundles; it never infers the caller's intent from
+an installed receipt. A mismatched selection also retains full evidence.
 Successful checks retain caller pin bytes, command output and the exact selected
-bundle path. IC checks also retain `pins.tsv`, `host` and `files.sha256`; host
+bundle path. IC checks also retain `caller-tools`, `tools`, `pins.tsv`, `host` and `files.sha256`; host
 sets have no equivalent bundle receipt, so caller configuration and check evidence
 remain explicit. Tiny tool fixtures can grow because diagnostic metadata exceeds
 the omitted payload. Archive size and collection time depend on the actual sets.
@@ -139,14 +142,17 @@ it never installs or downloads tools. Invalid selections refuse before dispatch.
 
 The common failure action defaults to full retention. Set
 upstream store configuration consistently with setup. If store admission fails,
-the selector still emits safe local references and bundles without following
-their targets, and returns nonzero. The action archives those selections plus
-local logs/builds and the selection diagnostic/status, sets
+the selector returns nonzero; its partial output is diagnostic data, not authority
+to select physical payloads. The action uses `collect-tool-evidence.sh` to retain
+local references without following them, local logs/builds and the selection
+diagnostic/status, sets
 `collection-complete=false`, uploads that partial evidence, then fails its final
 completeness step. A rejected store never authorizes traversal or repair, and
 partial evidence is not reported as complete retention. Set
 `compact-successful-tools: 'true'` to opt in; `host-versions` and `ic-pins` select
 absolute caller pin files, defaulting to the repository's common configuration.
+Set `ic-tools` to the same space-separated selection as setup/check when
+compacting IC bundles. Omitting it retains their full payloads.
 Its native CI control uploads/downloads successful-set diagnostics alongside a
 failed candidate, separately from the existing full-failure control. Native
 acceptance requires matching executed jobs; a configured control is not evidence
@@ -154,8 +160,10 @@ of a successful hosted transport. The selector owns the full physical
 `.tools/rust` tree plus its admitted shared generations and original build/log
 evidence, independently of host/IC compaction. Custom callers must not also add
 the same local tree to the archive. Links are archived without following targets.
-Consumers adopt the selector only from a
-reviewed committed snapshot, rather than recreating its classifier locally.
+Consumers adopt the selector only from a reviewed committed snapshot, rather
+than recreating its classifier locally. For collection, prefer the existing
+[orchestrator](#tool-evidence-collection-orchestration) over a local selector/read/
+archive loop; keep product log selection and upload policy in the consumer.
 
 ## Runner disk capacity
 
@@ -577,8 +585,9 @@ regular file). Relative paths resolve from the caller's working directory.
 The verifier owns backend selection: native `sha256sum`/`sha512sum` when available,
 otherwise Perl's `shasum`. It hashes the file through stdin, so spaces, leading
 dashes, backslashes and newlines in filenames do not become options or escaped
-checksum records. File-read errors, backend failures and malformed output fail
-without emitting a digest; a failing backend is never retried through another.
+checksum records. Embedded NUL bytes are rejected before shell capture can discard
+them. File-read errors, backend failures and malformed output fail without emitting
+a digest; a failing backend is never retried through another.
 No network access or build is involved.
 
 Shared Tooling uses this same owner for IC installer receipts and snapshot
@@ -861,9 +870,11 @@ Only trusted, reviewed fixture sources and caller-owned injection are inputs.
 
 ## Tool evidence collection orchestration
 
-`collect-tool-evidence.sh ARCHIVE REPOSITORY DIAGNOSTICS full|compact HOST IC
+`collect-tool-evidence.sh ARCHIVE REPOSITORY DIAGNOSTICS full|compact HOST IC [IC-TOOLS for compact]
 [ROOT PATH]...` composes the selector and neutral archiver. Callers keep their
 log roots, run identity, qualified catalogs, upload and retention policy.
+Full retention takes no tool-list argument; compact mode requires it even when
+empty so a log-root argument cannot accidentally become the requested tool set.
 Status 0 means complete, 1 means safe partial evidence was archived, and 2 means
 collection/archive failed. A fresh `selection-status` receipt retains the exact
 selector status, `archive-status` records an attempted archive failure, and
@@ -872,6 +883,15 @@ is never used to admit physical payloads. Instead, local Rust evidence and
 host/IC references are retained without following redirected roots or links.
 Diagnostics remain in the partial archive; completeness is not inferred from
 successful archiving. Stdout contains the created archive path only.
+
+Callers still admit their own selected paths. If a parent such as `target` or
+`.tools` is a symlink, select the parent link itself instead of its children,
+retain a diagnostic and report incomplete collection. This keeps independent
+logs eligible for archiving without traversing the redirected parent. The
+orchestrator does not repair an invalid caller selection or infer product paths.
+Keep consumer tests for these selections, original failures, completeness and
+upload/download bindings; Shared owns the generic selector/archiver regression
+matrix.
 
 ## Formatter evidence selection
 
@@ -994,6 +1014,10 @@ filename. Verify the explicitly selected archive through the checksum owner:
 ```bash
 bash scripts/ci/verify-file-checksum.sh sha256 "$(cat "$archive.sha256")" "$archive"
 ```
+
+Both `OUTPUT` and `OUTPUT.sha256` must be new paths. Existing checksum entries,
+including symlinks, are refused before archiving. Checksum publication uses
+noclobber so a file or symlink introduced during archiving cannot be overwritten.
 
 This replaces the filename-bearing sidecar contract; update `shasum -c` callers.
 Names cannot traverse directories; the scratch tree is never implicitly selected.

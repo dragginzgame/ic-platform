@@ -75,7 +75,7 @@ check-release-commands:
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 	bash scripts/ci/test-release-changelog.sh
 ci:
-	+bash scripts/ci/run-validation-targets.sh --fail-fast check-runtime-lock shared-tooling-check check-doc-links check-pins check-boundary fmt-check clippy check-release-commands check test docs-check check-consumer check-features wasm-check msrv
+	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary fmt-check clippy check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
 
 version release-version:
 	@bash scripts/release/adapter.sh version

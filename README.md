@@ -93,7 +93,11 @@ Tool setup includes the pinned IC Build 0.18.0 release editor, which requires
 Rust 1.91 or later to build. `make install-release-editor` prepares it separately;
 `make release-editor-check` admits it offline. Standard release commands prepare
 tools during admitted preflight; standalone metadata checks never install them.
-Pending changelog notes use `## [X.Y.Z]` without a date or `Unreleased` suffix.
+Pending changelog notes use `## [X.Y.Z]`; `## [X.Y.Z] - Unreleased` is also
+accepted and dated during release preparation.
+Platform does not require shared IC executables for normal setup. Optional
+`make install-ic-tools` and `make ic-tools-check` calls must explicitly select
+the required tools with `IC_TOOLS`, for example `IC_TOOLS=ic-wasm`.
 
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
@@ -168,7 +172,7 @@ The root catalog has `Production dependencies` and `Tests and tooling only`
 sections. Fixture-only selections stay in the second section and outside the
 consumer library's production graph.
 `fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
-sections with grouped ordering. The reviewed Shared 0.25.1 snapshot supports
+sections with grouped ordering. The reviewed Shared 0.26.4 snapshot supports
 this through the paired local formatting commands.
 Keep a blank line after each section heading so sorting preserves its position.
 The common Rust tool set now contains only cargo-sort and cargo-sort-derives;

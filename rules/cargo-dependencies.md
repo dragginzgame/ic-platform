@@ -77,9 +77,10 @@ through renamed dependencies, generated code or proc-macro expansions.
 
 Apply the baseline's [IC application encoding policy](../DRAGGINZGAME.md#ic-application-encoding)
 before adding or retaining a Candid dependency or requesting another Platform
-Candid facade. Prefer `ic-wire` for supported controlled application messages;
-`ic-platform` is the dependency boundary for Candid that is still required,
-not a reason to retain otherwise unnecessary Candid use.
+Candid facade. Owned application endpoints use `ic-wire`, including public
+endpoints with third-party callers. `ic-platform` supplies the explicit adapter
+for independently defined protocols that require Candid and existing checkpoint
+compatibility; dependency isolation does not make Candid an application-codec choice.
 
 ## Dependency roles and deployment checks
 
@@ -207,6 +208,11 @@ operations according to their purpose rather than applying one flag everywhere.
   report any unavailable evidence. Metadata checks establish graph consistency,
   not build, test or native-host qualification; a full gate is not required just
   to prepare a dependency change.
+- For focused post-update qualification, follow the
+  [dependency-adoption contract](../docs/cargo-graph-checks.md#focused-dependency-adoption-contract).
+  Keep manifest inventories, target/features, singleton policy, affected-package
+  lint and artifact verification consumer-owned. Reuse existing observations and
+  sequential fail-fast orchestration before adding shared machinery.
 - When that change selects a different executable CLI, run its existing explicit
   setup target and offline check before declaring preparation complete. Preserve
   independent consumer selections; a library update does not automatically

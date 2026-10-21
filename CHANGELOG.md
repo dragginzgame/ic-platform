@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.6]
+
+- Adopt Shared Tooling 0.26.4, including numbered `Unreleased` heading support,
+  release recovery safeguards and improved validation failure evidence.
+- Run Clippy before runtime fixture tests in the release gate and before
+  publication packaging; optional IC tool setup now requires explicit selection.
+
 ## [0.6.5] - 2026-10-21
 
 - Expose exact upstream `MemoryId`, `MemoryManager` and `VirtualMemory` identities

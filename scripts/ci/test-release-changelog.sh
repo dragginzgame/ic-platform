@@ -8,12 +8,14 @@ fixture="$(fixture_create "${TMPDIR:-/tmp}/release-changelog.XXXXXX")"
 fixture_complete=false
 trap 'fixture_finish "$?" "$fixture" "Changelog preflight fixture retained"' EXIT
 checker="$root/scripts/ci/check-release-changelog.sh"
-for scenario in pending empty previous undated whitespace; do
+for scenario in pending empty previous undated whitespace unreleased unreleased-whitespace; do
     printf '# Changelog\n\n' > "$fixture/notes"
     case "$scenario" in
         pending) printf '## [0.1.1]\n\n- Pending notes.\n\n' >> "$fixture/notes" ;;
         empty) printf '## [0.1.1]\n\n' >> "$fixture/notes" ;;
         whitespace) printf '## [0.1.1]  \t\n\n- Pending notes.  \t\n\n' >> "$fixture/notes" ;;
+        unreleased) printf '## [0.1.1] - Unreleased\n\n- Pending notes.\n\n' >> "$fixture/notes" ;;
+        unreleased-whitespace) printf '##\t[0.1.1]  -\tUnreleased \t\n\n- Pending notes.\n\n' >> "$fixture/notes" ;;
     esac
     printf '## [0.1.0]' >> "$fixture/notes"
     [[ "$scenario" == undated ]] || printf ' - 2026-08-01' >> "$fixture/notes"
