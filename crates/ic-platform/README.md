@@ -1,7 +1,7 @@
 # ic-platform
 
 Enable `stable-structures` for explicit upstream 0.7.2 collection, Memory,
-Storable/codec, iterator, restricted and vector-backed identities. Storage owns
+Storable/codec, iterator, restricted, vector-backed and memory-manager identities. Storage owns
 governed constructors; Memory owns allocation; Testkit owns instrumentation.
 This optional capability adds no Candid or executor and implements no storage.
 See the [substrate contract](../../docs/migration.md#stable-structures-substrate).

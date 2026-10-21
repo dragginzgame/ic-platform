@@ -78,7 +78,8 @@ does not itself remove upstream code or shrink a canister.
 ## Development
 
 The optional `stable-structures` boundary supplies original substrate identities
-for Storage/Testkit; see the [contract](docs/migration.md#stable-structures-substrate).
+for Storage/Testkit and manager identities for Memory infrastructure; see the
+[contract](docs/migration.md#stable-structures-substrate).
 
 Prepare common tools explicitly with `make install-tools`; `make tools-check`
 verifies them offline. Prepare locked dependency sources with

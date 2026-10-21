@@ -14,6 +14,7 @@ pub use ic_stable_structures::{
 pub mod btreemap;
 pub mod btreeset;
 pub mod log;
+pub mod memory_manager;
 pub mod storable;
 
 #[cfg(test)]

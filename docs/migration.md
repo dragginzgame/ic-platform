@@ -2,6 +2,18 @@
 
 ## Stable-structures substrate
 
+Pending 0.6.5 adds `memory_manager::{MemoryId, MemoryManager, VirtualMemory}`
+under the same optional feature, retaining exact upstream 0.7.2 identities for
+IC Persistence's Memory infrastructure. After the supplying release is qualified
+and published, require Platform 0.6.5 or later and replace direct manager imports
+with `ic_platform::stable_structures::memory_manager::{MemoryId, MemoryManager,
+VirtualMemory}`. Existing `Vec`/`Log` exports cover local StableVec/StableLog
+aliases; no additional alias exports are needed. Memory retains checked layout
+reopening, growth preflight, allocation authority and exclusive leases. The
+standalone vector-backed manager test qualifies upstream bytes and identity,
+not production governance or installed upgrades. No manager implementation or
+allocation policy moves into Platform.
+
 Platform 0.6.2 adds optional `stable-structures` exports from upstream `=0.7.2`.
 This completes [PR #32](https://github.com/dragginzgame/ic-platform/pull/32),
 including Storage's review feedback: `storable::{Blob, BoundedVecN,

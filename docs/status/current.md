@@ -1,63 +1,54 @@
 # Current handoff
 
-## Pending 0.6.3
+## Pending 0.6.5
 
-The next candidate is 0.6.3: a compatible contributor-tooling fix with no library,
-crypto, dependency, wire or persisted-data changes. Package versions remain
-0.6.2; commits, delivery and release remain maintainer-owned.
+Compatible addition for [#45](https://github.com/dragginzgame/ic-platform/issues/45):
+`stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory}`
+re-exports the exact upstream 0.7.2 identities under the existing opt-in feature.
+No new dependency, defaults, public removal, implementation, crypto or persisted
+format changes. Memory retains allocation authority, exclusive leases, checked
+layout reopening and growth preflight. Migration imports and supplying-version
+requirements are documented in the migration contract; no sibling is edited.
 
-The standalone consumer runner now invokes runtime graph admission with an
-explicit optional Candid argument, avoiding Bash 3.2's empty-array `nounset`
-failure. The regression runs the actual runner/checker with stubbed Cargo,
-covering CDK, runtime and external Candid admission and stopping before tests
-on rejected graphs. It reproduced the original failure under Bash 3.2 on Linux
-and passes after the fix on Bash 3.2 and the development shell. It is included
-in `make check-consumer` for native CI. This is shell compatibility evidence,
-not native macOS qualification.
+Identity checks cover all three exports. The Platform-only consumer exercises
+virtual region growth, separate byte ranges, reopening on original vector
+backing and retained bytes after further growth. This isolated fixture does not
+qualify production allocation governance or installed upgrade behavior.
 
-Full `make clippy` passed before longer checks. Current validation evidence is
-retained in `/tmp/platform043-clippy.log` and `/tmp/platform043-consumers.log`:
-CDK, runtime, external Candid, Candid and substrate consumers pass development
-Rust/MSRV 1.88 native tests and Wasm compilation, with runtime graph admission.
-Registry-only 0.6.2 external Candid, Candid and substrate consumers also pass
-both compiler/target selections (`/tmp/platform043-published.log`). Runtime graph
-regressions, formatting, documentation links and diff checks pass. Native macOS
-and installed-canister execution were not rerun for this shell-only change.
-The implementation and required native acceptance are tracked by
-[#43](https://github.com/dragginzgame/ic-platform/issues/43).
+Full Clippy passed before focused tests (`/tmp/platform045-clippy.log`). Consumer
+native tests and Wasm checks pass on development Rust, 1.88 and 1.91; original
+type-identity checks pass on 1.88. Evidence: `/tmp/platform045-consumer.log`,
+`/tmp/platform045-191.log`, `target/boundary-consumer.JmMSGs`. Native/Wasm graphs
+exclude the substrate by default; the selected graph contains only Platform,
+stable-structures 0.7.2 and upstream Principal. Declaration/pin, formatting,
+documentation-link and diff checks pass. Native macOS,
+installed-canister qualification and published Persistence adoption are separate
+acceptance steps; no new supplying release is claimed. The implementation stays
+local for maintainer integration. Package versions remain 0.6.4.
 
-## Released 0.6.2
+## Released 0.6.4 and earlier qualification
 
-The maintainer delivered 0.6.2 at `5ae524d0e81e86b23158566db978cd154f388ac1`.
-The Candid sequence/reserved helpers from PR #26, optional exact-identity
-stable-structures surface from PR #32 (including codec review feedback), and
-explicit external-Candid composition proof/documentation are integrated.
-Both proposal PRs are closed as already integrated; no second merge is needed.
-The release also includes short feature-graph cache keys, hygienic printing
-macro paths and Clippy-before-tests gate ordering.
+0.6.4 includes PR #44's declared-development-compiler selection. The earlier
+0.6.3 shell fix and regression are delivered: [native CI](https://github.com/dragginzgame/ic-platform/actions/runs/39580492029)
+passed Linux, Apple Silicon and Intel macOS, with a separate successful
+[installed-runtime run](https://github.com/dragginzgame/ic-platform/actions/runs/39580492011).
+Producer issues #43, #24, #30 and #36 are closed. These checks qualify their
+respective delivered behavior, not the new manager exports or downstream adoption.
 
-Earlier local qualification passed full Clippy, Rust 1.88 and development Rust
-standalone native/Wasm checks, Rust 1.91 substrate checks, 219 feature selections
-and 97 graph admission cases. Historical logs are `/tmp/platform062-*.log`;
-`target/` evidence may have been removed by subsequent maintainer cleanup.
-No local pass establishes ordinary downstream adoption.
+Released 0.6.2 contains bounded Candid sequences/strict reserved helpers from
+PR #26, exact-identity substrate exports from PR #32, and explicit external-Candid
+composition proof/migration guidance. It also includes short feature-graph cache
+keys, hygienic printing macro paths and Clippy-before-tests gate ordering. Its
+original macOS failure remains historical; the 0.6.3 pass supersedes it for
+current acceptance. Historical local evidence is `/tmp/platform062-*.log` and
+`/tmp/platform043-*.log`; target artifacts may have been removed by maintainer
+cleanup. Original proposal PRs are closed as integrated.
 
-The released source's [native CI](https://github.com/dragginzgame/ic-platform/actions/runs/39574151061)
-failed macOS consumer admission; Linux passed. Its separate
-[installed-runtime run](https://github.com/dragginzgame/ic-platform/actions/runs/39574151082)
-passed. The native failure does not demonstrate a runtime/codec defect, and the
-installed pass does not replace native qualification. Producer acceptance
-remains tracked in [#24](https://github.com/dragginzgame/ic-platform/issues/24),
-[#30](https://github.com/dragginzgame/ic-platform/issues/30) and
-[#36](https://github.com/dragginzgame/ic-platform/issues/36), pending the delivered
-shell fix and successful applicable native CI.
-
-Further hard cuts remain deferred until Canic is live. The compiler retirement
-contract is [#38](https://github.com/dragginzgame/ic-platform/issues/38), dependent
-on Canic #613 and Tooling #225; both consumer issues remain open. Agent copy
-optimization [#39](https://github.com/dragginzgame/ic-platform/issues/39) was closed
-as not planned at the maintainer's request: retain upstream Agent, with no fork
-or claimed fix. Historical benchmark evidence remains unchanged.
+Further hard cuts remain deferred until Canic is live. Compiler retirement
+[#38](https://github.com/dragginzgame/ic-platform/issues/38) depends on Canic #613
+and Tooling #225. Agent copy optimization #39 was closed as not planned: retain
+upstream Agent without a fork or claimed fix. Historical benchmark evidence is
+unchanged. GitHub remains the follow-up tracker.
 
 ## Released 0.6.1
 

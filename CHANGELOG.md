@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.5]
+
+- Expose exact upstream `MemoryId`, `MemoryManager` and `VirtualMemory` identities
+  under the existing optional `stable-structures` feature for IC Persistence.
+  Memory retains allocation, leases and checked reopening; no implementation,
+  dependency selection or persisted format changes
+  ([#45 — Expose exact stable-memory manager identities for IC Persistence](https://github.com/dragginzgame/ic-platform/issues/45)).
+
 ## [0.6.4] - 2026-10-21
 
 - Use the declared development compiler in CI and installed-runtime qualification; retain independent minimum-Rust gates and explicit Wasm target preparation.

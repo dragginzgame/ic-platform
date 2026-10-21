@@ -12,6 +12,18 @@ fn collections_and_traits_keep_original_identities() {
     use ic_stable_structures as original;
     identity!(Backing, original::DefaultMemoryImpl);
     identity!(boundary::VectorMemory, original::VectorMemory);
+    identity!(
+        boundary::memory_manager::MemoryId,
+        original::memory_manager::MemoryId
+    );
+    identity!(
+        boundary::memory_manager::MemoryManager<Backing>,
+        original::memory_manager::MemoryManager<Backing>
+    );
+    identity!(
+        boundary::memory_manager::VirtualMemory<Backing>,
+        original::memory_manager::VirtualMemory<Backing>
+    );
     identity!(boundary::BTreeMap<u64, u64, Backing>, original::BTreeMap<u64, u64, Backing>);
     identity!(boundary::BTreeSet<u64, Backing>, original::BTreeSet<u64, Backing>);
     identity!(boundary::Cell<u64, Backing>, original::Cell<u64, Backing>);

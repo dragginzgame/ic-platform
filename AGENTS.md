@@ -16,6 +16,8 @@ Read [the current handoff](docs/status/current.md), then
   stable passthroughs preserve upstream bytes and semantics; they do
   not transfer storage ownership. Wire, Testkit, Host, Canic and Query
   retain their product responsibilities; existing siblings remain read-only.
+  The authorized #45 manager exports retain upstream 0.7.2 identities solely for
+  Memory infrastructure; allocation, checked reopening and leases remain there.
 - Preserve dirty work and check for Cargo/rustc processes sharing target/ before
   editing or compiling. Use focused checks from README; full CI is release-owned.
 - Run full `make clippy` (all targets/features, warnings denied) before longer

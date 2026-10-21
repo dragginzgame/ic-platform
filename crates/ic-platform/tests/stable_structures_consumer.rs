@@ -74,3 +74,43 @@ pub fn collection_contract<M: Memory + Clone>(memory: [M; 8]) {
 fn collections_reopen_on_original_backing() {
     collection_contract(std::array::from_fn(|_| VectorMemory::default()));
 }
+
+/// Qualify upstream manager bytes using isolated backing, not production allocation.
+pub fn manager_contract() {
+    use stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+
+    let backing = VectorMemory::default();
+    {
+        let manager = MemoryManager::init(backing.clone());
+        let first: VirtualMemory<VectorMemory> = manager.get(MemoryId::new(0));
+        let second = manager.get(MemoryId::new(1));
+        assert_eq!(first.size(), 0);
+        assert_eq!(first.grow(2), 0);
+        assert_eq!(second.grow(1), 0);
+        first.write(65_534, &[1, 2, 3, 4]);
+        second.write(65_534, &[9, 8]);
+        let mut bytes = [0; 4];
+        first.read(65_534, &mut bytes);
+        assert_eq!(bytes, [1, 2, 3, 4]);
+    }
+    let reopened = MemoryManager::init(backing);
+    let first = reopened.get(MemoryId::new(0));
+    let second = reopened.get(MemoryId::new(1));
+    assert_eq!(first.size(), 2);
+    assert_eq!(second.size(), 1);
+    let mut bytes = [0; 4];
+    first.read(65_534, &mut bytes);
+    assert_eq!(bytes, [1, 2, 3, 4]);
+    let mut other = [0; 2];
+    second.read(65_534, &mut other);
+    assert_eq!(other, [9, 8]);
+    assert_eq!(first.grow(1), 2);
+    first.read(65_534, &mut bytes);
+    assert_eq!(bytes, [1, 2, 3, 4]);
+}
+
+#[cfg(not(target_family = "wasm"))]
+#[test]
+fn manager_reopens_original_virtual_memory() {
+    manager_contract();
+}
