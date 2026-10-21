@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.6]
+## [0.6.6] - 2026-10-21
 
 - Adopt Shared Tooling 0.26.4, including numbered `Unreleased` heading support,
   release recovery safeguards and improved validation failure evidence.
