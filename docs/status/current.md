@@ -1,100 +1,63 @@
 # Current handoff
 
-## Pending 0.6.2
+## Pending 0.6.3
 
-The additive [#30](https://github.com/dragginzgame/ic-platform/issues/30) /
-[PR #32](https://github.com/dragginzgame/ic-platform/pull/32) substrate proposal
-is prepared locally from reviewed head `55cf1e5`, preserving its explicit upstream
-0.7.2 exports and reopen/clone-shared-backing tests. Storage's four missing codec
-exports are included with original-identity and standalone path checks. The new
-optional feature owns no storage implementation, manager or allocation policy;
-no sibling was edited. Root lock changes add only the substrate and its edge.
-The imported runtime qualification lock remains unchanged.
+The next candidate is 0.6.3: a compatible contributor-tooling fix with no library,
+crypto, dependency, wire or persisted-data changes. Package versions remain
+0.6.2; commits, delivery and release remain maintainer-owned.
 
-Full Clippy passes before tests. Rust 1.88 library identity and standalone
-native/MSRV/Wasm checks pass, plus Rust 1.91 library/consumer tests and Wasm.
-All 219 routine selections pass on native/Wasm (199/127 unique queries), retaining
-default/executor isolation. The substrate contains upstream Principal but does
-not select Platform's owned Principal. The expanded all-feature closure exposed
-a filename-length failure; run-local short graph IDs now preserve closure sharing
-without long filenames, with full closure mappings retained alongside them.
-Long-key/malformed-map regressions and 97 graph admission cases pass. Runtime
-graph admission, formatting, docs, declaration boundaries and pins pass.
-Evidence: `/tmp/platform062-substrate-*.log`,
-`target/feature-graphs/attempt.qnrw78`, `target/boundary-consumer.Vm9TVp`.
-Native macOS, installed upgrades and ordinary published consumer adoption remain
-unqualified for this addition. No version bump, commit, push or publication.
+The standalone consumer runner now invokes runtime graph admission with an
+explicit optional Candid argument, avoiding Bash 3.2's empty-array `nounset`
+failure. The regression runs the actual runner/checker with stubbed Cargo,
+covering CDK, runtime and external Candid admission and stopping before tests
+on rejected graphs. It reproduced the original failure under Bash 3.2 on Linux
+and passes after the fix on Bash 3.2 and the development shell. It is included
+in `make check-consumer` for native CI. This is shell compatibility evidence,
+not native macOS qualification.
 
-The issue audit closed delivered #1, #16, #17, #18, #20, #21, #22 and #31 plus
-already-integrated PR #35 with source/publication/consumer evidence. The cancelled
-0.1.13 matrix was not relabelled successful; subsequent three-host main CI at
-`73dda4a` and installed runtime at `0df13fc` supply the recorded producer evidence.
-Remaining work stays in GitHub: #24/#26, #30/#32 and #36 await integration of
-prepared local changes; #38 is deferred until Canic's Wire migration and the end
-of the hard-cut freeze; #39 still needs an upstream/distributable Agent solution,
-without an unauthorized Agent fork.
+Full `make clippy` passed before longer checks. Current validation evidence is
+retained in `/tmp/platform043-clippy.log` and `/tmp/platform043-consumers.log`:
+CDK, runtime, external Candid, Candid and substrate consumers pass development
+Rust/MSRV 1.88 native tests and Wasm compilation, with runtime graph admission.
+Registry-only 0.6.2 external Candid, Candid and substrate consumers also pass
+both compiler/target selections (`/tmp/platform043-published.log`). Runtime graph
+regressions, formatting, documentation links and diff checks pass. Native macOS
+and installed-canister execution were not rerun for this shell-only change.
+The implementation and required native acceptance are tracked by
+[#43](https://github.com/dragginzgame/ic-platform/issues/43).
 
-The exported `cdk::println!` wrapper now qualifies `::std::format!` and
-`::std::println!` so consumer-local names cannot capture either native or Wasm
-expansions. The new runtime-only consumer regression reproduced E0433 before
-the fix and covers both existing invocation forms with shadowed names. Full
-Clippy passes before standalone native/MSRV tests and both Wasm checks; the
-final consumer log has no warnings. Test-only API/stable imports were moved into
-their test to avoid unused imports in the standalone library build. Evidence:
-`/tmp/platform062-print-*.log`, `target/boundary-consumer.z5fN7D`. Formatting,
-links, dependency boundaries and runtime source guards pass. No imported runtime
-body, cryptography, public signature or wire format changes. Native macOS and
-installed-canister execution were not rerun for this macro path qualification.
+## Released 0.6.2
 
-The new `external-candid` standalone profile composes explicit CDK codecs with
-external Candid service registration, checking fixed empty-request, nat64-reply
-and service bytes plus malformed/oversized refusal. Full Clippy passed before
-native/MSRV tests and linked Wasm builds on both compilers. Both local source and
-published registry 0.6.1 pass; graphs admit only the canonical executor/IC0 and
-exclude parser/Agent/PocketIC. Evidence: `/tmp/platform062-external-*.log`,
-`target/boundary-consumer.LfUYyU`. This proves existing supported composition;
-no runtime/API change, installed guard/trap execution or native macOS claim.
-The migration contract now explicitly distinguishes required external interfaces
-from Canic's owned Wire migration (#36); #36 stays open pending integration.
+The maintainer delivered 0.6.2 at `5ae524d0e81e86b23158566db978cd154f388ac1`.
+The Candid sequence/reserved helpers from PR #26, optional exact-identity
+stable-structures surface from PR #32 (including codec review feedback), and
+explicit external-Candid composition proof/documentation are integrated.
+Both proposal PRs are closed as already integrated; no second merge is needed.
+The release also includes short feature-graph cache keys, hygienic printing
+macro paths and Clippy-before-tests gate ordering.
 
-Issue #37 was closed as no longer planned after verifying Blob default branch
-`8430be0` retired its extraction-only feature/legacy alias and documents native
-service export. No missing Wasm pointer helper was implemented or newly removed.
+Earlier local qualification passed full Clippy, Rust 1.88 and development Rust
+standalone native/Wasm checks, Rust 1.91 substrate checks, 219 feature selections
+and 97 graph admission cases. Historical logs are `/tmp/platform062-*.log`;
+`target/` evidence may have been removed by subsequent maintainer cleanup.
+No local pass establishes ordinary downstream adoption.
 
-Start from released 0.6.1 (`0df13fc`). The maintainer has deferred further hard
-cuts until Canic is live: retain public APIs, features and supported consumer
-paths. Parser/compiler retirement remains deferred under #38 below.
+The released source's [native CI](https://github.com/dragginzgame/ic-platform/actions/runs/39574151061)
+failed macOS consumer admission; Linux passed. Its separate
+[installed-runtime run](https://github.com/dragginzgame/ic-platform/actions/runs/39574151082)
+passed. The native failure does not demonstrate a runtime/codec defect, and the
+installed pass does not replace native qualification. Producer acceptance
+remains tracked in [#24](https://github.com/dragginzgame/ic-platform/issues/24),
+[#30](https://github.com/dragginzgame/ic-platform/issues/30) and
+[#36](https://github.com/dragginzgame/ic-platform/issues/36), pending the delivered
+shell fix and successful applicable native CI.
 
-The release gate now runs full all-target/all-feature Clippy with warnings denied
-before test targets. This also applies to ordinary work before longer tests;
-the explicit maintainer instruction is recorded in AGENTS.md. Package versions
-remain 0.6.1; no runtime, cryptographic or wire-format changes.
-Full `make clippy` passes before the focused release-command/changelog tests;
-those tests and documentation-link/diff checks pass. Evidence:
-`/tmp/platform062-clippy.log`, `/tmp/platform062-validation.log`. Full release
-CI, native macOS and installed-canister tests were not rerun for this workflow
-change. No staging, commits or publication occurred.
-
-The additive implementation from [PR #26](https://github.com/dragginzgame/ic-platform/pull/26)
-at `c90004c` is now prepared locally: `candid::sequence::deserialize` and
-`candid::reserved::StrictReserved`, with all four original helper/test modules
-byte-identical and the standalone Platform-only regression retained. Callers
-keep bounds, diagnostics and quotas; strict payload refusal requires zero
-skipping quota. Migration/provenance is documented in the migration contract.
-Full all-target/all-feature Clippy passes before testing. All 12 Candid library
-tests pass on Rust 1.88; standalone native/MSRV/Wasm checks, documentation links
-and dependency-boundary checks pass. Evidence: `/tmp/platform062-helpers-*.log`.
-Native macOS, installed canisters and consumer adoption were not rerun for this
-addition. #24/#26 remain open pending integration; no commit or publication.
-
-Backlog review confirmed #33/#34 (locked-cache preparation), #27/#28 (PocketIC
-fixture identities), and #23/#25 (guarded graph caching) already delivered on
-main; they were closed with source comparisons and original/current three-host
-CI evidence. Main CI at `73dda4a` passes Linux, Intel macOS and Apple Silicon
-([run](https://github.com/dragginzgame/ic-platform/actions/runs/39560562647)).
-That evidence does not qualify the new local helpers or every downstream user.
-Current graph tests also pass eight changed-contract refusals and 92 admission
-cases, plus shared-key/missing-graph checks. No new performance gain is claimed.
+Further hard cuts remain deferred until Canic is live. The compiler retirement
+contract is [#38](https://github.com/dragginzgame/ic-platform/issues/38), dependent
+on Canic #613 and Tooling #225; both consumer issues remain open. Agent copy
+optimization [#39](https://github.com/dragginzgame/ic-platform/issues/39) was closed
+as not planned at the maintainer's request: retain upstream Agent, with no fork
+or claimed fix. Historical benchmark evidence remains unchanged.
 
 ## Released 0.6.1
 

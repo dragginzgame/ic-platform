@@ -51,6 +51,7 @@ msrv:
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)"
 check-consumer:
+	bash scripts/ci/test-platform-consumer-admission.sh
 	bash scripts/ci/check-platform-consumer.sh
 check-features:
 	bash scripts/ci/test-platform-feature-selections.sh

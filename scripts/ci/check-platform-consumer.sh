@@ -114,11 +114,14 @@ if [[ "$capability" == executor || "$capability" == ic0 ]]; then
     done
 fi
 if [[ "$capability" == cdk || "$capability" == runtime || "$capability" == external-candid ]]; then
-    admission=()
-    if [[ "$capability" == external-candid ]]; then admission=(--external-candid); fi
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
-        bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph" "${admission[@]}"
+        # Bash 3.2 treats an empty array as unset under nounset.
+        if [[ "$capability" == external-candid ]]; then
+            bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph" --external-candid
+        else
+            bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph"
+        fi
         if grep -Eq '^(darling|darling_core|darling_macro) ' "$fixture/$graph_target.graph"; then
             echo 'Runtime/entrypoint consumer acquired retired Darling scaffolding' >&2; exit 1
         fi

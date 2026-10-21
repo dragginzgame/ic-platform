@@ -2,7 +2,7 @@
 
 ## Stable-structures substrate
 
-Pending 0.6.2 adds optional `stable-structures` exports from upstream `=0.7.2`.
+Platform 0.6.2 adds optional `stable-structures` exports from upstream `=0.7.2`.
 This completes [PR #32](https://github.com/dragginzgame/ic-platform/pull/32),
 including Storage's review feedback: `storable::{Blob, BoundedVecN,
 UnboundedVecN, TryFromSliceError}` accompany `Bound` and `Storable`.
@@ -15,7 +15,7 @@ dependency control, not transitive removal or measured Wasm reduction.
 
 The exact version preserves the trait identity requested by Memory/Storage and
 Testkit. Changing it requires renewed interoperability and retained-byte checks.
-After publication require Platform 0.6.2 or later with this feature and replace
+Require Platform 0.6.2 or later with this feature and replace
 the direct declaration/private alias with
 `use ic_platform::stable_structures as substrate`. Keep governed constructors,
 record/region/recovery policy in Storage and allocation/runtime handles in
@@ -59,7 +59,7 @@ actual endpoint/service goldens and installed qualification. No Wasm
 `get_candid_pointer` helper is added; native service export remains separate from
 compiled Wasm endpoint inspection.
 
-## Pending 0.6.2 strict reply helpers
+## 0.6.2 strict reply helpers
 
 Under the existing `candid` feature, use
 `ic_platform::candid::sequence::deserialize::<D, T, LIMIT>` inside a caller-owned
@@ -78,7 +78,7 @@ Implementation and regression tests are preserved from Platform
 migrated from Testkit [PR #123](https://github.com/dragginzgame/ic-testkit/pull/123)
 at `97df333a0aa57a056eb3bfe443a7365c4314b361`, originally extracted from Backup
 0.30.0 (`3992e15`). Do not restore `ic-testkit-candid` or add a compatibility
-package. After publication, require at least Platform 0.6.2 with
+package. Require at least Platform 0.6.2 with
 `features = ["candid"]`, select the import paths above, and retain endpoint DTOs,
 ceilings and tests in the consumer. No generator or existing import changes are
 required. Publication and Backup adoption remain separately qualified; this

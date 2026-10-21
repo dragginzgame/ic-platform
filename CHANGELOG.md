@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.3]
+
+### Fixed
+
+- Make standalone consumer graph admission compatible with macOS Bash 3.2,
+  preserving CDK/runtime isolation, explicit external Candid selection and
+  failure propagation ([#43 — Make standalone consumer graph admission portable to native macOS Bash](https://github.com/dragginzgame/ic-platform/issues/43)).
+  No library API, dependency or wire-format changes.
+
 ## [0.6.2] - 2026-10-21
 
 ### Fixed
