@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.6.2]
+
+### Fixed
+
+- Use short feature-graph cache filenames with retained closure mappings, avoiding
+  filesystem filename limits as the supported feature inventory grows.
+- Qualify standard-library paths in `cdk::println!` so consumer-local `std` and
+  `format!` names cannot capture its native or Wasm expansion. Printing behavior
+  and both existing invocation forms are unchanged.
+
+### Added
+
+- Add optional `stable-structures` exports retaining upstream 0.7.2 collection,
+  Memory, backing, iterator and codec identities for Storage/Testkit. Complete
+  PR #32's codec-export feedback; no storage implementation or policy moves.
+- Add caller-bounded Candid sequence deserialization and strict reserved-marker
+  admission from PR #26. Callers retain element ceilings, diagnostics and decoder
+  quotas; strict payload refusal requires a zero skipping quota. No wire changes.
+
+### Improved
+
+- Qualify explicit external Candid entrypoints and service registration together
+  in a Platform-only consumer with fixed wire bytes, bounded empty-request
+  decoding, native/MSRV checks and linked Wasm builds. Document the migration.
+- Run full all-target/all-feature Clippy before test targets in the fail-fast
+  release gate, catching lint failures before longer validation work.
+
 ## [0.6.1] - 2026-10-21
 
 ### Fixed

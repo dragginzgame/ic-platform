@@ -242,3 +242,76 @@ fn borrowed_argument_encoding_keeps_original_external_bytes() {
     );
     assert_eq!(arguments.1, "external");
 }
+/// Caller-selected sequence and reserved admission through Platform alone.
+pub fn strict_admission() {
+    use ic_platform::candid::{DecodeError, reserved::StrictReserved, sequence};
+    fn bounded<'de, D: contract::serde::Deserializer<'de>>(d: D) -> Result<Vec<u8>, D::Error> {
+        sequence::deserialize::<D, u8, 2>(d, "bounded bytes", "too many bytes")
+    }
+    #[derive(contract::CandidType, contract::serde::Deserialize)]
+    #[candid_path("ic_platform::candid::contract")]
+    #[serde(crate = "ic_platform::candid::contract::serde")]
+    struct StrictReply {
+        #[serde(deserialize_with = "bounded")]
+        bytes: Vec<u8>,
+        marker: StrictReserved,
+    }
+    let limits = DecodeLimits {
+        reply_bytes: 1024,
+        decoding_quota: 10_000,
+        skipping_quota: 0,
+        type_entries: 8,
+        header_bytes: 256,
+    };
+    let encode = |bytes| {
+        contract::encode_one(StrictReply {
+            bytes,
+            marker: StrictReserved,
+        })
+        .unwrap()
+    };
+    let wire = encode(vec![1, 2]);
+    assert_eq!(
+        decode_exactly_one::<StrictReply>(&wire, limits)
+            .unwrap()
+            .bytes,
+        [1, 2]
+    );
+    assert!(matches!(
+        decode_exactly_one::<StrictReply>(&encode(vec![1, 2, 3]), limits),
+        Err(DecodeError::Candid(_))
+    ));
+    assert!(matches!(
+        decode_exactly_one::<StrictReply>(
+            &wire,
+            DecodeLimits {
+                reply_bytes: 0,
+                ..limits
+            }
+        ),
+        Err(DecodeError::ReplyTooLarge { .. })
+    ));
+    assert!(matches!(
+        decode_exactly_one::<StrictReply>(
+            &wire,
+            DecodeLimits {
+                decoding_quota: 0,
+                ..limits
+            }
+        ),
+        Err(DecodeError::Candid(_))
+    ));
+    assert_eq!(
+        contract::encode_one(StrictReserved).unwrap(),
+        contract::encode_one(contract::Reserved).unwrap()
+    );
+    assert!(matches!(
+        decode_exactly_one::<StrictReserved>(&contract::encode_one(7_u64).unwrap(), limits),
+        Err(DecodeError::Candid(_))
+    ));
+}
+
+#[test]
+fn strict_consumer_admission() {
+    strict_admission();
+}

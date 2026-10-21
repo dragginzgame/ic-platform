@@ -1,5 +1,11 @@
 # ic-platform
 
+Enable `stable-structures` for explicit upstream 0.7.2 collection, Memory,
+Storable/codec, iterator, restricted and vector-backed identities. Storage owns
+governed constructors; Memory owns allocation; Testkit owns instrumentation.
+This optional capability adds no Candid or executor and implements no storage.
+See the [substrate contract](../../docs/migration.md#stable-structures-substrate).
+
 For raw calls and system/task adapters, select `runtime` and keep the existing
 `ic_platform::cdk::{api, call, futures, stable}` imports. Select `cdk` when the
 package also owns generated entrypoints; it includes `runtime`. Both use the

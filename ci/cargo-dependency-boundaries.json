@@ -18,5 +18,6 @@
   {"dependency": "ic-cdk-executor", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-cdk-macros", "allowed_packages": []},
   {"dependency": "ic-platform-macros", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-cdk-timers", "allowed_packages": []}
+  {"dependency": "ic-cdk-timers", "allowed_packages": []},
+  {"dependency": "ic-stable-structures", "allowed_packages": ["ic-platform"]}
 ]

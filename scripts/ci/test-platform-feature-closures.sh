@@ -11,6 +11,16 @@ actual="$(printf '%s' '["none","default","cdk","ic0,executor,candid,cdk","nested
 expected="$(printf 'none\tnone\ndefault\tdefault\ncdk\tcdk,executor,ic0\nic0,executor,candid,cdk\tcandid,cdk,executor,ic0\nnested\tcandid,cdk,executor,ic0,nested\nnested,candid\tcandid,cdk,executor,ic0,nested\nagent\tagent\nagent,cdk\tagent,cdk,executor,ic0')"
 [[ "$actual" == "$expected" ]] || { printf 'Unexpected closures:\n%s\n' "$actual" >&2; exit 1; }
 echo 'Feature closure equivalence and isolation cases passed'
+long_key="$(printf '%0300d' 0)"
+actual="$(printf 'first\t%s\nsecond\t%s\nthird\tother\n' "$long_key" "$long_key" |
+    awk -f scripts/ci/platform-feature-cache-keys.awk)"
+[[ "$actual" == $'first\tgraph-1\nsecond\tgraph-1\nthird\tgraph-2' ]] || {
+    echo 'Short graph IDs lost closure identity' >&2; exit 1;
+}
+if printf 'invalid\n' | awk -f scripts/ci/platform-feature-cache-keys.awk >/dev/null 2>&1; then
+    echo 'Invalid closure mapping was admitted' >&2; exit 1;
+fi
+echo 'Long closure names retain distinct short cache IDs'
 # Native-only leaves may be removed from a Wasm key only after exact admission.
 native_metadata="$(printf '%s' "$metadata" | "$jq" '
   .[0].packages[0] |= (.features += {principal:[],agent:["principal","dep:ic-agent"],"candid-parser":["principal","dep:candid_parser"],secp256k1:["principal","dep:ic-secp256k1"],"pocket-ic":["principal","dep:pocket-ic"]} |

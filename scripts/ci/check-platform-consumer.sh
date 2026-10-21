@@ -12,7 +12,7 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(executor principal ecdsa ed25519 candid candid-service certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk runtime secp256k1 pocket-ic)
+capabilities=(executor principal ecdsa ed25519 candid candid-service external-candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk runtime secp256k1 pocket-ic stable-structures)
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in
@@ -25,6 +25,7 @@ fi
 for capability in "${capabilities[@]}"; do
 features="\"$capability\""
 if [[ "$capability" == executor ]]; then features='"executor", "ic0"'; fi
+if [[ "$capability" == external-candid ]]; then features='"cdk", "candid-service"'; fi
 if [[ "$capability" == agent ]]; then features='"agent", "certification"'; fi
 if [[ "$capability" == dynamic ]]; then features='"candid", "candid-parser"'; fi
 if [[ "$capability" == management ]]; then features='"management-canister-types", "candid"'; fi
@@ -56,6 +57,8 @@ if [[ "$capability" == principal ]]; then
     printf '\n[features]\ncandid = ["ic-platform/candid"]\n' >> "$fixture/crates/consumer/Cargo.toml"
 fi
 source="$capability"
+if [[ "$capability" == external-candid ]]; then source=external_candid; fi
+if [[ "$capability" == stable-structures ]]; then source=stable_structures; fi
 if [[ "$capability" == candid-parser ]]; then source=parser; fi
 if [[ "$capability" == candid-service ]]; then source=service; fi
 if [[ "$capability" == pocket-ic ]]; then source=pocket_ic; fi
@@ -82,7 +85,7 @@ fi
 if [[ "$capability" == signature-verification ]]; then
     cp crates/ic-platform/tests/fixtures/signature-*.hex "$fixture/crates/consumer/src/fixtures/"
 fi
-if [[ "$capability" == cdk ]]; then
+if [[ "$capability" == cdk || "$capability" == external-candid ]]; then
     printf '\n[lib]\ncrate-type = ["cdylib", "rlib"]\n' >> "$fixture/crates/consumer/Cargo.toml"
 fi
 cp Cargo.lock "$fixture/Cargo.lock"
@@ -110,10 +113,12 @@ if [[ "$capability" == executor || "$capability" == ic0 ]]; then
         fi
     done
 fi
-if [[ "$capability" == cdk || "$capability" == runtime ]]; then
+if [[ "$capability" == cdk || "$capability" == runtime || "$capability" == external-candid ]]; then
+    admission=()
+    if [[ "$capability" == external-candid ]]; then admission=(--external-candid); fi
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
-        bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph"
+        bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph" "${admission[@]}"
         if grep -Eq '^(darling|darling_core|darling_macro) ' "$fixture/$graph_target.graph"; then
             echo 'Runtime/entrypoint consumer acquired retired Darling scaffolding' >&2; exit 1
         fi
@@ -126,7 +131,7 @@ CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixt
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 test --manifest-path "$fixture/Cargo.toml" --frozen
 if [[ "$capability" != candid-parser && "$capability" != dynamic && "$capability" != agent ]]; then
     command=check
-    if [[ "$capability" == cdk ]]; then command=build; fi
+    if [[ "$capability" == cdk || "$capability" == external-candid ]]; then command=build; fi
     CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
     CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.88.0 "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
 fi

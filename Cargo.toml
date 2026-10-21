@@ -24,6 +24,7 @@ ic-certification = { version = "3.2.0", default-features = false, features = ["s
 ic-management-canister-types = "=0.11.0"
 ic-platform-macros = { version = "0.6.1", path = "crates/ic-platform-macros" }
 ic-secp256k1 = "=0.3.0"
+ic-stable-structures = { version = "=0.7.2", default-features = false }
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
 ic0 = "=1.2.0"
 ic_principal = { version = "0.1.5", default-features = false, features = ["convert", "self_authenticating", "serde"] }

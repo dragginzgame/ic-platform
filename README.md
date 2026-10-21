@@ -77,6 +77,9 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
+The optional `stable-structures` boundary supplies original substrate identities
+for Storage/Testkit; see the [contract](docs/migration.md#stable-structures-substrate).
+
 Prepare common tools explicitly with `make install-tools`; `make tools-check`
 verifies them offline. Prepare locked dependency sources with
 `cargo fetch --locked` before validation, including the Wasm target dependencies
@@ -94,6 +97,8 @@ Pending changelog notes use `## [X.Y.Z]` without a date or `Unreleased` suffix.
 Focused commands: `make check`, `make test`, `make clippy`, `make wasm-check`,
 `make msrv`, `make check-boundary`, `make check-doc-links`, and
 `make shared-tooling-check`. `make ci` is the full release gate.
+Run full `make clippy` before longer tests; its all-target/all-feature check denies
+warnings. The fail-fast release gate also runs Clippy before its test targets.
 `make check-upstream-scaffolding` applies the experimental packaging patches to
 disposable registry-source copies and checks source preservation and licenses.
 It performs no dependency adoption, publication or runtime qualification.
@@ -101,6 +106,9 @@ It performs no dependency adoption, publication or runtime qualification.
 dynamic, management/Candid, ledger/Candid, ic0-only, Agent/certification three signature/BLS consumers and a CDK canister
 with only Platform declared, on Rust 1.99 and 1.88. The CDK standalone
 consumer proves raw entrypoints/calls without Candid or full CDK dependencies.
+The `external-candid` profile separately qualifies required external Candid
+entrypoints, explicit service registration and fixed wire bytes without a direct
+Candid dependency; both compilers link its Wasm library.
 Candid and certification
 consumers also compile for Wasm on both compilers, as do the management, ledger
 and raw-system consumers all three signature/BLS selections and the CDK canister. `make msrv` runs native all-feature tests and checks

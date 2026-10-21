@@ -43,7 +43,8 @@ function reject(reason) {
     ledger = enabled("icrc-ledger-types")
     candid = pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger
     principal = enabled("principal") || cdk || enabled("runtime") || creation || enabled("candid") || enabled("candid-service") || management || ledger || enabled("agent") || enabled("candid-parser") || enabled("pocket-ic") || enabled("secp256k1")
-    minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification")
+    minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
+    found_storage = 0
     found_ed = 0
     found_curve = 0
     found_secp = 0
@@ -101,9 +102,13 @@ function reject(reason) {
         if (name == "ic-management-canister-types" && !(registry && ((management && version == "v0.11.0") || (pocket && version == "v0.8.0")))) reject("unselected management types")
         if (name == "icrc-ledger-types" && !ledger) reject("unselected ledger types")
         if (name == "ic-error-types" && !(agent || pocket)) reject("runtime error catalogue")
-        if (name == "ic-stable-structures") reject("storage integration")
+        if (name == "ic-stable-structures") {
+            if (!enabled("stable-structures") || version != "v0.7.2" || !registry) reject("unqualified storage substrate")
+            found_storage = 1
+        }
         if ((name == "candid" || name == "candid_derive") && !candid) reject("unexpected Candid")
     }
+    if (enabled("stable-structures") && !found_storage) reject("missing selected storage substrate")
     if (enabled("ed25519") && (!found_ed || !found_curve)) reject("missing selected Dalek")
     if (pocket && !found_pocket) reject("missing selected PocketIC")
     if (secp && !found_secp) reject("missing selected secp256k1")

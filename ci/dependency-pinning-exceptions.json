@@ -30,5 +30,13 @@
     "value": "=0.11.0",
     "reason": "Maintainer-selected external management DTO version; preserve qualified Candid formats and upstream type identities.",
     "evidence": "AGENTS.md#management-contract"
+  },
+  {
+    "rule": "cargo-exact",
+    "file": "Cargo.toml",
+    "subject": "ic-stable-structures",
+    "value": "=0.7.2",
+    "reason": "Preserve the Memory/Storable and persisted collection identities shared with IC Memory, IC Storage and Testkit instrumentation.",
+    "evidence": "docs/migration.md#stable-structures-substrate"
   }
 ]

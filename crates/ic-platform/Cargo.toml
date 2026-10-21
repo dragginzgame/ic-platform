@@ -36,6 +36,7 @@ signature-verification = [
 ]
 pocket-ic = ["principal", "dep:pocket-ic"]
 secp256k1 = ["principal", "dep:ic-secp256k1"]
+stable-structures = ["dep:ic-stable-structures"]
 
 [dependencies]
 candid = { workspace = true, optional = true }
@@ -47,6 +48,7 @@ ic-cdk-executor = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
+ic-stable-structures = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 ic0 = { workspace = true, optional = true }
 ic_principal = { workspace = true, optional = true }
@@ -153,6 +155,11 @@ path = "tests/icrc_consumer.rs"
 required-features = ["icrc-ledger-types", "candid"]
 
 [[test]]
+name = "external_candid_consumer"
+path = "tests/external_candid_consumer.rs"
+required-features = ["cdk", "candid-service"]
+
+[[test]]
 name = "management_consumer"
 path = "tests/management_consumer.rs"
 required-features = ["management-canister-types", "candid"]
@@ -181,6 +188,11 @@ required-features = ["principal"]
 name = "parser_properties"
 path = "tests/parser_properties.rs"
 required-features = ["principal"]
+
+[[test]]
+name = "stable_structures_consumer"
+path = "tests/stable_structures_consumer.rs"
+required-features = ["stable-structures"]
 
 [lints]
 workspace = true

@@ -58,6 +58,7 @@ pub mod ed25519;
 pub mod executor;
 #[cfg(feature = "ic0")]
 pub mod ic0;
+
 #[cfg(feature = "icrc-ledger-types")]
 pub mod icrc_ledger_types;
 #[cfg(feature = "management-canister-types")]
@@ -66,6 +67,8 @@ pub mod management_canister_types;
 pub mod secp256k1;
 #[cfg(feature = "signature-verification")]
 pub mod signature_verification;
+#[cfg(feature = "stable-structures")]
+pub mod stable_structures;
 
 #[cfg(all(feature = "pocket-ic", not(target_family = "wasm")))]
 pub mod pocket_ic;

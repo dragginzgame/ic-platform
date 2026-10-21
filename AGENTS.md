@@ -18,6 +18,10 @@ Read [the current handoff](docs/status/current.md), then
   retain their product responsibilities; existing siblings remain read-only.
 - Preserve dirty work and check for Cargo/rustc processes sharing target/ before
   editing or compiling. Use focused checks from README; full CI is release-owned.
+- Run full `make clippy` (all targets/features, warnings denied) before longer
+  tests, as requested by the maintainer. Fix failures before proceeding.
+- Keep 0.6.2 backward-compatible. The maintainer has deferred further hard cuts
+  until Canic is live; do not remove APIs, features or supported consumer paths.
 - Rust 2024 and MSRV 1.88.0. Inherit workspace metadata and dependencies; ordinary
   directory modules only. Do not add Python tooling.
 - Ordinary implementation leaves staging, commits, release versions, publication

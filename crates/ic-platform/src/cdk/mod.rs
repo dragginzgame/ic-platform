@@ -77,14 +77,14 @@ pub mod futures {
 macro_rules! __platform_println {
     ($fmt:expr) => {{
         #[cfg(target_family = "wasm")]
-        $crate::cdk::api::debug_print(format!($fmt));
+        $crate::cdk::api::debug_print(::std::format!($fmt));
         #[cfg(not(target_family = "wasm"))]
-        std::println!($fmt);
+        ::std::println!($fmt);
     }};
     ($fmt:expr, $($arg:tt)*) => {{
         #[cfg(target_family = "wasm")]
-        $crate::cdk::api::debug_print(format!($fmt, $($arg)*));
+        $crate::cdk::api::debug_print(::std::format!($fmt, $($arg)*));
         #[cfg(not(target_family = "wasm"))]
-        std::println!($fmt, $($arg)*);
+        ::std::println!($fmt, $($arg)*);
     }};
 }

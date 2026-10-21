@@ -1,5 +1,89 @@
 # Candid and runtime ownership
 
+## Stable-structures substrate
+
+Pending 0.6.2 adds optional `stable-structures` exports from upstream `=0.7.2`.
+This completes [PR #32](https://github.com/dragginzgame/ic-platform/pull/32),
+including Storage's review feedback: `storable::{Blob, BoundedVecN,
+UnboundedVecN, TryFromSliceError}` accompany `Bound` and `Storable`.
+Collection, Memory, iterator, log-error and backing types retain upstream
+identities. No replacement types, formats, memory manager or storage
+implementation is introduced. Defaults/executor-only graphs exclude the
+dependency; substrate-only selection adds no Candid, parser, CDK, executor or
+owned Principal. Upstream `ic_principal` remains a substrate dependency; this is
+dependency control, not transitive removal or measured Wasm reduction.
+
+The exact version preserves the trait identity requested by Memory/Storage and
+Testkit. Changing it requires renewed interoperability and retained-byte checks.
+After publication require Platform 0.6.2 or later with this feature and replace
+the direct declaration/private alias with
+`use ic_platform::stable_structures as substrate`. Keep governed constructors,
+record/region/recovery policy in Storage and allocation/runtime handles in
+Memory. Applications continue using governed Storage rather than raw backing.
+
+Testkit's instrumentation selects `VectorMemory` explicitly for target-neutral
+shared backing. `DefaultMemoryImpl` is target-dependent and is not a substitute.
+Testkit retains counters, reset, overflow and fixture policy. No sibling changes
+are made here. Actual adoption, native macOS and installed-upgrade qualification
+remain separate from Platform export/identity and standalone reopening tests.
+
+## Explicit external Candid entrypoints (0.6.2 qualification)
+
+The 0.2 boundary removed implicit Candid entrypoint codecs. Owned application
+endpoints use Wire; a feature-only update does not migrate pre-0.2 generators or
+preserve deployed formats. Canic owns that coordinated protocol migration.
+Further hard cuts remain deferred until Canic is live.
+
+Required pre-existing external Candid interfaces remain supported. Select `cdk`
+and `candid-service` (which implies `candid`). Supply `decode_with` and
+`encode_with`, and explicitly register the external declaration with
+`contract::candid_method` before calling
+`contract::export_service!(ic_platform::candid::contract)`. Match original method
+names, query/update modes and argument/result tuples in both declarations.
+
+Zero-argument methods must still decode Candid: empty raw bytes are not an
+encoded empty argument list. Use `decode_args::<()>` with the caller's five
+finite `DecodeLimits` and retain its skipping policy. A zero skipping quota
+refuses charged extra values. Encode one result with `encode_args((value,))`
+and no results with `encode_args(())`; the unit-return encoder takes no Rust
+arguments. Adapters retain encoding/decoding failure mapping and trap disclosure.
+
+Guards run in declaration order before decoding and handler execution; a guard
+error rejects without running codecs. Query/update context selection and callback
+cleanup remain runtime-owned; do not install another executor. The standalone
+`external-candid` profile declares only Platform and checks fixed request, reply
+and service bytes, malformed/oversized refusal, native/MSRV compilation and linked
+Wasm with canonical executor/IC0 identities. This is composition evidence, not
+installed guard/trap execution or Canic/Blob adoption. Consumers retain their
+actual endpoint/service goldens and installed qualification. No Wasm
+`get_candid_pointer` helper is added; native service export remains separate from
+compiled Wasm endpoint inspection.
+
+## Pending 0.6.2 strict reply helpers
+
+Under the existing `candid` feature, use
+`ic_platform::candid::sequence::deserialize::<D, T, LIMIT>` inside a caller-owned
+Serde deserializer. It rejects excessive size hints before reading, never reserves
+from hints, and reads at most one typed excess element. The caller supplies
+expected-shape and overflow diagnostics; element errors propagate unchanged.
+Application aggregate bounds and all five `DecodeLimits` remain caller-owned.
+
+`ic_platform::candid::reserved::StrictReserved` preserves the Candid reserved
+wire type and encoding. It accepts only the owned decoder marker `[3]`. Use
+`DecodeLimits.skipping_quota = 0` for strict payload refusal; this type alone
+does not impose a quota or replace variant-tag and schema-evolution policies.
+
+Implementation and regression tests are preserved from Platform
+[PR #26](https://github.com/dragginzgame/ic-platform/pull/26) at `c90004c`,
+migrated from Testkit [PR #123](https://github.com/dragginzgame/ic-testkit/pull/123)
+at `97df333a0aa57a056eb3bfe443a7365c4314b361`, originally extracted from Backup
+0.30.0 (`3992e15`). Do not restore `ic-testkit-candid` or add a compatibility
+package. After publication, require at least Platform 0.6.2 with
+`features = ["candid"]`, select the import paths above, and retain endpoint DTOs,
+ceilings and tests in the consumer. No generator or existing import changes are
+required. Publication and Backup adoption remain separately qualified; this
+addition changes no existing API, dependency selection or external wire format.
+
 ## Pending 0.6 feature boundary
 
 This supersedes older unconditional Principal/Account descriptions. No defaults
