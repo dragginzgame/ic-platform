@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1]
+
+### Fixed
+
+- Update the runtime qualification fixture's TLS lock to rustls-webpki 0.103.16
+  and webpki-root-certs 1.0.10, addressing RUSTSEC-2026-0382 and
+  RUSTSEC-2026-0383. Production library dependency selections are unchanged.
+
 ## [0.6.0] - 2026-10-21
 
 ### Breaking

@@ -1,6 +1,41 @@
 # Current handoff
 
-## Pending 0.6
+## Pending 0.6.1
+
+The local fix for [42](https://github.com/dragginzgame/ic-platform/issues/42)
+updates only the runtime fixture lock's rustls-webpki 0.103.15 to 0.103.16 and
+webpki-root-certs 1.0.9 to 1.0.10, including their checksums. A fresh RustSec
+checkout at `4b587f00996ebe5c05a73eaef105ef241e876414` reports two vulnerabilities
+before and zero after (`cargo audit --no-fetch --no-yanked`); existing `paste`
+and `serde_cbor` unmaintained warnings remain. No library selection changes.
+
+The rebuilt native driver tests, native/Wasm graph admission and all four
+installed Rust 1.99.1/1.91.0 × Wire/external-Candid fixtures pass, including raw
+awaits, callback traps, timer cancellation, upgrade and stable rollback.
+Evidence: `target/cdk-runtime.9KcpTI`, `/tmp/platform-post06`. These are Linux
+PocketIC results; native macOS and live IC qualification were not performed.
+No package version change, staging, commit or publication occurred; #42 remains
+open until its fix reaches the default branch.
+
+Published registry 0.6.0 passes standalone executor+IC0, Principal and IC0
+consumer tests/checks on native Rust, MSRV 1.88 and Wasm. Evidence is retained in
+`target/boundary-consumer.00sBZ3`, `target/boundary-consumer.HS80XV` and
+`target/boundary-consumer.aquYOL`. Timers and IcyDB already contain pending 0.6
+adoption work; IcyDB's facade and schema select `principal` explicitly. These
+dirty sibling checkouts were inspected read-only, not independently qualified
+as complete products or claimed as released adoption.
+
+Canic's live frontend still calls both Candid binding compilers. Its canonical
+role unions still derive Candid types; their `wire` directory name does not
+prove IC Wire schema availability. [Canic #613](https://github.com/dragginzgame/canic/issues/613)
+must supply endpoint-derived schemas and the replacement artifact identity
+before [38](https://github.com/dragginzgame/ic-platform/issues/38) can retire the
+exports. The linked old Build repository is currently inaccessible; Build code
+now lives in `ic-tooling` under `crates/ic-build`, with orchestration follow-up
+[225](https://github.com/dragginzgame/ic-tooling/issues/225). No parser fork or removal is
+justified by this audit, and no consumer/persisted format has changed.
+
+## Released 0.6.0
 
 The maintainer authorized issues [40](https://github.com/dragginzgame/ic-platform/issues/40)
 and [41](https://github.com/dragginzgame/ic-platform/issues/41): explicit `principal`
@@ -21,9 +56,10 @@ The clean Timers 0.30.0 checkout at `41e1e2fb` compiles on Rust 1.91 native/Wasm
 through an isolated root-patched consumer. Siblings remain read-only. This is
 local integration evidence, not published adoption. Native macOS, installed
 canisters/timers and live IC were not rerun; no Wasm-size/speed gain is claimed.
-Package versions remain 0.5.1; the breaking changelog is pending 0.6.0. The
-pre-existing Candid/derive 0.10.39 lock update is preserved byte-for-byte.
-No staging, commits or publication occurred. Working logs: `/tmp/platform-06-work`.
+The maintainer subsequently released 0.6.0 at `73dda4a`; issues 40 and 41 are
+closed with default-branch evidence. The earlier qualification preserved the
+pre-existing Candid/derive 0.10.39 lock update. Working logs:
+`/tmp/platform-06-work`. Published consumer evidence is recorded above.
 
 Parser/compiler retirement remains blocked on Canic's live generator calls;
 [38](https://github.com/dragginzgame/ic-platform/issues/38) tracks that migration.
