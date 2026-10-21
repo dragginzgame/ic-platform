@@ -50,6 +50,11 @@ Runtime-only raw/executor consumers retain their independent features.
 
 ## Cryptographic boundary
 
+For the authorized 0.6 packaging cut, unused creation delegation/CBOR helpers
+compile only in tests. Preserve their complete bodies and vectors. The source
+guard checks both exact annotated source and reconstruction of the 0.5.1 source
+after removing only eight admitted attributes. No algorithm changes are allowed.
+
 The maintainer authorized the 0.5.1 deletion of the unused, unexported
 `IC_ROOT_PUBLIC_KEY` lazy cache and its import/dependency. This narrow scaffolding
 exception does not authorize changes to root-key bytes, DER extraction,
@@ -77,6 +82,12 @@ The owned runtime RejectCode similarly replaces only its external catalogue
 dependency; Agent/PocketIC codes keep their external identities.
 
 ## Owned Principal
+
+The maintainer authorized the 0.6 feature split: `principal` selects the owned
+Principal/Account family and external conversions. No default features. Runtime,
+Candid, signature creation and external DTO/client profiles select it explicitly;
+raw executor/IC0-only profiles exclude application types and their dependencies.
+This supersedes the earlier unconditional availability decision.
 
 The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
 Retain its Apache-2.0 provenance, raw bytes and length-first ordering. Keep parsing
@@ -115,8 +126,8 @@ independently selected external management DTO surface.
 
 ## Owned account
 
-The maintainer authorized unconditional owned Account/Subaccount alongside owned
-Principal. Preserve effective-zero equality, ordering and hashing, and preserve
+Owned Account/Subaccount accompany Principal under the `principal` feature.
+Preserve effective-zero equality, ordering and hashing, and preserve
 absent versus explicit zero fields during serialization and external conversion.
 Retain Apache provenance and the existing external ledger DTO identity. No Candid,
 storage implementation, cryptographic account-identifier derivation or application

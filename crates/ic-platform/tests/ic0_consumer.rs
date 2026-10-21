@@ -13,8 +13,8 @@ pub fn replicated_execution() -> u32 {
 }
 
 /// Pass the caller's existing Principal bytes to the upstream controller check.
-pub fn controller(principal: ic_platform::Principal) -> u32 {
-    ic_platform::ic0::is_controller(principal.as_slice())
+pub fn controller(principal: &[u8]) -> u32 {
+    ic_platform::ic0::is_controller(principal)
 }
 
 /// Append the caller's exact byte slices in order, then finalize the reply.

@@ -18,6 +18,13 @@ library. Both imported modules retain all original function bodies and unit test
   `packages/ic-signature-verification/src/canister_sig.rs`. Its creation import
   points at the sibling imported module; nothing else changes.
 
+For 0.6, seven `cfg(test)` attributes keep the unused delegation-signing helper
+and creation CBOR parser (including their imports/type/constant) in reference
+tests only. One unused-import allowance retains the original HashTree import.
+All bodies, constants and vectors remain exact; the guard also strips only those
+eight attributes to recover and verify the original 0.5.1 source hash. Production
+verification retains its own unmodified CBOR parser and dependencies.
+
 Each directory retains its original Apache-2.0 LICENSE. Exact source/test/license
 fingerprints are enforced by `scripts/ci/check-signature-source.sh`. Rustfmt skips
 these imported modules. The original SHA-256, domain separation, DER/CBOR parsing,

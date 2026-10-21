@@ -17,7 +17,7 @@ function reject(reason) {
             # affect admission. Keep complete lines for source/identity checks.
             split(line, fields, " ")
             if (fields[1] ~ /^(ic|candid|pocket-ic|ed25519-dalek|curve25519-dalek|k256)/ ||
-                fields[1] ~ /^(rand|rand_chacha|getrandom|pretty)$/)
+                fields[1] ~ /^(rand|rand_chacha|getrandom|pretty|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding|serde_cbor|half)$/)
                 lines[key, ++count[key]] = line
             nonempty = 1
         }
@@ -42,6 +42,8 @@ function reject(reason) {
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
     candid = pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger
+    principal = enabled("principal") || cdk || enabled("runtime") || creation || enabled("candid") || enabled("candid-service") || management || ledger || enabled("agent") || enabled("candid-parser") || enabled("pocket-ic") || enabled("secp256k1")
+    minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification")
     found_ed = 0
     found_curve = 0
     found_secp = 0
@@ -51,6 +53,12 @@ function reject(reason) {
         line = lines[key, i]
         n = split(line, f, " ")
         name = f[1]; version = f[2]
+        if (minimal && name ~ /^(ic_principal|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding)$/)
+            reject("application types in minimal executor/IC0 graph")
+        if (name == "ic-representation-independent-hash" && !(agent || pocket))
+            reject("reference-only signature hashing in production")
+        if ((name == "serde_cbor" || name == "half") && !(verification || agent || pocket || parser || ledger))
+            reject("unselected CBOR parser")
         if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || management || ledger))
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")

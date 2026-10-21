@@ -18,7 +18,10 @@ third parties. Enable `cdk` for explicit-codec entrypoints and the Candid-free
 runtime, or `executor` for the shared executor alone. Enable `candid` only for
 required management/system, NNS/SNS, ledger and other Candid interfaces, or legacy
 persisted checkpoints. Caller location does not select Candid.
-`ic_platform::Principal` is unconditional; no features are enabled by default.
+Select `principal` for Principal, Account and Subaccount. Runtime, Candid,
+signature creation and external DTO/client/parser profiles include it.
+No features are enabled by default; executor/IC0-only builds omit application
+types and their Serde, text and cryptographic dependencies.
 
 Enable `icrc-ledger-types` for `ic_platform::icrc_ledger_types`, selecting upstream
 0.2.0 without default/storage features. The explicit flat surface is `Account`,
@@ -96,7 +99,7 @@ Use `ic_platform::candid::contract` for Candid DTO derives and encoding. Add
 `#[serde(crate = "ic_platform::candid::contract::serde")]` when deriving Deserialize
 through the boundary's Serde export. These are external protocol types, not an
 application-wide requirement. Principal-only users import `ic_platform::Principal`
-without selecting a feature or declaring `ic_principal` directly. In the released
+with the `principal` feature, without declaring `ic_principal` directly. In the released
 0.3 migration the root type and `PrincipalError` are Platform-owned. Required
 Candid DTOs use `candid::contract::Principal`, which remains the original registry
 type. `principal::{ExternalPrincipal, ExternalPrincipalError}` provides that

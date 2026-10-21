@@ -15,8 +15,9 @@ parsing and PocketIC are native opt-ins. Consumers retain their Wire schemas,
 authentication, budgets and retry policy. See the [maintenance and recovery
 contract](docs/migration.md#runtime-maintenance-and-recovery).
 
-`ic_platform::Principal` is always available, without enabling a feature or
-depending directly on `ic_principal`. The 0.3 type is Platform-owned;
+Select `principal` for owned Principal/Account types without depending directly
+on `ic_principal`. Runtime, Candid and external client/DTO features include it;
+executor/IC0-only builds omit application types. The 0.3 type is Platform-owned;
 external clients and DTOs retain `principal::ExternalPrincipal`. Convert explicitly
 with `.into()` at those boundaries. Default builds include Principal and its
 dependencies, but neither Candid nor CDK. Self-authentication continues to delegate
@@ -24,6 +25,7 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 
 | Feature | Implemented contract |
 | --- | --- |
+| `principal` | Owned Principal/Account types, text/Serde and external conversions; no Candid |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |

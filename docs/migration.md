@@ -1,5 +1,43 @@
 # Candid and runtime ownership
 
+## Pending 0.6 feature boundary
+
+This supersedes older unconditional Principal/Account descriptions. No defaults
+are introduced. Select `features = ["principal"]` for owned Principal, Account,
+Subaccount, their errors and explicit external identity conversions. Existing
+imports and bytes stay unchanged. Type-only consumers (including Wire schema
+owners and IcyDB) must update inherited manifests and independent test/generator
+manifests; do not rely on another package unifying this feature accidentally.
+After publication, update the inherited Platform requirement to the 0.6 line
+and do the same for independent fixtures/generators. A `0.5` requirement will
+not select this breaking release. Timers keeps its two features but also needs
+that version-requirement update and qualification against the published package.
+
+`runtime` (therefore `cdk`), `candid` (therefore `candid-service`),
+`canister-sig-creation` (therefore `signature-verification`), management and ledger
+DTO features, `agent`, `pocket-ic`, `candid-parser` and `secp256k1` include
+`principal`. Native-only client/parser dependencies remain absent on Wasm;
+the explicitly implied portable principal types remain available there.
+Certification, BLS, ECDSA and Ed25519 alone do not select application types;
+add `principal` if a consumer uses both capabilities.
+
+Raw Timers-style consumers keep `features = ["executor", "ic0"]`. Their public
+executor/system imports and qualified registry identities remain unchanged.
+Those production graphs exclude Principal, Serde, SHA-2 and text conversion.
+Raw system helpers accept byte slices; construct application identities only in
+profiles that select them. The standalone raw consumer checks graph isolation
+and inability to import Principal, independently of workspace feature unification.
+
+Signature-creation production no longer selects the unused delegation hash
+helper or creation reference CBOR parser. Original bodies and tests are retained
+under test-only attributes; verification keeps its independent original parser.
+`ic-representation-independent-hash` becomes test-only for Platform. Other host
+features can still bring it transitively. Certification still brings serde_bytes;
+removing Platform's direct creation edge does not eliminate that package.
+No cryptographic implementation, external byte format, storage, retry or caller
+admission policy changes. A smaller dependency graph does not establish smaller
+Wasm or faster execution. Package versions remain release-owned.
+
 ## Pending 0.5 retirement
 
 The maintainer authorized a hard cut of unused compatibility surface after 0.4.1.
@@ -198,7 +236,7 @@ Arbitrary-precision integers enable Candid's `bignum` feature with `candid`;
 the separate native parser also enables it through upstream Candid's `all` feature.
 No default features, automatic limits or second executor are introduced.
 
-`ic_platform::Principal` is unconditional and Platform-owned for the 0.3
+`ic_platform::Principal` is Platform-owned since the 0.3
 migration. The Candid contract keeps the original registry identity; see
 [the migration below](#owned-principal-migration-03). Default builds remain
 Candid/CDK-free, not dependency-free.
@@ -1316,7 +1354,7 @@ installed-canister behavior, macOS qualification or smaller Wasm.
 
 ## Owned account migration (0.3)
 
-Use unconditional `ic_platform::{Account, Subaccount, AccountError}` for owned
+Use `ic_platform::{Account, Subaccount, AccountError}` with `principal` for owned
 application identities. `Account` contains the owned `Principal` and
 `Option<[u8; 32]>`; it has Serde but no Candid or storage/CBOR trait. Wire owns its
 codec integration; this addition does not establish a Wire trait implementation.

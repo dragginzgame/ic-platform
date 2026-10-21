@@ -1,7 +1,11 @@
 use ic_principal::Principal;
+#[allow(unused_imports)] // Platform: reference-only HashTree.
 use ic_certification::{Hash, HashTree};
+#[cfg(test)] // Platform: reference-only.
 use ic_representation_independent_hash::{representation_independent_hash, Value};
+#[cfg(test)] // Platform: reference-only.
 use serde::{Deserialize, Serialize};
+#[cfg(test)] // Platform: reference-only.
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
 
@@ -18,6 +22,7 @@ pub const CANISTER_SIG_PK_DER_OID: &[u8; 14] =
 
 /// Signature domain for IC request auth delegations as specified in the IC interface specification:
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#authentication
+#[cfg(test)] // Platform: reference-only.
 pub const DELEGATION_SIG_DOMAIN: &[u8] = b"ic-request-auth-delegation";
 
 /// A public key of canister signatures,
@@ -146,6 +151,7 @@ pub fn hash_with_domain(sep: &[u8], bytes: &[u8]) -> Hash {
 /// a signed `sender_delegation`.
 /// Relevant part of the IC interface specification:
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec#authentication
+#[cfg(test)] // Platform: reference-only.
 pub fn delegation_signature_msg(
     pubkey: &[u8],
     expiration: u64,
@@ -166,6 +172,7 @@ pub fn delegation_signature_msg(
 
 /// A canister signature,
 /// see https://internetcomputer.org/docs/current/references/ic-interface-spec#canister-signatures
+#[cfg(test)] // Platform: reference-only.
 #[derive(Clone, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub struct CanisterSig {
     certificate: ByteBuf,
@@ -173,6 +180,7 @@ pub struct CanisterSig {
 }
 
 /// Parses the given bytes as a CBOR-encoded `CanisterSig`-struct.
+#[cfg(test)] // Platform: reference-only.
 pub fn parse_canister_sig_cbor(signature_cbor: &[u8]) -> Result<CanisterSig, String> {
     // 0xd9d9f7 (cf. https://tools.ietf.org/html/rfc7049#section-2.4.5) is the
     // self-describing CBOR tag required to be present by the interface spec.

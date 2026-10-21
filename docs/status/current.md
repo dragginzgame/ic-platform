@@ -1,6 +1,35 @@
 # Current handoff
 
-## Pending 0.5.1
+## Pending 0.6
+
+The maintainer authorized issues [40](https://github.com/dragginzgame/ic-platform/issues/40)
+and [41](https://github.com/dragginzgame/ic-platform/issues/41): explicit `principal`
+feature ownership and lean signature-creation packaging. Runtime, Candid and
+external client/DTO profiles imply `principal`; type-only consumers must add it.
+Principal/Account bytes, crypto bodies, executor identity, callbacks and consumer
+policies are unchanged. The original creation source is recovered exactly by
+stripping only eight reviewed test/reference packaging attributes.
+
+[Graph evidence](../benchmarks/0.6/README.md) records executor+IC0 at 26 to 6
+packages and creation at 30 to 26, including Platform in both counts. Original
+vectors pass in 42 focused Rust 1.88 tests; eight standalone consumer profiles
+pass native/MSRV/Wasm. All 199 routine feature selections pass native/Wasm graph
+admission. Source/mutation guards, strict focused Clippy, minimal rustdoc,
+formatting, dependency boundaries, pins and documentation links pass.
+
+The clean Timers 0.30.0 checkout at `41e1e2fb` compiles on Rust 1.91 native/Wasm
+through an isolated root-patched consumer. Siblings remain read-only. This is
+local integration evidence, not published adoption. Native macOS, installed
+canisters/timers and live IC were not rerun; no Wasm-size/speed gain is claimed.
+Package versions remain 0.5.1; the breaking changelog is pending 0.6.0. The
+pre-existing Candid/derive 0.10.39 lock update is preserved byte-for-byte.
+No staging, commits or publication occurred. Working logs: `/tmp/platform-06-work`.
+
+Parser/compiler retirement remains blocked on Canic's live generator calls;
+[38](https://github.com/dragginzgame/ic-platform/issues/38) tracks that migration.
+Agent remains upstream-owned and unchanged.
+
+## 0.5.1 (historical)
 
 The native Agent request-copy experiment qualifies a one-line ownership change
 in an isolated copy of registry ic-agent 0.49.2; production still uses the

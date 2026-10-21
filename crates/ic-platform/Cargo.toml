@@ -12,30 +12,52 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [features]
 default = []
-agent = ["dep:ic-agent"]
+principal = ["dep:crc32fast", "dep:data-encoding", "dep:ic_principal", "dep:serde"]
+agent = ["principal", "dep:ic-agent"]
 bls = ["dep:ic-verify-bls-signature"]
-candid = ["dep:candid", "candid/bignum"]
-candid-parser = ["dep:candid_parser"]
+candid = ["principal", "dep:candid", "candid/bignum"]
+candid-parser = ["principal", "dep:candid_parser"]
 candid-service = ["candid", "candid/printer"]
-canister-sig-creation = [
-    "dep:ic-certification",
-    "dep:ic-representation-independent-hash",
-    "dep:serde_bytes",
-    "dep:serde_cbor",
-    "dep:sha2",
-]
+canister-sig-creation = ["principal", "dep:ic-certification", "dep:sha2"]
 cdk = ["runtime", "dep:ic-platform-macros"]
-runtime = ["executor", "ic0", "dep:pin-project-lite", "dep:thiserror"]
+runtime = ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserror"]
 certification = ["dep:ic-certification"]
 ecdsa = ["dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["dep:ic-cdk-executor"]
 ic0 = ["dep:ic0"]
-icrc-ledger-types = ["dep:icrc-ledger-types"]
-management-canister-types = ["dep:ic-management-canister-types"]
-signature-verification = ["canister-sig-creation", "dep:ic-verify-bls-signature"]
-pocket-ic = ["dep:pocket-ic"]
-secp256k1 = ["dep:ic-secp256k1"]
+icrc-ledger-types = ["principal", "dep:icrc-ledger-types"]
+management-canister-types = ["principal", "dep:ic-management-canister-types"]
+signature-verification = [
+    "canister-sig-creation",
+    "dep:ic-verify-bls-signature",
+    "dep:serde_bytes",
+    "dep:serde_cbor",
+]
+pocket-ic = ["principal", "dep:pocket-ic"]
+secp256k1 = ["principal", "dep:ic-secp256k1"]
+
+[dependencies]
+candid = { workspace = true, optional = true }
+crc32fast = { workspace = true, optional = true }
+curve25519-dalek = { workspace = true, optional = true }
+data-encoding = { workspace = true, optional = true }
+ed25519-dalek = { workspace = true, optional = true }
+ic-cdk-executor = { workspace = true, optional = true }
+ic-certification = { workspace = true, optional = true }
+ic-management-canister-types = { workspace = true, optional = true }
+ic-platform-macros = { workspace = true, optional = true }
+ic-verify-bls-signature = { workspace = true, optional = true }
+ic0 = { workspace = true, optional = true }
+ic_principal = { workspace = true, optional = true }
+icrc-ledger-types = { workspace = true, optional = true }
+k256 = { workspace = true, optional = true }
+pin-project-lite = { workspace = true, optional = true }
+serde = { workspace = true, optional = true, features = ["alloc"] }
+serde_bytes = { workspace = true, optional = true }
+serde_cbor = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
+thiserror = { workspace = true, optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }
@@ -43,32 +65,17 @@ ic-agent = { workspace = true, optional = true }
 ic-secp256k1 = { workspace = true, optional = true }
 pocket-ic = { workspace = true, optional = true }
 
-[dependencies]
-candid = { workspace = true, optional = true }
-crc32fast.workspace = true
-curve25519-dalek = { workspace = true, optional = true }
-data-encoding.workspace = true
-ed25519-dalek = { workspace = true, optional = true }
-ic-cdk-executor = { workspace = true, optional = true }
-ic-certification = { workspace = true, optional = true }
-ic-management-canister-types = { workspace = true, optional = true }
-ic-platform-macros = { workspace = true, optional = true }
-ic-representation-independent-hash = { workspace = true, optional = true }
-ic-verify-bls-signature = { workspace = true, optional = true }
-ic0 = { workspace = true, optional = true }
-ic_principal.workspace = true
-icrc-ledger-types = { workspace = true, optional = true }
-k256 = { workspace = true, optional = true }
-pin-project-lite = { workspace = true, optional = true }
-serde = { workspace = true, features = ["alloc"] }
-serde_bytes = { workspace = true, optional = true }
-serde_cbor = { workspace = true, optional = true }
-sha2 = { workspace = true, optional = true }
-thiserror = { workspace = true, optional = true }
-
 [dev-dependencies]
 assert_matches.workspace = true
+ic-representation-independent-hash.workspace = true
+serde_bytes.workspace = true
+serde_cbor.workspace = true
 serde_test.workspace = true
+
+[[test]]
+name = "executor_consumer"
+path = "tests/executor_consumer.rs"
+required-features = ["executor", "ic0"]
 
 [[test]]
 name = "ecdsa_consumer"
@@ -164,6 +171,16 @@ required-features = ["certification"]
 name = "pocket_ic_consumer"
 path = "tests/pocket_ic_consumer.rs"
 required-features = ["pocket-ic"]
+
+[[test]]
+name = "principal"
+path = "tests/principal.rs"
+required-features = ["principal"]
+
+[[test]]
+name = "parser_properties"
+path = "tests/parser_properties.rs"
+required-features = ["principal"]
 
 [lints]
 workspace = true

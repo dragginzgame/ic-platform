@@ -5,7 +5,7 @@
 //! interfaces; caller location does not select the codec. Existing Candid
 //! checkpoints remain a legacy persisted-data compatibility exception.
 //!
-//! [`Principal`] is always available. `candid` selects bounded decoding;
+//! `principal` selects Principal and Account. `candid` selects bounded decoding;
 //! `executor` selects the shared CDK executor without a Candid dependency.
 //! `candid-parser` selects native host parsing and binding generation only.
 //! `candid-service` separately selects Candid service declaration generation.
@@ -22,13 +22,17 @@
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
 //! Consumers retain protocol schemas, resource limits and lifecycle policy.
 
+#[cfg(feature = "principal")]
 pub mod account;
+#[cfg(feature = "principal")]
 pub use account::{Account, AccountError, Subaccount};
 
 #[cfg(any(feature = "canister-sig-creation", feature = "signature-verification"))]
 mod signature_upstream;
 
+#[cfg(feature = "principal")]
 pub mod principal;
+#[cfg(feature = "principal")]
 pub use principal::{Principal, PrincipalError};
 
 #[cfg(all(feature = "agent", not(target_family = "wasm")))]

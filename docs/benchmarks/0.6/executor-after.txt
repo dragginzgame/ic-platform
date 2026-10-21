@@ -1,0 +1,7 @@
+ic-platform v0.5.1 (/home/adam/projects/ic-platform/crates/ic-platform)
+ic-cdk-executor v2.0.0
+ic0 v1.2.0
+slotmap v1.1.1
+version_check v0.9.5
+smallvec v1.16.3
+ic0 v1.2.0

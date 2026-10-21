@@ -4,7 +4,7 @@ def native_leaves($package):
   {agent: "ic-agent", "candid-parser": "candid_parser", secp256k1: "ic-secp256k1", "pocket-ic": "pocket-ic"} |
   to_entries | map(. as $leaf |
     [$package.dependencies[] | select((.rename // .name) == $leaf.value)] as $deps |
-    if $package.features[$leaf.key] == ["dep:" + $leaf.value] and
+    if $package.features[$leaf.key] == ["principal", "dep:" + $leaf.value] and
        ($deps | length) == 1 and $deps[0].optional and
        $deps[0].target == "cfg(not(target_family = \"wasm\"))"
     then $leaf.key else error("native-only cache contract changed: " + $leaf.key) end);

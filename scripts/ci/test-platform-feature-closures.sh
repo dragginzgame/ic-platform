@@ -13,11 +13,11 @@ expected="$(printf 'none\tnone\ndefault\tdefault\ncdk\tcdk,executor,ic0\nic0,exe
 echo 'Feature closure equivalence and isolation cases passed'
 # Native-only leaves may be removed from a Wasm key only after exact admission.
 native_metadata="$(printf '%s' "$metadata" | "$jq" '
-  .[0].packages[0] |= (.features += {"candid-parser":["dep:candid_parser"],secp256k1:["dep:ic-secp256k1"],"pocket-ic":["dep:pocket-ic"]} |
+  .[0].packages[0] |= (.features += {principal:[],agent:["principal","dep:ic-agent"],"candid-parser":["principal","dep:candid_parser"],secp256k1:["principal","dep:ic-secp256k1"],"pocket-ic":["principal","dep:pocket-ic"]} |
   .dependencies = ["ic-agent","candid_parser","ic-secp256k1","pocket-ic"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
 selections='["none","default","agent","agent,candid-parser,secp256k1,pocket-ic","agent,cdk"]'
 actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" -f scripts/ci/platform-feature-closures.jq)"
-expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tnone\nagent,candid-parser,secp256k1,pocket-ic\tnone\nagent,cdk\tcdk,executor,ic0')"
+expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tprincipal\nagent,candid-parser,secp256k1,pocket-ic\tprincipal\nagent,cdk\tcdk,executor,ic0,principal')"
 [[ "$actual" == "$expected" ]] || { echo 'Unexpected target-aware closure' >&2; exit 1; }
 for feature in agent candid-parser secp256k1 pocket-ic; do
     changed="$(printf '%s' "$native_metadata" | "$jq" --arg feature "$feature" '.[0].packages[0].features[$feature] += ["candid"]')"

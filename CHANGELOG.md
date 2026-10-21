@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0]
+
+### Breaking
+
+- Gate Principal, Account, Subaccount and their errors/conversions behind
+  `principal`. Runtime, Candid, signature creation and external client/DTO/parser
+  features include it. Type-only consumers must select it explicitly. Empty and
+  executor/IC0-only production graphs no longer select application types.
+
+### Improved
+
+- Keep unused upstream delegation/CBOR helpers in signature reference tests,
+  preserving their bodies and vectors. Production signature creation no longer
+  selects representation-independent hashing or CBOR decoding; verification
+  retains its required CBOR parser. No cryptography or wire bytes change.
+
 ## [0.5.1] - 2026-10-20
 
 ### Documentation

@@ -12,7 +12,7 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(principal ecdsa ed25519 candid candid-service certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk runtime secp256k1 pocket-ic)
+capabilities=(executor principal ecdsa ed25519 candid candid-service certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk runtime secp256k1 pocket-ic)
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in
@@ -24,7 +24,7 @@ if [[ $# -gt 0 ]]; then
 fi
 for capability in "${capabilities[@]}"; do
 features="\"$capability\""
-if [[ "$capability" == principal ]]; then features=""; fi
+if [[ "$capability" == executor ]]; then features='"executor", "ic0"'; fi
 if [[ "$capability" == agent ]]; then features='"agent", "certification"'; fi
 if [[ "$capability" == dynamic ]]; then features='"candid", "candid-parser"'; fi
 if [[ "$capability" == management ]]; then features='"management-canister-types", "candid"'; fi
@@ -101,6 +101,14 @@ if [[ -n "$published" ]]; then
     ' "$fixture/metadata.json" > /dev/null || {
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
+fi
+if [[ "$capability" == executor || "$capability" == ic0 ]]; then
+    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
+        if grep -Eq '^(ic_principal|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding|candid|ic-agent) ' "$fixture/$graph_target.graph"; then
+            echo 'Minimal consumer acquired application types/codecs/crypto' >&2; exit 1
+        fi
+    done
 fi
 if [[ "$capability" == cdk || "$capability" == runtime ]]; then
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do

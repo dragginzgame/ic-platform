@@ -14,6 +14,17 @@ while IFS='|' read -r selection package expected; do
     count=$((count + 1))
 done <<'CASES'
 none||pass
+executor|ic_principal v0.1.5|reject
+ic0|serde v1.0.229|reject
+executor,ic0|sha2 v0.10.9|reject
+executor,ic0|serde_derive v1.0.229 (proc-macro)|reject
+principal|ic_principal v0.1.5|pass
+principal,executor|serde v1.0.229|pass
+canister-sig-creation|ic-representation-independent-hash v3.2.0|reject
+signature-verification|ic-representation-independent-hash v3.2.0|reject
+canister-sig-creation|serde_cbor v0.11.2|reject
+canister-sig-creation|half v1.8.3|reject
+signature-verification|serde_cbor v0.11.2|pass
 none|rand v0.8.5|reject
 executor|rand_chacha v0.3.1|reject
 cdk|getrandom v0.2.17|reject

@@ -11,12 +11,12 @@ esac
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/metadata.json
 "$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") |
-    .features.candid == ["dep:candid", "candid/bignum"] and
+    .features.candid == ["principal", "dep:candid", "candid/bignum"] and
     .features["candid-service"] == ["candid", "candid/printer"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Candid service generation must remain explicitly selected' >&2; exit 1;
 }
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "candid-service", "canister-sig-creation", "cdk", "certification", "default", "ecdsa", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "runtime", "secp256k1", "signature-verification"]' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "candid-service", "canister-sig-creation", "cdk", "certification", "default", "ecdsa", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "principal", "runtime", "secp256k1", "signature-verification"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
 }
@@ -28,12 +28,12 @@ cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/met
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve the exact qualified executor =2.0.0' >&2; exit 1;
 }
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | . as $p | .features.cdk == ["runtime", "dep:ic-platform-macros"] and .features.runtime == ["executor", "ic0", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | . as $p | .features.cdk == ["runtime", "dep:ic-platform-macros"] and .features.runtime == ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'CDK must select only the owned adapters, qualified executor/ic0 and coordinated generator' >&2; exit 1;
 }
 generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform") | .version' target/feature-graphs/metadata.json)"
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.secp256k1 == ["dep:ic-secp256k1"] and ([.dependencies[] | select(.name == "ic-secp256k1")] | length == 1 and .[0].optional and .[0].req == "=0.3.0" and .[0].target == "cfg(not(target_family = \"wasm\"))")' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.secp256k1 == ["principal", "dep:ic-secp256k1"] and ([.dependencies[] | select(.name == "ic-secp256k1")] | length == 1 and .[0].optional and .[0].req == "=0.3.0" and .[0].target == "cfg(not(target_family = \"wasm\"))")' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'secp256k1 must remain exact, optional and native-only' >&2; exit 1;
 }
@@ -41,11 +41,11 @@ generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name =
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve the exact qualified ic0 =1.2.0' >&2; exit 1;
 }
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["management-canister-types"] == ["dep:ic-management-canister-types"] and ([.dependencies[] | select(.name == "ic-management-canister-types")] | length == 1 and .[0].req == "=0.11.0" and .[0].optional)' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["management-canister-types"] == ["principal", "dep:ic-management-canister-types"] and ([.dependencies[] | select(.name == "ic-management-canister-types")] | length == 1 and .[0].req == "=0.11.0" and .[0].optional)' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform must preserve optional management types =0.11.0' >&2; exit 1;
 }
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["icrc-ledger-types"] == ["dep:icrc-ledger-types"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == [])' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["icrc-ledger-types"] == ["principal", "dep:icrc-ledger-types"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == [])' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Ledger types must be optional without upstream default/storage features' >&2; exit 1;
 }
