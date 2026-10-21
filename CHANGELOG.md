@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.7]
+## [0.6.7] - 2026-10-21
 
 - Record an individual export usage audit, separating observed sibling use,
   generated-code/type contracts and unproven consumer demand without removing APIs.
