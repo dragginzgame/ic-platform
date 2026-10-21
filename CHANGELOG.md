@@ -4,6 +4,8 @@
 
 ### Fixed
 
+- Scope secp256k1 consumer-test imports to the test that uses them, keeping
+  standalone library builds warning-free without changing coverage.
 - Update the runtime qualification fixture's TLS lock to rustls-webpki 0.103.16
   and webpki-root-certs 1.0.10, addressing RUSTSEC-2026-0382 and
   RUSTSEC-2026-0383. Production library dependency selections are unchanged.

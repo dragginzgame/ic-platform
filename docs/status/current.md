@@ -2,6 +2,13 @@
 
 ## Pending 0.6.1
 
+The secp256k1 standalone fixture now imports its test-only API inside the test,
+avoiding unused-import warnings when Cargo also compiles it as a library.
+Its unchanged derivation/encoding test passes on native Rust and MSRV 1.88;
+both Wasm checks pass without warnings. Evidence:
+`target/boundary-consumer.9knNxT`, `/tmp/platform-secp-consumer-warning.log`.
+No cryptographic implementation or public API changed.
+
 The local fix for [42](https://github.com/dragginzgame/ic-platform/issues/42)
 updates only the runtime fixture lock's rustls-webpki 0.103.15 to 0.103.16 and
 webpki-root-certs 1.0.9 to 1.0.10, including their checksums. A fresh RustSec

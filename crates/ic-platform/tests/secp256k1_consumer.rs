@@ -1,13 +1,13 @@
 //! Platform-only native public derivation, encoding and malformed-key contract.
 #![cfg(not(target_family = "wasm"))]
 
-use ic_platform::{
-    principal::ExternalPrincipal as Principal,
-    secp256k1::{KeyDecodingError, MasterPublicKeyId, PocketIcMasterPublicKeyId, PublicKey},
-};
-
 #[test]
 fn public_derivation_and_encoding() {
+    use ic_platform::{
+        principal::ExternalPrincipal as Principal,
+        secp256k1::{KeyDecodingError, MasterPublicKeyId, PocketIcMasterPublicKeyId, PublicKey},
+    };
+
     let root = Principal::from_text("5lnwm-ziaaa-aaaae-agtqa-cai").unwrap();
     let path = vec![b"platform-boundary".to_vec()];
     let (mainnet, chain) =
