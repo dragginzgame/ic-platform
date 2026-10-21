@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.5]
+## [0.6.5] - 2026-10-21
 
 - Expose exact upstream `MemoryId`, `MemoryManager` and `VirtualMemory` identities
   under the existing optional `stable-structures` feature for IC Persistence.
