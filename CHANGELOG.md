@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.6.4]
+
+- Use the declared development compiler in CI and installed-runtime qualification; retain independent minimum-Rust gates and explicit Wasm target preparation.
+
 ## [0.6.3] - 2026-10-21
 
 ### Fixed

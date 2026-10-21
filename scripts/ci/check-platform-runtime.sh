@@ -23,6 +23,8 @@ mkdir -p target
 fixture="$(mktemp -d "$root/target/cdk-runtime.XXXXXX")"
 mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 # Inherit the reviewed test dependency selections from the root catalog.
+development_toolchain="$("$root/.tools/host/bin/yq" -p toml -r '.toolchain.channel' rust-toolchain.toml)"
+[[ "$development_toolchain" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Expected a pinned development compiler in rust-toolchain.toml' >&2; exit 1; }
 testkit="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
 timers="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-timers' Cargo.toml)"
 wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
@@ -127,7 +129,7 @@ if [[ "$mode" == --check-graph ]]; then
 fi
 CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
 CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
-for toolchain in 1.99.1 1.91.0; do
+for toolchain in "$development_toolchain" 1.91.0; do
     for protocol in wire external-candid; do
         features=()
         if [[ "$protocol" == external-candid ]]; then features=(--features external-candid); fi
