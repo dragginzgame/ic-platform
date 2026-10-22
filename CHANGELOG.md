@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.8]
+## [0.6.8] - 2026-10-22
 
 - Audit both maintained lockfiles against an isolated, recorded RustSec revision
   in separate CI; retain maintenance warnings without treating them as vulnerabilities.
