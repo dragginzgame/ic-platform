@@ -66,6 +66,10 @@ if [[ "$capability" == canister-sig-creation ]]; then source=canister_sig; fi
 if [[ "$capability" == signature-verification ]]; then source=signature; fi
 if [[ "$capability" == principal ]]; then source=principal; else source="${source}_consumer"; fi
 cp "crates/ic-platform/tests/${source}.rs" "$fixture/crates/consumer/src/lib.rs"
+if [[ "$source" == candid_consumer ]]; then
+    mkdir -p "$fixture/crates/consumer/src/fixtures"
+    cp crates/ic-platform/tests/fixtures/candid_malformed.rs "$fixture/crates/consumer/src/fixtures/"
+fi
 if [[ "$capability" == management ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
     cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/consumer/src/fixtures/"

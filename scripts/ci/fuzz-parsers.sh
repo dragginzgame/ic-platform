@@ -12,7 +12,7 @@ cat > "$fixture/Cargo.toml" <<MANIFEST
 members = ["crates/probe"]
 resolver = "3"
 [workspace.dependencies]
-ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["icrc-ledger-types"] }
+ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["icrc-ledger-types", "candid"] }
 libfuzzer-sys = "$version"
 MANIFEST
 cat > "$fixture/crates/probe/Cargo.toml" <<'MANIFEST'
@@ -25,8 +25,12 @@ ic-platform.workspace = true
 libfuzzer-sys.workspace = true
 MANIFEST
 cp "$root/scripts/fixtures/parser-fuzz/main.rs" "$fixture/crates/probe/src/main.rs"
+cp "$root/crates/ic-platform/tests/fixtures/candid_malformed.rs" "$fixture/crates/probe/src/candid_malformed.rs"
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
 cargo metadata --offline --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"
+printf 'DIDL\000\001\170\052\000\000\000\000\000\000\000' > "$fixture/corpus/candid-one"
+printf 'DIDL\001\156\000\001\000\001' > "$fixture/corpus/candid-recursive"
+printf 'DIDL\200\200\200\200\200\200\200\200\200\200\000' > "$fixture/corpus/candid-overlong"
 printf aaaaa-aa > "$fixture/corpus/management"
 printf 2vxsx-fae > "$fixture/corpus/anonymous"
 printf '%s' 'k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae-6cc627i.1' > "$fixture/corpus/account"

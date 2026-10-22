@@ -1,0 +1,43 @@
+name: Dependency advisories
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  advisories:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Prepare audit tool
+        run: |
+          rustup toolchain install --profile minimal --no-self-update
+          cargo install cargo-audit --version '=0.22.2' --locked
+      - name: Audit both maintained lockfiles
+        run: bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git "$RUNNER_TEMP/advisory-evidence"
+      - name: Retain evidence in job log
+        if: always()
+        run: |
+          evidence="$RUNNER_TEMP/advisory-evidence"
+          for file in revision tool-version prepare.log workspace.status runtime.status workspace.log runtime.log; do
+            if [[ -f "$evidence/$file" ]]; then
+              printf '\nEvidence: %s\n' "$file"
+              cat "$evidence/$file"
+            fi
+          done

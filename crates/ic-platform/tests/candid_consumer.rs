@@ -315,3 +315,7 @@ pub fn strict_admission() {
 fn strict_consumer_admission() {
     strict_admission();
 }
+
+#[cfg(test)]
+#[path = "fixtures/candid_malformed.rs"]
+mod candid_malformed;

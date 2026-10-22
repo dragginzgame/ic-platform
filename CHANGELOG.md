@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.8]
+
+- Audit both maintained lockfiles against an isolated, recorded RustSec revision
+  in separate CI; retain maintenance warnings without treating them as vulnerabilities.
+- Extend bounded Candid malformed-input corpus and fuzz coverage; characterize
+  the inherited short-DER panic without changing cryptographic implementations.
+
 ## [0.6.7] - 2026-10-21
 
 - Record an individual export usage audit, separating observed sibling use,

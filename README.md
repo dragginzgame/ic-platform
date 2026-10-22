@@ -71,7 +71,9 @@ separate from this Linux workflow.
 Historical measurements and reproduction instructions are in
 [the benchmark report](docs/benchmarks/0.4/README.md).
 `bash scripts/ci/fuzz-parsers.sh` runs a separate 60-second coverage-guided
-Principal/Account differential campaign. Prepare nightly-2026-07-29, a C++
+Principal/Account differential campaign and caller-budgeted Candid decoding
+through all three public decoder policies. Deterministic recursive-type,
+overlong-header, extra-argument and truncation cases also run in consumer tests. Prepare nightly-2026-07-29, a C++
 compiler and registry sources explicitly first; the command installs nothing.
 It retains its corpus, crash artifacts and disposable lock under `target/`.
 This tooling-only libFuzzer selection does not enter consumer dependency graphs.
@@ -82,6 +84,16 @@ where external protocols specify it. Moving a dependency behind this boundary
 does not itself remove upstream code or shrink a canister.
 
 ## Development
+
+`bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git /tmp/platform-advisory-attempt`
+audits both maintained lockfiles without compiling feature matrices. Prepare
+`cargo-audit` explicitly first (CI selects 0.22.2); the destination must be new.
+For offline inspection, replace `online URL` with `local DATABASE_REPOSITORY`.
+The isolated database revision, tool version, copied locks, logs and statuses are
+retained. Offline results do not establish advisory freshness. Known vulnerabilities
+fail the check; informational maintenance warnings remain visible and are not
+exemptions. No lockfile or advisory cache is updated. A separate PR/main CI job
+runs the online check and retains its revision and findings in job logs.
 
 The optional `stable-structures` boundary supplies original substrate identities
 for Storage/Testkit and manager identities for Memory infrastructure; see the

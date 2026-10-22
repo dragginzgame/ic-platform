@@ -68,3 +68,20 @@ pub fn roundtrip() {
 fn key_and_hash_contracts_preserve_external_bytes() {
     roundtrip();
 }
+
+#[test]
+fn short_der_panic_is_characterized_without_changing_crypto() {
+    // Native unwinding characterizes the inherited bug; it is not a Wasm guard.
+    // The imported parser reads the 14-byte OID at offset 2 before checking length.
+    for length in 0..16 {
+        let bytes = vec![0; length];
+        assert!(
+            std::panic::catch_unwind(|| CanisterSigPublicKey::try_from(bytes.as_slice())).is_err()
+        );
+    }
+    // Once that slice is accessible, invalid OIDs return the upstream error.
+    for length in 16..=20 {
+        let bytes = vec![0; length];
+        assert!(CanisterSigPublicKey::try_from(bytes.as_slice()).is_err());
+    }
+}

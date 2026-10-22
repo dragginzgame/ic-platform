@@ -38,6 +38,7 @@ publish-check: host-tools-check
 check:
 	cargo check -p ic-platform -p ic-platform-macros --all-targets --all-features --locked
 test:
+	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
 	cargo test -p ic-platform -p ic-platform-macros --all-features --locked
 clippy:

@@ -1,8 +1,16 @@
 #![no_main]
 
+mod candid_malformed {
+    include!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/src/candid_malformed.rs"
+    ));
+}
+
 use ic_platform::{Account, Principal, account::ExternalAccount, principal::ExternalPrincipal};
 
 libfuzzer_sys::fuzz_target!(|data: &[u8]| {
+    candid_malformed::exercise(data);
     if let Ok(text) = std::str::from_utf8(data) {
         let owned = Principal::from_text(text);
         if text.len() <= Principal::MAX_LENGTH_IN_TEXT {
