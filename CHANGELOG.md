@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.10]
+
+- Adopt Shared Tooling 0.26.8 at `0b07c2a`, including Cargo setup lock-race
+  handling and concurrent source-cache initialization.
+- Select Wire 0.6.7 for Principal metadata and the independent runtime fixture;
+  preserve existing protocol bytes, caller budgets and external Candid paths.
+
 ## [0.6.9] - 2026-10-23
 
 - Align feature-selection regression expectations with the native-only

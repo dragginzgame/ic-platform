@@ -6,7 +6,7 @@ Platform's minimum Rust version is now 1.91 for all features, as authorized by
 the maintainer. Package versions remain unchanged until release. Enable
 `ic-platform = { version = "0.6.9", default-features = false, features = ["wire-schema"] }`
 after that version is supplied; qualification currently uses a local path.
-Select published `ic-wire` 0.6.4 or a compatible 0.6 release with its `typescript`
+Select published `ic-wire` 0.6.7 or a compatible 0.6 release with its `typescript`
 feature in the host schema producer. No direct Candid dependency is needed:
 
 ```rust,ignore
@@ -31,8 +31,8 @@ use `ExternalPrincipal` with explicit conversions. Account metadata is not added
 no runtime codec, cryptographic primitive, persisted format or retry policy changes.
 
 The workspace alias `ic-wire-metadata` names the modern host metadata dependency.
-The independent installed-runtime fixture retains its qualified Wire 0.4 selection;
-this integration neither bridges those protocol versions nor upgrades that fixture.
+The independent installed-runtime fixture also selects Wire 0.6.7. Its separate
+lock and installed qualification remain independent of host metadata generation.
 
 ## Authorized owned-endpoint Wire migration
 

@@ -86,7 +86,7 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-`wire-schema` enables native Wire metadata for owned Principal with Wire 0.6.4.
+`wire-schema` enables native Wire metadata for owned Principal with Wire 0.6.7.
 It is excluded from Wasm dependencies, even when selected. See the
 [migration contract](docs/migration.md#owned-principal-wire-metadata-pending-069).
 Run `bash scripts/ci/check-principal-wire-schema.sh /path/to/typescript/lib/tsc.js`
@@ -199,7 +199,7 @@ The root catalog has `Production dependencies` and `Tests and tooling only`
 sections. Fixture-only selections stay in the second section and outside the
 consumer library's production graph.
 `fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
-sections with grouped ordering. The reviewed Shared 0.26.4 snapshot supports
+sections with grouped ordering. The reviewed Shared 0.26.8 snapshot supports
 this through the paired local formatting commands.
 Keep a blank line after each section heading so sorting preserves its position.
 The common Rust tool set now contains only cargo-sort and cargo-sort-derives;

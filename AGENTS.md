@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`dc1ced7e240e90f0c6daa89fb6248fcb074164eb` (Shared Tooling 0.26.4) is recorded in
+`0b07c2a3163a5a66328e100b553baf93afd8ed07` (Shared Tooling 0.26.8) is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read

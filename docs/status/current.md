@@ -1,6 +1,32 @@
 # Current handoff
 
-## Pending 0.6.9 Principal metadata
+## Pending 0.6.10 adoption
+
+Shared Tooling 0.26.8 is adopted through its canonical exporter at
+`0b07c2a3163a5a66328e100b553baf93afd8ed07`, the verified upstream HEAD. Its VERSION
+is 0.26.8; the upstream changelog still labels it Unreleased. This identifies
+the exact committed snapshot, not a GitHub release. Explicit tool setup was
+rerun for the changed Cargo build policy; prior tool generations are retained.
+
+Both host Principal metadata and the independent runtime fixture now select
+Wire 0.6.7. The incoming root lockfile already selected it and is preserved;
+only Wire/derive change in the separate runtime lock. No source adaptation,
+crypto edit, executor/ic0 change, protocol conversion or sibling edit was needed.
+The maintainer's unrelated root lock upgrades remain intact.
+
+Full Clippy passed before longer checks. Explicit setup/offline tools admission,
+snapshot integrity, formatting, inventory, boundaries/pins, documentation links
+and source guards pass. Principal's standalone Rust 1.91/strict TypeScript/Node
+frame/length conformance passes. Runtime driver tests and both Wire/external-Candid
+Wasm builds pass on Rust 1.99.1 and 1.91. Evidence: `/tmp/platform-adopt-*.log`,
+`target/principal-wire-schema.FyYraF`, `target/cdk-runtime.pglTJN`.
+All four corresponding installed PocketIC 16 runs pass: raw awaits, admission,
+trap cleanup, timers, upgrade, cycles, stable rollback and certificate checks.
+The routine native/Wasm feature matrix also passes with the updated selection.
+No native macOS or live-network qualification, commit, push or release performed.
+Package versions remain 0.6.9; 0.6.10 notes are pending only.
+
+## Released 0.6.9 Principal metadata qualification
 
 Release validation exposed two stale critical-group expectations in the feature
 selection regression after `wire-schema` was added. They now include the native
@@ -9,7 +35,7 @@ the complete `make check-features` target pass, including 2,097,153 exhaustive
 selections, closure/admission regressions and both target graphs. Evidence:
 `/tmp/platform-feature-fix-{clippy,check}.log`. No release command was rerun.
 
-[#48](https://github.com/dragginzgame/ic-platform/issues/48) is implemented locally
+[#48](https://github.com/dragginzgame/ic-platform/issues/48) is implemented in 0.6.9
 with optional native-only `wire-schema`. Owned Principal implements Wire 0.6's
 metadata trait by delegating to its bounded byte-buffer schema (maximum 29).
 The existing serializer, parser, crypto and external Candid identities are
@@ -29,8 +55,8 @@ absent from plain Principal/executor and from Wasm with metadata selected.
 Imported-source guards, inventory, dependency boundaries/pins, doc links,
 formatting and ShellCheck pass. Native macOS and installed-canister qualification
 were not rerun. No sibling files, commits, publication or release versions changed.
-The incoming Agent lock update and migration notes are preserved. Supplying
-version is planned as 0.6.9; Canic adoption and issue closure await delivery.
+The Agent lock update and migration notes were preserved in that implementation.
+Release source is now `65f18a0`; the evidence below describes the earlier checks.
 
 ## Owned-endpoint migration
 
