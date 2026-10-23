@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.10]
+## [0.6.10] - 2026-10-23
 
 - Adopt Shared Tooling 0.26.8 at `0b07c2a`, including Cargo setup lock-race
   handling and concurrent source-cache initialization.
