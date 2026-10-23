@@ -77,6 +77,7 @@ check-inventory:
 check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance
 check-release-commands:
+	bash scripts/release/test-editor-bootstrap.sh
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 	bash scripts/ci/test-release-changelog.sh
 ci:
