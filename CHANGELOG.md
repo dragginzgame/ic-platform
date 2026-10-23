@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.11]
+
+- Keep release-editor setup and offline checks working with inherited CDPATH
+  and relative script invocation, including checkout paths containing spaces.
+
 ## [0.6.10] - 2026-10-23
 
 - Adopt Shared Tooling 0.26.8 at `0b07c2a`, including Cargo setup lock-race

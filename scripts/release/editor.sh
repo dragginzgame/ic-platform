@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-root="$(cd "$(dirname "$0")/../.." && pwd -P)"
+root="${BASH_SOURCE[0]}"
+[[ "$root" == /* ]] || root="$PWD/$root"
+root="$(CDPATH='' cd -P "${root%/*}/../.." && printf '%s/.' "$PWD")"
+root="${root%/.}"
 [[ $# == 1 ]] || exit 2
 case "$1" in install|check) ;; *) echo 'usage: editor.sh install|check' >&2; exit 2 ;; esac
 # shellcheck source=ci/release-editor.env
