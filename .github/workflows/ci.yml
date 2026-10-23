@@ -48,7 +48,7 @@ jobs:
         run: |
           rustup toolchain install --profile minimal --no-self-update --component rustfmt --component clippy
           rustup target add wasm32-unknown-unknown
-          rustup toolchain install 1.88.0 --profile minimal --target wasm32-unknown-unknown
+          rustup toolchain install 1.91.0 --profile minimal --target wasm32-unknown-unknown
       - name: Prepare shared tools
         run: make install-tools
       - name: Verify tools

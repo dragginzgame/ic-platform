@@ -26,6 +26,7 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | Feature | Implemented contract |
 | --- | --- |
 | `principal` | Owned Principal/Account types, text/Serde and external conversions; no Candid |
+| `wire-schema` | Native-only Wire metadata for owned Principal; implies principal, excludes metadata dependencies on Wasm |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
@@ -85,6 +86,14 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
+`wire-schema` enables native Wire metadata for owned Principal with Wire 0.6.4.
+It is excluded from Wasm dependencies, even when selected. See the
+[migration contract](docs/migration.md#owned-principal-wire-metadata-pending-069).
+Run `bash scripts/ci/check-principal-wire-schema.sh /path/to/typescript/lib/tsc.js`
+with an explicitly prepared TypeScript compiler and Node to qualify a standalone
+Rust 1.91 consumer against generated TS request/response bytes and length refusals.
+The command installs nothing and retains its fixture under `target/`.
+
 `bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git /tmp/platform-advisory-attempt`
 audits both maintained lockfiles without compiling feature matrices. Prepare
 `cargo-audit` explicitly first (CI selects 0.22.2); the destination must be new.
@@ -103,9 +112,9 @@ Prepare common tools explicitly with `make install-tools`; `make tools-check`
 verifies them offline. Prepare locked dependency sources with
 `cargo fetch --locked` before validation, including the Wasm target dependencies
 used by frozen standalone consumer checks. Checks never install executables. Rust 1.99.1 is the
-development compiler; Rust 1.88.0 is the minimum. Prepare both toolchains with the
+development compiler; Rust 1.91.0 is the minimum. Prepare both toolchains with the
 `wasm32-unknown-unknown` target for each compiler before their checks. For an
-existing MSRV toolchain, use `rustup target add --toolchain 1.88.0 wasm32-unknown-unknown`.
+existing MSRV toolchain, use `rustup target add --toolchain 1.91.0 wasm32-unknown-unknown`.
 
 Tool setup includes the pinned IC Build 0.18.0 release editor, which requires
 Rust 1.91 or later to build. `make install-release-editor` prepares it separately;
@@ -127,7 +136,7 @@ disposable registry-source copies and checks source preservation and licenses.
 It performs no dependency adoption, publication or runtime qualification.
 `make check-consumer` tests separate Candid-only, certification-only, parser-only,
 dynamic, management/Candid, ledger/Candid, ic0-only, Agent/certification three signature/BLS consumers and a CDK canister
-with only Platform declared, on Rust 1.99 and 1.88. The CDK standalone
+with only Platform declared, on Rust 1.99 and 1.91. The CDK standalone
 consumer proves raw entrypoints/calls without Candid or full CDK dependencies.
 The `external-candid` profile separately qualifies required external Candid
 entrypoints, explicit service registration and fixed wire bytes without a direct
@@ -135,7 +144,7 @@ Candid dependency; both compilers link its Wasm library.
 Candid and certification
 consumers also compile for Wasm on both compilers, as do the management, ledger
 and raw-system consumers all three signature/BLS selections and the CDK canister. `make msrv` runs native all-feature tests and checks
-the all-feature Wasm library at Rust 1.88.
+the all-feature Wasm library at Rust 1.91.
 The ic0-only caller compiles without executing a system call on native hosts.
 Management qualification covers fixed HTTP/history wire bytes and change variants.
 Ledger qualification covers account semantics, fixed account/block wire bytes,
@@ -306,7 +315,7 @@ protocol selections without starting a server. Runtime qualification remains an
 explicit target outside local full CI. Native macOS and live IC are separate
 qualification from Linux PocketIC or Wasm compilation.
 
-The Platform-only fixture remains a Rust 1.88 gate with no Wire-version MSRV
+The Platform-only fixture remains a Rust 1.91 gate with no Wire-version MSRV
 requirement. The installed Wire/Timers/Testkit fixture has Rust 1.91 inputs.
 No measured Wasm-size reduction is claimed.
 

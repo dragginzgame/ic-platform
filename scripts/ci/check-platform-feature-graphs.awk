@@ -28,6 +28,7 @@ function reject(reason) {
     }
     native = target !~ /^wasm/
     parser = native && enabled("candid-parser")
+    wire_schema = native && enabled("wire-schema")
     agent = native && enabled("agent")
     pocket = native && enabled("pocket-ic")
     secp = native && enabled("secp256k1")
@@ -42,7 +43,7 @@ function reject(reason) {
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
     candid = pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger
-    principal = enabled("principal") || cdk || enabled("runtime") || creation || enabled("candid") || enabled("candid-service") || management || ledger || enabled("agent") || enabled("candid-parser") || enabled("pocket-ic") || enabled("secp256k1")
+    principal = enabled("wire-schema") || enabled("principal") || cdk || enabled("runtime") || creation || enabled("candid") || enabled("candid-service") || management || ledger || enabled("agent") || enabled("candid-parser") || enabled("pocket-ic") || enabled("secp256k1")
     minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
     found_storage = 0
     found_ed = 0
@@ -85,6 +86,7 @@ function reject(reason) {
             found_pocket = 1
         }
         if (name == "ic-testkit" || name == "ic-testkit-candid") reject("Testkit in production")
+        if (name ~ /^(ic-wire|ic-wire-derive)$/ && !wire_schema) reject("unselected host Wire metadata")
         if (name == "candid_parser" && !parser) reject("unselected host parser")
         if (name == "ic-agent" && !agent) reject("unselected host Agent")
         if (name ~ /^ic-cdk/) {

@@ -13,6 +13,15 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+The optional native-only `wire-schema` feature adds the upstream Wire metadata
+trait to owned Principal, delegated to Wire's bounded byte-buffer schema.
+Platform #48's requested DTO schema integration uses the same Principal identity;
+consumer adoption is not yet claimed. The production alias `ic-wire-metadata`
+selects Wire 0.6 metadata independently of the qualified tooling-only Wire 0.4
+runtime fixture. Wire owns schema/TypeScript generation; Platform owns this
+projection of its existing serialization. Wasm, default and executor-only graphs
+exclude the added Wire/JSON dependency edges. All features now require Rust 1.91.
+
 Paths are relative to `crates/ic-platform/src` unless otherwise stated. Each
 module's explicit exports are authoritative; this table summarizes capabilities,
 not every symbol. Additions to exports require reviewing this table and the
@@ -121,6 +130,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal |
 | ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor |
 | ic-platform | stable-structures | dep:ic-stable-structures |
+| ic-platform | wire-schema | dep:ic-wire-metadata, dep:serde_json, principal |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -140,6 +150,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |
 | ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
+| ic-platform | ic-wire | ^0.6.4 | normal | cfg(not(target_family = "wasm")) | true | false | typescript |
 | ic-platform | ic0 | =1.2.0 | normal | all | true | true |  |
 | ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert, self_authenticating, serde |
 | ic-platform | icrc-ledger-types | ^0.2.0 | normal | all | true | false |  |
@@ -151,6 +162,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | serde_bytes | ^0.11 | dev | all | false | true |  |
 | ic-platform | serde_cbor | ^0.11.2 | normal | all | true | true |  |
 | ic-platform | serde_cbor | ^0.11.2 | dev | all | false | true |  |
+| ic-platform | serde_json | ^1.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |

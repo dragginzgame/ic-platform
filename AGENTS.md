@@ -25,8 +25,10 @@ Read [the current handoff](docs/status/current.md), then
 - Run full `make clippy` (all targets/features, warnings denied) before longer
   tests, as requested by the maintainer. Fix failures before proceeding.
 - Keep 0.6.2 backward-compatible. The maintainer has deferred further hard cuts
-  until Canic is live; do not remove APIs, features or supported consumer paths.
-- Rust 2024 and MSRV 1.88.0. Inherit workspace metadata and dependencies; ordinary
+  until Canic is live, except the explicitly authorized coordinated owned-endpoint
+  Wire migration in docs/migration.md. Retire its consumed compiler/service
+  exports only after consumer adoption; preserve required external Candid paths.
+- Rust 2024 and MSRV 1.91.0. Inherit workspace metadata and dependencies; ordinary
   directory modules only. Do not add Python tooling.
 - Ordinary implementation leaves staging, commits, release versions, publication
   and remote creation to the maintainer. Initial local repository creation is

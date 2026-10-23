@@ -1,5 +1,69 @@
 # Candid and runtime ownership
 
+## Owned Principal Wire metadata (pending 0.6.9)
+
+Platform's minimum Rust version is now 1.91 for all features, as authorized by
+the maintainer. Package versions remain unchanged until release. Enable
+`ic-platform = { version = "0.6.9", default-features = false, features = ["wire-schema"] }`
+after that version is supplied; qualification currently uses a local path.
+Select published `ic-wire` 0.6.4 or a compatible 0.6 release with its `typescript`
+feature in the host schema producer. No direct Candid dependency is needed:
+
+```rust,ignore
+#[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
+struct Request {
+    caller: ic_platform::Principal,
+}
+let schema = ic_wire::typescript::native_schema::<Request>()?;
+```
+
+`wire-schema` implies `principal`. Only native builds implement Wire's metadata
+trait and select Wire/JSON dependencies. Canister builds keep the original
+Principal Serde implementation even if a unified feature selection includes
+`wire-schema`; no metadata trait implementation or metadata dependency enters
+that target. Use ordinary `principal` in deployed consumer manifests.
+
+The projection delegates to Wire's bounded byte-buffer schema with Principal's
+existing 29-byte maximum. Generated TypeScript uses `Uint8Array`, not textual
+principals or a Candid marker. It preserves empty and anonymous identities and
+rejects longer values during encoding and decoding. External Candid DTOs still
+use `ExternalPrincipal` with explicit conversions. Account metadata is not added;
+no runtime codec, cryptographic primitive, persisted format or retry policy changes.
+
+The workspace alias `ic-wire-metadata` names the modern host metadata dependency.
+The independent installed-runtime fixture retains its qualified Wire 0.4 selection;
+this integration neither bridges those protocol versions nor upgrades that fixture.
+
+## Authorized owned-endpoint Wire migration
+
+Owned application endpoints and their Rust, host, test and browser clients use
+Wire, including controlled canister-to-canister calls. Candid remains for required
+external IC protocols: management, NNS/SNS, ledger and other pre-existing external
+interfaces. Running on the IC does not itself select Candid. Existing persisted
+and checkpoint bytes remain outside this transport migration.
+
+The maintainer authorized the coordinated owned-endpoint and frontend cut under
+[Canic #613](https://github.com/dragginzgame/canic/issues/613). This specifically
+supersedes deferral of that migration; it does not authorize unrelated API cuts.
+Canic owns endpoint-derived schemas, explicit method IDs/budgets, authorization
+and the separate `wire_schema_sha256` artifact identity. Wire owns codecs and
+TypeScript generation. [Tooling #225](https://github.com/dragginzgame/ic-tooling/issues/225)
+owns Build composition after the concrete producer contract is qualified.
+
+Platform [#38](https://github.com/dragginzgame/ic-platform/issues/38) retires
+exhausted compiler/service exports after consumer adoption, not before it.
+Remove corresponding generated imports, manifest selections and obsolete tests
+together. Preserve external DTO bytes and malformed-input coverage, replacing
+owned protocol fixtures with Wire equivalents. Qualify generated Rust/TS bytes,
+installed query/update calls, authorization and frame refusals, and schema/module/
+release mismatch admission before claiming completion. Report native macOS and
+installed-canister evidence separately.
+
+External DID inspection and textual external-call tooling may still require
+`candid-parser`; required external service declarations may still require
+`candid-service`. Neither feature is retired by this authorization alone. Removing
+compiler exports does not remove the upstream parser's compiler dependencies.
+
 ## Stable-structures substrate
 
 Pending 0.6.5 adds `memory_manager::{MemoryId, MemoryManager, VirtualMemory}`
@@ -44,7 +108,8 @@ remain separate from Platform export/identity and standalone reopening tests.
 The 0.2 boundary removed implicit Candid entrypoint codecs. Owned application
 endpoints use Wire; a feature-only update does not migrate pre-0.2 generators or
 preserve deployed formats. Canic owns that coordinated protocol migration.
-Further hard cuts remain deferred until Canic is live.
+The coordinated owned-endpoint Wire migration is authorized above; unrelated
+hard cuts remain deferred until Canic is live.
 
 Required pre-existing external Candid interfaces remain supported. Select `cdk`
 and `candid-service` (which implies `candid`). Supply `decode_with` and

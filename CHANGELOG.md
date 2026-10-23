@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.9]
+
+- Raise the minimum supported Rust version to 1.91 for all features.
+- Add optional native-only `wire-schema` metadata for owned Principal, preserving
+  byte-buffer encoding and the 29-byte limit in generated TypeScript (#48).
+- Record the authorized owned-endpoint Wire migration and consumer-first
+  retirement contract; retain Candid for required external IC interfaces.
+
 ## [0.6.8] - 2026-10-22
 
 - Audit both maintained lockfiles against an isolated, recorded RustSec revision

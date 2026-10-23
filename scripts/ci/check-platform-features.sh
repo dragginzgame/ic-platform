@@ -16,7 +16,7 @@ cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/met
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Candid service generation must remain explicitly selected' >&2; exit 1;
 }
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "candid-service", "canister-sig-creation", "cdk", "certification", "default", "ecdsa", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "principal", "runtime", "secp256k1", "signature-verification", "stable-structures"]' \
+"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "candid-service", "canister-sig-creation", "cdk", "certification", "default", "ecdsa", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "principal", "runtime", "secp256k1", "signature-verification", "stable-structures", "wire-schema"]' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
 }

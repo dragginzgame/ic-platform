@@ -1,11 +1,49 @@
 # Current handoff
 
-## Pending 0.6.8
+## Pending 0.6.9 Principal metadata
+
+[#48](https://github.com/dragginzgame/ic-platform/issues/48) is implemented locally
+with optional native-only `wire-schema`. Owned Principal implements Wire 0.6's
+metadata trait by delegating to its bounded byte-buffer schema (maximum 29).
+The existing serializer, parser, crypto and external Candid identities are
+unchanged. The maintainer selected Rust 1.91 as the minimum for all features;
+workspace metadata, CI, consumer checks and active documentation now agree.
+The modern host metadata dependency uses the `ic-wire-metadata` alias; the
+independent runtime fixture retains its qualified Wire 0.4 dependency.
+
+Full Clippy passed before tests. `make msrv` passes all-feature tests and Wasm
+compilation on Rust 1.91. A separate consumer derives metadata and generates
+strict TypeScript 7.0.2, executed with Node 24.21.0: empty, anonymous and 29-byte
+principal request/response frames agree with Rust; 30/31/255-byte values reject.
+Evidence: `target/principal-wire-schema.ZzjZOz`, `/tmp/platform48-wire.log`,
+`/tmp/platform48-{clippy,msrv,graphs,checks,source}.log`. The routine graph matrix
+passes 240 selections per target; focused native/Wasm graphs prove Wire/JSON
+absent from plain Principal/executor and from Wasm with metadata selected.
+Imported-source guards, inventory, dependency boundaries/pins, doc links,
+formatting and ShellCheck pass. Native macOS and installed-canister qualification
+were not rerun. No sibling files, commits, publication or release versions changed.
+The incoming Agent lock update and migration notes are preserved. Supplying
+version is planned as 0.6.9; Canic adoption and issue closure await delivery.
+
+## Owned-endpoint migration
+
+The maintainer reconfirmed Wire for all controlled application endpoints and
+clients, including canister-to-canister calls. Required external IC protocols
+remain Candid. The migration contract and local instructions now record this
+specific exception to the general hard-cut deferral; no feature is removed.
+Canic #613 has active uncommitted schema/endpoint/Blob work. Its newer evidence
+reports published Wire 0.6 metadata adoption, but complete endpoint registration,
+custom scalar schemas, artifact identities and generated-client qualification
+remain with that owner. Avoid a competing implementation over its pending batch.
+Tooling #225 still needs the concrete producer contract; Platform #38 retirement
+follows actual consumer adoption. Existing sibling checkouts remain untouched.
+
+## Released 0.6.8
 
 Work for [#46](https://github.com/dragginzgame/ic-platform/issues/46) and
-[#47](https://github.com/dragginzgame/ic-platform/issues/47) is local and uncommitted.
-Package versions remain 0.6.7; release/publication belong to the maintainer.
-The incoming Cargo.lock update, including Tokio 1.54.1, is preserved unchanged.
+[#47](https://github.com/dragginzgame/ic-platform/issues/47) is in local release
+commit `fd9ae1f` (0.6.8), including the maintainer's Tokio 1.54.1 update.
+This source observation does not establish registry publication or new CI results.
 No sibling edits, production API changes, crypto edits or dependency cuts.
 
 The advisory adapter audits both the workspace and maintained runtime fixture

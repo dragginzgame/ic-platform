@@ -19,8 +19,8 @@ def powerset:
      # Certificate/signature dependency paths and portable verification together.
      ["canister-sig-creation", "signature-verification", "bls", "certification", "ed25519"],
      # Host-feature exclusion on Wasm alongside the full runtime.
-     ["cdk", "agent", "candid-parser", "pocket-ic", "secp256k1"],
-     ($features - ["agent", "candid-parser", "pocket-ic", "secp256k1"])
+     ["cdk", "agent", "candid-parser", "pocket-ic", "secp256k1", "wire-schema"],
+     ($features - ["agent", "candid-parser", "pocket-ic", "secp256k1", "wire-schema"])
    ] | map(if (. - $features | length) == 0 then selection
            else error("critical selection contains an unknown feature") end)
  else error("unknown feature matrix mode") end) |
