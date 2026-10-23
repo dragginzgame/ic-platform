@@ -2,6 +2,13 @@
 
 ## Pending 0.6.9 Principal metadata
 
+Release validation exposed two stale critical-group expectations in the feature
+selection regression after `wire-schema` was added. They now include the native
+metadata feature and exclude it from the portable-only group. Full Clippy and
+the complete `make check-features` target pass, including 2,097,153 exhaustive
+selections, closure/admission regressions and both target graphs. Evidence:
+`/tmp/platform-feature-fix-{clippy,check}.log`. No release command was rerun.
+
 [#48](https://github.com/dragginzgame/ic-platform/issues/48) is implemented locally
 with optional native-only `wire-schema`. Owned Principal implements Wire 0.6's
 metadata trait by delegating to its bounded byte-buffer schema (maximum 29).

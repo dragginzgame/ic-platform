@@ -2,6 +2,8 @@
 
 ## [0.6.9]
 
+- Align feature-selection regression expectations with the native-only
+  `wire-schema` feature so release validation admits the updated matrix.
 - Raise the minimum supported Rust version to 1.91 for all features.
 - Add optional native-only `wire-schema` metadata for owned Principal, preserving
   byte-buffer encoding and the 29-byte limit in generated TypeScript (#48).

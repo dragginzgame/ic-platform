@@ -24,9 +24,9 @@ done
   (["candid,cdk,executor,ic0",
     "bls,ecdsa,ed25519",
     "cdk,certification,icrc-ledger-types,management-canister-types",
-    "agent,candid-parser,cdk,pocket-ic,secp256k1",
+    "agent,candid-parser,cdk,pocket-ic,secp256k1,wire-schema",
     "bls,canister-sig-creation,certification,ed25519,signature-verification",
-    ($f - ["agent","candid-parser","pocket-ic","secp256k1"] | join(","))] - $r | length) == 0
+    ($f - ["agent","candid-parser","pocket-ic","secp256k1","wire-schema"] | join(","))] - $r | length) == 0
 ' >/dev/null
 if "$jq" --arg mode typo -f scripts/ci/platform-feature-selections.jq "$fixture/features.json" >/dev/null 2>&1; then
     echo 'Unknown matrix mode was admitted' >&2; exit 1
