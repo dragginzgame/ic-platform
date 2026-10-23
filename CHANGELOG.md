@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.9]
+## [0.6.9] - 2026-10-23
 
 - Align feature-selection regression expectations with the native-only
   `wire-schema` feature so release validation admits the updated matrix.
