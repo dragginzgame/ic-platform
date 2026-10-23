@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.11]
+## [0.6.11] - 2026-10-23
 
 - Keep release-editor setup and offline checks working with inherited CDPATH
   and relative script invocation, including checkout paths containing spaces.
