@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.12]
+## [0.6.12] - 2026-10-24
 
 - Add native-only Wire metadata for owned Account under `wire-schema`, preserving
   existing bytes and absent versus explicit-zero subaccount representation.
