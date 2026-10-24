@@ -28,6 +28,8 @@ Evidence: `/tmp/platform51-*.log`, `target/boundary-consumer.bfXJi4`, and
 fixes missing Node/npm preparation before the full tool installer. Native CI at
 0.6.13 passed on all configured hosts, but installed-runtime setup failed before
 qualification. The workflow now uses the already qualified native CI setup.
+The fix merged through [PR #53](https://github.com/dragginzgame/ic-platform/pull/53)
+at `1b16288`; corrected hosted runtime qualification is pending.
 New native macOS/installed-canister execution remains separate from local proof.
 
 0.6.13's Wire proof automation and graph cleanup are released; historical details
@@ -51,8 +53,10 @@ Account also has different binary serialization, so it is not a drop-in alias.
 
 Owned endpoints and clients use Wire. Required external IC interfaces retain
 Candid, and existing checkpoint bytes remain consumer-owned. The coordinated
-migration is [Canic #613](https://github.com/dragginzgame/canic/issues/613) and
-[Tooling #225](https://github.com/dragginzgame/ic-tooling/issues/225). Do not replace
+migration remains [Canic #613](https://github.com/dragginzgame/canic/issues/613).
+[Tooling #225](https://github.com/dragginzgame/ic-tooling/issues/225) is closed as
+redundant coordination; its remaining concrete Build defect is tracked in
+[Tooling #239](https://github.com/dragginzgame/ic-tooling/issues/239). Do not replace
 active sibling work. Parser retirement and deferred Handlebars packaging stay on
 [#38](https://github.com/dragginzgame/ic-platform/issues/38); the crypto-bigint
 advisory remains separate on [#50](https://github.com/dragginzgame/ic-platform/issues/50).
