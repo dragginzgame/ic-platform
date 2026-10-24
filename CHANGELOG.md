@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.14]
+## [0.6.14] - 2026-10-24
 
 - Keep standalone consumer library imports and service declarations warning-free;
   deny warnings in every generated consumer profile.
