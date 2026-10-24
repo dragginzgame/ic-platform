@@ -1,38 +1,38 @@
 # Current handoff
 
-## Pending 0.6.13 validation cleanup
+## Pending 0.6.14 issue fixes
 
-The working batch starts from released 0.6.12 (`a332a15`). No production Rust API,
-codec, feature selection, cryptographic implementation or Cargo dependency changes.
-The pending changelog is 0.6.13; package versions remain 0.6.12. No staging,
-commit, push, publication or sibling edits are part of this batch.
+The working batch starts from released 0.6.13 (`19ca27a`). It adds
+`signature_verification::verify_canister_sig_with_time` and `CanisterSigTimeError`
+under the existing signature feature for [#51](https://github.com/dragginzgame/ic-platform/issues/51).
+The original verifier and every imported crypto body/vector remain exact. One
+child-module declaration permits reuse of the private original helpers; removing
+only that line recovers the original verifier source hash. The new owned module
+supplies evidence extraction and time-format admission, not crypto algorithms.
 
-`make check-wire-schema` now runs after full Clippy in `make ci`. Explicit setup
-uses Node 24.21.0, npm 12.2.0 and integrity-locked TypeScript 7.0.2; `make install-tools`
-includes the local installer and `make tools-check` includes offline admission.
-The native CI matrix prepares these tools on Linux and both macOS architectures.
-Validation never downloads npm dependencies. The standalone proof covers owned
-Principal/Account frames, representation preservation and malformed request/response
-refusals. Tool declarations live in `scripts/fixtures/wire-schema/package.json`.
+The adapter decodes the envelope and signing certificate once each and returns
+signing-certificate nanoseconds only after the same ordered checks succeed.
+Delegation time is never substituted. Errors distinguish upstream verification
+from absent/ambiguous/malformed time. Consumers keep protected trust, issuer/seed,
+DER admission, clock and inclusive freshness/skew policy. No dependency, feature,
+external DTO, wire/storage byte or original verifier behavior changes.
 
-Wasm graph caching now admits `wire-schema` only after checking both native-only
-optional dependency declarations and the exact feature edges. Principal remains
-in the closure; native metadata selections are not collapsed. Regression cases
-reject missing, duplicate, portable, required or renamed dependency contracts and
-added local feature implications. All feature selections still receive admission.
+Full Clippy passed before tests. Sixteen verifier/evidence tests and the standalone
+consumer pass at Rust 1.91; standalone native/development/MSRV and Wasm checks pass.
+An isolated copy of Auth 0.15.2 changes only its call/error mapping: Clippy, 40
+canister-signature/certified-proof tests and all-feature MSRV Wasm compilation pass.
+Evidence: `/tmp/platform51-*.log`, `target/boundary-consumer.bfXJi4`, and
+`/tmp/platform51-auth.uWZkFS`. Sibling checkouts remain read-only. No speed/size claim.
 
-Full Clippy passed before longer checks. The Rust 1.91 standalone consumer,
-TypeScript 7.0.2 and Node 24.21.0 proof passes, including seven malformed Account
-cases in both directions. Evidence: `target/principal-wire-schema.ZI4cyz` and
-`/tmp/platform-cleanup-*.log`. Dependency declarations were checked with a
-throwaway index admitting the new npm files; the real index remains untouched.
-All 240 routine feature selections per target pass: 219 native and 127 Wasm
-queries (previously 144 Wasm). Independent principal/metadata Wasm Cargo graphs
-are identical; metadata compilation passes on Rust 1.91. Graph guard regressions,
-formatting, inventory, boundaries, release-command tests, documentation links,
-ShellCheck, actionlint and offline tool admission pass. No timing gain is claimed.
-New native macOS CI execution and installed-canister qualification are not claimed.
-Full release CI remains maintainer-owned.
+[Installed-runtime CI #52](https://github.com/dragginzgame/ic-platform/issues/52)
+fixes missing Node/npm preparation before the full tool installer. Native CI at
+0.6.13 passed on all configured hosts, but installed-runtime setup failed before
+qualification. The workflow now uses the already qualified native CI setup.
+New native macOS/installed-canister execution remains separate from local proof.
+
+0.6.13's Wire proof automation and graph cleanup are released; historical details
+remain in this handoff at `19ca27a`. Packages remain 0.6.13; 0.6.14 is notes only.
+Publication and release remain maintainer-owned.
 
 ## Published capabilities and consumer ownership
 
