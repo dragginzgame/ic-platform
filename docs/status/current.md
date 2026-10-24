@@ -2,6 +2,23 @@
 
 ## Pending 0.6.14 issue fixes
 
+Standalone consumer warning cleanup is local and uncommitted. Generated proof
+packages deny Rust warnings without changing upstream dependency flags. Principal
+remains exported in ordinary/Wasm proofs; the service proof uses a callable
+roundtrip helper without altering its frozen Candid output. Full Clippy, all 22
+consumer profiles across development/MSRV and applicable Wasm checks, admission
+regressions, formatting, doc links and ShellCheck pass. An injected unused import
+is rejected. Evidence: `/tmp/platform-consumer-warnings-*.log`.
+
+The consumer runner's loop and successful exit are now parsed together. A live
+source edit during Cargo previously shifted Bash's read offset and could execute
+a partial command after every profile passed. A FIFO-controlled regression
+reproduces that failure and now passes; final Cargo errors still propagate.
+Focused evidence: `/tmp/platform-consumer-tail-*.log`. The actual final
+stable-structures profile passes development/MSRV tests and both Wasm checks.
+The complete `make check-consumer` rerun also passes all 22 profiles with no
+warnings; the retained log is `/tmp/platform-consumer-tail-check-consumer.log`.
+
 The working batch starts from released 0.6.13 (`19ca27a`). It adds
 `signature_verification::verify_canister_sig_with_time` and `CanisterSigTimeError`
 under the existing signature feature for [#51](https://github.com/dragginzgame/ic-platform/issues/51).

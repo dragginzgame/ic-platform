@@ -1,5 +1,6 @@
-//! The unconditional identity surface works without optional capabilities.
-use ic_platform::Principal;
+//! Owned identities need only the principal capability.
+// Keep the identity in the ordinary library/Wasm proof as well as its tests.
+pub use ic_platform::Principal;
 
 #[test]
 fn principal_is_available_without_features() {

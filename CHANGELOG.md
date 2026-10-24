@@ -2,6 +2,10 @@
 
 ## [0.6.14]
 
+- Keep standalone consumer library imports and service declarations warning-free;
+  deny warnings in every generated consumer profile.
+- Finish consumer qualification without rereading a concurrently edited script
+  tail; preserve Cargo failures and regression-test live source edits.
 - Add authenticated signing-certificate time evidence using unchanged signature
   verification helpers, with typed verification/time-format failures (#51).
 - Preserve the original verifier and cryptographic bodies; qualify Auth policy

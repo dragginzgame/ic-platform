@@ -8,11 +8,16 @@ fn declared_value() -> u64 {
 
 contract::export_service!(ic_platform::candid::contract);
 
-#[test]
-fn service_generation_preserves_declarations() {
+/// Check callable declarations and exact service bytes in an ordinary library.
+pub fn roundtrip() {
     assert_eq!(declared_value(), 1);
     assert_eq!(
         __export_service(),
         "service : { value : () -> (nat64) query }"
     );
+}
+
+#[test]
+fn service_generation_preserves_declarations() {
+    roundtrip();
 }

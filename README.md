@@ -141,6 +141,8 @@ It performs no dependency adoption, publication or runtime qualification.
 dynamic, management/Candid, ledger/Candid, ic0-only, Agent/certification three signature/BLS consumers and a CDK canister
 with only Platform declared, on Rust 1.99 and 1.91. The CDK standalone
 consumer proves raw entrypoints/calls without Candid or full CDK dependencies.
+Generated consumer packages deny warnings in ordinary library, test and Wasm
+builds, without changing lint flags for upstream dependencies.
 The `external-candid` profile separately qualifies required external Candid
 entrypoints, explicit service registration and fixed wire bytes without a direct
 Candid dependency; both compilers link its Wasm library.

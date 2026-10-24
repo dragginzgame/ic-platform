@@ -50,6 +50,8 @@ name = "platform-consumer-proof"
 version.workspace = true
 edition.workspace = true
 publish = false
+[lints.rust]
+warnings = "deny"
 [dependencies]
 ic-platform.workspace = true
 MANIFEST
@@ -100,6 +102,7 @@ cp Cargo.lock "$fixture/Cargo.lock"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 if [[ -n "$published" ]]; then
     # Refuse path/Git replacement of either the facade or its generator.
+    # shellcheck disable=SC2016 # $version and $facades are jq variables.
     "$root/.tools/host/bin/jq" -e --arg version "$published" '
         [.packages[] | select(.name == "ic-platform")] as $facades |
         ($facades | length) == 1 and $facades[0].version == $version and
@@ -143,4 +146,6 @@ if [[ "$capability" != candid-parser && "$capability" != dynamic && "$capability
     CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.91.0 "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
 fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
-done
+# Parse the exit with the loop before Cargo runs. A concurrent source edit must
+# not make Bash resume at a shifted byte offset in the changed file afterward.
+done; exit 0

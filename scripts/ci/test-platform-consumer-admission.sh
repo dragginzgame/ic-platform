@@ -26,7 +26,17 @@ case "$1" in
         if [[ "$TEST_CANDID" == yes ]]; then printf 'candid v0.10.38\n'; fi
         if [[ "$TEST_REJECT" == yes ]]; then printf 'ic-agent v0.49.2\n'; fi
         ;;
-    *) printf '%s\n' "$*" >> "$TEST_CALLS" ;;
+    *)
+        printf '%s\n' "$*" >> "$TEST_CALLS"
+        if [[ "${TEST_FAIL_LAST:-no}" == yes && "$1" == +1.91.0 && "$2" == build ]]; then
+            exit 42
+        fi
+        if [[ "${TEST_EDIT:-no}" == yes && "$1" == +1.91.0 && "$2" == build && ! -e "$TEST_READY.seen" ]]; then
+            : > "$TEST_READY.seen"
+            printf 'ready\n' > "$TEST_READY"
+            read -r _ < "$TEST_RESUME"
+        fi
+        ;;
 esac
 STUB
 chmod +x "$fixture/bin/cargo" "$fixture/bin/rustc"
@@ -48,3 +58,36 @@ for capability in cdk runtime external-candid; do
     done
 done
 echo 'Consumer admission: CDK/runtime/external Candid selection and failure propagation passed'
+
+export TEST_FAIL_LAST=yes TEST_REJECT=no TEST_CANDID=no
+if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" cdk > "$fixture/failure.log" 2>&1; then
+    echo 'Final Cargo failure was masked by consumer completion' >&2; exit 1
+else
+    [[ $? == 42 ]] || { cat "$fixture/failure.log" >&2; exit 1; }
+fi
+export TEST_FAIL_LAST=no
+echo 'Final Cargo failure still propagates before successful completion'
+
+# Cargo may run for minutes while a maintainer edits this checkout. Rewrite the
+# same inode while the last call is paused, shifting the already-read file tail.
+mkfifo "$fixture/ready" "$fixture/resume"
+export TEST_EDIT=yes TEST_REJECT=no TEST_CANDID=no
+export TEST_READY="$fixture/ready" TEST_RESUME="$fixture/resume"
+: > "$TEST_CALLS"
+"$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" cdk > "$fixture/edit.log" 2>&1 &
+runner_pid=$!
+read -r _ < "$TEST_READY"
+{
+    printf '# Concurrent edit: %0200d\n' 0
+    cat "$fixture/scripts/ci/check-platform-consumer.sh"
+    printf '\nexit 97\n'
+} > "$fixture/changed.sh"
+cat "$fixture/changed.sh" > "$fixture/scripts/ci/check-platform-consumer.sh"
+printf 'resume\n' > "$TEST_RESUME"
+if ! wait "$runner_pid"; then
+    cat "$fixture/edit.log" >&2
+    echo 'Consumer runner read a shifted script tail after its final Cargo call' >&2
+    exit 1
+fi
+[[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == 4 ]] || { cat "$fixture/edit.log" >&2; exit 1; }
+echo 'Consumer runner completes its parsed command list after a concurrent edit'
