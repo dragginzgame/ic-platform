@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.6.14]
+
+- Prepare pinned Node/npm before installed-runtime CI tool setup (#52).
+
 ## [0.6.13] - 2026-10-24
 
 - Gate Principal/Account generated Wire clients in CI with explicitly prepared,
