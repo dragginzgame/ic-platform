@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.13]
+## [0.6.13] - 2026-10-24
 
 - Gate Principal/Account generated Wire clients in CI with explicitly prepared,
   pinned Node/npm/TypeScript tooling on each supported native host.
