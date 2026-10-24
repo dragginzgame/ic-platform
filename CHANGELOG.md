@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.12]
+
+- Add native-only Wire metadata for owned Account under `wire-schema`, preserving
+  existing bytes and absent versus explicit-zero subaccount representation.
+- Qualify standalone Account Rust/TypeScript request and response frames.
+
 ## [0.6.11] - 2026-10-23
 
 - Keep release-editor setup and offline checks working with inherited CDPATH

@@ -15,6 +15,9 @@ use crate::{Principal, PrincipalError};
 use serde::{Deserialize, Serialize};
 use std::{fmt, hash::Hash, str::FromStr};
 
+#[cfg(all(feature = "wire-schema", not(target_family = "wasm")))]
+mod wire_schema;
+
 /// The 32-byte ledger subaccount; no principal or Candid marker is embedded.
 pub type Subaccount = [u8; 32];
 

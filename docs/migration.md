@@ -27,12 +27,34 @@ The projection delegates to Wire's bounded byte-buffer schema with Principal's
 existing 29-byte maximum. Generated TypeScript uses `Uint8Array`, not textual
 principals or a Candid marker. It preserves empty and anonymous identities and
 rejects longer values during encoding and decoding. External Candid DTOs still
-use `ExternalPrincipal` with explicit conversions. Account metadata is not added;
-no runtime codec, cryptographic primitive, persisted format or retry policy changes.
+use `ExternalPrincipal` with explicit conversions. Account metadata now describes
+its existing owner and optional fixed 32-byte subaccount fields; no runtime codec,
+cryptographic primitive, persisted format or retry policy changes.
 
 The workspace alias `ic-wire-metadata` names the modern host metadata dependency.
 The independent installed-runtime fixture also selects Wire 0.6.7. Its separate
 lock and installed qualification remain independent of host metadata generation.
+
+### Account adoption
+
+Account metadata is pending the next release; use the local path for qualification
+until a supplying version is published. No new feature is required: host schema
+producers select `wire-schema`, while canister consumers select `principal`.
+Use `ic_platform::Account` for ICRC owner/subaccount identities in shared DTOs;
+its enclosing DTO can derive `ic_wire::Wire` just like the Principal example.
+Generated TypeScript represents the owner as `Uint8Array` and the subaccount as
+`null | { readonly some: readonly number[] }`, with exactly 32 elements when present.
+It is not a legacy ICP AccountIdentifier or a ledger/asset identifier.
+
+`None` and `Some([0; 32])` compare, order and hash equally, but their serialized
+representations remain distinct. The metadata and codec do not normalize them.
+Consumers needing canonical bytes for signatures, request deduplication or content
+hashes must define that policy explicitly before encoding; do not silently rewrite
+existing stored data. Ledger identity, authorization, allocation and migration
+policies remain consumer-owned. Convert to `account::ExternalAccount` only at an
+external ledger DTO boundary, selecting `icrc-ledger-types` there. Conversions
+preserve the absent/explicit-zero distinction. No Candid dependency is required
+for the owned Account or its Wire metadata.
 
 ## Authorized owned-endpoint Wire migration
 

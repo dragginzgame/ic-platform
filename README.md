@@ -26,7 +26,7 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | Feature | Implemented contract |
 | --- | --- |
 | `principal` | Owned Principal/Account types, text/Serde and external conversions; no Candid |
-| `wire-schema` | Native-only Wire metadata for owned Principal; implies principal, excludes metadata dependencies on Wasm |
+| `wire-schema` | Native-only Wire metadata for owned Principal and Account; implies principal, excludes metadata dependencies on Wasm |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
@@ -86,7 +86,7 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-`wire-schema` enables native Wire metadata for owned Principal with Wire 0.6.7.
+`wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.6.7.
 It is excluded from Wasm dependencies, even when selected. See the
 [migration contract](docs/migration.md#owned-principal-wire-metadata-pending-069).
 Run `bash scripts/ci/check-principal-wire-schema.sh /path/to/typescript/lib/tsc.js`

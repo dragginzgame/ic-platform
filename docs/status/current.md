@@ -1,30 +1,32 @@
 # Current handoff
 
-## Pending 0.6.10 adoption
+## Pending Account metadata
 
-Shared Tooling 0.26.8 is adopted through its canonical exporter at
-`0b07c2a3163a5a66328e100b553baf93afd8ed07`, the verified upstream HEAD. Its VERSION
-is 0.26.8; the upstream changelog still labels it Unreleased. This identifies
-the exact committed snapshot, not a GitHub release. Explicit tool setup was
-rerun for the changed Cargo build policy; prior tool generations are retained.
+Against released 0.6.11 (`d5945a3`), owned Account now implements native-only Wire
+metadata under the existing `wire-schema` feature. Its ordered fields retain
+Principal's bounded byte buffer and an optional fixed 32-byte subaccount.
+Serialization, effective-zero equality/hashing, external DTO identities and all
+cryptographic code are unchanged. Consumers keep ledger context, allocation,
+authorization and any canonicalization policy; see the Account adoption section
+of [the migration contract](../migration.md#account-adoption).
 
-Both host Principal metadata and the independent runtime fixture now select
-Wire 0.6.7. The incoming root lockfile already selected it and is preserved;
-only Wire/derive change in the separate runtime lock. No source adaptation,
-crypto edit, executor/ic0 change, protocol conversion or sibling edit was needed.
-The maintainer's unrelated root lock upgrades remain intact.
+Full Clippy passed before longer checks. The standalone Rust 1.91 consumer and
+strict TypeScript/Node proof pass for Principal and Account request/response
+frames, including absent/explicit-zero/nonzero subaccounts and fixed-length
+encoding refusals. Evidence: `target/principal-wire-schema.2tjB46` and
+`/tmp/platform-account-*.log`. Native/Wasm graphs pass all 240 routine selections
+per target; Wasm compilation passes on Rust 1.91 and the development toolchain.
+Existing Principal and external Account semantics/Candid-byte regressions pass
+on 1.91, as do formatting, inventory, boundary and documentation checks.
+The incoming Cargo.lock smallvec update is preserved.
+No sibling edits, staging, commits, publication or package version changes.
+The new Account capability awaits release; no consumer adoption is claimed.
 
-Full Clippy passed before longer checks. Explicit setup/offline tools admission,
-snapshot integrity, formatting, inventory, boundaries/pins, documentation links
-and source guards pass. Principal's standalone Rust 1.91/strict TypeScript/Node
-frame/length conformance passes. Runtime driver tests and both Wire/external-Candid
-Wasm builds pass on Rust 1.99.1 and 1.91. Evidence: `/tmp/platform-adopt-*.log`,
-`target/principal-wire-schema.FyYraF`, `target/cdk-runtime.pglTJN`.
-All four corresponding installed PocketIC 16 runs pass: raw awaits, admission,
-trap cleanup, timers, upgrade, cycles, stable rollback and certificate checks.
-The routine native/Wasm feature matrix also passes with the updated selection.
-No native macOS or live-network qualification, commit, push or release performed.
-Package versions remain 0.6.9; 0.6.10 notes are pending only.
+Handlebars packaging is deferred on [#38](https://github.com/dragginzgame/ic-platform/issues/38#issuecomment-6381635102).
+Shared Tooling 0.26.8 at `0b07c2a` and Wire 0.6.7 are already selected. Prior
+adoption/native/Wasm/installed qualification is retained in this file's history
+at `d5945a3`; the current metadata change has no native macOS or installed-canister
+qualification. It does not change runtime codecs or executor identity.
 
 ## Released 0.6.9 Principal metadata qualification
 

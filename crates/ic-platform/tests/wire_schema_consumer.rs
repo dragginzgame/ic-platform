@@ -81,3 +81,69 @@ fn principal_schema_and_frames() {
         .unwrap();
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, ic_wire::Wire)]
+struct AccountRequest {
+    account: ic_platform::Account,
+}
+
+#[test]
+fn account_schema_and_frames_preserve_representation() {
+    use ic_platform::Account;
+    let schema = typescript::native_schema::<AccountRequest>().unwrap();
+    let absent = Account::from(Principal::anonymous());
+    let zero = Account {
+        subaccount: Some([0; 32]),
+        ..absent
+    };
+    assert_eq!(absent, zero);
+    assert_ne!(
+        native::encode_request(18, &absent, LIMITS).unwrap(),
+        native::encode_request(18, &zero, LIMITS).unwrap()
+    );
+    let mut vectors = Vec::new();
+    for raw in [vec![], vec![4], vec![255; 29]] {
+        for subaccount in [None, Some([0; 32]), Some([255; 32])] {
+            let value = AccountRequest {
+                account: Account {
+                    owner: Principal::from_slice(&raw),
+                    subaccount,
+                },
+            };
+            let request = native::encode_request(18, &value, LIMITS).unwrap();
+            let response = native::encode_response(18, &value, LIMITS).unwrap();
+            // Compare against the pre-existing field encoding, not Account equality.
+            assert_eq!(
+                request,
+                native::encode_request(18, &(serde_bytes::Bytes::new(&raw), subaccount), LIMITS)
+                    .unwrap()
+            );
+            let decoded = native::decode_request::<AccountRequest>(18, &request, LIMITS).unwrap();
+            assert_eq!(decoded.account.owner, value.account.owner);
+            assert_eq!(decoded.account.subaccount, subaccount);
+            let decoded = native::decode_response::<AccountRequest>(18, &response, LIMITS).unwrap();
+            assert_eq!(decoded.account.subaccount, subaccount);
+            vectors.push(serde_json::json!({"owner": raw, "subaccount": subaccount,
+                "request": request, "response": response}));
+        }
+    }
+    if let Some(directory) = std::env::var_os("PLATFORM_WIRE_SCHEMA_OUTPUT") {
+        let directory = std::path::PathBuf::from(directory);
+        let method = serde_json::json!({
+            "name": "account", "mode": "query", "id": "18", "request": schema,
+            "response": schema, "requestBytes": 512, "responseBytes": 512,
+            "requestNodes": 1024, "responseNodes": 1024, "requestDepth": 16, "responseDepth": 16
+        });
+        std::fs::write(
+            directory.join("account.ts"),
+            typescript::generate_registry(&Default::default(), &[method], "./wire-runtime.js")
+                .unwrap(),
+        )
+        .unwrap();
+        std::fs::write(
+            directory.join("accounts.json"),
+            serde_json::to_vec(&vectors).unwrap(),
+        )
+        .unwrap();
+    }
+}

@@ -29,7 +29,7 @@ PLATFORM_WIRE_SCHEMA_OUTPUT="$fixture/browser" CARGO_TARGET_DIR="$root/target/co
     cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --frozen
 printf '{"type":"module"}\n' > "$fixture/browser/package.json"
 node "$compiler" --strict --target ES2022 --module NodeNext --moduleResolution NodeNext \
-    --outDir "$fixture/browser" "$fixture/browser/principal.ts" "$fixture/browser/wire-runtime.ts"
+    --outDir "$fixture/browser" "$fixture/browser/account.ts" "$fixture/browser/principal.ts" "$fixture/browser/wire-runtime.ts"
 cp "$root/scripts/fixtures/wire-schema/check.mjs" "$fixture/browser/check.mjs"
 node "$fixture/browser/check.mjs"
 printf 'Principal Wire evidence: %s\n' "$fixture"

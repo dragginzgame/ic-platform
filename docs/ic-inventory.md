@@ -14,7 +14,9 @@ Upstream type members are not individually covered; this is not removal approval
 ## APIs, consumers and maintenance ownership
 
 The optional native-only `wire-schema` feature adds the upstream Wire metadata
-trait to owned Principal, delegated to Wire's bounded byte-buffer schema.
+trait to owned Principal and Account. Principal delegates to Wire's bounded
+byte-buffer schema; Account describes its ordered owner and optional fixed
+32-byte subaccount fields, preserving absent versus explicit zero.
 Platform #48's requested DTO schema integration uses the same Principal identity;
 consumer adoption is not yet claimed. The production alias `ic-wire-metadata`
 selects Wire 0.6.7 metadata independently of the tooling-only Wire 0.6.7
