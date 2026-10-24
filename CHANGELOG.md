@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.15]
+## [0.6.15] - 2026-10-24
 
 - Adopt published Wire 0.7.2 for native Principal/Account metadata and runtime
   qualification; host schema producers must upgrade their Wire selection together.
