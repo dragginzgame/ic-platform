@@ -16,7 +16,15 @@ library. Both imported modules retain all original function bodies and unit test
 - `verification/mod.rs`: ic-signature-verification 0.3.0, dfinity/ic revision
   `b8613a99eb324c313c6080f84964cb670ced517b`,
   `packages/ic-signature-verification/src/canister_sig.rs`. Its creation import
-  points at the sibling imported module; nothing else changes.
+  points at the sibling imported module. The additive `evidence` child module
+  declaration is the only later packaging change; its removal reconstructs the
+  exact imported verifier hash. Every original function and test remains exact.
+
+The owned `verification/evidence` adapter calls the original parse/check/verify
+helpers in their original order and then reads signing-certificate time. It adds
+no cryptographic algorithm, hash, domain separator or key encoding. The old
+verifier remains unchanged, including success for valid signatures without time.
+Time admission is additive and does not supply freshness or authorization policy.
 
 For 0.6, seven `cfg(test)` attributes keep the unused delegation-signing helper
 and creation CBOR parser (including their imports/type/constant) in reference
@@ -35,3 +43,10 @@ policy. No short-DER panic repair or security-policy change is implied.
 Platform now owns the packaging identity of CanisterSigPublicKey. It is no longer
 interchangeable with the registry creation package's type. BLS, certification and
 external Principal identities remain registry types. This requires the 0.4 line.
+
+The new `tests/fixtures/signature-time-valid.hex` fixture is generated only with
+upstream certification/BLS APIs in `verification/evidence/tests.rs`. Set
+`PLATFORM_SIGNATURE_TIME_FIXTURE` to an output path when running
+`authenticated_times_cover_u64_and_existing_nonminimal_encodings` to reproduce
+its fixed test-key-1, `seed`/`message`, 128-nanosecond certificate. This adds a
+vector without modifying any imported upstream vector or cryptographic body.

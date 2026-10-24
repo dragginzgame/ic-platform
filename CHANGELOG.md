@@ -2,6 +2,10 @@
 
 ## [0.6.14]
 
+- Add authenticated signing-certificate time evidence using unchanged signature
+  verification helpers, with typed verification/time-format failures (#51).
+- Preserve the original verifier and cryptographic bodies; qualify Auth policy
+  compatibility and standalone native/MSRV/Wasm consumers.
 - Prepare pinned Node/npm before installed-runtime CI tool setup (#52).
 
 ## [0.6.13] - 2026-10-24

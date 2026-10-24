@@ -1,5 +1,7 @@
 //! Platform-only IC signature verification against original-owner certificate bytes.
-use ic_platform::signature_verification::verify_canister_sig;
+use ic_platform::signature_verification::{
+    CanisterSigTimeError, verify_canister_sig, verify_canister_sig_with_time,
+};
 
 /// Preserve accepted signed bytes and upstream failures without adding trust policy.
 pub fn roundtrip() {
@@ -10,6 +12,24 @@ pub fn roundtrip() {
         verify_canister_sig(b"platform-signature", &signature, &public, &root),
         Ok(())
     );
+    // The old vector intentionally has no time: only the additive API refuses it.
+    assert_eq!(
+        verify_canister_sig_with_time(b"platform-signature", &signature, &public, &root),
+        Err(CanisterSigTimeError::InvalidCertificateTime)
+    );
+    let timed = hex(include_str!("fixtures/signature-time-valid.hex"));
+    let key = ic_platform::canister_sig_creation::CanisterSigPublicKey::new(
+        ic_platform::principal::ExternalPrincipal::from_slice(&[1; 10]),
+        b"seed".to_vec(),
+    );
+    assert_eq!(
+        verify_canister_sig_with_time(b"message", &timed, &key.to_der(), &root),
+        Ok(128)
+    );
+    assert!(matches!(
+        verify_canister_sig_with_time(b"changed", &timed, &key.to_der(), &root),
+        Err(CanisterSigTimeError::Verification(_))
+    ));
     assert!(verify_canister_sig(b"changed", &signature, &public, &root).is_err());
     assert!(verify_canister_sig(b"platform-signature", &signature, &public, &[0; 96]).is_err());
     let error: String =

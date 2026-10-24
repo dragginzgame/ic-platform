@@ -360,3 +360,4 @@ mod tests {
         assert_eq!(find_leaf_for_principal(tree.as_ref(), b"\x05"), None);
     }
 }
+pub(crate) mod evidence; // Platform: authenticated time adapter.

@@ -54,6 +54,45 @@ external ledger DTO boundary, selecting `icrc-ledger-types` there. Conversions
 preserve the absent/explicit-zero distinction. No Candid dependency is required
 for the owned Account or its Wire metadata.
 
+## Authenticated canister-signature time (pending 0.6.14)
+
+The existing `signature_verification::verify_canister_sig` is unchanged, including
+`Result<(), String>` and acceptance of valid signatures without a time leaf.
+The additive `verify_canister_sig_with_time` uses the same four byte-slice inputs
+and returns `Result<u64, CanisterSigTimeError>` under the existing
+`signature-verification` feature. The u64 is the authenticated signing certificate's
+Unix-epoch time in nanoseconds, never the subnet delegation certificate's time.
+
+The new adapter calls the unchanged imported parse/check/BLS helpers in the same
+order; it decodes the signature envelope and signing certificate once each. It
+returns evidence only after certified-data, seed/message path, delegation and
+signature checks succeed. The only imported-source change is one child-module
+declaration; the source guard removes exactly it and recovers the original hash.
+No cryptographic body, root/hash/domain bytes, key encoding or original vector changes.
+
+`CanisterSigTimeError::Verification(String)` retains upstream diagnostics as opaque
+text; `InvalidCertificateTime` distinguishes timestamp admission. Time must be a
+unique visible top-level leaf and a complete u64 unsigned LEB128 value, at most ten
+bytes. Missing/unknown/non-leaf time, duplicate visible labels, truncated/overflowing
+values and trailing bytes are refused. Non-minimal complete values within ten bytes
+remain accepted, matching Auth's current reader. Upstream sorted-tree assumptions
+and all existing parser admission limitations remain.
+
+Auth adoption replaces its verifier-plus-second-CBOR-decode sequence with the
+additive call. Map `Verification(message)` to Auth's existing `InvalidSignature`
+and `InvalidCertificateTime` to its existing time rejection. Keep the existing
+inclusive freshness/future-skew arithmetic unchanged. Keep protected issuer/seed,
+root and host time, byte/depth admission and canonical DER pre-validation in Auth.
+No clock, application authorization, automatic quota or freshness policy is supplied.
+Other Auth CBOR/LEB128 uses must be audited before retiring any dependencies.
+
+Local implementation is not publication. Consumers await a supplying release;
+no sibling checkout has been changed. The existing standalone consumer qualifies
+both APIs without direct crypto/Candid dependencies. An isolated copy of Auth
+0.15.2 adopts only the new API/error mapping and retains its actual policy tests.
+Native macOS and installed-canister qualification remain separate from native,
+MSRV and Wasm compilation. No timing or binary-size improvement is claimed.
+
 ## Authorized owned-endpoint Wire migration
 
 Owned application endpoints and their Rust, host, test and browser clients use
