@@ -19,6 +19,13 @@ const LIMITS: Limits = Limits {
 };
 
 #[test]
+fn owned_identities_implement_the_consumers_wire_trait() {
+    fn accepts<T: ic_wire::typescript::Wire>() {}
+    accepts::<ic_platform::Principal>();
+    accepts::<ic_platform::Account>();
+}
+
+#[test]
 fn principal_schema_and_frames() {
     assert_eq!(
         typescript::native_schema::<Principal>().unwrap(),
@@ -90,6 +97,17 @@ struct AccountRequest {
 #[test]
 fn account_schema_and_frames_preserve_representation() {
     use ic_platform::Account;
+    assert_eq!(
+        typescript::native_schema::<Account>().unwrap(),
+        serde_json::json!({
+            "k": "record", "fields": [
+                {"name": "owner", "value": {"k": "bytes", "max": 29}},
+                {"name": "subaccount", "value": {"k": "option", "item": {
+                    "k": "array", "max": 32, "item": {"k": "u", "bits": 8}
+                }}}
+            ]
+        })
+    );
     let schema = typescript::native_schema::<AccountRequest>().unwrap();
     let absent = Account::from(Principal::anonymous());
     let zero = Account {

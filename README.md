@@ -86,7 +86,7 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-`wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.6.7.
+`wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.7.2.
 It is excluded from Wasm dependencies, even when selected. See the
 [migration contract](docs/migration.md#owned-principal-and-account-wire-metadata).
 Prepare Node 24.21.0 and npm 12.2.0, then run `make install-wire-tools`
@@ -96,6 +96,9 @@ TS request/response bytes and malformed-frame refusals. It runs after Clippy in
 `make ci` on Linux and both macOS architectures. Validation installs nothing and
 retains its fixture under `target/`. `make wire-tools-check` admits prepared tools
 offline; versions are declared in `scripts/fixtures/wire-schema/package.json`.
+After explicitly preparing a published Platform release in Cargo's registry cache,
+append `--published X.Y.Z` to `check-principal-wire-schema.sh` to verify that exact
+registry artifact rather than the checkout. This checks both owned metadata types.
 
 `bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git /tmp/platform-advisory-attempt`
 audits both maintained lockfiles without compiling feature matrices. Prepare

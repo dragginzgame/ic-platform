@@ -2,11 +2,13 @@
 
 ## Owned Principal and Account Wire metadata
 
-Platform requires Rust 1.91 for all features. Principal metadata shipped in
-0.6.9 and Account metadata in 0.6.12. Host schema producers select
-`ic-platform = { version = "0.6.12", default-features = false, features = ["wire-schema"] }`.
-Select published `ic-wire` 0.6.7 or a compatible 0.6 release with its `typescript`
-feature in the host schema producer. No direct Candid dependency is needed:
+Platform requires Rust 1.91 for all features. Principal metadata originally shipped
+in 0.6.9 and Account metadata in 0.6.12. The pending 0.6.15 supplier adopts published
+Wire 0.7.2: qualify using a local Platform path until that release is published,
+then select `ic-platform = { version = "0.6.15", default-features = false, features = ["wire-schema"] }`.
+Host producers must also select `ic-wire = { version = "0.7.2", features = ["typescript"] }`
+for their derives and generation. Wire 0.6 and 0.7 metadata traits are different
+identities; update both selections together. No direct Candid dependency is needed:
 
 ```rust,ignore
 #[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
@@ -31,12 +33,39 @@ its existing owner and optional fixed 32-byte subaccount fields; no runtime code
 cryptographic primitive, persisted format or retry policy changes.
 
 The workspace alias `ic-wire-metadata` names the modern host metadata dependency.
-The independent installed-runtime fixture also selects Wire 0.6.7. Its separate
+The independent installed-runtime fixture also selects Wire 0.7.2. Its separate
 lock and installed qualification remain independent of host metadata generation.
+
+[#55](https://github.com/dragginzgame/ic-platform/issues/55) tracks the supplying
+publication: published Platform 0.6.14 still implements Wire 0.6 metadata and
+cannot satisfy a Wire 0.7 trait bound. The prepared 0.6.15 source satisfies both
+Principal and Account bounds. After release and explicit registry-cache preparation,
+run `bash scripts/ci/check-principal-wire-schema.sh /path/to/tsc.js --published 0.6.15`.
+This mode refuses a path/Git replacement and checks the exact registry version.
+Local-path qualification is not evidence that the new artifact is published.
+
+Blob Contracts must subsequently publish its paired Platform/Wire selection
+before Canic consumes its Wire `Limits` and `GenerationError` identities. Do not
+add cross-version adapters, consumer-local wrappers or a distribution Cargo patch.
+
+Wire 0.7 decodes in one pass with only `Deserialize`; it no longer reserializes
+the result to compare canonical bytes. Encoder bytes and frame identities are
+unchanged, but maps, sets and custom visitors can normalize accepted input.
+Consumers retain ordering/uniqueness admission and must keep original frame bytes
+for exact retries, signatures and hashes. Do not reconstruct those bytes from a
+decoded value. Required external Candid and existing persisted formats are outside
+this adoption. The owned Principal/Account serializers and subaccount policy do
+not change.
+
+Remove exhaustive matches on Wire's retired `Noncanonical` error: nonminimal
+varints and malformed character payloads now report `Malformed`. Configure encode
+and decode allowances independently; decode no longer charges a second serializer
+pass. Platform adds no automatic quotas, normalization or compatibility codec.
+The existing runtime fixture budgets remain consumer-owned and are not increased.
 
 ### Account adoption
 
-Account metadata is supplied by published Platform 0.6.12. No new feature is required: host schema
+Account metadata was first supplied by published Platform 0.6.12. No new feature is required: host schema
 producers select `wire-schema`, while canister consumers select `principal`.
 Use `ic_platform::Account` for ICRC owner/subaccount identities in shared DTOs;
 its enclosing DTO can derive `ic_wire::Wire` just like the Principal example.

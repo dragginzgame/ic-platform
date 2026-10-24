@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.15]
+
+- Adopt published Wire 0.7.2 for native Principal/Account metadata and runtime
+  qualification; host schema producers must upgrade their Wire selection together.
+- Use Deserialize-only fixture decoders, retain frame bytes and consumer-owned
+  budgets, and document one-pass decoding/normalization and error migration.
+- Qualify Principal/Account Wire trait identity and Blob Contracts all-feature
+  adoption; add exact-registry metadata verification for publication follow-up (#55).
+
 ## [0.6.14] - 2026-10-24
 
 - Keep standalone consumer library imports and service declarations warning-free;

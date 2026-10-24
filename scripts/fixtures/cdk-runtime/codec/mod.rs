@@ -3,7 +3,7 @@ use crate::protocol::{LIMITS, method_id};
 use ic_platform::cdk::api;
 use serde::{Serialize, de::DeserializeOwned};
 
-pub fn decode<T: Serialize + DeserializeOwned, const ID: u64>(bytes: Vec<u8>) -> T {
+pub fn decode<T: DeserializeOwned, const ID: u64>(bytes: Vec<u8>) -> T {
     ic_wire::native::decode_request(ID, &bytes, LIMITS)
         .unwrap_or_else(|error| api::trap(format!("fixture request: {error}")))
 }
@@ -17,7 +17,7 @@ pub fn encode_unit<const ID: u64>() -> Vec<u8> {
 pub fn request<T: Serialize>(name: &str, value: &T) -> Vec<u8> {
     ic_wire::native::encode_request(method_id(name), value, LIMITS).unwrap()
 }
-pub fn response<T: Serialize + DeserializeOwned>(name: &str, bytes: &[u8]) -> T {
+pub fn response<T: DeserializeOwned>(name: &str, bytes: &[u8]) -> T {
     ic_wire::native::decode_response(method_id(name), bytes, LIMITS).unwrap()
 }
 

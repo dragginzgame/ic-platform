@@ -17,7 +17,7 @@ fn admit() -> Result<(), String> {
     Ok(())
 }
 
-fn decode<T: Serialize + DeserializeOwned, const ID: u64>(bytes: Vec<u8>) -> T {
+fn decode<T: DeserializeOwned, const ID: u64>(bytes: Vec<u8>) -> T {
     ic_wire::native::decode_request(ID, &bytes, request_limits(ID))
         .unwrap_or_else(|error| api::trap(format!("Wire fixture request: {error}")))
 }

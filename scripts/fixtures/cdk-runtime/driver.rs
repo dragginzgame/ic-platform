@@ -10,16 +10,16 @@ use protocol::{LIMITS, method_id};
 use serde::{Serialize, de::DeserializeOwned};
 use std::time::Duration;
 
-// Native Serde admission charges four nodes per byte; leave room for framing.
+// Keep the existing copy corpus and its explicit fixture-owned frame allowance.
 const BUFFER_COPY_SIZES: [usize; 5] = [0, 1, 63, 1024, 2048];
 
 fn request(method: &str, args: impl Serialize) -> Vec<u8> {
     ic_wire::native::encode_request(method_id(method), &args, LIMITS).unwrap()
 }
-fn response<R: Serialize + DeserializeOwned>(method: &str, bytes: &[u8]) -> R {
+fn response<R: DeserializeOwned>(method: &str, bytes: &[u8]) -> R {
     ic_wire::native::decode_response(method_id(method), bytes, LIMITS).unwrap()
 }
-fn query<R: Serialize + DeserializeOwned>(
+fn query<R: DeserializeOwned>(
     pic: &PocketIc,
     id: Principal,
     method: &str,
@@ -31,7 +31,7 @@ fn query<R: Serialize + DeserializeOwned>(
             .unwrap(),
     )
 }
-fn update<R: Serialize + DeserializeOwned>(
+fn update<R: DeserializeOwned>(
     pic: &PocketIc,
     id: Principal,
     method: &str,
