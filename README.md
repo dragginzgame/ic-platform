@@ -88,11 +88,14 @@ does not itself remove upstream code or shrink a canister.
 
 `wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.6.7.
 It is excluded from Wasm dependencies, even when selected. See the
-[migration contract](docs/migration.md#owned-principal-wire-metadata-pending-069).
-Run `bash scripts/ci/check-principal-wire-schema.sh /path/to/typescript/lib/tsc.js`
-with an explicitly prepared TypeScript compiler and Node to qualify a standalone
-Rust 1.91 consumer against generated TS request/response bytes and length refusals.
-The command installs nothing and retains its fixture under `target/`.
+[migration contract](docs/migration.md#owned-principal-and-account-wire-metadata).
+Prepare Node 24.21.0 and npm 12.2.0, then run `make install-wire-tools`
+(or `make install-tools`) to install integrity-locked TypeScript 7.0.2.
+`make check-wire-schema` qualifies a standalone Rust 1.91 consumer against generated
+TS request/response bytes and malformed-frame refusals. It runs after Clippy in
+`make ci` on Linux and both macOS architectures. Validation installs nothing and
+retains its fixture under `target/`. `make wire-tools-check` admits prepared tools
+offline; versions are declared in `scripts/fixtures/wire-schema/package.json`.
 
 `bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git /tmp/platform-advisory-attempt`
 audits both maintained lockfiles without compiling feature matrices. Prepare

@@ -1,12 +1,13 @@
 # Collapse only local implications and strictly admitted native-only leaves.
 # A changed leaf contract fails closed, rather than reusing a possibly wrong graph.
 def native_leaves($package):
-  {agent: "ic-agent", "candid-parser": "candid_parser", secp256k1: "ic-secp256k1", "pocket-ic": "pocket-ic"} |
+  {agent: ["ic-agent"], "candid-parser": ["candid_parser"], secp256k1: ["ic-secp256k1"], "pocket-ic": ["pocket-ic"], "wire-schema": ["ic-wire-metadata", "serde_json"]} |
   to_entries | map(. as $leaf |
-    [$package.dependencies[] | select((.rename // .name) == $leaf.value)] as $deps |
-    if $package.features[$leaf.key] == ["principal", "dep:" + $leaf.value] and
-       ($deps | length) == 1 and $deps[0].optional and
-       $deps[0].target == "cfg(not(target_family = \"wasm\"))"
+    [$leaf.value[] as $name |
+      [$package.dependencies[] | select((.rename // .name) == $name)]] as $deps |
+    if $package.features[$leaf.key] == (["principal"] + ($leaf.value | map("dep:" + .))) and
+       all($deps[]; length == 1 and .[0].optional and
+           .[0].target == "cfg(not(target_family = \"wasm\"))")
     then $leaf.key else error("native-only cache contract changed: " + $leaf.key) end);
 def closure($features):
   . as $before |

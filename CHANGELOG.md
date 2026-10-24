@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.13]
+
+- Gate Principal/Account generated Wire clients in CI with explicitly prepared,
+  pinned Node/npm/TypeScript tooling on each supported native host.
+- Qualify malformed Account request/response refusals in Rust and TypeScript.
+- Reuse equivalent Wasm graphs for host-only metadata selections while guarding
+  both dependency declarations and preserving Principal implications.
+- Refresh published metadata adoption guidance and the current handoff.
+
 ## [0.6.12] - 2026-10-24
 
 - Add native-only Wire metadata for owned Account under `wire-schema`, preserving

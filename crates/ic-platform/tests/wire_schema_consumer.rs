@@ -147,3 +147,62 @@ fn account_schema_and_frames_preserve_representation() {
         .unwrap();
     }
 }
+
+fn account_frames<T: Serialize>(value: &T) -> (Vec<u8>, Vec<u8>) {
+    (
+        native::encode_request(18, value, LIMITS).unwrap(),
+        native::encode_response(18, value, LIMITS).unwrap(),
+    )
+}
+
+#[test]
+fn malformed_account_frames_are_refused() {
+    // Build malformed field layouts with the canonical encoder. The fixed-array
+    // subaccount has no length prefix; missing/extra elements must still refuse.
+    let owner = serde_bytes::Bytes::new(&[4]);
+    let valid = ic_platform::Account::from(Principal::anonymous());
+    let mut cases = vec![
+        (
+            "short subaccount",
+            account_frames(&(owner, 1_u8, [0_u8; 31])),
+        ),
+        (
+            "long subaccount",
+            account_frames(&(owner, 1_u8, [0_u8; 32], 0_u8)),
+        ),
+        ("invalid option tag", account_frames(&(owner, 2_u8))),
+        (
+            "oversized owner",
+            account_frames(&(serde_bytes::Bytes::new(&[0; 30]), None::<[u8; 32]>)),
+        ),
+        ("trailing bytes", account_frames(&(valid, 7_u8))),
+        (
+            "wrong method",
+            (
+                native::encode_request(19, &valid, LIMITS).unwrap(),
+                native::encode_response(19, &valid, LIMITS).unwrap(),
+            ),
+        ),
+    ];
+    let (request, response) = account_frames(&valid);
+    cases.push(("wrong direction", (response, request)));
+    let mut vectors = Vec::new();
+    for (name, (request, response)) in cases {
+        assert!(
+            native::decode_request::<AccountRequest>(18, &request, LIMITS).is_err(),
+            "{name}"
+        );
+        assert!(
+            native::decode_response::<AccountRequest>(18, &response, LIMITS).is_err(),
+            "{name}"
+        );
+        vectors.push(serde_json::json!({"name": name, "request": request, "response": response}));
+    }
+    if let Some(directory) = std::env::var_os("PLATFORM_WIRE_SCHEMA_OUTPUT") {
+        std::fs::write(
+            std::path::PathBuf::from(directory).join("accounts-invalid.json"),
+            serde_json::to_vec(&vectors).unwrap(),
+        )
+        .unwrap();
+    }
+}

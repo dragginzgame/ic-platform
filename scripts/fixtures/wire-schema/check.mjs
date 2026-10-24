@@ -40,3 +40,9 @@ for (const length of [0, 31, 33]) {
   } }));
 }
 console.log('Account Rust/TypeScript frames preserve absent, zero and nonzero subaccounts');
+const invalidAccounts = JSON.parse(readFileSync(new URL('./accounts-invalid.json', import.meta.url)));
+for (const { name, request, response } of invalidAccounts) {
+  assert.throws(() => account.decodeRequest(Uint8Array.from(request)), name);
+  assert.throws(() => account.decodeResponse(Uint8Array.from(response)), name);
+}
+console.log('Account malformed request/response refusals agree with Rust');

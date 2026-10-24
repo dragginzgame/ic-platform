@@ -23,13 +23,14 @@ fi
 echo 'Long closure names retain distinct short cache IDs'
 # Native-only leaves may be removed from a Wasm key only after exact admission.
 native_metadata="$(printf '%s' "$metadata" | "$jq" '
-  .[0].packages[0] |= (.features += {principal:[],agent:["principal","dep:ic-agent"],"candid-parser":["principal","dep:candid_parser"],secp256k1:["principal","dep:ic-secp256k1"],"pocket-ic":["principal","dep:pocket-ic"]} |
-  .dependencies = ["ic-agent","candid_parser","ic-secp256k1","pocket-ic"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
+  .[0].packages[0] |= (.features += {principal:[],agent:["principal","dep:ic-agent"],"candid-parser":["principal","dep:candid_parser"],secp256k1:["principal","dep:ic-secp256k1"],"pocket-ic":["principal","dep:pocket-ic"],"wire-schema":["principal","dep:ic-wire-metadata","dep:serde_json"]} |
+  .dependencies = ["ic-agent","candid_parser","ic-secp256k1","pocket-ic","ic-wire-metadata","serde_json"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
 selections='["none","default","agent","agent,candid-parser,secp256k1,pocket-ic","agent,cdk"]'
 actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" -f scripts/ci/platform-feature-closures.jq)"
 expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tprincipal\nagent,candid-parser,secp256k1,pocket-ic\tprincipal\nagent,cdk\tcdk,executor,ic0,principal')"
 [[ "$actual" == "$expected" ]] || { echo 'Unexpected target-aware closure' >&2; exit 1; }
-for feature in agent candid-parser secp256k1 pocket-ic; do
+for feature in agent candid-parser secp256k1 pocket-ic wire-schema; do
+    # shellcheck disable=SC2016 # $feature is a jq variable.
     changed="$(printf '%s' "$native_metadata" | "$jq" --arg feature "$feature" '.[0].packages[0].features[$feature] += ["candid"]')"
     if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$changed" -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
         echo "Admitted non-leaf feature $feature" >&2; exit 1
@@ -41,4 +42,18 @@ for change in '.dependencies[0].target = null' '.dependencies[1].optional = fals
         echo "Admitted changed dependency contract: $change" >&2; exit 1
     fi
 done
-echo 'Native-only Wasm equivalence and eight fail-closed contract cases passed'
+echo 'Native-only Wasm equivalence and fail-closed contract cases passed'
+# Both metadata dependencies must be admitted; retain Principal's implication.
+selections='["principal","wire-schema","wire-schema,principal","wire-schema,cdk"]'
+actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" -f scripts/ci/platform-feature-closures.jq)"
+expected="$(printf 'principal\tprincipal\nwire-schema\tprincipal\nwire-schema,principal\tprincipal\nwire-schema,cdk\tcdk,executor,ic0,principal')"
+[[ "$actual" == "$expected" ]] || { echo 'Wire metadata implication lost' >&2; exit 1; }
+actual="$(printf '%s' '["wire-schema"]' | "$jq" -r --arg target native --argjson metadata "$native_metadata" -f scripts/ci/platform-feature-closures.jq)"
+[[ "$actual" == $'wire-schema\tprincipal,wire-schema' ]] || { echo 'Native metadata was collapsed' >&2; exit 1; }
+for change in '.dependencies[4].target = null' '.dependencies[5].optional = false' '.dependencies |= map(select(.name != "serde_json"))' '.dependencies += [.dependencies[5]]'; do
+    changed="$(printf '%s' "$native_metadata" | "$jq" ".[0].packages[0] |= ($change)")"
+    if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$changed" -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
+        echo "Admitted changed metadata contract: $change" >&2; exit 1
+    fi
+done
+echo 'Wire metadata target isolation and both dependency guards passed'

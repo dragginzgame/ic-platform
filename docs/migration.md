@@ -1,11 +1,10 @@
 # Candid and runtime ownership
 
-## Owned Principal Wire metadata (pending 0.6.9)
+## Owned Principal and Account Wire metadata
 
-Platform's minimum Rust version is now 1.91 for all features, as authorized by
-the maintainer. Package versions remain unchanged until release. Enable
-`ic-platform = { version = "0.6.9", default-features = false, features = ["wire-schema"] }`
-after that version is supplied; qualification currently uses a local path.
+Platform requires Rust 1.91 for all features. Principal metadata shipped in
+0.6.9 and Account metadata in 0.6.12. Host schema producers select
+`ic-platform = { version = "0.6.12", default-features = false, features = ["wire-schema"] }`.
 Select published `ic-wire` 0.6.7 or a compatible 0.6 release with its `typescript`
 feature in the host schema producer. No direct Candid dependency is needed:
 
@@ -37,8 +36,7 @@ lock and installed qualification remain independent of host metadata generation.
 
 ### Account adoption
 
-Account metadata is pending the next release; use the local path for qualification
-until a supplying version is published. No new feature is required: host schema
+Account metadata is supplied by published Platform 0.6.12. No new feature is required: host schema
 producers select `wire-schema`, while canister consumers select `principal`.
 Use `ic_platform::Account` for ICRC owner/subaccount identities in shared DTOs;
 its enclosing DTO can derive `ic_wire::Wire` just like the Principal example.

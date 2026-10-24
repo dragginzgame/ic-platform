@@ -24,7 +24,7 @@ serde_json = "1"
 MANIFEST
 cp "$root/crates/ic-platform/tests/wire_schema_consumer.rs" "$fixture/src/lib.rs"
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
-cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --format-version 1 > "$fixture/metadata.json"
+cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 PLATFORM_WIRE_SCHEMA_OUTPUT="$fixture/browser" CARGO_TARGET_DIR="$root/target/consumer-msrv" \
     cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --frozen
 printf '{"type":"module"}\n' > "$fixture/browser/package.json"
@@ -32,4 +32,4 @@ node "$compiler" --strict --target ES2022 --module NodeNext --moduleResolution N
     --outDir "$fixture/browser" "$fixture/browser/account.ts" "$fixture/browser/principal.ts" "$fixture/browser/wire-runtime.ts"
 cp "$root/scripts/fixtures/wire-schema/check.mjs" "$fixture/browser/check.mjs"
 node "$fixture/browser/check.mjs"
-printf 'Principal Wire evidence: %s\n' "$fixture"
+printf 'Principal/Account Wire evidence: %s\n' "$fixture"

@@ -49,6 +49,12 @@ jobs:
           rustup toolchain install --profile minimal --no-self-update --component rustfmt --component clippy
           rustup target add wasm32-unknown-unknown
           rustup toolchain install 1.91.0 --profile minimal --target wasm32-unknown-unknown
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Prepare pinned npm
+        run: npm install --global --ignore-scripts "$(node -p 'require("./scripts/fixtures/wire-schema/package.json").packageManager')"
       - name: Prepare shared tools
         run: make install-tools
       - name: Verify tools
