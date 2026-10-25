@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.16]
+## [0.6.16] - 2026-10-25
 
 - Simplify consumer qualification with one profile table, shared registry identity
   admission, and checked-in runtime fixture manifests.
