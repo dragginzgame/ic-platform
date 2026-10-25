@@ -16,7 +16,8 @@ cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/met
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Candid service generation must remain explicitly selected' >&2; exit 1;
 }
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | (.features | keys) == ["agent", "bls", "candid", "candid-parser", "candid-service", "canister-sig-creation", "cdk", "certification", "default", "ecdsa", "ed25519", "executor", "ic0", "icrc-ledger-types", "management-canister-types", "pocket-ic", "principal", "runtime", "secp256k1", "signature-verification", "stable-structures", "wire-schema"]' \
+"$root/.tools/host/bin/jq" -e --slurpfile policy scripts/ci/platform-feature-policy.json \
+    '.packages[] | select(.name == "ic-platform") | (.features | keys) == $policy[0].features' \
     target/feature-graphs/metadata.json > /dev/null || {
     echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
 }
@@ -70,12 +71,14 @@ generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name =
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
 cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"
 "$root/.tools/host/bin/jq" '.packages[] | select(.name == "ic-platform") | .features | keys - ["default"]' target/feature-graphs/metadata.json |
-    "$root/.tools/host/bin/jq" --arg mode "$mode" -f scripts/ci/platform-feature-selections.jq > "$cache/selections.json"
+    "$root/.tools/host/bin/jq" --arg mode "$mode" --slurpfile policy scripts/ci/platform-feature-policy.json \
+        -f scripts/ci/platform-feature-selections.jq > "$cache/selections.json"
 selection_count="$("$root/.tools/host/bin/jq" length "$cache/selections.json")"
 printf 'Feature matrix mode: %s\n' "$mode"
 for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     mapping="$cache/$target.tsv"
     "$root/.tools/host/bin/jq" -r --arg target "$target" --slurpfile metadata target/feature-graphs/metadata.json \
+        --slurpfile policy scripts/ci/platform-feature-policy.json \
         -f scripts/ci/platform-feature-closures.jq "$cache/selections.json" > "$cache/$target-closures.tsv"
     awk -f scripts/ci/platform-feature-cache-keys.awk "$cache/$target-closures.tsv" > "$mapping"
     # Resolve/download once during setup, not in every exhaustive graph query.

@@ -1,90 +1,93 @@
 # Current handoff
 
-## Pending Wire 0.7 adoption
+## Compatible cleanup after 0.6.15
 
-This local batch starts at released Platform 0.6.14 (`45b331f`). Published Wire
-0.7.2 is selected for native `wire-schema` metadata and the independent runtime
-fixture. Upstream release source is `a4da015251beb8fa3346fb3780c0b3dc85c0ef32`.
-Package versions remain 0.6.14; 0.6.15 notes are pending. No staging, commit, push,
-release, publication or sibling edits are part of this batch.
+This local batch starts at released Platform 0.6.15 (`6dcf54a`). Pending notes use
+0.6.16 because the changes preserve the public API, feature selections, external
+wire bytes and persisted formats. Package versions remain 0.6.15. No staging,
+commit, push, release, publication or sibling edit is part of this batch.
 
-Only Wire/derive versions change in the root lock. The incoming uncommitted Wire
-0.6.13 selection is intentionally superseded by 0.7.2; other selections are
-preserved. The maintained runtime lock updates only Wire/derive plus required
-edges to its already locked bytemuck/serde_bytes. No unrelated dependency upgrade,
-executor/ic0 identity change, cryptographic source edit or feature change.
+The incoming uncommitted root lock selects Wire/derive 0.7.5 and is preserved.
+The manifest still declares Wire 0.7.2 ranges; the independent maintained runtime
+lock still selects 0.7.2. This cleanup does not upgrade or reconcile either lock.
+Shared Tooling 0.26.8 remains selected at `0b07c2a`; snapshot payloads are unchanged.
 
-Host schema producers must update their Wire derives/TypeScript selection to
-0.7 together with the next Platform supplier: 0.6/0.7 metadata traits have distinct
-identities. Canister/default/executor-only graphs retain their feature isolation.
-The [migration contract](../migration.md#owned-principal-and-account-wire-metadata)
-describes this coordinated host adoption and the new decode semantics.
+Implemented cleanup:
 
-[#55](https://github.com/dragginzgame/ic-platform/issues/55) is source-qualified but
-awaits maintainer publication of the next Platform release. Published 0.6.14 plus
-Wire 0.7.2 reproduces E0277 for both Principal and Account; the pending source passes
-the exact two bounds. `check-principal-wire-schema.sh ... --published X.Y.Z` now
-admits only the exact registry facade for post-publication qualification.
+- Consumer features, source/assets and Wasm commands have one reviewed TSV profile
+  table. Unknown profiles, graph admission, Cargo failure propagation and the
+  parsed final-loop exit retain their behavior.
+- Published consumer, metadata and runtime proofs share exact registry identity
+  admission. Generator presence is required for runtime qualification; an optional
+  generator, when present elsewhere, must also match the facade's exact version.
+  Runtime qualification retains older registry facades through Timers while
+  refusing replacements and requiring the exact supplier/generator pair.
+- Runtime manifests are explicit templates with shared workspace metadata. Setup,
+  graph admission and compilation retain their ordering and separate lock owner.
+- The reviewed feature inventory and native-only leaf dependency policy share one
+  JSON input. Cargo still supplies structural facts; graph permission/refusal
+  checks and adversarial fixtures remain independently specified.
+- Formatting write/check commands share their extra source list. Installed-runtime
+  CI selects common host/Rust setup without release-editor or frontend tooling;
+  standard contributor setup and CI still retain the complete frontend proof.
+- Entrypoint validation resolves paths and reply/context decisions before token
+  emission. Guard order, explicit unit codecs, mixed-site locals, symbols and
+  sync/async executor selection are preserved.
+- Principal deserialization directly preserves format errors. Bounded grammar,
+  visitors, binary bytes and external conversions are unchanged.
+- The experimental scaffolding checker now follows its sole supported secp path;
+  active source/license preservation and attribute-location checks are unchanged.
 
-An isolated copy of Blob Contracts 0.44.3 at source `9534f42` (pending root catalog
-preserved) selects local Platform/Wire 0.7.2 for qualification only. All-target and
-all-feature Clippy, Rust 1.91 compilation, 126 unit tests and all-feature MSRV Wasm
-compilation pass. Its real schema/client/adapter/runtime producer executes; strict
-TypeScript with relative-extension rewriting and generated-client import pass.
-Evidence: `/tmp/platform55-*.log`, `/tmp/platform55-blob.gcg2ls`, and
-`target/platform55-traits.MobRzd`. The temporary workspace patch models the pending
-supplier; it is not a supported consumer distribution mechanism. Siblings are
-read-only. Blob must publish an aligned contract release before Canic adoption.
+## Qualification
 
-Wire 0.7 keeps encoder/frame bytes but no longer reserializes decoded values for
-canonical comparison. Consumers retain collection ordering/uniqueness checks and
-original frame bytes for exact retries, signatures and hashes. `Noncanonical` is
-retired; malformed primitive encodings report `Malformed`. Encode/decode budgets
-are independent; existing fixture budgets are unchanged. Fixture decoders now
-require only Deserialize. Required external Candid and persisted formats remain
-consumer-owned and unchanged by this adoption.
+Full root all-target/all-feature `make clippy` passes before longer tests. Macro
+and Principal unit tests pass on Rust 1.99.1 and 1.91.0, including structured
+format-error preservation. An isolated before/after comparison finds identical
+emitted token strings and diagnostic text in 2,208 cases across all eight macros.
+This comparison does not independently establish span hygiene or installed behavior.
+The proof retains both source copies under `target/macro-equivalence.z1SoQI`.
 
-Full root Clippy and all-target/all-feature runtime-fixture Clippy passed before
-longer checks. Rust 1.91/strict TypeScript/Node Principal/Account conformance passes;
-valid and malformed vectors exactly match the captured pre-upgrade Wire 0.6.13
-proof. Generated Principal/Account TypeScript contracts also match exactly.
-Evidence: `target/principal-wire-schema.Ydcchk` (before),
-`target/principal-wire-schema.Do1csc` (after), `/tmp/platform55-*.log`.
-Runtime tests include Deserialize-only response decoding and existing resource
-refusals. Source/license, format, inventory, dependency boundary/pin and doc checks
-pass. All six runtime tests and four release Wasm builds (Wire/external Candid,
-Rust 1.99.1/1.91) pass; runtime evidence is `target/cdk-runtime.imgdwq`.
-All-feature MSRV Wasm and all 240 graph selections per target also pass. Every
-non-Wire package entry in both locks is unchanged from its captured input.
-Native macOS and installed-canister qualification have not been rerun for
-this Wire upgrade; the locally admitted Testkit server CLI is unavailable.
-No timing or Wasm-size improvement is claimed.
+Consumer admission stubs cover all 22 profiles and their real source/assets,
+unknown-profile rejection, runtime graph refusals, final Cargo failure and live
+script edits. Registry admission and native-leaf closure/graph refusal tests pass.
+All 22 standalone profiles pass native tests on both compilers and applicable
+Wasm checks/builds, without warnings or package-cache lock waits. All 240 routine
+selections pass graph admission per target; the selection helper's exhaustive
+completeness test also passes. Source/license, formatting, boundary, inventory,
+documentation-link and snapshot checks pass; all-feature MSRV Wasm compiles.
 
-## Current contracts and delivered source
+The runtime fixture passes native/Wasm graph admission for both protocols,
+all-target/all-feature canister Wasm Clippy and four release Wasm builds
+(Wire/external Candid, Rust 1.99.1/1.91.0). Runtime evidence and preserved artifacts
+are in `target/cdk-runtime.ZSVYbe`; feature graphs are in
+`target/feature-graphs/attempt.3uyWPo`. Logs are `/tmp/platform-cleanup-*.log`.
 
-Principal metadata originally shipped in 0.6.9 and Account metadata in 0.6.12.
-Owned Serde bytes, length/order/effective-zero semantics and external DTO identities
-remain unchanged. Rust 1.91 applies to all features. Shared Tooling 0.26.8 remains
-selected at `0b07c2a` through its canonical snapshot.
+Native macOS and installed-canister qualification have not been rerun for this
+batch; no admitted Testkit server is configured locally. Full release CI remains
+maintainer-owned. No runtime timing or Wasm-size improvement is claimed.
 
-[Signature time #51](https://github.com/dragginzgame/ic-platform/issues/51) and the
-consumer warning/live-script-tail fixes shipped in 0.6.14. Auth adoption is tracked
-in [Auth #86](https://github.com/dragginzgame/ic-auth/issues/86). The original
-verifier and imported bodies/vectors remain protected by exact reconstruction.
-[Runtime CI #52](https://github.com/dragginzgame/ic-platform/issues/52) is closed
-after full installed qualification passed on 0.6.14; that result does not qualify
-this new Wire selection. Historical detailed evidence remains in this handoff
-at `45b331f`, without transferring consumer trust, freshness or retry policy.
+## Retained contracts and retirement gate
 
-The [IC inventory](../ic-inventory.md) and [export audit](../audits/export-usage-2026-10-21.md)
-define the dependency boundary. All owned endpoints/clients use Wire; external IC
-interfaces retain required Candid. [Canic #613](https://github.com/dragginzgame/canic/issues/613)
-owns its active migration; do not duplicate pending sibling work. Parser retirement
-and deferred Handlebars packaging stay on [#38](https://github.com/dragginzgame/ic-platform/issues/38).
-The crypto-bigint advisory remains separate on [#50](https://github.com/dragginzgame/ic-platform/issues/50).
+Executor =2.0.0 and ic0 =1.2.0 retain their registry identities. Callback/trap and
+cryptographic implementations, licenses, source guards and vectors are unchanged.
+No default features, alternative executor, codec fallback or new allocation owner.
+Required external IC Candid interfaces and consumer-owned retry/resource policies
+remain intact. The [migration contract](../migration.md) and
+[IC inventory](../ic-inventory.md) remain authoritative for the public boundary.
 
-Executor =2.0.0 and ic0 =1.2.0 preserve their qualified registry identities.
-Callback/trap/cleanup, cryptographic implementations and licenses remain guarded.
-Storage/allocation, application admission and resource policy stay with consumers.
-Full release CI, publication, new native macOS and installed qualification remain
-separate maintainer steps.
+Compiler retirement remains gated by
+[#38](https://github.com/dragginzgame/ic-platform/issues/38) and
+[Canic #613](https://github.com/dragginzgame/canic/issues/613). Canic's working
+frontend uses Wire bindings, but committed `cf2d3d1fb` still imports/calls
+`compile_javascript` and `compile_typescript`. Its frontend file is dirty; do not
+retire exports or claim committed adoption from that working source. External DID
+inspection, typechecking and textual call tooling still require their parser
+surface. Removing compiler exports alone would not remove upstream Handlebars.
+
+Published 0.6.15 supplies the Wire 0.7 Principal/Account metadata integration;
+prior detailed qualification is preserved at `6dcf54a:docs/status/current.md`.
+Wire producers must align metadata identities; storage/allocation, schema admission,
+trust and interpretation remain with their consumers. The crypto-bigint advisory
+and advisory-index preparation remain separately tracked by
+[#50](https://github.com/dragginzgame/ic-platform/issues/50) and
+[#56](https://github.com/dragginzgame/ic-platform/issues/56).

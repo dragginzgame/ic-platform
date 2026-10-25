@@ -179,179 +179,157 @@ fn host_export_name(export_name: &str) -> String {
     symbol
 }
 
-fn dfn_macro(
-    method: MethodType,
-    attr: TokenStream,
+enum Reply {
+    None,
+    Automatic { encoder: Path, takes_result: bool },
+}
+
+/// Validated entrypoint decisions. Emission cannot select a codec or executor.
+struct EntryPlan {
     item: TokenStream,
-) -> Result<TokenStream, Error> {
-    let attr_span = attr.span();
-    let attrs = ExportAttributes::parse(attr)?;
-    if attrs.composite && method != MethodType::Query {
-        return Err(Error::new(
-            attr_span,
-            "composite is only supported on query methods",
-        ));
-    }
-    if attrs.manual_reply && method.is_lifecycle() {
-        return Err(Error::new(
-            attr_span,
-            "manual_reply is not supported on lifecycle hooks",
-        ));
-    }
-    // User-supplied function/codec paths retain their own spans. Generated locals
-    // must not capture those paths, even when they have the same spelling.
-    let guard_result = Ident::new("r", Span::mixed_site());
-    let argument_bytes = Ident::new("arg_bytes", Span::mixed_site());
-    let result = Ident::new("result", Span::mixed_site());
+    name: Ident,
+    outer_function_ident: Ident,
+    export_name: String,
+    cratename: Path,
+    guards: Vec<Path>,
+    arg_tuple: Vec<Ident>,
+    decoder: Option<Path>,
+    reply: Reply,
+    asynchronous: bool,
+    context: Ident,
+}
 
-    let fun: ItemFn = syn::parse2::<syn::ItemFn>(item.clone()).map_err(|e| {
-        Error::new(
-            item.span(),
-            format!("#[{method}] must be above a function. \n{e}"),
-        )
-    })?;
-    let signature = &fun.sig;
-    let generics = &signature.generics;
-
-    if !generics.params.is_empty() {
-        return Err(Error::new(
-            generics.span(),
-            format!("#[{method}] must be above a function with no generic parameters."),
-        ));
-    }
-    let cratename: Path =
-        syn::parse_str(attrs.cratename.as_deref().unwrap_or("::ic_platform::cdk"))?;
-
-    // 1. function name(s)
-    let name = &signature.ident;
-    let plain_name = name.unraw();
-    let outer_function_ident = format_ident!("__canister_method_{plain_name}");
-    let function_name = if let Some(custom_name) = attrs.name {
-        if method.is_lifecycle() {
+impl EntryPlan {
+    fn parse(method: MethodType, attr: TokenStream, item: TokenStream) -> Result<Self, Error> {
+        let attr_span = attr.span();
+        let attrs = ExportAttributes::parse(attr)?;
+        if attrs.composite && method != MethodType::Query {
             return Err(Error::new(
                 attr_span,
-                format!("#[{method}] cannot have a custom name"),
+                "composite is only supported on query methods",
             ));
         }
-        if custom_name.starts_with("<ic-cdk internal>") {
+        if attrs.manual_reply && method.is_lifecycle() {
             return Err(Error::new(
                 attr_span,
-                "Functions starting with `<ic-cdk internal>` are reserved for CDK internal use.",
+                "manual_reply is not supported on lifecycle hooks",
             ));
         }
-        custom_name
-    } else {
-        plain_name.to_string()
-    };
-    let export_name = if method.is_lifecycle() {
-        format!("canister_{method}")
-    } else if method == MethodType::Query && attrs.composite {
-        format!("canister_composite_query {function_name}",)
-    } else {
-        format!("canister_{method} {function_name}")
-    };
-    let host_compatible_name = host_export_name(&export_name);
+        let fun: ItemFn = syn::parse2::<syn::ItemFn>(item.clone()).map_err(|e| {
+            Error::new(
+                item.span(),
+                format!("#[{method}] must be above a function. \n{e}"),
+            )
+        })?;
+        let signature = &fun.sig;
+        let generics = &signature.generics;
 
-    // 2. guard(s)
-    if !attrs.guard.is_empty() && method.is_lifecycle() {
-        return Err(Error::new(
-            attr_span,
-            format!("#[{method}] cannot have guard function(s)."),
-        ));
-    }
-    let guards = attrs
-        .guard
-        .iter()
-        .map(|guard_name| -> Result<_, Error> {
-            let guard_path = parse_str::<Path>(guard_name)?;
-            Ok(quote! {
-                let #guard_result: ::std::result::Result<(), ::std::string::String> = #guard_path ();
-                if let ::std::result::Result::Err(e) = #guard_result {
-                    #cratename::api::msg_reject(&e);
-                    return;
-                }
-            })
-        })
-        .collect::<Result<Vec<_>, Error>>()?;
-    let guard = quote! {
-        #(#guards)*
-    };
+        if !generics.params.is_empty() {
+            return Err(Error::new(
+                generics.span(),
+                format!("#[{method}] must be above a function with no generic parameters."),
+            ));
+        }
+        let cratename: Path =
+            syn::parse_str(attrs.cratename.as_deref().unwrap_or("::ic_platform::cdk"))?;
 
-    // 3. decode arguments
-    let arg_tuple = get_args(method, signature)?;
-    if !method.can_have_args() {
-        if !arg_tuple.is_empty() {
-            return Err(Error::new(
-                Span::call_site(),
-                format!("#[{method}] function cannot have arguments."),
-            ));
-        }
-        if attrs.decode_with.is_some() {
-            return Err(Error::new(
-                attr_span,
-                format!("#[{method}] function cannot have a decode_with attribute."),
-            ));
-        }
-    }
-    let arg_decode = if let Some(decode_with) = &attrs.decode_with {
-        let decode_with_ident = parse_str::<Path>(decode_with)?;
-        if arg_tuple.len() == 1 {
-            let arg_one = &arg_tuple[0];
-            quote! {
-                let #argument_bytes = #cratename::api::msg_arg_data();
-                let #arg_one = #decode_with_ident(#argument_bytes);
+        // Function and export names.
+        let name = &signature.ident;
+        let plain_name = name.unraw();
+        let outer_function_ident = format_ident!("__canister_method_{plain_name}");
+        let function_name = if let Some(custom_name) = attrs.name {
+            if method.is_lifecycle() {
+                return Err(Error::new(
+                    attr_span,
+                    format!("#[{method}] cannot have a custom name"),
+                ));
             }
+            if custom_name.starts_with("<ic-cdk internal>") {
+                return Err(Error::new(
+                    attr_span,
+                    "Functions starting with `<ic-cdk internal>` are reserved for CDK internal use.",
+                ));
+            }
+            custom_name
         } else {
-            quote! {
-            let #argument_bytes = #cratename::api::msg_arg_data();
-            let ( #( #arg_tuple, )* ) = #decode_with_ident(#argument_bytes); }
-        }
-    } else if method.can_have_args() && (!method.is_lifecycle() || !arg_tuple.is_empty()) {
-        return Err(Error::new(
-            attr_span,
-            "endpoint requires decode_with, including unit RPC requests; use the consumer-owned Wire decoder",
-        ));
-    } else {
-        quote! {}
-    };
+            plain_name.to_string()
+        };
+        let export_name = if method.is_lifecycle() {
+            format!("canister_{method}")
+        } else if method == MethodType::Query && attrs.composite {
+            format!("canister_composite_query {function_name}",)
+        } else {
+            format!("canister_{method} {function_name}")
+        };
 
-    // 4. function call
-    let function_call = if signature.asyncness.is_some() {
-        quote! { #name ( #(#arg_tuple),* ) .await }
-    } else {
-        quote! { #name ( #(#arg_tuple),* ) }
-    };
-
-    // 5. return
-    let return_length = match &signature.output {
-        ReturnType::Default => 0,
-        ReturnType::Type(_, ty) => match ty.as_ref() {
-            Type::Tuple(tuple) => tuple.elems.len(),
-            _ => 1,
-        },
-    };
-    if method.is_lifecycle() {
-        if return_length > 0 {
-            return Err(Error::new(
-                Span::call_site(),
-                format!("#[{method}] function cannot have a return value."),
-            ));
-        }
-        if attrs.encode_with.is_some() {
+        // Guards remain ordered; parse paths before argument admission.
+        if !attrs.guard.is_empty() && method.is_lifecycle() {
             return Err(Error::new(
                 attr_span,
-                format!("#[{method}] function cannot have an encode_with attribute."),
+                format!("#[{method}] cannot have guard function(s)."),
             ));
         }
-    }
-    let return_encode = if method.is_lifecycle() || attrs.manual_reply {
-        quote! {}
-    } else {
-        let return_bytes = if let Some(encode_with) = &attrs.encode_with {
-            let encode_with_ident = parse_str::<Path>(encode_with)?;
-            match return_length {
-                0 => quote! { #encode_with_ident()},
-                _ => quote! { #encode_with_ident(#result)},
+        let guards = attrs
+            .guard
+            .iter()
+            .map(|guard_name| parse_str::<Path>(guard_name))
+            .collect::<Result<Vec<_>, Error>>()?;
+
+        // Argument admission, including explicit decoding for unit requests.
+        let arg_tuple = get_args(method, signature)?;
+        if !method.can_have_args() {
+            if !arg_tuple.is_empty() {
+                return Err(Error::new(
+                    Span::call_site(),
+                    format!("#[{method}] function cannot have arguments."),
+                ));
+            }
+            if attrs.decode_with.is_some() {
+                return Err(Error::new(
+                    attr_span,
+                    format!("#[{method}] function cannot have a decode_with attribute."),
+                ));
+            }
+        }
+        let decoder = if let Some(decode_with) = &attrs.decode_with {
+            Some(parse_str::<Path>(decode_with)?)
+        } else if method.can_have_args() && (!method.is_lifecycle() || !arg_tuple.is_empty()) {
+            return Err(Error::new(
+                attr_span,
+                "endpoint requires decode_with, including unit RPC requests; use the consumer-owned Wire decoder",
+            ));
+        } else {
+            None
+        };
+
+        // Reply admission.
+        let return_length = match &signature.output {
+            ReturnType::Default => 0,
+            ReturnType::Type(_, ty) => match ty.as_ref() {
+                Type::Tuple(tuple) => tuple.elems.len(),
+                _ => 1,
+            },
+        };
+        if method.is_lifecycle() {
+            if return_length > 0 {
+                return Err(Error::new(
+                    Span::call_site(),
+                    format!("#[{method}] function cannot have a return value."),
+                ));
+            }
+            if attrs.encode_with.is_some() {
+                return Err(Error::new(
+                    attr_span,
+                    format!("#[{method}] function cannot have an encode_with attribute."),
+                ));
+            }
+        }
+        let reply = if method.is_lifecycle() || attrs.manual_reply {
+            Reply::None
+        } else if let Some(encode_with) = &attrs.encode_with {
+            Reply::Automatic {
+                encoder: parse_str::<Path>(encode_with)?,
+                takes_result: return_length != 0,
             }
         } else {
             return Err(Error::new(
@@ -359,53 +337,135 @@ fn dfn_macro(
                 "endpoint requires encode_with or manual_reply; no default Candid codec is supplied",
             ));
         };
-        quote! {
-            let bytes: ::std::vec::Vec<u8> = #return_bytes;
-            #cratename::api::msg_reply(bytes);
-        }
-    };
+        let context = if method.is_state_persistent() {
+            format_ident!("in_executor_context")
+        } else {
+            format_ident!("in_query_executor_context")
+        };
+        Ok(Self {
+            name: name.clone(),
+            outer_function_ident,
+            export_name,
+            cratename,
+            guards,
+            arg_tuple,
+            decoder,
+            reply,
+            context,
+            asynchronous: signature.asyncness.is_some(),
+            item,
+        })
+    }
 
-    // Codec-defined endpoints are never registered as Candid services.
-
-    // 7. exported function body
-    let async_context_name = if method.is_state_persistent() {
-        format_ident!("in_executor_context")
-    } else {
-        format_ident!("in_query_executor_context")
-    };
-    let body = if signature.asyncness.is_some() {
-        quote! {
-            #cratename::futures::internals::#async_context_name(|| {
+    fn expand(self) -> TokenStream {
+        let Self {
+            item,
+            name,
+            outer_function_ident,
+            export_name,
+            cratename,
+            guards,
+            arg_tuple,
+            decoder,
+            reply,
+            asynchronous,
+            context: async_context_name,
+        } = self;
+        // User-supplied function/codec paths retain their own spans. Generated locals
+        // must not capture those paths, even when they have the same spelling.
+        let guard_result = Ident::new("r", Span::mixed_site());
+        let argument_bytes = Ident::new("arg_bytes", Span::mixed_site());
+        let result = Ident::new("result", Span::mixed_site());
+        let host_compatible_name = host_export_name(&export_name);
+        let guards = guards.iter().map(|guard_path| quote! {
+            let #guard_result: ::std::result::Result<(), ::std::string::String> = #guard_path ();
+            if let ::std::result::Result::Err(e) = #guard_result {
+                #cratename::api::msg_reject(&e);
+                return;
+            }
+        });
+        let guard = quote! { #(#guards)* };
+        let arg_decode = if let Some(decoder) = decoder {
+            if arg_tuple.len() == 1 {
+                let arg_one = &arg_tuple[0];
+                quote! {
+                    let #argument_bytes = #cratename::api::msg_arg_data();
+                    let #arg_one = #decoder(#argument_bytes);
+                }
+            } else {
+                quote! {
+                    let #argument_bytes = #cratename::api::msg_arg_data();
+                    let ( #( #arg_tuple, )* ) = #decoder(#argument_bytes);
+                }
+            }
+        } else {
+            quote! {}
+        };
+        let function_call = if asynchronous {
+            quote! { #name ( #(#arg_tuple),* ) .await }
+        } else {
+            quote! { #name ( #(#arg_tuple),* ) }
+        };
+        let return_encode = match reply {
+            Reply::None => quote! {},
+            Reply::Automatic {
+                encoder,
+                takes_result,
+            } => {
+                let return_bytes = if takes_result {
+                    quote! { #encoder(#result) }
+                } else {
+                    quote! { #encoder() }
+                };
+                quote! {
+                    let bytes: ::std::vec::Vec<u8> = #return_bytes;
+                    #cratename::api::msg_reply(bytes);
+                }
+            }
+        };
+        // Codec-defined endpoints are never registered as Candid services.
+        let body = if asynchronous {
+            quote! {
+                #cratename::futures::internals::#async_context_name(|| {
+                    #guard
+                    #[allow(clippy::disallowed_methods)]
+                    #cratename::futures::spawn(async {
+                        #arg_decode
+                        let #result = #function_call;
+                        #return_encode
+                    });
+                });
+            }
+        } else {
+            quote! {
                 #guard
-                #[allow(clippy::disallowed_methods)]
-                #cratename::futures::spawn(async {
+                #cratename::futures::internals::#async_context_name(|| {
                     #arg_decode
                     let #result = #function_call;
                     #return_encode
                 });
-            });
-        }
-    } else {
+            }
+        };
+
         quote! {
-            #guard
-            #cratename::futures::internals::#async_context_name(|| {
-                #arg_decode
-                let #result = #function_call;
-                #return_encode
-            });
+            #[cfg_attr(target_family = "wasm", unsafe(export_name = #export_name))]
+            #[cfg_attr(not(target_family = "wasm"), unsafe(export_name = #host_compatible_name))]
+            fn #outer_function_ident() {
+                #body
+            }
+
+
+            #item
         }
-    };
+    }
+}
 
-    Ok(quote! {
-        #[cfg_attr(target_family = "wasm", unsafe(export_name = #export_name))]
-        #[cfg_attr(not(target_family = "wasm"), unsafe(export_name = #host_compatible_name))]
-        fn #outer_function_ident() {
-            #body
-        }
-
-
-        #item
-    })
+fn dfn_macro(
+    method: MethodType,
+    attr: TokenStream,
+    item: TokenStream,
+) -> Result<TokenStream, Error> {
+    Ok(EntryPlan::parse(method, attr, item)?.expand())
 }
 
 pub(crate) fn ic_query(attr: TokenStream, item: TokenStream) -> Result<TokenStream, Error> {

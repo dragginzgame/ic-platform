@@ -39,12 +39,8 @@ cp "$root/crates/ic-platform/tests/wire_schema_consumer.rs" "$fixture/src/lib.rs
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 if [[ -n "$published" ]]; then
-    # shellcheck disable=SC2016 # $version is a jq variable.
-    "$root/.tools/host/bin/jq" -e --arg version "$published" '
-        [.packages[] | select(.name == "ic-platform")] as $facades |
-        ($facades | length) == 1 and $facades[0].version == $version and
-        $facades[0].source == "registry+https://github.com/rust-lang/crates.io-index"
-    ' "$fixture/metadata.json" > /dev/null || {
+    "$root/.tools/host/bin/jq" -e --arg version "$published" --argjson require_generator false \
+        -f "$root/scripts/ci/published-runtime.jq" "$fixture/metadata.json" > /dev/null || {
         echo 'Published metadata proof must use the exact registry Platform' >&2; exit 1;
     }
 fi

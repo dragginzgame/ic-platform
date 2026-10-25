@@ -1,0 +1,13 @@
+[package]
+name = "platform-runtime-driver"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+ic-platform = { workspace = true, features = ["certification", "candid"] }
+ic-testkit.workspace = true
+serde_cbor.workspace = true
+serde.workspace = true
+ic-wire.workspace = true

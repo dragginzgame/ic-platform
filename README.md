@@ -122,6 +122,11 @@ development compiler; Rust 1.91.0 is the minimum. Prepare both toolchains with t
 `wasm32-unknown-unknown` target for each compiler before their checks. For an
 existing MSRV toolchain, use `rustup target add --toolchain 1.91.0 wasm32-unknown-unknown`.
 
+Installed-runtime CI prepares only the common tools, in order with
+`make install-host-tools` and `make install-rust-tools`. It does not need the
+release editor or Node/npm/TypeScript. Normal `make install-tools` still prepares
+the complete contributor set, and standard CI retains the Wire frontend proof.
+
 Tool setup includes the pinned IC Build 0.18.0 release editor, which requires
 Rust 1.91 or later to build. `make install-release-editor` prepares it separately;
 `make release-editor-check` admits it offline. Standard release commands prepare
@@ -140,6 +145,12 @@ warnings. The fail-fast release gate also runs Clippy before its test targets.
 `make check-upstream-scaffolding` applies the experimental packaging patches to
 disposable registry-source copies and checks source preservation and licenses.
 It performs no dependency adoption, publication or runtime qualification.
+Consumer profiles are declared in
+[`platform-consumer-profiles.tsv`](scripts/ci/platform-consumer-profiles.tsv):
+capability, comma-separated Platform features, test source basename,
+comma-separated asset globs (`-` for none), and Wasm command (`check`, `build` or
+`skip`). The runner preserves native/MSRV tests and admits runtime graphs first.
+
 `make check-consumer` tests separate Candid-only, certification-only, parser-only,
 dynamic, management/Candid, ledger/Candid, ic0-only, Agent/certification three signature/BLS consumers and a CDK canister
 with only Platform declared, on Rust 1.99 and 1.91. The CDK standalone

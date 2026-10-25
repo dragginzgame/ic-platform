@@ -1,0 +1,18 @@
+[package]
+name = "platform-runtime-canister"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[features]
+external-candid = ["ic-platform/candid"]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ic-platform.workspace = true
+ic-timers.workspace = true
+ic-wire.workspace = true
+serde.workspace = true

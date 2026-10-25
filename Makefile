@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := help
 SHARED_TOOLING_RUST := 1
-FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all; rustfmt --edition 2024 crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs' -- "$(FORMAT_CARGO)"
-FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check; rustfmt --edition 2024 --check crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs' -- "$(FORMAT_CARGO)"
+FORMAT_EXTRA_SOURCES := crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs
+FORMAT_WRITE_COMMAND = bash -ec '"$$1" sort --workspace --grouped; "$$1" fmt --all; rustfmt --edition 2024 $(FORMAT_EXTRA_SOURCES)' -- "$(FORMAT_CARGO)"
+FORMAT_CHECK_COMMAND = bash -ec '"$$1" sort --workspace --grouped --check; "$$1" fmt --all -- --check; rustfmt --edition 2024 --check $(FORMAT_EXTRA_SOURCES)' -- "$(FORMAT_CARGO)"
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor

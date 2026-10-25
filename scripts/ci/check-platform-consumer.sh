@@ -12,7 +12,11 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-capabilities=(executor principal ecdsa ed25519 candid candid-service external-candid certification candid-parser dynamic agent management ic0 icrc bls canister-sig-creation signature-verification cdk runtime secp256k1 pocket-ic stable-structures)
+profiles="$root/scripts/ci/platform-consumer-profiles.tsv"
+capabilities=()
+while IFS=$'\t' read -r capability _; do
+    capabilities+=("$capability")
+done < "$profiles"
 if [[ $# -gt 0 ]]; then
     for requested in "$@"; do
         case " ${capabilities[*]} " in
@@ -23,13 +27,9 @@ if [[ $# -gt 0 ]]; then
     capabilities=("$@")
 fi
 for capability in "${capabilities[@]}"; do
-features="\"$capability\""
-if [[ "$capability" == executor ]]; then features='"executor", "ic0"'; fi
-if [[ "$capability" == external-candid ]]; then features='"cdk", "candid-service"'; fi
-if [[ "$capability" == agent ]]; then features='"agent", "certification"'; fi
-if [[ "$capability" == dynamic ]]; then features='"candid", "candid-parser"'; fi
-if [[ "$capability" == management ]]; then features='"management-canister-types", "candid"'; fi
-if [[ "$capability" == icrc ]]; then features='"icrc-ledger-types", "candid"'; fi
+profile="$(awk -F '\t' -v capability="$capability" '$1 == capability { print }' "$profiles")"
+IFS=$'\t' read -r _ features source assets wasm <<< "$profile"
+features="\"${features//,/\", \"}\""
 selection='path = "../../crates/ic-platform"'
 if [[ -n "$published" ]]; then selection="version = \"=$published\""; fi
 fixture="$(mktemp -d "$root/target/boundary-consumer.XXXXXX")"
@@ -58,40 +58,17 @@ MANIFEST
 if [[ "$capability" == principal ]]; then
     printf '\n[features]\ncandid = ["ic-platform/candid"]\n' >> "$fixture/crates/consumer/Cargo.toml"
 fi
-source="$capability"
-if [[ "$capability" == external-candid ]]; then source=external_candid; fi
-if [[ "$capability" == stable-structures ]]; then source=stable_structures; fi
-if [[ "$capability" == candid-parser ]]; then source=parser; fi
-if [[ "$capability" == candid-service ]]; then source=service; fi
-if [[ "$capability" == pocket-ic ]]; then source=pocket_ic; fi
-if [[ "$capability" == canister-sig-creation ]]; then source=canister_sig; fi
-if [[ "$capability" == signature-verification ]]; then source=signature; fi
-if [[ "$capability" == principal ]]; then source=principal; else source="${source}_consumer"; fi
 cp "crates/ic-platform/tests/${source}.rs" "$fixture/crates/consumer/src/lib.rs"
-if [[ "$source" == candid_consumer ]]; then
+if [[ "$assets" != - ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
-    cp crates/ic-platform/tests/fixtures/candid_malformed.rs "$fixture/crates/consumer/src/fixtures/"
+    IFS=, read -r -a patterns <<< "$assets"
+    for pattern in "${patterns[@]}"; do
+        # The reviewed profile supplies a filename glob, not a literal path.
+        # shellcheck disable=SC2086
+        cp crates/ic-platform/tests/fixtures/$pattern "$fixture/crates/consumer/src/fixtures/"
+    done
 fi
-if [[ "$capability" == management ]]; then
-    mkdir -p "$fixture/crates/consumer/src/fixtures"
-    cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/consumer/src/fixtures/"
-fi
-if [[ "$capability" == icrc ]]; then
-    mkdir -p "$fixture/crates/consumer/src/fixtures"
-    cp crates/ic-platform/tests/fixtures/icrc-*.hex "$fixture/crates/consumer/src/fixtures/"
-fi
-if [[ "$capability" == dynamic || "$capability" == agent ]]; then
-    mkdir -p "$fixture/crates/consumer/src/fixtures"
-    cp "crates/ic-platform/tests/fixtures/$capability-"*.hex "$fixture/crates/consumer/src/fixtures/"
-fi
-if [[ "$capability" == bls || "$capability" == signature-verification ]]; then
-    mkdir -p "$fixture/crates/consumer/src/fixtures"
-    cp crates/ic-platform/tests/fixtures/bls-*.hex "$fixture/crates/consumer/src/fixtures/"
-fi
-if [[ "$capability" == signature-verification ]]; then
-    cp crates/ic-platform/tests/fixtures/signature-*.hex "$fixture/crates/consumer/src/fixtures/"
-fi
-if [[ "$capability" == cdk || "$capability" == external-candid ]]; then
+if [[ "$wasm" == build ]]; then
     printf '\n[lib]\ncrate-type = ["cdylib", "rlib"]\n' >> "$fixture/crates/consumer/Cargo.toml"
 fi
 cp Cargo.lock "$fixture/Cargo.lock"
@@ -102,13 +79,8 @@ cp Cargo.lock "$fixture/Cargo.lock"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 if [[ -n "$published" ]]; then
     # Refuse path/Git replacement of either the facade or its generator.
-    # shellcheck disable=SC2016 # $version and $facades are jq variables.
-    "$root/.tools/host/bin/jq" -e --arg version "$published" '
-        [.packages[] | select(.name == "ic-platform")] as $facades |
-        ($facades | length) == 1 and $facades[0].version == $version and
-        all(.packages[] | select(.name == "ic-platform" or .name == "ic-platform-macros");
-            .source == "registry+https://github.com/rust-lang/crates.io-index")
-    ' "$fixture/metadata.json" > /dev/null || {
+    "$root/.tools/host/bin/jq" -e --arg version "$published" --argjson require_generator false \
+        -f "$root/scripts/ci/published-runtime.jq" "$fixture/metadata.json" > /dev/null || {
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
 fi
@@ -139,11 +111,9 @@ if [[ "$capability" == cdk || "$capability" == runtime || "$capability" == exter
 fi
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --frozen
-if [[ "$capability" != candid-parser && "$capability" != dynamic && "$capability" != agent ]]; then
-    command=check
-    if [[ "$capability" == cdk || "$capability" == external-candid ]]; then command=build; fi
-    CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
-    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.91.0 "$command" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
+if [[ "$wasm" != skip ]]; then
+    CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$wasm" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
+    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.91.0 "$wasm" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
 fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
 # Parse the exit with the loop before Cargo runs. A concurrent source edit must

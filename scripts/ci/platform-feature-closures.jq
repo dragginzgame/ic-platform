@@ -1,7 +1,7 @@
 # Collapse only local implications and strictly admitted native-only leaves.
 # A changed leaf contract fails closed, rather than reusing a possibly wrong graph.
 def native_leaves($package):
-  {agent: ["ic-agent"], "candid-parser": ["candid_parser"], secp256k1: ["ic-secp256k1"], "pocket-ic": ["pocket-ic"], "wire-schema": ["ic-wire-metadata", "serde_json"]} |
+  $policy[0].native_leaves |
   to_entries | map(. as $leaf |
     [$leaf.value[] as $name |
       [$package.dependencies[] | select((.rename // .name) == $name)]] as $deps |

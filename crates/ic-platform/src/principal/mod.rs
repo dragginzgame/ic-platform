@@ -330,15 +330,10 @@ mod deserialize {
 
 impl<'de> serde::Deserialize<'de> for Principal {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Principal, D::Error> {
-        use serde::de::Error;
         if deserializer.is_human_readable() {
-            deserializer
-                .deserialize_str(deserialize::PrincipalVisitor)
-                .map_err(D::Error::custom)
+            deserializer.deserialize_str(deserialize::PrincipalVisitor)
         } else {
-            deserializer
-                .deserialize_bytes(deserialize::PrincipalVisitor)
-                .map_err(D::Error::custom)
+            deserializer.deserialize_bytes(deserialize::PrincipalVisitor)
         }
     }
 }

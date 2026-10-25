@@ -1,0 +1,16 @@
+{
+  "features": [
+    "agent", "bls", "candid", "candid-parser", "candid-service",
+    "canister-sig-creation", "cdk", "certification", "default", "ecdsa",
+    "ed25519", "executor", "ic0", "icrc-ledger-types",
+    "management-canister-types", "pocket-ic", "principal", "runtime",
+    "secp256k1", "signature-verification", "stable-structures", "wire-schema"
+  ],
+  "native_leaves": {
+    "agent": ["ic-agent"],
+    "candid-parser": ["candid_parser"],
+    "pocket-ic": ["pocket-ic"],
+    "secp256k1": ["ic-secp256k1"],
+    "wire-schema": ["ic-wire-metadata", "serde_json"]
+  }
+}

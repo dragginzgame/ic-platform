@@ -7,10 +7,9 @@ fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-consumer-admission.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 mkdir -p "$fixture/scripts/ci" "$fixture/crates/ic-platform/tests" "$fixture/bin"
 cp "$root/scripts/ci/check-platform-consumer.sh" "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
-for source in cdk runtime external_candid; do
-    touch "$fixture/crates/ic-platform/tests/${source}_consumer.rs"
-done
+cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
 cat > "$fixture/bin/rustc" <<'STUB'
 #!/usr/bin/env bash
@@ -41,6 +40,24 @@ esac
 STUB
 chmod +x "$fixture/bin/cargo" "$fixture/bin/rustc"
 export PATH="$fixture/bin:$PATH" TEST_CALLS="$fixture/calls"
+export TEST_REJECT=no TEST_CANDID=no
+while IFS=$'\t' read -r capability _ _ _ wasm; do
+    TEST_CANDID=no
+    if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi
+    : > "$TEST_CALLS"
+    "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" "$capability" > "$fixture/log" 2>&1 || {
+        cat "$fixture/log" >&2; exit 1;
+    }
+    expected=4
+    if [[ "$wasm" == skip ]]; then expected=2; fi
+    [[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
+done < "$root/scripts/ci/platform-consumer-profiles.tsv"
+: > "$TEST_CALLS"
+if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" unknown > "$fixture/log" 2>&1; then
+    echo 'Unknown consumer profile was admitted' >&2; exit 1
+fi
+[[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled an unknown consumer profile' >&2; exit 1; }
+echo 'Every consumer profile prepares its source/assets and selects native/Wasm commands'
 for capability in cdk runtime external-candid; do
     export TEST_CANDID=no
     if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi

@@ -10,72 +10,55 @@ printf 'Scaffolding source evidence: %s\n' "$attempt"
 jq="$root/.tools/host/bin/jq"
 host="$(rustc -vV | sed -n 's/^host: //p')"
 cargo metadata --all-features --format-version 1 --filter-platform "$host" --frozen --offline > "$attempt/metadata.json"
-for selection in \
-    'secp ic-secp256k1 0.3.0 secp256k1-optional-scaffolding'; do
-    read -r directory package version proposal <<< "$selection"
-    manifest="$("$jq" -er --arg package "$package" --arg version "$version" '
-        [.packages[] | select(.name == $package)] as $p |
-        if ($p | length) == 1 and $p[0].version == $version and
-           $p[0].source == "registry+https://github.com/rust-lang/crates.io-index"
-        then $p[0].manifest_path else error("expected exact registry source") end
-    ' "$attempt/metadata.json")"
-    original="${manifest%/*}"
-    candidate="$attempt/$directory"
-    cp -R "$original" "$candidate"
-    # Git apply can skip these paths when the fixture is nested in this checkout.
-    # Patch operates on the explicit copied directory without Git discovery.
-    patch -p1 -F 0 -f -d "$candidate" < "$root/patches/$proposal.patch"
-    # Refuse a silently skipped patch even if unchanged sources would compare.
-    case "$directory" in
-        creation) rg -q '^signature-map = \["dep:ic0"\]$' "$candidate/Cargo.toml" ;;
-        secp) rg -q '^full = ' "$candidate/Cargo.toml" ;;
-        verifier)
-            "$root/.tools/host/bin/yq" -p toml -o json '.' "$candidate/Cargo.toml" |
-                "$jq" -e '.dependencies["ic-canister-sig-creation"]["default-features"] == false' > /dev/null ;;
-    esac
-    cmp "$original/LICENSE" "$candidate/LICENSE"
-    # Every source file must retain its original bytes after removing only the
-    # supported packaging attributes and canonical Principal import adjustment.
-    rg --files "$original/src" > "$attempt/$directory.sources"
-    while IFS= read -r source; do
-        relative="${source#"$original/"}"
-        if [[ "$relative" == src/lib.rs && "$directory" != verifier ]]; then
-            case "$directory" in
-                creation)
-                    perl -0777 -pe 's/^use ic_principal::Principal;$/use candid::Principal;/m;
-                        s/^#\[cfg\(feature = "signature-map"\)\]\n(?=pub mod signature_map;$)//mg' \
-                        "$candidate/$relative" > "$attempt/normalized.rs" ;;
-                secp)
-                    # Permit item-level scaffolding attributes only, never an
-                    # attribute that changes statements inside a crypto body.
-                    perl -0777 -pe '
-                        my @lines = split /(?<=\n)/;
-                        $_ = "";
-                        for my $i (0 .. $#lines) {
-                            if ($lines[$i] =~ /^[ \t]*#\[cfg\(feature = "full"\)\]$/) {
-                                my $next = $lines[$i + 1] // "";
-                                my $item = $next =~ /^(?:use (?:rand::|std::sync::LazyLock;|zeroize::ZeroizeOnDrop;)|static (?:ECDSA_OID|SECP256K1_OID):|const PEM_HEADER_|fn (?:der_|pem_encode|bip341_generate_tweak)|impl (?:PrivateKey|RecoveryId) |    (?:pub )?fn (?:deserialize_der|deserialize_pem|serialize_der|serialize_pem|verify_|try_recovery_from_digest|derive_bip341))/;
-                                my $derived = $next =~ /^#\[derive\(/ &&
-                                    ($lines[$i + 2] // "") =~ /^pub struct (?:PrivateKey|RecoveryId) /;
-                                die "unexpected feature attribute location\n" unless $item || $derived;
-                                next;
-                            }
-                            $_ .= $lines[$i];
-                        }' \
-                        "$candidate/$relative" > "$attempt/normalized.rs" ;;
-            esac
-            cmp "$source" "$attempt/normalized.rs"
-        else
-            cmp "$source" "$candidate/$relative"
-        fi
-        bash scripts/ci/verify-file-checksum.sh --print sha256 "$source" >> "$attempt/$directory.source-sha256"
-    done < "$attempt/$directory.sources"
-    # Refuse newly introduced source files, including a replacement implementation.
-    rg --files "$candidate/src" | sed "s|^$candidate/||" | LC_ALL=C sort > "$attempt/candidate.files"
-    sed "s|^$original/||" "$attempt/$directory.sources" | LC_ALL=C sort > "$attempt/original.files"
-    cmp "$attempt/original.files" "$attempt/candidate.files"
-    printf '%s: source preservation and license checks passed\n' "$package"
-done
+manifest="$("$jq" -er '
+    [.packages[] | select(.name == "ic-secp256k1")] as $p |
+    if ($p | length) == 1 and $p[0].version == "0.3.0" and
+       $p[0].source == "registry+https://github.com/rust-lang/crates.io-index"
+    then $p[0].manifest_path else error("expected exact registry source") end
+' "$attempt/metadata.json")"
+original="${manifest%/*}"
+candidate="$attempt/secp"
+cp -R "$original" "$candidate"
+# Git apply can skip these paths when the fixture is nested in this checkout.
+# Patch operates on the explicit copied directory without Git discovery.
+patch -p1 -F 0 -f -d "$candidate" < "$root/patches/secp256k1-optional-scaffolding.patch"
+# Refuse a silently skipped patch even if unchanged sources would compare.
+rg -q '^full = ' "$candidate/Cargo.toml"
+cmp "$original/LICENSE" "$candidate/LICENSE"
+# Every source file must retain its original bytes after removing only the
+# supported packaging attributes.
+rg --files "$original/src" > "$attempt/secp.sources"
+while IFS= read -r source; do
+    relative="${source#"$original/"}"
+    if [[ "$relative" == src/lib.rs ]]; then
+        # Permit item-level scaffolding attributes only, never an
+        # attribute that changes statements inside a crypto body.
+        perl -0777 -pe '
+            my @lines = split /(?<=\n)/;
+            $_ = "";
+            for my $i (0 .. $#lines) {
+                if ($lines[$i] =~ /^[ \t]*#\[cfg\(feature = "full"\)\]$/) {
+                    my $next = $lines[$i + 1] // "";
+                    my $item = $next =~ /^(?:use (?:rand::|std::sync::LazyLock;|zeroize::ZeroizeOnDrop;)|static (?:ECDSA_OID|SECP256K1_OID):|const PEM_HEADER_|fn (?:der_|pem_encode|bip341_generate_tweak)|impl (?:PrivateKey|RecoveryId) |    (?:pub )?fn (?:deserialize_der|deserialize_pem|serialize_der|serialize_pem|verify_|try_recovery_from_digest|derive_bip341))/;
+                    my $derived = $next =~ /^#\[derive\(/ &&
+                        ($lines[$i + 2] // "") =~ /^pub struct (?:PrivateKey|RecoveryId) /;
+                    die "unexpected feature attribute location\n" unless $item || $derived;
+                    next;
+                }
+                $_ .= $lines[$i];
+            }' \
+            "$candidate/$relative" > "$attempt/normalized.rs"
+        cmp "$source" "$attempt/normalized.rs"
+    else
+        cmp "$source" "$candidate/$relative"
+    fi
+    bash scripts/ci/verify-file-checksum.sh --print sha256 "$source" >> "$attempt/secp.source-sha256"
+done < "$attempt/secp.sources"
+# Refuse newly introduced source files, including a replacement implementation.
+rg --files "$candidate/src" | sed "s|^$candidate/||" | LC_ALL=C sort > "$attempt/candidate.files"
+sed "s|^$original/||" "$attempt/secp.sources" | LC_ALL=C sort > "$attempt/original.files"
+cmp "$attempt/original.files" "$attempt/candidate.files"
+printf 'ic-secp256k1: source preservation and license checks passed\n'
 mkdir -p "$attempt/vectors"
 cat > "$attempt/vectors/Cargo.toml" <<'MANIFEST'
 [workspace]

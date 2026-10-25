@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.16]
+
+- Simplify consumer qualification with one profile table, shared registry identity
+  admission, and checked-in runtime fixture manifests.
+- Share the reviewed feature inventory/native-only policy and extra formatting
+  source list; retain independent dependency-graph refusal tests.
+- Prepare only common host/Rust tools in installed-runtime CI; standard CI keeps
+  its pinned Node/npm/TypeScript Wire frontend proof.
+- Separate entrypoint validation/planning from token emission while preserving
+  codecs, diagnostics, guard order, export names and executor contexts.
+- Preserve structured Principal deserializer errors without redundant wrapping;
+  remove unreachable experimental checker branches without changing crypto code.
+
 ## [0.6.15] - 2026-10-24
 
 - Adopt published Wire 0.7.2 for native Principal/Account metadata and runtime

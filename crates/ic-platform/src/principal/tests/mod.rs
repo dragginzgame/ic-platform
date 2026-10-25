@@ -2,6 +2,53 @@ use super::{ExternalPrincipal, Principal, PrincipalError};
 use serde_test::{Configure, Token, assert_de_tokens, assert_tokens};
 
 #[test]
+fn deserialization_preserves_structured_format_errors() {
+    use serde::Deserialize;
+
+    #[derive(Debug, PartialEq)]
+    enum FormatError {
+        UnexpectedToken,
+        Custom(String),
+    }
+    impl std::fmt::Display for FormatError {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{self:?}")
+        }
+    }
+    impl std::error::Error for FormatError {}
+    impl serde::de::Error for FormatError {
+        fn custom<T: std::fmt::Display>(message: T) -> Self {
+            Self::Custom(message.to_string())
+        }
+    }
+    struct RefusingDeserializer(bool);
+    impl<'de> serde::Deserializer<'de> for RefusingDeserializer {
+        type Error = FormatError;
+
+        fn is_human_readable(&self) -> bool {
+            self.0
+        }
+        fn deserialize_any<V: serde::de::Visitor<'de>>(
+            self,
+            _: V,
+        ) -> Result<V::Value, Self::Error> {
+            Err(FormatError::UnexpectedToken)
+        }
+        serde::forward_to_deserialize_any! {
+            bool i8 i16 i32 i64 u8 u16 u32 u64 f32 f64 char str string bytes
+            byte_buf option unit unit_struct newtype_struct seq tuple tuple_struct
+            map struct enum identifier ignored_any
+        }
+    }
+    for human_readable in [true, false] {
+        assert_eq!(
+            Principal::deserialize(RefusingDeserializer(human_readable)),
+            Err(FormatError::UnexpectedToken)
+        );
+    }
+}
+
+#[test]
 fn all_lengths_preserve_text_bytes_order_and_padding() {
     for len in 0..=Principal::MAX_LENGTH_IN_BYTES {
         for seed in 0..=255u8 {

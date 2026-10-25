@@ -23,7 +23,7 @@ mkdir -p target
 fixture="$(mktemp -d "$root/target/cdk-runtime.XXXXXX")"
 mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 # Inherit the reviewed test dependency selections from the root catalog.
-development_toolchain="$("$root/.tools/host/bin/yq" -p toml -r '.toolchain.channel' rust-toolchain.toml)"
+development_toolchain="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.toolchain.channel' rust-toolchain.toml)"
 [[ "$development_toolchain" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Expected a pinned development compiler in rust-toolchain.toml' >&2; exit 1; }
 testkit="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
 timers="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-timers' Cargo.toml)"
@@ -32,64 +32,26 @@ serde="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.
 cbor="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde_cbor' Cargo.toml)"
 selection='path = "../../crates/ic-platform"'
 if [[ -n "$published" ]]; then selection="version = \"=$published\""; fi
-cat > "$fixture/Cargo.toml" <<MANIFEST
-[workspace]
-members = ["crates/canister", "apps/driver"]
-resolver = "3"
-[workspace.package]
-version = "0.0.0"
-edition = "2024"
-publish = false
-[workspace.dependencies]
-ic-platform = { $selection, default-features = false, features = ["cdk"] }
-ic-testkit = "$testkit"
-ic-timers = "$timers"
-ic-wire = "$wire"
-serde = { version = "$serde", default-features = false }
-serde_cbor = "$cbor"
-MANIFEST
+PLATFORM_FIXTURE_PLATFORM="$selection" PLATFORM_FIXTURE_TESTKIT="$testkit" \
+PLATFORM_FIXTURE_TIMERS="$timers" PLATFORM_FIXTURE_WIRE="$wire" \
+PLATFORM_FIXTURE_SERDE="$serde" PLATFORM_FIXTURE_CBOR="$cbor" \
+    perl -pe 's/\@(PLATFORM|TESTKIT|TIMERS|WIRE|SERDE|CBOR)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
+        scripts/fixtures/cdk-runtime/Cargo.toml.in > "$fixture/Cargo.toml"
 if [[ -z "$published" ]]; then
     cat >> "$fixture/Cargo.toml" <<'MANIFEST'
 [patch.crates-io]
 ic-platform = { path = "../../crates/ic-platform" }
 MANIFEST
 fi
-cat > "$fixture/crates/canister/Cargo.toml" <<'MANIFEST'
-[package]
-name = "platform-runtime-canister"
-version.workspace = true
-edition.workspace = true
-publish.workspace = true
-rust-version = "1.91"
-[features]
-external-candid = ["ic-platform/candid"]
-[lib]
-crate-type = ["cdylib"]
-[dependencies]
-ic-platform.workspace = true
-ic-timers.workspace = true
-ic-wire.workspace = true
-serde.workspace = true
-MANIFEST
-cat > "$fixture/apps/driver/Cargo.toml" <<'MANIFEST'
-[package]
-name = "platform-runtime-driver"
-version.workspace = true
-edition.workspace = true
-publish.workspace = true
-rust-version = "1.91"
-[dependencies]
-ic-platform = { workspace = true, features = ["certification", "candid"] }
-ic-testkit.workspace = true
-serde_cbor.workspace = true
-serde.workspace = true
-ic-wire.workspace = true
-MANIFEST
+cp scripts/fixtures/cdk-runtime/canister.Cargo.toml "$fixture/crates/canister/Cargo.toml"
+cp scripts/fixtures/cdk-runtime/driver.Cargo.toml "$fixture/apps/driver/Cargo.toml"
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
 cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec} "$fixture/crates/canister/src/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
 cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol} "$fixture/apps/driver/src/"
 lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
+# Preparation modes may resolve/fetch only as explicitly requested. Qualification
+# below this phase uses the maintained lock and admits graphs before compiling.
 if [[ "$mode" == --refresh-lock ]]; then
     # Explicitly rebase on the production lock, resolving the test-only additions.
     # Ordinary validation never resolves or rewrites the maintained selection.
@@ -108,7 +70,7 @@ fi
 if [[ -n "$published" ]]; then
     # Resolve only the disposable lock from explicitly prepared registry caches.
     cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
-    "$root/.tools/host/bin/jq" -e --arg version "$published" -f "$root/scripts/ci/published-runtime.jq" "$fixture/metadata.json" > /dev/null || {
+    "$root/.tools/host/bin/jq" -e --arg version "$published" --argjson require_generator true -f "$root/scripts/ci/published-runtime.jq" "$fixture/metadata.json" > /dev/null || {
         echo 'Published runtime requires the exact registry facade/generator and no local replacements' >&2
         exit 1
     }
