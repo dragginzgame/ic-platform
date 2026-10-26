@@ -6,6 +6,13 @@ endpoints called by third parties. Candid is the adapter for management canister
 NNS/SNS, ledgers and other interfaces that require it; caller location does not
 select a codec. Existing Candid checkpoints remain a legacy compatibility exception.
 
+The separate [browser package](packages/browser/README.md) supplies an initial
+`@dragginzgame/ic-platform` npm boundary over SDK Core 6.1.1 for Blob 0.48, with checked identity
+restoration, explicit Agent configuration and raw query integration. It is local
+source awaiting publication; existing browser SDK declarations remain until
+qualified adoption. Use `make check-browser` and the separately prepared Chromium
+gate `make check-browser-runtime`. This does not add SDK dependencies to Rust.
+
 The released 0.5 hard cut removed the unused `cdk::storage` checkpoint helpers;
 existing data stays with its consumer and raw stable-memory passthroughs remain.
 See [the retirement contract](docs/migration.md#pending-05-retirement).

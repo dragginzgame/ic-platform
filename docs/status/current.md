@@ -1,93 +1,117 @@
 # Current handoff
 
-## Compatible cleanup after 0.6.15
+## Browser SDK Core boundary
 
-This local batch starts at released Platform 0.6.15 (`6dcf54a`). Pending notes use
-0.6.16 because the changes preserve the public API, feature selections, external
-wire bytes and persisted formats. Package versions remain 0.6.15. No staging,
-commit, push, release, publication or sibling edit is part of this batch.
+This batch starts at released Platform 0.6.16 (`0b84c2e`). Pending root notes use
+0.6.17; Rust package versions remain 0.6.16. The independent npm candidate is
+`@dragginzgame/ic-platform` 0.1.0 under `packages/browser`, still unpublished.
+No commit, push, release or upload was performed. Siblings remain read-only.
+Shared Tooling is 0.26.18 (`37652c0`), refreshed through its canonical exporter.
+Normal releases start fresh; exact recovery uses `release-resume VERSION=X.Y.Z`.
+Common external IC dependency guards supplement Platform's stricter local policy.
+Snapshot, offline tool admission/reporting, formatting, release wiring and focused
+release/installer/guard fixtures pass on Linux after full Clippy. Evidence is at
+`target/shared-adoption.5kYsS9` and `/tmp/platform-shared-*.log`; macOS is not rerun.
+Full `check-pins` awaits Git-tracking the pending browser manifest/lock. Its pin
+data checks pass; no staging, release, tool installation or publication was performed.
 
-The incoming uncommitted root lock selects Wire/derive 0.7.5 and is preserved.
-The manifest still declares Wire 0.7.2 ranges; the independent maintained runtime
-lock still selects 0.7.2. This cleanup does not upgrade or reconcile either lock.
-Shared Tooling 0.26.8 remains selected at `0b07c2a`; snapshot payloads are unchanged.
+The candidate now selects exactly SDK Core **6.1.1** as an ordinary dependency
+for Blob's approved local 0.48 graph. This supersedes the unpublished SDK-5
+candidate. Explicit ESM subpaths cover Principal, Ed25519/secp256k1 identities,
+Agent/request APIs, certificates and required external Candid. No blanket root
+export, SDK fork, new crypto implementation, transport or Wire generator exists.
 
-Implemented cleanup:
+Owned adapters provide bounded canonical Principal text, checked identity JSON
+import with caller-selected budgets, explicit trust/Agent options and raw-query
+rejections. Buffer views are copied without aliasing; invalid query byte shapes
+are refused before dispatch. SDK-6 rejection context preserves effective canister
+or subnet routing, including the SDK's deprecated effective-canister input.
+Automatic root discovery is disabled by the options helper; consumers explicitly
+select retries, query verification and construction-time synchronization.
 
-- Consumer features, source/assets and Wasm commands have one reviewed TSV profile
-  table. Unknown profiles, graph admission, Cargo failure propagation and the
-  parsed final-loop exit retain their behavior.
-- Published consumer, metadata and runtime proofs share exact registry identity
-  admission. Generator presence is required for runtime qualification; an optional
-  generator, when present elsewhere, must also match the facade's exact version.
-  Runtime qualification retains older registry facades through Timers while
-  refusing replacements and requiring the exact supplier/generator pair.
-- Runtime manifests are explicit templates with shared workspace metadata. Setup,
-  graph admission and compilation retain their ordering and separate lock owner.
-- The reviewed feature inventory and native-only leaf dependency policy share one
-  JSON input. Cargo still supplies structural facts; graph permission/refusal
-  checks and adversarial fixtures remain independently specified.
-- Formatting write/check commands share their extra source list. Installed-runtime
-  CI selects common host/Rust setup without release-editor or frontend tooling;
-  standard contributor setup and CI still retain the complete frontend proof.
-- Entrypoint validation resolves paths and reply/context decisions before token
-  emission. Guard order, explicit unit codecs, mixed-site locals, symbols and
-  sync/async executor selection are preserved.
-- Principal deserialization directly preserves format errors. Bounded grammar,
-  visitors, binary bytes and external conversions are unchanged.
-- The experimental scaffolding checker now follows its sole supported secp path;
-  active source/license preservation and attribute-location checks are unchanged.
+Wire retains owned application codecs/generation. Consumers retain trust roots,
+authorization, budgets, sessions, storage, cancellation and effect reconciliation.
+Identity crypto, request signing/hashing, certificate verification and external
+Candid remain upstream. No Rust public surface or dependency selection changed.
+The [package contract](../../packages/browser/README.md),
+[migration guide](../migration.md#blob-048-and-sdk-6) and
+[inventory](../ic-inventory.md) describe supported imports and ownership.
 
-## Qualification
+## Blob 0.48 qualification
 
-Full root all-target/all-feature `make clippy` passes before longer tests. Macro
-and Principal unit tests pass on Rust 1.99.1 and 1.91.0, including structured
-format-error preservation. An isolated before/after comparison finds identical
-emitted token strings and diagnostic text in 2,208 cases across all eight macros.
-This comparison does not independently establish span hygiene or installed behavior.
-The proof retains both source copies under `target/macro-equivalence.z1SoQI`.
+Read-only review used Blob `c4fe55dd` with its dirty pending 0.48 work preserved.
+All current browser SDK imports fit the existing exports; no new exports were
+needed. Disposable copies adopt checked restoration with Blob's 512-byte budget,
+canonical text and explicit Agent options, retaining IntentAgent/guarded fetch,
+zero retries, exact signed bytes and durable uncertainty/cancellation fences.
 
-Consumer admission stubs cover all 22 profiles and their real source/assets,
-unknown-profile rejection, runtime graph refusals, final Cargo failure and live
-script edits. Registry admission and native-leaf closure/graph refusal tests pass.
-All 22 standalone profiles pass native tests on both compilers and applicable
-Wasm checks/builds, without warnings or package-cache lock waits. All 240 routine
-selections pass graph admission per target; the selection helper's exhaustive
-completeness test also passes. Source/license, formatting, boundary, inventory,
-documentation-link and snapshot checks pass; all-feature MSRV Wasm compiles.
+Full root `make clippy` passed before longer tests. `make check-browser-runtime`
+passes fifteen adapter/graph tests, packed-only strict Node/TypeScript consumers
+with no direct SDK declaration, export-map privacy, Principal bundle isolation, and actual
+Chromium page/module-worker checks. Provider types compile with Caffeine 1.1.2
+and Auth 10.0.2 on one SDK 6.1.1 graph. Latest packed browser evidence:
+`target/browser-consumer.qnGGb4`; logs: `/tmp/platform-browser-followup-*.log`.
+Tool/packed checks reject duplicate/aliased locks, installed SDK drift and shadow
+Agent copies; regular and packed license copies must match the root MIT owner.
 
-The runtime fixture passes native/Wasm graph admission for both protocols,
-all-target/all-feature canister Wasm Clippy and four release Wasm builds
-(Wire/external Candid, Rust 1.99.1/1.91.0). Runtime evidence and preserved artifacts
-are in `target/cdk-runtime.ZSVYbe`; feature graphs are in
-`target/feature-graphs/attempt.3uyWPo`. Logs are `/tmp/platform-cleanup-*.log`.
+Seven real Blob browser entry bundles use one SDK root. Copied Blob suites pass:
+35 frozen-publication cases, 58 worker cases, 22 native browser/profile cases,
+17 Chromium signer/bootstrap cases and IndexedDB persistence/restart checks.
+The Caffeine source hashes and reviewed integration patch are preserved.
+Source hashes, bundle maps, reports and registry readback:
+`target/blob048.4V8Lib/final`; copied sources: `target/browser-consumer.uLItSc/blob048`.
+These are local packed-artifact/source-migration proofs. Installed IC/live-provider,
+billing, real login, full release CI and native macOS are not qualified here.
+Blob's prior SDK-6 installed tests remain consumer-owned evidence, not proof of
+published Platform adoption. The earlier SDK-5/Canic source-copy evidence remains
+at `target/browser-consumer.IIPjBv/adoption` and does not qualify this SDK-6 change.
+The reviewed 16-file source migration patch is retained at
+`target/browser-followup.bbsRby/blob048-source-migration.patch`; read-only
+`git apply --check` passes against Blob. Manifests/supply remain separate.
 
-Native macOS and installed-canister qualification have not been rerun for this
-batch; no admitted Testkit server is configured locally. Full release CI remains
-maintainer-owned. No runtime timing or Wasm-size improvement is claimed.
+Contributor tools are Node 24.21.0/npm 12.2.0 and prepared Linux Chromium. Other
+engines/Node versions remain unqualified. No size or performance gain is claimed.
+Browser CI now selects Ubuntu and native macOS 15 Intel/Apple Silicon, with host
+identity admission. The new macOS jobs have not run; Linux is the local evidence.
+The source-publish hook and real offline no-upload npm publication preview pass:
+`/tmp/platform-browser-followup-publish.log`, packed proof `browser-consumer.KZtLUw`.
+The preview reports login required; it does not prove registry ownership.
+Rust `make publish` remains crates.io-only.
 
-## Retained contracts and retirement gate
+## Supply and adoption
 
-Executor =2.0.0 and ic0 =1.2.0 retain their registry identities. Callback/trap and
-cryptographic implementations, licenses, source guards and vectors are unchanged.
-No default features, alternative executor, codec fallback or new allocation owner.
-Required external IC Candid interfaces and consumer-owned retry/resource policies
-remain intact. The [migration contract](../migration.md) and
-[IC inventory](../ic-inventory.md) remain authoritative for the public boundary.
+[Platform #57](https://github.com/dragginzgame/ic-platform/issues/57) owns review,
+integration and npm supply. Public npm readback still returns HTTP 404 on
+2026-10-26. Maintainer organization/package permission and publication remain
+outstanding; local archives are qualification artifacts, not supported supply.
+[Blob #103](https://github.com/dragginzgame/ic-blob-storage/issues/103) owns adopting
+the published artifact, direct SDK declaration/import refusal and final consumer
+acceptance. Existing SDK peers stay until supply. Caffeine 1.1.2 declares SDK 5:
+retain Blob's application-owned SDK-6 override and reviewed patch. On removing the
+direct SDK declaration, replace `$@icp-sdk/core` with exact `6.1.1` in the override.
+Platform's development override is not inherited by applications.
 
-Compiler retirement remains gated by
-[#38](https://github.com/dragginzgame/ic-platform/issues/38) and
-[Canic #613](https://github.com/dragginzgame/canic/issues/613). Canic's working
-frontend uses Wire bindings, but committed `cf2d3d1fb` still imports/calls
-`compile_javascript` and `compile_typescript`. Its frontend file is dirty; do not
-retire exports or claim committed adoption from that working source. External DID
-inspection, typechecking and textual call tooling still require their parser
-surface. Removing compiler exports alone would not remove upstream Handlebars.
+[Canic #637](https://github.com/dragginzgame/canic/issues/637) needs a coordinated
+Core/Auth migration: its Core 5.4/Auth 8 declarations remain incompatible with a
+single SDK-6 graph. Auth 10.0.2 is a producer type fixture, not Canic login/session
+acceptance. Preserve Canic #613's owner/build deferral. Compiler retirement stays
+on Platform #38 after committed consumer adoption. Advisory-index #56 is unchanged.
 
-Published 0.6.15 supplies the Wire 0.7 Principal/Account metadata integration;
-prior detailed qualification is preserved at `6dcf54a:docs/status/current.md`.
-Wire producers must align metadata identities; storage/allocation, schema admission,
-trust and interpretation remain with their consumers. The crypto-bigint advisory
-and advisory-index preparation remain separately tracked by
-[#50](https://github.com/dragginzgame/ic-platform/issues/50) and
-[#56](https://github.com/dragginzgame/ic-platform/issues/56).
+## Rust qualification and advisory boundary
+
+The incoming Wire 0.7.12 lock update is preserved. Its derive selection advanced
+to 0.7.14 during tooling validation and was retained. The two host fixtures use
+the explicit acknowledgement/diagnostics API. Focused Rust 1.91 and generated
+Principal/Account byte proofs passed with the prior 0.7.12 derive selection;
+Full Clippy passes the current graph; those earlier runtime proofs remain separate.
+Detailed released runtime/source evidence remains at `0b84c2e:docs/status/current.md`.
+Executor =2.0.0, ic0 =1.2.0, external bytes and crypto/runtime guards are unchanged.
+
+The [#50](https://github.com/dragginzgame/ic-platform/issues/50) recheck uses RustSec
+`21d909e` and index records at `target/issue50-20261026`. The workspace still flags
+crypto-bigint 0.5.5 through ECDSA/Agent/public derivation; the separate runtime lock
+reports no vulnerabilities with yanked checks skipped. Defaults/executor/runtime
+normal/build graphs exclude it. No compatible supplier or signing exemption is
+established. A complete correction needs a reviewed three-path dependency/type
+migration. That investigation changed no crypto bodies, suppressions or dependency
+selections; the separate Wire lock activity above does not correct this advisory.

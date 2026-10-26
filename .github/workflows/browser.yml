@@ -1,0 +1,64 @@
+name: Browser SDK
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  chromium:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            os: Linux
+            arch: x86_64
+          - runner: macos-15-intel
+            os: Darwin
+            arch: x86_64
+          - runner: macos-15
+            os: Darwin
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Check native identity
+        env:
+          EXPECTED_OS: ${{ matrix.os }}
+          EXPECTED_ARCH: ${{ matrix.arch }}
+        run: |
+          args=("$EXPECTED_OS" "$EXPECTED_ARCH")
+          if [[ "$EXPECTED_OS" == Darwin ]]; then args+=(15); fi
+          bash scripts/ci/check-native-host.sh "${args[@]}"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Prepare pinned npm and dependencies
+        run: |
+          npm install --global --ignore-scripts "$(node -p 'require("./packages/browser/package.json").packageManager')"
+          npm ci --prefix packages/browser --ignore-scripts --no-audit --no-fund
+      - name: Qualify source-publish hook without upload
+        env:
+          npm_config_dry_run: 'true'
+        run: npm run prepublishOnly --prefix packages/browser
+      - name: Prepare selected Chromium
+        run: node packages/browser/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Qualify packed browser and module-worker consumers
+        run: make check-browser-runtime

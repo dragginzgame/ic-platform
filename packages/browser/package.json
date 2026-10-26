@@ -1,0 +1,38 @@
+{
+  "name": "@dragginzgame/ic-platform",
+  "version": "0.1.0",
+  "description": "Controlled browser boundary for Internet Computer SDK integration",
+  "type": "module",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/dragginzgame/ic-platform.git", "directory": "packages/browser" },
+  "sideEffects": false,
+  "publishConfig": { "access": "public" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "exports": {
+    "./principal": { "types": "./dist/principal.d.ts", "import": "./dist/principal.js" },
+    "./identity": { "types": "./dist/identity.d.ts", "import": "./dist/identity.js" },
+    "./identity/secp256k1": { "types": "./dist/secp256k1.d.ts", "import": "./dist/secp256k1.js" },
+    "./agent": { "types": "./dist/agent.d.ts", "import": "./dist/agent.js" },
+    "./certification": { "types": "./dist/certification.d.ts", "import": "./dist/certification.js" },
+    "./candid": { "types": "./dist/candid.d.ts", "import": "./dist/candid.js" }
+  },
+  "engines": { "node": ">=20.19.0" },
+  "packageManager": "npm@12.2.0",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "pretest": "npm run build",
+    "prepack": "npm run build",
+    "test": "node --test tests/*.test.mjs",
+    "check": "npm test && node ../../scripts/ci/check-browser-consumer.mjs",
+    "prepublishOnly": "node ../../scripts/ci/check-browser-tools.mjs && npm run check"
+  },
+  "dependencies": { "@icp-sdk/core": "6.1.1" },
+  "overrides": { "@caffeineai/object-storage": { "@icp-sdk/core": "$@icp-sdk/core" } },
+  "devDependencies": {
+    "@caffeineai/object-storage": "1.1.2",
+    "@icp-sdk/auth": "10.0.2",
+    "esbuild": "0.28.2",
+    "playwright": "1.64.1",
+    "typescript": "7.0.2"
+  }
+}

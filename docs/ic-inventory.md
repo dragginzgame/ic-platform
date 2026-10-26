@@ -13,6 +13,25 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+The separate ESM package `packages/browser` owns the browser SDK Core boundary
+under proposed npm identity `@dragginzgame/ic-platform` 0.1.0. Its sole production
+dependency is exactly `@icp-sdk/core` 6.1.1 for Blob's local 0.48 graph.
+Canic's SDK-5/Auth-8 handoff needs a coordinated migration before adoption.
+Explicit subpaths expose Principal, Ed25519/secp256k1
+identities, Agent/request APIs, certificates and required external Candid.
+Owned non-cryptographic adapters cover canonical text, checked key-pair import,
+explicit trust/Agent options and raw query errors. SDK crypto, hashing, key
+encoding and classes remain upstream; trust, limits, intents and application
+policies remain consumer-owned. Wire retains owned codecs and generators.
+
+`make check-browser` checks the npm selections, real provider types and packed
+consumer/bundle contract; `make check-browser-runtime` adds Chromium page/worker
+qualification. The Rust-only manifest block below does not inventory npm packages.
+Its separate lock also includes TypeScript, bundler, browser and Caffeine/Auth
+test dependencies; none are Rust or production browser dependencies. No package
+publication or sibling adoption is claimed. See the
+[browser migration contract](migration.md#browser-sdk-core-boundary).
+
 The optional native-only `wire-schema` feature adds the upstream Wire metadata
 trait to owned Principal and Account. Principal delegates to Wire's bounded
 byte-buffer schema; Account describes its ordered owner and optional fixed

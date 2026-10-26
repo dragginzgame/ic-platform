@@ -73,8 +73,14 @@ fn principal_schema_and_frames() {
         });
         std::fs::write(
             directory.join("principal.ts"),
-            typescript::generate_registry(&Default::default(), &[method], "./wire-runtime.js")
-                .unwrap(),
+            typescript::generate_registry(
+                &Default::default(),
+                &[method],
+                "./wire-runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}"),
+            )
+            .unwrap(),
         )
         .unwrap();
         std::fs::write(directory.join("wire-runtime.ts"), typescript::RUNTIME).unwrap();
@@ -154,8 +160,14 @@ fn account_schema_and_frames_preserve_representation() {
         });
         std::fs::write(
             directory.join("account.ts"),
-            typescript::generate_registry(&Default::default(), &[method], "./wire-runtime.js")
-                .unwrap(),
+            typescript::generate_registry(
+                &Default::default(),
+                &[method],
+                "./wire-runtime.js",
+                &Default::default(),
+                |report| eprint!("{report}"),
+            )
+            .unwrap(),
         )
         .unwrap();
         std::fs::write(

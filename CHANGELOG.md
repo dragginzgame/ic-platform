@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.17]
+
+- Adopt Shared Tooling 0.26.18, including fresh normal releases with explicit
+  recovery, tool-admission diagnostics and common external IC dependency guards.
+- Add the initial browser SDK Core boundary with canonical Principal admission,
+  checked identity restoration, explicit Agent policy inputs and raw query errors.
+- Qualify packed npm consumers, Caffeine/Auth type compatibility and actual
+  browser/module-worker integration; document separate publication and adoption.
+- Copy Node Buffer-backed trust/query views without aliasing, refuse invalid raw
+  byte shapes, and qualify fresh source builds before npm publication (#57).
+- Adapt host metadata fixtures to the selected Wire generator's explicit
+  diagnostics/acknowledgements interface.
+- Align the unpublished browser package with Blob 0.48's SDK Core 6.1.1 graph,
+  preserve effective-target query diagnostics, and qualify Caffeine composition
+  with compatible SDK-6 Auth types; document application override requirements.
+- Reject duplicate, aliased and shadow SDK graphs; verify copied and packed MIT
+  licenses, and cover browser/worker qualification on supported macOS runners.
+
 ## [0.6.16] - 2026-10-25
 
 - Simplify consumer qualification with one profile table, shared registry identity

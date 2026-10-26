@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`0b07c2a3163a5a66328e100b553baf93afd8ed07` (Shared Tooling 0.26.8) is recorded in
+`37652c087fff16f55f83d18d27ba17c83f34021c` (Shared Tooling 0.26.18) is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -35,6 +35,28 @@ Read [the current handoff](docs/status/current.md), then
   authorized; no remote, commit or publication is implied.
 - GitHub issues are the follow-up tracker once a remote exists. Migration and
   provenance documents specify contracts and evidence, not a second issue queue.
+
+## Browser SDK boundary
+
+The maintainer authorized the separate ESM npm package under `packages/browser`
+alongside the sole Rust consumer library. It owns SDK Core dependency selection
+and shared non-cryptographic integration for Blob and Canic; it is not a second
+Wire generator, storage owner, authentication flow or application policy owner.
+Target Blob's approved local 0.48 graph with SDK Core 6.1.1. Preserve upstream classes/type identity,
+cryptographic implementations and external bytes; expose explicit subpaths only.
+Principal text admission, checked identity restoration and Agent construction
+plumbing may be owned here. Consumers retain trust roots, budgets, retries,
+intent journals, authorization and release/schema binding. Never infer update,
+polling or resubmission permission from a transport response.
+
+Use `make check-browser` for strict TypeScript, adapter and packed-consumer proofs;
+`make check-browser-runtime` additionally requires explicitly prepared Chromium.
+Keep real browser/worker evidence separate from installed IC/provider acceptance.
+SDK Core is an exact ordinary npm dependency; consumer adoption waits for a
+published package. Existing SDK peers stay until then. Rust `make publish` remains
+crates.io-only; npm release/publication is a separate maintainer action.
+Caffeine 1.1.2 still declares SDK 5; its SDK-6 override belongs to the consuming
+application. Auth 10.0.2 is a compatible SDK-6 type fixture, not Canic adoption.
 
 ## Owned entrypoint generator
 

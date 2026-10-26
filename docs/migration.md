@@ -1,5 +1,108 @@
 # Candid and runtime ownership
 
+## Browser SDK Core boundary
+
+The initial browser package candidate is `@dragginzgame/ic-platform` 0.1.0 under
+`packages/browser`, backed by SDK Core exactly 6.1.1 as an ordinary dependency
+for Blob's approved local 0.48 graph. This supersedes the unpublished SDK-5 candidate.
+It is not yet published. Supply is tracked by
+[Platform #57](https://github.com/dragginzgame/ic-platform/issues/57). This npm
+release identity is independent of Rust package versions and `make publish`.
+Published-package and installed consumer acceptance remain separate requirements.
+
+| Current SDK import | Platform import |
+| --- | --- |
+| `@icp-sdk/core/principal` | `@dragginzgame/ic-platform/principal` |
+| `@icp-sdk/core/identity` | `@dragginzgame/ic-platform/identity` |
+| `@icp-sdk/core/identity/secp256k1` | `@dragginzgame/ic-platform/identity/secp256k1` |
+| `@icp-sdk/core/agent` | `/agent` for HttpAgent/request/reject APIs; `/certification` for Certificate/lookup |
+| `@icp-sdk/core/candid` | `@dragginzgame/ic-platform/candid` for required external protocols |
+
+This is a narrow supported surface, not a blanket SDK namespace. Re-audit each
+symbol against the package export map. Keep existing SDK class/type identities;
+do not replace Principal, identity, Agent or certificate values with new structs.
+Neither the npm package nor Rust adds a dependency from Wire back to Platform.
+Wire still generates and encodes owned endpoint payloads. SDK ingress envelopes
+and required Caffeine/system/ledger Candid remain external protocols.
+
+After maintainer npm publication, consumers replace their exhausted SDK Core
+declaration with a regular Platform dependency and update locks/build inputs.
+Blob retains its explicit SDK peer until that supply and its migration exist.
+Keep its Caffeine dependency; Canic retains Auth for its session integration.
+Qualify one compatible SDK Core 6.1.1 runtime across those provider edges rather
+than bundling an SDK copy or distributing aliases/local patches.
+After adoption, consumer CI must reject first-party direct SDK Core imports and
+declarations while allowing the provider's transitive SDK edge. Platform's Cargo
+boundary checker does not enforce JavaScript imports in sibling repositories.
+
+Blob may replace its canonical representation checks with
+`parseCanonicalPrincipal`; role/anonymous/range policy remains there. Its existing
+identity JSON consistency check maps to `restoreEd25519Identity` or
+`restoreSecp256k1Identity` with Blob's existing 512-byte import budget. Map typed
+import refusals to the existing public bootstrap refusal without exposing keys.
+No principal hashing, key derivation, encoding or signature implementation moves.
+
+Use `createAgentOptions` before the existing SDK constructor/factory, including
+Blob's HttpAgent subclass. Supply an admitted origin URL, exact selected identity
+and root bytes, and explicit retry/query-verification/time-sync choices. The
+helper snapshots trust bytes and disables automatic root fetching. Preserve each
+caller's selected policy: Canic's existing defaults are not a new shared default,
+and Blob retains zero SDK retries and its guarded fetch/intents transaction.
+Keep response limits, deadlines, endpoint authorization and historical certificate
+policy at their current owners. Required options must not select new network IO.
+
+`queryRaw` preserves opaque argument/reply bytes and upstream rejection context.
+Root and query snapshots own their selected bytes even for Node Buffer views;
+non-byte query arguments are rejected before SDK invocation rather than coerced.
+It adds no retries; underlying SDK retries/verification requests still apply.
+Keep update submission, request-ID/envelope retention, polling, cancellation and
+uncertain-effect authority explicit in consumers. Certificate lookup alone is
+not verification. SDK verification and caller freshness/trust decisions remain
+unchanged. No crypto or alternative transport implementation is introduced.
+
+Qualification must include strict TypeScript through the packed public exports,
+a consumer with no direct SDK Core declaration, exact provider Agent/Identity
+compatibility, Principal-only bundle isolation, external Candid/signature/request
+bytes, and real browser/module-worker checks. Disposable Blob/Canic source copies
+provide import/helper/bundling evidence only; they do not qualify installed IC,
+production authentication, durable intents or provider effects. Run those at the
+owning consumers after adoption. New SDK versions require renewed qualification;
+this batch follows Blob's approved 6.1.1 selection.
+
+### Blob 0.48 and SDK 6
+
+All current Blob browser SDK imports are covered by the explicit subpaths above;
+no additional runtime exports are needed. Preserve `IntentAgent` and its guarded
+fetch. Wrap its existing constructor inputs with `createAgentOptions`, supplying
+`host: new URL(origin)`, `retryTimes: 0`, `shouldSyncTime: false` and the existing
+`verifyQuerySignatures: true` policy. Retain exact envelope/request-ID handling,
+certificate freshness/root policy, durable claims and cancellation fences.
+Map checked restoration refusals to `BootstrapRefusal('signer')` with the existing
+512-byte budget. Keep anonymous/role admission after canonical text parsing.
+
+Caffeine 1.1.2 declares SDK `^5.3.0`; retain its reviewed integration patch and
+Blob's qualified SDK-6 application override. When the direct SDK declaration is
+removed, replace its `$@icp-sdk/core` override reference with the exact selection:
+
+```json
+"overrides": {
+  "@caffeineai/object-storage": { "@icp-sdk/core": "6.1.1" }
+}
+```
+
+Overrides in Platform's development manifest do not propagate to applications.
+Do not use `--force`/legacy peer resolution, install duplicate SDKs or call this
+provider-declared SDK-6 support. Check both locked packages and actual provider/
+Platform Agent resolution. Preserve the direct-import ban requirement after
+published adoption; the override is a transitive provider selection, not a new
+first-party SDK dependency.
+
+Canic's current Auth 8.0.3 declares SDK `^5`. The producer type fixture uses Auth
+10.0.2 (`^6`) and Signer 6.1.0; it does not qualify Canic login/session behavior.
+Keep Canic's current declarations until its coordinated Auth/Core migration and
+consumer acceptance. Never force Auth 8 onto SDK 6 or infer fleet adoption from
+Blob's tests. Native macOS and installed/live-provider acceptance remain separate.
+
 ## Owned Principal and Account Wire metadata
 
 Platform requires Rust 1.91 for all features. Principal metadata originally shipped

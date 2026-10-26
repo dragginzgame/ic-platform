@@ -1,4 +1,6 @@
 /.tools/
 /target/
 /scripts/fixtures/wire-schema/node_modules/
+/packages/browser/node_modules/
+/packages/browser/dist/
 .DS_Store
