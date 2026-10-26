@@ -2,6 +2,8 @@
 
 ## [0.6.19] - 2026-10-26
 
+### 📝 Summary
+
 - Adopt Shared Tooling 0.26.20, including the compact baseline and corrected
   historical-draft release checks; use its SDK boundary guard in packed browser
   consumers while retaining Platform as the SDK dependency owner.
