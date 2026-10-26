@@ -10,6 +10,8 @@
 - Bound the feature-selection regression's exhaustive model to four synthetic
   features; retain the real singles/pairs/critical matrix without enumerating
   millions of combinations during routine validation.
+- Include the BLAKE3 graph helpers in standalone consumer admission fixtures;
+  verify duplicate identities and extra features fail before compilation.
 - Supply the independent browser package as `@tokostudios/ic-platform` 0.1.0
   over SDK Core 6.1.1, with verified registry archive identity and standalone
   consumer installation. Blob/Canic adoption remains in their own issues

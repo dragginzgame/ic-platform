@@ -7,6 +7,7 @@ fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-consumer-admission.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 mkdir -p "$fixture/scripts/ci" "$fixture/crates/ic-platform/tests" "$fixture/bin"
 cp "$root/scripts/ci/check-platform-consumer.sh" "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/check-blake3-graph.sh" "$root/scripts/ci/check-cargo-graph.pl" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
@@ -21,6 +22,18 @@ set -euo pipefail
 case "$1" in
     metadata) printf '{}\n' ;;
     tree)
+        if [[ "${TEST_CAPABILITY:-}" == blake3 ]]; then
+            case " $* " in
+                *' --format {f} '*) printf '%s\n' "${TEST_BLAKE3_FEATURES:-std}" ;;
+                *)
+                    printf 'platform-consumer-proof v0.1.0\nblake3 v1.8.7\n'
+                    if [[ "${TEST_BLAKE3_DUPLICATE:-no}" == yes ]]; then
+                        printf 'blake3 v1.8.6\n'
+                    fi
+                    ;;
+            esac
+            exit 0
+        fi
         printf 'ic-cdk-executor v2.0.0\nic0 v1.2.0\n'
         if [[ "$TEST_CANDID" == yes ]]; then printf 'candid v0.10.38\n'; fi
         if [[ "$TEST_REJECT" == yes ]]; then printf 'ic-agent v0.49.2\n'; fi
@@ -45,7 +58,7 @@ while IFS=$'\t' read -r capability _ _ _ wasm; do
     TEST_CANDID=no
     if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi
     : > "$TEST_CALLS"
-    "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" "$capability" > "$fixture/log" 2>&1 || {
+    TEST_CAPABILITY="$capability" "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" "$capability" > "$fixture/log" 2>&1 || {
         cat "$fixture/log" >&2; exit 1;
     }
     expected=4
@@ -58,6 +71,24 @@ if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" unknown > "$fixture/
 fi
 [[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled an unknown consumer profile' >&2; exit 1; }
 echo 'Every consumer profile prepares its source/assets and selects native/Wasm commands'
+for rejection in duplicate features; do
+    duplicate=no feature_union=std
+    if [[ "$rejection" == duplicate ]]; then
+        duplicate=yes
+        diagnostic='maximum 1 rendered package identities, observed 2'
+    else
+        feature_union=pure,std
+        diagnostic='BLAKE3 must select only std'
+    fi
+    : > "$TEST_CALLS"
+    if TEST_CAPABILITY=blake3 TEST_BLAKE3_DUPLICATE="$duplicate" TEST_BLAKE3_FEATURES="$feature_union" \
+        "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" blake3 > "$fixture/log" 2>&1; then
+        echo "Admitted rejected BLAKE3 $rejection graph" >&2; exit 1
+    fi
+    grep -Fq "$diagnostic" "$fixture/log"
+    [[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled after BLAKE3 graph rejection' >&2; exit 1; }
+done
+echo 'BLAKE3 consumer rejects duplicate identities and extra features before compilation'
 for capability in cdk runtime external-candid; do
     export TEST_CANDID=no
     if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi

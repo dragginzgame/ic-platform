@@ -2,12 +2,26 @@
 
 ## Current work
 
-Baseline is released Platform 0.6.17 (`8d80630`). Pending compatible notes use
-0.6.18; Rust package versions remain 0.6.17. No commit, push or Rust release
-was performed. The maintainer authorized initial npm publication separately;
-its supply status is below. Existing sibling checkouts remain read-only.
+Current source is the maintainer's `d4f3a5b` commit, based on released Platform
+0.6.17 (`8d80630`). Pending notes use 0.6.18; Rust package versions remain 0.6.17.
+No commit, push or Rust release was performed by this repair. The maintainer
+authorized initial npm publication separately; its supply status is below.
+Existing sibling checkouts remain read-only.
 Shared Tooling stays at 0.26.18 (`37652c0`); its canonical exporter added the
 Cargo graph checker at that same revision. All 104 snapshot payloads verify.
+
+The release attempt stopped in consumer admission because its isolated fixture
+omitted `check-blake3-graph.sh` and the shared graph checker. The fixture now
+copies those real helpers and supplies representative BLAKE3 package/feature
+observations; duplicate identities and extra features reject before compilation.
+All-profile admission, runtime graph refusal, final Cargo failure and concurrent
+source-edit checks pass after full Clippy. This is fixture setup/coverage only;
+the production runner, graph policies and cryptographic code are unchanged.
+The full `make check-consumer` target now passes all 23 real standalone profiles,
+including development/MSRV 1.91 native tests and applicable Wasm checks/builds.
+Logs: `/tmp/platform-consumer-{admission-clippy,admission-after,check}.log`.
+Syntax, ShellCheck, formatting, inventory, links and pending changelog admission
+pass. Native macOS and the complete release CI were not rerun by this repair.
 
 The maintainer retired [Platform #58](https://github.com/dragginzgame/ic-platform/issues/58)
 as an unnecessary central coordination queue. Its acknowledgement/routing
@@ -126,8 +140,8 @@ no new macOS run is claimed. Runtime implementation/SDK identities are unchanged
 [Canic #637](https://github.com/dragginzgame/canic/issues/637) retain actual adoption,
 installed IC/provider/login and application acceptance. The earlier Blob copy
 logs retain their scope at `/tmp/platform-blob048-*.log`; no sibling was edited.
-Final npm-name, fixture and publication-document changes remain uncommitted for
-the maintainer's 0.6.18 push. Close #57 after those changes land on the default
+Final npm-name, fixture and publication-document changes are committed locally
+in `d4f3a5b` for the maintainer's 0.6.18 push. Close #57 after they land on the default
 branch; consumer adoption does not block this Rust release. The normal release
 gate still needs to run; focused checks do not claim full release CI acceptance.
 
