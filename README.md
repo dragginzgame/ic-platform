@@ -110,12 +110,21 @@ registry artifact rather than the checkout. This checks both owned metadata type
 
 `bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git /tmp/platform-advisory-attempt`
 audits both maintained lockfiles without compiling feature matrices. Prepare
-`cargo-audit` explicitly first (CI selects 0.22.2); the destination must be new.
-For offline inspection, replace `online URL` with `local DATABASE_REPOSITORY`.
-The isolated database revision, tool version, copied locks, logs and statuses are
-retained. Offline results do not establish advisory freshness. Known vulnerabilities
+`cargo-audit` explicitly first (CI selects 0.22.2) and prepare common host tools;
+the destination must be new. Online mode performs two locked dependency fetches
+in a fresh `CARGO_HOME` under the evidence directory, including the runtime's
+existing `--prepare` operation. This downloads registry data and crate sources
+without compiling or sharing the user's package-cache lock.
+For offline inspection, replace `online URL` with `local DATABASE_REPOSITORY`
+and select an already prepared Cargo cache through `CARGO_HOME` when needed.
+The isolated database revision, tool version, copied locks, registry preparation,
+logs and raw audit statuses are retained. Separate `*.index-status` files report
+complete/incomplete coverage; index failures reject even if cargo-audit exits zero.
+Offline results do not establish advisory or registry freshness. Known vulnerabilities
 fail the check; informational maintenance warnings remain visible and are not
-exemptions. No lockfile or advisory cache is updated. A separate PR/main CI job
+exemptions. Yanked versions retain cargo-audit's existing warning policy; missing
+index coverage is a failing observation. No maintained lockfile or shared advisory
+cache is updated. A separate PR/main CI job
 runs the online check and retains its revision and findings in job logs.
 
 The optional `stable-structures` boundary supplies original substrate identities

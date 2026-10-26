@@ -25,8 +25,9 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
-      - name: Prepare audit tool
+      - name: Prepare audit and manifest tools
         run: |
+          make install-host-tools
           rustup toolchain install --profile minimal --no-self-update
           cargo install cargo-audit --version '=0.22.2' --locked
       - name: Audit both maintained lockfiles
@@ -35,7 +36,7 @@ jobs:
         if: always()
         run: |
           evidence="$RUNNER_TEMP/advisory-evidence"
-          for file in revision tool-version prepare.log workspace.status runtime.status workspace.log runtime.log; do
+          for file in revision tool-version prepare.log workspace.registry-prepare.status runtime.registry-prepare.status workspace.registry-prepare.log runtime.registry-prepare.log workspace.status runtime.status workspace.index-status runtime.index-status workspace.log runtime.log; do
             if [[ -f "$evidence/$file" ]]; then
               printf '\nEvidence: %s\n' "$file"
               cat "$evidence/$file"

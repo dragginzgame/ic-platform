@@ -65,6 +65,7 @@ cp "$lock" "$fixture/Cargo.lock"
 if [[ "$mode" == --prepare ]]; then
     [[ -z "$published" ]] || { echo "Prepare published caches explicitly before qualification" >&2; exit 2; }
     cargo fetch --manifest-path "$fixture/Cargo.toml" --locked
+    printf 'Runtime dependency preparation retained at %s\n' "$fixture"
     exit 0
 fi
 if [[ -n "$published" ]]; then

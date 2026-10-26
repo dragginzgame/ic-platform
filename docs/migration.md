@@ -7,8 +7,8 @@ mandatory cross-repository acknowledgement before independent work proceeds.
 
 ## Optional BLAKE3 maintenance boundary
 
-This surface is pending Platform 0.6.18; use a local path for qualification until
-that supplying release is published. Published 0.6.17 does not provide it.
+This surface is supplied by published Platform 0.6.18. Earlier releases do not
+provide it; consumers must raise their minimum requirement when adopting it.
 
 Select `ic-platform/blake3` and import `ic_platform::blake3::{hash, Hasher, Hash}`.
 These are upstream identities, not wrapper types or a generic hashing API. The

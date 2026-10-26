@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.19]
+
+- Prepare both locked audit inputs in an isolated Cargo cache and reject
+  incomplete yanked-package observations even when cargo-audit exits zero.
+  Retain raw audit findings and statuses separately from index coverage
+  ([#56 — Prepare registry index coverage before yanked-package audit checks](https://github.com/dragginzgame/ic-platform/issues/56)).
+
 ## [0.6.18] - 2026-10-26
 
 - Add optional upstream BLAKE3 `hash`, `Hasher` and `Hash` exports with `std` only,
