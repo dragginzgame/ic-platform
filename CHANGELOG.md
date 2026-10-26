@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.18]
+## [0.6.18] - 2026-10-26
 
 - Add optional upstream BLAKE3 `hash`, `Hasher` and `Hash` exports with `std` only,
   independent of IC codecs, identities and runtime features.
