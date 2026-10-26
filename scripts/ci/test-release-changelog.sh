@@ -29,10 +29,38 @@ for scenario in pending empty previous undated whitespace unreleased unreleased-
     cmp "$fixture/original" "$fixture/notes"
     perl -e 'exit(((stat $ARGV[0])[2] & 07777) == 0640 ? 0 : 1)' "$fixture/notes"
 done
-for scenario in draft misplaced finalized conflicting headingless missing symlink directory; do
+# A historical unnumbered label cannot veto the current release. Exercise both
+# read-only preflight and rendered preparation, preserving every historical byte.
+for scenario in dated undated unreleased whitespace previous-top no-lf; do
+    case "$scenario" in
+        dated|previous-top|no-lf) heading='## [0.1.0] - 2026-08-01' ;;
+        undated) heading='## [0.1.0]' ;;
+        unreleased) heading='## [0.1.0] - Unreleased' ;;
+        whitespace) heading=$'##\t[0.1.0]  -\t2026-08-01  ' ;;
+    esac
+    printf '%s\n\n## [Draft]\n\n- Archived wording.  \t' "$heading" > "$fixture/history"
+    [[ "$scenario" == no-lf ]] || printf '\n' >> "$fixture/history"
+    printf '# Changelog\n\n' > "$fixture/notes"
+    [[ "$scenario" == previous-top ]] || printf '## [0.1.1]\n\n- Current change.\n\n' >> "$fixture/notes"
+    cat "$fixture/history" >> "$fixture/notes"
+    cp "$fixture/notes" "$fixture/original"
+    bash "$checker" 0.1.1 0.1.0 2026-08-02 "$fixture/notes"
+    cmp "$fixture/original" "$fixture/notes"
+    printf '# Changelog\n\n## [0.1.1] - 2026-08-02\n\n' > "$fixture/expected"
+    [[ "$scenario" == previous-top ]] || printf '%s\n\n' '- Current change.' >> "$fixture/expected"
+    cat "$fixture/history" >> "$fixture/expected"
+    awk -v version=0.1.1 -v previous=0.1.0 -v date=2026-08-02 \
+        -f "$root/scripts/ci/finalize-release-changelog.awk" "$fixture/notes" > "$fixture/rendered"
+    cmp "$fixture/expected" "$fixture/rendered"
+    awk -v version=0.1.1 -v previous=0.1.0 -v date=2026-08-02 -v allow_finalized=1 \
+        -f "$root/scripts/ci/finalize-release-changelog.awk" "$fixture/rendered" > "$fixture/recovered"
+    cmp "$fixture/rendered" "$fixture/recovered"
+done
+for scenario in draft active-draft misplaced finalized conflicting headingless missing symlink directory; do
     printf '# Changelog\n\n' > "$fixture/notes"
     case "$scenario" in
         draft) printf '## [Draft]\n\n- Pending notes.\n' >> "$fixture/notes" ;;
+        active-draft) printf '## [0.1.1]\n\n## [Draft]\n\n## [0.1.0] - 2026-08-01\n' >> "$fixture/notes" ;;
         misplaced) printf '## [0.1.0] - 2026-08-01\n\n## [0.1.1]\n\n- Pending notes.\n' >> "$fixture/notes" ;;
         finalized) printf '## [0.1.1] - 2026-08-02\n\n- Finalized notes.\n' >> "$fixture/notes" ;;
         conflicting) printf '## [0.2.0]\n\n- Public contract change.\n' >> "$fixture/notes" ;;

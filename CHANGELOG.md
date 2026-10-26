@@ -2,6 +2,12 @@
 
 ## [0.6.19]
 
+- Adopt Shared Tooling 0.26.20, including the compact baseline and corrected
+  historical-draft release checks; use its SDK boundary guard in packed browser
+  consumers while retaining Platform as the SDK dependency owner.
+- Raise Wire runtime/metadata minimums to 0.7.16 and align the independent runtime
+  fixture lock. Preserve existing payload bytes, admission policies and Rust 1.91.
+
 - Prepare both locked audit inputs in an isolated Cargo cache and reject
   incomplete yanked-package observations even when cargo-audit exits zero.
   Retain raw audit findings and statuses separately from index coverage

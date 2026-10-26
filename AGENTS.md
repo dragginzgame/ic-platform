@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`37652c087fff16f55f83d18d27ba17c83f34021c` (Shared Tooling 0.26.18) is recorded in
+`a7f85d45d4212d4c39225f58597580560a333550` (Shared Tooling 0.26.20) is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -30,9 +30,6 @@ Read [the current handoff](docs/status/current.md), then
   exports only after consumer adoption; preserve required external Candid paths.
 - Rust 2024 and MSRV 1.91.0. Inherit workspace metadata and dependencies; ordinary
   directory modules only. Do not add Python tooling.
-- Ordinary implementation leaves staging, commits, release versions, publication
-  and remote creation to the maintainer. Initial local repository creation is
-  authorized; no remote, commit or publication is implied.
 - GitHub issues are the follow-up tracker once a remote exists. Migration and
   provenance documents specify contracts and evidence, not a second issue queue.
 

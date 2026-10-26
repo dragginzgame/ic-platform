@@ -7,6 +7,7 @@ import { promisify, parseArgs } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from '../../packages/browser/node_modules/esbuild/lib/main.js';
 import { checkBrowserSdkGraph } from './browser-sdk-graph.mjs';
+import { checkIcSdkBoundary } from './check-ic-sdk-boundary.mjs';
 
 const { values } = parseArgs({ options: { browser: { type: 'boolean', default: false } }, allowPositionals: false });
 const root = fileURLToPath(new URL('../..', import.meta.url));
@@ -69,6 +70,7 @@ await checkBrowserSdkGraph(fixture, sdkVersion, ['@tokostudios/ic-platform']);
 assert.equal(await readFile(resolve(fixture, 'node_modules/@tokostudios/ic-platform/LICENSE'), 'utf8'),
   await readFile(resolve(root, 'LICENSE'), 'utf8'), 'Packed license differs from its owner');
 await copyFile(resolve(source, 'tests/consumer.ts'), resolve(fixture, 'consumer.ts'));
+await checkIcSdkBoundary([resolve(fixture, 'package.json'), resolve(fixture, 'consumer.ts')]);
 const configuration = JSON.parse(await readFile(resolve(source, 'tsconfig.json'), 'utf8'));
 configuration.compilerOptions.rootDir = '.';
 configuration.compilerOptions.outDir = 'compiled';
@@ -106,6 +108,7 @@ await copyFile(resolve(fixture, 'package.json'), resolve(fixture, 'platform-only
 await copyFile(resolve(fixture, 'package-lock.json'), resolve(fixture, 'platform-only.lock.json'));
 await installConsumer(providerManifest);
 await copyFile(resolve(source, 'tests/interop.ts'), resolve(fixture, 'interop.ts'));
+await checkIcSdkBoundary([resolve(fixture, 'package.json'), resolve(fixture, 'consumer.ts'), resolve(fixture, 'interop.ts')]);
 configuration.include.push('interop.ts');
 await writeFile(resolve(fixture, 'tsconfig.json'), JSON.stringify(configuration));
 await command('node', [resolve(source, 'node_modules/typescript/lib/tsc.js'), '-p', 'tsconfig.json']);

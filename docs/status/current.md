@@ -3,9 +3,41 @@
 ## Source and released boundaries
 
 Baseline is released Platform 0.6.18 (`98a2a8a`). Compatible working-tree notes
-use 0.6.19; package versions, maintained locks, Git refs and index are unchanged.
+use 0.6.19; own package versions and Git refs are unchanged. The incoming staged
+advisory repair and root Wire 0.7.16 lock update are preserved without staging edits.
 No commit, push, release or publication was performed in this batch. Sibling
-checkouts remain read-only. Shared Tooling remains 0.26.18 (`37652c0`).
+checkouts remain read-only. Shared Tooling is now 0.26.20 at
+`a7f85d45d4212d4c39225f58597580560a333550`, exported canonically with 106 payloads.
+
+## Current adoption
+
+Both workspace Wire requirements now select at least published 0.7.16. The
+incoming root lock was already at that version and is byte-identical to the
+starting input; the separate runtime lock moves only Wire/derive from 0.7.2 to
+0.7.16. No sibling checkout or cryptographic dependency selection was changed.
+
+Shared's new SDK checker is used on the actual packed consumer manifests and
+TS proof sources in both standalone and provider phases. It is not applied to
+Platform's browser producer, which deliberately owns the direct SDK dependency.
+Provider overrides/transitives retain their separate identity qualification.
+The compact baseline makes detailed accounting optional; local full-Clippy-first
+ordering remains the maintainer's explicit requirement. Existing full CI/release
+gates remain intact; no docs-only hosted routing or sibling SDK enforcement is
+claimed by this snapshot adoption. Prior #56 evidence below predates Wire adoption.
+
+Qualification passed: full `make clippy` before longer tests; snapshot integrity,
+inventory and formatting; actual grouped release metadata and pending changelog
+admission; packed browser consumers and a direct-SDK-import rejection probe;
+Rust 1.91 Principal/Account Rust–TypeScript frames and malformed-input refusals;
+native/Wasm runtime dependency graphs and runtime canister compilation. The
+`wire-schema` Wasm check passes with host metadata excluded; default, executor
+and runtime graphs remain free of Wire metadata. Evidence is retained under
+`target/principal-wire-schema.65A45J`, `target/browser-consumer.AcM6I9`,
+`target/adoption-sdk-refusal.3Uq71f`, `target/adoption-graphs` and
+`target/cdk-runtime.q2i5k1`; logs are `/tmp/platform-adoption-*.log`.
+The packed browser archive still matches published npm 0.1.0. Native macOS,
+fresh Chromium, installed-canister acceptance and full release CI were not run
+for this adoption. No performance or Wasm-size improvement is claimed.
 
 Published Rust 0.6.18 supplies the optional upstream BLAKE3 boundary. Existing
 hash formats, domain policies, cryptographic bodies and executor/IC0 identities
@@ -45,7 +77,8 @@ uses RustSec `21d909e4c8bd4e14c7aea58bf980c881a0053ab1`: both index observations
 are complete with no lookup errors; workspace audit exits 1 for #50, runtime 0.
 A real yanked crypto-bigint 0.7.8 fixture reports the expected warning. A real
 empty-cache probe gives raw audit status 0 for both locks but adapter status 1
-with incomplete coverage. Maintained lock hashes are unchanged.
+with incomplete coverage. Locks were unchanged during that qualification; the
+subsequent Wire-only updates are described above.
 The integrated `make test` target, including adapter regressions, Rust unit tests
 and doctests, passes; log `/tmp/platform-issues-tests.log`.
 
@@ -71,8 +104,8 @@ Locked native normal/build graphs select affected arithmetic under `ecdsa`,
 `agent` and `secp256k1`, excluding it from default/executor/runtime profiles.
 Agent's K256/P256 identities sign with resident private keys; there is no basis
 for a blanket verification-only exemption. The completed audit keeps the real
-failure visible. No cryptographic body, dependency constraint, type identity,
-maintained lock or exemption changed. Registry records, graphs and lock hashes
+failure visible. No cryptographic body, cryptographic dependency constraint,
+type identity or exemption changed. Registry records, graphs and lock hashes
 are retained under `target/issues-38-50-56`. #50 remains unresolved under the
 existing compatibility, no-Agent-fork and no-in-house-cryptography constraints.
 
