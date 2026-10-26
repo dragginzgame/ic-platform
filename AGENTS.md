@@ -82,6 +82,11 @@ Runtime-only raw/executor consumers retain their independent features.
 
 ## Cryptographic boundary
 
+The maintainer authorized the optional BLAKE3 maintenance surface with explicit
+upstream `hash`, `Hasher` and `Hash` identities. Keep the implementation upstream,
+select only `std`, and qualify singleton/source and effective-feature graphs.
+Consumers retain hash-format/domain policy; no existing SHA-256 contract changes.
+
 For the authorized 0.6 packaging cut, unused creation delegation/CBOR helpers
 compile only in tests. Preserve their complete bodies and vectors. The source
 guard checks both exact annotated source and reconstruction of the 0.5.1 source

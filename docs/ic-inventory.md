@@ -14,7 +14,7 @@ Upstream type members are not individually covered; this is not removal approval
 ## APIs, consumers and maintenance ownership
 
 The separate ESM package `packages/browser` owns the browser SDK Core boundary
-under proposed npm identity `@dragginzgame/ic-platform` 0.1.0. Its sole production
+under published npm identity `@tokostudios/ic-platform` 0.1.0. Its sole production
 dependency is exactly `@icp-sdk/core` 6.1.1 for Blob's local 0.48 graph.
 Canic's SDK-5/Auth-8 handoff needs a coordinated migration before adoption.
 Explicit subpaths expose Principal, Ed25519/secp256k1
@@ -28,9 +28,15 @@ policies remain consumer-owned. Wire retains owned codecs and generators.
 consumer/bundle contract; `make check-browser-runtime` adds Chromium page/worker
 qualification. The Rust-only manifest block below does not inventory npm packages.
 Its separate lock also includes TypeScript, bundler, browser and Caffeine/Auth
-test dependencies; none are Rust or production browser dependencies. No package
-publication or sibling adoption is claimed. See the
+test dependencies; none are Rust or production browser dependencies. npm supply
+is verified; sibling adoption is not claimed. See the
 [browser migration contract](migration.md#browser-sdk-core-boundary).
+Browser CI at `8d80630` passes on Linux and native macOS Intel/Apple Silicon.
+The maintainer selected the `tokostudios` scope; final-name packed/browser checks
+pass locally on Linux. Public registry metadata/archive and a fresh registry-only
+consumer were verified on 2026-10-26. Prior macOS CI used the earlier unpublished
+name with unchanged runtime code. These producer checks do not qualify
+installed IC, live provider effects or consumer adoption.
 
 The optional native-only `wire-schema` feature adds the upstream Wire metadata
 trait to owned Principal and Account. Principal delegates to Wire's bounded
@@ -51,6 +57,7 @@ API changes or automatically establish whether sibling source still uses an API.
 
 | Upstream / owned code | Public surface and source | Observed consumers | Maintenance responsibility |
 | --- | --- | --- | --- |
+| `blake3` | optional `blake3::{hash,Hasher,Hash}` | IcyDB currently uses upstream directly for predicate fingerprints; adoption remains consumer-owned | Platform selects unchanged upstream hashing with `std` only. Consumers own domain/format policy; no SHA-256 protocol replacement or size saving is implied. |
 | `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting, account semantics and conversions. External principal identity and self-authentication crypto remain upstream. |
 | `ic0`, `ic-cdk-executor`; imported CDK adapters and owned generator | `ic0`, `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters | Platform maintains non-crypto adapters/generator. Registry executor and system ABI stay pinned; callback/trap semantics require installed qualification. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
@@ -131,6 +138,7 @@ report; retain the existing graph, pin and imported-source gates.
 | Package | Feature | Enables |
 | --- | --- | --- |
 | ic-platform | agent | dep:ic-agent, principal |
+| ic-platform | blake3 | dep:blake3 |
 | ic-platform | bls | dep:ic-verify-bls-signature |
 | ic-platform | candid | candid/bignum, dep:candid, principal |
 | ic-platform | candid-parser | dep:candid_parser, principal |
@@ -156,6 +164,7 @@ report; retain the existing graph, pin and imported-source gates.
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ic-platform | assert_matches | ^1.5 | dev | all | false | true |  |
+| ic-platform | blake3 | ^1.8.7 | normal | all | true | false | std |
 | ic-platform | candid | ^0.10.38 | normal | all | true | false |  |
 | ic-platform | candid_parser | ^0.4.1 | normal | cfg(not(target_family = "wasm")) | true | false |  |
 | ic-platform | crc32fast | ^1.5 | normal | all | true | true |  |

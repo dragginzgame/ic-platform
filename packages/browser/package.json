@@ -1,5 +1,5 @@
 {
-  "name": "@dragginzgame/ic-platform",
+  "name": "@tokostudios/ic-platform",
   "version": "0.1.0",
   "description": "Controlled browser boundary for Internet Computer SDK integration",
   "type": "module",

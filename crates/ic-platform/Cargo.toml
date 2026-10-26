@@ -12,6 +12,7 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [features]
 default = []
+blake3 = ["dep:blake3"]
 principal = ["dep:crc32fast", "dep:data-encoding", "dep:ic_principal", "dep:serde"]
 agent = ["principal", "dep:ic-agent"]
 bls = ["dep:ic-verify-bls-signature"]
@@ -40,6 +41,7 @@ stable-structures = ["dep:ic-stable-structures"]
 wire-schema = ["principal", "dep:ic-wire-metadata", "dep:serde_json"]
 
 [dependencies]
+blake3 = { workspace = true, optional = true }
 candid = { workspace = true, optional = true }
 crc32fast = { workspace = true, optional = true }
 curve25519-dalek = { workspace = true, optional = true }
@@ -76,6 +78,11 @@ ic-representation-independent-hash.workspace = true
 serde_bytes.workspace = true
 serde_cbor.workspace = true
 serde_test.workspace = true
+
+[[test]]
+name = "blake3_consumer"
+path = "tests/blake3_consumer.rs"
+required-features = ["blake3"]
 
 [[test]]
 name = "executor_consumer"

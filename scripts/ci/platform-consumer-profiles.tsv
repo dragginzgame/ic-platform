@@ -1,6 +1,7 @@
 executor	executor,ic0	executor_consumer	-	check
 principal	principal	principal	-	check
 ecdsa	ecdsa	ecdsa_consumer	-	check
+blake3	blake3	blake3_consumer	-	check
 ed25519	ed25519	ed25519_consumer	-	check
 candid	candid	candid_consumer	candid_malformed.rs	check
 candid-service	candid-service	service_consumer	-	check

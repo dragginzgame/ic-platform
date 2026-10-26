@@ -7,10 +7,10 @@ NNS/SNS, ledgers and other interfaces that require it; caller location does not
 select a codec. Existing Candid checkpoints remain a legacy compatibility exception.
 
 The separate [browser package](packages/browser/README.md) supplies an initial
-`@dragginzgame/ic-platform` npm boundary over SDK Core 6.1.1 for Blob 0.48, with checked identity
-restoration, explicit Agent configuration and raw query integration. It is local
-source awaiting publication; existing browser SDK declarations remain until
-qualified adoption. Use `make check-browser` and the separately prepared Chromium
+`@tokostudios/ic-platform` 0.1.0 npm boundary over SDK Core 6.1.1 for Blob 0.48,
+with checked identity restoration, explicit Agent configuration and raw query
+integration. The package is published; existing browser SDK declarations remain
+until qualified adoption. Use `make check-browser` and the separately prepared Chromium
 gate `make check-browser-runtime`. This does not add SDK dependencies to Rust.
 
 The released 0.5 hard cut removed the unused `cdk::storage` checkpoint helpers;
@@ -32,6 +32,7 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 
 | Feature | Implemented contract |
 | --- | --- |
+| `blake3` | Upstream `hash`, `Hasher` and `Hash`; native/Wasm with `std`, no IC codecs, threading or memory mapping |
 | `principal` | Owned Principal/Account types, text/Serde and external conversions; no Candid |
 | `wire-schema` | Native-only Wire metadata for owned Principal and Account; implies principal, excludes metadata dependencies on Wasm |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |

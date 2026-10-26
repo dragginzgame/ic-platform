@@ -1,4 +1,4 @@
-import type { HttpAgent, Identity } from '@dragginzgame/ic-platform/agent';
+import type { HttpAgent, Identity } from '@tokostudios/ic-platform/agent';
 import type { StorageClient } from '@caffeineai/object-storage';
 import type { AuthClient } from '@icp-sdk/auth/client';
 

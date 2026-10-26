@@ -1,22 +1,97 @@
 # Candid and runtime ownership
 
+Compatibility changes are handled in the affected producer/consumer issues.
+Record agreed versions, identities and migration requirements in this contract
+and the existing dependency inventory. There is no central approval queue or
+mandatory cross-repository acknowledgement before independent work proceeds.
+
+## Optional BLAKE3 maintenance boundary
+
+This surface is pending Platform 0.6.18; use a local path for qualification until
+that supplying release is published. Published 0.6.17 does not provide it.
+
+Select `ic-platform/blake3` and import `ic_platform::blake3::{hash, Hasher, Hash}`.
+These are upstream identities, not wrapper types or a generic hashing API. The
+workspace requirement is BLAKE3 1.8.7 with defaults disabled and `std` selected.
+There are no default Platform features. Native and Wasm consumers can select
+hashing independently of Principal, Candid, CDK, executor and host features.
+
+Consumers may remove an exhausted direct/renamed BLAKE3 dependency after adopting
+the supplying Platform release. Add their own declaration guard so first-party
+usage has one owner, while retaining provider transitives. IcyDB's current
+`blake3 = "1.8.5"` range can unify with this supplier; publication and actual
+consumer graph checks still precede adoption. No sibling has been edited here.
+
+`make check-primitives` admits default, executor, runtime and BLAKE3 combinations
+on native and `wasm32-unknown-unknown`. It uses the shared Cargo graph checker
+for at most one full rendered BLAKE3 identity (version plus source qualifier),
+then reads Cargo's actual feature union and requires exactly `std` when present.
+Repeated `(*)` nodes are not duplicates. The source qualifier is Cargo's graph
+rendering, not artifact/source authentication. A real adversarial consumer shows
+that an aliased direct dependency can enable `pure` on the same identity; feature
+admission rejects it even though a duplicate-version check would pass.
+
+For another explicit selection, use
+`bash scripts/ci/check-blake3-graph.sh CONSUMER PACKAGE TARGET FEATURES_OR_DASH`.
+It disables root defaults, uses normal/build edges and locked/offline inputs,
+retains evidence under Platform's target directory and never compiles or fetches.
+Consumers needing root defaults or a broader reviewed feature policy must use
+their own actual build selection/policy rather than silently reusing this one.
+The standard graph checker supplies count/feature/path mechanics; product roots,
+reviewed exceptions and release features remain at the product owner.
+
+Canic must apply governance to each actual deployable package/manifest, including
+generated and independent workspaces, using its build's exact Cargo selection.
+Its existing canonical-role crypto gate is not an inventory of arbitrary Apps.
+Check version/source identities and effective features before expensive builds;
+retain reviewed exceptions explicitly. Its active Wire batch defers builds/tests,
+so no current Canic build, measurement or gate integration is claimed here.
+
+Keep required IC hashes, Caffeine object hashes and existing signed/persisted
+formats unchanged. This feature is not a migration of those contracts. Any new
+owned format/domain policy belongs to its consumer. Compare optimized artifacts
+under the same build recipe before claiming Wasm savings; host/test duplicates
+and graph identity counts alone do not establish linked code size.
+
+### Bounded Wasm size evidence
+
+The retained Rust 1.91 freestanding streaming-hash probe uses one exported ABI,
+`opt-level=z`, fat LTO, one codegen unit, aborting panics and symbol stripping,
+followed by `ic-wasm 0.11.1 shrink`. Optimized sizes are: control 109 bytes,
+BLAKE3 through Platform 23,340 bytes, direct BLAKE3 23,340 bytes and SHA-256
+10,215 bytes. Direct/facade BLAKE3 outputs are byte-identical in this probe.
+This demonstrates no facade overhead for the retained code path, not smaller
+production canisters. BLAKE3 is 13,125 bytes larger than SHA-256 here. It does
+not establish relative execution time or IC instruction/cycle cost.
+Sources, selected lock, metadata and artifact hashes are retained at
+`target/blake3-boundary.QmcewQ/wasm-probe`; `sizes.json` records the comparison.
+
 ## Browser SDK Core boundary
 
-The initial browser package candidate is `@dragginzgame/ic-platform` 0.1.0 under
+The published browser package is `@tokostudios/ic-platform` 0.1.0 under
 `packages/browser`, backed by SDK Core exactly 6.1.1 as an ordinary dependency
-for Blob's approved local 0.48 graph. This supersedes the unpublished SDK-5 candidate.
-It is not yet published. Supply is tracked by
+for Blob's approved local 0.48 graph. This supersedes the unpublished SDK-5 and
+`@dragginzgame/ic-platform` proposals. Publication and exact registry-archive
+verification completed on 2026-10-26; evidence is recorded in
 [Platform #57](https://github.com/dragginzgame/ic-platform/issues/57). This npm
 release identity is independent of Rust package versions and `make publish`.
 Published-package and installed consumer acceptance remain separate requirements.
+The implementation is committed at `8d80630` (Rust 0.6.17). Browser CI at that
+commit passes on Linux x86_64 and native macOS Intel/Apple Silicon, including
+packed-provider and Chromium page/module-worker checks under the earlier
+unpublished npm name. The maintainer selected the actual `tokostudios` npm scope;
+final-name packed/browser checks pass locally on Linux. A fresh registry-only
+consumer verifies archive integrity, Core identity and strict compilation/runtime
+without declaring SDK Core directly. See the
+[maintainer supply procedure](../packages/browser/README.md#initial-npm-supply).
 
 | Current SDK import | Platform import |
 | --- | --- |
-| `@icp-sdk/core/principal` | `@dragginzgame/ic-platform/principal` |
-| `@icp-sdk/core/identity` | `@dragginzgame/ic-platform/identity` |
-| `@icp-sdk/core/identity/secp256k1` | `@dragginzgame/ic-platform/identity/secp256k1` |
+| `@icp-sdk/core/principal` | `@tokostudios/ic-platform/principal` |
+| `@icp-sdk/core/identity` | `@tokostudios/ic-platform/identity` |
+| `@icp-sdk/core/identity/secp256k1` | `@tokostudios/ic-platform/identity/secp256k1` |
 | `@icp-sdk/core/agent` | `/agent` for HttpAgent/request/reject APIs; `/certification` for Certificate/lookup |
-| `@icp-sdk/core/candid` | `@dragginzgame/ic-platform/candid` for required external protocols |
+| `@icp-sdk/core/candid` | `@tokostudios/ic-platform/candid` for required external protocols |
 
 This is a narrow supported surface, not a blanket SDK namespace. Re-audit each
 symbol against the package export map. Keep existing SDK class/type identities;
@@ -25,9 +100,9 @@ Neither the npm package nor Rust adds a dependency from Wire back to Platform.
 Wire still generates and encodes owned endpoint payloads. SDK ingress envelopes
 and required Caffeine/system/ledger Candid remain external protocols.
 
-After maintainer npm publication, consumers replace their exhausted SDK Core
+Consumers adopting the published package replace their exhausted SDK Core
 declaration with a regular Platform dependency and update locks/build inputs.
-Blob retains its explicit SDK peer until that supply and its migration exist.
+Blob retains its explicit SDK peer until its qualified migration is complete.
 Keep its Caffeine dependency; Canic retains Auth for its session integration.
 Qualify one compatible SDK Core 6.1.1 runtime across those provider edges rather
 than bundling an SDK copy or distributing aliases/local patches.

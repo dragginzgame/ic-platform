@@ -63,6 +63,7 @@ revision	37652c087fff16f55f83d18d27ba17c83f34021c
 # entrypoint	scripts/ci/check-release-changelog.sh
 # entrypoint	scripts/ci/test-release-changelog.sh
 # entrypoint	scripts/ci/prepare-rustsec-db.sh
+# entrypoint	scripts/ci/check-cargo-graph.pl
 file	4a1ba791945d797e007f7a06048d8a64a8d0ad7b5d7be3c02270d57d81703f7f	-	DRAGGINZGAME.md
 file	c385168599f833bbcd390eaf5ba2aa7507e5a9f05df0ec7264907c3a0de02289	-	make/consumer.mk
 file	7a1d241218b77e5d88f19ddffb0d26976ca99096ba7cc0d847f3e571a0c6d49e	-	scripts/ci/check-cargo-dependency-boundaries.sh
@@ -123,6 +124,7 @@ file	0a24db6fb954511ecd0885c263309fd973817613483ce05bfb5473bf1f951511	x	.githook
 file	5a4f1abe764e1e46c472bcf1e2e38f7f998085c570f53976591c808eca884d65	-	scripts/ci/check-release-changelog.sh
 file	a3df182ddb655e5ab48c512f2989f0aac9ca8b1f54261afc385cdef139fdb112	-	scripts/ci/test-release-changelog.sh
 file	771cc142805d6200caddd32a2f10783516fe297e4424c051ac92a40884607e5f	x	scripts/ci/prepare-rustsec-db.sh
+file	682bfd272988e9774bdadcecd8c4cc3a23bd3004158ec4bd62e324b89f65607e	-	scripts/ci/check-cargo-graph.pl
 file	36f36552df36ea6e082f1fd1f14661d40b281ea01294ffda2eb6c6ec91bc6907	x	scripts/ci/verify-file-checksum.sh
 file	a4682503812f210b951aede536cdd65642bfe266b02ab532853a1aeff64f9742	x	scripts/ci/verify-shared-tooling-snapshot.sh
 file	e3aed908dd9b08bf93255328bb056bed57298dab39944e3726aad2726548e653	-	rules/rpc-budgets.md

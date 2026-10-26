@@ -1,9 +1,9 @@
-import { Principal, parseCanonicalPrincipal } from '@dragginzgame/ic-platform/principal';
-import { Ed25519KeyIdentity, restoreEd25519Identity } from '@dragginzgame/ic-platform/identity';
-import { Secp256k1KeyIdentity, restoreSecp256k1Identity } from '@dragginzgame/ic-platform/identity/secp256k1';
-import { HttpAgent, createAgentOptions, queryRaw, IC_ROOT_KEY, Cbor, type Identity } from '@dragginzgame/ic-platform/agent';
-import { Certificate, lookupResultToBuffer } from '@dragginzgame/ic-platform/certification';
-import { IDL } from '@dragginzgame/ic-platform/candid';
+import { Principal, parseCanonicalPrincipal } from '@tokostudios/ic-platform/principal';
+import { Ed25519KeyIdentity, restoreEd25519Identity } from '@tokostudios/ic-platform/identity';
+import { Secp256k1KeyIdentity, restoreSecp256k1Identity } from '@tokostudios/ic-platform/identity/secp256k1';
+import { HttpAgent, createAgentOptions, queryRaw, IC_ROOT_KEY, Cbor, type Identity } from '@tokostudios/ic-platform/agent';
+import { Certificate, lookupResultToBuffer } from '@tokostudios/ic-platform/certification';
+import { IDL } from '@tokostudios/ic-platform/candid';
 
 export async function smoke() {
   const key = Ed25519KeyIdentity.fromSecretKey(new Uint8Array(32).fill(7));

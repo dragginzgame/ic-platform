@@ -16,7 +16,7 @@ function reject(reason) {
             # Only retain policy-relevant lines; ordinary transitive nodes cannot
             # affect admission. Keep complete lines for source/identity checks.
             split(line, fields, " ")
-            if (fields[1] ~ /^(ic|candid|pocket-ic|ed25519-dalek|curve25519-dalek|k256)/ ||
+            if (fields[1] ~ /^(ic|candid|pocket-ic|ed25519-dalek|curve25519-dalek|k256|blake3)/ ||
                 fields[1] ~ /^(rand|rand_chacha|getrandom|pretty|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding|serde_cbor|half)$/)
                 lines[key, ++count[key]] = line
             nonempty = 1
@@ -51,6 +51,7 @@ function reject(reason) {
     found_secp = 0
     found_k256 = 0
     found_pocket = 0
+    found_blake3 = 0
     for (i = 1; i <= count[key]; i++) {
         line = lines[key, i]
         n = split(line, f, " ")
@@ -64,6 +65,10 @@ function reject(reason) {
         if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || management || ledger))
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
+        if (name == "blake3") {
+            if (!enabled("blake3") || !registry) reject("unselected or non-registry BLAKE3")
+            found_blake3 = 1
+        }
         # rand_core supplies traits and is permitted. Entropy/RNG implementations
         # belong only to the selected native host capabilities that require them.
         if (name ~ /^(rand|rand_chacha|getrandom)$/ && !(agent || pocket || secp || parser))
@@ -115,4 +120,5 @@ function reject(reason) {
     if (pocket && !found_pocket) reject("missing selected PocketIC")
     if (secp && !found_secp) reject("missing selected secp256k1")
     if (enabled("ecdsa") && !found_k256) reject("missing selected K256")
+    if (enabled("blake3") && !found_blake3) reject("missing selected BLAKE3")
 }

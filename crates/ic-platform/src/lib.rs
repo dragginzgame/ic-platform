@@ -13,6 +13,7 @@
 //! `pocket-ic` selects native simulator client identities; Testkit owns lifecycle policy.
 //! `secp256k1` selects native offline public-key derivation with upstream identities.
 //! `bls` selects BLS keys, signatures and verification with upstream allocation support.
+//! `blake3` selects the upstream hash function, streaming hasher and digest identity.
 //! `canister-sig-creation` selects canister public-key formats and hashing.
 //! `signature-verification` selects upstream canister-signature verification.
 //! `cdk` selects owned explicit-codec entrypoints and a Candid-free runtime.
@@ -38,6 +39,8 @@ pub use principal::{Principal, PrincipalError};
 #[cfg(all(feature = "agent", not(target_family = "wasm")))]
 pub mod agent;
 
+#[cfg(feature = "blake3")]
+pub mod blake3;
 #[cfg(feature = "bls")]
 pub mod bls;
 #[cfg(feature = "candid")]

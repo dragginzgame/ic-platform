@@ -32,7 +32,7 @@ async function command(file, args, cwd = fixture) {
     throw error;
   }
 }
-const packed = JSON.parse(await command('npm', ['pack', '--offline', '--ignore-scripts', '--json', '--pack-destination', fixture], source))['@dragginzgame/ic-platform'];
+const packed = JSON.parse(await command('npm', ['pack', '--offline', '--ignore-scripts', '--json', '--pack-destination', fixture], source))['@tokostudios/ic-platform'];
 assert(packed.files.every(file => /^(dist\/.*\.(js|ts)|package\.json|README\.md|LICENSE)$/.test(file.path)));
 const reviewedLock = JSON.parse(await readFile(resolve(source, 'package-lock.json'), 'utf8'));
 async function installConsumer(manifest) {
@@ -42,7 +42,7 @@ async function installConsumer(manifest) {
   lock.name = manifest.name;
   lock.version = '0.0.0';
   lock.packages[''] = { name: manifest.name, version: '0.0.0', dependencies: manifest.dependencies };
-  lock.packages['node_modules/@dragginzgame/ic-platform'] = {
+  lock.packages['node_modules/@tokostudios/ic-platform'] = {
     version: packed.version, resolved: `file:${resolve(fixture, packed.filename)}`,
     integrity: packed.integrity, dependencies: { '@icp-sdk/core': sdkVersion },
   };
@@ -52,21 +52,21 @@ async function installConsumer(manifest) {
   await command('npm', ['ci', '--offline', '--ignore-scripts', '--no-audit', '--no-fund']);
   const selected = JSON.parse(await readFile(resolve(fixture, 'package-lock.json'), 'utf8'));
   for (const [path, dependency] of Object.entries(selected.packages)) {
-    if (path === '' || path === 'node_modules/@dragginzgame/ic-platform') continue;
+    if (path === '' || path === 'node_modules/@tokostudios/ic-platform') continue;
     assert.equal(dependency.version, reviewedLock.packages[path]?.version, `Unreviewed selection: ${path}`);
     assert.equal(dependency.integrity, reviewedLock.packages[path]?.integrity, `Changed source: ${path}`);
   }
 }
 await installConsumer({
   name: 'platform-browser-consumer-proof', private: true, type: 'module',
-  dependencies: { '@dragginzgame/ic-platform': `file:${resolve(fixture, packed.filename)}` },
+  dependencies: { '@tokostudios/ic-platform': `file:${resolve(fixture, packed.filename)}` },
 });
 const graph = JSON.parse(await command('npm', ['ls', '--all', '--omit=dev', '--json']));
-const supplier = graph.dependencies['@dragginzgame/ic-platform'];
+const supplier = graph.dependencies['@tokostudios/ic-platform'];
 assert.equal(supplier.version, packed.version);
 assert.equal(supplier.dependencies['@icp-sdk/core'].version, sdkVersion);
-await checkBrowserSdkGraph(fixture, sdkVersion, ['@dragginzgame/ic-platform']);
-assert.equal(await readFile(resolve(fixture, 'node_modules/@dragginzgame/ic-platform/LICENSE'), 'utf8'),
+await checkBrowserSdkGraph(fixture, sdkVersion, ['@tokostudios/ic-platform']);
+assert.equal(await readFile(resolve(fixture, 'node_modules/@tokostudios/ic-platform/LICENSE'), 'utf8'),
   await readFile(resolve(root, 'LICENSE'), 'utf8'), 'Packed license differs from its owner');
 await copyFile(resolve(source, 'tests/consumer.ts'), resolve(fixture, 'consumer.ts'));
 const configuration = JSON.parse(await readFile(resolve(source, 'tsconfig.json'), 'utf8'));
@@ -78,13 +78,13 @@ await command('node', [resolve(source, 'node_modules/typescript/lib/tsc.js'), '-
 const { smoke } = await import(pathToFileURL(resolve(fixture, 'compiled/consumer.js')));
 assert.equal((await smoke()).calls, 1);
 // Export-map admission: consumers cannot reach internal SDK plumbing.
-await writeFile(resolve(fixture, 'private-import.mjs'), "import '@dragginzgame/ic-platform/dist/identity-import.js';\n");
+await writeFile(resolve(fixture, 'private-import.mjs'), "import '@tokostudios/ic-platform/dist/identity-import.js';\n");
 await assert.rejects(exec(process.execPath, ['private-import.mjs'], { cwd: fixture }), error => error.stderr.includes('ERR_PACKAGE_PATH_NOT_EXPORTED'));
 const bundled = await build({ entryPoints: [resolve(fixture, 'consumer.ts')], bundle: true,
   format: 'esm', platform: 'browser', target: 'es2022', metafile: true,
   outfile: resolve(fixture, 'bundle.js') });
 await writeFile(resolve(fixture, 'bundle-meta.json'), JSON.stringify(bundled.metafile, null, 2));
-const principal = await build({ stdin: { contents: "export { parseCanonicalPrincipal } from '@dragginzgame/ic-platform/principal';", resolveDir: fixture },
+const principal = await build({ stdin: { contents: "export { parseCanonicalPrincipal } from '@tokostudios/ic-platform/principal';", resolveDir: fixture },
   bundle: true, format: 'esm', platform: 'browser', metafile: true, write: false });
 assert(!Object.keys(principal.metafile.inputs).some(path => /\/core\/lib\/esm\/(agent|candid|identity)\//.test(path)));
 console.log('Packed-only Node/TypeScript consumer, export isolation and browser bundles passed');
@@ -94,7 +94,7 @@ console.log('Packed-only Node/TypeScript consumer, export isolation and browser 
 const providerManifest = {
   name: 'platform-browser-consumer-proof', private: true, type: 'module',
   dependencies: {
-    '@dragginzgame/ic-platform': `file:${resolve(fixture, packed.filename)}`,
+    '@tokostudios/ic-platform': `file:${resolve(fixture, packed.filename)}`,
     '@caffeineai/object-storage': sourceManifest.devDependencies['@caffeineai/object-storage'],
     '@icp-sdk/auth': sourceManifest.devDependencies['@icp-sdk/auth'],
   },
@@ -118,7 +118,7 @@ function checkSdk(node) {
 }
 checkSdk(providerGraph);
 await checkBrowserSdkGraph(fixture, sdkVersion,
-  ['@dragginzgame/ic-platform', '@caffeineai/object-storage', '@icp-sdk/auth', '@icp-sdk/signer']);
+  ['@tokostudios/ic-platform', '@caffeineai/object-storage', '@icp-sdk/auth', '@icp-sdk/signer']);
 console.log(`Caffeine Agent/Auth Identity type compatibility and shared SDK ${sdkVersion} graph passed`);
 
 if (values.browser) {

@@ -1,4 +1,5 @@
 [
+  {"dependency": "blake3", "allowed_packages": ["ic-platform"]},
   {"dependency": "pocket-ic", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic0", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-agent", "allowed_packages": ["ic-platform"]},

@@ -65,6 +65,7 @@ publish-check: host-tools-check
 check:
 	cargo check -p ic-platform -p ic-platform-macros --all-targets --all-features --locked
 test:
+	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
 	cargo test -p ic-platform -p ic-platform-macros --all-features --locked
@@ -79,6 +80,13 @@ msrv:
 	cargo +1.91.0 check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
+.PHONY: check-primitives
+check-primitives:
+	@for target in "$$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do \
+		for features in - executor runtime blake3 runtime,blake3; do \
+			bash scripts/ci/check-blake3-graph.sh "$(CURDIR)" ic-platform "$$target" "$$features" || exit $$?; \
+		done; \
+	done
 check-consumer:
 	bash scripts/ci/test-platform-consumer-admission.sh
 	bash scripts/ci/check-platform-consumer.sh
@@ -109,7 +117,7 @@ check-release-commands:
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 	bash scripts/ci/test-release-changelog.sh
 ci:
-	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check clippy check-browser check-wire-schema check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
+	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-primitives clippy check-browser check-wire-schema check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
 
 version release-version:
 	@bash scripts/release/adapter.sh version

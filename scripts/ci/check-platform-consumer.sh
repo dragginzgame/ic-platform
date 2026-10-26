@@ -109,6 +109,16 @@ if [[ "$capability" == cdk || "$capability" == runtime || "$capability" == exter
         fi
     done
 fi
+if [[ "$capability" == blake3 ]]; then
+    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+        bash scripts/ci/check-blake3-graph.sh "$fixture" platform-consumer-proof "$graph_target" -
+        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" \
+            --edges normal,build --prefix none > "$fixture/$graph_target.graph"
+        if grep -Eq '^(candid|ic-cdk|ic-platform-macros|ic-agent|pocket-ic|ic_principal|serde) ' "$fixture/$graph_target.graph"; then
+            echo 'BLAKE3 consumer acquired unrelated IC/application dependencies' >&2; exit 1
+        fi
+    done
+fi
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --frozen
 if [[ "$wasm" != skip ]]; then

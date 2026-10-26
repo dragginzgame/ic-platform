@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.18]
+
+- Add optional upstream BLAKE3 `hash`, `Hasher` and `Hash` exports with `std` only,
+  independent of IC codecs, identities and runtime features.
+- Admit source-qualified package identities and effective BLAKE3 features in
+  locked native/Wasm graphs; qualify standalone consumers without a direct
+  BLAKE3 dependency. Keep existing hash formats and cryptographic code unchanged.
+- Bound the feature-selection regression's exhaustive model to four synthetic
+  features; retain the real singles/pairs/critical matrix without enumerating
+  millions of combinations during routine validation.
+- Supply the independent browser package as `@tokostudios/ic-platform` 0.1.0
+  over SDK Core 6.1.1, with verified registry archive identity and standalone
+  consumer installation. Blob/Canic adoption remains in their own issues
+  ([#57 — Supply and publish the browser SDK Core boundary](https://github.com/dragginzgame/ic-platform/issues/57)).
+- Keep compatibility decisions in existing migration/inventory documents and
+  affected implementation issues; retire the central acknowledgement queue
+  ([#58 — Coordinate the current IC integration contract](https://github.com/dragginzgame/ic-platform/issues/58)).
+
 ## [0.6.17] - 2026-10-26
 
 - Adopt Shared Tooling 0.26.18, including fresh normal releases with explicit

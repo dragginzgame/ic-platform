@@ -1,9 +1,9 @@
 # IC Platform browser boundary
 
-`@dragginzgame/ic-platform` owns the shared SDK Core integration boundary for
-browser and module-worker consumers. The initial package candidate is 0.1.0,
-backed by exactly `@icp-sdk/core` 6.1.1 for Blob's approved 0.48 graph. It has not
-been published. Rust package versions and release commands remain independent.
+`@tokostudios/ic-platform` owns the shared SDK Core integration boundary for
+browser and module-worker consumers. Package version 0.1.0 uses exactly
+`@icp-sdk/core` 6.1.1 for Blob's approved 0.48 graph. Rust package versions and
+release commands remain independent; npm supplies the browser package.
 
 Consumers declare this package instead of SDK Core. SDK Core is a regular exact
 dependency, not a peer. Its cryptographic implementations, Principal/identity/
@@ -27,8 +27,8 @@ inherited SDK method a Platform-owned implementation. Export-map changes and SDK
 upgrades require consumer API/type and byte qualification.
 
 ```ts
-import { parseCanonicalPrincipal } from '@dragginzgame/ic-platform/principal';
-import { createAgentOptions, HttpAgent, queryRaw } from '@dragginzgame/ic-platform/agent';
+import { parseCanonicalPrincipal } from '@tokostudios/ic-platform/principal';
+import { createAgentOptions, HttpAgent, queryRaw } from '@tokostudios/ic-platform/agent';
 
 // Application admits the origin and selects identity, trust and policy first.
 const agent = await HttpAgent.create(createAgentOptions({
@@ -96,8 +96,11 @@ not installed IC or production provider evidence. Keep those qualifications
 separate. The current contributor environment is Node 24.21.0/npm 12.2.0; the
 package declares Node >=20.19.0, but other Node versions are not qualified here.
 The browser workflow selects Ubuntu 24.04 and macOS 15 Intel/Apple Silicon,
-checking native host identity before setup. Configuration alone does not qualify
-macOS; retain its pending native-run status until those jobs pass.
+checking native host identity before setup. All three jobs passed at committed
+Platform `8d80630` on 2026-10-26, including packed-provider types and actual
+Chromium page/module-worker checks ([run 40293386118](https://github.com/dragginzgame/ic-platform/actions/runs/40293386118)).
+This qualifies those hosts for the producer checks, not installed IC, live
+provider/login behavior or downstream adoption of a published artifact.
 
 Until maintainer publication and consumer adoption, Blob keeps its explicit SDK
 peer. Afterwards replace SDK Core imports using this export map, declare Platform
@@ -127,3 +130,32 @@ build, adapter tests and the packed-only consumer proof must pass before upload.
 Chromium qualification remains the separate prepared-browser CI gate. The hook
 adds no publication action to ordinary checks. Run it without publishing via
 `npm run prepublishOnly --prefix packages/browser`.
+
+### Initial npm supply
+
+The implementation is committed in Rust release 0.6.17. Rust releases do not
+publish the independent npm package. Initial npm supply requires explicit
+publication authorization, registry authentication and package/scope write access.
+
+From the reviewed checkout, run full `make clippy` before the longer
+`make check-browser-runtime`. Then preview the actual publication path without
+an upload:
+
+```sh
+npm publish ./packages/browser --dry-run --offline --access public
+```
+
+Retain the packed-consumer archive and its `1-npm.log` output: they record the
+exact package version, archive integrity and file list tested by that proof.
+Changes to shipped README/license files also change the archive identity; rerun
+the packed proof after such edits. A successful dry-run does not establish npm
+login, scope ownership or write permission.
+
+After explicit publication authorization, the maintainer authenticates to the
+public registry, verifies access to the `@dragginzgame` scope and publishes from
+this source directory so `prepublishOnly` runs. Rust `make publish` is unrelated.
+Read back `@tokostudios/ic-platform@0.1.0` with `npm view`, compare `dist.integrity`
+with the qualified archive, and verify its sole production dependency is SDK Core
+6.1.1. Report the published version/integrity to Platform #57, Blob #103 and
+Canic #637. Consumers then qualify the registry artifact in their own acceptance;
+only their exhausted first-party SDK declarations/imports may be removed.
