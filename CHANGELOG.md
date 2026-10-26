@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.17]
+## [0.6.17] - 2026-10-26
 
 - Adopt Shared Tooling 0.26.18, including fresh normal releases with explicit
   recovery, tool-admission diagnostics and common external IC dependency guards.
