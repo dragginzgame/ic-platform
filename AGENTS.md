@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`66c91c4412856baa147482e648fc80428db8b179` (Shared Tooling 0.26.21) is recorded in
+`5683060a5d8ce79af2fcfedb53b3eb24037fd064` (Shared Tooling 0.26.26) is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -24,15 +24,14 @@ Read [the current handoff](docs/status/current.md), then
   editing or compiling. Use focused checks from README; full CI is release-owned.
 - Run full `make clippy` (all targets/features, warnings denied) before longer
   tests, as requested by the maintainer. Fix failures before proceeding.
-- Keep 0.6.2 backward-compatible. The maintainer has deferred further hard cuts
+- The maintainer has deferred further hard cuts
   until Canic is live, except the explicitly authorized coordinated owned-endpoint
   Wire migration in docs/migration.md. Retire its consumed compiler/service
   exports only after consumer adoption; preserve required external Candid paths.
-- The maintainer explicitly authorized #38's compiler-only retirement for 0.7.0
-  after the Canic Wire caller/qualification audit. Remove the JS/TS compiler
-  exports and exhausted merged-program helper; retain external parsing/service
-  operations. This narrow cut does not authorize other breaking changes or a
-  parser fork, dependency upgrade, version bump or release execution.
+- The authorized #38 compiler-only retirement shipped in 0.7.0 after the Canic
+  Wire caller/qualification audit. Do not restore the JS/TS compiler facade
+  exports or exhausted merged-program helper; retain external parsing/service
+  operations. That narrow cut does not authorize other hard cuts or a parser fork.
 - Rust 2024 and MSRV 1.91.0. Inherit workspace metadata and dependencies; ordinary
   directory modules only. Do not add Python tooling.
 - GitHub issues are the follow-up tracker once a remote exists. Migration and

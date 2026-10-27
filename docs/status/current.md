@@ -2,18 +2,63 @@
 
 ## Source and authorized boundary
 
-Released main remains Platform 0.6.21 at
-`43928b07c9d04a63b6a77f90b185a5c4afda89fa`; npm browser 0.1.1 is separately
-published. Shared Tooling remains verified 0.26.21 at
-`66c91c4412856baa147482e648fc80428db8b179` (106 payloads).
-The maintainer explicitly requested #38 after the prior blocker assessment.
-That narrow compiler retirement is now prepared for **0.7.0**, the next breaking
-minor; own package versions remain 0.6.21 until maintainer release preparation.
-No staging, commit, push, release, publication, deployment or paid operation was
-performed in this task. Incoming post-release documentation edits are preserved;
-Cargo.lock and the original index are byte-identical. Siblings remain read-only.
+Released main is Platform 0.7.0 at
+`60c43108ca7f2a99bfac62ec21075afff5ed7a7e`; npm browser 0.1.1 is separately
+published. The maintainer released the preceding #38 cut. Shared Tooling 0.26.26
+at `5683060a5d8ce79af2fcfedb53b3eb24037fd064` was reviewed and exported
+canonically with 109 payloads. Incoming Shared adoption and #65 documentation
+work were preserved. No package version, runtime, feature, dependency or wire
+contract changed. The next compatible changelog draft is 0.7.1; release metadata
+remains 0.7.0.
 
-## Compiler retirement (#38): implemented locally
+Shared #314 now supplies standalone Rustfmt inputs. Platform's existing source
+roster feeds `FORMAT_RUST_ARGS` with explicit edition 2024; the paired command
+overrides are retired. Grouped manifest sorting, workspace Rustfmt and the full
+standalone pass remain in order, with visible timings and retained failures.
+Standalone selections deliberately run uncached; no result-reuse claim is made.
+The snapshot includes the revised opaque-submodule hook, shared Rust lexer and
+Node prerequisite guidance. Gzip guidance names Tooling's existing bounded
+encoder; no local encoder implementation required migration. Earlier policy updates
+for CandidType separation and error/subprocess handling remain included.
+Platform's owned Principal/Account remain Candid-free; required external protocol
+DTOs and dedicated Candid codec/refusal proofs retain their boundary role.
+The stale 0.6.2 overlay and completed #38 instruction were reconciled with 0.7.0.
+Full `make clippy` passed before focused tests. The maintained
+`make check-formatting` fixture exercises actual Platform Make/hook inputs:
+standalone check/write, changed configuration, exact failure status/stopping and
+selected-file hook updates preserving unrelated working edits and Cargo.lock.
+It is included in release CI. Snapshot integrity, owned links, actual
+`make fmt-check`, ShellCheck, pending changelog admission and diff checks pass.
+Evidence: `/tmp/platform-shared-02626`. No native macOS, installed-canister or full
+release CI execution is claimed. Prior runtime evidence below remains scoped.
+No real-checkout staging, commit, push, release, publication or deployment was
+performed. Git setup/commit effects were confined to disposable hook fixtures;
+the real Cargo.lock and index are unchanged. Siblings stay read-only.
+
+## Instrumented provider and formatting assessment (#65 / #66)
+
+#65 remains unimplemented; #66's formatter adoption is now prepared locally.
+The migration contract records the instrumented provider's source/ownership
+boundary and required native acceptance, and the inventory explicitly excludes
+it from the existing registry PocketIC capability. The patched client cannot be
+substituted with the same-version registry client. Replica hooks must remain
+below the facade to avoid dependency cycles; no direct-dependency exemption,
+unused Platform dependency or incompatible source substitution was added.
+
+Platform locked/offline metadata with `pocket-ic` confirms registry 16.1.0;
+the selected client lacks `start_system_profile`. Profiler's assembled native
+metadata fails offline on uncached pinned `dfinity-lab/build-info`; its latest
+local build receipt has exit 101 and no artifacts. Existing passing extraction
+receipts do not qualify a newly routed provider. Evidence is retained under
+`/tmp/platform-issues-65-66`. No native build/runtime pass is claimed.
+
+For #66, the 0.26.26 adoption above replaces the former Shared #314 supplier
+blocker. Platform's actual Linux caller/hook proofs pass. Native macOS and
+default-branch integration remain unqualified, so the issue is not closed.
+The source roster still has one owner in Makefile; no copied orchestration or
+additional source registry was introduced. No runtime implementation changed.
+
+## Compiler retirement (#38): released and closed
 
 Removed native `candid_parser::{compile_javascript, compile_typescript}` and the
 unused compiler-only `IDLMergedProg` export. Removed only the exhausted browser
@@ -58,9 +103,12 @@ Handlebars 6.4.4, derive_builder 0.20.2 and Darling 0.20.11. Only supported faca
 surface is retired. No transitive dependency removal, cryptographic/runtime/data
 change, Wasm-size improvement or performance gain is claimed. Existing external
 Candid bytes, checkpoints, aggregate limits and retry/effect policy stay unchanged.
-Keep #38 open until the committed cut reaches default main and its minor-release
-requirements are satisfied. Use a minor release, not release-patch. Other hard
-cuts retain their existing restriction; this task authorizes no broad retirement.
+Verified the non-yanked public 0.7.0 archive, SHA-256
+`677aad73f8b1339cbe1cd7c851f4140bdcdc91c3838fda425bb82549dcd7c35d`;
+its VCS equals released main and its parser facade matches the reviewed source.
+#38 is closed now that both default-main and minor-release conditions are met.
+Verification evidence is retained under `/tmp/platform-shared-02622`.
+Other hard cuts retain their restriction; no broader retirement is authorized.
 
 ## Existing published suppliers and consumer work
 
