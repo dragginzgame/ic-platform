@@ -31,9 +31,8 @@ It is included in release CI. Snapshot integrity, owned links, actual
 `make fmt-check`, ShellCheck, pending changelog admission and diff checks pass.
 Evidence: `/tmp/platform-shared-02626`. No native macOS, installed-canister or full
 release CI execution is claimed. Prior runtime evidence below remains scoped.
-No real-checkout staging, commit, push, release, publication or deployment was
-performed. Git setup/commit effects were confined to disposable hook fixtures;
-the real Cargo.lock and index are unchanged. Siblings stay read-only.
+The earlier Shared-only qualification used disposable fixtures. Current provider
+commits/PRs use isolated checkouts; siblings and release versions remain unchanged.
 
 ## Instrumented native provider and formatting
 
