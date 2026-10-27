@@ -107,6 +107,10 @@ check-upstream-scaffolding:
 check-doc-links:
 	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
 .PHONY: check-inventory
+.PHONY: check-native-provider
+check-native-provider:
+	python3 -m unittest discover -s native/ic-profiler/tests -p 'test_*.py'
+
 check-inventory:
 	bash scripts/ci/check-platform-inventory.sh
 check-pins:

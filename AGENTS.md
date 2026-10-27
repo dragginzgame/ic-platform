@@ -157,6 +157,14 @@ lockfile-only constraint or a blanket upstream export.
 
 ## PocketIC maintenance boundary
 
+The maintainer explicitly authorized transferring IC Profiler's native provider,
+including its existing assembler/fixtures, into `native/ic-profiler`. That opt-in
+source profile owns replica adapters and the patched client below this facade;
+its IC-free recorder/viewer remain consumer-owned. Preserve the legacy tooling
+during this transfer; this is no general permission to introduce Python tooling.
+Keep Motoko/lifeline outside the admitted native server graph. Follow the source
+profile contract in `native/ic-profiler/README.md` and preserve IC copyrights.
+
 The optional native-only `pocket-ic` feature owns explicit upstream client and DTO
 identities. Testkit retains server provisioning, compatibility admission,
 lifecycle, transport and retry policy. Keep PocketIC out of defaults, executor-only

@@ -14,6 +14,39 @@ import mappings, pinned schema/license provenance and qualification commands.
 Registry archive identity is verified; Canic consumer adoption is not claimed. Required
 external Candid remains; Canic retains effects, limits, retry bytes and policy.
 
+## Instrumented PocketIC source provider
+
+The maintainer approved moving native ownership from IC Profiler into Platform.
+The opt-in Git source profile [native/ic-profiler](../native/ic-profiler/README.md)
+owns the pinned IC gitlink, patch series, native adapters, patched PocketIC client
+and source/build receipts. Consumers select a full Platform commit and the
+`instrumented-pocket-ic` profile. This is an explicit source-provider interface,
+not a new default feature or a replacement for the published registry client.
+
+Profiler retains its IC-free recorder, reports, retention, workloads and viewer.
+Its source injection is separate from provider-owned adapters; overlaps are
+rejected and both origins enter the assembly digest. Native Cargo/Bazel build
+inputs belong here, below the facade, avoiding dependencies back from instrumented
+replica packages into the facade. Existing upstream type identities, external
+Candid bytes and cryptographic bodies remain unchanged.
+
+The native server selects the `ic-admin` library without CLI-only NNS setup;
+`lifeline` and Motoko are excluded. The upstream administrative CLI keeps its
+default feature. No dummy canister artifact or build-error suppression is admitted.
+
+Platform 0.7.0's `pocket-ic` Cargo feature still supplies the registry client;
+it does not expose the instrumented profile API. That registry contract remains
+unchanged. The provider is distributed through the pinned Git source profile and
+is excluded from default and Wasm package graphs.
+
+Acceptance remains tracked in
+[#65 — Provide the instrumented PocketIC boundary needed by IC Profiler](https://github.com/dragginzgame/ic-platform/issues/65):
+qualify actual source identities, reproducible assembly, the native server and
+all five `system_profiling` regressions against its recorded executable hash.
+Source/fixture checks and historical receipts do not establish native or Bazel
+qualification. Publishing a new Rust facade for instrumented clients is separate
+from consuming this source profile.
+
 ## Optional BLAKE3 maintenance boundary
 
 This surface is supplied by published Platform 0.6.18. Earlier releases do not
