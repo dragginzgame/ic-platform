@@ -70,7 +70,7 @@
       },
       {
         "path": "0004-native-library-dependencies.patch",
-        "sha256": "b19e3cf4d3683d2c0efef1ec41be0ccbaa696a3e7b1d01c39e776c4e1d09a4b6"
+        "sha256": "8e6026cdf3c0c5c3d9d2cc03842ab812dfd94919f3b4cf9af6d6cfa88fb51bfd"
       }
     ],
     "series": "patches/ic/series"

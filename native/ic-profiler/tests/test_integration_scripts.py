@@ -352,6 +352,24 @@ exit "${IC_PROFILER_FIXTURE_EXIT:-0}"
         self.assertIn(first, [json.loads(path.read_text()) for path in immutable])
         self.assertEqual(len(list((self.root / ".build/receipts").glob("build-*.json"))), 1)
 
+    def test_native_build_records_the_pinned_routing_snapshot(self):
+        self.fake_cargo()
+        contents = '[{"fixture": "routing snapshot"}]\n'
+        self.write(self.upstream, "mainnet-routing-table.json", contents)
+        self.pin_fixture_upstream_edit()
+        self.script("build")
+        receipt = json.loads((self.root / ".build/receipts/latest-build.json").read_text())
+        self.assertEqual(receipt["build_environment"]["MAINNET_ROUTING_TABLE"],
+                         str(self.checkout / "mainnet-routing-table.json"))
+        self.assertEqual(receipt["embedded_inputs"][0]["sha256"], hashlib.sha256(contents.encode()).hexdigest())
+
+    def test_invalid_routing_override_does_not_reach_cargo(self):
+        self.fake_cargo()
+        path = self.write(self.home, "invalid-routing.json", "")
+        self.env["MAINNET_ROUTING_TABLE"] = str(path)
+        self.script("build", success=False)
+        self.assertFalse(Path(self.env["IC_PROFILER_FIXTURE_ARGS"]).exists())
+
     def test_stale_gitlink_is_rejected(self):
         self.git(self.root, "update-index", "--cacheinfo", f"160000,{self.candidate},upstream/ic")
         self.script("prepare", success=False)

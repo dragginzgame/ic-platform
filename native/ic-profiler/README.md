@@ -42,3 +42,9 @@ Actual acceptance also requires the selected native graph, reproducible assembly
 the instrumented server build and all five `system_profiling` regressions against
 that new executable's recorded hash. Fixture passes do not establish native or
 Bazel qualification.
+
+Cargo builds embed the IC pin's real `mainnet-routing-table.json` rather than its
+compile-only empty placeholder. Explicit routing overrides are parsed and hashed
+in command receipts. The build script observes routing/canister input changes.
+NNS genesis still needs real canister artifacts supplied by the selected IC build
+environment; application-subnet profiling tests do not qualify those artifacts.

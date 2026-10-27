@@ -26,7 +26,7 @@ BUILD_ENVIRONMENT = (
     "CARGO_PROFILE_DEV_DEBUG", "CARGO_PROFILE_DEV_INCREMENTAL", "CARGO_PROFILE_DEV_OPT_LEVEL",
     "CARGO_PROFILE_RELEASE_DEBUG", "CARGO_PROFILE_RELEASE_INCREMENTAL", "CARGO_PROFILE_RELEASE_OPT_LEVEL",
     "CARGO_PROFILE_RELEASE_LTO",
-    "PROTOC", "PROTOC_INCLUDE",
+    "PROTOC", "PROTOC_INCLUDE", "MAINNET_ROUTING_TABLE",
 )
 
 
@@ -516,6 +516,15 @@ def executable_paths(checkout, env):
 def cargo_command(root, manifest, command, arguments, force):
     checkout, assembly = prepare(root, manifest, force=force)
     env = os.environ.copy()
+    embedded_inputs = []
+    routing = checkout / "mainnet-routing-table.json"
+    if routing.is_file():
+        env.setdefault("MAINNET_ROUTING_TABLE", str(routing))
+    if "MAINNET_ROUTING_TABLE" in env:
+        routing = Path(env["MAINNET_ROUTING_TABLE"]).expanduser().resolve()
+        read_json(routing)
+        env["MAINNET_ROUTING_TABLE"] = str(routing)
+        embedded_inputs.append(file_snapshot(routing, str(routing)))
     target = Path(env.get("CARGO_TARGET_DIR", str(build_directory(root) / "target"))).expanduser()
     if not target.is_absolute():
         target = Path.cwd() / target
@@ -549,6 +558,7 @@ def cargo_command(root, manifest, command, arguments, force):
                   "rustc_version": tool_version(checkout, [env.get("RUSTC", "rustc"), "--version", "--verbose"]),
                   "cargo_target_dir": env["CARGO_TARGET_DIR"],
                   "build_environment": {name: env[name] for name in BUILD_ENVIRONMENT if name in env},
+                  "embedded_inputs": embedded_inputs,
                   **executable_paths(checkout, env),
                   "started_at": datetime.now(timezone.utc).isoformat(), "artifacts": []}
     toolchain = checkout / "rust-toolchain.toml"

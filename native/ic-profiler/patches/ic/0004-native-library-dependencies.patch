@@ -40,3 +40,23 @@ index e560f8fb71ce7c33c2ca5eaa0d00696f45028028..7a57756352ecae1f09771c85306d82c6
  name = "ic-admin"
  path = "bin/main.rs"
 +required-features = ["cli"]
+diff --git a/rs/pocket_ic_server/build.rs b/rs/pocket_ic_server/build.rs
+index 61af39eb3596b7232cfffa80d181a3e09869a547..d1d0db9dfeba3aa0f719663b9921ab094fec00e4 100644
+--- a/rs/pocket_ic_server/build.rs
++++ b/rs/pocket_ic_server/build.rs
+@@ -2,6 +2,7 @@ use std::fs::File;
+ use std::path::PathBuf;
+ 
+ fn main() {
++    println!("cargo:rerun-if-env-changed=MAINNET_ROUTING_TABLE");
+     // The environment variable `<canister-name>_CANISTER_WASM_PATH` pointing to a file (storing the corresponding canister) is needed
+     // for the PocketIC server to compile. There are two flows to support:
+     // - code validation using `cargo`: we create a dummy file and point `<canister-name>_CANISTER_WASM_PATH` to that file for code validation to succeed;
+@@ -32,6 +33,7 @@ fn main() {
+         "MIGRATION",
+     ] {
+         let env_var_name = format!("{canister_name}_CANISTER_WASM_PATH");
++        println!("cargo:rerun-if-env-changed={env_var_name}");
+         if std::env::var(&env_var_name).is_err() {
+             let canister_wasm_name = format!("{}.wasm.gz", env_var_name.to_lowercase());
+             let canister_wasm_path =
