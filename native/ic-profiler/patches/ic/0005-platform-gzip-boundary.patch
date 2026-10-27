@@ -6,7 +6,7 @@ diff --git a/Cargo.toml b/Cargo.toml
  
  [workspace.dependencies]
 +
-+ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "d7e899c85781f641589d2b59a27a08d858152f0f", default-features = false, features = ["gzip"] }
++ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "8f2b478ef96936754284976cd75dd9cd4b929ef7", default-features = false, features = ["gzip"] }
  actix-rt = "2.10.0"
  actix-web = { version = "4.9.0", default-features = false, features = [
      "macros",
@@ -22,7 +22,7 @@ diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
 +    features = ["gzip"],
 +    git = "https://github.com/dragginzgame/ic-platform.git",
 +    package = "ic-platform",
-+    rev = "d7e899c85781f641589d2b59a27a08d858152f0f",
++    rev = "8f2b478ef96936754284976cd75dd9cd4b929ef7",
 +)
  # Build any crate with `@crate_index//:mycrate`
  # Use particular version with `@crate_index//:mycrate-3.14.16`
@@ -80,7 +80,7 @@ diff --git a/Cargo.lock b/Cargo.lock
  [[package]]
 +name = "ic-platform"
 +version = "0.7.0"
-+source = "git+https://github.com/dragginzgame/ic-platform.git?rev=d7e899c85781f641589d2b59a27a08d858152f0f#d7e899c85781f641589d2b59a27a08d858152f0f"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=8f2b478ef96936754284976cd75dd9cd4b929ef7#8f2b478ef96936754284976cd75dd9cd4b929ef7"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -181,7 +181,7 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
 +[[package]]
 +name = "ic-platform"
 +version = "0.7.0"
-+source = "git+https://github.com/dragginzgame/ic-platform.git?rev=d7e899c85781f641589d2b59a27a08d858152f0f#d7e899c85781f641589d2b59a27a08d858152f0f"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=8f2b478ef96936754284976cd75dd9cd4b929ef7#8f2b478ef96936754284976cd75dd9cd4b929ef7"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -235,7 +235,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "ic-wasm 0.11.1"
    ],
 -  "checksum": "d4e719583881cf898774f83b5661851ff3da30493e262b0832a817b5022e50da",
-+  "checksum": "e514a3df6a83f2e4dc208d85600a45696ddb7b82d8edb3859316acc442d8bb0c",
++  "checksum": "980d1366652f6f19c5ea644e6af362731fad2adf364608f80ae09f3f4a6aa7ba",
    "conditions": {
      "aarch64-apple-darwin": [
        "aarch64-apple-darwin"
@@ -430,7 +430,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "repository": {
 +        "Git": {
 +          "commitish": {
-+            "Rev": "d7e899c85781f641589d2b59a27a08d858152f0f"
++            "Rev": "8f2b478ef96936754284976cd75dd9cd4b929ef7"
 +          },
 +          "remote": "https://github.com/dragginzgame/ic-platform.git",
 +          "strip_prefix": "crates/ic-platform"

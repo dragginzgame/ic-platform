@@ -74,7 +74,7 @@
       },
       {
         "path": "0005-platform-gzip-boundary.patch",
-        "sha256": "2fb48b7086042da4b1148ff63ac062541b84c9791f0cf54032b42d58630212dc"
+        "sha256": "ae2b057548e352f6b4ca802eba95a09a706c5c0db0dd36050ac78b31c21e0adf"
       }
     ],
     "series": "patches/ic/series"

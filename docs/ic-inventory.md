@@ -13,6 +13,11 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzip`
+and `GzipError` from published IC Tooling `ic-host-artifacts` 0.69.1 for IC Profiler.
+Tooling retains codec implementation; callers retain levels, limits and payload
+admission. No backend types, default/Wasm dependency or IC runtime edge is added.
+
 The published 0.6.20 external DTO additions are maintained from pinned protocol
 schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,
 `nns_registry_types` and native-only `certified_assets_types`. Each has its own
@@ -175,6 +180,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ecdsa | dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
 | ic-platform | executor | dep:ic-cdk-executor |
+| ic-platform | gzip | dep:ic-host-artifacts |
 | ic-platform | ic0 | dep:ic0 |
 | ic-platform | icp-ledger-types | candid |
 | ic-platform | icrc-ledger-types | dep:icrc-ledger-types, principal |
@@ -201,6 +207,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
 | ic-platform | ic-cdk-executor | =2.0.0 | normal | all | true | true |  |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
+| ic-platform | ic-host-artifacts | ^0.69.1 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | all | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |

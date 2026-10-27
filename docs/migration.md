@@ -1,5 +1,21 @@
 # Candid and runtime ownership
 
+## Host gzip boundary
+
+The maintainer requested that IC Profiler access gzip through Platform rather
+than depend directly on `flate2`. Select optional `gzip` and use
+`ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`. These explicit exports
+delegate to published IC Tooling `ic-host-artifacts` 0.69.1; general compression
+implementation remains in Tooling. No backend type, default feature, Candid,
+executor, filesystem effect or automatic limit is added. The dependency and
+exports are native-only, including when `gzip` is selected on Wasm.
+
+Consumers own compression levels, compressed/decoded byte allowances and payload
+interpretation. Decoding admits one complete member and rejects trailing bytes;
+callers migrating permissive readers must qualify that admission change. Existing
+compressed artifacts retain their recorded byte identities; deterministic headers
+do not promise identical bytes across backend/feature selections.
+
 Compatibility changes are handled in the affected producer/consumer issues.
 Record agreed versions, identities and migration requirements in this contract
 and the existing dependency inventory. There is no central approval queue or
