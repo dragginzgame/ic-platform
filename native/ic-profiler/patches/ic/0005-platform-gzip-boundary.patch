@@ -127,3 +127,465 @@ diff --git a/Cargo.lock b/Cargo.lock
  name = "zmij"
  version = "1.0.21"
  source = "registry+https://github.com/rust-lang/crates.io-index"
+diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
+--- a/Cargo.Bazel.toml.lock
++++ b/Cargo.Bazel.toml.lock
+@@ -3858,6 +3858,7 @@
+  "ic-identity-hsm",
+  "ic-management-canister-types 0.8.0",
+  "ic-metrics-encoder",
++ "ic-platform",
+  "ic-sha3",
+  "ic-stable-structures 0.6.8",
+  "ic-stable-structures 0.7.0",
+@@ -4707,12 +4708,13 @@
+ 
+ [[package]]
+ name = "flate2"
+-version = "1.1.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "bfe33edd8e85a12a67454e37f8c75e730830d83e313556ab9ebf9ee7fbeb3bfb"
++version = "1.1.10"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb"
+ dependencies = [
+  "crc32fast",
+- "miniz_oxide 0.8.9",
++ "miniz_oxide 0.9.1",
++ "zlib-rs",
+ ]
+ 
+ [[package]]
+@@ -6125,6 +6127,16 @@
+ ]
+ 
+ [[package]]
++name = "ic-host-artifacts"
++version = "0.69.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b20117f13745daed32532f021365f2205337c65b193f7b85c133e9809f02065f"
++dependencies = [
++ "flate2",
++ "sha2 0.10.9",
++]
++
++[[package]]
+ name = "ic-http-certification"
+ version = "3.1.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -6211,6 +6223,14 @@
+ version = "1.1.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "8b5c7628eac357aecda461130f8074468be5aa4d258a002032d82d817f79f1f8"
++
++[[package]]
++name = "ic-platform"
++version = "0.7.0"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=d7e899c85781f641589d2b59a27a08d858152f0f#d7e899c85781f641589d2b59a27a08d858152f0f"
++dependencies = [
++ "ic-host-artifacts",
++]
+ 
+ [[package]]
+ name = "ic-representation-independent-hash"
+@@ -7873,9 +7893,9 @@
+ 
+ [[package]]
+ name = "miniz_oxide"
+-version = "0.8.9"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "1fa76a2c86f704bdb222d66965fb3d63269ce38518b83cb0575fca855ebb6316"
++version = "0.9.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c"
+ dependencies = [
+  "adler2",
+  "simd-adler32",
+@@ -11244,9 +11264,9 @@
+ 
+ [[package]]
+ name = "simd-adler32"
+-version = "0.3.7"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
++version = "0.3.10"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea"
+ 
+ [[package]]
+ name = "simd_cesu8"
+@@ -14577,6 +14597,12 @@
+ ]
+ 
+ [[package]]
++name = "zlib-rs"
++version = "0.6.8"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b268e58e7c693d7c271f93ffc4ba3b380412554231c85bf61ca7af91042a4112"
++
++[[package]]
+ name = "zstd"
+ version = "0.12.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
+--- a/Cargo.Bazel.json.lock
++++ b/Cargo.Bazel.json.lock
+@@ -3,7 +3,7 @@
+     "ic-gateway 0.0.0-git",
+     "ic-wasm 0.11.1"
+   ],
+-  "checksum": "d4e719583881cf898774f83b5661851ff3da30493e262b0832a817b5022e50da",
++  "checksum": "e514a3df6a83f2e4dc208d85600a45696ddb7b82d8edb3859316acc442d8bb0c",
+   "conditions": {
+     "aarch64-apple-darwin": [
+       "aarch64-apple-darwin"
+@@ -415,7 +415,7 @@
+             "target": "encoding_rs"
+           },
+           {
+-            "id": "flate2 1.1.5",
++            "id": "flate2 1.1.10",
+             "target": "flate2"
+           },
+           {
+@@ -5569,7 +5569,7 @@
+             "target": "brotli"
+           },
+           {
+-            "id": "flate2 1.1.5",
++            "id": "flate2 1.1.10",
+             "target": "flate2"
+           },
+           {
+@@ -17232,7 +17232,7 @@
+             "target": "ff"
+           },
+           {
+-            "id": "flate2 1.1.5",
++            "id": "flate2 1.1.10",
+             "target": "flate2"
+           },
+           {
+@@ -17406,6 +17406,10 @@
+           {
+             "id": "ic-metrics-encoder 1.1.1",
+             "target": "ic_metrics_encoder"
++          },
++          {
++            "id": "ic-platform 0.7.0",
++            "target": "ic_platform"
+           },
+           {
+             "id": "ic-sha3 1.0.0",
+@@ -21128,12 +21132,13 @@
+       ],
+       "version": "0.4.3"
+     },
+-    "flate2 1.1.5": {
++    "flate2 1.1.10": {
+       "common_attrs": {
+         "crate_features": [
+           "any_impl",
+           "default",
+           "miniz_oxide",
++          "runtime_detection",
+           "rust_backend"
+         ],
+         "deps": [
+@@ -21142,7 +21147,7 @@
+             "target": "crc32fast"
+           },
+           {
+-            "id": "miniz_oxide 0.8.9",
++            "id": "miniz_oxide 0.9.1",
+             "target": "miniz_oxide"
+           }
+         ],
+@@ -21159,8 +21164,8 @@
+       "package_url": "https://github.com/rust-lang/flate2-rs",
+       "repository": {
+         "Http": {
+-          "sha256": "bfe33edd8e85a12a67454e37f8c75e730830d83e313556ab9ebf9ee7fbeb3bfb",
+-          "url": "https://static.crates.io/crates/flate2/1.1.5/download"
++          "sha256": "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb",
++          "url": "https://static.crates.io/crates/flate2/1.1.10/download"
+         }
+       },
+       "targets": [
+@@ -21171,7 +21176,7 @@
+           }
+         }
+       ],
+-      "version": "1.1.5"
++      "version": "1.1.10"
+     },
+     "fluent-uri 0.4.1": {
+       "common_attrs": {
+@@ -25924,7 +25929,7 @@
+             "target": "clap"
+           },
+           {
+-            "id": "flate2 1.1.5",
++            "id": "flate2 1.1.10",
+             "target": "flate2"
+           },
+           {
+@@ -27440,6 +27445,47 @@
+       ],
+       "version": "0.0.0-git"
+     },
++    "ic-host-artifacts 0.69.1": {
++      "common_attrs": {
++        "crate_features": [
++          "gzip"
++        ],
++        "deps": [
++          {
++            "id": "flate2 1.1.10",
++            "target": "flate2"
++          },
++          {
++            "id": "sha2 0.10.9",
++            "target": "sha2"
++          }
++        ],
++        "edition": "2024"
++      },
++      "library_target_name": "ic_host_artifacts",
++      "license": "MIT",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "MIT"
++      ],
++      "name": "ic-host-artifacts",
++      "package_url": "https://github.com/dragginzgame/ic-tooling",
++      "repository": {
++        "Http": {
++          "sha256": "b20117f13745daed32532f021365f2205337c65b193f7b85c133e9809f02065f",
++          "url": "https://static.crates.io/crates/ic-host-artifacts/0.69.1/download"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "ic_host_artifacts",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.69.1"
++    },
+     "ic-http-certification 3.1.0": {
+       "common_attrs": {
+         "deps": [
+@@ -27788,6 +27834,70 @@
+       ],
+       "version": "1.1.1"
+     },
++    "ic-platform 0.7.0": {
++      "common_attrs": {
++        "crate_features": [
++          "gzip"
++        ],
++        "deps": {
++          "common": [],
++          "selects": {
++            "aarch64-apple-darwin": [
++              {
++                "id": "ic-host-artifacts 0.69.1",
++                "target": "ic_host_artifacts"
++              }
++            ],
++            "aarch64-unknown-linux-gnu": [
++              {
++                "id": "ic-host-artifacts 0.69.1",
++                "target": "ic_host_artifacts"
++              }
++            ],
++            "x86_64-apple-darwin": [
++              {
++                "id": "ic-host-artifacts 0.69.1",
++                "target": "ic_host_artifacts"
++              }
++            ],
++            "x86_64-unknown-linux-gnu": [
++              {
++                "id": "ic-host-artifacts 0.69.1",
++                "target": "ic_host_artifacts"
++              }
++            ]
++          }
++        },
++        "edition": "2024"
++      },
++      "library_target_name": "ic_platform",
++      "license": "MIT AND Apache-2.0",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "Apache-2.0",
++        "MIT"
++      ],
++      "name": "ic-platform",
++      "package_url": "https://github.com/dragginzgame/ic-platform",
++      "repository": {
++        "Git": {
++          "commitish": {
++            "Rev": "d7e899c85781f641589d2b59a27a08d858152f0f"
++          },
++          "remote": "https://github.com/dragginzgame/ic-platform.git",
++          "strip_prefix": "crates/ic-platform"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "ic_platform",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.7.0"
++    },
+     "ic-representation-independent-hash 3.1.0": {
+       "common_attrs": {
+         "deps": [
+@@ -27837,7 +27947,7 @@
+             "target": "candid"
+           },
+           {
+-            "id": "flate2 1.1.5",
++            "id": "flate2 1.1.10",
+             "target": "flate2"
+           },
+           {
+@@ -35326,9 +35436,10 @@
+       ],
+       "version": "0.7.1"
+     },
+-    "miniz_oxide 0.8.9": {
++    "miniz_oxide 0.9.1": {
+       "common_attrs": {
+         "crate_features": [
++          "default",
+           "simd",
+           "simd-adler32",
+           "with-alloc"
+@@ -35339,7 +35450,7 @@
+             "target": "adler2"
+           },
+           {
+-            "id": "simd-adler32 0.3.7",
++            "id": "simd-adler32 0.3.10",
+             "target": "simd_adler32"
+           }
+         ],
+@@ -35357,8 +35468,8 @@
+       "package_url": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
+       "repository": {
+         "Http": {
+-          "sha256": "1fa76a2c86f704bdb222d66965fb3d63269ce38518b83cb0575fca855ebb6316",
+-          "url": "https://static.crates.io/crates/miniz_oxide/0.8.9/download"
++          "sha256": "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c",
++          "url": "https://static.crates.io/crates/miniz_oxide/0.9.1/download"
+         }
+       },
+       "targets": [
+@@ -35369,7 +35480,7 @@
+           }
+         }
+       ],
+-      "version": "0.8.9"
++      "version": "0.9.1"
+     },
+     "mio 0.8.10": {
+       "common_attrs": {
+@@ -37518,7 +37629,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "flate2 1.1.5",
++            "id": "flate2 1.1.10",
+             "target": "flate2"
+           },
+           {
+@@ -50960,7 +51071,7 @@
+       ],
+       "version": "2.2.0"
+     },
+-    "simd-adler32 0.3.7": {
++    "simd-adler32 0.3.10": {
+       "common_attrs": {
+         "edition": "2018"
+       },
+@@ -50974,8 +51085,8 @@
+       "package_url": "https://github.com/mcountryman/simd-adler32",
+       "repository": {
+         "Http": {
+-          "sha256": "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe",
+-          "url": "https://static.crates.io/crates/simd-adler32/0.3.7/download"
++          "sha256": "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea",
++          "url": "https://static.crates.io/crates/simd-adler32/0.3.10/download"
+         }
+       },
+       "targets": [
+@@ -50986,7 +51097,7 @@
+           }
+         }
+       ],
+-      "version": "0.3.7"
++      "version": "0.3.10"
+     },
+     "simd_cesu8 1.1.1": {
+       "common_attrs": {
+@@ -66503,6 +66614,34 @@
+       ],
+       "version": "0.10.3"
+     },
++    "zlib-rs 0.6.8": {
++      "common_attrs": {
++        "edition": "2021"
++      },
++      "library_target_name": "zlib_rs",
++      "license": "Zlib",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "Zlib"
++      ],
++      "name": "zlib-rs",
++      "package_url": "https://github.com/trifectatechfoundation/zlib-rs",
++      "repository": {
++        "Http": {
++          "sha256": "b268e58e7c693d7c271f93ffc4ba3b380412554231c85bf61ca7af91042a4112",
++          "url": "https://static.crates.io/crates/zlib-rs/0.6.8/download"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "zlib_rs",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.6.8"
++    },
+     "zstd 0.12.4": {
+       "common_attrs": {
+         "deps": [
+@@ -66830,7 +66969,7 @@
+     "evm_rpc_client 0.4.0",
+     "evm_rpc_types 3.1.1",
+     "ff 0.12.1",
+-    "flate2 1.1.5",
++    "flate2 1.1.10",
+     "form_urlencoded 1.2.1",
+     "fqdn 0.5.2",
+     "fs_extra 1.3.0",
+@@ -66874,6 +67013,7 @@
+     "ic-identity-hsm 0.49.1",
+     "ic-management-canister-types 0.8.0",
+     "ic-metrics-encoder 1.1.1",
++    "ic-platform 0.7.0",
+     "ic-sha3 1.0.0",
+     "ic-stable-structures 0.6.8",
+     "ic-stable-structures 0.7.0",
