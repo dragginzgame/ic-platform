@@ -7,8 +7,8 @@ Released main is Platform 0.7.0 at
 published. The maintainer released the preceding #38 cut. Shared Tooling 0.26.26
 at `5683060a5d8ce79af2fcfedb53b3eb24037fd064` was reviewed and exported
 canonically with 109 payloads. Incoming Shared adoption and #65 documentation
-work were preserved. No package version, runtime, feature, dependency or wire
-contract changed. The next compatible changelog draft is 0.7.1; release metadata
+work were preserved. No package version, default library feature/dependency or wire
+contract changed in that adoption. The next compatible changelog draft is 0.7.1; release metadata
 remains 0.7.0.
 
 Shared #314 now supplies standalone Rustfmt inputs. Platform's existing source
@@ -35,28 +35,32 @@ No real-checkout staging, commit, push, release, publication or deployment was
 performed. Git setup/commit effects were confined to disposable hook fixtures;
 the real Cargo.lock and index are unchanged. Siblings stay read-only.
 
-## Instrumented provider and formatting assessment (#65 / #66)
+## Instrumented native provider and formatting
 
-#65 remains unimplemented; #66's formatter adoption is now prepared locally.
-The migration contract records the instrumented provider's source/ownership
-boundary and required native acceptance, and the inventory explicitly excludes
-it from the existing registry PocketIC capability. The patched client cannot be
-substituted with the same-version registry client. Replica hooks must remain
-below the facade to avoid dependency cycles; no direct-dependency exemption,
-unused Platform dependency or incompatible source substitution was added.
+The maintainer approved public Platform ownership of the native provider while
+Profiler retains its private IC-free recorder/viewer. Implementation is in
+[provider PR #70](https://github.com/dragginzgame/ic-platform/pull/70), stacked on
+[tooling PR #69](https://github.com/dragginzgame/ic-platform/pull/69). Neither is
+merged. The existing registry PocketIC feature remains a separate contract.
 
-Platform locked/offline metadata with `pocket-ic` confirms registry 16.1.0;
-the selected client lacks `start_system_profile`. Profiler's assembled native
-metadata fails offline on uncached pinned `dfinity-lab/build-info`; its latest
-local build receipt has exit 101 and no artifacts. Existing passing extraction
-receipts do not qualify a newly routed provider. Evidence is retained under
-`/tmp/platform-issues-65-66`. No native build/runtime pass is claimed.
+`native/ic-profiler` owns the IC gitlink, patches, adapters, patched client,
+legacy assembler and canonical verification API. Consumer source injection has
+separate origins/digests and rejects ownership overlap. The admitted server graph
+excludes lifeline/Motoko; routing uses the actual pinned IC snapshot. Native test
+windows serialize whole-server capture, and receipts bind the built server hash.
 
-For #66, the 0.26.26 adoption above replaces the former Shared #314 supplier
-blocker. Platform's actual Linux caller/hook proofs pass. Native macOS and
-default-branch integration remain unqualified, so the issue is not closed.
-The source roster still has one owner in Makefile; no copied orchestration or
-additional source registry was introduced. No runtime implementation changed.
+At provider `04a172b`, the actual server, 69 recorder tests and five native
+profiling regressions pass. Server SHA-256 is
+`6b2cd6eee09899cd8e064c21237a220921d6f9e1ed1b5cfcf79d97eda50a0067`.
+Also passing: 43 provider fixtures, seven consumer-binding fixtures, unchanged
+library Clippy and actual formatting/hook qualification with the IC gitlink.
+Consumer adoption is uncommitted; legacy source/assemblies and receipts remain
+retained. Hosted acceptance, Bazel and NNS-genesis artifacts are separate.
+
+The 0.26.26 adoption now has a prerequisite PR because old main's formatter
+rejects gitlinks. The consumer fixture exports opaque pointers without copying
+IC source/Git metadata. Review/integrate #69 first, then retarget #70 to main.
+Keep issues #65/#66 open until their review and applicable hosted acceptance.
 
 ## Compiler retirement (#38): released and closed
 
