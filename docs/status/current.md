@@ -73,16 +73,9 @@ Rust type equality. The separate external `candid-service` feature stays intact.
 The migration contract includes the retained API/consumer inventory and exact
 [0.7.0 removal instructions](../migration.md#pending-070-compiler-only-retirement-38).
 
-The audit found no references to any removed name in Canic default `aed32be2`
-crates or current Canic/Query/Host/Tooling/Blob/Auth/Backup/IcyDB/Jobs/Metrics/
-Persistence/Relay crate sources. Host retains its external service inspector;
-Canic retains `fleet_ensure::ops::init_arguments`. Owned frontend artifacts now
-use Wire metadata/bindings. Canic's owner records passing installed frontend
-handoff (275s) and later dedicated/embedded generated-client proof (637s) at
-local `b9482ec526c5dfb9f5dd349d22b1f60190b2dfdf`. The inspected qualification
-record is captured under `/tmp/platform-issue38-20261027/canic-qualification.json`;
-its source/hash are recorded in the migration contract. These are retained owner
-observations, not new sibling execution, full #613 closeout or live deployment.
+Consumer audit and installed-frontend evidence remain in the closed
+[#38 — Retire Candid frontend compiler exports](https://github.com/dragginzgame/ic-platform/issues/38).
+The canonical migration contract retains the source/API restrictions.
 
 Full `make clippy` passed before longer tests. Standalone parser (2), dynamic
 refusal (2), external service (1) and pinned external schema (5) tests pass on
