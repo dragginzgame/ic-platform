@@ -26,8 +26,9 @@ not a new default feature or a replacement for the published registry client.
 Profiler retains its IC-free recorder, reports, retention, workloads and viewer.
 Its source injection is separate from provider-owned adapters; overlaps are
 rejected and both origins enter the assembly digest. Native Cargo/Bazel build
-inputs belong here, below the facade, avoiding dependencies back from instrumented
-replica packages into the facade. Existing upstream type identities, external
+inputs belong here. The consumer recorder's optional native `gzip` dependency
+selects only the isolated Tooling codec facade; no IC/native feature or dependency
+back to the provider is selected. Existing upstream type identities, external
 Candid bytes and cryptographic bodies remain unchanged.
 
 The native server selects the `ic-admin` library without CLI-only NNS setup;

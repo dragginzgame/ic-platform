@@ -4,6 +4,10 @@
 
 ### ➕ Added
 
+- Bind the native recorder's gzip dependency to IC Platform's optional host codec
+  facade, keeping compression implementation in IC Tooling and direct backend
+  dependencies out of IC Profiler.
+
 - Own the opt-in instrumented PocketIC source provider for IC Profiler, keeping
   native adapters and IC build inputs below the facade while the consumer retains
   its recorder/viewer. Exclude Motoko/lifeline from the native server profile

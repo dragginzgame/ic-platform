@@ -71,6 +71,10 @@
       {
         "path": "0004-native-library-dependencies.patch",
         "sha256": "8e6026cdf3c0c5c3d9d2cc03842ab812dfd94919f3b4cf9af6d6cfa88fb51bfd"
+      },
+      {
+        "path": "0005-platform-gzip-boundary.patch",
+        "sha256": "8051a9fb3c7835a8d050483c70b9c08ba995e8b86eea76917bfebdbb0373e1c9"
       }
     ],
     "series": "patches/ic/series"

@@ -24,8 +24,11 @@ The provider's `profiler/` sources and the consumer's `profiler/` sources merge 
 the declared IC destination. Overlapping files are rejected. Their separate
 origins and digests enter the assembly identity, together with the IC pin and all
 patch/overlay inputs. Command receipts record both provider and consumer commits.
-Adapters stay inside the provider's IC workspace, below the public Platform
-boundary; they never depend back on the facade and create a package cycle.
+Adapters stay inside the provider's IC workspace. The consumer recorder selects
+only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
+Bazel inputs. That facade delegates to published IC Tooling and has no dependency
+back to this workspace, PocketIC or the native provider. Compression implementation
+stays in Tooling; the consumer retains levels, import limits and bundle semantics.
 
 The PocketIC profile selects the `ic-admin` library without its CLI-only NNS
 initialization dependency. The upstream CLI keeps its default feature and binary;
