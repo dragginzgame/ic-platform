@@ -1,0 +1,42 @@
+diff --git a/rs/pocket_ic_server/Cargo.toml b/rs/pocket_ic_server/Cargo.toml
+index f270f79a3917717193cd2fe00ea7df98f1145ccd..071aa304f6526fab51b16a68356e75d6d7691da2 100644
+--- a/rs/pocket_ic_server/Cargo.toml
++++ b/rs/pocket_ic_server/Cargo.toml
+@@ -26,7 +26,7 @@ hex = { workspace = true }
+ http = { workspace = true }
+ hyper = { workspace = true }
+ hyper-util = { workspace = true }
+-ic-admin = { path = "../registry/admin" }
++ic-admin = { path = "../registry/admin", default-features = false }
+ ic-agent = { workspace = true }
+ ic-boundary = { path = "../boundary_node/ic_boundary" }
+ ic-btc-adapter = { path = "../bitcoin/adapter" }
+diff --git a/rs/registry/admin/Cargo.toml b/rs/registry/admin/Cargo.toml
+index e560f8fb71ce7c33c2ca5eaa0d00696f45028028..7a57756352ecae1f09771c85306d82c622e7224e 100644
+--- a/rs/registry/admin/Cargo.toml
++++ b/rs/registry/admin/Cargo.toml
+@@ -6,6 +6,10 @@ edition.workspace = true
+ description.workspace = true
+ documentation.workspace = true
+ 
++[features]
++default = ["cli"]
++cli = ["dep:ic-nns-init"]
++
+ [dependencies]
+ anyhow = { workspace = true }
+ async-trait = { workspace = true }
+@@ -38,7 +42,7 @@ ic-nns-governance-api = { path = "../../nns/governance/api" }
+ ic-nns-governance-conversions = { path = "../../nns/governance/conversions" }
+ ic-nns-handler-lifeline-interface = { path = "../../nns/handlers/lifeline/interface" }
+ ic-nns-handler-root = { path = "../../nns/handlers/root/impl" }
+-ic-nns-init = { path = "../../nns/init" }
++ic-nns-init = { path = "../../nns/init", optional = true }
+ ic-prep = { path = "../../prep" }
+ ic-protobuf = { path = "../../protobuf" }
+ ic-registry-client = { path = "../client" }
+@@ -88,3 +92,4 @@ path = "src/lib.rs"
+ [[bin]]
+ name = "ic-admin"
+ path = "bin/main.rs"
++required-features = ["cli"]

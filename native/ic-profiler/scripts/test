@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+"""Run native profiler tests in the generated IC integration."""
+import sys
+sys.dont_write_bytecode = True
+from ic_profiler import main
+
+raise SystemExit(main(["test", *sys.argv[1:]]))
