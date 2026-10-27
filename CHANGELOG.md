@@ -8,6 +8,12 @@
   existing codec for IC Profiler, retaining consumer-owned levels and limits
   without direct compression-backend dependencies in the consumer.
 
+### 🩹 Fixed
+
+- Admit gzip's independent native-only feature in dependency-graph validation,
+  while retaining Principal prerequisites for other native features and strict
+  target/dependency checks ([#71](https://github.com/dragginzgame/ic-platform/pull/71)).
+
 ## [0.7.0] - 2026-10-27
 
 ### ⚠️ Breaking

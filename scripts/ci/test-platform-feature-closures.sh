@@ -23,13 +23,13 @@ fi
 echo 'Long closure names retain distinct short cache IDs'
 # Native-only leaves may be removed from a Wasm key only after exact admission.
 native_metadata="$(printf '%s' "$metadata" | "$jq" '
-  .[0].packages[0] |= (.features += {principal:[],agent:["principal","dep:ic-agent"],"candid-parser":["principal","dep:candid_parser"],secp256k1:["principal","dep:ic-secp256k1"],"pocket-ic":["principal","dep:pocket-ic"],"wire-schema":["principal","dep:ic-wire-metadata","dep:serde_json"]} |
-  .dependencies = ["ic-agent","candid_parser","ic-secp256k1","pocket-ic","ic-wire-metadata","serde_json"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
+  .[0].packages[0] |= (.features += {principal:[],agent:["principal","dep:ic-agent"],"candid-parser":["principal","dep:candid_parser"],secp256k1:["principal","dep:ic-secp256k1"],"pocket-ic":["principal","dep:pocket-ic"],"wire-schema":["principal","dep:ic-wire-metadata","dep:serde_json"],gzip:["dep:ic-host-artifacts"]} |
+  .dependencies = ["ic-agent","candid_parser","ic-secp256k1","pocket-ic","ic-wire-metadata","serde_json","ic-host-artifacts"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
 selections='["none","default","agent","agent,candid-parser,secp256k1,pocket-ic","agent,cdk"]'
 actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
 expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tprincipal\nagent,candid-parser,secp256k1,pocket-ic\tprincipal\nagent,cdk\tcdk,executor,ic0,principal')"
 [[ "$actual" == "$expected" ]] || { echo 'Unexpected target-aware closure' >&2; exit 1; }
-for feature in agent candid-parser secp256k1 pocket-ic wire-schema; do
+for feature in agent candid-parser secp256k1 pocket-ic wire-schema gzip; do
     # shellcheck disable=SC2016 # $feature is a jq variable.
     changed="$(printf '%s' "$native_metadata" | "$jq" --arg feature "$feature" '.[0].packages[0].features[$feature] += ["candid"]')"
     if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$changed" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
@@ -57,3 +57,35 @@ for change in '.dependencies[4].target = null' '.dependencies[5].optional = fals
     fi
 done
 echo 'Wire metadata target isolation and both dependency guards passed'
+
+# Gzip has no application-type prerequisite. Erasing its native leaf must not
+# erase Principal from other features, or introduce it into gzip-only graphs.
+selections='["gzip","gzip,agent","gzip,cdk","gzip,wire-schema"]'
+actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
+expected="$(printf 'gzip\tnone\ngzip,agent\tprincipal\ngzip,cdk\tcdk,executor,ic0\ngzip,wire-schema\tprincipal')"
+[[ "$actual" == "$expected" ]] || { echo 'Gzip prerequisite isolation changed' >&2; exit 1; }
+actual="$(printf '%s' '["gzip"]' | "$jq" -r --arg target native --argjson metadata "$native_metadata" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
+[[ "$actual" == $'gzip\tgzip' ]] || { echo 'Native gzip was collapsed' >&2; exit 1; }
+for change in '.features.gzip += ["principal"]' '.dependencies[6].target = null' '.dependencies[6].optional = false' '.dependencies |= map(select(.name != "ic-host-artifacts"))' '.dependencies += [.dependencies[6]]' '.dependencies[6].rename = "renamed"' '.features.agent = ["dep:ic-agent"]'; do
+    changed="$(printf '%s' "$native_metadata" | "$jq" ".[0].packages[0] |= ($change)")"
+    if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$changed" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
+        echo "Admitted changed gzip/prerequisite contract: $change" >&2; exit 1
+    fi
+done
+
+fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-native-closures.XXXXXX")"
+trap 'rm -rf "$fixture"' EXIT
+for change in 'del(.native_leaves.gzip.prerequisites)' '.native_leaves.gzip.prerequisites = "principal"' '.native_leaves.gzip.dependencies = []'; do
+    "$jq" "$change" scripts/ci/platform-feature-policy.json > "$fixture/policy.json"
+    if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" --slurpfile policy "$fixture/policy.json" -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
+        echo "Malformed native policy was admitted: $change" >&2; exit 1
+    fi
+done
+
+# Regress the original failure against actual Cargo metadata as well as the
+# independent synthetic admission/refusal cases above. No graph/build is run.
+cargo metadata --no-deps --format-version 1 --locked --offline > "$fixture/metadata.json"
+actual="$(printf '%s' '["none","gzip","executor","executor,gzip","agent","agent,gzip"]' | "$jq" -r --arg target wasm32-unknown-unknown --slurpfile metadata "$fixture/metadata.json" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
+expected="$(printf 'none\tnone\ngzip\tnone\nexecutor\texecutor\nexecutor,gzip\texecutor\nagent\tprincipal\nagent,gzip\tprincipal')"
+[[ "$actual" == "$expected" ]] || { echo 'Actual Cargo gzip closure failed' >&2; exit 1; }
+echo 'Gzip native/Wasm closures and explicit prerequisite guards passed'

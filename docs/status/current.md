@@ -1,5 +1,24 @@
 # Current handoff
 
+## PR #71 gzip feature-validation correction (2026-10-27)
+
+The gzip branch adds a native leaf without Principal. The previous graph-cache
+admission assumed every native leaf selected Principal and therefore refused
+gzip before querying the Wasm graphs. Each native leaf now declares its exact
+local prerequisites alongside its dependencies; gzip has none. Existing optional,
+target, dependency-count and alias checks remain strict. Regression fixtures cover
+native/Wasm and mixed selections, changed contracts, malformed policy, and actual
+Cargo metadata. No codec, public API, dependency or cryptographic code changed.
+
+Qualification: full `make clippy` passed before longer tests; `make fmt-check`,
+ShellCheck, gzip's native consumer test, inventory and documentation-link checks
+passed. Rust 1.91 gzip-only Wasm compilation and complete routine
+`make check-features` passed: 415 selections per target, 384 native and 234 Wasm
+graph queries, plus native-empty and Wasm executor compilation. Hosted macOS and
+installed-provider acceptance are separate; this correction adds no such evidence.
+The existing advisory blocker remains tracked by #50. No release or publication
+is included. The earlier handoff below records prior work, not current PR status.
+
 ## Source and authorized boundary
 
 Released main remains Platform 0.6.21 at

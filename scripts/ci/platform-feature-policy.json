@@ -8,11 +8,11 @@
     "signature-verification", "stable-structures", "wire-schema"
   ],
   "native_leaves": {
-    "agent": ["ic-agent"],
-    "candid-parser": ["candid_parser"],
-    "gzip": ["ic-host-artifacts"],
-    "pocket-ic": ["pocket-ic"],
-    "secp256k1": ["ic-secp256k1"],
-    "wire-schema": ["ic-wire-metadata", "serde_json"]
+    "agent": {"dependencies": ["ic-agent"], "prerequisites": ["principal"]},
+    "candid-parser": {"dependencies": ["candid_parser"], "prerequisites": ["principal"]},
+    "gzip": {"dependencies": ["ic-host-artifacts"], "prerequisites": []},
+    "pocket-ic": {"dependencies": ["pocket-ic"], "prerequisites": ["principal"]},
+    "secp256k1": {"dependencies": ["ic-secp256k1"], "prerequisites": ["principal"]},
+    "wire-schema": {"dependencies": ["ic-wire-metadata", "serde_json"], "prerequisites": ["principal"]}
   }
 }

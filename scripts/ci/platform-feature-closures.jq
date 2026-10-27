@@ -3,12 +3,20 @@
 def native_leaves($package):
   $policy[0].native_leaves |
   to_entries | map(. as $leaf |
-    [$leaf.value[] as $name |
-      [$package.dependencies[] | select((.rename // .name) == $name)]] as $deps |
-    if $package.features[$leaf.key] == (["principal"] + ($leaf.value | map("dep:" + .))) and
-       all($deps[]; length == 1 and .[0].optional and
-           .[0].target == "cfg(not(target_family = \"wasm\"))")
-    then $leaf.key else error("native-only cache contract changed: " + $leaf.key) end);
+    $leaf.value.prerequisites as $prerequisites |
+    $leaf.value.dependencies as $dependencies |
+    if ($prerequisites | type) != "array" or
+       ($dependencies | type) != "array" or ($dependencies | length) == 0
+    then error("malformed native-only cache policy: " + $leaf.key)
+    else
+      [$dependencies[] as $name |
+        [$package.dependencies[] | select((.rename // .name) == $name)]] as $deps |
+      if all($prerequisites[]; . as $name | $package.features[$name] != null) and
+         $package.features[$leaf.key] == ($prerequisites + ($dependencies | map("dep:" + .))) and
+         all($deps[]; length == 1 and .[0].optional and
+             .[0].target == "cfg(not(target_family = \"wasm\"))")
+      then $leaf.key else error("native-only cache contract changed: " + $leaf.key) end
+    end);
 def closure($features):
   . as $before |
   (. + [ .[] as $name | $features[$name][]? |
