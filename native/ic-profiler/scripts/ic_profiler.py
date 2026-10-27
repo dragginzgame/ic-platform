@@ -612,6 +612,25 @@ def check_native_graph(root, manifest):
     print("Platform native graph verified: no lifeline or CLI-only NNS initialization")
 
 
+def native_verify(root, manifest):
+    run(["bash", root / "scripts/dev/native-tools.sh", "check"], capture=False)
+    check_native_graph(root, manifest)
+    previous = {name: os.environ.get(name) for name in ("CARGO_TARGET_DIR", "POCKET_IC_BIN")}
+    try:
+        target = build_directory(root) / "target"
+        os.environ["CARGO_TARGET_DIR"] = str(target)
+        cargo_command(root, manifest, "build", [], False)
+        cargo_command(root, manifest, "test", ["--", "--lib"], False)
+        os.environ["POCKET_IC_BIN"] = str(target / "debug/pocket-ic-server")
+        cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic", "--test", "system_profiling"], False)
+    finally:
+        for name, value in previous.items():
+            if value is None:
+                os.environ.pop(name, None)
+            else:
+                os.environ[name] = value
+
+
 def update_upstream(root, manifest, revision, fetch, force):
     upstream = validate_upstream(root, manifest)
     if revision.startswith("-") or not revision.strip():
@@ -640,6 +659,7 @@ def main(argv=None, *, root=None):
     command = commands.add_parser("prepare", help="Assemble the pinned integration without fetching")
     command.add_argument("--force", action="store_true", help="Regenerate only a checkout already owned by this repository")
     commands.add_parser("check-native-graph", help="Check the selected native server graph without building")
+    commands.add_parser("native-verify", help="Build and qualify this provider against the actual server")
     for name in ("build", "test"):
         command = commands.add_parser(name, help=f"Prepare and run native cargo {name}; record provenance")
         command.add_argument("--force", action="store_true", help="Regenerate an existing owned checkout after source edits")
@@ -661,6 +681,8 @@ def main(argv=None, *, root=None):
                     prepare(root, manifest, force=options.force)
                 elif options.command == "check-native-graph":
                     check_native_graph(root, manifest)
+                elif options.command == "native-verify":
+                    native_verify(root, manifest)
                 elif options.command in ("build", "test"):
                     cargo_command(root, manifest, options.command, options.cargo_args, options.force)
                 else:

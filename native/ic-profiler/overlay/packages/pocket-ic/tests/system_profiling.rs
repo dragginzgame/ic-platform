@@ -7,6 +7,16 @@ use reqwest::blocking::Client;
 use serde_json::{Value, json};
 use std::time::Duration;
 
+// Captures observe the whole shared server process, so independent test
+// workloads must not run inside one another's recording windows.
+static CAPTURE_TEST: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+fn exclusive_capture() -> std::sync::MutexGuard<'static, ()> {
+    CAPTURE_TEST
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
 const WORK_WAT: &str = r#"
 (module
   (import "ic0" "msg_reply" (func $reply))
@@ -127,6 +137,7 @@ fn install(pic: &PocketIc, subnet: Principal, wat: &str) -> Principal {
 
 #[test]
 fn system_capture_preserves_instructions_cycles_and_rollback() {
+    let _capture = exclusive_capture();
     let pic = builder().with_application_subnet().build();
     let canister = install(&pic, pic.topology().get_app_subnets()[0], WORK_WAT);
     let before = pic.cycle_balance(canister);
@@ -225,6 +236,7 @@ fn system_capture_preserves_instructions_cycles_and_rollback() {
 
 #[test]
 fn system_capture_exposes_cross_subnet_calls_and_bounded_exports() {
+    let _capture = exclusive_capture();
     let pic = builder()
         .with_application_subnet()
         .with_application_subnet()
@@ -338,6 +350,7 @@ fn system_capture_exposes_cross_subnet_calls_and_bounded_exports() {
 
 #[test]
 fn rust_client_and_agent_exports_share_the_same_evidence() {
+    let _capture = exclusive_capture();
     use pocket_ic::{SystemProfileConfig, SystemProfileQuery};
 
     let pic = builder().with_application_subnet().build();
@@ -434,6 +447,7 @@ fn rust_client_and_agent_exports_share_the_same_evidence() {
 
 #[test]
 fn prices_reconcile_without_instruction_traces_even_when_event_details_drop() {
+    let _capture = exclusive_capture();
     use pocket_ic::{SystemProfileConfig, SystemProfileQuery};
 
     let pic = builder().with_application_subnet().build();
@@ -479,6 +493,7 @@ fn prices_reconcile_without_instruction_traces_even_when_event_details_drop() {
 
 #[test]
 fn scheduler_rounds_preserve_dts_accounting_when_event_details_drop() {
+    let _capture = exclusive_capture();
     use pocket_ic::{SystemProfileConfig, SystemProfileQuery};
 
     fn integer(value: &Value) -> i128 {
