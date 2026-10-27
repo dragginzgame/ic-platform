@@ -7,11 +7,11 @@ mandatory cross-repository acknowledgement before independent work proceeds.
 
 ## External DTO additions for Canic
 
-The pending compatible 0.6.20 work supplies optional CMC, legacy ICP, Cycles
+Published Platform 0.6.20 supplies optional CMC, legacy ICP, Cycles
 Ledger, NNS Registry and native certified-asset contract modules. See the
 [external contract and migration guide](external-contracts.md) for exact features,
 import mappings, pinned schema/license provenance and qualification commands.
-No published supplying version or consumer adoption is claimed yet. Required
+Registry archive identity is verified; Canic consumer adoption is not claimed. Required
 external Candid remains; Canic retains effects, limits, retry bytes and policy.
 
 ## Optional BLAKE3 maintenance boundary
@@ -77,24 +77,27 @@ Sources, selected lock, metadata and artifact hashes are retained at
 
 ## Browser SDK Core boundary
 
-The published browser package is `@tokostudios/ic-platform` 0.1.0 under
+The published browser package is `@tokostudios/ic-platform` 0.1.1 under
 `packages/browser`, backed by SDK Core exactly 6.1.1 as an ordinary dependency
 for Blob's approved local 0.48 graph. This supersedes the unpublished SDK-5 and
-`@dragginzgame/ic-platform` proposals. Publication and exact registry-archive
+`@dragginzgame/ic-platform` proposals. Initial 0.1.0 publication and archive
 verification completed on 2026-10-26; evidence is recorded in
 [Platform #57](https://github.com/dragginzgame/ic-platform/issues/57). This npm
 release identity is independent of Rust package versions and `make publish`.
 Published-package and installed consumer acceptance remain separate requirements.
 
-The pending additive browser update for
+The published 0.1.1 additive browser update for
 [Platform #59](https://github.com/dragginzgame/ic-platform/issues/59) supplies
 `Endpoint`, `SubmitRequestType`, `ReadRequestType` and `Expiry` through `/agent`.
 Auth's signing-request fixtures may replace their `@icp-sdk/core/agent` imports
-with `@tokostudios/ic-platform/agent` after a compatible npm version containing
-these exports is published and admitted in Auth's own graph. Published 0.1.0
+with `@tokostudios/ic-platform/agent` using a minimum requirement of 0.1.1,
+after admission in Auth's own graph. Published 0.1.0
 does not contain them. Keep request authorization, expiry selection and guarded
 identity policy at Auth; Platform retains upstream identities and implementation.
-This Rust 0.6.20 preparation does not bump or publish the independent npm package.
+Separate authorized npm publication completed on 2026-10-27. The public archive
+matches the qualified tarball and a fresh registry-only strict TypeScript/runtime
+consumer passes, with SDK Core still exactly 6.1.1. This does not qualify Auth's
+guarded-identity application policy or installed consumer adoption.
 
 The initial browser implementation is committed at `8d80630` (Rust 0.6.17). Browser CI at that
 commit passes on Linux x86_64 and native macOS Intel/Apple Silicon, including
@@ -1911,3 +1914,57 @@ external management/ledger request-byte, response-arity, error and retry tests.
 Manifests continue selecting `cdk` and explicit `candid`; no new feature is needed.
 Legacy `cdk::storage` Candid checkpoints are untouched and remain a compatibility
 exception, not a new storage format.
+
+## Canic external-contract closeout exports
+
+The pending compatible 0.6.21 addition adopts the narrow export patch prepared
+by Canic's owner for its remaining external-contract mirrors. Published 0.6.20
+already supplies CMC, ICP, Cycles Ledger, Registry and asset DTOs; these extra
+management/ICRC identities are not present in that immutable supplying archive.
+Reviewed patch: Canic `b9482ec52`,
+`docs/audits/working/0.112-push-readiness/platform-external-contracts.patch`,
+SHA-256 `4ecfff50e4b450e51f4648406b99c89d1b48bb9e3615add239cc4597ed09c890`.
+Only its reviewed export additions were adopted; obsolete release/supply prose
+was replaced with the current versions and consumer obligations below.
+
+Keep selecting `management-canister-types` and import the exact pinned 0.11.0
+identities from `ic_platform::management_canister_types`:
+
+- Lifecycle/settings: `CanisterSettings`, `LogVisibility`, `EnvironmentVariable`,
+  `UpdateSettingsArgs`, `UploadChunkArgs`, `InstallChunkedCodeArgs`,
+  `CanisterInstallMode` and `UninstallCodeArgs`.
+- History: `Change`, `ChangeOrigin`, `FromUserRecord`, `FromCanisterRecord`,
+  `CreationRecord`, `CodeDeploymentRecord` and `ControllersChangeRecord`.
+- External ECDSA DTOs: `EcdsaCurve`, `EcdsaKeyId`, `EcdsaPublicKeyArgs`,
+  `EcdsaPublicKeyResult`, `SignWithEcdsaArgs` and `SignWithEcdsaResult`.
+
+These are types, not new calls, cryptographic implementations or execution
+permission. The uninstall request with sender version maps to `UninstallCodeArgs`,
+not `CanisterIdRecord`. Full settings/install types include optional fields and
+variant payloads omitted by Canic's subset: do not assume identical Candid type
+maps or request-cost quotations after adopting them. Encode/quote new operations
+from the same canonical request and preserve original retained bytes when retrying
+an uncertain operation. Keep controller, target and sender-version checks with
+Canic. No call to the management canister is performed by this addition.
+
+Keep selecting `icrc-ledger-types`; import `TransferArg` and `Memo` from
+`ic_platform::icrc_ledger_types`. Use the explicit nested `icrc21` namespace for
+`ConsentMessageMetadata`, `ConsentMessageRequest`, `ConsentMessageSpec`,
+`DisplayMessageType`, `ConsentInfo`, `ConsentMessage`, `FieldsDisplay`, `Value`,
+`ErrorInfo` and `Icrc21Error`. The consent `Value` identity is distinct from the
+existing root ledger-generic `Value`; preserve that separation. Use upstream
+`Memo::from(existing_bytes)` for retained raw memo bytes rather than introducing
+a conversion bridge. Do not reinterpret those bytes through the integer
+constructor or normalize them during an uncertain retry.
+
+No feature, default, package dependency or upstream pin changes. There is no
+blanket re-export or compatibility alias. Upstream Rust identities, derives and
+external Candid encoding remain at the same registry suppliers. Canic retains
+consent generation/admission, authorization, spending, reply bounds, journals,
+retry/reconciliation, and native/installed acceptance. Require the actual supplying
+release before replacing its mirrors; no publication/adoption is claimed here.
+
+Qualification extends the existing standalone `management` and `icrc` consumer
+profiles, with native/MSRV execution and Wasm compilation. Package-local identity
+checks separately require exact registry type identity, including the two distinct
+`Value` types. These checks do not execute cryptography or qualify payment effects.

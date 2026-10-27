@@ -211,3 +211,95 @@ fn owned_account_parser_and_order_match_external_owner() {
         }
     }
 }
+
+/// Construct transfers and consent messages without a direct Candid/ledger dependency.
+pub fn transfers_and_consent_contracts() {
+    use ic_platform::icrc_ledger_types::{Memo, TransferArg, icrc21};
+    let request = TransferArg {
+        from_subaccount: Some([7; 32]),
+        to: Account {
+            owner: Principal::anonymous(),
+            subaccount: None,
+        },
+        fee: Some(10u64.into()),
+        created_at_time: Some(42),
+        memo: Some(Memo::from(99u64)),
+        amount: 100u64.into(),
+    };
+    roundtrip_value(&request);
+    let metadata = icrc21::ConsentMessageMetadata {
+        language: "en".into(),
+        utc_offset_minutes: Some(-60),
+    };
+    for device_spec in [
+        None,
+        Some(icrc21::DisplayMessageType::GenericDisplay),
+        Some(icrc21::DisplayMessageType::FieldsDisplay),
+    ] {
+        roundtrip_value(&icrc21::ConsentMessageRequest {
+            method: "icrc1_transfer".into(),
+            arg: vec![1, 2, 3],
+            user_preferences: icrc21::ConsentMessageSpec {
+                metadata: metadata.clone(),
+                device_spec,
+            },
+        });
+    }
+    for consent_message in [
+        icrc21::ConsentMessage::GenericDisplayMessage("transfer".into()),
+        icrc21::ConsentMessage::FieldsDisplayMessage(icrc21::FieldsDisplay {
+            intent: "transfer".into(),
+            fields: vec![
+                (
+                    "amount".into(),
+                    icrc21::Value::TokenAmount {
+                        decimals: 8,
+                        amount: 100,
+                        symbol: "ICP".into(),
+                    },
+                ),
+                (
+                    "time".into(),
+                    icrc21::Value::TimestampSeconds { amount: 42 },
+                ),
+                (
+                    "duration".into(),
+                    icrc21::Value::DurationSeconds { amount: 60 },
+                ),
+                (
+                    "description".into(),
+                    icrc21::Value::Text {
+                        content: "external consent".into(),
+                    },
+                ),
+            ],
+        }),
+    ] {
+        roundtrip_value(&icrc21::ConsentInfo {
+            consent_message,
+            metadata: metadata.clone(),
+        });
+    }
+    for error in [
+        icrc21::Icrc21Error::UnsupportedCanisterCall(icrc21::ErrorInfo {
+            description: "unsupported".into(),
+        }),
+        icrc21::Icrc21Error::ConsentMessageUnavailable(icrc21::ErrorInfo {
+            description: "unavailable".into(),
+        }),
+        icrc21::Icrc21Error::InsufficientPayment(icrc21::ErrorInfo {
+            description: "insufficient".into(),
+        }),
+        icrc21::Icrc21Error::GenericError {
+            error_code: 42u64.into(),
+            description: "error".into(),
+        },
+    ] {
+        roundtrip_value(&error);
+    }
+}
+
+#[test]
+fn external_transfer_and_consent_shapes_roundtrip() {
+    transfers_and_consent_contracts();
+}

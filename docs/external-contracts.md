@@ -1,8 +1,10 @@
 # External canister DTO contracts
 
-The pending compatible Platform 0.6.20 surface supplies the contract families
-below. Own package versions remain unchanged until maintainer release. No
-published supplying version is claimed yet. These are external Candid protocols,
+Published, non-yanked Platform 0.6.20 supplies the contract families below.
+The registry archive is verified against SHA-256
+`7345878bbf473daa1989d28b1f9828e22e63c2f21e776dd5a3e9eace8609016e`;
+its VCS identity is `401a8327b669c82fe34de82963a48a952061d1d4`.
+Selected DTO source matches released main. These are external Candid protocols,
 not owned Wire endpoints. Their structs/enums are Platform-maintained Rust
 representations of pinned schemas, not identities from an upstream Rust crate.
 The Principal/Nat/function machinery retains registry Candid identities.
@@ -71,7 +73,7 @@ exists or that dependency graphs/optimized Wasm are smaller.
 
 ## Canic migration
 
-After publication, require the actual supplying Platform version and select only
+Require Platform >=0.6.20 and select only
 the features each runtime/host crate uses. These features also supply the existing
 `candid::contract` and bounded decoding APIs; no direct Candid dependency is needed.
 Do not replace accepted original bytes in already-retained uncertain operations.

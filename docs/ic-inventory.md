@@ -13,7 +13,7 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
-The pending 0.6.20 external DTO additions are maintained from pinned protocol
+The published 0.6.20 external DTO additions are maintained from pinned protocol
 schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,
 `nns_registry_types` and native-only `certified_assets_types`. Each has its own
 optional `*-types` feature selecting Candid, without service engines, host
@@ -25,12 +25,12 @@ Rust DTO identities, not re-exported upstream Rust structs. Required external
 Principal/Nat/function and wire identities remain Candid's.
 
 The separate ESM package `packages/browser` owns the browser SDK Core boundary
-under published npm identity `@tokostudios/ic-platform` 0.1.0. Its sole production
+under published npm identity `@tokostudios/ic-platform` 0.1.1. Its sole production
 dependency is exactly `@icp-sdk/core` 6.1.1 for Blob's local 0.48 graph.
 Canic's SDK-5/Auth-8 handoff needs a coordinated migration before adoption.
 Explicit subpaths expose Principal, Ed25519/secp256k1
 identities, Agent/request APIs, certificates and required external Candid.
-The pending #59 browser extension adds explicit upstream `Endpoint`,
+The published 0.1.1 #59 browser extension adds explicit upstream `Endpoint`,
 `SubmitRequestType`, `ReadRequestType` and `Expiry` identities under `/agent`;
 published 0.1.0 does not supply them. No SDK selection or crypto body changes.
 Owned non-cryptographic adapters cover canonical text, checked key-pair import,
@@ -78,8 +78,8 @@ API changes or automatically establish whether sibling source still uses an API.
 | `candid_parser`; Candid printer | native `candid_parser`, optional `candid-service` exports | Tooling Host's Candid parsing; Canic host/testing and service generation | Upstream parser/compiler remains external. Retirement requires consumer migration, not a manifest-only deletion. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
 | `pocket-ic` | native `pocket_ic` client/DTO identities | Tooling Testkit `src/{lib.rs,pic/transport.rs}` | Upstream simulator client; Testkit owns server provisioning, compatibility, lifecycle and transport policy. |
-| `ic-management-canister-types` | `management_canister_types` | Canic Core; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
-| `icrc-ledger-types` | `icrc_ledger_types` account/metadata/transfer/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Upstream external ledger formats, distinct from owned Account. No ledger/storage policy in Platform. |
+| `ic-management-canister-types` | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
+| `icrc-ledger-types` | `icrc_ledger_types` account/metadata/transfer/consent/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Upstream external ledger formats, distinct from owned Account. No ledger/storage policy in Platform. |
 | `ic-certification` | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Upstream tree/hash implementations. Host owns bounded CBOR decoding; consumers own trust roots and verification policy. |
 | `ic-verify-bls-signature` | `bls`; imported verifier dependency | Auth and Canic test keys; Auth canister verification | Upstream cryptography unchanged. No in-house primitive replacement. |
 | `k256`, `curve25519-dalek`, `ed25519-dalek` | `ecdsa`, `ed25519` | Auth `src/{chain_key_signature,portable_signature}.rs`; Canic tests | General-purpose upstream crypto, not DFINITY-only code. Platform controls selected identities/features, not algorithms. |

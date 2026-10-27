@@ -419,3 +419,136 @@ pub fn snapshot_status_roundtrip() {
 fn management_snapshot_status_preserves_wire_and_variants() {
     snapshot_status_roundtrip();
 }
+
+/// Construct new external operations through Platform, preserving upstream fields.
+pub fn lifecycle_settings_and_ecdsa_contracts() {
+    use ic_platform::management_canister_types::{
+        CanisterInstallMode, CanisterSettings, Change, ChangeOrigin, CodeDeploymentRecord,
+        ControllersChangeRecord, CreationRecord, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs,
+        EcdsaPublicKeyResult, EnvironmentVariable, FromCanisterRecord, FromUserRecord,
+        InstallChunkedCodeArgs, LogVisibility, SignWithEcdsaArgs, SignWithEcdsaResult,
+        UninstallCodeArgs, UpdateSettingsArgs, UploadChunkArgs,
+    };
+    fn roundtrip<T>(value: T)
+    where
+        T: contract::CandidType
+            + for<'de> contract::serde::Deserialize<'de>
+            + PartialEq
+            + std::fmt::Debug,
+    {
+        let bytes = contract::encode_one(&value).unwrap();
+        let limits = DecodeLimits {
+            reply_bytes: 65_536,
+            decoding_quota: 1_000_000,
+            skipping_quota: 0,
+            type_entries: 128,
+            header_bytes: 8192,
+        };
+        assert_eq!(decode_exactly_one::<T>(&bytes, limits).unwrap(), value);
+        assert!(
+            decode_exactly_one::<T>(
+                &bytes,
+                DecodeLimits {
+                    reply_bytes: bytes.len() - 1,
+                    ..limits
+                }
+            )
+            .is_err()
+        );
+    }
+    let canister_id = Principal::anonymous();
+    let settings = CanisterSettings {
+        controllers: Some(vec![canister_id]),
+        log_visibility: Some(LogVisibility::AllowedViewers(vec![canister_id])),
+        environment_variables: Some(vec![EnvironmentVariable {
+            name: "key".into(),
+            value: "value".into(),
+        }]),
+        ..Default::default()
+    };
+    roundtrip(UpdateSettingsArgs {
+        canister_id,
+        settings,
+        sender_canister_version: Some(42),
+    });
+    roundtrip(UninstallCodeArgs {
+        canister_id,
+        sender_canister_version: Some(42),
+    });
+    roundtrip(UploadChunkArgs {
+        canister_id,
+        chunk: vec![1, 2, 3],
+    });
+    for mode in [
+        CanisterInstallMode::Install,
+        CanisterInstallMode::Reinstall,
+        CanisterInstallMode::Upgrade(None),
+    ] {
+        roundtrip(InstallChunkedCodeArgs {
+            mode,
+            target_canister: canister_id,
+            store_canister: Some(canister_id),
+            chunk_hashes_list: vec![ChunkHash { hash: vec![7; 32] }],
+            wasm_module_hash: vec![8; 32],
+            arg: vec![1, 2],
+            sender_canister_version: Some(42),
+        });
+    }
+    for origin in [
+        ChangeOrigin::FromUser(FromUserRecord {
+            user_id: canister_id,
+        }),
+        ChangeOrigin::FromCanister(FromCanisterRecord {
+            canister_id,
+            canister_version: Some(42),
+        }),
+    ] {
+        for details in [
+            ChangeDetails::Creation(CreationRecord {
+                controllers: vec![canister_id],
+                environment_variables_hash: None,
+            }),
+            ChangeDetails::CodeDeployment(CodeDeploymentRecord {
+                mode: CodeDeploymentMode::Upgrade,
+                module_hash: vec![7; 32],
+            }),
+            ChangeDetails::ControllersChange(ControllersChangeRecord {
+                controllers: vec![canister_id],
+            }),
+            ChangeDetails::CodeUninstall,
+        ] {
+            roundtrip(Change {
+                timestamp_nanos: 99,
+                canister_version: 43,
+                origin: origin.clone(),
+                details: Some(details),
+            });
+        }
+    }
+    let key_id = EcdsaKeyId {
+        curve: EcdsaCurve::Secp256k1,
+        name: "key_1".into(),
+    };
+    roundtrip(EcdsaPublicKeyArgs {
+        canister_id: Some(canister_id),
+        derivation_path: vec![vec![1, 2]],
+        key_id: key_id.clone(),
+    });
+    roundtrip(EcdsaPublicKeyResult {
+        public_key: vec![2; 33],
+        chain_code: vec![3; 32],
+    });
+    roundtrip(SignWithEcdsaArgs {
+        message_hash: vec![4; 32],
+        derivation_path: vec![vec![1, 2]],
+        key_id,
+    });
+    roundtrip(SignWithEcdsaResult {
+        signature: vec![5; 64],
+    });
+}
+
+#[test]
+fn new_external_management_contracts_preserve_sender_and_history_fields() {
+    lifecycle_settings_and_ecdsa_contracts();
+}

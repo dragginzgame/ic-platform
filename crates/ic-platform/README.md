@@ -1,10 +1,16 @@
 # ic-platform
 
-The pending external DTO additions provide optional `cmc-types`,
+Published 0.6.20 provides optional `cmc-types`,
 `icp-ledger-types`, `cycles-ledger-types`, `nns-registry-types` and native-only
 `certified-assets-types` surfaces. These retain external Candid and add no service
 engine or policy. See the [exact contract and migration guide](../../docs/external-contracts.md).
-Publication and consumer qualification are separate from local preparation.
+Consumer adoption and qualification remain separate from supplier publication.
+
+The pending compatible 0.6.21 additions extend `management-canister-types` with
+explicit lifecycle/settings/ECDSA/history identities and `icrc-ledger-types` with
+transfer/memo and `icrc21` consent DTOs. They keep the existing pins and feature
+selections; they add no calls, signing implementation or policy. Wait for the
+supplying release before replacing those remaining consumer mirrors.
 
 Enable `stable-structures` for explicit upstream 0.7.2 collection, Memory,
 Storable/codec, iterator, restricted, vector-backed and memory-manager identities. Storage owns

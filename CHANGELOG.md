@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.21]
+
+### ➕ Added
+
+- Publish the separate browser package `@tokostudios/ic-platform` 0.1.1 with
+  the signing-request and expiry exports needed by Auth; SDK Core remains 6.1.1
+  ([#59](https://github.com/dragginzgame/ic-platform/issues/59)).
+- Expose pinned management lifecycle/settings/ECDSA and complete change-origin
+  records needed by Canic's external adapters, preserving upstream identities.
+- Expose ICRC transfer arguments/memos and a distinct ICRC-21 consent namespace.
+  Consumers retain authorization, limits, original retry bytes and consent policy.
+
 ## [0.6.20] - 2026-10-27
 
 ### ➕ Added

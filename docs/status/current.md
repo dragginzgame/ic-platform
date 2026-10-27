@@ -2,104 +2,125 @@
 
 ## Source and release boundaries
 
-Baseline is released Platform 0.6.19 (`0502bce`), plus merged changelog-only
-[PR #60](https://github.com/dragginzgame/ic-platform/pull/60) at `c75fdff`.
-Compatible pending notes target 0.6.20; own Rust/npm package versions are unchanged.
-Shared Tooling 0.26.21 at `66c91c4412856baa147482e648fc80428db8b179` is adopted
-locally through the canonical exporter (106 payloads). Existing snapshot/browser
-work and unrelated root lock edits are preserved. No staging, new commit, push,
-release, publication, deployment or paid operation was performed for this batch.
-Sibling checkouts remain read-only.
+Default main and published Platform 0.6.20 are `401a8327b669c82fe34de82963a48a952061d1d4`.
+The issue batch began clean. New compatible Rust notes target 0.6.21; the Rust
+package version is unchanged. The user separately authorized npm 0.1.1 publication,
+completed below; its manifest/lock version edits remain uncommitted.
+Shared Tooling remains 0.26.21 at
+`66c91c4412856baa147482e648fc80428db8b179` (106 verified payloads).
+No staging, commit, push, Rust release, deployment or paid operation was performed.
+Sibling checkouts remain read-only, including Canic's active dirty batch.
 
-## External DTO supply (#61–64)
+## Remaining Canic export patch (pending 0.6.21)
 
-Five optional modules now supply selected external Candid contracts without any
-new package dependency or service engine: CMC top-up/mint/rates, legacy ICP
-transfer/encoded blocks, Cycles Ledger creation/withdrawal, Registry subnet lookup
-and native-only certified-asset reads. Defaults, runtime and executor do not imply
-these features. Asset exports are absent on Wasm; its explicit Candid prerequisite
-remains if that feature is selected there. No feature implies a host parser.
+Adopted only the source exports from Canic's prepared external-contract patch,
+reviewed at `b9482ec52`; its hash/provenance and exact mappings are recorded in
+[the migration contract](../migration.md#canic-external-contract-closeout-exports).
+The existing exact management 0.11.0 feature now exposes lifecycle/settings,
+ECDSA request/reply and complete origin/change-record identities. Existing ICRC
+0.2.0 exports now include `TransferArg`, `Memo` and a narrow `icrc21` namespace.
+Consent `Value` stays distinct from ledger-generic `Value`. All are registry Rust
+identities; there is no wrapper, copied crypto, new service engine, dependency,
+feature or changed default. Consumers retain effects, limits and consent policy.
 
-The [external contract guide](../external-contracts.md) owns exact feature/import
-mappings, source/license provenance, pinned DID hashes, projection differences and
-consumer qualification. Required external Candid is preserved. Rate/tree/certificate
-fields, asset `content_type`, exact archive query signatures, unbounded nats,
-creation duplicate/refund evidence and all withdrawal rejection variants are retained.
-Cycles Ledger creation settings are distinct from management/current CMC settings.
-Registry uses `Some(target)` for both quotation/submission; its canonical optional
-field changes request bytes relative to Canic's old required-principal projection.
-Upstream subtyping admits the old request, but that is not byte identity.
+Full `make clippy` passed before longer tests. Exact upstream identity tests pass.
+Extended standalone `management` and `icrc` consumers pass native and Rust 1.91
+execution and both Wasm compilation routes, without direct consumer Candid/DTO
+dependencies. New tests cover sender-version/settings/install requests, history
+origins/records, ECDSA DTO bytes, transfer/memo and consent request/display/error
+families. They perform no signing or paid calls. Evidence:
+`target/boundary-consumer.wbVf8F`, `target/boundary-consumer.c8bYEW`;
+logs `/tmp/platform-backlog-20261027/{clippy,identity,consumer}.log`.
+Actual default/executor/runtime and management/ICRC/combined native/Wasm graphs
+pass (`target/backlog-20261027-graphs`). Snapshot, inventory, docs and formatting
+pass; root dependency lock is unchanged. Native macOS, installed consumer/payment
+acceptance and full release CI were not run for this pending export extension.
 
-CMC/ICP/Cycles/asset declarations are narrowly schema-derived with retained Apache
-licenses. Registry's DID is under an IC-1.0 ancestor; it is not imported or
-mislabelled Apache. Its tiny public protocol facts are independently expressed in
-Platform Rust/tests. No service implementation or cryptographic body is copied.
-These are Platform-maintained DTOs, not upstream Rust struct identities.
+These extra exports are absent from immutable 0.6.20. A future supplying release
+is needed before Canic can remove those remaining mirrors. Quote new operations
+from the canonical request and retain original bytes for uncertain retries;
+complete upstream settings/install types need not match old subset type tables.
+No new cryptographic implementation or authority is provided.
 
-Full `make clippy` passed before longer tests. Standalone consumers declare only
-Platform: portable CMC/ICP/Cycles/Registry tests (4) and native asset tests (1)
-pass on native and Rust 1.91, with corresponding Wasm compilation. Native schema
-proofs (5) pass on native/MSRV, comparing complete selected types against pinned
-DIDs and Registry protocol facts. First schema attempt exposed an unquoted
-reserved field in the test input; corrected proof passes, earlier failure retained.
-Asset tests exercise first/chunk responses, bounds, missing/wrong digest and wrong
-encoding through an explicitly consumer-owned fixture policy, not Platform defaults.
+## Published DTO supply (#61–64)
 
-Evidence: `target/boundary-consumer.yPe7An` (portable),
-`target/boundary-consumer.1wsIeE` (assets),
-`target/boundary-consumer.O62pVF` (schema), `target/external-contract-graphs`;
-logs under `/tmp/platform-61-64`. Actual native/Wasm default/executor/runtime and
-all five DTO feature graphs pass. Graph refusal regressions and the updated
-feature-selection model pass. Source fixture hashes, root lock preservation,
-snapshot/inventory/documentation and pending changelog admission were checked.
-`target/assets-wasm-refusal.dbJJNN` proves the host asset API cannot be imported
-on Wasm; package listing includes every new DTO module and retained license.
-Native macOS, installed services, full release CI and Canic recovery/payment
-qualification were not run. No size/performance improvement is claimed.
+The five optional external DTO families are verified in non-yanked registry
+Platform 0.6.20. Archive SHA-256:
+`7345878bbf473daa1989d28b1f9828e22e63c2f21e776dd5a3e9eace8609016e`.
+Archive VCS equals released main; selected DTO module source is byte-identical.
+The [external contract guide](../external-contracts.md) now names the actual
+supplier, features, source/license provenance and adoption mappings.
 
-#61–64 remain open: no supplying publication or Canic adoption is claimed.
-The maintainer must release the supplying version before Canic removes mirrors;
-Canic retains target authority, limits, original uncertain retry bytes, journals,
-fees/refunds, receipt authentication and frontend acceptance.
+Fresh registry-only standalone consumers pass for portable CMC/ICP/Cycles/Registry
+(4 tests), native assets (1) and pinned-DID schema equality (5), including Rust
+1.91 execution and portable Wasm compilation. Evidence:
+`target/boundary-consumer.62bKiL`, `.T81QEY`, `.1hZtHp`;
+`/tmp/platform-backlog-20261027/published.log`. These use published 0.6.20,
+not the pending management/ICRC exports. Earlier host-asset Wasm import refusal
+and source-license/package checks remain under `/tmp/platform-61-64`.
 
-## Pending browser extension (#59)
+Canic has selected 0.6.20 but has not enabled/migrated/qualified these external
+DTO features. Its current handoff explicitly retains that work and its active
+supplier/installed acceptance. #61–64 stay open for actual Canic adoption, not
+version selection alone. Original retry bytes, target/subnet/controller binding,
+fees/refunds, receipt authentication and frontend bounds remain consumer-owned.
 
-Explicit `/agent` exports include upstream `Endpoint`, `SubmitRequestType`,
-`ReadRequestType` and `Expiry`, matching Auth's actual signing-request fixtures.
-SDK Core remains exactly 6.1.1; cryptographic implementation and policy stay upstream.
-Full Clippy, all 16 browser adapter/graph tests, strict packed consumers and
-Chromium page/module-worker checks passed. Signing requests preserve exact SDK
-identities, expiry serialization and signed envelopes for call/query/read-state.
-Logs: `/tmp/platform-0620-{clippy,browser,chromium}.log`; evidence:
-`target/browser-consumer.891Oy8` and `target/browser-consumer.JWXVZk`.
-Published npm 0.1.0 lacks these exports; a compatible npm release and Auth's own
-consumer qualification remain required. No npm bump/publication was performed.
-Earlier browser supply is recorded in closed #57; Blob #103 and Canic #637 retain
-actual adoption. Local producer proofs do not establish consumer acceptance.
+## Published browser supply (#59)
 
-## Released advisory repair (#56) and crypto blocker (#50)
+The four upstream signing-request exports are in source and passed the prior
+packed-consumer, exact-identity and Chromium page/module-worker proofs. Evidence:
+`/tmp/platform-0620-{clippy,browser,chromium}.log`,
+`target/browser-consumer.891Oy8`, `target/browser-consumer.JWXVZk`.
+The user authorized publication of compatible `@tokostudios/ic-platform` 0.1.1.
+Public npm accepted it at 2026-10-27T09:06:09.829Z with latest=0.1.1; SDK Core is
+still exactly 6.1.1 and no external lock selection changed. Initial saved login
+was expired; browser login and separate publication verification completed. The
+first noninteractive attempt was refused with EOTP before upload; interactive
+web verification completed the same qualified version. No password/code was handled.
 
-The #56 fix is present on released main in 0.6.19. Both maintained audit inputs
-are prepared using isolated locked Cargo fetches without compilation. Raw audit
-statuses and complete/incomplete index observations remain separate; missing
-records reject coverage even if cargo-audit exits zero. Offline mode claims no
-freshness. Evidence: `target/issues-38-50-56/online-audit-final`, `yanked.log`,
-`missing-index-probe`; `/tmp/platform-issue56-online-final.log`.
-The real workspace failure for crypto-bigint remains visible; runtime audit passed.
+Full Clippy passed before release checks. Dry-run and actual prepublish hooks
+pass all 16 adapter/graph tests and strict packed/provider consumers. Prepared
+Chromium page/module-worker qualification also passes. The public archive's
+integrity equals the qualified tarball; SHA-1 is
+`33bf72eaf3039111c462072d5d2bc0aa6dd80f45`. Fresh registry-only install,
+strict TypeScript/runtime signing-request smoke and singleton SDK graph pass
+without a direct consumer SDK declaration. Evidence: `/tmp/platform-npm-011`,
+`target/browser-consumer.jzEnrN`, `.0yfvt0`, `.pwu6B8`, and
+`target/npm-registry-consumer.1ClKKR`. Published package metadata is retained there;
+its Git-head field is baseline 401a832, not a new version/README commit.
+#59 is closed as supplied by npm 0.1.1. Auth's application policy/adoption and installed
+acceptance remain consumer-owned; no new native macOS/provider qualification is
+claimed. Local browser README and generated Agent files match the public archive.
 
-#50 remains unresolved. Agent 0.49.3 and exact ic-secp256k1 0.3.0 retain the
-K256/P256/elliptic-curve 0.13 family and affected crypto-bigint 0.5.5; the previously
-observed patch is >=0.7.6. Resident private-key signing prevents a blanket
-verification-only exemption. No compatible correction, exemption, Agent fork or
-in-house cryptographic replacement is supplied. Prior graphs/registry records
-remain under `target/issues-38-50-56`; they are not a fresh feed check this batch.
+## Closed advisory preparation (#56); crypto blocker (#50)
+
+#56 is closed after verifying the released fix and live 0.6.20 advisory workflow
+[40472663771](https://github.com/dragginzgame/ic-platform/actions/runs/40472663771).
+Both retained index statuses are complete. Workspace audit still fails for
+crypto-bigint/#50; runtime audit passes. No advisory is suppressed. Full workflow
+log is `/tmp/platform-backlog-20261027/advisory-ci-full.log`; earlier real
+prepared/yanked/missing-index regressions remain under `target/issues-38-50-56`.
+
+Fresh registry/advisory records on 2026-10-27 still show crypto-bigint 0.5.5 as
+the newest non-yanked 0.5 release, with patched >=0.7.6. Agent 0.49.3 and exact
+ic-secp256k1 0.3.0 still require K256/P256/elliptic-curve 0.13 and affected ^0.5
+arithmetic. Newer incompatible crypto versions do not resolve the coupled paths.
+No compatible fix or justified exemption was found. Resident private-key signing
+precludes a blanket verification-only claim. No crypto/Agent fork, override,
+exemption or in-house algorithm change is supplied. #50 stays open; raw records
+are retained under `/tmp/platform-backlog-20261027`. This is not a new local audit
+scan or exploitability proof; the live workflow independently confirms the match.
 
 ## Compiler retirement (#38)
 
-The earlier Canic audit found live JS/TS compiler calls on its default branch;
-its working Wire migration was not qualified adoption. Retirement still requires
-actual consumer adoption and an authorized breaking boundary. Host's bounded
-external service inspection and textual external/init arguments retain parsing.
-No parser fork, compiler hard cut or dependency/size reduction is claimed here.
-Previous Wire 0.7.16 qualification is retained in `/tmp/platform-adoption-*.log`
-and its migration contract; this batch does not claim a fleet Wire upgrade.
+The old live-compiler-call blocker is stale: Canic default `aed32be2` frontend ops
+now consumes retained Wire schemas and compiles Wire bindings. The inspected
+local Canic/Blob/Host/Tooling/Query/Auth/Backup/IcyDB crate sources have no references
+to Platform's `compile_javascript`/`compile_typescript`. Default source is retained
+at `/tmp/platform-backlog-20261027/canic-default-frontend.rs`.
+This is source adoption, not full #613 closeout or installed fleet qualification.
+Retirement removes public Platform exports and still requires the agreed explicit
+breaking boundary; the maintainer's compatible 0.6 restriction remains in force.
+Required external parsing/service behavior stays supported. No compiler hard cut,
+parser fork or dependency/size reduction is claimed. #38 stays open with corrected
+evidence rather than retaining the obsolete caller assertion.

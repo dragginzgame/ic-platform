@@ -6,8 +6,8 @@ endpoints called by third parties. Candid is the adapter for management canister
 NNS/SNS, ledgers and other interfaces that require it; caller location does not
 select a codec. Existing Candid checkpoints remain a legacy compatibility exception.
 
-The separate [browser package](packages/browser/README.md) supplies an initial
-`@tokostudios/ic-platform` 0.1.0 npm boundary over SDK Core 6.1.1 for Blob 0.48,
+The separate [browser package](packages/browser/README.md) supplies the
+`@tokostudios/ic-platform` 0.1.1 npm boundary over SDK Core 6.1.1 for Blob 0.48,
 with checked identity restoration, explicit Agent configuration and raw query
 integration. The package is published; existing browser SDK declarations remain
 until qualified adoption. Use `make check-browser` and the separately prepared Chromium
@@ -46,8 +46,8 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | `certification` | Upstream certificate/hash-tree and mutable tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
-| `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
-| `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
+| `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer/memo, consent and block/archive/certificate types; no storage integration |
+| `management-canister-types` | Upstream 0.11.0 lifecycle, settings, ECDSA, HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 | `cmc-types` | External CMC top-up, mint notification and certified rate DTOs; implies Candid, no payment policy |
 | `icp-ledger-types` | Legacy ICP transfer and encoded-block/archive DTOs; implies Candid, no ledger engine or CDK |
 | `cycles-ledger-types` | External Cycles Ledger creation and withdrawal DTOs, including its distinct creation settings; implies Candid |

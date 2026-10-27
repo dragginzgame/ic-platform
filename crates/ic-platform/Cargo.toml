@@ -236,5 +236,10 @@ required-features = [
     "candid-parser",
 ]
 
+[[test]]
+name = "upstream_dto_identity"
+path = "tests/upstream_dto_identity.rs"
+required-features = ["management-canister-types", "icrc-ledger-types"]
+
 [lints]
 workspace = true

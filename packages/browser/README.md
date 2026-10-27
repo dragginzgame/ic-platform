@@ -1,7 +1,7 @@
 # IC Platform browser boundary
 
 `@tokostudios/ic-platform` owns the shared SDK Core integration boundary for
-browser and module-worker consumers. Package version 0.1.0 uses exactly
+browser and module-worker consumers. Package version 0.1.1 uses exactly
 `@icp-sdk/core` 6.1.1 for Blob's approved 0.48 graph. Rust package versions and
 release commands remain independent; npm supplies the browser package.
 
@@ -21,12 +21,12 @@ boundary does not remove the transitive SDK or promise a smaller bundle.
 | `/certification` | SDK Certificate verification and lookup identities; lookup alone is not authentication |
 | `/candid` | SDK IDL for required external protocols |
 
-The pending browser update also exposes SDK `Endpoint`, `SubmitRequestType`,
+Version 0.1.1 also exposes SDK `Endpoint`, `SubmitRequestType`,
 `ReadRequestType` and `Expiry` through `/agent` for consumers constructing
 requests for `Identity.transformRequest`. These are unchanged upstream identities;
 they introduce no signing authority, expiry policy or network dispatch. Published
-0.1.0 does not supply these four names. Consumers must wait for the next compatible
-npm release before removing their direct SDK dependency for these imports.
+0.1.0 does not supply these four names. Require at least 0.1.1 and qualify the
+consumer before removing its direct SDK dependency for these imports.
 
 There is no root barrel, actor generator or alternative transport/codec. Exported
 SDK classes retain their public methods; these explicit names do not make every
@@ -143,6 +143,8 @@ adds no publication action to ordinary checks. Run it without publishing via
 The implementation is committed in Rust release 0.6.17. Rust releases do not
 publish the independent npm package. Initial npm supply requires explicit
 publication authorization, registry authentication and package/scope write access.
+The same qualification and verification steps apply to compatible follow-up
+versions; always read back the exact new version rather than only the latest tag.
 
 From the reviewed checkout, run full `make clippy` before the longer
 `make check-browser-runtime`. Then preview the actual publication path without
@@ -159,9 +161,9 @@ the packed proof after such edits. A successful dry-run does not establish npm
 login, scope ownership or write permission.
 
 After explicit publication authorization, the maintainer authenticates to the
-public registry, verifies access to the `@dragginzgame` scope and publishes from
+public registry, verifies access to the `@tokostudios` scope and publishes from
 this source directory so `prepublishOnly` runs. Rust `make publish` is unrelated.
-Read back `@tokostudios/ic-platform@0.1.0` with `npm view`, compare `dist.integrity`
+Read back the exact new version with `npm view`, compare `dist.integrity`
 with the qualified archive, and verify its sole production dependency is SDK Core
 6.1.1. Report the published version/integrity to Platform #57, Blob #103 and
 Canic #637. Consumers then qualify the registry artifact in their own acceptance;

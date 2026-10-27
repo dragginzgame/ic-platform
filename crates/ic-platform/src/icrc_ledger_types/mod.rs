@@ -6,10 +6,12 @@
 //! brings transitive Candid but selects no Platform codec, executor, parser or
 //! Agent feature. Upstream storage integration is not selected.
 
+pub mod icrc21;
+
 pub use icrc_ledger_types::icrc::generic_metadata_value::MetadataValue;
 pub use icrc_ledger_types::icrc::generic_value::{ICRC3Value, Value};
 pub use icrc_ledger_types::icrc1::account::Account;
-pub use icrc_ledger_types::icrc1::transfer::TransferError;
+pub use icrc_ledger_types::icrc1::transfer::{Memo, TransferArg, TransferError};
 pub use icrc_ledger_types::icrc2::allowance::{Allowance, AllowanceArgs};
 pub use icrc_ledger_types::icrc3::archive::{GetArchivesArgs, ICRC3ArchiveInfo, QueryArchiveFn};
 pub use icrc_ledger_types::icrc3::blocks::{
