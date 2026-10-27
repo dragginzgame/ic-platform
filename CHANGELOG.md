@@ -2,6 +2,17 @@
 
 ## [0.7.1]
 
+### ➕ Added
+
+- Expose optional native bounded gzip encoding/decoding through IC Tooling's
+  existing codec for IC Profiler, retaining consumer-owned levels and limits
+  without direct compression-backend dependencies in the consumer.
+
+### 🩹 Fixed
+
+- Admit gzip's independent native-only feature in dependency-graph validation,
+  while retaining Principal prerequisites for other native features and strict
+  target/dependency checks ([#71](https://github.com/dragginzgame/ic-platform/pull/71)).
 ### 🔧 Changed
 
 - Adopt Shared Tooling 0.26.26 and its visible formatting passes while preserving
