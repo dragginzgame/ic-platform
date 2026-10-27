@@ -5,8 +5,9 @@
 The maintainer authorized fixing CI and integrating Platform PRs #69, #71 and
 #70, then updating Profiler to integrated revisions. Tooling prerequisite
 [#69](https://github.com/dragginzgame/ic-platform/pull/69) is merged at
-`aa973e13bae7a6dd9027c0dea47d0736f37acb31`. Gzip #71 and native provider #70
-are being integrated; do not describe them as published. Rust release metadata
+`aa973e13bae7a6dd9027c0dea47d0736f37acb31`. Gzip #71 is merged at
+`8f2b478ef96936754284976cd75dd9cd4b929ef7`; native provider #70 is being
+integrated. Neither capability is a new published package release. Rust release metadata
 remains 0.7.0 with compatible notes under 0.7.1; npm browser 0.1.1 is published.
 No release, publication, deployment, advisory ignore or sibling checkout edit
 is authorized by this integration. Profiler's Git/release operations remain
@@ -47,9 +48,9 @@ resolves without repinning. Full Bazel builds and NNS-genesis artifacts remain
 unqualified. Forty-three provider fixtures and seven consumer binding fixtures
 passed. Retain old assemblies, inputs and receipts when adopting new pins.
 
-Retarget #70 after integrating #71, resolve shared notes without losing either
-capability, update native Cargo/Bazel pins to the integrated gzip facade, then
-qualify Profiler's actual merged provider. #65/#66 retain applicable acceptance.
+#70 now targets main. Native Cargo/Bazel pins select merged gzip facade
+`8f2b478ef96936754284976cd75dd9cd4b929ef7`; regenerate the Bazel lock checksum
+and qualify Profiler's actual merged provider. #65/#66 retain applicable acceptance.
 
 ## Shared rules and published contracts
 

@@ -1,0 +1,1248 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 1a1874d885..1a6cc433b0 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -6805,6 +6805,7 @@ dependencies = [
+  "ic-interfaces-adapter-client",
+  "ic-logger",
+  "ic-metrics",
++ "ic-system-profiler",
+  "ic-test-utilities-logger",
+  "ic-test-utilities-net",
+  "lmdb-rkv",
+@@ -7080,6 +7081,7 @@ dependencies = [
+  "ic-metrics",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
++ "ic-system-profiler",
+  "ic-test-utilities",
+  "ic-test-utilities-execution-environment",
+  "ic-test-utilities-metrics",
+@@ -7695,6 +7697,7 @@ dependencies = [
+  "ic-replicated-state",
+  "ic-state-manager",
+  "ic-sys",
++ "ic-system-profiler",
+  "ic-test-artifact-pool",
+  "ic-test-utilities",
+  "ic-test-utilities-consensus",
+@@ -7744,6 +7747,7 @@ dependencies = [
+  "ic-metrics",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
++ "ic-system-profiler",
+  "ic-test-artifact-pool",
+  "ic-test-utilities",
+  "ic-test-utilities-consensus",
+@@ -7840,6 +7844,7 @@ dependencies = [
+  "ic-registry-keys",
+  "ic-registry-subnet-features",
+  "ic-replicated-state",
++ "ic-system-profiler",
+  "ic-test-artifact-pool",
+  "ic-test-utilities",
+  "ic-test-utilities-consensus",
+@@ -7888,6 +7893,7 @@ dependencies = [
+  "ic-registry-client-helpers",
+  "ic-registry-subnet-features",
+  "ic-replicated-state",
++ "ic-system-profiler",
+  "ic-test-artifact-pool",
+  "ic-test-utilities",
+  "ic-test-utilities-consensus",
+@@ -7920,6 +7926,7 @@ dependencies = [
+  "ic-p2p-test-utils",
+  "ic-protobuf",
+  "ic-quic-transport",
++ "ic-system-profiler",
+  "ic-test-utilities-logger",
+  "ic-types",
+  "ic-types-test-utils",
+@@ -8694,6 +8701,7 @@ dependencies = [
+  "ic-ed25519 0.6.0",
+  "ic-secp256k1",
+  "ic-secp256r1",
++ "ic-system-profiler",
+  "ic-types",
+  "rand 0.8.6",
+  "simple_asn1",
+@@ -9175,6 +9183,7 @@ dependencies = [
+  "ic-nns-constants",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
++ "ic-system-profiler",
+  "ic-test-utilities",
+  "ic-test-utilities-logger",
+  "ic-test-utilities-state",
+@@ -9293,6 +9302,7 @@ dependencies = [
+  "ic-base-types",
+  "ic-btc-interface",
+  "ic-config",
++ "ic-crypto-sha2",
+  "ic-cycles-account-manager",
+  "ic-error-types 0.2.0",
+  "ic-heap-bytes",
+@@ -9306,6 +9316,7 @@ dependencies = [
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
+  "ic-sys",
++ "ic-system-profiler",
+  "ic-test-utilities",
+  "ic-test-utilities-embedders",
+  "ic-test-utilities-execution-environment",
+@@ -9450,6 +9461,7 @@ dependencies = [
+  "ic-replicated-state",
+  "ic-state-machine-tests",
+  "ic-sys",
++ "ic-system-profiler",
+  "ic-test-utilities",
+  "ic-test-utilities-consensus",
+  "ic-test-utilities-execution-environment",
+@@ -9709,6 +9721,7 @@ dependencies = [
+  "ic-registry-routing-table",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
++ "ic-system-profiler",
+  "ic-test-utilities-consensus",
+  "ic-test-utilities-metrics",
+  "ic-test-utilities-state",
+@@ -9780,6 +9793,7 @@ dependencies = [
+  "ic-registry-keys",
+  "ic-registry-proto-data-provider",
+  "ic-replicated-state",
++ "ic-system-profiler",
+  "ic-test-utilities",
+  "ic-test-utilities-logger",
+  "ic-test-utilities-metrics",
+@@ -9865,6 +9879,7 @@ dependencies = [
+  "ic-https-outcalls-service",
+  "ic-logger",
+  "ic-metrics",
++ "ic-system-profiler",
+  "ic-test-utilities-net",
+  "parking_lot",
+  "prometheus",
+@@ -10484,6 +10499,7 @@ dependencies = [
+  "ic-registry-proto-data-provider",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
++ "ic-system-profiler",
+  "ic-test-utilities",
+  "ic-test-utilities-logger",
+  "ic-test-utilities-registry",
+@@ -11022,6 +11038,7 @@ dependencies = [
+  "ic-replicated-state",
+  "ic-state-machine-tests",
+  "ic-state-manager",
++ "ic-system-profiler",
+  "ic-test-utilities",
+  "ic-test-utilities-execution-environment",
+  "ic-test-utilities-logger",
+@@ -12663,6 +12680,7 @@ dependencies = [
+  "ic-metrics",
+  "ic-p2p-test-utils",
+  "ic-protobuf",
++ "ic-system-profiler",
+  "ic-test-utilities-logger",
+  "ic-types-test-utils",
+  "phantom_newtype",
+@@ -13395,6 +13413,7 @@ dependencies = [
+  "ic-registry-subnet-features",
+  "ic-registry-subnet-type",
+  "ic-sys",
++ "ic-system-profiler",
+  "ic-test-utilities-io",
+  "ic-test-utilities-metrics",
+  "ic-test-utilities-state",
+@@ -14375,6 +14394,7 @@ dependencies = [
+  "ic-secp256r1",
+  "ic-state-layout",
+  "ic-state-manager",
++ "ic-system-profiler",
+  "ic-test-state-machine-client",
+  "ic-test-utilities-consensus",
+  "ic-test-utilities-metrics",
+@@ -14433,6 +14453,7 @@ dependencies = [
+  "ic-state-layout",
+  "ic-state-machine-tests",
+  "ic-sys",
++ "ic-system-profiler",
+  "ic-test-utilities-consensus",
+  "ic-test-utilities-io",
+  "ic-test-utilities-logger",
+@@ -14607,6 +14628,17 @@ dependencies = [
+  "tokio",
+ ]
+ 
++[[package]]
++name = "ic-system-profiler"
++version = "0.9.0"
++dependencies = [
++ "flate2",
++ "libc",
++ "serde",
++ "serde_cbor",
++ "serde_json",
++]
++
+ [[package]]
+ name = "ic-system-test-driver"
+ version = "0.9.0"
+@@ -15434,6 +15466,7 @@ dependencies = [
+  "ic-crypto-tree-hash",
+  "ic-limits",
+  "ic-secp256r1",
++ "ic-system-profiler",
+  "ic-test-utilities-types",
+  "ic-types",
+  "mockall",
+@@ -15646,6 +15679,7 @@ dependencies = [
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
+  "ic-state-manager",
++ "ic-system-profiler",
+  "ic-test-utilities",
+  "ic-test-utilities-consensus",
+  "ic-test-utilities-logger",
+@@ -19403,6 +19437,7 @@ dependencies = [
+  "ic-vetkeys",
+  "icrc-ledger-types",
+  "k256",
++ "libc",
+  "maplit",
+  "p256",
+  "prost",
+@@ -19444,6 +19479,7 @@ dependencies = [
+  "candid",
+  "candid_parser",
+  "clap",
++ "crc32fast",
+  "ctrlc",
+  "cycles-minting-canister",
+  "flate2",
+@@ -19468,7 +19504,9 @@ dependencies = [
+  "ic-crypto-utils-threshold-sig-der",
+  "ic-doge-interface",
+  "ic-ed25519 0.6.0",
++ "ic-embedders",
+  "ic-error-types 0.2.0",
++ "ic-execution-environment",
+  "ic-gateway",
+  "ic-http-endpoints-public",
+  "ic-https-outcalls-adapter",
+@@ -19505,6 +19543,7 @@ dependencies = [
+  "ic-state-machine-tests",
+  "ic-state-manager",
+  "ic-sys",
++ "ic-system-profiler",
+  "ic-types",
+  "ic-types-cycles",
+  "ic-utils 0.49.1",
+@@ -19521,6 +19560,7 @@ dependencies = [
+  "registry-canister",
+  "reqwest",
+  "rustls",
++ "schemars 0.8.22",
+  "serde",
+  "serde_cbor",
+  "serde_json",
+@@ -19537,6 +19577,7 @@ dependencies = [
+  "tracing-appender",
+  "tracing-subscriber",
+  "url",
++ "uuid",
+  "walrus",
+  "wat",
+ ]
+diff --git a/Cargo.toml b/Cargo.toml
+index a36f12cee3..ab16a08676 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -243,6 +243,7 @@ members = [
+     "rs/monitoring/adapter_metrics/service",
+     "rs/monitoring/logger",
+     "rs/monitoring/metrics",
++    "rs/pocket_ic_server/profiling/system",
+     "rs/monitoring/metrics_proxy",
+     "rs/monitoring/pprof",
+     "rs/monitoring/tracing",
+diff --git a/packages/pocket-ic/BUILD.bazel b/packages/pocket-ic/BUILD.bazel
+index 6aae015301..cccbc11126 100644
+--- a/packages/pocket-ic/BUILD.bazel
++++ b/packages/pocket-ic/BUILD.bazel
+@@ -20,6 +20,7 @@ rust_library(
+         "@crate_index//:ic-certification",
+         "@crate_index//:ic-management-canister-types",
+         "@crate_index//:ic-transport-types",
++        "@crate_index//:libc",
+         "@crate_index//:reqwest",
+         "@crate_index//:schemars",
+         "@crate_index//:semver",
+@@ -270,6 +271,65 @@ rust_test(
+     ],
+ )
+ 
++rust_test(
++    name = "memory_access_tracing",
++    size = "medium",
++    srcs = ["tests/memory_access_tracing.rs"],
++    data = [
++        "//rs/pocket_ic_server:pocket-ic-server",
++        "@mozilla_root_ca_store//file",
++    ],
++    env = {
++        "POCKET_IC_BIN": "$(rootpath //rs/pocket_ic_server:pocket-ic-server)",
++        "SSL_CERT_FILE": "$(rootpath @mozilla_root_ca_store//file)",
++    },
++    tags = [
++        # TODO: remove 'requires-network' tag when the root cause for sporadic error below on Apple Silicon is identified and fixed.
++        # Failed to bind PocketIC server to address 127.0.0.1:0
++        "requires-network",
++    ],
++    deps = [
++        ":pocket-ic",
++        "@crate_index//:candid",
++        "@crate_index//:reqwest",
++        "@crate_index//:serde_cbor",
++        "@crate_index//:serde_json",
++        "@crate_index//:wat",
++    ],
++)
++
++rust_test(
++    name = "ram_storage",
++    size = "medium",
++    srcs = ["tests/ram_storage.rs"],
++    data = ["//rs/pocket_ic_server:pocket-ic-server"],
++    env = {"POCKET_IC_BIN": "$(rootpath //rs/pocket_ic_server:pocket-ic-server)"},
++    tags = ["requires-network"],
++    deps = [
++        ":pocket-ic",
++        "@crate_index//:candid",
++        "@crate_index//:reqwest",
++        "@crate_index//:serde_json",
++        "@crate_index//:wat",
++    ],
++)
++
++rust_test(
++    name = "system_profiling",
++    size = "medium",
++    srcs = ["tests/system_profiling.rs"],
++    data = ["//rs/pocket_ic_server:pocket-ic-server"],
++    env = {"POCKET_IC_BIN": "$(rootpath //rs/pocket_ic_server:pocket-ic-server)"},
++    tags = ["requires-network"],
++    deps = [
++        ":pocket-ic",
++        "@crate_index//:candid",
++        "@crate_index//:reqwest",
++        "@crate_index//:serde_json",
++        "@crate_index//:wat",
++    ],
++)
++
+ rust_test(
+     name = "canister_snapshots",
+     size = "medium",
+diff --git a/packages/pocket-ic/Cargo.toml b/packages/pocket-ic/Cargo.toml
+index 56bf0fa16e..05e6509242 100644
+--- a/packages/pocket-ic/Cargo.toml
++++ b/packages/pocket-ic/Cargo.toml
+@@ -31,6 +31,7 @@ hex = { workspace = true }
+ ic-certification = { workspace = true }
+ ic-management-canister-types = { workspace = true }
+ ic-transport-types = { workspace = true }
++libc = { workspace = true }
+ reqwest = { workspace = true }
+ schemars = { workspace = true }
+ semver = { workspace = true }
+diff --git a/rs/bitcoin/adapter/BUILD.bazel b/rs/bitcoin/adapter/BUILD.bazel
+index d1d69b7fb6..184805a137 100644
+--- a/rs/bitcoin/adapter/BUILD.bazel
++++ b/rs/bitcoin/adapter/BUILD.bazel
+@@ -19,6 +19,7 @@ rust_library(
+         "//rs/http_endpoints/async_utils",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "@crate_index//:bitcoin_dogecoin",
+         "@crate_index//:futures",
+         "@crate_index//:hashlink",
+diff --git a/rs/bitcoin/adapter/Cargo.toml b/rs/bitcoin/adapter/Cargo.toml
+index 73411efa55..5d3eebaf8b 100644
+--- a/rs/bitcoin/adapter/Cargo.toml
++++ b/rs/bitcoin/adapter/Cargo.toml
+@@ -21,6 +21,7 @@ ic-btc-validation = { path = "../validation" }
+ ic-config = { path = "../../config" }
+ ic-logger = { path = "../../monitoring/logger" }
+ ic-metrics = { path = "../../monitoring/metrics" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ lmdb-rkv = { workspace = true }
+ prometheus = { workspace = true }
+ rand = { workspace = true }
+diff --git a/rs/canister_sandbox/BUILD.bazel b/rs/canister_sandbox/BUILD.bazel
+index a452093893..457c3f68b8 100644
+--- a/rs/canister_sandbox/BUILD.bazel
++++ b/rs/canister_sandbox/BUILD.bazel
+@@ -21,6 +21,7 @@ rust_library(
+         "//rs/interfaces/state_manager",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/replicated_state",
+         "//rs/types/management_canister_types",
+         "//rs/types/types",
+diff --git a/rs/canister_sandbox/Cargo.toml b/rs/canister_sandbox/Cargo.toml
+index bdb1af0682..11290c82de 100644
+--- a/rs/canister_sandbox/Cargo.toml
++++ b/rs/canister_sandbox/Cargo.toml
+@@ -24,6 +24,7 @@ ic-management-canister-types-private = { path = "../types/management_canister_ty
+ ic-metrics = { path = "../monitoring/metrics" }
+ ic-registry-subnet-type = { path = "../registry/subnet_type" }
+ ic-replicated-state = { path = "../replicated_state" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../types/types" }
+ ic-wasm-types = { path = "../types/wasm_types" }
+ lazy_static = { workspace = true }
+diff --git a/rs/config/BUILD.bazel b/rs/config/BUILD.bazel
+index 6929127804..dac1a751d8 100644
+--- a/rs/config/BUILD.bazel
++++ b/rs/config/BUILD.bazel
+@@ -2,6 +2,16 @@ load("@rules_rust//rust:defs.bzl", "rust_doc_test", "rust_library", "rust_test")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = [
++        "src/embedders.rs",
++        "src/execution_environment.rs",
++        "src/message_routing.rs",
++        "src/subnet_config.rs",
++    ],
++)
++
+ rust_library(
+     name = "config",
+     srcs = glob(["src/**"]),
+diff --git a/rs/consensus/BUILD.bazel b/rs/consensus/BUILD.bazel
+index 594e1bcf88..7e32b31b3c 100644
+--- a/rs/consensus/BUILD.bazel
++++ b/rs/consensus/BUILD.bazel
+@@ -29,6 +29,7 @@ rust_library(
+         "//rs/interfaces/state_manager",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/registry/helpers",
+         "//rs/registry/keys",
+diff --git a/rs/consensus/Cargo.toml b/rs/consensus/Cargo.toml
+index 0187b3c987..e5735520ae 100644
+--- a/rs/consensus/Cargo.toml
++++ b/rs/consensus/Cargo.toml
+@@ -29,6 +29,7 @@ ic-registry-client-helpers = { path = "../registry/helpers" }
+ ic-registry-subnet-features = { path = "../registry/subnet_features" }
+ ic-registry-subnet-type = { path = "../registry/subnet_type" }
+ ic-replicated-state = { path = "../replicated_state" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../types/types" }
+ num-traits = { workspace = true }
+ prometheus = { workspace = true }
+diff --git a/rs/consensus/certification/BUILD.bazel b/rs/consensus/certification/BUILD.bazel
+index abd6b2dcf7..0d36b47d74 100644
+--- a/rs/consensus/certification/BUILD.bazel
++++ b/rs/consensus/certification/BUILD.bazel
+@@ -18,6 +18,7 @@ rust_library(
+         "//rs/interfaces/state_manager",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/replicated_state",
+         "//rs/types/types",
+         "@crate_index//:prometheus",
+diff --git a/rs/consensus/certification/Cargo.toml b/rs/consensus/certification/Cargo.toml
+index ee085c64d8..80f427e9dd 100644
+--- a/rs/consensus/certification/Cargo.toml
++++ b/rs/consensus/certification/Cargo.toml
+@@ -17,6 +17,7 @@ ic-interfaces-state-manager = { path = "../../interfaces/state_manager" }
+ ic-logger = { path = "../../monitoring/logger" }
+ ic-metrics = { path = "../../monitoring/metrics" }
+ ic-replicated-state = { path = "../../replicated_state" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../../types/types" }
+ prometheus = { workspace = true }
+ slog = { workspace = true }
+diff --git a/rs/consensus/dkg/BUILD.bazel b/rs/consensus/dkg/BUILD.bazel
+index b8412076d1..a687b96d93 100644
+--- a/rs/consensus/dkg/BUILD.bazel
++++ b/rs/consensus/dkg/BUILD.bazel
+@@ -22,6 +22,7 @@ rust_library(
+         "//rs/interfaces/state_manager",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/registry/helpers",
+         "//rs/replicated_state",
+diff --git a/rs/consensus/dkg/Cargo.toml b/rs/consensus/dkg/Cargo.toml
+index 487742587c..f0d5514222 100644
+--- a/rs/consensus/dkg/Cargo.toml
++++ b/rs/consensus/dkg/Cargo.toml
+@@ -18,6 +18,7 @@ ic-management-canister-types-private = { path = "../../types/management_canister
+ ic-protobuf = { path = "../../protobuf" }
+ ic-registry-client-helpers = { path = "../../registry/helpers" }
+ ic-replicated-state = { path = "../../replicated_state" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../../types/types" }
+ prometheus = { workspace = true }
+ slog = { workspace = true }
+diff --git a/rs/consensus/idkg/BUILD.bazel b/rs/consensus/idkg/BUILD.bazel
+index 3f658e7914..0af6ad17ec 100644
+--- a/rs/consensus/idkg/BUILD.bazel
++++ b/rs/consensus/idkg/BUILD.bazel
+@@ -22,6 +22,7 @@ rust_library(
+         "//rs/interfaces/state_manager",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/registry/helpers",
+         "//rs/registry/subnet_features",
+diff --git a/rs/consensus/idkg/Cargo.toml b/rs/consensus/idkg/Cargo.toml
+index 81334c8f83..9829e4830a 100644
+--- a/rs/consensus/idkg/Cargo.toml
++++ b/rs/consensus/idkg/Cargo.toml
+@@ -22,6 +22,7 @@ ic-protobuf = { path = "../../protobuf" }
+ ic-registry-client-helpers = { path = "../../registry/helpers" }
+ ic-registry-subnet-features = { path = "../../registry/subnet_features" }
+ ic-replicated-state = { path = "../../replicated_state" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../../types/types" }
+ prometheus = { workspace = true }
+ rand = { workspace = true }
+diff --git a/rs/crypto/standalone-sig-verifier/BUILD.bazel b/rs/crypto/standalone-sig-verifier/BUILD.bazel
+index 71fa3bdd9a..42fddbb731 100644
+--- a/rs/crypto/standalone-sig-verifier/BUILD.bazel
++++ b/rs/crypto/standalone-sig-verifier/BUILD.bazel
+@@ -17,6 +17,7 @@ rust_library(
+         "//rs/crypto/internal/crypto_lib/basic_sig/der_utils",
+         "//rs/crypto/internal/crypto_lib/basic_sig/rsa_pkcs1",
+         "//rs/crypto/sha2",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/types/types",
+         "@crate_index//:p256",
+         "@crate_index//:simple_asn1",
+diff --git a/rs/crypto/standalone-sig-verifier/Cargo.toml b/rs/crypto/standalone-sig-verifier/Cargo.toml
+index d3b47dce4a..de40fcb60b 100644
+--- a/rs/crypto/standalone-sig-verifier/Cargo.toml
++++ b/rs/crypto/standalone-sig-verifier/Cargo.toml
+@@ -15,6 +15,7 @@ ic-crypto-iccsa = { path = "../iccsa" }
+ ic-crypto-internal-basic-sig-cose = { path = "../internal/crypto_lib/basic_sig/cose" }
+ ic-crypto-internal-basic-sig-der-utils = { path = "../internal/crypto_lib/basic_sig/der_utils" }
+ ic-crypto-internal-basic-sig-rsa-pkcs1 = { path = "../internal/crypto_lib/basic_sig/rsa_pkcs1" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../../types/types" }
+ simple_asn1 = { workspace = true }
+ 
+diff --git a/rs/cycles_account_manager/BUILD.bazel b/rs/cycles_account_manager/BUILD.bazel
+index 4964d04fec..e637b8fea1 100644
+--- a/rs/cycles_account_manager/BUILD.bazel
++++ b/rs/cycles_account_manager/BUILD.bazel
+@@ -2,6 +2,13 @@ load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = [
++        "src/cycles_account_manager.rs",
++    ],
++)
++
+ rust_library(
+     name = "cycles_account_manager",
+     srcs = glob(["src/**"]),
+@@ -14,6 +21,7 @@ rust_library(
+         "//rs/interfaces",
+         "//rs/monitoring/logger",
+         "//rs/nns/constants",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/registry/subnet_type",
+         "//rs/replicated_state",
+         "//rs/types/base_types",
+diff --git a/rs/cycles_account_manager/Cargo.toml b/rs/cycles_account_manager/Cargo.toml
+index c470937adc..1ada53be84 100644
+--- a/rs/cycles_account_manager/Cargo.toml
++++ b/rs/cycles_account_manager/Cargo.toml
+@@ -16,6 +16,7 @@ ic-management-canister-types-private = { path = "../types/management_canister_ty
+ ic-nns-constants = { path = "../nns/constants" }
+ ic-registry-subnet-type = { path = "../registry/subnet_type" }
+ ic-replicated-state = { path = "../replicated_state" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../types/types" }
+ ic-types-cycles = { path = "../types/cycles" }
+ prometheus = { workspace = true }
+diff --git a/rs/embedders/BUILD.bazel b/rs/embedders/BUILD.bazel
+index a6c280e922..495292304e 100644
+--- a/rs/embedders/BUILD.bazel
++++ b/rs/embedders/BUILD.bazel
+@@ -5,6 +5,22 @@ load("//rs/tests:common.bzl", "UNIVERSAL_CANISTER_RUNTIME_DEPS")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++# Embedded with the profiler's explanations, bound to the compiled server.
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = [
++        "src/wasm_executor.rs",
++        "src/wasm_utils/instrumentation.rs",
++        "src/wasm_utils/system_api_replacements.rs",
++        "src/wasmtime_embedder.rs",
++        "src/wasmtime_embedder/linker.rs",
++        "src/wasmtime_embedder/profiling.rs",
++        "src/wasmtime_embedder/system_api_complexity.rs",
++        "src/wasmtime_embedder/system_api/sandbox_safe_system_state.rs",
++    ],
++)
++
++
+ UNIVERSAL_CANISTER_DATA = [v for _, v in UNIVERSAL_CANISTER_RUNTIME_DEPS.items()]
+ 
+ UNIVERSAL_CANISTER_ENV = {key: "$(rootpath " + value + ")" for key, value in UNIVERSAL_CANISTER_RUNTIME_DEPS.items()}
+@@ -33,6 +49,7 @@ rust_library(
+         "//packages/ic-error-types",
+         "//packages/ic-heap-bytes",
+         "//rs/config",
++        "//rs/crypto/sha2",
+         "//rs/cycles_account_manager",
+         "//rs/interfaces",
+         "//rs/limits",
+@@ -40,6 +57,7 @@ rust_library(
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
+         "//rs/nns/constants",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/registry/subnet_type",
+         "//rs/replicated_state",
+         "//rs/sys",
+@@ -121,6 +139,7 @@ rust_test(
+         # Keep sorted.
+         ":embedders",
+         "//rs/config",
++        "//rs/crypto/sha2",
+         "//rs/interfaces",
+         "//rs/monitoring/logger",
+         "//rs/replicated_state",
+@@ -205,6 +224,7 @@ rust_ic_test_suite_with_extra_srcs(
+         ":embedders",
+         "//packages/ic-error-types",
+         "//rs/config",
++        "//rs/crypto/sha2",
+         "//rs/cycles_account_manager",
+         "//rs/interfaces",
+         "//rs/limits",
+diff --git a/rs/embedders/Cargo.toml b/rs/embedders/Cargo.toml
+index d32079e321..637bd73eec 100644
+--- a/rs/embedders/Cargo.toml
++++ b/rs/embedders/Cargo.toml
+@@ -14,6 +14,7 @@ flate2 = { workspace = true }
+ ic-base-types = { path = "../types/base_types" }
+ ic-btc-interface = { workspace = true }
+ ic-config = { path = "../config" }
++ic-crypto-sha2 = { path = "../crypto/sha2" }
+ ic-cycles-account-manager = { path = "../cycles_account_manager" }
+ ic-error-types = { path = "../../packages/ic-error-types" }
+ ic-heap-bytes = { path = "../../packages/ic-heap-bytes" }
+@@ -26,6 +27,7 @@ ic-nns-constants = { path = "../nns/constants" }
+ ic-registry-subnet-type = { path = "../registry/subnet_type" }
+ ic-replicated-state = { path = "../replicated_state" }
+ ic-sys = { path = "../sys" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../types/types" }
+ ic-types-cycles = { path = "../types/cycles" }
+ ic-utils = { path = "../utils" }
+diff --git a/rs/execution_environment/BUILD.bazel b/rs/execution_environment/BUILD.bazel
+index 537254ac2a..10963fad36 100644
+--- a/rs/execution_environment/BUILD.bazel
++++ b/rs/execution_environment/BUILD.bazel
+@@ -3,6 +3,22 @@ load("//bazel:defs.bzl", "rust_ic_bench", "rust_ic_test", "rust_ic_test_suite")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = [
++        "src/canister_manager.rs",
++        "src/execution/common.rs",
++        "src/execution/install.rs",
++        "src/execution/install_code.rs",
++        "src/execution/response.rs",
++        "src/execution/upgrade.rs",
++        "src/execution_environment.rs",
++        "src/lib.rs",
++        "src/query_handler/query_context.rs",
++        "src/scheduler.rs",
++    ],
++)
++
+ rust_library(
+     name = "execution_environment",
+     srcs = glob(["src/**"]),
+@@ -26,6 +42,7 @@ rust_library(
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
+         "//rs/phantom_newtype",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/query_stats",
+         "//rs/registry/provisional_whitelist",
+         "//rs/registry/resource_limits",
+diff --git a/rs/execution_environment/Cargo.toml b/rs/execution_environment/Cargo.toml
+index d169371e36..9155900e7a 100644
+--- a/rs/execution_environment/Cargo.toml
++++ b/rs/execution_environment/Cargo.toml
+@@ -31,6 +31,7 @@ ic-registry-routing-table = { path = "../registry/routing_table" }
+ ic-registry-subnet-type = { path = "../registry/subnet_type" }
+ ic-replicated-state = { path = "../replicated_state" }
+ ic-sys = { path = "../sys" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../types/types" }
+ ic-types-cycles = { path = "../types/cycles" }
+ ic-utils = { path = "../utils" }
+diff --git a/rs/http_endpoints/public/BUILD.bazel b/rs/http_endpoints/public/BUILD.bazel
+index fa4e7f97ac..bc68c28f02 100644
+--- a/rs/http_endpoints/public/BUILD.bazel
++++ b/rs/http_endpoints/public/BUILD.bazel
+@@ -46,6 +46,7 @@ rust_library(
+         "//rs/monitoring/metrics",
+         "//rs/monitoring/pprof",
+         "//rs/monitoring/tracing",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/registry/helpers",
+         "//rs/registry/provisional_whitelist",
+         "//rs/registry/subnet_type",
+diff --git a/rs/http_endpoints/public/Cargo.toml b/rs/http_endpoints/public/Cargo.toml
+index 51db3afd9f..7aca82b564 100644
+--- a/rs/http_endpoints/public/Cargo.toml
++++ b/rs/http_endpoints/public/Cargo.toml
+@@ -40,6 +40,7 @@ ic-registry-client-helpers = { path = "../../registry/helpers" }
+ ic-registry-provisional-whitelist = { path = "../../registry/provisional_whitelist" }
+ ic-registry-subnet-type = { path = "../../registry/subnet_type" }
+ ic-replicated-state = { path = "../../replicated_state" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ ic-tracing = { path = "../../monitoring/tracing" }
+ ic-types = { path = "../../types/types" }
+ ic-utils = { path = "../../utils" }
+diff --git a/rs/http_endpoints/xnet/BUILD.bazel b/rs/http_endpoints/xnet/BUILD.bazel
+index 8cbcac97b2..44faa242a4 100644
+--- a/rs/http_endpoints/xnet/BUILD.bazel
++++ b/rs/http_endpoints/xnet/BUILD.bazel
+@@ -18,6 +18,7 @@ rust_library(
+         "//rs/interfaces/registry",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/registry/helpers",
+         "//rs/types/types",
+diff --git a/rs/http_endpoints/xnet/Cargo.toml b/rs/http_endpoints/xnet/Cargo.toml
+index 7e625440f0..42f04f1cfa 100644
+--- a/rs/http_endpoints/xnet/Cargo.toml
++++ b/rs/http_endpoints/xnet/Cargo.toml
+@@ -23,6 +23,7 @@ ic-logger = { path = "../../monitoring/logger" }
+ ic-metrics = { path = "../../monitoring/metrics" }
+ ic-protobuf = { path = "../../protobuf" }
+ ic-registry-client-helpers = { path = "../../registry/helpers" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../../types/types" }
+ prometheus = { workspace = true }
+ serde = { workspace = true }
+diff --git a/rs/https_outcalls/adapter/BUILD.bazel b/rs/https_outcalls/adapter/BUILD.bazel
+index 93a5b3fc77..785e0fbaa5 100644
+--- a/rs/https_outcalls/adapter/BUILD.bazel
++++ b/rs/https_outcalls/adapter/BUILD.bazel
+@@ -17,6 +17,7 @@ rust_library(
+         "//rs/https_outcalls/service",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "@crate_index//:futures",
+         "@crate_index//:http",
+         "@crate_index//:http-body-util",
+diff --git a/rs/https_outcalls/adapter/Cargo.toml b/rs/https_outcalls/adapter/Cargo.toml
+index af57347a9f..8325708a5c 100644
+--- a/rs/https_outcalls/adapter/Cargo.toml
++++ b/rs/https_outcalls/adapter/Cargo.toml
+@@ -22,6 +22,7 @@ ic-config = { path = "../../config" }
+ ic-https-outcalls-service = { path = "../service" }
+ ic-logger = { path = "../../monitoring/logger" }
+ ic-metrics = { path = "../../monitoring/metrics" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ parking_lot = { workspace = true }
+ prometheus = { workspace = true }
+ rand = { workspace = true }
+diff --git a/rs/https_outcalls/pricing/BUILD.bazel b/rs/https_outcalls/pricing/BUILD.bazel
+index 16901cd43c..bc848f61ef 100644
+--- a/rs/https_outcalls/pricing/BUILD.bazel
++++ b/rs/https_outcalls/pricing/BUILD.bazel
+@@ -2,6 +2,13 @@ load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = [
++        "src/fees.rs",
++    ],
++)
++
+ rust_library(
+     name = "pricing",
+     srcs = glob(["src/**"]),
+diff --git a/rs/ingress_manager/BUILD.bazel b/rs/ingress_manager/BUILD.bazel
+index 6cad6d97c6..6a1bc38a1b 100644
+--- a/rs/ingress_manager/BUILD.bazel
++++ b/rs/ingress_manager/BUILD.bazel
+@@ -19,6 +19,7 @@ rust_library(
+         "//rs/limits",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/registry/helpers",
+         "//rs/replicated_state",
+         "//rs/types/cycles",
+diff --git a/rs/ingress_manager/Cargo.toml b/rs/ingress_manager/Cargo.toml
+index a0b9aa1b79..54b53e2ddd 100644
+--- a/rs/ingress_manager/Cargo.toml
++++ b/rs/ingress_manager/Cargo.toml
+@@ -19,6 +19,7 @@ ic-management-canister-types-private = { path = "../types/management_canister_ty
+ ic-metrics = { path = "../monitoring/metrics" }
+ ic-registry-client-helpers = { path = "../registry/helpers" }
+ ic-replicated-state = { path = "../replicated_state" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types-cycles = { path = "../types/cycles" }
+ ic-types = { path = "../types/types" }
+ ic-validator = { path = "../validator" }
+diff --git a/rs/interfaces/BUILD.bazel b/rs/interfaces/BUILD.bazel
+index 9c6240c586..5d5baec1be 100644
+--- a/rs/interfaces/BUILD.bazel
++++ b/rs/interfaces/BUILD.bazel
+@@ -2,6 +2,11 @@ load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "computation_catalog_sources",
++    srcs = ["src/execution_environment.rs"],
++)
++
+ rust_library(
+     name = "interfaces",
+     srcs = glob(["src/**/*.rs"]),
+diff --git a/rs/limits/BUILD.bazel b/rs/limits/BUILD.bazel
+index d4a3dc7cc0..1e14e53cc4 100644
+--- a/rs/limits/BUILD.bazel
++++ b/rs/limits/BUILD.bazel
+@@ -2,6 +2,13 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = [
++        "src/lib.rs",
++    ],
++)
++
+ rust_library(
+     name = "limits",
+     srcs = glob(["src/**"]),
+diff --git a/rs/memory_tracker/BUILD.bazel b/rs/memory_tracker/BUILD.bazel
+index 117823250b..58238cdcd3 100644
+--- a/rs/memory_tracker/BUILD.bazel
++++ b/rs/memory_tracker/BUILD.bazel
+@@ -3,6 +3,12 @@ load("//bazel:defs.bzl", "rust_bench")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = ["src/deterministic.rs"],
++)
++
++
+ rust_library(
+     name = "memory_tracker",
+     srcs = glob(["src/**"]),
+diff --git a/rs/messaging/BUILD.bazel b/rs/messaging/BUILD.bazel
+index 991ac46c7b..17245c9de5 100644
+--- a/rs/messaging/BUILD.bazel
++++ b/rs/messaging/BUILD.bazel
+@@ -3,6 +3,14 @@ load("//bazel:defs.bzl", "rust_ic_test_suite_with_extra_srcs")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = [
++        "src/canister_http_spent.rs",
++        "src/state_machine.rs",
++    ],
++)
++
+ rust_library(
+     name = "messaging",
+     srcs = glob(["src/**"]),
+@@ -27,6 +35,7 @@ rust_library(
+         "//rs/limits",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/query_stats",
+         "//rs/registry/helpers",
+diff --git a/rs/messaging/Cargo.toml b/rs/messaging/Cargo.toml
+index d1c39c1bb9..58e3f32ff0 100644
+--- a/rs/messaging/Cargo.toml
++++ b/rs/messaging/Cargo.toml
+@@ -32,6 +32,7 @@ ic-registry-routing-table = { path = "../registry/routing_table" }
+ ic-registry-subnet-features = { path = "../registry/subnet_features" }
+ ic-registry-subnet-type = { path = "../registry/subnet_type" }
+ ic-replicated-state = { path = "../replicated_state" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types-cycles = { path = "../types/cycles" }
+ ic-types = { path = "../types/types" }
+ ic-utils-thread = { path = "../utils/thread" }
+diff --git a/rs/p2p/consensus_manager/BUILD.bazel b/rs/p2p/consensus_manager/BUILD.bazel
+index bb3efa5b80..9954315c6c 100644
+--- a/rs/p2p/consensus_manager/BUILD.bazel
++++ b/rs/p2p/consensus_manager/BUILD.bazel
+@@ -18,6 +18,7 @@ rust_library(
+         "//rs/monitoring/metrics",
+         "//rs/p2p/quic_transport",
+         "//rs/phantom_newtype",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/types/base_types",
+         "//rs/types/types",
+diff --git a/rs/p2p/consensus_manager/Cargo.toml b/rs/p2p/consensus_manager/Cargo.toml
+index e4b88642ca..5295d22465 100644
+--- a/rs/p2p/consensus_manager/Cargo.toml
++++ b/rs/p2p/consensus_manager/Cargo.toml
+@@ -19,6 +19,7 @@ ic-logger = { path = "../../monitoring/logger" }
+ ic-metrics = { path = "../../monitoring/metrics" }
+ ic-protobuf = { path = "../../protobuf" }
+ ic-quic-transport = { path = "../quic_transport" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../../types/types" }
+ phantom_newtype = { path = "../../phantom_newtype" }
+ prometheus = { workspace = true }
+diff --git a/rs/p2p/quic_transport/BUILD.bazel b/rs/p2p/quic_transport/BUILD.bazel
+index b2192b5da4..e29d5f1c58 100644
+--- a/rs/p2p/quic_transport/BUILD.bazel
++++ b/rs/p2p/quic_transport/BUILD.bazel
+@@ -26,6 +26,7 @@ rust_library(
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
+         "//rs/phantom_newtype",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/types/base_types",
+         "@crate_index//:axum",
+diff --git a/rs/p2p/quic_transport/Cargo.toml b/rs/p2p/quic_transport/Cargo.toml
+index 8e3bafdf80..1f211d0351 100644
+--- a/rs/p2p/quic_transport/Cargo.toml
++++ b/rs/p2p/quic_transport/Cargo.toml
+@@ -23,6 +23,7 @@ ic-limits = { path = "../../limits" }
+ ic-logger = { path = "../../monitoring/logger" }
+ ic-metrics = { path = "../../monitoring/metrics" }
+ ic-protobuf = { path = "../../protobuf" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ phantom_newtype = { path = "../../phantom_newtype" }
+ prometheus = { workspace = true }
+ prost = { workspace = true }
+diff --git a/rs/pocket_ic_server/BUILD.bazel b/rs/pocket_ic_server/BUILD.bazel
+index f3262d67a0..cb50b6ac44 100644
+--- a/rs/pocket_ic_server/BUILD.bazel
++++ b/rs/pocket_ic_server/BUILD.bazel
+@@ -17,6 +17,8 @@ LIB_DEPENDENCIES = [
+     "//rs/crypto/iccsa",
+     "//rs/crypto/sha2",
+     "//rs/crypto/utils/threshold_sig_der",
++    "//rs/embedders",
++    "//rs/execution_environment",
+     "//rs/http_endpoints/nns_delegation_manager",
+     "//rs/http_endpoints/public",
+     "//rs/https_outcalls/adapter:adapter_with_http",
+@@ -41,6 +43,7 @@ LIB_DEPENDENCIES = [
+     "//rs/nns/governance/init",
+     "//rs/nns/handlers/root/impl:root",
+     "//rs/nns/sns-wasm",
++    "//rs/pocket_ic_server/profiling/system:system_profiler",
+     "//rs/registry/canister",
+     "//rs/registry/canister/api",
+     "//rs/registry/client",
+@@ -71,6 +74,7 @@ LIB_DEPENDENCIES = [
+     "@crate_index//:candid",
+     "@crate_index//:clap",
+     "@crate_index//:ctrlc",
++    "@crate_index//:crc32fast",
+     "@crate_index//:flate2",
+     "@crate_index//:fqdn",
+     "@crate_index//:futures",
+@@ -87,8 +91,10 @@ LIB_DEPENDENCIES = [
+     "@crate_index//:ic-utils",
+     "@crate_index//:itertools",
+     "@crate_index//:libc",
++    "@crate_index//:prometheus",
+     "@crate_index//:reqwest",
+     "@crate_index//:serde",
++    "@crate_index//:schemars",
+     "@crate_index//:serde_cbor",
+     "@crate_index//:serde_json",
+     "@crate_index//:slog",
+@@ -103,6 +109,7 @@ LIB_DEPENDENCIES = [
+     "@crate_index//:tracing",
+     "@crate_index//:tracing-appender",
+     "@crate_index//:tracing-subscriber",
++    "@crate_index//:uuid",
+     "@crate_index//:wat",
+ ]
+ 
+@@ -267,8 +274,26 @@ MAINNET_NNS_CANISTER_ENV = {
+             "src/pocket_ic.rs",
+         ] + glob([
+             "src/state_api/**/*.rs",
++            "profiling/mod.rs",
++            "profiling/server/**/*.rs",
+         ]),
+-        compile_data = EXTERNAL_CANISTER_DATA + nns_canister_data + ["templates/dashboard.html"],
++        compile_data = EXTERNAL_CANISTER_DATA + nns_canister_data + [
++            "//rs/config:instruction_charge_rule_sources",
++            "//rs/cycles_account_manager:instruction_charge_rule_sources",
++            "//rs/embedders:instruction_charge_rule_sources",
++            "//rs/execution_environment:instruction_charge_rule_sources",
++            "//rs/https_outcalls/pricing:instruction_charge_rule_sources",
++            "//rs/interfaces:computation_catalog_sources",
++            "//rs/limits:instruction_charge_rule_sources",
++            "//rs/memory_tracker:instruction_charge_rule_sources",
++            "//rs/messaging:instruction_charge_rule_sources",
++            "//rs/replicated_state:instruction_charge_rule_sources",
++            "//rs/state_machine_tests:computation_catalog_sources",
++            "//rs/types/types:computation_catalog_sources",
++            "profiling/viewer/agent_guide.md",
++            "profiling/viewer/viewer.html",
++            "templates/dashboard.html",
++        ],
+         crate_name = "pocket_ic_server",
+         proc_macro_deps = [
+             # Keep sorted.
+diff --git a/rs/pocket_ic_server/Cargo.toml b/rs/pocket_ic_server/Cargo.toml
+index 2ffd407043..f270f79a39 100644
+--- a/rs/pocket_ic_server/Cargo.toml
++++ b/rs/pocket_ic_server/Cargo.toml
+@@ -17,6 +17,7 @@ bytes = { workspace = true }
+ candid = { workspace = true }
+ clap = { workspace = true }
+ ctrlc = { version = "3.4.5", features = ["termination"] }
++crc32fast = { workspace = true }
+ cycles-minting-canister = { path = "../nns/cmc" }
+ flate2 = { workspace = true }
+ fqdn = "0.5.2"
+@@ -40,6 +41,8 @@ ic-crypto-utils-threshold-sig-der = { path = "../crypto/utils/threshold_sig_der"
+ ic-doge-interface = { workspace = true }
+ ic-ed25519 = { path = "../../packages/ic-ed25519" }
+ ic-error-types = { path = "../../packages/ic-error-types" }
++ic-embedders = { path = "../embedders" }
++ic-execution-environment = { path = "../execution_environment" }
+ ic-gateway = { workspace = true }
+ ic-http-endpoints-public = { path = "../http_endpoints/public" }
+ ic-https-outcalls-adapter = { path = "../https_outcalls/adapter" }
+@@ -76,6 +79,7 @@ ic-sns-wasm = { path = "../nns/sns-wasm" }
+ ic-state-machine-tests = { path = "../state_machine_tests" }
+ ic-state-manager = { path = "../state_manager" }
+ ic-sys = { path = "../sys" }
++ic-system-profiler = { path = "profiling/system" }
+ ic-types = { path = "../types/types" }
+ ic-types-cycles = { path = "../types/cycles" }
+ ic-utils = { workspace = true }
+@@ -86,6 +90,8 @@ icrc-ledger-types = { path = "../../packages/icrc-ledger-types" }
+ itertools = { workspace = true }
+ libc = { workspace = true }
+ pocket-ic = { path = "../../packages/pocket-ic" }
++prometheus = { workspace = true }
++schemars = { workspace = true }
+ registry-canister = { path = "../registry/canister" }
+ reqwest = { workspace = true }
+ serde = { workspace = true }
+@@ -104,6 +110,7 @@ tracing = { workspace = true }
+ tracing-appender = { workspace = true }
+ tracing-subscriber = { workspace = true }
+ url = { workspace = true }
++uuid = { workspace = true }
+ wat = { workspace = true }
+ 
+ [dev-dependencies]
+diff --git a/rs/replicated_state/BUILD.bazel b/rs/replicated_state/BUILD.bazel
+index d5489ea1b3..80d9e43ad1 100644
+--- a/rs/replicated_state/BUILD.bazel
++++ b/rs/replicated_state/BUILD.bazel
+@@ -3,6 +3,14 @@ load("//bazel:defs.bzl", "rust_bench", "rust_test_with_binary")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "instruction_charge_rule_sources",
++    srcs = [
++        "src/canister_state/system_state/wasm_chunk_store.rs",
++        "src/replicated_state.rs",
++    ],
++)
++
+ rust_library(
+     name = "replicated_state",
+     srcs = glob(["src/**/*.rs"]),
+@@ -30,6 +38,7 @@ rust_library(
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
+         "//rs/phantom_newtype",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/registry/resource_limits",
+         "//rs/registry/routing_table",
+diff --git a/rs/replicated_state/Cargo.toml b/rs/replicated_state/Cargo.toml
+index 3b91038881..ae0797c83f 100644
+--- a/rs/replicated_state/Cargo.toml
++++ b/rs/replicated_state/Cargo.toml
+@@ -26,6 +26,7 @@ ic-registry-routing-table = { path = "../registry/routing_table" }
+ ic-registry-subnet-features = { path = "../registry/subnet_features" }
+ ic-registry-subnet-type = { path = "../registry/subnet_type" }
+ ic-sys = { path = "../sys" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../types/types" }
+ ic-types-cycles = { path = "../types/cycles" }
+ ic-utils = { path = "../utils" }
+diff --git a/rs/state_machine_tests/BUILD.bazel b/rs/state_machine_tests/BUILD.bazel
+index f332a636f2..0f444bf933 100644
+--- a/rs/state_machine_tests/BUILD.bazel
++++ b/rs/state_machine_tests/BUILD.bazel
+@@ -3,6 +3,11 @@ load("//bazel:defs.bzl", "rust_ic_test")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "computation_catalog_sources",
++    srcs = ["src/lib.rs"],
++)
++
+ rust_library(
+     name = "state_machine_tests",
+     srcs = [
+@@ -43,6 +48,7 @@ rust_library(
+         "//rs/messaging",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/query_stats",
+         "//rs/registry/fake",
+diff --git a/rs/state_machine_tests/Cargo.toml b/rs/state_machine_tests/Cargo.toml
+index 2f8b85a992..f79ec02b0e 100644
+--- a/rs/state_machine_tests/Cargo.toml
++++ b/rs/state_machine_tests/Cargo.toml
+@@ -60,6 +60,7 @@ ic-secp256k1 = { path = "../../packages/ic-secp256k1" }
+ ic-secp256r1 = { path = "../../packages/ic-secp256r1" }
+ ic-state-layout = { path = "../state_layout" }
+ ic-state-manager = { path = "../state_manager" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-test-state-machine-client = "3.0"
+ ic-test-utilities-consensus = { path = "../test_utilities/consensus" }
+ ic-test-utilities-metrics = { path = "../test_utilities/metrics" }
+diff --git a/rs/state_manager/BUILD.bazel b/rs/state_manager/BUILD.bazel
+index 6c2203453c..e7956e4916 100644
+--- a/rs/state_manager/BUILD.bazel
++++ b/rs/state_manager/BUILD.bazel
+@@ -24,6 +24,7 @@ rust_library(
+         "//rs/interfaces/state_manager",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/registry/routing_table",
+         "//rs/registry/subnet_type",
+diff --git a/rs/state_manager/Cargo.toml b/rs/state_manager/Cargo.toml
+index 1ac017b507..c9c6508738 100644
+--- a/rs/state_manager/Cargo.toml
++++ b/rs/state_manager/Cargo.toml
+@@ -26,6 +26,7 @@ ic-registry-subnet-type = { path = "../registry/subnet_type" }
+ ic-replicated-state = { path = "../replicated_state" }
+ ic-state-layout = { path = "../state_layout" }
+ ic-sys = { path = "../sys" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../types/types" }
+ ic-types-cycles = { path = "../types/cycles" }
+ ic-utils = { path = "../utils" }
+diff --git a/rs/types/types/BUILD.bazel b/rs/types/types/BUILD.bazel
+index 119dcade5a..e5b41661da 100644
+--- a/rs/types/types/BUILD.bazel
++++ b/rs/types/types/BUILD.bazel
+@@ -3,6 +3,11 @@ load("//bazel:fuzz_testing.bzl", "DEFAULT_RUSTC_FLAGS_FOR_FUZZING")
+ 
+ package(default_visibility = ["//visibility:public"])
+ 
++filegroup(
++    name = "computation_catalog_sources",
++    srcs = ["src/canister_http.rs"],
++)
++
+ rust_library(
+     name = "types",
+     srcs = glob(["src/**"]),
+diff --git a/rs/validator/BUILD.bazel b/rs/validator/BUILD.bazel
+index ae4f5fe970..ed7af96e8f 100644
+--- a/rs/validator/BUILD.bazel
++++ b/rs/validator/BUILD.bazel
+@@ -15,6 +15,7 @@ rust_library(
+         "//rs/crypto/standalone-sig-verifier",
+         "//rs/crypto/tree_hash",
+         "//rs/limits",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/types/types",
+         "@crate_index//:hex",
+         "@crate_index//:thiserror",
+diff --git a/rs/validator/Cargo.toml b/rs/validator/Cargo.toml
+index 832ffa5840..fa2b4baedd 100644
+--- a/rs/validator/Cargo.toml
++++ b/rs/validator/Cargo.toml
+@@ -16,6 +16,7 @@ ic-crypto-interfaces-sig-verification = { path = "../crypto/interfaces/sig_verif
+ ic-crypto-sha2 = { path = "../crypto/sha2" }
+ ic-crypto-standalone-sig-verifier = { path = "../crypto/standalone-sig-verifier" }
+ ic-crypto-tree-hash = { path = "../crypto/tree_hash" }
++ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../types/types" }
+ thiserror = { workspace = true }
+ 
+diff --git a/rs/xnet/payload_builder/BUILD.bazel b/rs/xnet/payload_builder/BUILD.bazel
+index 66bf45e134..264fecec53 100644
+--- a/rs/xnet/payload_builder/BUILD.bazel
++++ b/rs/xnet/payload_builder/BUILD.bazel
+@@ -25,6 +25,7 @@ rust_library(
+         "//rs/limits",
+         "//rs/monitoring/logger",
+         "//rs/monitoring/metrics",
++        "//rs/pocket_ic_server/profiling/system:system_profiler",
+         "//rs/protobuf",
+         "//rs/registry/helpers",
+         "//rs/registry/keys",
+diff --git a/rs/xnet/payload_builder/Cargo.toml b/rs/xnet/payload_builder/Cargo.toml
+index face7564f5..1da53fbd2a 100644
+--- a/rs/xnet/payload_builder/Cargo.toml
++++ b/rs/xnet/payload_builder/Cargo.toml
+@@ -28,6 +28,7 @@ ic-registry-client-helpers = { path = "../../registry/helpers" }
+ ic-registry-keys = { path = "../../registry/keys" }
+ ic-registry-subnet-type = { path = "../../registry/subnet_type" }
+ ic-replicated-state = { path = "../../replicated_state" }
++ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
+ ic-types = { path = "../../types/types" }
+ ic-xnet-hyper = { path = "../hyper" }
+ ic-xnet-uri = { path = "../uri" }
