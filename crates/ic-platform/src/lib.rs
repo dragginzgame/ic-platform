@@ -7,7 +7,7 @@
 //!
 //! `principal` selects Principal and Account. `candid` selects bounded decoding;
 //! `executor` selects the shared CDK executor without a Candid dependency.
-//! `candid-parser` selects native host parsing and binding generation only.
+//! `candid-parser` selects native external Candid parsing and type checking.
 //! `candid-service` separately selects Candid service declaration generation.
 //! `agent` selects native IC transport and identities, with consumer-owned policy.
 //! `pocket-ic` selects native simulator client identities; Testkit owns lifecycle policy.

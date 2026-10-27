@@ -1331,12 +1331,13 @@ it does not select Platform's `candid` feature. This is dependency isolation,
 not transitive removal or a Wasm-size measurement.
 
 The explicit surface covers the reviewed Host service inspector and Canic's
-frontend bindings, protocol argument helpers and service/type comparisons:
+external protocol argument helpers and service/type comparisons:
 `IDLProg`, `check_prog`, `TypeEnv`, `Type`, `TypeInner`, `FuncMode`, `Dec`,
-`IDLMergedProg`, `Error`, `Result`, `IDLArgs`, `parse_idl_args`, `CandidSource`,
-`instantiate_candid`, `service_equal`, `TypeContainer`, `type_equal`,
-`compile_javascript` and `compile_typescript`. These directly preserve upstream
+`Error`, `Result`, `IDLArgs`, `parse_idl_args`, `CandidSource`,
+`instantiate_candid`, `service_equal`, `TypeContainer` and `type_equal`. These directly preserve upstream
 identities; there is no blanket crate/module export or new parser implementation.
+The pending 0.7.0 retirement below removes the earlier compiler exports and
+their unused merged-program helper after audited Wire consumer adoption.
 
 Native dynamic refusal fixtures additionally use explicit `IDLValue`, `IDLField`,
 `TypeSerialize` and `ValueSerializer` exports from `ic_platform::candid_parser`.
@@ -1358,12 +1359,12 @@ members and the unused root catalog; update locks and dependency-boundary rules.
 Canister libraries that use parser helpers only in integration tests must select
 the host feature through their dev-dependency rather than runtime features.
 Replace `candid_parser::` imports with `ic_platform::candid_parser::` and flatten
-`syntax::{Dec, IDLMergedProg}` and `utils::{CandidSource, instantiate_candid,
+`syntax::Dec` and `utils::{CandidSource, instantiate_candid,
 service_equal}` imports. Use root `FuncMode`, `Type`, `TypeInner`, `TypeEnv`,
-`TypeContainer` and `type_equal` for those host type operations. Replace
-`bindings::javascript::compile` with `compile_javascript` and
-`bindings::typescript::compile` with `compile_typescript`, preserving the merged
-program supplied to TypeScript generation. Move ordinary DTO/encode/decode uses
+`TypeContainer` and `type_equal` for those host type operations. Owned binding
+generation uses Wire's canonical endpoint metadata and generator through the
+consumer's existing Build/frontend integration, not Candid compiler aliases.
+Move ordinary DTO/encode/decode uses
 of the parser's blanket Candid export to Platform's `candid` contract/decoder
 instead; this host surface deliberately provides no `candid` crate alias.
 
@@ -1378,14 +1379,14 @@ silent `parse_text` path must continue parsing `IDLProg` and using `check_prog`
 directly. Do not replace it with `CandidSource::load`.
 
 The standalone parser-only consumer requires no direct Candid/parser dependency.
-It exercises constructor typing, generated browser bindings, malformed grammar,
+It exercises constructor typing, malformed grammar,
 undefined types, import detection, service drift, Rust type equality and a fixed
 nat64 argument wire vector. Host's service inspector and existing tests are also
 qualified from a disposable copy with only imports changed; source hashes and
 fixture evidence are under `target/parser-before/host-source.sha256` and
 `target/parser-host/`. These are focused proofs, not migrated sibling workspaces.
-Actual Host/Canic adoption must still compare service inventories, generated
-binding bytes, argument bytes and existing protocol/effect/retry tests. Neither
+Actual Host/Canic adoption must still compare service inventories,
+external argument bytes and existing protocol/effect/retry tests. Neither
 consumer product code nor external Candid formats or persisted data change here.
 
 Host's pending decoder first rejects oversized replies, then atomically subtracts
@@ -1397,9 +1398,61 @@ that diagnostic policy and needs explicit caller qualification.
 
 Host's service inspector uses `IDLProg`, type checking and `TypeEnv` to project
 bounded method facts, rejects imports, and leaves Wasm export identities to Host.
-Canic additionally consumes parser bindings, textual arguments and service equality;
+Canic retains textual external/init arguments and service equality;
 method inventory alone cannot replace those uses. The new explicit host surface
 covers those operations; Host and Canic retain the surrounding implementation.
+
+### Pending 0.7.0 compiler-only retirement (#38)
+
+The maintainer explicitly authorized completing the compiler retirement after
+the current consumer re-audit. Remove imports/calls of
+`ic_platform::candid_parser::{compile_javascript, compile_typescript, IDLMergedProg}`.
+There is no replacement Candid generator alias, compatibility package or new
+fallback codec. Owned endpoints and frontend binding artifacts use Wire metadata,
+Wire's existing TypeScript generator and the consumer's reviewed JS/declaration
+build path. Preserve method/direction/schema identities and artifact admission at
+their existing owners. Required external Candid inspection and textual argument
+encoding continue through the unchanged parser helpers above; `candid-service`
+remains available for independently defined external service declarations.
+After publication, move the inherited Platform requirement to the 0.7 line and
+keep only the features each consumer still needs. Align the consuming framework
+family rather than mixing Platform 0.6/0.7 owned Principal/Account identities in
+one application graph. The coordinated macro package follows Platform's release.
+Existing external Candid identities and owned Wire representations are unchanged;
+those facts do not make different Platform package versions one Rust type.
+
+Audit evidence: Canic default `aed32be2` has no references to the three removed
+names under `crates`; its frontend ops uses retained Wire schemas and bindings.
+Current Canic/Query/Host/Tooling/Blob/Auth/Backup/IcyDB/Jobs/Metrics/Persistence/Relay
+crate sources likewise have no callers. Host still consumes parsing/type checking;
+Canic's `fleet_ensure::ops::init_arguments` retains external/init textual argument
+handling. Existing external service and dynamic refusal behavior is preserved.
+
+| Retained parser surface | Actual external responsibility |
+| --- | --- |
+| `IDLProg`, `Dec`, `check_prog`, `TypeEnv`, `Type`, `TypeInner`, `FuncMode`, `Error`, `Result` | Host's bounded external service inspector and typed parser diagnostics |
+| `CandidSource`, `instantiate_candid`, `parse_idl_args`, `IDLArgs` | Canic external/init arguments and external mint/receipt contract fixtures |
+| `service_equal` | Blob's declared external installation/service contract comparison |
+| `IDLValue`, `IDLField`, `TypeSerialize`, `ValueSerializer` | Native external refusal/old-field fixtures; existing serializer bytes stay upstream |
+| `TypeContainer`, `type_equal` | External DTO/schema equality qualification, including Platform's pinned DID proofs |
+
+Canic's owner records passing installed frontend handoff and generated-client
+proofs in `docs/audits/working/0.112-push-readiness/owned-candid-cut.json` at
+local `b9482ec526c5dfb9f5dd349d22b1f60190b2dfdf`; the inspected evidence file has
+SHA-256 `989a4ce7bcd9f108fcff7fad602e554c97036e94c55c82267f7dca0389e5cc60`.
+Its frontend admission proof passed in 275s; its later dedicated/embedded generated
+browser-client proof is recorded as passed in 637s. These are the consumer owner's
+retained observations, not new sibling execution or full #613/production rollout
+acceptance by Platform. No sibling was edited or built in this task.
+
+This removes supported Rust APIs, so use the next minor release (0.7.0), not a
+0.6 patch. Own package versions remain unchanged until the maintainer executes
+that release. No external Candid bytes, checkpoint/storage formats, retry policy,
+runtime/executor identities or cryptographic implementations change.
+The parser package remains `candid_parser` 0.4.1, including its unconditional
+bindings/template scaffolding and Handlebars/derive-builder/Darling dependencies.
+This is facade retirement only, not transitive dependency removal, a parser fork
+or evidence of smaller Wasm or faster execution.
 
 ## Management-canister DTOs
 
@@ -1917,10 +1970,13 @@ exception, not a new storage format.
 
 ## Canic external-contract closeout exports
 
-The pending compatible 0.6.21 addition adopts the narrow export patch prepared
+Published Platform 0.6.21 supplies the narrow export patch prepared
 by Canic's owner for its remaining external-contract mirrors. Published 0.6.20
 already supplies CMC, ICP, Cycles Ledger, Registry and asset DTOs; these extra
 management/ICRC identities are not present in that immutable supplying archive.
+The 0.6.21 archive is non-yanked and verified against SHA-256
+`f82b7556c1a6acf55a82b0bdc789fc6d4cb4f9c3e0113e911354817387b866e0`,
+with VCS/default-main identity `43928b07c9d04a63b6a77f90b185a5c4afda89fa`.
 Reviewed patch: Canic `b9482ec52`,
 `docs/audits/working/0.112-push-readiness/platform-external-contracts.patch`,
 SHA-256 `4ecfff50e4b450e51f4648406b99c89d1b48bb9e3615add239cc4597ed09c890`.
@@ -1961,8 +2017,9 @@ No feature, default, package dependency or upstream pin changes. There is no
 blanket re-export or compatibility alias. Upstream Rust identities, derives and
 external Candid encoding remain at the same registry suppliers. Canic retains
 consent generation/admission, authorization, spending, reply bounds, journals,
-retry/reconciliation, and native/installed acceptance. Require the actual supplying
-release before replacing its mirrors; no publication/adoption is claimed here.
+retry/reconciliation, and native/installed acceptance. Require at least 0.6.21
+before replacing these mirrors; supplier publication does not establish Canic
+adoption or authorize rewriting any retained uncertain request bytes.
 
 Qualification extends the existing standalone `management` and `icrc` consumer
 profiles, with native/MSRV execution and Wasm compilation. Package-local identity

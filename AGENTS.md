@@ -28,6 +28,11 @@ Read [the current handoff](docs/status/current.md), then
   until Canic is live, except the explicitly authorized coordinated owned-endpoint
   Wire migration in docs/migration.md. Retire its consumed compiler/service
   exports only after consumer adoption; preserve required external Candid paths.
+- The maintainer explicitly authorized #38's compiler-only retirement for 0.7.0
+  after the Canic Wire caller/qualification audit. Remove the JS/TS compiler
+  exports and exhausted merged-program helper; retain external parsing/service
+  operations. This narrow cut does not authorize other breaking changes or a
+  parser fork, dependency upgrade, version bump or release execution.
 - Rust 2024 and MSRV 1.91.0. Inherit workspace metadata and dependencies; ordinary
   directory modules only. Do not add Python tooling.
 - GitHub issues are the follow-up tracker once a remote exists. Migration and

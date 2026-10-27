@@ -6,11 +6,11 @@ Published 0.6.20 provides optional `cmc-types`,
 engine or policy. See the [exact contract and migration guide](../../docs/external-contracts.md).
 Consumer adoption and qualification remain separate from supplier publication.
 
-The pending compatible 0.6.21 additions extend `management-canister-types` with
+Published 0.6.21 extends `management-canister-types` with
 explicit lifecycle/settings/ECDSA/history identities and `icrc-ledger-types` with
 transfer/memo and `icrc21` consent DTOs. They keep the existing pins and feature
-selections; they add no calls, signing implementation or policy. Wait for the
-supplying release before replacing those remaining consumer mirrors.
+selections; they add no calls, signing implementation or policy. Require at least
+0.6.21 and qualify the consumer before replacing those remaining mirrors.
 
 Enable `stable-structures` for explicit upstream 0.7.2 collection, Memory,
 Storable/codec, iterator, restricted, vector-backed and memory-manager identities. Storage owns
@@ -200,10 +200,12 @@ CDK/executor nor host tooling. Native and Wasm are supported by all three featur
 
 Enable `candid-parser` on native hosts for `ic_platform::candid_parser`. It
 explicitly exports `IDLProg`, `check_prog`, `TypeEnv`, `Type`, `TypeInner`,
-`FuncMode`, `Dec`, `IDLMergedProg`, `Error`, `Result`, `IDLArgs`, `parse_idl_args`,
-`CandidSource`, `instantiate_candid`, `service_equal`, `TypeContainer`, `type_equal`,
-`compile_javascript` and `compile_typescript`. These retain upstream identities
-and semantics. The feature does not enable Platform's `candid` or `executor`;
+`FuncMode`, `Dec`, `Error`, `Result`, `IDLArgs`, `parse_idl_args`,
+`CandidSource`, `instantiate_candid`, `service_equal`, `TypeContainer` and `type_equal`
+with their upstream identities and semantics. The pending 0.7.0 cut removes
+`compile_javascript`, `compile_typescript` and compiler-only `IDLMergedProg`;
+owned frontend bindings must use Wire. The feature does not enable Platform's
+`candid` or `executor`;
 the upstream parser itself depends on Candid with full type/value support.
 On Wasm this module and parser dependency are absent even with all features.
 Callers own source/output limits, imports and diagnostics. `check_prog` ignores

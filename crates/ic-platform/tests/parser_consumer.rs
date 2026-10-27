@@ -3,15 +3,15 @@
 
 #[cfg(test)]
 use ic_platform::candid_parser::{
-    self as parser, CandidSource, Dec, FuncMode, IDLArgs, IDLMergedProg, IDLProg, TypeContainer,
-    TypeEnv, TypeInner,
+    self as parser, CandidSource, Dec, FuncMode, IDLArgs, IDLProg, TypeContainer, TypeEnv,
+    TypeInner,
 };
 
 #[cfg(test)]
 const SERVICE: &str = "type Amount = nat64; service : (text) -> { read : () -> (Amount) query; write : (Amount) -> (); }";
 
 #[test]
-fn checked_services_generate_bindings_and_preserve_argument_wire_bytes() {
+fn checked_external_services_preserve_constructor_types_and_argument_wire_bytes() {
     let program: IDLProg = SERVICE.parse().unwrap();
     assert!(
         !program
@@ -27,11 +27,6 @@ fn checked_services_generate_bindings_and_preserve_argument_wire_bytes() {
         env.trace_type(&method.rets[0]).unwrap().as_ref(),
         TypeInner::Nat64
     ));
-
-    let js = parser::compile_javascript(&env, &actor);
-    let ts = parser::compile_typescript(&env, &actor, &IDLMergedProg::new(program));
-    assert!(js.contains("IDL.Nat64") && js.contains("'read'"));
-    assert!(ts.contains("bigint") && ts.contains("read"));
 
     let (init, (env, service)) = parser::instantiate_candid(CandidSource::Text(SERVICE)).unwrap();
     assert!(matches!(init[0].as_ref(), TypeInner::Text));

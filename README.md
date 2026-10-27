@@ -40,7 +40,7 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
 | `candid-service` | Candid service declaration macros and printer; implies `candid` |
 | `runtime` | Raw calls, system and task adapters at `cdk::*`, without entrypoint macros |
-| `candid-parser` | Native host parsing/type checking, service equality, dynamic refusal fixtures and JavaScript/TypeScript generation |
+| `candid-parser` | Native external Candid parsing/type checking, service equality and dynamic refusal fixtures; owned bindings use Wire |
 | `canister-sig-creation` | Imported signature public-key formats, root-key constants and hashing; no Candid/ic0 or store API |
 | `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one registry executor |
 | `certification` | Upstream certificate/hash-tree and mutable tree types, constructors, lookup and hashing; independent of Candid and executor |
@@ -192,7 +192,7 @@ Ledger qualification covers account semantics, fixed account/block wire bytes,
 representation-independent hashes, arbitrary-precision amounts and archive callbacks.
 It covers DTOs, argument helpers and wire vectors, plus hash-tree constructors,
 lookup outcomes, witness hashes and certificate/delegation fields. The parser
-consumer runs natively and covers checking, binding generation, service drift
+consumer runs natively and covers external checking, constructor types, service drift
 and typed textual-argument encoding. The Agent consumer checks offline signing,
 request identity, effective-ID routing, typed errors and shared certificate types.
 Signature qualification preserves original-owner DER/hash/BLS/certificate vectors,
@@ -227,9 +227,9 @@ checks establish target compatibility, not installed executor/trap behavior.
 
 ## Dependency roles and deployment admission
 
-Shared Tooling 0.24.0 is pinned at `cab12cd3dfa4fdb34846b25397f0d72881bb9ae0`.
+The reviewed Shared Tooling revision is recorded in [the snapshot](.shared-tooling.snapshot).
 `ic-platform` is the sole consumer library; `ic-platform-macros` is its production
-proc-macro support package. Its Syn/Quote/Darling dependencies generate consumer
+proc-macro support package. Its Syn/Quote dependencies generate consumer
 entrypoints. Principal, Candid, the host parser, Agent, certification, raw IC calls,
 management/ledger DTOs, signature/BLS APIs, the executor and Serde are production
 dependencies, including optional and derive use. Testkit, Timers and the runtime

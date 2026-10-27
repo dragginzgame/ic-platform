@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.0]
+
+### ⚠️ Breaking
+
+- Retire Candid JavaScript/TypeScript compiler exports and the compiler-only
+  `IDLMergedProg` helper. Owned bindings use Wire; required external Candid
+  parsing, type checking, textual arguments and service comparison remain
+  available. This narrows Platform's API without removing the upstream parser
+  or its transitive generator dependencies
+  ([#38 — Retire Candid frontend compiler exports](https://github.com/dragginzgame/ic-platform/issues/38)).
+
 ## [0.6.21] - 2026-10-27
 
 ### ➕ Added
