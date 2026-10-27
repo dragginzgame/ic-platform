@@ -1415,6 +1415,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-host-artifacts"
+version = "0.69.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b20117f13745daed32532f021365f2205337c65b193f7b85c133e9809f02065f"
+dependencies = [
+ "flate2",
+ "sha2 0.10.9",
+]
+
+[[package]]
 name = "ic-management-canister-types"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1451,6 +1461,7 @@ dependencies = [
  "ic-agent",
  "ic-cdk-executor",
  "ic-certification",
+ "ic-host-artifacts",
  "ic-management-canister-types 0.11.0",
  "ic-platform-macros",
  "ic-representation-independent-hash",

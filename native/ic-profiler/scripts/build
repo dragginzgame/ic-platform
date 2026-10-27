@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+"""Build the assembled PocketIC server and record artifact provenance."""
+import sys
+sys.dont_write_bytecode = True
+from ic_profiler import main
+
+raise SystemExit(main(["build", *sys.argv[1:]]))

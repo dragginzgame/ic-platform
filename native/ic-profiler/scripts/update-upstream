@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+"""Probe an upstream revision without changing the reviewed integration pin."""
+import sys
+sys.dont_write_bytecode = True
+from ic_profiler import main
+
+raise SystemExit(main(["update-upstream", *sys.argv[1:]]))

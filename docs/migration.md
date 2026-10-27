@@ -1,5 +1,21 @@
 # Candid and runtime ownership
 
+## Host gzip boundary
+
+The maintainer requested that IC Profiler access gzip through Platform rather
+than depend directly on `flate2`. Select optional `gzip` and use
+`ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`. These explicit exports
+delegate to published IC Tooling `ic-host-artifacts` 0.69.1; general compression
+implementation remains in Tooling. No backend type, default feature, Candid,
+executor, filesystem effect or automatic limit is added. The dependency and
+exports are native-only, including when `gzip` is selected on Wasm.
+
+Consumers own compression levels, compressed/decoded byte allowances and payload
+interpretation. Decoding admits one complete member and rejects trailing bytes;
+callers migrating permissive readers must qualify that admission change. Existing
+compressed artifacts retain their recorded byte identities; deterministic headers
+do not promise identical bytes across backend/feature selections.
+
 Compatibility changes are handled in the affected producer/consumer issues.
 Record agreed versions, identities and migration requirements in this contract
 and the existing dependency inventory. There is no central approval queue or
@@ -161,49 +177,39 @@ tool versions, logs and standalone manifests remain at
 `/tmp/platform-candid-experiments`. Separate build targets qualified the variants;
 source-path-normalized Wasm inputs were checked before/after each sweep.
 
-## Instrumented PocketIC source boundary (#65)
+## Instrumented PocketIC source provider
 
-Platform 0.7.0's `pocket-ic` feature supplies the registry client, not IC
-Profiler's instrumented client or replica backend. Matching the version string
-`16.1.0` does not establish source identity. The registry client does not
-implement Profiler's `start_system_profile` API. No instrumented provider feature,
-source distribution or native-backend qualification is supplied yet. The
-implementation and acceptance record belongs to
-[Platform #65](https://github.com/dragginzgame/ic-platform/issues/65).
+The maintainer approved moving native ownership from IC Profiler into Platform.
+The opt-in Git source profile [native/ic-profiler](../native/ic-profiler/README.md)
+owns the pinned IC gitlink, patch series, native adapters, patched PocketIC client
+and source/build receipts. Consumers select a full Platform commit and the
+`instrumented-pocket-ic` profile. This is an explicit source-provider interface,
+not a new default feature or a replacement for the published registry client.
 
-The inspected integration pins IC `ee8086a9773725fd1058832a9400297cf0990112`.
-Profiler's `integration/manifest.json`, `patches/ic/series`, `profiler/` and
-`overlay/` own reproducible assembly; `.build/ic` is generated output. A Platform
-provider must integrate with that owner rather than maintain another patch roster.
+Profiler retains its IC-free recorder, reports, retention, workloads and viewer.
+Its source injection is separate from provider-owned adapters; overlaps are
+rejected and both origins enter the assembly digest. Native Cargo/Bazel build
+inputs belong here. The consumer recorder's optional native `gzip` dependency
+selects only the isolated Tooling codec facade; no IC/native feature or dependency
+back to the provider is selected. Existing upstream type identities, external
+Candid bytes and cryptographic bodies remain unchanged.
 
-The native client facade must select the patched source and explicitly expose
-its required client and DTO identities, without depending on the server.
-A registry substitution or dependency-local Cargo patch cannot distribute this
-boundary. Replica adapters belong below that facade, inside the instrumented
-provider. Hooks use private scheduler state and replica message/accounting types;
-their packages cannot depend back on a facade that depends on those packages.
-Platform's provider/build inputs must own that seam before manifest routing is
-complete. Import renaming or a consumer-gate exemption is insufficient.
+The native server selects the `ic-admin` library without CLI-only NNS setup;
+`lifeline` and Motoko are excluded. The upstream administrative CLI keeps its
+default feature. No dummy canister artifact or build-error suppression is admitted.
 
-The independent recorder remains IC-free. Recording, reports, retention,
-workloads and viewer policy stay Profiler-owned. Provider adapters project
-observations into it without feeding physical observations into execution or
-billing. Public principal/DTO identities and external Candid bytes stay intact.
+Platform 0.7.0's `pocket-ic` Cargo feature still supplies the registry client;
+it does not expose the instrumented profile API. That registry contract remains
+unchanged. The provider is distributed through the pinned Git source profile and
+is excluded from default and Wasm package graphs.
 
-Cargo and Bazel must select the same assembled provider. Acceptance requires its
-actual native graph, exact type/source identities, reproducible assembly, a newly
-built executable and all five `system_profiling` regressions against its recorded
-hash. Default and actual Wasm deployment graphs must exclude it. Root metadata,
-recorder tests, facade-only smoke tests and historical binary receipts cannot
-substitute for native acceptance.
-
-On 2026-10-27, locked/offline metadata confirmed Platform's registry PocketIC
-16.1.0 selection. The assembled Profiler workspace could not resolve offline:
-the pinned `dfinity-lab/build-info` revision
-`27ba16a68aa312de66f2ebd0f16665f1429eee36` was unavailable in the local cache.
-Its latest local build receipt separately records exit 101 and no artifacts;
-the successful extraction receipt is historical evidence only. This inspection
-establishes neither a new server build nor a native runtime pass.
+Acceptance remains tracked in
+[#65 — Provide the instrumented PocketIC boundary needed by IC Profiler](https://github.com/dragginzgame/ic-platform/issues/65):
+qualify actual source identities, reproducible assembly, the native server and
+all five `system_profiling` regressions against its recorded executable hash.
+Source/fixture checks and historical receipts do not establish native or Bazel
+qualification. Publishing a new Rust facade for instrumented clients is separate
+from consuming this source profile.
 
 ## Optional BLAKE3 maintenance boundary
 

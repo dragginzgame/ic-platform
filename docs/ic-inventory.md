@@ -13,6 +13,11 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzip`
+and `GzipError` from published IC Tooling `ic-host-artifacts` 0.69.1 for IC Profiler.
+Tooling retains codec implementation; callers retain levels, limits and payload
+admission. No backend types, default/Wasm dependency or IC runtime edge is added.
+
 The published 0.6.20 external DTO additions are maintained from pinned protocol
 schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,
 `nns_registry_types` and native-only `certified_assets_types`. Each has its own
@@ -63,12 +68,13 @@ runtime fixture and its separate qualification lock. Wire owns schema/TypeScript
 projection of its existing serialization. Wasm, default and executor-only graphs
 exclude the added Wire/JSON dependency edges. All features now require Rust 1.91.
 
-IC Profiler's patched PocketIC client and replica instrumentation are not supplied
-by the registry `pocket-ic` feature. Their source-provider boundary is tracked by
-[Platform #65](https://github.com/dragginzgame/ic-platform/issues/65); the
-[migration contract](migration.md#instrumented-pocketic-source-boundary-65)
-distinguishes the native facade, provider-local replica adapters and IC-free
-recorder. No new export, dependency exception or adopted native graph is claimed.
+IC Profiler selects the opt-in Git source profile at `native/ic-profiler`, which
+owns the instrumented IC pin, adapters, patches and patched PocketIC client.
+The recorder/viewer remain consumer-owned. The registry `pocket-ic` feature is
+unchanged; no instrumented Rust export is added to that feature. The
+[migration contract](migration.md#instrumented-pocketic-source-provider) records
+the source-provider interface and the remaining native acceptance under
+[#65 — Instrumented PocketIC boundary for IC Profiler](https://github.com/dragginzgame/ic-platform/issues/65).
 
 Paths are relative to `crates/ic-platform/src` unless otherwise stated. Each
 module's explicit exports are authoritative; this table summarizes capabilities,
@@ -174,6 +180,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ecdsa | dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
 | ic-platform | executor | dep:ic-cdk-executor |
+| ic-platform | gzip | dep:ic-host-artifacts |
 | ic-platform | ic0 | dep:ic0 |
 | ic-platform | icp-ledger-types | candid |
 | ic-platform | icrc-ledger-types | dep:icrc-ledger-types, principal |
@@ -200,6 +207,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
 | ic-platform | ic-cdk-executor | =2.0.0 | normal | all | true | true |  |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
+| ic-platform | ic-host-artifacts | ^0.69.1 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | all | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |

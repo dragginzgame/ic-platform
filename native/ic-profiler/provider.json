@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "profile": "instrumented-pocket-ic",
+  "entrypoint": "scripts/ic_profiler.py",
+  "manifest": "integration/manifest.json",
+  "native_tools": "scripts/dev/native-tools.sh",
+  "consumer_source": "profiler",
+  "motoko": false
+}

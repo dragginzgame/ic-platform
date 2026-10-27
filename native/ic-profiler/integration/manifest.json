@@ -1,0 +1,102 @@
+{
+  "overlay": {
+    "files": [
+      {
+        "path": "packages/pocket-ic/examples/system_profile_ledger.rs",
+        "sha256": "e62cde2460827cb332868feb7988cb42ef470d6435732c1100f699897a4efeeb"
+      },
+      {
+        "path": "packages/pocket-ic/examples/system_profile_overhead.rs",
+        "sha256": "a6604fb5c6ca33d5bbe7f39f945ae69f4946af8cff2c2271dcaca950789c1a2d"
+      },
+      {
+        "path": "packages/pocket-ic/src/common/storage.rs",
+        "sha256": "cb1ad9806e56f21fc07ec1d1d8acf797a4f1ad14ad9ebac31e64fa7bab88a715"
+      },
+      {
+        "path": "packages/pocket-ic/tests/memory_access_tracing.rs",
+        "sha256": "8ece042a5ed4100ac7dd3ceb65d2475e0df131f71579e9e2c22293b19f420712"
+      },
+      {
+        "path": "packages/pocket-ic/tests/ram_storage.rs",
+        "sha256": "868fc9219181702ca84594cd4de1edf65195de0ca5bc77fe225400c3addf1c20"
+      },
+      {
+        "path": "packages/pocket-ic/tests/system_profiling.rs",
+        "sha256": "9eacd594ed7b1edfd36aeadd4f8e6b5b7c6028a1d173be842f290c2344fa46dc"
+      },
+      {
+        "path": "profilingic.md",
+        "sha256": "3b8b29218f2e7034691d0bc93e6cb77aac5190d5ee5c4770fefe5bf35392e9e0",
+        "source": "docs/profiling-design.md"
+      },
+      {
+        "path": "rs/cycles_account_manager/src/cycles_account_manager/system_profile.rs",
+        "sha256": "e282f6792269161eff8c3bd87d4d9649004845b26f1e3fbd43348d8a592b2f58"
+      },
+      {
+        "path": "rs/embedders/src/wasmtime_embedder/profiling.rs",
+        "sha256": "7ecbc6e161ea3d493a33b0ed4f34fee2293dda5b3fe5e71ca3851d5ac88c1352"
+      },
+      {
+        "path": "rs/execution_environment/src/execution_environment/tests/runtime_costs.rs",
+        "sha256": "09fcd0e7611beca3f3013901507719605a37a29c3a073653435c0e6ca4eb8e6f"
+      },
+      {
+        "path": "rs/execution_environment/src/scheduler/round_profile.rs",
+        "sha256": "49557588a9f9550585865f6796a398184e8b09941cd405dca25e7384327fc67d"
+      },
+      {
+        "path": "rs/messaging/src/system_profile.rs",
+        "sha256": "c2908f894e263926adf7c1b454dac24956b1b5db935cdbacb4f78fff76b8db71"
+      }
+    ],
+    "path": "overlay"
+  },
+  "patches": {
+    "directory": "patches/ic",
+    "files": [
+      {
+        "path": "0001-workspace-and-build.patch",
+        "sha256": "246014891a365fa9eea2aa8e0cf36c4b97cba63fe71a0f9d44f30ca9b23aea46"
+      },
+      {
+        "path": "0002-replica-runtime-hooks.patch",
+        "sha256": "8f1c2471d094a7f9a77e0c10288d83bcb45b7cd5598147c18be3456f7f3094e0"
+      },
+      {
+        "path": "0003-pocketic-client-and-server.patch",
+        "sha256": "7f410196b9afc49b790092886ec7df292237df049bf4b0adabbff27fd9fa62c5"
+      },
+      {
+        "path": "0004-native-library-dependencies.patch",
+        "sha256": "8e6026cdf3c0c5c3d9d2cc03842ab812dfd94919f3b4cf9af6d6cfa88fb51bfd"
+      },
+      {
+        "path": "0005-platform-gzip-boundary.patch",
+        "sha256": "ae2b057548e352f6b4ca802eba95a09a706c5c0db0dd36050ac78b31c21e0adf"
+      }
+    ],
+    "series": "patches/ic/series"
+  },
+  "profiler": {
+    "destination": "rs/pocket_ic_server/profiling",
+    "path": "profiler"
+  },
+  "provenance": {
+    "excluded_unrelated_paths": [
+      "security.md",
+      "tla.md"
+    ],
+    "source_head": "49a94778d9aff90139cadc4f9c14b98b2aae42a4",
+    "source_snapshot_tree": "bf5aa231297a805eaa48525d9b908e7f92778113",
+    "upstream_baseline": "ee8086a9773725fd1058832a9400297cf0990112"
+  },
+  "schema_version": 1,
+  "upstream": {
+    "baseline_commit": "ee8086a9773725fd1058832a9400297cf0990112",
+    "commit": "ee8086a9773725fd1058832a9400297cf0990112",
+    "path": "upstream/ic",
+    "url": "https://github.com/dfinity/ic.git"
+  }
+}
