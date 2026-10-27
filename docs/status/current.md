@@ -48,17 +48,25 @@ separate origins/digests and rejects ownership overlap. The admitted server grap
 excludes lifeline/Motoko; routing uses the actual pinned IC snapshot. Native test
 windows serialize whole-server capture, and receipts bind the built server hash.
 
-At provider `04a172b`, the actual server, 69 recorder tests and five native
+At provider `0d325ae`, the actual server, 69 recorder tests and five native
 profiling regressions pass. Server SHA-256 is
-`6b2cd6eee09899cd8e064c21237a220921d6f9e1ed1b5cfcf79d97eda50a0067`.
-Also passing: 43 provider fixtures, seven consumer-binding fixtures, unchanged
-library Clippy and actual formatting/hook qualification with the IC gitlink.
-Consumer adoption is uncommitted; legacy source/assemblies and receipts remain
-retained. Hosted acceptance, Bazel and NNS-genesis artifacts are separate.
+`b3e6fbc7c9a5678c2acbbfe96e9400ae968a1aff9c0c4ad22a0d2ba552c26218`.
+Profiler's bundle codec now selects Platform's optional native `gzip` facade in
+[PR #71](https://github.com/dragginzgame/ic-platform/pull/71), pinned at `d7e899c`.
+It delegates to published Tooling 0.69.1, preserving level 1 and import limits;
+single-member decoding rejects trailing bytes. Direct backend/Tooling declarations
+are denied by the consumer policy. No default/Wasm or native-IC cycle is added.
+
+Native Cargo/Bazel inputs pin the same facade. Both Bazel locks are regenerated
+with pinned Bazel 9.2.0; the real recorder target resolves without repinning.
+Also passing: 43 provider fixtures, seven binding fixtures, consumer/Platform
+Clippy, gzip/native/Wasm graph admission, inventory and links. Consumer changes
+remain uncommitted; inputs, assemblies and receipts remain retained. Hosted
+acceptance, full Bazel builds and NNS-genesis artifacts remain separate.
 
 The 0.26.26 adoption now has a prerequisite PR because old main's formatter
 rejects gitlinks. The consumer fixture exports opaque pointers without copying
-IC source/Git metadata. Review/integrate #69 first, then retarget #70 to main.
+IC source/Git metadata. Review/integrate #69 and gzip supplier #71, then retarget #70 to main.
 Keep issues #65/#66 open until their review and applicable hosted acceptance.
 
 ## Compiler retirement (#38): released and closed
