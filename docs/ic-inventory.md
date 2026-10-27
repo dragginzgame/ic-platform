@@ -68,6 +68,13 @@ runtime fixture and its separate qualification lock. Wire owns schema/TypeScript
 projection of its existing serialization. Wasm, default and executor-only graphs
 exclude the added Wire/JSON dependency edges. All features now require Rust 1.91.
 
+IC Profiler's patched PocketIC client and replica instrumentation are not supplied
+by the registry `pocket-ic` feature. Their source-provider boundary is tracked by
+[Platform #65](https://github.com/dragginzgame/ic-platform/issues/65); the
+[migration contract](migration.md#instrumented-pocketic-source-boundary-65)
+distinguishes the native facade, provider-local replica adapters and IC-free
+recorder. No new export, dependency exception or adopted native graph is claimed.
+
 Paths are relative to `crates/ic-platform/src` unless otherwise stated. Each
 module's explicit exports are authoritative; this table summarizes capabilities,
 not every symbol. Additions to exports require reviewing this table and the

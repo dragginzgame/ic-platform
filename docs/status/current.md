@@ -1,119 +1,81 @@
 # Current handoff
 
-## PR #71 gzip feature-validation correction (2026-10-27)
+## Integration and release state
 
-The gzip branch adds a native leaf without Principal. The previous graph-cache
-admission assumed every native leaf selected Principal and therefore refused
-gzip before querying the Wasm graphs. Each native leaf now declares its exact
-local prerequisites alongside its dependencies; gzip has none. Existing optional,
-target, dependency-count and alias checks remain strict. Regression fixtures cover
-native/Wasm and mixed selections, changed contracts, malformed policy, and actual
-Cargo metadata. No codec, public API, dependency or cryptographic code changed.
+The maintainer authorized fixing CI and integrating Platform PRs #69, #71 and
+#70, then updating Profiler to integrated revisions. Tooling prerequisite
+[#69](https://github.com/dragginzgame/ic-platform/pull/69) is merged at
+`aa973e13bae7a6dd9027c0dea47d0736f37acb31`. Gzip #71 and native provider #70
+are being integrated; do not describe them as published. Rust release metadata
+remains 0.7.0 with compatible notes under 0.7.1; npm browser 0.1.1 is published.
+No release, publication, deployment, advisory ignore or sibling checkout edit
+is authorized by this integration. Profiler's Git/release operations remain
+maintainer-owned. Preserve its incoming Tooling 0.69.2 lock update.
 
-Qualification: full `make clippy` passed before longer tests; `make fmt-check`,
-ShellCheck, gzip's native consumer test, inventory and documentation-link checks
-passed. Rust 1.91 gzip-only Wasm compilation and complete routine
-`make check-features` passed: 415 selections per target, 384 native and 234 Wasm
-graph queries, plus native-empty and Wasm executor compilation. Hosted macOS and
-installed-provider acceptance are separate; this correction adds no such evidence.
-The existing advisory blocker remains tracked by #50. No release or publication
-is included. The earlier handoff below records prior work, not current PR status.
+## Gzip feature admission (#71)
 
-## Source and authorized boundary
+The optional native gzip facade delegates to published IC Tooling 0.69.1 and
+adds no default/Wasm dependency or IC/runtime cycle. Consumers own levels,
+limits and payload admission. Single-member decoding rejects trailing data.
+See [the migration contract](../migration.md#host-gzip-boundary).
 
-Released main remains Platform 0.6.21 at
-`43928b07c9d04a63b6a77f90b185a5c4afda89fa`; npm browser 0.1.1 is separately
-published. Shared Tooling remains verified 0.26.21 at
-`66c91c4412856baa147482e648fc80428db8b179` (106 payloads).
-The maintainer explicitly requested #38 after the prior blocker assessment.
-That narrow compiler retirement is now prepared for **0.7.0**, the next breaking
-minor; own package versions remain 0.6.21 until maintainer release preparation.
-No staging, commit, push, release, publication, deployment or paid operation was
-performed in this task. Incoming post-release documentation edits are preserved;
-Cargo.lock and the original index are byte-identical. Siblings remain read-only.
+The cache checker previously assumed every native leaf enabled Principal.
+Policy now declares exact prerequisites and dependencies per leaf; gzip has no
+Principal prerequisite. Optional/target/count/alias checks remain strict.
+Regression coverage includes malformed policy, changed contracts, native/Wasm
+mixed selections and real Cargo metadata. Focused closure and selection fixtures
+pass at incoming `4ef8c39`. Its retained qualification records full Clippy,
+formatting, ShellCheck, gzip consumer, inventory and links; Rust 1.91 gzip-only
+Wasm compilation; and the complete routine feature matrix (415 selections per
+target, 384 native/234 Wasm queries). Codec/API/library inputs are unchanged by
+the cache correction or tooling merge; reuse their passing evidence.
 
-## Compiler retirement (#38): implemented locally
+## Native provider (#65 / #70)
 
-Removed native `candid_parser::{compile_javascript, compile_typescript}` and the
-unused compiler-only `IDLMergedProg` export. Removed only the exhausted browser
-compiler assertions from the standalone parser consumer. No compatibility alias,
-replacement generator, parser fork or fallback codec was added. Remaining APIs
-retain external parsing/typechecking, import detection, textual argument encoding,
-constructor typing, service comparison, dynamic refusal/value serializers and
-Rust type equality. The separate external `candid-service` feature stays intact.
-The migration contract includes the retained API/consumer inventory and exact
-[0.7.0 removal instructions](../migration.md#pending-070-compiler-only-retirement-38).
+The maintainer approved public Platform ownership under `native/ic-profiler`;
+private Profiler retains recorder/viewer policy. The provider owns the IC pin,
+patches, native adapters, patched client, prerequisites and legacy assembler.
+Keep the registry PocketIC feature separate and preserve origin licenses.
 
-The audit found no references to any removed name in Canic default `aed32be2`
-crates or current Canic/Query/Host/Tooling/Blob/Auth/Backup/IcyDB/Jobs/Metrics/
-Persistence/Relay crate sources. Host retains its external service inspector;
-Canic retains `fleet_ensure::ops::init_arguments`. Owned frontend artifacts now
-use Wire metadata/bindings. Canic's owner records passing installed frontend
-handoff (275s) and later dedicated/embedded generated-client proof (637s) at
-local `b9482ec526c5dfb9f5dd349d22b1f60190b2dfdf`. The inspected qualification
-record is captured under `/tmp/platform-issue38-20261027/canic-qualification.json`;
-its source/hash are recorded in the migration contract. These are retained owner
-observations, not new sibling execution, full #613 closeout or live deployment.
+At provider `0d325ae`, reproducible assembly, server build, 69 recorder tests and
+five native regressions passed. Server SHA-256:
+`b3e6fbc7c9a5678c2acbbfe96e9400ae968a1aff9c0c4ad22a0d2ba552c26218`.
+The graph excludes lifeline/Motoko; embedded routing is the actual IC snapshot.
+Receipts bind source origins, provider/consumer commits and the executable hash.
+Bazel locks were generated with pinned Bazel 9.2.0; the real recorder target
+resolves without repinning. Full Bazel builds and NNS-genesis artifacts remain
+unqualified. Forty-three provider fixtures and seven consumer binding fixtures
+passed. Retain old assemblies, inputs and receipts when adopting new pins.
 
-Full `make clippy` passed before longer tests. Standalone parser (2), dynamic
-refusal (2), external service (1) and pinned external schema (5) tests pass on
-native and Rust 1.91 with no direct consumer Candid/parser dependencies.
-Fixed nat64 argument bytes, malformed grammar, undefined types, import detection,
-service drift and constructor/type equality remain covered. The service consumer
-also compiles for Wasm. Rust 1.91 parser-feature Wasm library compilation passes;
-a real Wasm consumer import of the host parser is correctly refused.
-Actual native/Wasm default, executor, runtime, entrypoint, parser and external
-service normal/build graphs pass. Snapshot, inventory, formatting, doc links,
-diff checks and 0.7.0 pending changelog admission pass.
+Retarget #70 after integrating #71, resolve shared notes without losing either
+capability, update native Cargo/Bazel pins to the integrated gzip facade, then
+qualify Profiler's actual merged provider. #65/#66 retain applicable acceptance.
 
-Evidence: `/tmp/platform-issue38-20261027/{clippy,consumers,graphs,wasm,policy}.log`,
-`target/boundary-consumer.jtMvNt` (parser), `.Kkxhr9` (dynamic), `.PjyEZx` (service),
-`.36PvZw` (external schemas), `target/issue38-graphs` and
-`target/parser-wasm-exclusion.rKTWnF`. No new native macOS, installed-canister or
-full release CI run is claimed; those remain separate release/consumer duties.
+## Shared rules and published contracts
 
-The dependency remains candid_parser 0.4.1; actual native graphs still include
-Handlebars 6.4.4, derive_builder 0.20.2 and Darling 0.20.11. Only supported facade
-surface is retired. No transitive dependency removal, cryptographic/runtime/data
-change, Wasm-size improvement or performance gain is claimed. Existing external
-Candid bytes, checkpoints, aggregate limits and retry/effect policy stay unchanged.
-Keep #38 open until the committed cut reaches default main and its minor-release
-requirements are satisfied. Use a minor release, not release-patch. Other hard
-cuts retain their existing restriction; this task authorizes no broad retirement.
+Shared Tooling 0.26.26 at `5683060a5d8ce79af2fcfedb53b3eb24037fd064`
+has 109 verified payloads. Standalone Rustfmt has one roster in Makefile;
+formatting fixtures preserve opaque gitlinks without copying their source/Git
+metadata. Check/write/failure/staged-hook qualification passed, with source at
+`/tmp/platform-shared-02626`. #69 CI passed on Linux and both macOS architectures;
+its separate advisory failure remains #50. Hosted CI continues asynchronously.
 
-## Existing published suppliers and consumer work
+The #38 compiler-only cut shipped in 0.7.0 and is closed. Existing external
+Candid parsers/service operations and legacy bytes remain; no broader hard cut
+is authorized. Canonical evidence is in [the migration contract](../migration.md)
+and `/tmp/platform-issue38-20261027`, `/tmp/platform-shared-02622`.
+Published external DTO and browser suppliers remain qualified independently;
+[external contracts](../external-contracts.md), #61–64 and #59 own migration
+obligations. Canic/Auth/application adoption is not implied by these PRs.
 
-Platform 0.6.20 supplies optional CMC, ICP Ledger, Cycles Ledger, Registry and
-native asset DTOs. Published 0.6.21 adds the exact pinned management lifecycle/
-settings/ECDSA/history and ICRC transfer/memo/consent exports. Its verified archive
-SHA-256 is `f82b7556c1a6acf55a82b0bdc789fc6d4cb4f9c3e0113e911354817387b866e0`.
-Fresh registry-only management/ICRC native/MSRV/Wasm proofs passed before this
-cut (`/tmp/platform-0621-live`, `target/boundary-consumer.Zt7IyX`, `.j3pDdx`).
-The [external contract guide](../external-contracts.md) and migration contract own
-exact imports/provenance and canonical shape differences. Those external contract
-surfaces remain unchanged by #38. #61–64 stay open for Canic's actual adoption;
-Canic's dirty 0.112 migration remains owner-controlled, not a new published release.
-No old 'management export supplier is unpublished' blocker should remain.
+## Security blocker (#50)
 
-#59 is closed: public `@tokostudios/ic-platform` 0.1.1 supplies the four SDK
-signing-request/expiry exports with Core exactly 6.1.1. Archive SHA-1 is
-`33bf72eaf3039111c462072d5d2bc0aa6dd80f45`; registry metadata, exact integrity,
-packed/Chromium proofs and fresh registry-only strict TypeScript/runtime evidence
-are retained in `/tmp/platform-npm-011`, `target/npm-registry-consumer.1ClKKR`.
-Auth/application adoption and provider acceptance remain separate.
-
-## Advisory status
-
-#56 is closed: released CI has complete index observations for both maintained
-locks; the remaining workspace audit failure is #50. Live workflow evidence is
-[40472663771](https://github.com/dragginzgame/ic-platform/actions/runs/40472663771),
-retained in `/tmp/platform-backlog-20261027/advisory-ci-full.log`. No advisory was
-suppressed; earlier prepared/yanked/missing-index regressions remain retained.
-
-#50 remains unresolved. Latest observed compatible crypto-bigint is 0.5.5;
-patched >=0.7.6 is outside the selected K256/P256/elliptic-curve 0.13 family.
-Latest Agent 0.49.3 and exact ic-secp256k1 0.3.0 retain those coupled paths.
-Resident private-key signing precludes a blanket verification-only exemption.
-No compatible correction, exemption, override, Agent fork or in-house crypto
-change is supplied. Raw records are in `/tmp/platform-0621-live` and the earlier
-backlog evidence. This compiler retirement does not qualify crypto safety.
+[#50](https://github.com/dragginzgame/ic-platform/issues/50) remains the canonical
+RUSTSEC-2026-0387 remediation issue. Last qualified graph has crypto-bigint 0.5.5
+through elliptic-curve 0.13.8, direct ECDSA, Agent identities and pinned derivation;
+patched >=0.7.6 requires a coupled supplier/type migration. No blanket public-data
+or verification-only exemption is justified. Preserve upstream crypto bodies,
+vectors, source identities and no-Agent-fork constraints; no incompatible override,
+renaming to evade detection, in-house crypto or advisory ignore is supplied.
+#56 index coverage is resolved; the advisory failure remains independently real.
+Evidence: `/tmp/platform-backlog-20261027`, `/tmp/platform-0621-live` and #50.

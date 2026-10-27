@@ -30,6 +30,50 @@ import mappings, pinned schema/license provenance and qualification commands.
 Registry archive identity is verified; Canic consumer adoption is not claimed. Required
 external Candid remains; Canic retains effects, limits, retry bytes and policy.
 
+## Instrumented PocketIC source boundary (#65)
+
+Platform 0.7.0's `pocket-ic` feature supplies the registry client, not IC
+Profiler's instrumented client or replica backend. Matching the version string
+`16.1.0` does not establish source identity. The registry client does not
+implement Profiler's `start_system_profile` API. No instrumented provider feature,
+source distribution or native-backend qualification is supplied yet. The
+implementation and acceptance record belongs to
+[Platform #65](https://github.com/dragginzgame/ic-platform/issues/65).
+
+The inspected integration pins IC `ee8086a9773725fd1058832a9400297cf0990112`.
+Profiler's `integration/manifest.json`, `patches/ic/series`, `profiler/` and
+`overlay/` own reproducible assembly; `.build/ic` is generated output. A Platform
+provider must integrate with that owner rather than maintain another patch roster.
+
+The native client facade must select the patched source and explicitly expose
+its required client and DTO identities, without depending on the server.
+A registry substitution or dependency-local Cargo patch cannot distribute this
+boundary. Replica adapters belong below that facade, inside the instrumented
+provider. Hooks use private scheduler state and replica message/accounting types;
+their packages cannot depend back on a facade that depends on those packages.
+Platform's provider/build inputs must own that seam before manifest routing is
+complete. Import renaming or a consumer-gate exemption is insufficient.
+
+The independent recorder remains IC-free. Recording, reports, retention,
+workloads and viewer policy stay Profiler-owned. Provider adapters project
+observations into it without feeding physical observations into execution or
+billing. Public principal/DTO identities and external Candid bytes stay intact.
+
+Cargo and Bazel must select the same assembled provider. Acceptance requires its
+actual native graph, exact type/source identities, reproducible assembly, a newly
+built executable and all five `system_profiling` regressions against its recorded
+hash. Default and actual Wasm deployment graphs must exclude it. Root metadata,
+recorder tests, facade-only smoke tests and historical binary receipts cannot
+substitute for native acceptance.
+
+On 2026-10-27, locked/offline metadata confirmed Platform's registry PocketIC
+16.1.0 selection. The assembled Profiler workspace could not resolve offline:
+the pinned `dfinity-lab/build-info` revision
+`27ba16a68aa312de66f2ebd0f16665f1429eee36` was unavailable in the local cache.
+Its latest local build receipt separately records exit 101 and no artifacts;
+the successful extraction receipt is historical evidence only. This inspection
+establishes neither a new server build nor a native runtime pass.
+
 ## Optional BLAKE3 maintenance boundary
 
 This surface is supplied by published Platform 0.6.18. Earlier releases do not

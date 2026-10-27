@@ -13,6 +13,11 @@
 - Admit gzip's independent native-only feature in dependency-graph validation,
   while retaining Principal prerequisites for other native features and strict
   target/dependency checks ([#71](https://github.com/dragginzgame/ic-platform/pull/71)).
+### 🔧 Changed
+
+- Adopt Shared Tooling 0.26.26 and its visible formatting passes while preserving
+  grouped manifests, all standalone Rust fixtures and edition 2024. Qualify
+  check/write behavior, failure stopping and isolated staged-hook formatting.
 
 ## [0.7.0] - 2026-10-27
 

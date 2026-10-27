@@ -241,8 +241,11 @@ The root catalog has `Production dependencies` and `Tests and tooling only`
 sections. Fixture-only selections stay in the second section and outside the
 consumer library's production graph.
 `fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
-sections with grouped ordering. The reviewed Shared 0.26.8 snapshot supports
-this through the paired local formatting commands.
+sections with grouped ordering. Shared 0.26.26 owns the formatting passes;
+Platform selects its existing standalone Rust source roster and edition 2024
+through `FORMAT_RUST_ARGS`. These selections run uncached and show per-pass
+timings. `make check-formatting` qualifies the actual Make policy and staged hook
+in an isolated fixture, including standalone sources and failure stopping.
 Keep a blank line after each section heading so sorting preserves its position.
 The common Rust tool set now contains only cargo-sort and cargo-sort-derives;
 this repository has no Candid extraction command requiring a selected extractor.
