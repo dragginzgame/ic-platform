@@ -1,5 +1,10 @@
 # ic-platform
 
+Enable `gzip` for native `ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`.
+These are IC Tooling's existing bounded codecs, without backend types or a second
+implementation. Consumers retain compression levels, byte limits and artifact
+admission. The optional dependency is absent from Wasm and default graphs.
+
 Published 0.6.20 provides optional `cmc-types`,
 `icp-ledger-types`, `cycles-ledger-types`, `nns-registry-types` and native-only
 `certified-assets-types` surfaces. These retain external Candid and add no service

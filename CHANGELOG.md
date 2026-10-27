@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1]
+
+### ➕ Added
+
+- Expose optional native bounded gzip encoding/decoding through IC Tooling's
+  existing codec for IC Profiler, retaining consumer-owned levels and limits
+  without direct compression-backend dependencies in the consumer.
+
 ## [0.7.0] - 2026-10-27
 
 ### ⚠️ Breaking

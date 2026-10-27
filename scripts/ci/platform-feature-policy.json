@@ -2,7 +2,7 @@
   "features": [
     "agent", "blake3", "bls", "candid", "candid-parser", "candid-service",
     "canister-sig-creation", "cdk", "certification", "certified-assets-types",
-    "cmc-types", "cycles-ledger-types", "default", "ecdsa", "ed25519", "executor",
+    "cmc-types", "cycles-ledger-types", "default", "ecdsa", "ed25519", "executor", "gzip",
     "ic0", "icp-ledger-types", "icrc-ledger-types", "management-canister-types",
     "nns-registry-types", "pocket-ic", "principal", "runtime", "secp256k1",
     "signature-verification", "stable-structures", "wire-schema"
@@ -10,6 +10,7 @@
   "native_leaves": {
     "agent": ["ic-agent"],
     "candid-parser": ["candid_parser"],
+    "gzip": ["ic-host-artifacts"],
     "pocket-ic": ["pocket-ic"],
     "secp256k1": ["ic-secp256k1"],
     "wire-schema": ["ic-wire-metadata", "serde_json"]
