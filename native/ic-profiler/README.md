@@ -15,6 +15,11 @@ assembly, checks or builds. The consumer's `.build` holds generated integration,
 targets and immutable receipts. Useful previous assemblies must be retained when
 migrating from a consumer-owned backend.
 
+`scripts/ic_profiler.py native-verify` owns the complete native gate: prerequisite
+and graph admission, server build, recorder tests and the five profiling tests
+against that exact server. Profiling tests serialize their whole-server recording
+windows; independent workloads must not contaminate one another's cycle totals.
+
 The provider's `profiler/` sources and the consumer's `profiler/` sources merge at
 the declared IC destination. Overlapping files are rejected. Their separate
 origins and digests enter the assembly identity, together with the IC pin and all
