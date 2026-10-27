@@ -5,6 +5,15 @@ Record agreed versions, identities and migration requirements in this contract
 and the existing dependency inventory. There is no central approval queue or
 mandatory cross-repository acknowledgement before independent work proceeds.
 
+## External DTO additions for Canic
+
+The pending compatible 0.6.20 work supplies optional CMC, legacy ICP, Cycles
+Ledger, NNS Registry and native certified-asset contract modules. See the
+[external contract and migration guide](external-contracts.md) for exact features,
+import mappings, pinned schema/license provenance and qualification commands.
+No published supplying version or consumer adoption is claimed yet. Required
+external Candid remains; Canic retains effects, limits, retry bytes and policy.
+
 ## Optional BLAKE3 maintenance boundary
 
 This surface is supplied by published Platform 0.6.18. Earlier releases do not
@@ -76,7 +85,18 @@ verification completed on 2026-10-26; evidence is recorded in
 [Platform #57](https://github.com/dragginzgame/ic-platform/issues/57). This npm
 release identity is independent of Rust package versions and `make publish`.
 Published-package and installed consumer acceptance remain separate requirements.
-The implementation is committed at `8d80630` (Rust 0.6.17). Browser CI at that
+
+The pending additive browser update for
+[Platform #59](https://github.com/dragginzgame/ic-platform/issues/59) supplies
+`Endpoint`, `SubmitRequestType`, `ReadRequestType` and `Expiry` through `/agent`.
+Auth's signing-request fixtures may replace their `@icp-sdk/core/agent` imports
+with `@tokostudios/ic-platform/agent` after a compatible npm version containing
+these exports is published and admitted in Auth's own graph. Published 0.1.0
+does not contain them. Keep request authorization, expiry selection and guarded
+identity policy at Auth; Platform retains upstream identities and implementation.
+This Rust 0.6.20 preparation does not bump or publish the independent npm package.
+
+The initial browser implementation is committed at `8d80630` (Rust 0.6.17). Browser CI at that
 commit passes on Linux x86_64 and native macOS Intel/Apple Silicon, including
 packed-provider and Chromium page/module-worker checks under the earlier
 unpublished npm name. The maintainer selected the actual `tokostudios` npm scope;

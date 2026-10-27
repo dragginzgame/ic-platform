@@ -21,6 +21,13 @@ boundary does not remove the transitive SDK or promise a smaller bundle.
 | `/certification` | SDK Certificate verification and lookup identities; lookup alone is not authentication |
 | `/candid` | SDK IDL for required external protocols |
 
+The pending browser update also exposes SDK `Endpoint`, `SubmitRequestType`,
+`ReadRequestType` and `Expiry` through `/agent` for consumers constructing
+requests for `Identity.transformRequest`. These are unchanged upstream identities;
+they introduce no signing authority, expiry policy or network dispatch. Published
+0.1.0 does not supply these four names. Consumers must wait for the next compatible
+npm release before removing their direct SDK dependency for these imports.
+
 There is no root barrel, actor generator or alternative transport/codec. Exported
 SDK classes retain their public methods; these explicit names do not make every
 inherited SDK method a Platform-owned implementation. Export-map changes and SDK

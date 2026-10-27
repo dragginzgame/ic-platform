@@ -1,5 +1,11 @@
 # ic-platform
 
+The pending external DTO additions provide optional `cmc-types`,
+`icp-ledger-types`, `cycles-ledger-types`, `nns-registry-types` and native-only
+`certified-assets-types` surfaces. These retain external Candid and add no service
+engine or policy. See the [exact contract and migration guide](../../docs/external-contracts.md).
+Publication and consumer qualification are separate from local preparation.
+
 Enable `stable-structures` for explicit upstream 0.7.2 collection, Memory,
 Storable/codec, iterator, restricted, vector-backed and memory-manager identities. Storage owns
 governed constructors; Memory owns allocation; Testkit owns instrumentation.

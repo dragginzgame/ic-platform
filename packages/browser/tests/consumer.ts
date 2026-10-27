@@ -2,6 +2,7 @@ import { Principal, parseCanonicalPrincipal } from '@tokostudios/ic-platform/pri
 import { Ed25519KeyIdentity, restoreEd25519Identity } from '@tokostudios/ic-platform/identity';
 import { Secp256k1KeyIdentity, restoreSecp256k1Identity } from '@tokostudios/ic-platform/identity/secp256k1';
 import { HttpAgent, createAgentOptions, queryRaw, IC_ROOT_KEY, Cbor, type Identity } from '@tokostudios/ic-platform/agent';
+import { Endpoint, SubmitRequestType, ReadRequestType, Expiry } from '@tokostudios/ic-platform/agent';
 import { Certificate, lookupResultToBuffer } from '@tokostudios/ic-platform/certification';
 import { IDL } from '@tokostudios/ic-platform/candid';
 
@@ -13,6 +14,25 @@ export async function smoke() {
     throw new Error('Secp identity mismatch');
   }
   const target: Principal = parseCanonicalPrincipal('2vxsx-fae');
+  const expiry = Expiry.fromJSON('{"__expiry__":"100000000000"}');
+  if (expiry.toBigInt() !== 100000000000n || !Expiry.isExpiry(expiry)) throw new Error('Expiry changed');
+  const common = { sender: identity.getPrincipal(), ingress_expiry: expiry };
+  const method = { canister_id: target, method_name: 'wire_method', arg: Uint8Array.of(1, 2) };
+  const signingRequests: Parameters<Identity['transformRequest']>[0][] = [
+    { endpoint: Endpoint.Call, request: { method: 'POST' },
+      body: { ...common, ...method, request_type: SubmitRequestType.Call } },
+    { endpoint: Endpoint.Query, request: { method: 'POST' },
+      body: { ...common, ...method, request_type: ReadRequestType.Query } },
+    { endpoint: Endpoint.ReadState, request: { method: 'POST' },
+      body: { ...common, request_type: ReadRequestType.ReadState, paths: [[Uint8Array.of(1)]] } },
+  ];
+  for (const request of signingRequests) {
+    const signed = await identity.transformRequest(request);
+    if (typeof signed !== 'object' || signed === null || !('body' in signed) ||
+        typeof signed.body !== 'object' || signed.body === null ||
+        !('sender_sig' in signed.body) || !(signed.body.sender_sig instanceof Uint8Array) ||
+        signed.body.sender_sig.length === 0) throw new Error('Signing request failed');
+  }
   const rootKey = Uint8Array.from(IC_ROOT_KEY.match(/../g)!, pair => Number.parseInt(pair, 16));
   const arg = Uint8Array.of(0x49, 0x43, 0x57, 7);
   const reply = Uint8Array.of(3, 2, 1);

@@ -3,11 +3,15 @@ import test from 'node:test';
 import { Principal as SdkPrincipal } from '@icp-sdk/core/principal';
 import { Ed25519KeyIdentity as SdkEd25519 } from '@icp-sdk/core/identity';
 import { Secp256k1KeyIdentity as SdkSecp256k1 } from '@icp-sdk/core/identity/secp256k1';
-import { HttpAgent as SdkAgent, Certificate as SdkCertificate } from '@icp-sdk/core/agent';
+import {
+  HttpAgent as SdkAgent, Certificate as SdkCertificate, Endpoint as SdkEndpoint,
+  SubmitRequestType as SdkSubmitRequestType, ReadRequestType as SdkReadRequestType, Expiry as SdkExpiry,
+} from '@icp-sdk/core/agent';
 import { Principal, parseCanonicalPrincipal, PrincipalTextError } from '../dist/principal.js';
 import { Ed25519KeyIdentity, restoreEd25519Identity, IdentityImportError } from '../dist/identity.js';
 import { Secp256k1KeyIdentity, restoreSecp256k1Identity } from '../dist/secp256k1.js';
 import { HttpAgent, createAgentOptions, queryRaw, Cbor, requestIdOf, RejectError, IC_ROOT_KEY } from '../dist/agent.js';
+import { Endpoint, SubmitRequestType, ReadRequestType, Expiry } from '../dist/agent.js';
 import { Certificate } from '../dist/certification.js';
 import { IDL } from '../dist/candid.js';
 
@@ -46,6 +50,36 @@ test('identity restoration retains SDK keys/signatures and refuses mismatched pa
         return true;
       });
     }
+  }
+});
+
+test('signing requests retain SDK endpoint, expiry and signed-envelope identities', async () => {
+  assert.equal(Endpoint, SdkEndpoint);
+  assert.equal(SubmitRequestType, SdkSubmitRequestType);
+  assert.equal(ReadRequestType, SdkReadRequestType);
+  assert.equal(Expiry, SdkExpiry);
+  const json = '{"__expiry__":"100000000000"}';
+  const expiry = Expiry.fromJSON(json);
+  assert.equal(expiry.toBigInt(), 100000000000n);
+  assert.equal(JSON.stringify(expiry), json);
+  assert.deepEqual(expiry.toHash(), SdkExpiry.fromJSON(json).toHash());
+  const identity = Ed25519KeyIdentity.fromSecretKey(new Uint8Array(32).fill(7));
+  const sdkIdentity = SdkEd25519.fromSecretKey(new Uint8Array(32).fill(7));
+  const sender = identity.getPrincipal();
+  const canister_id = Principal.anonymous();
+  const ingress_expiry = expiry;
+  const method = { canister_id, method_name: 'wire_method', arg: Uint8Array.of(1, 2) };
+  for (const [endpoint, body] of [
+    [Endpoint.Call, { ...method, request_type: SubmitRequestType.Call, sender, ingress_expiry }],
+    [Endpoint.Query, { ...method, request_type: ReadRequestType.Query, sender, ingress_expiry }],
+    [Endpoint.ReadState, { request_type: ReadRequestType.ReadState, paths: [[Uint8Array.of(1)]], sender, ingress_expiry }],
+  ]) {
+    const request = { endpoint, request: { method: 'POST' }, body };
+    const original = Cbor.encode(body);
+    const signed = await identity.transformRequest(request);
+    assert.deepEqual(signed, await sdkIdentity.transformRequest(request));
+    assert.deepEqual(signed.body.content, body);
+    assert.deepEqual(Cbor.encode(request.body), original);
   }
 });
 

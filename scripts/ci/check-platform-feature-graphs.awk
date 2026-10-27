@@ -42,8 +42,9 @@ function reject(reason) {
     certification = pocket || creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
-    candid = pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger
-    principal = enabled("wire-schema") || enabled("principal") || cdk || enabled("runtime") || creation || enabled("candid") || enabled("candid-service") || management || ledger || enabled("agent") || enabled("candid-parser") || enabled("pocket-ic") || enabled("secp256k1")
+    external_dto = enabled("cmc-types") || enabled("icp-ledger-types") || enabled("cycles-ledger-types") || enabled("nns-registry-types") || enabled("certified-assets-types")
+    candid = pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
+    principal = enabled("wire-schema") || enabled("principal") || cdk || enabled("runtime") || creation || enabled("candid") || enabled("candid-service") || management || ledger || external_dto || enabled("agent") || enabled("candid-parser") || enabled("pocket-ic") || enabled("secp256k1")
     minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
     found_storage = 0
     found_ed = 0

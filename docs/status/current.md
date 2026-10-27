@@ -1,125 +1,105 @@
 # Current handoff
 
-## Source and released boundaries
+## Source and release boundaries
 
-Baseline is released Platform 0.6.18 (`98a2a8a`). Compatible working-tree notes
-use 0.6.19; own package versions and Git refs are unchanged. The incoming staged
-advisory repair and root Wire 0.7.16 lock update are preserved without staging edits.
-No commit, push, release or publication was performed in this batch. Sibling
-checkouts remain read-only. Shared Tooling is now 0.26.20 at
-`a7f85d45d4212d4c39225f58597580560a333550`, exported canonically with 106 payloads.
+Baseline is released Platform 0.6.19 (`0502bce`), plus merged changelog-only
+[PR #60](https://github.com/dragginzgame/ic-platform/pull/60) at `c75fdff`.
+Compatible pending notes target 0.6.20; own Rust/npm package versions are unchanged.
+Shared Tooling 0.26.21 at `66c91c4412856baa147482e648fc80428db8b179` is adopted
+locally through the canonical exporter (106 payloads). Existing snapshot/browser
+work and unrelated root lock edits are preserved. No staging, new commit, push,
+release, publication, deployment or paid operation was performed for this batch.
+Sibling checkouts remain read-only.
 
-## Current adoption
+## External DTO supply (#61–64)
 
-Both workspace Wire requirements now select at least published 0.7.16. The
-incoming root lock was already at that version and is byte-identical to the
-starting input; the separate runtime lock moves only Wire/derive from 0.7.2 to
-0.7.16. No sibling checkout or cryptographic dependency selection was changed.
+Five optional modules now supply selected external Candid contracts without any
+new package dependency or service engine: CMC top-up/mint/rates, legacy ICP
+transfer/encoded blocks, Cycles Ledger creation/withdrawal, Registry subnet lookup
+and native-only certified-asset reads. Defaults, runtime and executor do not imply
+these features. Asset exports are absent on Wasm; its explicit Candid prerequisite
+remains if that feature is selected there. No feature implies a host parser.
 
-Shared's new SDK checker is used on the actual packed consumer manifests and
-TS proof sources in both standalone and provider phases. It is not applied to
-Platform's browser producer, which deliberately owns the direct SDK dependency.
-Provider overrides/transitives retain their separate identity qualification.
-The compact baseline makes detailed accounting optional; local full-Clippy-first
-ordering remains the maintainer's explicit requirement. Existing full CI/release
-gates remain intact; no docs-only hosted routing or sibling SDK enforcement is
-claimed by this snapshot adoption. Prior #56 evidence below predates Wire adoption.
+The [external contract guide](../external-contracts.md) owns exact feature/import
+mappings, source/license provenance, pinned DID hashes, projection differences and
+consumer qualification. Required external Candid is preserved. Rate/tree/certificate
+fields, asset `content_type`, exact archive query signatures, unbounded nats,
+creation duplicate/refund evidence and all withdrawal rejection variants are retained.
+Cycles Ledger creation settings are distinct from management/current CMC settings.
+Registry uses `Some(target)` for both quotation/submission; its canonical optional
+field changes request bytes relative to Canic's old required-principal projection.
+Upstream subtyping admits the old request, but that is not byte identity.
 
-Qualification passed: full `make clippy` before longer tests; snapshot integrity,
-inventory and formatting; actual grouped release metadata and pending changelog
-admission; packed browser consumers and a direct-SDK-import rejection probe;
-Rust 1.91 Principal/Account Rust–TypeScript frames and malformed-input refusals;
-native/Wasm runtime dependency graphs and runtime canister compilation. The
-`wire-schema` Wasm check passes with host metadata excluded; default, executor
-and runtime graphs remain free of Wire metadata. Evidence is retained under
-`target/principal-wire-schema.65A45J`, `target/browser-consumer.AcM6I9`,
-`target/adoption-sdk-refusal.3Uq71f`, `target/adoption-graphs` and
-`target/cdk-runtime.q2i5k1`; logs are `/tmp/platform-adoption-*.log`.
-The packed browser archive still matches published npm 0.1.0. Native macOS,
-fresh Chromium, installed-canister acceptance and full release CI were not run
-for this adoption. No performance or Wasm-size improvement is claimed.
+CMC/ICP/Cycles/asset declarations are narrowly schema-derived with retained Apache
+licenses. Registry's DID is under an IC-1.0 ancestor; it is not imported or
+mislabelled Apache. Its tiny public protocol facts are independently expressed in
+Platform Rust/tests. No service implementation or cryptographic body is copied.
+These are Platform-maintained DTOs, not upstream Rust struct identities.
 
-Published Rust 0.6.18 supplies the optional upstream BLAKE3 boundary. Existing
-hash formats, domain policies, cryptographic bodies and executor/IC0 identities
-are unchanged. [IcyDB #467](https://github.com/dragginzgame/icydb/issues/467) owns
-routing its existing uses; [Tooling #252](https://github.com/dragginzgame/ic-tooling/issues/252)
-owns the bounded private-cache evaluation. Previous measurements and constraints
-remain in the [migration contract](../migration.md#optional-blake3-maintenance-boundary).
+Full `make clippy` passed before longer tests. Standalone consumers declare only
+Platform: portable CMC/ICP/Cycles/Registry tests (4) and native asset tests (1)
+pass on native and Rust 1.91, with corresponding Wasm compilation. Native schema
+proofs (5) pass on native/MSRV, comparing complete selected types against pinned
+DIDs and Registry protocol facts. First schema attempt exposed an unquoted
+reserved field in the test input; corrected proof passes, earlier failure retained.
+Asset tests exercise first/chunk responses, bounds, missing/wrong digest and wrong
+encoding through an explicitly consumer-owned fixture policy, not Platform defaults.
 
-The browser supplier is published `@tokostudios/ic-platform` 0.1.0 / Core 6.1.1;
-[Platform #57](https://github.com/dragginzgame/ic-platform/issues/57) is closed.
-Public archive integrity and a fresh registry-only consumer were verified.
-[Blob #103](https://github.com/dragginzgame/ic-blob-storage/issues/103) and
-[Canic #637](https://github.com/dragginzgame/canic/issues/637) retain actual adoption.
-Do not repeat npm publication for this Rust patch. #58's acknowledgement/routing
-queue was withdrawn; compatibility decisions stay with existing owners/docs.
+Evidence: `target/boundary-consumer.yPe7An` (portable),
+`target/boundary-consumer.1wsIeE` (assets),
+`target/boundary-consumer.O62pVF` (schema), `target/external-contract-graphs`;
+logs under `/tmp/platform-61-64`. Actual native/Wasm default/executor/runtime and
+all five DTO feature graphs pass. Graph refusal regressions and the updated
+feature-selection model pass. Source fixture hashes, root lock preservation,
+snapshot/inventory/documentation and pending changelog admission were checked.
+`target/assets-wasm-refusal.dbJJNN` proves the host asset API cannot be imported
+on Wasm; package listing includes every new DTO module and retained license.
+Native macOS, installed services, full release CI and Canic recovery/payment
+qualification were not run. No size/performance improvement is claimed.
 
-## Advisory index repair (#56)
+#61–64 remain open: no supplying publication or Canic adoption is claimed.
+The maintainer must release the supplying version before Canic removes mirrors;
+Canic retains target authority, limits, original uncertain retry bytes, journals,
+fees/refunds, receipt authentication and frontend acceptance.
 
-The local fix prepares both captured maintained locks before auditing. Online
-mode creates an isolated Cargo home, fetches the locked workspace and reuses the
-existing runtime `--prepare` operation for its template-generated workspace.
-It compiles nothing and avoids the user's shared package-cache lock. This is
-Cargo's supported dependency fetch, including crate sources, not an index-only
-fetch or a new registry implementation. CI explicitly prepares common host tools
-needed by the existing runtime renderer.
+## Pending browser extension (#59)
 
-Audits retain `--no-fetch` against the isolated committed RustSec database.
-Raw audit exit codes remain in `*.status`; independent `*.index-status` records
-complete/incomplete yanked observations. Missing records/index failures reject
-coverage even if cargo-audit exits zero. Existing vulnerability/warning policy
-is unchanged; no finding is ignored. Preparation errors and concurrent maintained
-lock changes stop before audit. Offline mode fetches nothing and claims no freshness.
+Explicit `/agent` exports include upstream `Endpoint`, `SubmitRequestType`,
+`ReadRequestType` and `Expiry`, matching Auth's actual signing-request fixtures.
+SDK Core remains exactly 6.1.1; cryptographic implementation and policy stay upstream.
+Full Clippy, all 16 browser adapter/graph tests, strict packed consumers and
+Chromium page/module-worker checks passed. Signing requests preserve exact SDK
+identities, expiry serialization and signed envelopes for call/query/read-state.
+Logs: `/tmp/platform-0620-{clippy,browser,chromium}.log`; evidence:
+`target/browser-consumer.891Oy8` and `target/browser-consumer.JWXVZk`.
+Published npm 0.1.0 lacks these exports; a compatible npm release and Auth's own
+consumer qualification remain required. No npm bump/publication was performed.
+Earlier browser supply is recorded in closed #57; Blob #103 and Canic #637 retain
+actual adoption. Local producer proofs do not establish consumer acceptance.
 
-Full all-target/all-feature Clippy passed before longer tests. Adapter fixtures,
-Bash syntax, ShellCheck and workflow lint pass. Real cold-cache preparation/audit
-uses RustSec `21d909e4c8bd4e14c7aea58bf980c881a0053ab1`: both index observations
-are complete with no lookup errors; workspace audit exits 1 for #50, runtime 0.
-A real yanked crypto-bigint 0.7.8 fixture reports the expected warning. A real
-empty-cache probe gives raw audit status 0 for both locks but adapter status 1
-with incomplete coverage. Locks were unchanged during that qualification; the
-subsequent Wire-only updates are described above.
-The integrated `make test` target, including adapter regressions, Rust unit tests
-and doctests, passes; log `/tmp/platform-issues-tests.log`.
+## Released advisory repair (#56) and crypto blocker (#50)
 
-Evidence: `target/issues-38-50-56/online-audit-final`, `yanked.log` and
-`missing-index-probe`; `/tmp/platform-issue56-online-final.log` and
-`/tmp/platform-issues-clippy.log`. The first preparation attempt exposed the
-runtime's template-only layout; it is retained separately as `online-audit`.
-The corrected path reuses the existing preparer without duplicating its renderer.
-Native all-target/all-feature and Wasm all-feature checks pass at Rust 1.91;
-logs are `/tmp/platform-issues-{msrv,wasm}.log`. Native macOS, hosted execution of
-the changed advisory workflow and full release/installed CI are not claimed.
-#56 stays open until the fix lands on the default branch.
+The #56 fix is present on released main in 0.6.19. Both maintained audit inputs
+are prepared using isolated locked Cargo fetches without compilation. Raw audit
+statuses and complete/incomplete index observations remain separate; missing
+records reject coverage even if cargo-audit exits zero. Offline mode claims no
+freshness. Evidence: `target/issues-38-50-56/online-audit-final`, `yanked.log`,
+`missing-index-probe`; `/tmp/platform-issue56-online-final.log`.
+The real workspace failure for crypto-bigint remains visible; runtime audit passed.
 
-## Crypto advisory (#50)
-
-Fresh registry records still show crypto-bigint 0.5.5 as the latest non-yanked
-0.5 release. Agent 0.49.3 and exact ic-secp256k1 0.3.0 retain K256/P256 0.13;
-elliptic-curve 0.13.8 requires crypto-bigint ^0.5. The advisory still lists
->=0.7.6 as patched. Newer K256/P256/elliptic-curve families have different exposed
-identities and do not provide a compatible fix to all three paths.
-
-Locked native normal/build graphs select affected arithmetic under `ecdsa`,
-`agent` and `secp256k1`, excluding it from default/executor/runtime profiles.
-Agent's K256/P256 identities sign with resident private keys; there is no basis
-for a blanket verification-only exemption. The completed audit keeps the real
-failure visible. No cryptographic body, cryptographic dependency constraint,
-type identity or exemption changed. Registry records, graphs and lock hashes
-are retained under `target/issues-38-50-56`. #50 remains unresolved under the
-existing compatibility, no-Agent-fork and no-in-house-cryptography constraints.
+#50 remains unresolved. Agent 0.49.3 and exact ic-secp256k1 0.3.0 retain the
+K256/P256/elliptic-curve 0.13 family and affected crypto-bigint 0.5.5; the previously
+observed patch is >=0.7.6. Resident private-key signing prevents a blanket
+verification-only exemption. No compatible correction, exemption, Agent fork or
+in-house cryptographic replacement is supplied. Prior graphs/registry records
+remain under `target/issues-38-50-56`; they are not a fresh feed check this batch.
 
 ## Compiler retirement (#38)
 
-Canic's default-branch frontend still imports/calls Platform's JS/TS compiler
-exports. Published Canic Host 0.111.0 still generates Candid bindings through its
-older direct parser dependency. The dirty working tree at `cf2d3d1fb` has removed
-those calls for Wire, but its handoff says the batch is not push-ready and defers
-builds/tests; [Canic #613](https://github.com/dragginzgame/canic/issues/613) is open.
-That source preparation is not live consumer adoption or installed acceptance.
-
-The compiler exports remain intact. Retirement requires the agreed consumer
-adoption and an explicit breaking release, rather than this compatible patch.
-Host's bounded external service inspection and Canic's textual external/init
-arguments still need parsing/typechecking. No parser fork, dependency-removal or
-size improvement is claimed. No sibling source or build was changed.
+The earlier Canic audit found live JS/TS compiler calls on its default branch;
+its working Wire migration was not qualified adoption. Retirement still requires
+actual consumer adoption and an authorized breaking boundary. Host's bounded
+external service inspection and textual external/init arguments retain parsing.
+No parser fork, compiler hard cut or dependency/size reduction is claimed here.
+Previous Wire 0.7.16 qualification is retained in `/tmp/platform-adoption-*.log`
+and its migration contract; this batch does not claim a fleet Wire upgrade.

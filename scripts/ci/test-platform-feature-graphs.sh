@@ -56,6 +56,16 @@ cdk|candid_derive v0.10.38|reject
 cdk,candid|candid v0.10.38|pass
 none|candid_derive v0.10.38|reject
 candid|candid v0.10.38|pass
+cmc-types|candid v0.10.38|pass
+icp-ledger-types|candid_derive v0.10.38|pass
+cycles-ledger-types|ic_principal v0.1.5|pass
+nns-registry-types|serde v1.0.229|pass
+certified-assets-types|candid v0.10.38|pass
+cmc-types|candid_parser v0.4.1|reject
+cycles-ledger-types|ic-cdk v0.19.0|reject
+icp-ledger-types|icrc-ledger-types v0.2.0|reject
+certified-assets-types|ic-agent v0.49.3|reject
+nns-registry-types|pocket-ic v16.1.0|reject
 candid-service|candid v0.10.38|pass
 candid|pretty v0.12.5|reject
 cdk,candid|pretty v0.12.5|reject

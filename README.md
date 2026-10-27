@@ -48,6 +48,11 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer-error and block/archive/certificate types; no storage integration |
 | `management-canister-types` | Upstream 0.11.0 HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
+| `cmc-types` | External CMC top-up, mint notification and certified rate DTOs; implies Candid, no payment policy |
+| `icp-ledger-types` | Legacy ICP transfer and encoded-block/archive DTOs; implies Candid, no ledger engine or CDK |
+| `cycles-ledger-types` | External Cycles Ledger creation and withdrawal DTOs, including its distinct creation settings; implies Candid |
+| `nns-registry-types` | Exact optional-principal Registry subnet lookup DTOs; implies Candid, no topology policy |
+| `certified-assets-types` | Native-only asset get/get_chunk DTOs; implies Candid, no verification or host transport |
 | `signature-verification` | Imported canister-signature verification with optional authenticated time result; certification/BLS, no Candid/ic0, executor or host transport |
 | `pocket-ic` | Native PocketIC client identities; Testkit retains server lifecycle and policy |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |

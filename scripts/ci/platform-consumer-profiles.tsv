@@ -21,3 +21,6 @@ runtime	runtime	runtime_consumer	-	check
 secp256k1	secp256k1	secp256k1_consumer	-	check
 pocket-ic	pocket-ic	pocket_ic_consumer	-	check
 stable-structures	stable-structures	stable_structures_consumer	-	check
+external-contracts	cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types	external_contract_consumer	-	check
+asset-contracts	certified-assets-types	asset_contract_consumer	-	check
+external-contract-schema	cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types,certified-assets-types,candid-parser	external_contract_schema	external-*.did	skip

@@ -13,12 +13,26 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+The pending 0.6.20 external DTO additions are maintained from pinned protocol
+schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,
+`nns_registry_types` and native-only `certified_assets_types`. Each has its own
+optional `*-types` feature selecting Candid, without service engines, host
+transport, executor or storage dependencies. Canic Core/Host are the requesting
+consumers; no sibling adoption is claimed. Complete source/license provenance,
+intentional projection differences and migration mappings are in the
+[external contract guide](external-contracts.md). These are Platform-maintained
+Rust DTO identities, not re-exported upstream Rust structs. Required external
+Principal/Nat/function and wire identities remain Candid's.
+
 The separate ESM package `packages/browser` owns the browser SDK Core boundary
 under published npm identity `@tokostudios/ic-platform` 0.1.0. Its sole production
 dependency is exactly `@icp-sdk/core` 6.1.1 for Blob's local 0.48 graph.
 Canic's SDK-5/Auth-8 handoff needs a coordinated migration before adoption.
 Explicit subpaths expose Principal, Ed25519/secp256k1
 identities, Agent/request APIs, certificates and required external Candid.
+The pending #59 browser extension adds explicit upstream `Endpoint`,
+`SubmitRequestType`, `ReadRequestType` and `Expiry` identities under `/agent`;
+published 0.1.0 does not supply them. No SDK selection or crypto body changes.
 Owned non-cryptographic adapters cover canonical text, checked key-pair import,
 explicit trust/Agent options and raw query errors. SDK crypto, hashing, key
 encoding and classes remain upstream; trust, limits, intents and application
@@ -146,13 +160,18 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | canister-sig-creation | dep:ic-certification, dep:sha2, principal |
 | ic-platform | cdk | dep:ic-platform-macros, runtime |
 | ic-platform | certification | dep:ic-certification |
+| ic-platform | certified-assets-types | candid |
+| ic-platform | cmc-types | candid |
+| ic-platform | cycles-ledger-types | candid |
 | ic-platform | default |  |
 | ic-platform | ecdsa | dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
 | ic-platform | executor | dep:ic-cdk-executor |
 | ic-platform | ic0 | dep:ic0 |
+| ic-platform | icp-ledger-types | candid |
 | ic-platform | icrc-ledger-types | dep:icrc-ledger-types, principal |
 | ic-platform | management-canister-types | dep:ic-management-canister-types, principal |
+| ic-platform | nns-registry-types | candid |
 | ic-platform | pocket-ic | dep:pocket-ic, principal |
 | ic-platform | principal | dep:crc32fast, dep:data-encoding, dep:ic_principal, dep:serde |
 | ic-platform | runtime | dep:pin-project-lite, dep:thiserror, executor, ic0, principal |

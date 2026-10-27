@@ -105,7 +105,7 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
 .PHONY: check-inventory
 check-inventory:
 	bash scripts/ci/check-platform-inventory.sh

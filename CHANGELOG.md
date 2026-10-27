@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.6.20]
+
+### ➕ Added
+
+- Supply optional CMC, legacy ICP Ledger and Cycles Ledger contracts without
+  service engines. Preserve rate certificates, archive callback signatures and
+  complete creation/withdrawal refund and duplicate evidence
+  ([#61](https://github.com/dragginzgame/ic-platform/issues/61),
+  [#62](https://github.com/dragginzgame/ic-platform/issues/62)).
+- Supply canonical NNS Registry subnet-lookup and native certified-asset read
+  DTOs, including the optional Registry target and asset content type. Consumer
+  adoption requires publication and owner qualification
+  [#63](https://github.com/dragginzgame/ic-platform/issues/63),
+  [#64](https://github.com/dragginzgame/ic-platform/issues/64).
+- Prepare explicit browser SDK signing-request and expiry exports for Auth's
+  guarded-identity tests. Existing SDK identities and signing behavior are
+  preserved; adoption requires a separate compatible npm release
+  ([#59](https://github.com/dragginzgame/ic-platform/issues/59)).
+
 ## [0.6.19] - 2026-10-26
 
 ### 📝 Summary

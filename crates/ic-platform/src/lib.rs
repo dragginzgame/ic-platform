@@ -53,6 +53,12 @@ pub mod canister_sig_creation;
 pub mod cdk;
 #[cfg(feature = "certification")]
 pub mod certification;
+#[cfg(all(feature = "certified-assets-types", not(target_family = "wasm")))]
+pub mod certified_assets_types;
+#[cfg(feature = "cmc-types")]
+pub mod cmc_types;
+#[cfg(feature = "cycles-ledger-types")]
+pub mod cycles_ledger_types;
 #[cfg(feature = "ecdsa")]
 pub mod ecdsa;
 #[cfg(feature = "ed25519")]
@@ -61,6 +67,10 @@ pub mod ed25519;
 pub mod executor;
 #[cfg(feature = "ic0")]
 pub mod ic0;
+#[cfg(feature = "icp-ledger-types")]
+pub mod icp_ledger_types;
+#[cfg(feature = "nns-registry-types")]
+pub mod nns_registry_types;
 
 #[cfg(feature = "icrc-ledger-types")]
 pub mod icrc_ledger_types;

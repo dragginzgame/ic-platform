@@ -5,6 +5,7 @@ import {
 import { Principal } from '@icp-sdk/core/principal';
 
 export { HttpAgent, IC_ROOT_KEY, Cbor, requestIdOf, RejectError, UncertifiedRejectErrorCode } from '@icp-sdk/core/agent';
+export { Endpoint, SubmitRequestType, ReadRequestType, Expiry } from '@icp-sdk/core/agent';
 export type { Agent, Identity, HttpAgentOptions, SubmitResponse } from '@icp-sdk/core/agent';
 
 export type ExplicitAgentOptions = Omit<HttpAgentOptions,
