@@ -1,0 +1,48 @@
+diff --git a/crates/ic-platform/src/candid/sequence/mod.rs b/crates/ic-platform/src/candid/sequence/mod.rs
+index 7814c4e..9a94c35 100644
+--- a/crates/ic-platform/src/candid/sequence/mod.rs
++++ b/crates/ic-platform/src/candid/sequence/mod.rs
+@@ -25,13 +25,14 @@ where
+     D: Deserializer<'de>,
+     T: Deserialize<'de>,
+ {
+-    struct Visitor<T, X, E, const LIMIT: usize> {
++    struct Visitor<T, X, E> {
+         expected: X,
+         overflow: E,
+         item: PhantomData<T>,
++        limit: usize,
+     }
+-    impl<'de, T: Deserialize<'de>, X: fmt::Display, E: fmt::Display, const LIMIT: usize>
+-        de::Visitor<'de> for Visitor<T, X, E, LIMIT>
++    impl<'de, T: Deserialize<'de>, X: fmt::Display, E: fmt::Display> de::Visitor<'de>
++        for Visitor<T, X, E>
+     {
+         type Value = Vec<T>;
+ 
+@@ -43,11 +44,11 @@ where
+             self,
+             mut sequence: A,
+         ) -> Result<Self::Value, A::Error> {
+-            if sequence.size_hint().is_some_and(|size| size > LIMIT) {
++            if sequence.size_hint().is_some_and(|size| size > self.limit) {
+                 return Err(de::Error::custom(self.overflow));
+             }
+             let mut entries = Vec::new();
+-            while entries.len() < LIMIT {
++            while entries.len() < self.limit {
+                 match sequence.next_element()? {
+                     Some(entry) => entries.push(entry),
+                     None => return Ok(entries),
+@@ -59,9 +60,10 @@ where
+             Ok(entries)
+         }
+     }
+-    deserializer.deserialize_seq(Visitor::<T, _, _, LIMIT> {
++    deserializer.deserialize_seq(Visitor::<T, _, _> {
+         expected,
+         overflow,
+         item: PhantomData,
++        limit: LIMIT,
+     })
+ }

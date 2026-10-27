@@ -1,0 +1,5 @@
+comparison	recipe	before_optimized_bytes	after_optimized_bytes	delta_bytes
+principal-binary	3-fat-1	8157	8157	0
+principal-self-auth	3-fat-1	18612	17788	-824
+principal-binary	z-fat-1	7631	7631	0
+principal-self-auth	z-fat-1	17898	17099	-799

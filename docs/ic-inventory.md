@@ -180,7 +180,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | management-canister-types | dep:ic-management-canister-types, principal |
 | ic-platform | nns-registry-types | candid |
 | ic-platform | pocket-ic | dep:pocket-ic, principal |
-| ic-platform | principal | dep:crc32fast, dep:data-encoding, dep:ic_principal, dep:serde |
+| ic-platform | principal | dep:crc32fast, dep:data-encoding, dep:ic_principal, dep:serde, dep:thiserror |
 | ic-platform | runtime | dep:pin-project-lite, dep:thiserror, executor, ic0, principal |
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal |
 | ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor |

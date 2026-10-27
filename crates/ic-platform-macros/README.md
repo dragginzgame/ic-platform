@@ -33,4 +33,10 @@ Export names, lifecycle restrictions, guard order, tuple/unit custom-encoder
 arity and sync/async/query contexts retain the reviewed generator behavior.
 Async entries use Platform's preserved protected-spawn wrapper and the sole
 registry executor. `IC_CDK_DEBUG` retains opt-in expansion diagnostics.
+Automatic `encode_with` retains its `Vec<u8>` expectation, including inference for
+generic encoders. For a constant or fixed-size encoded response, `manual_reply`
+can pass a borrowed slice or array directly to `ic_platform::cdk::api::msg_reply`.
+It does not select a codec: the bytes must still satisfy the consumer's explicit
+Wire or required external protocol. Consumers own the exactly-once reply and
+encoding-failure behavior on this path.
 The support package and facade require coordinated next-minor publication.

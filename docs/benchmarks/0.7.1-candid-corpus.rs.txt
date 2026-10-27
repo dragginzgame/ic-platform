@@ -1,0 +1,50 @@
+use ic_platform::candid::{self, contract, DecodeError, DecodeLimits};
+use contract::serde::{Deserialize, Deserializer};
+
+struct ExternalBoundedBytes<const LIMIT: usize>(Vec<u8>);
+impl<const LIMIT: usize> contract::CandidType for ExternalBoundedBytes<LIMIT> {
+    fn _ty() -> contract::types::Type { <Vec<u8> as contract::CandidType>::_ty() }
+    fn idl_serialize<S: contract::types::Serializer>(&self, s: S) -> Result<(), S::Error> {
+        contract::CandidType::idl_serialize(&self.0, s)
+    }
+}
+impl<'de, const LIMIT: usize> Deserialize<'de> for ExternalBoundedBytes<LIMIT> {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        candid::sequence::deserialize::<D, u8, LIMIT>(d, "bounded external bytes", "external byte limit").map(Self)
+    }
+}
+fn hex(bytes: &[u8]) -> String { bytes.iter().map(|b| format!("{b:02x}")).collect() }
+fn record<T: contract::CandidType + for<'de> Deserialize<'de>>(schema: &str, case: usize, mode: usize, bytes: &[u8], limits: DecodeLimits) {
+    let result = match candid::decode_exactly_one::<T>(bytes, limits) {
+        Ok(value) => format!("ok:{}", hex(&contract::encode_one(value).unwrap())),
+        Err(DecodeError::ReplyTooLarge { actual, maximum }) => format!("bytes:{actual}:{maximum}"),
+        Err(DecodeError::Candid(error)) => format!("candid:{error:#}"),
+    };
+    println!("{schema}\t{case}\t{mode}\t{result:?}");
+}
+fn main() {
+    let mut truncated = contract::encode_one(42_u64).unwrap(); truncated.pop();
+    let mut trailing = contract::encode_one(42_u64).unwrap(); trailing.push(0);
+    let cases = [
+        contract::encode_args(()).unwrap(), contract::encode_one(()).unwrap(),
+        contract::encode_one(42_u64).unwrap(), contract::encode_one("text").unwrap(),
+        contract::encode_args((42_u64,23_u64)).unwrap(),
+        contract::encode_one(Vec::<u8>::new()).unwrap(), contract::encode_one(vec![1_u8,2]).unwrap(),
+        contract::encode_one(vec![1_u8,2,3]).unwrap(), contract::encode_one(vec![1_u8;17]).unwrap(),
+        contract::encode_one(vec![1_u8;257]).unwrap(), truncated, trailing, b"DIDL\x81\x20".to_vec(),
+    ];
+    let base = DecodeLimits { reply_bytes:4096, decoding_quota:200_000, skipping_quota:0, type_entries:64, header_bytes:1024 };
+    let limits = [base, DecodeLimits { reply_bytes:0,..base }, DecodeLimits { decoding_quota:0,..base }, DecodeLimits { type_entries:0,..base }, DecodeLimits { header_bytes:0,..base }, DecodeLimits { skipping_quota:100_000,..base }];
+    for (case,bytes) in cases.iter().enumerate() { for (mode,&limits) in limits.iter().enumerate() {
+        record::<u64>("nat64",case,mode,bytes,limits);
+        record::<bool>("bool",case,mode,bytes,limits);
+        record::<Option<u64>>("optional",case,mode,bytes,limits);
+        record::<()>("null",case,mode,bytes,limits);
+        record::<String>("text",case,mode,bytes,limits);
+        record::<Vec<u8>>("blob",case,mode,bytes,limits);
+        record::<ExternalBoundedBytes<0>>("bounded-0",case,mode,bytes,limits);
+        record::<ExternalBoundedBytes<2>>("bounded-2",case,mode,bytes,limits);
+        record::<ExternalBoundedBytes<16>>("bounded-16",case,mode,bytes,limits);
+        record::<ExternalBoundedBytes<256>>("bounded-256",case,mode,bytes,limits);
+    }}
+}

@@ -45,8 +45,17 @@ pub fn msg_reject_msg() -> String {
     let len = ic0::msg_reject_msg_size();
     let mut buf = vec![0u8; len];
     ic0::msg_reject_msg_copy(&mut buf, 0);
-    String::from_utf8(buf).expect("reject message is not valid UTF-8")
+    system_text(buf, "reject message is not valid UTF-8")
 }
+
+// Validate System API text without pulling rejected-byte Debug formatting into
+// canister panic paths. Invalid UTF-8 still panics with the same reason.
+fn system_text(bytes: Vec<u8>, failure: &'static str) -> String {
+    String::from_utf8(bytes).unwrap_or_else(|_| panic!("{failure}"))
+}
+
+#[cfg(test)]
+mod text_tests;
 
 /// Replies to the sender with the data.
 pub fn msg_reply<T: AsRef<[u8]>>(data: T) {
@@ -136,7 +145,7 @@ pub fn msg_method_name() -> String {
     let len = ic0::msg_method_name_size();
     let mut buf = vec![0u8; len];
     ic0::msg_method_name_copy(&mut buf, 0);
-    String::from_utf8(buf).expect("msg_method_name is not valid UTF-8")
+    system_text(buf, "msg_method_name is not valid UTF-8")
 }
 
 /// Accepts the message in `canister_inspect_message`.

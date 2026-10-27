@@ -10,63 +10,11 @@ case "${1:-}" in
 esac
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/metadata.json
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") |
-    .features.candid == ["principal", "dep:candid", "candid/bignum"] and
-    .features["candid-service"] == ["candid", "candid/printer"]' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Candid service generation must remain explicitly selected' >&2; exit 1;
-}
 "$root/.tools/host/bin/jq" -e --slurpfile policy scripts/ci/platform-feature-policy.json \
-    '.packages[] | select(.name == "ic-platform") | (.features | keys) == $policy[0].features' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Platform feature inventory changed; update the graph matrix and isolation policy' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.default == []' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Platform must declare empty default features' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .dependencies[] | select(.name == "ic-cdk-executor") | .req == "=2.0.0"' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Platform must preserve the exact qualified executor =2.0.0' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | . as $p | .features.cdk == ["runtime", "dep:ic-platform-macros"] and .features.runtime == ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'CDK must select only the owned adapters, qualified executor/ic0 and coordinated generator' >&2; exit 1;
-}
+    -f scripts/ci/platform-feature-contract.jq target/feature-graphs/metadata.json >/dev/null || exit 1
+
 generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform") | .version' target/feature-graphs/metadata.json)"
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.secp256k1 == ["principal", "dep:ic-secp256k1"] and ([.dependencies[] | select(.name == "ic-secp256k1")] | length == 1 and .[0].optional and .[0].req == "=0.3.0" and .[0].target == "cfg(not(target_family = \"wasm\"))")' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'secp256k1 must remain exact, optional and native-only' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .dependencies[] | select(.name == "ic0") | .req == "=1.2.0"' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Platform must preserve the exact qualified ic0 =1.2.0' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["management-canister-types"] == ["principal", "dep:ic-management-canister-types"] and ([.dependencies[] | select(.name == "ic-management-canister-types")] | length == 1 and .[0].req == "=0.11.0" and .[0].optional)' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Platform must preserve optional management types =0.11.0' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["icrc-ledger-types"] == ["principal", "dep:icrc-ledger-types"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == [])' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Ledger types must be optional without upstream default/storage features' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.bls == ["dep:ic-verify-bls-signature"] and ([.dependencies[] | select(.name == "ic-verify-bls-signature")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["alloc"])' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'BLS must be optional with alloc and no upstream default/RNG features' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.ed25519 == ["dep:curve25519-dalek", "dep:ed25519-dalek"] and ([.dependencies[] | select(.name == "curve25519-dalek" or .name == "ed25519-dalek")] | length == 2 and all(.[]; .optional and (.uses_default_features | not) and .features == [] and .target == null))' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Ed25519 must remain optional on native/Wasm without upstream default/RNG features' >&2; exit 1;
-}
-# These are production graphs including normal/build, excluding dev dependencies.
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features["stable-structures"] == ["dep:ic-stable-structures"] and ([.dependencies[] | select(.name == "ic-stable-structures")] | length == 1 and .[0].optional and .[0].req == "=0.7.2" and (.[0].uses_default_features | not) and .[0].features == [] and .[0].target == null)' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'Storage substrate must remain optional, portable and aligned with Memory =0.7.2' >&2; exit 1;
-}
-"$root/.tools/host/bin/jq" -e '.packages[] | select(.name == "ic-platform") | .features.ecdsa == ["dep:k256"] and ([.dependencies[] | select(.name == "k256")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["ecdsa"] and .[0].target == null)' \
-    target/feature-graphs/metadata.json > /dev/null || {
-    echo 'ECDSA must remain optional on native/Wasm without default/RNG features' >&2; exit 1;
-}
+
 # Cargo tree prints canonical package names even for renamed deps.
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
 cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"
@@ -90,7 +38,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     while IFS=$'\t' read -r selection key; do
         cached="$cache/$target-$key.txt"
         if [[ -f "$cached" ]]; then continue; fi
-        args=(tree -p ic-platform --frozen --target "$target" --edges normal,build --prefix none)
+        args=(tree -p ic-platform --frozen --target "$target" --edges "normal,build" --prefix none)
         if [[ "$selection" != default ]]; then args+=(--no-default-features); fi
         if [[ "$selection" != none && "$selection" != default ]]; then args+=(--features "$selection"); fi
         if ! cargo "${args[@]}" > "$cached"; then

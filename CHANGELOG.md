@@ -7,6 +7,27 @@
 - Adopt Shared Tooling 0.26.26 and its visible formatting passes while preserving
   grouped manifests, all standalone Rust fixtures and edition 2024. Qualify
   check/write behavior, failure stopping and isolated staged-hook formatting.
+- Share the Principal parser across input types and serialize human-readable
+  Principals directly from their stack buffer. Simplify Account formatting and
+  derive existing typed errors without changing messages or source chains.
+- Normalize Principal self-authentication inputs at the owned wrapper to reduce
+  generic code duplication while retaining the unchanged upstream implementation.
+- Keep System API UTF-8 validation and panic reasons, omitting rejected-byte
+  debug dumps from invalid-text panics to reduce retained runtime formatting.
+- Validate feature contracts in one pass, preserving isolation diagnostics and
+  adding negative coverage for removed dependencies and changed selections.
+
+### ➕ Added
+
+- Add a manual Rust 1.91 Wasm size sweep covering Principal/Account, raw calls,
+  external management Candid and unchanged signature verification. Record raw
+  and optimized sizes across five compiler recipes; application savings and
+  instruction costs require separate consumer qualification.
+- Add isolated-change attribution and binary/self-authentication controls so
+  text-probe savings are not mistaken for costs of the raw Principal/Account types.
+- Add opt-in Candid decoder/sequence comparison probes and a regression for
+  enormous admitted size hints. Retain the existing implementations after
+  measuring the prototypes' size and native-runtime tradeoffs.
 
 ## [0.7.0] - 2026-10-27
 

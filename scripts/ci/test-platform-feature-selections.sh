@@ -5,8 +5,45 @@ cd "$root"
 jq="$root/.tools/host/bin/jq"
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-selections.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
-cargo metadata --no-deps --format-version 1 --frozen |
-    "$jq" '.packages[] | select(.name == "ic-platform") | .features | keys - ["default"]' > "$fixture/features.json"
+cargo metadata --no-deps --format-version 1 --frozen > "$fixture/metadata.json"
+"$jq" '.packages[] | select(.name == "ic-platform") | .features | keys - ["default"]' "$fixture/metadata.json" > "$fixture/features.json"
+contract() {
+    "$jq" -e --slurpfile policy scripts/ci/platform-feature-policy.json \
+        -f scripts/ci/platform-feature-contract.jq "$1" >/dev/null
+}
+contract "$fixture/metadata.json"
+for selection in 'map(select(.name != "ic-platform"))' '. + map(select(.name == "ic-platform"))'; do
+    "$jq" ".packages |= ($selection)" "$fixture/metadata.json" > "$fixture/invalid.json"
+    if contract "$fixture/invalid.json" 2> "$fixture/error"; then
+        echo 'Missing or ambiguous Platform package was admitted' >&2; exit 1
+    fi
+    grep -q 'expected exactly one ic-platform package' "$fixture/error"
+done
+# Mutate actual Cargo observations, retaining each policy's refusal evidence.
+while IFS= read -r mutation; do
+    "$jq" "(.packages[] | select(.name == \"ic-platform\")) |= ($mutation)" \
+        "$fixture/metadata.json" > "$fixture/invalid.json"
+    if contract "$fixture/invalid.json" 2> "$fixture/error"; then
+        echo "Feature contract admitted mutation: $mutation" >&2; exit 1
+    fi
+    grep -q 'jq: error' "$fixture/error"
+done <<'MUTATIONS'
+.features.candid = []
+.features.extra = []
+.features.default = ["runtime"]
+(.dependencies[] | select(.name == "ic-cdk-executor")).req = "^2"
+.features.cdk = []
+.features.secp256k1 = []
+(.dependencies[] | select(.name == "ic0")).req = "^1"
+(.dependencies[] | select(.name == "ic-management-canister-types")).req = "^0.11"
+(.dependencies[] | select(.name == "icrc-ledger-types")).uses_default_features = true
+(.dependencies[] | select(.name == "ic-verify-bls-signature")).uses_default_features = true
+(.dependencies[] | select(.name == "ed25519-dalek")).uses_default_features = true
+(.dependencies[] | select(.name == "ic-stable-structures")).req = "^0.7"
+(.dependencies[] | select(.name == "k256")).uses_default_features = true
+.dependencies |= map(select(.name != "ic-cdk-executor"))
+.dependencies |= map(select(.name != "ic0"))
+MUTATIONS
 "$jq" --arg mode routine --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-selections.jq "$fixture/features.json" > "$fixture/routine.json"
 # Prove powerset completeness on a bounded universe. Ordinary qualification must
 # not materialize millions of production combinations before its routine matrix.

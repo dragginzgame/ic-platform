@@ -90,14 +90,16 @@ fn checksum(owner: &[u8], subaccount: &Subaccount) -> [u8; 7] {
 
 impl fmt::Display for Account {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.owner)?;
+        fmt::Display::fmt(&self.owner, f)?;
         let subaccount = self.effective_subaccount();
         if subaccount == DEFAULT_SUBACCOUNT {
             return Ok(());
         }
         let checksum = checksum(self.owner.as_slice(), subaccount);
         let checksum = std::str::from_utf8(&checksum).map_err(|_| fmt::Error)?;
-        write!(f, "-{checksum}.")?;
+        f.write_str("-")?;
+        f.write_str(checksum)?;
+        f.write_str(".")?;
         let first = subaccount
             .iter()
             .position(|byte| *byte != 0)
@@ -120,47 +122,29 @@ impl fmt::Display for Account {
 }
 
 /// Failures admitting canonical account text. No input strings are retained.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum AccountError {
     /// Input exceeds the account grammar's maximum length.
+    #[error("account text is too long")]
     TextTooLong,
     /// The owner is not a valid principal.
-    InvalidPrincipal(PrincipalError),
+    #[error("invalid principal: {0}")]
+    InvalidPrincipal(#[source] PrincipalError),
     /// A non-default subaccount needs a seven-character checksum.
+    #[error("missing account checksum")]
     MissingChecksum,
     /// The checksum differs from CRC32(owner || subaccount).
+    #[error("invalid account checksum")]
     InvalidChecksum,
     /// Subaccount contains non-hex characters or exceeds 64 hex digits.
+    #[error("subaccount must contain at most 64 hex digits")]
     InvalidSubaccount,
     /// Canonical subaccount text must omit leading zeroes.
+    #[error("subaccount should not have leading zeroes")]
     LeadingZeroesInSubaccount,
     /// Default subaccounts must be represented by the owner alone.
+    #[error("default subaccount should be omitted")]
     DefaultSubaccountShouldBeOmitted,
-}
-impl fmt::Display for AccountError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::TextTooLong => f.write_str("account text is too long"),
-            Self::InvalidPrincipal(error) => write!(f, "invalid principal: {error}"),
-            Self::MissingChecksum => f.write_str("missing account checksum"),
-            Self::InvalidChecksum => f.write_str("invalid account checksum"),
-            Self::InvalidSubaccount => f.write_str("subaccount must contain at most 64 hex digits"),
-            Self::LeadingZeroesInSubaccount => {
-                f.write_str("subaccount should not have leading zeroes")
-            }
-            Self::DefaultSubaccountShouldBeOmitted => {
-                f.write_str("default subaccount should be omitted")
-            }
-        }
-    }
-}
-impl std::error::Error for AccountError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::InvalidPrincipal(error) => Some(error),
-            _ => None,
-        }
-    }
 }
 impl FromStr for Account {
     type Err = AccountError;

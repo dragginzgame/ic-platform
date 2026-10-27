@@ -72,6 +72,16 @@ fn excessive_hints_reject_before_reading_or_allocating_from_them() {
 }
 
 #[test]
+fn admitted_huge_hints_do_not_reserve_capacity() {
+    let reads = Cell::new(0);
+    assert_eq!(
+        read::<{ usize::MAX }>(&[1, 2], Some(usize::MAX), &reads).unwrap(),
+        [1, 2]
+    );
+    assert_eq!(reads.get(), 2);
+}
+
+#[test]
 fn absent_or_deceptive_hints_read_only_one_typed_excess_element() {
     for hint in [None, Some(0), Some(2)] {
         let reads = Cell::new(0);

@@ -1,5 +1,96 @@
 # Current handoff
 
+## Current optimization batch (pending 0.7.1)
+
+Further Candid experiments remain isolated: neither shared exact-one setup nor
+runtime-valued sequence visitor limits were adopted. Both reduced multi-type/
+multi-limit Wasm probes, and all 780 differential value/error cases matched,
+but setup sharing slowed the native scalar/blob controls and visitor sharing
+added 132 bytes (`z`) / 150 (`3`) in the single-limit control. The original
+production implementations are restored byte-for-byte. The extra admitted-huge-
+hint regression remains; it protects the existing no-reservation contract.
+Opt-in benchmark profiles, source patches/drivers and size/native data are
+recorded under `docs/benchmarks/0.7.1-candid-*` and in the migration contract.
+
+All prototypes passed full Clippy first, focused native/MSRV Candid suites and
+standalone differential checks; the combined case was qualified independently.
+Separate build targets avoid stale host artifacts between same-dependency source
+copies. Root Clippy was restored to the actual working source after identifying
+shared-target reuse. Wasm sweeps used normalized source/probe paths and checked
+input hashes before/after. Evidence: `/tmp/platform-candid-experiments`.
+No IC instruction, installed-canister, application-size or native macOS result
+is claimed. Earlier qualified optimizations below remain intact.
+The retained implementation passes full Clippy, native/MSRV Candid suites (13
+each), standalone native/MSRV/Wasm consumer proofs, formatting, snapshot,
+inventory, doc-link, ShellCheck and changelog checks. Saved prototype patches
+pass isolated dry-run application. Cargo.lock and the real index remain unchanged.
+
+Follow-up attribution against the same owned baseline isolates the parser-body
+change as −35,561 bytes of the text/JSON probe at `z-fat-1` (−2,288 at `3-fat-1`).
+Serialization contributes −310 bytes and Account formatting −137 in isolated
+`z` trials; error derives alone are size-neutral. These are interacting compiler
+results, not additive or DFINITY-versus-owned comparisons. The raw binary control
+is unchanged at 7,631 bytes (`z`) / 8,157 (`3`). Data and interpretation are in the
+migration contract and `docs/benchmarks/0.7.1-{attribution,controls}.tsv`.
+
+The additional owned Principal wrapper now passes a slice to the unchanged
+upstream self-authentication function, canonicalizing only its generic input
+type. Focused optimized Wasm falls by 799 bytes (`z`) / 824 (`3`); text/JSON
+sizes stay unchanged. No crypto body, hash/domain/key encoding or vector changed.
+Native and Rust 1.91 type tests pass (12 each), including Vec/slice equivalence
+and exactly-once custom AsRef evaluation; full Clippy passed first. New controls
+compile at Rust 1.91 for Wasm, with source/crypto/runtime provenance guards intact.
+Evidence: `/tmp/platform-size-followup`. The manual harness adds an optional
+recipe subset and identifies archive inputs without borrowing a parent Git HEAD.
+
+Implemented against clean baseline `e918d23`: one non-generic Principal parser
+behind the existing generic API, stack-buffer human-readable serialization,
+simpler Account formatting and mechanical `thiserror` error implementations.
+Messages, source chains, identities, CRC/hash inputs and binary Serde stay intact.
+`principal` now selects the already optional `thiserror`; inventory is updated.
+Default/executor-only graphs remain application/Candid/substrate-free.
+
+Runtime System API text keeps UTF-8 validation and panic reasons but drops
+rejected-byte Debug dumps. The private shared adapter has valid/invalid-text
+regression coverage. Submission/callback/trap cleanup, executor identity and all
+cryptographic bodies/vectors/license fingerprints remain unchanged.
+
+Kept automatic encoder Vec inference compatible. Standalone consumers now prove
+the existing manual-reply path accepts fixed arrays/borrowed slices and automatic
+generic encoders remain supported; no new generator mode or public API was added.
+Feature contracts now use one jq pass with the same named policies, tested
+against changed selections, missing dependencies and missing/ambiguous packages.
+Normal feature-selection checks own this regression coverage.
+
+Added the manual `scripts/benchmarks/wasm-size.sh` sweep and its standalone probe;
+the existing native type runner now creates its target parent on clean checkouts.
+Normalized source/probe paths before final size comparison, so panic-location
+strings do not create fake gains. Full raw/code/optimized evidence and source/
+artifact/tool identities live under `/tmp/platform-size-work/normalized-{before,after}`;
+provisional unnormalized trials and failed setup attempts remain retained but
+are not the reported results. The migration contract and repository TSV data
+record all five recipes/four capabilities. Same-recipe optimized changes include
+Principal/Account −2,578 bytes (`3-fat-1`) and −36,003 (`z-fat-1`), raw-call runtime
+−1,561 (`z-fat-1`), external Candid and signature verification 0. These fixture
+deltas are not additive or claims about application Wasm. Native Account timings
+use two alternating before/after process pairs; formatting medians are lower and
+parsing roughly unchanged. No IC instruction/cycle claim follows.
+
+Full `make clippy` passes before longer tests. Runtime/type unit tests pass on
+native and Rust 1.91 (15 each); parser properties pass (2). Standalone Principal
+and CDK consumer proofs pass on native/MSRV/Wasm; the final runtime adapter also
+compiles in every normalized Rust 1.91 size recipe. Provenance guards, selected
+Wasm graphs, feature mutation/selection tests, formatting, inventory,
+dependency boundary/pins, docs, ShellCheck and pending changelog admission pass.
+Evidence/logs: `/tmp/platform-size-work`. No full CI, native macOS, installed
+canister or consumer deployment was run. No staging/commit/push/publication;
+real index and Cargo.lock are unchanged, and siblings remain read-only.
+
+Inspected Canic's service-generation cfg and Core crypto feature/development
+declarations, plus Canic/IcyDB release profiles. They do not establish a removable
+production capability; no speculative sibling edits or crypto/API hard cuts were
+made. Actual application artifact/instruction qualification remains consumer-owned.
+
 ## Source and authorized boundary
 
 Released main is Platform 0.7.0 at
@@ -7,8 +98,9 @@ Released main is Platform 0.7.0 at
 published. The maintainer released the preceding #38 cut. Shared Tooling 0.26.26
 at `5683060a5d8ce79af2fcfedb53b3eb24037fd064` was reviewed and exported
 canonically with 109 payloads. Incoming Shared adoption and #65 documentation
-work were preserved. No package version, runtime, feature, dependency or wire
-contract changed. The next compatible changelog draft is 0.7.1; release metadata
+work were preserved. That snapshot adoption changed no runtime or dependency
+contract; the later optimization batch is recorded above. The next compatible
+changelog draft is 0.7.1; release metadata
 remains 0.7.0.
 
 Shared #314 now supplies standalone Rustfmt inputs. Platform's existing source

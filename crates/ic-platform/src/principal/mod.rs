@@ -15,24 +15,30 @@ use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
 /// An error happened while encoding, decoding or serializing a [`Principal`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, thiserror::Error)]
 pub enum PrincipalError {
     /// More than 29 significant bytes.
+    #[error("Bytes is longer than 29 bytes.")]
     BytesTooLong(),
 
     /// Invalid Base32 spelling or trailing bits.
+    #[error("Text must be in valid Base32 encoding.")]
     InvalidBase32(),
 
     /// Missing complete checksum.
+    #[error("Text is too short.")]
     TextTooShort(),
 
     /// Input exceeds 63 text bytes or decodes to more than 29 identity bytes.
+    #[error("Text is too long.")]
     TextTooLong(),
 
     /// CRC32 checksum mismatch.
+    #[error("CRC32 check sequence doesn't match with calculated from Principal bytes.")]
     CheckSequenceNotMatch(),
 
     /// Correct identity with noncanonical dash placement.
+    #[error("Text should be separated by - (dash) every 5 characters: expected \"{0}\"")]
     AbnormalGrouped(Principal),
 }
 
@@ -99,7 +105,7 @@ impl Principal {
 
     /// Construct a self-authenticating ID from public key
     pub fn self_authenticating<P: AsRef<[u8]>>(public_key: P) -> Self {
-        ExternalPrincipal::self_authenticating(public_key).into()
+        ExternalPrincipal::self_authenticating(public_key.as_ref()).into()
     }
 
     /// Construct an anonymous ID.
@@ -150,7 +156,10 @@ impl Principal {
 
     /// Parse a [`Principal`] from text representation.
     pub fn from_text<S: AsRef<str>>(text: S) -> Result<Self, PrincipalError> {
-        let input = text.as_ref();
+        Self::parse_text(text.as_ref())
+    }
+
+    fn parse_text(input: &str) -> Result<Self, PrincipalError> {
         if input.len() > Self::MAX_LENGTH_IN_TEXT {
             return Err(PrincipalError::TextTooLong());
         }
@@ -282,7 +291,7 @@ impl AsRef<[u8]> for Principal {
 impl serde::Serialize for Principal {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         if serializer.is_human_readable() {
-            self.to_text().serialize(serializer)
+            serializer.serialize_str(self.write_text(&mut [0; Self::MAX_LENGTH_IN_TEXT]))
         } else {
             serializer.serialize_bytes(self.as_slice())
         }
@@ -354,25 +363,6 @@ impl From<Principal> for ExternalPrincipal {
         Self::from_slice(value.as_slice())
     }
 }
-impl std::fmt::Display for PrincipalError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::BytesTooLong() => f.write_str("Bytes is longer than 29 bytes."),
-            Self::InvalidBase32() => f.write_str("Text must be in valid Base32 encoding."),
-            Self::TextTooShort() => f.write_str("Text is too short."),
-            Self::TextTooLong() => f.write_str("Text is too long."),
-            Self::CheckSequenceNotMatch() => f.write_str(
-                "CRC32 check sequence doesn't match with calculated from Principal bytes.",
-            ),
-            Self::AbnormalGrouped(principal) => write!(
-                f,
-                "Text should be separated by - (dash) every 5 characters: expected \"{principal}\""
-            ),
-        }
-    }
-}
-impl std::error::Error for PrincipalError {}
-
 impl Principal {
     fn write_text<'a>(&self, output: &'a mut [u8; Self::MAX_LENGTH_IN_TEXT]) -> &'a str {
         let mut input = [0u8; 33];

@@ -1,6 +1,25 @@
 //! Standalone Candid-free runtime ABI proof; installed RPC fixtures use Wire.
 use ic_platform::cdk::{api, call};
 
+#[ic_platform::cdk::query(decode_with = "decode_unit", manual_reply)]
+fn fixed_reply() {
+    api::msg_reply(42_u64.to_le_bytes());
+}
+
+#[ic_platform::cdk::query(decode_with = "decode_unit", manual_reply)]
+fn static_reply() {
+    api::msg_reply(b"explicit-static-codec");
+}
+
+fn encode_default<T: Default>() -> T {
+    T::default()
+}
+
+// Keep the existing Vec expectation: widening encode_with would make this
+// previously supported generic encoder ambiguous.
+#[ic_platform::cdk::query(decode_with = "decode_unit", encode_with = "encode_default")]
+fn generic_reply() {}
+
 mod binding_collisions {
     type Vec = ();
     type String = ();

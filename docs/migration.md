@@ -14,6 +14,153 @@ import mappings, pinned schema/license provenance and qualification commands.
 Registry archive identity is verified; Canic consumer adoption is not claimed. Required
 external Candid remains; Canic retains effects, limits, retry bytes and policy.
 
+## Non-cryptographic size qualification (0.7.1)
+
+The compatible Principal input wrapper now delegates to one `&str` parser;
+human-readable Serde writes canonical text directly from its stack buffer.
+Principal/Account errors use mechanical `thiserror` derives, preserving messages,
+source chains and variant identities. The `principal` feature consequently adds
+the existing optional `thiserror` dependency. Defaults and executor-only profiles
+still exclude application types and Candid. Account formatting retains canonical
+spelling, checksum inputs and absent/explicit-zero semantics.
+
+Runtime System API text still validates UTF-8 and panics on invalid bytes. The
+panic retains its reason but omits `FromUtf8Error`'s rejected-byte debug dump.
+No call submission, callback, cancellation or executor body changes.
+
+Run `bash scripts/benchmarks/wasm-size.sh [PLATFORM_SOURCE [NEW_OUTPUT_DIRECTORY]]`
+with prepared Rust 1.91/Wasm and `ic-wasm`. This manual, serial harness uses
+independent workspaces/locks, normalizes embedded source/probe paths, preserves
+source and tool identities, and records
+raw/optimized artifacts and hashes for five recipes and four capabilities.
+`WASM_BENCH_PROFILES` can select a subset; `WASM_BENCH_TARGET_DIR` can reuse a
+dedicated target directory between serial runs. `WASM_BENCH_RECIPES` selects a
+subset of the five documented recipes. Binary-only and self-authentication
+controls are also available as `principal-binary` and `principal-self-auth`.
+It installs nothing and is not a
+routine CI gate. Generated probe endpoints are qualification fixtures, not new
+application protocols or performance benchmarks.
+
+The [size observations](benchmarks/0.7.1-wasm.tsv) compare baseline `e918d23` with
+this batch on Linux, Rust 1.91.0, `ic-wasm shrink`, stripped symbols and aborting
+panics. All reported deltas compare identical recipes and probe sources:
+
+| Probe / recipe | Before optimized bytes | After | Difference |
+| --- | ---: | ---: | ---: |
+| Principal/Account, `3-fat-1` | 64,890 | 62,312 | −2,578 |
+| Principal/Account, `z-fat-1` | 92,405 | 56,402 | −36,003 |
+| Raw async calls, `z-fat-1` | 43,359 | 41,798 | −1,561 |
+| External management Candid, `z-fat-1` | 426,731 | 426,731 | 0 |
+| Signature verification, `z-fat-1` | 302,661 | 302,661 | 0 |
+
+These are reachable-capability probes, not production canister measurements;
+gains are not additive and no individual change's attribution is claimed.
+Build settings dominate some comparisons: Canic and IcyDB already select fat
+LTO and one codegen unit in the inspected release profiles. `z` is not always
+smallest: the final Principal/Account probe is 54,311 bytes with `s-fat-1` versus
+56,402 with `z-fat-1`. Actual application selections/artifacts remain unqualified.
+Canic guards
+service generation with `canic_export_candid` for its declaration pass, and its
+Core ECDSA/Ed25519 declarations are development dependencies. No redundant
+production capability was established by those declarations alone, so sibling
+features, cryptographic code and required external Candid remain unchanged.
+No new IC instruction/cycle, installed-canister or native macOS result is claimed.
+
+The existing native Account harness was also run in two alternating before/after
+process pairs on Linux x86-64, Rust 1.99.1: five internal trials per case/process,
+500,000 operations per trial, with unchanged external controls. The
+[raw observations](benchmarks/0.7.1-native-types.tsv) show formatting medians
+0.5–6.7% lower across the six owner/subaccount cases, with parsing roughly
+unchanged (−2.3% to +1.1%). These native timings are observations, not IC cost
+predictions. Principal/Account/Subaccount layouts remain 30/63/32 bytes on that
+target; they are not persisted ABI guarantees.
+
+### Attribution and binary controls
+
+The [isolated-change trials](benchmarks/0.7.1-attribution.tsv) apply one change at
+a time to the same Platform-owned baseline, using the original text/JSON probe.
+They do not compare DFINITY's types against Platform's:
+
+| Isolated change | Optimized delta, `3-fat-1` | Optimized delta, `z-fat-1` |
+| --- | ---: | ---: |
+| One non-generic parser body | −2,288 bytes | −35,561 bytes |
+| Stack-buffer human serialization | −276 bytes | −310 bytes |
+| Account formatting dispatch | −18 bytes | −137 bytes |
+| Mechanical error derives | 0 | 0 |
+
+The results identify duplicated generic parsing as the dominant cost in this
+probe/compiler combination. Deltas are not additive: optimizer interactions
+explain the small difference from the combined result. This is not 36 KB of
+unnecessary machinery in the raw types. The
+[binary-only control](benchmarks/0.7.1-controls.tsv), excluding text/JSON code,
+stays exactly 8,157 bytes (`3-fat-1`) and 7,631 bytes (`z-fat-1`).
+That control covers raw Principal admission/byte replies through IC0 and an
+optimizable Account conversion; it is not an Account Wire/Serde codec or a
+persisted-format benchmark.
+
+A further compatible scaffolding change passes `public_key.as_ref()` at the owned
+Principal wrapper before delegating to `ExternalPrincipal::self_authenticating`.
+It normalizes the generic upstream invocation to one slice type without changing
+any upstream cryptographic body, key bytes, hashing, tag or vector. The focused
+control exercises owned Vec, borrowed Vec and slice inputs: optimized bytes fall
+18,612 → 17,788 (`3-fat-1`) and 17,898 → 17,099 (`z-fat-1`). Both vector identity
+and exactly-once evaluation of a custom `AsRef` are qualified. No self-authentication
+execution-time or application-Wasm saving is inferred. The final text/JSON probe
+retains the combined sizes in the table above.
+
+### Candid sharing experiments: implementations retained
+
+Two isolated prototypes tested shared exact-one decoder setup/finalization and
+storing the caller's const sequence limit as private visitor data. Neither is
+retained in the consumer library: constructor sharing showed a native-runtime
+tradeoff, and sequence sharing increased the single-limit control's size. The
+retained code still uses its original decoder staging and const-specialized
+visitor. A new regression proves that an enormous *admitted* hint does not cause
+reservation from the hint.
+
+The [size matrix](benchmarks/0.7.1-candid-experiments.tsv) compares the same
+pre-experiment working tree with each isolated variant and their combination:
+
+| Prototype / probe | Optimized delta, `3-fat-1` | Optimized delta, `z-fat-1` |
+| --- | ---: | ---: |
+| Shared setup/finalization; four management reply DTOs | −56,116 bytes | −1,421 bytes |
+| Runtime visitor limit; four distinct const limits | −11,653 bytes | −7,339 bytes |
+| Runtime visitor limit; one const limit | +150 bytes | +132 bytes |
+| Both prototypes; four distinct const limits | −113,035 bytes | −71,731 bytes |
+
+The management probe uses pinned CanisterStatus, HTTP, ECDSA public-key and ECDSA
+signature result identities. Sequence probes use a dedicated synthetic external
+`vec nat8` contract with limits 0/2/16/256, or just 2 for the single-limit control.
+These are qualification probes, not owned application protocols or evidence of
+application Wasm savings. Select `candid-exact`, `candid-sequence` or
+`candid-sequence-one` through `WASM_BENCH_PROFILES`; they are opt-in, not part of
+the default sweep.
+
+Full Clippy and the focused Candid suites passed for each prototype on native and
+Rust 1.91. A Rust 1.99.1 standalone corpus compared 780 value/arity/malformed-wire/quota
+cases: decoded canonical bytes and compact diagnostics matched baseline exactly
+for all three variants. Existing sequence tests cover deceptive/missing hints,
+typed excess-element failure precedence and zero bounds. The final retained
+implementation passes native/MSRV suites and its independent consumer proofs.
+
+The [native observations](benchmarks/0.7.1-candid-native.tsv) used Rust 1.91,
+`opt-level=3`, fat LTO and one codegen unit: four process rounds, five 10,000-call
+trials per case, after 1,000 warmup calls. The separate scalar/blob controls showed
+1.7–13.8% higher median time with shared setup/finalization; sequence-only medians
+were roughly neutral to lower. These host observations do not predict IC
+instruction/cycle cost. They do rule out claiming an unconditional performance
+win from the Wasm reductions. No such tradeoff was silently adopted.
+
+Frozen evidence includes the [exact-one patch](benchmarks/0.7.1-candid-exact.patch),
+[visitor patch](benchmarks/0.7.1-candid-sequence.patch),
+[differential driver](benchmarks/0.7.1-candid-corpus.rs.txt) and
+[native timing driver](benchmarks/0.7.1-candid-perf.rs.txt).
+They are historical experiment inputs, not additional maintained implementations;
+the combined variant applies both patches. Full source/probe/artifact hashes,
+tool versions, logs and standalone manifests remain at
+`/tmp/platform-candid-experiments`. Separate build targets qualified the variants;
+source-path-normalized Wasm inputs were checked before/after each sweep.
+
 ## Instrumented PocketIC source boundary (#65)
 
 Platform 0.7.0's `pocket-ic` feature supplies the registry client, not IC
@@ -1214,6 +1361,12 @@ Failed decoding must trap/reject before handler effects; response-encoding failu
 must trap. There is no Candid fallback, dummy Candid service registration,
 `export_candid!` macro or `candid = "path"` entrypoint option. Existing explicit
 From 0.5, remove the retired no-op `hidden` option from Wire hooks and generators.
+
+Automatic `encode_with` continues to require `Vec<u8>` so generic encoder
+inference remains compatible. An existing `manual_reply` handler can pass a
+borrowed slice or fixed array to `cdk::api::msg_reply` without allocating a reply
+vector. Use this only for already encoded protocol bytes; Wire framing,
+exactly-once replies and failure-before-effects remain consumer responsibilities.
 
 ```rust,ignore
 #[ic_platform::cdk::update(

@@ -3,6 +3,37 @@ use serde_test::{Token, assert_de_tokens};
 use std::{collections::hash_map::DefaultHasher, hash::Hasher};
 
 #[test]
+fn error_messages_and_sources_remain_stable() {
+    use std::error::Error;
+    for (error, message) in [
+        (AccountError::TextTooLong, "account text is too long"),
+        (AccountError::MissingChecksum, "missing account checksum"),
+        (AccountError::InvalidChecksum, "invalid account checksum"),
+        (
+            AccountError::InvalidSubaccount,
+            "subaccount must contain at most 64 hex digits",
+        ),
+        (
+            AccountError::LeadingZeroesInSubaccount,
+            "subaccount should not have leading zeroes",
+        ),
+        (
+            AccountError::DefaultSubaccountShouldBeOmitted,
+            "default subaccount should be omitted",
+        ),
+    ] {
+        assert_eq!(error.to_string(), message);
+        assert!(error.source().is_none());
+    }
+    let error = AccountError::InvalidPrincipal(PrincipalError::InvalidBase32());
+    assert_eq!(
+        error.to_string(),
+        "invalid principal: Text must be in valid Base32 encoding."
+    );
+    assert!(error.source().unwrap().is::<PrincipalError>());
+}
+
+#[test]
 fn default_identity_preserves_representation() {
     let absent = Account::from(Principal::anonymous());
     let explicit = Account {

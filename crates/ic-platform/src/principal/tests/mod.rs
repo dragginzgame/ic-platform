@@ -2,6 +2,34 @@ use super::{ExternalPrincipal, Principal, PrincipalError};
 use serde_test::{Configure, Token, assert_de_tokens, assert_tokens};
 
 #[test]
+fn error_messages_and_sources_remain_stable() {
+    use std::error::Error;
+    for (error, message) in [
+        (
+            PrincipalError::BytesTooLong(),
+            "Bytes is longer than 29 bytes.",
+        ),
+        (
+            PrincipalError::InvalidBase32(),
+            "Text must be in valid Base32 encoding.",
+        ),
+        (PrincipalError::TextTooShort(), "Text is too short."),
+        (PrincipalError::TextTooLong(), "Text is too long."),
+        (
+            PrincipalError::CheckSequenceNotMatch(),
+            "CRC32 check sequence doesn't match with calculated from Principal bytes.",
+        ),
+        (
+            PrincipalError::AbnormalGrouped(Principal::management_canister()),
+            "Text should be separated by - (dash) every 5 characters: expected \"aaaaa-aa\"",
+        ),
+    ] {
+        assert_eq!(error.to_string(), message);
+        assert!(error.source().is_none());
+    }
+}
+
+#[test]
 fn deserialization_preserves_structured_format_errors() {
     use serde::Deserialize;
 
@@ -134,9 +162,38 @@ fn self_authentication_keeps_upstream_vectors() {
     ];
     assert_eq!(Principal::self_authenticating([]).as_slice(), expected);
     for input in [&[][..], b"public key bytes", &[42; 1024][..]] {
+        let owned = input.to_vec();
+        let expected = ExternalPrincipal::self_authenticating(input);
+        assert_eq!(
+            ExternalPrincipal::from(Principal::self_authenticating(&owned)),
+            expected
+        );
+        assert_eq!(
+            ExternalPrincipal::from(Principal::self_authenticating(owned)),
+            expected
+        );
         assert_eq!(
             ExternalPrincipal::from(Principal::self_authenticating(input)),
-            ExternalPrincipal::self_authenticating(input)
+            expected
         );
     }
+}
+
+#[test]
+fn self_authentication_evaluates_custom_as_ref_once() {
+    use std::cell::Cell;
+    struct PublicKey<'a>(&'a Cell<usize>);
+    impl AsRef<[u8]> for PublicKey<'_> {
+        fn as_ref(&self) -> &[u8] {
+            self.0.set(self.0.get() + 1);
+            b"public key bytes"
+        }
+    }
+    let calls = Cell::new(0);
+    let actual = Principal::self_authenticating(PublicKey(&calls));
+    assert_eq!(calls.get(), 1);
+    assert_eq!(
+        ExternalPrincipal::from(actual),
+        ExternalPrincipal::self_authenticating(b"public key bytes")
+    );
 }

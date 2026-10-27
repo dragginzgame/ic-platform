@@ -1,0 +1,15 @@
+variant	recipe	probe	baseline_raw_bytes	variant_raw_bytes	baseline_optimized_bytes	variant_optimized_bytes	delta_bytes
+exact	3-fat-1	candid-exact	781440	721818	732978	676862	-56116
+exact	3-fat-1	candid-sequence	392739	285431	365647	264226	-101421
+exact	z-fat-1	candid-exact	489725	488107	455762	454341	-1421
+exact	z-fat-1	candid-sequence	279833	210636	259357	194938	-64419
+sequence	3-fat-1	candid-exact	781440	781439	732978	732978	0
+sequence	3-fat-1	candid-sequence	392739	380371	365647	353994	-11653
+sequence	z-fat-1	candid-exact	489725	489725	455762	455762	0
+sequence	z-fat-1	candid-sequence	279833	271975	259357	252018	-7339
+combined	3-fat-1	candid-exact	781440	721816	732978	676862	-56116
+combined	3-fat-1	candid-sequence	392739	273086	365647	252612	-113035
+combined	z-fat-1	candid-exact	489725	488107	455762	454341	-1421
+combined	z-fat-1	candid-sequence	279833	202776	259357	187626	-71731
+sequence	3-fat-1	candid-sequence-one	258722	258871	239457	239607	150
+sequence	z-fat-1	candid-sequence-one	194885	195017	180530	180662	132

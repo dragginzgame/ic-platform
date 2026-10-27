@@ -1,0 +1,9 @@
+change	recipe	baseline_optimized_bytes	variant_optimized_bytes	delta_bytes
+parser	3-fat-1	64890	62602	-2288
+parser	z-fat-1	92405	56844	-35561
+serde	3-fat-1	64890	64614	-276
+serde	z-fat-1	92405	92095	-310
+account-format	3-fat-1	64890	64872	-18
+account-format	z-fat-1	92405	92268	-137
+error-derives	3-fat-1	64890	64890	0
+error-derives	z-fat-1	92405	92405	0

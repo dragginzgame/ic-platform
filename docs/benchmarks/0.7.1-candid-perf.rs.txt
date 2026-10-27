@@ -1,0 +1,31 @@
+use ic_platform::candid::{self, contract, DecodeLimits};
+use contract::serde::{Deserialize, Deserializer};
+use std::{hint::black_box, time::Instant};
+struct ExternalBoundedBytes<const LIMIT: usize>(Vec<u8>);
+impl<const LIMIT: usize> contract::CandidType for ExternalBoundedBytes<LIMIT> {
+    fn _ty() -> contract::types::Type { <Vec<u8> as contract::CandidType>::_ty() }
+    fn idl_serialize<S: contract::types::Serializer>(&self, s: S) -> Result<(), S::Error> {
+        contract::CandidType::idl_serialize(&self.0, s)
+    }
+}
+impl<'de, const LIMIT: usize> Deserialize<'de> for ExternalBoundedBytes<LIMIT> {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self,D::Error> {
+        candid::sequence::deserialize::<D,u8,LIMIT>(d,"bounded external bytes","external byte limit").map(Self)
+    }
+}
+fn measure<T:contract::CandidType+for<'de>Deserialize<'de>>(label:&str, wire:&[u8]) {
+    let limits=DecodeLimits{reply_bytes:4096,decoding_quota:200_000,skipping_quota:0,type_entries:64,header_bytes:1024};
+    for _ in 0..1000 { black_box(candid::decode_exactly_one::<T>(black_box(wire),limits).unwrap()); }
+    for trial in 0..5 {
+        let start=Instant::now();
+        for _ in 0..10_000 { black_box(candid::decode_exactly_one::<T>(black_box(wire),limits).unwrap()); }
+        println!("{label}\t{trial}\t{}",start.elapsed().as_nanos() as f64/10_000.0);
+    }
+}
+fn main() {
+    measure::<u64>("nat64",&contract::encode_one(42_u64).unwrap());
+    measure::<ExternalBoundedBytes<0>>("bound-0",&contract::encode_one(Vec::<u8>::new()).unwrap());
+    measure::<ExternalBoundedBytes<2>>("bound-2",&contract::encode_one(vec![1_u8;2]).unwrap());
+    measure::<ExternalBoundedBytes<16>>("bound-16",&contract::encode_one(vec![1_u8;16]).unwrap());
+    measure::<ExternalBoundedBytes<256>>("bound-256",&contract::encode_one(vec![1_u8;256]).unwrap());
+}

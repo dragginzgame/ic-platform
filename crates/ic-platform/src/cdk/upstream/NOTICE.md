@@ -21,6 +21,11 @@ adapter retains its upstream bytes and construction unchanged.
 
 Changes from the import:
 
+- System API text admission retains UTF-8 validation and the invalid-text panic
+  reason, while omitting rejected-byte Debug dumps. The shared text adapter is
+  qualified separately; call submission, callback and cleanup fingerprints are
+  unchanged.
+
 - In 0.5.1 copy message bytes directly into vector spare capacity using ic0
   1.2.0's all-or-trap initialization contract, then set the initialized length.
   This avoids requesting zero initialization before overwriting the same bytes.

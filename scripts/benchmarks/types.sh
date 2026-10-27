@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
+mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/type-benchmark.XXXXXX")"
 mkdir -p "$fixture/src"
 cp "$root/scripts/fixtures/type-benchmark/main.rs" "$fixture/src/main.rs"
