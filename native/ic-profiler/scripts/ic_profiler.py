@@ -559,6 +559,8 @@ def cargo_command(root, manifest, command, arguments, force):
                   "cargo_target_dir": env["CARGO_TARGET_DIR"],
                   "build_environment": {name: env[name] for name in BUILD_ENVIRONMENT if name in env},
                   "embedded_inputs": embedded_inputs,
+                  "native_server": file_snapshot(Path(env["POCKET_IC_BIN"]).resolve(), env["POCKET_IC_BIN"])
+                  if command == "test" and env.get("POCKET_IC_BIN") else None,
                   **executable_paths(checkout, env),
                   "started_at": datetime.now(timezone.utc).isoformat(), "artifacts": []}
     toolchain = checkout / "rust-toolchain.toml"
@@ -615,10 +617,12 @@ def check_native_graph(root, manifest):
 def native_verify(root, manifest):
     run(["bash", root / "scripts/dev/native-tools.sh", "check"], capture=False)
     check_native_graph(root, manifest)
-    previous = {name: os.environ.get(name) for name in ("CARGO_TARGET_DIR", "POCKET_IC_BIN")}
+    previous = {name: os.environ.get(name) for name in
+                ("CARGO_TARGET_DIR", "POCKET_IC_BIN", "SYSTEM_PROFILE_TEST_SERVER_URL")}
     try:
         target = build_directory(root) / "target"
         os.environ["CARGO_TARGET_DIR"] = str(target)
+        os.environ.pop("SYSTEM_PROFILE_TEST_SERVER_URL", None)
         cargo_command(root, manifest, "build", [], False)
         cargo_command(root, manifest, "test", ["--", "--lib"], False)
         os.environ["POCKET_IC_BIN"] = str(target / "debug/pocket-ic-server")
