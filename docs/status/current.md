@@ -15,7 +15,8 @@ its own reviewed registry lock, including Wire 0.7.19 and Candid 0.10.38.
 
 ## External codec supply (#78, #79)
 
-Pending 0.7.4 supplies explicit `candid-endpoint` adapters and pure
+Pending [PR #85](https://github.com/dragginzgame/ic-platform/pull/85) supplies
+0.7.4's explicit `candid-endpoint` adapters and pure
 `candid::protocols` operations. See the [migration and concrete Canic deletion
 map](../migration.md#external-endpoint-and-protocol-codecs-78-79).
 The adapters delegate to the existing generator/executor, run caller guards
