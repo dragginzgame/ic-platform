@@ -2,14 +2,33 @@
 
 ## Source and accepted scope
 
-The checkout is at maintainer release commit `95b7caf` (0.7.2). Rust metadata
-remains 0.7.2; new compatible adoption notes target 0.7.3. No release, publication
+The checkout is at maintainer release commit `6733f50` (0.7.3). Rust metadata
+remains 0.7.3; new compatible repair notes target 0.7.4. No release, publication
 or deployment is part of this task. npm browser 0.1.1 is separately published.
 Shared Tooling stays 0.26.26 at `5683060a5d8ce79af2fcfedb53b3eb24037fd064`
 (109 payloads). Earlier source/delivery records below retain their own scope.
 
 Preserve incoming root lockfile work: Wire/derive 0.7.19, ic-host-artifacts
 0.69.5 and unicode-width 0.2.3. Sibling checkouts remain read-only.
+
+## Bash 3.2 call qualification repair
+
+The released `ic-call` implementation is present on main; its PR's two macOS
+jobs exposed a runner defect, `features[@]: unbound variable`. Empty feature,
+admission and preparation argument arrays now use Bash-3.2-compatible expansion.
+The runtime's published-version regex also uses a variable so earlier Bash 3.2
+parsers accept the runner. No call runtime, codec, executor or dependency changes.
+
+Full `make clippy` passes. The maintained command-admission regression passes on
+Bash 5.2 and a real Linux-built Bash 3.2.0, covering all three consumer selections,
+empty/nonempty argument arrays, eight raw/owned runtime graph commands, version
+refusal and propagation of a failing final Wasm check. The complete standalone
+consumer also passes under Bash 3.2 with strict Clippy and current/Rust-1.91 native
+and Wasm checks; real combined runtime graph admission passes under that shell.
+ShellCheck, formatting and links pass. This is shell compatibility evidence on
+Linux, not a new native macOS run. Hosted macOS acceptance remains with the fix PR.
+Evidence: `/tmp/platform-backlog-20261028`; the repair is isolated from later
+Candid-depth/adapter work and changes no release metadata or advisory policy.
 
 ## IC Wire 0.7.19 adoption
 
@@ -73,8 +92,8 @@ Implementation is proposed in [PR #83](https://github.com/dragginzgame/ic-platfo
 #75 stays open pending default-branch delivery.
 Evidence is retained at `/tmp/platform-icc-20261028`, including the isolated
 contribution under `delivery/repo`. The local release metadata and default-branch
-metadata differ; the new crate inherits each without a version bump. There is
-no published supplier yet. Changelog notes, publication ordering and normal CI
+metadata differ; the new crate inherits each without a version bump. Published `ic-call` 0.7.2 is the initial supplier; its registry-only ownership
+and Rust 1.91 native/Wasm proof is recorded in #75's publication comment. Changelog notes, publication ordering and normal CI
 include the additional crate. Native macOS, publication and downstream adoption
 remain separate; no application Wasm-size reduction is claimed. Candid Wasm depth
 #73 remains unresolved. Sibling sources and incoming security/browser work are

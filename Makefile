@@ -93,6 +93,7 @@ check-primitives:
 	done
 check-consumer:
 	bash scripts/ci/test-platform-consumer-admission.sh
+	bash scripts/ci/test-ic-call-consumer-admission.sh
 	bash scripts/ci/check-ic-call-consumer.sh
 	bash scripts/ci/check-platform-consumer.sh
 check-features:

@@ -2286,8 +2286,9 @@ fn prepare(target: Principal) -> Call<'static, 'static> {
 ```
 
 Add `ic-call` with defaults disabled to the workspace production catalog and
-inherit it from the consumer. The new crate is **not yet a published supplier**. Use the released version only
-after maintainer publication. Remove the local generic builder/execution wrapper,
+inherit it from the consumer. The initial supplying version is published `ic-call` 0.7.2 with Platform 0.7.2;
+select `ic-call = { version = "0.7.2", default-features = false }` or a newer
+qualified compatible release. Remove the local generic builder/execution wrapper,
 replace its repeated attachment-plus-cost formula with `get_cost()`, and call
 `execute().await`. Keep domain facades and stage-specific metrics with their
 consumer; observing construction is different from observing actual submission.
