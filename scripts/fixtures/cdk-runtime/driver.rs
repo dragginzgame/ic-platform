@@ -1,4 +1,5 @@
 //! Installed Wire runtime checks. Testkit owns server lifecycle and transport.
+mod external_driver;
 mod protocol;
 mod wire_driver;
 mod wire_protocol;
@@ -319,6 +320,9 @@ fn main() {
     assert_eq!(burned, 123);
     assert!(absent);
     wire_driver::run(pic, receiver);
+    if legacy && std::env::var_os("PLATFORM_EXTERNAL_ADAPTERS").is_some() {
+        external_driver::qualify(pic, id);
+    }
     println!(
         "Owned runtime: Wire RPCs, raw awaits, trap cleanup, timer cancellation, upgrade, cycles, stable rollback and certificates passed (external Candid: {legacy})"
     );

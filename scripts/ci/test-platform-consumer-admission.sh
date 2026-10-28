@@ -22,6 +22,11 @@ set -euo pipefail
 case "$1" in
     metadata) printf '{}\n' ;;
     tree)
+        if [[ "${TEST_CAPABILITY:-}" == external-codecs ]]; then
+            printf 'candid v0.10.39\n'
+            if [[ "$TEST_REJECT" == yes ]]; then printf 'ic-agent v0.49.3\n'; fi
+            exit 0
+        fi
         if [[ "${TEST_CAPABILITY:-}" == blake3 ]]; then
             case " $* " in
                 *' --format {f} '*) printf '%s\n' "${TEST_BLAKE3_FEATURES:-std}" ;;
@@ -71,6 +76,10 @@ if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" unknown > "$fixture/
 fi
 [[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled an unknown consumer profile' >&2; exit 1; }
 echo 'Every consumer profile prepares its source/assets and selects native/Wasm commands'
+if TEST_CAPABILITY=external-codecs TEST_REJECT=yes "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-codecs > "$fixture/codec-rejection.log" 2>&1; then
+    echo 'External codecs admitted host transport' >&2; exit 1
+fi
+grep -q 'External codecs acquired transport' "$fixture/codec-rejection.log"
 for rejection in duplicate features; do
     duplicate=no feature_union=std
     if [[ "$rejection" == duplicate ]]; then

@@ -119,6 +119,14 @@ if [[ "$capability" == blake3 ]]; then
         fi
     done
 fi
+if [[ "$capability" == external-codecs ]]; then
+    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
+        if grep -Eq '^(ic-cdk[^ ]*|ic0|ic-platform-macros|ic-agent|pocket-ic|ic-testkit|candid_parser|reqwest|tokio) ' "$fixture/$graph_target.graph"; then
+            echo 'External codecs acquired transport, executor or host parsing' >&2; exit 1
+        fi
+    done
+fi
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
 CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --frozen
 if [[ "$wasm" != skip ]]; then

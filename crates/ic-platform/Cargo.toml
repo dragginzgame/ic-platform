@@ -23,6 +23,7 @@ principal = [
 agent = ["principal", "dep:ic-agent"]
 bls = ["dep:ic-verify-bls-signature"]
 candid = ["principal", "dep:candid", "candid/bignum"]
+candid-endpoint = ["cdk", "candid"]
 candid-parser = ["principal", "dep:candid_parser"]
 candid-service = ["candid", "candid/printer"]
 cmc-types = ["candid"]
@@ -241,6 +242,7 @@ required-features = ["certified-assets-types"]
 name = "external_contract_schema"
 path = "tests/external_contract_schema.rs"
 required-features = [
+    "icrc-ledger-types",
     "cmc-types",
     "cycles-ledger-types",
     "icp-ledger-types",
@@ -253,6 +255,25 @@ required-features = [
 name = "upstream_dto_identity"
 path = "tests/upstream_dto_identity.rs"
 required-features = ["management-canister-types", "icrc-ledger-types"]
+
+[[test]]
+name = "protocol_consumer"
+path = "tests/protocol_consumer.rs"
+required-features = [
+    "candid",
+    "management-canister-types",
+    "cmc-types",
+    "icp-ledger-types",
+    "icrc-ledger-types",
+    "nns-registry-types",
+    "cycles-ledger-types",
+    "certified-assets-types",
+]
+
+[[test]]
+name = "candid_endpoint_consumer"
+path = "tests/candid_endpoint_consumer.rs"
+required-features = ["candid-endpoint", "candid-service"]
 
 [lints]
 workspace = true

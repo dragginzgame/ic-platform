@@ -133,4 +133,114 @@ mod tests {
         method_type::<assets::GetChunkArgs>(&mut env, &service, "get_chunk", true);
         method_type::<assets::GetChunkResult>(&mut env, &service, "get_chunk", false);
     }
+    fn operation_type<T: CandidType>(env: &mut parser::TypeEnv, declared: parser::Type) {
+        let mut rust = parser::TypeContainer::new();
+        let actual = rust.add::<T>();
+        let actual = env.merge_type(rust.env, actual);
+        parser::type_equal(
+            &mut std::collections::HashSet::new(),
+            env,
+            &declared,
+            &actual,
+        )
+        .unwrap();
+    }
+    fn operation<Req: CandidType, Rep: CandidType>(source: &str, method: &str) {
+        let (_, (mut env, service)) =
+            parser::instantiate_candid(parser::CandidSource::Text(source)).unwrap();
+        let function = env.get_method(&service, method).unwrap().clone();
+        assert_eq!(function.args.len(), 1, "{method} request arity");
+        assert_eq!(function.rets.len(), 1, "{method} reply arity");
+        operation_type::<Req>(&mut env, function.args[0].clone());
+        operation_type::<Rep>(&mut env, function.rets[0].clone());
+    }
+    #[test]
+    fn protocol_operations_match_independent_provider_methods_and_arity() {
+        use ic_platform::{candid::protocols as p, icrc_ledger_types as icrc};
+        let cmc_did = include_str!("fixtures/external-cmc.did");
+        operation::<cmc::NotifyTopUpArg, cmc::NotifyTopUpResult>(
+            cmc_did,
+            p::cmc::notify_top_up::METHOD,
+        );
+        operation::<cmc::NotifyMintCyclesArg, cmc::NotifyMintCyclesResult>(
+            cmc_did,
+            p::cmc::notify_mint_cycles::METHOD,
+        );
+        let icp_did = include_str!("fixtures/external-icp.did");
+        operation::<icp::TransferArgs, icp::TransferResult>(
+            icp_did,
+            p::icp_ledger::transfer::METHOD,
+        );
+        operation::<icp::GetBlocksArgs, icp::QueryEncodedBlocksResponse>(
+            icp_did,
+            p::icp_ledger::query_encoded_blocks::METHOD,
+        );
+        let cycles_did = include_str!("fixtures/external-cycles.did");
+        operation::<cycles::CreateCanisterArgs, cycles::CreateCanisterResult>(
+            cycles_did,
+            p::cycles_ledger::create_canister::METHOD,
+        );
+        operation::<cycles::WithdrawArgs, cycles::WithdrawResult>(
+            cycles_did,
+            p::cycles_ledger::withdraw::METHOD,
+        );
+        operation::<icrc::Account, contract::Nat>(cycles_did, p::icrc::balance_of::METHOD);
+        operation::<icrc::TransferArg, Result<contract::Nat, icrc::TransferError>>(
+            cycles_did,
+            p::icrc::transfer::METHOD,
+        );
+        operation::<Vec<icrc::GetBlocksRequest>, cycles::GetBlocksResult>(
+            cycles_did,
+            p::cycles_ledger::get_blocks::METHOD,
+        );
+        let assets_did = include_str!("fixtures/external-assets.did");
+        operation::<assets::GetArgs, assets::GetResult>(
+            assets_did,
+            p::certified_assets::get::METHOD,
+        );
+        operation::<assets::GetChunkArgs, assets::GetChunkResult>(
+            assets_did,
+            p::certified_assets::get_chunk::METHOD,
+        );
+        for (source, method) in [
+            (cmc_did, p::cmc::get_icp_xdr_conversion_rate::METHOD),
+            (cycles_did, p::icrc::fee::METHOD),
+            (cycles_did, p::icrc::get_tip_certificate::METHOD),
+        ] {
+            let (_, (env, service)) =
+                parser::instantiate_candid(parser::CandidSource::Text(source)).unwrap();
+            let function = env.get_method(&service, method).unwrap();
+            assert!(function.args.is_empty());
+            assert_eq!(function.rets.len(), 1);
+        }
+    }
+    #[test]
+    fn cycles_provider_codec_preserves_nat64_instead_of_narrowing_standard_value() {
+        use ic_platform::candid::{
+            self,
+            protocols::{self, ReplyArity},
+        };
+        let (_, (env, service)) = parser::instantiate_candid(parser::CandidSource::Text(
+            include_str!("fixtures/external-cycles.did"),
+        ))
+        .unwrap();
+        let response = env.get_method(&service, "icrc3_get_blocks").unwrap().rets[0].clone();
+        let value=parser::parse_idl_args("(record { log_length = 1 : nat; blocks = vec { record { id = 0 : nat; block = variant { Nat64 = 7 : nat64 } } }; archived_blocks = vec {} })").unwrap();
+        let bytes = value.to_bytes_with_types(&env, &[response]).unwrap();
+        let limits = candid::DecodeLimits {
+            reply_bytes: 65536,
+            decoding_quota: 1000000,
+            skipping_quota: 10000,
+            type_entries: 256,
+            header_bytes: 8192,
+        };
+        let decoded =
+            protocols::cycles_ledger::get_blocks::decode(&bytes, limits, ReplyArity::Exact)
+                .unwrap();
+        assert!(matches!(
+            decoded.blocks[0].block,
+            ic_platform::icrc_ledger_types::Value::Nat64(7)
+        ));
+        assert!(protocols::icrc::get_blocks::decode(&bytes, limits, ReplyArity::Exact).is_err());
+    }
 }

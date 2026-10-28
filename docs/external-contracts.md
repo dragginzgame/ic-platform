@@ -17,6 +17,17 @@ The Principal/Nat/function machinery retains registry Candid identities.
 | `nns-registry-types` | `ic_platform::nns_registry_types` | `get_subnet_for_canister` |
 | `certified-assets-types` | `ic_platform::certified_assets_types` | Native-host asset `get`, `get_chunk` |
 
+Pending 0.7.4 adds typed `candid::protocols` operations over these existing DTOs
+and the management/ICRC registry identities, without transport or recovery policy.
+It additionally supplies the pinned Cycles Ledger `icrc3_get_blocks` result under
+**both** `cycles-ledger-types` and `icrc-ledger-types`. Its
+`cycles_ledger_types::{BlockWithId, ArchivedBlocks, GetBlocksResult}` use upstream
+`Value` (including `Nat64`) and the exact `QueryArchiveFn` identity. The standard
+upstream ICRC-3 projection omits `Nat64` and is not a substitute for that provider
+schema. No block conversion or hash change occurs. An independently parsed pinned
+Cycles DID exercises this distinction. These additions are not supplied by 0.6.20;
+see the [endpoint and codec migration](migration.md#external-endpoint-and-protocol-codecs-78-79).
+
 Each feature explicitly selects `candid`; none is default or implied by runtime,
 CDK, executor or another DTO family. Asset exports are absent on Wasm. Selecting
 that feature on Wasm still selects its explicit Candid prerequisite; it does not
