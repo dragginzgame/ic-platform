@@ -15,6 +15,19 @@ integer conversions. Consumers retain size/depth admission and authority checks.
 Source checks require the single admission call at parser entry and reconstruct
 the original fingerprints without changing their recorded hashes.
 
+## External Candid nesting qualification (#73)
+
+`DecodeLimits` bounds bytes, work, type count and header size, not Wasm recursion
+depth. The selected Candid 0.10.39 stack check is a no-op on Wasm and exposes no
+depth setter. Installed local Wasm reproduced a decoder trap with 8,192 nested
+`opt` values in an 8,202-byte reply despite finite decoding/skipping quotas of
+1,000,000. This is a confirmed open limitation, not a corrected depth contract.
+The configured helpers may therefore trap rather than return `DecodeError` for
+such inputs. Low-level contract decoders keep upstream/caller-owned budgeting.
+Do not infer stack safety from quotas or move owned Wire RPC back to Candid.
+[#73](https://github.com/dragginzgame/ic-platform/issues/73) owns the reproduction
+and required caller-selected, installed-Wasm depth qualification.
+
 ## Host gzip boundary
 
 The maintainer requested that IC Profiler access gzip through Platform rather
