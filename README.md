@@ -100,7 +100,7 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-`wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.7.16.
+`wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.7.19.
 It is excluded from Wasm dependencies, even when selected. See the
 [migration contract](docs/migration.md#owned-principal-and-account-wire-metadata).
 Prepare Node 24.21.0 and npm 12.2.0, then run `make install-wire-tools`

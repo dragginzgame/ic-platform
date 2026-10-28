@@ -2,18 +2,39 @@
 
 ## Source and accepted scope
 
-The local branch contains 0.7.1 release commit `b301438` and integration merge
-`5862651`; remote main now includes receipt-fix #77 at `8ebaf50`, after provider
-`9dcef4b`. That receipt fix is also applied in the local working tree.
-Rust metadata remains 0.7.1; new compatible security notes target 0.7.2.
-No release, publication or deployment is part of this task. npm browser 0.1.1
-is separately published. Shared Tooling stays 0.26.26 at
-`5683060a5d8ce79af2fcfedb53b3eb24037fd064` (109 payloads).
+The checkout is at maintainer release commit `95b7caf` (0.7.2). Rust metadata
+remains 0.7.2; new compatible adoption notes target 0.7.3. No release, publication
+or deployment is part of this task. npm browser 0.1.1 is separately published.
+Shared Tooling stays 0.26.26 at `5683060a5d8ce79af2fcfedb53b3eb24037fd064`
+(109 payloads). Earlier source/delivery records below retain their own scope.
 
-Preserve incoming Cargo.lock work: ic-host-artifacts was 0.69.3 during the
-qualification below and changed concurrently to 0.69.5 afterward; the latter
-is outside this task's test evidence and isolated PR. Unicode-width stays 0.2.3. Sibling checkouts remain read-only. Local security changes
-are not default-branch delivery or a newly published supplier.
+Preserve incoming root lockfile work: Wire/derive 0.7.19, ic-host-artifacts
+0.69.5 and unicode-width 0.2.3. Sibling checkouts remain read-only.
+
+## IC Wire 0.7.19 adoption
+
+Both catalog declarations now require published Wire 0.7.19: the production
+native metadata alias and the independent tooling/runtime dependency. The incoming
+root lock already selected Wire/derive 0.7.19 and is preserved byte-for-byte.
+Only Wire and its derive change in the maintained runtime fixture lock; other
+selections, Platform exports, features, codecs and consumer policies are unchanged.
+The compatible changelog note targets 0.7.3 without changing release metadata.
+
+Full `make clippy` passed before longer checks. The standalone Rust 1.91 schema
+consumer and strict generated TypeScript/Node tests pass for Principal/Account
+frames, lengths, absent/zero/nonzero subaccounts and malformed frame refusals.
+Standalone `ic-call` raw/Wire/external-Candid consumers pass strict Clippy and
+native tests/Wasm compilation under Rust 1.99.1 and 1.91. Rust 1.91 additionally
+compiles Platform's selected `wire-schema` feature for Wasm. Native/Wasm default
+and executor graphs remain Wire/JSON/Candid/host-free; Wasm `wire-schema` also
+excludes native metadata edges. Combined owned/raw runtime graphs retain registry
+executor 2.0.0 and ic0 1.2.0. Inventory, boundaries, pins, docs and formatting pass.
+
+Evidence is retained at `/tmp/platform-wire-adoption.sbnFJ8`. This is Linux native,
+TypeScript and Wasm compile/graph qualification; no new installed-canister or native
+macOS execution is claimed. Existing callback/upgrade installed records below
+predate this Wire selection. No sibling checkout, cryptographic implementation,
+Platform release version, Git history or publication is changed by this adoption.
 
 ## Prepared one-shot calls (#75)
 

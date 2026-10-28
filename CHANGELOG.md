@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.3]
+
+### 🔧 Changed
+
+- Adopt IC Wire 0.7.19 for host metadata and runtime qualification, including
+  its matching derive crate. Preserve the existing Platform surface, framed
+  protocol bytes and caller-owned admission policies.
+
 ## [0.7.2] - 2026-10-28
 
 ### ➕ Added

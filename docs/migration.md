@@ -430,10 +430,11 @@ Blob's tests. Native macOS and installed/live-provider acceptance remain separat
 
 Platform requires Rust 1.91 for all features. Principal metadata originally shipped
 in 0.6.9 and Account metadata in 0.6.12; Platform 0.6.15 adopted the Wire 0.7 family.
-Pending Platform 0.6.19 raises both Wire minimums to published 0.7.16. Qualify using
-a local Platform path until that supplier is published, then select
-`ic-platform = { version = "0.6.19", default-features = false, features = ["wire-schema"] }`.
-Host producers must also select `ic-wire = { version = "0.7.16", features = ["typescript"] }`
+Platform 0.6.19 raised both Wire minimums to 0.7.16. The next compatible
+Platform release raises the host metadata and tooling minima to published 0.7.19.
+Qualify using a local Platform path until that supplier is published, then select
+its released version with defaults disabled and `features = ["wire-schema"]`.
+Host producers must also select `ic-wire = { version = "0.7.19", features = ["typescript"] }`
 for their derives and generation. Wire 0.6 and 0.7 metadata traits are different
 identities; update both selections together. No direct Candid dependency is needed:
 
@@ -460,13 +461,14 @@ its existing owner and optional fixed 32-byte subaccount fields; no runtime code
 cryptographic primitive, persisted format or retry policy changes.
 
 The workspace alias `ic-wire-metadata` names the modern host metadata dependency.
-The independent installed-runtime fixture also selects Wire 0.7.16. Its separate
+The independent installed-runtime fixture also selects Wire 0.7.19. Its separate
 lock and installed qualification remain independent of host metadata generation.
 
 [#55](https://github.com/dragginzgame/ic-platform/issues/55) records the original
 Wire 0.6-to-0.7 supplying cut; older Platform 0.6.14 cannot satisfy a Wire 0.7
-trait bound. After the new supplier is published and registry caches are prepared,
-run `bash scripts/ci/check-principal-wire-schema.sh /path/to/tsc.js --published 0.6.19`.
+trait bound. After the supplying release is published and registry caches are prepared,
+run `bash scripts/ci/check-principal-wire-schema.sh /path/to/tsc.js --published X.Y.Z`
+with that exact released version.
 This mode refuses a path/Git replacement and checks the exact registry version.
 Local-path qualification is not evidence that the new artifact is published.
 
