@@ -38,6 +38,11 @@ where
 
 /// Exercise upstream identities, account semantics, hashes, archive callbacks and bytes.
 pub fn roundtrip() {
+    let standard = ic_platform::icrc_ledger_types::icrc10::SupportedStandard {
+        name: "ICRC-10".into(),
+        url: "https://example.test/standard".into(),
+    };
+    roundtrip_value(&vec![standard]);
     let owner = Principal::anonymous();
     let account = Account {
         owner,

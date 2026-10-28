@@ -1,11 +1,13 @@
-//! Explicit upstream ledger types used by Query and Canic.
+//! Explicit external ledger and standards types used by Query and Canic.
 //!
 //! External Candid formats, account semantics, hashes and callback identities
 //! stay upstream. Consumers retain call bounds, archive admission, certificate
 //! verification, transaction interpretation and retry policy. This feature
-//! brings transitive Candid but selects no Platform codec, executor, parser or
-//! Agent feature. Upstream storage integration is not selected.
+//! brings Candid but selects no Platform codec, executor, parser or Agent feature.
+//! Upstream storage integration is not selected. The ICRC-10 record is maintained
+//! here from protocol facts; the existing registry types keep their identities.
 
+pub mod icrc10;
 pub mod icrc21;
 
 pub use icrc_ledger_types::icrc::generic_metadata_value::MetadataValue;

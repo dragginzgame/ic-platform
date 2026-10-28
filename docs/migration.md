@@ -1,8 +1,39 @@
 # Candid and runtime ownership
 
+## Shared ICRC-10 discovery record (pending 0.7.5)
+
+Select `icrc-ledger-types` and import
+`ic_platform::icrc_ledger_types::icrc10::SupportedStandard`. This passive external
+DTO is the Candid record `{ name : text; url : text }`, not a tuple. Values are
+preserved without name/URL policy. Select `candid` separately when the consumer
+needs Platform's encode/decode APIs; no direct Candid dependency is necessary.
+The types feature alone supplies the DTO, without selecting those codec APIs.
+
+The independent source contract is [ICRC-10's DID at 1df0c6a](https://github.com/dfinity/ICRC/blob/1df0c6af6ecca4f4eb1956c67b29c0d13279f1cd/ICRCs/ICRC-10/ICRC-10.did).
+Platform independently represents its protocol facts; no upstream Rust type or
+cryptographic implementation is replaced. ICRC-21 retains existing upstream
+identities. The direct Candid derive edge adds no resolved ledger-profile package
+or effective feature over the pre-existing upstream dependency.
+
+Canic's prepared optional adapter replaces its local `SupportedStandard`
+declaration/derives with this import, retaining one public type identity. Its
+required Platform floor becomes **0.7.5**, pending maintainer release/publication.
+Keep its mounting macros, framework guards, explicit argument budgets, advertised
+standards and application-owned consent handler there. There is no Platform
+endpoint, global registry or configuration flag for ICRC discovery/consent.
+[Canic #706](https://github.com/dragginzgame/canic/issues/706) tracks the pending
+0.113 integration. No sibling checkout or production version is changed here.
+
+The Platform-only `icrc10-types` consumer proves ledger-types-only availability;
+`icrc` encodes/decodes a response; `external-contract-schema` independently checks
+named field types and identical schema-generated reply bytes. They qualify native
+Rust 1.91/current and applicable Wasm profiles. Native macOS and consumer/provider
+installation remain separate. The addition does not fix #73 nesting admission.
+
 ## External endpoint and protocol codecs (#78, #79)
 
-The compatible additions below target **0.7.4; they are not published yet**.
+The compatible additions below are present in **source release 0.7.4**.
+Registry publication has not been verified in this pass.
 Existing external DTOs remain available from their documented earlier suppliers.
 Owned application endpoints, including public ones, remain Wire. Required IC,
 ledger and pre-existing provider interfaces explicitly select Candid.

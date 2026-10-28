@@ -2,23 +2,50 @@
 
 ## Source and accepted scope
 
-Local base: maintainer release `6733f50` (0.7.3); remote main now has runner
-repair `ce92a9f`. Compatible pending notes target 0.7.4;
-Rust metadata remains 0.7.3. No release/publication/deployment is authorized here.
+Local and remote main are at maintainer release `ca2ac1e` (0.7.4), including
+the runner repair and external codec supply. Registry publication has not been
+verified in this pass. No further release/publication/deployment is authorized here.
 Shared Tooling remains 0.26.26 at `5683060a5d8ce79af2fcfedb53b3eb24037fd064`.
 Browser npm 0.1.1 is already published separately. Siblings remain read-only.
 
-Preserve concurrent, unrelated root Cargo.lock changes: Wire/derive now resolve
-0.7.20 and ic-host-artifacts 0.69.7 (initial task input was 0.7.19/0.69.5).
-They are excluded from this contribution. Existing runtime qualification retains
-its own reviewed registry lock, including Wire 0.7.19 and Candid 0.10.38.
+Preserve concurrent, unrelated root Cargo.lock changes to aws-lc-rs/aws-lc-sys
+and Wire/derive 0.7.21. This pass does not adopt or independently qualify them.
+Wire/derive 0.7.20 and ic-host-artifacts 0.69.7 were included by the maintainer's release. Existing
+runtime qualification retains its own registry lock and evidence scope.
+
+## Shared ICRC-10 DTO (pending 0.7.5)
+
+The maintainer requested moving the prepared Canic adapter's discovery DTO into
+Platform. `icrc_ledger_types::icrc10::SupportedStandard { name, url }` is available
+under existing `icrc-ledger-types`; no new/default feature or automatic endpoint.
+This independently maintained external record follows the pinned named-field
+ICRC-10 schema. Its direct `dep:candid` derive edge reuses the transitive ledger
+identity; measured native/Wasm resolved identities and effective features match
+the earlier ledger profile. The facade codec feature remains independently selected.
+
+Full `make clippy`, strict Rustdoc and standalone types-only/codec/schema consumers
+pass on current Rust/1.91 and applicable Wasm. Independent schema/bytes checks
+and consumer/feature admission regressions pass. No release metadata is bumped.
+The prepared Canic 0.113 patch replaces its local declaration with the exact
+Platform identity and requires supplying **0.7.5 publication**. [Canic #706](https://github.com/dragginzgame/canic/issues/706)
+also awaits its pending source base on upstream main. Source-only consumer
+qualification uses a disposable supplier candidate at that version; it is not
+registry acceptance or a distributed Cargo patch. Normal sibling checkouts stay
+untouched. Evidence: `/tmp/platform-icrc10-20261028`.
+Canic's scoped strict lint and adapter/schema/type-identity tests pass with that
+candidate, as do Rust 1.91/Wasm and all four installed local profiles. Discovery
+response bytes match the previous Canic-owned record exactly in both mounted
+selections. Native macOS and actual published-supplier acceptance remain separate.
 
 ## External codec supply (#78, #79)
 
-Pending [PR #85](https://github.com/dragginzgame/ic-platform/pull/85) supplies
-0.7.4's explicit `candid-endpoint` adapters and pure
+Source release 0.7.4 supplies explicit `candid-endpoint` adapters and pure
 `candid::protocols` operations. See the [migration and concrete Canic deletion
 map](../migration.md#external-endpoint-and-protocol-codecs-78-79).
+Issues #78/#79 are closed after verifying default-branch delivery. [PR #85](https://github.com/dragginzgame/ic-platform/pull/85)
+is closed as already integrated: every implementation, test and documentation
+file matches main; only release metadata and lock selections differ. All its
+functional CI passed, including Linux/macOS Intel/ARM64 and installed runtime.
 The adapters delegate to the existing generator/executor, run caller guards
 before argument admission, and check scalar byte length before copying. Budgets,
 empty-envelope policy, endpoint names, auth, startup and lifecycle stay caller-owned.
@@ -48,8 +75,8 @@ synchronous mutation rollback, composite query and async management raw_rand.
 Existing callback/trap/drop/timer/upgrade subjects remain in the same runner.
 Local sources include these cases; historical published qualification keeps its
 original profile. `--external-adapters --published X.Y.Z` opts into the new cases
-once the supplier is published. No new native macOS or live provider/ledger
-acceptance is inferred from local installed proofs. Evidence:
+once the supplier is published. Native macOS source/consumer CI passed separately;
+live provider/ledger acceptance is not inferred from local installed proofs. Evidence:
 `/tmp/platform-backlog-20261028`; no Canic/Host migration is claimed.
 
 ## Shipped work and CI runner repair
@@ -83,6 +110,8 @@ in `/tmp/platform-security-20261028` and `/tmp/platform-backlog-20261028/depth-p
 RUSTSEC-2026-0387 through coupled ECDSA/Agent/derivation dependencies. No advisory
 ignore, incompatible override, Agent fork or in-house crypto is authorized.
 Functional passes do not turn that failed advisory check into a pass.
+The maintainer approved setting #50 aside for integration; no dependency ignore
+or check suppression was added and the finding remains open.
 
 #72's approved DER check is the sole admitted parser-entry call; source guards
 reconstruct original fingerprints. Short-form framing refusal is qualified;

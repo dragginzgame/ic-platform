@@ -13,6 +13,7 @@ agent	agent,certification	agent_consumer	agent-*.hex	skip
 management	management-canister-types,candid	management_consumer	management-*.hex	check
 ic0	ic0	ic0_consumer	-	check
 icrc	icrc-ledger-types,candid	icrc_consumer	icrc-*.hex	check
+icrc10-types	icrc-ledger-types	icrc10_types_consumer	-	check
 bls	bls	bls_consumer	bls-*.hex	check
 canister-sig-creation	canister-sig-creation	canister_sig_consumer	-	check
 signature-verification	signature-verification	signature_consumer	bls-*.hex,signature-*.hex	check
