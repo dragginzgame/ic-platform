@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.4]
+
+### 🩹 Fixed
+
+- Preserve empty optional argument arrays under macOS Bash 3.2 in the standalone
+  call consumer and runtime qualification runners. Add a command-admission
+  regression covering raw, Wire and external-Candid selections and failures.
+
 ## [0.7.3] - 2026-10-28
 
 ### 🔧 Changed
