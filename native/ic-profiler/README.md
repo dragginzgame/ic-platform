@@ -15,6 +15,12 @@ assembly, checks or builds. The consumer's `.build` holds generated integration,
 targets and immutable receipts. Useful previous assemblies must be retained when
 migrating from a consumer-owned backend.
 
+Fresh and verified cached preparation publish the normal assembly's summary to
+the consumer's `.build/receipts/latest-prepare.json`. Candidate probes keep that
+summary unchanged. The normal assembly also retains its complete preparation receipt
+at `.build/ic/.git/ic-profiler-receipt.json`; check its provider/consumer identities
+before retaining it with measurements.
+
 `scripts/ic_profiler.py native-verify` owns the complete native gate: prerequisite
 and graph admission, server build, recorder tests and the five profiling tests
 against that exact server. Profiling tests serialize their whole-server recording

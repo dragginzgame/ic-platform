@@ -15,6 +15,10 @@
 
 ### 🩹 Fixed
 
+- Publish native preparation summaries under the consuming checkout, including
+  cached preparation, so split provider/consumer layouts cannot leave a stale
+  receipt behind. Keep candidate probes separate from the selected assembly.
+
 - Admit gzip's independent native-only feature in dependency-graph validation,
   while retaining Principal prerequisites for other native features and strict
   target/dependency checks ([#71](https://github.com/dragginzgame/ic-platform/pull/71)).

@@ -394,8 +394,9 @@ def copy_file(source, destination):
 
 
 def publish_prepare_receipt(root, destination, receipt):
-    if destination == root / ".build" / "ic":
-        write_json(root / ".build" / "receipts" / "latest-prepare.json", {**receipt, "destination": str(destination)})
+    build = build_directory(root)
+    if destination == build / "ic":
+        write_json(build / "receipts" / "latest-prepare.json", {**receipt, "destination": str(destination)})
 
 
 def prepare(root, manifest, *, force=False, revision=None, destination=None):
