@@ -186,9 +186,10 @@ Enable `signature-verification` for
 0.3.0's four byte-slice arguments and `Result<(), String>`. This checks supplied
 signature/certificate bytes against the supplied root. It does not select a
 trusted issuer, seed, network root, freshness window, resource ceiling or grant
-application authority. Keep those checks in the consumer. Both public-key and
-verification paths retain upstream's short-DER panic risk: retain pre-validation
-and canonical re-encoding. Hash/domain lengths likewise retain upstream behavior.
+application authority. Keep those checks in the consumer. Owned framing admission
+rejects truncated/noncanonical short-form public-key DER before the unchanged
+parser on both public-key and verification paths. Long-form DER is unsupported;
+encoder/hash/domain length conversion behavior remains upstream.
 The verifier selects creation, certification and BLS, exposing the creation
 surface without enabling Candid, ic0, CDK, parser or Agent. Both imported source
 modules and their vectors/licenses are protected by exact fingerprints.

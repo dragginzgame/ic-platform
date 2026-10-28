@@ -40,8 +40,8 @@ impl std::error::Error for CanisterSigTimeError {}
 /// time labels, overflow, truncation and trailing bytes are rejected.
 ///
 /// Callers retain byte/depth admission, DER pre-validation, trusted inputs and
-/// all freshness/future-skew policy. The existing short-DER panic limitation of
-/// the imported public-key parser remains; this is not a bounded proof decoder.
+/// all freshness/future-skew policy. Owned DER framing admission precedes the
+/// unchanged imported public-key parser; this is not a bounded proof decoder.
 /// Verification authenticates the message and time, not application authority.
 pub fn verify_canister_sig_with_time(
     message: &[u8],

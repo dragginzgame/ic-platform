@@ -83,6 +83,12 @@ Runtime-only raw/executor consumers retain their independent features.
 
 ## Cryptographic boundary
 
+The maintainer authorized #72's narrow DER admission exception: one owned envelope
+check precedes the unchanged imported canister-key parser. The source guard admits
+only that exact call at parser entry, then reconstructs the original fingerprints.
+Encoding, cryptographic bodies, constants and upstream vectors remain unchanged;
+this authorizes no other key-format changes or fingerprint refreshes.
+
 The maintainer authorized the optional BLAKE3 maintenance surface with explicit
 upstream `hash`, `Hasher` and `Hash` identities. Keep the implementation upstream,
 select only `std`, and qualify singleton/source and effective-feature graphs.

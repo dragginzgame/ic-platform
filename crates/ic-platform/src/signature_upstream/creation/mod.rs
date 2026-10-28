@@ -115,6 +115,7 @@ pub fn extract_raw_root_pk_from_der(pk_der: &[u8]) -> Result<Vec<u8>, String> {
 
 /// Verifies the structure given public key in DER-format, and returns raw bytes of the key.
 pub fn extract_raw_canister_sig_pk_from_der(pk_der: &[u8]) -> Result<Vec<u8>, String> {
+    super::admission::canister_sig_der(pk_der)?; // Platform: checked DER admission.
     let oid_part = &pk_der[2..(CANISTER_SIG_PK_DER_OID.len() + 2)];
     if oid_part[..] != CANISTER_SIG_PK_DER_OID[..] {
         return Err(String::from("invalid OID of canister sig pk"));

@@ -1,5 +1,20 @@
 # Candid and runtime ownership
 
+## Pending DER framing admission (#72)
+
+The maintainer approved one owned envelope check before the unchanged imported
+canister-key parser. Truncated prefixes, inconsistent/noncanonical lengths, wrong
+tags/OID/unused-bit framing and trailing data now return errors through
+`CanisterSigPublicKey::try_from` and both verification functions. Valid existing
+keys and signature vectors retain their bytes and results. No public type,
+cryptographic implementation, encoder or seed/issuer policy changes.
+
+The fixed-offset upstream parser's supported grammar remains short-form DER;
+this does not add long-form support or repair the encoder's oversized-length
+integer conversions. Consumers retain size/depth admission and authority checks.
+Source checks require the single admission call at parser entry and reconstruct
+the original fingerprints without changing their recorded hashes.
+
 ## Host gzip boundary
 
 The maintainer requested that IC Profiler access gzip through Platform rather
@@ -927,9 +942,10 @@ Other Serde/CBOR/SHA and consumer feature selections remain consumer-owned.
 Keep Auth's byte/depth limits, canonical DER re-encoding, protected issuer/seed
 and trust roots, original signed payloads/domains, certificate authentication,
 freshness/future-skew policy, signature retention, clock/transaction behavior,
-expiry/pruning and root publication. Upstream short public-key DER can panic;
-Auth's pre-parser length admission must remain. Domain/DER lengths also retain
-upstream integer-conversion behavior. Do not move these checks into Platform or
+expiry/pruning and root publication. The #72 correction adds DER envelope
+admission before the unchanged key parser; retain Auth's resource and canonicality
+checks. Domain/DER encoding lengths still retain upstream integer-conversion
+behavior, and long-form DER is unsupported. Do not move application checks into Platform or
 interpret verifier success as application authority. No signature map, global
 store, clock or certification side effect is exposed here.
 
@@ -1960,8 +1976,10 @@ introduced. The coordinated Platform package carries the supported implementatio
 Both imported modules retain all upstream function bodies and test vectors.
 Only the canonical registry Principal import, the sibling creation import and
 omission of the unused store declaration differ. Exact source/license admission
-runs with the runtime source check. Short-DER panic behavior and domain/DER length
-conversion behavior remain upstream; keep Auth's pre-admission, canonical DER
+runs with the runtime source check. The approved #72 exception adds only one
+checked framing call at parser entry; removing that exact call reconstructs the
+original source fingerprints. Domain/DER encoding length conversions remain
+upstream; keep Auth's resource admission, canonical DER
 re-encoding, issuer/seed, freshness and trust-root checks. BLS, certificates and
 hash/domain separation use their existing upstream implementations.
 
