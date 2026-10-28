@@ -4,6 +4,10 @@
 
 ### ➕ Added
 
+- Qualify browser declarations with TypeScript 6.0.3 and the producer compiler,
+  documenting the consumer floor separately from application tooling peers
+  ([#76](https://github.com/dragginzgame/ic-platform/issues/76)).
+
 - Own the opt-in instrumented PocketIC source provider for IC Profiler, keeping
   native adapters and IC build inputs below the facade while the consumer retains
   its recorder/viewer. Exclude Motoko/lifeline from the native server profile

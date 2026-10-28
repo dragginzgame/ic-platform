@@ -54,6 +54,7 @@ jobs:
         run: |
           npm install --global --ignore-scripts "$(node -p 'require("./packages/browser/package.json").packageManager')"
           npm ci --prefix packages/browser --ignore-scripts --no-audit --no-fund
+          npm ci --prefix scripts/fixtures/browser-compiler-floor --ignore-scripts --no-audit --no-fund
       - name: Qualify source-publish hook without upload
         env:
           npm_config_dry_run: 'true'

@@ -52,6 +52,7 @@ check-wire-schema: wire-tools-check
 .PHONY: install-browser-tools browser-tools-check check-browser check-browser-runtime
 install-browser-tools: wire-tools-check
 	npm ci --prefix packages/browser --ignore-scripts --no-audit --no-fund
+	npm ci --prefix scripts/fixtures/browser-compiler-floor --ignore-scripts --no-audit --no-fund
 browser-tools-check:
 	node scripts/ci/check-browser-tools.mjs
 check-browser: browser-tools-check
