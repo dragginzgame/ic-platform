@@ -113,6 +113,7 @@ check-doc-links:
 .PHONY: check-native-provider
 check-native-provider:
 	python3 -m unittest discover -s native/ic-profiler/tests -p 'test_*.py'
+	bash scripts/ci/check-native-profiler-http.sh
 
 check-inventory:
 	bash scripts/ci/check-platform-inventory.sh

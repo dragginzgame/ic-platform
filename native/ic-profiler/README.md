@@ -56,3 +56,21 @@ compile-only empty placeholder. Explicit routing overrides are parsed and hashed
 in command receipts. The build script observes routing/canister input changes.
 NNS genesis still needs real canister artifacts supplied by the selected IC build
 environment; application-subnet profiling tests do not qualify those artifacts.
+
+Profiling routes on the main PocketIC listener and the separate viewer share
+Host/Origin admission. This includes run APIs, memory trace/snapshot controls and
+viewer startup. Loopback listeners admit localhost names and IP authorities;
+explicit non-loopback binds also admit other valid hostnames. Present Origin
+headers must use HTTP(S) with the exact requested authority. Local nonbrowser
+clients may omit Origin; forwarded headers do not confer authority. This is
+request admission, not authentication for a remotely exposed listener.
+
+Focused native regression command, using an explicitly prepared consumer/provider:
+`scripts/test -- -p pocket-ic-server --lib system_profile_api::admission`.
+From the Platform repository root, `bash scripts/ci/check-native-profiler-http.sh`
+additionally tests that exact
+admission source and its Axum/Aide route integration without compiling the replica;
+explicitly prepare its dependency cache with `--prepare` first. The source CI job
+runs this proof alongside the assembler fixtures, with a separate build target.
+Route-unit and standalone browser evidence do not replace a newly built native
+server's qualification when the consumer adopts a changed provider pin.

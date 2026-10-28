@@ -15,6 +15,10 @@
 
 ### 🩹 Fixed
 
+- Share Host/Origin admission across native profiling APIs, trace/snapshot
+  controls and viewer startup on both listeners, preserving local nonbrowser
+  clients ([#74](https://github.com/dragginzgame/ic-platform/issues/74)).
+
 - Admit gzip's independent native-only feature in dependency-graph validation,
   while retaining Principal prerequisites for other native features and strict
   target/dependency checks ([#71](https://github.com/dragginzgame/ic-platform/pull/71)).

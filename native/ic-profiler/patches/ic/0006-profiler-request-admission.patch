@@ -1,0 +1,88 @@
+diff --git a/rs/pocket_ic_server/src/main.rs b/rs/pocket_ic_server/src/main.rs
+index 81029be..ddc6ff1 100644
+--- a/rs/pocket_ic_server/src/main.rs
++++ b/rs/pocket_ic_server/src/main.rs
+@@ -463,7 +463,9 @@ async fn start(runtime: Arc<Runtime>, args: Args, storage_info: StorageInfo) {
+         // Serve the memory access viewer.
+         .directory_route(
+             "/memory_access_viewer",
+-            post(handler_start_memory_access_viewer),
++            post(handler_start_memory_access_viewer).layer(middleware::from_fn(
++                pocket_ic_server::system_profile_api::protect_bound_requests,
++            )),
+         )
+         //
+         // Read state: Poll a result based on a received Started{} reply.
+@@ -507,6 +509,11 @@ async fn start(runtime: Arc<Runtime>, args: Args, storage_info: StorageInfo) {
+         // Extensions are cloned for every request. Share the read-only schema
+         // so ordinary canister calls do not clone every API path and type.
+         .layer(Extension(Arc::new(api)))
++        .layer(Extension(
++            pocket_ic_server::system_profile_api::ListenerAdmission(
++                listener.local_addr().unwrap().ip().is_loopback(),
++            ),
++        ))
+         // For examples on how to customize the logging spans:
+         // https://github.com/tokio-rs/axum/blob/main/examples/tracing-aka-logging/src/main.rs#L45
+         .layer(TraceLayer::new_for_http())
+diff --git a/rs/pocket_ic_server/src/state_api/routes.rs b/rs/pocket_ic_server/src/state_api/routes.rs
+index f872c54..c6a49b5 100644
+--- a/rs/pocket_ic_server/src/state_api/routes.rs
++++ b/rs/pocket_ic_server/src/state_api/routes.rs
+@@ -127,15 +127,21 @@ where
+         .directory_route("/get_stable_memory", post(handler_get_stable_memory))
+         .directory_route(
+             "/capture_memory_snapshot",
+-            post(handler_capture_memory_snapshot),
++            post(handler_capture_memory_snapshot).layer(axum::middleware::from_fn(
++                crate::system_profile_api::protect_bound_requests,
++            )),
+         )
+         .directory_route(
+             "/delete_memory_snapshot",
+-            post(handler_delete_memory_snapshot),
++            post(handler_delete_memory_snapshot).layer(axum::middleware::from_fn(
++                crate::system_profile_api::protect_bound_requests,
++            )),
+         )
+         .directory_route(
+             "/get_memory_access_trace",
+-            post(handler_get_memory_access_trace),
++            post(handler_get_memory_access_trace).layer(axum::middleware::from_fn(
++                crate::system_profile_api::protect_bound_requests,
++            )),
+         )
+         .directory_route("/get_subnet", post(handler_get_subnet))
+         .directory_route("/pub_key", post(handler_pub_key))
+@@ -162,19 +168,27 @@ where
+         .directory_route("/set_stable_memory", post(handler_set_stable_memory))
+         .directory_route(
+             "/start_instruction_profiling",
+-            post(handler_start_instruction_profiling),
++            post(handler_start_instruction_profiling).layer(axum::middleware::from_fn(
++                crate::system_profile_api::protect_bound_requests,
++            )),
+         )
+         .directory_route(
+             "/start_memory_access_tracing",
+-            post(handler_start_memory_access_tracing),
++            post(handler_start_memory_access_tracing).layer(axum::middleware::from_fn(
++                crate::system_profile_api::protect_bound_requests,
++            )),
+         )
+         .directory_route(
+             "/stop_memory_access_tracing",
+-            post(handler_stop_memory_access_tracing),
++            post(handler_stop_memory_access_tracing).layer(axum::middleware::from_fn(
++                crate::system_profile_api::protect_bound_requests,
++            )),
+         )
+         .directory_route(
+             "/clear_memory_access_trace",
+-            post(handler_clear_memory_access_trace),
++            post(handler_clear_memory_access_trace).layer(axum::middleware::from_fn(
++                crate::system_profile_api::protect_bound_requests,
++            )),
+         )
+         .directory_route("/tick", post(handler_tick))
+         .directory_route("/mock_canister_http", post(handler_mock_canister_http))

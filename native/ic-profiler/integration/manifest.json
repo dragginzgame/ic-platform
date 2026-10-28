@@ -75,6 +75,10 @@
       {
         "path": "0005-platform-gzip-boundary.patch",
         "sha256": "ae2b057548e352f6b4ca802eba95a09a706c5c0db0dd36050ac78b31c21e0adf"
+      },
+      {
+        "path": "0006-profiler-request-admission.patch",
+        "sha256": "3395eb0c99c94255a99061a25a08ba7d96751058cdd35bf7e45ce2f2cbe2f0f6"
       }
     ],
     "series": "patches/ic/series"

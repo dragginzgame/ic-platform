@@ -23,6 +23,10 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
+      - name: Prepare native HTTP fixture toolchain
+        run: rustup toolchain install --profile minimal --no-self-update --component clippy --component rustfmt
+      - name: Prepare native HTTP fixture dependencies
+        run: bash scripts/ci/check-native-profiler-http.sh --prepare
       - name: Qualify native source-provider assembly boundaries
         run: make check-native-provider
 
