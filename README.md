@@ -334,7 +334,9 @@ IC Testkit's copyright notice. The maintained generator is Apache-2.0.
 
 ### Maintained runtime regression
 
-`make check-runtime` builds and installs Wire canisters through Testkit-managed
+`make check-runtime` qualifies both raw calls and owned `ic-call` requests in one
+fixture, sharing the host-driver and compiler builds. It installs Wire canisters
+through Testkit-managed
 PocketIC on Rust 1.99 and 1.91. The pure `cdk` selection rejects Candid, parser,
 full CDK and native host clients in its canister graph. A separate
 `external-candid` selection tests an outbound management `raw_rand` call with

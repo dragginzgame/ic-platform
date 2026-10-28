@@ -48,7 +48,9 @@ MANIFEST
 fi
 cp scripts/fixtures/cdk-runtime/canister.Cargo.toml "$fixture/crates/canister/Cargo.toml"
 if [[ -n "$ic_call" ]]; then
-    printf '\nic-call = { path = "../../../../crates/ic-call", default-features = false }\n' >> "$fixture/crates/canister/Cargo.toml"
+    sed -i.bak 's/ic-call = \[\]/ic-call = ["dep:ic-call"]/' "$fixture/crates/canister/Cargo.toml"
+    rm "$fixture/crates/canister/Cargo.toml.bak"
+    printf '\nic-call = { path = "../../../../crates/ic-call", default-features = false, optional = true }\n' >> "$fixture/crates/canister/Cargo.toml"
 fi
 cp scripts/fixtures/cdk-runtime/driver.Cargo.toml "$fixture/apps/driver/Cargo.toml"
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
@@ -97,15 +99,19 @@ if [[ -n "$published" ]]; then
     }
 fi
 cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
+transports=(raw)
+if [[ -n "$ic_call" ]]; then transports+=(owned); fi
+for transport in "${transports[@]}"; do
 for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     for protocol in wire external-candid; do
         features=()
-        if [[ -n "$ic_call" ]]; then features+=(--features ic-call); fi
+        if [[ "$transport" == owned ]]; then features+=(--features ic-call); fi
         admission=()
         if [[ "$protocol" == external-candid ]]; then features+=(--features external-candid); admission=(--external-candid); fi
-        cargo tree --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister "${features[@]}" --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target-$protocol.graph"
-        bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target-$protocol.graph" "${admission[@]}"
+        cargo tree --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister "${features[@]}" --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target-$transport-$protocol.graph"
+        bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target-$transport-$protocol.graph" "${admission[@]}"
     done
+done
 done
 if [[ "$mode" == --check-graph ]]; then
     printf 'Runtime graph evidence retained at %s\n' "$fixture"
@@ -113,24 +119,28 @@ if [[ "$mode" == --check-graph ]]; then
 fi
 CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
 CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
+for transport in "${transports[@]}"; do
 for toolchain in "$development_toolchain" 1.91.0; do
     for protocol in wire external-candid; do
         features=()
-        if [[ -n "$ic_call" ]]; then features+=(--features ic-call); fi
+        if [[ "$transport" == owned ]]; then features+=(--features ic-call); fi
         if [[ "$protocol" == external-candid ]]; then features+=(--features external-candid); fi
         CARGO_TARGET_DIR="$fixture/build/$toolchain" cargo +"$toolchain" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister "${features[@]}" --release --target wasm32-unknown-unknown
         mkdir -p "$fixture/artifacts/$toolchain"
-        cp "$fixture/build/$toolchain/wasm32-unknown-unknown/release/platform_runtime_canister.wasm" "$fixture/artifacts/$toolchain/$protocol.wasm"
+        artifact="$protocol"
+        if [[ -n "$ic_call" ]]; then artifact="$transport-$protocol"; fi
+        cp "$fixture/build/$toolchain/wasm32-unknown-unknown/release/platform_runtime_canister.wasm" "$fixture/artifacts/$toolchain/$artifact.wasm"
         if [[ "$mode" == run ]]; then
             if [[ "$protocol" == external-candid ]]; then
-                PLATFORM_EXTERNAL_CANDID=1 "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$protocol.wasm"
+                PLATFORM_EXTERNAL_CANDID=1 "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$artifact.wasm"
             else
                 (
                     unset PLATFORM_EXTERNAL_CANDID
-                    "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$protocol.wasm"
+                    "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$artifact.wasm"
                 )
             fi
         fi
     done
+done
 done
 printf 'Runtime sources, lock and metadata retained at %s\n' "$fixture"

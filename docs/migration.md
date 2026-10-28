@@ -2138,7 +2138,7 @@ of later consumer adoption.
 `make check-consumer` includes a standalone crate exercising raw calls with only
 `ic-call`, then explicit Wire and external-Candid selections on the development
 compiler and Rust 1.91, native and Wasm. `bash scripts/ci/check-platform-runtime.sh
---ic-call` selects owned dynamic methods in the existing installed lifecycle
+--ic-call` qualifies owned dynamic methods alongside the raw control in the existing installed lifecycle
 fixture. Its disposable lock may add the local crate, but all maintained registry
 identities and dependency edges must match exactly. The original raw/published
 fixture remains independently selectable. Local Linux/PocketIC evidence and

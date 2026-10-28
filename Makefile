@@ -144,7 +144,7 @@ release-files:
 
 .PHONY: check-runtime
 check-runtime:
-	bash scripts/ci/check-platform-runtime.sh
+	bash scripts/ci/check-platform-runtime.sh --ic-call
 
 .PHONY: check-runtime-lock
 check-runtime-lock:
