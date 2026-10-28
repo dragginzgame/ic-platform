@@ -1,4 +1,4 @@
-//! Cycles Ledger creation and withdrawal contracts, without its service engine.
+//! Cycles Ledger creation, withdrawal and provider block contracts, without its service engine.
 //!
 //! Passive external Candid contracts; see docs/external-contracts.md for pinned
 //! schemas and provenance. Decoding does not authenticate a response or authorize
@@ -232,3 +232,40 @@ pub enum WithdrawError {
 
 /// External Candid WithdrawResult.
 pub type WithdrawResult = Result<Nat, WithdrawError>;
+
+/// Cycles Ledger's provider block retains legacy `Value::Nat64`, unlike the
+/// narrower standard ICRC-3 `ICRC3Value` projection. No value conversion is made.
+#[cfg(feature = "icrc-ledger-types")]
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct BlockWithId {
+    /// Exact provider block index.
+    pub id: Nat,
+    /// Exact provider value, including the legacy Nat64 alternative.
+    pub block: crate::icrc_ledger_types::Value,
+}
+
+/// Provider archive callback identity; admission and following stay caller-owned.
+#[cfg(feature = "icrc-ledger-types")]
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct ArchivedBlocks {
+    /// Exact provider ranges, without normalization or automatic merging.
+    pub args: Vec<crate::icrc_ledger_types::GetBlocksRequest>,
+    /// Upstream function identity with this provider's complete result schema.
+    pub callback: crate::icrc_ledger_types::QueryArchiveFn<
+        Vec<crate::icrc_ledger_types::GetBlocksRequest>,
+        GetBlocksResult,
+    >,
+}
+
+/// Exact Cycles Ledger `icrc3_get_blocks` result, including legacy Nat64 values.
+/// Both `cycles-ledger-types` and `icrc-ledger-types` select this provider schema.
+#[cfg(feature = "icrc-ledger-types")]
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct GetBlocksResult {
+    /// Provider-reported total log length; not an authenticated observation.
+    pub log_length: Nat,
+    /// Provider blocks without standard-projection narrowing.
+    pub blocks: Vec<BlockWithId>,
+    /// Untrusted provider callback declarations, never followed automatically.
+    pub archived_blocks: Vec<ArchivedBlocks>,
+}

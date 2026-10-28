@@ -24,7 +24,7 @@ case "$1" in
     metadata) printf '{}\n' ;;
     tree)
         printf 'ic-cdk-executor v2.0.0\nic0 v1.2.0\n'
-        case " $* " in *' --features external-candid '*) printf 'candid v0.10.39\n' ;; esac
+        case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'candid v0.10.39\n' ;; esac
         ;;
     +1.91.0)
         if [[ "${ADMISSION_FAIL:-no}" == yes && "$2" == check ]]; then exit 42; fi ;;
@@ -49,6 +49,7 @@ fi
 : > "$ADMISSION_CALLS"
 "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --ic-call --check-graph > "$fixture/runtime.log" 2>&1 || { cat "$fixture/runtime.log"; exit 1; }
 [[ "$(grep -c '^tree ' "$ADMISSION_CALLS")" == 8 ]]
+[[ "$(grep '^tree ' "$ADMISSION_CALLS" | grep -c -- ' --features external-adapters ')" == 4 ]]
 if "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --published invalid --check-graph > "$fixture/version.log" 2>&1; then
     echo 'Runtime admitted an invalid published version' >&2; exit 1
 else

@@ -13,6 +13,16 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+Pending 0.7.4 adds `candid-endpoint` for explicitly external query/update codec
+adapters over the existing generator/executor. It selects `cdk` and `candid`,
+never a parser or service printer. Native DID generation selects `candid-service`
+separately. Consumers own guards, names, limits and lifecycle; Platform owns only
+the shared codec/metadata mechanics. Existing raw/Wire entrypoints are unchanged.
+The `candid::protocols` surface is transport-free and uses only selected DTO
+features. Cycles Ledger's provider block schema requires both Cycles and ICRC
+features to preserve legacy `Value::Nat64` and upstream callback identities.
+No consumer adoption, depth protection or dependency/Wasm reduction is claimed.
+
 `ic-call` is the authorized #75 consumer crate for prepared one-shot requests.
 It depends only on `ic-platform` with `runtime`, has no default or codec features,
 and owns method/argument custody. Physical calls, response/error identities,
@@ -97,7 +107,7 @@ API changes or automatically establish whether sibling source still uses an API.
 | `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting, account semantics and conversions. External principal identity and self-authentication crypto remain upstream. |
 | `ic0`, `ic-cdk-executor`; imported CDK adapters and owned generator | `ic0`, `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters | Platform maintains non-crypto adapters/generator. Registry executor and system ABI stay pinned; callback/trap semantics require installed qualification. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
-| `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | Pending 0.7.0 removes JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
+| `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
 | `pocket-ic` | native `pocket_ic` client/DTO identities | Tooling Testkit `src/{lib.rs,pic/transport.rs}` | Upstream simulator client; Testkit owns server provisioning, compatibility, lifecycle and transport policy. |
 | `ic-management-canister-types` | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
@@ -178,6 +188,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | blake3 | dep:blake3 |
 | ic-platform | bls | dep:ic-verify-bls-signature |
 | ic-platform | candid | candid/bignum, dep:candid, principal |
+| ic-platform | candid-endpoint | candid, cdk |
 | ic-platform | candid-parser | dep:candid_parser, principal |
 | ic-platform | candid-service | candid, candid/printer |
 | ic-platform | canister-sig-creation | dep:ic-certification, dep:sha2, principal |

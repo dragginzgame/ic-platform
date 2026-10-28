@@ -1,5 +1,19 @@
 # ic-platform
 
+Pending 0.7.4 adds `candid-endpoint` and `candid::endpoint::{query, update}` for
+required external Candid interfaces with explicit `limits`, `empty_args` and
+ordered caller guards. It reuses the existing generator/executor; select
+`candid-service` separately for native DID printing. Raw/Wire endpoints retain
+their explicit codecs. `candid::arguments` also supplies pure argument admission.
+
+Select `candid` and the required DTO features for transport-free
+`candid::protocols` operations: explicit method, request encoding and bounded
+reply decoding with caller-selected arity. Cycles provider block codecs require
+both `cycles-ledger-types` and `icrc-ledger-types` to preserve legacy `Nat64`.
+These are pending additions, not released capabilities; see the
+[migration and qualification guide](../../docs/migration.md#external-endpoint-and-protocol-codecs-78-79).
+The unresolved Wasm nesting limitation in #73 applies to these codecs too.
+
 Enable `gzip` for native `ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`.
 These are IC Tooling's existing bounded codecs, without backend types or a second
 implementation. Consumers retain compression levels, byte limits and artifact

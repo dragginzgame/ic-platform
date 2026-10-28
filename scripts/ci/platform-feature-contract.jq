@@ -8,6 +8,7 @@ if length == 1 then .[0] else error("expected exactly one ic-platform package") 
 require((.features.candid == ["principal", "dep:candid", "candid/bignum"] and
     .features["candid-service"] == ["candid", "candid/printer"]); "Candid service generation must remain explicitly selected") |
 require(((.features | keys) == $policy[0].features); "Platform feature inventory changed; update the graph matrix and isolation policy") |
+require((.features["candid-endpoint"] == ["cdk", "candid"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
 require((.features.default == []); "Platform must declare empty default features") |
 require((.dependencies[] | select(.name == "ic-cdk-executor") | .req == "=2.0.0"); "Platform must preserve the exact qualified executor =2.0.0") |
 require((. as $p | .features.cdk == ["runtime", "dep:ic-platform-macros"] and .features.runtime == ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))); "CDK must select only the owned adapters, qualified executor/ic0 and coordinated generator") |

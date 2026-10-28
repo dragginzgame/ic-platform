@@ -33,7 +33,8 @@ function reject(reason) {
     pocket = native && enabled("pocket-ic")
     secp = native && enabled("secp256k1")
     gzip = native && enabled("gzip")
-    cdk = enabled("cdk")
+    external_endpoint = enabled("candid-endpoint")
+    cdk = external_endpoint || enabled("cdk")
     runtime = cdk || enabled("runtime")
     executor = runtime || enabled("executor")
     verification = enabled("signature-verification")
@@ -44,7 +45,7 @@ function reject(reason) {
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
     external_dto = enabled("cmc-types") || enabled("icp-ledger-types") || enabled("cycles-ledger-types") || enabled("nns-registry-types") || enabled("certified-assets-types")
-    candid = pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
+    candid = external_endpoint || pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
     principal = enabled("wire-schema") || enabled("principal") || cdk || enabled("runtime") || creation || enabled("candid") || enabled("candid-service") || management || ledger || external_dto || enabled("agent") || enabled("candid-parser") || enabled("pocket-ic") || enabled("secp256k1")
     minimal = !principal && !gzip && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
     found_storage = 0

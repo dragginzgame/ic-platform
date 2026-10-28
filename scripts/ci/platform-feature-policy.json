@@ -1,6 +1,6 @@
 {
   "features": [
-    "agent", "blake3", "bls", "candid", "candid-parser", "candid-service",
+    "agent", "blake3", "bls", "candid", "candid-endpoint", "candid-parser", "candid-service",
     "canister-sig-creation", "cdk", "certification", "certified-assets-types",
     "cmc-types", "cycles-ledger-types", "default", "ecdsa", "ed25519", "executor", "gzip",
     "ic0", "icp-ledger-types", "icrc-ledger-types", "management-canister-types",

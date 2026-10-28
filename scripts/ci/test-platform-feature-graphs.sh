@@ -49,6 +49,10 @@ ed25519|ed25519-dalek v2.2.0|reject
 none|candid v0.10.38|reject
 cdk|candid v0.10.38|reject
 runtime|candid v0.10.38|reject
+candid-endpoint|candid v0.10.38|pass
+candid-endpoint|pretty v0.12.5|reject
+candid-endpoint|ic-cdk-executor v2.0.0|pass
+candid-endpoint|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
 runtime|ic-cdk-executor v2.0.0|pass
 runtime|ic0 v1.2.0|pass
 runtime|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject

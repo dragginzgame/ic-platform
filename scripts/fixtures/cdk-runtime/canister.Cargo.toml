@@ -8,6 +8,7 @@ rust-version.workspace = true
 [features]
 ic-call = []
 external-candid = ["ic-platform/candid"]
+external-adapters = ["external-candid"]
 
 [lib]
 crate-type = ["cdylib"]

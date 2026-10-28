@@ -3,7 +3,16 @@
 Implementation support for Platform's optional `cdk` feature. This maintained
 Apache-2.0 generator derives from IC CDK 0.20.3 release revision
 `624606f7fd1ecd6668e9608594946486aec29167`; its complete original license remains.
-It implements no executor or codec and requires no upstream change.
+Its entrypoint core implements no executor or implicit codec and requires no
+upstream change.
+
+The pending external-Candid bridge is available only through the facade's
+`candid-endpoint` feature. It supplies explicit codec functions and native Candid
+registration, then delegates to this same entrypoint generator. `limits` and
+`empty_args` are mandatory; caller guards retain their ordering and execute
+before byte admission/copying. It does not change the explicit-codec contract
+of existing query/update macros or add a Candid fallback to owned Wire endpoints.
+See the [migration](../../docs/migration.md#external-endpoint-and-protocol-codecs-78-79).
 
 The default runtime path is `::ic_platform::cdk`; a parsed `crate = "module::path"`
 override supports renamed dependencies. Every query/update explicitly supplies
@@ -39,4 +48,4 @@ can pass a borrowed slice or array directly to `ic_platform::cdk::api::msg_reply
 It does not select a codec: the bytes must still satisfy the consumer's explicit
 Wire or required external protocol. Consumers own the exactly-once reply and
 encoding-failure behavior on this path.
-The support package and facade require coordinated next-minor publication.
+The support package and facade require coordinated publication.

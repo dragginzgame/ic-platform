@@ -1,6 +1,141 @@
 # Candid and runtime ownership
 
-## Pending DER framing admission (#72)
+## External endpoint and protocol codecs (#78, #79)
+
+The compatible additions below target **0.7.4; they are not published yet**.
+Existing external DTOs remain available from their documented earlier suppliers.
+Owned application endpoints, including public ones, remain Wire. Required IC,
+ledger and pre-existing provider interfaces explicitly select Candid.
+
+### Canic external entrypoints
+
+Select `candid-endpoint` in the canister manifest. Select `candid-service`
+**separately** in native DID-generation/testing profiles; the endpoint feature
+registers native metadata but does not select the printer or parser. Neither
+feature is implied by raw/runtime/executor or Wire profiles. No direct `candid`
+or `ic-cdk` dependency is necessary.
+
+```rust,ignore
+use ic_platform::candid::endpoint::{self, ArgumentLimits};
+const LIMITS: ArgumentLimits = ArgumentLimits {
+    max_bytes: 4096,
+    decoding_quota: 100_000,
+    skipping_quota: 1_000,
+    max_type_len: 64,
+    max_header_len: 1024,
+};
+#[endpoint::query(
+    name = "icrc10_supported_standards",
+    limits = "LIMITS",
+    empty_args = "reject",
+    guard = "authorize_external"
+)]
+fn supported_standards() -> Vec<ExternalStandard> { external_standards() }
+```
+
+These allowances are illustrative, not Platform defaults. Canic's wrapper can
+emit `platform = "::canic::__internal::ic_platform"` for its existing re-export.
+Platform's adapter emits codecs and delegates to the same CDK generator and
+registry executor. Application guards execute in their supplied order before
+byte admission; the scalar size check precedes argument copying. Decode refusal
+traps before the handler. Reply encoding refusal traps, preserving synchronous
+mutation rollback. Async boundaries retain the existing executor's commit/trap
+semantics; a trap after an await cannot undo earlier committed effects.
+
+Arguments use normal Candid tuples: zero arguments are `()`, one is `(T,)`, and
+multiple are `(T, U, ...)`. A scalar return encodes one value, a tuple return
+encodes its elements, and `()` encodes **zero results**. For an external single
+null result, write a distinct `type Null = ();` return or `((),)`; do not confuse
+it with an empty reply. `composite` explicitly selects composite query mode.
+`empty_args = "reject"` requires an actual envelope, even for zero arguments.
+`"unit"` alone admits missing bytes as a legacy zero-argument envelope; it does
+not supply missing required values. Additional arguments retain quota-bounded
+Candid skipping. Byte, decode-work, skip-work, header and type allowances are all
+caller-selected. None supplies the missing Wasm nesting protection tracked by
+[#73](https://github.com/dragginzgame/ic-platform/issues/73).
+
+Canic can delete Candid declaration/decode/reply emission in
+`canic-macros/src/adapter` and `endpoint/expand`, and replace its local argument
+configuration/decoder in `canic/src/endpoint` with
+`ic_platform::candid::arguments::{ArgumentLimits, EmptyArgs, ArgumentDecodeError}`.
+Raw codec-owner adapters may use `candid::endpoint::read` after their own guards.
+Keep Canic's endpoint names, contract selection, guards, startup order, lifecycle,
+measurements and semantic validation. `canic/src/macros/start` may reuse native
+registration and existing `candid::contract::export_service!` with an explicit
+facade path. Do not add registration to owned Wire endpoints.
+
+### Canic and Host external calls
+
+Select `candid` and only the required DTO feature(s). The pure
+`ic_platform::candid::protocols` operations provide `METHOD`, `encode` and
+`decode` without selecting runtime, Agent, executor or host parsing. `decode`
+requires explicit `DecodeLimits` and `ReplyArity::{Exact, Compatible}`. Exact
+requires the declared single result (including optional results) and refuses
+extra top-level values before skipping; Compatible retains upstream optional
+missing-value and quota-bounded skip behavior. Protocol `Result` errors remain
+inside the decoded value, separate from codec and transport failures.
+
+```rust,ignore
+use ic_platform::candid::protocols::{cmc::notify_top_up, ReplyArity};
+let request_bytes = notify_top_up::encode(&request)?;
+// Persist the exact bytes and consumer intent before any paid effect.
+let reply_bytes = caller_owned_transport(destination, notify_top_up::METHOD, &request_bytes).await?;
+let provider_result = notify_top_up::decode(&reply_bytes, reply_limits, ReplyArity::Exact)?;
+```
+
+| Consumer responsibility / existing implementation | Shared operation(s) |
+| --- | --- |
+| `canic-core` infra/API/workflow generic Candid call glue | Typed `protocols` request/reply codecs; existing `ic-call` owns prepared one-shot execution separately |
+| Management history, controller handoff, installation, snapshots and signing envelopes | `management::{canister_info, canister_status, update_settings, upload_chunk, stored_chunks, clear_chunk_store, install_chunked_code, uninstall_code, start_canister, stop_canister, delete_canister, deposit_cycles, list_canister_snapshots, delete_canister_snapshot, raw_rand, ecdsa_public_key, sign_with_ecdsa}` |
+| Host `icp/{candid,management}` and operator-mint transport | Same pure operations over the existing Host/Agent transport; no generic Candid encode/decode owner remains necessary |
+| Operator mint/rate/top-up and ICP receipt requests | `cmc::{get_icp_xdr_conversion_rate, notify_top_up, notify_mint_cycles}` and `icp_ledger::{transfer, query_encoded_blocks}` |
+| ICRC balances, fees, transfers and receipt readback | `icrc::{balance_of, fee, transfer, get_tip_certificate, get_blocks}` |
+| Cycles creation/withdrawal and provider receipt blocks | `cycles_ledger::{create_canister, withdraw, get_blocks}` |
+| Registry target-subnet lookup | `nns_registry::get_subnet_for_canister` |
+| Native assets | `certified_assets::{get, get_chunk}` |
+| ICP encoded-block archives | `archive_encoded_blocks::{encode, decode}`; **no fixed METHOD**: retain validated callback destination/method |
+
+Cycles Ledger's pinned `icrc3_get_blocks` provider uses legacy `Value`, including
+`Nat64`; select **both** `cycles-ledger-types` and `icrc-ledger-types` for this
+operation. Its `cycles_ledger_types::{BlockWithId, ArchivedBlocks, GetBlocksResult}`
+preserve that full schema and upstream callback identity. The existing standard
+ICRC-3 `icrc_ledger_types` identities remain unchanged; do not use their narrower
+`ICRC3Value` projection to decode this provider. No value/hash conversion occurs.
+
+Replace Host's local generic codec helpers with these operations and its
+external service parsing/extraction with existing `candid::service` and native
+`candid::parser` APIs. Service text remains inspection of an external contract;
+it does not choose an owned endpoint's codec. Do not generate owned Wire clients
+from DID or restore retired JS/TS compiler exports.
+
+Canic/Host still own destination/callback admission, signing authority, cycles,
+fees, intent journals, original request custody, receipts/certificates, trust,
+validation and retry/uncertainty. Encoding is usable before submission. Keep
+retained request bytes unchanged on reconciliation/retry; re-encoding new DTOs
+is not a migration for already-uncertain effects. Decode failure/timeout never
+establishes no remote effect or authorizes resubmission. The supplying change
+neither edits nor claims adoption in Canic or Host.
+
+### Qualification and adoption
+
+After full `make clippy`, run the standalone Platform-only profiles:
+`bash scripts/ci/check-platform-consumer.sh candid-endpoint external-codecs external-contract-schema`.
+They cover native/MSRV, Wasm where applicable, exact external schemas and native
+service metadata. Independent management bytes and pinned provider DIDs anchor
+compatibility; the provider `Nat64` regression is generated from the pinned DID.
+
+The existing installed runner includes the endpoint cases for local sources:
+`POCKET_IC_BIN=... bash scripts/ci/check-platform-runtime.sh --ic-call`.
+It checks valid and refused arguments, every budget, guard order, scalar/tuple/
+zero/null results, synchronous rollback, composite query and management await,
+alongside its existing callback/trap/upgrade subjects. Published historical
+qualification remains available with `--published X.Y.Z`; request the new
+subjects explicitly with `--external-adapters --published X.Y.Z` once the
+supplying release is available. Native macOS, actual Canic migration tests and
+installed provider/ledger acceptance are separate qualifications. No release,
+publication, deployment or paid provider operation is performed by this change.
+
+## DER framing admission (#72)
 
 The maintainer approved one owned envelope check before the unchanged imported
 canister-key parser. Truncated prefixes, inconsistent/noncanonical lengths, wrong

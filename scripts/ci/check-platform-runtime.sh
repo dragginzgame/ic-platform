@@ -3,6 +3,8 @@ set -euo pipefail
 # Requires an explicitly prepared Testkit server or server URL; never installs it.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
+adapters=""
+if [[ "${1:-}" == --external-adapters ]]; then adapters=1; shift; fi
 ic_call=""
 if [[ "${1:-}" == --ic-call ]]; then ic_call=1; shift; fi
 published=""
@@ -13,9 +15,12 @@ if [[ "${1:-}" == --published ]]; then
     shift 2
 fi
 [[ -z "$ic_call" || -z "$published" ]] || { echo 'The ic-call fixture selects local sources; omit --published' >&2; exit 2; }
+if [[ -z "$published" ]]; then adapters=1; fi
+external_feature=external-candid
+if [[ -n "$adapters" ]]; then external_feature=external-adapters; fi
 mode="${1:-run}"
-[[ $# -le 1 ]] || { echo "Expected [--ic-call | --published X.Y.Z] [mode]" >&2; exit 2; }
-case "$mode" in run|--prepare|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--ic-call | --published X.Y.Z] [run|--prepare|--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
+[[ $# -le 1 ]] || { echo "Expected [--external-adapters] [--ic-call | --published X.Y.Z] [mode]" >&2; exit 2; }
+case "$mode" in run|--prepare|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--external-adapters] [--ic-call | --published X.Y.Z] [run|--prepare|--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
 [[ ( -z "$published" && -z "$ic_call" ) || "$mode" != --refresh-lock ]] || {
     echo 'Published or ic-call qualification cannot rewrite the maintained local lock' >&2; exit 2;
 }
@@ -48,6 +53,10 @@ ic-platform = { path = "../../crates/ic-platform" }
 MANIFEST
 fi
 cp scripts/fixtures/cdk-runtime/canister.Cargo.toml "$fixture/crates/canister/Cargo.toml"
+if [[ -n "$adapters" ]]; then
+    sed -i.bak 's/external-adapters = \["external-candid"\]/external-adapters = ["external-candid", "ic-platform\/candid-endpoint"]/' "$fixture/crates/canister/Cargo.toml"
+    rm "$fixture/crates/canister/Cargo.toml.bak"
+fi
 if [[ -n "$ic_call" ]]; then
     sed -i.bak 's/ic-call = \[\]/ic-call = ["dep:ic-call"]/' "$fixture/crates/canister/Cargo.toml"
     rm "$fixture/crates/canister/Cargo.toml.bak"
@@ -55,9 +64,9 @@ if [[ -n "$ic_call" ]]; then
 fi
 cp scripts/fixtures/cdk-runtime/driver.Cargo.toml "$fixture/apps/driver/Cargo.toml"
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
-cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport} "$fixture/crates/canister/src/"
+cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister} "$fixture/crates/canister/src/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
-cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol} "$fixture/apps/driver/src/"
+cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver} "$fixture/apps/driver/src/"
 lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
 # Preparation modes may resolve/fetch only as explicitly requested. Qualification
 # below this phase uses the maintained lock and admits graphs before compiling.
@@ -108,9 +117,12 @@ for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknow
         features=()
         if [[ "$transport" == owned ]]; then features+=(--features ic-call); fi
         admission=()
-        if [[ "$protocol" == external-candid ]]; then features+=(--features external-candid); admission=(--external-candid); fi
+        if [[ "$protocol" == external-candid ]]; then features+=(--features "$external_feature"); admission=(--external-candid); fi
         cargo tree --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${features[@]+"${features[@]}"} --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target-$transport-$protocol.graph"
         bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target-$transport-$protocol.graph" ${admission[@]+"${admission[@]}"}
+        if grep -q '^pretty ' "$fixture/$graph_target-$transport-$protocol.graph"; then
+            echo 'Canister runtime acquired an unselected Candid service printer' >&2; exit 1
+        fi
     done
 done
 done
@@ -125,7 +137,7 @@ for toolchain in "$development_toolchain" 1.91.0; do
     for protocol in wire external-candid; do
         features=()
         if [[ "$transport" == owned ]]; then features+=(--features ic-call); fi
-        if [[ "$protocol" == external-candid ]]; then features+=(--features external-candid); fi
+        if [[ "$protocol" == external-candid ]]; then features+=(--features "$external_feature"); fi
         CARGO_TARGET_DIR="$fixture/build/$toolchain" cargo +"$toolchain" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${features[@]+"${features[@]}"} --release --target wasm32-unknown-unknown
         mkdir -p "$fixture/artifacts/$toolchain"
         artifact="$protocol"
@@ -133,10 +145,14 @@ for toolchain in "$development_toolchain" 1.91.0; do
         cp "$fixture/build/$toolchain/wasm32-unknown-unknown/release/platform_runtime_canister.wasm" "$fixture/artifacts/$toolchain/$artifact.wasm"
         if [[ "$mode" == run ]]; then
             if [[ "$protocol" == external-candid ]]; then
-                PLATFORM_EXTERNAL_CANDID=1 "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$artifact.wasm"
+                (
+                    export PLATFORM_EXTERNAL_CANDID=1
+                    if [[ -n "$adapters" ]]; then export PLATFORM_EXTERNAL_ADAPTERS=1; else unset PLATFORM_EXTERNAL_ADAPTERS; fi
+                    "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$artifact.wasm"
+                )
             else
                 (
-                    unset PLATFORM_EXTERNAL_CANDID
+                    unset PLATFORM_EXTERNAL_CANDID PLATFORM_EXTERNAL_ADAPTERS
                     "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$artifact.wasm"
                 )
             fi

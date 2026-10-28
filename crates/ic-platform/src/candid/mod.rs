@@ -19,7 +19,11 @@ use candid::{
 use serde::Deserialize;
 use std::{error::Error, fmt};
 
+pub mod arguments;
 pub mod decoder;
+#[cfg(feature = "candid-endpoint")]
+pub mod endpoint;
+pub mod protocols;
 pub mod reserved;
 pub mod sequence;
 

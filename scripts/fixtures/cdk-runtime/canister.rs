@@ -525,6 +525,8 @@ fn timer_start(trap: bool, cancel: bool) {
 }
 
 mod codec;
+#[cfg(feature = "external-adapters")]
+mod external_canister;
 mod protocol;
 mod wire_canister;
 mod wire_protocol;

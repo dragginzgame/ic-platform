@@ -2,6 +2,16 @@
 
 ## [0.7.4]
 
+### ➕ Added
+
+- Supply explicit external Candid endpoint adapters with caller-selected argument
+  limits, native service metadata and the existing generator/executor. Owned
+  application endpoints remain Wire ([#78](https://github.com/dragginzgame/ic-platform/issues/78)).
+- Add transport-independent typed external protocol codecs for management,
+  CMC, ICP/ICRC/Cycles ledgers, Registry and native assets. Preserve exact request
+  custody and provider errors; Cycles Ledger block replies retain legacy `Nat64`
+  values ([#79](https://github.com/dragginzgame/ic-platform/issues/79)).
+
 ### 🩹 Fixed
 
 - Preserve empty optional argument arrays under macOS Bash 3.2 in the standalone

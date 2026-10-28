@@ -4,6 +4,7 @@ use proc_macro::TokenStream;
 use syn::Error;
 
 mod export;
+mod external_candid;
 
 fn handle_debug_and_errors<F>(
     cb: F,
@@ -83,6 +84,27 @@ pub fn on_low_wasm_memory(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(
         export::ic_on_low_wasm_memory,
         "ic_on_low_wasm_memory",
+        attr,
+        item,
+    )
+}
+
+/// Generate a bounded required-external-Candid query with explicit artifact policy.
+#[proc_macro_attribute]
+pub fn candid_query(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| external_candid::expand(true, attr, item),
+        "candid_query",
+        attr,
+        item,
+    )
+}
+/// Generate a bounded required-external-Candid update with explicit artifact policy.
+#[proc_macro_attribute]
+pub fn candid_update(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| external_candid::expand(false, attr, item),
+        "candid_update",
         attr,
         item,
     )
