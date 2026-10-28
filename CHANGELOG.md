@@ -15,13 +15,13 @@
 
 ### 🩹 Fixed
 
-- Reject truncated and noncanonical short-form canister-signature DER before
-  the unchanged upstream parser, preserving valid keys and cryptographic code
-  ([#72](https://github.com/dragginzgame/ic-platform/issues/72)).
-
 - Admit gzip's independent native-only feature in dependency-graph validation,
   while retaining Principal prerequisites for other native features and strict
   target/dependency checks ([#71](https://github.com/dragginzgame/ic-platform/pull/71)).
+
+- Reject truncated and noncanonical short-form canister-signature DER before
+  the unchanged upstream parser, preserving valid keys and cryptographic code
+  ([#72](https://github.com/dragginzgame/ic-platform/issues/72)).
 
 ### 🔧 Changed
 
