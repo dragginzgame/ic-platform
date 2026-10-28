@@ -68,3 +68,52 @@ fn hex(input: &str) -> Vec<u8> {
 fn signatures_keep_original_acceptance_and_refusal_contracts() {
     roundtrip();
 }
+
+#[test]
+fn malformed_key_envelopes_are_rejected_by_parser_and_both_verifiers() {
+    use ic_platform::canister_sig_creation::CanisterSigPublicKey;
+    let signature = hex(include_str!("fixtures/signature-valid.hex"));
+    let public = hex(include_str!("fixtures/signature-public.hex"));
+    let root = hex(include_str!("fixtures/bls-public.hex"));
+    let reject = |bytes: &[u8]| {
+        assert!(CanisterSigPublicKey::try_from(bytes).is_err());
+        assert!(verify_canister_sig(b"platform-signature", &signature, bytes, &root).is_err());
+        assert!(
+            verify_canister_sig_with_time(b"platform-signature", &signature, bytes, &root).is_err()
+        );
+    };
+    for length in 0..public.len() {
+        reject(&public[..length]);
+    }
+    // Every single-byte change to framing/OID must be refused, including tags,
+    // noncanonical length forms, inconsistent lengths and unused-bit framing.
+    for index in 0..19 {
+        for byte in 0..=u8::MAX {
+            if byte == public[index] {
+                continue;
+            }
+            let mut bytes = public.clone();
+            bytes[index] = byte;
+            reject(&bytes);
+        }
+    }
+    let mut trailing = public.clone();
+    trailing.push(0);
+    reject(&trailing);
+    let mut nonminimal_outer = public.clone();
+    nonminimal_outer.insert(1, 0x81);
+    reject(&nonminimal_outer);
+    let mut nonminimal_bitstring = public.clone();
+    nonminimal_bitstring.insert(17, 0x81);
+    nonminimal_bitstring[1] += 1;
+    reject(&nonminimal_bitstring);
+    for length in 0..192 {
+        for fill in [0, 1, 0x30, 0xff] {
+            reject(&vec![fill; length]);
+        }
+    }
+    assert_eq!(
+        verify_canister_sig(b"platform-signature", &signature, &public, &root),
+        Ok(())
+    );
+}

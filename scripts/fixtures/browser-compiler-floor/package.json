@@ -1,0 +1,9 @@
+{
+  "name": "platform-browser-consumer-compiler-floor",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@12.2.0",
+  "engines": { "node": "24.21.0", "npm": "12.2.0" },
+  "devDependencies": { "typescript": "6.0.3" }
+}

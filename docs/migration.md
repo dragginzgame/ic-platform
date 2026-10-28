@@ -1,5 +1,33 @@
 # Candid and runtime ownership
 
+## Pending DER framing admission (#72)
+
+The maintainer approved one owned envelope check before the unchanged imported
+canister-key parser. Truncated prefixes, inconsistent/noncanonical lengths, wrong
+tags/OID/unused-bit framing and trailing data now return errors through
+`CanisterSigPublicKey::try_from` and both verification functions. Valid existing
+keys and signature vectors retain their bytes and results. No public type,
+cryptographic implementation, encoder or seed/issuer policy changes.
+
+The fixed-offset upstream parser's supported grammar remains short-form DER;
+this does not add long-form support or repair the encoder's oversized-length
+integer conversions. Consumers retain size/depth admission and authority checks.
+Source checks require the single admission call at parser entry and reconstruct
+the original fingerprints without changing their recorded hashes.
+
+## External Candid nesting qualification (#73)
+
+`DecodeLimits` bounds bytes, work, type count and header size, not Wasm recursion
+depth. The selected Candid 0.10.39 stack check is a no-op on Wasm and exposes no
+depth setter. Installed local Wasm reproduced a decoder trap with 8,192 nested
+`opt` values in an 8,202-byte reply despite finite decoding/skipping quotas of
+1,000,000. This is a confirmed open limitation, not a corrected depth contract.
+The configured helpers may therefore trap rather than return `DecodeError` for
+such inputs. Low-level contract decoders keep upstream/caller-owned budgeting.
+Do not infer stack safety from quotas or move owned Wire RPC back to Candid.
+[#73](https://github.com/dragginzgame/ic-platform/issues/73) owns the reproduction
+and required caller-selected, installed-Wasm depth qualification.
+
 ## Host gzip boundary
 
 The maintainer requested that IC Profiler access gzip through Platform rather
@@ -1074,9 +1102,10 @@ Other Serde/CBOR/SHA and consumer feature selections remain consumer-owned.
 Keep Auth's byte/depth limits, canonical DER re-encoding, protected issuer/seed
 and trust roots, original signed payloads/domains, certificate authentication,
 freshness/future-skew policy, signature retention, clock/transaction behavior,
-expiry/pruning and root publication. Upstream short public-key DER can panic;
-Auth's pre-parser length admission must remain. Domain/DER lengths also retain
-upstream integer-conversion behavior. Do not move these checks into Platform or
+expiry/pruning and root publication. The #72 correction adds DER envelope
+admission before the unchanged key parser; retain Auth's resource and canonicality
+checks. Domain/DER encoding lengths still retain upstream integer-conversion
+behavior, and long-form DER is unsupported. Do not move application checks into Platform or
 interpret verifier success as application authority. No signature map, global
 store, clock or certification side effect is exposed here.
 
@@ -2113,8 +2142,10 @@ introduced. The coordinated Platform package carries the supported implementatio
 Both imported modules retain all upstream function bodies and test vectors.
 Only the canonical registry Principal import, the sibling creation import and
 omission of the unused store declaration differ. Exact source/license admission
-runs with the runtime source check. Short-DER panic behavior and domain/DER length
-conversion behavior remain upstream; keep Auth's pre-admission, canonical DER
+runs with the runtime source check. The approved #72 exception adds only one
+checked framing call at parser entry; removing that exact call reconstructs the
+original source fingerprints. Domain/DER encoding length conversions remain
+upstream; keep Auth's resource admission, canonical DER
 re-encoding, issuer/seed, freshness and trust-root checks. BLS, certificates and
 hash/domain separation use their existing upstream implementations.
 
@@ -2228,3 +2259,73 @@ Qualification extends the existing standalone `management` and `icrc` consumer
 profiles, with native/MSRV execution and Wasm compilation. Package-local identity
 checks separately require exact registry type identity, including the two distinct
 `Value` types. These checks do not execute cryptography or qualify payment effects.
+
+## Prepared one-shot calls (issue #75)
+
+The new `ic-call` workspace crate owns generic request custody and delegates every
+physical submission to Platform's existing raw runtime. It deliberately expands
+the single-consumer-library contract: `ic-platform` remains the sole owner of the
+IC dependency/runtime boundary, and `ic-call` depends downward on it. No callback
+body, executor, codec, timer, Relay dispatch or cryptographic implementation is
+copied. Existing raw Platform callers remain supported.
+
+Canic #700 demonstrated the gap against published Platform 0.7.1: a raw call
+cannot be returned after dropping its dynamically selected method String.
+Use the new crate to retire the local generic request/execute owner:
+
+```rust
+use ic_call::{Call, Principal, WaitPolicy};
+
+fn prepare(target: Principal) -> Call<'static, 'static> {
+    let method = String::from("runtime-selected-method");
+    Call::new(target, method, WaitPolicy::Bounded { timeout_seconds: 300 })
+        .take_raw_args(vec![1, 2, 3])
+}
+```
+
+Add `ic-call` with defaults disabled to the workspace production catalog and
+inherit it from the consumer. The new crate is **not yet a published supplier**. Use the released version only
+after maintainer publication. Remove the local generic builder/execution wrapper,
+replace its repeated attachment-plus-cost formula with `get_cost()`, and call
+`execute().await`. Keep domain facades and stage-specific metrics with their
+consumer; observing construction is different from observing actual submission.
+
+There is no implicit codec or wait choice. Preserve each call site's existing
+bounded timeout or unbounded policy explicitly. `String` owns the method;
+`&str` borrows it. `take_raw_args(Vec<u8>)` owns bytes, and `with_raw_args(&[u8])`
+borrows them independently. Last attachment/wait selection replaces the earlier
+one. Empty raw bytes are not Candid unit bytes. Encode Wire frames for owned
+endpoints; encode required external Candid separately through Platform before
+constructing a request. Decode `Response::into_bytes()` with the selected codec
+and consumer-owned budgets/arity/admission after handling transport failure.
+No direct Candid/CDK dependency or generator change is needed for this API.
+A codec failure after a reply does not prove no remote effect.
+
+`CallFailed`, submission/balance errors, raw rejection codes and `Response` retain
+Platform identities. `SysUnknown`, a logical timeout, future drop or a callback
+trap does not establish physical settlement. No retry, funding, alternate route,
+refund authority or universal codec/transport error is added. Capture refund facts
+only in the matching reply/reject continuation, before another await; the new
+execution wrapper adds no await after raw completion. Relay retains journals,
+ACKs, retries and durable delivery; Timers retains its private dispatch machinery.
+
+The read-only consumer inventory found no additional execution gap in Blob #108,
+Query #108, IC Crates #19, Jobs #75 or Relay #14: their static/scoped method names
+already fit raw calls. Blob's four adapters retain provider codecs, reply limits,
+actor checks and financial/continuity policy. Query retains governance DTO/limit
+policy; IC Crates retains attestation interpretation; Jobs and Relay retain
+delivery policy. Timers #80 remains an infrastructure qualification. Codec
+consolidation is separately tracked by Platform #78/#79; this does not restore
+implicit Candid or retire consumer policy. Producer completion is independent
+of later consumer adoption.
+
+`make check-consumer` includes a standalone crate exercising raw calls with only
+`ic-call`, then explicit Wire and external-Candid selections on the development
+compiler and Rust 1.91, native and Wasm. `bash scripts/ci/check-platform-runtime.sh
+--ic-call` qualifies owned dynamic methods alongside the raw control in the existing installed lifecycle
+fixture. Its disposable lock may add the local crate, but all maintained registry
+identities and dependency edges must match exactly. The original raw/published
+fixture remains independently selectable. Local Linux/PocketIC evidence and
+native macOS qualification must be reported separately. Neither graph isolation
+nor this wrapper alone proves smaller application Wasm. Candid's unresolved Wasm
+depth limitation (#73) remains in force.

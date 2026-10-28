@@ -19,15 +19,15 @@ export INVENTORY_TEST_METADATA="$fixture/metadata.json"
 export PATH="$fixture/bin:$PATH"
 bash "$fixture/scripts/ci/check-platform-inventory.sh" > "$fixture/log"
 for mutation in \
-    '.packages[0].features["new-feature"] = []' \
-    '.packages[0].dependencies[0].req = "=99.0.0"' \
-    '.packages[0].dependencies[0].optional |= not' \
-    '.packages[0].dependencies[0].uses_default_features |= not' \
-    '.packages[0].dependencies[0].target = "cfg(unix)"' \
-    '.packages[0].dependencies[0].kind = "build"' \
-    '.packages[0].dependencies[0].features += ["new-upstream-feature"]' \
-    'del(.packages[0].dependencies[0])'; do
-    jq "$mutation" "$fixture/original.json" > "$fixture/metadata.json"
+    '.features["new-feature"] = []' \
+    '.dependencies[0].req = "=99.0.0"' \
+    '.dependencies[0].optional |= not' \
+    '.dependencies[0].uses_default_features |= not' \
+    '.dependencies[0].target = "cfg(unix)"' \
+    '.dependencies[0].kind = "build"' \
+    '.dependencies[0].features += ["new-upstream-feature"]' \
+    'del(.dependencies[0])'; do
+    jq "(.packages[] | select(.name == \"ic-platform\")) |= ($mutation)" "$fixture/original.json" > "$fixture/metadata.json"
     if bash "$fixture/scripts/ci/check-platform-inventory.sh" > "$fixture/log" 2>&1; then
         echo "inventory accepted drift: $mutation" >&2; exit 1
     fi

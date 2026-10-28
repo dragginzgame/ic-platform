@@ -1,6 +1,13 @@
 //! Run-wide physical profiling API. This deliberately never enables detailed
 //! Wasm instrumentation or feeds host observations into replicated accounting.
 
+mod admission;
+
+#[cfg(test)]
+pub(crate) use admission::is_local_host;
+pub(crate) use admission::protect_requests;
+pub use admission::{ListenerAdmission, protect_bound_requests};
+
 use crate::state_api::routes::AppState;
 use axum::{
     Json, Router,
@@ -81,6 +88,7 @@ pub fn router(app: AppState) -> Router {
         .route("/api/profiling/runs/{run_id}/{view}", get(view))
         .layer(DefaultBodyLimit::max(MAX_IMPORT_BYTES))
         .layer(tower_http::compression::CompressionLayer::new())
+        .layer(axum::middleware::from_fn(protect_bound_requests))
         .with_state(app)
 }
 

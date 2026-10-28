@@ -31,7 +31,7 @@ class IntegrationScriptsTest(unittest.TestCase):
         self.remote.mkdir()
         self.env = os.environ.copy()
         for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY",
-                     "GIT_ALTERNATE_OBJECT_DIRECTORIES"):
+                     "GIT_ALTERNATE_OBJECT_DIRECTORIES", "IC_PROFILER_CONSUMER_ROOT"):
             self.env.pop(name, None)
         self.env.update({
             "GIT_CONFIG_GLOBAL": os.devnull,
@@ -194,12 +194,38 @@ class IntegrationScriptsTest(unittest.TestCase):
                          "// IC-free recorder\n")
         state = self.receipt(checkout)["sources"]["profiler"]
         self.assertEqual({entry["origin"] for entry in state}, {"provider", "consumer"})
+        latest = consumer / ".build/receipts/latest-prepare.json"
+        self.assertEqual(json.loads(latest.read_text()),
+                         {**self.receipt(checkout), "destination": str(checkout)})
+        self.assertFalse((self.root / ".build/receipts/latest-prepare.json").exists())
         before = self.receipt(checkout)["recipe_sha256"]
         self.write(consumer, "profiler/system/core.rs", "// revised recorder\n")
         self.script("prepare", success=False)
         self.script("prepare", "--force")
         self.assertNotEqual(self.receipt(checkout)["recipe_sha256"], before)
+        self.assertEqual(json.loads(latest.read_text())["recipe_sha256"],
+                         self.receipt(checkout)["recipe_sha256"])
         self.assert_pristine_pin()
+
+    def test_consumer_prepare_receipt_refreshes_cached_assembly_but_not_candidate(self):
+        consumer = self.home / "consumer"
+        consumer.mkdir()
+        self.git(consumer, "init", "--quiet")
+        self.write(consumer, "profiler/system/core.rs", "// consumer recorder\n")
+        self.env["IC_PROFILER_CONSUMER_ROOT"] = str(consumer)
+        self.script("prepare")
+        checkout = consumer / ".build/ic"
+        latest = consumer / ".build/receipts/latest-prepare.json"
+        expected = {**self.receipt(checkout), "destination": str(checkout)}
+        self.assertEqual(json.loads(latest.read_text()), expected)
+        latest.write_text('{"stale":true}\n')
+        self.script("prepare")
+        self.assertEqual(json.loads(latest.read_text()), expected)
+        before = latest.read_bytes()
+        self.script("update-upstream", self.candidate)
+        self.assertEqual(latest.read_bytes(), before)
+        self.assertEqual(self.receipt(consumer / ".build/candidates" / self.candidate)["upstream_commit"],
+                         self.candidate)
 
     def test_consumer_cannot_replace_provider_adapters(self):
         consumer = self.home / "consumer"

@@ -1,7 +1,9 @@
 //! Qualify caller-owned Wire codecs with the original CDK lifecycle.
 
+#[cfg(not(feature = "ic-call"))]
+use crate::transport::Execute as _;
 use crate::wire_protocol::*;
-use ic_platform::cdk::{api, call::Call, futures};
+use ic_platform::cdk::{api, futures};
 use serde::{Serialize, de::DeserializeOwned};
 use std::cell::Cell;
 
@@ -102,8 +104,9 @@ impl Drop for Cleanup {
 )]
 async fn wire_await(input: Vec<u8>) -> Vec<u8> {
     let request = ic_wire::native::encode_request(ECHO, &input, REQUEST).unwrap();
-    let response = Call::unbounded_wait(api::canister_self(), "wire_echo")
+    let response = crate::transport::unbounded_wait(api::canister_self(), "wire_echo")
         .take_raw_args(request)
+        .execute()
         .await
         .unwrap()
         .into_bytes();
@@ -117,8 +120,9 @@ async fn wire_await(input: Vec<u8>) -> Vec<u8> {
 )]
 async fn wire_encode_trap() -> Vec<u8> {
     let _cleanup = Cleanup;
-    let _reply = Call::unbounded_wait(api::canister_self(), "wire_echo")
+    let _reply = crate::transport::unbounded_wait(api::canister_self(), "wire_echo")
         .take_raw_args(ic_wire::native::encode_request(ECHO, &vec![1u8], REQUEST).unwrap())
+        .execute()
         .await
         .unwrap();
     EFFECTS.set(EFFECTS.get() + 1);

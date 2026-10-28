@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.7.2]
+
+### ➕ Added
+
+- Add `ic-call` for prepared one-shot calls with owned dynamic method names and
+  borrowed or owned raw arguments. Reuse Platform's existing call implementation,
+  cost query and error identities with explicit waits and separate codecs
+  ([#75](https://github.com/dragginzgame/ic-platform/issues/75)).
+- Qualify browser declarations with TypeScript 6.0.3 and the producer compiler,
+  documenting the consumer floor separately from application tooling peers
+  ([#76](https://github.com/dragginzgame/ic-platform/issues/76)).
+
+### 🩹 Fixed
+
+- Publish native preparation summaries in the consuming checkout, including
+  cached/forced preparation, while keeping candidate receipts separate
+  ([#77](https://github.com/dragginzgame/ic-platform/pull/77)).
+- Reject truncated and noncanonical short-form canister-signature DER before
+  the unchanged upstream parser, preserving valid keys and cryptographic code
+  ([#72](https://github.com/dragginzgame/ic-platform/issues/72)).
+- Share Host/Origin admission across the native provider's profiling APIs,
+  trace/snapshot controls and viewer startup on both listeners; preserve local
+  nonbrowser clients ([#74](https://github.com/dragginzgame/ic-platform/issues/74)).
+
 ## [0.7.1] - 2026-10-27
 
 ### ➕ Added

@@ -26,3 +26,16 @@ for part in creation verification; do
     done
 done
 printf 'Signature source, vector and license mutation refusals passed.\n'
+for mutation in missing duplicate moved; do
+    destination="$fixture/signature-admission-$mutation"
+    cp -R "$root/crates/ic-platform/src/signature_upstream" "$destination"
+    case "$mutation" in
+        missing) perl -i -ne 'print unless /Platform: checked DER admission\./' "$destination/creation/mod.rs" ;;
+        duplicate) perl -i -pe 'print if /Platform: checked DER admission\./' "$destination/creation/mod.rs" ;;
+        moved) perl -0777 -i -pe 's/(    super::admission::canister_sig_der\(pk_der\)\?; \/\/ Platform: checked DER admission\.\n)(    let oid_part = [^\n]+\n)/$2$1/' "$destination/creation/mod.rs" ;;
+    esac
+    if bash "$root/scripts/ci/check-signature-source.sh" "$destination" > "$fixture/log" 2>&1; then
+        echo "Unexpectedly admitted changed DER admission: $mutation" >&2; exit 1
+    fi
+done
+printf 'Missing, duplicate and moved DER admission calls are refused.\n'

@@ -5,6 +5,12 @@
 //! additional values; exact-single-result decoding rejects them.
 //! All decoders select Candid's compact diagnostics while retaining typed causes.
 //! Compact diagnostics can include small inputs; callers own error disclosure.
+//!
+//! These wire/work quotas are not a Wasm recursion-depth guarantee. The selected
+//! upstream decoder has no supported Wasm depth ceiling: a small, deeply nested
+//! external reply can trap rather than return [`DecodeError`]. See
+//! [the nesting issue](https://github.com/dragginzgame/ic-platform/issues/73).
+//! Low-level [`contract`] APIs retain caller-owned configuration and budgeting.
 
 use candid::{
     CandidType,

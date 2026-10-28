@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 SHARED_TOOLING_RUST := 1
-FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
+FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/ic-call-consumer/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
@@ -52,6 +52,7 @@ check-wire-schema: wire-tools-check
 .PHONY: install-browser-tools browser-tools-check check-browser check-browser-runtime
 install-browser-tools: wire-tools-check
 	npm ci --prefix packages/browser --ignore-scripts --no-audit --no-fund
+	npm ci --prefix scripts/fixtures/browser-compiler-floor --ignore-scripts --no-audit --no-fund
 browser-tools-check:
 	node scripts/ci/check-browser-tools.mjs
 check-browser: browser-tools-check
@@ -66,21 +67,21 @@ publish-check: host-tools-check
 	bash scripts/release/publish.sh check
 
 check:
-	cargo check -p ic-platform -p ic-platform-macros --all-targets --all-features --locked
+	cargo check -p ic-call -p ic-platform -p ic-platform-macros --all-targets --all-features --locked
 test:
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
-	cargo test -p ic-platform -p ic-platform-macros --all-features --locked
+	cargo test -p ic-call -p ic-platform -p ic-platform-macros --all-features --locked
 clippy:
-	cargo clippy -p ic-platform -p ic-platform-macros --all-targets --all-features --locked -- -D warnings
+	cargo clippy -p ic-call -p ic-platform -p ic-platform-macros --all-targets --all-features --locked -- -D warnings
 docs-check:
-	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-macros --all-features --no-deps --locked
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-call -p ic-platform -p ic-platform-macros --all-features --no-deps --locked
 wasm-check:
-	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
+	cargo check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 msrv:
-	cargo +1.91.0 test -p ic-platform -p ic-platform-macros --all-features --locked
-	cargo +1.91.0 check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
+	cargo +1.91.0 test -p ic-call -p ic-platform -p ic-platform-macros --all-features --locked
+	cargo +1.91.0 check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 .PHONY: check-primitives
@@ -92,6 +93,7 @@ check-primitives:
 	done
 check-consumer:
 	bash scripts/ci/test-platform-consumer-admission.sh
+	bash scripts/ci/check-ic-call-consumer.sh
 	bash scripts/ci/check-platform-consumer.sh
 check-features:
 	bash scripts/ci/test-platform-feature-selections.sh
@@ -108,11 +110,12 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-call/README.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
 .PHONY: check-inventory
 .PHONY: check-native-provider
 check-native-provider:
 	python3 -m unittest discover -s native/ic-profiler/tests -p 'test_*.py'
+	bash scripts/ci/check-native-profiler-http.sh
 
 check-inventory:
 	bash scripts/ci/check-platform-inventory.sh
@@ -143,7 +146,7 @@ release-files:
 
 .PHONY: check-runtime
 check-runtime:
-	bash scripts/ci/check-platform-runtime.sh
+	bash scripts/ci/check-platform-runtime.sh --ic-call
 
 .PHONY: check-runtime-lock
 check-runtime-lock:

@@ -28,7 +28,6 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::net::{IpAddr, SocketAddr};
-use std::str::FromStr;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -152,6 +151,9 @@ fn router(viewer: Viewer) -> Router {
         .route("/mcp", post(mcp).get(mcp_get).delete(mcp_get))
         .with_state(viewer.clone())
         .merge(crate::system_profile_api::router(viewer.app.clone()))
+        .layer(axum::Extension(
+            crate::system_profile_api::ListenerAdmission(viewer.loopback),
+        ))
         .layer(middleware::from_fn_with_state(
             viewer.clone(),
             protect_state_changes,
@@ -198,65 +200,7 @@ async fn protect_state_changes(
     request: Request,
     next: Next,
 ) -> Response {
-    let host = request
-        .headers()
-        .get(header::HOST)
-        .and_then(|host| host.to_str().ok())
-        .or_else(|| {
-            request
-                .uri()
-                .authority()
-                .map(|authority| authority.as_str())
-        })
-        .unwrap_or_default()
-        .to_string();
-    if viewer.loopback && !is_local_host(&host) {
-        let message = format!(
-            "The memory access viewer only accepts requests for `localhost` \
-             or an IP address, not for `{host}`. Serve it at a non-loopback address to allow \
-             other host names."
-        );
-        return (StatusCode::FORBIDDEN, message).into_response();
-    }
-    if let Some(origin) = request.headers().get(header::ORIGIN) {
-        let origin_host = origin
-            .to_str()
-            .ok()
-            .and_then(|origin| origin.split_once("://"))
-            .map(|(_, origin_host)| origin_host);
-        if origin_host != Some(host.as_str()) {
-            let message = "The memory access viewer does not accept requests from other websites.";
-            return (StatusCode::FORBIDDEN, message).into_response();
-        }
-    }
-    next.run(request).await
-}
-
-/// Whether the host (with an optional port) of a request is `localhost` or an
-/// IP address.
-fn is_local_host(host: &str) -> bool {
-    let Ok(authority) = host.parse::<axum::http::uri::Authority>() else {
-        return false;
-    };
-    if authority.as_str().contains('@') {
-        return false;
-    }
-    let name = authority.host();
-    let suffix = authority.as_str().strip_prefix(name).unwrap_or_default();
-    if !suffix.is_empty()
-        && suffix
-            .strip_prefix(':')
-            .and_then(|port| port.parse::<u16>().ok())
-            .is_none()
-    {
-        return false;
-    }
-    let name = name
-        .strip_prefix('[')
-        .and_then(|s| s.strip_suffix(']'))
-        .unwrap_or(name);
-    let name = name.to_ascii_lowercase();
-    name == "localhost" || name.ends_with(".localhost") || IpAddr::from_str(&name).is_ok()
+    crate::system_profile_api::protect_requests(State(viewer.loopback), request, next).await
 }
 
 // ----------------------------------------------------------------------------
@@ -2615,6 +2559,7 @@ mod tests {
 
     #[test]
     fn only_localhost_and_ip_addresses_are_local_hosts() {
+        use crate::system_profile_api::is_local_host;
         for host in [
             "localhost",
             "localhost:8080",

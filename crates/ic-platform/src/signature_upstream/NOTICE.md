@@ -35,10 +35,15 @@ verification retains its own unmodified CBOR parser and dependencies.
 
 Each directory retains its original Apache-2.0 LICENSE. Exact source/test/license
 fingerprints are enforced by `scripts/ci/check-signature-source.sh`. Rustfmt skips
-these imported modules. The original SHA-256, domain separation, DER/CBOR parsing,
-BLS and certificate verification behavior (including admission limitations) stays
-unchanged. Callers must retain length bounds, canonicality, issuer/seed and trust
-policy. No short-DER panic repair or security-policy change is implied.
+these imported modules. For #72, the maintainer authorized one owned DER framing
+check before the original canister-key extraction body. The guard requires that
+exact call once at parser entry, removes only that call, and verifies the original
+hashes above. No fingerprint was refreshed. The added `admission` module rejects
+truncated/noncanonical short-form DER; it does not implement key encoding.
+The original SHA-256, domain separation, DER/raw encoding, CBOR parsing, BLS and
+certificate verification bodies, constants and vectors remain unchanged.
+Long-form DER remains unsupported by the fixed-offset imported key parser.
+Callers retain byte/depth bounds, issuer/seed, trust and application policy.
 
 Platform now owns the packaging identity of CanisterSigPublicKey. It is no longer
 interchangeable with the registry creation package's type. BLS, certification and

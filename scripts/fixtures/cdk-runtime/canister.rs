@@ -3,9 +3,12 @@
 use ic_platform::candid::contract;
 use ic_platform::{
     Principal,
-    cdk::{api, call::Call, futures},
+    cdk::{api, futures},
 };
 use std::cell::Cell;
+#[cfg(not(feature = "ic-call"))]
+use transport::Execute as _;
+mod transport;
 
 thread_local! {
     static VALUE: Cell<u64> = const { Cell::new(0) };
@@ -99,11 +102,12 @@ fn unit() {}
     encode_with = "codec::encode::<_, { protocol::Method::Awaited as u64 }>"
 )]
 async fn awaited(input: u64) -> u64 {
-    let bytes = Call::unbounded_wait(api::canister_self(), "scalar")
+    let bytes = transport::unbounded_wait(api::canister_self(), "scalar")
         .with_wait_policy(ic_platform::cdk::call::WaitPolicy::Bounded {
             timeout_seconds: 300,
         })
         .take_raw_args(codec::request("scalar", &input))
+        .execute()
         .await
         .unwrap()
         .into_bytes();
@@ -117,9 +121,10 @@ async fn awaited(input: u64) -> u64 {
     encode_with = "codec::encode::<_, { protocol::Method::Composite as u64 }>"
 )]
 async fn composite(input: u64) -> u64 {
-    let bytes = Call::bounded_wait(api::canister_self(), "scalar")
+    let bytes = transport::bounded_wait(api::canister_self(), "scalar")
         .with_wait_policy(ic_platform::cdk::call::WaitPolicy::Unbounded)
         .take_raw_args(codec::request("scalar", &input))
+        .execute()
         .await
         .unwrap()
         .into_bytes();
@@ -168,8 +173,9 @@ impl Drop for Cleanup {
 )]
 async fn callback_trap() {
     let _cleanup = Cleanup;
-    Call::unbounded_wait(api::canister_self(), "scalar")
+    transport::unbounded_wait(api::canister_self(), "scalar")
         .take_raw_args(codec::request("scalar", &1u64))
+        .execute()
         .await
         .unwrap();
     api::trap("fixture callback trap");
@@ -217,9 +223,25 @@ fn controller() -> bool {
     encode_with = "codec::encode::<_, { protocol::Method::Missing as u64 }>"
 )]
 async fn missing() -> bool {
+    // A successful transport can return bytes invalid for the chosen codec.
+    // Do not reclassify that reply as a submission failure or retry permission.
+    let reply = transport::bounded_wait(api::canister_self(), "manual")
+        .take_raw_args(codec::request("manual", &()))
+        .execute()
+        .await
+        .unwrap();
+    assert!(
+        ic_wire::native::decode_response::<()>(
+            protocol::Method::Manual as u64,
+            reply.as_ref(),
+            protocol::LIMITS,
+        )
+        .is_err()
+    );
     matches!(
-        Call::bounded_wait(api::canister_self(), "no_such_method")
+        transport::bounded_wait(api::canister_self(), "no_such_method")
             .take_raw_args(codec::request("no_such_method", &()))
+            .execute()
             .await,
         Err(ic_platform::cdk::call::CallFailed::CallRejected(_))
     )
@@ -275,10 +297,18 @@ async fn cycle_roundtrip(
     let _cleanup = Cleanup;
     let before_message = api::instruction_counter();
     let before_context = api::call_context_instruction_counter();
-    let result = Call::unbounded_wait(receiver, "cycle_receiver")
-        .take_raw_args(codec::request("cycle_receiver", &(limit, mode)))
-        .with_cycles(offered)
-        .await;
+    let bytes = codec::request("cycle_receiver", &(limit, mode));
+    let call = transport::unbounded_wait(receiver, "cycle_receiver")
+        .with_raw_args(&bytes)
+        .with_cycles(offered);
+    assert_eq!(
+        call.get_cost(),
+        offered.saturating_add(api::cost_call(
+            "cycle_receiver".len() as u64,
+            bytes.len() as u64
+        ))
+    );
+    let result = call.execute().await;
     // Match Blob's policy: only an actual reply/reject callback owns a refund.
     let refunded = match &result {
         Ok(_) | Err(ic_platform::cdk::call::CallFailed::CallRejected(_)) => {
@@ -448,8 +478,9 @@ fn inspect() {
 )]
 async fn external_management() -> bool {
     let args = ic_platform::candid::contract::encode_args(()).unwrap();
-    let response = Call::unbounded_wait(Principal::management_canister(), "raw_rand")
+    let response = transport::unbounded_wait(Principal::management_canister(), "raw_rand")
         .with_raw_args(&args)
+        .execute()
         .await
         .unwrap();
     // Preserve this fixture's original upstream decode/arity policy explicitly.
@@ -475,8 +506,9 @@ fn timer_start(trap: bool, cancel: bool) {
         },
         move |_| async move {
             let _cleanup = Cleanup;
-            Call::unbounded_wait(api::canister_self(), "scalar")
+            transport::unbounded_wait(api::canister_self(), "scalar")
                 .take_raw_args(codec::request("scalar", &1u64))
+                .execute()
                 .await
                 .unwrap();
             if trap {
@@ -503,13 +535,12 @@ mod wire_protocol;
     encode_with = "codec::encode::<_, { protocol::Method::SubmissionPressure as u64 }>"
 )]
 async fn submission_pressure() -> (u64, u64) {
-    use std::future::IntoFuture;
     let mut calls: Vec<_> = (0..600)
         .map(|_| {
             Some(Box::pin(
-                Call::unbounded_wait(api::canister_self(), "scalar")
+                transport::unbounded_wait(api::canister_self(), "scalar")
                     .take_raw_args(codec::request("scalar", &1u64))
-                    .into_future(),
+                    .execute(),
             ))
         })
         .collect();
@@ -546,9 +577,9 @@ async fn submission_pressure() -> (u64, u64) {
     encode_with = "codec::encode::<_, { protocol::Method::InsufficientCycles as u64 }>"
 )]
 async fn insufficient_cycles() -> bool {
-    matches!(Call::bounded_wait(api::canister_self(), "scalar")
+    matches!(transport::bounded_wait(api::canister_self(), "scalar")
         .take_raw_args(codec::request("scalar", &1u64))
-        .with_cycles(api::canister_liquid_cycle_balance()).await,
+        .with_cycles(api::canister_liquid_cycle_balance()).execute().await,
         Err(ic_platform::cdk::call::CallFailed::InsufficientLiquidCycleBalance(error))
             if error.available < error.required)
 }

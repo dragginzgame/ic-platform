@@ -13,6 +13,12 @@ const { values } = parseArgs({ options: { browser: { type: 'boolean', default: f
 const root = fileURLToPath(new URL('../..', import.meta.url));
 const source = resolve(root, 'packages/browser');
 const sourceManifest = JSON.parse(await readFile(resolve(source, 'package.json'), 'utf8'));
+const floorRoot = resolve(root, 'scripts/fixtures/browser-compiler-floor');
+const floorManifest = JSON.parse(await readFile(resolve(floorRoot, 'package.json'), 'utf8'));
+const compilers = [
+  { root: floorRoot, version: floorManifest.devDependencies.typescript, role: 'consumer floor' },
+  { root: source, version: sourceManifest.devDependencies.typescript, role: 'producer/current consumer' },
+];
 const sdkVersion = sourceManifest.dependencies['@icp-sdk/core'];
 await mkdir(resolve(root, 'target'), { recursive: true });
 const fixture = await mkdtemp(resolve(root, 'target/browser-consumer.'));
@@ -32,6 +38,23 @@ async function command(file, args, cwd = fixture) {
     await writeFile(log, (error.stdout ?? '') + (error.stderr ?? ''));
     throw error;
   }
+}
+async function compileConsumer(runSmoke = false) {
+  for (const compiler of compilers) {
+    const installed = JSON.parse(await readFile(resolve(compiler.root, 'node_modules/typescript/package.json'), 'utf8'));
+    assert.equal(installed.version, compiler.version, 'Prepare the selected consumer compiler');
+    await command('node', [resolve(compiler.root, 'node_modules/typescript/lib/tsc.js'), '-p', 'tsconfig.json']);
+    if (runSmoke) {
+      const url = pathToFileURL(resolve(fixture, 'compiled/consumer.js'));
+      url.searchParams.set('compiler', compiler.version);
+      const { smoke } = await import(url);
+      assert.equal((await smoke()).calls, 1);
+    }
+    console.log(`Packed declarations: TypeScript ${compiler.version} (${compiler.role}), Node ${process.versions.node}`);
+  }
+  await writeFile(resolve(fixture, 'compiler-inputs.json'), JSON.stringify({
+    node: process.versions.node, compilers: compilers.map(({ version, role }) => ({ version, role })),
+  }, null, 2));
 }
 const packed = JSON.parse(await command('npm', ['pack', '--offline', '--ignore-scripts', '--json', '--pack-destination', fixture], source))['@tokostudios/ic-platform'];
 assert(packed.files.every(file => /^(dist\/.*\.(js|ts)|package\.json|README\.md|LICENSE)$/.test(file.path)));
@@ -76,9 +99,7 @@ configuration.compilerOptions.rootDir = '.';
 configuration.compilerOptions.outDir = 'compiled';
 configuration.include = ['consumer.ts'];
 await writeFile(resolve(fixture, 'tsconfig.json'), JSON.stringify(configuration));
-await command('node', [resolve(source, 'node_modules/typescript/lib/tsc.js'), '-p', 'tsconfig.json']);
-const { smoke } = await import(pathToFileURL(resolve(fixture, 'compiled/consumer.js')));
-assert.equal((await smoke()).calls, 1);
+await compileConsumer(true);
 // Export-map admission: consumers cannot reach internal SDK plumbing.
 await writeFile(resolve(fixture, 'private-import.mjs'), "import '@tokostudios/ic-platform/dist/identity-import.js';\n");
 await assert.rejects(exec(process.execPath, ['private-import.mjs'], { cwd: fixture }), error => error.stderr.includes('ERR_PACKAGE_PATH_NOT_EXPORTED'));
@@ -111,7 +132,7 @@ await copyFile(resolve(source, 'tests/interop.ts'), resolve(fixture, 'interop.ts
 await checkIcSdkBoundary([resolve(fixture, 'package.json'), resolve(fixture, 'consumer.ts'), resolve(fixture, 'interop.ts')]);
 configuration.include.push('interop.ts');
 await writeFile(resolve(fixture, 'tsconfig.json'), JSON.stringify(configuration));
-await command('node', [resolve(source, 'node_modules/typescript/lib/tsc.js'), '-p', 'tsconfig.json']);
+await compileConsumer();
 const providerGraph = JSON.parse(await command('npm', ['ls', '@icp-sdk/core', '--all', '--json']));
 function checkSdk(node) {
   for (const [name, dependency] of Object.entries(node.dependencies ?? {})) {

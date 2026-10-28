@@ -10,6 +10,26 @@ dependency, not a peer. Its cryptographic implementations, Principal/identity/
 Agent classes and external Candid bytes retain their upstream identities. The
 boundary does not remove the transitive SDK or promise a smaller bundle.
 
+## Consumer TypeScript support
+
+The supported consumer compiler floor is TypeScript **6.0.3**. The packed-consumer
+proof checks the actual declarations with that floor and the current producer
+compiler, **7.0.2**, under strict checking without skipping dependency declarations.
+Both compile the public imports and Caffeine/Auth interoperability fixtures;
+the plain consumer also executes under Node with each compiler's emitted code.
+
+The package's development TypeScript pin builds and tests the supplier; it is
+not a runtime dependency or a mandate for application compilers. Applications
+must also satisfy their own build/lint peer ranges. Choose a compiler compatible
+with those peers and this declaration contract; do not force an incompatible
+peer graph to match the producer pin. These proofs use the pinned contributor
+Node version and do not establish an application's lint or browser deployment.
+
+`make install-browser-tools` explicitly prepares both compiler selections.
+`make check-browser` records their actual versions and the Node version in its
+retained packed-consumer evidence. Native-host CI qualifies the same proof;
+pending or unrun hosts are not local execution evidence.
+
 ## Explicit imports
 
 | Subpath | Supported responsibility |
