@@ -3,17 +3,20 @@ set -euo pipefail
 # Requires an explicitly prepared Testkit server or server URL; never installs it.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
+ic_call=""
+if [[ "${1:-}" == --ic-call ]]; then ic_call=1; shift; fi
 published=""
 if [[ "${1:-}" == --published ]]; then
     [[ $# -ge 2 && "$2" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 2
     published="$2"
     shift 2
 fi
+[[ -z "$ic_call" || -z "$published" ]] || { echo 'Qualify the unpublished ic-call crate locally' >&2; exit 2; }
 mode="${1:-run}"
-[[ $# -le 1 ]] || { echo "Expected [--published X.Y.Z] [mode]" >&2; exit 2; }
-case "$mode" in run|--prepare|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--published X.Y.Z] [run|--prepare|--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
-[[ -z "$published" || "$mode" != --refresh-lock ]] || {
-    echo 'Published qualification cannot rewrite the maintained local lock' >&2; exit 2;
+[[ $# -le 1 ]] || { echo "Expected [--ic-call | --published X.Y.Z] [mode]" >&2; exit 2; }
+case "$mode" in run|--prepare|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--ic-call | --published X.Y.Z] [run|--prepare|--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
+[[ ( -z "$published" && -z "$ic_call" ) || "$mode" != --refresh-lock ]] || {
+    echo 'Published or ic-call qualification cannot rewrite the maintained local lock' >&2; exit 2;
 }
 if [[ "$mode" == run && -z "${POCKET_IC_BIN:-}" && -z "${IC_TESTKIT_POCKET_IC_URL:-}" ]]; then
     echo 'Set POCKET_IC_BIN (Testkit-admitted binary) or IC_TESTKIT_POCKET_IC_URL first' >&2
@@ -44,9 +47,12 @@ ic-platform = { path = "../../crates/ic-platform" }
 MANIFEST
 fi
 cp scripts/fixtures/cdk-runtime/canister.Cargo.toml "$fixture/crates/canister/Cargo.toml"
+if [[ -n "$ic_call" ]]; then
+    printf '\nic-call = { path = "../../../../crates/ic-call", default-features = false }\n' >> "$fixture/crates/canister/Cargo.toml"
+fi
 cp scripts/fixtures/cdk-runtime/driver.Cargo.toml "$fixture/apps/driver/Cargo.toml"
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
-cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec} "$fixture/crates/canister/src/"
+cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport} "$fixture/crates/canister/src/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
 cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol} "$fixture/apps/driver/src/"
 lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
@@ -62,6 +68,20 @@ if [[ "$mode" == --refresh-lock ]]; then
     exit 0
 fi
 cp "$lock" "$fixture/Cargo.lock"
+if [[ -n "$ic_call" ]]; then
+    # Add only local request-custody packages in the disposable consumer lock.
+    # Registry package identities and edges must remain exactly the maintained set.
+    resolution=(--offline)
+    if [[ "$mode" == --prepare ]]; then resolution=(); fi
+    cargo metadata --manifest-path "$fixture/Cargo.toml" "${resolution[@]}" --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
+    for side in baseline consumer; do
+        selected="$lock"
+        if [[ "$side" == consumer ]]; then selected="$fixture/Cargo.lock"; fi
+        "$root/.tools/host/bin/yq" -p toml -o json '.' "$selected" |
+            "$root/.tools/host/bin/jq" -S '[.package[] | select(.source != null)] | sort_by(.name, .version, .source)' > "$fixture/$side-registry.json"
+    done
+    cmp "$fixture/baseline-registry.json" "$fixture/consumer-registry.json"
+fi
 if [[ "$mode" == --prepare ]]; then
     [[ -z "$published" ]] || { echo "Prepare published caches explicitly before qualification" >&2; exit 2; }
     cargo fetch --manifest-path "$fixture/Cargo.toml" --locked
@@ -80,8 +100,9 @@ cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter
 for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     for protocol in wire external-candid; do
         features=()
+        if [[ -n "$ic_call" ]]; then features+=(--features ic-call); fi
         admission=()
-        if [[ "$protocol" == external-candid ]]; then features=(--features external-candid); admission=(--external-candid); fi
+        if [[ "$protocol" == external-candid ]]; then features+=(--features external-candid); admission=(--external-candid); fi
         cargo tree --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister "${features[@]}" --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target-$protocol.graph"
         bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target-$protocol.graph" "${admission[@]}"
     done
@@ -95,7 +116,8 @@ CARGO_TARGET_DIR="$fixture/build/host" cargo +1.91.0 build --manifest-path "$fix
 for toolchain in "$development_toolchain" 1.91.0; do
     for protocol in wire external-candid; do
         features=()
-        if [[ "$protocol" == external-candid ]]; then features=(--features external-candid); fi
+        if [[ -n "$ic_call" ]]; then features+=(--features ic-call); fi
+        if [[ "$protocol" == external-candid ]]; then features+=(--features external-candid); fi
         CARGO_TARGET_DIR="$fixture/build/$toolchain" cargo +"$toolchain" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister "${features[@]}" --release --target wasm32-unknown-unknown
         mkdir -p "$fixture/artifacts/$toolchain"
         cp "$fixture/build/$toolchain/wasm32-unknown-unknown/release/platform_runtime_canister.wasm" "$fixture/artifacts/$toolchain/$protocol.wasm"

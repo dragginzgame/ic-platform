@@ -4,6 +4,11 @@
 
 ### ➕ Added
 
+- Add `ic-call` for prepared one-shot calls with owned dynamic method names and
+  borrowed or owned raw arguments. Reuse Platform's existing call implementation,
+  cost query and error identities with explicit waits and separate codecs
+  ([#75](https://github.com/dragginzgame/ic-platform/issues/75)).
+
 - Own the opt-in instrumented PocketIC source provider for IC Profiler, keeping
   native adapters and IC build inputs below the facade while the consumer retains
   its recorder/viewer. Exclude Motoko/lifeline from the native server profile

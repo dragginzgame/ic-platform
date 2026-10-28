@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/ic-platform", "crates/ic-platform-macros"]
+members = ["crates/ic-call", "crates/ic-platform", "crates/ic-platform-macros"]
 resolver = "3"
 
 [workspace.package]
@@ -24,6 +24,7 @@ ic-cdk-executor = "=2.0.0"
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
 ic-host-artifacts = { version = "0.69.1", default-features = false, features = ["gzip"] }
 ic-management-canister-types = "=0.11.0"
+ic-platform = { version = "0.7.0", path = "crates/ic-platform", default-features = false }
 ic-platform-macros = { version = "0.7.0", path = "crates/ic-platform-macros" }
 ic-secp256k1 = "=0.3.0"
 ic-stable-structures = { version = "=0.7.2", default-features = false }

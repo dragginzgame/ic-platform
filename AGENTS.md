@@ -9,7 +9,11 @@ Read [the current handoff](docs/status/current.md), then
   [the migration contract](docs/migration.md) before changing its public surface.
   Keep [the IC inventory](docs/ic-inventory.md) aligned with dependency, feature,
   export and ownership changes; `make check-inventory` checks manifest facts.
-- Keep one consumer library under `crates/ic-platform`. Add no blanket upstream
+- The maintainer authorized `crates/ic-call` as the additional prepared one-shot
+  ICC library for #75. It depends downward on `ic-platform` and reuses its sole
+  call implementation and executor. It owns method/argument custody, not codecs,
+  retries, Relay delivery, timers, domain endpoints or application policy.
+- Keep the low-level consumer boundary under `crates/ic-platform`. Add no blanket upstream
   re-exports, automatic resource limits or alternative executor implementation.
   Explicit upstream-coupled exports belong to the documented contract.
 - No default features. Executor-only builds must remain Candid-free; host parser

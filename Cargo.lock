@@ -1375,6 +1375,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-call"
+version = "0.7.0"
+dependencies = [
+ "ic-platform",
+]
+
+[[package]]
 name = "ic-cdk-executor"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

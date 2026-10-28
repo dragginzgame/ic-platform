@@ -212,13 +212,13 @@ authorized operation after a clean committed source and native qualification.
 Run `make publish-check` to package and verify the current version with all
 features without uploading; this dry run allows working-tree changes. After
 release and native qualification, `make publish` uploads the current committed
-`ic-platform-macros` and `ic-platform` versions to crates.io using Cargo's
+`ic-platform-macros`, `ic-platform` and `ic-call` versions to crates.io using Cargo's
 configured credentials and dependency ordering. It
 requires a clean checkout and does not bump versions, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are
-automatic: after an interrupted dispatch, reconcile both exact registry package versions
+automatic: after an interrupted dispatch, reconcile all three exact registry package versions
 before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
 prove registry visibility or consumer adoption.
 
@@ -229,7 +229,10 @@ checks establish target compatibility, not installed executor/trap behavior.
 ## Dependency roles and deployment admission
 
 The reviewed Shared Tooling revision is recorded in [the snapshot](.shared-tooling.snapshot).
-`ic-platform` is the sole consumer library; `ic-platform-macros` is its production
+`ic-platform` owns the low-level boundary; `ic-call` adds prepared one-shot
+requests with owned or borrowed methods and bytes through its existing runtime.
+It has no default features or codecs and never depends on Relay or Timers.
+See [the call contract](crates/ic-call/README.md). `ic-platform-macros` is the production
 proc-macro support package. Its Syn/Quote dependencies generate consumer
 entrypoints. Principal, Candid, the host parser, Agent, certification, raw IC calls,
 management/ledger DTOs, signature/BLS APIs, the executor and Serde are production

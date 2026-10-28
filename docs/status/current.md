@@ -1,13 +1,54 @@
 # Current handoff
 
+## Prepared one-shot calls (#75)
+
+The maintainer authorized the additional `crates/ic-call` consumer library.
+It owns prepared method/argument custody and delegates execution and exact cost
+queries to Platform's unchanged raw call implementation. Dynamic method Strings
+and argument Vecs can outlive their source locals; borrowed inputs stay supported.
+Wait policy is explicit, with unchanged response/error identities and no codec,
+retry, funding, instrumentation policy, Relay or Timers dependency. Existing raw
+callers remain supported. Canic #700 is the demonstrated ownership gap; Blob #108,
+Query #108, IC Crates #19, Jobs #75, Relay #14 and Timers #80 retain their documented
+consumer responsibilities. See [the migration](../migration.md#prepared-one-shot-calls-issue-75).
+
+Full `make clippy` passed before longer checks. The working tree passes
+`make test docs-check wasm-check msrv`, formatting, dependency/inventory/pin/link
+checks, feature-selection regressions, release-command/runtime-lock/source guards.
+The isolated default-branch contribution separately passes full Clippy, five
+Rust 1.91 unit tests and standalone raw/Wire/external-Candid consumers under
+Rust 1.99.1 and 1.91, native and Wasm. Those graphs keep one registry executor
+2.0.0 and ic0 1.2.0, with no Candid in raw/Wire selections and no host stack,
+Relay, Timers or entrypoint generator in the standalone call dependency.
+
+The installed lifecycle fixture now selects either original raw calls or owned
+requests. All eight Linux/PocketIC combinations of raw/owned, Wire/external Candid
+and both compilers pass; the exact isolated contribution's owned profile also
+passes all four combinations. These cover dynamic method ownership, borrowed and
+owned arguments, exact cost plus attachments, reply/reject refund timing,
+structured balance/submission/rejection failures, successful transport with bad
+codec bytes, callback/encoding traps, cancellation/drop and upgrade controls.
+Unknown and SysUnknown codes are additionally checked as typed native fixtures;
+no deliberately delayed physical bounded-timeout experiment is claimed.
+Registry dependency identities/edges in the installed disposable lock match the
+maintained qualification lock; callback/submission source fingerprints are unchanged.
+
+Evidence is retained at `/tmp/platform-icc-20261028`, including the isolated
+contribution under `delivery/repo`. The local release metadata and default-branch
+metadata differ; the new crate inherits each without a version bump. There is
+no published supplier yet. Changelog notes, publication ordering and normal CI
+include the additional crate. Native macOS, publication and downstream adoption
+remain separate; no application Wasm-size reduction is claimed. Candid Wasm depth
+#73 remains unresolved. Sibling sources and incoming security/browser work are
+preserved.
+
 ## Integration and release state
 
 The maintainer authorized fixing CI and integrating Platform PRs #69, #71 and
 #70, then updating Profiler to integrated revisions. Tooling prerequisite
 [#69](https://github.com/dragginzgame/ic-platform/pull/69) is merged at
 `aa973e13bae7a6dd9027c0dea47d0736f37acb31`. Gzip #71 is merged at
-`8f2b478ef96936754284976cd75dd9cd4b929ef7`; native provider #70 is being
-integrated. Neither capability is a new published package release. Rust release metadata
+`8f2b478ef96936754284976cd75dd9cd4b929ef7`; native provider #70 merged at `9dcef4b`. Neither capability is a new published package release. Rust release metadata
 remains 0.7.0 with compatible notes under 0.7.1; npm browser 0.1.1 is published.
 No release, publication, deployment, advisory ignore or sibling checkout edit
 is authorized by this integration. Profiler's Git/release operations remain

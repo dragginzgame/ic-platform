@@ -2075,3 +2075,73 @@ Qualification extends the existing standalone `management` and `icrc` consumer
 profiles, with native/MSRV execution and Wasm compilation. Package-local identity
 checks separately require exact registry type identity, including the two distinct
 `Value` types. These checks do not execute cryptography or qualify payment effects.
+
+## Prepared one-shot calls (issue #75)
+
+The new `ic-call` workspace crate owns generic request custody and delegates every
+physical submission to Platform's existing raw runtime. It deliberately expands
+the single-consumer-library contract: `ic-platform` remains the sole owner of the
+IC dependency/runtime boundary, and `ic-call` depends downward on it. No callback
+body, executor, codec, timer, Relay dispatch or cryptographic implementation is
+copied. Existing raw Platform callers remain supported.
+
+Canic #700 demonstrated the gap against published Platform 0.7.1: a raw call
+cannot be returned after dropping its dynamically selected method String.
+Use the new crate to retire the local generic request/execute owner:
+
+```rust
+use ic_call::{Call, Principal, WaitPolicy};
+
+fn prepare(target: Principal) -> Call<'static, 'static> {
+    let method = String::from("runtime-selected-method");
+    Call::new(target, method, WaitPolicy::Bounded { timeout_seconds: 300 })
+        .take_raw_args(vec![1, 2, 3])
+}
+```
+
+Add `ic-call` with defaults disabled to the workspace production catalog and
+inherit it from the consumer. The new crate is **not yet a published supplier**. Use the released version only
+after maintainer publication. Remove the local generic builder/execution wrapper,
+replace its repeated attachment-plus-cost formula with `get_cost()`, and call
+`execute().await`. Keep domain facades and stage-specific metrics with their
+consumer; observing construction is different from observing actual submission.
+
+There is no implicit codec or wait choice. Preserve each call site's existing
+bounded timeout or unbounded policy explicitly. `String` owns the method;
+`&str` borrows it. `take_raw_args(Vec<u8>)` owns bytes, and `with_raw_args(&[u8])`
+borrows them independently. Last attachment/wait selection replaces the earlier
+one. Empty raw bytes are not Candid unit bytes. Encode Wire frames for owned
+endpoints; encode required external Candid separately through Platform before
+constructing a request. Decode `Response::into_bytes()` with the selected codec
+and consumer-owned budgets/arity/admission after handling transport failure.
+No direct Candid/CDK dependency or generator change is needed for this API.
+A codec failure after a reply does not prove no remote effect.
+
+`CallFailed`, submission/balance errors, raw rejection codes and `Response` retain
+Platform identities. `SysUnknown`, a logical timeout, future drop or a callback
+trap does not establish physical settlement. No retry, funding, alternate route,
+refund authority or universal codec/transport error is added. Capture refund facts
+only in the matching reply/reject continuation, before another await; the new
+execution wrapper adds no await after raw completion. Relay retains journals,
+ACKs, retries and durable delivery; Timers retains its private dispatch machinery.
+
+The read-only consumer inventory found no additional execution gap in Blob #108,
+Query #108, IC Crates #19, Jobs #75 or Relay #14: their static/scoped method names
+already fit raw calls. Blob's four adapters retain provider codecs, reply limits,
+actor checks and financial/continuity policy. Query retains governance DTO/limit
+policy; IC Crates retains attestation interpretation; Jobs and Relay retain
+delivery policy. Timers #80 remains an infrastructure qualification. Codec
+consolidation is separately tracked by Platform #78/#79; this does not restore
+implicit Candid or retire consumer policy. Producer completion is independent
+of later consumer adoption.
+
+`make check-consumer` includes a standalone crate exercising raw calls with only
+`ic-call`, then explicit Wire and external-Candid selections on the development
+compiler and Rust 1.91, native and Wasm. `bash scripts/ci/check-platform-runtime.sh
+--ic-call` selects owned dynamic methods in the existing installed lifecycle
+fixture. Its disposable lock may add the local crate, but all maintained registry
+identities and dependency edges must match exactly. The original raw/published
+fixture remains independently selectable. Local Linux/PocketIC evidence and
+native macOS qualification must be reported separately. Neither graph isolation
+nor this wrapper alone proves smaller application Wasm. Candid's unresolved Wasm
+depth limitation (#73) remains in force.

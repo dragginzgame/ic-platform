@@ -6,6 +6,7 @@ publish.workspace = true
 rust-version.workspace = true
 
 [features]
+ic-call = []
 external-candid = ["ic-platform/candid"]
 
 [lib]

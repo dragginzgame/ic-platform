@@ -13,6 +13,15 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+`ic-call` is the authorized #75 consumer crate for prepared one-shot requests.
+It depends only on `ic-platform` with `runtime`, has no default or codec features,
+and owns method/argument custody. Physical calls, response/error identities,
+cost calculation, callbacks and executor remain with Platform. Canic #700 needs
+owned dynamic methods; other audited callers may keep the raw API. Codecs, metrics,
+budgets and durable delivery stay consumer-owned. See the
+[call contract](../crates/ic-call/README.md) and
+[migration](migration.md#prepared-one-shot-calls-issue-75).
+
 The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzip`
 and `GzipError` from published IC Tooling `ic-host-artifacts` 0.69.1 for IC Profiler.
 Tooling retains codec implementation; callers retain levels, limits and payload
@@ -164,6 +173,7 @@ report; retain the existing graph, pin and imported-source gates.
 <!-- BEGIN MANIFEST INVENTORY -->
 | Package | Feature | Enables |
 | --- | --- | --- |
+| ic-call | default |  |
 | ic-platform | agent | dep:ic-agent, principal |
 | ic-platform | blake3 | dep:blake3 |
 | ic-platform | bls | dep:ic-verify-bls-signature |
@@ -196,6 +206,7 @@ report; retain the existing graph, pin and imported-source gates.
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| ic-call | ic-platform | workspace-owned | normal | all | false | false | runtime |
 | ic-platform | assert_matches | ^1.5 | dev | all | false | true |  |
 | ic-platform | blake3 | ^1.8.7 | normal | all | true | false | std |
 | ic-platform | candid | ^0.10.38 | normal | all | true | false |  |
