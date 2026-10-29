@@ -12,6 +12,13 @@ owns raw OS facts and workload custody. Rebuild all process peers together.
 Supplying publication and native macOS acceptance are separate from local Linux
 qualification. The existing IC pin and cryptographic graph remain unchanged.
 
+Profiler adopted this batch directly in released 0.10.0 and closed its superseded
+PR #7 and issues #5/#6. PR #95 now also repairs feature admission for the exact
+manifest-selected Host source, preserving foreign/path, duplicate-source and
+Wasm refusals. This CI-only correction changes no native provider input or
+previously qualified executable. Consumer CI separately prepares the complete
+locked Cargo cache before its offline release fixtures.
+
 
 ## Pending 0.7.7: paired Profiler product source contract
 

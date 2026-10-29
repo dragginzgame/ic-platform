@@ -188,3 +188,29 @@ for package in ic-wire ic-wire-derive; do
         echo 'Wasm graph admitted host Wire metadata' >&2; exit 1
     fi
 done
+# Admit only the declared codec identity, on native gzip selections. Registry
+# duplicates cannot conceal themselves beside a valid pinned Git node.
+pinned='(https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11)'
+for declared in '' "$pinned"; do
+    for target in native wasm32-unknown-unknown; do
+        for selection in gzip none executor; do
+            for source in '' "$pinned" "$pinned (*)" '(/local)' \
+                '(https://github.com/dragginzgame/ic-tooling.git?rev=0000000000000000000000000000000000000000#00000000)' \
+                '(https://github.com/other/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11)'; do
+                printf 'ic-host-artifacts v0.69.13 %s\n' "$source" > "$fixture/$target-gzip.txt"
+                printf '%s\tgzip\n' "$selection" > "$fixture/mapping"
+                actual=reject
+                if awk -v target="$target" -v cache="$fixture" -v gzip_source="$declared" \
+                    -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
+                expected=reject
+                if [[ "$target" == native && "$selection" == gzip && ( "$source" == "$declared" || ( -n "$declared" && "$source" == "$declared (*)" ) ) ]]; then expected=pass; fi
+                [[ "$actual" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
+            done
+        done
+    done
+done
+printf 'ic-host-artifacts v0.69.13 %s\nic-host-artifacts v0.69.12\n' "$pinned" > "$fixture/native-gzip.txt"
+printf 'gzip\tgzip\n' > "$fixture/mapping"
+if awk -v target=native -v cache="$fixture" -v gzip_source="$pinned" \
+    -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
+echo 'Host gzip identity, selection, Wasm and mixed-source refusals passed'
