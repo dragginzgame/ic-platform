@@ -117,7 +117,7 @@ a distinct native dependency; PNG mechanics and budgets stay product-owned.
 ## Host process and private Wire inputs
 
 The paired Profiler consumer supplies the Host process policy adapter and the
-IC Wire private process DTOs. This profile wires IC Wire 0.7.21 and
+IC Wire private process DTOs. This profile wires IC Wire 0.7.23 and
 `ic-host-process` into both Cargo and Bazel, retaining the 60 KiB consumer frame
 limit. Old ICP2/JSON process senders and receivers must be rebuilt together.
 Saved reports and profile bundle formats do not change. Generic OS observations

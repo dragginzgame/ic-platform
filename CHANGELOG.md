@@ -7,7 +7,7 @@
 - Own textual-canister profiling requests, IC operation completion and compiled
   backend descriptions in the native provider. Pair the Python client and
   recorder description interface with IC Profiler; saved formats remain schema 1.
-- Adopt Platform 0.8.1 in native Cargo/Bazel inputs while preserving the shared
+- Adopt Wire 0.7.23 and Platform 0.8.1 in native Cargo/Bazel inputs while preserving the shared
   immutable Host supplier required by Profiler process observations.
 
 - Supply coherent Host process and IC Wire Cargo/Bazel inputs for Profiler's
