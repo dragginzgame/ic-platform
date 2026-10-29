@@ -1,6 +1,6 @@
 # Current handoff
 
-## Pending 0.7.7: ordinary native API module layout
+## Pending 0.7.7: native counter supply and ordinary API layout
 
 Source release **0.7.6** is on main at `8871f67`. Its API repair and complete
 complexity cleanup remain intact. [PR #88](https://github.com/dragginzgame/ic-platform/pull/88)
@@ -15,6 +15,28 @@ already implemented after exact implementation/test comparison with that release
 The fixed nesting source remains unchanged in main; costs and limitations remain
 in the migration contract. #50 is set aside until a supplying solution exists;
 its advisory check and dependency selection are unchanged.
+
+[PR #89](https://github.com/dragginzgame/ic-platform/pull/89) supplies published
+IC Metrics 0.17 with defaults disabled through the native workspace/Bazel inputs.
+It remains distinct from internal replica metrics 0.9. Profiler owns counter use,
+retained capture compatibility and reporting; no facade feature, IC pin, runtime
+charging or cryptographic implementation changes. This candidate also includes
+the complete 0.7.6 native adapter cleanup. Fresh Linux qualification of da3e999
+passes the native graph, actual server build, all 73 assembled recorder tests and
+five installed profiling scenarios through Profiler's real adoption scripts.
+Frozen server SHA-256:
+`a22c6fb6795fe8e6aa8380b6abcfb6d269229452f3e1acd3712cdd474d599766`.
+Evidence: `/tmp/platform-backlog-final-20261029/profiler-adoption/.build/receipts`.
+The normal Profiler checkout remains untouched. Its source 0.9.4 recorder uses
+published IC Metrics; the independent normal/build graph excludes Candid, CDK,
+IC0, Agent and PocketIC. Profiler Clippy, boundary and seven script tests pass.
+The separate #88 candidate c878ad0 also passes 69 recorder/five profiling tests.
+
+Broader hosted matrix status is reported on the PRs. Native macOS provider
+execution, full replica Bazel/NNS genesis and a consumer's final merged pin remain
+separate. Earlier 25c7614 native/Bazel proofs are historical. Keep
+[Profiler #1](https://github.com/dragginzgame/ic-profiler/issues/1) open: the core
+uses Platform gzip, while the transferred server still has local gzip adapters.
 
 ## Released 0.7.6 cleanup and qualification
 

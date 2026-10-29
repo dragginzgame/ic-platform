@@ -109,7 +109,10 @@ exclude the added Wire/JSON dependency edges. All features now require Rust 1.91
 
 IC Profiler selects the opt-in Git source profile at `native/ic-profiler`, which
 owns the instrumented IC pin, adapters, patches and patched PocketIC client.
-The recorder/viewer remain consumer-owned. The registry `pocket-ic` feature is
+The recorder/viewer remain consumer-owned. Native workspace/Bazel inputs supply
+published IC Metrics 0.17 counters with defaults disabled, distinct from internal
+replica metrics 0.9. These inputs add no Platform Cargo feature or default/Wasm
+dependency. The registry `pocket-ic` feature is
 unchanged; no instrumented Rust export is added to that feature. The
 [migration contract](migration.md#instrumented-pocketic-source-provider) records
 the source-provider interface and the remaining native acceptance under
