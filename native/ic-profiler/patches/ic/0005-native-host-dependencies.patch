@@ -7,7 +7,7 @@ index 5c254b6..5936950 100644
      "ic-wasm 0.11.1"
    ],
 -  "checksum": "d4e719583881cf898774f83b5661851ff3da30493e262b0832a817b5022e50da",
-+  "checksum": "377df08a9b3ed85cf58ad68fe222cae9ab56fc2a7341f1233b5c20f1c83ebe16",
++  "checksum": "71f4afb8526d1573082c837d0c89250c15f3ad73ef5745397129b19113b8e756",
    "conditions": {
      "aarch64-apple-darwin": [
        "aarch64-apple-darwin"
@@ -763,7 +763,7 @@ index 5c254b6..5936950 100644
              "target": "ic_metrics_encoder"
            },
 +          {
-+            "id": "ic-platform 0.7.6",
++            "id": "ic-platform 0.8.1",
 +            "target": "ic_platform"
 +          },
            {
@@ -1491,7 +1491,7 @@ index 5c254b6..5936950 100644
        ],
        "version": "1.1.1"
      },
-+    "ic-platform 0.7.6": {
++    "ic-platform 0.8.1": {
 +      "common_attrs": {
 +        "crate_features": [
 +          "gzip"
@@ -1539,7 +1539,7 @@ index 5c254b6..5936950 100644
 +      "repository": {
 +        "Git": {
 +          "commitish": {
-+            "Rev": "ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
++            "Rev": "c8bbe7e1aee45c905de05ec5083d6bf7ba95819e"
 +          },
 +          "remote": "https://github.com/dragginzgame/ic-platform.git",
 +          "strip_prefix": "crates/ic-platform"
@@ -1553,7 +1553,7 @@ index 5c254b6..5936950 100644
 +          }
 +        }
 +      ],
-+      "version": "0.7.6"
++      "version": "0.8.1"
 +    },
      "ic-representation-independent-hash 3.1.0": {
        "common_attrs": {
@@ -3449,7 +3449,7 @@ index 5c254b6..5936950 100644
      "ic-management-canister-types 0.8.0",
 +    "ic-metrics 0.17.2",
      "ic-metrics-encoder 1.1.1",
-+    "ic-platform 0.7.6",
++    "ic-platform 0.8.1",
      "ic-sha3 1.0.0",
      "ic-stable-structures 0.6.8",
      "ic-stable-structures 0.7.0",
@@ -3619,8 +3619,8 @@ index 3bef13b..e9cc273 100644
  
 +[[package]]
 +name = "ic-platform"
-+version = "0.7.6"
-+source = "git+https://github.com/dragginzgame/ic-platform.git?rev=ba98bd33ef1cbe463d6daf34f0511f17d7770c20#ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
++version = "0.8.1"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=c8bbe7e1aee45c905de05ec5083d6bf7ba95819e#c8bbe7e1aee45c905de05ec5083d6bf7ba95819e"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -4207,8 +4207,8 @@ index 1a6cc43..1a68860 100644
  
 +[[package]]
 +name = "ic-platform"
-+version = "0.7.6"
-+source = "git+https://github.com/dragginzgame/ic-platform.git?rev=ba98bd33ef1cbe463d6daf34f0511f17d7770c20#ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
++version = "0.8.1"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=c8bbe7e1aee45c905de05ec5083d6bf7ba95819e#c8bbe7e1aee45c905de05ec5083d6bf7ba95819e"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -4608,7 +4608,7 @@ index ab16a08..883e8d4 100644
 +ic-host-process = { git = "https://github.com/dragginzgame/ic-tooling.git", rev = "c20dbd11785c17d369651f51fa0967fbec69c57a", default-features = false }
 +ic-metrics = { version = "0.17.2", default-features = false }
 +
-+ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "ba98bd33ef1cbe463d6daf34f0511f17d7770c20", default-features = false, features = ["gzip"] }
++ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "c8bbe7e1aee45c905de05ec5083d6bf7ba95819e", default-features = false, features = ["gzip"] }
  actix-rt = "2.10.0"
  actix-web = { version = "4.9.0", default-features = false, features = [
      "macros",
@@ -4650,7 +4650,7 @@ index 41a0bf6..05c671f 100644
 +    features = ["gzip"],
 +    package = "ic-platform",
 +    git = "https://github.com/dragginzgame/ic-platform.git",
-+    rev = "ba98bd33ef1cbe463d6daf34f0511f17d7770c20",
++    rev = "c8bbe7e1aee45c905de05ec5083d6bf7ba95819e",
 +)
  # Build any crate with `@crate_index//:mycrate`
  # Use particular version with `@crate_index//:mycrate-3.14.16`

@@ -127,9 +127,12 @@ pinned root selection, cadence, aggregation, diagnostics and CLI output.
 Until Tooling #265 is published, all Host packages in the selected recorder
 and native graph use Tooling Git revision
 `c20dbd11785c17d369651f51fa0967fbec69c57a`. The gzip-only Platform library input
-is the immutable scaffold `ba98bd33ef1cbe463d6daf34f0511f17d7770c20`, selecting
+is Platform 0.8.1 at `c8bbe7e1aee45c905de05ec5083d6bf7ba95819e`, selecting
 the same Host artifact source. This avoids mixed registry/Git Host identities
-and downstream Cargo patches. Gzip remains a Platform facade, with no new
+and downstream Cargo patches. The registry 0.8.1 package instead selects
+registry Host artifacts; published Host process packages still lack the required
+process-observation interface. Keep this paired Git selection until a coherent
+published graph supplies both capabilities. Gzip remains a Platform facade, with no new
 canister/runtime feature or public API removal. Supplying publication and native
 macOS execution remain separate acceptance steps.
 
