@@ -818,7 +818,7 @@ fn platform_client_boundary_completes_operations_and_preserves_trace_guards() {
     let id = begin(&pic);
     let result = finish(&pic, &id);
     assert_eq!(
-        result["metadata"]["backend_description"]["availability"],
+        result["scope"]["metadata"]["backend_description"]["availability"],
         "available"
     );
     let dictionary = view(&pic, &id, "explain");
