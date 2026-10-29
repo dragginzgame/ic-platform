@@ -8,6 +8,7 @@ results, plus compiled scheduler/PocketIC descriptions. The consumer retains
 Python commands, export-before-clear and offline rendering. Captures retain the
 provider facts; unbound captures have explicit missingness, and saved schema-1
 dictionaries remain recorded evidence. No own release/version or crypto change.
+Qualification and remaining native host scopes are tracked in [PR #99](https://github.com/dragginzgame/ic-platform/pull/99); its paired consumer retains fresh receipts.
 
 
 ## Pending complexity cleanup (#96)
