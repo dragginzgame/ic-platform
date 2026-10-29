@@ -11,6 +11,7 @@ cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
 cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 ln -s "$BASH" "$fixture/bin/bash"
+cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
 cat > "$fixture/bin/rustc" <<'RUSTC'
 #!/usr/bin/env bash
 printf 'host: x86_64-unknown-linux-gnu\n'
@@ -21,12 +22,13 @@ set -euo pipefail
 for arg in "$@"; do [[ -n "$arg" ]] || { echo 'empty argument reached Cargo' >&2; exit 31; }; done
 printf '%s\n' "$*" >> "$ADMISSION_CALLS"
 case "$1" in
+    locate-project) exit 0 ;;
     metadata) printf '{}\n' ;;
     tree)
         printf 'ic-cdk-executor v2.0.0\nic0 v1.2.0\n'
         case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'candid v0.10.39\n' ;; esac
         ;;
-    +1.91.0)
+    +*)
         if [[ "${ADMISSION_FAIL:-no}" == yes && "$2" == check ]]; then exit 42; fi ;;
 esac
 CARGO

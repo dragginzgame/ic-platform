@@ -6,12 +6,16 @@ cd "$root"
 mkdir -p target
 published=""
 if [[ "${1:-}" == --published ]]; then
-    [[ $# -ge 2 && "$2" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || {
+    stable_version='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+    [[ $# -ge 2 && "$2" =~ $stable_version ]] || {
         echo 'Usage: check-platform-consumer.sh [--published X.Y.Z] [capability ...]' >&2; exit 2;
     }
     published="$2"
     shift 2
 fi
+# Published qualification retains its historical compiler; source checks use the manifest.
+msrv=1.91.0
+if [[ -z "$published" ]]; then msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"; fi
 profiles="$root/scripts/ci/platform-consumer-profiles.tsv"
 capabilities=()
 while IFS=$'\t' read -r capability _; do
@@ -41,6 +45,7 @@ resolver = "3"
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+rust-version = "$msrv"
 [workspace.dependencies]
 ic-platform = { $selection, default-features = false, features = [$features] }
 MANIFEST
@@ -49,6 +54,7 @@ cat > "$fixture/crates/consumer/Cargo.toml" <<'MANIFEST'
 name = "platform-consumer-proof"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 publish = false
 [lints.rust]
 warnings = "deny"
@@ -128,10 +134,10 @@ if [[ "$capability" == external-codecs ]]; then
     done
 fi
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
-CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.91.0 test --manifest-path "$fixture/Cargo.toml" --frozen
+CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --frozen
 if [[ "$wasm" != skip ]]; then
     CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$wasm" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
-    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +1.91.0 "$wasm" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
+    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +"$msrv" "$wasm" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
 fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
 # Parse the exit with the loop before Cargo runs. A concurrent source edit must

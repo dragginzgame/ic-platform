@@ -12,6 +12,10 @@ cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
+cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
+cp "$root/Cargo.toml" "$fixture/Cargo.toml"
+mkdir -p "$fixture/.tools"
+ln -s "$root/.tools/host" "$fixture/.tools/host"
 cat > "$fixture/bin/rustc" <<'STUB'
 #!/usr/bin/env bash
 printf 'host: x86_64-unknown-linux-gnu\n'
@@ -20,6 +24,7 @@ cat > "$fixture/bin/cargo" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
 case "$1" in
+    locate-project) exit 0 ;;
     metadata) printf '{}\n' ;;
     tree)
         if [[ "${TEST_CAPABILITY:-}" == external-codecs ]]; then
@@ -45,10 +50,10 @@ case "$1" in
         ;;
     *)
         printf '%s\n' "$*" >> "$TEST_CALLS"
-        if [[ "${TEST_FAIL_LAST:-no}" == yes && "$1" == +1.91.0 && "$2" == build ]]; then
+        if [[ "${TEST_FAIL_LAST:-no}" == yes && "$1" == +"$TEST_MSRV" && "$2" == build ]]; then
             exit 42
         fi
-        if [[ "${TEST_EDIT:-no}" == yes && "$1" == +1.91.0 && "$2" == build && ! -e "$TEST_READY.seen" ]]; then
+        if [[ "${TEST_EDIT:-no}" == yes && "$1" == +"$TEST_MSRV" && "$2" == build && ! -e "$TEST_READY.seen" ]]; then
             : > "$TEST_READY.seen"
             printf 'ready\n' > "$TEST_READY"
             read -r _ < "$TEST_RESUME"
@@ -58,6 +63,8 @@ esac
 STUB
 chmod +x "$fixture/bin/cargo" "$fixture/bin/rustc"
 export PATH="$fixture/bin:$PATH" TEST_CALLS="$fixture/calls"
+TEST_MSRV="$("$BASH" "$root/scripts/ci/read-platform-msrv.sh")"
+export TEST_MSRV
 export TEST_REJECT=no TEST_CANDID=no
 while IFS=$'\t' read -r capability _ _ _ wasm; do
     TEST_CANDID=no

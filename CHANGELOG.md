@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.7.6]
+
+### 🧹 Cleanup
+
+- Simplify external endpoint generation and reply decoding while preserving
+  generated behavior, caller-selected arity, diagnostics and the fixed nesting guard.
+- Share native profiler argument handling, capture configuration and image
+  responses. Select response encoding at the producing adapter and read stop
+  settings under one lock. Discover configuration keys from the existing producer
+  instead of parsing its Rust source; retain profiler-owned unit interpretation.
+- Derive current-source MSRV qualification from the workspace manifest and share
+  runtime profile selection across graph checks, builds and execution. Published
+  artifact qualification keeps its historical compiler selection.
+
+### 🩹 Fixed
+
+- Repair the assembled native profiler's admission-module path and principal
+  parsing import so its actual server and focused regressions compile.
+
 ## [0.7.5] - 2026-10-29
 
 ### ➕ Added
