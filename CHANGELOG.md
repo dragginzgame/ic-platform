@@ -8,6 +8,16 @@
   ledger-types surface, letting Canic's opt-in adapter reuse the named `name`/`url`
   contract without maintaining another Candid DTO. No endpoint is mounted automatically.
 
+### 🩹 Fixed
+
+- Add opt-in iterative external Candid admission with caller-selected nesting and
+  work ceilings before upstream decoding. Inspect unused type definitions and
+  skipped values; return typed refusals for the deep-option Wasm trap input.
+  Existing decoder signatures, quotas, arity policies and bytes stay unchanged.
+  External endpoint adapters accept an explicit `nesting` budget. This bounds
+  wire nesting without forking Candid or guaranteeing arbitrary custom visitors
+  ([#73](https://github.com/dragginzgame/ic-platform/issues/73)).
+
 ## [0.7.4] - 2026-10-28
 
 ### ➕ Added

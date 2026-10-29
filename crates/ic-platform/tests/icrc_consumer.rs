@@ -1,5 +1,5 @@
 //! Standalone Platform-only consumer of the explicit external ledger surface.
-use ic_platform::candid::{DecodeLimits, contract, decode_exactly_one};
+use ic_platform::candid::{DecodeLimits, contract};
 use ic_platform::icrc_ledger_types::{
     Account, Allowance, AllowanceArgs, ArchivedBlocks, BlockWithId, GetArchivesArgs,
     GetBlocksRequest, GetBlocksResult, ICRC3ArchiveInfo, ICRC3DataCertificate, ICRC3Value,
@@ -21,16 +21,18 @@ where
     T: contract::CandidType + for<'de> contract::serde::Deserialize<'de>,
 {
     let bytes = contract::encode_one(value).unwrap();
-    let decoded: T = decode_exactly_one(
-        &bytes,
-        DecodeLimits {
-            reply_bytes: 4096,
-            decoding_quota: 1_000_000,
-            skipping_quota: 1024,
-            type_entries: 128,
-            header_bytes: 2048,
-        },
-    )
+    let decoded: T = DecodeLimits {
+        reply_bytes: 4096,
+        decoding_quota: 1_000_000,
+        skipping_quota: 1024,
+        type_entries: 128,
+        header_bytes: 2048,
+    }
+    .with_nesting(ic_platform::candid::nesting::NestingLimits {
+        depth: 64,
+        work: 1_000_000,
+    })
+    .decode_exactly_one(&bytes)
     .unwrap();
     assert_eq!(contract::encode_one(&decoded).unwrap(), bytes);
     bytes

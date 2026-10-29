@@ -189,6 +189,16 @@ Retain Apache provenance and the existing external ledger DTO identity. No Candi
 storage implementation, cryptographic account-identifier derivation or application
 subaccount allocation policy belongs in the owned account surface.
 
+## External Candid nesting admission
+
+The maintainer authorized opt-in iterative wire-framing admission for #73, with
+caller-selected depth/work budgets before the unchanged upstream decoder. Keep
+existing decoder signatures, arity and error variants, and add no implicit limit.
+Inspect unused type definitions and skipped values, retain bytes, and fail closed
+on uninspectable future/opaque forms. This is a bounded admission walk, not a
+Candid fork or universal stack-safety claim for arbitrary trusted Rust schemas or
+custom visitors. Keep installed Wasm regression evidence for the original trap.
+
 ## Transport and codecs
 
 The 0.4 runtime accepts/returns raw transport bytes only. Do not restore implicit

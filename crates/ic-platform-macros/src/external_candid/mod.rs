@@ -9,6 +9,7 @@ pub(crate) fn expand(
     item: TokenStream,
 ) -> syn::Result<TokenStream> {
     let mut limits = None;
+    let mut nesting = None;
     let mut empty = None;
     let mut name = None;
     let mut guards = Vec::new();
@@ -31,12 +32,13 @@ pub(crate) fn expand(
             return Ok(());
         }
         match key.as_str() {
-            "limits" | "empty_args" | "name" | "guard" | "platform" => {}
+            "limits" | "nesting" | "empty_args" | "name" | "guard" | "platform" => {}
             _ => return Err(meta.error(format!("unsupported external Candid option `{key}`"))),
         }
         let value: LitStr = meta.value()?.parse()?;
         match key.as_str() {
             "limits" => limits = Some(value.parse::<Path>()?),
+            "nesting" => nesting = Some(value.parse::<Path>()?),
             "empty_args" => {
                 empty = Some(match value.value().as_str() {
                     "reject" => quote!(Reject),
@@ -87,6 +89,12 @@ pub(crate) fn expand(
         quote!(value.0)
     } else {
         quote!(value)
+    };
+    let decode_call = match nesting {
+        Some(nesting) => {
+            quote!(limits.decode_with_nesting(&bytes, #platform::candid::arguments::EmptyArgs::#empty, #nesting))
+        }
+        None => quote!(limits.decode(&bytes, #platform::candid::arguments::EmptyArgs::#empty)),
     };
     let decode_type = if types.len() == 1 {
         let ty = types[0];
@@ -141,7 +149,7 @@ pub(crate) fn expand(
         }
         fn #decode(bytes: ::std::vec::Vec<u8>) -> #decode_type {
             let limits: #platform::candid::arguments::ArgumentLimits = #limits;
-            let value: #tuple = limits.decode(&bytes,#platform::candid::arguments::EmptyArgs::#empty).unwrap_or_else(|error| #platform::cdk::api::trap(error.to_string()));
+            let value: #tuple = #decode_call.unwrap_or_else(|error| #platform::cdk::api::trap(error.to_string()));
             #decode_result
         }
         fn #encode(#encode_param) -> ::std::vec::Vec<u8> {
@@ -160,6 +168,7 @@ mod tests {
             true,
             quote!(
                 limits = "LIMITS",
+                nesting = "NESTING",
                 empty_args = "reject",
                 guard = "auth",
                 platform = "::renamed"
@@ -173,6 +182,7 @@ mod tests {
         .unwrap()
         .to_string();
         assert!(generated.contains("renamed :: candid :: endpoint :: __candid_method"));
+        assert!(generated.contains("decode_with_nesting"));
         assert!(generated.contains("renamed :: cdk :: futures :: internals"));
         let auth = generated.find("= auth ()").unwrap();
         let byte_guard = generated[auth..]
@@ -197,6 +207,15 @@ mod tests {
             ),
             (
                 quote!(limits = "A", limits = "B", empty_args = "unit"),
+                "duplicate",
+            ),
+            (
+                quote!(
+                    limits = "A",
+                    nesting = "A",
+                    nesting = "B",
+                    empty_args = "unit"
+                ),
                 "duplicate",
             ),
             (

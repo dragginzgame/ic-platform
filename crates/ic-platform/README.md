@@ -12,7 +12,8 @@ reply decoding with caller-selected arity. Cycles provider block codecs require
 both `cycles-ledger-types` and `icrc-ledger-types` to preserve legacy `Nat64`.
 Verify registry availability before downstream adoption; see the
 [migration and qualification guide](../../docs/migration.md#external-endpoint-and-protocol-codecs-78-79).
-The unresolved Wasm nesting limitation in #73 applies to these codecs too.
+Select caller-owned nesting admission before these codecs when accepting external
+bytes; ordinary decoder quotas alone do not bound Wasm recursion (see #73).
 
 Enable `gzip` for native `ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`.
 These are IC Tooling's existing bounded codecs, without backend types or a second
@@ -134,6 +135,17 @@ decode_exactly_one}` preserves Testkit's explicit limits and typed failures.
 `decode_exactly_one` requires one actual wire argument. All select compact Candid
 diagnostics, which are not a redaction guarantee. Callers retain raw bytes,
 aggregate accounting, trust, resource policy and domain errors.
+
+Select `limits.with_nesting(candid::nesting::NestingLimits { depth, work })` and
+use its `decode_one`, `decode_args` or `decode_exactly_one` methods for iterative
+wire admission before Candid. Call `.admit(&bytes)?` before a protocol operation's
+existing decoder. External entrypoints may set `nesting = "NESTING"`; raw adapters
+use `ArgumentLimits::decode_with_nesting` or `endpoint::read_with_nesting`.
+`error.nesting_error()` exposes typed depth/work/framing refusals. These budgets
+are opt-in and separate from decoder quotas. The walk covers unused type entries
+and skipped values, accepts recursive declarations and never rewrites bytes. It
+refuses uninspectable future/opaque forms. This bounds wire nesting, not arbitrary
+custom Rust visitors or trusted expected schemas. See the [contract](../../docs/migration.md#external-candid-nesting-qualification-73).
 
 Use `ic_platform::candid::contract` for Candid DTO derives and encoding. Add
 `#[candid_path("ic_platform::candid::contract")]` to derived types, and

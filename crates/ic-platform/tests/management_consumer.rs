@@ -23,6 +23,10 @@ pub fn roundtrip() {
         type_entries: 64,
         header_bytes: 2048,
     };
+    let guarded = limits.with_nesting(ic_platform::candid::nesting::NestingLimits {
+        depth: 64,
+        work: 1_000_000,
+    });
     let mut request = HttpRequestArgs {
         url: "https://perf-context.invalid/0".into(),
         max_response_bytes: Some(256),
@@ -53,7 +57,9 @@ pub fn roundtrip() {
         .collect();
     assert_eq!(contract::encode_one(&request).unwrap(), original);
     assert_eq!(
-        decode_exactly_one::<HttpRequestArgs>(&original, limits).unwrap(),
+        guarded
+            .decode_exactly_one::<HttpRequestArgs>(&original)
+            .unwrap(),
         request
     );
     request.headers.push(HttpHeader {
@@ -77,7 +83,9 @@ pub fn roundtrip() {
         request.method = method;
         let bytes = contract::encode_one(&request).unwrap();
         assert_eq!(
-            decode_exactly_one::<HttpRequestArgs>(&bytes, limits).unwrap(),
+            guarded
+                .decode_exactly_one::<HttpRequestArgs>(&bytes)
+                .unwrap(),
             request
         );
     }

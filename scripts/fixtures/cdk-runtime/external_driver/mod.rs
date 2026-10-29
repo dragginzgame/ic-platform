@@ -137,6 +137,99 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             .len(),
         32
     );
+    let nested = |some: usize| {
+        let mut bytes = b"DIDL\x01\x6e\0\x01\0".to_vec();
+        bytes.resize(bytes.len() + some, 1);
+        bytes.push(0);
+        bytes
+    };
+    for (depth, expected) in [(0, 0u8), (63, 0), (64, 1), (8192, 1)] {
+        let response = pic
+            .query_call(
+                id,
+                Principal::anonymous(),
+                "external_nesting_probe",
+                contract::encode_one(nested(depth)).unwrap(),
+            )
+            .unwrap();
+        assert_eq!(
+            candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
+            expected
+        );
+    }
+    let mut truncated = nested(1);
+    truncated.pop();
+    for malformed in [truncated, b"DIDL\x01\x67".to_vec()] {
+        let response = pic
+            .query_call(
+                id,
+                Principal::anonymous(),
+                "external_nesting_probe",
+                contract::encode_one(malformed).unwrap(),
+            )
+            .unwrap();
+        assert_eq!(
+            candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
+            3
+        );
+    }
+    // Unused record definitions also reach Candid's recursive normalization.
+    let leb = |mut value: usize, bytes: &mut Vec<u8>| {
+        loop {
+            let byte = (value & 127) as u8;
+            value >>= 7;
+            bytes.push(byte | if value == 0 { 0 } else { 128 });
+            if value == 0 {
+                break;
+            }
+        }
+    };
+    let mut header = b"DIDL".to_vec();
+    leb(2048, &mut header);
+    for index in 0..2048 {
+        header.extend_from_slice(b"\x6c\x01\0");
+        if index == 2047 {
+            header.push(0x7f); // null
+        } else {
+            // Positive signed LEB needs a leading sign bit when bit 6 is set.
+            let mut value = index + 1;
+            loop {
+                let byte = (value & 127) as u8;
+                value >>= 7;
+                let done = value == 0 && byte & 64 == 0;
+                header.push(byte | if done { 0 } else { 128 });
+                if done {
+                    break;
+                }
+            }
+        }
+    }
+    header.extend_from_slice(b"\x01\x7e\x01"); // only a bool value
+    let response = pic
+        .query_call(
+            id,
+            Principal::anonymous(),
+            "external_nesting_probe",
+            contract::encode_one(header).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(
+        candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
+        2
+    );
+    assert!(
+        pic.update_call(
+            id,
+            Principal::anonymous(),
+            "external_nesting_effect",
+            nested(8192)
+        )
+        .is_err()
+    );
+    assert_eq!(observed(pic, id), 7);
+    println!(
+        "Typed iterative nesting refusal passed for the 8,202-byte trap input; handler effects remain unchanged"
+    );
     println!(
         "External endpoint admission, auth-before-decode, scalar/tuple/zero/null replies, mutation rollback, composite query and management await passed"
     );
