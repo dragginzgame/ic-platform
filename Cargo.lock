@@ -1376,7 +1376,7 @@ dependencies = [
 
 [[package]]
 name = "ic-call"
-version = "0.7.4"
+version = "0.7.5"
 dependencies = [
  "ic-platform",
 ]
@@ -1455,7 +1455,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.7.4"
+version = "0.7.5"
 dependencies = [
  "assert_matches",
  "blake3",
@@ -1493,7 +1493,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.7.4"
+version = "0.7.5"
 dependencies = [
  "proc-macro2",
  "quote",
