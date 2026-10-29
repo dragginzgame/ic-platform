@@ -23,7 +23,7 @@
       },
       {
         "path": "packages/pocket-ic/tests/system_profiling.rs",
-        "sha256": "a2f01e885f4211d3dba71f41c5cbd78acb9c5adc4be57f039be09ba79473c694"
+        "sha256": "afd24c354a7019bb5baffef39952105dc5ac530cf4df65e0d188c2a7d36ec570"
       },
       {
         "path": "profilingic.md",
@@ -83,6 +83,10 @@
       {
         "path": "0007-compiled-catalog-facts.patch",
         "sha256": "ae7d10eff1a0f4cab0c9d96d9de384f97e83d52de8f6d51754921c3aedbd1d34"
+      },
+      {
+        "path": "0008-client-validation-inputs.patch",
+        "sha256": "cf12cc7b4d41f35c89add77faba69d3af20825c0dda79d09e7b78dfbe3c9b92a"
       }
     ],
     "series": "patches/ic/series"

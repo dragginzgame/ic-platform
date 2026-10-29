@@ -755,11 +755,16 @@ fn platform_client_boundary_completes_operations_and_preserves_trace_guards() {
     // including its durable export followed by independently guarded clear.
     let directory = tempfile::tempdir().unwrap();
     let output = directory.path().join("trace.json");
+    let script = std::env::var_os("PROFILER_PYTHON_CLIENT")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| {
+            std::path::PathBuf::from(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../../rs/pocket_ic_server/profiling/viewer/memory_access_viewer.py"
+            ))
+        });
     let python = std::process::Command::new("python3")
-        .arg(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/../../rs/pocket_ic_server/profiling/viewer/memory_access_viewer.py"
-        ))
+        .arg(script)
         .args([
             "fetch",
             "--server",

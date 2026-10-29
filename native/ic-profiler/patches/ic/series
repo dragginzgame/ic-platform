@@ -5,3 +5,4 @@
 0005-native-host-dependencies.patch
 0006-profiler-request-admission.patch
 0007-compiled-catalog-facts.patch
+0008-client-validation-inputs.patch
