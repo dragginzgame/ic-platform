@@ -350,10 +350,27 @@ native/Wasm benchmark Clippy checks pass with warnings denied before execution.
 The maintainer requested that IC Profiler access gzip through Platform rather
 than depend directly on `flate2`. Select optional `gzip` and use
 `ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`. These explicit exports
-delegate to published IC Tooling `ic-host-artifacts` 0.69.1; general compression
+delegate to published IC Tooling `ic-host-artifacts` 0.70.0; general compression
 implementation remains in Tooling. No backend type, default feature, Candid,
 executor, filesystem effect or automatic limit is added. The dependency and
 exports are native-only, including when `gzip` is selected on Wasm.
+
+The pending Platform 0.8.2 release selects Tooling 0.70.0. `GzipError` retains its
+upstream identity, so consumers exchanging it with direct Host Artifacts APIs
+must align those dependencies to 0.70. Platform-only imports stay the same.
+The maintainer approved this patch release as a one-time exception, confirming
+the gzip surface has no consumers yet; future compatibility policy is unchanged.
+No retained gzip artifact, external IC payload or consumer retry policy is
+migrated. The release editor
+and independent Testkit qualification also select 0.70.0. The opt-in native
+Profiler source profile retains its separately qualified Cargo/Bazel pins.
+The runtime harness imports raw PocketIC identities from Platform and borrows
+Testkit's managed instance through `instance()`. Its direct Platform dependency
+uses local source during development; Testkit keeps its published Platform 0.8
+dependency without a global Cargo patch. This preserves Testkit's dependency
+constraint across future Platform releases and keeps registry records
+unchanged during release lock preparation. Both routes retain the same upstream
+PocketIC and executor identities; no retry or lifecycle policy moves to Platform.
 
 Consumers own compression levels, compressed/decoded byte allowances and payload
 interpretation. Decoding admits one complete member and rejects trailing bytes;
@@ -756,10 +773,10 @@ Blob's tests. Native macOS and installed/live-provider acceptance remain separat
 Platform requires Rust 1.91 for all features. Principal metadata originally shipped
 in 0.6.9 and Account metadata in 0.6.12; Platform 0.6.15 adopted the Wire 0.7 family.
 Platform 0.6.19 raised both Wire minimums to 0.7.16. The next compatible
-Platform release raises the host metadata and tooling minima to published 0.7.19.
+Platform release raises the host metadata and tooling minima to published 0.7.22.
 Qualify using a local Platform path until that supplier is published, then select
 its released version with defaults disabled and `features = ["wire-schema"]`.
-Host producers must also select `ic-wire = { version = "0.7.19", features = ["typescript"] }`
+Host producers must also select `ic-wire = { version = "0.7.22", features = ["typescript"] }`
 for their derives and generation. Wire 0.6 and 0.7 metadata traits are different
 identities; update both selections together. No direct Candid dependency is needed:
 
@@ -786,7 +803,7 @@ its existing owner and optional fixed 32-byte subaccount fields; no runtime code
 cryptographic primitive, persisted format or retry policy changes.
 
 The workspace alias `ic-wire-metadata` names the modern host metadata dependency.
-The independent installed-runtime fixture also selects Wire 0.7.19. Its separate
+The independent installed-runtime fixture also selects Wire 0.7.22. Its separate
 lock and installed qualification remain independent of host metadata generation.
 
 [#55](https://github.com/dragginzgame/ic-platform/issues/55) records the original

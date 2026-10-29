@@ -154,8 +154,9 @@ Installed-runtime CI prepares only the common tools, in order with
 release editor or Node/npm/TypeScript. Normal `make install-tools` still prepares
 the complete contributor set, and standard CI retains the Wire frontend proof.
 
-Tool setup includes the pinned IC Build 0.18.0 release editor, which requires
-Rust 1.91 or later to build. `make install-release-editor` prepares it separately;
+Tool setup includes the pinned IC Build 0.70.0 release editor with its `cli`
+feature, which requires Rust 1.91 or later to build. `make install-release-editor`
+prepares it separately;
 `make release-editor-check` admits it offline. Standard release commands prepare
 tools during admitted preflight; standalone metadata checks never install them.
 Pending changelog notes use `## [X.Y.Z]`; `## [X.Y.Z] - Unreleased` is also
@@ -248,7 +249,7 @@ The root catalog has `Production dependencies` and `Tests and tooling only`
 sections. Fixture-only selections stay in the second section and outside the
 consumer library's production graph.
 `fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
-sections with grouped ordering. Shared 0.26.26 owns the formatting passes;
+sections with grouped ordering. Shared 0.27.7 owns the formatting passes;
 Platform selects its existing standalone Rust source roster and edition 2024
 through `FORMAT_RUST_ARGS`. These selections run uncached and show per-pass
 timings. `make check-formatting` qualifies the actual Make policy and staged hook

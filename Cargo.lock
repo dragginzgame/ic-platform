@@ -1370,7 +1370,7 @@ dependencies = [
 
 [[package]]
 name = "ic-call"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "ic-platform",
 ]
@@ -1417,8 +1417,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.69.13"
-source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
+version = "0.70.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a5bbc52379cb9b3a6d381b59790aa1c4da7bed7a6a0186cda0b10804fe6565c"
 dependencies = [
  "flate2",
  "sha2 0.10.9",
@@ -1448,7 +1449,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "assert_matches",
  "blake3",
@@ -1488,7 +1489,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.8.1"
+version = "0.8.2"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1567,9 +1568,9 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.7.21"
+version = "0.7.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d9d4dbea25193bd0b891080e44a0fb8a4538d1d7f695423499fe4d8110a40e3"
+checksum = "98860d4ece1147bf4f32218eadde961f34bb6881c5ccf39026c5c298133db0f3"
 dependencies = [
  "bytemuck",
  "ic-wire-derive",
@@ -1581,9 +1582,9 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.7.21"
+version = "0.7.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26896f2c980e27ce375eefd8846fce6d1c5924a96eed0c252b779f5f7af5e12a"
+checksum = "bcd8b95734ebf64025c65ebd651cc6521992af6e3dea92c2b1521d4e1dfe1186"
 dependencies = [
  "proc-macro2",
  "quote",

@@ -1,18 +1,46 @@
 # Changelog
 
-## [0.8.2]
+## [0.8.3]
 
 ### 🔧 Changed
 
 - Own textual-canister profiling requests, IC operation completion and compiled
-  backend descriptions in the native provider. Pair the Python client and
-  recorder description interface with IC Profiler; saved formats remain schema 1.
-- Adopt Wire 0.7.23 and Platform 0.8.1 in native Cargo/Bazel inputs while preserving the shared
-  immutable Host supplier required by Profiler process observations.
+  backend descriptions in the native provider. The paired Profiler consumer keeps
+  file publication, rendering and capture/report policy; saved formats remain
+  schema 1.
+
+### ⬆️ Dependencies
+
+- Select Wire 0.7.23 and gzip-only Platform 0.8.1 in the native Cargo/Bazel graph,
+  retaining one immutable Host supplier for process observations. The published
+  Platform 0.8.2 gzip graph remains independent.
+
+### 🧭 Migration Notes
+
+- Adopt Profiler 0.11.0's query-product and recorder-description interfaces with
+  this native source profile. Older consumers retain their previous provider pin
+  until adopting the paired interface; existing raw PocketIC routes stay intact.
+
+## [0.8.2] - 2026-10-29
+
+### ⬆️ Dependencies
+
+- Adopt Host Artifacts 0.70.0 for the optional gzip facade. The maintainer approved
+  this patch release as a one-time exception because the surface has no consumers
+  yet. Its error uses the 0.70 Rust identity; imports, bytes and limits retain
+  their contracts.
+- Adopt Shared Tooling 0.27.7 with its required
+  [graph-observation supplier](https://github.com/dragginzgame/shared-tooling/pull/322),
+  and Wire 0.7.22 for host metadata and qualification fixtures.
+  Preserve feature isolation, external bytes and consumer-owned policy.
+- Adopt IC Tooling 0.70.0 for Testkit qualification and the managed release
+  metadata editor, retaining caller-owned transport and retry policies.
+
+### 🔧 Changed
 
 - Supply coherent Host process and IC Wire Cargo/Bazel inputs for Profiler's
-  adopted private transport. Keep gzip behind Platform and all Host packages on
-  one immutable source family until the supplying APIs are published
+  adopted private transport. Keep the native profile's Host packages on one
+  immutable source family until the supplying APIs are published
   ([#94](https://github.com/dragginzgame/ic-platform/issues/94)).
 
 ### 🩹 Fixed

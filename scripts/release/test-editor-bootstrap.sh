@@ -34,6 +34,7 @@ for mode in install check; do
         ) > "$fixture/output" 2> "$fixture/error"
         [[ ! -s "$fixture/output" && ! -s "$fixture/error" ]]
         grep -Fx -- ic-build-release-metadata "$EDITOR_OBSERVATION" > /dev/null
+        [[ "$(awk 'previous == "--features" { print } { previous = $0 }' "$EDITOR_OBSERVATION")" == cli ]]
         if [[ "$mode" == check ]]; then
             [[ "$(tail -1 "$EDITOR_OBSERVATION")" == --check ]]
         elif grep -Fx -- --check "$EDITOR_OBSERVATION"; then exit 1; fi

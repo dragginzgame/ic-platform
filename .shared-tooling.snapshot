@@ -2,7 +2,7 @@
 # version	0.27.7
 format	1
 source	https://github.com/dragginzgame/shared-tooling
-revision	1e89c0d3f8cbd6b68190f34a7c6975fb1063ea52
+revision	a8baa51099ca48cdb12e2171f031d488db89d67d
 # entrypoint	DRAGGINZGAME.md
 # entrypoint	make/consumer.mk
 # entrypoint	scripts/ci/check-cargo-dependency-boundaries.sh

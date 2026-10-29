@@ -1,79 +1,69 @@
 # Current handoff
 
-## Active paired Profiler contribution
+## Pending 0.8.3: paired native Profiler boundary
 
-[PR #99](https://github.com/dragginzgame/ic-platform/pull/99) moves Profiler's
-remaining IC client protocol and compiled backend descriptions into this native
-provider. #95 and #97 are merged; the contribution now targets main at `c8bbe7e`.
-The consumer reuses Profiler #9's pure query/cache/tool/render source interface.
-Profiler selects the qualified contribution pin below. Older consumers must
-retain their existing source profile until adopting the paired interface.
+[PR #99](https://github.com/dragginzgame/ic-platform/pull/99) is refreshed onto
+released Platform 0.8.2 at `b0bf82f`. Package versions remain 0.8.2. Preserve its
+published Host 0.70 gzip error identity, Testkit/managed editor adoption, runtime
+fixtures and released notes. Release/publication remain maintainer-owned.
+Shared Tooling 0.27.7 stays at `a8baa51099ca48cdb12e2171f031d488db89d67d`;
+do not replace it with an older supplying snapshot.
 
-Qualified native source is `fd845c4a633f0c82e80e2edaeec9963a3fe14144`.
-The following handoff change is documentation only. Both build graphs select
-Wire 0.7.23 and Platform 0.8.1 at `c8bbe7e`, retaining gzip-only features and
-the shared immutable Host supplier. The generated Cargo/Bazel delta changes only
-Wire and its paired derive crate. Profiler retains fresh
-assembly/build/test receipts under its `.build/receipts`, plus
-`artifacts/wire-0723-qualification.json` and the previous offline CLI proof. Its
-working-tree source is bound by assembly digests; no clean-HEAD claim is made.
-Linux executable SHA-256:
+Profiler 0.11.0 at `651448415a3a7eaed799c43be6662000fe0659cd` already supplies the
+paired query/cache/render and recorder-description interfaces. Profiler #8 is
+completed and #9 is closed as incorporated by that release. Older consumers keep
+their provider pin until adopting the paired interface. PR #99 is not merged;
+Profiler currently selects its qualified code revision `fd845c4`.
+
+This refresh preserves the complete native profile tree from
+`fd845c4a633f0c82e80e2edaeec9963a3fe14144`. Its Cargo/Bazel inputs select Wire
+0.7.23, gzip-only Platform 0.8.1 at `c8bbe7e` and Tooling `c20dbd1`. The ordinary
+Platform 0.8.2 registry Host 0.70 gzip graph is separate. Do not silently switch
+the native graph or mix supplying identities during this merge refresh.
+
+Tooling #265 is merged, but published Host process 0.70.0 still lacks the consumed
+observation module at the latest registry inspection. Published adoption remains
+separate. Profiler owns capture activation, process selection/identity admission,
+cadence, aggregation, retention, diagnostics and reports; Host owns raw OS facts
+and workload custody. Rebuild private ICPROF03 peers together.
+
+## Native behavior and qualification
+
+Platform owns textual-canister admission, native DTOs, Busy/Started operation
+completion and successful-result pruning. Domain errors are not resubmitted;
+a timeout can leave an already-started operation running. Raw PocketIC JSON
+routes remain unchanged. Python retains export-before-clear and file policy.
+
+Compiled scheduler/defaults, round interpretations, source hashes and component
+coverage belong here. Captures retain those facts for offline reporting; arbitrary
+backend labels infer nothing. Profiler preserves schema-1 recorded dictionaries
+with bounded admission. No runtime, crypto or charging body changes in this PR.
+Retain query admission order, diagnostics, 8 MiB/query, 32 MiB total, 128-entry FIFO
+and cross-run cache checks. Existing Value routes and saved formats remain.
+
+Qualified native server SHA-256 at `fd845c4`:
 `1bff7f3c31ce8dd2a2bd679593c6af64a17f0e06f8497384fdebee0403c57571`.
+Its actual build passes 78 recorder, 109 server-product and six installed tests,
+including the real Python export/guarded-clear command. Evidence remains in
+Profiler's `artifacts/wire-0723-qualification.json` and `.build/receipts`.
+The current merge refresh requires its own owner lint/governance and assembly
+identity check; unchanged native execution evidence is reused, not a new build.
 
-Platform owns textual-canister admission, native operations, busy/Started result
-completion and successful-result pruning. Operation errors are not resubmitted;
-a timeout may leave an already-started operation running. Existing PocketIC REST
-JSON arguments/replies and raw endpoints retain their external contract. The
-Python CLI remains standard-library-only and retains export-before-clear policy.
-The independent process transport remains IC Wire, with no Candid fallback.
+Wire and derive src trees match 0.7.22 exactly; the prior all-fields frame proof
+remains applicable. Earlier Python/browser/assembler/script, offline CLI, MSRV
+and substituted release-fixture evidence retains its exact input scope. Profiler
+0.11.0's delivered Linux, Intel/Apple Silicon macOS core and browser CI passes.
+Do not relabel those core jobs as native-server macOS qualification.
 
-Compiled scheduler models/defaults, round interpretations, source hashes and
-PocketIC component/coverage facts belong here. Local captures retain them for
-offline queries/bundles; arbitrary backend labels infer no IC facts. Profiler
-preserves recorded schema-1 dictionaries with bounded admission before copying.
-No runtime, crypto, charging body or own release version was changed.
+Native IC-server Darwin, full replica Bazel/NNS, fresh-host provisioning and
+live-provider/release acceptance remain separate. #98 owns the extra strict
+native lint findings; that probe is not claimed as passing. #50 stays deferred
+with its advisory check intact. Hosted qualification runs asynchronously.
 
-## Current validation and remaining scope
-
-The independent recorder lint passes; unchanged published-workspace inputs
-reuse the passing owner all-target/all-feature Clippy evidence from the 0.8.1 adoption.
-The final paired native build passes 78 recorder tests, 109 server-product tests
-and all six installed scenarios, including the real Python export/guarded-clear
-command. The consumer's four new description tests pass Rust 1.91; Python,
-browser, script, assembler and release-fixture proofs are detailed in #99.
-Bazel loads the test's declared Python runfile and tempfile dependency; full
-replica execution is not claimed. The actual offline CLI uses saved provider
-facts rather than substituting this binary's compiled description.
-
-Native IC-server Darwin, full replica Bazel/NNS genesis, fresh-host provisioning
-and live-provider/release acceptance remain separate. Hosted checks run
-asynchronously. The additional strict native lint findings remain in #98;
-required owner gates pass, and that separate probe is not represented as a pass.
-Historical receipts never qualify another binary.
-
-## Supplying contracts
-
-#95 supplies Host process and Wire inputs already adopted in Profiler 0.10.0.
-All selected Host packages use Tooling revision
-`c20dbd11785c17d369651f51fa0967fbec69c57a`; the gzip-only Platform library is
-`c8bbe7e1aee45c905de05ec5083d6bf7ba95819e` (Platform 0.8.1). Published Host
-process 0.70.0 lacks the consumed observation module; Tooling #265 is still open.
-Registry Platform uses registry Host artifacts. Keep the coherent Git family
-until both are supplied. Wire and derive source trees match 0.7.22 exactly;
-Profiler retains the prior all-fields frame proof alongside the new native receipts.
-Profiler owns capture policy, selected identities and accounting; Host owns raw
-OS facts and workload custody. Rebuild private process peers together.
-
-#97 consolidates native inputs and returns pure query/cache/render plumbing to
-Profiler. Preserve 8 MiB/query, 32 MiB total and 128-entry FIFO/cross-run policy.
-It adopts Shared Tooling #322 at immutable `1e89c0d` through the exporter; feature
-activation comes from Cargo metadata, while identity admission stays explicit.
-Its protected runtime/crypto sources and public library contracts stay unchanged.
-
-The maintainer retained Platform gzip. API input/decoded budgets remain 128 MiB;
-the recorder decoded budget remains 256 MiB. Strict framing rejects corrupt,
-truncated, concatenated or trailing members. PNG stays a distinct zlib contract.
-The IC source pin remains `ee8086a9773725fd1058832a9400297cf0990112`, Rust 1.99.0.
+The maintainer retained Platform gzip. API input/decoded limits remain 128 MiB;
+the recorder decoded limit remains 256 MiB. Strict single-member framing rejects
+corrupt, truncated, concatenated and trailing input. PNG remains distinct zlib.
+The IC pin stays `ee8086a9773725fd1058832a9400297cf0990112`, Rust 1.99.0.
 
 ## Released 0.8.0: Principal and selected ICRC packaging
 

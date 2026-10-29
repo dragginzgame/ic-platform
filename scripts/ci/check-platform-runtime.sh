@@ -48,12 +48,8 @@ PLATFORM_FIXTURE_TIMERS="$timers" PLATFORM_FIXTURE_WIRE="$wire" \
 PLATFORM_FIXTURE_SERDE="$serde" PLATFORM_FIXTURE_CBOR="$cbor" \
     perl -pe 's/\@(PLATFORM|TESTKIT|TIMERS|WIRE|SERDE|CBOR|MSRV)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
         scripts/fixtures/cdk-runtime/Cargo.toml.in > "$fixture/Cargo.toml"
-if [[ -z "$published" ]]; then
-    cat >> "$fixture/Cargo.toml" <<'MANIFEST'
-[patch.crates-io]
-ic-platform = { path = "../../crates/ic-platform" }
-MANIFEST
-fi
+# Only the fixture's direct boundary uses local sources. Testkit retains its
+# published Platform requirement across local minor releases.
 cp scripts/fixtures/cdk-runtime/canister.Cargo.toml "$fixture/crates/canister/Cargo.toml"
 if [[ -n "$adapters" ]]; then
     sed -i.bak 's/external-adapters = \["external-candid"\]/external-adapters = ["external-candid", "ic-platform\/candid-endpoint"]/' "$fixture/crates/canister/Cargo.toml"

@@ -4,9 +4,9 @@ mod protocol;
 mod wire_driver;
 mod wire_protocol;
 
+use ic_platform::pocket_ic::{PocketIc, PocketIcBuilder, RejectCode, RejectResponse};
 use ic_platform::principal::ExternalPrincipal as Principal;
-use ic_testkit::pic::{PocketIc, PocketIcBuilder, PocketIcStartupConfig};
-use ic_testkit::pocket_ic::{RejectCode, RejectResponse};
+use ic_testkit::pic::PocketIcStartupConfig;
 use protocol::{LIMITS, method_id};
 use serde::{Serialize, de::DeserializeOwned};
 use std::time::Duration;
@@ -61,7 +61,7 @@ fn missing_entrypoint_is_not_guard_rejection() {
     assert_guard_rejection(&RejectResponse {
         reject_code: RejectCode::CanisterError,
         reject_message: "fixture guard refused".into(),
-        error_code: ic_testkit::pocket_ic::ErrorCode::CanisterMethodNotFound,
+        error_code: ic_platform::pocket_ic::ErrorCode::CanisterMethodNotFound,
         certified: false,
     });
 }
@@ -71,7 +71,7 @@ fn unrelated_rejection_is_not_guard_rejection() {
     assert_guard_rejection(&RejectResponse {
         reject_code: RejectCode::CanisterReject,
         reject_message: "unrelated rejection".into(),
-        error_code: ic_testkit::pocket_ic::ErrorCode::CanisterRejectedMessage,
+        error_code: ic_platform::pocket_ic::ErrorCode::CanisterRejectedMessage,
         certified: false,
     });
 }
@@ -98,7 +98,7 @@ fn main() {
         .unwrap()
         .build_instance(PocketIcBuilder::new().with_application_subnet())
         .unwrap();
-    let pic = &owned.instance;
+    let pic = owned.instance();
     let id = pic.create_canister();
     pic.add_cycles(id, 10_000_000_000_000);
     pic.install_canister(id, wasm.clone(), request("initialize", 10u64), None);

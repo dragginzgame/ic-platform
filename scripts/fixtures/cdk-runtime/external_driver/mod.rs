@@ -1,9 +1,9 @@
 //! Installed effect/refusal checks; Testkit owns provider admission/lifecycle.
+use ic_platform::pocket_ic::PocketIc;
 use ic_platform::{
     candid::{self, contract},
     principal::ExternalPrincipal as Principal,
 };
-use ic_testkit::pic::PocketIc;
 const LIMITS: candid::DecodeLimits = candid::DecodeLimits {
     reply_bytes: 65536,
     decoding_quota: 100000,
