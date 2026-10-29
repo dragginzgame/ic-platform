@@ -6,17 +6,18 @@
 remaining IC client protocol and compiled backend descriptions into this native
 provider. #95 and #97 are merged; the contribution now targets main at `c8bbe7e`.
 The consumer reuses Profiler #9's pure query/cache/tool/render source interface.
-Refresh the consuming provider pin to the final contribution identity. Older consumers must
+Profiler selects the qualified contribution pin below. Older consumers must
 retain their existing source profile until adopting the paired interface.
 
-Prior qualified native source is `d662c19501a16047030e9afb40ac635470a6942d`.
-The new adoption changes the gzip-only Platform library to 0.8.1 at `c8bbe7e`;
-its new native qualification is pending. Profiler retains fresh
+Qualified native source is `4e497487666b37d79117787e583df8b26c1ad373`.
+The following handoff change is documentation only. Both build graphs select
+Platform 0.8.1 at `c8bbe7e`, retaining gzip-only features and the shared immutable
+Host supplier. The generated Cargo/Bazel delta changes only Platform. Profiler retains fresh
 assembly/build/test receipts under its `.build/receipts`, plus
-`artifacts/platform-client-qualification.json` and the offline CLI proof. Its
+`artifacts/platform-081-qualification.json` and the previous offline CLI proof. Its
 working-tree source is bound by assembly digests; no clean-HEAD claim is made.
 Linux executable SHA-256:
-`b6f9e457b6782bcde883040b5a9a2a9eb2a3d1b68cc9dc08ae7fae1b4e0ed57f`.
+`8246a63974ca22efef1d82dd57ddfac36968ad81920a9bf1cd14c494370b6da3`.
 
 Platform owns textual-canister admission, native operations, busy/Started result
 completion and successful-result pruning. Operation errors are not resubmitted;
@@ -52,8 +53,10 @@ Historical receipts never qualify another binary.
 
 #95 supplies Host process and Wire inputs already adopted in Profiler 0.10.0.
 All selected Host packages use Tooling revision
-`c20dbd11785c17d369651f51fa0967fbec69c57a`; the gzip-only Platform scaffold is
-`c8bbe7e1aee45c905de05ec5083d6bf7ba95819e` (Platform 0.8.1). Supplying publication remains separate.
+`c20dbd11785c17d369651f51fa0967fbec69c57a`; the gzip-only Platform library is
+`c8bbe7e1aee45c905de05ec5083d6bf7ba95819e` (Platform 0.8.1). Published Host
+process 0.70.0 lacks the consumed observation module; registry Platform uses
+registry Host artifacts. Keep the coherent Git family until both are supplied.
 Profiler owns capture policy, selected identities and accounting; Host owns raw
 OS facts and workload custody. Rebuild private process peers together.
 
@@ -67,8 +70,6 @@ The maintainer retained Platform gzip. API input/decoded budgets remain 128 MiB;
 the recorder decoded budget remains 256 MiB. Strict framing rejects corrupt,
 truncated, concatenated or trailing members. PNG stays a distinct zlib contract.
 The IC source pin remains `ee8086a9773725fd1058832a9400297cf0990112`, Rust 1.99.0.
-
-## Released library packaging
 
 ## Released 0.8.0: Principal and selected ICRC packaging
 
