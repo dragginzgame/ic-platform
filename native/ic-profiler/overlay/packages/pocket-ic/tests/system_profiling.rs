@@ -751,8 +751,40 @@ fn platform_client_boundary_completes_operations_and_preserves_trace_guards() {
         .json()
         .unwrap();
     assert_eq!(retained["executions"], snapshot["executions"]);
-    guard["expected_server_generation"] = snapshot["server_generation"].clone();
-    call("clear", guard).error_for_status().unwrap();
+    // Exercise the existing Python command against this actual native server,
+    // including its durable export followed by independently guarded clear.
+    let directory = tempfile::tempdir().unwrap();
+    let output = directory.path().join("trace.json");
+    let python = std::process::Command::new("python3")
+        .arg(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../rs/pocket_ic_server/profiling/viewer/memory_access_viewer.py"
+        ))
+        .args([
+            "fetch",
+            "--server",
+            pic.get_server_url().as_str(),
+            "--instance-id",
+            &pic.instance_id().to_string(),
+            "--canister-id",
+            &canister.to_text(),
+            "--clear",
+            "-o",
+        ])
+        .arg(&output)
+        .output()
+        .unwrap();
+    assert!(
+        python.status.success(),
+        "Python live client failed: {}",
+        String::from_utf8_lossy(&python.stderr)
+    );
+    let exported: Value = serde_json::from_slice(&std::fs::read(output).unwrap()).unwrap();
+    assert_eq!(exported["server_generation"], snapshot["server_generation"]);
+    assert_eq!(
+        exported["executions"].as_array().unwrap().len(),
+        snapshot["executions"].as_array().unwrap().len()
+    );
     let cleared: Value = call("trace", json!({}))
         .error_for_status()
         .unwrap()
