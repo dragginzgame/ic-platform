@@ -46,8 +46,13 @@ Qualified native server SHA-256 at `fd845c4`:
 Its actual build passes 78 recorder, 109 server-product and six installed tests,
 including the real Python export/guarded-clear command. Evidence remains in
 Profiler's `artifacts/wire-0723-qualification.json` and `.build/receipts`.
-The current merge refresh requires its own owner lint/governance and assembly
-identity check; unchanged native execution evidence is reused, not a new build.
+Merge refresh `53879d5` passes full owner Clippy, snapshot/pin/inventory, formatting,
+links and source-manifest checks. Its fresh candidate assembly matches all three
+input digests and the complete qualified source-tree digest; its native graph
+excludes lifeline and CLI-only NNS initialization. Evidence is retained in
+Profiler's `artifacts/platform99-refresh-assembly-equivalence.json`. Native
+execution evidence is reused, not a new binary build. The following handoff
+change is documentation only.
 
 Wire and derive src trees match 0.7.22 exactly; the prior all-fields frame proof
 remains applicable. Earlier Python/browser/assembler/script, offline CLI, MSRV
