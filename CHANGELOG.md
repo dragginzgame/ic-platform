@@ -1,6 +1,23 @@
 # Changelog
 
-## [0.7.7]
+## [0.8.0]
+
+### ⚠️ Breaking
+
+- Retire the generic `gzip` facade and feature. Use Host Artifacts directly with
+  its `gzip` feature and `artifact` imports
+  ([#91 — Retire the generic gzip facade after direct Host adoption](https://github.com/dragginzgame/ic-platform/issues/91)).
+- Return the unchanged native Profiler CLI and renderer to the consumer. Update
+  its source injection and provider pin together; IC capture adapters and build
+  inputs remain here
+  ([#90 — Return Profiler CLI and rendering source ownership to IC Profiler](https://github.com/dragginzgame/ic-platform/issues/90)).
+
+### 🩹 Fixed
+
+- Use Host's strict gzip decoder for native profile imports, rejecting corrupt,
+  truncated, concatenated and trailing input while preserving the API's 128 MiB
+  limits and the recorder's separate 256 MiB expanded allowance
+  ([Profiler #1 — Reuse IC Tooling gzip helpers for profile bundle import and export](https://github.com/dragginzgame/ic-profiler/issues/1)).
 
 ### 🔧 Changed
 

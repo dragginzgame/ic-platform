@@ -30,15 +30,18 @@ The provider's `profiler/` sources and the consumer's `profiler/` sources merge 
 the declared IC destination. Overlapping files are rejected. Their separate
 origins and digests enter the assembly identity, together with the IC pin and all
 patch/overlay inputs. Command receipts record both provider and consumer commits.
-Adapters stay inside the provider's IC workspace. The consumer recorder selects
-only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
-Bazel inputs. The recorder also consumes published IC Metrics 0.17 scalar
-arithmetic; this provider owns its native workspace and Bazel locks, distinct
-from the IC workspace's internal `ic-metrics` package. Neither measurement
-counters nor the gzip facade own charging policy. The gzip facade delegates to
-published IC Tooling and has no dependency back to this workspace, PocketIC or
-the native provider. Compression implementation
-stays in Tooling; the consumer retains levels, import limits and bundle semantics.
+IC capture/state adapters stay inside the provider's IC workspace. Profiler must
+inject `server/system_profile_cli.rs` and `server/system_profile_render.rs`
+alongside its recorder/viewer. Those product sources retain their exact bodies
+and assembled paths. Provider 0.8 requires the paired consumer source update.
+The recorder and server select Host Artifacts gzip directly in matching Cargo
+and Bazel inputs. Compression stays in Tooling; the consumer retains levels,
+limits and bundle semantics. API input/expanded limits remain 128 MiB; the core's
+expanded limit remains 256 MiB. Both refuse corrupt or incomplete members,
+concatenation and trailing bytes. PNG zlib remains separate.
+The recorder also consumes published IC Metrics 0.17 scalar arithmetic; this
+provider owns native workspace/Bazel locks, distinct from internal replica
+metrics. Neither dependency owns charging or report policy.
 
 The PocketIC profile selects the `ic-admin` library without its CLI-only NNS
 initialization dependency. The upstream CLI keeps its default feature and binary;

@@ -17,12 +17,11 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use flate2::{Compression, read::GzDecoder, write::GzEncoder};
+use ic_host_artifacts::artifact::{ArtifactError, GzipError, decode_gzip};
 use ic_system_profiler::{Query as ProfileQuery, RunConfig, StopOptions};
 use serde_json::{Value, json};
 use std::{
     collections::{BTreeMap, HashMap, VecDeque},
-    io::{Read, Write},
     sync::{Mutex, OnceLock},
 };
 
@@ -202,13 +201,7 @@ async fn import(body: Bytes) -> Response {
 
 pub fn export_bytes(run_id: &str) -> Result<Vec<u8>, String> {
     let _scope = ic_system_profiler::scope("ic.observability.export");
-    let raw = ic_system_profiler::export_bundle(run_id)?;
-    if raw.starts_with(&[0x1f, 0x8b]) {
-        return Ok(raw);
-    }
-    let mut writer = GzEncoder::new(Vec::new(), Compression::fast());
-    writer.write_all(&raw).map_err(|e| e.to_string())?;
-    writer.finish().map_err(|e| e.to_string())
+    ic_system_profiler::export_bundle(run_id)
 }
 
 pub fn import_bytes(bytes: &[u8]) -> Result<Value, String> {
@@ -217,15 +210,12 @@ pub fn import_bytes(bytes: &[u8]) -> Result<Value, String> {
         return Err("Profile bundle exceeds the 128 MiB input budget".into());
     }
     let decoded = if bytes.starts_with(&[0x1f, 0x8b]) {
-        let mut decoded = Vec::new();
-        GzDecoder::new(bytes)
-            .take(MAX_IMPORT_BYTES as u64 + 1)
-            .read_to_end(&mut decoded)
-            .map_err(|e| format!("Invalid gzip profile bundle: {e}"))?;
-        if decoded.len() > MAX_IMPORT_BYTES {
-            return Err("Decompressed profile bundle exceeds the 128 MiB budget".into());
-        }
-        decoded
+        decode_gzip(bytes, MAX_IMPORT_BYTES, MAX_IMPORT_BYTES).map_err(|error| match error {
+            GzipError::Decode(ArtifactError::LimitExceeded { .. }) => {
+                "Decompressed profile bundle exceeds the 128 MiB budget".to_string()
+            }
+            error => format!("Invalid gzip profile bundle: {error}"),
+        })?
     } else {
         bytes.to_vec()
     };
@@ -982,3 +972,6 @@ mod tests {
         assert_eq!(values.len(), 1);
     }
 }
+
+#[cfg(test)]
+mod gzip_tests;

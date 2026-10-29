@@ -33,7 +33,6 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | Feature | Implemented contract |
 | --- | --- |
 | `blake3` | Upstream `hash`, `Hasher` and `Hash`; native/Wasm with `std`, no IC codecs, threading or memory mapping |
-| `gzip` | Native bounded gzip encode/decode and typed decoding errors from IC Tooling; consumer-owned levels and limits |
 | `principal` | Owned Principal/Account types, text/Serde and external conversions; no Candid |
 | `wire-schema` | Native-only Wire metadata for owned Principal and Account; implies principal, excludes metadata dependencies on Wasm |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |

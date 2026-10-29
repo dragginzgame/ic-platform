@@ -83,6 +83,10 @@
       {
         "path": "0007-profiler-measurement-counters.patch",
         "sha256": "56bed913832332a695651777c83e079b6d5e778731d31d125094cb77ee547498"
+      },
+      {
+        "path": "0008-host-gzip-boundary.patch",
+        "sha256": "426e61ec4646eeb4c3ded099de3a0a1d3688c94434e6ddc2424dbbb126de1a68"
       }
     ],
     "series": "patches/ic/series"

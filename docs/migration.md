@@ -291,14 +291,12 @@ native/Wasm benchmark Clippy checks pass with warnings denied before execution.
 
 ## Host gzip boundary
 
-The maintainer requested that IC Profiler access gzip through Platform rather
-than depend directly on `flate2`. Select optional `gzip` and use
-`ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`. These explicit exports
-delegate to published IC Tooling `ic-host-artifacts` 0.69.1; general compression
-implementation remains in Tooling. No backend type, default feature, Candid,
-executor, filesystem effect or automatic limit is added. The dependency and
-exports are native-only, including when `gzip` is selected on Wasm.
-
+Generic gzip belongs to IC Tooling. Platform 0.8 retires its `gzip` feature and
+`ic_platform::gzip` facade. Replace the Platform gzip dependency with a root-owned
+`ic-host-artifacts = { version = "0.69.1", default-features = false, features = ["gzip"] }`
+and import `ic_host_artifacts::artifact::{encode_gzip, decode_gzip, GzipError}`.
+Do not select a Platform IC capability for an independent recorder or codec.
+This routing change uses the same upstream codec; it adds no compression copy.
 Consumers own compression levels, compressed/decoded byte allowances and payload
 interpretation. Decoding admits one complete member and rejects trailing bytes;
 callers migrating permissive readers must qualify that admission change. Existing
@@ -475,12 +473,17 @@ and source/build receipts. Consumers select a full Platform commit and the
 `instrumented-pocket-ic` profile. This is an explicit source-provider interface,
 not a new default feature or a replacement for the published registry client.
 
-Profiler retains its IC-free recorder, reports, retention, workloads and viewer.
-Its source injection is separate from provider-owned adapters; overlaps are
-rejected and both origins enter the assembly digest. Native Cargo/Bazel build
-inputs belong here. The consumer recorder's optional native `gzip` dependency
-selects only the isolated Tooling codec facade; no IC/native feature or dependency
-back to the provider is selected. Existing upstream type identities, external
+Profiler retains its IC-free recorder, reports, retention, workloads, viewer,
+CLI and rendering. With the 0.8 provider, consumers must inject
+`profiler/server/system_profile_cli.rs` and `system_profile_render.rs` as well as
+the existing recorder/viewer sources. Their bodies and assembled paths are unchanged;
+update the paired consumer source and provider pin together. Disjoint source
+injection rejects overlaps and records both origins. IC state/capture adapters,
+patches and native Cargo/Bazel build inputs remain here. The native recorder and
+server consume Host Artifacts gzip directly; their graph needs no registry Platform
+facade. The API retains 128 MiB input/expanded limits, while the recorder retains
+128 MiB input/256 MiB expanded limits. Both accept only one complete gzip member,
+reject trailing bytes, and retain raw JSON imports and level-1 exports. Existing upstream type identities, external
 Candid bytes and cryptographic bodies remain unchanged. The native workspace
 and Bazel locks additionally supply published IC Metrics 0.17 with defaults
 disabled for consumer-owned counters. This is distinct from internal replica
