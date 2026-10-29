@@ -22,7 +22,8 @@ at `.build/ic/.git/ic-profiler-receipt.json`; check its provider/consumer identi
 before retaining it with measurements.
 
 `scripts/ic_profiler.py native-verify` owns the complete native gate: prerequisite
-and graph admission, server build, recorder tests and the five profiling tests
+and graph admission, server build, recorder and server-library product tests,
+and the five profiling tests
 against that exact server. Profiling tests serialize their whole-server recording
 windows; independent workloads must not contaminate one another's cycle totals.
 

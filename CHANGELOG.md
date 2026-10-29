@@ -12,6 +12,8 @@
 
 ### 🩹 Fixed
 
+- Include server-library product regressions in the native verification gate,
+  so image/framing failures stop release validation before installed scenarios.
 - Route server gzip imports through Platform's existing shared codec and export
   core gzip bytes unchanged. Retain API/core budgets and reject corrupt, trailing
   or concatenated members

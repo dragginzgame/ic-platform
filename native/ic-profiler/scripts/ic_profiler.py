@@ -626,6 +626,7 @@ def native_verify(root, manifest):
         os.environ.pop("SYSTEM_PROFILE_TEST_SERVER_URL", None)
         cargo_command(root, manifest, "build", [], False)
         cargo_command(root, manifest, "test", ["--", "--lib"], False)
+        cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic-server", "--lib", "profiling::"], False)
         os.environ["POCKET_IC_BIN"] = str(target / "debug/pocket-ic-server")
         cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic", "--test", "system_profiling"], False)
     finally:
