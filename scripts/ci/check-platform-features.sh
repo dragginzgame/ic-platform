@@ -37,6 +37,9 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     "$root/.tools/host/bin/jq" -r --arg target "$target" --slurpfile metadata target/feature-graphs/metadata.json \
         --slurpfile policy scripts/ci/platform-feature-policy.json \
         -f scripts/ci/platform-feature-closures.jq "$cache/selections.json" > "$cache/$target-closures.tsv"
+    "$root/.tools/host/bin/jq" -r --arg target "$target" --arg projection activation --slurpfile metadata target/feature-graphs/metadata.json \
+        --slurpfile policy scripts/ci/platform-feature-policy.json \
+        -f scripts/ci/platform-feature-closures.jq "$cache/selections.json" > "$cache/$target-activation.tsv"
     awk -f scripts/ci/platform-feature-cache-keys.awk "$cache/$target-closures.tsv" > "$mapping"
     # Resolve/download once during setup, not in every exhaustive graph query.
     # Keep all selection admissions, including those sharing an equivalent key.
@@ -59,7 +62,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
             printf 'Feature graphs: %s %s/%s complete\n' "$target" "$completed" "$queries"
         fi
     done < "$mapping"
-    awk -v target="$target" -v cache="$cache" \
+    awk -v target="$target" -v cache="$cache" -v activation="$cache/$target-activation.tsv" \
         -v gzip_source="$gzip_source" \
         -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" \
         -f scripts/ci/check-platform-feature-graphs.awk "$mapping"

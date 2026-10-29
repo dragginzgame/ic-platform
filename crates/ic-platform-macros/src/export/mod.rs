@@ -5,7 +5,7 @@ use std::fmt::Formatter;
 use syn::ext::IdentExt;
 use syn::parse::Parser;
 use syn::spanned::Spanned;
-use syn::{Error, FnArg, ItemFn, Path, ReturnType, Signature, Type, parse_str};
+use syn::{Error, ItemFn, Path, Signature, parse_str};
 
 pub(super) struct ExportAttributes<P = String> {
     pub name: Option<String>,
@@ -160,23 +160,19 @@ impl std::fmt::Display for MethodType {
 }
 
 fn get_args(method: MethodType, signature: &Signature) -> Result<Vec<Ident>, Error> {
-    // Fresh positional bindings avoid collisions with user patterns and paths.
-    let mut args = vec![];
-    for (i, arg) in signature.inputs.iter().enumerate() {
-        let ident = match arg {
-            FnArg::Receiver(r) => {
-                return Err(Error::new(
-                    r.span(),
-                    format!("#[{method}] cannot be above functions with `self` as a parameter."),
-                ));
-            }
-            FnArg::Typed(_) => format_ident!("__platform_arg_{i}", span = Span::mixed_site()),
-        };
-
-        args.push(ident);
-    }
-
-    Ok(args)
+    crate::signature::argument_types(signature, |r| {
+        Error::new(
+            r.span(),
+            format!("#[{method}] cannot be above functions with `self` as a parameter."),
+        )
+    })
+    .map(|types| {
+        types
+            .iter()
+            .enumerate()
+            .map(|(i, _)| format_ident!("__platform_arg_{i}", span = Span::mixed_site()))
+            .collect()
+    })
 }
 
 // Native object formats need portable symbols, but replacing punctuation can
@@ -336,13 +332,7 @@ impl EntryPlan {
         };
 
         // Reply admission.
-        let return_length = match &signature.output {
-            ReturnType::Default => 0,
-            ReturnType::Type(_, ty) => match ty.as_ref() {
-                Type::Tuple(tuple) => tuple.elems.len(),
-                _ => 1,
-            },
-        };
+        let return_length = crate::signature::ReturnShape::of(signature).arity();
         if method.is_lifecycle() {
             if return_length > 0 {
                 return Err(Error::new(

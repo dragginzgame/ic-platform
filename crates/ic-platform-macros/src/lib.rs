@@ -5,6 +5,7 @@ use syn::Error;
 
 mod export;
 mod external_candid;
+mod signature;
 
 fn handle_debug_and_errors<F>(
     cb: F,

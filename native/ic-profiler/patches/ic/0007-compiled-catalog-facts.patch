@@ -1,0 +1,26 @@
+diff --git a/rs/execution_environment/src/lib.rs b/rs/execution_environment/src/lib.rs
+index 67cb675..1a5488b 100644
+--- a/rs/execution_environment/src/lib.rs
++++ b/rs/execution_environment/src/lib.rs
+@@ -922,3 +922,8 @@ fn setup_execution_helper(
+         exec_env,
+     )
+ }
++
++/// Source cadence compiled into this native profiler provider; not an active configuration.
++pub const fn resource_charge_interval_rounds() -> u64 {
++    scheduler::CHARGE_INTERVAL_ROUNDS
++}
+diff --git a/rs/execution_environment/src/scheduler.rs b/rs/execution_environment/src/scheduler.rs
+index 538e61b..07edfae 100644
+--- a/rs/execution_environment/src/scheduler.rs
++++ b/rs/execution_environment/src/scheduler.rs
+@@ -77,7 +77,7 @@ const SUBNET_MESSAGES_LIMIT_FRACTION: u64 = 16;
+ /// Because it is relatively expensive to make every canister mutable just to
+ /// check whether 10 seconds have passed since it was last charged, only try to
+ /// charge canisters every 50 rounds (and/or on checkpoint rounds).
+-const CHARGE_INTERVAL_ROUNDS: u64 = 50;
++pub(crate) const CHARGE_INTERVAL_ROUNDS: u64 = 50;
+ 
+ /// Contains limits (or budget) for various resources that affect duration of
+ /// an execution round.

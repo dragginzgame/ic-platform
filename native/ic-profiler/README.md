@@ -31,6 +31,15 @@ The provider's `profiler/` sources and the consumer's `profiler/` sources merge 
 the declared IC destination. Overlapping files are rejected. Their separate
 origins and digests enter the assembly identity, together with the IC pin and all
 patch/overlay inputs. Command receipts record both provider and consumer commits.
+The paired consumer additionally supplies `server/system_profile_product/mod.rs`
+and its tests. It owns query admission, immutable images, command metadata and
+render/bundle plumbing. Native capture and scope cleanup stay in this provider.
+Keep older consumers pinned until that product source is present.
+
+Dependency updates compose in one current patch after the foundational workspace
+patches. The separate compiled-fact patch exposes the existing resource-charge
+cadence; it changes no scheduler calculation or charging behavior.
+
 Adapters stay inside the provider's IC workspace. The consumer recorder selects
 only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
 Bazel inputs. The recorder also consumes published IC Metrics 0.17 scalar

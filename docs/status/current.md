@@ -1,11 +1,52 @@
 # Current handoff
 
-## Pending 0.8.2: Host process and private Wire inputs
+## Pending 0.8.2: graph and native product cleanup
 
-PR #95 is refreshed onto source release **0.8.1**, `10c2610`. Keep released
-0.8.0 Principal/ICRC packaging, the signature Serde repair and 0.8.1's Profiler
-product ownership intact. Package versions remain 0.8.1; release/publication
-are separate maintainer actions. The normal checkout and siblings are untouched.
+PR #95 is merged at `1e3d24a`; PR #97 is refreshed onto it and released
+0.8.1. Preserve the released Principal/selected ICRC packaging and standalone
+signature Serde repair. Package versions remain 0.8.1. Release/publication are
+separate maintainer actions; the normal checkout and siblings are untouched.
+
+Shared Tooling's single-observation supplier is PR #322 at immutable
+`1e89c0d3f8cbd6b68190f34a7c6975fb1063ea52`, adopted through its exporter.
+Feature activation comes from Cargo metadata; identity/source admission remains
+explicit. Standalone proofs share preparation only. Entrypoint adapters share
+syntax facts while retaining their admission order, diagnostics and codecs.
+The 0.8 Principal tiers and selected ICRC exclusions remain enforced.
+
+Profiler #9 supplies pure query/cache/tool/render plumbing under its
+`server/system_profile_product/` directory. Platform retains HTTP protection,
+native start/stop, metrics/pricing adapters and scope cleanup. Query admission
+preserves lexical/error order. Immutable image caching retains 8 MiB/query,
+32 MiB total, 128-entry FIFO and cross-run checks. Existing Value API paths remain.
+One native dependency patch replaces four overlapping patches. The compiled
+scheduler constant supplies catalog cadence without changing charging behavior.
+Older Profiler consumers must retain their provider pin until paired adoption.
+
+The original qualified pair is provider `f5051bf` and Profiler `e9f68b6`:
+74 recorder, 26 assembled product, three catalog and five installed profiling
+tests passed. All seven dependency inputs match the prior ordered recipe's final
+bytes. Frozen Linux server SHA-256:
+`b863005e0272c82e2f94a6a3684bbdeb0652fdb8162b6aa823d1da02b2b290e1`.
+Original temporary receipts/executable were externally removed after those runs;
+results survive in the session observations and paired PR summaries. The native
+profile is unchanged by this 0.8.1 base refresh; this is reused evidence, not a
+new native-server build. Profiler #9 must select the final merged provider pin.
+
+Integration evidence is under
+`/tmp/ic-platform-merge-95-97-20261029/evidence97`. Full owner Clippy passed before
+longer checks. All 505 native/Wasm feature selections, admission/refusal fixtures,
+14 macro tests on current Rust and 1.91, five standalone Platform profiles and
+all three ic-call profiles passed native/MSRV/Wasm. The real BLAKE3 unified-feature
+refusal, 45 assembler tests, snapshot integrity, inventory, source/license guards,
+ShellCheck, formatting and links pass. The native profile matches qualified
+head `9747fa9` exactly. Previous functional hosted checks pass; refreshed hosted
+checks run asynchronously. #50's advisory failure remains unchanged. The extra strict native Clippy probe has existing findings in #98;
+it did not pass and changes no owner gate. Native macOS server, full replica
+Bazel/NNS, supplier publication and live acceptance remain separate. No size or
+speed improvement is measured.
+
+## Integrated Host process and private Wire inputs (#94)
 
 The native recipe supplies IC Wire 0.7.21 and Host process at Tooling
 `c20dbd11785c17d369651f51fa0967fbec69c57a`. Its gzip-only Platform library
@@ -21,20 +62,6 @@ external IC bytes, saved report/bundle formats and retry authority stay unchange
 The IC pin remains `ee8086a9773725fd1058832a9400297cf0990112`, with native
 Rust 1.99.0. Platform's library floor remains 1.91. Source/feature graph checks
 admit only the declared immutable Host supplier and reject foreign/mixed sources.
-
-The original supplier proof is recorded in PR #95 and Profiler's
-`artifacts/process-wire-qualification.json` at `55e08a9`: 74 recorder,
-104 native product and five installed profiling tests, focused recorder Bazel and
-real CLI lifecycle cases. Its frozen server hash is
-`2150a037ceb62a2ad46adb9a6ea9705d40973ce9a8845743113270e53771cf4a`.
-The native profile inputs are unchanged by this base refresh. Full owner Clippy,
-505 native/Wasm feature selections, admission fixtures, 45 assembler tests,
-source/license guards, formatting, inventory and links pass. Standalone signature
-verification and owned Principal pass native/MSRV/Wasm; focused gzip tests pass
-on current Rust and 1.91. Evidence is under
-`/tmp/ic-platform-merge-95-97-20261029/evidence95`. Old hosted functional checks
-pass and the retained advisory failure is #50. New hosted checks run asynchronously. Native macOS server execution, full replica Bazel/NNS,
-supplier publication and live acceptance remain separate; no size saving is claimed.
 
 ## Released 0.8.0: Principal and selected ICRC packaging
 

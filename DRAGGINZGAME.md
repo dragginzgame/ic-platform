@@ -116,16 +116,26 @@ when changing interfaces, persistence or installation/recovery behavior.
 Do not submit DFINITY PRs or depend on future DFINITY work. Use available qualified
 dependencies or own the solution under the [maintenance contract](rules/engineering-details.md#dfinity-dependencies-own-the-solution).
 
-## Repository files: no symlinks
+<a id="repository-files-no-symlinks"></a>
 
-Maintain regular repository and package files. Read the [symlink contract and
-limited exceptions](rules/engineering-details.md#repository-files-no-symlinks)
-when changing generators, packaging or installation paths.
+## Repository files: self-contained source and packages
+
+Keep source and distributions self-contained; prefer regular files. Read the
+[file and symlink contract](rules/engineering-details.md#repository-files-no-symlinks)
+for justified internal links, packaging and filesystem security boundaries.
 
 ## CLI applications
 
 Use Clap for Rust CLI parsing. Read the [CLI contract](rules/engineering-details.md#cli-applications)
 when adding or changing commands.
+
+## Metrics and logging
+
+**All our Rust crates use `ic-metrics` for metrics and `ic-logging` for logging.**
+Do not maintain custom or competing implementations. Raise capability gaps as
+issues in IC Observability and improve the canonical crates there. Read the
+[observability contract](rules/engineering-details.md#metrics-and-logging)
+when adding, changing or reviewing metrics and logging.
 
 ## IC application encoding
 
@@ -186,6 +196,11 @@ when changing platform behavior or CI. Routine CI cancels superseded runs while
 preserving required hosts on the retained run.
 
 ## Feedback and handoff
+
+Shared dependency defects and advisories have one remediation issue at the
+supplying owner. Do not create a waiting issue in every consumer; separate
+consumer issues need distinct actionable work. Apply the
+[dependency finding rule](rules/engineering-details.md#shared-dependency-findings).
 
 Use owning GitHub issues for follow-up; no parallel local trackers. CI/issue
 maintenance and scheduled work run only when activated. Read [feedback details](rules/engineering-details.md#feedback-and-handoff)

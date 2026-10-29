@@ -73,24 +73,16 @@
         "sha256": "8e6026cdf3c0c5c3d9d2cc03842ab812dfd94919f3b4cf9af6d6cfa88fb51bfd"
       },
       {
-        "path": "0005-platform-gzip-boundary.patch",
-        "sha256": "ae2b057548e352f6b4ca802eba95a09a706c5c0db0dd36050ac78b31c21e0adf"
+        "path": "0005-native-host-dependencies.patch",
+        "sha256": "032e67d62ff05d9b5c35178ea2771fc04e2fc234b58029c7ced6406706ac3a77"
       },
       {
         "path": "0006-profiler-request-admission.patch",
         "sha256": "3395eb0c99c94255a99061a25a08ba7d96751058cdd35bf7e45ce2f2cbe2f0f6"
       },
       {
-        "path": "0007-profiler-measurement-counters.patch",
-        "sha256": "56bed913832332a695651777c83e079b6d5e778731d31d125094cb77ee547498"
-      },
-      {
-        "path": "0008-profiler-product-inputs.patch",
-        "sha256": "a1f38dfbabdca3891968f90ccd7f9549af00930849172648f2dcc36ff72eb99b"
-      },
-      {
-        "path": "0009-profiler-process-wire-inputs.patch",
-        "sha256": "e726acae59636eb9786aea4a5d8580d37c3d41da8e98003e663e050fdc417211"
+        "path": "0007-compiled-catalog-facts.patch",
+        "sha256": "ae7d10eff1a0f4cab0c9d96d9de384f97e83d52de8f6d51754921c3aedbd1d34"
       }
     ],
     "series": "patches/ic/series"
