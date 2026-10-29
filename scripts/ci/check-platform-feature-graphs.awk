@@ -83,7 +83,10 @@ function reject(reason) {
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") {
-            if (!gzip || !registry) reject("unselected or unqualified host gzip codec")
+            # Profiler 0.10 qualifies this one supplying Host family until publication.
+            host_supplier = "ic-host-artifacts v0.69.13 (https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11)"
+            if (!gzip || !(registry || line == host_supplier || line == host_supplier " (*)"))
+                reject("unselected or unqualified host gzip codec")
             found_gzip = 1
         }
         if (name == "blake3") {

@@ -200,3 +200,22 @@ for package in ic-wire ic-wire-derive; do
         echo 'Wasm graph admitted host Wire metadata' >&2; exit 1
     fi
 done
+
+# Preserve registry qualification and admit only the paired immutable Host supplier.
+for target in native wasm32-unknown-unknown; do
+    for selection in none gzip; do
+        for source in registry supplier wrong; do
+            package='ic-host-artifacts v0.69.13'
+            case "$source" in
+                supplier) package="$package (https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11)" ;;
+                wrong) package="$package (/unqualified/source)" ;;
+            esac
+            printf '%s\n' "$package" > "$fixture/$target-host.txt"
+            printf '%s\thost\n' "$selection" > "$fixture/mapping"
+            actual=reject expected=reject
+            if admit -v target="$target" -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
+            if [[ "$target" == native && "$selection" == gzip && "$source" != wrong ]]; then expected=pass; fi
+            [[ "$actual" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
+        done
+    done
+done
