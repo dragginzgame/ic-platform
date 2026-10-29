@@ -13,25 +13,21 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 [features]
 default = []
 blake3 = ["dep:blake3"]
-principal = [
-    "dep:crc32fast",
-    "dep:data-encoding",
-    "dep:ic_principal",
-    "dep:serde",
-    "dep:thiserror",
-]
-agent = ["principal", "dep:ic-agent"]
+principal = ["dep:crc32fast", "dep:data-encoding", "dep:serde", "dep:thiserror"]
+principal-external = ["principal", "dep:ic_principal"]
+principal-self-authenticating = ["principal-external", "ic_principal/self_authenticating"]
+agent = ["principal-external", "dep:ic-agent"]
 bls = ["dep:ic-verify-bls-signature"]
-candid = ["principal", "dep:candid", "candid/bignum"]
+candid = ["principal-external", "dep:candid", "candid/bignum"]
 candid-endpoint = ["cdk", "candid"]
-candid-parser = ["principal", "dep:candid_parser"]
+candid-parser = ["principal-external", "dep:candid_parser"]
 candid-service = ["candid", "candid/printer"]
 cmc-types = ["candid"]
 icp-ledger-types = ["candid"]
 cycles-ledger-types = ["candid"]
 nns-registry-types = ["candid"]
 certified-assets-types = ["candid"]
-canister-sig-creation = ["principal", "dep:ic-certification", "dep:sha2"]
+canister-sig-creation = ["principal-external", "dep:ic-certification", "dep:sha2"]
 cdk = ["runtime", "dep:ic-platform-macros"]
 runtime = ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserror"]
 certification = ["dep:ic-certification"]
@@ -40,16 +36,27 @@ ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["dep:ic-cdk-executor"]
 gzip = ["dep:ic-host-artifacts"]
 ic0 = ["dep:ic0"]
-icrc-ledger-types = ["principal", "dep:icrc-ledger-types", "dep:candid"]
-management-canister-types = ["principal", "dep:ic-management-canister-types"]
+icrc-ledger-types = [
+    "principal-external",
+    "dep:candid",
+    "candid/bignum",
+    "candid/serde_bytes",
+    "dep:hex",
+    "dep:num-bigint",
+    "dep:num-traits",
+    "dep:serde_bytes",
+    "dep:sha2",
+]
+management-canister-types = ["principal-external", "dep:ic-management-canister-types"]
 signature-verification = [
     "canister-sig-creation",
+    "ic_principal/serde",
     "dep:ic-verify-bls-signature",
     "dep:serde_bytes",
     "dep:serde_cbor",
 ]
-pocket-ic = ["principal", "dep:pocket-ic"]
-secp256k1 = ["principal", "dep:ic-secp256k1"]
+pocket-ic = ["principal-external", "dep:pocket-ic"]
+secp256k1 = ["principal-external", "dep:ic-secp256k1"]
 stable-structures = ["dep:ic-stable-structures"]
 wire-schema = ["principal", "dep:ic-wire-metadata", "dep:serde_json"]
 
@@ -60,6 +67,7 @@ crc32fast = { workspace = true, optional = true }
 curve25519-dalek = { workspace = true, optional = true }
 data-encoding = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true, optional = true }
+hex = { workspace = true, optional = true }
 ic-cdk-executor = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
@@ -68,8 +76,9 @@ ic-stable-structures = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 ic0 = { workspace = true, optional = true }
 ic_principal = { workspace = true, optional = true }
-icrc-ledger-types = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
+num-bigint = { workspace = true, optional = true }
+num-traits = { workspace = true, optional = true }
 pin-project-lite = { workspace = true, optional = true }
 serde = { workspace = true, optional = true, features = ["alloc"] }
 serde_bytes = { workspace = true, optional = true }
@@ -226,7 +235,17 @@ required-features = ["principal"]
 [[test]]
 name = "parser_properties"
 path = "tests/parser_properties.rs"
-required-features = ["principal"]
+required-features = ["principal-external"]
+
+[[test]]
+name = "principal_external_consumer"
+path = "tests/principal_external_consumer.rs"
+required-features = ["principal-external"]
+
+[[test]]
+name = "principal_self_authenticating_consumer"
+path = "tests/principal_self_authenticating_consumer.rs"
+required-features = ["principal-self-authenticating"]
 
 [[test]]
 name = "stable_structures_consumer"

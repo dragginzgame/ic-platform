@@ -2,7 +2,9 @@
 //!
 //! Adapted from ic_principal 0.1.5 under Apache-2.0; see NOTICE.md.
 //! No Candid marker handling or generic range stepping is implemented.
-//! Required Candid DTOs must use [ExternalPrincipal], converting at the boundary:
+//! `principal-external` adds registry Principal conversions; `principal-self-authenticating`
+//! separately selects upstream public-key hashing. Required Candid DTOs use the
+//! external Principal, converting at the boundary:
 //!
 //! ```compile_fail
 //! ic_platform::candid::contract::encode_one(ic_platform::Principal::anonymous()).unwrap();
@@ -104,6 +106,7 @@ impl Principal {
     }
 
     /// Construct a self-authenticating ID from public key
+    #[cfg(feature = "principal-self-authenticating")]
     pub fn self_authenticating<P: AsRef<[u8]>>(public_key: P) -> Self {
         ExternalPrincipal::self_authenticating(public_key.as_ref()).into()
     }
@@ -349,15 +352,19 @@ impl<'de> serde::Deserialize<'de> for Principal {
 
 /// Original registry identity required by external IC clients and DTOs.
 /// Convert explicitly at the boundary; owned application payloads use [Principal].
+#[cfg(feature = "principal-external")]
 pub use ic_principal::Principal as ExternalPrincipal;
 /// Original parse errors for the explicitly external principal identity.
+#[cfg(feature = "principal-external")]
 pub use ic_principal::PrincipalError as ExternalPrincipalError;
 
+#[cfg(feature = "principal-external")]
 impl From<ExternalPrincipal> for Principal {
     fn from(value: ExternalPrincipal) -> Self {
         Self::from_slice(value.as_slice())
     }
 }
+#[cfg(feature = "principal-external")]
 impl From<Principal> for ExternalPrincipal {
     fn from(value: Principal) -> Self {
         Self::from_slice(value.as_slice())
