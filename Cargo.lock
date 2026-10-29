@@ -1423,9 +1423,8 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.69.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47dac0771a6bec5b86890d551a91c7c3d23696ff1d496d22deb1a31a852c4dd7"
+version = "0.69.13"
+source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
 dependencies = [
  "flate2",
  "sha2 0.10.9",
