@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.5]
+## [0.7.6]
 
 ### 🔧 Changed
 
@@ -8,6 +8,8 @@
   consumer-owned IC Metrics counters, preserving the pinned IC source and
   keeping the measurement crate distinct from the replica's internal metrics
   ([Profiler #2](https://github.com/dragginzgame/ic-profiler/issues/2)).
+
+## [0.7.5]
 
 ### 🩹 Fixed
 
