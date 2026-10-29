@@ -14,7 +14,8 @@ Read [the current handoff](docs/status/current.md), then
   call implementation and executor. It owns method/argument custody, not codecs,
   retries, Relay delivery, timers, domain endpoints or application policy.
 - Keep the low-level consumer boundary under `crates/ic-platform`. Add no blanket upstream
-  re-exports, automatic resource limits or alternative executor implementation.
+  re-exports, automatic resource limits beyond the authorized Candid ceiling below,
+  or alternative executor implementation.
   Explicit upstream-coupled exports belong to the documented contract.
 - No default features. Executor-only builds must remain Candid-free; host parser
   features must never be enabled by canister/runtime features.
@@ -188,6 +189,20 @@ absent versus explicit zero fields during serialization and external conversion.
 Retain Apache provenance and the existing external ledger DTO identity. No Candid,
 storage implementation, cryptographic account-identifier derivation or application
 subaccount allocation policy belongs in the owned account surface.
+
+## External Candid nesting admission
+
+The maintainer superseded #73's draft opt-in policy with one fixed admission rule:
+Platform's bounded Candid decoders and external endpoint adapters reject more than
+16 constructed wire levels before upstream decoding. This is the explicitly
+authorized resource-policy exception; keep existing byte/work/header/type budgets,
+function signatures and closed error variants. Cap admission work using the
+saturating sum of existing decoding/skipping quotas, with no new policy object or
+macro option. Inspect unused type definitions and skipped values, retain bytes,
+and fail closed on uninspectable forms. Low-level upstream APIs retain their
+behavior; callers may run the same check explicitly. This is a bounded framing
+walk, not a Candid fork or universal stack-safety claim for arbitrary trusted Rust
+schemas/custom visitors. Keep installed Wasm evidence at 16/17 and the original trap.
 
 ## Transport and codecs
 

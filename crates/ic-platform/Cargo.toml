@@ -164,6 +164,11 @@ path = "tests/candid_consumer.rs"
 required-features = ["candid"]
 
 [[test]]
+name = "nesting_consumer"
+path = "tests/nesting_consumer.rs"
+required-features = ["candid"]
+
+[[test]]
 name = "service_consumer"
 path = "tests/service_consumer.rs"
 required-features = ["candid-service"]

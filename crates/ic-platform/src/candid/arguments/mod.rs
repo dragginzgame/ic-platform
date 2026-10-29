@@ -1,5 +1,5 @@
 //! External Candid argument admission without a runtime or implicit empty request.
-use super::{DecodeError, DecodeLimits};
+use super::{DecodeError, DecodeLimits, nesting::NestingError};
 use candid::utils::ArgumentDecoder;
 use std::{error::Error, fmt};
 
@@ -13,7 +13,7 @@ pub enum EmptyArgs {
 }
 
 /// Artifact-selected argument byte, work, type-table and header allowances.
-/// These are not an effective Wasm recursion-depth limit; see issue #73.
+/// Decoding also rejects wire nesting beyond 16 constructed levels.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ArgumentLimits {
     /// Maximum original envelope bytes, checked before reading message data.
@@ -57,6 +57,15 @@ impl Error for ArgumentDecodeError {
         match self {
             Self::TooLarge { .. } => None,
             Self::Candid(error) => Some(error),
+        }
+    }
+}
+impl ArgumentDecodeError {
+    /// Recover the typed wire-admission refusal through the existing error variant.
+    pub fn nesting_error(&self) -> Option<&NestingError> {
+        match self {
+            Self::Candid(candid::Error::Custom(error)) => error.downcast_ref(),
+            _ => None,
         }
     }
 }

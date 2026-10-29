@@ -5,7 +5,7 @@
 //! adapters delegate entrypoints, async contexts and replies to the existing
 //! generator/executor. Invalid arguments and encoding failures trap; access guards
 //! retain their ordered rejection semantics. No parser or retry owner is added.
-//! The unresolved Wasm nesting limitation in issue #73 remains applicable.
+//! Arguments deeper than 16 constructed levels are refused before Candid runs.
 pub use super::arguments::{ArgumentDecodeError, ArgumentLimits, EmptyArgs};
 pub use ic_platform_macros::{candid_query as query, candid_update as update};
 

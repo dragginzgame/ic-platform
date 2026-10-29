@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.5]
+## [0.7.6]
 
 ### 🩹 Fixed
 
@@ -9,11 +9,23 @@
   canister-ID parsing import. Qualify the assembled PocketIC server as well as
   the isolated admission fixture.
 
+## [0.7.5] - 2026-10-29
+
 ### ➕ Added
 
 - Add the shared ICRC-10 `SupportedStandard` external record under the optional
   ledger-types surface, letting Canic's opt-in adapter reuse the named `name`/`url`
   contract without maintaining another Candid DTO. No endpoint is mounted automatically.
+
+### 🩹 Fixed
+
+- Reject external Candid nested beyond 16 constructed levels in Platform's bounded
+  decoders and endpoint adapters before upstream decoding. Include unused type
+  definitions and skipped values. Reuse existing work budgets; no additional
+  policy object, limit configuration or macro option is needed. Preserve external
+  bytes, API signatures and caller arity policies. This bounds wire nesting
+  without forking Candid or guaranteeing arbitrary custom visitors
+  ([#73](https://github.com/dragginzgame/ic-platform/issues/73)).
 
 ## [0.7.4] - 2026-10-28
 

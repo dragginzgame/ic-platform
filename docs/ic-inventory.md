@@ -24,6 +24,15 @@ standards and consent policy; its [integration issue #706](https://github.com/dr
 tracks adoption after supplying publication. No consumer adoption or size saving
 is inferred from this export.
 
+Pending 0.7.5 also adds a fixed 16-level admission ceiling in bounded Candid
+helpers, protocol decoders and external endpoint adapters, plus
+`candid::nesting::{MAX_DEPTH, NestingError, check}` and typed error accessors.
+Platform owns this bounded nonrecursive framing admission; Candid still owns
+decoding, subtyping and external identities. Work admission uses existing caller
+quotas; there is no separate policy object or macro option. No dependency/feature
+is added. Default, executor and runtime isolation remains unchanged. See the
+[bounded wire contract](migration.md#external-candid-nesting-qualification-73).
+
 Source release 0.7.4 adds `candid-endpoint` for explicitly external query/update codec
 adapters over the existing generator/executor. It selects `cdk` and `candid`,
 never a parser or service printer. Native DID generation selects `candid-service`

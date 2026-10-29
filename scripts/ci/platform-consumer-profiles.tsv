@@ -4,6 +4,7 @@ ecdsa	ecdsa	ecdsa_consumer	-	check
 blake3	blake3	blake3_consumer	-	check
 ed25519	ed25519	ed25519_consumer	-	check
 candid	candid	candid_consumer	candid_malformed.rs	check
+nesting	candid	nesting_consumer	-	check
 candid-service	candid-service	service_consumer	-	check
 external-candid	cdk,candid-service	external_candid_consumer	-	build
 certification	certification	certification_consumer	-	check

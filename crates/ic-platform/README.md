@@ -12,7 +12,8 @@ reply decoding with caller-selected arity. Cycles provider block codecs require
 both `cycles-ledger-types` and `icrc-ledger-types` to preserve legacy `Nat64`.
 Verify registry availability before downstream adoption; see the
 [migration and qualification guide](../../docs/migration.md#external-endpoint-and-protocol-codecs-78-79).
-The unresolved Wasm nesting limitation in #73 applies to these codecs too.
+Bounded external codecs automatically reject more than 16 constructed wire levels
+before Candid runs (see #73).
 
 Enable `gzip` for native `ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`.
 These are IC Tooling's existing bounded codecs, without backend types or a second
@@ -134,6 +135,16 @@ decode_exactly_one}` preserves Testkit's explicit limits and typed failures.
 `decode_exactly_one` requires one actual wire argument. All select compact Candid
 diagnostics, which are not a redaction guarantee. Callers retain raw bytes,
 aggregate accounting, trust, resource policy and domain errors.
+
+The bounded helpers, protocol decoders and external endpoint adapters reject more
+than **16 constructed wire levels** automatically. No extra limit object or macro
+option is needed. The check includes unused type entries and skipped values; large
+byte blobs remain valid. Existing decoding/skipping quotas also cap admission
+work, without changing the quotas subsequently passed to Candid. Typed failures
+are available through `error.nesting_error()`. Low-level upstream APIs remain
+unchanged: staged callers can run `candid::nesting::check(&bytes, limits)` first.
+This bounds wire nesting, not arbitrary trusted expected Rust schemas/custom
+visitors. See the [contract](../../docs/migration.md#external-candid-nesting-qualification-73).
 
 Use `ic_platform::candid::contract` for Candid DTO derives and encoding. Add
 `#[candid_path("ic_platform::candid::contract")]` to derived types, and
