@@ -1,5 +1,5 @@
 diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
-index 8543761..cc2607a 100644
+index 8543761..c8e5e2d 100644
 --- a/Cargo.Bazel.json.lock
 +++ b/Cargo.Bazel.json.lock
 @@ -3,7 +3,7 @@
@@ -7,7 +7,7 @@ index 8543761..cc2607a 100644
      "ic-wasm 0.11.1"
    ],
 -  "checksum": "970c7413cb654c6129a3266411c9e94bccdbe93d978af80d993e280271a1b16c",
-+  "checksum": "352163a334c4e14adec0b6ada14a9518c0b2a1b008515e2cb64a5861dd204941",
++  "checksum": "08d96db29a422790fc3a94c7ee6c4afe9e1600a800398ff48cc2ac036e97bb83",
    "conditions": {
      "aarch64-apple-darwin": [
        "aarch64-apple-darwin"
@@ -348,6 +348,15 @@ index 8543761..cc2607a 100644
                "target": "libc"
              }
            ],
+@@ -22415,7 +22460,7 @@
+       "version": "0.14.7"
+     },
+     "getrandom 0.2.10": {
+-      "additive_build_file_content": "load(\"@rules_rust//rust:defs.bzl\", \"rust_library\")\n\nrust_library(\n    name = \"getrandom_no_wasm_bindgen\",\n    srcs = glob(\n        allow_empty = True,\n        include = [\"**/*.rs\"],\n    ),\n    compile_data = glob(\n        allow_empty = True,\n        include = [\"**\"],\n        exclude = [\n            \"**/* *\",\n            \".tmp_git_root/**/*\",\n            \"BUILD\",\n            \"BUILD.bazel\",\n            \"WORKSPACE\",\n            \"WORKSPACE.bazel\",\n        ],\n    ),\n    crate_features = [\"custom\", \"std\"],\n    crate_name = \"getrandom\",\n    crate_root = \"src/lib.rs\",\n    deps = [\n        \"@crate_index__cfg-if-1.0.0//:cfg_if\",\n    ] + select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"//conditions:default\": [],\n    }),\n    edition = \"2018\",\n    rustc_env_files = [\":cargo_toml_env_vars\"],\n    rustc_flags = [\"--cap-lints=allow\"],\n    tags = [\"cargo-bazel\", \"crate-name=getrandom\", \"manual\", \"noclippy\", \"norustfmt\"],\n    target_compatible_with = select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [],\n        \"//conditions:default\": [\"@platforms//:incompatible\"],\n    }),\n    version = \"0.2.10\",\n    visibility = [\"//visibility:public\"],\n)\n",
++      "additive_build_file_content": "load(\"@rules_rust//rust:defs.bzl\", \"rust_library\")\n\nrust_library(\n    name = \"getrandom_no_wasm_bindgen\",\n    srcs = glob(\n        allow_empty = True,\n        include = [\"**/*.rs\"],\n    ),\n    compile_data = glob(\n        allow_empty = True,\n        include = [\"**\"],\n        exclude = [\n            \"**/* *\",\n            \".tmp_git_root/**/*\",\n            \"BUILD\",\n            \"BUILD.bazel\",\n            \"WORKSPACE\",\n            \"WORKSPACE.bazel\",\n        ],\n    ),\n    crate_features = [\"custom\", \"std\"],\n    crate_name = \"getrandom\",\n    crate_root = \"src/lib.rs\",\n    deps = [\n        \"@crate_index__cfg-if-1.0.0//:cfg_if\",\n    ] + select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"//conditions:default\": [],\n    }),\n    edition = \"2018\",\n    rustc_env_files = [\":cargo_toml_env_vars\"],\n    rustc_flags = [\"--cap-lints=allow\"],\n    tags = [\"cargo-bazel\", \"crate-name=getrandom\", \"manual\", \"noclippy\", \"norustfmt\"],\n    target_compatible_with = select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [],\n        \"//conditions:default\": [\"@platforms//:incompatible\"],\n    }),\n    version = \"0.2.10\",\n    visibility = [\"//visibility:public\"],\n)\n",
+       "common_attrs": {
+         "crate_features": {
+           "common": [
 @@ -22446,7 +22491,7 @@
              ],
              "cfg(unix)": [
@@ -1645,7 +1654,7 @@ index 86e655e..230962f 100644
  actix-web = { version = "4.9.0", default-features = false, features = [
      "macros",
 diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
-index 06673e2..96fdda1 100644
+index 06673e2..6aebc3c 100644
 --- a/bazel/rust.MODULE.bazel
 +++ b/bazel/rust.MODULE.bazel
 @@ -35,7 +35,14 @@ crate.spec(
@@ -1664,6 +1673,22 @@ index 06673e2..96fdda1 100644
  )
  # Build any crate with `@crate_index//:mycrate`
  # Use particular version with `@crate_index//:mycrate-3.14.16`
+@@ -549,11 +556,11 @@ rust_library(
+     deps = [
+         "@crate_index__cfg-if-1.0.0//:cfg_if",
+     ] + select({
+-        "@rules_rust//rust/platform:aarch64-apple-darwin": ["@crate_index__libc-0.2.186//:libc"],
+-        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": ["@crate_index__libc-0.2.186//:libc"],
++        "@rules_rust//rust/platform:aarch64-apple-darwin": ["@crate_index__libc-0.2.191//:libc"],
++        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": ["@crate_index__libc-0.2.191//:libc"],
+         "@rules_rust//rust/platform:wasm32-unknown-unknown": [],
+-        "@rules_rust//rust/platform:x86_64-apple-darwin": ["@crate_index__libc-0.2.186//:libc"],
+-        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": ["@crate_index__libc-0.2.186//:libc"],
++        "@rules_rust//rust/platform:x86_64-apple-darwin": ["@crate_index__libc-0.2.191//:libc"],
++        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": ["@crate_index__libc-0.2.191//:libc"],
+         "//conditions:default": [],
+     }),
+     edition = "2018",
 diff --git a/rs/pocket_ic_server/BUILD.bazel b/rs/pocket_ic_server/BUILD.bazel
 index b4d437a..b5a84dd 100644
 --- a/rs/pocket_ic_server/BUILD.bazel

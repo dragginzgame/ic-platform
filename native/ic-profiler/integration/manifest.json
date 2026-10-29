@@ -90,7 +90,7 @@
       },
       {
         "path": "0009-host-process-ownership.patch",
-        "sha256": "82822ead04d430cd222bc507354bd7282579ba804157fffcd9d0b0db5bf093f6"
+        "sha256": "0a4a59e31fd2c0f88b2be76431670f8af5a5a843033c5e2950aec57282bf830c"
       }
     ],
     "series": "patches/ic/series"
