@@ -12,6 +12,8 @@
 
 ### 🩹 Fixed
 
+- Admit the manifest-selected immutable Host gzip supplier in feature checks,
+  retaining foreign/path identity, mixed-source and Wasm rejection.
 - Include server-library product regressions in the native verification gate,
   so image/framing failures stop release validation before installed scenarios.
 - Route server gzip imports through Platform's existing shared codec and export

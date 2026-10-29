@@ -14,6 +14,15 @@ cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/met
     -f scripts/ci/platform-feature-contract.jq target/feature-graphs/metadata.json >/dev/null || exit 1
 
 generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform") | .version' target/feature-graphs/metadata.json)"
+# Admit the manifest's immutable Host supplier, including the reviewed process
+# adoption source. Paths, branches and foreign Git sources are not that contract.
+gzip_source="$("$root/.tools/host/bin/jq" -er '
+    .packages[] | select(.name == "ic-platform") | .dependencies[] |
+    select(.name == "ic-host-artifacts") | .source |
+    if . == "registry+https://github.com/rust-lang/crates.io-index" then ""
+    else capture("^git\\+(?<url>https://github.com/dragginzgame/ic-tooling\\.git\\?rev=(?<revision>[0-9a-f]{40}))$") |
+        "(\(.url)#\(.revision[0:8]))"
+    end' target/feature-graphs/metadata.json)"
 
 # Cargo tree prints canonical package names even for renamed deps.
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
@@ -54,6 +63,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         fi
     done < "$mapping"
     awk -v target="$target" -v cache="$cache" -v activation="$cache/$target-activation.tsv" \
+        -v gzip_source="$gzip_source" \
         -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" \
         -f scripts/ci/check-platform-feature-graphs.awk "$mapping"
 done
