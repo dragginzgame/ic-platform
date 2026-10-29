@@ -2,6 +2,13 @@
 
 ## [0.7.5]
 
+### 🔧 Changed
+
+- Supply the native profiler workspace and Bazel dependency wiring for
+  consumer-owned IC Metrics counters, preserving the pinned IC source and
+  keeping the measurement crate distinct from the replica's internal metrics
+  ([Profiler #2](https://github.com/dragginzgame/ic-profiler/issues/2)).
+
 ### 🩹 Fixed
 
 - Restore native profiler compilation after shared HTTP admission extraction:

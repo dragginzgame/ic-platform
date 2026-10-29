@@ -79,6 +79,10 @@
       {
         "path": "0006-profiler-request-admission.patch",
         "sha256": "3395eb0c99c94255a99061a25a08ba7d96751058cdd35bf7e45ce2f2cbe2f0f6"
+      },
+      {
+        "path": "0007-profiler-measurement-counters.patch",
+        "sha256": "56bed913832332a695651777c83e079b6d5e778731d31d125094cb77ee547498"
       }
     ],
     "series": "patches/ic/series"

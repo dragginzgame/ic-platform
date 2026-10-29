@@ -32,7 +32,10 @@ origins and digests enter the assembly identity, together with the IC pin and al
 patch/overlay inputs. Command receipts record both provider and consumer commits.
 Adapters stay inside the provider's IC workspace. The consumer recorder selects
 only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
-Bazel inputs. That facade delegates to published IC Tooling and has no dependency
+Bazel inputs. The recorder also consumes published IC Metrics 0.17 scalar
+arithmetic; this provider owns its native workspace and Bazel locks, distinct
+from the IC workspace's internal `ic-metrics` package. Neither measurement
+counters nor the gzip facade own charging policy. That facade delegates to published IC Tooling and has no dependency
 back to this workspace, PocketIC or the native provider. Compression implementation
 stays in Tooling; the consumer retains levels, import limits and bundle semantics.
 
