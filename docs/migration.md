@@ -183,7 +183,7 @@ the original fingerprints without changing their recorded hashes.
 
 ## External Candid nesting qualification (#73)
 
-Pending **0.7.5** applies one fixed rule: bounded Platform decoders reject Candid
+Source release **0.7.5** applies one fixed rule: bounded Platform decoders reject Candid
 nested beyond **16 constructed levels** before upstream header construction or
 decoding. Exactly 16 levels are allowed. Scalars have depth zero; an empty
 container still uses one level. This applies to `decode_one`, `decode_args`,
