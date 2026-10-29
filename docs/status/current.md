@@ -1,81 +1,127 @@
 # Current handoff
 
-## Pending 0.8.0: Host and Profiler ownership
+## Pending 0.7.7: paired Profiler product source contract
 
-This isolated follow-on starts from #92 (`c7ff4d5`), over remote main `26ad783`.
-Own package versions remain 0.7.6. The normal checkout and sibling work remain
-untouched; release/publication belong to the maintainer. Pending notes remain
-0.8.0 for the already authorized public gzip/native-input cut.
+Main `26ad783` integrates #88 and #89. This paired change returns Profiler's
+CLI/query renderer to its consumer source tree (#90) and delegates common PNG
+encoding and sparse range mechanics to that same product owner (Profiler #4).
+The provider keeps native state/trace access, HTTP admission, IC pin, patched
+client and build inputs. Its library API and cryptographic source stay unchanged.
+Older consumers must retain their prior provider pin until supplying the product
+files listed in `native/ic-profiler/README.md`; no duplicate compatibility owner
+is retained. Current native pins remain exact full Git identities.
 
-[#94 — Supply Host process dependencies for Profiler ownership adoption](https://github.com/dragginzgame/ic-platform/issues/94)
-supplies matching native Cargo/Bazel inputs for Host Process observations and
-workload mechanics. The implementation owner is
-[Tooling #264](https://github.com/dragginzgame/ic-tooling/issues/264), supplied by
-[Tooling #265](https://github.com/dragginzgame/ic-tooling/pull/265) at immutable
-`c20dbd11785c17d369651f51fa0967fbec69c57a`. Artifacts/FS/Process use one Git source
-family until a supplying registry release exists. No local Cargo patch is
-required. Normal resolvers add the required packages and update libc from
-0.2.186 to 0.2.191 to meet the supplier minimum; no blanket upgrade is performed.
-IC source `ee8086a` and its Rust 1.99.0 toolchain remain unchanged.
+The maintainer explicitly chose to keep the Platform gzip boundary instead of
+#91's proposed direct Host migration. Server imports now use that facade, and
+exports return the unchanged core gzip bytes (Profiler #1). API input/decoded
+limits remain 128 MiB and the core's decoded limit remains 256 MiB. Strict framing
+rejects CRC/length corruption, truncation, concatenated members and trailing data.
+PNG remains zlib and keeps its separate snapshot budget and layout policies.
 
-Profiler projects Host facts into existing capture DTOs and keeps root/creation
-identity admission, cadence, aggregation, missingness, retention and reports.
-Final sampling remains before reaping. Host owns raw procfs/libproc/Mach facts,
-clock/thread/affinity observations, child-list completeness and explicit launch
-and custody operations. The CLI retains its launch gate/argv/stdin, 500 ms-or-exit
-grace, synchronous reap, keep-command-running choice and exit-status JSON text.
-Platform retains IC capture/state adapters and native build inputs; no new Rust
-facade feature or Host export is introduced.
+Published Metrics 0.17.2, Platform 0.7.6 and Host Artifacts 0.69.12 are selected
+in the paired Cargo/Bazel native inputs. Profiler independently adopts those
+registry releases, release editor 0.69.12 and Shared Tooling 0.27.7. It still
+selects only Platform gzip; Metrics adds no IC runtime edge or charging authority.
 
-The consumer follow-on to #3 is tracked by
-[Profiler #6](https://github.com/dragginzgame/ic-profiler/issues/6). It does not copy
-the normal Profiler checkout's concurrent rendering/Shared Tooling work.
+Full owner/consumer Clippy precedes the focused checks. The 44 assembler fixtures
+pass. PNG fixtures compare both former encoders before extraction; caller tests
+cover independent pixels/CRC, exact source budgets, sparse high addresses and
+range-admission differences. Final server/recorder/installed-scenario evidence and
+its actual executable hash are recorded by the paired Profiler qualification and
+delivery PR; historical receipts do not qualify a changed provider or binary.
+Native macOS, full replica Bazel and NNS genesis remain separate.
 
-## Qualification
+#73 is delivered in 0.7.5; #87 closed as already integrated. #50 remains set aside
+until an available supplying correction exists, with its advisory check intact.
 
-Evidence: `/tmp/profiler-host-ownership-20261029`. Full Platform Clippy and
-independent Profiler Clippy pass before longer checks. The changed recorder's
-72 tests pass; its former pure parser case moved to Host. Host's 24 focused child
-and four raw/native observation tests pass at Rust 1.91; strict Rustdoc, format
-and links pass. Extra recorder Rust 1.91 probing fails on pre-existing unstable
-Atomic try_update calls; Profiler already selects Rust 1.99.0 and that selected
-compiler remains its supported qualification here. No atomic/report policy change
-is included. Platform's published Rust 1.91/default/Wasm contracts are unchanged.
+## Released 0.7.6 cleanup and qualification
 
-Cargo/Bazel locks are resolver-generated; an initial workspace-only Bazel repin
-refused the old locked libc, then targeted libc repinning succeeded. Failures and
-artifacts remain. Paired Platform `b4de0d4` and clean Profiler `a238580` pass actual assembly, native
-graph admission and the Rust 1.99.0 server build. The corrected native recorder
-Bazel target passes all 72 tests. Native Cargo passes 72 recorder, three CLI and
-12 API/gzip tests. Three real CLI scenarios preserve natural-exit text, final
-sampling before reaping, default cleanup and keep-running behavior. All five
-installed profiling scenarios pass against frozen server SHA-256:
-`72ae33520917c0a65f0f897aa241c3f2ea3c9d23bacf9b3dde5d8556df13360d`.
-Receipts bind those exact inputs and executable; the later handoff-only commit
-does not change qualified source. Deliveries: [Platform #95](https://github.com/dragginzgame/ic-platform/pull/95),
-[Profiler #7](https://github.com/dragginzgame/ic-profiler/pull/7) and Tooling #265.
-The first Bazel test exposed an upstream annotation still naming libc 0.2.186;
-its generator input and generated lock are corrected, with the failed log kept.
-Native macOS, full replica Bazel/NNS and live provider acceptance remain separate.
-No performance or Wasm-size saving is measured for this native ownership move.
+External endpoint adapters now pass parsed paths/functions to the existing
+generator rather than stringify/reparse them. Single-result and protocol replies
+share decoder setup/finalization while retaining their separate arity decisions.
+The fixed 16-level Candid guard and protected crypto/callback sources are unchanged.
 
-## Retained prior work and safety boundaries
+Native profiler adapters share JSON argument conversion, capture configuration
+and image envelopes. Responses carry their encoding class from the producing
+adapter; stop settings are read under one scope lock. Configuration key discovery
+uses the existing runtime producer instead of parsing Rust macro invocations.
+This deliberately narrows the proposed metadata redesign: unit interpretation
+stays profiler-owned; no new capture metadata contract or replica patch is added.
+The batch also repairs the assembled admission-module path and principal trait
+import exposed by compiling the real native sources.
 
-#92/#3 independently carry the qualified gzip/product-source move. Their prior
-server SHA-256 is `cc1fe0e7078c79b4c255ade7e06bb887e8412c05539d9296c48ad976ab16caf0`,
-with evidence in `/tmp/platform-ownership-20261029`; it does not qualify this new
-Host/libc graph. Integrate supplier parents before refreshing consumer pins to
-merged identities. Issues close only after their default-branch resolution.
-Profiler #4 separately owns private PNG/range helper convergence.
+Current-source MSRV runners and CI derive the compiler from the workspace
+manifest. Published qualification retains its historical compiler. The runtime
+runner shares profile selection across graph admission, artifacts and execution.
+Regression coverage exercises the actual Make recipe with a different floor,
+failure propagation, exact request/image budgets and equivalent macro emission.
 
-Owned endpoints remain Wire. External Candid bytes, persisted formats, executor
-and IC0 identities, cryptographic bodies/vectors/licenses and source guards are
-unchanged. The fixed 16-level Candid admission remains as released in 0.7.5;
-its measured costs and limitations stay in the migration contract. Canic #706
-owns optional ICRC adapter adoption.
+Evidence is retained in `/tmp/platform-simplify-20261029`. Full `make clippy`
+passed before longer tests. Focused macro (13) and Candid (21) tests pass on Rust
+1.99.1/1.91. Standalone endpoint/external-codec consumers pass native/MSRV/Wasm;
+installed Linux/PocketIC passes both compilers with raw and owned calls using
+fixture `target/cdk-runtime.OAbzt1`. Runtime graphs, strict Rustdoc, protected
+sources, 44 assembler tests, MSRV/Make and Bash 5.2/3.2 runner checks pass.
+No performance or Wasm-size saving is measured or claimed for this batch.
 
-[#50](https://github.com/dragginzgame/ic-platform/issues/50) remains deferred until
-a supplying solution exists. Dependencies and the failed advisory check remain
-unchanged; no advisory ignore, incompatible override, Agent fork or new crypto
-is authorized. #72's narrow DER admission remains the sole protected-source
-exception. Historical qualification artifacts remain preserved.
+## Native provider qualification
+
+Qualification uses isolated provider/consumer copies, upstream IC
+`ee8086a9773725fd1058832a9400297cf0990112` and its Rust **1.99.0** toolchain.
+The normal sibling checkout remains read-only. The assembled native library
+compiles and passes 37 focused adapter/catalog/admission tests. The newly built
+Linux server SHA-256 is
+`07bd658a47d50bb0dd59176a1012eff09128d0c026abf23c39009379a34922d5`;
+all five `system_profiling` scenarios pass against that exact executable.
+Preparation/build/test receipts are under the isolated consumer's
+`.build/receipts` inside the evidence directory above, binding the dirty provider
+source digests and embedded routing input rather than claiming HEAD alone supplied it.
+
+All 69 recorder tests pass with admitted local socket access; native graph
+exclusions pass. Native macOS, Bazel/NNS genesis, live provider acceptance and a
+consumer's new provider pin remain separate. Root full CI/release gates were not run.
+No runtime, crypto, pricing/debit body, capture format or dependency was replaced.
+
+## Retained 0.7.5 Candid and ICRC contracts
+
+The maintainer accepted one fixed rule for #73: bounded decoders reject more than
+**16 constructed wire levels** before upstream Candid; exactly 16 are allowed.
+No policy object, limit setting or macro option is added. Unused types and skipped
+values are checked with the existing combined decode/skip work budget. Candid
+still receives its original quotas. Low-level upstream APIs retain their behavior;
+staged callers can explicitly use `candid::nesting::check`.
+
+This mitigates wire nesting, not arbitrary trusted Rust schemas/custom visitors.
+Do not claim upstream Candid itself is repaired. Original installed proofs include
+16/17 levels, the 8,202-byte/8,192-opt trap, malformed input, refused-handler state,
+management raw_rand, callbacks, timers and upgrades. Evidence:
+`/tmp/platform-fixed-depth-20261029`; fixture `target/cdk-runtime.p3w1eD`.
+Historical source/installed locks select Candid 0.10.39/0.10.38 respectively.
+
+The accepted frozen cost study adds about 10–20% decoder instructions for ordinary
+structured DTOs, about 1.13M for 100 ICRC-3 blocks, and about 12.4K for 64 KiB/1 MiB
+HTTP bodies. Exact fixture cycle deltas, methodology and server identity are in
+the [cost report](../migration.md#admission-cost-2026-10-29), with evidence in
+`/tmp/platform-candid-cost-20261029`. Further optimization awaits consumer metrics.
+Owned endpoints remain Wire; external identities, bytes and persisted formats remain.
+
+Source 0.7.5 also supplies the named external ICRC-10 `SupportedStandard` from
+[PR #86](https://github.com/dragginzgame/ic-platform/pull/86). Its independent
+schema/type/byte proofs remain in `/tmp/platform-icrc10-20261028`.
+[Canic #706](https://github.com/dragginzgame/canic/issues/706) owns optional adapter
+adoption on the pending 0.113 base. Source-candidate strict lint, DTO/schema/bytes,
+MSRV/Wasm and four installed profiles pass; registry/managed adoption is not
+asserted. Mounting, consent, authorization and budgets remain Canic-owned.
+
+## Retained advisory and safety boundaries
+
+[#50](https://github.com/dragginzgame/ic-platform/issues/50) remains the retained
+RUSTSEC-2026-0387 blocker through coupled ECDSA/Agent/derivation dependencies.
+The maintainer approved setting it aside for integration only. No advisory ignore,
+check suppression, incompatible override, Agent fork or in-house crypto is authorized.
+#72's narrow DER admission is the sole source-guard exception; crypto bodies,
+encoding, constants, vectors and licenses remain protected. Only short-form
+framing refusal is qualified; long-form support and oversized encoder conversions
+remain outside that change. #74 retains native Origin/Host admission and local
+nonbrowser clients; Chromium/assembler evidence is in
+`/tmp/platform-security-20261028`. Historical size figures remain fixture-specific.

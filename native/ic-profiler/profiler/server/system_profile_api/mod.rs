@@ -17,7 +17,6 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use ic_host_artifacts::artifact::{ArtifactError, GzipError, decode_gzip};
 use ic_system_profiler::{Query as ProfileQuery, RunConfig, StopOptions};
 use serde_json::{Value, json};
 use std::{
@@ -210,12 +209,8 @@ pub fn import_bytes(bytes: &[u8]) -> Result<Value, String> {
         return Err("Profile bundle exceeds the 128 MiB input budget".into());
     }
     let decoded = if bytes.starts_with(&[0x1f, 0x8b]) {
-        decode_gzip(bytes, MAX_IMPORT_BYTES, MAX_IMPORT_BYTES).map_err(|error| match error {
-            GzipError::Decode(ArtifactError::LimitExceeded { .. }) => {
-                "Decompressed profile bundle exceeds the 128 MiB budget".to_string()
-            }
-            error => format!("Invalid gzip profile bundle: {error}"),
-        })?
+        ic_platform::gzip::decode_gzip(bytes, MAX_IMPORT_BYTES, MAX_IMPORT_BYTES)
+            .map_err(|error| format!("Invalid gzip profile bundle: {error}"))?
     } else {
         bytes.to_vec()
     };
@@ -878,6 +873,62 @@ mod tests {
     use super::*;
 
     #[test]
+    fn bundle_entrypoints_preserve_shared_gzip_framing_and_distinct_expanded_budgets() {
+        assert_eq!(MAX_IMPORT_BYTES, 128 * 1024 * 1024);
+        let created = ic_system_profiler::start(ic_system_profiler::RunConfig::default()).unwrap();
+        let id = created["run_id"].as_str().unwrap();
+        ic_system_profiler::stop(id, &ic_system_profiler::StopOptions::default()).unwrap();
+        let compressed = export_bytes(id).unwrap();
+        assert_eq!(compressed, ic_system_profiler::export_bundle(id).unwrap());
+        let raw = ic_platform::gzip::decode_gzip(&compressed, MAX_IMPORT_BYTES, 256 * 1024 * 1024)
+            .unwrap();
+        for bytes in [raw.as_slice(), compressed.as_slice()] {
+            let imported = import_bytes(bytes).unwrap();
+            ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
+        }
+        let mut trailing = compressed.clone();
+        trailing.push(0);
+        let mut concatenated = compressed.clone();
+        concatenated.extend_from_slice(&compressed);
+        let mut crc = compressed.clone();
+        let tail = crc.len() - 8;
+        crc[tail] ^= 1;
+        let mut length = compressed.clone();
+        let tail = length.len() - 4;
+        length[tail] ^= 1;
+        for invalid in [
+            trailing.as_slice(),
+            concatenated.as_slice(),
+            crc.as_slice(),
+            length.as_slice(),
+            &compressed[..compressed.len() - 1],
+            &[0x1f, 0x8b, 0],
+        ] {
+            assert!(import_bytes(invalid).is_err());
+            assert!(ic_system_profiler::import_bundle(invalid).is_err());
+        }
+        // Padding outside the JSON document preserves the exact same profile.
+        // Exercise the real inclusive API limit rather than a smaller substitute.
+        let mut expanded = raw;
+        expanded.resize(MAX_IMPORT_BYTES, b' ');
+        let mut exact = Vec::new();
+        ic_platform::gzip::encode_gzip(&expanded, &mut exact, 1, u64::MAX).unwrap();
+        for bytes in [expanded.as_slice(), exact.as_slice()] {
+            let imported = import_bytes(bytes).unwrap();
+            ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
+        }
+        expanded.push(b' ');
+        assert!(import_bytes(&expanded).is_err());
+        let mut over = Vec::new();
+        ic_platform::gzip::encode_gzip(&expanded, &mut over, 1, u64::MAX).unwrap();
+        assert!(import_bytes(&over).is_err());
+        // The independent recorder retains its separate 256 MiB decoded ceiling.
+        let imported = ic_system_profiler::import_bundle(&over).unwrap();
+        ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
+        ic_system_profiler::delete_run(id).unwrap();
+    }
+
+    #[test]
     fn shared_argument_conversion_preserves_exact_values_and_omits_nulls() {
         let parameters = argument_parameters(
             &json!({"missing":null,"text":"01","limit":42,"round_number":u64::MAX,"round_details":false,"nested":{"x":1}}),
@@ -972,6 +1023,3 @@ mod tests {
         assert_eq!(values.len(), 1);
     }
 }
-
-#[cfg(test)]
-mod gzip_tests;

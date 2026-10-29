@@ -22,7 +22,8 @@ at `.build/ic/.git/ic-profiler-receipt.json`; check its provider/consumer identi
 before retaining it with measurements.
 
 `scripts/ic_profiler.py native-verify` owns the complete native gate: prerequisite
-and graph admission, server build, recorder tests and the five profiling tests
+and graph admission, server build, recorder and server-library product tests,
+and the five profiling tests
 against that exact server. Profiling tests serialize their whole-server recording
 windows; independent workloads must not contaminate one another's cycle totals.
 
@@ -30,24 +31,15 @@ The provider's `profiler/` sources and the consumer's `profiler/` sources merge 
 the declared IC destination. Overlapping files are rejected. Their separate
 origins and digests enter the assembly identity, together with the IC pin and all
 patch/overlay inputs. Command receipts record both provider and consumer commits.
-IC capture/state adapters stay inside the provider's IC workspace. Profiler must
-inject `server/system_profile_cli.rs` and `server/system_profile_render.rs`
-alongside its recorder/viewer. Those product sources retain their exact bodies
-and assembled paths. Provider 0.8 requires the paired consumer source update.
-The recorder and server select Host Artifacts gzip directly in matching Cargo
-and Bazel inputs. Compression stays in Tooling; the consumer retains levels,
-limits and bundle semantics. API input/expanded limits remain 128 MiB; the core's
-expanded limit remains 256 MiB. Both refuse corrupt or incomplete members,
-concatenation and trailing bytes. PNG zlib remains separate.
-The Host Process follow-on supplies raw OS observations and explicit workload
-custody/gating. Profiler owns selection, creation-identity admission, cadence,
-retained DTOs, final-sample ordering, grace and keep-running choices. Host
-Artifacts/FS/Process share immutable supplier c20dbd11785c17d369651f51fa0967fbec69c57a
-until a supplying registry release exists. Matching Cargo/Bazel locks select libc
-0.2.191 to satisfy that supplier minimum; the IC pin/toolchain remain unchanged.
-The recorder also consumes published IC Metrics 0.17 scalar arithmetic; this
-provider owns native workspace/Bazel locks, distinct from internal replica
-metrics. Neither dependency owns charging or report policy.
+Adapters stay inside the provider's IC workspace. The consumer recorder selects
+only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
+Bazel inputs. The recorder also consumes published IC Metrics 0.17 scalar
+arithmetic; this provider owns its native workspace and Bazel locks, distinct
+from the IC workspace's internal `ic-metrics` package. Neither measurement
+counters nor the gzip facade own charging policy. The gzip facade delegates to
+published IC Tooling and has no dependency back to this workspace, PocketIC or
+the native provider. Compression implementation
+stays in Tooling; the consumer retains levels, import limits and bundle semantics.
 
 The PocketIC profile selects the `ic-admin` library without its CLI-only NNS
 initialization dependency. The upstream CLI keeps its default feature and binary;
@@ -93,3 +85,21 @@ explicitly prepare its dependency cache with `--prepare` first. The source CI jo
 runs this proof alongside the assembler fixtures, with a separate build target.
 Route-unit and standalone browser evidence do not replace a newly built native
 server's qualification when the consumer adopts a changed provider pin.
+
+## Paired product-source contract
+
+This revision requires the consuming Profiler tree to supply
+`server/system_profile_cli.rs`, `server/system_profile_render.rs` and
+`rendering/{mod,png,ranges}.rs` with the PNG byte fixtures below that directory.
+Those product modules have no provider compatibility copies. Older consumers
+that omit them must retain their previous pin until adopting this paired source
+change. Existing assembled module paths and native integration callers stay the
+same; the provider still owns state access, trace capture, HTTP admission and
+Cargo/Bazel dependencies. This source-profile change does not alter the published
+Platform library API.
+
+Server profile bundles import through Platform's shared gzip facade and export
+unchanged core gzip bytes. API input/decoded limits remain 128 MiB; the recorder
+retains its separate 256 MiB decoded limit. The maintainer chose to retain this
+facade instead of the proposed direct Host migration in #91. Zlib for PNG remains
+a distinct native dependency; PNG mechanics and budgets stay product-owned.

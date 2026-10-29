@@ -212,27 +212,14 @@ impl MemoryAccessTraceRecorder {
         logical_execution_id: Option<u64>,
     ) -> serde_json::Value {
         use serde_json::json;
-        fn union(mut ranges: Vec<(u64, u64)>) -> Vec<(u64, u64)> {
-            ranges.retain(|&(start, end)| start < end);
-            ranges.sort_unstable();
-            let mut result: Vec<(u64, u64)> = Vec::new();
-            for (start, end) in ranges {
-                if let Some(last) = result.last_mut()
-                    && start <= last.1
-                {
-                    last.1 = last.1.max(end);
-                } else {
-                    result.push((start, end));
-                }
-            }
-            result
-        }
         fn encoded(ranges: Vec<(u64, u64)>) -> serde_json::Value {
             json!(
-                union(ranges)
-                    .into_iter()
-                    .map(|(start, end)| [start.to_string(), end.to_string()])
-                    .collect::<Vec<_>>()
+                super::rendering::merge_ranges(
+                    ranges.into_iter().filter(|&(start, end)| start < end)
+                )
+                .into_iter()
+                .map(|(start, end)| [start.to_string(), end.to_string()])
+                .collect::<Vec<_>>()
             )
         }
         let traces = self.traces.lock().unwrap();

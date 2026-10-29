@@ -5,10 +5,8 @@
 //! are outside that body. Only page IDs appear in the image. A snapshot comparison
 //! describes the whole capture interval, not necessarily one call or a write.
 
-use flate2::{Compression, write::ZlibEncoder};
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
-use std::io::Write;
 
 pub(crate) const WASM_PAGE_BYTES: usize = 65_536;
 pub(crate) const MAX_IMAGE_PAGES: usize = 256;
@@ -900,40 +898,14 @@ impl Canvas {
 }
 
 fn encode_png(canvas: &Canvas) -> Result<Vec<u8>, String> {
-    let stride = canvas.width * 3;
-    let mut zlib = ZlibEncoder::new(Vec::new(), Compression::fast());
-    for row in canvas.rgb.chunks_exact(stride) {
-        zlib.write_all(&[0])
-            .and_then(|()| zlib.write_all(row))
-            .map_err(|error| format!("PNG compression failed: {error}"))?;
-    }
-    let compressed = zlib
-        .finish()
+    let png = super::rendering::encode_png(canvas.width, canvas.height, &canvas.rgb)
         .map_err(|error| format!("PNG compression failed: {error}"))?;
-    let mut png = b"\x89PNG\r\n\x1a\n".to_vec();
-    let mut header = Vec::with_capacity(13);
-    header.extend_from_slice(&(canvas.width as u32).to_be_bytes());
-    header.extend_from_slice(&(canvas.height as u32).to_be_bytes());
-    header.extend_from_slice(&[8, 2, 0, 0, 0]); // RGB8, standard compression/filter, no interlace.
-    png_chunk(&mut png, *b"IHDR", &header);
-    png_chunk(&mut png, *b"IDAT", &compressed);
-    png_chunk(&mut png, *b"IEND", &[]);
     if png.len() > MAX_PNG_BYTES {
         return Err(format!(
             "Memory image exceeds the {MAX_PNG_BYTES}-byte PNG limit; select fewer pages."
         ));
     }
     Ok(png)
-}
-
-fn png_chunk(png: &mut Vec<u8>, kind: [u8; 4], data: &[u8]) {
-    png.extend_from_slice(&(data.len() as u32).to_be_bytes());
-    png.extend_from_slice(&kind);
-    png.extend_from_slice(data);
-    let mut crc = crc32fast::Hasher::new();
-    crc.update(&kind);
-    crc.update(data);
-    png.extend_from_slice(&crc.finalize().to_be_bytes());
 }
 
 /// Small bitmap font avoids system font dependencies and nondeterministic layout.
@@ -998,6 +970,24 @@ mod tests {
     use super::*;
     use flate2::read::ZlibDecoder;
     use std::io::Read;
+
+    #[test]
+    fn snapshot_png_budget_stays_with_the_snapshot_caller() {
+        assert_eq!(MAX_PNG_BYTES, 6 * 1024 * 1024);
+        let mut canvas = Canvas::new(2048, 1024);
+        let mut pattern = 0x5eed1234u32;
+        for byte in &mut canvas.rgb {
+            pattern ^= pattern << 13;
+            pattern ^= pattern >> 17;
+            pattern ^= pattern << 5;
+            *byte = pattern as u8;
+        }
+        let raw =
+            super::super::rendering::encode_png(canvas.width, canvas.height, &canvas.rgb).unwrap();
+        assert!(raw.len() > MAX_PNG_BYTES);
+        assert!(encode_png(&canvas).is_err());
+        assert!(encode_png(&Canvas::new(1, 1)).unwrap().len() < MAX_PNG_BYTES);
+    }
 
     fn input() -> MemorySnapshotImageInput {
         MemorySnapshotImageInput {

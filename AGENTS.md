@@ -31,8 +31,7 @@ Read [the current handoff](docs/status/current.md), then
   tests, as requested by the maintainer. Fix failures before proceeding.
 - The maintainer has deferred further hard cuts
   until Canic is live, except the explicitly authorized coordinated owned-endpoint
-  Wire migration in docs/migration.md and the coordinated Host/Profiler ownership
-  migration below. Retire its consumed compiler/service
+  Wire migration in docs/migration.md. Retire its consumed compiler/service
   exports only after consumer adoption; preserve required external Candid paths.
 - The authorized #38 compiler-only retirement shipped in 0.7.0 after the Canic
   Wire caller/qualification audit. Do not restore the JS/TS compiler facade
@@ -166,23 +165,14 @@ Candid bytes, including HTTP pricing/replication fields. Changing this constrain
 requires renewed consumer DTO/wire qualification; do not replace it with a
 lockfile-only constraint or a blanket upstream export.
 
-## Host and Profiler ownership
-
-The maintainer authorized the coordinated ownership migration in #90/#91:
-Profiler owns and injects its CLI/render sources; Platform retains the IC native
-adapters and build inputs. Generic gzip is supplied directly by Host Artifacts.
-The exhausted Platform gzip facade is retired in the breaking 0.8 batch, without
-a compatibility export or codec copy. Preserve the distinct API/core budgets and
-qualify the paired consumer and native Cargo/Bazel graphs.
-The authorized #94 follow-on delegates raw OS observations and Unix workload
-mechanics to Host Process. Profiler retains selection, cadence, retained DTOs,
-diagnostics and lifecycle choices; Platform supplies matching native inputs.
-Do not introduce a facade export for those generic Host operations.
-
 ## PocketIC maintenance boundary
 
 The maintainer explicitly authorized transferring IC Profiler's native provider,
-including its existing assembler/fixtures, into `native/ic-profiler`. That opt-in
+including its existing assembler/fixtures, into `native/ic-profiler`. Profiler
+#4 / Platform #90 return the product CLI/query renderer and shared PNG/range
+mechanics to the consumer; keep only their native integration/state adapters here.
+The maintainer retained Platform's gzip facade for Profiler; #91 retirement is
+outside this paired change. That opt-in
 source profile owns replica adapters and the patched client below this facade;
 its IC-free recorder/viewer remain consumer-owned. Preserve the legacy tooling
 during this transfer; this is no general permission to introduce Python tooling.

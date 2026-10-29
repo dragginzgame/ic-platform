@@ -52,15 +52,15 @@ budgets and durable delivery stay consumer-owned. See the
 [call contract](../crates/ic-call/README.md) and
 [migration](migration.md#prepared-one-shot-calls-issue-75).
 
-Generic gzip belongs directly to IC Tooling `ic-host-artifacts`; the Platform
-facade/feature is retired in 0.8 after Profiler adoption. Profiler also supplies
-its CLI and rendering sources through disjoint injection. Platform retains IC
-capture/state adapters and their native Cargo/Bazel inputs, without acquiring
-product rendering or codec implementation ownership. The native profile also
-supplies Host Process for raw OS observations and explicit workload mechanics;
-Profiler retains capture selection, cadence, retained DTOs and report policy.
-Artifacts/FS/Process share immutable supplier c20dbd1, selecting libc 0.2.191 in
-native Cargo/Bazel locks; none enters the default or deployed Platform graph.
+The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzip`
+and `GzipError` from published IC Tooling `ic-host-artifacts` 0.69.1 for IC Profiler.
+Tooling retains codec implementation; callers retain levels, limits and payload
+admission. No backend types, default/Wasm dependency or IC runtime edge is added.
+The maintainer retained this facade for Profiler instead of #91's proposed direct
+Host migration. Its native server now also imports through this same owner.
+The native profile supplies product CLI/rendering modules from the consuming
+Profiler tree; Platform retains IC state access, HTTP admission and Cargo/Bazel
+inputs. See the [paired source contract](../native/ic-profiler/README.md#paired-product-source-contract).
 
 The published 0.6.20 external DTO additions are maintained from pinned protocol
 schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,
@@ -229,6 +229,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ecdsa | dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
 | ic-platform | executor | dep:ic-cdk-executor |
+| ic-platform | gzip | dep:ic-host-artifacts |
 | ic-platform | ic0 | dep:ic0 |
 | ic-platform | icp-ledger-types | candid |
 | ic-platform | icrc-ledger-types | dep:candid, dep:icrc-ledger-types, principal |
@@ -256,6 +257,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
 | ic-platform | ic-cdk-executor | =2.0.0 | normal | all | true | true |  |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
+| ic-platform | ic-host-artifacts | ^0.69.1 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | all | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |
