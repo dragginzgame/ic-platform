@@ -22,7 +22,8 @@ at `.build/ic/.git/ic-profiler-receipt.json`; check its provider/consumer identi
 before retaining it with measurements.
 
 `scripts/ic_profiler.py native-verify` owns the complete native gate: prerequisite
-and graph admission, server build, recorder tests and the five profiling tests
+and graph admission, server build, recorder and server-library product tests,
+and the five profiling tests
 against that exact server. Profiling tests serialize their whole-server recording
 windows; independent workloads must not contaminate one another's cycle totals.
 
@@ -32,8 +33,12 @@ origins and digests enter the assembly identity, together with the IC pin and al
 patch/overlay inputs. Command receipts record both provider and consumer commits.
 Adapters stay inside the provider's IC workspace. The consumer recorder selects
 only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
-Bazel inputs. That facade delegates to published IC Tooling and has no dependency
-back to this workspace, PocketIC or the native provider. Compression implementation
+Bazel inputs. The recorder also consumes published IC Metrics 0.17 scalar
+arithmetic; this provider owns its native workspace and Bazel locks, distinct
+from the IC workspace's internal `ic-metrics` package. Neither measurement
+counters nor the gzip facade own charging policy. The gzip facade delegates to
+published IC Tooling and has no dependency back to this workspace, PocketIC or
+the native provider. Compression implementation
 stays in Tooling; the consumer retains levels, import limits and bundle semantics.
 
 The PocketIC profile selects the `ic-admin` library without its CLI-only NNS
@@ -80,3 +85,21 @@ explicitly prepare its dependency cache with `--prepare` first. The source CI jo
 runs this proof alongside the assembler fixtures, with a separate build target.
 Route-unit and standalone browser evidence do not replace a newly built native
 server's qualification when the consumer adopts a changed provider pin.
+
+## Paired product-source contract
+
+This revision requires the consuming Profiler tree to supply
+`server/system_profile_cli.rs`, `server/system_profile_render.rs` and
+`rendering/{mod,png,ranges}.rs` with the PNG byte fixtures below that directory.
+Those product modules have no provider compatibility copies. Older consumers
+that omit them must retain their previous pin until adopting this paired source
+change. Existing assembled module paths and native integration callers stay the
+same; the provider still owns state access, trace capture, HTTP admission and
+Cargo/Bazel dependencies. This source-profile change does not alter the published
+Platform library API.
+
+Server profile bundles import through Platform's shared gzip facade and export
+unchanged core gzip bytes. API input/decoded limits remain 128 MiB; the recorder
+retains its separate 256 MiB decoded limit. The maintainer chose to retain this
+facade instead of the proposed direct Host migration in #91. Zlib for PNG remains
+a distinct native dependency; PNG mechanics and budgets stay product-owned.

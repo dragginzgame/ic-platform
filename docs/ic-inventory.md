@@ -70,6 +70,11 @@ The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzi
 and `GzipError` from published IC Tooling `ic-host-artifacts` 0.69.1 for IC Profiler.
 Tooling retains codec implementation; callers retain levels, limits and payload
 admission. No backend types, default/Wasm dependency or IC runtime edge is added.
+The maintainer retained this facade for Profiler instead of #91's proposed direct
+Host migration. Its native server now also imports through this same owner.
+The native profile supplies product CLI/rendering modules from the consuming
+Profiler tree; Platform retains IC state access, HTTP admission and Cargo/Bazel
+inputs. See the [paired source contract](../native/ic-profiler/README.md#paired-product-source-contract).
 
 The published 0.6.20 external DTO additions are maintained from pinned protocol
 schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,
@@ -123,7 +128,10 @@ exclude the added Wire/JSON dependency edges. All features now require Rust 1.91
 
 IC Profiler selects the opt-in Git source profile at `native/ic-profiler`, which
 owns the instrumented IC pin, adapters, patches and patched PocketIC client.
-The recorder/viewer remain consumer-owned. The registry `pocket-ic` feature is
+The recorder/viewer remain consumer-owned. Native workspace/Bazel inputs supply
+published IC Metrics 0.17 counters with defaults disabled, distinct from internal
+replica metrics 0.9. These inputs add no Platform Cargo feature or default/Wasm
+dependency. The registry `pocket-ic` feature is
 unchanged; no instrumented Rust export is added to that feature. The
 [migration contract](migration.md#instrumented-pocketic-source-provider) records
 the source-provider interface and the remaining native acceptance under

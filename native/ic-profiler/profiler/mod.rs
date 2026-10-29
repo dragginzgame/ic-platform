@@ -1,6 +1,8 @@
 //! PocketIC profiling implementation: canister attribution, whole-system observation,
 //! compact viewer and built-in agent reference. Public root aliases preserve API paths.
 
+pub(crate) mod rendering;
+
 #[path = "server/computation_catalog.rs"]
 pub mod computation_catalog;
 #[path = "server/computation_catalog_notes.rs"]
@@ -19,7 +21,7 @@ pub(crate) mod memory_snapshot_api;
 pub(crate) mod memory_snapshot_image;
 #[path = "server/memory_snapshots.rs"]
 pub(crate) mod memory_snapshots;
-#[path = "server/system_profile_api.rs"]
+#[path = "server/system_profile_api/mod.rs"]
 pub mod system_profile_api;
 #[path = "server/system_profile_cli.rs"]
 pub mod system_profile_cli;

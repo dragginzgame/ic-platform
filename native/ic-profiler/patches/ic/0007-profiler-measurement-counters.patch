@@ -1,0 +1,2495 @@
+diff --git a/Cargo.toml b/Cargo.toml
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -601,6 +601,7 @@
+ opt-level = 3
+ 
+ [workspace.dependencies]
++ic-metrics = { version = "0.17.0", default-features = false }
+ 
+ ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "8f2b478ef96936754284976cd75dd9cd4b929ef7", default-features = false, features = ["gzip"] }
+ actix-rt = "2.10.0"
+diff --git a/Cargo.lock b/Cargo.lock
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -2239,9 +2239,9 @@
+ 
+ [[package]]
+ name = "bytemuck"
+-version = "1.25.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c8efb64bd706a16a1bdde310ae86b351e4d21550d98d056f22f8a7f7a2183fec"
++version = "1.25.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797"
+ 
+ [[package]]
+ name = "byteorder"
+@@ -4776,7 +4776,7 @@
+  "ic-interfaces",
+  "ic-limits",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nns-constants",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
+@@ -6210,7 +6210,7 @@
+  "futures",
+  "ic-adapter-metrics-service",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "protobuf",
+  "tokio",
+  "tonic",
+@@ -6378,7 +6378,7 @@
+  "ic-error-types 0.2.0",
+  "ic-interfaces",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-p2p-test-utils",
+  "ic-protobuf",
+  "ic-quic-transport",
+@@ -6403,7 +6403,7 @@
+  "ic-consensus-manager",
+  "ic-interfaces",
+  "ic-limits",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-types",
+  "prometheus",
+  "tokio",
+@@ -6427,7 +6427,7 @@
+  "ic-interfaces-state-manager",
+  "ic-limits",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-sys",
+  "ic-test-artifact-pool",
+@@ -6805,7 +6805,7 @@
+  "ic-http-endpoints-async-utils",
+  "ic-interfaces-adapter-client",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-system-profiler",
+  "ic-test-utilities-logger",
+  "ic-test-utilities-net",
+@@ -6837,7 +6837,7 @@
+  "ic-http-endpoints-async-utils",
+  "ic-interfaces-adapter-client",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "prometheus",
+  "serde",
+  "serde_bytes",
+@@ -6914,7 +6914,7 @@
+  "ic-interfaces-state-manager",
+  "ic-interfaces-state-manager-mocks",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-replicated-state",
+  "ic-test-utilities",
+@@ -7079,7 +7079,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
+  "ic-system-profiler",
+@@ -7687,7 +7687,7 @@
+  "ic-logger",
+  "ic-management-canister-types-private",
+  "ic-messaging",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+  "ic-registry-client-helpers",
+@@ -7745,7 +7745,7 @@
+  "ic-interfaces-registry",
+  "ic-interfaces-state-manager",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
+  "ic-system-profiler",
+@@ -7776,7 +7776,7 @@
+  "ic-interfaces-state-manager",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+  "ic-registry-client-helpers",
+@@ -7839,7 +7839,7 @@
+  "ic-interfaces-state-manager",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-helpers",
+  "ic-registry-keys",
+@@ -7888,7 +7888,7 @@
+  "ic-interfaces-state-manager",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+  "ic-registry-client-helpers",
+@@ -7923,7 +7923,7 @@
+  "ic-interfaces",
+  "ic-limits",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-p2p-test-utils",
+  "ic-protobuf",
+  "ic-quic-transport",
+@@ -7955,7 +7955,7 @@
+  "ic-interfaces-mocks",
+  "ic-interfaces-state-manager",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+  "ic-registry-keys",
+@@ -7992,7 +7992,7 @@
+  "ic-interfaces-registry",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-helpers",
+  "ic-registry-keys",
+@@ -8070,7 +8070,7 @@
+  "ic-interfaces-registry-mocks",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+  "ic-registry-client-helpers",
+@@ -8344,7 +8344,7 @@
+  "ic-interfaces",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-sys",
+  "ic-test-utilities-compare-dirs",
+@@ -8439,7 +8439,7 @@
+ name = "ic-crypto-internal-logmon"
+ version = "0.9.0"
+ dependencies = [
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "prometheus",
+  "strum 0.26.3",
+  "strum_macros 0.26.4",
+@@ -8625,7 +8625,7 @@
+  "ic-crypto-utils-basic-sig",
+  "ic-interfaces",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+  "ic-registry-proto-data-provider",
+@@ -8868,7 +8868,7 @@
+ version = "0.9.0"
+ dependencies = [
+  "ic-crypto-internal-logmon",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-test-utilities-metrics",
+ ]
+ 
+@@ -9215,7 +9215,7 @@
+  "ic-interfaces-state-manager",
+  "ic-management-canister-types-private",
+  "ic-messaging",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client",
+  "ic-registry-keys",
+@@ -9311,7 +9311,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nns-constants",
+  "ic-registry-routing-table",
+  "ic-registry-subnet-type",
+@@ -9451,7 +9451,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nns-constants",
+  "ic-query-stats",
+  "ic-registry-provisional-whitelist",
+@@ -9670,7 +9670,7 @@
+  "axum",
+  "ic-config",
+  "ic-http-endpoints-async-utils",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-test-utilities-logger",
+  "prometheus",
+  "reqwest",
+@@ -9721,7 +9721,7 @@
+  "ic-interfaces-state-manager-mocks",
+  "ic-limits",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nns-delegation-manager",
+  "ic-pprof",
+  "ic-protobuf",
+@@ -9797,7 +9797,7 @@
+  "ic-interfaces-registry",
+  "ic-interfaces-state-manager",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+  "ic-registry-client-helpers",
+@@ -9889,7 +9889,7 @@
+  "ic-http-endpoints-async-utils",
+  "ic-https-outcalls-service",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-system-profiler",
+  "ic-test-utilities-net",
+  "parking_lot",
+@@ -9927,7 +9927,7 @@
+  "ic-interfaces-adapter-client",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-test-utilities-metrics",
+  "ic-test-utilities-types",
+  "ic-types",
+@@ -9963,7 +9963,7 @@
+  "ic-interfaces-state-manager",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-helpers",
+  "ic-registry-subnet-features",
+@@ -9993,7 +9993,7 @@
+ dependencies = [
+  "ic-config",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-types",
+  "ic-types-cycles",
+  "ic-types-test-utils",
+@@ -10503,7 +10503,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-registry-client-fake",
+  "ic-registry-client-helpers",
+  "ic-registry-keys",
+@@ -11032,7 +11032,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-query-stats",
+  "ic-registry-client-fake",
+@@ -11089,6 +11089,16 @@
+  "procfs",
+  "prometheus",
+  "tokio-metrics",
++]
++
++[[package]]
++name = "ic-metrics"
++version = "0.17.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6b63fcb11be2072221f86d632e3fbb978dc523ad24830f5a15365d1dfa83268a"
++dependencies = [
++ "ic-wire",
++ "serde",
+ ]
+ 
+ [[package]]
+@@ -11821,7 +11831,7 @@
+  "ic-interfaces-state-manager",
+  "ic-interfaces-state-manager-mocks",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nns-delegation-reader",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+@@ -12478,7 +12488,7 @@
+  "ic-interfaces",
+  "ic-interfaces-mocks",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-peer-manager",
+  "ic-protobuf",
+  "ic-quic-transport",
+@@ -12512,7 +12522,7 @@
+  "ic-interfaces-mocks",
+  "ic-interfaces-registry",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-p2p-test-utils",
+  "ic-quic-transport",
+  "ic-registry-client-fake",
+@@ -12566,7 +12576,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client",
+  "ic-registry-keys",
+@@ -12648,7 +12658,7 @@
+  "ic-interfaces-state-manager",
+  "ic-interfaces-state-manager-mocks",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-replicated-state",
+  "ic-test-utilities-state",
+  "ic-types",
+@@ -12696,7 +12706,7 @@
+  "ic-interfaces-registry",
+  "ic-limits",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-p2p-test-utils",
+  "ic-protobuf",
+  "ic-system-profiler",
+@@ -12752,7 +12762,7 @@
+  "ic-interfaces",
+  "ic-interfaces-registry",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-helpers",
+  "ic-registry-keys",
+@@ -12859,7 +12869,7 @@
+  "assert_matches",
+  "crossbeam-channel",
+  "ic-interfaces-registry",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-registry-client-helpers",
+  "ic-registry-common-proto",
+  "ic-registry-proto-data-provider",
+@@ -13075,7 +13085,7 @@
+  "ic-http-endpoints-metrics",
+  "ic-interfaces-registry",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nervous-system-integration-tests",
+  "ic-nns-constants",
+  "ic-nns-test-utils",
+@@ -13207,7 +13217,7 @@
+  "ic-interfaces-state-manager-mocks",
+  "ic-logger",
+  "ic-messaging",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nervous-system-agent",
+  "ic-nervous-system-chunks",
+  "ic-nervous-system-common",
+@@ -13277,7 +13287,7 @@
+  "ic-interfaces-state-manager",
+  "ic-logger",
+  "ic-messaging",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nns-delegation-manager",
+  "ic-pprof",
+  "ic-protobuf",
+@@ -13337,7 +13347,7 @@
+  "ic-interfaces-registry",
+  "ic-interfaces-state-manager",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-peer-manager",
+  "ic-quic-transport",
+  "ic-registry-client-helpers",
+@@ -13370,7 +13380,7 @@
+  "ic-interfaces-registry",
+  "ic-interfaces-state-manager",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-prep",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+@@ -13424,7 +13434,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nns-delegation-reader",
+  "ic-protobuf",
+  "ic-registry-resource-limits",
+@@ -14333,7 +14343,7 @@
+  "ic-interfaces",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-replicated-state",
+  "ic-sys",
+@@ -14396,7 +14406,7 @@
+  "ic-logger",
+  "ic-management-canister-types-private",
+  "ic-messaging",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-query-stats",
+  "ic-registry-client-fake",
+@@ -14463,7 +14473,7 @@
+  "ic-interfaces-state-manager",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-routing-table",
+  "ic-registry-subnet-features",
+@@ -14518,7 +14528,7 @@
+  "ic-interfaces",
+  "ic-logger",
+  "ic-memory-transport",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-p2p-test-utils",
+  "ic-protobuf",
+  "ic-quic-transport",
+@@ -14546,7 +14556,7 @@
+  "hex",
+  "ic-config",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-routing-table",
+  "ic-registry-subnet-type",
+@@ -14582,7 +14592,7 @@
+  "csv",
+  "ic-base-types",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-recovery",
+  "ic-registry-routing-table",
+@@ -14651,6 +14661,7 @@
+ name = "ic-system-profiler"
+ version = "0.9.0"
+ dependencies = [
++ "ic-metrics 0.17.0",
+  "ic-platform",
+  "libc",
+  "serde",
+@@ -14802,7 +14813,7 @@
+  "ic-interfaces-registry",
+  "ic-interfaces-state-manager",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-registry-client-helpers",
+  "ic-replicated-state",
+  "ic-test-utilities-consensus",
+@@ -14852,7 +14863,7 @@
+  "ic-interfaces-certified-stream-store",
+  "ic-interfaces-state-manager",
+  "ic-interfaces-state-manager-mocks",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
+  "ic-test-utilities-logger",
+@@ -14942,7 +14953,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-registry-provisional-whitelist",
+  "ic-registry-resource-limits",
+  "ic-registry-routing-table",
+@@ -15006,7 +15017,7 @@
+ name = "ic-test-utilities-metrics"
+ version = "0.9.0"
+ dependencies = [
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "prometheus",
+ ]
+ 
+@@ -15448,7 +15459,7 @@
+ version = "0.9.0"
+ dependencies = [
+  "crossbeam-channel",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "prometheus",
+ ]
+ 
+@@ -15652,6 +15663,31 @@
+ ]
+ 
+ [[package]]
++name = "ic-wire"
++version = "0.7.21"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7d9d4dbea25193bd0b891080e44a0fb8a4538d1d7f695423499fe4d8110a40e3"
++dependencies = [
++ "bytemuck",
++ "ic-wire-derive",
++ "postcard",
++ "serde",
++ "serde_bytes",
++ "serde_json",
++]
++
++[[package]]
++name = "ic-wire-derive"
++version = "0.7.21"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "26896f2c980e27ce375eefd8846fce6d1c5924a96eed0c252b779f5f7af5e12a"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "syn 3.0.9",
++]
++
++[[package]]
+ name = "ic-xnet-hyper"
+ version = "0.9.0"
+ dependencies = [
+@@ -15689,7 +15725,7 @@
+  "ic-interfaces-state-manager-mocks",
+  "ic-limits",
+  "ic-logger",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-protobuf",
+  "ic-registry-client-fake",
+  "ic-registry-client-helpers",
+@@ -18868,7 +18904,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nns-constants",
+  "ic-protobuf",
+  "ic-registry-canister-api",
+@@ -19550,7 +19586,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-nervous-system-common",
+  "ic-nns-common",
+  "ic-nns-constants",
+@@ -19883,9 +19919,9 @@
+ 
+ [[package]]
+ name = "proc-macro2"
+-version = "1.0.106"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
++version = "1.0.107"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+ dependencies = [
+  "unicode-ident",
+ ]
+@@ -20209,9 +20245,9 @@
+ 
+ [[package]]
+ name = "quote"
+-version = "1.0.45"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
++version = "1.0.47"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
+ dependencies = [
+  "proc-macro2",
+ ]
+@@ -22969,6 +23005,17 @@
+ ]
+ 
+ [[package]]
++name = "syn"
++version = "3.0.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "unicode-ident",
++]
++
++[[package]]
+ name = "syn-solidity"
+ version = "1.7.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -24585,7 +24632,7 @@
+  "ic-limits",
+  "ic-logger",
+  "ic-management-canister-types-private",
+- "ic-metrics",
++ "ic-metrics 0.9.0",
+  "ic-registry-subnet-type",
+  "ic-replicated-state",
+  "ic-test-utilities",
+diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
+--- a/Cargo.Bazel.toml.lock
++++ b/Cargo.Bazel.toml.lock
+@@ -2152,9 +2152,9 @@
+ 
+ [[package]]
+ name = "bytemuck"
+-version = "1.13.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "17febce684fd15d89027105661fec94afb475cb995fbc59d2865198446ba2eea"
++version = "1.25.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797"
+ 
+ [[package]]
+ name = "byteorder"
+@@ -3857,6 +3857,7 @@
+  "ic-gateway",
+  "ic-identity-hsm",
+  "ic-management-canister-types 0.8.0",
++ "ic-metrics",
+  "ic-metrics-encoder",
+  "ic-platform",
+  "ic-sha3",
+@@ -6219,6 +6220,16 @@
+ ]
+ 
+ [[package]]
++name = "ic-metrics"
++version = "0.17.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6b63fcb11be2072221f86d632e3fbb978dc523ad24830f5a15365d1dfa83268a"
++dependencies = [
++ "ic-wire",
++ "serde",
++]
++
++[[package]]
+ name = "ic-metrics-encoder"
+ version = "1.1.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -6408,6 +6419,31 @@
+  "thiserror 2.0.18",
+  "walrus",
+  "wasmparser 0.253.0",
++]
++
++[[package]]
++name = "ic-wire"
++version = "0.7.21"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "7d9d4dbea25193bd0b891080e44a0fb8a4538d1d7f695423499fe4d8110a40e3"
++dependencies = [
++ "bytemuck",
++ "ic-wire-derive",
++ "postcard",
++ "serde",
++ "serde_bytes",
++ "serde_json",
++]
++
++[[package]]
++name = "ic-wire-derive"
++version = "0.7.21"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "26896f2c980e27ce375eefd8846fce6d1c5924a96eed0c252b779f5f7af5e12a"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "syn 3.0.9",
+ ]
+ 
+ [[package]]
+@@ -9313,9 +9349,9 @@
+ 
+ [[package]]
+ name = "proc-macro2"
+-version = "1.0.106"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
++version = "1.0.107"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+ dependencies = [
+  "unicode-ident",
+ ]
+@@ -10879,11 +10915,12 @@
+ 
+ [[package]]
+ name = "serde_bytes"
+-version = "0.11.15"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "387cc504cb06bb40a96c8e04e951fe01854cf6bc921053c954e4a606d9675c6a"
+-dependencies = [
+- "serde",
++version = "0.11.19"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a5d440709e79d88e51ac01c4b72fc6cb7314017bb7da9eeff678aa94c10e3ea8"
++dependencies = [
++ "serde",
++ "serde_core",
+ ]
+ 
+ [[package]]
+@@ -11780,6 +11817,17 @@
+ version = "2.0.119"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "unicode-ident",
++]
++
++[[package]]
++name = "syn"
++version = "3.0.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
+--- a/Cargo.Bazel.json.lock
++++ b/Cargo.Bazel.json.lock
+@@ -3,7 +3,7 @@
+     "ic-gateway 0.0.0-git",
+     "ic-wasm 0.11.1"
+   ],
+-  "checksum": "980d1366652f6f19c5ea644e6af362731fad2adf364608f80ae09f3f4a6aa7ba",
++  "checksum": "24aa55ff324e383bacbf09a49cd2f23d27a0fa06d297f95215da95120e1001a5",
+   "conditions": {
+     "aarch64-apple-darwin": [
+       "aarch64-apple-darwin"
+@@ -1019,7 +1019,7 @@
+             "target": "actix_router"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -2554,7 +2554,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -2736,7 +2736,7 @@
+             "target": "proc_macro_error3"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -2799,7 +2799,7 @@
+             "target": "proc_macro_error3"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -2866,7 +2866,7 @@
+             "target": "macro_string"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -3065,7 +3065,7 @@
+             "target": "darling"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -4075,7 +4075,7 @@
+             "target": "num_traits"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -4126,7 +4126,7 @@
+             "target": "num_traits"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -4177,7 +4177,7 @@
+             "target": "num_traits"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -4392,7 +4392,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -4876,7 +4876,7 @@
+             "target": "memchr"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -5179,7 +5179,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -5226,7 +5226,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -5273,7 +5273,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -5932,7 +5932,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -6007,7 +6007,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -6192,7 +6192,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -6742,7 +6742,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -7482,7 +7482,7 @@
+             "target": "prettyplease"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -7580,7 +7580,7 @@
+             "target": "lazycell"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -7685,7 +7685,7 @@
+             "target": "prettyplease"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -7756,7 +7756,7 @@
+             "target": "array_init"
+           },
+           {
+-            "id": "bytemuck 1.13.1",
++            "id": "bytemuck 1.25.2",
+             "target": "bytemuck"
+           }
+         ],
+@@ -7812,7 +7812,7 @@
+             "target": "either"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -8491,7 +8491,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -8989,7 +8989,7 @@
+             "target": "proc_macro_crate"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -9488,7 +9488,7 @@
+             "target": "num_traits"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -9654,8 +9654,25 @@
+       ],
+       "version": "0.6.9"
+     },
+-    "bytemuck 1.13.1": {
+-      "common_attrs": {
++    "bytemuck 1.25.2": {
++      "common_attrs": {
++        "crate_features": {
++          "common": [],
++          "selects": {
++            "aarch64-apple-darwin": [
++              "must_cast"
++            ],
++            "aarch64-unknown-linux-gnu": [
++              "must_cast"
++            ],
++            "x86_64-apple-darwin": [
++              "must_cast"
++            ],
++            "x86_64-unknown-linux-gnu": [
++              "must_cast"
++            ]
++          }
++        },
+         "edition": "2018"
+       },
+       "library_target_name": "bytemuck",
+@@ -9670,8 +9687,8 @@
+       "package_url": "https://github.com/Lokathor/bytemuck",
+       "repository": {
+         "Http": {
+-          "sha256": "17febce684fd15d89027105661fec94afb475cb995fbc59d2865198446ba2eea",
+-          "url": "https://static.crates.io/crates/bytemuck/1.13.1/download"
++          "sha256": "95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797",
++          "url": "https://static.crates.io/crates/bytemuck/1.25.2/download"
+         }
+       },
+       "targets": [
+@@ -9682,7 +9699,7 @@
+           }
+         }
+       ],
+-      "version": "1.13.1"
++      "version": "1.25.2"
+     },
+     "byteorder 1.5.0": {
+       "common_attrs": {
+@@ -10082,7 +10099,7 @@
+             "target": "darling"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -10247,7 +10264,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -10337,7 +10354,7 @@
+               "target": "serde"
+             },
+             {
+-              "id": "serde_bytes 0.11.15",
++              "id": "serde_bytes 0.11.19",
+               "target": "serde_bytes"
+             },
+             {
+@@ -10421,7 +10438,7 @@
+             "target": "lazy_static"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -10716,7 +10733,7 @@
+             "target": "darling"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -11885,7 +11902,7 @@
+             "target": "heck"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -12371,7 +12388,7 @@
+             "target": "convert_case"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -12421,7 +12438,7 @@
+             "target": "convert_case"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -14982,7 +14999,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -15181,7 +15198,7 @@
+             "target": "ident_case"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -15236,7 +15253,7 @@
+             "target": "ident_case"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -15575,7 +15592,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -15945,7 +15962,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -16032,7 +16049,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -16075,7 +16092,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -16125,7 +16142,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -16167,7 +16184,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -16256,7 +16273,7 @@
+             "target": "darling"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -16373,7 +16390,7 @@
+             "target": "convert_case"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -16488,7 +16505,7 @@
+             "target": "convert_case"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -17404,6 +17421,10 @@
+             "target": "ic_management_canister_types"
+           },
+           {
++            "id": "ic-metrics 0.17.0",
++            "target": "ic_metrics"
++          },
++          {
+             "id": "ic-metrics-encoder 1.1.1",
+             "target": "ic_metrics_encoder"
+           },
+@@ -17704,7 +17725,7 @@
+             "target": "pretty_assertions"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -17918,7 +17939,7 @@
+             "target": "serde_bytes_repr"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           },
+           {
+@@ -18573,7 +18594,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -19162,7 +19183,7 @@
+             "target": "enum_ordinalize"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -19208,7 +19229,7 @@
+             "target": "enum_ordinalize"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -19626,7 +19647,7 @@
+             "target": "heck"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -19709,7 +19730,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -19926,7 +19947,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -22028,7 +22049,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -25779,7 +25800,7 @@
+               "target": "serde"
+             },
+             {
+-              "id": "serde_bytes 0.11.15",
++              "id": "serde_bytes 0.11.19",
+               "target": "serde_bytes"
+             },
+             {
+@@ -26260,7 +26281,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           }
+         ],
+@@ -26415,7 +26436,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           },
+           {
+@@ -26679,7 +26700,7 @@
+             "target": "darling"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -26737,7 +26758,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           },
+           {
+@@ -26920,7 +26941,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           },
+           {
+@@ -26962,7 +26983,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           },
+           {
+@@ -27063,7 +27084,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           }
+         ],
+@@ -27693,7 +27714,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           }
+         ],
+@@ -27735,7 +27756,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           }
+         ],
+@@ -27777,7 +27798,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           }
+         ],
+@@ -27805,6 +27826,50 @@
+         }
+       ],
+       "version": "0.8.0"
++    },
++    "ic-metrics 0.17.0": {
++      "common_attrs": {
++        "deps": {
++          "common": [
++            {
++              "id": "serde 1.0.228",
++              "target": "serde"
++            }
++          ],
++          "selects": {
++            "cfg(not(target_family = \"wasm\"))": [
++              {
++                "id": "ic-wire 0.7.21",
++                "target": "ic_wire"
++              }
++            ]
++          }
++        },
++        "edition": "2024"
++      },
++      "library_target_name": "ic_metrics",
++      "license": "MIT",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "MIT"
++      ],
++      "name": "ic-metrics",
++      "package_url": "https://github.com/dragginzgame/ic-metrics",
++      "repository": {
++        "Http": {
++          "sha256": "6b63fcb11be2072221f86d632e3fbb978dc523ad24830f5a15365d1dfa83268a",
++          "url": "https://static.crates.io/crates/ic-metrics/0.17.0/download"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "ic_metrics",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.17.0"
+     },
+     "ic-metrics-encoder 1.1.1": {
+       "common_attrs": {
+@@ -28192,7 +28257,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           }
+         ],
+@@ -28246,7 +28311,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           },
+           {
+@@ -28328,7 +28393,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           },
+           {
+@@ -28507,7 +28572,7 @@
+             "target": "serde"
+           },
+           {
+-            "id": "serde_bytes 0.11.15",
++            "id": "serde_bytes 0.11.19",
+             "target": "serde_bytes"
+           },
+           {
+@@ -28654,6 +28719,107 @@
+         }
+       ],
+       "version": "0.11.1"
++    },
++    "ic-wire 0.7.21": {
++      "common_attrs": {
++        "crate_features": [
++          "typescript"
++        ],
++        "deps": [
++          {
++            "id": "bytemuck 1.25.2",
++            "target": "bytemuck"
++          },
++          {
++            "id": "postcard 1.1.3",
++            "target": "postcard"
++          },
++          {
++            "id": "serde 1.0.228",
++            "target": "serde"
++          },
++          {
++            "id": "serde_bytes 0.11.19",
++            "target": "serde_bytes"
++          },
++          {
++            "id": "serde_json 1.0.145",
++            "target": "serde_json"
++          }
++        ],
++        "edition": "2024",
++        "proc_macro_deps": [
++          {
++            "id": "ic-wire-derive 0.7.21",
++            "target": "ic_wire_derive"
++          }
++        ]
++      },
++      "library_target_name": "ic_wire",
++      "license": "MIT",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "MIT"
++      ],
++      "name": "ic-wire",
++      "package_url": "https://github.com/dragginzgame/ic-wire",
++      "repository": {
++        "Http": {
++          "sha256": "7d9d4dbea25193bd0b891080e44a0fb8a4538d1d7f695423499fe4d8110a40e3",
++          "url": "https://static.crates.io/crates/ic-wire/0.7.21/download"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "ic_wire",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.7.21"
++    },
++    "ic-wire-derive 0.7.21": {
++      "common_attrs": {
++        "deps": [
++          {
++            "id": "proc-macro2 1.0.107",
++            "target": "proc_macro2"
++          },
++          {
++            "id": "quote 1.0.47",
++            "target": "quote"
++          },
++          {
++            "id": "syn 3.0.9",
++            "target": "syn"
++          }
++        ],
++        "edition": "2024"
++      },
++      "library_target_name": "ic_wire_derive",
++      "license": "MIT",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "MIT"
++      ],
++      "name": "ic-wire-derive",
++      "package_url": "https://github.com/dragginzgame/ic-wire",
++      "repository": {
++        "Http": {
++          "sha256": "26896f2c980e27ce375eefd8846fce6d1c5924a96eed0c252b779f5f7af5e12a",
++          "url": "https://static.crates.io/crates/ic-wire-derive/0.7.21/download"
++        }
++      },
++      "targets": [
++        {
++          "ProcMacro": {
++            "crate_name": "ic_wire_derive",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.7.21"
+     },
+     "ic-xrc-types 1.2.0": {
+       "common_attrs": {
+@@ -29425,7 +29591,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -29765,7 +29931,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -30295,7 +30461,7 @@
+             "target": "darling"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -31200,7 +31366,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -34068,7 +34234,7 @@
+             "target": "fnv"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -34126,7 +34292,7 @@
+             "target": "lazy_static"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -34536,7 +34702,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -34585,7 +34751,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -34640,7 +34806,7 @@
+             "target": "proc_macro_utils"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -34751,7 +34917,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -35330,7 +35496,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -35735,7 +35901,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -38046,7 +38212,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -38932,7 +39098,7 @@
+             "target": "proc_macro_crate"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -39289,7 +39455,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -39817,7 +39983,7 @@
+             "target": "pest_meta"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -40156,7 +40322,7 @@
+             "target": "phf_shared"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -40298,7 +40464,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -41564,7 +41730,7 @@
+         },
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -41759,7 +41925,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -41798,7 +41964,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -41841,7 +42007,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -41894,7 +42060,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -41951,7 +42117,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -41990,7 +42156,7 @@
+       ],
+       "version": "0.10.0"
+     },
+-    "proc-macro2 1.0.106": {
++    "proc-macro2 1.0.107": {
+       "build_script_attrs": {},
+       "common_attrs": {
+         "crate_features": {
+@@ -42035,8 +42201,8 @@
+       "package_url": "https://github.com/dtolnay/proc-macro2",
+       "repository": {
+         "Http": {
+-          "sha256": "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934",
+-          "url": "https://static.crates.io/crates/proc-macro2/1.0.106/download"
++          "sha256": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9",
++          "url": "https://static.crates.io/crates/proc-macro2/1.0.107/download"
+         }
+       },
+       "targets": [
+@@ -42053,7 +42219,7 @@
+           }
+         }
+       ],
+-      "version": "1.0.106"
++      "version": "1.0.107"
+     },
+     "procfs 0.17.0": {
+       "build_script_attrs": {},
+@@ -42386,7 +42552,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -42569,7 +42735,7 @@
+             "target": "itertools"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -42998,7 +43164,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -43567,7 +43733,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           }
+         ],
+@@ -44802,7 +44968,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -45897,7 +46063,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "bytemuck 1.13.1",
++            "id": "bytemuck 1.25.2",
+             "target": "bytemuck"
+           }
+         ],
+@@ -46373,7 +46539,7 @@
+             "target": "glob"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -48315,7 +48481,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -49399,18 +49565,44 @@
+       ],
+       "version": "0.3.0"
+     },
+-    "serde_bytes 0.11.15": {
+-      "common_attrs": {
+-        "crate_features": [
+-          "default",
+-          "std"
+-        ],
+-        "deps": [
+-          {
+-            "id": "serde 1.0.228",
+-            "target": "serde"
+-          }
+-        ],
++    "serde_bytes 0.11.19": {
++      "common_attrs": {
++        "crate_features": {
++          "common": [
++            "default",
++            "std"
++          ],
++          "selects": {
++            "aarch64-apple-darwin": [
++              "alloc"
++            ],
++            "aarch64-unknown-linux-gnu": [
++              "alloc"
++            ],
++            "x86_64-apple-darwin": [
++              "alloc"
++            ],
++            "x86_64-unknown-linux-gnu": [
++              "alloc"
++            ]
++          }
++        },
++        "deps": {
++          "common": [
++            {
++              "id": "serde_core 1.0.228",
++              "target": "serde_core"
++            }
++          ],
++          "selects": {
++            "cfg(any())": [
++              {
++                "id": "serde 1.0.228",
++                "target": "serde"
++              }
++            ]
++          }
++        },
+         "edition": "2018"
+       },
+       "library_target_name": "serde_bytes",
+@@ -49424,8 +49616,8 @@
+       "package_url": "https://github.com/serde-rs/bytes",
+       "repository": {
+         "Http": {
+-          "sha256": "387cc504cb06bb40a96c8e04e951fe01854cf6bc921053c954e4a606d9675c6a",
+-          "url": "https://static.crates.io/crates/serde_bytes/0.11.15/download"
++          "sha256": "a5d440709e79d88e51ac01c4b72fc6cb7314017bb7da9eeff678aa94c10e3ea8",
++          "url": "https://static.crates.io/crates/serde_bytes/0.11.19/download"
+         }
+       },
+       "targets": [
+@@ -49436,7 +49628,7 @@
+           }
+         }
+       ],
+-      "version": "0.11.15"
++      "version": "0.11.19"
+     },
+     "serde_cbor 0.11.2": {
+       "common_attrs": {
+@@ -49545,7 +49737,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -49588,7 +49780,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -49826,7 +50018,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -50005,7 +50197,7 @@
+             "target": "darling"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -51868,7 +52060,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -51958,7 +52150,7 @@
+             "target": "heck"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -52679,7 +52871,7 @@
+             "target": "phf_shared"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -52746,7 +52938,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -52794,7 +52986,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -52960,7 +53152,7 @@
+             "target": "heck"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -53012,7 +53204,7 @@
+             "target": "heck"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -53064,7 +53256,7 @@
+             "target": "heck"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -53319,7 +53511,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -53399,7 +53591,7 @@
+         },
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -53438,6 +53630,58 @@
+       ],
+       "version": "2.0.119"
+     },
++    "syn 3.0.9": {
++      "common_attrs": {
++        "crate_features": [
++          "clone-impls",
++          "default",
++          "derive",
++          "parsing",
++          "printing",
++          "proc-macro",
++          "visit"
++        ],
++        "deps": [
++          {
++            "id": "proc-macro2 1.0.107",
++            "target": "proc_macro2"
++          },
++          {
++            "id": "quote 1.0.47",
++            "target": "quote"
++          },
++          {
++            "id": "unicode-ident 1.0.22",
++            "target": "unicode_ident"
++          }
++        ],
++        "edition": "2021"
++      },
++      "library_target_name": "syn",
++      "license": "MIT OR Apache-2.0",
++      "license_file": "LICENSE-APACHE",
++      "license_ids": [
++        "Apache-2.0",
++        "MIT"
++      ],
++      "name": "syn",
++      "package_url": "https://github.com/dtolnay/syn",
++      "repository": {
++        "Http": {
++          "sha256": "d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b",
++          "url": "https://static.crates.io/crates/syn/3.0.9/download"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "syn",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "3.0.9"
++    },
+     "syn-solidity 1.7.1": {
+       "common_attrs": {
+         "crate_features": [
+@@ -53446,7 +53690,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -53536,7 +53780,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -53910,7 +54154,7 @@
+             "target": "proc_macro_error2"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -54262,7 +54506,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -54688,7 +54932,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -54909,7 +55153,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -54952,7 +55196,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -55615,7 +55859,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -55832,7 +56076,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -56908,7 +57152,7 @@
+             "target": "prettyplease"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -57000,7 +57244,7 @@
+             "target": "prettyplease"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -57833,7 +58077,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -60338,7 +60582,7 @@
+             "target": "heck"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -60676,7 +60920,7 @@
+             "target": "bumpalo"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -62243,7 +62487,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -65285,7 +65529,7 @@
+             "target": "prettyplease"
+           },
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -66102,7 +66346,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -66272,7 +66516,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -66316,7 +66560,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -66398,7 +66642,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -66485,7 +66729,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -66576,7 +66820,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "proc-macro2 1.0.106",
++            "id": "proc-macro2 1.0.107",
+             "target": "proc_macro2"
+           },
+           {
+@@ -67012,6 +67256,7 @@
+     "ic-gateway 0.0.0-git",
+     "ic-identity-hsm 0.49.1",
+     "ic-management-canister-types 0.8.0",
++    "ic-metrics 0.17.0",
+     "ic-metrics-encoder 1.1.1",
+     "ic-platform 0.7.0",
+     "ic-sha3 1.0.0",
+@@ -67088,7 +67333,7 @@
+     "pprof 0.15.0",
+     "predicates 3.1.2",
+     "pretty_assertions 1.4.0",
+-    "proc-macro2 1.0.106",
++    "proc-macro2 1.0.107",
+     "procfs 0.17.0",
+     "prometheus 0.14.0",
+     "prometheus-parse 0.2.4",
+@@ -67144,7 +67389,7 @@
+     "semver 1.0.27",
+     "serde 1.0.228",
+     "serde-bytes-repr 0.3.0",
+-    "serde_bytes 0.11.15",
++    "serde_bytes 0.11.19",
+     "serde_cbor 0.11.2",
+     "serde_json 1.0.145",
+     "serde_regex 1.1.0",
+diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
+--- a/bazel/rust.MODULE.bazel
++++ b/bazel/rust.MODULE.bazel
+@@ -26,6 +26,11 @@
+ crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+ 
+ # Rust crates.
++crate.spec(
++    default_features = False,
++    package = "ic-metrics",
++    version = "0.17.0",
++)
+ crate.spec(
+     default_features = False,
+     features = ["gzip"],

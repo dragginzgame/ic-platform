@@ -171,7 +171,11 @@ lockfile-only constraint or a blanket upstream export.
 ## PocketIC maintenance boundary
 
 The maintainer explicitly authorized transferring IC Profiler's native provider,
-including its existing assembler/fixtures, into `native/ic-profiler`. That opt-in
+including its existing assembler/fixtures, into `native/ic-profiler`. Profiler
+#4 / Platform #90 return the product CLI/query renderer and shared PNG/range
+mechanics to the consumer; keep only their native integration/state adapters here.
+The maintainer retained Platform's gzip facade for Profiler; #91 retirement is
+outside this paired change. That opt-in
 source profile owns replica adapters and the patched client below this facade;
 its IC-free recorder/viewer remain consumer-owned. Preserve the legacy tooling
 during this transfer; this is no general permission to introduce Python tooling.

@@ -27,7 +27,7 @@
       },
       {
         "path": "profilingic.md",
-        "sha256": "3b8b29218f2e7034691d0bc93e6cb77aac5190d5ee5c4770fefe5bf35392e9e0",
+        "sha256": "5cdfc689d24dce12e18bcc66203f276e64fff9502f7fbc5c9ff47126f8079cfd",
         "source": "docs/profiling-design.md"
       },
       {
@@ -79,6 +79,14 @@
       {
         "path": "0006-profiler-request-admission.patch",
         "sha256": "3395eb0c99c94255a99061a25a08ba7d96751058cdd35bf7e45ce2f2cbe2f0f6"
+      },
+      {
+        "path": "0007-profiler-measurement-counters.patch",
+        "sha256": "56bed913832332a695651777c83e079b6d5e778731d31d125094cb77ee547498"
+      },
+      {
+        "path": "0008-profiler-product-inputs.patch",
+        "sha256": "a1f38dfbabdca3891968f90ccd7f9549af00930849172648f2dcc36ff72eb99b"
       }
     ],
     "series": "patches/ic/series"

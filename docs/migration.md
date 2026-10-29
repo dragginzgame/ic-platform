@@ -239,7 +239,7 @@ the original fingerprints without changing their recorded hashes.
 
 ## External Candid nesting qualification (#73)
 
-Pending **0.7.5** applies one fixed rule: bounded Platform decoders reject Candid
+Source release **0.7.5** applies one fixed rule: bounded Platform decoders reject Candid
 nested beyond **16 constructed levels** before upstream header construction or
 decoding. Exactly 16 levels are allowed. Scalars have depth zero; an empty
 container still uses one level. This applies to `decode_one`, `decode_args`,
@@ -532,12 +532,20 @@ and source/build receipts. Consumers select a full Platform commit and the
 not a new default feature or a replacement for the published registry client.
 
 Profiler retains its IC-free recorder, reports, retention, workloads and viewer.
+The paired #90 cut also requires consumer-owned CLI/query-rendering files and
+private PNG/range helpers listed in the [source contract](../native/ic-profiler/README.md#paired-product-source-contract).
+Do not select this source revision with an older consumer that omits them.
+The existing native integration module paths remain unchanged; no compatibility
+copies remain in the provider.
 Its source injection is separate from provider-owned adapters; overlaps are
 rejected and both origins enter the assembly digest. Native Cargo/Bazel build
 inputs belong here. The consumer recorder's optional native `gzip` dependency
 selects only the isolated Tooling codec facade; no IC/native feature or dependency
 back to the provider is selected. Existing upstream type identities, external
-Candid bytes and cryptographic bodies remain unchanged.
+Candid bytes and cryptographic bodies remain unchanged. The native workspace
+and Bazel locks additionally supply published IC Metrics 0.17 with defaults
+disabled for consumer-owned counters. This is distinct from internal replica
+metrics 0.9; counter arithmetic transfers no runtime charging or report policy.
 
 The native server selects the `ic-admin` library without CLI-only NNS setup;
 `lifeline` and Motoko are excluded. The upstream administrative CLI keeps its

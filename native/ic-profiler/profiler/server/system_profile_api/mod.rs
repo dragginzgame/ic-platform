@@ -1,7 +1,6 @@
 //! Run-wide physical profiling API. This deliberately never enables detailed
 //! Wasm instrumentation or feeds host observations into replicated accounting.
 
-#[path = "system_profile_api/admission.rs"]
 mod admission;
 
 #[cfg(test)]
@@ -18,12 +17,10 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use flate2::{Compression, read::GzDecoder, write::GzEncoder};
 use ic_system_profiler::{Query as ProfileQuery, RunConfig, StopOptions};
 use serde_json::{Value, json};
 use std::{
     collections::{BTreeMap, HashMap, VecDeque},
-    io::{Read, Write},
     sync::{Mutex, OnceLock},
 };
 
@@ -203,13 +200,7 @@ async fn import(body: Bytes) -> Response {
 
 pub fn export_bytes(run_id: &str) -> Result<Vec<u8>, String> {
     let _scope = ic_system_profiler::scope("ic.observability.export");
-    let raw = ic_system_profiler::export_bundle(run_id)?;
-    if raw.starts_with(&[0x1f, 0x8b]) {
-        return Ok(raw);
-    }
-    let mut writer = GzEncoder::new(Vec::new(), Compression::fast());
-    writer.write_all(&raw).map_err(|e| e.to_string())?;
-    writer.finish().map_err(|e| e.to_string())
+    ic_system_profiler::export_bundle(run_id)
 }
 
 pub fn import_bytes(bytes: &[u8]) -> Result<Value, String> {
@@ -218,15 +209,8 @@ pub fn import_bytes(bytes: &[u8]) -> Result<Value, String> {
         return Err("Profile bundle exceeds the 128 MiB input budget".into());
     }
     let decoded = if bytes.starts_with(&[0x1f, 0x8b]) {
-        let mut decoded = Vec::new();
-        GzDecoder::new(bytes)
-            .take(MAX_IMPORT_BYTES as u64 + 1)
-            .read_to_end(&mut decoded)
-            .map_err(|e| format!("Invalid gzip profile bundle: {e}"))?;
-        if decoded.len() > MAX_IMPORT_BYTES {
-            return Err("Decompressed profile bundle exceeds the 128 MiB budget".into());
-        }
-        decoded
+        ic_platform::gzip::decode_gzip(bytes, MAX_IMPORT_BYTES, MAX_IMPORT_BYTES)
+            .map_err(|error| format!("Invalid gzip profile bundle: {error}"))?
     } else {
         bytes.to_vec()
     };
@@ -887,6 +871,62 @@ pub fn render(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bundle_entrypoints_preserve_shared_gzip_framing_and_distinct_expanded_budgets() {
+        assert_eq!(MAX_IMPORT_BYTES, 128 * 1024 * 1024);
+        let created = ic_system_profiler::start(ic_system_profiler::RunConfig::default()).unwrap();
+        let id = created["run_id"].as_str().unwrap();
+        ic_system_profiler::stop(id, &ic_system_profiler::StopOptions::default()).unwrap();
+        let compressed = export_bytes(id).unwrap();
+        assert_eq!(compressed, ic_system_profiler::export_bundle(id).unwrap());
+        let raw = ic_platform::gzip::decode_gzip(&compressed, MAX_IMPORT_BYTES, 256 * 1024 * 1024)
+            .unwrap();
+        for bytes in [raw.as_slice(), compressed.as_slice()] {
+            let imported = import_bytes(bytes).unwrap();
+            ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
+        }
+        let mut trailing = compressed.clone();
+        trailing.push(0);
+        let mut concatenated = compressed.clone();
+        concatenated.extend_from_slice(&compressed);
+        let mut crc = compressed.clone();
+        let tail = crc.len() - 8;
+        crc[tail] ^= 1;
+        let mut length = compressed.clone();
+        let tail = length.len() - 4;
+        length[tail] ^= 1;
+        for invalid in [
+            trailing.as_slice(),
+            concatenated.as_slice(),
+            crc.as_slice(),
+            length.as_slice(),
+            &compressed[..compressed.len() - 1],
+            &[0x1f, 0x8b, 0],
+        ] {
+            assert!(import_bytes(invalid).is_err());
+            assert!(ic_system_profiler::import_bundle(invalid).is_err());
+        }
+        // Padding outside the JSON document preserves the exact same profile.
+        // Exercise the real inclusive API limit rather than a smaller substitute.
+        let mut expanded = raw;
+        expanded.resize(MAX_IMPORT_BYTES, b' ');
+        let mut exact = Vec::new();
+        ic_platform::gzip::encode_gzip(&expanded, &mut exact, 1, u64::MAX).unwrap();
+        for bytes in [expanded.as_slice(), exact.as_slice()] {
+            let imported = import_bytes(bytes).unwrap();
+            ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
+        }
+        expanded.push(b' ');
+        assert!(import_bytes(&expanded).is_err());
+        let mut over = Vec::new();
+        ic_platform::gzip::encode_gzip(&expanded, &mut over, 1, u64::MAX).unwrap();
+        assert!(import_bytes(&over).is_err());
+        // The independent recorder retains its separate 256 MiB decoded ceiling.
+        let imported = ic_system_profiler::import_bundle(&over).unwrap();
+        ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
+        ic_system_profiler::delete_run(id).unwrap();
+    }
 
     #[test]
     fn shared_argument_conversion_preserves_exact_values_and_omits_nulls() {
