@@ -1,18 +1,22 @@
 # Current handoff
 
-## Pending 0.7.6: compatible complexity cleanup
+## Pending 0.7.7: ordinary native API module layout
 
-Local HEAD is source release **0.7.5**, `55f4d72`. The uncommitted cleanup batch
-uses **0.7.6** notes because public APIs, external bytes, CLI/request fields,
-decoder errors and caller policies remain compatible. No package version,
-release, publication or consumer adoption is performed. Preserve the unrelated
-local `ic-host-artifacts` lock update from 0.69.10 to 0.69.11.
+Source release **0.7.6** is on main at `8871f67`. Its API repair and complete
+complexity cleanup remain intact. [PR #88](https://github.com/dragginzgame/ic-platform/pull/88)
+now contributes only the ordinary API module directory and matching source links;
+the shipped path override is removed because normal module resolution suffices.
+No package version, release or publication is performed. Pending notes use
+**0.7.7** because public behavior and dependency identities remain compatible.
 
-Separately, [PR #89](https://github.com/dragginzgame/ic-platform/pull/89) is updated
-at `2e038f9`, stacked on refreshed [PR #88](https://github.com/dragginzgame/ic-platform/pull/88)
-at `8ff4272`. These supply native counter inputs and ordinary module layout, with
-published notes preserved. They exclude this dirty cleanup and are not applied
-here. Hosted checks are pending; integration order remains #88, then #89.
+[#73](https://github.com/dragginzgame/ic-platform/issues/73) is closed as delivered
+in 0.7.5. [PR #87](https://github.com/dragginzgame/ic-platform/pull/87) is closed as
+already implemented after exact implementation/test comparison with that release.
+The fixed nesting source remains unchanged in main; costs and limitations remain
+in the migration contract. #50 is set aside until a supplying solution exists;
+its advisory check and dependency selection are unchanged.
+
+## Released 0.7.6 cleanup and qualification
 
 External endpoint adapters now pass parsed paths/functions to the existing
 generator rather than stringify/reparse them. Single-result and protocol replies

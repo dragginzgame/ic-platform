@@ -1,7 +1,6 @@
 //! Run-wide physical profiling API. This deliberately never enables detailed
 //! Wasm instrumentation or feeds host observations into replicated accounting.
 
-#[path = "system_profile_api/admission.rs"]
 mod admission;
 
 #[cfg(test)]

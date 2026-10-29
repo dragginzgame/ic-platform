@@ -19,7 +19,7 @@ pub(crate) mod memory_snapshot_api;
 pub(crate) mod memory_snapshot_image;
 #[path = "server/memory_snapshots.rs"]
 pub(crate) mod memory_snapshots;
-#[path = "server/system_profile_api.rs"]
+#[path = "server/system_profile_api/mod.rs"]
 pub mod system_profile_api;
 #[path = "server/system_profile_cli.rs"]
 pub mod system_profile_cli;
