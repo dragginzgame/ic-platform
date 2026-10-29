@@ -31,7 +31,7 @@ The consumer follow-on to #3 is tracked by
 [Profiler #6](https://github.com/dragginzgame/ic-profiler/issues/6). It does not copy
 the normal Profiler checkout's concurrent rendering/Shared Tooling work.
 
-## Qualification in progress
+## Qualification
 
 Evidence: `/tmp/profiler-host-ownership-20261029`. Full Platform Clippy and
 independent Profiler Clippy pass before longer checks. The changed recorder's
@@ -44,8 +44,18 @@ is included. Platform's published Rust 1.91/default/Wasm contracts are unchanged
 
 Cargo/Bazel locks are resolver-generated; an initial workspace-only Bazel repin
 refused the old locked libc, then targeted libc repinning succeeded. Failures and
-artifacts remain. Actual paired assembly/server, changed recorder Bazel and
-installed qualification are pending and must not be inferred from fixture checks.
+artifacts remain. Paired Platform `b4de0d4` and clean Profiler `a238580` pass actual assembly, native
+graph admission and the Rust 1.99.0 server build. The corrected native recorder
+Bazel target passes all 72 tests. Native Cargo passes 72 recorder, three CLI and
+12 API/gzip tests. Three real CLI scenarios preserve natural-exit text, final
+sampling before reaping, default cleanup and keep-running behavior. All five
+installed profiling scenarios pass against frozen server SHA-256:
+`72ae33520917c0a65f0f897aa241c3f2ea3c9d23bacf9b3dde5d8556df13360d`.
+Receipts bind those exact inputs and executable; the later handoff-only commit
+does not change qualified source. Deliveries: [Platform #95](https://github.com/dragginzgame/ic-platform/pull/95),
+[Profiler #7](https://github.com/dragginzgame/ic-profiler/pull/7) and Tooling #265.
+The first Bazel test exposed an upstream annotation still naming libc 0.2.186;
+its generator input and generated lock are corrected, with the failed log kept.
 Native macOS, full replica Bazel/NNS and live provider acceptance remain separate.
 No performance or Wasm-size saving is measured for this native ownership move.
 
