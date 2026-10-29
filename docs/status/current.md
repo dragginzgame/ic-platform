@@ -1,38 +1,48 @@
 # Current handoff
 
-## Pending 0.8.1: paired Profiler product source contract
+## Pending 0.8.2: IC Tooling adoption
 
-Local source release **0.8.0** is `80b424a`. The current merge brings incoming
-`c5740cd`, including #93's Profiler product ownership work. Its former pending
-0.7.7 notes now belong to 0.8.1; package versions stay at 0.8.0. Preserve the
-released Principal/ICRC packaging and standalone signature Serde correction.
-Publication and consumer/provider adoption retain their separate qualification.
+The local base is released Platform 0.8.1, `10c2610`. Package versions remain
+0.8.1. The maintainer explicitly approved 0.8.2 as a one-time exception for the
+unused gzip surface, including Host Artifacts 0.70's `GzipError` identity.
+This does not relax future compatibility policy. Platform-only imports stay
+unchanged; direct Host APIs exchanging that type must align to 0.70.
+Release/publication remain maintainer-owned; siblings are read-only.
 
-Profiler owns the injected CLI, query renderer and private PNG/range helpers.
-Platform retains the pinned IC source, native state/trace adapters, HTTP admission,
-patched client and Cargo/Bazel inputs. Older consumers keep their previous
-provider pin until supplying the files in the
-[paired contract](../../native/ic-profiler/README.md#paired-product-source-contract).
-The source profile rejects overlapping owners and records provider/consumer digests.
+Adopt published IC Tooling 0.70.0 (source `ecc8d61`) for Host Artifacts,
+Testkit qualification and the managed IC Build release editor. Preserve codec
+levels/budgets, external bytes, Testkit transport/retry authority and exact
+executor/ic0/management pins. The main lock changes only Host Artifacts relative
+to this batch's captured input; retain its pre-existing Wire 0.7.23 selection.
+The runtime lock updates Testkit and its required Host family together, retaining
+Wire 0.7.22, Timers and the simulator selection. Its native dependency versions
+are independent of the deployment graph. Testkit retains registry Platform 0.8
+without a global local-source patch, including during release lock preparation.
+The native Profiler Cargo/Bazel recipe
+retains its separate qualified pins and is outside this update.
 
-The maintainer chose to retain Platform gzip. Native imports use that facade;
-exports preserve core gzip bytes. API input/expanded limits remain 128 MiB and
-core expansion remains 256 MiB. Corrupt, truncated, trailing and concatenated
-members are rejected. PNG remains zlib with its own image budgets and admission.
-Server-library product regressions now run before installed native scenarios.
+Shared Tooling 0.27.7 remains exported at
+`a8baa51099ca48cdb12e2171f031d488db89d67d`, including source main `11d519c`
+and PR #322's reviewed graph-observation interface required by merged #97.
+All 109 snapshot files match the independently selected source commit.
+Both Wire workspace minima remain 0.7.22. Native-only metadata and Wasm/default/
+executor exclusions remain; the optional sccache catalog entry does not enable it.
 
-The native Cargo/Bazel recipe selects published Metrics 0.17.2, Platform 0.7.6
-and Host Artifacts 0.69.12. Those source-profile inputs are independent of this
-repository's 0.8.0 library version. Replica-internal metrics remain distinct;
-physical measurements never acquire charging or allocation authority. Profiler
-retains its product policy, and siblings remain read-only.
+Earlier Tooling/Wire proof is in `target/tooling-wire-adoption-20261029`.
+Current adoption evidence is in `target/ic-tooling-adoption-20261029`.
+Full owner Clippy passed before longer checks. Standalone gzip identity, prior
+byte parity and refusal proofs pass on Rust 1.91/1.99.1. The Testkit driver passes
+strict Clippy and six native tests on each compiler. Raw/owned Wire and external
+Candid canisters build at MSRV; graph isolation, current Wire schema/TypeScript,
+source guards and formatting pass. The prepared CLI-feature editor passes real
+lock drift/refusal/idempotence checks, preserving same-version registry records.
+Full CI, installed canisters and native macOS remain separate.
 
-The incoming handoff records assembler and independent PNG/range checks. They
-are historical evidence for their source inputs, not a new server qualification
-for this merge. Full owner Clippy, 45 assembler fixtures, inventory/docs/format,
-changelog validation and protected-source checks pass; evidence is in
-`target/merge-resolution`. Full release CI and native build/runtime acceptance
-remain separate.
+PRs #95/#97 are merged on remote main at `c8bbe7e`, closing #94/#96. This
+working checkout has not advanced its Git base; retain those integrated Host/
+process and Profiler product changes when combining work. Profiler #9 needs the
+merged provider pin. #50 remains deferred; #98 owns extra native Clippy findings
+and #99 remains draft. These integration records do not waive their checks.
 
 ## Released 0.8.0: Principal and selected ICRC packaging
 
@@ -88,9 +98,7 @@ admitted. Follow-up remains in GitHub, not a separate local issue queue.
 
 ## Prior native qualification
 
-The 0.7.6 handoff retains the qualified IC pin
-`ee8086a9773725fd1058832a9400297cf0990112`, Rust 1.99.0 and frozen server hashes
-with their exact source/receipt scope. Prior installed tests do not qualify
-changed provider inputs. Native macOS, full replica Bazel/NNS genesis, release
-CI and live-provider acceptance remain separate. The detailed handoffs are
-preserved at `80b424a` and incoming `c5740cd`; no build artifacts are removed.
+The native profile retains IC pin `ee8086a9773725fd1058832a9400297cf0990112`
+and Rust 1.99.0. Frozen server hashes and exact receipt scope remain in the
+handoffs at `80b424a` and `c5740cd`; no artifacts are removed. This adoption adds
+no installed/native-server, macOS, full Bazel/NNS or live-provider qualification.

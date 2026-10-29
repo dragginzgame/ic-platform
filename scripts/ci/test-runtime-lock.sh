@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-runtime-lock.XXXXXX")"
-trap 'rm -rf "$fixture"' EXIT
+# shellcheck source=scripts/ci/fixture-lifecycle.sh
+source "$root/scripts/ci/fixture-lifecycle.sh"
+fixture="$(fixture_create "${TMPDIR:-/tmp}/platform-runtime-lock.XXXXXX")"
+fixture_complete=false
+trap 'fixture_finish "$?" "$fixture" "Runtime lock fixture retained"' EXIT
 mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/fixtures/cdk-runtime" "$fixture/.tools" "$fixture/ci"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 cp "$root/scripts/release/runtime-lock.sh" "$fixture/scripts/release/"
@@ -26,8 +29,9 @@ if bash "$fixture/scripts/release/runtime-lock.sh" prepare 98.0.0 2> "$fixture/w
 cmp "$fixture/before.lock" "$lock"
 bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
 bash "$fixture/scripts/release/runtime-lock.sh" check
-# Only local package versions and their version-qualified dependency references
-# may change. Registry versions (including an older Platform) remain untouched.
+# Only local package versions and references to those identities may change.
+# Registry identities and their references (including Testkit's separate
+# Platform of the same version) must remain untouched.
 for side in before after; do
     source="$lock"
     if [[ "$side" == before ]]; then source="$fixture/before.lock"; fi
@@ -44,4 +48,5 @@ cmp "$fixture/before.json" "$fixture/after.json"
 cp "$lock" "$fixture/prepared.lock"
 bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
 cmp "$fixture/prepared.lock" "$lock"
+fixture_complete=true
 echo 'Runtime lock drift, wrong-base refusal, coordinated update and retry checks passed'

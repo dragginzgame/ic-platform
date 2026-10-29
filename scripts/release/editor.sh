@@ -9,6 +9,6 @@ case "$1" in install|check) ;; *) echo 'usage: editor.sh install|check' >&2; exi
 # shellcheck source=ci/release-editor.env
 source "$root/ci/release-editor.env"
 arguments=(--consumer "$root" --package ic-build --version "$PLATFORM_RELEASE_EDITOR_VERSION"
-    --bin ic-build-release-metadata --profile debug)
+    --bin ic-build-release-metadata --features cli --profile debug)
 [[ "$1" != check ]] || arguments+=(--check)
 exec bash "$root/scripts/dev/install-rust-tools.sh" "${arguments[@]}"

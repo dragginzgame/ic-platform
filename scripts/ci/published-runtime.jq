@@ -1,5 +1,5 @@
 # All boundary packages must be registry identities. Runtime fixtures also have
-# an older facade through Timers: preserve that admitted graph while requiring
+# transitive facades through Timers/Testkit: preserve that graph while requiring
 # the exact supplier/generator pair. Standalone proofs retain one facade.
 [.packages[] | select(.name == "ic-platform")] as $facades |
 [.packages[] | select(.name == "ic-platform-macros")] as $generators |

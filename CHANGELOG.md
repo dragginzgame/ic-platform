@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.2]
+
+### ⬆️ Dependencies
+
+- Adopt Host Artifacts 0.70.0 for the optional gzip facade. The maintainer approved
+  this patch release as a one-time exception because the surface has no consumers
+  yet. Its error uses the 0.70 Rust identity; imports, bytes and limits retain
+  their contracts.
+- Adopt Shared Tooling 0.27.7 with its required
+  [graph-observation supplier](https://github.com/dragginzgame/shared-tooling/pull/322),
+  and Wire 0.7.22 for host metadata and qualification fixtures.
+  Preserve feature isolation, external bytes and consumer-owned policy.
+- Adopt IC Tooling 0.70.0 for Testkit qualification and the managed release
+  metadata editor, retaining caller-owned transport and retry policies.
+
 ## [0.8.1] - 2026-10-29
 
 ### 🧭 Migration Notes
