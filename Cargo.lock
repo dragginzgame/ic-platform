@@ -166,9 +166,9 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "aws-lc-rs"
-version = "1.18.2"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "faac5829c2b74c28f830747e7818ccfb684261b5f48a1118b1e2a13d36dfab13"
+checksum = "048006790404103c488e6c5616b3e7e702a71292aadda08e8f7698a9e0d2eb53"
 dependencies = [
  "aws-lc-sys",
  "zeroize",
@@ -176,9 +176,9 @@ dependencies = [
 
 [[package]]
 name = "aws-lc-sys"
-version = "0.46.0"
+version = "0.47.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1622d8446a2d4b2ce0c7eefc73dd43a99779028d5ee5c2dd8073a658ba8a2bc"
+checksum = "8bfbe32ac36b3c428696ce315464181bc4029d689fd58e3f2a4e58c252242f52"
 dependencies = [
  "cc",
  "cmake",
@@ -1376,7 +1376,7 @@ dependencies = [
 
 [[package]]
 name = "ic-call"
-version = "0.7.4"
+version = "0.7.5"
 dependencies = [
  "ic-platform",
 ]
@@ -1423,9 +1423,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.69.8"
+version = "0.69.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fdf8752c1be431cb95d1f13ef0fdad3f7e564e5444396642d8d77bfb297ca54b"
+checksum = "1daa646aee2bab75e8169b013ed294023196450af321d3b05503046a4959d5d9"
 dependencies = [
  "flate2",
  "sha2 0.10.9",
@@ -1455,7 +1455,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.7.4"
+version = "0.7.5"
 dependencies = [
  "assert_matches",
  "blake3",
@@ -1493,7 +1493,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.7.4"
+version = "0.7.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1572,9 +1572,9 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.7.20"
+version = "0.7.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "734414271ae5bb90c5dbd470ed498a7a8b3aa80f55293654b6a6d1240beec2c2"
+checksum = "7d9d4dbea25193bd0b891080e44a0fb8a4538d1d7f695423499fe4d8110a40e3"
 dependencies = [
  "bytemuck",
  "ic-wire-derive",
@@ -1586,9 +1586,9 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.7.20"
+version = "0.7.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60e681d8cb6ee0a99b87c6c26e29f0bb4d371f2dbcda0c9719b7d591d111df10"
+checksum = "26896f2c980e27ce375eefd8846fce6d1c5924a96eed0c252b779f5f7af5e12a"
 dependencies = [
  "proc-macro2",
  "quote",

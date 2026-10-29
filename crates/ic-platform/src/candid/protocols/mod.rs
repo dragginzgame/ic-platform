@@ -4,7 +4,7 @@
 //! Callers select the destination, wait, attachment, budgets and reply arity.
 //! Returned protocol errors are decoded values, separate from transport failures.
 //! Decoding authenticates nothing and never permits resubmission. The parent
-//! module's unresolved Wasm depth limitation also applies here.
+//! module admits at most 16 constructed wire levels before upstream decoding.
 
 use super::{DecodeError, DecodeLimits, config};
 use candid::{de::IDLDeserialize, utils::ArgumentDecoder};

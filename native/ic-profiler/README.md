@@ -35,8 +35,9 @@ only Platform's optional native `gzip` feature, pinned in the provider's Cargo a
 Bazel inputs. The recorder also consumes published IC Metrics 0.17 scalar
 arithmetic; this provider owns its native workspace and Bazel locks, distinct
 from the IC workspace's internal `ic-metrics` package. Neither measurement
-counters nor the gzip facade own charging policy. That facade delegates to published IC Tooling and has no dependency
-back to this workspace, PocketIC or the native provider. Compression implementation
+counters nor the gzip facade own charging policy. The gzip facade delegates to
+published IC Tooling and has no dependency back to this workspace, PocketIC or
+the native provider. Compression implementation
 stays in Tooling; the consumer retains levels, import limits and bundle semantics.
 
 The PocketIC profile selects the `ic-admin` library without its CLI-only NNS

@@ -69,18 +69,15 @@ async fn random() -> Vec<u8> {
     .execute()
     .await
     .unwrap();
-    protocols::management::raw_rand::decode(
-        response.as_ref(),
-        candid::DecodeLimits {
-            reply_bytes: 512,
-            decoding_quota: 10000,
-            skipping_quota: 0,
-            type_entries: 8,
-            header_bytes: 128,
-        },
-        ReplyArity::Exact,
-    )
-    .unwrap()
+    let reply_limits = candid::DecodeLimits {
+        reply_bytes: 512,
+        decoding_quota: 10000,
+        skipping_quota: 0,
+        type_entries: 8,
+        header_bytes: 128,
+    };
+    protocols::management::raw_rand::decode(response.as_ref(), reply_limits, ReplyArity::Exact)
+        .unwrap()
 }
 #[endpoint::update(name = "external_legacy_empty", limits = "LIMITS", empty_args = "unit")]
 fn legacy_empty() {}
@@ -144,4 +141,43 @@ fn no_types(value: Option<u64>) -> u64 {
 fn no_skip(value: u64) -> u64 {
     VALUE.set(value);
     value
+}
+
+const NESTED_LIMITS: ArgumentLimits = ArgumentLimits {
+    max_bytes: 65536,
+    decoding_quota: 1_000_000,
+    skipping_quota: 1_000_000,
+    max_type_len: 4096,
+    max_header_len: 65536,
+};
+#[endpoint::query(
+    name = "external_nesting_probe",
+    limits = "NESTED_LIMITS",
+    empty_args = "reject"
+)]
+fn nesting_probe(bytes: Vec<u8>) -> u8 {
+    let limits = candid::DecodeLimits {
+        reply_bytes: 65536,
+        decoding_quota: 1_000_000,
+        skipping_quota: 1_000_000,
+        type_entries: 4096,
+        header_bytes: 65536,
+    };
+    match candid::decode_exactly_one::<contract::Reserved>(&bytes, limits) {
+        Ok(_) => 0,
+        Err(error) => match error.nesting_error() {
+            Some(candid::nesting::NestingError::ValueDepth { .. }) => 1,
+            Some(candid::nesting::NestingError::TypeDepth { .. }) => 2,
+            _ => 3,
+        },
+    }
+}
+#[endpoint::update(
+    name = "external_nesting_effect",
+    limits = "NESTED_LIMITS",
+    empty_args = "reject"
+)]
+fn nesting_effect(_: contract::Reserved) -> u64 {
+    VALUE.set(555);
+    555
 }

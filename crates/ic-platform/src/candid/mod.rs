@@ -6,11 +6,11 @@
 //! All decoders select Candid's compact diagnostics while retaining typed causes.
 //! Compact diagnostics can include small inputs; callers own error disclosure.
 //!
-//! These wire/work quotas are not a Wasm recursion-depth guarantee. The selected
-//! upstream decoder has no supported Wasm depth ceiling: a small, deeply nested
-//! external reply can trap rather than return [`DecodeError`]. See
-//! [the nesting issue](https://github.com/dragginzgame/ic-platform/issues/73).
-//! Low-level [`contract`] APIs retain caller-owned configuration and budgeting.
+//! Bounded helpers refuse more than 16 constructed wire levels before upstream
+//! header construction or decoding. Existing quotas also bound admission work.
+//! Low-level [`decoder`]/[`contract`] APIs retain upstream behavior; their
+//! callers may run [`nesting::check`] first. This bounds wire nesting, not
+//! arbitrary trusted expected schemas or custom Rust visitors.
 
 use candid::{
     CandidType,
@@ -23,6 +23,7 @@ pub mod arguments;
 pub mod decoder;
 #[cfg(feature = "candid-endpoint")]
 pub mod endpoint;
+pub mod nesting;
 pub mod protocols;
 pub mod reserved;
 pub mod sequence;
@@ -117,6 +118,16 @@ impl Error for DecodeError {
     }
 }
 
+impl DecodeError {
+    /// Recover the typed admission refusal without changing existing error variants.
+    pub fn nesting_error(&self) -> Option<&nesting::NestingError> {
+        match self {
+            Self::Candid(candid::Error::Custom(error)) => error.downcast_ref(),
+            _ => None,
+        }
+    }
+}
+
 fn config(bytes: &[u8], limits: DecodeLimits) -> Result<DecoderConfig, DecodeError> {
     if bytes.len() > limits.reply_bytes {
         return Err(DecodeError::ReplyTooLarge {
@@ -124,6 +135,8 @@ fn config(bytes: &[u8], limits: DecodeLimits) -> Result<DecoderConfig, DecodeErr
             maximum: limits.reply_bytes,
         });
     }
+    nesting::check(bytes, limits)
+        .map_err(|error| DecodeError::Candid(candid::Error::Custom(error.into())))?;
     let mut config = DecoderConfig::new();
     config
         .set_decoding_quota(limits.decoding_quota)
