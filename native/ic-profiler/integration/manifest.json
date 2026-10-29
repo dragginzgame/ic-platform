@@ -87,6 +87,10 @@
       {
         "path": "0008-host-gzip-boundary.patch",
         "sha256": "426e61ec4646eeb4c3ded099de3a0a1d3688c94434e6ddc2424dbbb126de1a68"
+      },
+      {
+        "path": "0009-host-process-ownership.patch",
+        "sha256": "82822ead04d430cd222bc507354bd7282579ba804157fffcd9d0b0db5bf093f6"
       }
     ],
     "series": "patches/ic/series"

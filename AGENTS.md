@@ -174,6 +174,10 @@ adapters and build inputs. Generic gzip is supplied directly by Host Artifacts.
 The exhausted Platform gzip facade is retired in the breaking 0.8 batch, without
 a compatibility export or codec copy. Preserve the distinct API/core budgets and
 qualify the paired consumer and native Cargo/Bazel graphs.
+The authorized #94 follow-on delegates raw OS observations and Unix workload
+mechanics to Host Process. Profiler retains selection, cadence, retained DTOs,
+diagnostics and lifecycle choices; Platform supplies matching native inputs.
+Do not introduce a facade export for those generic Host operations.
 
 ## PocketIC maintenance boundary
 

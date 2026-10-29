@@ -56,7 +56,11 @@ Generic gzip belongs directly to IC Tooling `ic-host-artifacts`; the Platform
 facade/feature is retired in 0.8 after Profiler adoption. Profiler also supplies
 its CLI and rendering sources through disjoint injection. Platform retains IC
 capture/state adapters and their native Cargo/Bazel inputs, without acquiring
-product rendering or codec implementation ownership.
+product rendering or codec implementation ownership. The native profile also
+supplies Host Process for raw OS observations and explicit workload mechanics;
+Profiler retains capture selection, cadence, retained DTOs and report policy.
+Artifacts/FS/Process share immutable supplier c20dbd1, selecting libc 0.2.191 in
+native Cargo/Bazel locks; none enters the default or deployed Platform graph.
 
 The published 0.6.20 external DTO additions are maintained from pinned protocol
 schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,

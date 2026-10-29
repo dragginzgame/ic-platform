@@ -39,6 +39,12 @@ and Bazel inputs. Compression stays in Tooling; the consumer retains levels,
 limits and bundle semantics. API input/expanded limits remain 128 MiB; the core's
 expanded limit remains 256 MiB. Both refuse corrupt or incomplete members,
 concatenation and trailing bytes. PNG zlib remains separate.
+The Host Process follow-on supplies raw OS observations and explicit workload
+custody/gating. Profiler owns selection, creation-identity admission, cadence,
+retained DTOs, final-sample ordering, grace and keep-running choices. Host
+Artifacts/FS/Process share immutable supplier c20dbd11785c17d369651f51fa0967fbec69c57a
+until a supplying registry release exists. Matching Cargo/Bazel locks select libc
+0.2.191 to satisfy that supplier minimum; the IC pin/toolchain remain unchanged.
 The recorder also consumes published IC Metrics 0.17 scalar arithmetic; this
 provider owns native workspace/Bazel locks, distinct from internal replica
 metrics. Neither dependency owns charging or report policy.

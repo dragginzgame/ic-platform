@@ -476,8 +476,13 @@ not a new default feature or a replacement for the published registry client.
 Profiler retains its IC-free recorder, reports, retention, workloads, viewer,
 CLI and rendering. With the 0.8 provider, consumers must inject
 `profiler/server/system_profile_cli.rs` and `system_profile_render.rs` as well as
-the existing recorder/viewer sources. Their bodies and assembled paths are unchanged;
-update the paired consumer source and provider pin together. Disjoint source
+the existing recorder/viewer sources. Their assembled paths remain unchanged; update the paired consumer source and
+provider pin together. CLI workload mechanics and raw OS observations delegate
+to Host Process, while capture selection, cadence, retained DTOs, diagnostics and
+reporting stay Profiler-owned. The launch gate, final sampling before reaping,
+500 ms-or-exit grace, synchronous reap, keep-running choice and exit-status text
+are preserved. Artifacts/FS/Process use one immutable Host source until the new
+API is published; no local Cargo patch is distributed. Disjoint source
 injection rejects overlaps and records both origins. IC state/capture adapters,
 patches and native Cargo/Bazel build inputs remain here. The native recorder and
 server consume Host Artifacts gzip directly; their graph needs no registry Platform

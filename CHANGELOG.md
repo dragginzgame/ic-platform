@@ -21,6 +21,11 @@
 
 ### 🔧 Changed
 
+- Supply matching native Host Process dependencies for Profiler-owned capture
+  policy, delegating raw OS queries and workload mechanics to Host. Use one
+  immutable Host source family and admit the supplying libc minimum explicitly
+  ([#94 — Supply Host process dependencies for Profiler ownership adoption](https://github.com/dragginzgame/ic-platform/issues/94)).
+
 - Supply the native profiler workspace and Bazel dependency wiring for
   consumer-owned IC Metrics counters, preserving the pinned IC source and
   keeping the measurement crate distinct from the replica's internal metrics
