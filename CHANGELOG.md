@@ -15,6 +15,36 @@
 - Adopt IC Tooling 0.70.0 for Testkit qualification and the managed release
   metadata editor, retaining caller-owned transport and retry policies.
 
+### 🔧 Changed
+
+- Supply coherent Host process and IC Wire Cargo/Bazel inputs for Profiler's
+  adopted private transport. Keep the native profile's Host packages on one
+  immutable source family until the supplying APIs are published
+  ([#94](https://github.com/dragginzgame/ic-platform/issues/94)).
+
+### 🩹 Fixed
+
+- Admit the manifest-selected immutable Host gzip supplier in feature checks,
+  preserving foreign/path, mixed-source and Wasm rejection.
+
+### 🧹 Cleanup
+
+- Derive feature activation from Cargo metadata, share standalone consumer setup
+  and entrypoint signature analysis, and admit BLAKE3 identities/features from
+  one locked Cargo graph observation
+  ([#96](https://github.com/dragginzgame/ic-platform/issues/96)).
+- Consolidate the native dependency recipe while preserving assembled inputs.
+  Move pure profiling queries, immutable image caching and tool metadata to the
+  paired Profiler consumer. Retain Platform gzip and native capture adapters;
+  read the existing resource-charge cadence from its compiled producer.
+
+### 🧭 Migration Notes
+
+- Native source-profile consumers must adopt the paired Profiler query/cache
+  module before changing their provider pin. Keep the previous pin until then;
+  ordinary Rust library consumers need no import changes
+  ([Profiler #9](https://github.com/dragginzgame/ic-profiler/pull/9)).
+
 ## [0.8.1] - 2026-10-29
 
 ### 🧭 Migration Notes

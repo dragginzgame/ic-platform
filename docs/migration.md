@@ -2674,3 +2674,10 @@ fixture remains independently selectable. Local Linux/PocketIC evidence and
 native macOS qualification must be reported separately. Neither graph isolation
 nor this wrapper alone proves smaller application Wasm. Candid's unresolved Wasm
 depth limitation (#73) remains for unguarded low-level upstream APIs.
+
+The next paired native cleanup adds Profiler-owned query/cache/tool support under
+`server/system_profile_product/`. Keep provider and consumer source pins paired;
+older consumers retain their previous provider. HTTP/MCP admission, errors,
+response fields, immutable query ownership and budgets stay unchanged. The
+Platform gzip facade and native start/stop, IC metrics and pricing adapters stay
+at their existing owner. Published Rust consumers need no import changes.

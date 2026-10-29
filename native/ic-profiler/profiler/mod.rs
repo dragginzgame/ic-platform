@@ -35,3 +35,6 @@ pub(crate) mod profiling_manual;
 
 #[path = "server/catalog_cli.rs"]
 pub mod catalog_cli;
+
+#[path = "server/system_profile_product/mod.rs"]
+pub(crate) mod system_profile_product;

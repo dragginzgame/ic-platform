@@ -68,6 +68,8 @@ budgets and durable delivery stay consumer-owned. See the
 
 The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzip`
 and `GzipError` from published IC Tooling `ic-host-artifacts` 0.70.0 for IC Profiler.
+The native source provider independently retains its qualified Git-pinned Platform
+scaffold and Host family. Updating the ordinary facade does not change those inputs.
 Tooling retains codec implementation; callers retain levels, limits and payload
 admission. No backend types, default/Wasm dependency or IC runtime edge is added.
 The maintainer retained this facade for Profiler instead of #91's proposed direct

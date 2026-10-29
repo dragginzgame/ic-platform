@@ -1,48 +1,52 @@
 # Current handoff
 
-## Pending 0.8.2: IC Tooling adoption
+## Pending 0.8.2: adoption and integrated cleanup
 
-The local base is released Platform 0.8.1, `10c2610`. Package versions remain
-0.8.1. The maintainer explicitly approved 0.8.2 as a one-time exception for the
-unused gzip surface, including Host Artifacts 0.70's `GzipError` identity.
-This does not relax future compatibility policy. Platform-only imports stay
-unchanged; direct Host APIs exchanging that type must align to 0.70.
-Release/publication remain maintainer-owned; siblings are read-only.
+Resolve local `1971797` with incoming `c8bbe7e` (#95/#97), retaining both
+batches. Package versions remain 0.8.1. The maintainer approved 0.8.2 once for
+the unused gzip surface, including Host 0.70's error identity; future compatibility
+policy is unchanged. Release/publication remain maintainer-owned. Siblings stay
+read-only; the incoming native recipe and cryptographic bodies are preserved.
 
-Adopt published IC Tooling 0.70.0 (source `ecc8d61`) for Host Artifacts,
-Testkit qualification and the managed IC Build release editor. Preserve codec
-levels/budgets, external bytes, Testkit transport/retry authority and exact
-executor/ic0/management pins. The main lock changes only Host Artifacts relative
-to this batch's captured input; retain its pre-existing Wire 0.7.23 selection.
-The runtime lock updates Testkit and its required Host family together, retaining
-Wire 0.7.22, Timers and the simulator selection. Its native dependency versions
-are independent of the deployment graph. Testkit retains registry Platform 0.8
-without a global local-source patch, including during release lock preparation.
-The native Profiler Cargo/Bazel recipe
-retains its separate qualified pins and is outside this update.
+Keep published Tooling 0.70.0 for the ordinary gzip facade, Testkit and managed
+release editor with `cli`. Testkit's raw PocketIC imports route through Platform;
+managed instances use `instance()`. Its registry Platform dependency stays
+independent of local release versions. The runtime lock retains Wire 0.7.22;
+workspace Wire minima remain 0.7.22 with the main lock's existing 0.7.23 selection.
+Shared Tooling 0.27.7 remains at `a8baa51099ca48cdb12e2171f031d488db89d67d`,
+including #322's graph observations. Do not replace it with the older revision.
 
-Shared Tooling 0.27.7 remains exported at
-`a8baa51099ca48cdb12e2171f031d488db89d67d`, including source main `11d519c`
-and PR #322's reviewed graph-observation interface required by merged #97.
-All 109 snapshot files match the independently selected source commit.
-Both Wire workspace minima remain 0.7.22. Native-only metadata and Wasm/default/
-executor exclusions remain; the optional sccache catalog entry does not enable it.
+Incoming #97 derives feature activation from metadata, shares consumer setup and
+private macro syntax facts, and reuses one locked BLAKE3 graph observation.
+Preserve Principal tiers, ICRC exclusions, admission order, diagnostics and codecs.
+Its native dependency patches consolidate without changing seven assembled inputs.
+Profiler #9 owns query/cache/tool/render plumbing; Platform retains HTTP admission,
+native start/stop, cleanup, metrics and pricing. Retain 8 MiB/query, 32 MiB total,
+128-entry FIFO and cross-run checks. Older consumers keep their previous pin until
+paired product adoption. Catalog cadence reads the unchanged compiled constant.
 
-Earlier Tooling/Wire proof is in `target/tooling-wire-adoption-20261029`.
-Current adoption evidence is in `target/ic-tooling-adoption-20261029`.
-Full owner Clippy passed before longer checks. Standalone gzip identity, prior
-byte parity and refusal proofs pass on Rust 1.91/1.99.1. The Testkit driver passes
-strict Clippy and six native tests on each compiler. Raw/owned Wire and external
-Candid canisters build at MSRV; graph isolation, current Wire schema/TypeScript,
-source guards and formatting pass. The prepared CLI-feature editor passes real
-lock drift/refusal/idempotence checks, preserving same-version registry records.
-Full CI, installed canisters and native macOS remain separate.
+The native profile stays exactly at incoming `c8bbe7e`: Host supplier
+`c20dbd11785c17d369651f51fa0967fbec69c57a`, Wire 0.7.21 and gzip-only Platform
+scaffold `ba98bd33ef1cbe463d6daf34f0511f17d7770c20`. All its Host packages retain
+one Git family; ordinary Platform gzip 0.70 is a separate graph. Rebuild private
+ICPROF03 peers together; saved reports, external bytes and retry authority remain.
 
-PRs #95/#97 are merged on remote main at `c8bbe7e`, closing #94/#96. This
-working checkout has not advanced its Git base; retain those integrated Host/
-process and Profiler product changes when combining work. Profiler #9 needs the
-merged provider pin. #50 remains deferred; #98 owns extra native Clippy findings
-and #99 remains draft. These integration records do not waive their checks.
+Prior native qualification is provider `f5051bf` + Profiler `e9f68b6`: 74 recorder,
+26 product, three catalog and five installed tests; Linux server SHA-256
+`b863005e0272c82e2f94a6a3684bbdeb0652fdb8162b6aa823d1da02b2b290e1`.
+Original scratch receipts/executable were externally removed; PR #97 retains the
+observations. These unchanged-source results are reused, not a new server build.
+
+Merge evidence is under `target/merge-resolution-20261029`. Full owner Clippy
+passed before longer checks. All 505 native/Wasm selections, 14 macro tests on
+both compilers, standalone CDK/external-Candid/BLAKE3 native/MSRV/Wasm proofs,
+admission/refusal fixtures, 45 assembler tests, source guards, snapshot provenance,
+inventory, formatting, links and 0.8.2 changelog admission pass. Prior supplying
+proofs remain in PRs #95/#97 and `target/ic-tooling-adoption-20261029`.
+Full CI, installed-canister/native-server execution, native macOS, full Bazel/NNS
+and live acceptance remain separate. #98 owns extra native Clippy debt; #99 stays
+draft. #50's advisory failure remains deferred and unchanged. Profiler #9 needs
+its paired product module and final qualified provider pin before integration.
 
 ## Released 0.8.0: Principal and selected ICRC packaging
 

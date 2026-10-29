@@ -1,7 +1,7 @@
 //! External codec bridge; the existing entrypoint generator owns all runtime emission.
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::{FnArg, ItemFn, LitStr, Path, ReturnType, Type, ext::IdentExt, parse::Parser};
+use syn::{ItemFn, LitStr, Path, ext::IdentExt, parse::Parser};
 
 pub(crate) fn expand(
     query: bool,
@@ -69,18 +69,9 @@ pub(crate) fn expand(
     let decode = format_ident!("__platform_candid_decode_{ident}");
     let encode = format_ident!("__platform_candid_encode_{ident}");
     let admit = format_ident!("__platform_candid_admit_{ident}");
-    let types: Vec<_> = function
-        .sig
-        .inputs
-        .iter()
-        .map(|arg| match arg {
-            FnArg::Typed(arg) => Ok(arg.ty.as_ref()),
-            FnArg::Receiver(arg) => Err(syn::Error::new_spanned(
-                arg,
-                "self is unsupported on entrypoints",
-            )),
-        })
-        .collect::<syn::Result<_>>()?;
+    let types = crate::signature::argument_types(&function.sig, |arg| {
+        syn::Error::new_spanned(arg, "self is unsupported on entrypoints")
+    })?;
     let tuple = quote!((#(#types,)*));
     let decode_result = if types.len() == 1 {
         quote!(value.0)
@@ -93,25 +84,19 @@ pub(crate) fn expand(
     } else {
         tuple.clone()
     };
-    let (encode_param, encode_value) = match &function.sig.output {
-        ReturnType::Default => (
+    let (encode_param, encode_value) = match crate::signature::ReturnShape::of(&function.sig) {
+        crate::signature::ReturnShape::Unit => (
             quote!(),
             quote!(#platform::candid::contract::encode_args(())),
         ),
-        ReturnType::Type(_, ty) => match ty.as_ref() {
-            Type::Tuple(tuple) if tuple.elems.is_empty() => (
-                quote!(),
-                quote!(#platform::candid::contract::encode_args(())),
-            ),
-            Type::Tuple(_) => (
-                quote!(value: #ty),
-                quote!(#platform::candid::contract::encode_args(value)),
-            ),
-            _ => (
-                quote!(value: #ty),
-                quote!(#platform::candid::contract::encode_one(value)),
-            ),
-        },
+        crate::signature::ReturnShape::Tuple(ty, _) => (
+            quote!(value: #ty),
+            quote!(#platform::candid::contract::encode_args(value)),
+        ),
+        crate::signature::ReturnShape::Scalar(ty) => (
+            quote!(value: #ty),
+            quote!(#platform::candid::contract::encode_one(value)),
+        ),
     };
     let mode = if composite {
         quote!(composite_query)

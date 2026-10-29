@@ -1,7 +1,18 @@
 # Validate every selection against its cached graph in one process per target.
 # Input TSV: original selection, target-aware cache key. Graphs remain Cargo output.
-BEGIN { FS = "\t" }
-function enabled(name) { return index("," selection ",", "," name ",") != 0 }
+BEGIN {
+    FS = "\t"
+    if (activation == "") { print "missing feature activation input" > "/dev/stderr"; exit 1 }
+    while ((status = (getline < activation)) > 0) {
+        if (NF != 2 || $1 == "" || $2 == "" || ($1 in active_features)) {
+            print "invalid feature activation input" > "/dev/stderr"; exit 1
+        }
+        active_features[$1] = $2
+    }
+    close(activation)
+    if (status < 0) { print "unreadable feature activation input" > "/dev/stderr"; exit 1 }
+}
+function enabled(name) { return index("," active ",", "," name ",") != 0 }
 function reject(reason) {
     print target ": " selection ": " reason " (" graph ")" > "/dev/stderr"
     exit 1
@@ -10,6 +21,8 @@ function reject(reason) {
     if (NF != 2 || $1 == "" || $2 == "") reject("invalid selection mapping")
     selection = $1
     key = $2
+    if (!(selection in active_features)) reject("missing feature activation")
+    active = active_features[selection]
     graph = cache "/" target "-" key ".txt"
     if (!(key in loaded)) {
         while ((status = (getline line < graph)) > 0) {
@@ -34,11 +47,11 @@ function reject(reason) {
     secp = native && enabled("secp256k1")
     gzip = native && enabled("gzip")
     external_endpoint = enabled("candid-endpoint")
-    cdk = external_endpoint || enabled("cdk")
-    runtime = cdk || enabled("runtime")
-    executor = runtime || enabled("executor")
+    cdk = enabled("cdk")
+    runtime = enabled("runtime")
+    executor = enabled("executor")
     verification = enabled("signature-verification")
-    creation = verification || enabled("canister-sig-creation")
+    creation = enabled("canister-sig-creation")
     bls = verification || agent || enabled("bls")
     raw_system = executor || enabled("ic0")
     certification = pocket || creation || agent || enabled("certification")
@@ -46,8 +59,8 @@ function reject(reason) {
     ledger = enabled("icrc-ledger-types")
     external_dto = enabled("cmc-types") || enabled("icp-ledger-types") || enabled("cycles-ledger-types") || enabled("nns-registry-types") || enabled("certified-assets-types")
     candid = external_endpoint || pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
-    external_principal = enabled("principal-external") || enabled("principal-self-authenticating") || creation || enabled("candid") || enabled("candid-service") || external_endpoint || management || ledger || external_dto || enabled("agent") || enabled("candid-parser") || enabled("pocket-ic") || enabled("secp256k1")
-    principal = external_principal || enabled("wire-schema") || enabled("principal") || runtime
+    external_principal = enabled("principal-external")
+    principal = enabled("principal")
     hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp || gzip
     minimal = !principal && !gzip && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
     found_storage = 0
@@ -76,7 +89,9 @@ function reject(reason) {
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") {
-            if (!gzip || !registry) reject("unselected or non-registry host gzip codec")
+            qualified_gzip = gzip_source == "" ? registry : \
+                (f[3] == gzip_source && (n == 3 || (n == 4 && f[4] == "(*)")))
+            if (!gzip || !qualified_gzip) reject("unselected or unqualified host gzip codec")
             found_gzip = 1
         }
         if (name == "blake3") {

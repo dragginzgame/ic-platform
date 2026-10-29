@@ -12,26 +12,24 @@ consumer="$1" package="$2" target="$3" features="$4"
 mkdir -p "$root/target"
 evidence="$(mktemp -d "$root/target/blake3-graph.XXXXXX")"
 printf 'BLAKE3 graph evidence: %s\n' "$evidence"
-selection=(--package "$package" --target "$target" --no-default-features)
-policy=(--consumer "$consumer" "${selection[@]}" --max-count blake3=1 --json --explain)
+policy=(--consumer "$consumer" --package "$package" --target "$target" --no-default-features --max-count blake3=1 --json --explain --observations)
 if [[ "$features" != - ]]; then
-    selection+=(--features "$features")
     policy+=(--features "$features")
 fi
 if ! perl "$root/scripts/ci/check-cargo-graph.pl" "${policy[@]}" > "$evidence/policy.json"; then
     cat "$evidence/policy.json" >&2
     exit 1
 fi
-cargo tree --manifest-path "$consumer/Cargo.toml" --locked --offline "${selection[@]}" \
-    --edges normal,build --prefix none --format '{p}' > "$evidence/packages.txt"
+jq="$root/.tools/host/bin/jq"
+"$jq" -r '.observations[].identity' "$evidence/policy.json" > "$evidence/packages.txt"
+"$jq" -r '.observations[] | select(.name == "blake3") | .features | join(",")' "$evidence/policy.json" > "$evidence/features.txt"
 if grep -q '^blake3 ' "$evidence/packages.txt"; then
-    cargo tree --manifest-path "$consumer/Cargo.toml" --locked --offline "${selection[@]}" \
-        --edges normal,build --invert blake3 --depth 0 --prefix none --format '{f}' > "$evidence/features.txt"
-    # Inspect the effective feature union, including command-line/root selections.
     [[ "$(cat "$evidence/features.txt")" == std ]] || {
         echo 'BLAKE3 must select only std in this qualified graph; observed:' >&2
         cat "$evidence/features.txt" >&2
         exit 1
     }
 fi
+# Optional caller evidence reuses the same complete selected graph.
+if [[ -n "${BLAKE3_PACKAGES_OUTPUT:-}" ]]; then cp "$evidence/packages.txt" "$BLAKE3_PACKAGES_OUTPUT"; fi
 echo 'BLAKE3 identity/feature policy passed (normal/build graph; no size claim)'

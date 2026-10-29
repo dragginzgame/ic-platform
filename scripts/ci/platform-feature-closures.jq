@@ -22,11 +22,15 @@ def closure($features):
   (. + [ .[] as $name | $features[$name][]? |
           select($features[.] != null) ]) | unique |
   if . == $before then . else closure($features) end;
+($ARGS.named.projection // "cache") as $projection |
+if ($projection != "cache" and $projection != "activation") then error("unknown feature projection") else . end |
 ($metadata[0].packages[] | select(.name == "ic-platform")) as $package |
 $package.features as $features |
 (if $target == "wasm32-unknown-unknown" then native_leaves($package) else [] end) as $ignored |
 .[] as $selection |
-(if $selection == "default" then "default"
- else (if $selection == "none" then [] else $selection | split(",") end |
-       closure($features) | . - $ignored | join(",")) end) as $key |
-[$selection, (if $key == "" then "none" else $key end)] | @tsv
+(if $selection == "none" then [] else $selection | split(",") end) as $selected |
+if any($selected[]; $features[.] == null) then error("unknown feature selection: " + $selection) else . end |
+($selected | closure($features) | . - $ignored | join(",")) as $active |
+(if $projection == "cache" and $selection == "default" then "default"
+ else if $active == "" then "none" else $active end end) as $key |
+[$selection, $key] | @tsv

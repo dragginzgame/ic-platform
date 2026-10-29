@@ -54,15 +54,9 @@ const SYSTEM_STATE: (&str, &str) = (
     include_str!("../../../replicated_state/src/canister_state/system_state.rs"),
 );
 
-fn source_integer(file: (&str, &str), marker: &str) -> String {
-    let expression = file.1.split_once(marker).unwrap().1;
-    let literal = expression.split_once(';').unwrap().0.trim();
-    literal.replace('_', "").parse::<u64>().unwrap().to_string()
-}
-
 pub(crate) fn interpretation_notes() -> Value {
     let resource_poll_every_rounds =
-        source_integer(SCHEDULER, "const CHARGE_INTERVAL_ROUNDS: u64 =");
+        ic_execution_environment::resource_charge_interval_rounds().to_string();
     json!({
         "version": 1,
         "value_authority": {

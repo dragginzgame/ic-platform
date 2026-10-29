@@ -10,6 +10,7 @@ cp "$root/scripts/ci/check-platform-consumer.sh" "$root/scripts/ci/check-platfor
 cp "$root/scripts/ci/check-blake3-graph.sh" "$root/scripts/ci/check-cargo-graph.pl" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
+cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
@@ -33,15 +34,8 @@ case "$1" in
             exit 0
         fi
         if [[ "${TEST_CAPABILITY:-}" == blake3 ]]; then
-            case " $* " in
-                *' --format {f} '*) printf '%s\n' "${TEST_BLAKE3_FEATURES:-std}" ;;
-                *)
-                    printf 'platform-consumer-proof v0.1.0\nblake3 v1.8.7\n'
-                    if [[ "${TEST_BLAKE3_DUPLICATE:-no}" == yes ]]; then
-                        printf 'blake3 v1.8.6\n'
-                    fi
-                    ;;
-            esac
+            printf 'platform-consumer-proof v0.1.0\t\nblake3 v1.8.7\t%s\n' "${TEST_BLAKE3_FEATURES:-std}"
+            if [[ "${TEST_BLAKE3_DUPLICATE:-no}" == yes ]]; then printf 'blake3 v1.8.6\tstd\n'; fi
             exit 0
         fi
         printf 'ic-cdk-executor v2.0.0\nic0 v1.2.0\n'
