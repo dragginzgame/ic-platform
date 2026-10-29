@@ -27,6 +27,13 @@
 
 ### 🔧 Changed
 
+- Supply coherent Host process and IC Wire Cargo/Bazel inputs for the paired
+  Profiler consumer. Preserve the gzip facade and use one pinned Host supplier
+  source until its new process APIs are published
+  ([#94](https://github.com/dragginzgame/ic-platform/issues/94),
+  [Profiler #5](https://github.com/dragginzgame/ic-profiler/issues/5),
+  [Profiler #6](https://github.com/dragginzgame/ic-profiler/issues/6)).
+
 - Supply the native profiler workspace and Bazel dependency wiring for
   consumer-owned IC Metrics counters, preserving the pinned IC source and
   keeping the measurement crate distinct from the replica's internal metrics
