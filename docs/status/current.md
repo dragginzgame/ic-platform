@@ -9,15 +9,16 @@ The consumer reuses Profiler #9's pure query/cache/tool/render source interface.
 Profiler selects the qualified contribution pin below. Older consumers must
 retain their existing source profile until adopting the paired interface.
 
-Qualified native source is `4e497487666b37d79117787e583df8b26c1ad373`.
+Qualified native source is `fd845c4a633f0c82e80e2edaeec9963a3fe14144`.
 The following handoff change is documentation only. Both build graphs select
-Platform 0.8.1 at `c8bbe7e`, retaining gzip-only features and the shared immutable
-Host supplier. The generated Cargo/Bazel delta changes only Platform. Profiler retains fresh
+Wire 0.7.23 and Platform 0.8.1 at `c8bbe7e`, retaining gzip-only features and
+the shared immutable Host supplier. The generated Cargo/Bazel delta changes only
+Wire and its paired derive crate. Profiler retains fresh
 assembly/build/test receipts under its `.build/receipts`, plus
-`artifacts/platform-081-qualification.json` and the previous offline CLI proof. Its
+`artifacts/wire-0723-qualification.json` and the previous offline CLI proof. Its
 working-tree source is bound by assembly digests; no clean-HEAD claim is made.
 Linux executable SHA-256:
-`8246a63974ca22efef1d82dd57ddfac36968ad81920a9bf1cd14c494370b6da3`.
+`1bff7f3c31ce8dd2a2bd679593c6af64a17f0e06f8497384fdebee0403c57571`.
 
 Platform owns textual-canister admission, native operations, busy/Started result
 completion and successful-result pruning. Operation errors are not resubmitted;
@@ -34,7 +35,8 @@ No runtime, crypto, charging body or own release version was changed.
 
 ## Current validation and remaining scope
 
-Owner all-target/all-feature Clippy and the independent recorder lint pass.
+The independent recorder lint passes; unchanged published-workspace inputs
+reuse the passing owner all-target/all-feature Clippy evidence from the 0.8.1 adoption.
 The final paired native build passes 78 recorder tests, 109 server-product tests
 and all six installed scenarios, including the real Python export/guarded-clear
 command. The consumer's four new description tests pass Rust 1.91; Python,
@@ -55,8 +57,10 @@ Historical receipts never qualify another binary.
 All selected Host packages use Tooling revision
 `c20dbd11785c17d369651f51fa0967fbec69c57a`; the gzip-only Platform library is
 `c8bbe7e1aee45c905de05ec5083d6bf7ba95819e` (Platform 0.8.1). Published Host
-process 0.70.0 lacks the consumed observation module; registry Platform uses
-registry Host artifacts. Keep the coherent Git family until both are supplied.
+process 0.70.0 lacks the consumed observation module; Tooling #265 is still open.
+Registry Platform uses registry Host artifacts. Keep the coherent Git family
+until both are supplied. Wire and derive source trees match 0.7.22 exactly;
+Profiler retains the prior all-fields frame proof alongside the new native receipts.
 Profiler owns capture policy, selected identities and accounting; Host owns raw
 OS facts and workload custody. Rebuild private process peers together.
 
