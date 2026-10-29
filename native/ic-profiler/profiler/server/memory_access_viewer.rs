@@ -2188,15 +2188,34 @@ fn tools() -> Value {
     definitions
 }
 
-fn encode_tool_response(name: &str, value: Value) -> Value {
-    if name == "get_computation_catalog" || name.starts_with("profile_") {
-        // This immutable document already specifies its numeric encoding and
-        // hashes its exact contents. Trace encoding adds a process generation
-        // and rewrites version/source-line integers, invalidating that hash.
-        value
-    } else {
-        encode_response(value)
+enum ToolOutput {
+    Trace(Value),
+    Native(Value),
+}
+
+fn encode_tool_response(output: ToolOutput) -> Value {
+    match output {
+        ToolOutput::Trace(value) => encode_response(value),
+        // Native profile/catalog documents already own their integer format and
+        // content hashes; applying trace encoding would invalidate that contract.
+        ToolOutput::Native(value) => value,
     }
+}
+
+fn image_tool_response(
+    metadata: &Value,
+    png: &[u8],
+    oversize_message: &str,
+) -> Result<Value, String> {
+    use base64::prelude::*;
+    let text = metadata.to_string();
+    let png = BASE64_STANDARD.encode(png);
+    if text.len().saturating_add(png.len()) > MAX_TOOL_RESPONSE_BYTES {
+        return Err(oversize_message.to_string());
+    }
+    Ok(
+        json!({"content":[{"type":"text","text":text},{"type":"image","mimeType":"image/png","data":png}],"isError":false}),
+    )
 }
 
 async fn call_tool(viewer: &Viewer, base_url: &str, params: &Value) -> Value {
@@ -2209,35 +2228,18 @@ async fn call_tool(viewer: &Viewer, base_url: &str, params: &Value) -> Value {
         .cloned()
         .unwrap_or_else(|| json!({}));
     if name == "profile_render" {
-        use base64::prelude::*;
         let result = (|| {
             let run_id = arguments
                 .get("run_id")
                 .and_then(Value::as_str)
                 .ok_or("Missing run_id")?;
-            let parameters = arguments
-                .as_object()
-                .ok_or("Arguments must be an object")?
-                .iter()
-                .filter_map(|(k, v)| {
-                    (!v.is_null()).then(|| {
-                        (
-                            k.clone(),
-                            v.as_str()
-                                .map(str::to_owned)
-                                .unwrap_or_else(|| v.to_string()),
-                        )
-                    })
-                })
-                .collect();
+            arguments.as_object().ok_or("Arguments must be an object")?;
+            let parameters = crate::system_profile_api::argument_parameters(&arguments);
             let rendered = crate::system_profile_api::render(run_id, &parameters)?;
-            let png = BASE64_STANDARD.encode(rendered.png);
-            let metadata = rendered.metadata.to_string();
-            if metadata.len().saturating_add(png.len()) > MAX_TOOL_RESPONSE_BYTES {
-                return Err("Rendered profile exceeds the tool response budget".to_string());
-            }
-            Ok(
-                json!({"content":[{"type":"text","text":metadata},{"type":"image","mimeType":"image/png","data":png}],"isError":false}),
+            image_tool_response(
+                &rendered.metadata,
+                &rendered.png,
+                "Rendered profile exceeds the tool response budget",
             )
         })();
         return result.unwrap_or_else(
@@ -2245,7 +2247,6 @@ async fn call_tool(viewer: &Viewer, base_url: &str, params: &Value) -> Value {
         );
     }
     if name == "get_memory_snapshot_image" {
-        use base64::prelude::*;
         let result = async {
             if !arguments.is_object() {
                 return Err("Tool arguments must be an object.".to_string());
@@ -2259,17 +2260,11 @@ async fn call_tool(viewer: &Viewer, base_url: &str, params: &Value) -> Value {
             let image = render_memory_snapshot(viewer, base_url.to_string(), snapshot_id, query)
                 .await
                 .map_err(|(_, message)| message)?;
-            let summary = image.summary.to_string();
-            let png = BASE64_STANDARD.encode(image.png);
-            if summary.len().saturating_add(png.len()) > MAX_TOOL_RESPONSE_BYTES {
-                return Err(
-                    "Image exceeds the tool response budget; request fewer pages.".to_string(),
-                );
-            }
-            Ok(json!({"content": [
-                {"type": "text", "text": summary},
-                {"type": "image", "mimeType": "image/png", "data": png}
-            ], "isError": false}))
+            image_tool_response(
+                &image.summary,
+                &image.png,
+                "Image exceeds the tool response budget; request fewer pages.",
+            )
         }
         .await;
         return result.unwrap_or_else(
@@ -2278,7 +2273,7 @@ async fn call_tool(viewer: &Viewer, base_url: &str, params: &Value) -> Value {
     }
     let (text, is_error) = match run_tool(viewer, base_url, name, &arguments).await {
         Ok(value) => {
-            let text = encode_tool_response(name, value).to_string();
+            let text = encode_tool_response(value).to_string();
             if text.len() > MAX_TOOL_RESPONSE_BYTES {
                 ("The tool response exceeds 8 MiB; request a smaller execution limit or ranking, or export module dictionaries through the JSON API.".to_string(), true)
             } else {
@@ -2295,7 +2290,7 @@ async fn run_tool(
     base_url: &str,
     name: &str,
     arguments: &Value,
-) -> Result<Value, String> {
+) -> Result<ToolOutput, String> {
     if !arguments.is_object() {
         return Err("Tool arguments must be an object.".to_string());
     }
@@ -2305,9 +2300,9 @@ async fn run_tool(
             .and_then(Value::as_str)
             .ok_or("Missing run_id")?;
         crate::system_profile_api::query_run(run_id, "status", &HashMap::new())?;
-        return Ok(
+        return Ok(ToolOutput::Native(
             json!({"run_id":run_id,"url":format!("{base_url}/api/profiling/runs/{run_id}/export"),"format":"icprofile","compression":"gzip"}),
-        );
+        ));
     }
     if name.starts_with("profile_") {
         return crate::system_profile_api::dispatch(
@@ -2315,7 +2310,11 @@ async fn run_tool(
             name,
             arguments.clone(),
         )
-        .await;
+        .await
+        .map(ToolOutput::Native);
+    }
+    if name == "get_computation_catalog" {
+        return Ok(ToolOutput::Native(crate::computation_catalog::catalog()));
     }
     let number = |key: &str| integer_argument(arguments, key);
     let instance_id = || {
@@ -2335,10 +2334,9 @@ async fn run_tool(
         }))
     };
     let api = |result: ApiResult| result.map_err(|(_, message)| message);
-    match name {
+    let value = match name {
         "list_traces" => Ok(traces(viewer, base_url)),
         "get_charge_rules" => Ok(charge_rule_dictionary()),
-        "get_computation_catalog" => Ok(crate::computation_catalog::catalog()),
         "capture_memory_snapshot" => {
             let label = arguments
                 .get("label")
@@ -2456,7 +2454,8 @@ async fn run_tool(
             Ok(json!({ "url": url }))
         }
         _ => Err(format!("Unknown tool: {name}")),
-    }
+    }?;
+    Ok(ToolOutput::Trace(value))
 }
 
 fn tool_selection(arguments: &Value) -> Result<ExecutionSelection, String> {
@@ -2836,9 +2835,26 @@ mod tests {
     }
 
     #[test]
+    fn shared_image_envelope_preserves_bytes_and_exact_budget() {
+        let metadata = json!({"label":"é"});
+        let response = image_tool_response(&metadata, &[255], "too large").unwrap();
+        assert_eq!(
+            response,
+            json!({"content":[{"type":"text","text":metadata.to_string()},{"type":"image","mimeType":"image/png","data":"/w=="}],"isError":false})
+        );
+        let at_limit = Value::String("x".repeat(MAX_TOOL_RESPONSE_BYTES - 6));
+        assert!(image_tool_response(&at_limit, &[255], "too large").is_ok());
+        let over_limit = Value::String("x".repeat(MAX_TOOL_RESPONSE_BYTES - 5));
+        assert_eq!(
+            image_tool_response(&over_limit, &[255], "too large").unwrap_err(),
+            "too large"
+        );
+    }
+
+    #[test]
     fn immutable_mcp_catalog_preserves_its_content_hash_and_numeric_contract() {
         let catalog = crate::computation_catalog::catalog();
-        let mut encoded = encode_tool_response("get_computation_catalog", catalog.clone());
+        let mut encoded = encode_tool_response(ToolOutput::Native(catalog.clone()));
         assert_eq!(encoded, catalog);
         assert!(encoded.get("server_generation").is_none());
         assert_eq!(encoded["catalog_version"], 1);
@@ -2855,7 +2871,7 @@ mod tests {
         );
 
         // Ordinary trace tools retain their independent process/decimal encoding.
-        let trace = encode_tool_response("get_trace_summary", json!({"time_nanos": u64::MAX}));
+        let trace = encode_tool_response(ToolOutput::Trace(json!({"time_nanos": u64::MAX})));
         assert_eq!(trace["time_nanos"], u64::MAX.to_string());
         assert!(trace["server_generation"].is_string());
     }

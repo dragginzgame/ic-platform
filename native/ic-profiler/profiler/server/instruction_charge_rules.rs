@@ -708,83 +708,40 @@ fn add_runtime_rules(rules: &mut BTreeMap<String, InstructionChargeRule>) {
 fn add_configuration_rules(rules: &mut BTreeMap<String, InstructionChargeRule>) {
     // Exact captured keys double as lookup IDs in the Limits view. Values are
     // supplied by each running subnet; these descriptions never override them.
-    let contents = CONFIG_CAPTURE.1;
-    let start = contents
-        .find("pub fn runtime_configuration_defaults(")
-        .unwrap();
-    let end = contents[start..]
-        .find("tracer.record_runtime_configuration")
-        .unwrap()
-        + start;
-    let capture = &contents[start..end];
-    let mut keys: Vec<(String, (&str, &str), String)> = Vec::new();
-    for (group, file) in [("cycles", FEES), ("instructions", FEES)] {
-        if let Some(offset) = capture.find(&format!("{group}!(")) {
-            let fields = capture[offset..]
-                .split_once('(')
-                .unwrap()
-                .1
-                .split_once(");")
-                .unwrap()
-                .0;
-            for field in fields.split(',').map(str::trim).filter(|s| !s.is_empty()) {
-                let prefix = if group == "cycles" {
-                    "cycles"
-                } else {
-                    "scheduler"
-                };
-                keys.push((format!("{prefix}.{field}"), file, format!("pub {field}:")));
-            }
-        }
-    }
-    for invocation in ["quantities!(", "scalars!("] {
-        for suffix in capture.split(invocation).skip(1) {
-            let Some((arguments, _)) = suffix.split_once(");") else {
-                continue;
-            };
-            let mut parts = arguments.split(',').map(str::trim);
-            let Some(prefix) = parts.next() else { continue };
-            let prefix = prefix.trim_matches('"');
-            let Some(object) = parts.next() else { continue };
-            let file = if object.contains("embedders_config") {
-                EMBED_CONFIG
-            } else if object.contains("scheduler_config") {
-                FEES
-            } else {
-                EXEC_CONFIG
-            };
-            for field in parts.filter(|s| !s.is_empty()) {
-                keys.push((format!("{prefix}.{field}"), file, format!("pub {field}:")));
-            }
-        }
-    }
-    // Include literal keys added by the capture block. The archived capture
-    // expression proves how each value was obtained, including explicit defaults.
-    for part in capture.split('"').skip(1).step_by(2) {
-        if part.contains('.')
-            && !part.contains(' ')
-            && !part.contains('\n')
-            && part.len() < 120
-            && !part.ends_with('.')
-        {
-            keys.push((part.to_string(), CONFIG_CAPTURE, format!("\"{part}\"")));
-        }
-    }
-    for key in [
-        "subnet_size",
-        "reference_subnet_size",
-        "cost_schedule",
-        "subnet_type",
-    ] {
-        keys.push((
-            key.to_string(),
-            FEES,
-            "pub struct CyclesAccountManagerConfig".to_string(),
-        ));
-    }
-    for (key, file, marker) in keys {
-        let (file, marker) = if file.1.contains(&marker) {
-            (file, marker)
+    // Enumerate the actual captured keys rather than reparsing the producer's
+    // Rust macro invocations. The existing config constructors own these facts.
+    let config = ic_config::execution_environment::Config::default();
+    let subnet = ic_config::subnet_config::SubnetConfig::new(
+        ic_registry_subnet_type::SubnetType::Application,
+    );
+    let capacity = (subnet.scheduler_config.scheduler_cores - 1) * 100;
+    let defaults = ic_execution_environment::runtime_configuration_defaults(
+        &config,
+        &subnet,
+        ic_registry_subnet_type::SubnetType::Application,
+        capacity,
+    );
+    let keys = defaults.into_keys().chain([
+        "subnet_size".into(),
+        "reference_subnet_size".into(),
+        "cost_schedule".into(),
+        "subnet_type".into(),
+    ]);
+    for key in keys {
+        let field = key.rsplit('.').next().unwrap_or(&key);
+        let declaration = format!("pub {field}:");
+        let declared_in = match key.split('.').next() {
+            Some("cycles" | "scheduler") => FEES,
+            Some("embedder") => EMBED_CONFIG,
+            _ => EXEC_CONFIG,
+        };
+        let literal = format!("\"{key}\"");
+        let (file, marker) = if !key.contains('.') {
+            (FEES, "pub struct CyclesAccountManagerConfig".to_string())
+        } else if declared_in.1.contains(&declaration) {
+            (declared_in, declaration)
+        } else if CONFIG_CAPTURE.1.contains(&literal) {
+            (CONFIG_CAPTURE, literal)
         } else {
             (
                 CONFIG_CAPTURE,

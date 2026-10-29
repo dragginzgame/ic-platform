@@ -267,3 +267,42 @@ fn lifecycle_arguments_are_explicit_and_empty_hooks_stay_raw() {
         assert!(!generated.contains("msg_arg_data"));
     }
 }
+
+#[test]
+fn typed_bridge_preserves_the_public_generators_decisions() {
+    for query in [false, true] {
+        let item = quote!(
+            async fn entry(value: u64) -> (u64, bool) {
+                (value, true)
+            }
+        );
+        let public = quote!(
+            crate = "::renamed::cdk",
+            name = "named/method",
+            guard = "auth::first",
+            guard = "auth::second",
+            decode_with = "codec::decode::<_, { 42 }>",
+            encode_with = "codec::encode"
+        );
+        let expected = if query {
+            ic_query(public, item.clone())
+        } else {
+            ic_update(public, item.clone())
+        }
+        .unwrap();
+        let attrs = ExportAttributes {
+            name: Some("named/method".into()),
+            guard: vec![
+                syn::parse_quote!(auth::first),
+                syn::parse_quote!(auth::second),
+            ],
+            decode_with: Some(syn::parse_quote!(codec::decode::<_, { 42 }>)),
+            encode_with: Some(syn::parse_quote!(codec::encode)),
+            cratename: Some(syn::parse_quote!(::renamed::cdk)),
+            ..Default::default()
+        };
+        let actual =
+            external_entry(query, attrs, syn::parse2(item.clone()).unwrap(), item).unwrap();
+        assert_eq!(actual.to_string(), expected.to_string());
+    }
+}

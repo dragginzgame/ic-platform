@@ -79,9 +79,11 @@ docs-check:
 	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-call -p ic-platform -p ic-platform-macros --all-features --no-deps --locked
 wasm-check:
 	cargo check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
-msrv:
-	cargo +1.91.0 test -p ic-call -p ic-platform -p ic-platform-macros --all-features --locked
-	cargo +1.91.0 check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
+msrv: host-tools-check
+	@set -eu; \
+	platform_msrv="$$(bash scripts/ci/read-platform-msrv.sh)"; \
+	cargo +"$$platform_msrv" test -p ic-call -p ic-platform -p ic-platform-macros --all-features --locked; \
+	cargo +"$$platform_msrv" check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 .PHONY: check-primitives
@@ -92,6 +94,7 @@ check-primitives:
 		done; \
 	done
 check-consumer:
+	bash scripts/ci/test-platform-msrv.sh
 	bash scripts/ci/test-platform-consumer-admission.sh
 	bash scripts/ci/test-ic-call-consumer-admission.sh
 	bash scripts/ci/check-ic-call-consumer.sh

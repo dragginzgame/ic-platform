@@ -6,8 +6,8 @@
 //! Decoding authenticates nothing and never permits resubmission. The parent
 //! module admits at most 16 constructed wire levels before upstream decoding.
 
-use super::{DecodeError, DecodeLimits, config};
-use candid::{de::IDLDeserialize, utils::ArgumentDecoder};
+use super::{DecodeError, DecodeLimits, with_decoder};
+use candid::utils::ArgumentDecoder;
 
 /// Caller-selected handling of the declared top-level reply arity.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -25,21 +25,20 @@ fn reply<'a, T: ArgumentDecoder<'a>>(
     arity: ReplyArity,
     requires_value: bool,
 ) -> Result<T, DecodeError> {
-    let mut decoder = IDLDeserialize::new_with_config(bytes, &config(bytes, limits)?)
-        .map_err(DecodeError::Candid)?;
-    if arity == ReplyArity::Exact && requires_value && decoder.is_done() {
-        return Err(DecodeError::Candid(candid::Error::msg(
-            "missing external protocol reply value",
-        )));
-    }
-    let value = T::decode(&mut decoder).map_err(DecodeError::Candid)?;
-    if arity == ReplyArity::Exact && !decoder.is_done() {
-        return Err(DecodeError::Candid(candid::Error::msg(
-            "unexpected additional external protocol reply values",
-        )));
-    }
-    decoder.done().map_err(DecodeError::Candid)?;
-    Ok(value)
+    with_decoder(bytes, limits, |decoder| {
+        if arity == ReplyArity::Exact && requires_value && decoder.is_done() {
+            return Err(DecodeError::Candid(candid::Error::msg(
+                "missing external protocol reply value",
+            )));
+        }
+        let value = T::decode(decoder).map_err(DecodeError::Candid)?;
+        if arity == ReplyArity::Exact && !decoder.is_done() {
+            return Err(DecodeError::Candid(candid::Error::msg(
+                "unexpected additional external protocol reply values",
+            )));
+        }
+        Ok(value)
+    })
 }
 
 #[cfg(any(

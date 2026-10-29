@@ -1,13 +1,30 @@
 # Changelog
 
-## [0.7.6]
+## [0.7.7]
+
+### 🧹 Cleanup
+
+- Use an ordinary module directory for the native profiling API, retaining the
+  admission repair and adapter simplifications shipped in 0.7.6.
+
+## [0.7.6] - 2026-10-29
+
+### 🧹 Cleanup
+
+- Simplify external endpoint generation and reply decoding while preserving
+  generated behavior, caller-selected arity, diagnostics and the fixed nesting guard.
+- Share native profiler argument handling, capture configuration and image
+  responses. Select response encoding at the producing adapter and read stop
+  settings under one lock. Discover configuration keys from the existing producer
+  instead of parsing its Rust source; retain profiler-owned unit interpretation.
+- Derive current-source MSRV qualification from the workspace manifest and share
+  runtime profile selection across graph checks, builds and execution. Published
+  artifact qualification keeps its historical compiler selection.
 
 ### 🩹 Fixed
 
-- Restore native profiler compilation after shared HTTP admission extraction:
-  place the API in an ordinary module directory and retain the viewer's
-  canister-ID parsing import. Qualify the assembled PocketIC server as well as
-  the isolated admission fixture.
+- Repair the assembled native profiler's admission-module path and principal
+  parsing import so its actual server and focused regressions compile.
 
 ## [0.7.5] - 2026-10-29
 
