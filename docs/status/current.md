@@ -21,9 +21,8 @@ The native server now uses Host's complete-member gzip decoder and returns the
 core's existing level-1 export directly. API input/expanded limits remain 128 MiB;
 core input/expanded limits remain 128/256 MiB. Raw JSON remains supported. Corrupt,
 truncated, concatenated and trailing gzip input is refused before importing.
-This completes the source work tracked by
-[Profiler #1](https://github.com/dragginzgame/ic-profiler/issues/1), pending paired
-qualification/integration. PNG zlib is independent and unchanged.
+This completes the qualified source work tracked by
+[Profiler #1](https://github.com/dragginzgame/ic-profiler/issues/1), pending integration. PNG zlib is independent and unchanged.
 [Profiler #4](https://github.com/dragginzgame/ic-profiler/issues/4) separately tracks
 private rendering-helper convergence; no generic Host chart API is added.
 
@@ -33,8 +32,19 @@ independent Profiler Clippy pass before longer tests. The standalone recorder's
 Feature policy/closure/graph fixtures, inventory, pin/source checks and Rust 1.91
 all-feature Wasm compilation pass. Native Cargo/Bazel locks are refreshed with
 normal resolvers, retaining Host Artifacts 0.69.1 and the selected backend while
-removing the old Git Platform gzip package. Actual paired native qualification
-and final consumer pin are still pending; do not infer them from fixture checks.
+removing the old Git Platform gzip package. The paired Platform candidate `550ee6c` and clean Profiler `fd55a9d` pass real
+assembly, native graph admission and the Rust 1.99.0 server build. Its receipt
+records both transferred modules as consumer-origin with their original hashes.
+All 12 native API tests (including exact gzip budgets/framing), 73 assembled
+recorder tests, five renderer tests, two CLI tests and five installed profiling
+scenarios pass. Frozen server SHA-256:
+`cc1fe0e7078c79b4c255ade7e06bb887e8412c05539d9296c48ad976ab16caf0`.
+The direct-Host Bazel recorder target also passes all 73 tests using the documented
+local configuration; the first remote-cache attempt failed and is retained.
+[Platform #92](https://github.com/dragginzgame/ic-platform/pull/92) and
+[Profiler #3](https://github.com/dragginzgame/ic-profiler/pull/3) carry the paired
+changes. Integrate the supplier first, then refresh the consumer pin to its
+merged main identity. Do not close owning issues before default-branch resolution.
 Native macOS, full replica Bazel/NNS genesis and live provider acceptance remain
 separate. No performance or Wasm-size saving is measured for this batch.
 
