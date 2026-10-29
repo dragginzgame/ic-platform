@@ -23,7 +23,7 @@ before retaining it with measurements.
 
 `scripts/ic_profiler.py native-verify` owns the complete native gate: prerequisite
 and graph admission, server build, recorder and server-library product tests,
-and the five profiling tests
+and the installed profiling tests
 against that exact server. Profiling tests serialize their whole-server recording
 windows; independent workloads must not contaminate one another's cycle totals.
 
@@ -68,7 +68,7 @@ python3 -m unittest discover -s native/ic-profiler/tests -p 'test_*.py'
 ```
 
 Actual acceptance also requires the selected native graph, reproducible assembly,
-the instrumented server build and all five `system_profiling` regressions against
+the instrumented server build and the installed `system_profiling` suite against
 that new executable's recorded hash. Fixture passes do not establish native or
 Bazel qualification.
 
