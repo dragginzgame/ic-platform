@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.2]
+
+### 🔧 Changed
+
+- Supply coherent Host process and IC Wire Cargo/Bazel inputs for Profiler's
+  adopted private transport. Keep gzip behind Platform and all Host packages on
+  one immutable source family until the supplying APIs are published
+  ([#94](https://github.com/dragginzgame/ic-platform/issues/94)).
+
+### 🩹 Fixed
+
+- Admit the manifest-selected immutable Host gzip supplier in feature checks,
+  preserving foreign/path, mixed-source and Wasm rejection.
+
 ## [0.8.1] - 2026-10-29
 
 ### 🧭 Migration Notes

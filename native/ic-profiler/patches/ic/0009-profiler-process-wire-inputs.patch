@@ -1,0 +1,2067 @@
+diff --git a/Cargo.toml b/Cargo.toml
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -601,9 +601,11 @@
+ opt-level = 3
+ 
+ [workspace.dependencies]
++ic-wire = { version = "0.7.21", default-features = false }
++ic-host-process = { git = "https://github.com/dragginzgame/ic-tooling.git", rev = "c20dbd11785c17d369651f51fa0967fbec69c57a", default-features = false }
+ ic-metrics = { version = "0.17.2", default-features = false }
+ 
+-ic-platform = { version = "0.7.6", default-features = false, features = ["gzip"] }
++ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "ba98bd33ef1cbe463d6daf34f0511f17d7770c20", default-features = false, features = ["gzip"] }
+ actix-rt = "2.10.0"
+ actix-web = { version = "4.9.0", default-features = false, features = [
+     "macros",
+@@ -912,7 +914,7 @@
+ serde = { version = "1.0.203", features = ["derive"] }
+ serde_bytes = "0.11.15"
+ serde_cbor = "0.11.2"
+-serde_json = { version = "^1.0.107" }
++serde_json = { version = "^1.0.107", features = ["float_roundtrip"] }
+ serde_regex = "1.1.0"
+ serde_with = "3.21.0"
+ serde_yaml = "0.9.33"
+diff --git a/Cargo.lock b/Cargo.lock
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -2893,6 +2893,16 @@
+ version = "1.0.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "55b672471b4e9f9e95499ea597ff64941a309b2cdbffcc46f2cc5e2d971fd335"
++
++[[package]]
++name = "command-fds"
++version = "0.3.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1b60b5124979fccd9addd89d8b97a1d6eebb4950694520c75ddd722535ea443f"
++dependencies = [
++ "nix 0.31.3",
++ "thiserror 2.0.18",
++]
+ 
+ [[package]]
+ name = "command_runner"
+@@ -9615,12 +9625,33 @@
+ 
+ [[package]]
+ name = "ic-host-artifacts"
+-version = "0.69.12"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "374fa708729c7c85d786b207e3fc74f1c2b21da5a0a0609ba2d8dd1400d0d7df"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
+ dependencies = [
+  "flate2",
+  "sha2 0.10.9",
++]
++
++[[package]]
++name = "ic-host-fs"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
++dependencies = [
++ "ic-host-artifacts",
++ "rustix 1.1.4",
++ "thiserror 2.0.18",
++]
++
++[[package]]
++name = "ic-host-process"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
++dependencies = [
++ "command-fds",
++ "ic-host-artifacts",
++ "ic-host-fs",
++ "libc",
++ "rustix 1.1.4",
+ ]
+ 
+ [[package]]
+@@ -12539,8 +12570,7 @@
+ [[package]]
+ name = "ic-platform"
+ version = "0.7.6"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "e2899efd19bafbac5cba000d5a407b5392ed4e9bfc9ab726fb897f09ac5ee2f6"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=ba98bd33ef1cbe463d6daf34f0511f17d7770c20#ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
+ dependencies = [
+  "ic-host-artifacts",
+ ]
+@@ -14662,11 +14692,12 @@
+ name = "ic-system-profiler"
+ version = "0.9.0"
+ dependencies = [
++ "ic-host-process",
+  "ic-metrics 0.17.2",
+  "ic-platform",
++ "ic-wire",
+  "libc",
+  "serde",
+- "serde_cbor",
+  "serde_json",
+ ]
+ 
+@@ -17180,9 +17211,9 @@
+ 
+ [[package]]
+ name = "libc"
+-version = "0.2.186"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
++version = "0.2.191"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+ 
+ [[package]]
+ name = "libcryptsetup-rs"
+@@ -19573,6 +19604,7 @@
+  "ic-error-types 0.2.0",
+  "ic-execution-environment",
+  "ic-gateway",
++ "ic-host-process",
+  "ic-http-endpoints-public",
+  "ic-https-outcalls-adapter",
+  "ic-https-outcalls-adapter-client",
+diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
+--- a/Cargo.Bazel.toml.lock
++++ b/Cargo.Bazel.toml.lock
+@@ -2700,6 +2700,16 @@
+ version = "1.0.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "55b672471b4e9f9e95499ea597ff64941a309b2cdbffcc46f2cc5e2d971fd335"
++
++[[package]]
++name = "command-fds"
++version = "0.3.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1b60b5124979fccd9addd89d8b97a1d6eebb4950694520c75ddd722535ea443f"
++dependencies = [
++ "nix 0.31.3",
++ "thiserror 2.0.18",
++]
+ 
+ [[package]]
+ name = "compact_str"
+@@ -3855,6 +3865,7 @@
+  "ic-certified-map",
+  "ic-doge-interface",
+  "ic-gateway",
++ "ic-host-process",
+  "ic-identity-hsm",
+  "ic-management-canister-types 0.8.0",
+  "ic-metrics",
+@@ -3869,6 +3880,7 @@
+  "ic-verify-bls-signature",
+  "ic-vetkeys",
+  "ic-wasm",
++ "ic-wire",
+  "ic-xrc-types",
+  "ic0",
+  "ic_bls12_381",
+@@ -6129,12 +6141,33 @@
+ 
+ [[package]]
+ name = "ic-host-artifacts"
+-version = "0.69.12"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "374fa708729c7c85d786b207e3fc74f1c2b21da5a0a0609ba2d8dd1400d0d7df"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
+ dependencies = [
+  "flate2",
+  "sha2 0.10.9",
++]
++
++[[package]]
++name = "ic-host-fs"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
++dependencies = [
++ "ic-host-artifacts",
++ "rustix 1.1.4",
++ "thiserror 2.0.18",
++]
++
++[[package]]
++name = "ic-host-process"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
++dependencies = [
++ "command-fds",
++ "ic-host-artifacts",
++ "ic-host-fs",
++ "libc",
++ "rustix 1.1.4",
+ ]
+ 
+ [[package]]
+@@ -6238,8 +6271,7 @@
+ [[package]]
+ name = "ic-platform"
+ version = "0.7.6"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "e2899efd19bafbac5cba000d5a407b5392ed4e9bfc9ab726fb897f09ac5ee2f6"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=ba98bd33ef1cbe463d6daf34f0511f17d7770c20#ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
+ dependencies = [
+  "ic-host-artifacts",
+ ]
+@@ -7293,9 +7325,9 @@
+ 
+ [[package]]
+ name = "libc"
+-version = "0.2.186"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
++version = "0.2.191"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+ 
+ [[package]]
+ name = "libcryptsetup-rs"
+diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
+--- a/Cargo.Bazel.json.lock
++++ b/Cargo.Bazel.json.lock
+@@ -3,7 +3,7 @@
+     "ic-gateway 0.0.0-git",
+     "ic-wasm 0.11.1"
+   ],
+-  "checksum": "160354cf72355c9b3605988e1d7e01ea2309ec87e9a773736fc3111ccf9b3da8",
++  "checksum": "377df08a9b3ed85cf58ad68fe222cae9ab56fc2a7341f1233b5c20f1c83ebe16",
+   "conditions": {
+     "aarch64-apple-darwin": [
+       "aarch64-apple-darwin"
+@@ -3107,7 +3107,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -5386,7 +5386,7 @@
+           "selects": {
+             "cfg(any())": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -6990,7 +6990,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -9656,23 +9656,9 @@
+     },
+     "bytemuck 1.25.2": {
+       "common_attrs": {
+-        "crate_features": {
+-          "common": [],
+-          "selects": {
+-            "aarch64-apple-darwin": [
+-              "must_cast"
+-            ],
+-            "aarch64-unknown-linux-gnu": [
+-              "must_cast"
+-            ],
+-            "x86_64-apple-darwin": [
+-              "must_cast"
+-            ],
+-            "x86_64-unknown-linux-gnu": [
+-              "must_cast"
+-            ]
+-          }
+-        },
++        "crate_features": [
++          "must_cast"
++        ],
+         "edition": "2018"
+       },
+       "library_target_name": "bytemuck",
+@@ -9857,7 +9843,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -9934,7 +9920,7 @@
+             "target": "hex"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -11005,7 +10991,7 @@
+                 "target": "jobserver"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -11015,7 +11001,7 @@
+                 "target": "jobserver"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -11025,7 +11011,7 @@
+                 "target": "jobserver"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -11035,7 +11021,7 @@
+                 "target": "jobserver"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -11736,7 +11722,7 @@
+             "target": "glob"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -11975,7 +11961,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -12264,6 +12250,47 @@
+       ],
+       "version": "1.0.0"
+     },
++    "command-fds 0.3.3": {
++      "common_attrs": {
++        "crate_features": [
++          "default"
++        ],
++        "deps": [
++          {
++            "id": "nix 0.31.3",
++            "target": "nix"
++          },
++          {
++            "id": "thiserror 2.0.18",
++            "target": "thiserror"
++          }
++        ],
++        "edition": "2024"
++      },
++      "library_target_name": "command_fds",
++      "license": "Apache-2.0",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "Apache-2.0"
++      ],
++      "name": "command-fds",
++      "package_url": "https://github.com/google/command-fds/",
++      "repository": {
++        "Http": {
++          "sha256": "1b60b5124979fccd9addd89d8b97a1d6eebb4950694520c75ddd722535ea443f",
++          "url": "https://static.crates.io/crates/command-fds/0.3.3/download"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "command_fds",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.3.3"
++    },
+     "compact_str 0.8.1": {
+       "common_attrs": {
+         "crate_features": [
+@@ -12565,7 +12592,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -12640,7 +12667,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -12911,7 +12938,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -12954,7 +12981,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -13070,19 +13097,19 @@
+           "selects": {
+             "aarch64-linux-android": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"aarch64\", target_vendor = \"apple\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -13122,25 +13149,25 @@
+           "selects": {
+             "cfg(all(target_arch = \"aarch64\", target_os = \"android\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"aarch64\", target_vendor = \"apple\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"loongarch64\", target_os = \"linux\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -13772,7 +13799,7 @@
+           "selects": {
+             "cfg(target_arch = \"riscv64\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -15638,7 +15665,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -17413,6 +17440,10 @@
+             "target": "ic_gateway"
+           },
+           {
++            "id": "ic-host-process 0.69.13",
++            "target": "ic_host_process"
++          },
++          {
+             "id": "ic-identity-hsm 0.49.1",
+             "target": "ic_identity_hsm"
+           },
+@@ -17470,6 +17501,10 @@
+             "target": "ic_wasm"
+           },
+           {
++            "id": "ic-wire 0.7.21",
++            "target": "ic_wire"
++          },
++          {
+             "id": "ic-xrc-types 1.2.0",
+             "target": "ic_xrc_types"
+           },
+@@ -17554,7 +17589,7 @@
+             "target": "leb128"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -18495,7 +18530,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -18547,7 +18582,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -20073,19 +20108,19 @@
+           "selects": {
+             "cfg(target_os = \"hermit\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"wasi\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -20862,7 +20897,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -20943,7 +20978,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             }
+           ],
+@@ -22415,7 +22450,7 @@
+       "version": "0.14.7"
+     },
+     "getrandom 0.2.10": {
+-      "additive_build_file_content": "load(\"@rules_rust//rust:defs.bzl\", \"rust_library\")\n\nrust_library(\n    name = \"getrandom_no_wasm_bindgen\",\n    srcs = glob(\n        allow_empty = True,\n        include = [\"**/*.rs\"],\n    ),\n    compile_data = glob(\n        allow_empty = True,\n        include = [\"**\"],\n        exclude = [\n            \"**/* *\",\n            \".tmp_git_root/**/*\",\n            \"BUILD\",\n            \"BUILD.bazel\",\n            \"WORKSPACE\",\n            \"WORKSPACE.bazel\",\n        ],\n    ),\n    crate_features = [\"custom\", \"std\"],\n    crate_name = \"getrandom\",\n    crate_root = \"src/lib.rs\",\n    deps = [\n        \"@crate_index__cfg-if-1.0.0//:cfg_if\",\n    ] + select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"//conditions:default\": [],\n    }),\n    edition = \"2018\",\n    rustc_env_files = [\":cargo_toml_env_vars\"],\n    rustc_flags = [\"--cap-lints=allow\"],\n    tags = [\"cargo-bazel\", \"crate-name=getrandom\", \"manual\", \"noclippy\", \"norustfmt\"],\n    target_compatible_with = select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [],\n        \"//conditions:default\": [\"@platforms//:incompatible\"],\n    }),\n    version = \"0.2.10\",\n    visibility = [\"//visibility:public\"],\n)\n",
++      "additive_build_file_content": "load(\"@rules_rust//rust:defs.bzl\", \"rust_library\")\n\nrust_library(\n    name = \"getrandom_no_wasm_bindgen\",\n    srcs = glob(\n        allow_empty = True,\n        include = [\"**/*.rs\"],\n    ),\n    compile_data = glob(\n        allow_empty = True,\n        include = [\"**\"],\n        exclude = [\n            \"**/* *\",\n            \".tmp_git_root/**/*\",\n            \"BUILD\",\n            \"BUILD.bazel\",\n            \"WORKSPACE\",\n            \"WORKSPACE.bazel\",\n        ],\n    ),\n    crate_features = [\"custom\", \"std\"],\n    crate_name = \"getrandom\",\n    crate_root = \"src/lib.rs\",\n    deps = [\n        \"@crate_index__cfg-if-1.0.0//:cfg_if\",\n    ] + select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"//conditions:default\": [],\n    }),\n    edition = \"2018\",\n    rustc_env_files = [\":cargo_toml_env_vars\"],\n    rustc_flags = [\"--cap-lints=allow\"],\n    tags = [\"cargo-bazel\", \"crate-name=getrandom\", \"manual\", \"noclippy\", \"norustfmt\"],\n    target_compatible_with = select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [],\n        \"//conditions:default\": [\"@platforms//:incompatible\"],\n    }),\n    version = \"0.2.10\",\n    visibility = [\"//visibility:public\"],\n)\n",
+       "common_attrs": {
+         "crate_features": {
+           "common": [
+@@ -22446,7 +22481,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -22509,7 +22544,7 @@
+           "selects": {
+             "cfg(all(any(target_os = \"linux\", target_os = \"android\"), not(any(all(target_os = \"linux\", target_env = \"\"), getrandom_backend = \"custom\", getrandom_backend = \"linux_raw\", getrandom_backend = \"rdrand\", getrandom_backend = \"rndr\"))))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -22527,43 +22562,43 @@
+             ],
+             "cfg(any(target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"hurd\", target_os = \"illumos\", target_os = \"cygwin\", all(target_os = \"horizon\", target_arch = \"arm\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"haiku\", target_os = \"redox\", target_os = \"nto\", target_os = \"aix\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"ios\", target_os = \"visionos\", target_os = \"watchos\", target_os = \"tvos\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"macos\", target_os = \"openbsd\", target_os = \"vita\", target_os = \"emscripten\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"netbsd\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"solaris\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"vxworks\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -22639,7 +22674,7 @@
+           "selects": {
+             "cfg(all(any(target_os = \"linux\", target_os = \"android\"), not(any(all(target_os = \"linux\", target_env = \"\"), getrandom_backend = \"custom\", getrandom_backend = \"linux_raw\", getrandom_backend = \"rdrand\", getrandom_backend = \"rndr\"))))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -22663,43 +22698,43 @@
+             ],
+             "cfg(any(target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"hurd\", target_os = \"illumos\", target_os = \"cygwin\", all(target_os = \"horizon\", target_arch = \"arm\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"haiku\", target_os = \"redox\", target_os = \"nto\", target_os = \"aix\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"ios\", target_os = \"visionos\", target_os = \"watchos\", target_os = \"tvos\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"macos\", target_os = \"openbsd\", target_os = \"vita\", target_os = \"emscripten\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"netbsd\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"solaris\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"vxworks\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -24643,7 +24678,7 @@
+           "selects": {
+             "cfg(any(unix, target_os = \"redox\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -25481,7 +25516,7 @@
+               "target": "ipnet"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -27466,21 +27501,59 @@
+       ],
+       "version": "0.0.0-git"
+     },
+-    "ic-host-artifacts 0.69.12": {
+-      "common_attrs": {
+-        "crate_features": [
+-          "gzip"
+-        ],
+-        "deps": [
+-          {
+-            "id": "flate2 1.1.10",
+-            "target": "flate2"
+-          },
+-          {
+-            "id": "sha2 0.10.9",
+-            "target": "sha2"
+-          }
+-        ],
++    "ic-host-artifacts 0.69.13": {
++      "common_attrs": {
++        "crate_features": {
++          "common": [],
++          "selects": {
++            "aarch64-apple-darwin": [
++              "gzip"
++            ],
++            "aarch64-unknown-linux-gnu": [
++              "gzip"
++            ],
++            "x86_64-apple-darwin": [
++              "gzip"
++            ],
++            "x86_64-unknown-linux-gnu": [
++              "gzip"
++            ]
++          }
++        },
++        "deps": {
++          "common": [
++            {
++              "id": "sha2 0.10.9",
++              "target": "sha2"
++            }
++          ],
++          "selects": {
++            "aarch64-apple-darwin": [
++              {
++                "id": "flate2 1.1.10",
++                "target": "flate2"
++              }
++            ],
++            "aarch64-unknown-linux-gnu": [
++              {
++                "id": "flate2 1.1.10",
++                "target": "flate2"
++              }
++            ],
++            "x86_64-apple-darwin": [
++              {
++                "id": "flate2 1.1.10",
++                "target": "flate2"
++              }
++            ],
++            "x86_64-unknown-linux-gnu": [
++              {
++                "id": "flate2 1.1.10",
++                "target": "flate2"
++              }
++            ]
++          }
++        },
+         "edition": "2024"
+       },
+       "library_target_name": "ic_host_artifacts",
+@@ -27492,9 +27565,12 @@
+       "name": "ic-host-artifacts",
+       "package_url": "https://github.com/dragginzgame/ic-tooling",
+       "repository": {
+-        "Http": {
+-          "sha256": "374fa708729c7c85d786b207e3fc74f1c2b21da5a0a0609ba2d8dd1400d0d7df",
+-          "url": "https://static.crates.io/crates/ic-host-artifacts/0.69.12/download"
++        "Git": {
++          "commitish": {
++            "Rev": "c20dbd11785c17d369651f51fa0967fbec69c57a"
++          },
++          "remote": "https://github.com/dragginzgame/ic-tooling.git",
++          "strip_prefix": "crates/ic-host-artifacts"
+         }
+       },
+       "targets": [
+@@ -27505,7 +27581,117 @@
+           }
+         }
+       ],
+-      "version": "0.69.12"
++      "version": "0.69.13"
++    },
++    "ic-host-fs 0.69.13": {
++      "common_attrs": {
++        "deps": {
++          "common": [
++            {
++              "id": "ic-host-artifacts 0.69.13",
++              "target": "ic_host_artifacts"
++            },
++            {
++              "id": "thiserror 2.0.18",
++              "target": "thiserror"
++            }
++          ],
++          "selects": {
++            "cfg(unix)": [
++              {
++                "id": "rustix 1.1.4",
++                "target": "rustix"
++              }
++            ]
++          }
++        },
++        "edition": "2024"
++      },
++      "library_target_name": "ic_host_fs",
++      "license": "MIT",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "MIT"
++      ],
++      "name": "ic-host-fs",
++      "package_url": "https://github.com/dragginzgame/ic-tooling",
++      "repository": {
++        "Git": {
++          "commitish": {
++            "Rev": "c20dbd11785c17d369651f51fa0967fbec69c57a"
++          },
++          "remote": "https://github.com/dragginzgame/ic-tooling.git",
++          "strip_prefix": "crates/ic-host-fs"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "ic_host_fs",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.69.13"
++    },
++    "ic-host-process 0.69.13": {
++      "common_attrs": {
++        "deps": {
++          "common": [
++            {
++              "id": "ic-host-artifacts 0.69.13",
++              "target": "ic_host_artifacts"
++            },
++            {
++              "id": "ic-host-fs 0.69.13",
++              "target": "ic_host_fs"
++            }
++          ],
++          "selects": {
++            "cfg(unix)": [
++              {
++                "id": "command-fds 0.3.3",
++                "target": "command_fds"
++              },
++              {
++                "id": "libc 0.2.191",
++                "target": "libc"
++              },
++              {
++                "id": "rustix 1.1.4",
++                "target": "rustix"
++              }
++            ]
++          }
++        },
++        "edition": "2024"
++      },
++      "library_target_name": "ic_host_process",
++      "license": "MIT",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "MIT"
++      ],
++      "name": "ic-host-process",
++      "package_url": "https://github.com/dragginzgame/ic-tooling",
++      "repository": {
++        "Git": {
++          "commitish": {
++            "Rev": "c20dbd11785c17d369651f51fa0967fbec69c57a"
++          },
++          "remote": "https://github.com/dragginzgame/ic-tooling.git",
++          "strip_prefix": "crates/ic-host-process"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "ic_host_process",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.69.13"
+     },
+     "ic-http-certification 3.1.0": {
+       "common_attrs": {
+@@ -27909,25 +28095,25 @@
+           "selects": {
+             "aarch64-apple-darwin": [
+               {
+-                "id": "ic-host-artifacts 0.69.12",
++                "id": "ic-host-artifacts 0.69.13",
+                 "target": "ic_host_artifacts"
+               }
+             ],
+             "aarch64-unknown-linux-gnu": [
+               {
+-                "id": "ic-host-artifacts 0.69.12",
++                "id": "ic-host-artifacts 0.69.13",
+                 "target": "ic_host_artifacts"
+               }
+             ],
+             "x86_64-apple-darwin": [
+               {
+-                "id": "ic-host-artifacts 0.69.12",
++                "id": "ic-host-artifacts 0.69.13",
+                 "target": "ic_host_artifacts"
+               }
+             ],
+             "x86_64-unknown-linux-gnu": [
+               {
+-                "id": "ic-host-artifacts 0.69.12",
++                "id": "ic-host-artifacts 0.69.13",
+                 "target": "ic_host_artifacts"
+               }
+             ]
+@@ -27945,9 +28131,12 @@
+       "name": "ic-platform",
+       "package_url": "https://github.com/dragginzgame/ic-platform",
+       "repository": {
+-        "Http": {
+-          "sha256": "e2899efd19bafbac5cba000d5a407b5392ed4e9bfc9ab726fb897f09ac5ee2f6",
+-          "url": "https://static.crates.io/crates/ic-platform/0.7.6/download"
++        "Git": {
++          "commitish": {
++            "Rev": "ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
++          },
++          "remote": "https://github.com/dragginzgame/ic-platform.git",
++          "strip_prefix": "crates/ic-platform"
+         }
+       },
+       "targets": [
+@@ -28719,31 +28908,69 @@
+     },
+     "ic-wire 0.7.21": {
+       "common_attrs": {
+-        "crate_features": [
+-          "typescript"
+-        ],
+-        "deps": [
+-          {
+-            "id": "bytemuck 1.25.2",
+-            "target": "bytemuck"
+-          },
+-          {
+-            "id": "postcard 1.1.3",
+-            "target": "postcard"
+-          },
+-          {
+-            "id": "serde 1.0.228",
+-            "target": "serde"
+-          },
+-          {
+-            "id": "serde_bytes 0.11.19",
+-            "target": "serde_bytes"
+-          },
+-          {
+-            "id": "serde_json 1.0.145",
+-            "target": "serde_json"
+-          }
+-        ],
++        "crate_features": {
++          "common": [],
++          "selects": {
++            "aarch64-apple-darwin": [
++              "typescript"
++            ],
++            "aarch64-unknown-linux-gnu": [
++              "typescript"
++            ],
++            "x86_64-apple-darwin": [
++              "typescript"
++            ],
++            "x86_64-unknown-linux-gnu": [
++              "typescript"
++            ]
++          }
++        },
++        "deps": {
++          "common": [
++            {
++              "id": "bytemuck 1.25.2",
++              "target": "bytemuck"
++            },
++            {
++              "id": "postcard 1.1.3",
++              "target": "postcard"
++            },
++            {
++              "id": "serde 1.0.228",
++              "target": "serde"
++            },
++            {
++              "id": "serde_bytes 0.11.19",
++              "target": "serde_bytes"
++            }
++          ],
++          "selects": {
++            "aarch64-apple-darwin": [
++              {
++                "id": "serde_json 1.0.145",
++                "target": "serde_json"
++              }
++            ],
++            "aarch64-unknown-linux-gnu": [
++              {
++                "id": "serde_json 1.0.145",
++                "target": "serde_json"
++              }
++            ],
++            "x86_64-apple-darwin": [
++              {
++                "id": "serde_json 1.0.145",
++                "target": "serde_json"
++              }
++            ],
++            "x86_64-unknown-linux-gnu": [
++              {
++                "id": "serde_json 1.0.145",
++                "target": "serde_json"
++              }
++            ]
++          }
++        },
+         "edition": "2024",
+         "proc_macro_deps": [
+           {
+@@ -30291,7 +30518,7 @@
+             "target": "inotify_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -30329,7 +30556,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -31523,7 +31750,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -32563,7 +32790,7 @@
+       ],
+       "version": "0.1.0"
+     },
+-    "libc 0.2.186": {
++    "libc 0.2.191": {
+       "build_script_attrs": {},
+       "common_attrs": {
+         "crate_features": [
+@@ -32587,8 +32814,8 @@
+       "package_url": "https://github.com/rust-lang/libc",
+       "repository": {
+         "Http": {
+-          "sha256": "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66",
+-          "url": "https://static.crates.io/crates/libc/0.2.186/download"
++          "sha256": "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a",
++          "url": "https://static.crates.io/crates/libc/0.2.191/download"
+         }
+       },
+       "targets": [
+@@ -32605,7 +32832,7 @@
+           }
+         }
+       ],
+-      "version": "0.2.186"
++      "version": "0.2.191"
+     },
+     "libcryptsetup-rs 0.15.0": {
+       "build_script_attrs": {
+@@ -32634,7 +32861,7 @@
+             "target": "either"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -33123,7 +33350,7 @@
+             "target": "lazy_static"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33166,7 +33393,7 @@
+             "target": "bitflags"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33224,7 +33451,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33374,7 +33601,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -33440,7 +33667,7 @@
+             "target": "hmac"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -33536,7 +33763,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33606,7 +33833,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33687,7 +33914,7 @@
+             "target": "bitflags"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33725,7 +33952,8 @@
+           "errno",
+           "general",
+           "ioctl",
+-          "no_std"
++          "no_std",
++          "prctl"
+         ],
+         "edition": "2021"
+       },
+@@ -33881,7 +34109,7 @@
+             "target": "byteorder"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -33944,7 +34172,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -34417,7 +34645,7 @@
+             "target": "errno"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -35186,7 +35414,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -35226,7 +35454,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -35663,7 +35891,7 @@
+           "selects": {
+             "cfg(target_os = \"wasi\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -35673,7 +35901,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -35762,7 +35990,7 @@
+             ],
+             "cfg(target_os = \"wasi\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -35772,7 +36000,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -36340,7 +36568,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -36410,7 +36638,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -36486,7 +36714,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -37608,7 +37836,7 @@
+           "selects": {
+             "cfg(not(windows))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -38155,7 +38383,7 @@
+             "target": "foreign_types"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -38341,7 +38569,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -39275,7 +39503,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -39346,7 +39574,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -39811,7 +40039,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -41319,7 +41547,7 @@
+             "target": "inferno"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -42339,7 +42567,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -43290,7 +43518,7 @@
+             ],
+             "cfg(not(any(target_os = \"windows\", target_arch = \"wasm32\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -43669,7 +43897,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -43943,25 +44171,25 @@
+           "selects": {
+             "aarch64-apple-darwin": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "aarch64-unknown-linux-gnu": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "x86_64-apple-darwin": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "x86_64-unknown-linux-gnu": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -46141,13 +46369,13 @@
+             ],
+             "cfg(all(all(target_arch = \"aarch64\", target_endian = \"little\"), target_vendor = \"apple\", any(target_os = \"ios\", target_os = \"macos\", target_os = \"tvos\", target_os = \"visionos\", target_os = \"watchos\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(any(all(target_arch = \"aarch64\", target_endian = \"little\"), all(target_arch = \"arm\", target_endian = \"little\")), any(target_os = \"android\", target_os = \"linux\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -46303,7 +46531,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -46687,7 +46915,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -47180,7 +47408,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -47203,7 +47431,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -47225,7 +47453,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -47236,7 +47464,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -47287,6 +47515,7 @@
+           "fs",
+           "mm",
+           "param",
++          "process",
+           "std"
+         ],
+         "deps": {
+@@ -47304,7 +47533,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -47327,7 +47556,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -47349,7 +47578,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -49119,7 +49348,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -49174,7 +49403,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -49233,7 +49462,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -49564,26 +49793,11 @@
+     },
+     "serde_bytes 0.11.19": {
+       "common_attrs": {
+-        "crate_features": {
+-          "common": [
+-            "default",
+-            "std"
+-          ],
+-          "selects": {
+-            "aarch64-apple-darwin": [
+-              "alloc"
+-            ],
+-            "aarch64-unknown-linux-gnu": [
+-              "alloc"
+-            ],
+-            "x86_64-apple-darwin": [
+-              "alloc"
+-            ],
+-            "x86_64-unknown-linux-gnu": [
+-              "alloc"
+-            ]
+-          }
+-        },
++        "crate_features": [
++          "alloc",
++          "default",
++          "std"
++        ],
+         "deps": {
+           "common": [
+             {
+@@ -49822,6 +50036,7 @@
+         "crate_features": [
+           "alloc",
+           "default",
++          "float_roundtrip",
+           "raw_value",
+           "std",
+           "unbounded_depth"
+@@ -50453,7 +50668,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -51088,7 +51303,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -51140,7 +51355,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -51184,7 +51399,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -52196,7 +52411,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -52245,7 +52460,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -52294,7 +52509,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -52525,7 +52740,7 @@
+             "target": "bitflags"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -52615,7 +52830,7 @@
+               "target": "cfg_if"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -53828,7 +54043,7 @@
+             "target": "bitflags"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -53985,7 +54200,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -54038,7 +54253,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -54302,7 +54517,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -54824,7 +55039,7 @@
+           "selects": {
+             "cfg(not(windows))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -54867,7 +55082,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -55314,7 +55529,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -55389,7 +55604,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -55437,7 +55652,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -55942,7 +56157,7 @@
+           "selects": {
+             "aarch64-apple-darwin": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -55956,7 +56171,7 @@
+             ],
+             "aarch64-unknown-linux-gnu": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -55970,7 +56185,7 @@
+             ],
+             "x86_64-apple-darwin": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -55984,7 +56199,7 @@
+             ],
+             "x86_64-unknown-linux-gnu": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -56625,7 +56840,7 @@
+             "target": "futures"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -58201,7 +58416,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -60091,7 +60306,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -60141,7 +60356,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -60358,7 +60573,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -60399,7 +60614,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -61713,7 +61928,7 @@
+               "target": "bumpalo"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -62254,7 +62469,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -62383,7 +62598,7 @@
+           "selects": {
+             "cfg(any(target_os = \"linux\", target_vendor = \"apple\", target_os = \"freebsd\", target_os = \"android\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -66153,7 +66368,7 @@
+             ],
+             "cfg(any(target_os = \"freebsd\", target_os = \"netbsd\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -66972,7 +67187,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -67251,6 +67466,7 @@
+     "ic-certified-map 0.3.4",
+     "ic-doge-interface 0.3.0",
+     "ic-gateway 0.0.0-git",
++    "ic-host-process 0.69.13",
+     "ic-identity-hsm 0.49.1",
+     "ic-management-canister-types 0.8.0",
+     "ic-metrics 0.17.2",
+@@ -67265,6 +67481,7 @@
+     "ic-verify-bls-signature 0.6.0",
+     "ic-vetkeys 0.7.0",
+     "ic-wasm 0.11.1",
++    "ic-wire 0.7.21",
+     "ic-xrc-types 1.2.0",
+     "ic0 1.1.0",
+     "ic_bls12_381 0.10.1",
+@@ -67287,7 +67504,7 @@
+     "keyring 3.4.0",
+     "lazy_static 1.5.0",
+     "leb128 0.2.5",
+-    "libc 0.2.186",
++    "libc 0.2.191",
+     "libcryptsetup-rs 0.15.0",
+     "libfuzzer-sys 0.4.7",
+     "libnss 0.5.0",
+diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
+--- a/bazel/rust.MODULE.bazel
++++ b/bazel/rust.MODULE.bazel
+@@ -28,6 +28,17 @@
+ # Rust crates.
+ crate.spec(
+     default_features = False,
++    package = "ic-wire",
++    version = "0.7.21",
++)
++crate.spec(
++    default_features = False,
++    package = "ic-host-process",
++    git = "https://github.com/dragginzgame/ic-tooling.git",
++    rev = "c20dbd11785c17d369651f51fa0967fbec69c57a",
++)
++crate.spec(
++    default_features = False,
+     package = "ic-metrics",
+     version = "0.17.2",
+ )
+@@ -35,7 +46,8 @@
+     default_features = False,
+     features = ["gzip"],
+     package = "ic-platform",
+-    version = "0.7.6",
++    git = "https://github.com/dragginzgame/ic-platform.git",
++    rev = "ba98bd33ef1cbe463d6daf34f0511f17d7770c20",
+ )
+ # Build any crate with `@crate_index//:mycrate`
+ # Use particular version with `@crate_index//:mycrate-3.14.16`
+@@ -549,11 +561,11 @@
+     deps = [
+         "@crate_index__cfg-if-1.0.0//:cfg_if",
+     ] + select({
+-        "@rules_rust//rust/platform:aarch64-apple-darwin": ["@crate_index__libc-0.2.186//:libc"],
+-        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": ["@crate_index__libc-0.2.186//:libc"],
++        "@rules_rust//rust/platform:aarch64-apple-darwin": ["@crate_index__libc-0.2.191//:libc"],
++        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": ["@crate_index__libc-0.2.191//:libc"],
+         "@rules_rust//rust/platform:wasm32-unknown-unknown": [],
+-        "@rules_rust//rust/platform:x86_64-apple-darwin": ["@crate_index__libc-0.2.186//:libc"],
+-        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": ["@crate_index__libc-0.2.186//:libc"],
++        "@rules_rust//rust/platform:x86_64-apple-darwin": ["@crate_index__libc-0.2.191//:libc"],
++        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": ["@crate_index__libc-0.2.191//:libc"],
+         "//conditions:default": [],
+     }),
+     edition = "2018",
+@@ -1471,6 +1483,7 @@
+ )
+ crate.spec(
+     package = "serde_json",
++    features = ["float_roundtrip"],
+     version = "^1.0.107",
+ )
+ crate.spec(
+diff --git a/rs/pocket_ic_server/Cargo.toml b/rs/pocket_ic_server/Cargo.toml
+--- a/rs/pocket_ic_server/Cargo.toml
++++ b/rs/pocket_ic_server/Cargo.toml
+@@ -4,6 +4,7 @@
+ edition.workspace = true
+ 
+ [dependencies]
++ic-host-process = { workspace = true }
+ aide = { workspace = true }
+ askama = { workspace = true }
+ async-trait = { workspace = true }
+diff --git a/rs/pocket_ic_server/BUILD.bazel b/rs/pocket_ic_server/BUILD.bazel
+--- a/rs/pocket_ic_server/BUILD.bazel
++++ b/rs/pocket_ic_server/BUILD.bazel
+@@ -89,6 +89,7 @@
+     "@crate_index//:ic-doge-interface",
+     "@crate_index//:ic-gateway",
+     "@crate_index//:ic-platform",
++    "@crate_index//:ic-host-process",
+     "@crate_index//:ic-utils",
+     "@crate_index//:itertools",
+     "@crate_index//:libc",
+@@ -139,6 +140,7 @@
+     "@crate_index//:ic-doge-interface",
+     "@crate_index//:ic-gateway",
+     "@crate_index//:ic-platform",
++    "@crate_index//:ic-host-process",
+     "@crate_index//:ic-utils",
+     "@crate_index//:nix",
+     "@crate_index//:prometheus",

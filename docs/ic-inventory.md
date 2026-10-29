@@ -67,7 +67,9 @@ budgets and durable delivery stay consumer-owned. See the
 [migration](migration.md#prepared-one-shot-calls-issue-75).
 
 The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzip`
-and `GzipError` from published IC Tooling `ic-host-artifacts` 0.69.1 for IC Profiler.
+and `GzipError` from IC Tooling `ic-host-artifacts` for IC Profiler. The paired process adoption
+temporarily pins Tooling #265 at `c20dbd11785c17d369651f51fa0967fbec69c57a`,
+using the same Git family as consumer Host process until publication.
 Tooling retains codec implementation; callers retain levels, limits and payload
 admission. No backend types, default/Wasm dependency or IC runtime edge is added.
 The maintainer retained this facade for Profiler instead of #91's proposed direct
@@ -274,7 +276,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
 | ic-platform | ic-cdk-executor | =2.0.0 | normal | all | true | true |  |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
-| ic-platform | ic-host-artifacts | ^0.69.1 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
+| ic-platform | ic-host-artifacts | ^0.69.13 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | all | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |

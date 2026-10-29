@@ -87,6 +87,10 @@
       {
         "path": "0008-profiler-product-inputs.patch",
         "sha256": "a1f38dfbabdca3891968f90ccd7f9549af00930849172648f2dcc36ff72eb99b"
+      },
+      {
+        "path": "0009-profiler-process-wire-inputs.patch",
+        "sha256": "e726acae59636eb9786aea4a5d8580d37c3d41da8e98003e663e050fdc417211"
       }
     ],
     "series": "patches/ic/series"

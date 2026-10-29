@@ -1,38 +1,40 @@
 # Current handoff
 
-## Pending 0.8.1: paired Profiler product source contract
+## Pending 0.8.2: Host process and private Wire inputs
 
-Local source release **0.8.0** is `80b424a`. The current merge brings incoming
-`c5740cd`, including #93's Profiler product ownership work. Its former pending
-0.7.7 notes now belong to 0.8.1; package versions stay at 0.8.0. Preserve the
-released Principal/ICRC packaging and standalone signature Serde correction.
-Publication and consumer/provider adoption retain their separate qualification.
+PR #95 is refreshed onto source release **0.8.1**, `10c2610`. Keep released
+0.8.0 Principal/ICRC packaging, the signature Serde repair and 0.8.1's Profiler
+product ownership intact. Package versions remain 0.8.1; release/publication
+are separate maintainer actions. The normal checkout and siblings are untouched.
 
-Profiler owns the injected CLI, query renderer and private PNG/range helpers.
-Platform retains the pinned IC source, native state/trace adapters, HTTP admission,
-patched client and Cargo/Bazel inputs. Older consumers keep their previous
-provider pin until supplying the files in the
-[paired contract](../../native/ic-profiler/README.md#paired-product-source-contract).
-The source profile rejects overlapping owners and records provider/consumer digests.
+The native recipe supplies IC Wire 0.7.21 and Host process at Tooling
+`c20dbd11785c17d369651f51fa0967fbec69c57a`. Its gzip-only Platform library
+scaffold is `ba98bd33ef1cbe463d6daf34f0511f17d7770c20`. All selected Host
+packages use one Git source family; no downstream Cargo patch is required.
+The public gzip facade follows that same source. This is the reviewed supplier
+for Profiler's already released 0.10.0 process adoption, not a broad upgrade.
 
-The maintainer chose to retain Platform gzip. Native imports use that facade;
-exports preserve core gzip bytes. API input/expanded limits remain 128 MiB and
-core expansion remains 256 MiB. Corrupt, truncated, trailing and concatenated
-members are rejected. PNG remains zlib with its own image budgets and admission.
-Server-library product regressions now run before installed native scenarios.
+Profiler retains process selection, creation-identity admission, cadence,
+aggregation, retention, reports and CLI policy. Host owns raw OS observations,
+launch gates and child custody. Rebuild all private peers together for ICPROF03;
+external IC bytes, saved report/bundle formats and retry authority stay unchanged.
+The IC pin remains `ee8086a9773725fd1058832a9400297cf0990112`, with native
+Rust 1.99.0. Platform's library floor remains 1.91. Source/feature graph checks
+admit only the declared immutable Host supplier and reject foreign/mixed sources.
 
-The native Cargo/Bazel recipe selects published Metrics 0.17.2, Platform 0.7.6
-and Host Artifacts 0.69.12. Those source-profile inputs are independent of this
-repository's 0.8.0 library version. Replica-internal metrics remain distinct;
-physical measurements never acquire charging or allocation authority. Profiler
-retains its product policy, and siblings remain read-only.
-
-The incoming handoff records assembler and independent PNG/range checks. They
-are historical evidence for their source inputs, not a new server qualification
-for this merge. Full owner Clippy, 45 assembler fixtures, inventory/docs/format,
-changelog validation and protected-source checks pass; evidence is in
-`target/merge-resolution`. Full release CI and native build/runtime acceptance
-remain separate.
+The original supplier proof is recorded in PR #95 and Profiler's
+`artifacts/process-wire-qualification.json` at `55e08a9`: 74 recorder,
+104 native product and five installed profiling tests, focused recorder Bazel and
+real CLI lifecycle cases. Its frozen server hash is
+`2150a037ceb62a2ad46adb9a6ea9705d40973ce9a8845743113270e53771cf4a`.
+The native profile inputs are unchanged by this base refresh. Full owner Clippy,
+505 native/Wasm feature selections, admission fixtures, 45 assembler tests,
+source/license guards, formatting, inventory and links pass. Standalone signature
+verification and owned Principal pass native/MSRV/Wasm; focused gzip tests pass
+on current Rust and 1.91. Evidence is under
+`/tmp/ic-platform-merge-95-97-20261029/evidence95`. Old hosted functional checks
+pass and the retained advisory failure is #50. New hosted checks run asynchronously. Native macOS server execution, full replica Bazel/NNS,
+supplier publication and live acceptance remain separate; no size saving is claimed.
 
 ## Released 0.8.0: Principal and selected ICRC packaging
 

@@ -23,7 +23,7 @@ hex = "0.4.3"
 ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
 ic-cdk-executor = "=2.0.0"
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
-ic-host-artifacts = { version = "0.69.1", default-features = false, features = ["gzip"] }
+ic-host-artifacts = { git = "https://github.com/dragginzgame/ic-tooling.git", rev = "c20dbd11785c17d369651f51fa0967fbec69c57a", version = "0.69.13", default-features = false, features = ["gzip"] }
 ic-management-canister-types = "=0.11.0"
 ic-platform = { version = "0.8.1", path = "crates/ic-platform", default-features = false }
 ic-platform-macros = { version = "0.8.1", path = "crates/ic-platform-macros" }
