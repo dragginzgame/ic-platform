@@ -40,7 +40,7 @@ ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["dep:ic-cdk-executor"]
 gzip = ["dep:ic-host-artifacts"]
 ic0 = ["dep:ic0"]
-icrc-ledger-types = ["principal", "dep:icrc-ledger-types"]
+icrc-ledger-types = ["principal", "dep:icrc-ledger-types", "dep:candid"]
 management-canister-types = ["principal", "dep:ic-management-canister-types"]
 signature-verification = [
     "canister-sig-creation",
@@ -182,6 +182,11 @@ required-features = ["ic0"]
 name = "icrc_consumer"
 path = "tests/icrc_consumer.rs"
 required-features = ["icrc-ledger-types", "candid"]
+
+[[test]]
+name = "icrc10_types_consumer"
+path = "tests/icrc10_types_consumer.rs"
+required-features = ["icrc-ledger-types"]
 
 [[test]]
 name = "external_candid_consumer"

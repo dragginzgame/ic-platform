@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.5]
+
+### ➕ Added
+
+- Add the shared ICRC-10 `SupportedStandard` external record under the optional
+  ledger-types surface, letting Canic's opt-in adapter reuse the named `name`/`url`
+  contract without maintaining another Candid DTO. No endpoint is mounted automatically.
+
 ## [0.7.4] - 2026-10-28
 
 ### ➕ Added

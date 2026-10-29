@@ -1,5 +1,11 @@
 # External canister DTO contracts
 
+Pending 0.7.5 adds the shared
+`icrc_ledger_types::icrc10::SupportedStandard { name, url }` external record under
+`icrc-ledger-types`, with no automatic endpoint or standards advertisement.
+See the [ICRC-10 supplier and adoption contract](migration.md#shared-icrc-10-discovery-record-pending-075).
+The existing registry ICRC-21 identities remain unchanged.
+
 Published, non-yanked Platform 0.6.20 supplies the contract families below.
 The registry archive is verified against SHA-256
 `7345878bbf473daa1989d28b1f9828e22e63c2f21e776dd5a3e9eace8609016e`;
@@ -17,7 +23,7 @@ The Principal/Nat/function machinery retains registry Candid identities.
 | `nns-registry-types` | `ic_platform::nns_registry_types` | `get_subnet_for_canister` |
 | `certified-assets-types` | `ic_platform::certified_assets_types` | Native-host asset `get`, `get_chunk` |
 
-Pending 0.7.4 adds typed `candid::protocols` operations over these existing DTOs
+Source release 0.7.4 adds typed `candid::protocols` operations over these existing DTOs
 and the management/ICRC registry identities, without transport or recovery policy.
 It additionally supplies the pinned Cycles Ledger `icrc3_get_blocks` result under
 **both** `cycles-ledger-types` and `icrc-ledger-types`. Its
