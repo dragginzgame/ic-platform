@@ -94,6 +94,22 @@ if [[ "$capability" == executor || "$capability" == ic0 ]]; then
         fi
     done
 fi
+if [[ "$capability" == principal || "$capability" == principal-external || "$capability" == principal-self-authenticating || "$capability" == icrc || "$capability" == icrc10-types ]]; then
+    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
+        if grep -Eq '^(icrc-ledger-types|icrc-cbor|minicbor|base32|candid_parser|ic-agent|pocket-ic) ' "$fixture/$graph_target.graph"; then
+            echo 'Identity/ledger consumer acquired retired or unrelated integration machinery' >&2; exit 1
+        fi
+        if [[ "$capability" == principal || "$capability" == principal-external ]]; then
+            if grep -Eq '^(sha2|digest|candid) ' "$fixture/$graph_target.graph"; then
+                echo 'Principal byte/text capability acquired hashing or Candid' >&2; exit 1
+            fi
+        fi
+        if [[ "$capability" == principal ]] && grep -q '^ic_principal ' "$fixture/$graph_target.graph"; then
+            echo 'Owned Principal acquired the external identity' >&2; exit 1
+        fi
+    done
+fi
 if [[ "$capability" == cdk || "$capability" == runtime || "$capability" == external-candid ]]; then
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"

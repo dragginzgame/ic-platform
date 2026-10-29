@@ -1,6 +1,44 @@
 # Changelog
 
-## [0.7.7]
+## [0.8.2]
+
+### 🔧 Changed
+
+- Own textual-canister profiling requests, IC operation completion and compiled
+  backend descriptions in the native provider. Pair the Python client and
+  recorder description interface with IC Profiler; saved formats remain schema 1.
+- Adopt Platform 0.8.1 in native Cargo/Bazel inputs while preserving the shared
+  immutable Host supplier required by Profiler process observations.
+
+- Supply coherent Host process and IC Wire Cargo/Bazel inputs for Profiler's
+  adopted private transport. Keep gzip behind Platform and all Host packages on
+  one immutable source family until the supplying APIs are published
+  ([#94](https://github.com/dragginzgame/ic-platform/issues/94)).
+
+### 🩹 Fixed
+
+- Admit the manifest-selected immutable Host gzip supplier in feature checks,
+  preserving foreign/path, mixed-source and Wasm rejection.
+
+### 🧹 Cleanup
+
+- Derive feature activation from Cargo metadata, share standalone consumer setup
+  and entrypoint signature analysis, and admit BLAKE3 identities/features from
+  one locked Cargo graph observation
+  ([#96](https://github.com/dragginzgame/ic-platform/issues/96)).
+- Consolidate the native dependency recipe while preserving assembled inputs.
+  Move pure profiling queries, immutable image caching and tool metadata to the
+  paired Profiler consumer. Retain Platform gzip and native capture adapters;
+  read the existing resource-charge cadence from its compiled producer.
+
+### 🧭 Migration Notes
+
+- Native source-profile consumers must adopt the paired Profiler query/cache
+  module before changing their provider pin. Keep the previous pin until then;
+  ordinary Rust library consumers need no import changes
+  ([Profiler #9](https://github.com/dragginzgame/ic-profiler/pull/9)).
+
+## [0.8.1] - 2026-10-29
 
 ### 🧭 Migration Notes
 
@@ -12,8 +50,6 @@
 
 ### 🩹 Fixed
 
-- Admit the manifest-selected immutable Host gzip supplier in feature checks,
-  retaining foreign/path identity, mixed-source and Wasm rejection.
 - Include server-library product regressions in the native verification gate,
   so image/framing failures stop release validation before installed scenarios.
 - Route server gzip imports through Platform's existing shared codec and export
@@ -29,17 +65,6 @@
 
 ### 🔧 Changed
 
-- Own textual-canister profiling requests, IC operation completion and compiled
-  backend descriptions in the native provider. Pair the Python client and
-  recorder description interface with IC Profiler; saved formats remain schema 1.
-
-- Supply coherent Host process and IC Wire Cargo/Bazel inputs for the paired
-  Profiler consumer. Preserve the gzip facade and use one pinned Host supplier
-  source until its new process APIs are published
-  ([#94](https://github.com/dragginzgame/ic-platform/issues/94),
-  [Profiler #5](https://github.com/dragginzgame/ic-profiler/issues/5),
-  [Profiler #6](https://github.com/dragginzgame/ic-profiler/issues/6)).
-
 - Supply the native profiler workspace and Bazel dependency wiring for
   consumer-owned IC Metrics counters, preserving the pinned IC source and
   keeping the measurement crate distinct from the replica's internal metrics
@@ -48,15 +73,25 @@
 - Use an ordinary module directory for the native profiling API, retaining the
   admission repair and adapter simplifications shipped in 0.7.6.
 
-### 🧹 Cleanup
+## [0.8.0] - 2026-10-29
 
-- Derive feature activation from Cargo metadata, share standalone consumer setup
-  and entrypoint signature analysis, and admit BLAKE3 identities/features from
-  one locked Cargo graph observation.
-- Consolidate the native dependency recipe without changing its assembled bytes.
-  Transfer pure profiling queries, immutable image caching and tool metadata to
-  the paired Profiler consumer; retain Platform gzip and native capture adapters.
-  Read the resource-charge cadence from its compiled producer rather than source text.
+### ⚠️ Breaking
+
+- Keep `principal` and the raw runtime independent of the external Principal and
+  hashing dependencies. Select `principal-external` for `.into()` conversions and
+  `principal-self-authenticating` for upstream public-key hashing; required
+  external protocol/client features include the conversion capability.
+- Replace the broad `icrc-ledger-types` dependency with selected maintained DTOs
+  and unchanged upstream value-hashing code. Ledger Rust types and callbacks now
+  have Platform identities; Candid/Serde representations and value hashes remain.
+  Unused CBOR/storage and consent-formatting APIs are no longer supplied.
+  See the [migration contract](docs/migration.md#minimal-principal-and-selected-icrc-packaging).
+
+### 🩹 Fixed
+
+- Enable external Principal Serde support for standalone signature verification
+  after the Principal feature split, preserving certified range decoding without
+  requiring Candid or an unrelated consumer feature.
 
 ## [0.7.6] - 2026-10-29
 

@@ -22,19 +22,22 @@ parsing and PocketIC are native opt-ins. Consumers retain their Wire schemas,
 authentication, budgets and retry policy. See the [maintenance and recovery
 contract](docs/migration.md#runtime-maintenance-and-recovery).
 
-Select `principal` for owned Principal/Account types without depending directly
-on `ic_principal`. Runtime, Candid and external client/DTO features include it;
-executor/IC0-only builds omit application types. The 0.3 type is Platform-owned;
-external clients and DTOs retain `principal::ExternalPrincipal`. Convert explicitly
-with `.into()` at those boundaries. Default builds exclude Principal and its
-dependencies, Candid and CDK. Self-authentication continues to delegate
-to the original upstream implementation. See the [Principal migration](docs/migration.md#owned-principal-migration-03).
+Select `principal` for owned Principal/Account bytes, text and Serde, without
+`ic_principal`, hashing or Candid. Runtime includes this minimal capability;
+executor/IC0-only builds omit application types. Select `principal-external` for
+`principal::ExternalPrincipal` and `.into()` conversions at external boundaries.
+This adds byte conversions without self-authentication. Required Candid/client
+features select it automatically. Select `principal-self-authenticating` explicitly
+for the unchanged upstream public-key hashing implementation. Default features
+remain empty. See the [packaging migration](docs/migration.md#minimal-principal-and-selected-icrc-packaging).
 
 | Feature | Implemented contract |
 | --- | --- |
 | `blake3` | Upstream `hash`, `Hasher` and `Hash`; native/Wasm with `std`, no IC codecs, threading or memory mapping |
 | `gzip` | Native bounded gzip encode/decode and typed decoding errors from IC Tooling; consumer-owned levels and limits |
-| `principal` | Owned Principal/Account types, text/Serde and external conversions; no Candid |
+| `principal` | Owned Principal/Account bytes, text and Serde; no external Principal, hashing or Candid |
+| `principal-external` | Registry Principal identity and byte conversions; implies principal, no hashing or Candid |
+| `principal-self-authenticating` | Explicit unchanged upstream self-authentication; implies principal-external |
 | `wire-schema` | Native-only Wire metadata for owned Principal and Account; implies principal, excludes metadata dependencies on Wasm |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
@@ -48,7 +51,7 @@ to the original upstream implementation. See the [Principal migration](docs/migr
 | `certification` | Upstream certificate/hash-tree and mutable tree types, constructors, lookup and hashing; independent of Candid and executor |
 | `executor` | Shared CDK executor task/context primitives; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
-| `icrc-ledger-types` | Explicit upstream ICRC account, metadata, allowance, transfer/memo, consent and block/archive/certificate types, plus Platform's ICRC-10 discovery record; no storage integration |
+| `icrc-ledger-types` | Selected maintained ICRC DTOs and unchanged upstream value hashing, plus ICRC-10; no registry ledger package, storage, CBOR or consent formatting |
 | `management-canister-types` | Upstream 0.11.0 lifecycle, settings, ECDSA, HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
 | `cmc-types` | External CMC top-up, mint notification and certified rate DTOs; implies Candid, no payment policy |
 | `icp-ledger-types` | Legacy ICP transfer and encoded-block/archive DTOs; implies Candid, no ledger engine or CDK |

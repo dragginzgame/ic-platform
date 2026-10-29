@@ -4,13 +4,14 @@
 
 [PR #99](https://github.com/dragginzgame/ic-platform/pull/99) moves Profiler's
 remaining IC client protocol and compiled backend descriptions into this native
-provider. It stacks on #97 and #95, and the consumer reuses Profiler #9's pure
-query/cache/tool/render source interface. Integrate suppliers first, then refresh
-the consuming provider pin to the final merged identity. Older consumers must
+provider. #95 and #97 are merged; the contribution now targets main at `c8bbe7e`.
+The consumer reuses Profiler #9's pure query/cache/tool/render source interface.
+Refresh the consuming provider pin to the final contribution identity. Older consumers must
 retain their existing source profile until adopting the paired interface.
 
-The qualified native source is `d662c19501a16047030e9afb40ac635470a6942d`.
-The following handoff/README update is documentation only. Profiler retains fresh
+Prior qualified native source is `d662c19501a16047030e9afb40ac635470a6942d`.
+The new adoption changes the gzip-only Platform library to 0.8.1 at `c8bbe7e`;
+its new native qualification is pending. Profiler retains fresh
 assembly/build/test receipts under its `.build/receipts`, plus
 `artifacts/platform-client-qualification.json` and the offline CLI proof. Its
 working-tree source is bound by assembly digests; no clean-HEAD claim is made.
@@ -52,7 +53,7 @@ Historical receipts never qualify another binary.
 #95 supplies Host process and Wire inputs already adopted in Profiler 0.10.0.
 All selected Host packages use Tooling revision
 `c20dbd11785c17d369651f51fa0967fbec69c57a`; the gzip-only Platform scaffold is
-`ba98bd33ef1cbe463d6daf34f0511f17d7770c20`. Supplying publication remains separate.
+`c8bbe7e1aee45c905de05ec5083d6bf7ba95819e` (Platform 0.8.1). Supplying publication remains separate.
 Profiler owns capture policy, selected identities and accounting; Host owns raw
 OS facts and workload custody. Rebuild private process peers together.
 
@@ -66,6 +67,37 @@ The maintainer retained Platform gzip. API input/decoded budgets remain 128 MiB;
 the recorder decoded budget remains 256 MiB. Strict framing rejects corrupt,
 truncated, concatenated or trailing members. PNG stays a distinct zlib contract.
 The IC source pin remains `ee8086a9773725fd1058832a9400297cf0990112`, Rust 1.99.0.
+
+## Released library packaging
+
+## Released 0.8.0: Principal and selected ICRC packaging
+
+`principal` supplies owned Principal/Account bytes, bounded text and Serde without
+registry Principal or hashing. Runtime/CDK use that capability. Select
+`principal-external` for registry identities/byte conversions and
+`principal-self-authenticating` for unchanged upstream hashing. Required external
+protocol/client and signature profiles select their own prerequisites explicitly.
+
+Selected ledger DTOs/callbacks now have Platform Rust identities under the existing
+feature/module. Candid/Serde bytes, effective-zero accounts, absent versus explicit
+zero fields, legacy Nat64 and unchanged upstream value hashes/vectors remain.
+The registry ledger package and unused storage/CBOR, metadata-key and consent
+formatting machinery are retired. The [packaging contract](../migration.md#minimal-principal-and-selected-icrc-packaging)
+retains the migration and 28 independent frozen external schema obligations.
+
+The released handoff at `80b424a:docs/status/current.md` records 505 native/Wasm
+feature selections, eight standalone profiles, schema/type/byte/hash proofs,
+source/license guards and MSRV/Rustdoc/format checks. Evidence locations include
+`/tmp/platform-dependencies-20261029` and `target/feature-graphs/attempt.FZeIyu`.
+Do not infer installed-runtime, registry publication or consumer adoption from
+those package checks, or claim a Wasm-size saving from removed dependency edges.
+
+Standalone verification additionally requires `ic_principal/serde` to decode
+certified canister ranges. That release correction preserves protected verifier
+bodies and is not supplied by unrelated Candid features. Full owner Clippy and
+four standalone native/MSRV/Wasm profiles pass; only verification adds external
+Serde. Minimal Principal, external conversion and creation graphs remain narrow.
+Its retained evidence is `target/signature-serde-fix`.
 
 ## Retained library and safety contracts
 

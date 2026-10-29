@@ -14,6 +14,9 @@ checksum algorithm, Base32 spelling and case-insensitive admission remain intact
 Overlong input now returns `TextTooLong` before examining its content.
 
 Cryptographic self-authentication delegates to registry `ic_principal` unchanged.
+It is selected only by `principal-self-authenticating`; the base owned type has
+no external Principal or hashing dependency. `principal-external` separately adds
+the byte-copy conversions and registry identities without self-authentication.
 No SHA implementation, key encoding or hashing algorithm is copied or rewritten.
 `ExternalPrincipal` explicitly exposes that registry identity for external client
 and DTO parameters; conversions copy only the significant bytes. Registry identity

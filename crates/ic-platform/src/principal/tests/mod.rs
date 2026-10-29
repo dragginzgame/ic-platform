@@ -1,4 +1,6 @@
-use super::{ExternalPrincipal, Principal, PrincipalError};
+#[cfg(feature = "principal-external")]
+use super::ExternalPrincipal;
+use super::{Principal, PrincipalError};
 use serde_test::{Configure, Token, assert_de_tokens, assert_tokens};
 
 #[test]
@@ -77,6 +79,7 @@ fn deserialization_preserves_structured_format_errors() {
 }
 
 #[test]
+#[cfg(feature = "principal-external")]
 fn all_lengths_preserve_text_bytes_order_and_padding() {
     for len in 0..=Principal::MAX_LENGTH_IN_BYTES {
         for seed in 0..=255u8 {
@@ -155,6 +158,7 @@ fn serde_bytes_never_consume_a_candid_marker() {
 }
 
 #[test]
+#[cfg(feature = "principal-self-authenticating")]
 fn self_authentication_keeps_upstream_vectors() {
     let expected = [
         209, 74, 2, 140, 42, 58, 43, 201, 71, 97, 2, 187, 40, 130, 52, 196, 21, 162, 176, 31, 130,
@@ -180,6 +184,7 @@ fn self_authentication_keeps_upstream_vectors() {
 }
 
 #[test]
+#[cfg(feature = "principal-self-authenticating")]
 fn self_authentication_evaluates_custom_as_ref_once() {
     use std::cell::Cell;
     struct PublicKey<'a>(&'a Cell<usize>);
