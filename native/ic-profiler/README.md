@@ -46,7 +46,8 @@ Bazel inputs. The recorder also consumes published IC Metrics 0.17 scalar
 arithmetic; this provider owns its native workspace and Bazel locks, distinct
 from the IC workspace's internal `ic-metrics` package. Neither measurement
 counters nor the gzip facade own charging policy. The gzip facade delegates to
-published IC Tooling and has no dependency back to this workspace, PocketIC or
+the same pinned IC Tooling supplier as Host process and has no dependency back
+to this workspace, PocketIC or
 the native provider. Compression implementation
 stays in Tooling; the consumer retains levels, import limits and bundle semantics.
 
@@ -112,3 +113,22 @@ unchanged core gzip bytes. API input/decoded limits remain 128 MiB; the recorder
 retains its separate 256 MiB decoded limit. The maintainer chose to retain this
 facade instead of the proposed direct Host migration in #91. Zlib for PNG remains
 a distinct native dependency; PNG mechanics and budgets stay product-owned.
+
+## Host process and private Wire inputs
+
+The paired Profiler consumer supplies the Host process policy adapter and the
+IC Wire private process DTOs. This profile wires IC Wire 0.7.21 and
+`ic-host-process` into both Cargo and Bazel, retaining the 60 KiB consumer frame
+limit. Old ICP2/JSON process senders and receivers must be rebuilt together.
+Saved reports and profile bundle formats do not change. Generic OS observations
+and child/gate mechanics belong to Host; Profiler retains capture activation,
+pinned root selection, cadence, aggregation, diagnostics and CLI output.
+
+Until Tooling #265 is published, all Host packages in the selected recorder
+and native graph use Tooling Git revision
+`c20dbd11785c17d369651f51fa0967fbec69c57a`. The gzip-only Platform library input
+is the immutable scaffold `ba98bd33ef1cbe463d6daf34f0511f17d7770c20`, selecting
+the same Host artifact source. This avoids mixed registry/Git Host identities
+and downstream Cargo patches. Gzip remains a Platform facade, with no new
+canister/runtime feature or public API removal. Supplying publication and native
+macOS execution remain separate acceptance steps.

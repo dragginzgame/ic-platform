@@ -83,7 +83,7 @@ function reject(reason) {
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") {
-            if (!gzip || !registry) reject("unselected or non-registry host gzip codec")
+            if (!gzip || !registry) reject("unselected or unqualified host gzip codec")
             found_gzip = 1
         }
         if (name == "blake3") {

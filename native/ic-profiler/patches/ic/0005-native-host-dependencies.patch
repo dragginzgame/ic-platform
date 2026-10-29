@@ -1,5 +1,5 @@
 diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
-index 5c254b6..2d1ad5d 100644
+index 5c254b6..5936950 100644
 --- a/Cargo.Bazel.json.lock
 +++ b/Cargo.Bazel.json.lock
 @@ -3,7 +3,7 @@
@@ -7,7 +7,7 @@ index 5c254b6..2d1ad5d 100644
      "ic-wasm 0.11.1"
    ],
 -  "checksum": "d4e719583881cf898774f83b5661851ff3da30493e262b0832a817b5022e50da",
-+  "checksum": "160354cf72355c9b3605988e1d7e01ea2309ec87e9a773736fc3111ccf9b3da8",
++  "checksum": "377df08a9b3ed85cf58ad68fe222cae9ab56fc2a7341f1233b5c20f1c83ebe16",
    "conditions": {
      "aarch64-apple-darwin": [
        "aarch64-apple-darwin"
@@ -74,6 +74,15 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
+@@ -3107,7 +3107,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
 @@ -4075,7 +4075,7 @@
              "target": "num_traits"
            },
@@ -146,6 +155,15 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
+@@ -5386,7 +5386,7 @@
+           "selects": {
+             "cfg(any())": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
 @@ -5569,7 +5569,7 @@
              "target": "brotli"
            },
@@ -189,6 +207,15 @@ index 5c254b6..2d1ad5d 100644
 -            "id": "proc-macro2 1.0.106",
 +            "id": "proc-macro2 1.0.107",
              "target": "proc_macro2"
+           },
+           {
+@@ -6990,7 +6990,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
            },
            {
 @@ -7482,7 +7482,7 @@
@@ -263,34 +290,20 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -9654,8 +9654,25 @@
+@@ -9654,8 +9654,11 @@
        ],
        "version": "0.6.9"
      },
 -    "bytemuck 1.13.1": {
 +    "bytemuck 1.25.2": {
        "common_attrs": {
-+        "crate_features": {
-+          "common": [],
-+          "selects": {
-+            "aarch64-apple-darwin": [
-+              "must_cast"
-+            ],
-+            "aarch64-unknown-linux-gnu": [
-+              "must_cast"
-+            ],
-+            "x86_64-apple-darwin": [
-+              "must_cast"
-+            ],
-+            "x86_64-unknown-linux-gnu": [
-+              "must_cast"
-+            ]
-+          }
-+        },
++        "crate_features": [
++          "must_cast"
++        ],
          "edition": "2018"
        },
        "library_target_name": "bytemuck",
-@@ -9670,8 +9687,8 @@
+@@ -9670,8 +9673,8 @@
        "package_url": "https://github.com/Lokathor/bytemuck",
        "repository": {
          "Http": {
@@ -301,7 +314,7 @@ index 5c254b6..2d1ad5d 100644
          }
        },
        "targets": [
-@@ -9682,7 +9699,7 @@
+@@ -9682,7 +9685,7 @@
            }
          }
        ],
@@ -310,7 +323,25 @@ index 5c254b6..2d1ad5d 100644
      },
      "byteorder 1.5.0": {
        "common_attrs": {
-@@ -10082,7 +10099,7 @@
+@@ -9840,7 +9843,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -9917,7 +9920,7 @@
+             "target": "hex"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -10082,7 +10085,7 @@
              "target": "darling"
            },
            {
@@ -319,7 +350,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -10247,7 +10264,7 @@
+@@ -10247,7 +10250,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -328,7 +359,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -10337,7 +10354,7 @@
+@@ -10337,7 +10340,7 @@
                "target": "serde"
              },
              {
@@ -337,7 +368,7 @@ index 5c254b6..2d1ad5d 100644
                "target": "serde_bytes"
              },
              {
-@@ -10421,7 +10438,7 @@
+@@ -10421,7 +10424,7 @@
              "target": "lazy_static"
            },
            {
@@ -346,7 +377,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -10716,7 +10733,7 @@
+@@ -10716,7 +10719,7 @@
              "target": "darling"
            },
            {
@@ -355,7 +386,52 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -11885,7 +11902,7 @@
+@@ -10988,7 +10991,7 @@
+                 "target": "jobserver"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -10998,7 +11001,7 @@
+                 "target": "jobserver"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -11008,7 +11011,7 @@
+                 "target": "jobserver"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -11018,7 +11021,7 @@
+                 "target": "jobserver"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -11719,7 +11722,7 @@
+             "target": "glob"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -11885,7 +11888,7 @@
              "target": "heck"
            },
            {
@@ -364,7 +440,64 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -12371,7 +12388,7 @@
+@@ -11958,7 +11961,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -12247,6 +12250,47 @@
+       ],
+       "version": "1.0.0"
+     },
++    "command-fds 0.3.3": {
++      "common_attrs": {
++        "crate_features": [
++          "default"
++        ],
++        "deps": [
++          {
++            "id": "nix 0.31.3",
++            "target": "nix"
++          },
++          {
++            "id": "thiserror 2.0.18",
++            "target": "thiserror"
++          }
++        ],
++        "edition": "2024"
++      },
++      "library_target_name": "command_fds",
++      "license": "Apache-2.0",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "Apache-2.0"
++      ],
++      "name": "command-fds",
++      "package_url": "https://github.com/google/command-fds/",
++      "repository": {
++        "Http": {
++          "sha256": "1b60b5124979fccd9addd89d8b97a1d6eebb4950694520c75ddd722535ea443f",
++          "url": "https://static.crates.io/crates/command-fds/0.3.3/download"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "command_fds",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.3.3"
++    },
+     "compact_str 0.8.1": {
+       "common_attrs": {
+         "crate_features": [
+@@ -12371,7 +12415,7 @@
              "target": "convert_case"
            },
            {
@@ -373,7 +506,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -12421,7 +12438,7 @@
+@@ -12421,7 +12465,7 @@
              "target": "convert_case"
            },
            {
@@ -382,7 +515,105 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -14982,7 +14999,7 @@
+@@ -12548,7 +12592,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -12623,7 +12667,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -12894,7 +12938,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -12937,7 +12981,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -13053,19 +13097,19 @@
+           "selects": {
+             "aarch64-linux-android": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"aarch64\", target_vendor = \"apple\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -13105,25 +13149,25 @@
+           "selects": {
+             "cfg(all(target_arch = \"aarch64\", target_os = \"android\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"aarch64\", target_vendor = \"apple\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(target_arch = \"loongarch64\", target_os = \"linux\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -13755,7 +13799,7 @@
+           "selects": {
+             "cfg(target_arch = \"riscv64\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -14982,7 +15026,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -391,7 +622,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -15181,7 +15198,7 @@
+@@ -15181,7 +15225,7 @@
              "target": "ident_case"
            },
            {
@@ -400,7 +631,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -15236,7 +15253,7 @@
+@@ -15236,7 +15280,7 @@
              "target": "ident_case"
            },
            {
@@ -409,7 +640,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -15575,7 +15592,7 @@
+@@ -15575,7 +15619,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -418,7 +649,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -15945,7 +15962,7 @@
+@@ -15621,7 +15665,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -15945,7 +15989,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -427,7 +667,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -16032,7 +16049,7 @@
+@@ -16032,7 +16076,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -436,7 +676,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -16075,7 +16092,7 @@
+@@ -16075,7 +16119,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -445,7 +685,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -16125,7 +16142,7 @@
+@@ -16125,7 +16169,7 @@
          ],
          "deps": [
            {
@@ -454,7 +694,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -16167,7 +16184,7 @@
+@@ -16167,7 +16211,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -463,7 +703,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -16256,7 +16273,7 @@
+@@ -16256,7 +16300,7 @@
              "target": "darling"
            },
            {
@@ -472,7 +712,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -16373,7 +16390,7 @@
+@@ -16373,7 +16417,7 @@
              "target": "convert_case"
            },
            {
@@ -481,7 +721,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -16488,7 +16505,7 @@
+@@ -16488,7 +16532,7 @@
              "target": "convert_case"
            },
            {
@@ -490,7 +730,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -17232,7 +17249,7 @@
+@@ -17232,7 +17276,7 @@
              "target": "ff"
            },
            {
@@ -499,7 +739,18 @@ index 5c254b6..2d1ad5d 100644
              "target": "flate2"
            },
            {
-@@ -17403,10 +17420,18 @@
+@@ -17395,6 +17439,10 @@
+             "id": "ic-gateway 0.0.0-git",
+             "target": "ic_gateway"
+           },
++          {
++            "id": "ic-host-process 0.69.13",
++            "target": "ic_host_process"
++          },
+           {
+             "id": "ic-identity-hsm 0.49.1",
+             "target": "ic_identity_hsm"
+@@ -17403,10 +17451,18 @@
              "id": "ic-management-canister-types 0.8.0",
              "target": "ic_management_canister_types"
            },
@@ -518,7 +769,27 @@ index 5c254b6..2d1ad5d 100644
            {
              "id": "ic-sha3 1.0.0",
              "target": "ic_sha3"
-@@ -17700,7 +17725,7 @@
+@@ -17444,6 +17500,10 @@
+             "id": "ic-wasm 0.11.1",
+             "target": "ic_wasm"
+           },
++          {
++            "id": "ic-wire 0.7.21",
++            "target": "ic_wire"
++          },
+           {
+             "id": "ic-xrc-types 1.2.0",
+             "target": "ic_xrc_types"
+@@ -17529,7 +17589,7 @@
+             "target": "leb128"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -17700,7 +17760,7 @@
              "target": "pretty_assertions"
            },
            {
@@ -527,7 +798,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -17914,7 +17939,7 @@
+@@ -17914,7 +17974,7 @@
              "target": "serde_bytes_repr"
            },
            {
@@ -536,7 +807,25 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            },
            {
-@@ -18569,7 +18594,7 @@
+@@ -18470,7 +18530,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -18522,7 +18582,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -18569,7 +18629,7 @@
          ],
          "deps": [
            {
@@ -545,7 +834,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -19158,7 +19183,7 @@
+@@ -19158,7 +19218,7 @@
              "target": "enum_ordinalize"
            },
            {
@@ -554,7 +843,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -19204,7 +19229,7 @@
+@@ -19204,7 +19264,7 @@
              "target": "enum_ordinalize"
            },
            {
@@ -563,7 +852,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -19622,7 +19647,7 @@
+@@ -19622,7 +19682,7 @@
              "target": "heck"
            },
            {
@@ -572,7 +861,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -19705,7 +19730,7 @@
+@@ -19705,7 +19765,7 @@
          ],
          "deps": [
            {
@@ -581,7 +870,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -19922,7 +19947,7 @@
+@@ -19922,7 +19982,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -590,7 +879,48 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -21128,12 +21153,13 @@
+@@ -20048,19 +20108,19 @@
+           "selects": {
+             "cfg(target_os = \"hermit\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"wasi\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -20837,7 +20897,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -20918,7 +20978,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             }
+           ],
+@@ -21128,12 +21188,13 @@
        ],
        "version": "0.4.3"
      },
@@ -605,7 +935,7 @@ index 5c254b6..2d1ad5d 100644
            "rust_backend"
          ],
          "deps": [
-@@ -21142,7 +21168,7 @@
+@@ -21142,7 +21203,7 @@
              "target": "crc32fast"
            },
            {
@@ -614,7 +944,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "miniz_oxide"
            }
          ],
-@@ -21159,8 +21185,8 @@
+@@ -21159,8 +21220,8 @@
        "package_url": "https://github.com/rust-lang/flate2-rs",
        "repository": {
          "Http": {
@@ -625,7 +955,7 @@ index 5c254b6..2d1ad5d 100644
          }
        },
        "targets": [
-@@ -21171,7 +21197,7 @@
+@@ -21171,7 +21232,7 @@
            }
          }
        ],
@@ -634,7 +964,7 @@ index 5c254b6..2d1ad5d 100644
      },
      "fluent-uri 0.4.1": {
        "common_attrs": {
-@@ -22023,7 +22049,7 @@
+@@ -22023,7 +22084,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -643,7 +973,163 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -25774,7 +25800,7 @@
+@@ -22389,7 +22450,7 @@
+       "version": "0.14.7"
+     },
+     "getrandom 0.2.10": {
+-      "additive_build_file_content": "load(\"@rules_rust//rust:defs.bzl\", \"rust_library\")\n\nrust_library(\n    name = \"getrandom_no_wasm_bindgen\",\n    srcs = glob(\n        allow_empty = True,\n        include = [\"**/*.rs\"],\n    ),\n    compile_data = glob(\n        allow_empty = True,\n        include = [\"**\"],\n        exclude = [\n            \"**/* *\",\n            \".tmp_git_root/**/*\",\n            \"BUILD\",\n            \"BUILD.bazel\",\n            \"WORKSPACE\",\n            \"WORKSPACE.bazel\",\n        ],\n    ),\n    crate_features = [\"custom\", \"std\"],\n    crate_name = \"getrandom\",\n    crate_root = \"src/lib.rs\",\n    deps = [\n        \"@crate_index__cfg-if-1.0.0//:cfg_if\",\n    ] + select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.186//:libc\"],\n        \"//conditions:default\": [],\n    }),\n    edition = \"2018\",\n    rustc_env_files = [\":cargo_toml_env_vars\"],\n    rustc_flags = [\"--cap-lints=allow\"],\n    tags = [\"cargo-bazel\", \"crate-name=getrandom\", \"manual\", \"noclippy\", \"norustfmt\"],\n    target_compatible_with = select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [],\n        \"//conditions:default\": [\"@platforms//:incompatible\"],\n    }),\n    version = \"0.2.10\",\n    visibility = [\"//visibility:public\"],\n)\n",
++      "additive_build_file_content": "load(\"@rules_rust//rust:defs.bzl\", \"rust_library\")\n\nrust_library(\n    name = \"getrandom_no_wasm_bindgen\",\n    srcs = glob(\n        allow_empty = True,\n        include = [\"**/*.rs\"],\n    ),\n    compile_data = glob(\n        allow_empty = True,\n        include = [\"**\"],\n        exclude = [\n            \"**/* *\",\n            \".tmp_git_root/**/*\",\n            \"BUILD\",\n            \"BUILD.bazel\",\n            \"WORKSPACE\",\n            \"WORKSPACE.bazel\",\n        ],\n    ),\n    crate_features = [\"custom\", \"std\"],\n    crate_name = \"getrandom\",\n    crate_root = \"src/lib.rs\",\n    deps = [\n        \"@crate_index__cfg-if-1.0.0//:cfg_if\",\n    ] + select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [\"@crate_index__libc-0.2.191//:libc\"],\n        \"//conditions:default\": [],\n    }),\n    edition = \"2018\",\n    rustc_env_files = [\":cargo_toml_env_vars\"],\n    rustc_flags = [\"--cap-lints=allow\"],\n    tags = [\"cargo-bazel\", \"crate-name=getrandom\", \"manual\", \"noclippy\", \"norustfmt\"],\n    target_compatible_with = select({\n        \"@rules_rust//rust/platform:aarch64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:aarch64-unknown-linux-gnu\": [],\n        \"@rules_rust//rust/platform:wasm32-unknown-unknown\": [],\n        \"@rules_rust//rust/platform:x86_64-apple-darwin\": [],\n        \"@rules_rust//rust/platform:x86_64-unknown-linux-gnu\": [],\n        \"//conditions:default\": [\"@platforms//:incompatible\"],\n    }),\n    version = \"0.2.10\",\n    visibility = [\"//visibility:public\"],\n)\n",
+       "common_attrs": {
+         "crate_features": {
+           "common": [
+@@ -22420,7 +22481,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -22483,7 +22544,7 @@
+           "selects": {
+             "cfg(all(any(target_os = \"linux\", target_os = \"android\"), not(any(all(target_os = \"linux\", target_env = \"\"), getrandom_backend = \"custom\", getrandom_backend = \"linux_raw\", getrandom_backend = \"rdrand\", getrandom_backend = \"rndr\"))))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -22501,43 +22562,43 @@
+             ],
+             "cfg(any(target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"hurd\", target_os = \"illumos\", target_os = \"cygwin\", all(target_os = \"horizon\", target_arch = \"arm\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"haiku\", target_os = \"redox\", target_os = \"nto\", target_os = \"aix\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"ios\", target_os = \"visionos\", target_os = \"watchos\", target_os = \"tvos\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"macos\", target_os = \"openbsd\", target_os = \"vita\", target_os = \"emscripten\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"netbsd\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"solaris\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"vxworks\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -22613,7 +22674,7 @@
+           "selects": {
+             "cfg(all(any(target_os = \"linux\", target_os = \"android\"), not(any(all(target_os = \"linux\", target_env = \"\"), getrandom_backend = \"custom\", getrandom_backend = \"linux_raw\", getrandom_backend = \"rdrand\", getrandom_backend = \"rndr\"))))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -22637,43 +22698,43 @@
+             ],
+             "cfg(any(target_os = \"dragonfly\", target_os = \"freebsd\", target_os = \"hurd\", target_os = \"illumos\", target_os = \"cygwin\", all(target_os = \"horizon\", target_arch = \"arm\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"haiku\", target_os = \"redox\", target_os = \"nto\", target_os = \"aix\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"ios\", target_os = \"visionos\", target_os = \"watchos\", target_os = \"tvos\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(any(target_os = \"macos\", target_os = \"openbsd\", target_os = \"vita\", target_os = \"emscripten\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"netbsd\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"solaris\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(target_os = \"vxworks\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -24617,7 +24678,7 @@
+           "selects": {
+             "cfg(any(unix, target_os = \"redox\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -25455,7 +25516,7 @@
+               "target": "ipnet"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -25774,7 +25835,7 @@
                "target": "serde"
              },
              {
@@ -652,7 +1138,7 @@ index 5c254b6..2d1ad5d 100644
                "target": "serde_bytes"
              },
              {
-@@ -25924,7 +25950,7 @@
+@@ -25924,7 +25985,7 @@
              "target": "clap"
            },
            {
@@ -661,7 +1147,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "flate2"
            },
            {
-@@ -26255,7 +26281,7 @@
+@@ -26255,7 +26316,7 @@
              "target": "serde"
            },
            {
@@ -670,7 +1156,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            }
          ],
-@@ -26410,7 +26436,7 @@
+@@ -26410,7 +26471,7 @@
              "target": "serde"
            },
            {
@@ -679,7 +1165,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            },
            {
-@@ -26674,7 +26700,7 @@
+@@ -26674,7 +26735,7 @@
              "target": "darling"
            },
            {
@@ -688,7 +1174,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -26732,7 +26758,7 @@
+@@ -26732,7 +26793,7 @@
              "target": "serde"
            },
            {
@@ -697,7 +1183,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            },
            {
-@@ -26915,7 +26941,7 @@
+@@ -26915,7 +26976,7 @@
              "target": "serde"
            },
            {
@@ -706,7 +1192,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            },
            {
-@@ -26957,7 +26983,7 @@
+@@ -26957,7 +27018,7 @@
              "target": "serde"
            },
            {
@@ -715,7 +1201,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            },
            {
-@@ -27058,7 +27084,7 @@
+@@ -27058,7 +27119,7 @@
              "target": "serde"
            },
            {
@@ -724,25 +1210,63 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            }
          ],
-@@ -27440,6 +27466,47 @@
+@@ -27440,6 +27501,198 @@
        ],
        "version": "0.0.0-git"
      },
-+    "ic-host-artifacts 0.69.12": {
++    "ic-host-artifacts 0.69.13": {
 +      "common_attrs": {
-+        "crate_features": [
-+          "gzip"
-+        ],
-+        "deps": [
-+          {
-+            "id": "flate2 1.1.10",
-+            "target": "flate2"
-+          },
-+          {
-+            "id": "sha2 0.10.9",
-+            "target": "sha2"
++        "crate_features": {
++          "common": [],
++          "selects": {
++            "aarch64-apple-darwin": [
++              "gzip"
++            ],
++            "aarch64-unknown-linux-gnu": [
++              "gzip"
++            ],
++            "x86_64-apple-darwin": [
++              "gzip"
++            ],
++            "x86_64-unknown-linux-gnu": [
++              "gzip"
++            ]
 +          }
-+        ],
++        },
++        "deps": {
++          "common": [
++            {
++              "id": "sha2 0.10.9",
++              "target": "sha2"
++            }
++          ],
++          "selects": {
++            "aarch64-apple-darwin": [
++              {
++                "id": "flate2 1.1.10",
++                "target": "flate2"
++              }
++            ],
++            "aarch64-unknown-linux-gnu": [
++              {
++                "id": "flate2 1.1.10",
++                "target": "flate2"
++              }
++            ],
++            "x86_64-apple-darwin": [
++              {
++                "id": "flate2 1.1.10",
++                "target": "flate2"
++              }
++            ],
++            "x86_64-unknown-linux-gnu": [
++              {
++                "id": "flate2 1.1.10",
++                "target": "flate2"
++              }
++            ]
++          }
++        },
 +        "edition": "2024"
 +      },
 +      "library_target_name": "ic_host_artifacts",
@@ -754,9 +1278,12 @@ index 5c254b6..2d1ad5d 100644
 +      "name": "ic-host-artifacts",
 +      "package_url": "https://github.com/dragginzgame/ic-tooling",
 +      "repository": {
-+        "Http": {
-+          "sha256": "374fa708729c7c85d786b207e3fc74f1c2b21da5a0a0609ba2d8dd1400d0d7df",
-+          "url": "https://static.crates.io/crates/ic-host-artifacts/0.69.12/download"
++        "Git": {
++          "commitish": {
++            "Rev": "c20dbd11785c17d369651f51fa0967fbec69c57a"
++          },
++          "remote": "https://github.com/dragginzgame/ic-tooling.git",
++          "strip_prefix": "crates/ic-host-artifacts"
 +        }
 +      },
 +      "targets": [
@@ -767,12 +1294,122 @@ index 5c254b6..2d1ad5d 100644
 +          }
 +        }
 +      ],
-+      "version": "0.69.12"
++      "version": "0.69.13"
++    },
++    "ic-host-fs 0.69.13": {
++      "common_attrs": {
++        "deps": {
++          "common": [
++            {
++              "id": "ic-host-artifacts 0.69.13",
++              "target": "ic_host_artifacts"
++            },
++            {
++              "id": "thiserror 2.0.18",
++              "target": "thiserror"
++            }
++          ],
++          "selects": {
++            "cfg(unix)": [
++              {
++                "id": "rustix 1.1.4",
++                "target": "rustix"
++              }
++            ]
++          }
++        },
++        "edition": "2024"
++      },
++      "library_target_name": "ic_host_fs",
++      "license": "MIT",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "MIT"
++      ],
++      "name": "ic-host-fs",
++      "package_url": "https://github.com/dragginzgame/ic-tooling",
++      "repository": {
++        "Git": {
++          "commitish": {
++            "Rev": "c20dbd11785c17d369651f51fa0967fbec69c57a"
++          },
++          "remote": "https://github.com/dragginzgame/ic-tooling.git",
++          "strip_prefix": "crates/ic-host-fs"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "ic_host_fs",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.69.13"
++    },
++    "ic-host-process 0.69.13": {
++      "common_attrs": {
++        "deps": {
++          "common": [
++            {
++              "id": "ic-host-artifacts 0.69.13",
++              "target": "ic_host_artifacts"
++            },
++            {
++              "id": "ic-host-fs 0.69.13",
++              "target": "ic_host_fs"
++            }
++          ],
++          "selects": {
++            "cfg(unix)": [
++              {
++                "id": "command-fds 0.3.3",
++                "target": "command_fds"
++              },
++              {
++                "id": "libc 0.2.191",
++                "target": "libc"
++              },
++              {
++                "id": "rustix 1.1.4",
++                "target": "rustix"
++              }
++            ]
++          }
++        },
++        "edition": "2024"
++      },
++      "library_target_name": "ic_host_process",
++      "license": "MIT",
++      "license_file": "LICENSE",
++      "license_ids": [
++        "MIT"
++      ],
++      "name": "ic-host-process",
++      "package_url": "https://github.com/dragginzgame/ic-tooling",
++      "repository": {
++        "Git": {
++          "commitish": {
++            "Rev": "c20dbd11785c17d369651f51fa0967fbec69c57a"
++          },
++          "remote": "https://github.com/dragginzgame/ic-tooling.git",
++          "strip_prefix": "crates/ic-host-process"
++        }
++      },
++      "targets": [
++        {
++          "Library": {
++            "crate_name": "ic_host_process",
++            "crate_root": "src/lib.rs"
++          }
++        }
++      ],
++      "version": "0.69.13"
 +    },
      "ic-http-certification 3.1.0": {
        "common_attrs": {
          "deps": [
-@@ -27647,7 +27714,7 @@
+@@ -27647,7 +27900,7 @@
              "target": "serde"
            },
            {
@@ -781,7 +1418,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            }
          ],
-@@ -27689,7 +27756,7 @@
+@@ -27689,7 +27942,7 @@
              "target": "serde"
            },
            {
@@ -790,7 +1427,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            }
          ],
-@@ -27731,7 +27798,7 @@
+@@ -27731,7 +27984,7 @@
              "target": "serde"
            },
            {
@@ -799,7 +1436,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            }
          ],
-@@ -27760,6 +27827,50 @@
+@@ -27760,6 +28013,50 @@
        ],
        "version": "0.8.0"
      },
@@ -850,7 +1487,7 @@ index 5c254b6..2d1ad5d 100644
      "ic-metrics-encoder 1.1.1": {
        "common_attrs": {
          "edition": "2021"
-@@ -27788,6 +27899,67 @@
+@@ -27788,6 +28085,70 @@
        ],
        "version": "1.1.1"
      },
@@ -864,25 +1501,25 @@ index 5c254b6..2d1ad5d 100644
 +          "selects": {
 +            "aarch64-apple-darwin": [
 +              {
-+                "id": "ic-host-artifacts 0.69.12",
++                "id": "ic-host-artifacts 0.69.13",
 +                "target": "ic_host_artifacts"
 +              }
 +            ],
 +            "aarch64-unknown-linux-gnu": [
 +              {
-+                "id": "ic-host-artifacts 0.69.12",
++                "id": "ic-host-artifacts 0.69.13",
 +                "target": "ic_host_artifacts"
 +              }
 +            ],
 +            "x86_64-apple-darwin": [
 +              {
-+                "id": "ic-host-artifacts 0.69.12",
++                "id": "ic-host-artifacts 0.69.13",
 +                "target": "ic_host_artifacts"
 +              }
 +            ],
 +            "x86_64-unknown-linux-gnu": [
 +              {
-+                "id": "ic-host-artifacts 0.69.12",
++                "id": "ic-host-artifacts 0.69.13",
 +                "target": "ic_host_artifacts"
 +              }
 +            ]
@@ -900,9 +1537,12 @@ index 5c254b6..2d1ad5d 100644
 +      "name": "ic-platform",
 +      "package_url": "https://github.com/dragginzgame/ic-platform",
 +      "repository": {
-+        "Http": {
-+          "sha256": "e2899efd19bafbac5cba000d5a407b5392ed4e9bfc9ab726fb897f09ac5ee2f6",
-+          "url": "https://static.crates.io/crates/ic-platform/0.7.6/download"
++        "Git": {
++          "commitish": {
++            "Rev": "ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
++          },
++          "remote": "https://github.com/dragginzgame/ic-platform.git",
++          "strip_prefix": "crates/ic-platform"
 +        }
 +      },
 +      "targets": [
@@ -918,7 +1558,7 @@ index 5c254b6..2d1ad5d 100644
      "ic-representation-independent-hash 3.1.0": {
        "common_attrs": {
          "deps": [
-@@ -27837,7 +28009,7 @@
+@@ -27837,7 +28198,7 @@
              "target": "candid"
            },
            {
@@ -927,7 +1567,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "flate2"
            },
            {
-@@ -28082,7 +28254,7 @@
+@@ -28082,7 +28443,7 @@
              "target": "serde"
            },
            {
@@ -936,7 +1576,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            }
          ],
-@@ -28136,7 +28308,7 @@
+@@ -28136,7 +28497,7 @@
              "target": "serde"
            },
            {
@@ -945,7 +1585,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            },
            {
-@@ -28218,7 +28390,7 @@
+@@ -28218,7 +28579,7 @@
              "target": "serde"
            },
            {
@@ -954,7 +1594,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            },
            {
-@@ -28397,7 +28569,7 @@
+@@ -28397,7 +28758,7 @@
              "target": "serde"
            },
            {
@@ -963,37 +1603,75 @@ index 5c254b6..2d1ad5d 100644
              "target": "serde_bytes"
            },
            {
-@@ -28545,6 +28717,107 @@
+@@ -28545,6 +28906,145 @@
        ],
        "version": "0.11.1"
      },
 +    "ic-wire 0.7.21": {
 +      "common_attrs": {
-+        "crate_features": [
-+          "typescript"
-+        ],
-+        "deps": [
-+          {
-+            "id": "bytemuck 1.25.2",
-+            "target": "bytemuck"
-+          },
-+          {
-+            "id": "postcard 1.1.3",
-+            "target": "postcard"
-+          },
-+          {
-+            "id": "serde 1.0.228",
-+            "target": "serde"
-+          },
-+          {
-+            "id": "serde_bytes 0.11.19",
-+            "target": "serde_bytes"
-+          },
-+          {
-+            "id": "serde_json 1.0.145",
-+            "target": "serde_json"
++        "crate_features": {
++          "common": [],
++          "selects": {
++            "aarch64-apple-darwin": [
++              "typescript"
++            ],
++            "aarch64-unknown-linux-gnu": [
++              "typescript"
++            ],
++            "x86_64-apple-darwin": [
++              "typescript"
++            ],
++            "x86_64-unknown-linux-gnu": [
++              "typescript"
++            ]
 +          }
-+        ],
++        },
++        "deps": {
++          "common": [
++            {
++              "id": "bytemuck 1.25.2",
++              "target": "bytemuck"
++            },
++            {
++              "id": "postcard 1.1.3",
++              "target": "postcard"
++            },
++            {
++              "id": "serde 1.0.228",
++              "target": "serde"
++            },
++            {
++              "id": "serde_bytes 0.11.19",
++              "target": "serde_bytes"
++            }
++          ],
++          "selects": {
++            "aarch64-apple-darwin": [
++              {
++                "id": "serde_json 1.0.145",
++                "target": "serde_json"
++              }
++            ],
++            "aarch64-unknown-linux-gnu": [
++              {
++                "id": "serde_json 1.0.145",
++                "target": "serde_json"
++              }
++            ],
++            "x86_64-apple-darwin": [
++              {
++                "id": "serde_json 1.0.145",
++                "target": "serde_json"
++              }
++            ],
++            "x86_64-unknown-linux-gnu": [
++              {
++                "id": "serde_json 1.0.145",
++                "target": "serde_json"
++              }
++            ]
++          }
++        },
 +        "edition": "2024",
 +        "proc_macro_deps": [
 +          {
@@ -1071,7 +1749,7 @@ index 5c254b6..2d1ad5d 100644
      "ic-xrc-types 1.2.0": {
        "common_attrs": {
          "deps": [
-@@ -29315,7 +29588,7 @@
+@@ -29315,7 +29815,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1080,7 +1758,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -29655,7 +29928,7 @@
+@@ -29655,7 +30155,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1089,7 +1767,25 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -30185,7 +30458,7 @@
+@@ -30018,7 +30518,7 @@
+             "target": "inotify_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -30056,7 +30556,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -30185,7 +30685,7 @@
              "target": "darling"
            },
            {
@@ -1098,7 +1794,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -31090,7 +31363,7 @@
+@@ -31090,7 +31590,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1107,7 +1803,154 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -33958,7 +34231,7 @@
+@@ -31250,7 +31750,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -32290,7 +32790,7 @@
+       ],
+       "version": "0.1.0"
+     },
+-    "libc 0.2.186": {
++    "libc 0.2.191": {
+       "build_script_attrs": {},
+       "common_attrs": {
+         "crate_features": [
+@@ -32314,8 +32814,8 @@
+       "package_url": "https://github.com/rust-lang/libc",
+       "repository": {
+         "Http": {
+-          "sha256": "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66",
+-          "url": "https://static.crates.io/crates/libc/0.2.186/download"
++          "sha256": "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a",
++          "url": "https://static.crates.io/crates/libc/0.2.191/download"
+         }
+       },
+       "targets": [
+@@ -32332,7 +32832,7 @@
+           }
+         }
+       ],
+-      "version": "0.2.186"
++      "version": "0.2.191"
+     },
+     "libcryptsetup-rs 0.15.0": {
+       "build_script_attrs": {
+@@ -32361,7 +32861,7 @@
+             "target": "either"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -32850,7 +33350,7 @@
+             "target": "lazy_static"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -32893,7 +33393,7 @@
+             "target": "bitflags"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -32951,7 +33451,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33101,7 +33601,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -33167,7 +33667,7 @@
+             "target": "hmac"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -33263,7 +33763,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33333,7 +33833,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33414,7 +33914,7 @@
+             "target": "bitflags"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33452,7 +33952,8 @@
+           "errno",
+           "general",
+           "ioctl",
+-          "no_std"
++          "no_std",
++          "prctl"
+         ],
+         "edition": "2021"
+       },
+@@ -33608,7 +34109,7 @@
+             "target": "byteorder"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -33671,7 +34172,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -33958,7 +34459,7 @@
              "target": "fnv"
            },
            {
@@ -1116,7 +1959,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -34016,7 +34289,7 @@
+@@ -34016,7 +34517,7 @@
              "target": "lazy_static"
            },
            {
@@ -1125,7 +1968,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -34426,7 +34699,7 @@
+@@ -34144,7 +34645,7 @@
+             "target": "errno"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -34426,7 +34927,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1134,7 +1986,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -34475,7 +34748,7 @@
+@@ -34475,7 +34976,7 @@
          ],
          "deps": [
            {
@@ -1143,7 +1995,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -34530,7 +34803,7 @@
+@@ -34530,7 +35031,7 @@
              "target": "proc_macro_utils"
            },
            {
@@ -1152,7 +2004,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -34641,7 +34914,7 @@
+@@ -34641,7 +35142,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1161,7 +2013,25 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -35220,7 +35493,7 @@
+@@ -34913,7 +35414,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -34953,7 +35454,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -35220,7 +35721,7 @@
          ],
          "deps": [
            {
@@ -1170,7 +2040,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -35326,9 +35599,10 @@
+@@ -35326,9 +35827,10 @@
        ],
        "version": "0.7.1"
      },
@@ -1182,7 +2052,7 @@ index 5c254b6..2d1ad5d 100644
            "simd",
            "simd-adler32",
            "with-alloc"
-@@ -35339,7 +35613,7 @@
+@@ -35339,7 +35841,7 @@
              "target": "adler2"
            },
            {
@@ -1191,7 +2061,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "simd_adler32"
            }
          ],
-@@ -35357,8 +35631,8 @@
+@@ -35357,8 +35859,8 @@
        "package_url": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
        "repository": {
          "Http": {
@@ -1202,7 +2072,7 @@ index 5c254b6..2d1ad5d 100644
          }
        },
        "targets": [
-@@ -35369,7 +35643,7 @@
+@@ -35369,7 +35871,7 @@
            }
          }
        ],
@@ -1211,7 +2081,43 @@ index 5c254b6..2d1ad5d 100644
      },
      "mio 0.8.10": {
        "common_attrs": {
-@@ -35624,7 +35898,7 @@
+@@ -35389,7 +35891,7 @@
+           "selects": {
+             "cfg(target_os = \"wasi\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -35399,7 +35901,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -35488,7 +35990,7 @@
+             ],
+             "cfg(target_os = \"wasi\")": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -35498,7 +36000,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -35624,7 +36126,7 @@
              "target": "cfg_if"
            },
            {
@@ -1220,7 +2126,43 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -37518,7 +37792,7 @@
+@@ -36066,7 +36568,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -36136,7 +36638,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -36212,7 +36714,7 @@
+             "target": "cfg_if"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -37334,7 +37836,7 @@
+           "selects": {
+             "cfg(not(windows))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -37518,7 +38020,7 @@
          ],
          "deps": [
            {
@@ -1229,7 +2171,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "flate2"
            },
            {
-@@ -37935,7 +38209,7 @@
+@@ -37881,7 +38383,7 @@
+             "target": "foreign_types"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -37935,7 +38437,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1238,7 +2189,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -38821,7 +39095,7 @@
+@@ -38067,7 +38569,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -38821,7 +39323,7 @@
              "target": "proc_macro_crate"
            },
            {
@@ -1247,7 +2207,25 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -39178,7 +39452,7 @@
+@@ -39001,7 +39503,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -39072,7 +39574,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -39178,7 +39680,7 @@
          ],
          "deps": [
            {
@@ -1256,7 +2234,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -39706,7 +39980,7 @@
+@@ -39537,7 +40039,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -39706,7 +40208,7 @@
              "target": "pest_meta"
            },
            {
@@ -1265,7 +2252,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -40045,7 +40319,7 @@
+@@ -40045,7 +40547,7 @@
              "target": "phf_shared"
            },
            {
@@ -1274,7 +2261,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -40187,7 +40461,7 @@
+@@ -40187,7 +40689,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1283,7 +2270,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -41453,7 +41727,7 @@
+@@ -41045,7 +41547,7 @@
+             "target": "inferno"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -41453,7 +41955,7 @@
          },
          "deps": [
            {
@@ -1292,7 +2288,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -41648,7 +41922,7 @@
+@@ -41648,7 +42150,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1301,7 +2297,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -41687,7 +41961,7 @@
+@@ -41687,7 +42189,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1310,7 +2306,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -41730,7 +42004,7 @@
+@@ -41730,7 +42232,7 @@
          ],
          "deps": [
            {
@@ -1319,7 +2315,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -41783,7 +42057,7 @@
+@@ -41783,7 +42285,7 @@
          ],
          "deps": [
            {
@@ -1328,7 +2324,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -41840,7 +42114,7 @@
+@@ -41840,7 +42342,7 @@
          ],
          "deps": [
            {
@@ -1337,7 +2333,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -41879,7 +42153,7 @@
+@@ -41879,7 +42381,7 @@
        ],
        "version": "0.10.0"
      },
@@ -1346,7 +2342,7 @@ index 5c254b6..2d1ad5d 100644
        "build_script_attrs": {},
        "common_attrs": {
          "crate_features": {
-@@ -41924,8 +42198,8 @@
+@@ -41924,8 +42426,8 @@
        "package_url": "https://github.com/dtolnay/proc-macro2",
        "repository": {
          "Http": {
@@ -1357,7 +2353,7 @@ index 5c254b6..2d1ad5d 100644
          }
        },
        "targets": [
-@@ -41942,7 +42216,7 @@
+@@ -41942,7 +42444,7 @@
            }
          }
        ],
@@ -1366,7 +2362,16 @@ index 5c254b6..2d1ad5d 100644
      },
      "procfs 0.17.0": {
        "build_script_attrs": {},
-@@ -42275,7 +42549,7 @@
+@@ -42065,7 +42567,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -42275,7 +42777,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1375,7 +2380,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -42458,7 +42732,7 @@
+@@ -42458,7 +42960,7 @@
              "target": "itertools"
            },
            {
@@ -1384,7 +2389,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -42887,7 +43161,7 @@
+@@ -42887,7 +43389,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1393,7 +2398,25 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -43456,7 +43730,7 @@
+@@ -43016,7 +43518,7 @@
+             ],
+             "cfg(not(any(target_os = \"windows\", target_arch = \"wasm32\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -43395,7 +43897,7 @@
+         "deps": {
+           "common": [
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -43456,7 +43958,7 @@
          ],
          "deps": [
            {
@@ -1402,7 +2425,37 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            }
          ],
-@@ -44691,7 +44965,7 @@
+@@ -43669,25 +44171,25 @@
+           "selects": {
+             "aarch64-apple-darwin": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "aarch64-unknown-linux-gnu": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "x86_64-apple-darwin": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "x86_64-unknown-linux-gnu": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -44691,7 +45193,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1411,7 +2464,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -45786,7 +46060,7 @@
+@@ -45786,7 +46288,7 @@
          ],
          "deps": [
            {
@@ -1420,7 +2473,32 @@ index 5c254b6..2d1ad5d 100644
              "target": "bytemuck"
            }
          ],
-@@ -46262,7 +46536,7 @@
+@@ -45867,13 +46369,13 @@
+             ],
+             "cfg(all(all(target_arch = \"aarch64\", target_endian = \"little\"), target_vendor = \"apple\", any(target_os = \"ios\", target_os = \"macos\", target_os = \"tvos\", target_os = \"visionos\", target_os = \"watchos\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+             "cfg(all(any(all(target_arch = \"aarch64\", target_endian = \"little\"), all(target_arch = \"arm\", target_endian = \"little\")), any(target_os = \"android\", target_os = \"linux\")))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -46029,7 +46531,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -46262,7 +46764,7 @@
              "target": "glob"
            },
            {
@@ -1429,7 +2507,87 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -48204,7 +48478,7 @@
+@@ -46413,7 +46915,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -46906,7 +47408,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -46929,7 +47431,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -46951,7 +47453,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -46962,7 +47464,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -47013,6 +47515,7 @@
+           "fs",
+           "mm",
+           "param",
++          "process",
+           "std"
+         ],
+         "deps": {
+@@ -47030,7 +47533,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -47053,7 +47556,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -47075,7 +47578,7 @@
+                 "target": "errno"
+               },
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -48204,7 +48707,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1438,42 +2596,49 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -49288,18 +49562,44 @@
+@@ -48845,7 +49348,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -48900,7 +49403,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -48959,7 +49462,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -49288,18 +49791,29 @@
        ],
        "version": "0.3.0"
      },
 -    "serde_bytes 0.11.15": {
 +    "serde_bytes 0.11.19": {
        "common_attrs": {
--        "crate_features": [
--          "default",
--          "std"
--        ],
+         "crate_features": [
++          "alloc",
+           "default",
+           "std"
+         ],
 -        "deps": [
 -          {
 -            "id": "serde 1.0.228",
 -            "target": "serde"
-+        "crate_features": {
-+          "common": [
-+            "default",
-+            "std"
-+          ],
-+          "selects": {
-+            "aarch64-apple-darwin": [
-+              "alloc"
-+            ],
-+            "aarch64-unknown-linux-gnu": [
-+              "alloc"
-+            ],
-+            "x86_64-apple-darwin": [
-+              "alloc"
-+            ],
-+            "x86_64-unknown-linux-gnu": [
-+              "alloc"
-+            ]
-           }
--        ],
-+        },
 +        "deps": {
 +          "common": [
 +            {
@@ -1488,12 +2653,13 @@ index 5c254b6..2d1ad5d 100644
 +                "target": "serde"
 +              }
 +            ]
-+          }
+           }
+-        ],
 +        },
          "edition": "2018"
        },
        "library_target_name": "serde_bytes",
-@@ -49313,8 +49613,8 @@
+@@ -49313,8 +49827,8 @@
        "package_url": "https://github.com/serde-rs/bytes",
        "repository": {
          "Http": {
@@ -1504,7 +2670,7 @@ index 5c254b6..2d1ad5d 100644
          }
        },
        "targets": [
-@@ -49325,7 +49625,7 @@
+@@ -49325,7 +49839,7 @@
            }
          }
        ],
@@ -1513,7 +2679,7 @@ index 5c254b6..2d1ad5d 100644
      },
      "serde_cbor 0.11.2": {
        "common_attrs": {
-@@ -49434,7 +49734,7 @@
+@@ -49434,7 +49948,7 @@
          ],
          "deps": [
            {
@@ -1522,7 +2688,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -49477,7 +49777,7 @@
+@@ -49477,7 +49991,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1531,7 +2697,15 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -49715,7 +50015,7 @@
+@@ -49522,6 +50036,7 @@
+         "crate_features": [
+           "alloc",
+           "default",
++          "float_roundtrip",
+           "raw_value",
+           "std",
+           "unbounded_depth"
+@@ -49715,7 +50230,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1540,7 +2714,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -49894,7 +50194,7 @@
+@@ -49894,7 +50409,7 @@
              "target": "darling"
            },
            {
@@ -1549,7 +2723,43 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -50960,7 +51260,7 @@
+@@ -50153,7 +50668,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -50788,7 +51303,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -50840,7 +51355,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -50884,7 +51399,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -50960,7 +51475,7 @@
        ],
        "version": "2.2.0"
      },
@@ -1558,7 +2768,7 @@ index 5c254b6..2d1ad5d 100644
        "common_attrs": {
          "edition": "2018"
        },
-@@ -50974,8 +51274,8 @@
+@@ -50974,8 +51489,8 @@
        "package_url": "https://github.com/mcountryman/simd-adler32",
        "repository": {
          "Http": {
@@ -1569,7 +2779,7 @@ index 5c254b6..2d1ad5d 100644
          }
        },
        "targets": [
-@@ -50986,7 +51286,7 @@
+@@ -50986,7 +51501,7 @@
            }
          }
        ],
@@ -1578,7 +2788,7 @@ index 5c254b6..2d1ad5d 100644
      },
      "simd_cesu8 1.1.1": {
        "common_attrs": {
-@@ -51757,7 +52057,7 @@
+@@ -51757,7 +52272,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1587,7 +2797,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -51847,7 +52147,7 @@
+@@ -51847,7 +52362,7 @@
              "target": "heck"
            },
            {
@@ -1596,7 +2806,52 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -52568,7 +52868,7 @@
+@@ -51896,7 +52411,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -51945,7 +52460,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -51994,7 +52509,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -52225,7 +52740,7 @@
+             "target": "bitflags"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -52315,7 +52830,7 @@
+               "target": "cfg_if"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -52568,7 +53083,7 @@
              "target": "phf_shared"
            },
            {
@@ -1605,7 +2860,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -52635,7 +52935,7 @@
+@@ -52635,7 +53150,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1614,7 +2869,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -52683,7 +52983,7 @@
+@@ -52683,7 +53198,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1623,7 +2878,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -52849,7 +53149,7 @@
+@@ -52849,7 +53364,7 @@
              "target": "heck"
            },
            {
@@ -1632,7 +2887,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -52901,7 +53201,7 @@
+@@ -52901,7 +53416,7 @@
              "target": "heck"
            },
            {
@@ -1641,7 +2896,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -52953,7 +53253,7 @@
+@@ -52953,7 +53468,7 @@
              "target": "heck"
            },
            {
@@ -1650,7 +2905,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -53208,7 +53508,7 @@
+@@ -53208,7 +53723,7 @@
          ],
          "deps": [
            {
@@ -1659,7 +2914,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -53288,7 +53588,7 @@
+@@ -53288,7 +53803,7 @@
          },
          "deps": [
            {
@@ -1668,7 +2923,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -53327,6 +53627,58 @@
+@@ -53327,6 +53842,58 @@
        ],
        "version": "2.0.119"
      },
@@ -1727,7 +2982,7 @@ index 5c254b6..2d1ad5d 100644
      "syn-solidity 1.7.1": {
        "common_attrs": {
          "crate_features": [
-@@ -53335,7 +53687,7 @@
+@@ -53335,7 +53902,7 @@
          ],
          "deps": [
            {
@@ -1736,7 +2991,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -53425,7 +53777,7 @@
+@@ -53425,7 +53992,7 @@
          ],
          "deps": [
            {
@@ -1745,7 +3000,34 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -53799,7 +54151,7 @@
+@@ -53476,7 +54043,7 @@
+             "target": "bitflags"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -53633,7 +54200,7 @@
+             "target": "core_foundation_sys"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -53686,7 +54253,7 @@
+               "target": "lazy_static"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -53799,7 +54366,7 @@
              "target": "proc_macro_error2"
            },
            {
@@ -1754,7 +3036,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -54151,7 +54503,7 @@
+@@ -53950,7 +54517,7 @@
+             ],
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -54151,7 +54718,7 @@
          ],
          "deps": [
            {
@@ -1763,7 +3054,25 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -54577,7 +54929,7 @@
+@@ -54472,7 +55039,7 @@
+           "selects": {
+             "cfg(not(windows))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -54515,7 +55082,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -54577,7 +55144,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1772,7 +3081,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -54798,7 +55150,7 @@
+@@ -54798,7 +55365,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1781,7 +3090,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -54841,7 +55193,7 @@
+@@ -54841,7 +55408,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1790,7 +3099,34 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -55504,7 +55856,7 @@
+@@ -54962,7 +55529,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -55037,7 +55604,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -55085,7 +55652,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -55504,7 +56071,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1799,7 +3135,43 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -55721,7 +56073,7 @@
+@@ -55590,7 +56157,7 @@
+           "selects": {
+             "aarch64-apple-darwin": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -55604,7 +56171,7 @@
+             ],
+             "aarch64-unknown-linux-gnu": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -55618,7 +56185,7 @@
+             ],
+             "x86_64-apple-darwin": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -55632,7 +56199,7 @@
+             ],
+             "x86_64-unknown-linux-gnu": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -55721,7 +56288,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1808,7 +3180,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -56797,7 +57149,7 @@
+@@ -56273,7 +56840,7 @@
+             "target": "futures"
+           },
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -56797,7 +57364,7 @@
              "target": "prettyplease"
            },
            {
@@ -1817,7 +3198,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -56889,7 +57241,7 @@
+@@ -56889,7 +57456,7 @@
              "target": "prettyplease"
            },
            {
@@ -1826,7 +3207,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -57722,7 +58074,7 @@
+@@ -57722,7 +58289,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1835,7 +3216,52 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -60227,7 +60579,7 @@
+@@ -57849,7 +58416,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -59739,7 +60306,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -59789,7 +60356,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           }
+         ],
+@@ -60006,7 +60573,7 @@
+       "common_attrs": {
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -60047,7 +60614,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -60227,7 +60794,7 @@
              "target": "heck"
            },
            {
@@ -1844,7 +3270,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -60565,7 +60917,7 @@
+@@ -60565,7 +61132,7 @@
              "target": "bumpalo"
            },
            {
@@ -1853,7 +3279,34 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -62132,7 +62484,7 @@
+@@ -61361,7 +61928,7 @@
+               "target": "bumpalo"
+             },
+             {
+-              "id": "libc 0.2.186",
++              "id": "libc 0.2.191",
+               "target": "libc"
+             },
+             {
+@@ -61902,7 +62469,7 @@
+           "selects": {
+             "cfg(unix)": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               },
+               {
+@@ -62031,7 +62598,7 @@
+           "selects": {
+             "cfg(any(target_os = \"linux\", target_vendor = \"apple\", target_os = \"freebsd\", target_os = \"android\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ],
+@@ -62132,7 +62699,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1862,7 +3315,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -65174,7 +65526,7 @@
+@@ -65174,7 +65741,7 @@
              "target": "prettyplease"
            },
            {
@@ -1871,7 +3324,16 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -65991,7 +66343,7 @@
+@@ -65801,7 +66368,7 @@
+             ],
+             "cfg(any(target_os = \"freebsd\", target_os = \"netbsd\"))": [
+               {
+-                "id": "libc 0.2.186",
++                "id": "libc 0.2.191",
+                 "target": "libc"
+               }
+             ]
+@@ -65991,7 +66558,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1880,7 +3342,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -66161,7 +66513,7 @@
+@@ -66161,7 +66728,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1889,7 +3351,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -66205,7 +66557,7 @@
+@@ -66205,7 +66772,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1898,7 +3360,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -66287,7 +66639,7 @@
+@@ -66287,7 +66854,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1907,7 +3369,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -66374,7 +66726,7 @@
+@@ -66374,7 +66941,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1916,7 +3378,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -66465,7 +66817,7 @@
+@@ -66465,7 +67032,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1925,7 +3387,7 @@ index 5c254b6..2d1ad5d 100644
              "target": "proc_macro2"
            },
            {
-@@ -66503,6 +66855,34 @@
+@@ -66503,6 +67070,34 @@
        ],
        "version": "0.10.3"
      },
@@ -1960,7 +3422,16 @@ index 5c254b6..2d1ad5d 100644
      "zstd 0.12.4": {
        "common_attrs": {
          "deps": [
-@@ -66830,7 +67210,7 @@
+@@ -66592,7 +67187,7 @@
+         ],
+         "deps": [
+           {
+-            "id": "libc 0.2.186",
++            "id": "libc 0.2.191",
+             "target": "libc"
+           },
+           {
+@@ -66830,7 +67425,7 @@
      "evm_rpc_client 0.4.0",
      "evm_rpc_types 3.1.1",
      "ff 0.12.1",
@@ -1969,8 +3440,11 @@ index 5c254b6..2d1ad5d 100644
      "form_urlencoded 1.2.1",
      "fqdn 0.5.2",
      "fs_extra 1.3.0",
-@@ -66873,7 +67253,9 @@
+@@ -66871,9 +67466,12 @@
+     "ic-certified-map 0.3.4",
+     "ic-doge-interface 0.3.0",
      "ic-gateway 0.0.0-git",
++    "ic-host-process 0.69.13",
      "ic-identity-hsm 0.49.1",
      "ic-management-canister-types 0.8.0",
 +    "ic-metrics 0.17.2",
@@ -1979,7 +3453,24 @@ index 5c254b6..2d1ad5d 100644
      "ic-sha3 1.0.0",
      "ic-stable-structures 0.6.8",
      "ic-stable-structures 0.7.0",
-@@ -66948,7 +67330,7 @@
+@@ -66883,6 +67481,7 @@
+     "ic-verify-bls-signature 0.6.0",
+     "ic-vetkeys 0.7.0",
+     "ic-wasm 0.11.1",
++    "ic-wire 0.7.21",
+     "ic-xrc-types 1.2.0",
+     "ic0 1.1.0",
+     "ic_bls12_381 0.10.1",
+@@ -66905,7 +67504,7 @@
+     "keyring 3.4.0",
+     "lazy_static 1.5.0",
+     "leb128 0.2.5",
+-    "libc 0.2.186",
++    "libc 0.2.191",
+     "libcryptsetup-rs 0.15.0",
+     "libfuzzer-sys 0.4.7",
+     "libnss 0.5.0",
+@@ -66948,7 +67547,7 @@
      "pprof 0.15.0",
      "predicates 3.1.2",
      "pretty_assertions 1.4.0",
@@ -1988,7 +3479,7 @@ index 5c254b6..2d1ad5d 100644
      "procfs 0.17.0",
      "prometheus 0.14.0",
      "prometheus-parse 0.2.4",
-@@ -67004,7 +67386,7 @@
+@@ -67004,7 +67603,7 @@
      "semver 1.0.27",
      "serde 1.0.228",
      "serde-bytes-repr 0.3.0",
@@ -1998,7 +3489,7 @@ index 5c254b6..2d1ad5d 100644
      "serde_json 1.0.145",
      "serde_regex 1.1.0",
 diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
-index 3bef13b..14480c0 100644
+index 3bef13b..e9cc273 100644
 --- a/Cargo.Bazel.toml.lock
 +++ b/Cargo.Bazel.toml.lock
 @@ -2152,9 +2152,9 @@ checksum = "175812e0be2bccb6abe50bb8d566126198344f707e304f45c648fd8f2cc0365e"
@@ -2013,8 +3504,28 @@ index 3bef13b..14480c0 100644
  
  [[package]]
  name = "byteorder"
-@@ -3857,7 +3857,9 @@ dependencies = [
+@@ -2701,6 +2701,16 @@ version = "1.0.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "55b672471b4e9f9e95499ea597ff64941a309b2cdbffcc46f2cc5e2d971fd335"
+ 
++[[package]]
++name = "command-fds"
++version = "0.3.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1b60b5124979fccd9addd89d8b97a1d6eebb4950694520c75ddd722535ea443f"
++dependencies = [
++ "nix 0.31.3",
++ "thiserror 2.0.18",
++]
++
+ [[package]]
+ name = "compact_str"
+ version = "0.8.1"
+@@ -3855,9 +3865,12 @@ dependencies = [
+  "ic-certified-map",
+  "ic-doge-interface",
   "ic-gateway",
++ "ic-host-process",
   "ic-identity-hsm",
   "ic-management-canister-types 0.8.0",
 + "ic-metrics",
@@ -2023,7 +3534,15 @@ index 3bef13b..14480c0 100644
   "ic-sha3",
   "ic-stable-structures 0.6.8",
   "ic-stable-structures 0.7.0",
-@@ -4707,12 +4709,13 @@ checksum = "cda653ca797810c02f7ca4b804b40b8b95ae046eb989d356bce17919a8c25499"
+@@ -3867,6 +3880,7 @@ dependencies = [
+  "ic-verify-bls-signature",
+  "ic-vetkeys",
+  "ic-wasm",
++ "ic-wire",
+  "ic-xrc-types",
+  "ic0",
+  "ic_bls12_381",
+@@ -4707,12 +4721,13 @@ checksum = "cda653ca797810c02f7ca4b804b40b8b95ae046eb989d356bce17919a8c25499"
  
  [[package]]
  name = "flate2"
@@ -2040,24 +3559,45 @@ index 3bef13b..14480c0 100644
  ]
  
  [[package]]
-@@ -6124,6 +6127,16 @@ dependencies = [
+@@ -6124,6 +6139,37 @@ dependencies = [
   "woothee",
  ]
  
 +[[package]]
 +name = "ic-host-artifacts"
-+version = "0.69.12"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "374fa708729c7c85d786b207e3fc74f1c2b21da5a0a0609ba2d8dd1400d0d7df"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
 +dependencies = [
 + "flate2",
 + "sha2 0.10.9",
 +]
 +
++[[package]]
++name = "ic-host-fs"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
++dependencies = [
++ "ic-host-artifacts",
++ "rustix 1.1.4",
++ "thiserror 2.0.18",
++]
++
++[[package]]
++name = "ic-host-process"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
++dependencies = [
++ "command-fds",
++ "ic-host-artifacts",
++ "ic-host-fs",
++ "libc",
++ "rustix 1.1.4",
++]
++
  [[package]]
  name = "ic-http-certification"
  version = "3.1.0"
-@@ -6206,12 +6219,31 @@ dependencies = [
+@@ -6206,12 +6252,30 @@ dependencies = [
   "serde_bytes",
  ]
  
@@ -2080,8 +3620,7 @@ index 3bef13b..14480c0 100644
 +[[package]]
 +name = "ic-platform"
 +version = "0.7.6"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "e2899efd19bafbac5cba000d5a407b5392ed4e9bfc9ab726fb897f09ac5ee2f6"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=ba98bd33ef1cbe463d6daf34f0511f17d7770c20#ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -2089,7 +3628,7 @@ index 3bef13b..14480c0 100644
  [[package]]
  name = "ic-representation-independent-hash"
  version = "3.1.0"
-@@ -6390,6 +6422,31 @@ dependencies = [
+@@ -6390,6 +6454,31 @@ dependencies = [
   "wasmparser 0.253.0",
  ]
  
@@ -2121,7 +3660,19 @@ index 3bef13b..14480c0 100644
  [[package]]
  name = "ic-xrc-types"
  version = "1.2.0"
-@@ -7873,9 +7930,9 @@ dependencies = [
+@@ -7236,9 +7325,9 @@ checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
+ 
+ [[package]]
+ name = "libc"
+-version = "0.2.186"
++version = "0.2.191"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
++checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+ 
+ [[package]]
+ name = "libcryptsetup-rs"
+@@ -7873,9 +7962,9 @@ dependencies = [
  
  [[package]]
  name = "miniz_oxide"
@@ -2133,7 +3684,7 @@ index 3bef13b..14480c0 100644
  dependencies = [
   "adler2",
   "simd-adler32",
-@@ -9293,9 +9350,9 @@ dependencies = [
+@@ -9293,9 +9382,9 @@ dependencies = [
  
  [[package]]
  name = "proc-macro2"
@@ -2145,7 +3696,7 @@ index 3bef13b..14480c0 100644
  dependencies = [
   "unicode-ident",
  ]
-@@ -10859,11 +10916,12 @@ dependencies = [
+@@ -10859,11 +10948,12 @@ dependencies = [
  
  [[package]]
  name = "serde_bytes"
@@ -2160,7 +3711,7 @@ index 3bef13b..14480c0 100644
  ]
  
  [[package]]
-@@ -11244,9 +11302,9 @@ dependencies = [
+@@ -11244,9 +11334,9 @@ dependencies = [
  
  [[package]]
  name = "simd-adler32"
@@ -2172,7 +3723,7 @@ index 3bef13b..14480c0 100644
  
  [[package]]
  name = "simd_cesu8"
-@@ -11766,6 +11824,17 @@ dependencies = [
+@@ -11766,6 +11856,17 @@ dependencies = [
   "unicode-ident",
  ]
  
@@ -2190,7 +3741,7 @@ index 3bef13b..14480c0 100644
  [[package]]
  name = "syn-solidity"
  version = "1.7.1"
-@@ -14576,6 +14645,12 @@ dependencies = [
+@@ -14576,6 +14677,12 @@ dependencies = [
   "syn 2.0.119",
  ]
  
@@ -2204,7 +3755,7 @@ index 3bef13b..14480c0 100644
  name = "zstd"
  version = "0.12.4"
 diff --git a/Cargo.lock b/Cargo.lock
-index 1a6cc43..99ea8ee 100644
+index 1a6cc43..1a68860 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
 @@ -1671,7 +1671,7 @@ dependencies = [
@@ -2228,7 +3779,24 @@ index 1a6cc43..99ea8ee 100644
  
  [[package]]
  name = "byteorder"
-@@ -4776,7 +4776,7 @@ dependencies = [
+@@ -2894,6 +2894,16 @@ version = "1.0.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "55b672471b4e9f9e95499ea597ff64941a309b2cdbffcc46f2cc5e2d971fd335"
+ 
++[[package]]
++name = "command-fds"
++version = "0.3.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1b60b5124979fccd9addd89d8b97a1d6eebb4950694520c75ddd722535ea443f"
++dependencies = [
++ "nix 0.31.3",
++ "thiserror 2.0.18",
++]
++
+ [[package]]
+ name = "command_runner"
+ version = "0.0.0"
+@@ -4776,7 +4786,7 @@ dependencies = [
   "ic-interfaces",
   "ic-limits",
   "ic-logger",
@@ -2237,7 +3805,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nns-constants",
   "ic-registry-subnet-type",
   "ic-replicated-state",
-@@ -5009,12 +5009,13 @@ checksum = "b7ac824320a75a52197e8f2d787f6a38b6718bb6897a35142d749af3c0e8f4fe"
+@@ -5009,12 +5019,13 @@ checksum = "b7ac824320a75a52197e8f2d787f6a38b6718bb6897a35142d749af3c0e8f4fe"
  
  [[package]]
  name = "flate2"
@@ -2254,7 +3822,7 @@ index 1a6cc43..99ea8ee 100644
  ]
  
  [[package]]
-@@ -6209,7 +6210,7 @@ dependencies = [
+@@ -6209,7 +6220,7 @@ dependencies = [
   "futures",
   "ic-adapter-metrics-service",
   "ic-logger",
@@ -2263,7 +3831,7 @@ index 1a6cc43..99ea8ee 100644
   "protobuf",
   "tokio",
   "tonic",
-@@ -6377,7 +6378,7 @@ dependencies = [
+@@ -6377,7 +6388,7 @@ dependencies = [
   "ic-error-types 0.2.0",
   "ic-interfaces",
   "ic-logger",
@@ -2272,7 +3840,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-p2p-test-utils",
   "ic-protobuf",
   "ic-quic-transport",
-@@ -6402,7 +6403,7 @@ dependencies = [
+@@ -6402,7 +6413,7 @@ dependencies = [
   "ic-consensus-manager",
   "ic-interfaces",
   "ic-limits",
@@ -2281,7 +3849,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-types",
   "prometheus",
   "tokio",
-@@ -6426,7 +6427,7 @@ dependencies = [
+@@ -6426,7 +6437,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-limits",
   "ic-logger",
@@ -2290,7 +3858,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-sys",
   "ic-test-artifact-pool",
-@@ -6804,7 +6805,7 @@ dependencies = [
+@@ -6804,7 +6815,7 @@ dependencies = [
   "ic-http-endpoints-async-utils",
   "ic-interfaces-adapter-client",
   "ic-logger",
@@ -2299,7 +3867,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-system-profiler",
   "ic-test-utilities-logger",
   "ic-test-utilities-net",
-@@ -6836,7 +6837,7 @@ dependencies = [
+@@ -6836,7 +6847,7 @@ dependencies = [
   "ic-http-endpoints-async-utils",
   "ic-interfaces-adapter-client",
   "ic-logger",
@@ -2308,7 +3876,7 @@ index 1a6cc43..99ea8ee 100644
   "prometheus",
   "serde",
   "serde_bytes",
-@@ -6913,7 +6914,7 @@ dependencies = [
+@@ -6913,7 +6924,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-interfaces-state-manager-mocks",
   "ic-logger",
@@ -2317,7 +3885,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-replicated-state",
   "ic-test-utilities",
-@@ -7078,7 +7079,7 @@ dependencies = [
+@@ -7078,7 +7089,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2326,7 +3894,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-subnet-type",
   "ic-replicated-state",
   "ic-system-profiler",
-@@ -7686,7 +7687,7 @@ dependencies = [
+@@ -7686,7 +7697,7 @@ dependencies = [
   "ic-logger",
   "ic-management-canister-types-private",
   "ic-messaging",
@@ -2335,7 +3903,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
-@@ -7744,7 +7745,7 @@ dependencies = [
+@@ -7744,7 +7755,7 @@ dependencies = [
   "ic-interfaces-registry",
   "ic-interfaces-state-manager",
   "ic-logger",
@@ -2344,7 +3912,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-subnet-type",
   "ic-replicated-state",
   "ic-system-profiler",
-@@ -7775,7 +7776,7 @@ dependencies = [
+@@ -7775,7 +7786,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2353,7 +3921,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
-@@ -7838,7 +7839,7 @@ dependencies = [
+@@ -7838,7 +7849,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2362,7 +3930,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-helpers",
   "ic-registry-keys",
-@@ -7887,7 +7888,7 @@ dependencies = [
+@@ -7887,7 +7898,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2371,7 +3939,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
-@@ -7922,7 +7923,7 @@ dependencies = [
+@@ -7922,7 +7933,7 @@ dependencies = [
   "ic-interfaces",
   "ic-limits",
   "ic-logger",
@@ -2380,7 +3948,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-p2p-test-utils",
   "ic-protobuf",
   "ic-quic-transport",
-@@ -7954,7 +7955,7 @@ dependencies = [
+@@ -7954,7 +7965,7 @@ dependencies = [
   "ic-interfaces-mocks",
   "ic-interfaces-state-manager",
   "ic-logger",
@@ -2389,7 +3957,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-keys",
-@@ -7991,7 +7992,7 @@ dependencies = [
+@@ -7991,7 +8002,7 @@ dependencies = [
   "ic-interfaces-registry",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2398,7 +3966,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-helpers",
   "ic-registry-keys",
-@@ -8069,7 +8070,7 @@ dependencies = [
+@@ -8069,7 +8080,7 @@ dependencies = [
   "ic-interfaces-registry-mocks",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2407,7 +3975,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
-@@ -8343,7 +8344,7 @@ dependencies = [
+@@ -8343,7 +8354,7 @@ dependencies = [
   "ic-interfaces",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2416,7 +3984,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-sys",
   "ic-test-utilities-compare-dirs",
-@@ -8438,7 +8439,7 @@ dependencies = [
+@@ -8438,7 +8449,7 @@ dependencies = [
  name = "ic-crypto-internal-logmon"
  version = "0.9.0"
  dependencies = [
@@ -2425,7 +3993,7 @@ index 1a6cc43..99ea8ee 100644
   "prometheus",
   "strum 0.26.3",
   "strum_macros 0.26.4",
-@@ -8624,7 +8625,7 @@ dependencies = [
+@@ -8624,7 +8635,7 @@ dependencies = [
   "ic-crypto-utils-basic-sig",
   "ic-interfaces",
   "ic-logger",
@@ -2434,7 +4002,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-proto-data-provider",
-@@ -8867,7 +8868,7 @@ name = "ic-crypto-test-utils-metrics"
+@@ -8867,7 +8878,7 @@ name = "ic-crypto-test-utils-metrics"
  version = "0.9.0"
  dependencies = [
   "ic-crypto-internal-logmon",
@@ -2443,7 +4011,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-test-utilities-metrics",
  ]
  
-@@ -9214,7 +9215,7 @@ dependencies = [
+@@ -9214,7 +9225,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-management-canister-types-private",
   "ic-messaging",
@@ -2452,7 +4020,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client",
   "ic-registry-keys",
-@@ -9310,7 +9311,7 @@ dependencies = [
+@@ -9310,7 +9321,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2461,7 +4029,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nns-constants",
   "ic-registry-routing-table",
   "ic-registry-subnet-type",
-@@ -9450,7 +9451,7 @@ dependencies = [
+@@ -9450,7 +9461,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2470,24 +4038,45 @@ index 1a6cc43..99ea8ee 100644
   "ic-nns-constants",
   "ic-query-stats",
   "ic-registry-provisional-whitelist",
-@@ -9612,6 +9613,16 @@ dependencies = [
+@@ -9612,6 +9623,37 @@ dependencies = [
   "syn 2.0.117",
  ]
  
 +[[package]]
 +name = "ic-host-artifacts"
-+version = "0.69.12"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "374fa708729c7c85d786b207e3fc74f1c2b21da5a0a0609ba2d8dd1400d0d7df"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
 +dependencies = [
 + "flate2",
 + "sha2 0.10.9",
 +]
 +
++[[package]]
++name = "ic-host-fs"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
++dependencies = [
++ "ic-host-artifacts",
++ "rustix 1.1.4",
++ "thiserror 2.0.18",
++]
++
++[[package]]
++name = "ic-host-process"
++version = "0.69.13"
++source = "git+https://github.com/dragginzgame/ic-tooling.git?rev=c20dbd11785c17d369651f51fa0967fbec69c57a#c20dbd11785c17d369651f51fa0967fbec69c57a"
++dependencies = [
++ "command-fds",
++ "ic-host-artifacts",
++ "ic-host-fs",
++ "libc",
++ "rustix 1.1.4",
++]
++
  [[package]]
  name = "ic-hpke"
  version = "0.1.0"
-@@ -9659,7 +9670,7 @@ dependencies = [
+@@ -9659,7 +9701,7 @@ dependencies = [
   "axum",
   "ic-config",
   "ic-http-endpoints-async-utils",
@@ -2496,7 +4085,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-test-utilities-logger",
   "prometheus",
   "reqwest",
-@@ -9710,7 +9721,7 @@ dependencies = [
+@@ -9710,7 +9752,7 @@ dependencies = [
   "ic-interfaces-state-manager-mocks",
   "ic-limits",
   "ic-logger",
@@ -2505,7 +4094,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nns-delegation-manager",
   "ic-pprof",
   "ic-protobuf",
-@@ -9786,7 +9797,7 @@ dependencies = [
+@@ -9786,7 +9828,7 @@ dependencies = [
   "ic-interfaces-registry",
   "ic-interfaces-state-manager",
   "ic-logger",
@@ -2514,7 +4103,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
-@@ -9878,7 +9889,7 @@ dependencies = [
+@@ -9878,7 +9920,7 @@ dependencies = [
   "ic-http-endpoints-async-utils",
   "ic-https-outcalls-service",
   "ic-logger",
@@ -2523,7 +4112,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-system-profiler",
   "ic-test-utilities-net",
   "parking_lot",
-@@ -9916,7 +9927,7 @@ dependencies = [
+@@ -9916,7 +9958,7 @@ dependencies = [
   "ic-interfaces-adapter-client",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2532,7 +4121,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-test-utilities-metrics",
   "ic-test-utilities-types",
   "ic-types",
-@@ -9952,7 +9963,7 @@ dependencies = [
+@@ -9952,7 +9994,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2541,7 +4130,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-helpers",
   "ic-registry-subnet-features",
-@@ -9982,7 +9993,7 @@ version = "0.9.0"
+@@ -9982,7 +10024,7 @@ version = "0.9.0"
  dependencies = [
   "ic-config",
   "ic-logger",
@@ -2550,7 +4139,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-types",
   "ic-types-cycles",
   "ic-types-test-utils",
-@@ -10492,7 +10503,7 @@ dependencies = [
+@@ -10492,7 +10534,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2559,7 +4148,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
   "ic-registry-keys",
-@@ -11021,7 +11032,7 @@ dependencies = [
+@@ -11021,7 +11063,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2568,7 +4157,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-query-stats",
   "ic-registry-client-fake",
-@@ -11080,6 +11091,16 @@ dependencies = [
+@@ -11080,6 +11122,16 @@ dependencies = [
   "tokio-metrics",
  ]
  
@@ -2585,7 +4174,7 @@ index 1a6cc43..99ea8ee 100644
  [[package]]
  name = "ic-metrics-assert"
  version = "0.5.0"
-@@ -11810,7 +11831,7 @@ dependencies = [
+@@ -11810,7 +11862,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-interfaces-state-manager-mocks",
   "ic-logger",
@@ -2594,7 +4183,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nns-delegation-reader",
   "ic-protobuf",
   "ic-registry-client-fake",
-@@ -12467,7 +12488,7 @@ dependencies = [
+@@ -12467,7 +12519,7 @@ dependencies = [
   "ic-interfaces",
   "ic-interfaces-mocks",
   "ic-logger",
@@ -2603,7 +4192,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-peer-manager",
   "ic-protobuf",
   "ic-quic-transport",
-@@ -12501,7 +12522,7 @@ dependencies = [
+@@ -12501,7 +12553,7 @@ dependencies = [
   "ic-interfaces-mocks",
   "ic-interfaces-registry",
   "ic-logger",
@@ -2612,15 +4201,14 @@ index 1a6cc43..99ea8ee 100644
   "ic-p2p-test-utils",
   "ic-quic-transport",
   "ic-registry-client-fake",
-@@ -12515,6 +12536,15 @@ dependencies = [
+@@ -12515,6 +12567,14 @@ dependencies = [
   "tokio",
  ]
  
 +[[package]]
 +name = "ic-platform"
 +version = "0.7.6"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "e2899efd19bafbac5cba000d5a407b5392ed4e9bfc9ab726fb897f09ac5ee2f6"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=ba98bd33ef1cbe463d6daf34f0511f17d7770c20#ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -2628,7 +4216,7 @@ index 1a6cc43..99ea8ee 100644
  [[package]]
  name = "ic-pprof"
  version = "0.9.0"
-@@ -12547,7 +12577,7 @@ dependencies = [
+@@ -12547,7 +12607,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2637,7 +4225,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client",
   "ic-registry-keys",
-@@ -12629,7 +12659,7 @@ dependencies = [
+@@ -12629,7 +12689,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-interfaces-state-manager-mocks",
   "ic-logger",
@@ -2646,7 +4234,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-replicated-state",
   "ic-test-utilities-state",
   "ic-types",
-@@ -12677,7 +12707,7 @@ dependencies = [
+@@ -12677,7 +12737,7 @@ dependencies = [
   "ic-interfaces-registry",
   "ic-limits",
   "ic-logger",
@@ -2655,7 +4243,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-p2p-test-utils",
   "ic-protobuf",
   "ic-system-profiler",
-@@ -12733,7 +12763,7 @@ dependencies = [
+@@ -12733,7 +12793,7 @@ dependencies = [
   "ic-interfaces",
   "ic-interfaces-registry",
   "ic-management-canister-types-private",
@@ -2664,7 +4252,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-helpers",
   "ic-registry-keys",
-@@ -12840,7 +12870,7 @@ dependencies = [
+@@ -12840,7 +12900,7 @@ dependencies = [
   "assert_matches",
   "crossbeam-channel",
   "ic-interfaces-registry",
@@ -2673,7 +4261,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-client-helpers",
   "ic-registry-common-proto",
   "ic-registry-proto-data-provider",
-@@ -13056,7 +13086,7 @@ dependencies = [
+@@ -13056,7 +13116,7 @@ dependencies = [
   "ic-http-endpoints-metrics",
   "ic-interfaces-registry",
   "ic-logger",
@@ -2682,7 +4270,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nervous-system-integration-tests",
   "ic-nns-constants",
   "ic-nns-test-utils",
-@@ -13188,7 +13218,7 @@ dependencies = [
+@@ -13188,7 +13248,7 @@ dependencies = [
   "ic-interfaces-state-manager-mocks",
   "ic-logger",
   "ic-messaging",
@@ -2691,7 +4279,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nervous-system-agent",
   "ic-nervous-system-chunks",
   "ic-nervous-system-common",
-@@ -13258,7 +13288,7 @@ dependencies = [
+@@ -13258,7 +13318,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-logger",
   "ic-messaging",
@@ -2700,7 +4288,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nns-delegation-manager",
   "ic-pprof",
   "ic-protobuf",
-@@ -13318,7 +13348,7 @@ dependencies = [
+@@ -13318,7 +13378,7 @@ dependencies = [
   "ic-interfaces-registry",
   "ic-interfaces-state-manager",
   "ic-logger",
@@ -2709,7 +4297,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-peer-manager",
   "ic-quic-transport",
   "ic-registry-client-helpers",
-@@ -13351,7 +13381,7 @@ dependencies = [
+@@ -13351,7 +13411,7 @@ dependencies = [
   "ic-interfaces-registry",
   "ic-interfaces-state-manager",
   "ic-management-canister-types-private",
@@ -2718,7 +4306,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-prep",
   "ic-protobuf",
   "ic-registry-client-fake",
-@@ -13405,7 +13435,7 @@ dependencies = [
+@@ -13405,7 +13465,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2727,7 +4315,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nns-delegation-reader",
   "ic-protobuf",
   "ic-registry-resource-limits",
-@@ -14314,7 +14344,7 @@ dependencies = [
+@@ -14314,7 +14374,7 @@ dependencies = [
   "ic-interfaces",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2736,7 +4324,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-replicated-state",
   "ic-sys",
-@@ -14377,7 +14407,7 @@ dependencies = [
+@@ -14377,7 +14437,7 @@ dependencies = [
   "ic-logger",
   "ic-management-canister-types-private",
   "ic-messaging",
@@ -2745,7 +4333,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-query-stats",
   "ic-registry-client-fake",
-@@ -14444,7 +14474,7 @@ dependencies = [
+@@ -14444,7 +14504,7 @@ dependencies = [
   "ic-interfaces-state-manager",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2754,7 +4342,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-routing-table",
   "ic-registry-subnet-features",
-@@ -14499,7 +14529,7 @@ dependencies = [
+@@ -14499,7 +14559,7 @@ dependencies = [
   "ic-interfaces",
   "ic-logger",
   "ic-memory-transport",
@@ -2763,7 +4351,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-p2p-test-utils",
   "ic-protobuf",
   "ic-quic-transport",
-@@ -14527,7 +14557,7 @@ dependencies = [
+@@ -14527,7 +14587,7 @@ dependencies = [
   "hex",
   "ic-config",
   "ic-logger",
@@ -2772,7 +4360,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-routing-table",
   "ic-registry-subnet-type",
-@@ -14563,7 +14593,7 @@ dependencies = [
+@@ -14563,7 +14623,7 @@ dependencies = [
   "csv",
   "ic-base-types",
   "ic-management-canister-types-private",
@@ -2781,17 +4369,22 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-recovery",
   "ic-registry-routing-table",
-@@ -14632,7 +14662,8 @@ dependencies = [
+@@ -14632,10 +14692,12 @@ dependencies = [
  name = "ic-system-profiler"
  version = "0.9.0"
  dependencies = [
 - "flate2",
++ "ic-host-process",
 + "ic-metrics 0.17.2",
 + "ic-platform",
++ "ic-wire",
   "libc",
   "serde",
-  "serde_cbor",
-@@ -14783,7 +14814,7 @@ dependencies = [
+- "serde_cbor",
+  "serde_json",
+ ]
+ 
+@@ -14783,7 +14845,7 @@ dependencies = [
   "ic-interfaces-registry",
   "ic-interfaces-state-manager",
   "ic-logger",
@@ -2800,7 +4393,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-client-helpers",
   "ic-replicated-state",
   "ic-test-utilities-consensus",
-@@ -14833,7 +14864,7 @@ dependencies = [
+@@ -14833,7 +14895,7 @@ dependencies = [
   "ic-interfaces-certified-stream-store",
   "ic-interfaces-state-manager",
   "ic-interfaces-state-manager-mocks",
@@ -2809,7 +4402,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-subnet-type",
   "ic-replicated-state",
   "ic-test-utilities-logger",
-@@ -14923,7 +14954,7 @@ dependencies = [
+@@ -14923,7 +14985,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2818,7 +4411,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-provisional-whitelist",
   "ic-registry-resource-limits",
   "ic-registry-routing-table",
-@@ -14987,7 +15018,7 @@ dependencies = [
+@@ -14987,7 +15049,7 @@ dependencies = [
  name = "ic-test-utilities-metrics"
  version = "0.9.0"
  dependencies = [
@@ -2827,7 +4420,7 @@ index 1a6cc43..99ea8ee 100644
   "prometheus",
  ]
  
-@@ -15429,7 +15460,7 @@ name = "ic-utils-thread"
+@@ -15429,7 +15491,7 @@ name = "ic-utils-thread"
  version = "0.9.0"
  dependencies = [
   "crossbeam-channel",
@@ -2836,7 +4429,7 @@ index 1a6cc43..99ea8ee 100644
   "prometheus",
  ]
  
-@@ -15632,6 +15663,31 @@ dependencies = [
+@@ -15632,6 +15694,31 @@ dependencies = [
   "tempfile",
  ]
  
@@ -2868,7 +4461,7 @@ index 1a6cc43..99ea8ee 100644
  [[package]]
  name = "ic-xnet-hyper"
  version = "0.9.0"
-@@ -15670,7 +15726,7 @@ dependencies = [
+@@ -15670,7 +15757,7 @@ dependencies = [
   "ic-interfaces-state-manager-mocks",
   "ic-limits",
   "ic-logger",
@@ -2877,7 +4470,19 @@ index 1a6cc43..99ea8ee 100644
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
-@@ -17891,6 +17947,15 @@ name = "miniz_oxide"
+@@ -17124,9 +17211,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "libc"
+-version = "0.2.186"
++version = "0.2.191"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
++checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
+ 
+ [[package]]
+ name = "libcryptsetup-rs"
+@@ -17891,6 +17978,15 @@ name = "miniz_oxide"
  version = "0.8.9"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "1fa76a2c86f704bdb222d66965fb3d63269ce38518b83cb0575fca855ebb6316"
@@ -2893,7 +4498,7 @@ index 1a6cc43..99ea8ee 100644
  dependencies = [
   "adler2",
   "simd-adler32",
-@@ -18840,7 +18905,7 @@ dependencies = [
+@@ -18840,7 +18936,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2902,7 +4507,15 @@ index 1a6cc43..99ea8ee 100644
   "ic-nns-constants",
   "ic-protobuf",
   "ic-registry-canister-api",
-@@ -19522,7 +19587,7 @@ dependencies = [
+@@ -19508,6 +19604,7 @@ dependencies = [
+  "ic-error-types 0.2.0",
+  "ic-execution-environment",
+  "ic-gateway",
++ "ic-host-process",
+  "ic-http-endpoints-public",
+  "ic-https-outcalls-adapter",
+  "ic-https-outcalls-adapter-client",
+@@ -19522,7 +19619,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2911,7 +4524,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-nervous-system-common",
   "ic-nns-common",
   "ic-nns-constants",
-@@ -19530,6 +19595,7 @@ dependencies = [
+@@ -19530,6 +19627,7 @@ dependencies = [
   "ic-nns-governance-api",
   "ic-nns-governance-init",
   "ic-nns-handler-root",
@@ -2919,7 +4532,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-canister-api",
   "ic-registry-client",
   "ic-registry-client-helpers",
-@@ -19855,9 +19921,9 @@ dependencies = [
+@@ -19855,9 +19953,9 @@ dependencies = [
  
  [[package]]
  name = "proc-macro2"
@@ -2931,7 +4544,7 @@ index 1a6cc43..99ea8ee 100644
  dependencies = [
   "unicode-ident",
  ]
-@@ -20181,9 +20247,9 @@ dependencies = [
+@@ -20181,9 +20279,9 @@ dependencies = [
  
  [[package]]
  name = "quote"
@@ -2943,7 +4556,7 @@ index 1a6cc43..99ea8ee 100644
  dependencies = [
   "proc-macro2",
  ]
-@@ -22940,6 +23006,17 @@ dependencies = [
+@@ -22940,6 +23038,17 @@ dependencies = [
   "unicode-ident",
  ]
  
@@ -2961,7 +4574,7 @@ index 1a6cc43..99ea8ee 100644
  [[package]]
  name = "syn-solidity"
  version = "1.7.1"
-@@ -24557,7 +24634,7 @@ dependencies = [
+@@ -24557,7 +24666,7 @@ dependencies = [
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -2970,7 +4583,7 @@ index 1a6cc43..99ea8ee 100644
   "ic-registry-subnet-type",
   "ic-replicated-state",
   "ic-test-utilities",
-@@ -25716,6 +25793,12 @@ dependencies = [
+@@ -25716,6 +25825,12 @@ dependencies = [
   "syn 2.0.117",
  ]
  
@@ -2984,27 +4597,49 @@ index 1a6cc43..99ea8ee 100644
  name = "zmij"
  version = "1.0.21"
 diff --git a/Cargo.toml b/Cargo.toml
-index ab16a08..8824fd9 100644
+index ab16a08..883e8d4 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -601,6 +601,9 @@ opt-level = 3
+@@ -601,6 +601,11 @@ opt-level = 3
  opt-level = 3
  
  [workspace.dependencies]
++ic-wire = { version = "0.7.21", default-features = false }
++ic-host-process = { git = "https://github.com/dragginzgame/ic-tooling.git", rev = "c20dbd11785c17d369651f51fa0967fbec69c57a", default-features = false }
 +ic-metrics = { version = "0.17.2", default-features = false }
 +
-+ic-platform = { version = "0.7.6", default-features = false, features = ["gzip"] }
++ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "ba98bd33ef1cbe463d6daf34f0511f17d7770c20", default-features = false, features = ["gzip"] }
  actix-rt = "2.10.0"
  actix-web = { version = "4.9.0", default-features = false, features = [
      "macros",
+@@ -909,7 +914,7 @@ semver = { version = "1.0.9", features = ["serde"] }
+ serde = { version = "1.0.203", features = ["derive"] }
+ serde_bytes = "0.11.15"
+ serde_cbor = "0.11.2"
+-serde_json = { version = "^1.0.107" }
++serde_json = { version = "^1.0.107", features = ["float_roundtrip"] }
+ serde_regex = "1.1.0"
+ serde_with = "3.21.0"
+ serde_yaml = "0.9.33"
 diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
-index 41a0bf6..c556159 100644
+index 41a0bf6..05c671f 100644
 --- a/bazel/rust.MODULE.bazel
 +++ b/bazel/rust.MODULE.bazel
-@@ -26,6 +26,17 @@ COMPARABLE_REV = "8338f595496454f9e770389e2edc0d96e137a4e9"
+@@ -26,6 +26,29 @@ COMPARABLE_REV = "8338f595496454f9e770389e2edc0d96e137a4e9"
  crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
  
  # Rust crates.
++crate.spec(
++    default_features = False,
++    package = "ic-wire",
++    version = "0.7.21",
++)
++crate.spec(
++    default_features = False,
++    package = "ic-host-process",
++    git = "https://github.com/dragginzgame/ic-tooling.git",
++    rev = "c20dbd11785c17d369651f51fa0967fbec69c57a",
++)
 +crate.spec(
 +    default_features = False,
 +    package = "ic-metrics",
@@ -3014,32 +4649,59 @@ index 41a0bf6..c556159 100644
 +    default_features = False,
 +    features = ["gzip"],
 +    package = "ic-platform",
-+    version = "0.7.6",
++    git = "https://github.com/dragginzgame/ic-platform.git",
++    rev = "ba98bd33ef1cbe463d6daf34f0511f17d7770c20",
 +)
  # Build any crate with `@crate_index//:mycrate`
  # Use particular version with `@crate_index//:mycrate-3.14.16`
  
+@@ -538,11 +561,11 @@ rust_library(
+     deps = [
+         "@crate_index__cfg-if-1.0.0//:cfg_if",
+     ] + select({
+-        "@rules_rust//rust/platform:aarch64-apple-darwin": ["@crate_index__libc-0.2.186//:libc"],
+-        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": ["@crate_index__libc-0.2.186//:libc"],
++        "@rules_rust//rust/platform:aarch64-apple-darwin": ["@crate_index__libc-0.2.191//:libc"],
++        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": ["@crate_index__libc-0.2.191//:libc"],
+         "@rules_rust//rust/platform:wasm32-unknown-unknown": [],
+-        "@rules_rust//rust/platform:x86_64-apple-darwin": ["@crate_index__libc-0.2.186//:libc"],
+-        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": ["@crate_index__libc-0.2.186//:libc"],
++        "@rules_rust//rust/platform:x86_64-apple-darwin": ["@crate_index__libc-0.2.191//:libc"],
++        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": ["@crate_index__libc-0.2.191//:libc"],
+         "//conditions:default": [],
+     }),
+     edition = "2018",
+@@ -1460,6 +1483,7 @@ crate.spec(
+ )
+ crate.spec(
+     package = "serde_json",
++    features = ["float_roundtrip"],
+     version = "^1.0.107",
+ )
+ crate.spec(
 diff --git a/rs/pocket_ic_server/BUILD.bazel b/rs/pocket_ic_server/BUILD.bazel
-index cb50b6a..fdcfd3a 100644
+index cb50b6a..58cadf0 100644
 --- a/rs/pocket_ic_server/BUILD.bazel
 +++ b/rs/pocket_ic_server/BUILD.bazel
-@@ -88,6 +88,7 @@ LIB_DEPENDENCIES = [
+@@ -88,6 +88,8 @@ LIB_DEPENDENCIES = [
      "@crate_index//:ic-cdk-management-canister",
      "@crate_index//:ic-doge-interface",
      "@crate_index//:ic-gateway",
 +    "@crate_index//:ic-platform",
++    "@crate_index//:ic-host-process",
      "@crate_index//:ic-utils",
      "@crate_index//:itertools",
      "@crate_index//:libc",
-@@ -137,6 +138,7 @@ TEST_DEPENDENCIES = [
+@@ -137,6 +139,8 @@ TEST_DEPENDENCIES = [
      "@crate_index//:ic-cdk-management-canister",
      "@crate_index//:ic-doge-interface",
      "@crate_index//:ic-gateway",
 +    "@crate_index//:ic-platform",
++    "@crate_index//:ic-host-process",
      "@crate_index//:ic-utils",
      "@crate_index//:nix",
      "@crate_index//:prometheus",
-@@ -276,6 +278,7 @@ MAINNET_NNS_CANISTER_ENV = {
+@@ -276,6 +280,7 @@ MAINNET_NNS_CANISTER_ENV = {
              "src/state_api/**/*.rs",
              "profiling/mod.rs",
              "profiling/server/**/*.rs",
@@ -3047,7 +4709,7 @@ index cb50b6a..fdcfd3a 100644
          ]),
          compile_data = EXTERNAL_CANISTER_DATA + nns_canister_data + [
              "//rs/config:instruction_charge_rule_sources",
-@@ -293,7 +296,7 @@ MAINNET_NNS_CANISTER_ENV = {
+@@ -293,7 +298,7 @@ MAINNET_NNS_CANISTER_ENV = {
              "profiling/viewer/agent_guide.md",
              "profiling/viewer/viewer.html",
              "templates/dashboard.html",
@@ -3057,10 +4719,18 @@ index cb50b6a..fdcfd3a 100644
          proc_macro_deps = [
              # Keep sorted.
 diff --git a/rs/pocket_ic_server/Cargo.toml b/rs/pocket_ic_server/Cargo.toml
-index 071aa30..9648743 100644
+index 071aa30..f4bc1fc 100644
 --- a/rs/pocket_ic_server/Cargo.toml
 +++ b/rs/pocket_ic_server/Cargo.toml
-@@ -80,6 +80,7 @@ ic-state-machine-tests = { path = "../state_machine_tests" }
+@@ -4,6 +4,7 @@ version = "16.1.0"
+ edition.workspace = true
+ 
+ [dependencies]
++ic-host-process = { workspace = true }
+ aide = { workspace = true }
+ askama = { workspace = true }
+ async-trait = { workspace = true }
+@@ -80,6 +81,7 @@ ic-state-machine-tests = { path = "../state_machine_tests" }
  ic-state-manager = { path = "../state_manager" }
  ic-sys = { path = "../sys" }
  ic-system-profiler = { path = "profiling/system" }

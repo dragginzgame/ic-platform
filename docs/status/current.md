@@ -2,8 +2,8 @@
 
 ## Pending complexity cleanup (#96)
 
-This isolated follow-on uses current main's retained gzip boundary; it does not
-integrate the unfinished #95 Host Process dependency change. Shared Tooling's
+This paired follow-on retains Platform gzip and includes the #95 native inputs
+already selected by released Profiler 0.10.0. Integrate #95 before this cleanup. Shared Tooling's
 single-observation supplier is PR #322 at `1e89c0d`, adopted through the canonical
 exporter. Root package versions and crypto/runtime identities are unchanged.
 
@@ -28,6 +28,19 @@ fixtures and 45 assembler tests pass. Paired native product/build qualification
 is being completed before this candidate is declared ready. No size or speed
 saving is claimed; native macOS, full replica Bazel/NNS and release/live-provider
 acceptance remain separate. #50 and its advisory check stay unchanged.
+
+## Host process and private Wire follow-on (#94 / Profiler #5 and #6)
+
+PR #95 now targets main after merged #93, retaining Platform gzip. Native inputs
+wire IC Wire 0.7.21 and Host process from supplying Tooling #265, revision
+`c20dbd11785c17d369651f51fa0967fbec69c57a`. Platform gzip uses that same Host
+source family; the native library scaffold is `ba98bd33ef1cbe463d6daf34f0511f17d7770c20`.
+There are no downstream Cargo patches or mixed registry/Git Host packages.
+Profiler owns process selection/accounting and the private protocol cut; Host
+owns raw OS facts and workload custody. Rebuild all process peers together.
+Supplying publication and native macOS acceptance are separate from local Linux
+qualification. The existing IC pin and cryptographic graph remain unchanged.
+
 
 ## Pending 0.7.7: paired Profiler product source contract
 
