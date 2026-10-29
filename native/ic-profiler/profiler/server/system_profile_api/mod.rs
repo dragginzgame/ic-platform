@@ -3,6 +3,10 @@
 
 mod admission;
 
+pub use super::system_profile_product::{export_bytes, import_bytes, query_parameters, query_run, render, tool_definitions};
+pub(crate) use super::system_profile_product::argument_parameters;
+use super::system_profile_product::MAX_IMPORT_BYTES;
+
 #[cfg(test)]
 pub(crate) use admission::is_local_host;
 pub(crate) use admission::protect_requests;
@@ -20,27 +24,9 @@ use axum::{
 use ic_system_profiler::{Query as ProfileQuery, RunConfig, StopOptions};
 use serde_json::{Value, json};
 use std::{
-    collections::{BTreeMap, HashMap, VecDeque},
+    collections::{BTreeMap, HashMap},
     sync::{Mutex, OnceLock},
 };
-
-const MAX_QUERY_BYTES: usize = 8 * 1024 * 1024;
-const MAX_CACHED_BYTES: usize = 32 * 1024 * 1024;
-const MAX_CACHED_QUERIES: usize = 128;
-const MAX_IMPORT_BYTES: usize = 128 * 1024 * 1024;
-const VIEWS: &[&str] = &[
-    "summary",
-    "components",
-    "resources",
-    "events",
-    "flows",
-    "limits",
-    "rounds",
-    "pricing",
-    "metrics",
-    "status",
-    "explain",
-];
 
 static SERVER_STORAGE: OnceLock<pocket_ic::common::storage::StorageInfo> = OnceLock::new();
 
@@ -145,19 +131,7 @@ async fn delete(Path(run_id): Path<String>) -> Response {
 fn delete_run(run_id: &str) -> Result<Value, String> {
     ic_system_profiler::delete_run(run_id)?;
     scopes().lock().unwrap().remove(run_id);
-    let mut snapshots = cache().lock().unwrap();
-    let keys: Vec<_> = snapshots
-        .entries
-        .iter()
-        .filter(|(_, (v, _))| v.get("run_id").and_then(Value::as_str) == Some(run_id))
-        .map(|(k, _)| k.clone())
-        .collect();
-    for key in keys {
-        if let Some((_, size)) = snapshots.entries.remove(&key) {
-            snapshots.bytes = snapshots.bytes.saturating_sub(size);
-        }
-        snapshots.order.retain(|k| k != &key);
-    }
+    super::system_profile_product::forget_run(run_id);
     Ok(json!({"run_id":run_id,"deleted":true}))
 }
 
@@ -196,165 +170,6 @@ async fn export(Path(run_id): Path<String>) -> Response {
 
 async fn import(body: Bytes) -> Response {
     response(import_bytes(&body))
-}
-
-pub fn export_bytes(run_id: &str) -> Result<Vec<u8>, String> {
-    let _scope = ic_system_profiler::scope("ic.observability.export");
-    ic_system_profiler::export_bundle(run_id)
-}
-
-pub fn import_bytes(bytes: &[u8]) -> Result<Value, String> {
-    let _scope = ic_system_profiler::scope("ic.observability.export");
-    if bytes.len() > MAX_IMPORT_BYTES {
-        return Err("Profile bundle exceeds the 128 MiB input budget".into());
-    }
-    let decoded = if bytes.starts_with(&[0x1f, 0x8b]) {
-        ic_platform::gzip::decode_gzip(bytes, MAX_IMPORT_BYTES, MAX_IMPORT_BYTES)
-            .map_err(|error| format!("Invalid gzip profile bundle: {error}"))?
-    } else {
-        bytes.to_vec()
-    };
-    ic_system_profiler::import_bundle(&decoded)
-}
-
-#[derive(Default)]
-struct SnapshotCache {
-    entries: BTreeMap<String, (Value, usize)>,
-    order: VecDeque<String>,
-    bytes: usize,
-}
-
-impl SnapshotCache {
-    fn insert(&mut self, value: &Value) -> Result<(), String> {
-        let key = value
-            .get("query_id")
-            .and_then(Value::as_str)
-            .ok_or("Profiler query did not supply an immutable query_id")?;
-        let size = serde_json::to_vec(value).map_err(|e| e.to_string())?.len();
-        if size > MAX_QUERY_BYTES {
-            return Err("Profile query exceeds 8 MiB; reduce limit or resolution".into());
-        }
-        if self.entries.contains_key(key) {
-            return Ok(());
-        }
-        while !self.order.is_empty()
-            && (self.entries.len() >= MAX_CACHED_QUERIES || self.bytes + size > MAX_CACHED_BYTES)
-        {
-            if let Some(old) = self.order.pop_front()
-                && let Some((_, bytes)) = self.entries.remove(&old)
-            {
-                self.bytes = self.bytes.saturating_sub(bytes);
-            }
-        }
-        self.bytes += size;
-        self.order.push_back(key.to_string());
-        self.entries.insert(key.to_string(), (value.clone(), size));
-        Ok(())
-    }
-
-    fn get(&self, run_id: &str, key: &str) -> Result<Value, String> {
-        let value = &self
-            .entries
-            .get(key)
-            .ok_or("Immutable query snapshot is not retained; rerun the query explicitly")?
-            .0;
-        if value.get("run_id").and_then(Value::as_str) != Some(run_id) {
-            return Err("Immutable query snapshot belongs to a different run".into());
-        }
-        Ok(value.clone())
-    }
-}
-
-fn cache() -> &'static Mutex<SnapshotCache> {
-    static CACHE: OnceLock<Mutex<SnapshotCache>> = OnceLock::new();
-    CACHE.get_or_init(|| Mutex::new(SnapshotCache::default()))
-}
-
-pub fn query_parameters(parameters: &HashMap<String, String>) -> Result<ProfileQuery, String> {
-    let mut object = serde_json::Map::new();
-    for key in [
-        "start_ns",
-        "end_ns",
-        "process_id",
-        "round_number",
-        "limit",
-        "cursor",
-        "resolution",
-    ] {
-        if let Some(text) = parameters.get(key) {
-            let value = text
-                .parse::<u64>()
-                .map_err(|_| format!("{key} must be an unsigned integer"))?;
-            object.insert(key.into(), json!(value));
-        }
-    }
-    for key in ["component", "canister_id", "subnet_id", "round_id"] {
-        if let Some(value) = parameters.get(key) {
-            object.insert(key.into(), json!(value));
-        }
-    }
-    if let Some(value) = parameters.get("round_details") {
-        let enabled = match value.as_str() {
-            "true" => true,
-            "false" => false,
-            _ => return Err("round_details must be true or false".into()),
-        };
-        object.insert("round_details".into(), json!(enabled));
-    }
-    if let Some(limit) = object.get("limit").and_then(Value::as_u64)
-        && !(1..=10_000).contains(&limit)
-    {
-        return Err("limit must be between 1 and 10000".into());
-    }
-    if let Some(resolution) = object.get("resolution").and_then(Value::as_u64)
-        && !(2..=10_000).contains(&resolution)
-    {
-        return Err("resolution must be between 2 and 10000".into());
-    }
-    serde_json::from_value(Value::Object(object)).map_err(|e| format!("Invalid profile query: {e}"))
-}
-
-pub fn query_run(
-    run_id: &str,
-    view: &str,
-    parameters: &HashMap<String, String>,
-) -> Result<Value, String> {
-    let _scope = ic_system_profiler::scope("ic.observability.api");
-    if !VIEWS.contains(&view) {
-        return Err(format!("Unknown profile view {view}"));
-    }
-    if let Some(query_id) = parameters.get("query_id") {
-        let value = cache().lock().unwrap().get(run_id, query_id)?;
-        if value.get("view").and_then(Value::as_str) != Some(view) {
-            return Err("A different view requires a new query; immutable query IDs preserve their original view".into());
-        }
-        return Ok(value);
-    }
-    let mut result = ic_system_profiler::query(run_id, view, &query_parameters(parameters)?)?;
-    result["view"] = json!(view);
-    cache().lock().unwrap().insert(&result)?;
-    Ok(result)
-}
-
-pub(crate) fn argument_parameters(arguments: &Value) -> HashMap<String, String> {
-    arguments
-        .as_object()
-        .into_iter()
-        .flatten()
-        .filter_map(|(key, value)| {
-            if value.is_null() {
-                None
-            } else {
-                Some((
-                    key.clone(),
-                    value
-                        .as_str()
-                        .map(str::to_owned)
-                        .unwrap_or_else(|| value.to_string()),
-                ))
-            }
-        })
-        .collect()
 }
 
 pub async fn dispatch(
@@ -500,25 +315,7 @@ pub fn dispatch_sync(
             ic_system_profiler::query(id, "status", &ProfileQuery::default())
         }
         "profile_delete" => delete_run(run()?),
-        "profile_list" => Ok(ic_system_profiler::list_runs()),
-        "profile_explain" if arguments.get("run_id").is_none() => Ok(ic_system_profiler::explain()),
-        "profile_compare" => ic_system_profiler::compare(
-            run()?,
-            arguments
-                .get("other_run_id")
-                .and_then(Value::as_str)
-                .ok_or("Missing other_run_id")?,
-        ),
-        name => {
-            let view = name
-                .strip_prefix("profile_")
-                .ok_or("Unknown profile operation")?;
-            let view = match view {
-                "trace_slice" | "evidence" => "events",
-                _ => view,
-            };
-            query_run(run()?, view, &argument_parameters(arguments))
-        }
+        name => super::system_profile_product::dispatch_sync(name, arguments),
     }
 }
 
@@ -721,94 +518,6 @@ fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
     json!({"kind":"pricing_delta","rows":rows,"totals":{"cycles_debited":complete.then(||debit.to_string()),"cycles_refunded":complete.then(||refund.to_string())},"coverage":if complete{"selected_existing_recorders"}else{"partial_or_unavailable"},"covered_canisters":covered,"note":"Only generation-matched, continuously recorded cumulative ledgers are differenced. Partial rows are not complete run totals; transfers/reservations remain distinct from debits/refunds."})
 }
 
-pub fn tool_definitions() -> Vec<Value> {
-    let names = [
-        (
-            "profile_start",
-            "Start a bounded whole-system capture of actual host CPU, memory and storage, component scopes, call flows and logical budget events. Does not enable costly instruction/byte profiling.",
-        ),
-        (
-            "profile_stop",
-            "Finish foreground capture and an optional bounded observation drain. Pending or unobserved maintenance is reported honestly.",
-        ),
-        ("profile_list", "List retained whole-system profiling runs."),
-        (
-            "profile_delete",
-            "Release a stopped whole-system capture and its retained immutable query images. Does not change canister state.",
-        ),
-        (
-            "profile_export",
-            "Return a download URL for a self-contained compressed profile bundle.",
-        ),
-        ("profile_status", "Read capture status, scope and coverage."),
-        (
-            "profile_metrics",
-            "Read bounded start/stop snapshots of existing per-subnet IC counters, gauges and wall histograms, with raw source names, labels, units and registry generations. These are not measured component CPU.",
-        ),
-        (
-            "profile_summary",
-            "Read a small run summary with physical resources, distinct pricing, shared/unattributed work and missingness.",
-        ),
-        (
-            "profile_components",
-            "Rank exclusive measured component CPU; inclusive wall spans are not additional CPU.",
-        ),
-        (
-            "profile_resources",
-            "Read bounded CPU, memory and storage samples; every series retains its units and measurement scope.",
-        ),
-        (
-            "profile_flows",
-            "Read observed causal canister/XNet call links; emulated transport and incomplete joins stay explicit.",
-        ),
-        (
-            "profile_rounds",
-            "Read dedicated scheduler round/worker allowance records and stopping reasons. Includes rounds.scheduler_model explaining worker assignment/barriers, dispatch reserve and chart interpretation; independent of generic event retention, with explicit missing/censored coverage and logical units.",
-        ),
-        (
-            "profile_limits",
-            "Read logical round/page/queue stopping events and captured configuration, distinct from physical utilization.",
-        ),
-        (
-            "profile_pricing",
-            "Join priced logical work and existing cycle ledgers with physical observations, without claiming physical observations determine billing.",
-        ),
-        (
-            "profile_trace_slice",
-            "Read bounded exact profiling events with process/thread identity and causal attributes.",
-        ),
-        (
-            "profile_evidence",
-            "Retrieve bounded exact evidence for a whole-system finding.",
-        ),
-        (
-            "profile_compare",
-            "Compare two retained runs with explicit scope and configuration differences.",
-        ),
-        (
-            "profile_explain",
-            "Explain subsystem coverage, sources, units, physical/logical accounting and the built-in profiler interfaces.",
-        ),
-        (
-            "profile_render",
-            "Render an immutable query as PNG/SVG with a JSON evidence sidecar; no events or costs are invented.",
-        ),
-    ];
-    names.into_iter().map(|(name, description)| json!({
-        "name":name,"description":description,
-        "inputSchema":{"type":"object","properties":{
-            "run_id":{"type":"string"},"other_run_id":{"type":"string"},"name":{"type":"string"},
-            "instance_id":{"type":"integer"},"root_pid":{"type":"integer"},"sample_interval_ms":{"type":"integer"},
-            "max_events":{"type":"integer"},"max_samples":{"type":"integer"},"max_retained_bytes":{"type":"integer"},"drain_ms":{"type":"integer"},"metrics_level":{"type":"string","enum":["none","standard","full"]},"memory_detail_interval_ms":{"type":"integer"},
-            "start_ns":{"type":["integer","string"]},"end_ns":{"type":["integer","string"]},
-            "component":{"type":"string"},"canister_id":{"type":"string"},"process_id":{"type":"integer"},"subnet_id":{"type":"string"},"round_id":{"type":"string"},"round_number":{"type":["integer","string"]},"round_details":{"type":"boolean"},
-            "limit":{"type":"integer"},"cursor":{"type":["integer","string"]},"resolution":{"type":"integer"},
-            "query_id":{"type":"string"},"view":{"type":"string"},"render_round_id":{"type":"string"},"width":{"type":"integer"},"height":{"type":"integer"}
-        }},
-        "annotations":{"readOnlyHint":!matches!(name,"profile_start"|"profile_stop"|"profile_delete"),"destructiveHint":name=="profile_delete","openWorldHint":false}
-    })).collect()
-}
-
 async fn render_svg(
     Path(run_id): Path<String>,
     Query(parameters): Query<HashMap<String, String>>,
@@ -850,138 +559,10 @@ async fn render_metadata(
     response(render(&run_id, &parameters).map(|image| image.metadata))
 }
 
-pub fn render(
-    run_id: &str,
-    parameters: &HashMap<String, String>,
-) -> Result<crate::system_profile_render::RenderedProfile, String> {
-    let _scope = ic_system_profiler::scope("ic.observability.export");
-    let requested = parameters
-        .get("view")
-        .map(String::as_str)
-        .unwrap_or("components");
-    let view = match requested {
-        "overview" => "events",
-        "calls" => "flows",
-        other => other,
-    };
-    let data = query_run(run_id, view, parameters)?;
-    crate::system_profile_render::render(&data, view, parameters)
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn bundle_entrypoints_preserve_shared_gzip_framing_and_distinct_expanded_budgets() {
-        assert_eq!(MAX_IMPORT_BYTES, 128 * 1024 * 1024);
-        let created = ic_system_profiler::start(ic_system_profiler::RunConfig::default()).unwrap();
-        let id = created["run_id"].as_str().unwrap();
-        ic_system_profiler::stop(id, &ic_system_profiler::StopOptions::default()).unwrap();
-        let compressed = export_bytes(id).unwrap();
-        assert_eq!(compressed, ic_system_profiler::export_bundle(id).unwrap());
-        let raw = ic_platform::gzip::decode_gzip(&compressed, MAX_IMPORT_BYTES, 256 * 1024 * 1024)
-            .unwrap();
-        for bytes in [raw.as_slice(), compressed.as_slice()] {
-            let imported = import_bytes(bytes).unwrap();
-            ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
-        }
-        let mut trailing = compressed.clone();
-        trailing.push(0);
-        let mut concatenated = compressed.clone();
-        concatenated.extend_from_slice(&compressed);
-        let mut crc = compressed.clone();
-        let tail = crc.len() - 8;
-        crc[tail] ^= 1;
-        let mut length = compressed.clone();
-        let tail = length.len() - 4;
-        length[tail] ^= 1;
-        for invalid in [
-            trailing.as_slice(),
-            concatenated.as_slice(),
-            crc.as_slice(),
-            length.as_slice(),
-            &compressed[..compressed.len() - 1],
-            &[0x1f, 0x8b, 0],
-        ] {
-            assert!(import_bytes(invalid).is_err());
-            assert!(ic_system_profiler::import_bundle(invalid).is_err());
-        }
-        // Padding outside the JSON document preserves the exact same profile.
-        // Exercise the real inclusive API limit rather than a smaller substitute.
-        let mut expanded = raw;
-        expanded.resize(MAX_IMPORT_BYTES, b' ');
-        let mut exact = Vec::new();
-        ic_platform::gzip::encode_gzip(&expanded, &mut exact, 1, u64::MAX).unwrap();
-        for bytes in [expanded.as_slice(), exact.as_slice()] {
-            let imported = import_bytes(bytes).unwrap();
-            ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
-        }
-        expanded.push(b' ');
-        assert!(import_bytes(&expanded).is_err());
-        let mut over = Vec::new();
-        ic_platform::gzip::encode_gzip(&expanded, &mut over, 1, u64::MAX).unwrap();
-        assert!(import_bytes(&over).is_err());
-        // The independent recorder retains its separate 256 MiB decoded ceiling.
-        let imported = ic_system_profiler::import_bundle(&over).unwrap();
-        ic_system_profiler::delete_run(imported["run_id"].as_str().unwrap()).unwrap();
-        ic_system_profiler::delete_run(id).unwrap();
-    }
-
-    #[test]
-    fn shared_argument_conversion_preserves_exact_values_and_omits_nulls() {
-        let parameters = argument_parameters(
-            &json!({"missing":null,"text":"01","limit":42,"round_number":u64::MAX,"round_details":false,"nested":{"x":1}}),
-        );
-        assert!(!parameters.contains_key("missing"));
-        assert_eq!(parameters["text"], "01");
-        assert_eq!(parameters["limit"], "42");
-        assert_eq!(parameters["round_number"], u64::MAX.to_string());
-        assert_eq!(parameters["round_details"], "false");
-        assert_eq!(parameters["nested"], r#"{"x":1}"#);
-    }
-
-    #[test]
-    fn query_parameters_reject_unbounded_limits_and_lossy_decimals() {
-        assert!(query_parameters(&HashMap::from([("limit".into(), "10001".into())])).is_err());
-        assert!(query_parameters(&HashMap::from([("start_ns".into(), "1.5".into())])).is_err());
-        assert!(
-            query_parameters(&HashMap::from([("start_ns".into(), u64::MAX.to_string())])).is_ok()
-        );
-    }
-
-    #[test]
-    fn dedicated_round_filters_keep_exact_identity_and_unsigned_numbers() {
-        let query = query_parameters(&HashMap::from([
-            ("round_id".into(), "pid:subnet:round".into()),
-            ("subnet_id".into(), "subnet".into()),
-            ("round_number".into(), u64::MAX.to_string()),
-            ("round_details".into(), "false".into()),
-        ]))
-        .unwrap();
-        assert_eq!(query.round_id.as_deref(), Some("pid:subnet:round"));
-        assert_eq!(query.subnet_id.as_deref(), Some("subnet"));
-        assert_eq!(query.round_number, Some(u64::MAX));
-        assert_eq!(query.round_details, Some(false));
-        assert!(query_parameters(&HashMap::from([("round_details".into(), "0".into())])).is_err());
-        assert!(query_parameters(&HashMap::from([("round_number".into(), "1.5".into())])).is_err());
-        assert!(
-            tool_definitions()
-                .iter()
-                .any(|tool| tool["name"] == "profile_rounds")
-        );
-    }
-
-    #[test]
-    fn immutable_snapshot_keeps_displayed_data_and_refuses_cross_run_lookup() {
-        let mut cache = SnapshotCache::default();
-        let value =
-            json!({"query_id":"q","run_id":"r","summary":{"cpu_time_ns":"9007199254740993"}});
-        cache.insert(&value).unwrap();
-        assert_eq!(cache.get("r", "q").unwrap(), value);
-        assert!(cache.get("other", "q").is_err());
-        assert!(cache.get("r", "missing").is_err());
-    }
 
     #[test]
     fn pricing_ledger_differences_keep_transfers_and_currencies_separate() {
@@ -1023,3 +604,4 @@ mod tests {
         assert_eq!(values.len(), 1);
     }
 }
+

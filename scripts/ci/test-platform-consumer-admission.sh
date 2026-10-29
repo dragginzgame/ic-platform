@@ -10,6 +10,7 @@ cp "$root/scripts/ci/check-platform-consumer.sh" "$root/scripts/ci/check-platfor
 cp "$root/scripts/ci/check-blake3-graph.sh" "$root/scripts/ci/check-cargo-graph.pl" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
+cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"

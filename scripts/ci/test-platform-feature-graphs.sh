@@ -3,12 +3,24 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-feature-admission.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
+cd "$root"
+jq="$root/.tools/host/bin/jq"
+cargo metadata --no-deps --format-version 1 --locked --offline > "$fixture/metadata.json"
+admit() {
+    local graph_target=native arg
+    for arg in "$@"; do case "$arg" in target=*) graph_target="${arg#target=}" ;; esac; done
+    cut -f1 "$fixture/mapping" | "$jq" -Rsc 'split("\n")[:-1]' |
+        "$jq" -r --arg projection activation --arg target "$graph_target" \
+            --slurpfile metadata "$fixture/metadata.json" --slurpfile policy "$root/scripts/ci/platform-feature-policy.json" \
+            -f "$root/scripts/ci/platform-feature-closures.jq" > "$fixture/activation.tsv"
+    awk -v activation="$fixture/activation.tsv" "$@"
+}
 count=0
 while IFS='|' read -r selection package expected; do
     printf 'ic-platform v0.1.13\n%s\n' "$package" > "$fixture/native-case.txt"
     printf '%s\tcase\n' "$selection" > "$fixture/mapping"
     actual=reject
-    if awk -v target=native -v cache="$fixture" -v generator='ic-platform-macros v0.1.13 (proc-macro) (/fixture)' \
+    if admit -v target=native -v cache="$fixture" -v generator='ic-platform-macros v0.1.13 (proc-macro) (/fixture)' \
         -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
     [[ "$actual" == "$expected" ]] || { echo "Unexpected $actual for $selection: $package" >&2; cat "$fixture/log" >&2; exit 1; }
     count=$((count + 1))
@@ -132,10 +144,10 @@ CASES
 # A shared key must still be admitted separately for each original selection.
 printf 'ic-platform v0.1.13\nic-agent v0.49.2\n' > "$fixture/native-case.txt"
 printf 'agent\tcase\nnone\tcase\n' > "$fixture/mapping"
-if awk -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
+if admit -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 # Missing graphs fail closed rather than being treated as an empty package set.
 rm "$fixture/native-case.txt"
-if awk -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
+if admit -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 printf 'Batch graph admission: %s cases plus shared-key and missing-graph refusals passed\n' "$count"
 # PocketIC is admitted only as a selected native dependency with its own DTOs.
 for target in native wasm32-unknown-unknown; do
@@ -143,7 +155,7 @@ for target in native wasm32-unknown-unknown; do
         printf 'pocket-ic v16.1.0\nic-management-canister-types v0.8.0\ncandid v0.10.38\nic-certification v3.2.0\n' > "$fixture/$target-pocket.txt"
         printf '%s\tpocket\n' "$selection" > "$fixture/mapping"
         actual=reject
-        if awk -v target="$target" -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
+        if admit -v target="$target" -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
         expected=reject
         if [[ "$target" == native && "$selection" == pocket-ic ]]; then expected=pass; fi
         [[ "$actual" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
@@ -155,7 +167,7 @@ for target in native wasm32-unknown-unknown; do
         printf 'blake3 v1.8.7\n' > "$fixture/$target-blake3.txt"
         printf '%s\tblake3\n' "$selection" > "$fixture/mapping"
         actual=reject
-        if awk -v target="$target" -v cache="$fixture" \
+        if admit -v target="$target" -v cache="$fixture" \
             -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
         expected=reject
         [[ "$selection" != blake3 ]] || expected=pass
@@ -165,14 +177,14 @@ done
 for package in 'pocket-ic v16.0.0' 'pocket-ic v16.1.0 (/local)' 'ic-management-canister-types v0.8.0'; do
     printf '%s\n' "$package" > "$fixture/native-pocket.txt"
     printf 'pocket-ic\tpocket\n' > "$fixture/mapping"
-    if awk -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
+    if admit -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 done
 echo 'PocketIC native selection, Wasm exclusion and identity refusals passed'
 # Native host selections cannot authorize entropy dependencies in a Wasm graph.
 for selection in agent candid-parser pocket-ic secp256k1; do
     printf 'getrandom v0.2.17\n' > "$fixture/wasm32-unknown-unknown-entropy.txt"
     printf '%s\tentropy\n' "$selection" > "$fixture/mapping"
-    if awk -v target=wasm32-unknown-unknown -v cache="$fixture" \
+    if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \
         -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then
         echo "Unexpected Wasm entropy admission for $selection" >&2; exit 1
     fi
@@ -183,7 +195,7 @@ echo 'Native-only feature names cannot admit Wasm entropy dependencies'
 for package in ic-wire ic-wire-derive; do
     printf '%s v0.6.4\n' "$package" > "$fixture/wasm32-unknown-unknown-wire.txt"
     printf 'wire-schema\twire\n' > "$fixture/mapping"
-    if awk -v target=wasm32-unknown-unknown -v cache="$fixture" \
+    if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \
         -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then
         echo 'Wasm graph admitted host Wire metadata' >&2; exit 1
     fi

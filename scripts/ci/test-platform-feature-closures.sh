@@ -89,3 +89,15 @@ actual="$(printf '%s' '["none","gzip","executor","executor,gzip","agent","agent,
 expected="$(printf 'none\tnone\ngzip\tnone\nexecutor\texecutor\nexecutor,gzip\texecutor\nagent\tprincipal\nagent,gzip\tprincipal')"
 [[ "$actual" == "$expected" ]] || { echo 'Actual Cargo gzip closure failed' >&2; exit 1; }
 echo 'Gzip native/Wasm closures and explicit prerequisite guards passed'
+actual="$(printf '%s' '["none","executor","agent","agent,executor","wire-schema"]' | "$jq" -r --arg target wasm32-unknown-unknown --slurpfile metadata "$fixture/metadata.json" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
+expected="$(printf 'none\tnone\nexecutor\texecutor\nagent\tprincipal\nagent,executor\texecutor,principal\nwire-schema\tprincipal')"
+[[ "$actual" == "$expected" ]] || { echo 'Actual Cargo native-leaf closure failed' >&2; exit 1; }
+echo 'Actual native/Wasm closures and explicit prerequisite guards passed'
+
+actual="$(printf '%s' '["default","nested"]' | "$jq" -r --arg projection activation --arg target native --argjson metadata "$metadata" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
+[[ "$actual" == $'default\tdefault\nnested\tcandid,cdk,executor,ic0,nested' ]] || { echo 'Activation projection lost transitive implications' >&2; exit 1; }
+for projection in cache activation; do
+    if printf '%s' '["missing"]' | "$jq" --arg projection "$projection" --arg target native --argjson metadata "$metadata" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
+        echo 'Unknown feature was admitted' >&2; exit 1
+    fi
+done

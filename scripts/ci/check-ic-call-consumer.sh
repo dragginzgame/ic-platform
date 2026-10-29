@@ -2,10 +2,11 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
+# shellcheck source=scripts/ci/consumer-fixture.sh
+source "$root/scripts/ci/consumer-fixture.sh"
 msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 mkdir -p target
-fixture="$(mktemp -d "$root/target/ic-call-consumer.XXXXXX")"
-mkdir -p "$fixture/src"
+consumer_fixture ic-call-consumer src
 wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
@@ -27,9 +28,7 @@ ic-platform = { path = "../../crates/ic-platform", default-features = false, fea
 ic-wire = { version = "$wire", optional = true }
 MANIFEST
 cp scripts/fixtures/ic-call-consumer/lib.rs "$fixture/src/lib.rs"
-cp Cargo.lock "$fixture/Cargo.lock"
-# Only this disposable standalone package is resolved from prepared caches.
-cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
+consumer_metadata
 for profile in raw wire external-candid; do
     features=()
     admission=()

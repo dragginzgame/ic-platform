@@ -9,6 +9,7 @@ cp "$root/scripts/ci/"{check-ic-call-consumer.sh,check-platform-runtime.sh,check
 cp "$root/scripts/fixtures/ic-call-consumer/lib.rs" "$fixture/scripts/fixtures/ic-call-consumer/"
 cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
 cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/"
+cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
