@@ -3,7 +3,8 @@
 ## Pending complexity cleanup (#96)
 
 This paired follow-on retains Platform gzip and includes the #95 native inputs
-already selected by released Profiler 0.10.0. Integrate #95 before this cleanup. Shared Tooling's
+already selected by released Profiler 0.10.0. Integrate #95 before this cleanup.
+Shared Tooling's
 single-observation supplier is PR #322 at `1e89c0d`, adopted through the canonical
 exporter. Root package versions and crypto/runtime identities are unchanged.
 
@@ -21,13 +22,26 @@ One native dependency patch replaces overlapping history; the cadence catalog
 reads the existing scheduler constant through a compiled getter, with unchanged
 charging behavior. Older Profiler consumers must retain their provider pin.
 
-Full owner and independent-recorder Clippy precede focused tests. Current evidence
-is retained in `/tmp/platform-complexity-20261029`. Macro and consumer admission
-fixtures, actual standalone CDK/external-Candid MSRV/Wasm proofs, Shared graph
-fixtures and 45 assembler tests pass. Paired native product/build qualification
-is being completed before this candidate is declared ready. No size or speed
-saving is claimed; native macOS, full replica Bazel/NNS and release/live-provider
-acceptance remain separate. #50 and its advisory check stay unchanged.
+Full owner and independent-recorder Clippy precede the passing focused checks:
+444-selection native/Wasm graphs, 14 macro tests on dev/MSRV, standalone CDK and
+external-Candid native/MSRV/Wasm consumers, consumer rejection/failure fixtures,
+Shared graph fixtures, 45 assembler tests and protected source/inventory checks.
+
+Provider `f5051bf` and Profiler `e9f68b6` build the actual instrumented server.
+All 74 recorder, 26 assembled product, three catalog and five installed profiling
+tests pass. The frozen server SHA-256 was
+`b863005e0272c82e2f94a6a3684bbdeb0652fdb8162b6aa823d1da02b2b290e1`.
+All seven dependency inputs match the ordered recipe's final bytes exactly.
+Profiler #9 holds the paired source. Integrate #95, this PR and then the paired
+consumer with its final merged supplier pin. Shared's supplying PR is #322.
+
+Original temporary receipts and the executable disappeared in an external
+scratch cleanup after validation; session observations and paired PR summaries
+retain the results. The extra strict native Clippy probe has existing findings
+tracked in #98; it did not pass and changes no owner gate. Native macOS server,
+full replica Bazel/NNS and release/live-provider acceptance remain separate.
+Hosted macOS recorder jobs pass. No size/speed saving is measured. #50 and its
+advisory check remain unchanged.
 
 ## Host process and private Wire follow-on (#94 / Profiler #5 and #6)
 
