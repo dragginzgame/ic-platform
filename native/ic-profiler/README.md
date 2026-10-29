@@ -84,3 +84,21 @@ explicitly prepare its dependency cache with `--prepare` first. The source CI jo
 runs this proof alongside the assembler fixtures, with a separate build target.
 Route-unit and standalone browser evidence do not replace a newly built native
 server's qualification when the consumer adopts a changed provider pin.
+
+## Paired product-source contract
+
+This revision requires the consuming Profiler tree to supply
+`server/system_profile_cli.rs`, `server/system_profile_render.rs` and
+`rendering/{mod,png,ranges}.rs` with the PNG byte fixtures below that directory.
+Those product modules have no provider compatibility copies. Older consumers
+that omit them must retain their previous pin until adopting this paired source
+change. Existing assembled module paths and native integration callers stay the
+same; the provider still owns state access, trace capture, HTTP admission and
+Cargo/Bazel dependencies. This source-profile change does not alter the published
+Platform library API.
+
+Server profile bundles import through Platform's shared gzip facade and export
+unchanged core gzip bytes. API input/decoded limits remain 128 MiB; the recorder
+retains its separate 256 MiB decoded limit. The maintainer chose to retain this
+facade instead of the proposed direct Host migration in #91. Zlib for PNG remains
+a distinct native dependency; PNG mechanics and budgets stay product-owned.

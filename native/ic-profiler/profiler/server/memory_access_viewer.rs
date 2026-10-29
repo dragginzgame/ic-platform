@@ -4,6 +4,7 @@
 //! separate port and reads the recorded executions directly from the
 //! recorders, so it shows them while the instances keep executing.
 
+use super::rendering::merge_ranges as union;
 use crate::InstanceId;
 use crate::memory_access_tracing::{ExecutionFilter, server_identity};
 use crate::pocket_ic::{StartInstructionProfiling, StartMemoryAccessTracing};
@@ -1437,20 +1438,6 @@ fn function_labels(executions: &[TracedExecution]) -> Vec<String> {
             }
         })
         .collect()
-}
-
-/// Merges ranges `[start, end)` into sorted, disjoint, and non-adjacent ranges.
-fn union(ranges: impl Iterator<Item = (u64, u64)>) -> Vec<(u64, u64)> {
-    let mut ranges: Vec<_> = ranges.collect();
-    ranges.sort_unstable();
-    let mut merged: Vec<(u64, u64)> = Vec::with_capacity(ranges.len());
-    for (start, end) in ranges {
-        match merged.last_mut() {
-            Some(last) if start <= last.1 => last.1 = last.1.max(end),
-            _ => merged.push((start, end)),
-        }
-    }
-    merged
 }
 
 fn pages(ranges: &[(u64, u64)]) -> u64 {

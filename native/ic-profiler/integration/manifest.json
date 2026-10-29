@@ -83,6 +83,10 @@
       {
         "path": "0007-profiler-measurement-counters.patch",
         "sha256": "56bed913832332a695651777c83e079b6d5e778731d31d125094cb77ee547498"
+      },
+      {
+        "path": "0008-profiler-product-inputs.patch",
+        "sha256": "a1f38dfbabdca3891968f90ccd7f9549af00930849172648f2dcc36ff72eb99b"
       }
     ],
     "series": "patches/ic/series"
