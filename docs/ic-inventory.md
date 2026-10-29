@@ -247,7 +247,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | principal-self-authenticating | ic_principal/self_authenticating, principal-external |
 | ic-platform | runtime | dep:pin-project-lite, dep:thiserror, executor, ic0, principal |
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
-| ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor |
+| ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor, ic_principal/serde |
 | ic-platform | stable-structures | dep:ic-stable-structures |
 | ic-platform | wire-schema | dep:ic-wire-metadata, dep:serde_json, principal |
 

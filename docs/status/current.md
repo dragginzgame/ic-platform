@@ -2,9 +2,10 @@
 
 ## Pending 0.8.0: minimal Principal and selected ICRC packaging
 
-Local HEAD is source release **0.7.6**, `8871f67`. The maintainer authorized
-this breaking packaging cut. Package versions remain 0.7.6; pending notes use
-0.8.0. No staging, commit, release, publication or sibling adoption is performed.
+Packaging source HEAD is `a4da4ce`, based on source release **0.7.6**, `8871f67`.
+The maintainer authorized this breaking packaging cut. Package versions remain
+0.7.6; pending notes use 0.8.0. Release, publication and sibling adoption remain
+separate.
 Preserve the pre-existing IC Host Artifacts lock selection; it is unrelated.
 
 `principal` now supplies owned Principal/Account bytes, bounded text and Serde
@@ -34,7 +35,15 @@ Strict Rustdoc (all features and owned Principal only), formatting, ShellCheck
 and local documentation links pass.
 
 The consumer checks caught a test-only import and missing explicit Candid blob/
-bignum prerequisites; both are repaired, with failed and passing evidence retained.
+bignum prerequisites; both are repaired. The release consumer run then exposed
+missing external Principal Serde in standalone signature verification, hidden by
+all-feature unification. `signature-verification` now explicitly selects
+`ic_principal/serde`; protected verifier source is unchanged. Full `make clippy`
+passes before the focused rerun. Verification, owned Principal, external conversion
+and signature creation standalone profiles pass native tests and Wasm checks on
+Rust 1.99.1 and 1.91. Only verification adds external Serde; all four normal/build
+graphs remain Candid/runtime-free. Source guards, inventory, formatting and docs
+checks pass. Current repair evidence is in `target/signature-serde-fix`.
 No code-size saving, consumer/provider adoption, live IC or native macOS acceptance
 is claimed. Registry executor/ic0, management DTO identity and protected crypto/
 callback sources remain unchanged. Installed runtime was not rerun for packaging.

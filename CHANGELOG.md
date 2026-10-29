@@ -14,6 +14,12 @@
   Unused CBOR/storage and consent-formatting APIs are no longer supplied.
   See the [migration contract](docs/migration.md#minimal-principal-and-selected-icrc-packaging).
 
+### 🩹 Fixed
+
+- Enable external Principal Serde support for standalone signature verification
+  after the Principal feature split, preserving certified range decoding without
+  requiring Candid or an unrelated consumer feature.
+
 ## [0.7.6] - 2026-10-29
 
 ### 🧹 Cleanup

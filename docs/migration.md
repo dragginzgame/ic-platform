@@ -30,6 +30,10 @@ unchanged registry implementation. The registry conversion dependency selects
 only `convert`; other integration dependencies may independently unify more
 upstream features. No new Candid implementation is added to the owned type.
 
+`signature-verification` explicitly enables the registry Principal's Serde support
+for certified canister-range CBOR. Its standalone selection remains Candid-free;
+conversion-only and owned Principal selections retain their narrower graphs.
+
 Keep selecting `icrc-ledger-types` and using the existing flat module and nested
 `icrc21` imports. Platform now maintains only the selected DTOs and helpers from
 upstream 0.2.0, retaining its Apache-2.0 license/provenance. Account, transfer,

@@ -50,6 +50,7 @@ icrc-ledger-types = [
 management-canister-types = ["principal-external", "dep:ic-management-canister-types"]
 signature-verification = [
     "canister-sig-creation",
+    "ic_principal/serde",
     "dep:ic-verify-bls-signature",
     "dep:serde_bytes",
     "dep:serde_cbor",
