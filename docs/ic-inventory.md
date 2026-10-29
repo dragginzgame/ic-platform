@@ -56,6 +56,11 @@ The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzi
 and `GzipError` from published IC Tooling `ic-host-artifacts` 0.69.1 for IC Profiler.
 Tooling retains codec implementation; callers retain levels, limits and payload
 admission. No backend types, default/Wasm dependency or IC runtime edge is added.
+The maintainer retained this facade for Profiler instead of #91's proposed direct
+Host migration. Its native server now also imports through this same owner.
+The native profile supplies product CLI/rendering modules from the consuming
+Profiler tree; Platform retains IC state access, HTTP admission and Cargo/Bazel
+inputs. See the [paired source contract](../native/ic-profiler/README.md#paired-product-source-contract).
 
 The published 0.6.20 external DTO additions are maintained from pinned protocol
 schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,

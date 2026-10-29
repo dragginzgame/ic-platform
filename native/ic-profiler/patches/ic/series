@@ -5,3 +5,4 @@
 0005-platform-gzip-boundary.patch
 0006-profiler-request-admission.patch
 0007-profiler-measurement-counters.patch
+0008-profiler-product-inputs.patch

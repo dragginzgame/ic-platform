@@ -2,14 +2,35 @@
 
 ## [0.7.7]
 
+### 🧭 Migration Notes
+
+- The native profiler source profile now requires the paired consumer's CLI,
+  query renderer and private PNG/range helper sources. Older consumers must keep
+  their previous pin until adopting those files; ordinary Platform library
+  consumers are unchanged
+  ([#90](https://github.com/dragginzgame/ic-platform/issues/90)).
+
+### 🩹 Fixed
+
+- Include server-library product regressions in the native verification gate,
+  so image/framing failures stop release validation before installed scenarios.
+- Route server gzip imports through Platform's existing shared codec and export
+  core gzip bytes unchanged. Retain API/core budgets and reject corrupt, trailing
+  or concatenated members
+  ([Profiler #1](https://github.com/dragginzgame/ic-profiler/issues/1)).
+
+### 🧹 Cleanup
+
+- Delegate common PNG and sparse range mechanics to Profiler-owned helpers,
+  retaining native state access and caller admission policies in the provider
+  ([Profiler #4](https://github.com/dragginzgame/ic-profiler/issues/4)).
+
 ### 🔧 Changed
 
 - Supply the native profiler workspace and Bazel dependency wiring for
   consumer-owned IC Metrics counters, preserving the pinned IC source and
   keeping the measurement crate distinct from the replica's internal metrics
   ([Profiler #2 — Reuse IC Metrics counters for logical instruction and cycle totals](https://github.com/dragginzgame/ic-profiler/issues/2)).
-
-### 🧹 Cleanup
 
 - Use an ordinary module directory for the native profiling API, retaining the
   admission repair and adapter simplifications shipped in 0.7.6.

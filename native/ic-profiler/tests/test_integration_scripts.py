@@ -7,6 +7,7 @@ entrypoints into an isolated outer repository and uses a local Git submodule.
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -15,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 REPOSITORY = Path(__file__).resolve().parents[1]
@@ -636,6 +638,34 @@ exit "${IC_PROFILER_FIXTURE_EXIT:-0}"
         self.script("update-upstream", self.candidate, "--force", success=False)
         self.assertEqual(sentinel.read_text(), "unowned candidate\n")
         self.assert_pristine_pin()
+
+
+class NativeVerifyGateTest(unittest.TestCase):
+    def test_product_regression_failures_block_installed_scenarios_and_restore_environment(self):
+        spec = importlib.util.spec_from_file_location("profiler_gate_fixture", REPOSITORY / "scripts/ic_profiler.py")
+        provider = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(provider)
+        root = Path("/fixture/provider")
+        manifest = {"fixture": True}
+        for refused in [False, True]:
+            calls = []
+            def cargo(_root, _manifest, command, args, force):
+                calls.append((command, args))
+                if "profiling::" in args and refused:
+                    raise provider.Error("product regression failed")
+            with mock.patch.dict(os.environ, {"CARGO_TARGET_DIR": "prior-target", "POCKET_IC_BIN": "prior-server", "SYSTEM_PROFILE_TEST_SERVER_URL": "prior-url"}), mock.patch.object(provider, "run"), mock.patch.object(provider, "check_native_graph"), mock.patch.object(provider, "build_directory", return_value=Path("/fixture/consumer/.build")), mock.patch.object(provider, "cargo_command", side_effect=cargo):
+                if refused:
+                    with self.assertRaises(provider.Error):
+                        provider.native_verify(root, manifest)
+                else:
+                    provider.native_verify(root, manifest)
+                product = [args for command, args in calls if "profiling::" in args]
+                installed = [args for command, args in calls if "system_profiling" in args]
+                self.assertEqual(product, [["--", "-p", "pocket-ic-server", "--lib", "profiling::"]])
+                self.assertEqual(bool(installed), not refused)
+                self.assertEqual(os.environ["CARGO_TARGET_DIR"], "prior-target")
+                self.assertEqual(os.environ["POCKET_IC_BIN"], "prior-server")
+                self.assertEqual(os.environ["SYSTEM_PROFILE_TEST_SERVER_URL"], "prior-url")
 
 
 class NativeToolsTest(unittest.TestCase):

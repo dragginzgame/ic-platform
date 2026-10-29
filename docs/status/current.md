@@ -1,42 +1,38 @@
 # Current handoff
 
-## Pending 0.7.7: native counter supply and ordinary API layout
+## Pending 0.7.7: paired Profiler product source contract
 
-Source release **0.7.6** is on main at `8871f67`. Its API repair and complete
-complexity cleanup remain intact. [PR #88](https://github.com/dragginzgame/ic-platform/pull/88)
-now contributes only the ordinary API module directory and matching source links;
-the shipped path override is removed because normal module resolution suffices.
-No package version, release or publication is performed. Pending notes use
-**0.7.7** because public behavior and dependency identities remain compatible.
+Main `26ad783` integrates #88 and #89. This paired change returns Profiler's
+CLI/query renderer to its consumer source tree (#90) and delegates common PNG
+encoding and sparse range mechanics to that same product owner (Profiler #4).
+The provider keeps native state/trace access, HTTP admission, IC pin, patched
+client and build inputs. Its library API and cryptographic source stay unchanged.
+Older consumers must retain their prior provider pin until supplying the product
+files listed in `native/ic-profiler/README.md`; no duplicate compatibility owner
+is retained. Current native pins remain exact full Git identities.
 
-[#73](https://github.com/dragginzgame/ic-platform/issues/73) is closed as delivered
-in 0.7.5. [PR #87](https://github.com/dragginzgame/ic-platform/pull/87) is closed as
-already implemented after exact implementation/test comparison with that release.
-The fixed nesting source remains unchanged in main; costs and limitations remain
-in the migration contract. #50 is set aside until a supplying solution exists;
-its advisory check and dependency selection are unchanged.
+The maintainer explicitly chose to keep the Platform gzip boundary instead of
+#91's proposed direct Host migration. Server imports now use that facade, and
+exports return the unchanged core gzip bytes (Profiler #1). API input/decoded
+limits remain 128 MiB and the core's decoded limit remains 256 MiB. Strict framing
+rejects CRC/length corruption, truncation, concatenated members and trailing data.
+PNG remains zlib and keeps its separate snapshot budget and layout policies.
 
-[PR #89](https://github.com/dragginzgame/ic-platform/pull/89) supplies published
-IC Metrics 0.17 with defaults disabled through the native workspace/Bazel inputs.
-It remains distinct from internal replica metrics 0.9. Profiler owns counter use,
-retained capture compatibility and reporting; no facade feature, IC pin, runtime
-charging or cryptographic implementation changes. This candidate also includes
-the complete 0.7.6 native adapter cleanup. Fresh Linux qualification of da3e999
-passes the native graph, actual server build, all 73 assembled recorder tests and
-five installed profiling scenarios through Profiler's real adoption scripts.
-Frozen server SHA-256:
-`a22c6fb6795fe8e6aa8380b6abcfb6d269229452f3e1acd3712cdd474d599766`.
-Evidence: `/tmp/platform-backlog-final-20261029/profiler-adoption/.build/receipts`.
-The normal Profiler checkout remains untouched. Its source 0.9.4 recorder uses
-published IC Metrics; the independent normal/build graph excludes Candid, CDK,
-IC0, Agent and PocketIC. Profiler Clippy, boundary and seven script tests pass.
-The separate #88 candidate c878ad0 also passes 69 recorder/five profiling tests.
+Published Metrics 0.17.2, Platform 0.7.6 and Host Artifacts 0.69.12 are selected
+in the paired Cargo/Bazel native inputs. Profiler independently adopts those
+registry releases, release editor 0.69.12 and Shared Tooling 0.27.7. It still
+selects only Platform gzip; Metrics adds no IC runtime edge or charging authority.
 
-Broader hosted matrix status is reported on the PRs. Native macOS provider
-execution, full replica Bazel/NNS genesis and a consumer's final merged pin remain
-separate. Earlier 25c7614 native/Bazel proofs are historical. Keep
-[Profiler #1](https://github.com/dragginzgame/ic-profiler/issues/1) open: the core
-uses Platform gzip, while the transferred server still has local gzip adapters.
+Full owner/consumer Clippy precedes the focused checks. The 44 assembler fixtures
+pass. PNG fixtures compare both former encoders before extraction; caller tests
+cover independent pixels/CRC, exact source budgets, sparse high addresses and
+range-admission differences. Final server/recorder/installed-scenario evidence and
+its actual executable hash are recorded by the paired Profiler qualification and
+delivery PR; historical receipts do not qualify a changed provider or binary.
+Native macOS, full replica Bazel and NNS genesis remain separate.
+
+#73 is delivered in 0.7.5; #87 closed as already integrated. #50 remains set aside
+until an available supplying correction exists, with its advisory check intact.
 
 ## Released 0.7.6 cleanup and qualification
 

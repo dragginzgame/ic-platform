@@ -476,6 +476,11 @@ and source/build receipts. Consumers select a full Platform commit and the
 not a new default feature or a replacement for the published registry client.
 
 Profiler retains its IC-free recorder, reports, retention, workloads and viewer.
+The paired #90 cut also requires consumer-owned CLI/query-rendering files and
+private PNG/range helpers listed in the [source contract](../native/ic-profiler/README.md#paired-product-source-contract).
+Do not select this source revision with an older consumer that omits them.
+The existing native integration module paths remain unchanged; no compatibility
+copies remain in the provider.
 Its source injection is separate from provider-owned adapters; overlaps are
 rejected and both origins enter the assembly digest. Native Cargo/Bazel build
 inputs belong here. The consumer recorder's optional native `gzip` dependency
