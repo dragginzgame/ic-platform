@@ -5,8 +5,7 @@
 //! adapters delegate entrypoints, async contexts and replies to the existing
 //! generator/executor. Invalid arguments and encoding failures trap; access guards
 //! retain their ordered rejection semantics. No parser or retry owner is added.
-//! Select explicit `nesting = "PATH"` for iterative wire admission before Candid.
-//! Without it, the upstream Wasm nesting limitation in issue #73 remains.
+//! Arguments deeper than 16 constructed levels are refused before Candid runs.
 pub use super::arguments::{ArgumentDecodeError, ArgumentLimits, EmptyArgs};
 pub use ic_platform_macros::{candid_query as query, candid_update as update};
 
@@ -22,20 +21,6 @@ pub fn read<T: for<'de> super::contract::ArgumentDecoder<'de>>(
     limits.admit_len(crate::ic0::msg_arg_data_size())?;
     let bytes = crate::cdk::api::msg_arg_data();
     limits.decode(&bytes, empty)
-}
-
-/// Read after scalar byte admission, then enforce explicit nesting before Candid.
-///
-/// # Errors
-/// Preserves typed nesting refusals and existing argument/decoder errors.
-pub fn read_with_nesting<T: for<'de> super::contract::ArgumentDecoder<'de>>(
-    limits: ArgumentLimits,
-    empty: EmptyArgs,
-    nesting: super::nesting::NestingLimits,
-) -> Result<T, ArgumentDecodeError> {
-    limits.admit_len(crate::ic0::msg_arg_data_size())?;
-    let bytes = crate::cdk::api::msg_arg_data();
-    limits.decode_with_nesting(&bytes, empty, nesting)
 }
 
 // Generator-only coupling: registration does not select the service printer.

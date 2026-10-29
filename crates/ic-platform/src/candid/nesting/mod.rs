@@ -10,16 +10,9 @@
 use super::DecodeLimits;
 use std::{error::Error, fmt};
 
-/// Explicit admission allowances, separate from Candid's decoding/skip quotas.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct NestingLimits {
-    /// Maximum constructed-type path and constructed-value depth. Scalars use
-    /// depth zero; an empty container still uses one level. No default is chosen.
-    pub depth: usize,
-    /// Maximum admission work: consumed bytes, graph edges and visited values.
-    /// This is not the upstream decoder's work unit or a remaining decode quota.
-    pub work: usize,
-}
+/// Maximum constructed wire-type path and value depth admitted by bounded decoders.
+/// Scalars use depth zero; an empty container still uses one level.
+pub const MAX_DEPTH: usize = 16;
 
 /// A compact, typed refusal from admission, without disclosing input bytes.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -83,7 +76,9 @@ impl fmt::Display for NestingError {
             }
             Self::TypeDepth { maximum } => write!(f, "Candid type nesting exceeds {maximum}"),
             Self::ValueDepth { maximum } => write!(f, "Candid value nesting exceeds {maximum}"),
-            Self::Work { maximum } => write!(f, "Candid nesting admission work exceeds {maximum}"),
+            Self::Work { maximum } => {
+                write!(f, "Candid nesting admission work quota exceeds {maximum}")
+            }
             Self::Malformed { offset } => {
                 write!(f, "invalid Candid admission framing at byte {offset}")
             }
@@ -103,7 +98,7 @@ struct Cursor<'a> {
     end: usize,
     header: bool,
     remaining: usize,
-    limits: NestingLimits,
+    work_limit: usize,
 }
 impl Cursor<'_> {
     fn malformed(&self) -> NestingError {
@@ -114,7 +109,7 @@ impl Cursor<'_> {
             .remaining
             .checked_sub(amount)
             .ok_or(NestingError::Work {
-                maximum: self.limits.work,
+                maximum: self.work_limit,
             })?;
         Ok(())
     }
@@ -293,9 +288,6 @@ fn type_depth(cursor: &mut Cursor<'_>, types: &[Node]) -> Result<()> {
     let mut stack = Vec::new();
     for root in 0..types.len() {
         cursor.charge(1)?;
-        if cursor.limits.depth == 0 {
-            return Err(NestingError::TypeDepth { maximum: 0 });
-        }
         active[root] = true;
         stack.push((root, 0usize));
         while let Some((index, next)) = stack.last_mut() {
@@ -315,10 +307,8 @@ fn type_depth(cursor: &mut Cursor<'_>, types: &[Node]) -> Result<()> {
             if active[child] {
                 continue;
             }
-            if stack.len() >= cursor.limits.depth {
-                return Err(NestingError::TypeDepth {
-                    maximum: cursor.limits.depth,
-                });
+            if stack.len() >= MAX_DEPTH {
+                return Err(NestingError::TypeDepth { maximum: MAX_DEPTH });
             }
             active[child] = true;
             stack.push((child, 0));
@@ -382,10 +372,8 @@ fn values(cursor: &mut Cursor<'_>, types: &[Node], args: &[i64]) -> Result<()> {
             }
             continue;
         }
-        if depth >= cursor.limits.depth {
-            return Err(NestingError::ValueDepth {
-                maximum: cursor.limits.depth,
-            });
+        if depth >= MAX_DEPTH {
+            return Err(NestingError::ValueDepth { maximum: MAX_DEPTH });
         }
         let depth = depth + 1;
         let node = &types[usize::try_from(ty).map_err(|_| cursor.malformed())?];
@@ -429,7 +417,9 @@ fn values(cursor: &mut Cursor<'_>, types: &[Node], args: &[i64]) -> Result<()> {
 }
 
 /// Admit the complete wire envelope using bounded heap stacks, before constructing
-/// upstream `IDLDeserialize`. Work is charged independently of decoder quotas.
+/// upstream `IDLDeserialize`, rejecting more than 16 constructed wire levels.
+/// Admission work is capped by the saturating sum of the supplied decoding and
+/// skipping quotas. The decoder retains its original, unchanged quotas afterward.
 ///
 /// This is wire-nesting admission, not a replacement decoder or a guarantee about
 /// arbitrary custom Rust visitors/expected schemas. Low-level Candid APIs remain
@@ -437,7 +427,7 @@ fn values(cursor: &mut Cursor<'_>, types: &[Node], args: &[i64]) -> Result<()> {
 ///
 /// # Errors
 /// Returns typed byte/header/type/depth/work or unsupported/framing refusals.
-pub fn check(bytes: &[u8], wire: DecodeLimits, nesting: NestingLimits) -> Result<()> {
+pub fn check(bytes: &[u8], wire: DecodeLimits) -> Result<()> {
     if bytes.len() > wire.reply_bytes {
         return Err(NestingError::Bytes {
             actual: bytes.len(),
@@ -449,8 +439,8 @@ pub fn check(bytes: &[u8], wire: DecodeLimits, nesting: NestingLimits) -> Result
         pos: 0,
         end: bytes.len().min(wire.header_bytes),
         header: true,
-        remaining: nesting.work,
-        limits: nesting,
+        remaining: wire.decoding_quota.saturating_add(wire.skipping_quota),
+        work_limit: wire.decoding_quota.saturating_add(wire.skipping_quota),
     };
     let (types, args) = header(&mut cursor, wire)?;
     type_depth(&mut cursor, &types)?;

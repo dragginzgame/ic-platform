@@ -6,11 +6,11 @@
 //! All decoders select Candid's compact diagnostics while retaining typed causes.
 //! Compact diagnostics can include small inputs; callers own error disclosure.
 //!
-//! Ordinary wire/work quotas are not a Wasm recursion-depth guarantee. Select
-//! [`DecodeLimits::with_nesting`] for iterative wire admission before Candid.
-//! The unchanged helpers and low-level APIs retain upstream recursion behavior;
-//! arbitrary trusted Rust schemas/custom visitors require separate qualification.
-//! Low-level [`contract`] APIs retain caller-owned configuration and budgeting.
+//! Bounded helpers refuse more than 16 constructed wire levels before upstream
+//! header construction or decoding. Existing quotas also bound admission work.
+//! Low-level [`decoder`]/[`contract`] APIs retain upstream behavior; their
+//! callers may run [`nesting::check`] first. This bounds wire nesting, not
+//! arbitrary trusted expected schemas or custom Rust visitors.
 
 use candid::{
     CandidType,
@@ -84,76 +84,6 @@ pub struct DecodeLimits {
     pub header_bytes: usize,
 }
 
-/// Explicit iterative wire admission followed by the existing bounded decoder.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct DecodePolicy {
-    limits: DecodeLimits,
-    nesting: nesting::NestingLimits,
-}
-impl DecodeLimits {
-    /// Select iterative admission before upstream header construction/decoding.
-    /// The admission budget is independent of the unchanged decoder quotas.
-    pub const fn with_nesting(self, nesting: nesting::NestingLimits) -> DecodePolicy {
-        DecodePolicy {
-            limits: self,
-            nesting,
-        }
-    }
-}
-
-impl DecodePolicy {
-    /// Check wire framing, type paths, value depth and work before Candid runs.
-    ///
-    /// # Errors
-    /// Refuses oversized, malformed, unsupported or over-budget envelopes.
-    pub fn admit(self, bytes: &[u8]) -> Result<(), DecodeError> {
-        if bytes.len() > self.limits.reply_bytes {
-            return Err(DecodeError::ReplyTooLarge {
-                actual: bytes.len(),
-                maximum: self.limits.reply_bytes,
-            });
-        }
-        nesting::check(bytes, self.limits, self.nesting)
-            .map_err(|error| DecodeError::Candid(candid::Error::Custom(error.into())))
-    }
-
-    /// Admit wire nesting, then decode one value with bounded compatible skipping.
-    ///
-    /// # Errors
-    /// Preserves admission and decoder failures, including typed nesting causes.
-    pub fn decode_one<'a, T: Deserialize<'a> + CandidType>(
-        self,
-        bytes: &'a [u8],
-    ) -> Result<T, DecodeError> {
-        self.admit(bytes)?;
-        decode_one(bytes, self.limits)
-    }
-
-    /// Admit wire nesting, then decode the requested top-level argument tuple.
-    ///
-    /// # Errors
-    /// Preserves admission and decoder failures, including typed nesting causes.
-    pub fn decode_args<'a, T: candid::utils::ArgumentDecoder<'a>>(
-        self,
-        bytes: &'a [u8],
-    ) -> Result<T, DecodeError> {
-        self.admit(bytes)?;
-        decode_args(bytes, self.limits)
-    }
-
-    /// Admit wire nesting, then require exactly one result value.
-    ///
-    /// # Errors
-    /// Preserves admission, decoder and exact-arity failures.
-    pub fn decode_exactly_one<'a, T: Deserialize<'a> + CandidType>(
-        self,
-        bytes: &'a [u8],
-    ) -> Result<T, DecodeError> {
-        self.admit(bytes)?;
-        decode_exactly_one(bytes, self.limits)
-    }
-}
-
 /// Wire admission or Candid decoding failure, retaining the original decoder cause.
 #[derive(Debug)]
 pub enum DecodeError {
@@ -205,6 +135,8 @@ fn config(bytes: &[u8], limits: DecodeLimits) -> Result<DecoderConfig, DecodeErr
             maximum: limits.reply_bytes,
         });
     }
+    nesting::check(bytes, limits)
+        .map_err(|error| DecodeError::Candid(candid::Error::Custom(error.into())))?;
     let mut config = DecoderConfig::new();
     config
         .set_decoding_quota(limits.decoding_quota)

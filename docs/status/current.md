@@ -1,49 +1,50 @@
 # Current handoff
 
-## Pending 0.7.5: explicit external Candid nesting admission (#73)
+## Pending 0.7.5: fixed 16-level Candid admission (#73)
 
-The maintainer requested a wire-nesting sanity limit rather than a Candid fork.
-`DecodeLimits::with_nesting(NestingLimits { depth, work })` selects an iterative
-admission walk, then the existing decoder. `DecodePolicy` offers `admit`,
-`decode_one`, `decode_args` and `decode_exactly_one`. Existing helper signatures,
-limit structs, arity and closed error variants remain unchanged; `nesting_error()`
-recovers the typed cause through the existing Candid error. No implicit limit,
-new dependency, feature, unsafe code or byte rewriting is introduced.
+The maintainer replaced #73's unpublished opt-in design with one fixed rule:
+Platform's bounded decoders reject more than **16 constructed wire levels** before
+Candid runs. Exactly 16 levels are allowed. No new caller policy object, limit
+setting, macro option or feature is needed. Existing helper signatures, limit
+structs and closed error variants remain; typed refusals use `nesting_error()`.
+[PR #87](https://github.com/dragginzgame/ic-platform/pull/87) is the delivery vehicle.
 
-The flat walk checks unused type definitions, every simple constructed-type path
-and all values including skipped fields/arguments. It accepts recursive type
-references, bounds actual recursive values, charges zero-byte vector elements and
-caps DAG path expansion with the separate work budget. Future/opaque forms fail
-closed. `ArgumentLimits::decode_with_nesting`, `endpoint::read_with_nesting` and
-optional endpoint `nesting = "PATH"` preserve guards and pre-copy byte admission.
-Consumers must select budgets and adopt these APIs in their generators/reply code.
-See the [migration contract](../migration.md#external-candid-nesting-qualification-73).
+The same check runs from the shared decoder configuration, covering single,
+argument, exact-single and protocol replies plus external endpoint adapters.
+`candid::nesting::{MAX_DEPTH, NestingError, check}` supplies the fixed contract;
+low-level upstream decoder/contract APIs retain their behavior, with explicit
+`check(bytes, limits)` available to their staged callers. The earlier draft's
+policy/methods and nesting macro option were removed before publication.
 
-Full `make clippy` passes before longer tests. The focused Candid suite passes
-22 tests on Rust 1.99.1 and 1.91; macro adapter tests pass. Standalone facade-only
-nesting, endpoint, management and ICRC consumers pass native tests and applicable
-Wasm on both compilers. They preserve normal DTO bytes and registry identities.
-Strict Rustdoc, consumer command admission, boundary/inventory and source checks
-pass. Runtime graphs preserve executor/ic0 identity and Wire/runtime isolation.
-Evidence: `/tmp/platform-nesting-20261029`; fixture `target/cdk-runtime.p3w1eD`.
+The iterative walk checks unused type definitions and skipped fields/arguments.
+It permits recursive declarations while limiting each simple type path and
+actual value depth; byte blobs remain valid. Admission work uses the saturating
+sum of existing decode/skip quotas, counting bytes, edges and values including
+zero-byte vector expansion. Candid subsequently receives its original quotas.
+Unsupported future/opaque framing fails closed. No dependency, unsafe code,
+executor/crypto change or byte rewriting is introduced. Wire endpoints remain Wire.
 
-Installed Linux/PocketIC qualification passes Rust 1.99.1/1.91 × raw/owned calls.
-The probe returns a typed refusal for the original 8,202-byte/8,192-opt trap input,
-accepts the selected 64-level boundary and refuses 2,048 unused record definitions.
-Malformed/truncated inputs are refused; normal guarded arguments and management
-raw_rand replies work, and refused updates leave handler state unchanged. Existing
-await/trap/timer/cancellation/upgrade subjects pass in the same fixture. Native
-macOS CI and live provider acceptance remain separate; no performance/size saving
-is claimed. Maintained installed lock selects Candid 0.10.38; root consumers test
-0.10.39. No registry selections or production version are changed.
+Full `make clippy` passes before longer tests. Focused Candid tests pass 21 cases
+on Rust 1.99.1/1.91; macro adapter tests pass. Standalone facade-only nesting,
+Candid, endpoint, management, ICRC and protocol consumers pass native tests and
+applicable Wasm on both compilers. Normal external identities and bytes remain.
+Strict Rustdoc, inventory/links and protected source checks pass. Evidence:
+`/tmp/platform-fixed-depth-20261029`; fixture `target/cdk-runtime.p3w1eD`.
 
-This mitigates **wire nesting**, not all Candid defects or arbitrary trusted
-expected Rust schemas/custom visitors. The unchanged helpers, `candid::decoder`
-and low-level `candid::contract` APIs retain upstream/caller-owned budgeting.
-Candid 0.10.39 still exposes no Wasm depth setter; its stack check is a no-op there.
-The rejected custom Serde visitor panicked in upstream option recovery, and
-header normalization recurses before visitors. Preserve those findings in #73;
-do not claim the upstream decoder is repaired or unadopted consumers protected.
+Installed Linux/PocketIC passes current Rust/1.91 × raw/owned calls: 16 levels
+succeed; 17 and the original 8,202-byte/8,192-opt trap return typed refusals.
+Deep unused headers and malformed/truncated inputs are refused. Guarded normal
+arguments, real management raw_rand and unchanged refused-handler state pass;
+existing callback/trap/timer/upgrade subjects pass in the same fixture. Native
+macOS CI and live external-provider acceptance remain separate. Installed lock
+tests Candid 0.10.38; root/standalone checks select 0.10.39. No production version,
+registry lock selection, publication or performance/size reduction is claimed.
+
+This mitigates wire nesting, not arbitrary trusted expected Rust schemas/custom
+Serde visitors. The upstream Wasm stack check remains a no-op with no depth setter.
+The rejected custom visitor panicked during upstream option recovery; header
+normalization recurses before visitors. Do not claim Candid itself is repaired.
+See the [contract](../migration.md#external-candid-nesting-qualification-73).
 
 ## Shared ICRC-10 supplier and Canic adoption
 

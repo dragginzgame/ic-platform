@@ -9,10 +9,11 @@ upstream change.
 The external-Candid bridge is available only through the facade's
 `candid-endpoint` feature. It supplies explicit codec functions and native Candid
 registration, then delegates to this same entrypoint generator. `limits` and
-`empty_args` are mandatory. Optional `nesting = "PATH"` selects the caller's
-wire-depth/work admission budget before Candid. Caller guards retain their ordering
-and execute before byte admission/copying. It does not change the explicit-codec contract
-of existing query/update macros or add a Candid fallback to owned Wire endpoints.
+`empty_args` are mandatory; argument decoding automatically refuses more than
+16 constructed wire levels. Caller guards retain their ordering and execute
+before byte admission/copying. No additional nesting option is needed. This
+preserves existing query/update macros' explicit-codec contract and keeps owned
+Wire endpoints on their selected codec.
 See the [migration](../../docs/migration.md#external-endpoint-and-protocol-codecs-78-79).
 
 The default runtime path is `::ic_platform::cdk`; a parsed `crate = "module::path"`

@@ -82,8 +82,8 @@ it with an empty reply. `composite` explicitly selects composite query mode.
 `"unit"` alone admits missing bytes as a legacy zero-argument envelope; it does
 not supply missing required values. Additional arguments retain quota-bounded
 Candid skipping. Byte, decode-work, skip-work, header and type allowances are all
-caller-selected. They alone do not limit wire nesting; explicitly select the
-[nesting admission](#external-candid-nesting-qualification-73) below.
+caller-selected. Argument decoding also applies the fixed
+[16-level wire ceiling](#external-candid-nesting-qualification-73) below.
 
 Canic can delete Candid declaration/decode/reply emission in
 `canic-macros/src/adapter` and `endpoint/expand`, and replace its local argument
@@ -183,64 +183,55 @@ the original fingerprints without changing their recorded hashes.
 
 ## External Candid nesting qualification (#73)
 
-Pending **0.7.5** adds caller-selected iterative wire admission. Candid's decoder
-and its type identities remain upstream. The existing helpers and low-level APIs
-are unchanged: byte/work/header/type quotas alone do not limit Wasm recursion.
-Candid 0.10.39's stack check is a no-op on Wasm; the original installed reproduction
-uses 8,192 nested `opt` values in only 8,202 bytes and traps at finite quotas.
-
-Select the existing `candid` feature and choose two additional explicit budgets:
+Pending **0.7.5** applies one fixed rule: bounded Platform decoders reject Candid
+nested beyond **16 constructed levels** before upstream header construction or
+decoding. Exactly 16 levels are allowed. Scalars have depth zero; an empty
+container still uses one level. This applies to `decode_one`, `decode_args`,
+`decode_exactly_one`, typed protocol operations and external endpoint adapters.
+Call them as before; no policy object, nesting setting, macro option or manifest
+change is required. The maintainer explicitly authorized this ceiling in place of
+the earlier unpublished opt-in proposal.
 
 ```rust,ignore
-use ic_platform::candid::{DecodeLimits, nesting::NestingLimits};
-let nesting = NestingLimits { depth: 64, work: 1_000_000 }; // illustrative policy
-let policy = reply_limits.with_nesting(nesting);
-let value: ExternalReply = policy.decode_exactly_one(&reply_bytes)?;
-// Alternatives retain compatible skipping / tuple decoding:
-// policy.decode_one::<ExternalReply>(&reply_bytes)?;
-// policy.decode_args::<(ExternalReply,)>(&reply_bytes)?;
+let reply: ExternalReply = ic_platform::candid::decode_exactly_one(&bytes, limits)?;
+// Existing endpoint declarations also receive the same fixed admission rule.
 ```
 
-For a typed protocol operation, call `policy.admit(&reply_bytes)?` immediately
-before its existing `decode(&reply_bytes, reply_limits, arity)`. Use the same
-original bytes and limits. Admission does not change arity, authenticate a source,
-return decoded values, or authorize retries. Existing `DecodeLimits` struct
-literals, decoder signatures and exhaustive error matches remain compatible.
-`DecodeError::nesting_error()` and `ArgumentDecodeError::nesting_error()` recover
-an owned `NestingError` typed cause through the existing Candid error variant.
+Byte, header and type-entry ceilings still apply. Admission work is capped by the
+saturating sum of the existing decoding and skipping quotas; it charges consumed
+bytes, graph roots/edges and visited values, including zero-byte vector elements.
+These units count framing work, not upstream decoding work. Candid then receives
+its original quotas unchanged. There is no additional configurable budget. Wide
+DAG traversal consumes work, so shallow type graphs cannot amplify without bound.
 
-External entrypoint macros may add `nesting = "NESTING"` pointing to a
-`NestingLimits` constant beside their mandatory argument limits/empty policy.
-Guards still run first; scalar size admission still precedes copying, and wire
-admission precedes the upstream decoder and handler. Raw adapters select
-`ArgumentLimits::decode_with_nesting(bytes, empty, nesting)` or
-`endpoint::read_with_nesting(limits, empty, nesting)`. No default is imposed.
-Consumer generators and external reply callers must opt in explicitly.
+The iterative framing walk checks every type definition, including unused ones,
+and every value, including extra arguments and unknown record fields. Recursive
+type declarations remain allowed; each simple constructed-type path and actual
+recursive value must fit 16 levels. Large byte blobs are not interpreted as nested
+option tags. Unsupported future constructors and opaque references fail closed.
+Candid still owns semantic/type/UTF-8 validation. No bytes are rewritten, external
+identities replaced, encoding modified, decoder forked or unsafe code introduced.
 
-The walk uses flat type storage and explicit heap stacks. It checks every type
-entry, including unused definitions, then every value, including skipped record
-fields and extra arguments. It allows recursive declarations, bounding actual
-recursive value depth and every simple constructed-type path. Scalars use depth
-zero; empty containers still consume one level. Work charges consumed bytes,
-graph roots/edges and visited values, including zero-byte vector elements; DAG
-path revisits also consume work. Byte/header/type ceilings still apply before
-untrusted allocation. Large byte blobs are not mistaken for nested option tags.
-No recursive visitor, unsafe code, dependencies or wire rewriting is introduced.
-Unsupported future constructors and opaque references fail closed; ordinary
-Candid still validates semantics, UTF-8, subtyping and the expected DTO shape.
+Existing function signatures, limit structs and exhaustive error matches remain
+compatible. `DecodeError::nesting_error()` and
+`ArgumentDecodeError::nesting_error()` expose the typed admission cause through
+the existing Candid error variant. Entrypoint guards still run first, byte length
+is checked before copying, and refusal precedes the handler. Retry, disclosure,
+authorization and external protocol interpretation remain consumer-owned.
 
-This is a **wire-nesting sanity limit**, not universal stack safety for arbitrary
-trusted expected Rust schemas, recursive custom Serde visitors or low-level
-upstream APIs. Those still need consumer qualification. Admission adds an opt-in
-linear value walk plus budgeted type-path traversal before decoding; no speed or
-Wasm-size reduction is claimed. Owned application endpoints remain Wire.
+Upstream `candid::decoder` and `candid::contract` decoding APIs/macros retain
+their original behavior. Their staged callers can explicitly run
+`candid::nesting::check(&bytes, limits)?` before constructing a decoder. The
+16-level wire check does not guarantee stack safety for arbitrary trusted expected
+Rust schemas or custom Serde visitors. Owned application endpoints remain Wire.
 
-Qualification uses the standalone facade-only `nesting` consumer, existing
-management/ledger/endpoint consumers and the installed raw/owned runtime fixture.
-It covers the original small trap input, exact depth boundaries, unused deep
-record headers, skipped fields/arguments, malformed/truncated inputs, work
-exhaustion and unchanged normal DTO bytes. Native macOS CI and live external
-provider acceptance are separate from local Linux/PocketIC evidence.
+The original installed reproduction sends 8,192 nested options in only 8,202
+bytes. Candid 0.10.39 has no effective Wasm depth setter; the unchanged decoder
+still has that defect. Qualification must show the boundary returns typed
+refusals for that input and 17 levels, accepts 16, checks unused deep headers,
+and preserves ordinary external DTO bytes. Standalone/native/MSRV/Wasm and local
+installed qualification are separate from native macOS/live provider acceptance.
+The preflight adds work; no speed or Wasm-size reduction is claimed.
 
 ## Host gzip boundary
 
@@ -2545,4 +2536,4 @@ identities and dependency edges must match exactly. The original raw/published
 fixture remains independently selectable. Local Linux/PocketIC evidence and
 native macOS qualification must be reported separately. Neither graph isolation
 nor this wrapper alone proves smaller application Wasm. Candid's unresolved Wasm
-depth limitation (#73) remains for paths without explicit wire admission.
+depth limitation (#73) remains for unguarded low-level upstream APIs.

@@ -11,11 +11,6 @@ const LIMITS: ArgumentLimits = ArgumentLimits {
     max_type_len: 32,
     max_header_len: 512,
 };
-const NESTING: ic_platform::candid::nesting::NestingLimits =
-    ic_platform::candid::nesting::NestingLimits {
-        depth: 64,
-        work: 100_000,
-    };
 
 #[derive(contract::CandidType, contract::serde::Deserialize)]
 #[candid_path("ic_platform::candid::contract")]
@@ -31,7 +26,6 @@ fn permit() -> Result<(), String> {
 #[endpoint::query(
     name = "icrc10_supported_standards",
     limits = "LIMITS",
-    nesting = "NESTING",
     empty_args = "reject",
     guard = "permit"
 )]

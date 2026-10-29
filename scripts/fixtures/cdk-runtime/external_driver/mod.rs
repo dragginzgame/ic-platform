@@ -143,7 +143,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
         bytes.push(0);
         bytes
     };
-    for (depth, expected) in [(0, 0u8), (63, 0), (64, 1), (8192, 1)] {
+    for (depth, expected) in [(0, 0u8), (15, 0), (16, 1), (8192, 1)] {
         let response = pic
             .query_call(
                 id,

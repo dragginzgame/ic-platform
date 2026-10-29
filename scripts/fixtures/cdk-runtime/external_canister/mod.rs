@@ -22,12 +22,7 @@ const LIMITS: ArgumentLimits = ArgumentLimits {
 fn observed() -> u64 {
     VALUE.get()
 }
-#[endpoint::update(
-    name = "external_effect",
-    limits = "LIMITS",
-    nesting = "NESTING",
-    empty_args = "reject"
-)]
+#[endpoint::update(name = "external_effect", limits = "LIMITS", empty_args = "reject")]
 fn effect(value: u64) -> u64 {
     VALUE.set(value);
     value
@@ -38,7 +33,6 @@ fn refuse() -> Result<(), String> {
 #[endpoint::update(
     name = "external_denied",
     limits = "LIMITS",
-    nesting = "NESTING",
     empty_args = "reject",
     guard = "refuse"
 )]
@@ -82,10 +76,6 @@ async fn random() -> Vec<u8> {
         type_entries: 8,
         header_bytes: 128,
     };
-    reply_limits
-        .with_nesting(NESTING)
-        .admit(response.as_ref())
-        .unwrap();
     protocols::management::raw_rand::decode(response.as_ref(), reply_limits, ReplyArity::Exact)
         .unwrap()
 }
@@ -160,14 +150,9 @@ const NESTED_LIMITS: ArgumentLimits = ArgumentLimits {
     max_type_len: 4096,
     max_header_len: 65536,
 };
-const NESTING: candid::nesting::NestingLimits = candid::nesting::NestingLimits {
-    depth: 64,
-    work: 1_000_000,
-};
 #[endpoint::query(
     name = "external_nesting_probe",
     limits = "NESTED_LIMITS",
-    nesting = "NESTING",
     empty_args = "reject"
 )]
 fn nesting_probe(bytes: Vec<u8>) -> u8 {
@@ -178,10 +163,7 @@ fn nesting_probe(bytes: Vec<u8>) -> u8 {
         type_entries: 4096,
         header_bytes: 65536,
     };
-    match limits
-        .with_nesting(NESTING)
-        .decode_exactly_one::<contract::Reserved>(&bytes)
-    {
+    match candid::decode_exactly_one::<contract::Reserved>(&bytes, limits) {
         Ok(_) => 0,
         Err(error) => match error.nesting_error() {
             Some(candid::nesting::NestingError::ValueDepth { .. }) => 1,
@@ -193,7 +175,6 @@ fn nesting_probe(bytes: Vec<u8>) -> u8 {
 #[endpoint::update(
     name = "external_nesting_effect",
     limits = "NESTED_LIMITS",
-    nesting = "NESTING",
     empty_args = "reject"
 )]
 fn nesting_effect(_: contract::Reserved) -> u64 {
