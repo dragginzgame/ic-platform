@@ -2,8 +2,8 @@
 use ic_platform::candid::{
     DecodeError, DecodeLimits,
     arguments::{ArgumentLimits, EmptyArgs},
-    contract,
-    nesting::{NestingError, NestingLimits},
+    contract, decode_args, decode_exactly_one, decode_one,
+    nesting::NestingError,
     protocols::{ReplyArity, management::raw_rand},
 };
 
@@ -14,11 +14,6 @@ const LIMITS: DecodeLimits = DecodeLimits {
     type_entries: 4096,
     header_bytes: 32768,
 };
-const NESTING: NestingLimits = NestingLimits {
-    depth: 64,
-    work: 1_000_000,
-};
-
 #[derive(Debug, PartialEq, contract::CandidType, contract::serde::Deserialize)]
 #[candid_path("ic_platform::candid::contract")]
 #[serde(crate = "ic_platform::candid::contract::serde")]
@@ -27,23 +22,21 @@ struct ExternalRecord {
     values: Vec<Option<u64>>,
 }
 
-/// Caller-selected admission leaves DTO identity, bytes and decoder arity intact.
+/// Automatic depth admission leaves DTO identity, bytes and decoder arity intact.
 pub fn qualify() {
-    let policy = LIMITS.with_nesting(NESTING);
     let value = ExternalRecord {
         id: contract::Principal::anonymous(),
         values: vec![None, Some(42)],
     };
     let bytes = contract::encode_one(&value).unwrap();
-    let decoded: ExternalRecord = policy.decode_exactly_one(&bytes).unwrap();
+    let decoded: ExternalRecord = decode_exactly_one(&bytes, LIMITS).unwrap();
     assert_eq!(value, decoded);
     assert_eq!(contract::encode_one(decoded).unwrap(), bytes);
     let extra = contract::encode_args((7u64, true)).unwrap();
-    assert_eq!(policy.decode_one::<u64>(&extra).unwrap(), 7);
-    assert_eq!(policy.decode_args::<(u64,)>(&extra).unwrap(), (7,));
-    assert!(policy.decode_exactly_one::<u64>(&extra).is_err());
+    assert_eq!(decode_one::<u64>(&extra, LIMITS).unwrap(), 7);
+    assert_eq!(decode_args::<(u64,)>(&extra, LIMITS).unwrap(), (7,));
+    assert!(decode_exactly_one::<u64>(&extra, LIMITS).is_err());
     let blob = contract::encode_one(vec![1u8; 8192]).unwrap();
-    policy.admit(&blob).unwrap();
     assert_eq!(
         raw_rand::decode(&blob, LIMITS, ReplyArity::Exact)
             .unwrap()
@@ -54,12 +47,15 @@ pub fn qualify() {
     let mut nested = b"DIDL\x01\x6e\0\x01\0".to_vec();
     nested.resize(nested.len() + 8192, 1);
     nested.push(0);
-    let error = policy
-        .decode_exactly_one::<contract::Reserved>(&nested)
-        .unwrap_err();
+    let error = decode_exactly_one::<contract::Reserved>(&nested, LIMITS).unwrap_err();
     assert_eq!(
         error.nesting_error(),
-        Some(&NestingError::ValueDepth { maximum: 64 })
+        Some(&NestingError::ValueDepth { maximum: 16 })
+    );
+    let protocol_error = raw_rand::decode(&nested, LIMITS, ReplyArity::Exact).unwrap_err();
+    assert_eq!(
+        protocol_error.nesting_error(),
+        Some(&NestingError::ValueDepth { maximum: 16 })
     );
     // Existing exhaustive matches remain source-compatible.
     match error {
@@ -74,18 +70,14 @@ pub fn qualify() {
         max_header_len: LIMITS.header_bytes,
     };
     let error = args
-        .decode_with_nesting::<(contract::Reserved,)>(&nested, EmptyArgs::Reject, NESTING)
+        .decode::<(contract::Reserved,)>(&nested, EmptyArgs::Reject)
         .unwrap_err();
     assert_eq!(
         error.nesting_error(),
-        Some(&NestingError::ValueDepth { maximum: 64 })
+        Some(&NestingError::ValueDepth { maximum: 16 })
     );
-    args.decode_with_nesting::<()>(&[], EmptyArgs::Unit, NESTING)
-        .unwrap();
-    assert!(
-        args.decode_with_nesting::<()>(&[], EmptyArgs::Reject, NESTING)
-            .is_err()
-    );
+    args.decode::<()>(&[], EmptyArgs::Unit).unwrap();
+    assert!(args.decode::<()>(&[], EmptyArgs::Reject).is_err());
 }
 
 #[test]

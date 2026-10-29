@@ -1,8 +1,5 @@
 //! External Candid argument admission without a runtime or implicit empty request.
-use super::{
-    DecodeError, DecodeLimits,
-    nesting::{NestingError, NestingLimits},
-};
+use super::{DecodeError, DecodeLimits, nesting::NestingError};
 use candid::utils::ArgumentDecoder;
 use std::{error::Error, fmt};
 
@@ -16,7 +13,7 @@ pub enum EmptyArgs {
 }
 
 /// Artifact-selected argument byte, work, type-table and header allowances.
-/// These alone do not limit wire depth; select [`Self::decode_with_nesting`].
+/// Decoding also rejects wire nesting beyond 16 constructed levels.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ArgumentLimits {
     /// Maximum original envelope bytes, checked before reading message data.
@@ -64,7 +61,7 @@ impl Error for ArgumentDecodeError {
     }
 }
 impl ArgumentDecodeError {
-    /// Retain the typed admission error while preserving the existing enum shape.
+    /// Recover the typed wire-admission refusal through the existing error variant.
     pub fn nesting_error(&self) -> Option<&NestingError> {
         match self {
             Self::Candid(candid::Error::Custom(error)) => error.downcast_ref(),
@@ -98,46 +95,23 @@ impl ArgumentLimits {
         bytes: &'a [u8],
         empty: EmptyArgs,
     ) -> Result<T, ArgumentDecodeError> {
-        self.decode_policy(bytes, empty, None)
-    }
-
-    /// Decode with caller-selected iterative wire admission before Candid.
-    ///
-    /// # Errors
-    /// Refuses depth/work limits as typed causes, in addition to existing limits.
-    pub fn decode_with_nesting<'a, T: ArgumentDecoder<'a>>(
-        self,
-        bytes: &'a [u8],
-        empty: EmptyArgs,
-        nesting: NestingLimits,
-    ) -> Result<T, ArgumentDecodeError> {
-        self.decode_policy(bytes, empty, Some(nesting))
-    }
-
-    fn decode_policy<'a, T: ArgumentDecoder<'a>>(
-        self,
-        bytes: &'a [u8],
-        empty: EmptyArgs,
-        nesting: Option<NestingLimits>,
-    ) -> Result<T, ArgumentDecodeError> {
         self.admit_len(bytes.len())?;
         let bytes = if bytes.is_empty() && empty == EmptyArgs::Unit {
             &b"DIDL\0\0"[..]
         } else {
             bytes
         };
-        let limits = DecodeLimits {
-            reply_bytes: self.max_bytes.max(bytes.len()),
-            decoding_quota: self.decoding_quota,
-            skipping_quota: self.skipping_quota,
-            type_entries: self.max_type_len,
-            header_bytes: self.max_header_len,
-        };
-        let result = match nesting {
-            Some(nesting) => limits.with_nesting(nesting).decode_args(bytes),
-            None => super::decode_args(bytes, limits),
-        };
-        result.map_err(|error| match error {
+        super::decode_args(
+            bytes,
+            DecodeLimits {
+                reply_bytes: self.max_bytes.max(bytes.len()),
+                decoding_quota: self.decoding_quota,
+                skipping_quota: self.skipping_quota,
+                type_entries: self.max_type_len,
+                header_bytes: self.max_header_len,
+            },
+        )
+        .map_err(|error| match error {
             DecodeError::ReplyTooLarge { actual, maximum } => {
                 ArgumentDecodeError::TooLarge { actual, maximum }
             }
