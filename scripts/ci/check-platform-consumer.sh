@@ -38,7 +38,7 @@ IFS=$'\t' read -r _ features source assets wasm <<< "$profile"
 features="\"${features//,/\", \"}\""
 selection='path = "../../crates/ic-platform"'
 if [[ -n "$published" ]]; then selection="version = \"=$published\""; fi
-consumer_fixture boundary-consumer crates/consumer/src
+consumer_fixture "$root" boundary-consumer crates/consumer/src
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 members = ["crates/consumer"]
@@ -78,7 +78,7 @@ fi
 if [[ "$wasm" == build ]]; then
     printf '\n[lib]\ncrate-type = ["cdylib", "rlib"]\n' >> "$fixture/crates/consumer/Cargo.toml"
 fi
-consumer_metadata
+consumer_metadata "$root"
 if [[ -n "$published" ]]; then
     # Refuse path/Git replacement of either the facade or its generator.
     "$root/.tools/host/bin/jq" -e --arg version "$published" --argjson require_generator false \
@@ -113,9 +113,8 @@ if [[ "$capability" == cdk || "$capability" == runtime || "$capability" == exter
 fi
 if [[ "$capability" == blake3 ]]; then
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
-        bash scripts/ci/check-blake3-graph.sh "$fixture" platform-consumer-proof "$graph_target" -
-        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" \
-            --edges normal,build --prefix none > "$fixture/$graph_target.graph"
+        BLAKE3_PACKAGES_OUTPUT="$fixture/$graph_target.graph" \
+            bash scripts/ci/check-blake3-graph.sh "$fixture" platform-consumer-proof "$graph_target" -
         if grep -Eq '^(candid|ic-cdk|ic-platform-macros|ic-agent|pocket-ic|ic_principal|serde) ' "$fixture/$graph_target.graph"; then
             echo 'BLAKE3 consumer acquired unrelated IC/application dependencies' >&2; exit 1
         fi

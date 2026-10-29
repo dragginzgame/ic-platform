@@ -3,9 +3,11 @@
 
 mod admission;
 
-pub use super::system_profile_product::{export_bytes, import_bytes, query_parameters, query_run, render, tool_definitions};
-pub(crate) use super::system_profile_product::argument_parameters;
 use super::system_profile_product::MAX_IMPORT_BYTES;
+pub(crate) use super::system_profile_product::argument_parameters;
+pub use super::system_profile_product::{
+    export_bytes, import_bytes, query_parameters, query_run, render, tool_definitions,
+};
 
 #[cfg(test)]
 pub(crate) use admission::is_local_host;
@@ -559,7 +561,6 @@ async fn render_metadata(
     response(render(&run_id, &parameters).map(|image| image.metadata))
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -604,4 +605,3 @@ mod tests {
         assert_eq!(values.len(), 1);
     }
 }
-

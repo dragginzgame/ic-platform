@@ -6,7 +6,7 @@ cd "$root"
 source "$root/scripts/ci/consumer-fixture.sh"
 msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 mkdir -p target
-consumer_fixture ic-call-consumer src
+consumer_fixture "$root" ic-call-consumer src
 wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
@@ -28,7 +28,7 @@ ic-platform = { path = "../../crates/ic-platform", default-features = false, fea
 ic-wire = { version = "$wire", optional = true }
 MANIFEST
 cp scripts/fixtures/ic-call-consumer/lib.rs "$fixture/src/lib.rs"
-consumer_metadata
+consumer_metadata "$root"
 for profile in raw wire external-candid; do
     features=()
     admission=()

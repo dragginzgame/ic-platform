@@ -35,6 +35,16 @@
 - Use an ordinary module directory for the native profiling API, retaining the
   admission repair and adapter simplifications shipped in 0.7.6.
 
+### 🧹 Cleanup
+
+- Derive feature activation from Cargo metadata, share standalone consumer setup
+  and entrypoint signature analysis, and admit BLAKE3 identities/features from
+  one locked Cargo graph observation.
+- Consolidate the native dependency recipe without changing its assembled bytes.
+  Transfer pure profiling queries, immutable image caching and tool metadata to
+  the paired Profiler consumer; retain Platform gzip and native capture adapters.
+  Read the resource-charge cadence from its compiled producer rather than source text.
+
 ## [0.7.6] - 2026-10-29
 
 ### 🧹 Cleanup

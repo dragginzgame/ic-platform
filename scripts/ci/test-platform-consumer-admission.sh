@@ -34,15 +34,8 @@ case "$1" in
             exit 0
         fi
         if [[ "${TEST_CAPABILITY:-}" == blake3 ]]; then
-            case " $* " in
-                *' --format {f} '*) printf '%s\n' "${TEST_BLAKE3_FEATURES:-std}" ;;
-                *)
-                    printf 'platform-consumer-proof v0.1.0\nblake3 v1.8.7\n'
-                    if [[ "${TEST_BLAKE3_DUPLICATE:-no}" == yes ]]; then
-                        printf 'blake3 v1.8.6\n'
-                    fi
-                    ;;
-            esac
+            printf 'platform-consumer-proof v0.1.0\t\nblake3 v1.8.7\t%s\n' "${TEST_BLAKE3_FEATURES:-std}"
+            if [[ "${TEST_BLAKE3_DUPLICATE:-no}" == yes ]]; then printf 'blake3 v1.8.6\tstd\n'; fi
             exit 0
         fi
         printf 'ic-cdk-executor v2.0.0\nic0 v1.2.0\n'

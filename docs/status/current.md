@@ -1,5 +1,34 @@
 # Current handoff
 
+## Pending complexity cleanup (#96)
+
+This isolated follow-on uses current main's retained gzip boundary; it does not
+integrate the unfinished #95 Host Process dependency change. Shared Tooling's
+single-observation supplier is PR #322 at `1e89c0d`, adopted through the canonical
+exporter. Root package versions and crypto/runtime identities are unchanged.
+
+Feature activation comes from Cargo metadata, while upstream identity/source
+admission remains explicit. Standalone proofs share preparation only; their
+manifests, policy assertions and published checks remain independent. Entrypoint
+adapters share syntax facts without changing their own diagnostics or codec rules.
+
+The paired Profiler #8 source supplies pure query/cache/tool/render plumbing.
+Platform keeps HTTP protection, native start/stop, metrics/pricing adapters and
+scope cleanup. Query admission preserves the former lexical/error order; cached
+images retain 8 MiB/query, 32 MiB total and 128-entry FIFO budgets and cross-run
+checks. Rendering borrows immutable images; existing Value API paths remain.
+One native dependency patch replaces overlapping history; the cadence catalog
+reads the existing scheduler constant through a compiled getter, with unchanged
+charging behavior. Older Profiler consumers must retain their provider pin.
+
+Full owner and independent-recorder Clippy precede focused tests. Current evidence
+is retained in `/tmp/platform-complexity-20261029`. Macro and consumer admission
+fixtures, actual standalone CDK/external-Candid MSRV/Wasm proofs, Shared graph
+fixtures and 45 assembler tests pass. Paired native product/build qualification
+is being completed before this candidate is declared ready. No size or speed
+saving is claimed; native macOS, full replica Bazel/NNS and release/live-provider
+acceptance remain separate. #50 and its advisory check stay unchanged.
+
 ## Pending 0.7.7: paired Profiler product source contract
 
 Main `26ad783` integrates #88 and #89. This paired change returns Profiler's
