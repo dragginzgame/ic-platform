@@ -180,7 +180,8 @@ where
                 };
                 let op_id = OpId(op_id);
                 loop {
-                    if let Some((_, output)) = app.api_state.read_graph(label, op_id.clone()).await
+                    if let Some((_, output)) =
+                        app.api_state.read_graph(label.clone(), op_id.clone()).await
                     {
                         let (code, response) = <T as FromOpOut>::from(output).await;
                         return match response {
