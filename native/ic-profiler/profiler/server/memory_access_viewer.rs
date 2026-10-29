@@ -27,7 +27,8 @@ use pocket_ic::common::rest::{
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::net::{IpAddr, SocketAddr};
+use std::net::SocketAddr;
+use std::str::FromStr;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 

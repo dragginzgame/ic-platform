@@ -4,7 +4,7 @@ Research, design and implementation notes, 2026-10-26. The earlier canister prof
 
 ## Implemented system profiler
 
-The implementation adds the [`ic-system-profiler` crate](rs/pocket_ic_server/profiling/system), [runtime instrumentation](rs/pocket_ic_server/profiling/system/src/flow.rs), [HTTP/MCP API](rs/pocket_ic_server/profiling/server/system_profile_api.rs), [CLI](rs/pocket_ic_server/profiling/server/system_profile_cli.rs), [IC metric snapshots](rs/pocket_ic_server/profiling/server/system_profile_metrics.rs), [image renderer](rs/pocket_ic_server/profiling/server/system_profile_render.rs) and the System workspace in the existing viewer. It does not change deterministic instruction or cycle prices.
+The implementation adds the [`ic-system-profiler` crate](rs/pocket_ic_server/profiling/system), [runtime instrumentation](rs/pocket_ic_server/profiling/system/src/flow.rs), [HTTP/MCP API](rs/pocket_ic_server/profiling/server/system_profile_api/mod.rs), [CLI](rs/pocket_ic_server/profiling/server/system_profile_cli.rs), [IC metric snapshots](rs/pocket_ic_server/profiling/server/system_profile_metrics.rs), [image renderer](rs/pocket_ic_server/profiling/server/system_profile_render.rs) and the System workspace in the existing viewer. It does not change deterministic instruction or cycle prices.
 
 Available now:
 

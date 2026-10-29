@@ -2,6 +2,13 @@
 
 ## [0.7.5]
 
+### 🩹 Fixed
+
+- Restore native profiler compilation after shared HTTP admission extraction:
+  place the API in an ordinary module directory and retain the viewer's
+  canister-ID parsing import. Qualify the assembled PocketIC server as well as
+  the isolated admission fixture.
+
 ### ➕ Added
 
 - Add the shared ICRC-10 `SupportedStandard` external record under the optional
