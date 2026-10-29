@@ -59,7 +59,9 @@ function reject(reason) {
     ledger = enabled("icrc-ledger-types")
     external_dto = enabled("cmc-types") || enabled("icp-ledger-types") || enabled("cycles-ledger-types") || enabled("nns-registry-types") || enabled("certified-assets-types")
     candid = external_endpoint || pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
+    external_principal = enabled("principal-external")
     principal = enabled("principal")
+    hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp || gzip
     minimal = !principal && !gzip && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
     found_storage = 0
     found_ed = 0
@@ -75,11 +77,15 @@ function reject(reason) {
         name = f[1]; version = f[2]
         if (minimal && name ~ /^(ic_principal|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding)$/)
             reject("application types in minimal executor/IC0 graph")
+        if (name == "ic_principal" && !(external_principal || enabled("stable-structures")))
+            reject("external Principal in owned-only graph")
+        if (name ~ /^(sha2|digest)$/ && !hashing)
+            reject("unselected hashing")
         if (name == "ic-representation-independent-hash" && !(agent || pocket))
             reject("reference-only signature hashing in production")
-        if ((name == "serde_cbor" || name == "half") && !(verification || agent || pocket || parser || ledger))
+        if ((name == "serde_cbor" || name == "half") && !(verification || agent || pocket || parser))
             reject("unselected CBOR parser")
-        if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || management || ledger))
+        if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || management))
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") {
@@ -130,7 +136,7 @@ function reject(reason) {
         if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified BLS curve")
         if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
         if (name == "ic-management-canister-types" && !(registry && ((management && version == "v0.11.0") || (pocket && version == "v0.8.0")))) reject("unselected management types")
-        if (name == "icrc-ledger-types" && !ledger) reject("unselected ledger types")
+        if (name == "icrc-ledger-types" || name == "icrc-cbor") reject("retired upstream ledger package")
         if (name == "ic-error-types" && !(agent || pocket)) reject("runtime error catalogue")
         if (name == "ic-stable-structures") {
             if (!enabled("stable-structures") || version != "v0.7.2" || !registry) reject("unqualified storage substrate")

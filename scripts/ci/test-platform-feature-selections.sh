@@ -36,7 +36,9 @@ done <<'MUTATIONS'
 .features.secp256k1 = []
 (.dependencies[] | select(.name == "ic0")).req = "^1"
 (.dependencies[] | select(.name == "ic-management-canister-types")).req = "^0.11"
-(.dependencies[] | select(.name == "icrc-ledger-types")).uses_default_features = true
+.features["icrc-ledger-types"] += ["dep:icrc-ledger-types"]
+.features.principal += ["dep:ic_principal"]
+(.dependencies[] | select(.name == "ic_principal")).features += ["self_authenticating"]
 (.dependencies[] | select(.name == "ic-verify-bls-signature")).uses_default_features = true
 (.dependencies[] | select(.name == "ed25519-dalek")).uses_default_features = true
 (.dependencies[] | select(.name == "ic-stable-structures")).req = "^0.7"
