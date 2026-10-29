@@ -29,6 +29,10 @@
 
 ### 🔧 Changed
 
+- Own textual-canister profiling requests, IC operation completion and compiled
+  backend descriptions in the native provider. Pair the Python client and
+  recorder description interface with IC Profiler; saved formats remain schema 1.
+
 - Supply coherent Host process and IC Wire Cargo/Bazel inputs for the paired
   Profiler consumer. Preserve the gzip facade and use one pinned Host supplier
   source until its new process APIs are published

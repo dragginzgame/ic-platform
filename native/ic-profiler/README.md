@@ -132,3 +132,22 @@ the same Host artifact source. This avoids mixed registry/Git Host identities
 and downstream Cargo patches. Gzip remains a Platform facade, with no new
 canister/runtime feature or public API removal. Supplying publication and native
 macOS execution remain separate acceptance steps.
+
+## Textual client and compiled backend description
+
+The protected profiling router exposes POST
+`/api/profiling/instances/{instance_id}/canisters/{canister_id}/{action}` for
+`start`, `stop`, `clear`, `trace`, `profile` and `snapshot`. It admits canister
+text through IC's type, reuses native operations/DTO conversions and returns one
+completed JSON result. Busy state is retried only before submission; Started
+results are polled and successful results pruned. Operation errors, including
+changed-snapshot conflicts, are never resubmitted. A timeout can leave an already
+started operation running; the error says so. No client-side IC codec is needed.
+Existing raw PocketIC endpoints retain their external contract.
+
+The paired Profiler consumer supplies the query-product source interface from
+Profiler #9 and the recorder's `explain_with_backend` projection. This provider
+owns scheduler/source defaults, component implementation facts and PocketIC
+coverage notes. It records descriptions only for local native captures. Source
+hashes and compiled values accompany those facts; runtime configurations remain
+independent captured evidence. Older consumers must retain their previous pin.

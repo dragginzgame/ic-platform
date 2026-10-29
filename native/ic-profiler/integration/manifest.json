@@ -23,7 +23,7 @@
       },
       {
         "path": "packages/pocket-ic/tests/system_profiling.rs",
-        "sha256": "9eacd594ed7b1edfd36aeadd4f8e6b5b7c6028a1d173be842f290c2344fa46dc"
+        "sha256": "065451b5ab01bea8089d87b230c1c23b5bd97960d2ac9ba8dfe178090f2fd699"
       },
       {
         "path": "profilingic.md",

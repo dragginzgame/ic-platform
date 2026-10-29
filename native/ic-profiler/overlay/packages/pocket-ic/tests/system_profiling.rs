@@ -686,3 +686,112 @@ fn scheduler_rounds_preserve_dts_accounting_when_event_details_drop() {
             .contains(result["query_id"].as_str().unwrap())
     );
 }
+
+#[test]
+fn platform_client_boundary_completes_operations_and_preserves_trace_guards() {
+    let _capture = exclusive_capture();
+    let pic = builder().with_application_subnet().build();
+    let canister = install(&pic, pic.topology().get_app_subnets()[0], WORK_WAT);
+    let base = pic
+        .get_server_url()
+        .join(&format!(
+            "api/profiling/instances/{}/canisters/{}/",
+            pic.instance_id(),
+            canister
+        ))
+        .unwrap();
+    let call = |action: &str, body: Value| {
+        client()
+            .post(base.join(action).unwrap())
+            .json(&body)
+            .send()
+            .unwrap()
+    };
+    assert_eq!(
+        client()
+            .post(base.join("start").unwrap())
+            .header("Origin", "http://unrelated.invalid")
+            .json(&json!({}))
+            .send()
+            .unwrap()
+            .status()
+            .as_u16(),
+        403
+    );
+    // Zero synchronous wait forces operation-graph completion into Platform.
+    call(
+        "profile",
+        json!({"max_executions":20,"read_mask":true,"write_mask":true}),
+    )
+    .error_for_status()
+    .unwrap();
+    pic.update_call(canister, Principal::anonymous(), "work", vec![])
+        .unwrap();
+    let snapshot: Value = call("trace", json!({}))
+        .error_for_status()
+        .unwrap()
+        .json()
+        .unwrap();
+    let native = serde_json::to_value(pic.get_memory_access_trace(canister)).unwrap();
+    assert_eq!(snapshot, native);
+    assert!(!snapshot["executions"].as_array().unwrap().is_empty());
+    let image: Value = call("snapshot", json!({"label":"client-boundary"}))
+        .error_for_status()
+        .unwrap()
+        .json()
+        .unwrap();
+    assert!(image["snapshot_id"].is_string());
+    assert_eq!(image["label"], "client-boundary");
+    let mut guard = json!({"expected_server_generation":snapshot["server_generation"], "expected_trace_generation":snapshot["trace_generation"], "expected_last_sequence_number":snapshot["executions"].as_array().unwrap().last().unwrap()["sequence_number"], "expected_last_runtime_cost_sequence_number":snapshot["last_runtime_cost_sequence_number"]});
+    guard["expected_server_generation"] = json!("different-server");
+    assert_eq!(call("clear", guard.clone()).status().as_u16(), 409);
+    let retained: Value = call("trace", json!({}))
+        .error_for_status()
+        .unwrap()
+        .json()
+        .unwrap();
+    assert_eq!(retained["executions"], snapshot["executions"]);
+    guard["expected_server_generation"] = snapshot["server_generation"].clone();
+    call("clear", guard).error_for_status().unwrap();
+    let cleared: Value = call("trace", json!({}))
+        .error_for_status()
+        .unwrap()
+        .json()
+        .unwrap();
+    assert!(cleared["executions"].as_array().unwrap().is_empty());
+    call("stop", json!({})).error_for_status().unwrap();
+    assert_eq!(
+        call("profile", json!({"max_executions":0}))
+            .status()
+            .as_u16(),
+        400
+    );
+    let bad = pic
+        .get_server_url()
+        .join(&format!(
+            "api/profiling/instances/{}/canisters/invalid-principal/trace",
+            pic.instance_id()
+        ))
+        .unwrap();
+    assert_eq!(
+        client()
+            .post(bad)
+            .json(&json!({}))
+            .send()
+            .unwrap()
+            .status()
+            .as_u16(),
+        400
+    );
+    let id = begin(&pic);
+    let result = finish(&pic, &id);
+    assert_eq!(
+        result["metadata"]["backend_description"]["availability"],
+        "available"
+    );
+    let dictionary = view(&pic, &id, "explain");
+    assert_eq!(
+        dictionary["dictionary"]["backend_description"]["value_kind"],
+        "compiled_source_description"
+    );
+}

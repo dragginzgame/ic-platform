@@ -1,5 +1,15 @@
 # Current handoff
 
+## Profiler client and backend description boundary
+
+This topic stacks on #97 / #95 and reuses Profiler #9's paired product interface.
+Platform now owns textual-canister request admission and complete IC operation
+results, plus compiled scheduler/PocketIC descriptions. The consumer retains
+Python commands, export-before-clear and offline rendering. Captures retain the
+provider facts; unbound captures have explicit missingness, and saved schema-1
+dictionaries remain recorded evidence. No own release/version or crypto change.
+
+
 ## Pending complexity cleanup (#96)
 
 This paired follow-on retains Platform gzip and includes the #95 native inputs
