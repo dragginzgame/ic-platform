@@ -351,7 +351,7 @@ pub fn query_run(
     Ok(result)
 }
 
-fn argument_parameters(arguments: &Value) -> HashMap<String, String> {
+pub(crate) fn argument_parameters(arguments: &Value) -> HashMap<String, String> {
     arguments
         .as_object()
         .into_iter()
@@ -458,20 +458,18 @@ pub fn dispatch_sync(
             let options: StopOptions =
                 serde_json::from_value(arguments.clone()).map_err(|e| e.to_string())?;
             if let Some(app) = app.filter(|_| options.drain_ms > 0) {
-                let instance = scopes()
-                    .lock()
-                    .unwrap()
-                    .get(id)
-                    .and_then(|scope| scope.instance_id);
-                let local_metrics = scopes()
-                    .lock()
-                    .unwrap()
-                    .get(id)
-                    .is_some_and(|scope| scope.local_metrics);
-                let metrics_level = scopes().lock().unwrap().get(id).map_or(
-                    crate::system_profile_metrics::MetricsLevel::Standard,
-                    |scope| scope.metrics_level,
-                );
+                let (instance, local_metrics, metrics_level) = {
+                    let scopes = scopes().lock().unwrap();
+                    let scope = scopes.get(id);
+                    (
+                        scope.and_then(|scope| scope.instance_id),
+                        scope.is_some_and(|scope| scope.local_metrics),
+                        scope.map_or(
+                            crate::system_profile_metrics::MetricsLevel::Standard,
+                            |scope| scope.metrics_level,
+                        ),
+                    )
+                };
                 ingest_snapshot(
                     id,
                     json!({"kind":"pricing_snapshot", "phase":"foreground_end", "snapshot":pricing_snapshot(app, instance)}),
@@ -888,6 +886,19 @@ pub fn render(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shared_argument_conversion_preserves_exact_values_and_omits_nulls() {
+        let parameters = argument_parameters(
+            &json!({"missing":null,"text":"01","limit":42,"round_number":u64::MAX,"round_details":false,"nested":{"x":1}}),
+        );
+        assert!(!parameters.contains_key("missing"));
+        assert_eq!(parameters["text"], "01");
+        assert_eq!(parameters["limit"], "42");
+        assert_eq!(parameters["round_number"], u64::MAX.to_string());
+        assert_eq!(parameters["round_details"], "false");
+        assert_eq!(parameters["nested"], r#"{"x":1}"#);
+    }
 
     #[test]
     fn query_parameters_reject_unbounded_limits_and_lossy_decimals() {

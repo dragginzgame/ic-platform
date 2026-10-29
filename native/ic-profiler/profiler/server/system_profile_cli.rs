@@ -117,21 +117,8 @@ fn json_output(value: &Value, path: Option<&PathBuf>) -> Result<(), String> {
 pub fn run(args: &ProfileArgs) -> Result<(), String> {
     let query: Value =
         serde_json::from_str(&args.query).map_err(|e| format!("Invalid --query JSON: {e}"))?;
-    let mut parameters: HashMap<String, String> = query
-        .as_object()
-        .ok_or("--query must be an object")?
-        .iter()
-        .filter_map(|(k, v)| {
-            (!v.is_null()).then(|| {
-                (
-                    k.clone(),
-                    v.as_str()
-                        .map(str::to_owned)
-                        .unwrap_or_else(|| v.to_string()),
-                )
-            })
-        })
-        .collect();
+    query.as_object().ok_or("--query must be an object")?;
+    let mut parameters = crate::system_profile_api::argument_parameters(&query);
     if !args.duration.is_finite() || args.duration < 0.0 || args.duration > 86400.0 {
         return Err("--duration must be between 0 and 86400 seconds".into());
     }
@@ -236,6 +223,31 @@ fn action_view(action: &ProfileAction) -> &'static str {
     }
 }
 
+fn capture_config(args: &ProfileArgs, default_name: String, default_backend: &str) -> RunConfig {
+    RunConfig {
+        name: args.name.clone().unwrap_or(default_name),
+        root_pid: args.pid,
+        extra_pids: args.extra_pid.clone(),
+        sample_interval_ms: args.sample_interval_ms,
+        metrics_level: args.metrics_level.clone(),
+        memory_detail_interval_ms: args.memory_detail_interval_ms,
+        backend: args
+            .backend
+            .clone()
+            .unwrap_or_else(|| default_backend.into()),
+        ..Default::default()
+    }
+}
+
+fn start_parameters(args: &ProfileArgs) -> Value {
+    let config = capture_config(args, "system profile".into(), "pocketic");
+    // Preserve the existing remote-start field set; local-only metadata and
+    // other RunConfig defaults are not added to the HTTP request.
+    json!({"name":config.name,"root_pid":config.root_pid,"extra_pids":config.extra_pids,
+        "sample_interval_ms":config.sample_interval_ms,"backend":config.backend,
+        "metrics_level":config.metrics_level,"memory_detail_interval_ms":config.memory_detail_interval_ms})
+}
+
 fn remote(
     args: &ProfileArgs,
     server: &str,
@@ -288,12 +300,14 @@ fn remote(
             pairs.append_pair("view", &args.view);
         }
     }
-    let request=match args.action{
-        ProfileAction::Start=>client.post(url).json(&json!({"name":args.name.clone().unwrap_or_else(||"system profile".into()),"root_pid":args.pid,"extra_pids":args.extra_pid,"sample_interval_ms":args.sample_interval_ms,"backend":args.backend.as_deref().unwrap_or("pocketic"),"metrics_level":args.metrics_level,"memory_detail_interval_ms":args.memory_detail_interval_ms})),
-        ProfileAction::Stop=>client.post(url).json(&json!({"drain_ms":args.drain_ms})),
-        ProfileAction::Delete=>client.delete(url),
-        ProfileAction::Import=>client.post(url).body(std::fs::read(args.input.as_ref().ok_or("Pass --input")?).map_err(|e|e.to_string())?),
-        _=>client.get(url),
+    let request = match args.action {
+        ProfileAction::Start => client.post(url).json(&start_parameters(args)),
+        ProfileAction::Stop => client.post(url).json(&json!({"drain_ms":args.drain_ms})),
+        ProfileAction::Delete => client.delete(url),
+        ProfileAction::Import => client.post(url).body(
+            std::fs::read(args.input.as_ref().ok_or("Pass --input")?).map_err(|e| e.to_string())?,
+        ),
+        _ => client.get(url),
     };
     let response = request.send().map_err(|e| e.to_string())?;
     let status = response.status();
@@ -499,23 +513,9 @@ fn record(args: &ProfileArgs) -> Result<(), String> {
         .map(|c| c.child.id())
         .or(args.pid)
         .ok_or("capture requires --pid PID")?;
-    let config = RunConfig {
-        name: args
-            .name
-            .clone()
-            .unwrap_or_else(|| format!("process {pid}")),
-        root_pid: Some(pid),
-        extra_pids: args.extra_pid.clone(),
-        sample_interval_ms: args.sample_interval_ms,
-        metrics_level: args.metrics_level.clone(),
-        memory_detail_interval_ms: args.memory_detail_interval_ms,
-        backend: args
-            .backend
-            .clone()
-            .unwrap_or_else(|| "attached_process".into()),
-        metadata: json!({"capture_kind":if child.is_some(){"launched_command"}else{"attached_process"},"startup_scope":if launch_gate.is_some(){"workload exec is gated until capture baseline and child instrumentation activation are ready"}else{"capture begins after spawn/attach; earlier activity is not observed"},"collector_outside_target_tree":true,"command_cleanup_outside_capture":true}),
-        ..Default::default()
-    };
+    let mut config = capture_config(args, format!("process {pid}"), "attached_process");
+    config.root_pid = Some(pid);
+    config.metadata = json!({"capture_kind":if child.is_some(){"launched_command"}else{"attached_process"},"startup_scope":if launch_gate.is_some(){"workload exec is gated until capture baseline and child instrumentation activation are ready"}else{"capture begins after spawn/attach; earlier activity is not observed"},"collector_outside_target_tree":true,"command_cleanup_outside_capture":true});
     let run = ic_system_profiler::start(config)?;
     let run_id = id(&run)?;
     if let Some(mut gate) = launch_gate {
@@ -589,5 +589,51 @@ mod tests {
         let result = child.wait_with_output().unwrap();
         assert!(result.status.success());
         assert_eq!(result.stdout, b"literal $() and spaces");
+    }
+}
+
+#[cfg(test)]
+mod adapter_tests {
+    use super::*;
+    use clap::Parser;
+    #[derive(Parser)]
+    struct CommandLine {
+        #[command(flatten)]
+        profile: ProfileArgs,
+    }
+
+    #[test]
+    fn capture_config_preserves_context_defaults_and_remote_field_set() {
+        let args = CommandLine::try_parse_from(["fixture", "start"])
+            .unwrap()
+            .profile;
+        assert_eq!(
+            start_parameters(&args),
+            json!({"name":"system profile","root_pid":null,"extra_pids":[],"sample_interval_ms":100,"backend":"pocketic","metrics_level":"standard","memory_detail_interval_ms":1000})
+        );
+        let local = capture_config(&args, "process 42".into(), "attached_process");
+        assert_eq!(local.name, "process 42");
+        assert_eq!(local.backend, "attached_process");
+        let args = CommandLine::try_parse_from([
+            "fixture",
+            "start",
+            "--name",
+            "custom",
+            "--backend",
+            "explicit",
+            "--pid",
+            "42",
+            "--metrics-level",
+            "none",
+        ])
+        .unwrap()
+        .profile;
+        let local = capture_config(&args, "fallback".into(), "attached_process");
+        let remote = start_parameters(&args);
+        assert_eq!(local.name, "custom");
+        assert_eq!(local.backend, "explicit");
+        assert_eq!(local.root_pid, Some(42));
+        assert_eq!(remote["root_pid"], 42);
+        assert_eq!(remote["metrics_level"], "none");
     }
 }

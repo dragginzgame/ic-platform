@@ -7,23 +7,36 @@ use syn::parse::Parser;
 use syn::spanned::Spanned;
 use syn::{Error, FnArg, ItemFn, Path, ReturnType, Signature, Type, parse_str};
 
-#[derive(Default)]
-struct ExportAttributes {
+pub(super) struct ExportAttributes<P = String> {
     pub name: Option<String>,
-    pub guard: Vec<String>,
+    pub guard: Vec<P>,
     /// The name of the function to use for decoding arguments.
     /// Required for callable entries, including unit requests.
     ///
     /// Even if the argument type is empty, the specified function will still be executed.
-    pub decode_with: Option<String>,
+    pub decode_with: Option<P>,
     /// The name of the function to use for encoding the return value.
     /// Required for automatic replies. No default protocol is selected.
     ///
     /// If the method returns a tuple, this custom encoder function should take the tuple as an argument.
-    pub encode_with: Option<String>,
+    pub encode_with: Option<P>,
     pub manual_reply: bool,
     pub composite: bool,
-    pub cratename: Option<String>,
+    pub cratename: Option<P>,
+}
+
+impl<P> Default for ExportAttributes<P> {
+    fn default() -> Self {
+        Self {
+            name: None,
+            guard: Vec::new(),
+            decode_with: None,
+            encode_with: None,
+            manual_reply: false,
+            composite: false,
+            cratename: None,
+        }
+    }
 }
 
 impl ExportAttributes {
@@ -203,6 +216,19 @@ impl EntryPlan {
     fn parse(method: MethodType, attr: TokenStream, item: TokenStream) -> Result<Self, Error> {
         let attr_span = attr.span();
         let attrs = ExportAttributes::parse(attr)?;
+        Self::build(method, attrs, attr_span, item, None, |path| {
+            parse_str(&path)
+        })
+    }
+
+    fn build<P>(
+        method: MethodType,
+        attrs: ExportAttributes<P>,
+        attr_span: Span,
+        item: TokenStream,
+        parsed: Option<ItemFn>,
+        parse_path: impl Fn(P) -> Result<Path, Error>,
+    ) -> Result<Self, Error> {
         if attrs.composite && method != MethodType::Query {
             return Err(Error::new(
                 attr_span,
@@ -215,12 +241,16 @@ impl EntryPlan {
                 "manual_reply is not supported on lifecycle hooks",
             ));
         }
-        let fun: ItemFn = syn::parse2::<syn::ItemFn>(item.clone()).map_err(|e| {
-            Error::new(
-                item.span(),
-                format!("#[{method}] must be above a function. \n{e}"),
-            )
-        })?;
+        let fun = if let Some(fun) = parsed {
+            fun
+        } else {
+            syn::parse2::<syn::ItemFn>(item.clone()).map_err(|e| {
+                Error::new(
+                    item.span(),
+                    format!("#[{method}] must be above a function. \n{e}"),
+                )
+            })?
+        };
         let signature = &fun.sig;
         let generics = &signature.generics;
 
@@ -230,8 +260,11 @@ impl EntryPlan {
                 format!("#[{method}] must be above a function with no generic parameters."),
             ));
         }
-        let cratename: Path =
-            syn::parse_str(attrs.cratename.as_deref().unwrap_or("::ic_platform::cdk"))?;
+        let cratename = attrs
+            .cratename
+            .map(&parse_path)
+            .transpose()?
+            .unwrap_or_else(|| syn::parse_quote!(::ic_platform::cdk));
 
         // Function and export names.
         let name = &signature.ident;
@@ -271,8 +304,8 @@ impl EntryPlan {
         }
         let guards = attrs
             .guard
-            .iter()
-            .map(|guard_name| parse_str::<Path>(guard_name))
+            .into_iter()
+            .map(&parse_path)
             .collect::<Result<Vec<_>, Error>>()?;
 
         // Argument admission, including explicit decoding for unit requests.
@@ -291,8 +324,8 @@ impl EntryPlan {
                 ));
             }
         }
-        let decoder = if let Some(decode_with) = &attrs.decode_with {
-            Some(parse_str::<Path>(decode_with)?)
+        let decoder = if let Some(decode_with) = attrs.decode_with {
+            Some(parse_path(decode_with)?)
         } else if method.can_have_args() && (!method.is_lifecycle() || !arg_tuple.is_empty()) {
             return Err(Error::new(
                 attr_span,
@@ -326,9 +359,9 @@ impl EntryPlan {
         }
         let reply = if method.is_lifecycle() || attrs.manual_reply {
             Reply::None
-        } else if let Some(encode_with) = &attrs.encode_with {
+        } else if let Some(encode_with) = attrs.encode_with {
             Reply::Automatic {
-                encoder: parse_str::<Path>(encode_with)?,
+                encoder: parse_path(encode_with)?,
                 takes_result: return_length != 0,
             }
         } else {
@@ -458,6 +491,21 @@ impl EntryPlan {
             #item
         }
     }
+}
+
+/// Internal typed bridge; the normal attribute parser remains the public grammar.
+pub(super) fn external_entry(
+    query: bool,
+    attrs: ExportAttributes<Path>,
+    function: ItemFn,
+    item: TokenStream,
+) -> Result<TokenStream, Error> {
+    let method = if query {
+        MethodType::Query
+    } else {
+        MethodType::Update
+    };
+    Ok(EntryPlan::build(method, attrs, item.span(), item, Some(function), Ok)?.expand())
 }
 
 fn dfn_macro(

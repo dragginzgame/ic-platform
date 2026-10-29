@@ -46,8 +46,7 @@ pub(crate) fn expand(
             }
             "name" => name = Some(value),
             "guard" => {
-                value.parse::<Path>()?;
-                guards.push(value);
+                guards.push(value.parse::<Path>()?);
             }
             "platform" => platform = value.parse()?,
             _ => unreachable!(),
@@ -122,17 +121,18 @@ pub(crate) fn expand(
         quote!(update)
     };
     let method = name.unwrap_or_else(|| LitStr::new(&ident.to_string(), ident.span()));
-    let sdk = LitStr::new(&quote!(#platform::cdk).to_string(), ident.span());
-    let decode_name = LitStr::new(&decode.to_string(), ident.span());
-    let encode_name = LitStr::new(&encode.to_string(), ident.span());
-    let admit_name = LitStr::new(&admit.to_string(), ident.span());
-    let attrs = quote! { name = #method, crate = #sdk, #(guard = #guards,)* guard = #admit_name, decode_with = #decode_name, encode_with = #encode_name, composite = #composite };
-    let declared = quote! { #[cfg_attr(not(target_family = "wasm"), #platform::candid::endpoint::__candid_method(#mode, rename = #method))] #item };
-    let entry = if query {
-        crate::export::ic_query(attrs, declared)?
-    } else {
-        crate::export::ic_update(attrs, declared)?
+    guards.push(syn::parse_quote!(#admit));
+    let attrs = crate::export::ExportAttributes {
+        name: Some(method.value()),
+        guard: guards,
+        cratename: Some(syn::parse_quote!(#platform::cdk)),
+        decode_with: Some(syn::parse_quote!(#decode)),
+        encode_with: Some(syn::parse_quote!(#encode)),
+        composite,
+        ..Default::default()
     };
+    let declared = quote! { #[cfg_attr(not(target_family = "wasm"), #platform::candid::endpoint::__candid_method(#mode, rename = #method))] #item };
+    let entry = crate::export::external_entry(query, attrs, function, declared)?;
     Ok(quote! {
         fn #admit() -> ::std::result::Result<(), ::std::string::String> {
             let limits: #platform::candid::arguments::ArgumentLimits = #limits;

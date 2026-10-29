@@ -2,6 +2,7 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
+msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 mkdir -p target
 fixture="$(mktemp -d "$root/target/ic-call-consumer.XXXXXX")"
 mkdir -p "$fixture/src"
@@ -12,7 +13,7 @@ cat > "$fixture/Cargo.toml" <<MANIFEST
 name = "ic-call-consumer-proof"
 version = "0.0.0"
 edition = "2024"
-rust-version = "1.91"
+rust-version = "$msrv"
 publish = false
 [lints.rust]
 warnings = "deny"
@@ -43,7 +44,7 @@ for profile in raw wire external-candid; do
     done
     # Strict standalone Clippy precedes all tests of each actual selection.
     cargo clippy --manifest-path "$fixture/Cargo.toml" --frozen --all-targets ${features[@]+"${features[@]}"} -- -D warnings
-    for compiler in "$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.toolchain.channel' rust-toolchain.toml)" 1.91.0; do
+    for compiler in "$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.toolchain.channel' rust-toolchain.toml)" "$msrv"; do
         cargo +"$compiler" test --manifest-path "$fixture/Cargo.toml" --frozen ${features[@]+"${features[@]}"}
         cargo +"$compiler" check --manifest-path "$fixture/Cargo.toml" --frozen ${features[@]+"${features[@]}"} --target wasm32-unknown-unknown
     done

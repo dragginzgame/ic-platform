@@ -180,20 +180,31 @@ pub fn decode_exactly_one<'a, T: Deserialize<'a> + CandidType>(
     bytes: &'a [u8],
     limits: DecodeLimits,
 ) -> Result<T, DecodeError> {
+    with_decoder(bytes, limits, |decoder| {
+        if decoder.is_done() {
+            return Err(DecodeError::Candid(candid::Error::msg(
+                "expected exactly one Candid result",
+            )));
+        }
+        let value = decoder.get_value::<T>().map_err(DecodeError::Candid)?;
+        if !decoder.is_done() {
+            return Err(DecodeError::Candid(candid::Error::msg(
+                "expected exactly one Candid result",
+            )));
+        }
+        Ok(value)
+    })
+}
+
+fn with_decoder<'a, T>(
+    bytes: &'a [u8],
+    limits: DecodeLimits,
+    decode: impl FnOnce(&mut IDLDeserialize<'a>) -> Result<T, DecodeError>,
+) -> Result<T, DecodeError> {
     let config = config(bytes, limits)?;
     let mut decoder =
         IDLDeserialize::new_with_config(bytes, &config).map_err(DecodeError::Candid)?;
-    if decoder.is_done() {
-        return Err(DecodeError::Candid(candid::Error::msg(
-            "expected exactly one Candid result",
-        )));
-    }
-    let value = decoder.get_value::<T>().map_err(DecodeError::Candid)?;
-    if !decoder.is_done() {
-        return Err(DecodeError::Candid(candid::Error::msg(
-            "expected exactly one Candid result",
-        )));
-    }
+    let value = decode(&mut decoder)?;
     decoder.done().map_err(DecodeError::Candid)?;
     Ok(value)
 }
