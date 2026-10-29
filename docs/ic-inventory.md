@@ -13,7 +13,26 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
-Pending 0.7.4 adds `candid-endpoint` for explicitly external query/update codec
+Pending 0.7.5 adds `icrc_ledger_types::icrc10::SupportedStandard` under existing
+`icrc-ledger-types`. Platform maintains the named external discovery record from
+ICRC protocol facts; it is not a registry Rust identity. The feature now names
+`dep:candid` for its derive, without selecting the facade's codec feature.
+The existing registry ledger edge already supplies that Candid identity/features;
+native/Wasm dependency identities and effective-feature sets are unchanged.
+Default/executor isolation remains. Canic owns opt-in mounting, advertised
+standards and consent policy; its [integration issue #706](https://github.com/dragginzgame/canic/issues/706)
+tracks adoption after supplying publication. No consumer adoption or size saving
+is inferred from this export.
+
+Pending 0.7.5 also adds opt-in `candid::nesting::{NestingLimits, NestingError, check}`,
+`DecodeLimits::with_nesting` and its `DecodePolicy` methods, typed error accessors,
+argument/read adapters and the endpoint `nesting` option. Platform owns this
+nonrecursive framing admission, not a Candid decoder or subtype engine. Budgets
+and opting in remain consumer-owned; upstream decoding, external identities and
+bytes stay unchanged. No dependency/feature is added. Existing default, executor
+and runtime isolation stays unchanged. See the [bounded wire contract](migration.md#external-candid-nesting-qualification-73).
+
+Source release 0.7.4 adds `candid-endpoint` for explicitly external query/update codec
 adapters over the existing generator/executor. It selects `cdk` and `candid`,
 never a parser or service printer. Native DID generation selects `candid-service`
 separately. Consumers own guards, names, limits and lifecycle; Platform owns only
@@ -204,7 +223,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | gzip | dep:ic-host-artifacts |
 | ic-platform | ic0 | dep:ic0 |
 | ic-platform | icp-ledger-types | candid |
-| ic-platform | icrc-ledger-types | dep:icrc-ledger-types, principal |
+| ic-platform | icrc-ledger-types | dep:candid, dep:icrc-ledger-types, principal |
 | ic-platform | management-canister-types | dep:ic-management-canister-types, principal |
 | ic-platform | nns-registry-types | candid |
 | ic-platform | pocket-ic | dep:pocket-ic, principal |

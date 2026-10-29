@@ -22,7 +22,12 @@ const LIMITS: ArgumentLimits = ArgumentLimits {
 fn observed() -> u64 {
     VALUE.get()
 }
-#[endpoint::update(name = "external_effect", limits = "LIMITS", empty_args = "reject")]
+#[endpoint::update(
+    name = "external_effect",
+    limits = "LIMITS",
+    nesting = "NESTING",
+    empty_args = "reject"
+)]
 fn effect(value: u64) -> u64 {
     VALUE.set(value);
     value
@@ -33,6 +38,7 @@ fn refuse() -> Result<(), String> {
 #[endpoint::update(
     name = "external_denied",
     limits = "LIMITS",
+    nesting = "NESTING",
     empty_args = "reject",
     guard = "refuse"
 )]
@@ -69,18 +75,19 @@ async fn random() -> Vec<u8> {
     .execute()
     .await
     .unwrap();
-    protocols::management::raw_rand::decode(
-        response.as_ref(),
-        candid::DecodeLimits {
-            reply_bytes: 512,
-            decoding_quota: 10000,
-            skipping_quota: 0,
-            type_entries: 8,
-            header_bytes: 128,
-        },
-        ReplyArity::Exact,
-    )
-    .unwrap()
+    let reply_limits = candid::DecodeLimits {
+        reply_bytes: 512,
+        decoding_quota: 10000,
+        skipping_quota: 0,
+        type_entries: 8,
+        header_bytes: 128,
+    };
+    reply_limits
+        .with_nesting(NESTING)
+        .admit(response.as_ref())
+        .unwrap();
+    protocols::management::raw_rand::decode(response.as_ref(), reply_limits, ReplyArity::Exact)
+        .unwrap()
 }
 #[endpoint::update(name = "external_legacy_empty", limits = "LIMITS", empty_args = "unit")]
 fn legacy_empty() {}
@@ -144,4 +151,52 @@ fn no_types(value: Option<u64>) -> u64 {
 fn no_skip(value: u64) -> u64 {
     VALUE.set(value);
     value
+}
+
+const NESTED_LIMITS: ArgumentLimits = ArgumentLimits {
+    max_bytes: 65536,
+    decoding_quota: 1_000_000,
+    skipping_quota: 1_000_000,
+    max_type_len: 4096,
+    max_header_len: 65536,
+};
+const NESTING: candid::nesting::NestingLimits = candid::nesting::NestingLimits {
+    depth: 64,
+    work: 1_000_000,
+};
+#[endpoint::query(
+    name = "external_nesting_probe",
+    limits = "NESTED_LIMITS",
+    nesting = "NESTING",
+    empty_args = "reject"
+)]
+fn nesting_probe(bytes: Vec<u8>) -> u8 {
+    let limits = candid::DecodeLimits {
+        reply_bytes: 65536,
+        decoding_quota: 1_000_000,
+        skipping_quota: 1_000_000,
+        type_entries: 4096,
+        header_bytes: 65536,
+    };
+    match limits
+        .with_nesting(NESTING)
+        .decode_exactly_one::<contract::Reserved>(&bytes)
+    {
+        Ok(_) => 0,
+        Err(error) => match error.nesting_error() {
+            Some(candid::nesting::NestingError::ValueDepth { .. }) => 1,
+            Some(candid::nesting::NestingError::TypeDepth { .. }) => 2,
+            _ => 3,
+        },
+    }
+}
+#[endpoint::update(
+    name = "external_nesting_effect",
+    limits = "NESTED_LIMITS",
+    nesting = "NESTING",
+    empty_args = "reject"
+)]
+fn nesting_effect(_: contract::Reserved) -> u64 {
+    VALUE.set(555);
+    555
 }

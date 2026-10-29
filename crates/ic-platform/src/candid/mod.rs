@@ -6,10 +6,10 @@
 //! All decoders select Candid's compact diagnostics while retaining typed causes.
 //! Compact diagnostics can include small inputs; callers own error disclosure.
 //!
-//! These wire/work quotas are not a Wasm recursion-depth guarantee. The selected
-//! upstream decoder has no supported Wasm depth ceiling: a small, deeply nested
-//! external reply can trap rather than return [`DecodeError`]. See
-//! [the nesting issue](https://github.com/dragginzgame/ic-platform/issues/73).
+//! Ordinary wire/work quotas are not a Wasm recursion-depth guarantee. Select
+//! [`DecodeLimits::with_nesting`] for iterative wire admission before Candid.
+//! The unchanged helpers and low-level APIs retain upstream recursion behavior;
+//! arbitrary trusted Rust schemas/custom visitors require separate qualification.
 //! Low-level [`contract`] APIs retain caller-owned configuration and budgeting.
 
 use candid::{
@@ -23,6 +23,7 @@ pub mod arguments;
 pub mod decoder;
 #[cfg(feature = "candid-endpoint")]
 pub mod endpoint;
+pub mod nesting;
 pub mod protocols;
 pub mod reserved;
 pub mod sequence;
@@ -83,6 +84,76 @@ pub struct DecodeLimits {
     pub header_bytes: usize,
 }
 
+/// Explicit iterative wire admission followed by the existing bounded decoder.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DecodePolicy {
+    limits: DecodeLimits,
+    nesting: nesting::NestingLimits,
+}
+impl DecodeLimits {
+    /// Select iterative admission before upstream header construction/decoding.
+    /// The admission budget is independent of the unchanged decoder quotas.
+    pub const fn with_nesting(self, nesting: nesting::NestingLimits) -> DecodePolicy {
+        DecodePolicy {
+            limits: self,
+            nesting,
+        }
+    }
+}
+
+impl DecodePolicy {
+    /// Check wire framing, type paths, value depth and work before Candid runs.
+    ///
+    /// # Errors
+    /// Refuses oversized, malformed, unsupported or over-budget envelopes.
+    pub fn admit(self, bytes: &[u8]) -> Result<(), DecodeError> {
+        if bytes.len() > self.limits.reply_bytes {
+            return Err(DecodeError::ReplyTooLarge {
+                actual: bytes.len(),
+                maximum: self.limits.reply_bytes,
+            });
+        }
+        nesting::check(bytes, self.limits, self.nesting)
+            .map_err(|error| DecodeError::Candid(candid::Error::Custom(error.into())))
+    }
+
+    /// Admit wire nesting, then decode one value with bounded compatible skipping.
+    ///
+    /// # Errors
+    /// Preserves admission and decoder failures, including typed nesting causes.
+    pub fn decode_one<'a, T: Deserialize<'a> + CandidType>(
+        self,
+        bytes: &'a [u8],
+    ) -> Result<T, DecodeError> {
+        self.admit(bytes)?;
+        decode_one(bytes, self.limits)
+    }
+
+    /// Admit wire nesting, then decode the requested top-level argument tuple.
+    ///
+    /// # Errors
+    /// Preserves admission and decoder failures, including typed nesting causes.
+    pub fn decode_args<'a, T: candid::utils::ArgumentDecoder<'a>>(
+        self,
+        bytes: &'a [u8],
+    ) -> Result<T, DecodeError> {
+        self.admit(bytes)?;
+        decode_args(bytes, self.limits)
+    }
+
+    /// Admit wire nesting, then require exactly one result value.
+    ///
+    /// # Errors
+    /// Preserves admission, decoder and exact-arity failures.
+    pub fn decode_exactly_one<'a, T: Deserialize<'a> + CandidType>(
+        self,
+        bytes: &'a [u8],
+    ) -> Result<T, DecodeError> {
+        self.admit(bytes)?;
+        decode_exactly_one(bytes, self.limits)
+    }
+}
+
 /// Wire admission or Candid decoding failure, retaining the original decoder cause.
 #[derive(Debug)]
 pub enum DecodeError {
@@ -113,6 +184,16 @@ impl Error for DecodeError {
         match self {
             Self::ReplyTooLarge { .. } => None,
             Self::Candid(error) => Some(error),
+        }
+    }
+}
+
+impl DecodeError {
+    /// Recover the typed admission refusal without changing existing error variants.
+    pub fn nesting_error(&self) -> Option<&nesting::NestingError> {
+        match self {
+            Self::Candid(candid::Error::Custom(error)) => error.downcast_ref(),
+            _ => None,
         }
     }
 }

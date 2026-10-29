@@ -28,6 +28,43 @@ mod tests {
         .unwrap_or_else(|e| panic!("{name}: {e}"));
     }
     #[test]
+    fn icrc10_matches_external_named_records_and_independent_reply_bytes() {
+        use ic_platform::{
+            candid::{DecodeLimits, decode_exactly_one},
+            icrc_ledger_types::icrc10::SupportedStandard,
+        };
+        // Independently express protocol facts from the pinned ICRC-10 DID.
+        let source = "type SupportedStandard = record { name : text; url : text }; service : { icrc10_supported_standards : () -> (vec SupportedStandard) query }";
+        let (_, (env, service)) =
+            parser::instantiate_candid(parser::CandidSource::Text(source)).unwrap();
+        equal::<SupportedStandard>(&env, "SupportedStandard");
+        let method = env
+            .get_method(&service, "icrc10_supported_standards")
+            .unwrap();
+        assert!(method.args.is_empty());
+        assert_eq!(method.rets.len(), 1);
+        let values = parser::parse_idl_args(
+            "(vec { record { name = \"ICRC-10\"; url = \"https://example.test/standard\" } })",
+        )
+        .unwrap();
+        let bytes = values.to_bytes_with_types(&env, &method.rets).unwrap();
+        let decoded: Vec<SupportedStandard> = decode_exactly_one(
+            &bytes,
+            DecodeLimits {
+                reply_bytes: 4096,
+                decoding_quota: 100_000,
+                skipping_quota: 1024,
+                type_entries: 32,
+                header_bytes: 1024,
+            },
+        )
+        .unwrap();
+        assert_eq!(decoded.len(), 1);
+        assert_eq!(decoded[0].name, "ICRC-10");
+        assert_eq!(decoded[0].url, "https://example.test/standard");
+        assert_eq!(contract::encode_one(decoded).unwrap(), bytes);
+    }
+    #[test]
     fn cmc_matches_pinned_did_including_certification_and_notify_variants() {
         let env = env(include_str!("fixtures/external-cmc.did"));
         equal::<cmc::NotifyTopUpArg>(&env, "NotifyTopUpArg");

@@ -1,8 +1,39 @@
 # Candid and runtime ownership
 
+## Shared ICRC-10 discovery record (pending 0.7.5)
+
+Select `icrc-ledger-types` and import
+`ic_platform::icrc_ledger_types::icrc10::SupportedStandard`. This passive external
+DTO is the Candid record `{ name : text; url : text }`, not a tuple. Values are
+preserved without name/URL policy. Select `candid` separately when the consumer
+needs Platform's encode/decode APIs; no direct Candid dependency is necessary.
+The types feature alone supplies the DTO, without selecting those codec APIs.
+
+The independent source contract is [ICRC-10's DID at 1df0c6a](https://github.com/dfinity/ICRC/blob/1df0c6af6ecca4f4eb1956c67b29c0d13279f1cd/ICRCs/ICRC-10/ICRC-10.did).
+Platform independently represents its protocol facts; no upstream Rust type or
+cryptographic implementation is replaced. ICRC-21 retains existing upstream
+identities. The direct Candid derive edge adds no resolved ledger-profile package
+or effective feature over the pre-existing upstream dependency.
+
+Canic's prepared optional adapter replaces its local `SupportedStandard`
+declaration/derives with this import, retaining one public type identity. Its
+required Platform floor becomes **0.7.5**, pending maintainer release/publication.
+Keep its mounting macros, framework guards, explicit argument budgets, advertised
+standards and application-owned consent handler there. There is no Platform
+endpoint, global registry or configuration flag for ICRC discovery/consent.
+[Canic #706](https://github.com/dragginzgame/canic/issues/706) tracks the pending
+0.113 integration. No sibling checkout or production version is changed here.
+
+The Platform-only `icrc10-types` consumer proves ledger-types-only availability;
+`icrc` encodes/decodes a response; `external-contract-schema` independently checks
+named field types and identical schema-generated reply bytes. They qualify native
+Rust 1.91/current and applicable Wasm profiles. Native macOS and consumer/provider
+installation remain separate. The addition does not fix #73 nesting admission.
+
 ## External endpoint and protocol codecs (#78, #79)
 
-The compatible additions below target **0.7.4; they are not published yet**.
+The compatible additions below are present in **source release 0.7.4**.
+Registry publication has not been verified in this pass.
 Existing external DTOs remain available from their documented earlier suppliers.
 Owned application endpoints, including public ones, remain Wire. Required IC,
 ledger and pre-existing provider interfaces explicitly select Candid.
@@ -51,8 +82,8 @@ it with an empty reply. `composite` explicitly selects composite query mode.
 `"unit"` alone admits missing bytes as a legacy zero-argument envelope; it does
 not supply missing required values. Additional arguments retain quota-bounded
 Candid skipping. Byte, decode-work, skip-work, header and type allowances are all
-caller-selected. None supplies the missing Wasm nesting protection tracked by
-[#73](https://github.com/dragginzgame/ic-platform/issues/73).
+caller-selected. They alone do not limit wire nesting; explicitly select the
+[nesting admission](#external-candid-nesting-qualification-73) below.
 
 Canic can delete Candid declaration/decode/reply emission in
 `canic-macros/src/adapter` and `endpoint/expand`, and replace its local argument
@@ -152,16 +183,64 @@ the original fingerprints without changing their recorded hashes.
 
 ## External Candid nesting qualification (#73)
 
-`DecodeLimits` bounds bytes, work, type count and header size, not Wasm recursion
-depth. The selected Candid 0.10.39 stack check is a no-op on Wasm and exposes no
-depth setter. Installed local Wasm reproduced a decoder trap with 8,192 nested
-`opt` values in an 8,202-byte reply despite finite decoding/skipping quotas of
-1,000,000. This is a confirmed open limitation, not a corrected depth contract.
-The configured helpers may therefore trap rather than return `DecodeError` for
-such inputs. Low-level contract decoders keep upstream/caller-owned budgeting.
-Do not infer stack safety from quotas or move owned Wire RPC back to Candid.
-[#73](https://github.com/dragginzgame/ic-platform/issues/73) owns the reproduction
-and required caller-selected, installed-Wasm depth qualification.
+Pending **0.7.5** adds caller-selected iterative wire admission. Candid's decoder
+and its type identities remain upstream. The existing helpers and low-level APIs
+are unchanged: byte/work/header/type quotas alone do not limit Wasm recursion.
+Candid 0.10.39's stack check is a no-op on Wasm; the original installed reproduction
+uses 8,192 nested `opt` values in only 8,202 bytes and traps at finite quotas.
+
+Select the existing `candid` feature and choose two additional explicit budgets:
+
+```rust,ignore
+use ic_platform::candid::{DecodeLimits, nesting::NestingLimits};
+let nesting = NestingLimits { depth: 64, work: 1_000_000 }; // illustrative policy
+let policy = reply_limits.with_nesting(nesting);
+let value: ExternalReply = policy.decode_exactly_one(&reply_bytes)?;
+// Alternatives retain compatible skipping / tuple decoding:
+// policy.decode_one::<ExternalReply>(&reply_bytes)?;
+// policy.decode_args::<(ExternalReply,)>(&reply_bytes)?;
+```
+
+For a typed protocol operation, call `policy.admit(&reply_bytes)?` immediately
+before its existing `decode(&reply_bytes, reply_limits, arity)`. Use the same
+original bytes and limits. Admission does not change arity, authenticate a source,
+return decoded values, or authorize retries. Existing `DecodeLimits` struct
+literals, decoder signatures and exhaustive error matches remain compatible.
+`DecodeError::nesting_error()` and `ArgumentDecodeError::nesting_error()` recover
+an owned `NestingError` typed cause through the existing Candid error variant.
+
+External entrypoint macros may add `nesting = "NESTING"` pointing to a
+`NestingLimits` constant beside their mandatory argument limits/empty policy.
+Guards still run first; scalar size admission still precedes copying, and wire
+admission precedes the upstream decoder and handler. Raw adapters select
+`ArgumentLimits::decode_with_nesting(bytes, empty, nesting)` or
+`endpoint::read_with_nesting(limits, empty, nesting)`. No default is imposed.
+Consumer generators and external reply callers must opt in explicitly.
+
+The walk uses flat type storage and explicit heap stacks. It checks every type
+entry, including unused definitions, then every value, including skipped record
+fields and extra arguments. It allows recursive declarations, bounding actual
+recursive value depth and every simple constructed-type path. Scalars use depth
+zero; empty containers still consume one level. Work charges consumed bytes,
+graph roots/edges and visited values, including zero-byte vector elements; DAG
+path revisits also consume work. Byte/header/type ceilings still apply before
+untrusted allocation. Large byte blobs are not mistaken for nested option tags.
+No recursive visitor, unsafe code, dependencies or wire rewriting is introduced.
+Unsupported future constructors and opaque references fail closed; ordinary
+Candid still validates semantics, UTF-8, subtyping and the expected DTO shape.
+
+This is a **wire-nesting sanity limit**, not universal stack safety for arbitrary
+trusted expected Rust schemas, recursive custom Serde visitors or low-level
+upstream APIs. Those still need consumer qualification. Admission adds an opt-in
+linear value walk plus budgeted type-path traversal before decoding; no speed or
+Wasm-size reduction is claimed. Owned application endpoints remain Wire.
+
+Qualification uses the standalone facade-only `nesting` consumer, existing
+management/ledger/endpoint consumers and the installed raw/owned runtime fixture.
+It covers the original small trap input, exact depth boundaries, unused deep
+record headers, skipped fields/arguments, malformed/truncated inputs, work
+exhaustion and unchanged normal DTO bytes. Native macOS CI and live external
+provider acceptance are separate from local Linux/PocketIC evidence.
 
 ## Host gzip boundary
 
@@ -2466,4 +2545,4 @@ identities and dependency edges must match exactly. The original raw/published
 fixture remains independently selectable. Local Linux/PocketIC evidence and
 native macOS qualification must be reported separately. Neither graph isolation
 nor this wrapper alone proves smaller application Wasm. Candid's unresolved Wasm
-depth limitation (#73) remains in force.
+depth limitation (#73) remains for paths without explicit wire admission.
