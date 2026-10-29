@@ -31,7 +31,7 @@ Read [the current handoff](docs/status/current.md), then
   tests, as requested by the maintainer. Fix failures before proceeding.
 - The maintainer has deferred further hard cuts
   until Canic is live, except the explicitly authorized coordinated owned-endpoint
-  Wire migration in docs/migration.md. Retire its consumed compiler/service
+  Wire migration and minimal Principal/selected ICRC packaging cut in docs/migration.md. Retire its consumed compiler/service
   exports only after consumer adoption; preserve required external Candid paths.
 - The authorized #38 compiler-only retirement shipped in 0.7.0 after the Canic
   Wire caller/qualification audit. Do not restore the JS/TS compiler facade
@@ -132,16 +132,19 @@ dependency; Agent/PocketIC codes keep their external identities.
 
 ## Owned Principal
 
-The maintainer authorized the 0.6 feature split: `principal` selects the owned
-Principal/Account family and external conversions. No default features. Runtime,
-Candid, signature creation and external DTO/client profiles select it explicitly;
+The maintainer authorized narrowing `principal` to owned Principal/Account bytes,
+text and Serde without external Principal or hashing. `principal-external` adds
+registry identity and byte conversions; `principal-self-authenticating` separately
+selects unchanged upstream self-authentication. No default features. Runtime
+selects only the owned capability; Candid, signature creation and external
+DTO/client profiles select external conversions explicitly;
 raw executor/IC0-only profiles exclude application types and their dependencies.
 This supersedes the earlier unconditional availability decision.
 
 The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
 Retain its Apache-2.0 provenance, raw bytes and length-first ordering. Keep parsing
 bounded by the 63-byte text grammar, binary Serde marker-free and range policy
-consumer-owned. Delegate self-authentication to the unchanged upstream crypto
+consumer-owned. Delegate explicitly selected self-authentication to the unchanged upstream crypto
 implementation. External DTO/client principal and error identities remain registry
 types, named explicitly through principal::ExternalPrincipal/ExternalPrincipalError;
 Candid contract types stay external. Do not add Candid to the owned type.
@@ -186,7 +189,12 @@ independently selected external management DTO surface.
 Owned Account/Subaccount accompany Principal under the `principal` feature.
 Preserve effective-zero equality, ordering and hashing, and preserve
 absent versus explicit zero fields during serialization and external conversion.
-Retain Apache provenance and the existing external ledger DTO identity. No Candid,
+Retain Apache provenance. The maintainer authorized replacing the broad registry
+ledger package with selected maintained DTOs under the existing feature/module.
+Ledger types/callbacks now have Platform identity; external Candid Principal/Nat,
+Candid/Serde bytes and unchanged upstream value-hash bodies/vectors remain.
+Keep source/license guards; omit unused storage/CBOR and consent-formatting machinery.
+No Candid,
 storage implementation, cryptographic account-identifier derivation or application
 subaccount allocation policy belongs in the owned account surface.
 

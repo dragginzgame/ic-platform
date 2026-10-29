@@ -58,6 +58,7 @@ Changes from the import:
 
 Call, response, cost/error and stable-error types now have Platform identities.
 `Principal` became Platform-owned in 0.3; the 0.4 runtime RejectCode is owned too.
-ExternalPrincipal, external DTOs and certification retain registry identities.
+ExternalPrincipal, management DTOs and certification retain registry identities.
+The selected ledger DTO packaging cut has its own provenance in `../../icrc_ledger_types/NOTICE.md`.
 The initial runtime migration shipped in 0.2; these further breaking changes
 require 0.4. The declared version does not establish registry publication.

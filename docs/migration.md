@@ -1,5 +1,57 @@
 # Candid and runtime ownership
 
+## Minimal Principal and selected ICRC packaging
+
+The maintainer authorized this breaking packaging cut after source release 0.7.6.
+Pending notes use 0.8.0; package versions, publication and consumer adoption are
+separate. This contract supersedes the earlier combined Principal capability and
+registry-ledger Rust identity promises in the historical supplier sections below.
+Registry executor =2.0.0, ic0 =1.2.0 and management DTO =0.11.0 remain unchanged.
+
+`principal` supplies owned Principal/Account bytes, bounded text and Serde without
+the registry `ic_principal`, SHA-2, Candid or runtime. `runtime` and `cdk` select
+only this owned capability. `principal-external` adds the registry Principal/error
+identity and byte conversions, without self-authentication or a codec. Required
+Candid/client/DTO and signature features select the conversion capability.
+
+For a consumer selecting `principal-external`, conversion is still one step:
+
+```rust,ignore
+use ic_platform::{Principal, principal::ExternalPrincipal};
+let owned = Principal::anonymous();
+let external: ExternalPrincipal = owned.into();
+assert_eq!(external.as_slice(), owned.as_slice());
+```
+
+Without that capability, callers can pass `owned.as_slice()` to an external
+constructor at their integration boundary. Select `principal-self-authenticating`
+explicitly to use `Principal::self_authenticating`; its hashing delegates to the
+unchanged registry implementation. The registry conversion dependency selects
+only `convert`; other integration dependencies may independently unify more
+upstream features. No new Candid implementation is added to the owned type.
+
+Keep selecting `icrc-ledger-types` and using the existing flat module and nested
+`icrc21` imports. Platform now maintains only the selected DTOs and helpers from
+upstream 0.2.0, retaining its Apache-2.0 license/provenance. Account, transfer,
+consent, generic value and archive callback Rust identities are Platform-owned.
+Candid Principal/Nat/Int/function and Serde byte identities remain upstream.
+There is no normal or development dependency on the registry ledger package.
+
+Preserve account effective-zero equality/order/hash and absent versus explicit
+zero serialized fields. Legacy Value's Nat64 remains distinct from ICRC3Value.
+The complete imported value-hash bodies, integer encoders and fixed vectors are
+unchanged and guarded by original-source reconstruction. No hash/domain policy,
+storage format or cryptographic implementation is replaced. The selected types
+omit CBOR derives, storage integration, metadata-key helpers and consent display,
+number and time formatting; those methods/traits are no longer supplied.
+
+Frozen schemas from the independent registry encoder cover all 28 selected types,
+including recursive values and typed query callback signatures. Existing byte,
+account and hash vectors remain separate checks. Consumer final graphs, source
+and persisted Serde/callback uses need qualification before adoption. Do not
+normalize or reconstruct retained uncertain requests. No Wasm-size saving or
+live provider acceptance follows from removing package edges alone.
+
 ## Shared ICRC-10 discovery record (pending 0.7.5)
 
 Select `icrc-ledger-types` and import

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.8.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Keep `principal` and the raw runtime independent of the external Principal and
+  hashing dependencies. Select `principal-external` for `.into()` conversions and
+  `principal-self-authenticating` for upstream public-key hashing; required
+  external protocol/client features include the conversion capability.
+- Replace the broad `icrc-ledger-types` dependency with selected maintained DTOs
+  and unchanged upstream value-hashing code. Ledger Rust types and callbacks now
+  have Platform identities; Candid/Serde representations and value hashes remain.
+  Unused CBOR/storage and consent-formatting APIs are no longer supplied.
+  See the [migration contract](docs/migration.md#minimal-principal-and-selected-icrc-packaging).
+
 ## [0.7.6] - 2026-10-29
 
 ### 🧹 Cleanup

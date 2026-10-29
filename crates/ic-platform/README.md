@@ -38,6 +38,14 @@ governed constructors; Memory owns allocation; Testkit owns instrumentation.
 This optional capability adds no Candid or executor and implements no storage.
 See the [substrate contract](../../docs/migration.md#stable-structures-substrate).
 
+Select `principal` for owned Principal/Account bytes, text and Serde without
+external Principal or hashing. `principal-external` adds registry identity and
+byte-copy `.into()` conversions; `principal-self-authenticating` separately adds
+unchanged upstream self-authentication. External protocol/client features select
+conversions automatically. The selected ledger DTOs now have Platform identities
+and omit the upstream package, storage/CBOR adapters and consent formatting. See
+the [packaging migration](../../docs/migration.md#minimal-principal-and-selected-icrc-packaging).
+
 For raw calls and system/task adapters, select `runtime` and keep the existing
 `ic_platform::cdk::{api, call, futures, stable}` imports. Select `cdk` when the
 package also owns generated entrypoints; it includes `runtime`. Both use the
@@ -61,12 +69,12 @@ signature creation and external DTO/client/parser profiles include it.
 No features are enabled by default; executor/IC0-only builds omit application
 types and their Serde, text and cryptographic dependencies.
 
-Enable `icrc-ledger-types` for `ic_platform::icrc_ledger_types`, selecting upstream
-0.2.0 without default/storage features. The explicit flat surface is `Account`,
+Enable `icrc-ledger-types` for `ic_platform::icrc_ledger_types`, maintained from
+selected upstream 0.2.0 sources without the registry ledger package. The explicit flat surface is `Account`,
 `MetadataValue`, `Value`, `ICRC3Value`, `TransferError`, `AllowanceArgs`, `Allowance`,
 `GetArchivesArgs`, `ICRC3ArchiveInfo`, `QueryArchiveFn`, `ArchivedBlocks`,
 `BlockWithId`, `GetBlocksRequest`, `GetBlocksResult`, `ICRC3DataCertificate` and
-`SupportedBlockType`. These preserve upstream identities, external Candid formats,
+`SupportedBlockType`. These have Platform identities and preserve external Candid formats,
 account/text semantics and value hashes. Select `candid` separately for Platform
 encoding/decoding. Pending 0.7.5 also supplies
 `icrc_ledger_types::icrc10::SupportedStandard { name, url }`, Platform's passive
@@ -154,15 +162,16 @@ application-wide requirement. Principal-only users import `ic_platform::Principa
 with the `principal` feature, without declaring `ic_principal` directly. In the released
 0.3 migration the root type and `PrincipalError` are Platform-owned. Required
 Candid DTOs use `candid::contract::Principal`, which remains the original registry
-type. `principal::{ExternalPrincipal, ExternalPrincipalError}` provides that
+type. Selecting `principal-external` supplies `principal::{ExternalPrincipal, ExternalPrincipalError}` for that
 explicit external identity without requiring Candid. Convert principals with
 `.into()` at the client/DTO boundary; errors are distinct types.
 
 Owned parsing rejects text longer than 63 bytes before copying, retains uppercase
 acceptance and dash validation, and formats using stack buffers. Binary Serde
 uses identical raw bytes for borrowed and owned buffers. No generic range-step
-implementation or Candid trait/marker handling is provided. Self-authentication
-delegates to the original upstream implementation; no cryptographic code changes.
+implementation or Candid trait/marker handling is provided. Explicitly select
+`principal-self-authenticating` for the original upstream implementation;
+the base owned type and runtime do not acquire hashing.
 
 Use `candid::decoder::{DecoderConfig, IDLDeserialize, decode_one_with_config,
 decode_args_with_config, decode_one, decode_args}` for existing low-level configuration and staged
@@ -309,8 +318,8 @@ their 300-second default and original cycle/timeout/error behavior.
 
 Call/response/future, cost/performance/error and stable-error types now have
 Platform identities; upstream direct-type equality is not retained. Principal
-and runtime RejectCode are owned too. External DTO/Principal, BLS and certification
-identities remain upstream. The 0.4 release changes signature-key identity as
+and runtime RejectCode are owned too. Management DTO/Principal, BLS and certification
+identities remain upstream; the selected ledger DTOs have Platform identities. The 0.4 release changes signature-key identity as
 documented above.
 The generator and imported non-cryptographic runtime source retain Apache-2.0
 with provenance; the combined package is MIT AND Apache-2.0. No executor or

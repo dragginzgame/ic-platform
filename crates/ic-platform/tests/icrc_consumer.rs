@@ -36,7 +36,7 @@ where
     bytes
 }
 
-/// Exercise upstream identities, account semantics, hashes, archive callbacks and bytes.
+/// Exercise selected DTOs, account semantics, upstream hashes, archive callbacks and bytes.
 pub fn roundtrip() {
     let standard = ic_platform::icrc_ledger_types::icrc10::SupportedStandard {
         name: "ICRC-10".into(),
@@ -136,7 +136,7 @@ pub fn roundtrip() {
 }
 
 #[test]
-fn ledger_dtos_preserve_wire_hashes_and_type_identities() {
+fn ledger_dtos_preserve_wire_hashes_and_callback_types() {
     roundtrip();
 }
 

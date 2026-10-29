@@ -13,6 +13,20 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+The authorized pending 0.8 packaging cut makes `principal` independent of
+`ic_principal` and SHA-2. `principal-external` adds registry identity and byte
+conversions; `principal-self-authenticating` explicitly adds unchanged upstream
+hashing. Runtime selects only the owned capability. Required external integrations
+select conversions automatically.
+
+The `icrc-ledger-types` feature now supplies selected Platform-maintained DTOs
+and unchanged imported value hashing, without the registry ledger package,
+CBOR/storage adapters or consent-formatting machinery. External Candid/Serde
+representations remain; ledger Rust types and callbacks now have Platform identity.
+Original source/license fingerprints and an independently frozen 28-type schema
+qualify this cut; see the [packaging contract](migration.md#minimal-principal-and-selected-icrc-packaging).
+Earlier supplier/adoption observations below retain their historical scope.
+
 Pending 0.7.5 adds `icrc_ledger_types::icrc10::SupportedStandard` under existing
 `icrc-ledger-types`. Platform maintains the named external discovery record from
 ICRC protocol facts; it is not a registry Rust identity. The feature now names
@@ -124,14 +138,14 @@ API changes or automatically establish whether sibling source still uses an API.
 | Upstream / owned code | Public surface and source | Observed consumers | Maintenance responsibility |
 | --- | --- | --- | --- |
 | `blake3` | optional `blake3::{hash,Hasher,Hash}` | IcyDB currently uses upstream directly for predicate fingerprints; adoption remains consumer-owned | Platform selects unchanged upstream hashing with `std` only. Consumers own domain/format policy; no SHA-256 protocol replacement or size saving is implied. |
-| `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting, account semantics and conversions. External principal identity and self-authentication crypto remain upstream. |
+| `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting and account semantics. External Principal conversions and upstream self-authentication are separate explicit features; owned-only graphs exclude both. |
 | `ic0`, `ic-cdk-executor`; imported CDK adapters and owned generator | `ic0`, `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters | Platform maintains non-crypto adapters/generator. Registry executor and system ABI stay pinned; callback/trap semantics require installed qualification. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
 | `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
 | `pocket-ic` | native `pocket_ic` client/DTO identities | Tooling Testkit `src/{lib.rs,pic/transport.rs}` | Upstream simulator client; Testkit owns server provisioning, compatibility, lifecycle and transport policy. |
 | `ic-management-canister-types` | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
-| `icrc-ledger-types` | `icrc_ledger_types` account/metadata/transfer/consent/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Upstream external ledger formats, distinct from owned Account. No ledger/storage policy in Platform. |
+| Selected imported ICRC 0.2.0 declarations/value helpers | `icrc_ledger_types` account/metadata/transfer/consent/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Platform maintains selected types and callbacks; external wire/Serde representations and unchanged upstream hashes remain. Registry ledger/CBOR/storage and consent-formatting dependencies are removed. No ledger/storage policy. |
 | `ic-certification` | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Upstream tree/hash implementations. Host owns bounded CBOR decoding; consumers own trust roots and verification policy. |
 | `ic-verify-bls-signature` | `bls`; imported verifier dependency | Auth and Canic test keys; Auth canister verification | Upstream cryptography unchanged. No in-house primitive replacement. |
 | `k256`, `curve25519-dalek`, `ed25519-dalek` | `ecdsa`, `ed25519` | Auth `src/{chain_key_signature,portable_signature}.rs`; Canic tests | General-purpose upstream crypto, not DFINITY-only code. Platform controls selected identities/features, not algorithms. |
@@ -204,14 +218,14 @@ report; retain the existing graph, pin and imported-source gates.
 | Package | Feature | Enables |
 | --- | --- | --- |
 | ic-call | default |  |
-| ic-platform | agent | dep:ic-agent, principal |
+| ic-platform | agent | dep:ic-agent, principal-external |
 | ic-platform | blake3 | dep:blake3 |
 | ic-platform | bls | dep:ic-verify-bls-signature |
-| ic-platform | candid | candid/bignum, dep:candid, principal |
+| ic-platform | candid | candid/bignum, dep:candid, principal-external |
 | ic-platform | candid-endpoint | candid, cdk |
-| ic-platform | candid-parser | dep:candid_parser, principal |
+| ic-platform | candid-parser | dep:candid_parser, principal-external |
 | ic-platform | candid-service | candid, candid/printer |
-| ic-platform | canister-sig-creation | dep:ic-certification, dep:sha2, principal |
+| ic-platform | canister-sig-creation | dep:ic-certification, dep:sha2, principal-external |
 | ic-platform | cdk | dep:ic-platform-macros, runtime |
 | ic-platform | certification | dep:ic-certification |
 | ic-platform | certified-assets-types | candid |
@@ -224,13 +238,15 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | gzip | dep:ic-host-artifacts |
 | ic-platform | ic0 | dep:ic0 |
 | ic-platform | icp-ledger-types | candid |
-| ic-platform | icrc-ledger-types | dep:candid, dep:icrc-ledger-types, principal |
-| ic-platform | management-canister-types | dep:ic-management-canister-types, principal |
+| ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
+| ic-platform | management-canister-types | dep:ic-management-canister-types, principal-external |
 | ic-platform | nns-registry-types | candid |
-| ic-platform | pocket-ic | dep:pocket-ic, principal |
-| ic-platform | principal | dep:crc32fast, dep:data-encoding, dep:ic_principal, dep:serde, dep:thiserror |
+| ic-platform | pocket-ic | dep:pocket-ic, principal-external |
+| ic-platform | principal | dep:crc32fast, dep:data-encoding, dep:serde, dep:thiserror |
+| ic-platform | principal-external | dep:ic_principal, principal |
+| ic-platform | principal-self-authenticating | ic_principal/self_authenticating, principal-external |
 | ic-platform | runtime | dep:pin-project-lite, dep:thiserror, executor, ic0, principal |
-| ic-platform | secp256k1 | dep:ic-secp256k1, principal |
+| ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
 | ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor |
 | ic-platform | stable-structures | dep:ic-stable-structures |
 | ic-platform | wire-schema | dep:ic-wire-metadata, dep:serde_json, principal |
@@ -246,6 +262,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | curve25519-dalek | ^4.1.3 | normal | all | true | false |  |
 | ic-platform | data-encoding | ^2.11 | normal | all | true | true |  |
 | ic-platform | ed25519-dalek | ^2.2 | normal | all | true | false |  |
+| ic-platform | hex | ^0.4.3 | normal | all | true | true |  |
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
 | ic-platform | ic-cdk-executor | =2.0.0 | normal | all | true | true |  |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
@@ -258,9 +275,10 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
 | ic-platform | ic-wire | ^0.7.19 | normal | cfg(not(target_family = "wasm")) | true | false | typescript |
 | ic-platform | ic0 | =1.2.0 | normal | all | true | true |  |
-| ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert, self_authenticating, serde |
-| ic-platform | icrc-ledger-types | ^0.2.0 | normal | all | true | false |  |
+| ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert |
 | ic-platform | k256 | ^0.13.4 | normal | all | true | false | ecdsa |
+| ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
+| ic-platform | num-traits | ^0.2.19 | normal | all | true | true |  |
 | ic-platform | pin-project-lite | ^0.2.17 | normal | all | true | true |  |
 | ic-platform | pocket-ic | ^16.1.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | serde | ^1.0 | normal | all | true | false | alloc, derive |

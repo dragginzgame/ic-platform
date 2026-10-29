@@ -22,7 +22,13 @@ executor|ic_principal v0.1.5|reject
 ic0|serde v1.0.229|reject
 executor,ic0|sha2 v0.10.9|reject
 executor,ic0|serde_derive v1.0.229 (proc-macro)|reject
-principal|ic_principal v0.1.5|pass
+principal|ic_principal v0.1.5|reject
+principal-external|ic_principal v0.1.5|pass
+principal-external|sha2 v0.10.9|reject
+principal-self-authenticating|sha2 v0.10.9|pass
+runtime|ic_principal v0.1.5|reject
+runtime|sha2 v0.10.9|reject
+cdk|digest v0.10.7|reject
 principal,executor|serde v1.0.229|pass
 canister-sig-creation|ic-representation-independent-hash v3.2.0|reject
 signature-verification|ic-representation-independent-hash v3.2.0|reject
@@ -121,7 +127,9 @@ certification|ic-certification v3.2.1|reject
 none|ic-management-canister-types v0.11.0|reject
 management-canister-types|ic-management-canister-types v0.11.0|pass
 none|icrc-ledger-types v0.2.0|reject
-icrc-ledger-types|icrc-ledger-types v0.2.0|pass
+icrc-ledger-types|icrc-ledger-types v0.2.0|reject
+icrc-ledger-types|icrc-cbor v0.1.0|reject
+icrc-ledger-types|pretty v0.12.5|reject
 icrc-ledger-types|ic-stable-structures v0.7.2|reject
 stable-structures|ic-stable-structures v0.7.2|pass
 stable-structures|ic-stable-structures v0.7.3|reject

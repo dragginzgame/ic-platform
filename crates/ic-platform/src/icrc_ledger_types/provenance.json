@@ -1,0 +1,20 @@
+{
+  "upstream_package": "icrc-ledger-types",
+  "upstream_version": "0.2.0",
+  "upstream_revision": "3fe742eebad228950d1029d1fc14079a2ea9f1e5",
+  "original_files_sha256": {
+    "icrc/generic_value": "78675ea07a17b4dac8fc528c3f719c8c07766e90cd9218bd07866ac334b359b0",
+    "icrc/generic_metadata_value": "c5fef52fb0686a5fdba17c53cb8b328646715c96bca7914cb3955177a929646f",
+    "icrc1/account": "a902594bc3b4a5d7ffe3616aa9b4079d615dc9877dc45a245163668edba479dd",
+    "icrc1/transfer": "9467d9c32184714f14042c20323b7719d9fb9d846c9101aa9e54469cc923d998",
+    "icrc2/allowance": "ed4f09e09228c6fdcc49a829ee6d981232cc9928c499d9fce1072f761a27c317",
+    "icrc3/archive": "6916b2cc35880b967ce1a4148466a32b8f244a53b5a8738bb4f452958961fcac",
+    "icrc3/blocks": "9cb05980ae001724eb9dde9010a7a8e5b599ce4862a008df6355de9231342ffc",
+    "icrc21/errors": "1f94cc4642cf64059f07fa7e3103f12218bf90144601b5d2578b5c68956eee40",
+    "icrc21/requests": "c226a2a07ee2a7ba6780e6284fb78361fdf5dbff7e05f96c4cf7fe1b0b583ff3",
+    "icrc21/responses": "372c4ef3b5b27b246e398a09506307824723b04dbf4251b6b502b30c883b5c06"
+  },
+  "license_sha256": "6f44e3f228570e343cdb96bd929d1e8c6057ac33b411e47d77427f824e5a96ac",
+  "value_source_fingerprint": "d2ac05959d78324fa627813a75f277d19f4f3016abd35de47f9a0269672cfe22",
+  "reference_schema_sha256": "ce684cfcaad41f96de42b99ba402b94e2bf77033f84ba5b27e79ab34823aa903"
+}

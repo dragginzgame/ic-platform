@@ -250,7 +250,7 @@ pub struct BlockWithId {
 pub struct ArchivedBlocks {
     /// Exact provider ranges, without normalization or automatic merging.
     pub args: Vec<crate::icrc_ledger_types::GetBlocksRequest>,
-    /// Upstream function identity with this provider's complete result schema.
+    /// Typed query function with this provider's complete result schema.
     pub callback: crate::icrc_ledger_types::QueryArchiveFn<
         Vec<crate::icrc_ledger_types::GetBlocksRequest>,
         GetBlocksResult,

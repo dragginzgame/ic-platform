@@ -1,10 +1,11 @@
-//! External ICRC-21 consent DTOs with their original upstream identities.
-//!
-//! This explicit namespace keeps consent Value distinct from the ledger generic
-//! Value. Consumers own consent policy, authentication and endpoint mounting.
+//! Passive external ICRC-21 consent DTOs; consumers own display and consent policy.
 
-pub use icrc_ledger_types::icrc21::errors::{ErrorInfo, Icrc21Error};
-pub use icrc_ledger_types::icrc21::requests::{
+mod errors;
+mod requests;
+mod responses;
+
+pub use errors::{ErrorInfo, Icrc21Error};
+pub use requests::{
     ConsentMessageMetadata, ConsentMessageRequest, ConsentMessageSpec, DisplayMessageType,
 };
-pub use icrc_ledger_types::icrc21::responses::{ConsentInfo, ConsentMessage, FieldsDisplay, Value};
+pub use responses::{ConsentInfo, ConsentMessage, FieldsDisplay, Value};

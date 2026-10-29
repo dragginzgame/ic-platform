@@ -196,9 +196,9 @@ impl FromStr for Account {
     }
 }
 
-/// Original Candid ledger DTO identity, available only with ledger integration.
+/// Selected external Candid ledger DTO, available only with ledger integration.
 #[cfg(feature = "icrc-ledger-types")]
-pub use icrc_ledger_types::icrc1::account::Account as ExternalAccount;
+pub use crate::icrc_ledger_types::Account as ExternalAccount;
 
 #[cfg(feature = "icrc-ledger-types")]
 impl From<ExternalAccount> for Account {

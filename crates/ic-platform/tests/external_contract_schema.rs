@@ -28,6 +28,54 @@ mod tests {
         .unwrap_or_else(|e| panic!("{name}: {e}"));
     }
     #[test]
+    fn selected_icrc_types_match_frozen_registry_schemas() {
+        use ic_platform::icrc_ledger_types::{self as ledger, icrc21};
+        // Generated independently by icrc-ledger-types =0.2.0 and Candid =0.10.39.
+        // This includes recursive values, defaulted fields and query callbacks.
+        let env = env(include_str!("fixtures/icrc-reference.did"));
+        macro_rules! check {
+            ($($name:ident),+ $(,)?) => { $(equal::<ledger::$name>(&env, concat!("Expected", stringify!($name)));)+ };
+        }
+        check!(
+            Account,
+            MetadataValue,
+            Value,
+            ICRC3Value,
+            TransferArg,
+            Memo,
+            TransferError,
+            AllowanceArgs,
+            Allowance,
+            GetArchivesArgs,
+            ICRC3ArchiveInfo,
+            ArchivedBlocks,
+            BlockWithId,
+            GetBlocksRequest,
+            GetBlocksResult,
+            ICRC3DataCertificate,
+            SupportedBlockType
+        );
+        equal::<ledger::QueryArchiveFn<Vec<ledger::GetBlocksRequest>, ledger::GetBlocksResult>>(
+            &env,
+            "ExpectedQueryArchiveFn",
+        );
+        macro_rules! consent {
+            ($($name:ident),+ $(,)?) => { $(equal::<icrc21::$name>(&env, concat!("Expected", stringify!($name)));)+ };
+        }
+        consent!(
+            ConsentMessageMetadata,
+            ConsentMessageRequest,
+            ConsentMessageSpec,
+            DisplayMessageType,
+            ConsentInfo,
+            ConsentMessage,
+            FieldsDisplay,
+            ErrorInfo,
+            Icrc21Error
+        );
+        equal::<icrc21::Value>(&env, "ExpectedConsentValue");
+    }
+    #[test]
     fn icrc10_matches_external_named_records_and_independent_reply_bytes() {
         use ic_platform::{
             candid::{DecodeLimits, decode_exactly_one},

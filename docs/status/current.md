@@ -1,46 +1,50 @@
 # Current handoff
 
-## Pending 0.7.6: compatible complexity cleanup
+## Pending 0.8.0: minimal Principal and selected ICRC packaging
 
-Local HEAD is source release **0.7.5**, `55f4d72`. The uncommitted cleanup batch
-uses **0.7.6** notes because public APIs, external bytes, CLI/request fields,
-decoder errors and caller policies remain compatible. No package version,
-release, publication or consumer adoption is performed. Preserve the unrelated
-local `ic-host-artifacts` lock update from 0.69.10 to 0.69.11.
+Local HEAD is source release **0.7.6**, `8871f67`. The maintainer authorized
+this breaking packaging cut. Package versions remain 0.7.6; pending notes use
+0.8.0. No staging, commit, release, publication or sibling adoption is performed.
+Preserve the pre-existing IC Host Artifacts lock selection; it is unrelated.
 
-Separately, [PR #89](https://github.com/dragginzgame/ic-platform/pull/89) is updated
-at `2e038f9`, stacked on refreshed [PR #88](https://github.com/dragginzgame/ic-platform/pull/88)
-at `8ff4272`. These supply native counter inputs and ordinary module layout, with
-published notes preserved. They exclude this dirty cleanup and are not applied
-here. Hosted checks are pending; integration order remains #88, then #89.
+`principal` now supplies owned Principal/Account bytes, bounded text and Serde
+without registry Principal or hashing. Runtime/CDK select only that capability.
+`principal-external` adds registry identities and byte-copy conversions;
+`principal-self-authenticating` separately selects unchanged upstream hashing.
+Required external protocol/client and signature profiles select conversions.
 
-External endpoint adapters now pass parsed paths/functions to the existing
-generator rather than stringify/reparse them. Single-result and protocol replies
-share decoder setup/finalization while retaining their separate arity decisions.
-The fixed 16-level Candid guard and protected crypto/callback sources are unchanged.
+`icrc-ledger-types` retains its feature/module paths and selected APIs, while
+removing the registry package from normal/development dependencies. Platform owns
+selected DTOs/callbacks; Candid/Serde representations, effective-zero accounts,
+legacy Nat64 and upstream value hashes remain. Storage/CBOR adapters, metadata-key
+helpers and consent formatting are omitted. The complete value/hash source and
+fixed vectors reconstruct original fingerprints after admitted packaging changes.
+Licenses/provenance and all 28 independent frozen registry schemas are retained.
+See the [packaging contract](../migration.md#minimal-principal-and-selected-icrc-packaging).
 
-Native profiler adapters share JSON argument conversion, capture configuration
-and image envelopes. Responses carry their encoding class from the producing
-adapter; stop settings are read under one scope lock. Configuration key discovery
-uses the existing runtime producer instead of parsing Rust macro invocations.
-This deliberately narrows the proposed metadata redesign: unit interpretation
-stays profiler-owned; no new capture metadata contract or replica patch is added.
-The batch also repairs the assembled admission-module path and principal trait
-import exposed by compiling the real native sources.
+Evidence is in `/tmp/platform-dependencies-20261029`; graph receipts are in
+`target/feature-graphs/attempt.FZeIyu`. Full `make clippy` passes before longer
+tests. All 505 routine feature selections pass native/Wasm admission. Eight
+standalone profiles pass native/current and Rust 1.91; applicable profiles also
+compile Wasm (CDK links a cdylib). Independent schema checks pass all 28 selected
+ICRC types, including recursive values and query callbacks. Upstream hash vectors,
+ledger bytes/accounts, seven Principal unit tests and two parser properties pass.
+Inventory/boundary, source/license guards and their mutation refusals pass.
+Strict Rustdoc (all features and owned Principal only), formatting, ShellCheck
+and local documentation links pass.
 
-Current-source MSRV runners and CI derive the compiler from the workspace
-manifest. Published qualification retains its historical compiler. The runtime
-runner shares profile selection across graph admission, artifacts and execution.
-Regression coverage exercises the actual Make recipe with a different floor,
-failure propagation, exact request/image budgets and equivalent macro emission.
+The consumer checks caught a test-only import and missing explicit Candid blob/
+bignum prerequisites; both are repaired, with failed and passing evidence retained.
+No code-size saving, consumer/provider adoption, live IC or native macOS acceptance
+is claimed. Registry executor/ic0, management DTO identity and protected crypto/
+callback sources remain unchanged. Installed runtime was not rerun for packaging.
 
-Evidence is retained in `/tmp/platform-simplify-20261029`. Full `make clippy`
-passed before longer tests. Focused macro (13) and Candid (21) tests pass on Rust
-1.99.1/1.91. Standalone endpoint/external-codec consumers pass native/MSRV/Wasm;
-installed Linux/PocketIC passes both compilers with raw and owned calls using
-fixture `target/cdk-runtime.OAbzt1`. Runtime graphs, strict Rustdoc, protected
-sources, 44 assembler tests, MSRV/Make and Bash 5.2/3.2 runner checks pass.
-No performance or Wasm-size saving is measured or claimed for this batch.
+## Retained 0.7.6 evidence
+
+The complexity cleanup and native provider qualification below are committed in
+the source release; detailed prior handoff/source is preserved at `8871f67`.
+Evidence remains in `/tmp/platform-simplify-20261029`. PR #88/#89 integration,
+provider acceptance and consumer pins retain their separate recorded scope.
 
 ## Native provider qualification
 

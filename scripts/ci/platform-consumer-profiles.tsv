@@ -1,5 +1,7 @@
 executor	executor,ic0	executor_consumer	-	check
 principal	principal	principal	-	check
+principal-external	principal-external	principal_external_consumer	-	check
+principal-self-authenticating	principal-self-authenticating	principal_self_authenticating_consumer	-	check
 ecdsa	ecdsa	ecdsa_consumer	-	check
 blake3	blake3	blake3_consumer	-	check
 ed25519	ed25519	ed25519_consumer	-	check
@@ -25,6 +27,6 @@ pocket-ic	pocket-ic	pocket_ic_consumer	-	check
 stable-structures	stable-structures	stable_structures_consumer	-	check
 external-contracts	cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types	external_contract_consumer	-	check
 asset-contracts	certified-assets-types	asset_contract_consumer	-	check
-external-contract-schema	icrc-ledger-types,cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types,certified-assets-types,candid-parser	external_contract_schema	external-*.did	skip
+external-contract-schema	icrc-ledger-types,cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types,certified-assets-types,candid-parser	external_contract_schema	external-*.did,icrc-reference.did	skip
 external-codecs	candid,management-canister-types,cmc-types,icp-ledger-types,icrc-ledger-types,nns-registry-types,cycles-ledger-types,certified-assets-types	protocol_consumer	management-info-*.hex	check
 candid-endpoint	candid-endpoint,candid-service	candid_endpoint_consumer	-	build

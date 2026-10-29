@@ -1,5 +1,12 @@
 # External canister DTO contracts
 
+The authorized pending 0.8 packaging cut also replaces the registry ICRC package
+with selected maintained DTOs and unchanged upstream value hashes. Ledger Rust
+identities, including query callbacks, now belong to Platform; external wire and
+Serde representations remain. The [packaging contract](migration.md#minimal-principal-and-selected-icrc-packaging)
+supersedes the older registry-identity statements below. Management DTO identities
+remain exactly upstream 0.11.0.
+
 Pending 0.7.5 adds the shared
 `icrc_ledger_types::icrc10::SupportedStandard { name, url }` external record under
 `icrc-ledger-types`, with no automatic endpoint or standards advertisement.
