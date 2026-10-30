@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.6]
+
+### ⬆️ Dependencies
+
+- Adopt published Metrics 0.18.0 in the Profiler native source profile's Cargo and
+  Bazel inputs. Preserve arithmetic-only features, existing logical report bytes,
+  Wire 0.7.23, Host 0.70.3 and gzip-only Platform 0.8.3 selections.
+
 ## [0.8.5] - 2026-10-30
 
 ## [0.8.4] - 2026-10-30

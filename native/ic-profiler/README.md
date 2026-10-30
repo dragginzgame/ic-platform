@@ -48,7 +48,7 @@ cadence; it changes no scheduler calculation or charging behavior.
 
 Adapters stay inside the provider's IC workspace. The consumer recorder selects
 only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
-Bazel inputs. The recorder also consumes published IC Metrics 0.17 scalar
+Bazel inputs. The recorder also consumes published IC Metrics 0.18 scalar
 arithmetic; this provider owns its native workspace and Bazel locks, distinct
 from the IC workspace's internal `ic-metrics` package. Neither measurement
 counters nor the gzip facade own charging policy. The gzip facade delegates to
