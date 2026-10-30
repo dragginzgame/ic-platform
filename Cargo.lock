@@ -1431,7 +1431,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.9.1"
+version = "0.10.0"
 dependencies = [
  "assert_matches",
  "blake3",
@@ -1471,7 +1471,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.9.1"
+version = "0.10.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1480,7 +1480,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.9.1"
+version = "0.10.0"
 
 [[package]]
 name = "ic-representation-independent-hash"
