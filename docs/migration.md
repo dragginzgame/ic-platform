@@ -1,5 +1,17 @@
 # Candid and runtime ownership
 
+## Native Wire 0.8 metadata
+
+The pending 0.10.0 line implements IC Wire 0.8's native TypeScript schema trait
+for Platform's Principal and Account. Consumers selecting `wire-schema` must
+align their direct Wire dependency to 0.8; a Wire 0.7 trait bound is a different
+Rust identity and is no longer supplied. No compatibility implementation is kept.
+The existing schema/frame and independent browser consumer tests retain their
+byte, length and malformed-input checks. Wire metadata remains native-only and
+does not enter the canister runtime graph. This change does not modify the
+Principal representation, Account representation or either serialization format.
+Package versions remain unchanged until the maintainer prepares the minor release.
+
 ## Selected canister management DTOs
 
 The maintainer authorized the canister-used subset of management 0.11.0 for the

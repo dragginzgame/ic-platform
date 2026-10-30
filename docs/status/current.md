@@ -1,5 +1,20 @@
 # Current handoff
 
+## Pending native Wire 0.8 metadata alignment
+
+[#105](https://github.com/dragginzgame/ic-platform/issues/105) owns the native
+Principal/Account schema alignment with published Wire 0.8. The isolated fix
+updates both workspace Wire selections and their lock, preserving implementation
+source and native-only metadata packaging. Existing schema/frame tests and the
+independent Rust 1.91/TypeScript consumer pass, including malformed-input and
+subaccount cases. Full owner Clippy, Wasm `wire-schema` compilation, manifest
+inventory, dependency boundaries and documentation links pass.
+
+The optional public schema trait changes Rust identity, so notes select pending
+0.10.0 while package metadata remains 0.9.1. Auth and Blob consumer adoption needs
+a compatible published supplier; this contribution does not publish or adopt it
+in sibling working checkouts. See the [migration](../migration.md#native-wire-08-metadata).
+
 ## Pending 0.9.1: runtime-only singleton packaging
 
 Platform 0.9.0 is released at `47dae924`; workspace versions remain 0.9.0.

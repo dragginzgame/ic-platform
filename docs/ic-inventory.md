@@ -316,7 +316,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |
 | ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
-| ic-platform | ic-wire | ^0.7.22 | normal | cfg(not(target_family = "wasm")) | true | false | typescript |
+| ic-platform | ic-wire | ^0.8.0 | normal | cfg(not(target_family = "wasm")) | true | false | typescript |
 | ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert |
 | ic-platform | k256 | ^0.13.4 | normal | all | true | false | ecdsa |
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |

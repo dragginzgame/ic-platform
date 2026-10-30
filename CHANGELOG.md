@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.10.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Align native `wire-schema` implementations for Principal and Account with
+  IC Wire 0.8. Consumers using those implementations must adopt Wire 0.8 together;
+  the schema, encoded bytes and native-only feature boundary stay unchanged.
+  [Migration](docs/migration.md#native-wire-08-metadata)
+  ([#105](https://github.com/dragginzgame/ic-platform/issues/105)).
+
 ## [0.9.1] - 2026-10-30
 
 ### 🐛 Fixed
