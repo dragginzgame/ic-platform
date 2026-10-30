@@ -1,6 +1,8 @@
 // Imported from ic-cdk 0.20.3; Apache-2.0. See ../NOTICE.md.
 //! Reviewed non-cryptographic System API adapters.
 
+use crate::ic0::upstream as ic0;
+
 use crate::Principal;
 
 /// Gets the message argument data.

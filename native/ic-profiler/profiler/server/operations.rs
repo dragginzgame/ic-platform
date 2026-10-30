@@ -54,7 +54,7 @@ impl Operation for CaptureMemorySnapshot {
         let Some(canister) = state.canister_state(&self.canister_id) else {
             return OpOut::Error(PocketIcError::CanisterNotFound(self.canister_id));
         };
-        let (generation, last_sequence, last_runtime_sequence, tracing_enabled) = pic
+        let cursor = pic
             .subnets
             .memory_access_trace_recorder
             .snapshot_cursor(self.canister_id);
@@ -67,10 +67,10 @@ impl Operation for CaptureMemorySnapshot {
             state.metadata.batch_time.as_nanos_since_unix_epoch(),
             canister.execution_state.as_ref(),
             self.label.clone(),
-            generation,
-            last_sequence,
-            last_runtime_sequence,
-            tracing_enabled,
+            cursor.generation,
+            cursor.last_sequence,
+            cursor.last_runtime_sequence,
+            cursor.tracing,
         ) {
             Ok(snapshot) => match serde_json::to_vec(snapshot.metadata()) {
                 Ok(bytes) => OpOut::Bytes(bytes),

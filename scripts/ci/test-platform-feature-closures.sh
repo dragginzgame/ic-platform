@@ -86,11 +86,11 @@ done
 # independent synthetic admission/refusal cases above. No graph/build is run.
 cargo metadata --no-deps --format-version 1 --locked --offline > "$fixture/metadata.json"
 actual="$(printf '%s' '["none","gzip","executor","executor,gzip","agent","agent,gzip"]' | "$jq" -r --arg target wasm32-unknown-unknown --slurpfile metadata "$fixture/metadata.json" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
-expected="$(printf 'none\tnone\ngzip\tnone\nexecutor\texecutor\nexecutor,gzip\texecutor\nagent\tprincipal,principal-external\nagent,gzip\tprincipal,principal-external')"
+expected="$(printf 'none\tnone\ngzip\tnone\nexecutor\texecutor,ic0\nexecutor,gzip\texecutor,ic0\nagent\tprincipal,principal-external\nagent,gzip\tprincipal,principal-external')"
 [[ "$actual" == "$expected" ]] || { echo 'Actual Cargo gzip closure failed' >&2; exit 1; }
 echo 'Gzip native/Wasm closures and explicit prerequisite guards passed'
 actual="$(printf '%s' '["none","executor","agent","agent,executor","wire-schema"]' | "$jq" -r --arg target wasm32-unknown-unknown --slurpfile metadata "$fixture/metadata.json" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
-expected="$(printf 'none\tnone\nexecutor\texecutor\nagent\tprincipal,principal-external\nagent,executor\texecutor,principal,principal-external\nwire-schema\tprincipal')"
+expected="$(printf 'none\tnone\nexecutor\texecutor,ic0\nagent\tprincipal,principal-external\nagent,executor\texecutor,ic0,principal,principal-external\nwire-schema\tprincipal')"
 [[ "$actual" == "$expected" ]] || { echo 'Actual Cargo native-leaf closure failed' >&2; exit 1; }
 echo 'Actual native/Wasm closures and explicit prerequisite guards passed'
 

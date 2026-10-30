@@ -102,8 +102,13 @@ Backup's snapshot and status contract also exports `CanisterIdRecord`,
 `UploadCanisterSnapshotMetadataArgs` and `UploadCanisterSnapshotMetadataResult`.
 Canic's snapshot-delete request additionally uses the same feature's explicit
 `DeleteCanisterSnapshotArgs` export, with the original canister/snapshot fields.
-These retain the external Candid format and upstream type identity on native and
-Wasm targets. This feature brings transitive Candid; select Platform's `candid`
+Native targets retain this registry 0.11.0 surface and its type identities.
+Wasm targets use 43 Platform-owned exports selected from sibling canister use;
+the 14 host-only snapshot-transfer exports are absent. Complete nested types and
+external Candid bytes are retained. See the [management migration](../../docs/migration.md#selected-canister-management-dtos)
+and `src/management_canister_types/maintained/provenance.json` for the exact lists.
+The Wasm graph excludes the registry DTO crate and implicit Candid printer.
+This feature brings Candid; select Platform's `candid`
 feature separately for encoders/decoders. It selects no executor, Agent or parser.
 Consumers retain HTTP bounds, cycle pricing, transforms, call execution and retry
 policy. History consumers retain bounded calls, reply/work limits, change counts,
@@ -267,17 +272,20 @@ partial projections. The `candid` feature includes upstream big-number support.
 Use `Result<T, contract::Error>` for encoding errors and `DecodeError` for bounded
 decoding failures. Existing wire labels and caller-owned limits remain unchanged.
 
-`executor` exports the exact selected task/context types and operations. It owns
-no independent task registry. Callers must preserve context placement, callbacks
+`executor` exports Platform-owned task/context types and operations from its
+single maintained task registry. Callers must preserve context placement, callbacks
 and trap cleanup; native compilation does not qualify installed IC behavior.
-Its published dependency constraint is `ic-cdk-executor = "=2.0.0"`.
+The implementation is maintained from ic-cdk-executor 2.0.0, with protected-query
+wake routing, wake coalescing, cached wakers and task-bookkeeping reclamation.
+The Cargo singleton guard rejects old registry executors and multiple new Platform
+versions; coordinate Timers/application adoption of the same Platform minor line.
 
 Enable `ic0` for `ic_platform::ic0`: the explicit IC 1.2.0 calls used by Timers
 for time/version/counters/stable page count, one timer, self/caller/argument
 copying, replies/reject codes, cycles/costs and call submission/cleanup, plus
 Testkit's `debug_print(&[u8])`. Debug output retains upstream byte/trap behavior;
-marker formatting, labels and byte limits belong to the caller. The exact
-`=1.2.0` dependency preserves upstream safe/unsafe callback signatures and traps.
+marker formatting, labels and byte limits belong to the caller. The embedded
+1.2.0 implementation preserves upstream safe/unsafe callback signatures and traps.
 It selects neither Candid nor an executor and installs no exports, timer or storage
 owner. Timers must select both `executor` and `ic0`; changing either qualified
 identity requires renewed combined callback/trap/cancellation/upgrade evidence.
@@ -292,8 +300,8 @@ replace CDK's Principal/Vec convenience helpers, macros or call/task lifecycle.
 
 Enable `cdk` for the Candid-free `ic_platform::cdk` runtime: explicit-codec
 entrypoints, raw calls, system helpers, protected spawning and raw stable-byte
-operations. Full `ic-cdk` and upstream macros are not dependencies. Registry
-executor =2.0.0 and ic0 =1.2.0 remain shared with Timers.
+operations. Full `ic-cdk` and upstream macros are not dependencies. The embedded
+executor and IC0 remain shared with Timers; neither registry package is required.
 
 All controlled endpoints use Wire. Query/update macros require `decode_with`
 (including unit RPCs) and `encode_with` or `manual_reply`. Use a guard for

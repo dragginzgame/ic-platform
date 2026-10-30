@@ -7,7 +7,7 @@ rust-version.workspace = true
 
 [features]
 ic-call = []
-external-candid = ["ic-platform/candid"]
+external-candid = ["ic-platform/candid", "ic-platform/management-canister-types"]
 external-adapters = ["external-candid"]
 
 [lib]

@@ -1376,17 +1376,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-cdk-executor"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33716b730ded33690b8a704bff3533fda87d229e58046823647d28816e9bcee7"
-dependencies = [
- "ic0",
- "slotmap",
- "smallvec",
-]
-
-[[package]]
 name = "ic-certification"
 version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1417,9 +1406,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.70.4"
+version = "0.70.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff28726294d5d7516a32823f49c9947de3f41e4729f2e9ad63db51f01e8bb57a"
+checksum = "7c09ffb7d87f4099b984b9c08d351ab4a910c03913ebbd70729f4dacb8ab72fe"
 dependencies = [
  "flate2",
  "sha2 0.10.9",
@@ -1461,7 +1450,6 @@ dependencies = [
  "ed25519-dalek",
  "hex",
  "ic-agent",
- "ic-cdk-executor",
  "ic-certification",
  "ic-host-artifacts",
  "ic-management-canister-types 0.11.0",
@@ -1471,7 +1459,6 @@ dependencies = [
  "ic-stable-structures",
  "ic-verify-bls-signature",
  "ic-wire",
- "ic0",
  "ic_principal",
  "k256",
  "num-bigint",
@@ -1484,6 +1471,7 @@ dependencies = [
  "serde_json",
  "serde_test",
  "sha2 0.10.9",
+ "slotmap",
  "thiserror 2.0.18",
 ]
 
@@ -1590,12 +1578,6 @@ dependencies = [
  "quote",
  "syn 3.0.9",
 ]
-
-[[package]]
-name = "ic0"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f05349d5c51ab6cc962c8963f877f826997ee6b737c6be3aafc9779eb8a4dd05"
 
 [[package]]
 name = "ic_bls12_381"

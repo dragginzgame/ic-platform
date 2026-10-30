@@ -8,7 +8,22 @@ use ic_platform::{
 use std::cell::Cell;
 #[cfg(not(feature = "ic-call"))]
 use transport::Execute as _;
+#[cfg(feature = "external-candid")]
+mod management_proof;
 mod transport;
+
+#[cfg(feature = "external-candid")]
+#[ic_platform::cdk::query(
+    decode_with = "codec::decode::<_, { protocol::Method::ManagementProof as u64 }>",
+    encode_with = "codec::encode::<_, { protocol::Method::ManagementProof as u64 }>"
+)]
+fn management_proof() -> u8 {
+    management_proof::roundtrip();
+    management_proof::history_roundtrip();
+    management_proof::canister_snapshot_status_roundtrip();
+    management_proof::lifecycle_settings_and_ecdsa_contracts();
+    4
+}
 
 thread_local! {
     static VALUE: Cell<u64> = const { Cell::new(0) };
@@ -68,6 +83,31 @@ fn after_upgrade(value: u64) {
 )]
 fn value() -> u64 {
     VALUE.get()
+}
+
+// A query must drain protected wakes produced while its own future is polling.
+#[ic_platform::cdk::query(
+    guard = "codec::admit",
+    decode_with = "codec::decode::<_, { protocol::Method::SelfWakeQuery as u64 }>",
+    encode_with = "codec::encode::<_, { protocol::Method::SelfWakeQuery as u64 }>"
+)]
+async fn self_wake_query() -> u64 {
+    let mut polls = 0;
+    let mut saved: Option<std::task::Waker> = None;
+    std::future::poll_fn(|cx| {
+        polls += 1;
+        if let Some(first) = &saved {
+            assert!(first.will_wake(cx.waker()));
+            std::task::Poll::Ready(polls)
+        } else {
+            saved = Some(cx.waker().clone());
+            for _ in 0..32 {
+                cx.waker().wake_by_ref();
+            }
+            std::task::Poll::Pending
+        }
+    })
+    .await
 }
 
 #[ic_platform::cdk::query(

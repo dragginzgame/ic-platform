@@ -15,6 +15,18 @@ for mutation in cleanup protected license; do
     fi
 done
 printf 'Cleanup, protected-spawn and license mutation refusals passed.\n'
+for module in ic0/upstream executor/runtime; do
+    for file in mod.rs LICENSE-APACHE; do
+        destination="$fixture/embedded-${module//\//-}-${file//./-}"
+        mkdir -p "$destination/ic0" "$destination/executor"
+        cp -R "$root/crates/ic-platform/src/ic0/upstream" "$destination/ic0/"
+        cp -R "$root/crates/ic-platform/src/executor/runtime" "$destination/executor/"
+        printf '\nmutated source\n' >> "$destination/$module/$file"
+        if bash "$root/scripts/ci/check-embedded-runtime-source.sh" "$destination" > "$fixture/log" 2>&1; then
+            echo "Unexpectedly admitted embedded runtime mutation: $module/$file" >&2; exit 1
+        fi
+    done
+done
 for part in creation verification; do
     for file in mod.rs LICENSE; do
         destination="$fixture/signature-$part-${file//./-}"
@@ -39,3 +51,12 @@ for mutation in missing duplicate moved; do
     fi
 done
 printf 'Missing, duplicate and moved DER admission calls are refused.\n'
+for file in mod.rs LICENSE-APACHE; do
+    destination="$fixture/management-${file//./-}"
+    cp -R "$root/crates/ic-platform/src/management_canister_types/maintained" "$destination"
+    printf '\nmutated\n' >> "$destination/$file"
+    if bash "$root/scripts/ci/check-management-source.sh" "$destination" > "$fixture/log" 2>&1; then
+        echo "Unexpectedly admitted management source/license mutation: $file" >&2; exit 1
+    fi
+done
+printf 'Management DTO source and license mutation refusals passed.\n'

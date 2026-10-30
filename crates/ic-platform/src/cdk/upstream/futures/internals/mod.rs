@@ -3,6 +3,8 @@
 //!
 //! You do not need to use this module unless you are deliberately avoiding the attribute macros.
 
+use crate::executor as ic_cdk_executor;
+
 /// Execute an update function in a context that allows calling [`spawn`](super::spawn).
 ///
 /// You do not need to worry about this function unless you are avoiding the attribute macros.

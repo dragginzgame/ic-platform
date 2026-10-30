@@ -2,7 +2,10 @@
 //! Raw inter-canister calls with the imported CDK 0.20.3 callback state machine.
 //!
 //! Callers supply explicit Wire frames or separately encoded external Candid.
-//! The registry executor remains shared; this module performs no codec work.
+//! Platform's executor is shared with Timers; this module performs no codec work.
+
+use crate::executor as ic_cdk_executor;
+use crate::ic0::upstream as ic0;
 
 use super::api::{cost_call, msg_arg_data, msg_reject_code, msg_reject_msg};
 use super::{api::trap, futures::is_recovering_from_trap};

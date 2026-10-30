@@ -99,63 +99,49 @@ enum MethodType {
     OnLowWasmMemory,
 }
 
+struct MethodInfo {
+    name: &'static str,
+    lifecycle: bool,
+    arguments: bool,
+    persistent: bool,
+}
+
 impl MethodType {
-    /// A lifecycle method is a method that is called by the system and not by the user.
-    /// So far, `update` and `query` are the only methods that are not lifecycle methods.
-    ///
-    /// We have a few assumptions for lifecycle methods:
-    /// - They cannot have a return value.
-    /// - The export name is prefixed with `canister_`, e.g. `init` => `canister_init`.
-    pub fn is_lifecycle(&self) -> bool {
-        match self {
-            MethodType::Init
-            | MethodType::PreUpgrade
-            | MethodType::PostUpgrade
-            | MethodType::Heartbeat
-            | MethodType::InspectMessage
-            | MethodType::OnLowWasmMemory => true,
-            MethodType::Update | MethodType::Query => false,
+    fn info(self) -> MethodInfo {
+        let (name, lifecycle, arguments, persistent) = match self {
+            Self::Init => ("init", true, true, true),
+            Self::PreUpgrade => ("pre_upgrade", true, false, true),
+            Self::PostUpgrade => ("post_upgrade", true, true, true),
+            Self::Update => ("update", false, true, true),
+            Self::Query => ("query", false, true, false),
+            Self::Heartbeat => ("heartbeat", true, false, true),
+            Self::InspectMessage => ("inspect_message", true, false, false),
+            Self::OnLowWasmMemory => ("on_low_wasm_memory", true, false, true),
+        };
+        MethodInfo {
+            name,
+            lifecycle,
+            arguments,
+            persistent,
         }
     }
 
-    /// `init`, `post_upgrade`, `update`, `query` can have arguments.
+    pub fn is_lifecycle(&self) -> bool {
+        self.info().lifecycle
+    }
+
     pub fn can_have_args(&self) -> bool {
-        match self {
-            MethodType::Init | MethodType::PostUpgrade | MethodType::Update | MethodType::Query => {
-                true
-            }
-            MethodType::PreUpgrade
-            | MethodType::Heartbeat
-            | MethodType::InspectMessage
-            | MethodType::OnLowWasmMemory => false,
-        }
+        self.info().arguments
     }
 
     pub fn is_state_persistent(&self) -> bool {
-        match self {
-            Self::Query | Self::InspectMessage => false,
-            Self::Update
-            | Self::Heartbeat
-            | Self::Init
-            | Self::PreUpgrade
-            | Self::PostUpgrade
-            | Self::OnLowWasmMemory => true,
-        }
+        self.info().persistent
     }
 }
 
 impl std::fmt::Display for MethodType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            MethodType::Init => f.write_str("init"),
-            MethodType::PreUpgrade => f.write_str("pre_upgrade"),
-            MethodType::PostUpgrade => f.write_str("post_upgrade"),
-            MethodType::Query => f.write_str("query"),
-            MethodType::Update => f.write_str("update"),
-            MethodType::Heartbeat => f.write_str("heartbeat"),
-            MethodType::InspectMessage => f.write_str("inspect_message"),
-            MethodType::OnLowWasmMemory => f.write_str("on_low_wasm_memory"),
-        }
+        f.write_str(self.info().name)
     }
 }
 

@@ -47,12 +47,12 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `runtime` | Raw calls, system and task adapters at `cdk::*`, without entrypoint macros |
 | `candid-parser` | Native external Candid parsing/type checking, service equality and dynamic refusal fixtures; owned bindings use Wire |
 | `canister-sig-creation` | Imported signature public-key formats, root-key constants and hashing; no Candid/ic0 or store API |
-| `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one registry executor |
+| `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one embedded executor |
 | `certification` | Upstream certificate/hash-tree and mutable tree types, constructors, lookup and hashing; independent of Candid and executor |
-| `executor` | Shared CDK executor task/context primitives; no Candid |
+| `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Selected maintained ICRC DTOs and unchanged upstream value hashing, plus ICRC-10; no registry ledger package, storage, CBOR or consent formatting |
-| `management-canister-types` | Upstream 0.11.0 lifecycle, settings, ECDSA, HTTP, history, snapshot and status DTOs; transitive Candid, no executor or host transport |
+| `management-canister-types` | Owned canister-used 0.11.0 DTOs on Wasm; native upstream DTOs for host tooling; Candid without implicit Wasm printer, no executor or transport |
 | `cmc-types` | External CMC top-up, mint notification and certified rate DTOs; implies Candid, no payment policy |
 | `icp-ledger-types` | Legacy ICP transfer and encoded-block/archive DTOs; implies Candid, no ledger engine or CDK |
 | `cycles-ledger-types` | External Cycles Ledger creation and withdrawal DTOs, including its distinct creation settings; implies Candid |
@@ -175,9 +175,10 @@ disposable registry-source copies and checks source preservation and licenses.
 It performs no dependency adoption, publication or runtime qualification.
 Consumer profiles are declared in
 [`platform-consumer-profiles.tsv`](scripts/ci/platform-consumer-profiles.tsv):
-capability, comma-separated Platform features, test source basename,
+capability, test source basename,
 comma-separated asset globs (`-` for none), and Wasm command (`check`, `build` or
-`skip`). The runner preserves native/MSRV tests and admits runtime graphs first.
+`skip`), and graph family. Required features come from the corresponding Cargo
+test declaration. The runner preserves native/MSRV tests and admits runtime graphs first.
 
 `make check-consumer` tests separate Candid-only, certification-only, parser-only,
 dynamic, management/Candid, ledger/Candid, ic0-only, Agent/certification three signature/BLS consumers and a CDK canister
@@ -316,10 +317,11 @@ Without certification, native Agent or canister-signature capabilities, builds e
 selection; no runtime feature enables them. Host retains strict bounded CBOR decoding;
 trust roots, authentication and application interpretation remain consumer-owned.
 
-The executor requirement is `=2.0.0`; raw `ic0` is `=1.2.0`. These explicit
-compatibility constraints preserve Timers' qualified identities for downstream
-consumers, rather than relying on this repository's lockfile. Changing either
-requires renewed combined callback/trap/cancellation/upgrade qualification.
+Platform embeds the executor and IC0 implementations from upstream 2.0.0/1.2.0.
+Their registry packages are absent. The inherited Cargo singleton guard requires
+one Platform runtime owner across Timers and applications; task/method handles
+now have Platform identity. See the [breaking migration](docs/migration.md#embedded-ic0-and-executor).
+Changes require combined callback/trap/cancellation/upgrade qualification.
 Use `candid::decoder` when preserving upstream configuration/defaults or observing
 construction, value, finalization and drop separately. The `candid` feature also
 supports explicit service registration/export and reflection; see the packaged
@@ -359,7 +361,8 @@ Run `make check-runtime-lock` for coordinated lock, graph and imported-source
 checks, or `bash scripts/ci/check-platform-runtime.sh --check-graph` without
 compiling/starting a server. Source fingerprints protect the imported call,
 callback/trap cleanup and protected-spawn regions; mutation cases test refusal.
-The sole registry executor remains =2.0.0 and ic0 remains =1.2.0.
+The sole executor and IC0 implementation now live inside Platform; the fixture
+selects Timers 0.32.3 against that same local owner.
 
 Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
 `IC_TESTKIT_POCKET_IC_URL`. The harness retains Testkit's bounded startup and

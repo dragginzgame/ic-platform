@@ -443,6 +443,15 @@ fn pricing_snapshot(app: &AppState, selected_instance: Option<usize>) -> Value {
 }
 
 fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
+    fn canister_key(row: &Value) -> (&Value, &str) {
+        (
+            &row["instance_id"],
+            row["canister_id"].as_str().unwrap_or(""),
+        )
+    }
+    fn total_key(row: &Value) -> (&Value, &Value, &Value) {
+        (&row["rule_id"], &row["unit"], &row["kind"])
+    }
     let initial_rows = initial
         .get("canisters")
         .and_then(Value::as_array)
@@ -453,14 +462,10 @@ fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
         .and_then(Value::as_array)
         .map(Vec::as_slice)
         .unwrap_or_default();
-    let key = |row: &Value| {
-        format!(
-            "{}:{}",
-            row.get("instance_id").unwrap_or(&Value::Null),
-            row.get("canister_id").and_then(Value::as_str).unwrap_or("")
-        )
-    };
-    let baseline: BTreeMap<_, _> = initial_rows.iter().map(|row| (key(row), row)).collect();
+    let baseline: HashMap<_, _> = initial_rows
+        .iter()
+        .map(|row| (canister_key(row), row))
+        .collect();
     let mut rows = Vec::new();
     let mut debit = 0u128;
     let mut refund = 0u128;
@@ -469,7 +474,7 @@ fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
         || final_snapshot["truncated"] == true
         || baseline.len() != final_rows.len();
     for end in final_rows {
-        let Some(begin) = baseline.get(&key(end)) else {
+        let Some(begin) = baseline.get(&canister_key(end)) else {
             incomplete = true;
             continue;
         };
@@ -489,8 +494,7 @@ fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
                 .map(Vec::as_slice)
                 .unwrap_or_default()
         }
-        let total_key = |row: &Value| format!("{}:{}:{}", row["rule_id"], row["unit"], row["kind"]);
-        let before: BTreeMap<_, _> = totals(begin)
+        let before: HashMap<_, _> = totals(begin)
             .iter()
             .map(|row| (total_key(row), row))
             .collect();

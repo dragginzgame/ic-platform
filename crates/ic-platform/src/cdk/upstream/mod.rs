@@ -1,6 +1,6 @@
 //! Maintained non-cryptographic adapters imported from CDK 0.20.3.
 //!
-//! The sole executor remains registry ic-cdk-executor 2.0.0.
+//! The sole executor is maintained by Platform from ic-cdk-executor 2.0.0.
 
 #[cfg(target_feature = "atomics")]
 compile_error!("This version of the runtime does not support multithreading.");

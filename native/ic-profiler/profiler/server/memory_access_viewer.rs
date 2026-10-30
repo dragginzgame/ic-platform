@@ -4,6 +4,9 @@
 //! separate port and reads the recorded executions directly from the
 //! recorders, so it shows them while the instances keep executing.
 
+use super::arguments::{
+    DEFAULT_PROFILE_EXECUTIONS, MAX_INSTRUCTION_PROFILING_EXECUTIONS, unsigned_argument,
+};
 use super::rendering::merge_ranges as union;
 use crate::InstanceId;
 use crate::memory_access_tracing::{ExecutionFilter, server_identity};
@@ -48,7 +51,6 @@ const MAX_TOP: usize = 1_000;
 const MAX_MCP_BATCH: usize = 64;
 const MAX_TOOL_RESPONSE_BYTES: usize = 8 * 1024 * 1024;
 const MAX_MCP_BATCH_RESPONSE_BYTES: usize = 16 * 1024 * 1024;
-const FORMAT_VERSION: u64 = 2;
 const START_TRACING_TIMEOUT: Duration = Duration::from_secs(10);
 const MCP_PROTOCOL_VERSIONS: [&str; 3] = ["2025-06-18", "2025-03-26", "2024-11-05"];
 
@@ -292,63 +294,16 @@ struct LimitQuery {
 
 fn respond(result: ApiResult) -> Response {
     match result {
-        Ok(value) => Json(encode_response(value)).into_response(),
+        Ok(value) => Json(trace_document(value)).into_response(),
         Err((code, message)) => (code, Json(json!({ "error": message }))).into_response(),
     }
 }
 
-/// JSON numbers cannot represent wasm64 counters and timestamps exactly in
-/// JavaScript. Version the viewer format and use decimal strings for integral
-/// data, retaining only the bounded routing/page-size fields as numbers.
-fn encode_response(mut value: Value) -> Value {
-    fn encode(value: &mut Value, field: Option<&str>) {
-        // The immutable explanation dictionary uses its public schema: source
-        // line numbers and rule versions are bounded u32 values.
-        if field == Some("charge_rules") {
-            return;
-        }
-        match value {
-            Value::Object(object) => {
-                for (key, value) in object {
-                    encode(value, Some(key));
-                }
-            }
-            Value::Array(values) => {
-                for value in values {
-                    encode(value, field);
-                }
-            }
-            Value::Number(number)
-                if (number.is_u64() || number.is_i64())
-                    && !matches!(
-                        field,
-                        Some(
-                            "instance_id"
-                                | "page_size"
-                                | "format_version"
-                                | "version"
-                                | "instrumentation_version"
-                                | "function_index"
-                                | "origin_id"
-                                | "origin_ids"
-                                | "block_id"
-                                | "operator_ordinal"
-                                | "configuration_sha256"
-                                | "instrumentation_source_sha256"
-                                | "module_sha256"
-                        )
-                    ) =>
-            {
-                *value = Value::String(number.to_string());
-            }
-            _ => {}
-        }
-    }
-    encode(&mut value, None);
+/// Add process identity to a trace document. Producers own counter encoding;
+/// typed PocketIC values use their existing Serde implementations unchanged.
+fn trace_document(mut value: Value) -> Value {
     if let Some(object) = value.as_object_mut() {
         let identity = server_identity();
-        object.insert("format_version".into(), json!(FORMAT_VERSION));
-        object.insert("integer_encoding".into(), json!("decimal"));
         object.insert("server_generation".into(), json!(identity.generation));
         object.insert("server_binary_hash".into(), json!(identity.binary_hash));
     }
@@ -521,8 +476,9 @@ struct ProfileRequest {
 
 impl ProfileRequest {
     fn parse(body: &Value) -> Result<Self, String> {
-        let maximum = pocket_ic::common::rest::MAX_INSTRUCTION_PROFILING_EXECUTIONS;
-        let max_executions = integer_argument(body, "max_executions")?.unwrap_or(20);
+        let maximum = MAX_INSTRUCTION_PROFILING_EXECUTIONS;
+        let max_executions =
+            integer_argument(body, "max_executions")?.unwrap_or(DEFAULT_PROFILE_EXECUTIONS);
         if max_executions == 0 {
             return Err("max_executions must be positive.".to_string());
         }
@@ -724,12 +680,12 @@ fn traces(viewer: &Viewer, base_url: &str) -> Value {
                         "canister_id": canister_id,
                         "tracing": canister.tracing && !recorder.deleted,
                         "runtime_costs_recording": canister.runtime_costs_recording && !recorder.deleted,
-                        "executions": canister.executions,
-                        "first_sequence_number": canister.first_sequence_number,
-                        "last_sequence_number": canister.last_sequence_number,
-                        "trace_generation": canister.trace_generation,
+                        "executions": canister.executions.to_string(),
+                        "first_sequence_number": canister.first_sequence_number.map(|v| v.to_string()),
+                        "last_sequence_number": canister.last_sequence_number.map(|v| v.to_string()),
+                        "trace_generation": canister.trace_generation.to_string(),
                         "truncated": canister.truncated,
-                        "profile_remaining": canister.profile_remaining,
+                        "profile_remaining": canister.profile_remaining.to_string(),
                         "urls": canister_urls(base_url, instance_id, &canister_id),
                     })
                 })
@@ -762,14 +718,14 @@ fn executions(
         "canister_id": canister_id.to_string(),
         "page_size": PAGE_SIZE,
         "tracing": recorder.is_tracing(canister_id),
-        "first_sequence_number": snapshot.first_sequence_number,
-        "last_sequence_number": snapshot.last_sequence_number,
-        "trace_generation": snapshot.trace_generation,
+        "first_sequence_number": snapshot.first_sequence_number.map(|v| v.to_string()),
+        "last_sequence_number": snapshot.last_sequence_number.map(|v| v.to_string()),
+        "trace_generation": snapshot.trace_generation.to_string(),
         "truncated": snapshot.truncated,
-        "dropped_executions": snapshot.dropped_executions,
+        "dropped_executions": snapshot.dropped_executions.to_string(),
         "dropped_instructions": snapshot.dropped_instructions.to_string(),
         "dropped_instructions_incomplete": snapshot.dropped_instructions_incomplete,
-        "recorded_bytes": snapshot.recorded_bytes,
+        "recorded_bytes": snapshot.recorded_bytes.to_string(),
         "more": snapshot.more,
         "executions": snapshot.executions,
         "modules": snapshot.modules,
@@ -797,8 +753,8 @@ fn runtime_costs(
         "runtime_costs_truncated": snapshot.runtime_costs_truncated, "subnet_runtime_costs_truncated": snapshot.subnet_runtime_costs_truncated,
         "runtime_cost_totals_incomplete": snapshot.runtime_cost_totals_incomplete,
         "subnet_runtime_cost_totals_incomplete": snapshot.subnet_runtime_cost_totals_incomplete,
-        "last_runtime_cost_sequence_number": snapshot.last_runtime_cost_sequence_number,
-        "next_after": snapshot.next_after, "more": snapshot.more, "trace_generation": snapshot.trace_generation,
+        "last_runtime_cost_sequence_number": snapshot.last_runtime_cost_sequence_number.map(|v| v.to_string()),
+        "next_after": snapshot.next_after.map(|v| v.to_string()), "more": snapshot.more, "trace_generation": snapshot.trace_generation.to_string(),
         "runtime_configurations": snapshot.runtime_configurations, "charge_rules": crate::instruction_charge_rules::charge_rules(),
     }))
 }
@@ -812,24 +768,22 @@ fn summary(
     selection: &ExecutionSelection,
 ) -> ApiResult {
     let (recorder, canister_id) = lookup(viewer, instance_id, canister_id)?;
-    let trace = recorder.recorder.get(canister_id);
-    let executions: Vec<_> = trace
-        .executions
-        .into_iter()
-        .filter(|execution| selection.filter().matches(execution))
-        .collect();
-    let mut summary = summarize(&executions, top.clamp(1, MAX_TOP));
+    let trace = recorder
+        .recorder
+        .query_snapshot(canister_id, &selection.filter());
+    let executions = &trace.executions;
+    let mut summary = summarize(executions, top.clamp(1, MAX_TOP));
     let tracing = recorder.is_tracing(canister_id);
     let canister_id = canister_id.to_string();
     summary["instance_id"] = json!(instance_id);
     summary["canister_id"] = json!(canister_id);
     summary["tracing"] = json!(tracing);
-    summary["trace_generation"] = json!(trace.trace_generation);
+    summary["trace_generation"] = json!(trace.trace_generation.to_string());
     summary["truncated"] = json!(trace.truncated);
-    summary["dropped_executions"] = json!(trace.dropped_executions);
+    summary["dropped_executions"] = json!(trace.dropped_executions.to_string());
     summary["dropped_instructions"] = json!(trace.dropped_instructions.to_string());
     summary["dropped_instructions_incomplete"] = json!(trace.dropped_instructions_incomplete);
-    summary["recorded_bytes"] = json!(trace.recorded_bytes);
+    summary["recorded_bytes"] = json!(trace.recorded_bytes.to_string());
     summary["runtime_costs_recording"] = json!(trace.runtime_costs_recording && !recorder.deleted);
     summary["runtime_cost_totals"] = json!(trace.runtime_cost_totals);
     summary["subnet_runtime_cost_totals"] = json!(trace.subnet_runtime_cost_totals);
@@ -840,8 +794,7 @@ fn summary(
     summary["subnet_runtime_cost_totals_incomplete"] =
         json!(trace.subnet_runtime_cost_totals_incomplete);
     summary["urls"] = canister_urls(base_url, instance_id, &canister_id);
-    summary["logical_executions"] =
-        selected_logical_dictionary(&trace.logical_executions, &executions);
+    summary["logical_executions"] = json!(trace.logical_executions);
     Ok(summary)
 }
 
@@ -853,15 +806,12 @@ fn profiles(
     selection: &ExecutionSelection,
 ) -> ApiResult {
     let (recorder, canister_id) = lookup(viewer, instance_id, canister_id)?;
-    let trace = recorder.recorder.get(canister_id);
-    let executions: Vec<_> = trace
-        .executions
-        .into_iter()
-        .filter(|execution| selection.filter().matches(execution))
-        .collect();
-    let mut profile = aggregate_profiles(&executions, top.clamp(1, MAX_TOP));
-    let attribution =
-        allocate_profile_functions(&executions, &trace.modules, top.clamp(1, MAX_TOP));
+    let trace = recorder
+        .recorder
+        .query_snapshot(canister_id, &selection.filter());
+    let executions = &trace.executions;
+    let mut profile = aggregate_profiles(executions, top.clamp(1, MAX_TOP));
+    let attribution = allocate_profile_functions(executions, &trace.modules, top.clamp(1, MAX_TOP));
     for flag in [
         "module_origin_map_truncated",
         "module_origin_map_unavailable",
@@ -873,17 +823,16 @@ fn profiles(
     profile["instance_id"] = json!(instance_id);
     profile["canister_id"] = json!(canister_id.to_string());
     profile["tracing"] = json!(recorder.is_tracing(canister_id));
-    profile["trace_generation"] = json!(trace.trace_generation);
+    profile["trace_generation"] = json!(trace.trace_generation.to_string());
     profile["truncated"] =
         json!(trace.truncated || profile["truncated"].as_bool().unwrap_or_default());
-    profile["dropped_executions"] = json!(trace.dropped_executions);
+    profile["dropped_executions"] = json!(trace.dropped_executions.to_string());
     profile["dropped_instructions"] = json!(trace.dropped_instructions.to_string());
-    profile["recorded_bytes"] = json!(trace.recorded_bytes);
+    profile["recorded_bytes"] = json!(trace.recorded_bytes.to_string());
     profile["charge_rules"] = json!(trace.charge_rules);
     profile["runtime_costs_recording"] = json!(trace.runtime_costs_recording && !recorder.deleted);
     profile["dropped_instructions_incomplete"] = json!(trace.dropped_instructions_incomplete);
-    profile["logical_executions"] =
-        selected_logical_dictionary(&trace.logical_executions, &executions);
+    profile["logical_executions"] = json!(trace.logical_executions);
     profile["runtime_cost_totals"] = json!(trace.runtime_cost_totals);
     profile["subnet_runtime_cost_totals"] = json!(trace.subnet_runtime_cost_totals);
     profile["runtime_configurations"] = json!(trace.runtime_configurations);
@@ -893,17 +842,7 @@ fn profiles(
     profile["subnet_runtime_cost_totals_incomplete"] =
         json!(trace.subnet_runtime_cost_totals_incomplete);
 
-    let referenced: BTreeSet<_> = executions
-        .iter()
-        .filter_map(|execution| execution.module_hash.as_deref())
-        .collect();
-    profile["modules"] = json!(
-        trace
-            .modules
-            .into_iter()
-            .filter(|(hash, _)| referenced.contains(hash.as_str()))
-            .collect::<BTreeMap<_, _>>()
-    );
+    profile["modules"] = json!(trace.modules);
     Ok(profile)
 }
 
@@ -1049,7 +988,7 @@ fn allocate_profile_functions(
     } else {
         format!("-{}", allocated - raw)
     };
-    json!({"functions": rows, "function_count": count, "ranking_limited": count > top,
+    json!({"functions": rows, "function_count": count.to_string(), "ranking_limited": count > top,
         "raw_instructions": raw.to_string(), "allocated_instructions": allocated.to_string(),
         "raw_minus_allocated_instructions": difference,
         "allocation_valid": allocated <= raw, "detail_complete": detail_complete,
@@ -1139,11 +1078,11 @@ fn aggregate_profiles(executions: &[TracedExecution], top: usize) -> Value {
                     "module_hash_kind": execution.module_hash_kind,
                     "block_id": block.block_id,
                     "function_index": block.function_index,
-                    "body_offset": block.body_offset,
-                    "end_body_offset": block.end_body_offset,
+                    "body_offset": block.body_offset.to_string(),
+                    "end_body_offset": block.end_body_offset.to_string(),
                     "operator_ordinal": block.operator_ordinal,
-                    "weight": block.weight,
-                    "entry_weight": block.entry_weight,
+                    "weight": block.weight.to_string(),
+                    "entry_weight": block.entry_weight.to_string(),
                     "hits": "0",
                     "instructions": "0",
                 })
@@ -1194,7 +1133,7 @@ fn aggregate_profiles(executions: &[TracedExecution], top: usize) -> Value {
                     "function": format!("Wasm function {function_index}"),
                     "static_prepaid_instructions": function.instructions.to_string(),
                     "block_hits": function.block_hits.to_string(),
-                    "blocks": function.blocks.len(),
+                    "blocks": function.blocks.len().to_string(),
                     "source_status": "unmapped",
                 })
             },
@@ -1225,9 +1164,9 @@ fn aggregate_profiles(executions: &[TracedExecution], top: usize) -> Value {
     limitations.insert("Function rows allocate static prepaid IC charges; they do not prove that every operator executed.".to_string());
     limitations.insert("Source and inline attribution require an exact matching artifact bundle and origin map; source coverage is currently unavailable.".to_string());
     json!({
-        "executions": executions.len(),
-        "profiled_executions": profiled,
-        "unprofiled_executions": executions.len() as u64 - profiled,
+        "executions": executions.len().to_string(),
+        "profiled_executions": profiled.to_string(),
+        "unprofiled_executions": (executions.len() as u64 - profiled).to_string(),
         "whole_execution_instructions": executions.iter().map(|execution| execution.instructions as u128).sum::<u128>().to_string(),
         "ledger": totals,
         "rules": rules,
@@ -1236,8 +1175,8 @@ fn aggregate_profiles(executions: &[TracedExecution], top: usize) -> Value {
         "rules_cover_raw_instructions": profiled > 0 && raw_instructions == observed_rule_instructions,
         "allocated_static_instructions": allocated_static.to_string(),
         "unallocated_static_instructions": ledger.get("static_instructions").copied().unwrap_or_default().saturating_sub(allocated_static).to_string(),
-        "function_count": function_count,
-        "block_count": block_count,
+        "function_count": function_count.to_string(),
+        "block_count": block_count.to_string(),
         "functions": functions,
         "blocks": blocks,
         "ranking_limited": function_count > top || block_count > top,
@@ -1287,11 +1226,11 @@ fn page_history(
         eligible += 1;
         if listed.len() < limit {
             listed.push(json!({
-                "sequence_number": e.sequence_number,
+                "sequence_number": e.sequence_number.to_string(),
                 "api_type": e.api_type,
                 "function": label,
-                "call_context_id": e.call_context_id,
-                "time_nanos": e.time_nanos,
+                "call_context_id": e.call_context_id.map(|v| v.to_string()),
+                "time_nanos": e.time_nanos.to_string(),
                 "written": (e.dirty_pages_tracked && memory_details_available(e)).then_some(written),
                 "dirty_pages_tracked": e.dirty_pages_tracked,
             }));
@@ -1300,13 +1239,13 @@ fn page_history(
     Ok(json!({
         "instance_id": instance_id,
         "canister_id": canister_id.to_string(),
-        "page": page,
+        "page": page.to_string(),
         "offset": format!("{:#x}", page.saturating_mul(PAGE_SIZE)),
-        "accessed_by": accessed_by,
-        "written_by": written_by,
-        "writes_tracked_executions": writes_tracked_executions,
-        "unknown_access_executions": executions.iter().filter(|e| !memory_details_available(e)).count(),
-        "trace_generation": trace.trace_generation,
+        "accessed_by": accessed_by.to_string(),
+        "written_by": written_by.to_string(),
+        "writes_tracked_executions": writes_tracked_executions.to_string(),
+        "unknown_access_executions": executions.iter().filter(|e| !memory_details_available(e)).count().to_string(),
+        "trace_generation": trace.trace_generation.to_string(),
         "truncated": trace.truncated,
         "more": eligible > listed.len() as u64,
         "next_after": listed.last().map(|e| e["sequence_number"].clone()),
@@ -1380,7 +1319,7 @@ async fn control(
                             .find(|canister| canister.canister_id == canister_id)
                             .map_or(0, |canister| canister.profile_remaining);
                         Ok(
-                            json!({ "tracing": recorder.is_tracing(canister_id), "profile_selected": max_executions, "profile_remaining": remaining, "read_mask": read_mask, "write_mask": write_mask }),
+                            json!({ "tracing": recorder.is_tracing(canister_id), "profile_selected": max_executions.to_string(), "profile_remaining": remaining.to_string(), "read_mask": read_mask, "write_mask": write_mask }),
                         )
                     } else {
                         Ok(json!({ "tracing": true }))
@@ -1566,35 +1505,13 @@ fn instructions_available(e: &TracedExecution) -> bool {
         .is_none_or(|attempt| attempt.instructions_available)
 }
 
-fn selected_logical_dictionary(
-    dictionary: &BTreeMap<String, pocket_ic::common::rest::TracedLogicalExecution>,
-    executions: &[TracedExecution],
-) -> Value {
-    let ids: std::collections::BTreeSet<String> = executions
-        .iter()
-        .filter_map(|execution| {
-            execution
-                .disposition
-                .as_ref()?
-                .logical_execution_id
-                .map(|id| id.to_string())
-        })
-        .collect();
-    json!(
-        dictionary
-            .iter()
-            .filter(|(id, _)| ids.contains(*id))
-            .collect::<BTreeMap<_, _>>()
-    )
-}
-
 fn page_range(start: u64, end: u64) -> Value {
     json!({
-        "first_page": start,
-        "last_page": end - 1,
-        "pages": end - start,
+        "first_page": start.to_string(),
+        "last_page": (end - 1).to_string(),
+        "pages": (end - start).to_string(),
         "offset": format!("{:#x}", start.saturating_mul(PAGE_SIZE)),
-        "size_bytes": (end - start).saturating_mul(PAGE_SIZE),
+        "size_bytes": (end - start).saturating_mul(PAGE_SIZE).to_string(),
     })
 }
 
@@ -1725,26 +1642,26 @@ fn summarize(executions: &[TracedExecution], top: usize) -> Value {
             json!({
                 "function": label,
                 "api_type": s.api_type,
-                "executions": s.executions,
-                "outcomes": s.outcomes,
+                "executions": s.executions.to_string(),
+                "outcomes": s.outcomes.into_iter().map(|(key, value)| (key, value.to_string())).collect::<BTreeMap<_, _>>(),
                 "instructions": {
                     "total": s.instructions.to_string(),
                     "mean": mean(s.instructions, s.instruction_executions),
                     "detail_complete": s.instruction_executions == s.executions,
-                    "available_executions": s.instruction_executions,
-                    "max": s.max_instructions,
+                    "available_executions": s.instruction_executions.to_string(),
+                    "max": s.max_instructions.to_string(),
                     "page_access_total": s.page_access_instructions.to_string(),
                     "page_access_share": share(s.page_access_instructions, s.instructions),
                 },
                 "pages": {
                     "accessed_mean": mean(s.accessed, s.accessed_executions),
-                    "accessed_executions": s.accessed_executions,
-                    "accessed_max": s.max_accessed,
+                    "accessed_executions": s.accessed_executions.to_string(),
+                    "accessed_max": s.max_accessed.to_string(),
                     "written_mean": mean(s.written, s.written_executions),
-                    "written_executions": s.written_executions,
-                    "written_max": s.max_written,
-                    "distinct_accessed": pages(&union(s.accessed_ranges.into_iter())),
-                    "distinct_written": pages(&union(s.written_ranges.into_iter())),
+                    "written_executions": s.written_executions.to_string(),
+                    "written_max": s.max_written.to_string(),
+                    "distinct_accessed": pages(&union(s.accessed_ranges.into_iter())).to_string(),
+                    "distinct_written": pages(&union(s.written_ranges.into_iter())).to_string(),
                 },
             })
         })
@@ -1766,14 +1683,14 @@ fn summarize(executions: &[TracedExecution], top: usize) -> Value {
         .map(|i| {
             let e = &executions[i];
             json!({
-                "sequence_number": e.sequence_number,
+                "sequence_number": e.sequence_number.to_string(),
                 "function": labels[i],
                 "api_type": e.api_type,
                 "outcome": outcome(e),
-                "instructions": e.instructions,
-                "page_access_instructions": e.page_access_instructions,
-                "accessed_pages": memory_details_available(e).then_some(accessed[i]),
-                "written_pages": (memory_details_available(e) && e.dirty_pages_tracked).then_some(written[i]),
+                "instructions": e.instructions.to_string(),
+                "page_access_instructions": e.page_access_instructions.to_string(),
+                "accessed_pages": memory_details_available(e).then(|| accessed[i].to_string()),
+                "written_pages": (memory_details_available(e) && e.dirty_pages_tracked).then(|| written[i].to_string()),
             })
         })
         .collect();
@@ -1791,8 +1708,8 @@ fn summarize(executions: &[TracedExecution], top: usize) -> Value {
         .take(top)
         .map(|run| {
             let mut value = page_range(run.start, run.end);
-            value["accessed_by"] = json!(run.accessed_by);
-            value["written_by"] = json!(run.written_by);
+            value["accessed_by"] = json!(run.accessed_by.to_string());
+            value["written_by"] = json!(run.written_by.to_string());
             value
         })
         .collect();
@@ -1840,8 +1757,8 @@ fn summarize(executions: &[TracedExecution], top: usize) -> Value {
         .take(top)
         .map(|region| {
             let mut value = page_range(region.start, region.end);
-            value["accessed_by"] = json!(region.executions);
-            value["written_pages"] = json!(region.written_pages);
+            value["accessed_by"] = json!(region.executions.to_string());
+            value["written_pages"] = json!(region.written_pages.to_string());
             value["page_accesses"] = json!(region.page_accesses.to_string());
             value["page_writes"] = json!(region.page_writes.to_string());
             value
@@ -1853,39 +1770,39 @@ fn summarize(executions: &[TracedExecution], top: usize) -> Value {
     };
     json!({
         "page_size": PAGE_SIZE,
-        "executions": count,
-        "first_sequence_number": executions.first().map(|e| e.sequence_number),
-        "last_sequence_number": executions.last().map(|e| e.sequence_number),
-        "first_time_nanos": executions.first().map(|e| e.time_nanos),
-        "last_time_nanos": executions.last().map(|e| e.time_nanos),
-        "outcomes": outcomes,
-        "wasm_memory_size": executions.last().filter(|e| memory_details_available(e)).map(|e| e.wasm_memory_size),
+        "executions": count.to_string(),
+        "first_sequence_number": executions.first().map(|e| e.sequence_number.to_string()),
+        "last_sequence_number": executions.last().map(|e| e.sequence_number.to_string()),
+        "first_time_nanos": executions.first().map(|e| e.time_nanos.to_string()),
+        "last_time_nanos": executions.last().map(|e| e.time_nanos.to_string()),
+        "outcomes": outcomes.into_iter().map(|(key, value)| (key, value.to_string())).collect::<BTreeMap<_, _>>(),
+        "wasm_memory_size": executions.last().filter(|e| memory_details_available(e)).map(|e| e.wasm_memory_size.to_string()),
         "instructions": {
             "total": instructions.to_string(),
             "mean": mean(instructions, instruction_executions),
             "detail_complete": instruction_executions == count,
-            "available_executions": instruction_executions,
+            "available_executions": instruction_executions.to_string(),
             "page_access_total": page_access_instructions.to_string(),
             "page_access_share": share(page_access_instructions, instructions),
             "per_page_access": ratio(complete_page_fees, complete_page_accesses, 1.0),
             "per_page_access_available": complete_page_accesses > 0,
         },
         "pages": {
-            "distinct_accessed": distinct(&mut runs.iter()),
-            "distinct_written": distinct(&mut runs.iter().filter(|run| run.written_by > 0)),
+            "distinct_accessed": distinct(&mut runs.iter()).to_string(),
+            "distinct_written": distinct(&mut runs.iter().filter(|run| run.written_by > 0)).to_string(),
             "detail_complete": accessed_executions == count,
-            "accessed_executions": accessed_executions,
-            "written_executions": written_executions,
+            "accessed_executions": accessed_executions.to_string(),
+            "written_executions": written_executions.to_string(),
             "accessed_mean": mean(total_accessed, accessed_executions),
-            "accessed_max": accessed.iter().max().copied().unwrap_or_default(),
+            "accessed_max": accessed.iter().max().copied().unwrap_or_default().to_string(),
             "written_mean": mean(total_written, written_executions),
-            "written_max": written.iter().max().copied().unwrap_or_default(),
+            "written_max": written.iter().max().copied().unwrap_or_default().to_string(),
         },
-        "function_count": function_count,
+        "function_count": function_count.to_string(),
         "functions": functions,
         "most_expensive_executions": most_expensive,
         "hot_pages": hot_pages,
-        "region_count": region_count,
+        "region_count": region_count.to_string(),
         "regions": regions,
     })
 }
@@ -2149,8 +2066,8 @@ fn tools() -> Value {
         },
         {
             "name": "start_profiling",
-            "description": "Starts tracing and selects the next bounded number of executions for the diagnostic IC charge profiler, using host-owned counters. Defaults to 20 executions, at most 10000. Retained trace data is bounded by a 64 MiB per-instance budget.",
-            "inputSchema": schema(json!({ "max_executions": { "type": "integer", "minimum": 1, "maximum": 10000 }, "read_mask": { "type": "boolean", "default": false, "description": "Collect exact logical byte-read ranges/frequencies for read-mask images; slower diagnostic mode." }, "write_mask": { "type": "boolean", "default": false, "description": "Collect completed byte writes and frequencies, including same-value and restored writes." } }), &[]),
+            "description": format!("Starts tracing and selects the next bounded number of executions for the diagnostic IC charge profiler, using host-owned counters. Defaults to {DEFAULT_PROFILE_EXECUTIONS} executions, at most {MAX_INSTRUCTION_PROFILING_EXECUTIONS}. Retained trace data is bounded by a 64 MiB per-instance budget."),
+            "inputSchema": schema(json!({ "max_executions": { "type": "integer", "minimum": 1, "maximum": MAX_INSTRUCTION_PROFILING_EXECUTIONS }, "read_mask": { "type": "boolean", "default": false, "description": "Collect exact logical byte-read ranges/frequencies for read-mask images; slower diagnostic mode." }, "write_mask": { "type": "boolean", "default": false, "description": "Collect completed byte writes and frequencies, including same-value and restored writes." } }), &[]),
             "annotations": control(false),
         },
         {
@@ -2207,9 +2124,8 @@ enum ToolOutput {
 
 fn encode_tool_response(output: ToolOutput) -> Value {
     match output {
-        ToolOutput::Trace(value) => encode_response(value),
-        // Native profile/catalog documents already own their integer format and
-        // content hashes; applying trace encoding would invalidate that contract.
+        ToolOutput::Trace(value) => trace_document(value),
+        // Native profile/catalog documents own their metadata and content hashes.
         ToolOutput::Native(value) => value,
     }
 }
@@ -2490,12 +2406,7 @@ fn integer_argument(arguments: &Value, key: &str) -> Result<Option<u64>, String>
     let Some(value) = arguments.get(key) else {
         return Ok(None);
     };
-    let number = value.as_u64().or_else(|| {
-        let decimal = value.as_str()?;
-        (!decimal.is_empty() && decimal.bytes().all(|byte| byte.is_ascii_digit()))
-            .then(|| decimal.parse().ok())
-            .flatten()
-    });
+    let number = unsigned_argument(value);
     number.map(Some).ok_or_else(|| {
         format!("The argument `{key}` must be an unsigned 64-bit integer or a decimal string.")
     })
@@ -2504,6 +2415,31 @@ fn integer_argument(arguments: &Value, key: &str) -> Result<Option<u64>, String>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn numeric_surfaces_preserve_their_distinct_lexical_contracts() {
+        let query: ExecutionSelection = serde_json::from_value(json!({"after": "+1"})).unwrap();
+        assert_eq!(query.after, Some(1));
+        assert!(tool_selection(&json!({"after": "+1"})).is_err());
+        assert!(
+            crate::memory_snapshot_api::SnapshotImageQuery::from_arguments(
+                &json!({"start_page": "+1"})
+            )
+            .is_err()
+        );
+        assert_eq!(
+            integer_argument(&json!({"n": u64::MAX.to_string()}), "n").unwrap(),
+            Some(u64::MAX)
+        );
+        for invalid in [
+            json!("18446744073709551616"),
+            json!("１２"),
+            json!(-1),
+            json!(1.5),
+        ] {
+            assert!(integer_argument(&json!({"n": invalid}), "n").is_err());
+        }
+    }
 
     #[test]
     fn profile_requests_preserve_defaults_limits_masks_and_refusals() {
@@ -2736,11 +2672,11 @@ mod tests {
             ),
         ];
         let summary = summarize(&executions, 10);
-        assert_eq!(summary["executions"], 3);
-        assert_eq!(summary["outcomes"]["reply"], 3);
-        assert_eq!(summary["pages"]["distinct_accessed"], 1 + 3 + 100);
-        assert_eq!(summary["pages"]["distinct_written"], 3);
-        assert_eq!(summary["pages"]["accessed_max"], 101);
+        assert_eq!(summary["executions"], "3");
+        assert_eq!(summary["outcomes"]["reply"], "3");
+        assert_eq!(summary["pages"]["distinct_accessed"], "104");
+        assert_eq!(summary["pages"]["distinct_written"], "3");
+        assert_eq!(summary["pages"]["accessed_max"], "101");
         assert_eq!(summary["instructions"]["per_page_access"], 80_000.0);
         assert!(
             summary["instructions"]["page_access_share"]
@@ -2750,45 +2686,45 @@ mod tests {
         );
 
         // The scan takes the most instructions.
-        assert_eq!(summary["function_count"], 2);
+        assert_eq!(summary["function_count"], "2");
         let scan = &summary["functions"][0];
         assert_eq!(scan["function"], "canister_update scan");
         assert_eq!(scan["pages"]["accessed_mean"], 101.0);
         let put = &summary["functions"][1];
         assert_eq!(put["function"], "canister_update put");
-        assert_eq!(put["executions"], 2);
+        assert_eq!(put["executions"], "2");
         assert_eq!(put["pages"]["accessed_mean"], 2.5);
-        assert_eq!(put["pages"]["distinct_accessed"], 4);
-        assert_eq!(put["pages"]["distinct_written"], 3);
+        assert_eq!(put["pages"]["distinct_accessed"], "4");
+        assert_eq!(put["pages"]["distinct_written"], "3");
         assert_eq!(
             summary["most_expensive_executions"][0]["sequence_number"],
-            2
+            "2"
         );
 
         // Page 0 is accessed by all executions.
-        assert_eq!(summary["hot_pages"][0]["first_page"], 0);
-        assert_eq!(summary["hot_pages"][0]["pages"], 1);
-        assert_eq!(summary["hot_pages"][0]["accessed_by"], 3);
+        assert_eq!(summary["hot_pages"][0]["first_page"], "0");
+        assert_eq!(summary["hot_pages"][0]["pages"], "1");
+        assert_eq!(summary["hot_pages"][0]["accessed_by"], "3");
 
         // The regions are [0, 1), [10, 13), and [100, 200).
-        assert_eq!(summary["region_count"], 3);
+        assert_eq!(summary["region_count"], "3");
         let regions = &summary["regions"];
-        assert_eq!(regions[0]["first_page"], 0);
-        assert_eq!(regions[0]["accessed_by"], 3);
-        assert_eq!(regions[1]["first_page"], 10);
-        assert_eq!(regions[1]["last_page"], 12);
-        assert_eq!(regions[1]["accessed_by"], 2);
-        assert_eq!(regions[1]["written_pages"], 3);
+        assert_eq!(regions[0]["first_page"], "0");
+        assert_eq!(regions[0]["accessed_by"], "3");
+        assert_eq!(regions[1]["first_page"], "10");
+        assert_eq!(regions[1]["last_page"], "12");
+        assert_eq!(regions[1]["accessed_by"], "2");
+        assert_eq!(regions[1]["written_pages"], "3");
         assert_eq!(regions[1]["offset"], "0xa0000");
-        assert_eq!(regions[2]["first_page"], 100);
+        assert_eq!(regions[2]["first_page"], "100");
         assert_eq!(regions[2]["page_accesses"], "100");
     }
 
     #[test]
     fn summary_of_no_executions_is_empty() {
         let summary = summarize(&[], 10);
-        assert_eq!(summary["executions"], 0);
-        assert_eq!(summary["pages"]["distinct_accessed"], 0);
+        assert_eq!(summary["executions"], "0");
+        assert_eq!(summary["pages"]["distinct_accessed"], "0");
         assert_eq!(summary["functions"], json!([]));
         assert_eq!(summary["regions"], json!([]));
         assert_eq!(summary["instructions"]["page_access_share"], 0.0);
@@ -2828,8 +2764,8 @@ mod tests {
             known.instructions.to_string()
         );
         assert_eq!(summary["instructions"]["detail_complete"], false);
-        assert_eq!(summary["instructions"]["available_executions"], 1);
-        assert_eq!(summary["pages"]["distinct_accessed"], 1);
+        assert_eq!(summary["instructions"]["available_executions"], "1");
+        assert_eq!(summary["pages"]["distinct_accessed"], "1");
         assert_eq!(summary["pages"]["detail_complete"], false);
         assert_eq!(summary["wasm_memory_size"], Value::Null);
         assert_eq!(
@@ -2890,42 +2826,70 @@ mod tests {
         );
 
         // Ordinary trace tools retain their independent process/decimal encoding.
-        let trace = encode_tool_response(ToolOutput::Trace(json!({"time_nanos": u64::MAX})));
-        assert_eq!(trace["time_nanos"], u64::MAX.to_string());
+        let trace = encode_tool_response(ToolOutput::Trace(summarize(&[], 10)));
+        assert_eq!(trace["executions"], "0");
         assert!(trace["server_generation"].is_string());
     }
 
-    #[test]
-    fn json_counters_are_lossless_decimal_strings() {
-        let encoded = encode_response(json!({
-            "instance_id": 7,
-            "page_size": PAGE_SIZE,
-            "time_nanos": u64::MAX,
-            "executions": [{
-                "sequence_number": 9_007_199_254_740_993_u64,
-                "call_context_id": u64::MAX,
-                "accessed_pages": [[0, 3]],
-            }],
-            "instructions": { "total": "36893488147419103230", "mean": 1.5 },
-        }));
-        assert_eq!(encoded["format_version"], 2);
-        assert_eq!(encoded["integer_encoding"], "decimal");
-        assert_eq!(encoded["instance_id"], 7);
-        assert_eq!(encoded["page_size"], PAGE_SIZE);
-        assert_eq!(encoded["time_nanos"], u64::MAX.to_string());
+    #[tokio::test]
+    async fn http_and_mcp_preserve_producer_owned_counter_encoding() {
+        let mut observed = execution(0, "update", "f", Some(u64::MAX), vec![(0, 3)], vec![]);
+        observed.sequence_number = 9_007_199_254_740_993;
+        observed.time_nanos = u64::MAX;
+        observed.instructions = u64::MAX;
+        let summary = summarize(std::slice::from_ref(&observed), 10);
+        assert_eq!(summary["first_sequence_number"], "9007199254740993");
+        assert_eq!(summary["first_time_nanos"], u64::MAX.to_string());
+        assert_eq!(summary["instructions"]["total"], u64::MAX.to_string());
         assert_eq!(
-            encoded["executions"][0]["sequence_number"],
-            "9007199254740993"
-        );
-        assert_eq!(
-            encoded["executions"][0]["call_context_id"],
+            summary["functions"][0]["instructions"]["max"],
             u64::MAX.to_string()
         );
+        assert_eq!(summary["pages"]["distinct_accessed"], "3");
+        assert_eq!(summary["page_size"], PAGE_SIZE);
+        assert!(summary["instructions"]["mean"].is_f64());
+        let bytes = axum::body::to_bytes(
+            respond(Ok(summary.clone())).into_body(),
+            MAX_TOOL_RESPONSE_BYTES,
+        )
+        .await
+        .unwrap();
+        let http: Value = serde_json::from_slice(&bytes).unwrap();
+        let mcp = encode_tool_response(ToolOutput::Trace(summary.clone()));
+        assert_eq!(http, mcp);
+        for (key, value) in summary.as_object().unwrap() {
+            assert_eq!(&http[key], value);
+        }
+        assert!(http["server_generation"].is_string());
+        assert!(http.get("format_version").is_none());
+        assert!(http.get("integer_encoding").is_none());
+
+        // The canonical DTO serializer owns both wide counters and bounded
+        // identifiers. HTTP/MCP cannot silently rewrite that typed contract.
+        let mut document = json!({"executions": [observed], "module": pocket_ic::common::rest::WasmInstructionOriginRange {
+            instrumented_function_index: 17,
+            start_offset: u64::MAX,
+            ..Default::default()
+        }});
+        let body = axum::body::to_bytes(
+            respond(Ok(document.clone())).into_body(),
+            MAX_TOOL_RESPONSE_BYTES,
+        )
+        .await
+        .unwrap();
+        let http: Value = serde_json::from_slice(&body).unwrap();
+        assert_eq!(http["executions"], document["executions"]);
+        assert_eq!(http["module"], document["module"]);
         assert_eq!(
-            encoded["executions"][0]["accessed_pages"],
-            json!([["0", "3"]])
+            http["executions"][0]["call_context_id"],
+            u64::MAX.to_string()
         );
-        assert_eq!(encoded["instructions"]["mean"], 1.5);
+        assert_eq!(http["executions"][0]["accessed_pages"], json!([["0", "3"]]));
+        assert_eq!(http["module"]["instrumented_function_index"], 17);
+        assert_eq!(http["module"]["start_offset"], u64::MAX.to_string());
+        document["charge_rules"] = charge_rule_dictionary()["charge_rules"].clone();
+        let mcp = encode_tool_response(ToolOutput::Trace(document.clone()));
+        assert_eq!(mcp["charge_rules"], document["charge_rules"]);
     }
 
     #[test]
@@ -3147,9 +3111,9 @@ mod tests {
         upgraded.sequence_number = 1;
         upgraded.module_hash = Some("different-installed-module".to_string());
         let profile = aggregate_profiles(&[first, upgraded], 10);
-        assert_eq!(profile["profiled_executions"], 2);
-        assert_eq!(profile["function_count"], 2);
-        assert_eq!(profile["block_count"], 2);
+        assert_eq!(profile["profiled_executions"], "2");
+        assert_eq!(profile["function_count"], "2");
+        assert_eq!(profile["block_count"], "2");
         assert_eq!(profile["allocated_static_instructions"], "200");
         assert_eq!(profile["ledger"]["static_instructions"], "200");
         assert_eq!(profile["ledger"]["api_instructions"], "1800");
@@ -3178,7 +3142,7 @@ mod tests {
         truncated.detail_truncated = true;
         let summary = summarize(&[first, truncated], 10);
         assert_eq!(summary["pages"]["detail_complete"], false);
-        assert_eq!(summary["pages"]["accessed_executions"], 1);
+        assert_eq!(summary["pages"]["accessed_executions"], "1");
         assert_eq!(summary["pages"]["accessed_mean"], 2.0);
         assert_eq!(summary["pages"]["written_mean"], 1.0);
         assert_eq!(summary["instructions"]["per_page_access"], 80_000.0);

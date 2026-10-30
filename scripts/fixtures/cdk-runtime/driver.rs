@@ -138,6 +138,11 @@ fn main() {
     query::<()>(pic, id, "unit", ());
     assert_eq!(update::<u64>(pic, id, "awaited", 8u64), 9);
     assert_eq!(query::<u64>(pic, id, "composite", 9u64), 10);
+    assert_eq!(query::<u64>(pic, id, "self_wake_query", ()), 2);
+    if legacy {
+        assert_eq!(query::<u8>(pic, id, "management_proof", ()), 4);
+        println!("Owned management HTTP/history/status/snapshot/lifecycle wire proofs passed");
+    }
     assert_guard_rejection(
         &pic.query_call(
             id,

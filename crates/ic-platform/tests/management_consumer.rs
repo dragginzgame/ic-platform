@@ -1,16 +1,19 @@
 //! Platform-only consumer of external management DTOs and Candid formats.
 use ic_platform::candid::{DecodeError, DecodeLimits, contract, decode_exactly_one};
+#[cfg(not(target_family = "wasm"))]
 use ic_platform::management_canister_types::{
-    CanisterIdRecord, CanisterInfoArgs, CanisterInfoResult, CanisterStatusResult,
-    CanisterStatusType, CanisterTimer, ChangeDetails, ChunkHash, CodeDeploymentMode,
-    DefiniteCanisterSettings, DeleteCanisterSnapshotArgs, HttpHeader, HttpMethod, HttpRequestArgs,
-    HttpRequestResult, LoadCanisterSnapshotArgs, MemoryMetrics, OnLowWasmMemoryHookStatus,
-    QueryStats, ReadCanisterSnapshotDataArgs, ReadCanisterSnapshotDataResult,
-    ReadCanisterSnapshotMetadataArgs, ReadCanisterSnapshotMetadataResult, Snapshot,
-    SnapshotDataKind, SnapshotDataOffset, SnapshotMetadataGlobal, SnapshotSource, StatusVisibility,
-    TakeCanisterSnapshotArgs, TransformArgs, TransformContext, TransformFunc,
+    CanisterIdRecord, CanisterStatusType, CanisterTimer, DefiniteCanisterSettings,
+    LoadCanisterSnapshotArgs, MemoryMetrics, OnLowWasmMemoryHookStatus, QueryStats,
+    ReadCanisterSnapshotDataArgs, ReadCanisterSnapshotDataResult, ReadCanisterSnapshotMetadataArgs,
+    ReadCanisterSnapshotMetadataResult, SnapshotDataKind, SnapshotDataOffset,
+    SnapshotMetadataGlobal, SnapshotSource, StatusVisibility, TakeCanisterSnapshotArgs,
     UploadCanisterSnapshotDataArgs, UploadCanisterSnapshotMetadataArgs,
     UploadCanisterSnapshotMetadataResult,
+};
+use ic_platform::management_canister_types::{
+    CanisterInfoArgs, CanisterInfoResult, CanisterStatusResult, ChangeDetails, ChunkHash,
+    CodeDeploymentMode, DeleteCanisterSnapshotArgs, HttpHeader, HttpMethod, HttpRequestArgs,
+    HttpRequestResult, Snapshot, TransformArgs, TransformContext, TransformFunc,
 };
 use ic_platform::principal::ExternalPrincipal as Principal;
 
@@ -250,6 +253,7 @@ where
 }
 
 /// Preserve external snapshot/status identities and original-owner wire vectors.
+#[cfg(not(target_family = "wasm"))]
 pub fn snapshot_status_roundtrip() {
     macro_rules! original {
         ($ty:ty, $name:literal) => {
@@ -415,6 +419,7 @@ pub fn snapshot_status_roundtrip() {
     );
 }
 
+#[cfg(not(target_family = "wasm"))]
 #[test]
 fn management_snapshot_status_preserves_wire_and_variants() {
     snapshot_status_roundtrip();
@@ -551,4 +556,19 @@ pub fn lifecycle_settings_and_ecdsa_contracts() {
 #[test]
 fn new_external_management_contracts_preserve_sender_and_history_fields() {
     lifecycle_settings_and_ecdsa_contracts();
+}
+
+/// Check canister-used status, list and delete records independently of host transfer DTOs.
+pub fn canister_snapshot_status_roundtrip() {
+    let _: Vec<CanisterStatusResult> =
+        snapshot_value(include_str!("fixtures/management-snapshot-status.hex"), 0);
+    let _: Vec<Snapshot> =
+        snapshot_value(include_str!("fixtures/management-snapshot-list.hex"), 1024);
+    let _: DeleteCanisterSnapshotArgs =
+        snapshot_value(include_str!("fixtures/management-snapshot-delete.hex"), 0);
+}
+
+#[test]
+fn canister_status_and_snapshot_records_preserve_wire() {
+    canister_snapshot_status_roundtrip();
 }

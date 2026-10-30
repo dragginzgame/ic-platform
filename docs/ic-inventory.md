@@ -13,6 +13,35 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
+The pending 0.9.0 management cut owns only sibling-canister-used DTOs on Wasm:
+43 existing public names, backed by 51 complete 0.11.0 declarations. Canic Core,
+control-plane, Blob recovery and the Canic runtime-probe canister supply the
+selection evidence recorded in the maintained provenance. Fourteen host-only
+snapshot-transfer names are excluded from Wasm; native builds retain the complete
+57-name registry =0.11.0 facade and its original identities for Backup/Testkit.
+The registry management crate and its implicit Candid printer disappear from the
+management-only Wasm graph. Candid bignum/serde_bytes and all external fields,
+variants, Serde bytes and function signatures remain. See the
+[selected management contract](migration.md#selected-canister-management-dtos).
+
+The pending embedded-runtime cut replaces registry IC0/executor packages with
+maintained source inside Platform. Public module paths stay; method/task handles
+have Platform identity. Executor selects only owned IC0 and SlotMap.
+The inherited Cargo singleton guard and final graph checks prevent mixed owners;
+Timers consumers must adopt the supplying minor line together. Original source
+and license identities, deviations and qualification are in the
+[embedded runtime contract](migration.md#embedded-ic0-and-executor).
+
+The executor-only Wasm graph resolves SlotMap 1.1.1, with no normal dependencies.
+Its `version_check` 0.9.5 is build-only and contributes no production Wasm code.
+IC0 has no dependencies.
+SlotMap retains generation-checked task/method keys so stale handles cannot
+address reused slots. Standard Vec task lists replace SmallVec following the
+maintainer's measured Wasm-size decision; see the tradeoff in the migration
+contract above. SmallVec remains a transitive host/tooling dependency, not an
+executor dependency. Replacing SlotMap would require owning equivalent
+generation/reuse behavior; no other arena supplier is selected in this graph.
+
 The released 0.8 packaging cut makes `principal` independent of
 `ic_principal` and SHA-2. `principal-external` adds registry identity and byte
 conversions; `principal-self-authenticating` explicitly adds unchanged upstream
@@ -149,7 +178,7 @@ API changes or automatically establish whether sibling source still uses an API.
 | --- | --- | --- | --- |
 | `blake3` | optional `blake3::{hash,Hasher,Hash}` | IcyDB currently uses upstream directly for predicate fingerprints; adoption remains consumer-owned | Platform selects unchanged upstream hashing with `std` only. Consumers own domain/format policy; no SHA-256 protocol replacement or size saving is implied. |
 | `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting and account semantics. External Principal conversions and upstream self-authentication are separate explicit features; owned-only graphs exclude both. |
-| `ic0`, `ic-cdk-executor`; imported CDK adapters and owned generator | `ic0`, `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters | Platform maintains non-crypto adapters/generator. Registry executor and system ABI stay pinned; callback/trap semantics require installed qualification. No full `ic-cdk` dependency. |
+| Embedded IC0/executor; imported CDK adapters and owned generator | `ic0`, `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters | Platform maintains non-crypto adapters/generator. Platform maintains the sole executor and unchanged IC0 1.2.0 ABI; callback/trap semantics require installed qualification. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
 | `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
@@ -244,12 +273,12 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | default |  |
 | ic-platform | ecdsa | dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
-| ic-platform | executor | dep:ic-cdk-executor |
+| ic-platform | executor | dep:slotmap, ic0 |
 | ic-platform | gzip | dep:ic-host-artifacts |
-| ic-platform | ic0 | dep:ic0 |
+| ic-platform | ic0 |  |
 | ic-platform | icp-ledger-types | candid |
 | ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
-| ic-platform | management-canister-types | dep:ic-management-canister-types, principal-external |
+| ic-platform | management-canister-types | candid/bignum, candid/serde_bytes, dep:candid, dep:ic-management-canister-types, dep:serde_bytes, principal-external |
 | ic-platform | nns-registry-types | candid |
 | ic-platform | pocket-ic | dep:pocket-ic, principal-external |
 | ic-platform | principal | dep:crc32fast, dep:data-encoding, dep:serde, dep:thiserror |
@@ -274,17 +303,15 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ed25519-dalek | ^2.2 | normal | all | true | false |  |
 | ic-platform | hex | ^0.4.3 | normal | all | true | true |  |
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
-| ic-platform | ic-cdk-executor | =2.0.0 | normal | all | true | true |  |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
 | ic-platform | ic-host-artifacts | ^0.70.0 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
-| ic-platform | ic-management-canister-types | =0.11.0 | normal | all | true | true |  |
+| ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |
 | ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
 | ic-platform | ic-wire | ^0.7.22 | normal | cfg(not(target_family = "wasm")) | true | false | typescript |
-| ic-platform | ic0 | =1.2.0 | normal | all | true | true |  |
 | ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert |
 | ic-platform | k256 | ^0.13.4 | normal | all | true | false | ecdsa |
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
@@ -299,6 +326,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | serde_json | ^1.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
+| ic-platform | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |

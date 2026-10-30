@@ -19,6 +19,8 @@ fi
 msrv=1.91.0
 if [[ -z "$published" ]]; then msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"; fi
 profiles="$root/scripts/ci/platform-consumer-profiles.tsv"
+awk -f "$root/scripts/ci/platform-graph-policy.awk" /dev/null
+tests="$("$root/.tools/host/bin/yq" -p toml -o json '.test' crates/ic-platform/Cargo.toml)"
 capabilities=()
 while IFS=$'\t' read -r capability _; do
     capabilities+=("$capability")
@@ -34,12 +36,16 @@ if [[ $# -gt 0 ]]; then
 fi
 for capability in "${capabilities[@]}"; do
 profile="$(awk -F '\t' -v capability="$capability" '$1 == capability { print }' "$profiles")"
-IFS=$'\t' read -r _ features source assets wasm graph_family <<< "$profile"
+IFS=$'\t' read -r _ source assets wasm graph_family <<< "$profile"
 case "$graph_family" in
     -|minimal|principal|principal-external|principal-self-authenticating|ledger|cdk|runtime|external-candid|blake3|external-codecs) ;;
     *) echo "Unknown consumer graph family: $graph_family" >&2; exit 2 ;;
 esac
-features="\"${features//,/\", \"}\""
+features="$(printf '%s\n' "$tests" | "$root/.tools/host/bin/jq" -er --arg source "tests/$source.rs" '
+    [.[] | select(.path == $source)] |
+    if length == 1 and (.[0]["required-features"] | type == "array" and length > 0)
+    then .[0]["required-features"] | map(@json) | join(", ")
+    else error("expected one Cargo test with explicit required features: " + $source) end')"
 selection='path = "../../crates/ic-platform"'
 if [[ -n "$published" ]]; then selection="version = \"=$published\""; fi
 consumer_fixture "$root" boundary-consumer crates/consumer/src
@@ -90,6 +96,9 @@ if [[ -n "$published" ]]; then
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
 fi
+graph_has_forbidden() {
+    awk -v family="$1" -f "$root/scripts/ci/platform-graph-policy.awk" "$graph"
+}
 if [[ "$graph_family" != - ]]; then
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         graph="$fixture/$graph_target.graph"
@@ -100,11 +109,11 @@ if [[ "$graph_family" != - ]]; then
         fi
         case "$graph_family" in
             minimal)
-                if grep -Eq '^(ic_principal|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding|candid|ic-agent) ' "$graph"; then
+                if graph_has_forbidden minimal; then
                     echo 'Minimal consumer acquired application types/codecs/crypto' >&2; exit 1
                 fi ;;
             principal|principal-external|principal-self-authenticating|ledger)
-                if grep -Eq '^(icrc-ledger-types|icrc-cbor|minicbor|base32|candid_parser|ic-agent|pocket-ic) ' "$graph"; then
+                if graph_has_forbidden identity; then
                     echo 'Identity/ledger consumer acquired retired or unrelated integration machinery' >&2; exit 1
                 fi
                 if [[ "$graph_family" == principal || "$graph_family" == principal-external ]] &&
@@ -131,7 +140,7 @@ if [[ "$graph_family" != - ]]; then
                     echo 'BLAKE3 consumer acquired unrelated IC/application dependencies' >&2; exit 1
                 fi ;;
             external-codecs)
-                if grep -Eq '^(ic-cdk[^ ]*|ic0|ic-platform-macros|ic-agent|pocket-ic|ic-testkit|candid_parser|reqwest|tokio) ' "$graph"; then
+                if graph_has_forbidden external-codecs; then
                     echo 'External codecs acquired transport, executor or host parsing' >&2; exit 1
                 fi ;;
         esac

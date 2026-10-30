@@ -9,12 +9,14 @@ mkdir -p "$fixture/scripts/ci" "$fixture/crates/ic-platform/tests" "$fixture/bin
 cp "$root/scripts/ci/check-platform-consumer.sh" "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/check-blake3-graph.sh" "$root/scripts/ci/check-cargo-graph.pl" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
 cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
 cp "$root/Cargo.toml" "$fixture/Cargo.toml"
+cp "$root/crates/ic-platform/Cargo.toml" "$fixture/crates/ic-platform/Cargo.toml"
 mkdir -p "$fixture/.tools"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 cat > "$fixture/bin/rustc" <<'STUB'
@@ -38,7 +40,7 @@ case "$1" in
             if [[ "${TEST_BLAKE3_DUPLICATE:-no}" == yes ]]; then printf 'blake3 v1.8.6\tstd\n'; fi
             exit 0
         fi
-        printf 'ic-cdk-executor v2.0.0\nic0 v1.2.0\n'
+        printf 'ic-platform v0.8.5 (/local/platform)\n'
         if [[ "$TEST_CANDID" == yes ]]; then printf 'candid v0.10.38\n'; fi
         if [[ "$TEST_REJECT" == yes ]]; then printf 'ic-agent v0.49.2\n'; fi
         ;;
@@ -60,7 +62,7 @@ export PATH="$fixture/bin:$PATH" TEST_CALLS="$fixture/calls"
 TEST_MSRV="$("$BASH" "$root/scripts/ci/read-platform-msrv.sh")"
 export TEST_MSRV
 export TEST_REJECT=no TEST_CANDID=no
-while IFS=$'\t' read -r capability _ _ _ wasm _; do
+while IFS=$'\t' read -r capability _ _ wasm _; do
     TEST_CANDID=no
     if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi
     : > "$TEST_CALLS"
@@ -85,6 +87,14 @@ grep -q 'Unknown consumer graph family' "$fixture/invalid-family.log"
 [[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled an unknown graph family' >&2; exit 1; }
 cp "$fixture/profiles.before" "$fixture/scripts/ci/platform-consumer-profiles.tsv"
 echo 'Every consumer profile prepares its source/assets and selects native/Wasm commands'
+# The test declaration is the feature owner, even after a later edit.
+cp "$fixture/crates/ic-platform/Cargo.toml" "$fixture/test-manifest.before"
+perl -0777 -i -pe 's/(name = "ecdsa_consumer".*?required-features = )\["ecdsa"\]/${1}["ecdsa", "blake3"]/s' "$fixture/crates/ic-platform/Cargo.toml"
+"$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" ecdsa > "$fixture/derived-features.log" 2>&1
+derived="$(sed -n 's/^Consumer evidence retained at //p' "$fixture/derived-features.log")"
+grep -Fq 'features = ["ecdsa", "blake3"]' "$derived/Cargo.toml"
+cp "$fixture/test-manifest.before" "$fixture/crates/ic-platform/Cargo.toml"
+echo 'Standalone feature selection follows the Cargo test declaration'
 if TEST_CAPABILITY=external-codecs TEST_REJECT=yes "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-codecs > "$fixture/codec-rejection.log" 2>&1; then
     echo 'External codecs admitted host transport' >&2; exit 1
 fi

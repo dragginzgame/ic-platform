@@ -1,7 +1,7 @@
 [
   {"dependency": "blake3", "allowed_packages": ["ic-platform"]},
   {"dependency": "pocket-ic", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic0", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic0", "allowed_packages": []},
   {"dependency": "ic-agent", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-secp256k1", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-canister-sig-creation", "allowed_packages": ["ic-platform"]},
@@ -16,7 +16,7 @@
   {"dependency": "candid_parser", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-cdk", "allowed_packages": []},
   {"dependency": "ic-error-types", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-cdk-executor", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic-cdk-executor", "allowed_packages": []},
   {"dependency": "ic-cdk-macros", "allowed_packages": []},
   {"dependency": "ic-platform-macros", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-cdk-timers", "allowed_packages": []},

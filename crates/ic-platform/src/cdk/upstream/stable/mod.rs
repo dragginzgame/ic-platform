@@ -3,6 +3,8 @@
 //!
 //! You can check the [Internet Computer Specification](https://internetcomputer.org/docs/current/references/ic-interface-spec/#system-api-stable-memory)
 //! for a in-depth explanation of stable memory.
+
+use crate::ic0::upstream as ic0;
 use std::{error, fmt};
 
 /// A possible error value when dealing with stable memory.

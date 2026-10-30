@@ -119,10 +119,11 @@ impl SnapshotImageQuery {
 }
 
 fn parse_quantity(value: &str, field: &str) -> Result<u64, String> {
-    if value.is_empty() || !value.bytes().all(|byte| byte.is_ascii_digit()) {
-        return Err(format!("{field} must be an unsigned decimal integer"));
-    }
-    value.parse().map_err(|_| format!("{field} exceeds u64"))
+    use super::arguments::{DecimalError, unsigned_decimal};
+    unsigned_decimal(value).map_err(|error| match error {
+        DecimalError::Syntax => format!("{field} must be an unsigned decimal integer"),
+        DecimalError::Overflow => format!("{field} exceeds u64"),
+    })
 }
 
 fn snapshot_error(message: String) -> (StatusCode, String) {
@@ -313,16 +314,12 @@ pub(crate) fn render(
     };
     let evidence = &window.metadata;
     let start_page = quantity(&query.start_page, "start_page")?.unwrap_or(0);
-    if view == SnapshotView::Reads
-        && (before.is_none() || evidence["read_profile"]["available"] != true)
-    {
+    if view == SnapshotView::Reads && (before.is_none() || !window.coverage.reads()) {
         return Err(snapshot_error(
                 "view=reads requires matching before/after captures with retained opt-in byte-read profiling. Enable byte-read profiling before the call/install; existing page traces and snapshot bytes cannot reconstruct reads.".to_string(),
             ));
     }
-    if view == SnapshotView::Writes
-        && (before.is_none() || evidence["write_profile"]["available"] != true)
-    {
+    if view == SnapshotView::Writes && (before.is_none() || !window.coverage.writes()) {
         return Err(snapshot_error(
                 "view=writes requires matching before/after captures with retained opt-in byte-write profiling. Enable byte-write profiling before the call/install; page dirty flags and snapshot differences cannot reconstruct individual writes.".to_string(),
             ));
@@ -332,10 +329,10 @@ pub(crate) fn render(
             if query.start_page.is_some() {
                 return Err(snapshot_error("start_page applies only to selection=range; touched selection uses page_offset.".to_string()));
             }
-            if before.is_none() || evidence["available"] != true {
+            if before.is_none() || !window.coverage.available() {
                 return Err(snapshot_error(format!(
                     "Touched selection requires matching before/after captures with retained trace cursors. {} Enable tracing before the operation and capture both boundaries.",
-                    evidence["reason"].as_str().unwrap_or("")
+                    window.coverage.reason()
                 )));
             }
             let (pages, total) = touched_window(&window.touched, memory, offset, count);

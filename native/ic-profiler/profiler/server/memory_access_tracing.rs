@@ -117,6 +117,36 @@ struct StoredLogicalExecution {
 
 const MAX_PENDING_ATTEMPTS_PER_CANISTER: usize = 256;
 
+/// Facts derived together while the recorder lock is held.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct TraceCursor {
+    pub generation: u64,
+    pub last_sequence: Option<u64>,
+    pub first_sequence: Option<u64>,
+    pub last_runtime_sequence: Option<u64>,
+    pub tracing: bool,
+}
+
+impl TraceCursor {
+    fn read(traces: &Traces, trace: Option<&CanisterTrace>) -> Self {
+        Self {
+            generation: trace
+                .map_or(0, |t| t.generation)
+                .saturating_add(traces.subnet_cost_generation),
+            first_sequence: trace
+                .and_then(|t| t.executions.first())
+                .map(|e| e.sequence_number),
+            last_sequence: trace
+                .and_then(|t| t.executions.last())
+                .map(|e| e.sequence_number),
+            last_runtime_sequence: trace
+                .and_then(|t| t.last_runtime_cost_sequence)
+                .max(traces.last_subnet_cost_sequence),
+            tracing: trace.is_some_and(|t| t.tracing),
+        }
+    }
+}
+
 pub(crate) struct RuntimeCostSnapshot {
     pub runtime_costs_recording: bool,
     pub runtime_costs: Vec<rest::RuntimeCostEvent>,
@@ -184,9 +214,32 @@ impl ExecutionFilter<'_> {
     }
 }
 
+/// Admission facts stay typed; the retained JSON is an output projection.
+pub(crate) enum SnapshotCoverage {
+    Unavailable(String),
+    Available { reads: bool, writes: bool },
+}
+impl SnapshotCoverage {
+    pub(crate) fn available(&self) -> bool {
+        matches!(self, Self::Available { .. })
+    }
+    pub(crate) fn reads(&self) -> bool {
+        matches!(self, Self::Available { reads: true, .. })
+    }
+    pub(crate) fn writes(&self) -> bool {
+        matches!(self, Self::Available { writes: true, .. })
+    }
+    pub(crate) fn reason(&self) -> &str {
+        match self {
+            Self::Unavailable(reason) => reason,
+            Self::Available { .. } => "",
+        }
+    }
+}
+
 /// Native rendering consumes numeric ranges; JSON is produced only for the response.
-#[derive(Default)]
 pub(crate) struct SnapshotEvidence {
+    pub coverage: SnapshotCoverage,
     pub metadata: serde_json::Value,
     pub touched: [Vec<(u64, u64)>; 2],
     pub dirty: [Vec<(u64, u64)>; 2],
@@ -197,8 +250,12 @@ pub(crate) struct SnapshotEvidence {
 impl SnapshotEvidence {
     pub(crate) fn unavailable(reason: &str) -> Self {
         Self {
+            coverage: SnapshotCoverage::Unavailable(reason.to_string()),
             metadata: serde_json::json!({"available": false, "reason": reason}),
-            ..Self::default()
+            touched: Default::default(),
+            dirty: Default::default(),
+            reads: Vec::new(),
+            writes: Vec::new(),
         }
     }
 
@@ -213,7 +270,7 @@ impl SnapshotEvidence {
             });
             json!({"heap": heap, "stable": stable})
         };
-        if self.metadata["available"] == true {
+        if self.coverage.available() {
             self.metadata["known_touched_ranges"] = encode(self.touched);
             self.metadata["known_dirty_ranges"] = encode(self.dirty);
         }
@@ -266,10 +323,7 @@ impl MemoryAccessTraceRecorder {
                 "No retained execution trace; enable tracing before the operation and both captures.",
             );
         };
-        if trace
-            .generation
-            .saturating_add(traces.subnet_cost_generation)
-            != trace_generation
+        if TraceCursor::read(&traces, Some(trace)).generation != trace_generation
             || through.is_none()
             || after.zip(through).is_some_and(|(start, end)| start > end)
             || (attempt_id.is_some() && logical_execution_id.is_some())
@@ -424,13 +478,17 @@ impl MemoryAccessTraceRecorder {
                 }));
             }
         }
+        let coverage = SnapshotCoverage::Available {
+            reads: read_profiles > 0,
+            writes: write_profiles > 0,
+        };
         let metadata = json!({
-            "available": true,
+            "available": coverage.available(),
             "window_after": after.map(|v| v.to_string()), "window_through": through.map(|v| v.to_string()),
             "attempt_id": attempt_id.map(|v| v.to_string()), "logical_execution_id": logical_execution_id.map(|v| v.to_string()),
             "execution_count": count.to_string(), "attempts": attempts, "attempt_list_truncated": count > 128,
             "read_profile": {
-                "available": read_profiles > 0,
+                "available": coverage.reads(),
                 "observed_reads": observed_reads.to_string(),
                 "observed_bytes": observed_read_bytes.to_string(),
                 "profiled_executions": read_profiles.to_string(),
@@ -443,7 +501,7 @@ impl MemoryAccessTraceRecorder {
                 "semantics": "Successful logical byte reads from explicitly selected read-profile executions, independent of contents and native page fees. Counts measure read operations covering each byte; they are not CPU cache accesses. Missing executions or truncated ranges leave absence unknown."
             },
             "write_profile": {
-                "available": write_profiles > 0,
+                "available": coverage.writes(),
                 "observed_writes": observed_writes.to_string(),
                 "observed_bytes": observed_write_bytes.to_string(),
                 "profiled_executions": write_profiles.to_string(),
@@ -470,6 +528,7 @@ impl MemoryAccessTraceRecorder {
             super::rendering::merge_ranges(ranges.into_iter().filter(|&(start, end)| start < end))
         };
         SnapshotEvidence {
+            coverage,
             metadata,
             touched: [merge(heap), merge(stable)],
             dirty: [merge(heap_dirty), merge(stable_dirty)],
@@ -480,10 +539,18 @@ impl MemoryAccessTraceRecorder {
 
     fn logical_dictionary(
         trace: Option<&CanisterTrace>,
+        executions: Option<&[TracedExecution]>,
     ) -> BTreeMap<String, rest::TracedLogicalExecution> {
+        let ids = executions.map(|executions| {
+            executions
+                .iter()
+                .filter_map(|execution| execution.disposition.as_ref()?.logical_execution_id)
+                .collect::<std::collections::BTreeSet<_>>()
+        });
         trace
             .into_iter()
             .flat_map(|trace| &trace.logical_executions)
+            .filter(|(id, _)| ids.as_ref().is_none_or(|ids| ids.contains(id)))
             .map(|(id, stored)| (id.to_string(), stored.context.clone()))
             .collect()
     }
@@ -619,38 +686,61 @@ impl MemoryAccessTraceRecorder {
 
     /// Small immutable capture cursor; unlike `get`, this never clones trace
     /// events, profiles or module dictionaries.
-    pub(crate) fn snapshot_cursor(
-        &self,
-        canister_id: CanisterId,
-    ) -> (u64, Option<u64>, Option<u64>, bool) {
+    pub(crate) fn snapshot_cursor(&self, canister_id: CanisterId) -> TraceCursor {
         let traces = self.traces.lock().unwrap();
-        let trace = traces.canisters.get(&canister_id);
-        (
-            trace
-                .map_or(0, |trace| trace.generation)
-                .saturating_add(traces.subnet_cost_generation),
-            trace
-                .and_then(|trace| trace.executions.last())
-                .map(|execution| execution.sequence_number),
-            trace
-                .and_then(|trace| trace.last_runtime_cost_sequence)
-                .max(traces.last_subnet_cost_sequence),
-            trace.is_some_and(|trace| trace.tracing),
-        )
+        TraceCursor::read(&traces, traces.canisters.get(&canister_id))
     }
 
     pub(crate) fn get(&self, canister_id: CanisterId) -> MemoryAccessTrace {
+        self.snapshot(canister_id, None)
+    }
+
+    /// Select query executions and dictionaries under one lock; raw event
+    /// histories are intentionally supplied only by the full export above.
+    pub(crate) fn query_snapshot(
+        &self,
+        canister_id: CanisterId,
+        filter: &ExecutionFilter<'_>,
+    ) -> MemoryAccessTrace {
+        self.snapshot(canister_id, Some(filter))
+    }
+
+    fn snapshot(
+        &self,
+        canister_id: CanisterId,
+        filter: Option<&ExecutionFilter<'_>>,
+    ) -> MemoryAccessTrace {
         let identity = server_identity();
         let traces = self.traces.lock().unwrap();
         let trace = traces.canisters.get(&canister_id);
+        let cursor = TraceCursor::read(&traces, trace);
+        let executions: Vec<_> = trace
+            .into_iter()
+            .flat_map(|t| &t.executions)
+            .filter(|execution| filter.is_none_or(|filter| filter.matches(execution)))
+            .cloned()
+            .collect();
+        let selected_modules = filter.map(|_| {
+            executions
+                .iter()
+                .filter_map(|e| e.module_hash.as_deref())
+                .collect::<std::collections::BTreeSet<_>>()
+        });
+        // Dictionary availability comes from the whole retained trace, including
+        // when the selected execution itself was not instruction-profiled.
+        let modules = Self::referenced_modules(
+            &traces,
+            trace.map_or(&[], |t| t.executions.as_slice()),
+            selected_modules.as_ref(),
+        );
+        let logical_executions =
+            Self::logical_dictionary(trace, filter.map(|_| executions.as_slice()));
         MemoryAccessTrace {
             format_version: 2,
             charge_rules: crate::instruction_charge_rules::charge_rules().clone(),
             server_generation: identity.generation.clone(),
             server_binary_hash: identity.binary_hash.clone(),
-            trace_generation: trace
-                .map_or(0, |t| t.generation)
-                .saturating_add(traces.subnet_cost_generation),
+            trace_generation: cursor.generation,
             truncated: trace.is_some_and(|t| t.truncated),
             dropped_executions: trace.map_or(0, |t| t.dropped_executions),
             dropped_instructions: trace.map_or(0, |t| t.dropped_instructions),
@@ -658,10 +748,18 @@ impl MemoryAccessTraceRecorder {
                 .is_some_and(|t| t.dropped_instructions_incomplete),
             recorded_bytes: trace.map_or(0, |t| Self::retained_bytes(&traces, t) as u64),
             wasm_page_size: WASM_PAGE_SIZE_IN_BYTES as u64,
-            executions: trace.map_or_else(Vec::new, |t| t.executions.clone()),
+            executions,
             runtime_costs_recording: trace.is_some_and(|t| t.runtime_costs_recording),
-            runtime_costs: trace.map_or_else(Vec::new, |t| t.runtime_costs.clone()),
-            subnet_runtime_costs: traces.subnet_costs.clone(),
+            runtime_costs: if filter.is_none() {
+                trace.map_or_else(Vec::new, |t| t.runtime_costs.clone())
+            } else {
+                Vec::new()
+            },
+            subnet_runtime_costs: if filter.is_none() {
+                traces.subnet_costs.clone()
+            } else {
+                Vec::new()
+            },
             runtime_cost_totals: trace.map_or_else(Vec::new, |t| {
                 t.runtime_cost_totals.values().cloned().collect()
             }),
@@ -670,14 +768,10 @@ impl MemoryAccessTraceRecorder {
             subnet_runtime_costs_truncated: traces.subnet_costs_truncated,
             runtime_cost_totals_incomplete: trace.is_some_and(|t| t.runtime_cost_totals_incomplete),
             subnet_runtime_cost_totals_incomplete: traces.subnet_cost_totals_incomplete,
-            last_runtime_cost_sequence_number: trace
-                .and_then(|t| t.last_runtime_cost_sequence)
-                .max(traces.last_subnet_cost_sequence),
+            last_runtime_cost_sequence_number: cursor.last_runtime_sequence,
             runtime_configurations: traces.runtime_configurations.clone(),
-            modules: trace.map_or_else(BTreeMap::new, |t| {
-                Self::referenced_modules(&traces, &t.executions)
-            }),
-            logical_executions: Self::logical_dictionary(trace),
+            modules,
+            logical_executions,
         }
     }
 
@@ -699,6 +793,7 @@ impl MemoryAccessTraceRecorder {
     fn referenced_modules(
         traces: &Traces,
         executions: &[TracedExecution],
+        selected: Option<&std::collections::BTreeSet<&str>>,
     ) -> BTreeMap<String, rest::WasmInstructionModuleMetadata> {
         let hashes: std::collections::BTreeSet<_> = executions
             .iter()
@@ -707,6 +802,7 @@ impl MemoryAccessTraceRecorder {
             .collect();
         hashes
             .into_iter()
+            .filter(|hash| selected.is_none_or(|selected| selected.contains(hash.as_str())))
             .filter_map(|hash| {
                 traces
                     .modules
@@ -820,20 +916,11 @@ impl MemoryAccessTraceRecorder {
     ) -> bool {
         let mut traces = self.traces.lock().unwrap();
         let trace = traces.canisters.get(&canister_id);
-        if trace
-            .map_or(0, |t| t.generation)
-            .saturating_add(traces.subnet_cost_generation)
-            != expected_generation
-            || trace
-                .and_then(|t| t.executions.last())
-                .map(|e| e.sequence_number)
-                != expected_last_sequence
-            || expected_last_runtime_cost_sequence.is_some_and(|expected| {
-                trace
-                    .and_then(|t| t.last_runtime_cost_sequence)
-                    .max(traces.last_subnet_cost_sequence)
-                    != expected
-            })
+        let cursor = TraceCursor::read(&traces, trace);
+        if cursor.generation != expected_generation
+            || cursor.last_sequence != expected_last_sequence
+            || expected_last_runtime_cost_sequence
+                .is_some_and(|expected| cursor.last_runtime_sequence != expected)
         {
             return false;
         }
@@ -846,18 +933,19 @@ impl MemoryAccessTraceRecorder {
         traces
             .canisters
             .iter()
-            .map(|(id, trace)| TracedCanister {
-                canister_id: *id,
-                tracing: trace.tracing,
-                runtime_costs_recording: trace.runtime_costs_recording,
-                executions: trace.executions.len(),
-                first_sequence_number: trace.executions.first().map(|e| e.sequence_number),
-                last_sequence_number: trace.executions.last().map(|e| e.sequence_number),
-                trace_generation: trace
-                    .generation
-                    .saturating_add(traces.subnet_cost_generation),
-                truncated: trace.truncated,
-                profile_remaining: trace.profile_remaining,
+            .map(|(id, trace)| {
+                let cursor = TraceCursor::read(&traces, Some(trace));
+                TracedCanister {
+                    canister_id: *id,
+                    tracing: cursor.tracing,
+                    runtime_costs_recording: trace.runtime_costs_recording,
+                    executions: trace.executions.len(),
+                    first_sequence_number: cursor.first_sequence,
+                    last_sequence_number: cursor.last_sequence,
+                    trace_generation: cursor.generation,
+                    truncated: trace.truncated,
+                    profile_remaining: trace.profile_remaining,
+                }
             })
             .collect()
     }
@@ -871,19 +959,14 @@ impl MemoryAccessTraceRecorder {
     ) -> TraceSnapshot {
         let traces = self.traces.lock().unwrap();
         let trace = traces.canisters.get(&canister_id);
+        let cursor = TraceCursor::read(&traces, trace);
         let mut snapshot = TraceSnapshot {
-            trace_generation: trace
-                .map_or(0, |t| t.generation)
-                .saturating_add(traces.subnet_cost_generation),
-            first_sequence_number: trace
-                .and_then(|t| t.executions.first())
-                .map(|e| e.sequence_number),
-            last_sequence_number: trace
-                .and_then(|t| t.executions.last())
-                .map(|e| e.sequence_number),
+            trace_generation: cursor.generation,
+            first_sequence_number: cursor.first_sequence,
+            last_sequence_number: cursor.last_sequence,
             executions: vec![],
             modules: BTreeMap::new(),
-            logical_executions: Self::logical_dictionary(trace),
+            logical_executions: BTreeMap::new(),
             more: false,
             truncated: trace.is_some_and(|t| t.truncated),
             dropped_executions: trace.map_or(0, |t| t.dropped_executions),
@@ -910,19 +993,9 @@ impl MemoryAccessTraceRecorder {
                 .cloned()
                 .collect();
             snapshot.more = matching.next().is_some();
-            snapshot.modules = Self::referenced_modules(&traces, &snapshot.executions);
-            let ids: std::collections::BTreeSet<String> = snapshot
-                .executions
-                .iter()
-                .filter_map(|execution| {
-                    execution
-                        .disposition
-                        .as_ref()?
-                        .logical_execution_id
-                        .map(|id| id.to_string())
-                })
-                .collect();
-            snapshot.logical_executions.retain(|id, _| ids.contains(id));
+            snapshot.modules = Self::referenced_modules(&traces, &snapshot.executions, None);
+            snapshot.logical_executions =
+                Self::logical_dictionary(Some(trace), Some(&snapshot.executions));
         }
         snapshot
     }
@@ -935,6 +1008,7 @@ impl MemoryAccessTraceRecorder {
     ) -> RuntimeCostSnapshot {
         let traces = self.traces.lock().unwrap();
         let trace = traces.canisters.get(&canister_id);
+        let cursor = TraceCursor::read(&traces, trace);
         let mut events: Vec<_> = trace
             .into_iter()
             .flat_map(|t| &t.runtime_costs)
@@ -970,14 +1044,10 @@ impl MemoryAccessTraceRecorder {
             subnet_runtime_costs_truncated: traces.subnet_costs_truncated,
             runtime_cost_totals_incomplete: trace.is_some_and(|t| t.runtime_cost_totals_incomplete),
             subnet_runtime_cost_totals_incomplete: traces.subnet_cost_totals_incomplete,
-            last_runtime_cost_sequence_number: trace
-                .and_then(|t| t.last_runtime_cost_sequence)
-                .max(traces.last_subnet_cost_sequence),
+            last_runtime_cost_sequence_number: cursor.last_runtime_sequence,
             next_after,
             more,
-            trace_generation: trace
-                .map_or(0, |t| t.generation)
-                .saturating_add(traces.subnet_cost_generation),
+            trace_generation: cursor.generation,
             runtime_configurations: traces.runtime_configurations.clone(),
         }
     }
@@ -1929,6 +1999,46 @@ mod tests {
     }
 
     #[test]
+    fn query_snapshot_selects_before_copying_and_keeps_export_and_cursor_unchanged() {
+        use ic_interfaces::execution_environment::{
+            RuntimeCostKind as Kind, RuntimeCostUnit as Unit,
+        };
+        let recorder = MemoryAccessTraceRecorder::default();
+        let canister = CanisterId::from_u64(1);
+        recorder.start(canister);
+        recorder.record(canister, execution("kept"));
+        recorder.record(canister, execution("other"));
+        recorder.record_runtime_cost(canister, runtime_event(Unit::Cycles, Kind::Debit, 7));
+        let before = recorder.get(canister);
+        let cursor = recorder.snapshot_cursor(canister);
+        let query = recorder.query_snapshot(
+            canister,
+            &ExecutionFilter {
+                function: Some("kept"),
+                ..Default::default()
+            },
+        );
+        assert_eq!(query.executions.len(), 1);
+        assert_eq!(
+            serde_json::to_value(&query.executions[0]).unwrap(),
+            serde_json::to_value(&before.executions[0]).unwrap()
+        );
+        assert!(!before.runtime_costs.is_empty());
+        assert!(query.runtime_costs.is_empty());
+        assert!(query.subnet_runtime_costs.is_empty());
+        assert_eq!(
+            serde_json::to_value(&query.runtime_cost_totals).unwrap(),
+            serde_json::to_value(&before.runtime_cost_totals).unwrap()
+        );
+        assert_eq!(query.trace_generation, cursor.generation);
+        assert_eq!(recorder.snapshot_cursor(canister), cursor);
+        assert_eq!(
+            serde_json::to_value(recorder.get(canister)).unwrap(),
+            serde_json::to_value(before).unwrap()
+        );
+    }
+
+    #[test]
     fn snapshot_touched_union_preserves_logical_mask_pages_without_native_fees() {
         use ic_interfaces::execution_environment::{
             WasmReadProfile, WasmReadRange, WasmWriteProfile, WasmWriteRange,
@@ -2573,6 +2683,40 @@ mod tests {
         );
         assert_eq!(trace.format_version, 2);
     }
+    #[test]
+    fn selected_unprofiled_execution_keeps_its_available_module_dictionary() {
+        use ic_interfaces::execution_environment::{
+            WasmInstructionModuleMetadata, WasmInstructionProfile,
+        };
+        let recorder = MemoryAccessTraceRecorder::default();
+        let canister = CanisterId::from_u64(1);
+        let mut profiled = execution("profiled");
+        profiled.trace.instruction_profile = Some(WasmInstructionProfile {
+            module: Some(WasmInstructionModuleMetadata {
+                module_sha256: [0xab; 32],
+                ..Default::default()
+            }),
+            ..Default::default()
+        });
+        recorder.record(canister, profiled);
+        recorder.record(canister, execution("unprofiled"));
+        let full = recorder.get(canister);
+        let query = recorder.query_snapshot(
+            canister,
+            &ExecutionFilter {
+                function: Some("unprofiled"),
+                ..Default::default()
+            },
+        );
+        assert_eq!(query.executions.len(), 1);
+        assert!(query.executions[0].instruction_profile.is_none());
+        assert_eq!(query.modules.len(), 1);
+        assert_eq!(
+            serde_json::to_value(&query.modules).unwrap(),
+            serde_json::to_value(&full.modules).unwrap()
+        );
+    }
+
     #[test]
     fn module_dictionaries_are_interned_and_collected_when_unreferenced() {
         use ic_interfaces::execution_environment::{

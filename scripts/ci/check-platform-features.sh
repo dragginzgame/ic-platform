@@ -73,7 +73,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     awk -v target="$target" -v cache="$cache" -v activation="$cache/$target-activation.tsv" \
         -v gzip_source="$gzip_source" \
         -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" \
-        -f scripts/ci/check-platform-feature-graphs.awk "$mapping"
+        -f scripts/ci/platform-graph-policy.awk -f scripts/ci/check-platform-feature-graphs.awk "$mapping"
 done
 printf 'Feature selections, mappings and Cargo graphs retained at %s\n' "$cache"
 cargo check -p ic-platform --lib --frozen --no-default-features

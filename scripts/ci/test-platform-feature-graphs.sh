@@ -13,7 +13,7 @@ admit() {
         "$jq" -r --arg projection activation --arg target "$graph_target" \
             --slurpfile metadata "$fixture/metadata.json" --slurpfile policy "$root/scripts/ci/platform-feature-policy.json" \
             -f "$root/scripts/ci/platform-feature-closures.jq" > "$fixture/activation.tsv"
-    awk -v activation="$fixture/activation.tsv" "$@"
+    awk -v activation="$fixture/activation.tsv" -f "$root/scripts/ci/platform-graph-policy.awk" "$@"
 }
 count=0
 while IFS='|' read -r selection package expected; do
@@ -69,10 +69,10 @@ cdk|candid v0.10.38|reject
 runtime|candid v0.10.38|reject
 candid-endpoint|candid v0.10.38|pass
 candid-endpoint|pretty v0.12.5|reject
-candid-endpoint|ic-cdk-executor v2.0.0|pass
+candid-endpoint|ic-cdk-executor v2.0.0|reject
 candid-endpoint|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
-runtime|ic-cdk-executor v2.0.0|pass
-runtime|ic0 v1.2.0|pass
+runtime|ic-cdk-executor v2.0.0|reject
+runtime|ic0 v1.2.0|reject
 runtime|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
 cdk|candid_derive v0.10.38|reject
 cdk,candid|candid v0.10.38|pass
@@ -107,7 +107,7 @@ none|pocket-ic v16.1.0|reject
 none|ic-testkit v0.54.0|reject
 none|ic-testkit-candid v0.53.0|reject
 none|ic-cdk-executor v2.0.0|reject
-executor|ic-cdk-executor v2.0.0|pass
+executor|ic-cdk-executor v2.0.0|reject
 executor|ic-cdk-executor v1.0.2|reject
 executor|ic-cdk-executor v2.0.0 (/local)|reject
 cdk|ic-cdk v0.20.3|reject
@@ -118,7 +118,7 @@ cdk|ic-cdk-macros v0.20.3 (proc-macro) (/local)|reject
 cdk|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
 none|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
 cdk|ic-platform-macros v0.1.12 (proc-macro) (/fixture)|reject
-ic0|ic0 v1.2.0|pass
+ic0|ic0 v1.2.0|reject
 ic0|ic0 v1.1.0|reject
 ic0|ic0 v1.2.0 (/local)|reject
 canister-sig-creation|ic-canister-sig-creation v1.3.1|reject
@@ -234,3 +234,13 @@ printf 'gzip\tgzip\n' > "$fixture/mapping"
 if admit -v target=native -v cache="$fixture" -v gzip_source="$pinned" \
     -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 echo 'Host gzip identity, selection, Wasm and mixed-source refusals passed'
+# Management DTO adoption must exclude the registry supplier and implicit printer from Wasm.
+for package in 'ic-management-canister-types v0.11.0' 'pretty v0.12.5'; do
+    printf 'ic-platform v0.1.13\n%s\n' "$package" > "$fixture/wasm32-unknown-unknown-management.txt"
+    printf 'management-canister-types\tmanagement\n' > "$fixture/mapping"
+    if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \
+        -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then
+        echo "Wasm management admitted native-only supplier/printer: $package" >&2; exit 1
+    fi
+done
+echo 'Wasm management supplier and implicit-printer refusals passed'

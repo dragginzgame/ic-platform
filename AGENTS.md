@@ -76,9 +76,10 @@ adapters inside Platform and removing the `ic-cdk` package. Keep their Apache-2.
 license/provenance. The facade's mixed-source license is MIT AND Apache-2.0.
 The imported callback module permits reviewed unsafe code. The maintainer also
 authorized the function-local `msg_arg_data` exception: set the vector length
-only after pinned ic0's all-or-trap uninitialized-buffer copy returns.
-Other functions retain the workspace deny lint. No executor is forked.
-Preserve registry executor =2.0.0 and ic0 =1.2.0 identities. Endpoint macros require
+only after the maintained IC0 all-or-trap uninitialized-buffer copy returns.
+The maintainer authorized embedding IC0 1.2.0 and executor 2.0.0 inside Platform,
+including the reviewed IC0 unsafe bindings. Preserve Apache-2.0 provenance and
+the unchanged System API ABI. Other functions retain the workspace deny lint. Endpoint macros require
 explicit consumer-owned codecs; all owned application endpoints use Wire, including
 public endpoints called by third parties. Candid is an explicit adapter for required
 management/system, NNS/SNS, ledger and other pre-existing Candid interfaces. Caller
@@ -151,22 +152,36 @@ Candid contract types stay external. Do not add Candid to the owned type.
 
 ## Executor identity
 
-The published boundary constrains `ic-cdk-executor` to `=2.0.0` to preserve
-Timers' existing qualified callback/trap identity in downstream resolution.
-Any change requires renewed combined CDK/Timers await, callback-trap,
-cancellation and upgrade qualification; a lockfile-only check is insufficient.
-See [the executor constraint issue](https://github.com/dragginzgame/ic-platform/issues/7).
-The optional `ic0` boundary similarly preserves `=1.2.0` and upstream safe/unsafe
-signatures. It installs no timer entrypoint and transfers no storage ownership.
-Changes require renewed Timers submission/callback/trap/upgrade qualification.
+Platform now owns the embedded executor and IC0 implementations. This supersedes
+the registry =2.0.0 / =1.2.0 constraints and no-executor-fork restriction. Keep
+exactly one executor across Platform, Timers and application callbacks. Preserve
+the inherited Cargo links guard; never admit an external ic-cdk-executor beside
+the embedded owner. Existing public module paths remain; task/method handles
+now have Platform identity and require coordinated consumer adoption.
+
+Retain SlotMap generation checks. The maintainer selected standard Vec task lists
+after the 2026-10-30 benchmark, prioritizing reduced production Wasm size over
+SmallVec's small-method allocation advantage. Do not restore that runtime dependency.
+Keep protected wake routing while polling, coalesced wakeups, cached wakers,
+completed-task reclamation and destructor execution outside RefCell borrows.
+Preserve IC0 1.2.0 raw safe/unsafe signatures and imported source/license guards.
+No timer entrypoint, storage allocation or application scheduling policy is added.
+Changes require combined CDK/Timers await, callback-trap, cancellation and upgrade
+qualification plus relevant native executor regressions. See the
+[embedded runtime contract](docs/migration.md#embedded-ic0-and-executor).
 
 ## Management contract
 
-The optional management-canister DTO boundary uses `=0.11.0`, as explicitly
-requested by the maintainer. Preserve upstream type identities and external
-Candid bytes, including HTTP pricing/replication fields. Changing this constraint
-requires renewed consumer DTO/wire qualification; do not replace it with a
-lockfile-only constraint or a blanket upstream export.
+The maintainer authorized adopting only the management DTOs used by sibling
+canisters. Wasm uses 43 explicit exports backed by 51 complete declarations from
+0.11.0, including nested types and the Canic runtime-probe HTTP contract. Native
+builds retain the existing 57-name registry =0.11.0 surface and identities for
+Backup/Testkit/host tooling; do not import the host-only transfer DTOs speculatively.
+Keep Candid bytes, fields, variants, Serde attributes and function-reference
+signatures unchanged. Select bignum/serde_bytes without Candid's printer on Wasm.
+Keep source/license guards, upstream schema comparisons and installed byte proofs;
+record the type selection and consumer evidence in the maintained provenance.
+This supersedes the earlier cross-target registry-identity constraint for Wasm only.
 
 ## PocketIC maintenance boundary
 

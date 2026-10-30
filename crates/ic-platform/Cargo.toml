@@ -8,7 +8,9 @@ license = "MIT AND Apache-2.0"
 repository.workspace = true
 readme = "README.md"
 publish = ["crates-io"]
-include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+# Preserve the executor's Cargo singleton guard, including against the old supplier.
+links = "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md"
+include = ["src/**", "README.md", "LICENSE", "Cargo.toml", "build.rs"]
 
 [features]
 default = []
@@ -33,9 +35,9 @@ runtime = ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserro
 certification = ["dep:ic-certification"]
 ecdsa = ["dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
-executor = ["dep:ic-cdk-executor"]
+executor = ["ic0", "dep:slotmap"]
 gzip = ["dep:ic-host-artifacts"]
-ic0 = ["dep:ic0"]
+ic0 = []
 icrc-ledger-types = [
     "principal-external",
     "dep:candid",
@@ -47,7 +49,7 @@ icrc-ledger-types = [
     "dep:serde_bytes",
     "dep:sha2",
 ]
-management-canister-types = ["principal-external", "dep:ic-management-canister-types"]
+management-canister-types = ["principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:serde_bytes", "dep:ic-management-canister-types"]
 signature-verification = [
     "canister-sig-creation",
     "ic_principal/serde",
@@ -68,13 +70,10 @@ curve25519-dalek = { workspace = true, optional = true }
 data-encoding = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true, optional = true }
 hex = { workspace = true, optional = true }
-ic-cdk-executor = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
-ic-management-canister-types = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-stable-structures = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
-ic0 = { workspace = true, optional = true }
 ic_principal = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
 num-bigint = { workspace = true, optional = true }
@@ -84,9 +83,11 @@ serde = { workspace = true, optional = true, features = ["alloc"] }
 serde_bytes = { workspace = true, optional = true }
 serde_cbor = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }
+slotmap = { workspace = true, optional = true }
 thiserror = { workspace = true, optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
+ic-management-canister-types = { workspace = true, optional = true }
 candid_parser = { workspace = true, optional = true }
 ic-agent = { workspace = true, optional = true }
 ic-host-artifacts = { workspace = true, optional = true }

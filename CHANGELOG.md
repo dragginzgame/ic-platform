@@ -1,6 +1,60 @@
 # Changelog
 
+## [0.9.0]
+
+### ⚠️ Breaking
+
+- Embed IC0 and the executor in Platform, removing both external package suppliers.
+  Task/method handles now have Platform identity; applications and Timers must
+  adopt one Platform runtime owner together. The Cargo singleton guard rejects
+  mixed executors. Public module paths and external bytes remain unchanged.
+- Own the management DTO subset used by sibling canisters on Wasm, retaining
+  external Candid bytes while removing the registry supplier and implicit printer.
+  Native tooling keeps its upstream identities; host-only snapshot-transfer types
+  are no longer exported on Wasm. See the [management migration](docs/migration.md#selected-canister-management-dtos).
+- Remove the native viewer API's blanket integer rewriting and encoding/version
+  labels. Producers encode counters directly; typed PocketIC documents retain
+  their own serialization. Saved reports and raw PocketIC trace exports stay unchanged.
+
+### 🩹 Fixed
+
+- Preserve protected query wakeups while polling, coalesce repeated wakes, reuse
+  task wakers and reclaim completed-task bookkeeping and cancelled wakeups. Keep
+  cancellation cleanup outside executor borrows and preserve destructor-spawned tasks.
+
+### 🧭 Migration Notes
+
+- Follow the [embedded runtime migration](docs/migration.md#embedded-ic0-and-executor).
+  This requires a minor release; package versions and publication remain unchanged
+  during implementation. Imported Apache-2.0 licenses and provenance are retained.
+
+### 🧹 Cleanup
+
+- Derive standalone consumer features from Cargo test declarations and share
+  dependency classifications across graph checks, retaining independent consumer proofs.
+- Keep entrypoint names, lifecycle rules and executor-context selection in one
+  private definition without changing generated behavior.
+- Select native query executions and dictionaries in the recorder, share trace
+  cursor and typed snapshot-coverage facts, and compare pricing rows with borrowed
+  tuple keys. Preserve trace formats, accounting and conditional-clear semantics.
+- Share native profiling defaults and strict decimal argument parsing while
+  preserving each API's diagnostics, validation order and clamp/reject policy.
+
+### ⬆️ Dependencies
+
+- Remove SmallVec from the production executor graph, using standard Vec task
+  lists to reduce Wasm size at the cost of an extra allocation for small methods.
+- Select published Host Process/FS/Artifacts 0.70.3 and gzip-only Platform 0.8.3
+  in the native Cargo/Bazel graph, replacing temporary Git library suppliers.
+  Preserve Wire 0.7.23, consumer policy and registry checksum admission
+  ([#100 — Published native Profiler dependencies](https://github.com/dragginzgame/ic-platform/pull/100)).
+
 ## [0.8.5] - 2026-10-30
+
+### ⬆️ Dependencies
+
+- Update the workspace lockfile to IC Wire and its derive crate 0.7.24.
+  Dependency requirements and separately locked runtime/native profiles stay unchanged.
 
 ## [0.8.4] - 2026-10-30
 
@@ -23,9 +77,9 @@
 
 ### ⬆️ Dependencies
 
-- Select published Host Process/FS/Artifacts 0.70.3 and gzip-only Platform 0.8.3
-  in the native Cargo/Bazel graph, replacing temporary Git library suppliers.
-  Preserve Wire 0.7.23, consumer policy and registry checksum admission.
+- Select Wire 0.7.23 and gzip-only Platform 0.8.1 in the native Cargo/Bazel graph,
+  retaining one immutable Host supplier for process observations. The published
+  Platform registry gzip graph remains independent.
 
 ### 🧭 Migration Notes
 

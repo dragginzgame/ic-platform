@@ -1,10 +1,119 @@
 # Current handoff
 
-## Registry dependency adoption
+## Pending 0.9.0: selected canister management DTOs
 
-This isolated branch stacks on PR #99 head `2382502`; its qualification branch
-remains separate. It replaces the native Git library suppliers with published
-Host Process/FS/Artifacts 0.70.3 and gzip-only Platform 0.8.3, retaining Wire 0.7.23.
+The maintainer authorized adopting only the management types used by sibling
+canisters. Wasm now exposes 43 existing names backed by 51 complete maintained
+0.11.0 declarations, including required field types and all enum variants.
+Selection follows Canic Core/control-plane, Blob and Canic's runtime-probe
+canister. Native builds retain all 57 registry exports and their type identities;
+14 host-only snapshot-transfer exports are unavailable on Wasm. Source/license
+guards and provenance record this target-dependent boundary. Siblings are untouched.
+
+The Wasm management graph excludes the registry DTO package and its implicit
+Candid printer, removing pretty, arrayvec 0.5, typed-arena and unicode-width.
+The final owned status-codec probe saves 55,386 bytes (6.6%) without custom
+sections: 842,550 to 787,164 bytes. This differs from the earlier ~63 KB
+manifest-only experiment and is not a measured Canic production binary.
+Candid wire behavior stays unchanged; diagnostic formatting can differ.
+
+Full owner Clippy passed before tests. All 51 schemas match pinned upstream;
+three owned unit tests and five native consumer tests pass. Current/MSRV native
+and Wasm consumer checks, feature/runtime graph refusals, source mutation guards,
+strict Wasm rustdoc, inventory, boundary, pin and documentation checks pass.
+All eight installed runtime configurations pass, with owned management HTTP,
+history, status, snapshot and lifecycle byte proofs in the four external-Candid
+configurations. Evidence: `target/management-adoption/evidence.json`; installed
+fixture: `target/cdk-runtime.Sh5GVo`. Versions remain 0.8.5 with pending 0.9.0
+notes; no release, consumer adoption or live IC qualification is claimed.
+
+## Pending 0.9.0: embedded production runtime
+
+The maintainer authorized embedding IC0 1.2.0 and executor 2.0.0 inside Platform.
+The old registry pins/no-fork restriction are superseded for this scope. Preserve
+Apache-2.0 licenses, unchanged IC0 source/ABI, callback-source fingerprints and
+all protected crypto code. SlotMap remains the executor's sole registry runtime
+dependency; its version_check dependency is build-only.
+Task/method handles are Platform-owned; Cargo's inherited links guard prevents
+coexisting executors and makes coordinated consumer adoption mandatory. The
+qualification fixture selects published Timers 0.32.3 and one local Platform.
+
+Executor fixes retain wake-routing metadata while polling, coalesce wakeups,
+cache wakers, reclaim completed membership/expired queues and preserve drop order.
+The sanity review puts wake queues in their owning methods, removes redundant
+task context, and clears cancelled wakeups before destructors can spawn new work.
+The maintainer selected standard Vec task lists to prioritize production Wasm
+size after the benchmark in `target/vec-smallvec-benchmark/results.json`.
+The final Rust 1.99.1 Wire fixture saves 2,762 bytes (1.1%) without custom sections;
+small fresh methods pay one extra allocation and a few hundred IC instructions.
+SmallVec remains only through host/tooling dependencies. Keep generation checks.
+
+After Vec adoption, full owner Clippy, ten native regressions, source/license
+mutation guards, executor standalone native/Wasm proofs on current/MSRV, scoped
+feature graphs, inventory and documentation checks pass. Earlier IC0, package
+contents and strict rustdoc evidence remains unchanged. All eight installed
+raw/ic-call × Wire/external-Candid × Rust 1.99.1/1.91 combinations pass on Linux
+PocketIC 16.1.0, including query self-wakes, callback traps, Timers and upgrades.
+Latest receipts/source/artifact hashes: `target/vec-runtime-20261030/evidence.json`;
+installed fixture: `target/cdk-runtime.gTkMdr`. Earlier import/review evidence
+remains in `target/owned-runtime-20261030/` and `target/runtime-review-20261030/`.
+Vec adoption changes only Platform's direct SmallVec lock edges; retained host
+package versions and unrelated dirty work are preserved.
+No publication, sibling adoption, macOS or live IC qualification is claimed.
+Existing unrelated dirty macro/graph/Profiler work is preserved.
+
+The pending changelog is 0.9.0 because runtime identities and graph admission
+change. Manifest versions remain 0.8.5; no version/tag/publication was performed.
+The previously prepared compatible 0.8.6 notes are included in that draft.
+
+## Complexity cleanup
+
+The earlier compatible cleanup derives all 32 standalone feature selections
+from Cargo tests, shares graph classifications and centralizes entrypoint-kind
+facts. Native queries filter before copying, share locked cursor facts and typed
+snapshot coverage, and use borrowed pricing keys and shared argument primitives.
+HTTP unsigned strings retain their distinct lexical admission. The maintainer
+then authorized cutting the viewer's blanket integer projection: producers now
+encode counters directly, nested PocketIC DTOs retain their canonical Serde
+encoding, and viewer-wide encoding/version labels are retired. No parallel DTO
+owner, compatibility reader or saved-format migration is introduced.
+
+Evidence: `/tmp/platform-cleanup-20261030/final-qualification.json`. Full owner
+Clippy preceded tests; 14 macro tests, Rust 1.91, standalone native/Wasm and scoped
+graph checks passed before independent executor/IC0/manifest edits appeared in
+the shared checkout. Consumer/runtime/feature graph fixtures also pass with those
+concurrent edits; their Cargo/runtime qualification remains the separate receipt
+above. No full local CI or release validation was run for this cleanup.
+
+The viewer encoding cut is qualified separately in
+`/tmp/platform-json-cut-20261030/qualification.json`: full owner Clippy before
+tests, strict native library Clippy, 113 product tests and all six installed Linux
+PocketIC scenarios pass. The HTTP/MCP regression covers counters above JavaScript's
+safe range and canonical DTO/charge-dictionary serialization. Canonical assembly
+uses isolated provider/Profiler 0.11.1 sources and prepared registry dependencies;
+917 dependency metadata hashes match, 19 sysroot artifacts are compiler-validated,
+and all 936 artifact stamps stayed unchanged through compilation/execution.
+Library/tests/server were freshly linked; the unchanged installed-test executable
+was reused with its recorded hash. Final server SHA-256:
+`f04177cb991dfdd11ed8e2fc3d0b84019b628677465f97b238c4ba4980057ea6`.
+Native macOS, fresh-host, full Bazel/NNS and live IC acceptance remain separate;
+no performance or Wasm-size improvement is claimed without measurement.
+
+## Release accounting before the embedded-runtime cut
+
+Latest tagged release is 0.8.5 (`ec51bb0`, 2026-10-30); package versions remain
+0.8.5. Its initially empty notes now record the workspace lock's Wire/derive
+0.7.24 selection. The 0.8.4 notes match that release's tagged content again.
+No manifests, locks, tags or publication state change in this documentation repair.
+
+PR #100 merged at `d0ce012` and entered the local release branch through
+`af5b128`, after the 0.8.5 tag. Its compatible native dependency-source notes were prepared for 0.8.6 and are
+now included in pending 0.9.0 alongside the breaking runtime cut. That native
+source update itself changes no public API, wire or storage contract.
+Release/publication remain maintainer-owned; keep existing evidence and siblings intact.
+
+It replaces the native Git library suppliers with published Host
+Process/FS/Artifacts 0.70.3 and gzip-only Platform 0.8.3, retaining Wire 0.7.23.
 Cargo/Bazel locks are regenerated from the selected registry sources. Profiler
 adopts Shared Tooling 0.27.9 and the paired consumer lint fixes from Profiler #10.
 Registry code revision `62a165b12f5ffe94808cde95dfde3ab793f6a218` passes full owner
@@ -19,16 +128,12 @@ lifeline and CLI-only NNS initialization. Bazel repin/target loading passes.
 Profiler retains exact inputs, hashes and fresh receipts in
 `artifacts/registry-20261030-qualification.json` and `.build/receipts`. Server
 SHA-256: `288f4c7c0bfcf3a374822e9cd97ae8e01dca2e7afb521e1027f4f182dc28350e`.
-The following handoff change is documentation only. Older parent execution
-records below retain their original source identities; native macOS, full
-replica Bazel/NNS, fresh-host and live acceptance remain separate.
+Older parent execution records below retain their original source identities;
+native macOS, full replica Bazel/NNS, fresh-host and live acceptance remain separate.
 
+## Released 0.8.4: paired Profiler boundary and qualification fixes
 
-## Pending 0.8.4: paired Profiler boundary and qualification fixes
-
-Main released 0.8.3 at `f69a759`; its checkout was clean at refresh. PR #99 now
-merges that release without rewriting history. Package versions remain 0.8.3.
-Keep all released notes unchanged. Release/publication remain maintainer-owned.
+Release 0.8.4 (`8302c3d`) includes PR #99's paired boundary and qualification fixes.
 Shared Tooling 0.27.7 stays at `a8baa51099ca48cdb12e2171f031d488db89d67d`.
 Siblings stay read-only; separate isolated contributions supply consumer fixes.
 
@@ -41,10 +146,10 @@ remains required; older consumers retain their previous provider pin.
 
 Installed-runtime CI now selects Testkit's required `cli` feature. Its first
 refreshed run passed server setup, then exposed a stale source qualifier in the
-maintained runtime lock after the local version update. Remove that redundant
-qualifier without changing registry identities, checksums or edges; retain strict
-registry comparison. Runtime proofs
-retain shared dependency caches, but a kernel file lock covers each build and
+maintained runtime lock after the local version update. The fix removed that
+qualifier without changing registry identities, checksums or edges; it retains
+strict registry comparison. Runtime proofs retain shared dependency caches,
+but a kernel file lock covers each build and
 artifact copy. The inherited descriptor survives child execution and releases on
 exit. A concurrent-run regression pauses after Cargo and before retention, proves
 a second run is blocked and checks every retained Wasm's run identity. Failed
@@ -62,37 +167,15 @@ name the metrics-registry tuple and add meaningful must-use messages before
 unchanged async-trait expansion. The native patch changes no cryptographic body.
 Three consumer-owned CLI/render conditionals are supplied separately by
 [Profiler #10](https://github.com/dragginzgame/ic-profiler/pull/10), commit
-`a947b33`. Adopt that source with this profile. #98 remains open until the paired
-consumer contribution is integrated; its working checkout remains untouched.
+`a947b33`, merged at `b72a0b0`. Adopt that source with this profile. Platform #98
+is closed after both supplying changes reached their default branches.
 
-## Qualification
+## Historical native evidence
 
-Current evidence is under `/tmp/platform-pr99-evidence-20261030`. Full owner
-all-target/all-feature Clippy passes before longer tests. All 47 assembler tests,
-locked-build/concurrency/failure admission and the actual native graph pass.
-The canonical assembler prepares the combined provider/paired-product source.
-A comparison of 7,126 source files confirms every change from the prior native
-assembly is within `rs/pocket_ic_server`; dependency source bodies are unchanged.
-
-Strict native primary-package Clippy also passes using the prepared exact
-external dependency artifacts and the original IC Clippy configuration. This is
-not a new upstream dependency-workspace lint pass. Fresh server library, executable
-and test links reuse those exact dependency artifacts. All 110 freshly compiled
-server/product tests and six installed-canister scenarios pass on Linux, including
-the actual Python export/guarded-clear client. The unchanged installed-test source
-uses its qualified cached executable; the server is newly linked. Its SHA-256 is
-`71a87f9ec8a0f92f225762c6d335408f191dcf832ad24e228a95d545f3ccf49b`.
-The initial product run was denied local sockets by the sandbox; it passed with
-socket access. Hosted checks run asynchronously. Native-server Darwin, full
-Bazel/NNS, fresh-host and live-provider acceptance remain separate. Do not infer
-size or speed savings from this work.
-
-Prior PR #99 qualification at provider `fd845c4` used Profiler 0.11.0's source:
-78 recorder, 109 server-product and six installed tests, including actual Python
-export/guarded clear. Its server SHA-256 was
-`1bff7f3c31ce8dd2a2bd679593c6af64a17f0e06f8497384fdebee0403c57571`.
-Those historical receipts remain in Profiler's artifacts/.build; they are not a
-fresh execution or the supplying identity for this refresh.
+PRs [#99](https://github.com/dragginzgame/ic-platform/pull/99) and
+[#100](https://github.com/dragginzgame/ic-platform/pull/100) retain prior input
+identities, execution receipts and limitations. Earlier Git-supplier results do
+not qualify registry inputs or this cleanup's changed native server.
 
 ## Supply and retained contracts
 
@@ -114,8 +197,8 @@ the owned formatter; external parsing/errors and absent/explicit zero fields sta
 The [packaging contract](../migration.md#minimal-principal-and-selected-icrc-packaging)
 retains 28 independently frozen selected-ledger schemas. Value hashes are intact.
 
-Management =0.11.0, executor =2.0.0, ic0 =1.2.0 and stable structures =0.7.2 remain
-fixed. Memory/Storage own allocation, checked reopening and leases. Owned endpoints
+Management =0.11.0 and stable structures =0.7.2 remain fixed. Executor/IC0
+now use the maintained embedded implementations described above. Memory/Storage own allocation, checked reopening and leases. Owned endpoints
 use Wire; required external Candid and legacy checkpoints retain their contracts.
 Bounded Candid admits at most 16 constructed wire levels, including unused and
 skipped data, within existing quotas; arbitrary trusted visitors are not covered.

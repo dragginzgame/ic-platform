@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Compare the imported non-cryptographic call/cleanup machinery, not an executor fork.
+# Compare imported call/cleanup machinery and the maintained embedded runtime.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-if [[ $# == 0 ]]; then bash "$root/scripts/ci/check-signature-source.sh"; fi
+if [[ $# == 0 ]]; then
+    bash "$root/scripts/ci/check-signature-source.sh"
+    bash "$root/scripts/ci/check-embedded-runtime-source.sh"
+    bash "$root/scripts/ci/check-management-source.sh"
+fi
 source_root="${1:-$root/crates/ic-platform/src/cdk/upstream}"
 [[ $# -le 1 ]] || exit 2
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-runtime-source.XXXXXX")"

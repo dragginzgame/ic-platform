@@ -1,6 +1,7 @@
 //! Textual-canister profiling boundary for clients that do not own IC codecs or
 //! the PocketIC operation graph. State-changing operations are submitted once;
 //! a Started reply is observed to completion rather than resubmitted.
+use super::arguments::DEFAULT_PROFILE_EXECUTIONS;
 use crate::memory_snapshots::MemorySnapshotMetadata;
 use crate::pocket_ic::{
     CaptureMemorySnapshot, ClearMemoryAccessTrace, GetMemoryAccessTrace, StartInstructionProfiling,
@@ -98,7 +99,7 @@ pub(crate) async fn call(
             .await
         }
         Action::Profile => {
-            let max_executions = options.max_executions.unwrap_or(20);
+            let max_executions = options.max_executions.unwrap_or(DEFAULT_PROFILE_EXECUTIONS);
             if !(1..=MAX_INSTRUCTION_PROFILING_EXECUTIONS).contains(&max_executions) {
                 return error(
                     StatusCode::BAD_REQUEST,

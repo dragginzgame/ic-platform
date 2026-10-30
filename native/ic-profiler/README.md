@@ -151,6 +151,12 @@ changed-snapshot conflicts, are never resubmitted. A timeout can leave an alread
 started operation running; the error says so. No client-side IC codec is needed.
 Existing raw PocketIC endpoints retain their external contract.
 
+The viewer JSON/MCP adapters add process generation/hash only. Counter producers
+emit decimal strings directly; nested PocketIC values retain their canonical
+Serde encoding. There is no recursive field-name rewrite or document-wide
+`format_version` / `integer_encoding` label. Rebuild the paired viewer/provider
+together; raw trace exports and saved Profiler report formats are unchanged.
+
 The paired Profiler consumer supplies the query-product source interface from
 Profiler #9 and the recorder's `explain_with_backend` projection. This provider
 owns scheduler/source defaults, component implementation facts and PocketIC

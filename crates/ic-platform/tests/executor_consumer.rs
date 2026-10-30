@@ -4,7 +4,7 @@
 //! use ic_platform::Principal;
 //! ```
 
-/// Submit a caller-owned task to the single registry executor.
+/// Submit a caller-owned task to Platform's single maintained executor.
 pub fn submit(task: impl std::future::Future<Output = ()> + 'static) {
     ic_platform::executor::spawn_protected(task);
 }

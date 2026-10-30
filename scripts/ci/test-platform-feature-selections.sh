@@ -31,11 +31,12 @@ done <<'MUTATIONS'
 .features.candid = []
 .features.extra = []
 .features.default = ["runtime"]
-(.dependencies[] | select(.name == "ic-cdk-executor")).req = "^2"
+.features.executor = []
 .features.cdk = []
 .features.secp256k1 = []
-(.dependencies[] | select(.name == "ic0")).req = "^1"
+.features.ic0 = ["dep:ic0"]
 (.dependencies[] | select(.name == "ic-management-canister-types")).req = "^0.11"
+(.dependencies[] | select(.name == "ic-management-canister-types")).target = null
 .features["icrc-ledger-types"] += ["dep:icrc-ledger-types"]
 .features.principal += ["dep:ic_principal"]
 (.dependencies[] | select(.name == "ic_principal")).features += ["self_authenticating"]
@@ -43,8 +44,8 @@ done <<'MUTATIONS'
 (.dependencies[] | select(.name == "ed25519-dalek")).uses_default_features = true
 (.dependencies[] | select(.name == "ic-stable-structures")).req = "^0.7"
 (.dependencies[] | select(.name == "k256")).uses_default_features = true
-.dependencies |= map(select(.name != "ic-cdk-executor"))
-.dependencies |= map(select(.name != "ic0"))
+.links = null
+.dependencies += [{"name":"ic0"}]
 MUTATIONS
 "$jq" --arg mode routine --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-selections.jq "$fixture/features.json" > "$fixture/routine.json"
 # Prove powerset completeness on a bounded universe. Ordinary qualification must

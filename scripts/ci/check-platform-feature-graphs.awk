@@ -75,7 +75,8 @@ function reject(reason) {
         line = lines[key, i]
         n = split(line, f, " ")
         name = f[1]; version = f[2]
-        if (minimal && name ~ /^(ic_principal|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding)$/)
+        host_capability = platform_host_capability(name)
+        if (minimal && platform_forbidden("minimal", name))
             reject("application types in minimal executor/IC0 graph")
         if (name == "ic_principal" && !(external_principal || enabled("stable-structures")))
             reject("external Principal in owned-only graph")
@@ -85,7 +86,7 @@ function reject(reason) {
             reject("reference-only signature hashing in production")
         if ((name == "serde_cbor" || name == "half") && !(verification || agent || pocket || parser))
             reject("unselected CBOR parser")
-        if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || management))
+        if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || (native && management)))
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") {
@@ -111,31 +112,25 @@ function reject(reason) {
             if (name == "ed25519-dalek") found_ed = 1
             else found_curve = 1
         }
-        if (name == "ic-secp256k1") {
+        if (host_capability == "secp256k1") {
             if (!secp || version != "v0.3.0" || !registry) reject("unqualified secp256k1")
             found_secp = 1
         }
-        if (name == "pocket-ic") {
+        if (host_capability == "pocket-ic") {
             if (!pocket || version != "v16.1.0" || !registry) reject("unqualified PocketIC")
             found_pocket = 1
         }
-        if (name == "ic-testkit" || name == "ic-testkit-candid") reject("Testkit in production")
+        if (host_capability == "testkit") reject("Testkit in production")
         if (name ~ /^(ic-wire|ic-wire-derive)$/ && !wire_schema) reject("unselected host Wire metadata")
-        if (name == "candid_parser" && !parser) reject("unselected host parser")
-        if (name == "ic-agent" && !agent) reject("unselected host Agent")
-        if (name ~ /^ic-cdk/) {
-            if (name == "ic-cdk-executor") {
-                if (!executor || version != "v2.0.0") reject("unqualified executor")
-            } else reject("full CDK runtime/generator is retired")
-            if (!registry) reject("non-registry executor")
-        }
-        if (name == "ic0" && (!raw_system || version != "v1.2.0" || !registry)) reject("unqualified ic0")
+        if (host_capability == "candid-parser" && !parser) reject("unselected host parser")
+        if (host_capability == "agent" && !agent) reject("unselected host Agent")
+        if (platform_forbidden("retired-cdk", name)) reject("external CDK/executor/IC0 supplier is retired")
         if (name == "ic-platform-macros" && (!cdk || (line != generator && line != generator " (*)"))) reject("unqualified generator")
         if (name == "ic-canister-sig-creation" || name == "ic-signature-verification") reject("retired signature package")
         if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified BLS")
         if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified BLS curve")
         if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
-        if (name == "ic-management-canister-types" && !(registry && ((management && version == "v0.11.0") || (pocket && version == "v0.8.0")))) reject("unselected management types")
+        if (name == "ic-management-canister-types" && !(registry && native && ((management && version == "v0.11.0") || (pocket && version == "v0.8.0")))) reject("unselected or Wasm registry management types")
         if (name == "icrc-ledger-types" || name == "icrc-cbor") reject("retired upstream ledger package")
         if (name == "ic-error-types" && !(agent || pocket)) reject("runtime error catalogue")
         if (name == "ic-stable-structures") {

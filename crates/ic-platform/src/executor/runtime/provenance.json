@@ -1,0 +1,17 @@
+{
+  "upstream_package": "ic-cdk-executor-2.0.0",
+  "revision": "bb89b46a2b6027c5a3a9ff8aa4574891a0e9901c",
+  "original_sources": {
+    "src/machinery.rs": "dbf811827dd482a5d4f95d10180984acf65d64511c30e2b3a08ccc8a28a257ab"
+  },
+  "license_sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
+  "changes": [
+    "Platform-owned runtime wiring; polling retains task metadata, caches wakers and coalesces wakeups; completed task membership and method wake queues are reclaimed; native execution does not install the IC panic hook.",
+    "Method records own their wake queues, eliminating the secondary table and duplicate task context field; bulk cancellation clears stale wakeups before dropping futures, preserving destructor-spawned tasks.",
+    "Use standard Vec task lists and retire the direct SmallVec dependency after installed benchmarking; the maintainer prioritizes production Wasm size over small-method allocation savings."
+  ],
+  "maintained_sources": {
+    "mod.rs": "9ba71a6341a7200826517b8e408fdd6195a9710fce0847226d9faba1a5a7d3db"
+  },
+  "reviewed_upstream_history": "2.0.0 tracking/protected/migratory contexts and 1.x stale-waker/trap-recovery changes retained; local wake-routing and membership defects reproduced and covered by native/installed regressions."
+}

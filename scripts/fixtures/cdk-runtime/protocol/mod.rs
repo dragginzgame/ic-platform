@@ -41,6 +41,8 @@ pub enum Method {
     InsufficientCycles = 0x2001,
     WeakPending = 0x2002,
     BufferCopy = 0x2003,
+    SelfWakeQuery = 0x2004,
+    ManagementProof = 0x2005,
     Absent = 0xffff,
 }
 pub fn method_id(name: &str) -> u64 {
@@ -77,6 +79,8 @@ pub fn method_id(name: &str) -> u64 {
         "insufficient_cycles" => Method::InsufficientCycles as u64,
         "weak_pending" => Method::WeakPending as u64,
         "buffer_copy" => Method::BufferCopy as u64,
+        "self_wake_query" => Method::SelfWakeQuery as u64,
+        "management_proof" => Method::ManagementProof as u64,
         "no_such_method" => Method::Absent as u64,
         _ => panic!("unknown fixture endpoint: {name}"),
     }

@@ -48,8 +48,17 @@ PLATFORM_FIXTURE_TIMERS="$timers" PLATFORM_FIXTURE_WIRE="$wire" \
 PLATFORM_FIXTURE_SERDE="$serde" PLATFORM_FIXTURE_CBOR="$cbor" \
     perl -pe 's/\@(PLATFORM|TESTKIT|TIMERS|WIRE|SERDE|CBOR|MSRV)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
         scripts/fixtures/cdk-runtime/Cargo.toml.in > "$fixture/Cargo.toml"
-# Only the fixture's direct boundary uses local sources. Testkit retains its
-# published Platform requirement across local minor releases.
+# The embedded executor requires Timers and the canister to share one Platform.
+# This qualification-only patch tests existing compatible consumer requirements;
+# published consumers must adopt the supplying release themselves.
+if [[ -z "$published" ]]; then
+    cat >> "$fixture/Cargo.toml" <<'PATCH'
+
+[patch.crates-io]
+ic-platform = { path = "../../crates/ic-platform" }
+ic-platform-macros = { path = "../../crates/ic-platform-macros" }
+PATCH
+fi
 cp scripts/fixtures/cdk-runtime/canister.Cargo.toml "$fixture/crates/canister/Cargo.toml"
 if [[ -n "$adapters" ]]; then
     sed -i.bak 's/external-adapters = \["external-candid"\]/external-adapters = ["external-candid", "ic-platform\/candid-endpoint"]/' "$fixture/crates/canister/Cargo.toml"
@@ -62,6 +71,9 @@ if [[ -n "$ic_call" ]]; then
 fi
 cp scripts/fixtures/cdk-runtime/driver.Cargo.toml "$fixture/apps/driver/Cargo.toml"
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
+mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
+cp crates/ic-platform/tests/management_consumer.rs "$fixture/crates/canister/src/management_proof/mod.rs"
+cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/src/management_proof/fixtures/"
 cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister} "$fixture/crates/canister/src/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
 cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver} "$fixture/apps/driver/src/"
@@ -127,9 +139,12 @@ for transport in "${transports[@]}"; do
 for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     for protocol in wire external-candid; do
         select_runtime_profile "$transport" "$protocol"
+        if [[ "$graph_target" != wasm* && -n "$selected_external" ]]; then
+            selected_admission+=(--native-management)
+        fi
         cargo tree --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${selected_features[@]+"${selected_features[@]}"} --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target-$transport-$protocol.graph"
         bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target-$transport-$protocol.graph" ${selected_admission[@]+"${selected_admission[@]}"}
-        if grep -q '^pretty ' "$fixture/$graph_target-$transport-$protocol.graph"; then
+        if [[ "$graph_target" == wasm* ]] && grep -q '^pretty ' "$fixture/$graph_target-$transport-$protocol.graph"; then
             echo 'Canister runtime acquired an unselected Candid service printer' >&2; exit 1
         fi
     done

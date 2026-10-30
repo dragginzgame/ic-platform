@@ -6,6 +6,8 @@
 //! Callback traps cancel tasks through the original executor recovery context.
 //! Consumer code retains rollback and retry policy. No executor is implemented here.
 
+use crate::executor as ic_cdk_executor;
+
 use std::{
     future::Future,
     pin::Pin,

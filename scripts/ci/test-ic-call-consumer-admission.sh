@@ -16,6 +16,7 @@ finish() {
 trap finish EXIT
 mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/ic-call-consumer" "$fixture/.tools" "$fixture/bin"
 cp "$root/scripts/ci/"{check-ic-call-consumer.sh,check-platform-runtime.sh,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
+cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 cp "$root/scripts/fixtures/ic-call-consumer/lib.rs" "$fixture/scripts/fixtures/ic-call-consumer/"
 cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
 cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/"
@@ -36,7 +37,7 @@ case "$1" in
     locate-project) exit 0 ;;
     metadata) printf '{}\n' ;;
     tree)
-        printf 'ic-cdk-executor v2.0.0\nic0 v1.2.0\n'
+        printf 'ic-platform v0.8.5 (/local/platform)\n'
         case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'candid v0.10.39\n' ;; esac
         ;;
     +*)

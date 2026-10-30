@@ -1,5 +1,101 @@
 # Candid and runtime ownership
 
+## Selected canister management DTOs
+
+The maintainer authorized the canister-used subset of management 0.11.0 for the
+pending breaking 0.9.0 line. The existing module/feature name stays. On Wasm,
+43 explicit public names now refer to Platform-owned types, backed by 51 complete
+upstream declarations. The selection follows non-test Canic Core/control-plane
+and Blob source references, plus the maintained Canic runtime-probe canister's
+HTTP outcall contract. All supporting records, enum variants, optional fields,
+Serde attributes and Candid function signatures are retained. This adopts no
+transport, storage, signing implementation or application policy.
+
+Native builds retain all 57 existing registry 0.11.0 exports and their identities.
+Fourteen snapshot-transfer exports used only by native Backup/Testkit/tooling are
+not available on Wasm. Do not assume registry/owned Rust identity across targets;
+external Candid bytes and schemas remain compatible. The original exact supplier
+constraint below continues to apply to native DTOs and is superseded only on Wasm.
+Sibling source checkouts and release versions remain unchanged.
+
+The owned definitions live in `management_canister_types/maintained` inside the
+sole consumer library. Provenance records the exact source revision, selected
+names and hashes of the audited sibling files. Apache-2.0 terms are retained.
+Native tests compare all 51 selected schemas to the pinned original; independent
+management wire fixtures and installed Wasm checks cover HTTP, history, status,
+snapshot list/delete and lifecycle/signing envelopes. Native transfer tests retain
+their original registry identities. No consumer adoption or live IC acceptance is
+implied by this qualification.
+
+Wasm selects Candid bignum/serde_bytes explicitly, without the registry DTO package
+or its default-enabled printer. The final owned status-codec probe saves 55,386
+bytes (6.6%) of stripped Wasm; the earlier manifest-only investigation saved
+about 63 KB. Neither measures a Canic production binary.
+The same decoder and admission rules remain; some diagnostic type descriptions
+use Debug formatting. Native tools retain the printer for diagnosis. Another
+dependency explicitly selecting Candid's printer can re-enable it; graph checks
+reject its implicit selection through the management-only Wasm profile.
+
+## Embedded IC0 and executor
+
+The maintainer authorized this breaking production-dependency cut on 2026-10-30.
+Platform embeds IC0 1.2.0 and ic-cdk-executor 2.0.0 instead of selecting their
+registry packages. This section supersedes the older exact-supplier constraints
+and no-executor-fork statements below. Package versions remain 0.8.5 during local
+implementation; the pending release must be 0.9.0, not 0.8.6. Publication and
+consumer adoption remain separate.
+
+Existing `ic_platform::ic0` and `ic_platform::executor` paths remain. MethodHandle
+and TaskHandle now have Platform identity. The executor uses the same owned IC0
+implementation as the raw calls and CDK adapters. IC0 selects no dependencies;
+executor selects IC0 and SlotMap, without Principal, Candid or a host
+parser. Defaults remain empty. The implementation is packaged inside Platform;
+no additional consumer crate, patch-based distribution or second executor exists.
+
+The maintainer selected standard Vec task lists after measuring the SmallVec
+alternative, prioritizing production Wasm size. This removes SmallVec from the
+executor/runtime dependency graph; host tooling can still select it transitively.
+The Rust 1.99.1 Wire runtime fixture shrank by 2,762 bytes (1.1%) after removing
+custom Wasm sections. Fresh small-method benchmark batches used one extra
+allocation and a few hundred additional IC instructions; the tradeoff is not a
+general speed improvement or a whole-request latency measurement. Raw samples,
+harness, source variants and artifact hashes are retained under
+`target/vec-smallvec-benchmark/`.
+
+Cargo's inherited executor `links` value rejects combining this owner with the
+registry executor, and rejects two new Platform package identities. Cargo applies
+this guard package-wide, including native/default-only selections. Rebuild the
+application and all runtime consumers against the same new Platform line. Timers
+must adopt that requirement before production migration; a transitive old
+Platform requirement cannot be bridged with handle conversions. The installed
+fixture selects published Timers 0.32.3 and patches its compatible 0.8 requirement
+to the local pre-release source solely for qualification. After the minor release,
+its dependency requirement must be coordinated; this patch is not consumer supply.
+
+IC0's retained ABI wrappers and raw declarations are byte-for-byte source imports,
+with complete Apache-2.0 terms and source fingerprints. They retain existing
+safe/unsafe signatures, initialization guarantees and IC traps. Native stubs still
+panic. The executor is maintained from the pinned upstream source with documented
+changes: polling takes only the future, retaining protected-method routing;
+wakeups are coalesced without losing a wake during polling; one waker allocation
+is reused per task; completed/cancelled task IDs and expired method queues are
+reclaimed. Each method owns its wake queue directly, without a secondary map.
+Bulk cancellation clears old wakeups before dropping futures and preserves any
+tasks spawned by their destructors. Task context is derived from its binding.
+Future destructors run outside executor RefCell borrows. Native
+bookkeeping no longer installs an IC syscall panic hook; Wasm retains it.
+No cryptographic, wire, storage, retry or timer-policy implementation changes.
+
+Qualification covers protected-query self-wakes, wake storms, cross-method wakes,
+stale generational handles, cancellation/drop behavior and long-lived method
+bookkeeping. The installed lifecycle fixture adds the self-waking query and waker
+identity regression alongside raw/Wire calls, external Candid, Timers, callback
+traps, cleanup and upgrades, on the development compiler and MSRV. Source guards
+retain the imported callback and crypto fingerprints. Native tests and graph
+admission alone do not establish installed correctness; Linux PocketIC evidence
+is separate from macOS and live-provider qualification. No size or speed saving
+is inferred from dependency removal.
+
 ## Minimal Principal and selected ICRC packaging
 
 The maintainer authorized this breaking packaging cut after source release 0.7.6.
@@ -556,6 +652,14 @@ private PNG/range helpers listed in the [source contract](../native/ic-profiler/
 Do not select this source revision with an older consumer that omits them.
 The existing native integration module paths remain unchanged; no compatibility
 copies remain in the provider.
+The 0.9 source profile also removes the viewer API's recursive integer rewriting
+and its blanket `format_version` / `integer_encoding` labels. Viewer producers
+emit exact decimal counter strings; nested PocketIC DTOs use their canonical
+Serde encoding, including numeric bounded identifiers and byte arrays. Consumer
+code must use those fields' contracts rather than infer one document-wide integer
+representation. Process generation/hash and conditional-clear guards remain.
+Raw PocketIC trace exports and saved Profiler reports retain their own formats;
+rebuild the paired viewer/provider together when adopting the new Git pin.
 Its source injection is separate from provider-owned adapters; overlaps are
 rejected and both origins enter the assembly digest. Native Cargo/Bazel build
 inputs belong here. The consumer recorder's optional native `gzip` dependency
@@ -1811,7 +1915,7 @@ source availability and demonstrated recovery are separate claims.
 | Component | Maintenance responsibility and qualification |
 | --- | --- |
 | Owned generator and runtime adapters | Platform reviews upstream CDK fixes for applicability and maintains entrypoints, call ownership and cleanup. Preserve Apache provenance and qualify installed behavior. |
-| Registry executor =2.0.0 and ic0 =1.2.0 | Preserve source, licenses and their single package identities. Review executor fixes and IC System API changes; any replacement or version change requires combined entrypoint/call/Timers qualification. No second executor. |
+| Embedded executor and IC0 (originally 2.0.0 / 1.2.0) | Platform maintains their source and Apache licenses, preserving one runtime owner and the System API ABI. Review executor fixes and IC System API changes; changes require combined entrypoint/call/Timers qualification. No second executor. |
 | Candid, parser and required IC DTOs | Platform controls dependency exposure; retain external wire fixtures, bounded decoder behavior and host-only parser separation. Consumers own protocol selection and limits. |
 | Agent and PocketIC | Platform controls explicit client/type exposure. Host/Query retain transport and verification policy; Testkit retains simulator provisioning and admission. Archive required binaries as well as Rust sources for recovery. |
 | Certification and cryptographic implementations | Preserve upstream implementations, vectors and licenses. Platform may maintain scaffolding; algorithm or primitive changes require qualified external cryptographic expertise. |
@@ -1883,7 +1987,7 @@ is an acceptance contract; no completed recovery drill is claimed here.
 6. Check standalone native/MSRV/Wasm consumers and actual normal/build graphs.
    Wire-only deployments must reject Candid/derive/parser/full-CDK packages.
    Canisters with external Candid calls permit Candid explicitly, still rejecting
-   full CDK and host clients. Resolve one registry executor/ic0 identity across
+   full CDK and host clients. Resolve one embedded Platform executor/IC0 owner across
    generated entrypoints, calls and Timers.
 7. Qualify actual awaited/rejected/submission-failed/insufficient-cycle calls,
    protected/weak/migratory tasks, encoding and callback traps, cancellation,

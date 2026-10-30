@@ -714,17 +714,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-cdk-executor"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33716b730ded33690b8a704bff3533fda87d229e58046823647d28816e9bcee7"
-dependencies = [
- "ic0",
- "slotmap",
- "smallvec",
-]
-
-[[package]]
 name = "ic-certification"
 version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -794,19 +783,12 @@ dependencies = [
 
 [[package]]
 name = "ic-metrics"
-version = "0.14.5"
+version = "0.17.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7e25938776b03b0b716b3cf6cc5dc0e7088c118f483cefb1583f3fbc4fc5cdb"
-
-[[package]]
-name = "ic-platform"
-version = "0.1.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "227ba911212a849bd24263879c289c58eecf1e4775d729443df7acb9810e1469"
+checksum = "2d1a719e99b741094da7a7905cb54cf9f755fbbc2a985a0e395adadb6967449f"
 dependencies = [
- "ic-cdk-executor",
- "ic0",
- "ic_principal",
+ "ic-wire",
+ "serde",
 ]
 
 [[package]]
@@ -816,31 +798,14 @@ dependencies = [
  "candid",
  "crc32fast",
  "data-encoding",
- "ic-cdk-executor",
  "ic-certification",
+ "ic-management-canister-types 0.11.0",
  "ic-platform-macros",
- "ic0",
  "ic_principal",
  "pin-project-lite",
  "pocket-ic",
  "serde",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform"
-version = "0.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b28e5352b4a6fa35217dd5df181a5555197936477570f034a53ffd7dda221c65"
-dependencies = [
- "candid",
- "crc32fast",
- "data-encoding",
- "ic-management-canister-types 0.11.0",
- "ic0",
- "ic_principal",
- "pocket-ic",
- "serde",
+ "slotmap",
  "thiserror 2.0.18",
 ]
 
@@ -862,7 +827,7 @@ dependencies = [
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
- "ic-platform 0.8.1",
+ "ic-platform",
  "libc",
  "thiserror 2.0.18",
  "tokio",
@@ -870,12 +835,12 @@ dependencies = [
 
 [[package]]
 name = "ic-timers"
-version = "0.29.2"
+version = "0.32.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "244027ce4a14872e86883fcd87e9d2cb7112ca7b20e4cd4c82a3416a41204f19"
+checksum = "1170e721ed74497c166cde01d98fd72a5e87e23052ff8f127f15ac414fc1d016"
 dependencies = [
  "ic-metrics",
- "ic-platform 0.1.18",
+ "ic-platform",
  "thiserror 2.0.18",
 ]
 
@@ -908,6 +873,7 @@ dependencies = [
  "postcard",
  "serde",
  "serde_bytes",
+ "serde_json",
 ]
 
 [[package]]
@@ -920,12 +886,6 @@ dependencies = [
  "quote",
  "syn 3.0.9",
 ]
-
-[[package]]
-name = "ic0"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f05349d5c51ab6cc962c8963f877f826997ee6b737c6be3aafc9779eb8a4dd05"
 
 [[package]]
 name = "ic_principal"
@@ -1367,7 +1327,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.8.5",
+ "ic-platform",
  "ic-timers",
  "ic-wire",
  "serde",
@@ -1377,7 +1337,7 @@ dependencies = [
 name = "platform-runtime-driver"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.8.5",
+ "ic-platform",
  "ic-testkit",
  "ic-wire",
  "serde",
@@ -2016,9 +1976,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.16.3"
+version = "1.16.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
+checksum = "d0d5d4b1981b8bbbb7aed204cae5726d683d5d6ac7e74ec54122ea28f315e7c8"
 
 [[package]]
 name = "socket2"
