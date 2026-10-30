@@ -140,17 +140,35 @@ if [[ "$mode" == --check-graph ]]; then
     exit 0
 fi
 build="${CARGO_TARGET_DIR:-$root/target/runtime-build}"
-CARGO_TARGET_DIR="$build/host-$msrv" cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
-CARGO_TARGET_DIR="$build/host-$msrv" cargo +"$msrv" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
 mkdir -p "$fixture/artifacts"
-cp "$build/host-$msrv/debug/platform-runtime-driver" "$fixture/artifacts/platform-runtime-driver"
+# Cargo releases its target lock before returning. Keep our own inherited lock
+# through the copy, so another proof cannot replace the selected artifact first.
+# Perl flock is available on both supported Unix hosts; the subshell owns fd 9.
+retain_runtime_artifact() (
+    cache="$1" artifact="$2" destination="$3"
+    shift 3
+    mkdir -p "$cache"
+    exec 9>>"$cache/.platform-artifact.lock"
+    perl -MFcntl=:flock -e 'open my $lock, "<&=9" or die "$ARGV[0]: $!"; flock($lock, LOCK_EX) or die "$ARGV[0]: $!"' "$cache/.platform-artifact.lock"
+    export CARGO_TARGET_DIR="$cache"
+    "$@"
+    cp "$cache/$artifact" "$destination"
+)
+build_runtime_driver() {
+    cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
+    cargo +"$msrv" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
+}
+retain_runtime_artifact "$build/host-$msrv" debug/platform-runtime-driver \
+    "$fixture/artifacts/platform-runtime-driver" build_runtime_driver
 for transport in "${transports[@]}"; do
 for toolchain in "$development_toolchain" "$msrv"; do
     for protocol in wire external-candid; do
         select_runtime_profile "$transport" "$protocol"
-        CARGO_TARGET_DIR="$build/$toolchain" cargo +"$toolchain" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${selected_features[@]+"${selected_features[@]}"} --release --target wasm32-unknown-unknown
         mkdir -p "$fixture/artifacts/$toolchain"
-        cp "$build/$toolchain/wasm32-unknown-unknown/release/platform_runtime_canister.wasm" "$fixture/artifacts/$toolchain/$selected_artifact.wasm"
+        retain_runtime_artifact "$build/$toolchain" \
+            wasm32-unknown-unknown/release/platform_runtime_canister.wasm \
+            "$fixture/artifacts/$toolchain/$selected_artifact.wasm" \
+            cargo +"$toolchain" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${selected_features[@]+"${selected_features[@]}"} --release --target wasm32-unknown-unknown
         if [[ "$mode" == run ]]; then
             if [[ -n "$selected_external" ]]; then
                 (

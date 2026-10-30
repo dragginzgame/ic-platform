@@ -3,6 +3,11 @@
 
 pub(crate) mod rendering;
 
+#[path = "server/backend_description.rs"]
+pub(crate) mod backend_description;
+#[path = "server/client_api.rs"]
+pub(crate) mod client_api;
+
 #[path = "server/computation_catalog.rs"]
 pub mod computation_catalog;
 #[path = "server/computation_catalog_notes.rs"]

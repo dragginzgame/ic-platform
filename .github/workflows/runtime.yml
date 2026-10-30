@@ -39,7 +39,7 @@ jobs:
       - name: Prepare Testkit-owned server
         run: |
           version="$(.tools/host/bin/yq -p toml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
-          cargo +1.91.0 install --locked --version "=$version" --root target/testkit-cli ic-testkit --bin ic-testkit-server
+          cargo +1.91.0 install --locked --version "=$version" --features cli --root target/testkit-cli ic-testkit --bin ic-testkit-server
           target/testkit-cli/bin/ic-testkit-server setup
           binary="$(target/testkit-cli/bin/ic-testkit-server check)"
           printf 'POCKET_IC_BIN=%s\n' "$binary" >> "$GITHUB_ENV"

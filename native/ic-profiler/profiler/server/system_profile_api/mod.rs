@@ -58,6 +58,10 @@ fn server_storage_metadata() -> Value {
 /// These routes are merged into both the ordinary server and protected viewer.
 pub fn router(app: AppState) -> Router {
     Router::new()
+        .route(
+            "/api/profiling/instances/{instance_id}/canisters/{canister_id}/{action}",
+            post(super::client_api::call),
+        )
         .route("/api/profiling/runs", get(list).post(start))
         .route("/api/profiling/explain", get(explain))
         .route("/api/profiling/import", post(import))
@@ -103,7 +107,7 @@ async fn list() -> Response {
 }
 
 async fn explain() -> Response {
-    response(Ok(ic_system_profiler::explain()))
+    response(Ok(super::backend_description::explain()))
 }
 
 async fn start(State(app): State<AppState>, Json(config): Json<Value>) -> Response {
@@ -201,6 +205,9 @@ pub fn dispatch_sync(
             .ok_or("Missing string run_id")
     };
     match name {
+        "profile_explain" if arguments.get("run_id").is_none() => {
+            Ok(super::backend_description::explain())
+        }
         "profile_start" => {
             let mut config: RunConfig = serde_json::from_value(arguments.clone())
                 .map_err(|e| format!("Invalid profile configuration: {e}"))?;
@@ -226,6 +233,10 @@ pub fn dispatch_sync(
                 metadata["server_generation"] = json!(identity.generation);
                 metadata["server_binary_hash"] = json!(identity.binary_hash);
                 metadata["server_storage"] = server_storage_metadata();
+                if local_metrics {
+                    metadata["backend_description"] =
+                        super::backend_description::description().clone();
+                }
                 config.metadata = metadata;
             }
             let result = ic_system_profiler::start(config)?;

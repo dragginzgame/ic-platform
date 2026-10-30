@@ -126,7 +126,7 @@ pub(crate) fn manual() -> Value {
             {"flag":"--ram-dir DIRECTORY","environment":"POCKET_IC_RAM_DIR","effect":"Select a tmpfs parent; implies RAM mode, validates backing and has no disk fallback. Inspect GET /storage and profile scope.metadata.server_storage; imported persistent paths may have different backing."}
         ],
         "system_profile":{
-            "built_in_reference":ic_system_profiler::explain(),
+            "built_in_reference":crate::profiling::backend_description::explain(),
             "capture_configuration":{"name":"Label","sample_interval_ms":"Host-resource sample cadence, default 100; CPU/RSS/I/O independent of PSS scans","memory_detail_interval_ms":"Default 1000; 0 disables all PSS scans including boundaries while CPU/RSS/I/O remain","metrics_level":"standard (default): raw scalars/labels/units and histogram count/sum; full adds bounded raw buckets/quantiles; none explicitly disables registry gathering","max_events":"Bounded retained detail, maximum 200000","max_samples":"Bounded retained samples, maximum 20000","max_retained_bytes":"Default 64 MiB, 1–128 MiB per run; 256 MiB global across retained runs. Export/delete stopped captures when needed; budgets are conservative retained allocation estimates, not a measured RSS cap","root_pid":"Defaults to server process; capture can attach a different root","extra_pids":"Additional independently launched service roots; not invented child relationships","include_descendants":"Observe available descendants; true by default","instance_id":"Select logical evidence/IC registries. Shared process CPU/memory is still the observed server tree","cgroup_path":"Optional explicit host cgroup resource boundary","backend":"Descriptive deployment label, not a switch that creates production consensus","metadata":"Bounded caller provenance; server records actual binary/generation/storage context"},
             "cli_flags":["--server URL","--run RUN","--other-run RUN","--name LABEL","--backend LABEL","--pid PID","--extra-pid PID (repeatable)","--sample-interval-ms N","--metrics-level none|standard|full","--memory-detail-interval-ms N","--duration SECONDS","--drain-ms N","--input FILE","--other-input FILE","--output FILE","--view VIEW","--query JSON","--format png|svg|json","--keep-command-running","-- COMMAND ARGS"],
             "lifecycle":"Start before the intended work, stop with drain_ms=0 unless a later observation interval is wanted, query a small summary first, then export. Initial+stop IC metric snapshots; positive drain adds foreground_end. Drain is not a quiescence, durability or kernel-writeback barrier.",
@@ -170,7 +170,7 @@ mod tests {
         }
         assert_eq!(
             manual["system_profile"]["built_in_reference"],
-            ic_system_profiler::explain()
+            crate::profiling::backend_description::explain()
         );
         assert!(
             manual["rust_system_example"]

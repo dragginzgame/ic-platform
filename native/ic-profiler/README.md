@@ -22,10 +22,16 @@ at `.build/ic/.git/ic-profiler-receipt.json`; check its provider/consumer identi
 before retaining it with measurements.
 
 `scripts/ic_profiler.py native-verify` owns the complete native gate: prerequisite
-and graph admission, server build, recorder and server-library product tests,
-and the five profiling tests
+and graph admission, strict primary-package Clippy, server build, recorder and server-library product tests,
+and the installed profiling tests
 against that exact server. Profiling tests serialize their whole-server recording
 windows; independent workloads must not contaminate one another's cycle totals.
+
+`scripts/ic_profiler.py clippy -- --no-deps --lib -- -D warnings` checks the
+native server package without linting the full upstream dependency workspace.
+Retain the pinned IC Clippy configuration; no blanket warning allowances apply.
+The paired Profiler product sources also need the narrow CLI/rendering lint
+correction tracked by Platform #98. Old source pins retain their prior gate.
 
 The provider's `profiler/` sources and the consumer's `profiler/` sources merge at
 the declared IC destination. Overlapping files are rejected. Their separate
@@ -68,7 +74,7 @@ python3 -m unittest discover -s native/ic-profiler/tests -p 'test_*.py'
 ```
 
 Actual acceptance also requires the selected native graph, reproducible assembly,
-the instrumented server build and all five `system_profiling` regressions against
+the instrumented server build and the installed `system_profiling` suite against
 that new executable's recorded hash. Fixture passes do not establish native or
 Bazel qualification.
 
@@ -117,7 +123,7 @@ a distinct native dependency; PNG mechanics and budgets stay product-owned.
 ## Host process and private Wire inputs
 
 The paired Profiler consumer supplies the Host process policy adapter and the
-IC Wire private process DTOs. This profile wires IC Wire 0.7.21 and
+IC Wire private process DTOs. This profile wires IC Wire 0.7.23 and
 `ic-host-process` into both Cargo and Bazel, retaining the 60 KiB consumer frame
 limit. Old ICP2/JSON process senders and receivers must be rebuilt together.
 Saved reports and profile bundle formats do not change. Generic OS observations
@@ -127,8 +133,30 @@ pinned root selection, cadence, aggregation, diagnostics and CLI output.
 Until Tooling #265 is published, all Host packages in the selected recorder
 and native graph use Tooling Git revision
 `c20dbd11785c17d369651f51fa0967fbec69c57a`. The gzip-only Platform library input
-is the immutable scaffold `ba98bd33ef1cbe463d6daf34f0511f17d7770c20`, selecting
+is Platform 0.8.1 at `c8bbe7e1aee45c905de05ec5083d6bf7ba95819e`, selecting
 the same Host artifact source. This avoids mixed registry/Git Host identities
-and downstream Cargo patches. Gzip remains a Platform facade, with no new
+and downstream Cargo patches. The registry 0.8.1 package instead selects
+registry Host artifacts; published Host process packages still lack the required
+process-observation interface. Keep this paired Git selection until a coherent
+published graph supplies both capabilities. Gzip remains a Platform facade, with no new
 canister/runtime feature or public API removal. Supplying publication and native
 macOS execution remain separate acceptance steps.
+
+## Textual client and compiled backend description
+
+The protected profiling router exposes POST
+`/api/profiling/instances/{instance_id}/canisters/{canister_id}/{action}` for
+`start`, `stop`, `clear`, `trace`, `profile` and `snapshot`. It admits canister
+text through IC's type, reuses native operations/DTO conversions and returns one
+completed JSON result. Busy state is retried only before submission; Started
+results are polled and successful results pruned. Operation errors, including
+changed-snapshot conflicts, are never resubmitted. A timeout can leave an already
+started operation running; the error says so. No client-side IC codec is needed.
+Existing raw PocketIC endpoints retain their external contract.
+
+The paired Profiler consumer supplies the query-product source interface from
+Profiler #9 and the recorder's `explain_with_backend` projection. This provider
+owns scheduler/source defaults, component implementation facts and PocketIC
+coverage notes. It records descriptions only for local native captures. Source
+hashes and compiled values accompany those facts; runtime configurations remain
+independent captured evidence. Older consumers must retain their previous pin.

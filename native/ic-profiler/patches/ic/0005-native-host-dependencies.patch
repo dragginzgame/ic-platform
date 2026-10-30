@@ -7,7 +7,7 @@ index 5c254b6..5936950 100644
      "ic-wasm 0.11.1"
    ],
 -  "checksum": "d4e719583881cf898774f83b5661851ff3da30493e262b0832a817b5022e50da",
-+  "checksum": "377df08a9b3ed85cf58ad68fe222cae9ab56fc2a7341f1233b5c20f1c83ebe16",
++  "checksum": "74a0770a479d074fd91ee527bcd38972a0e2eb8c14874fc0e78b87f72b656485",
    "conditions": {
      "aarch64-apple-darwin": [
        "aarch64-apple-darwin"
@@ -763,7 +763,7 @@ index 5c254b6..5936950 100644
              "target": "ic_metrics_encoder"
            },
 +          {
-+            "id": "ic-platform 0.7.6",
++            "id": "ic-platform 0.8.1",
 +            "target": "ic_platform"
 +          },
            {
@@ -774,7 +774,7 @@ index 5c254b6..5936950 100644
              "target": "ic_wasm"
            },
 +          {
-+            "id": "ic-wire 0.7.21",
++            "id": "ic-wire 0.7.23",
 +            "target": "ic_wire"
 +          },
            {
@@ -1452,7 +1452,7 @@ index 5c254b6..5936950 100644
 +          "selects": {
 +            "cfg(not(target_family = \"wasm\"))": [
 +              {
-+                "id": "ic-wire 0.7.21",
++                "id": "ic-wire 0.7.23",
 +                "target": "ic_wire"
 +              }
 +            ]
@@ -1491,7 +1491,7 @@ index 5c254b6..5936950 100644
        ],
        "version": "1.1.1"
      },
-+    "ic-platform 0.7.6": {
++    "ic-platform 0.8.1": {
 +      "common_attrs": {
 +        "crate_features": [
 +          "gzip"
@@ -1539,7 +1539,7 @@ index 5c254b6..5936950 100644
 +      "repository": {
 +        "Git": {
 +          "commitish": {
-+            "Rev": "ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
++            "Rev": "c8bbe7e1aee45c905de05ec5083d6bf7ba95819e"
 +          },
 +          "remote": "https://github.com/dragginzgame/ic-platform.git",
 +          "strip_prefix": "crates/ic-platform"
@@ -1553,7 +1553,7 @@ index 5c254b6..5936950 100644
 +          }
 +        }
 +      ],
-+      "version": "0.7.6"
++      "version": "0.8.1"
 +    },
      "ic-representation-independent-hash 3.1.0": {
        "common_attrs": {
@@ -1607,7 +1607,7 @@ index 5c254b6..5936950 100644
        ],
        "version": "0.11.1"
      },
-+    "ic-wire 0.7.21": {
++    "ic-wire 0.7.23": {
 +      "common_attrs": {
 +        "crate_features": {
 +          "common": [],
@@ -1675,7 +1675,7 @@ index 5c254b6..5936950 100644
 +        "edition": "2024",
 +        "proc_macro_deps": [
 +          {
-+            "id": "ic-wire-derive 0.7.21",
++            "id": "ic-wire-derive 0.7.23",
 +            "target": "ic_wire_derive"
 +          }
 +        ]
@@ -1690,8 +1690,8 @@ index 5c254b6..5936950 100644
 +      "package_url": "https://github.com/dragginzgame/ic-wire",
 +      "repository": {
 +        "Http": {
-+          "sha256": "7d9d4dbea25193bd0b891080e44a0fb8a4538d1d7f695423499fe4d8110a40e3",
-+          "url": "https://static.crates.io/crates/ic-wire/0.7.21/download"
++          "sha256": "98860d4ece1147bf4f32218eadde961f34bb6881c5ccf39026c5c298133db0f3",
++          "url": "https://static.crates.io/crates/ic-wire/0.7.23/download"
 +        }
 +      },
 +      "targets": [
@@ -1702,9 +1702,9 @@ index 5c254b6..5936950 100644
 +          }
 +        }
 +      ],
-+      "version": "0.7.21"
++      "version": "0.7.23"
 +    },
-+    "ic-wire-derive 0.7.21": {
++    "ic-wire-derive 0.7.23": {
 +      "common_attrs": {
 +        "deps": [
 +          {
@@ -1732,8 +1732,8 @@ index 5c254b6..5936950 100644
 +      "package_url": "https://github.com/dragginzgame/ic-wire",
 +      "repository": {
 +        "Http": {
-+          "sha256": "26896f2c980e27ce375eefd8846fce6d1c5924a96eed0c252b779f5f7af5e12a",
-+          "url": "https://static.crates.io/crates/ic-wire-derive/0.7.21/download"
++          "sha256": "bcd8b95734ebf64025c65ebd651cc6521992af6e3dea92c2b1521d4e1dfe1186",
++          "url": "https://static.crates.io/crates/ic-wire-derive/0.7.23/download"
 +        }
 +      },
 +      "targets": [
@@ -1744,7 +1744,7 @@ index 5c254b6..5936950 100644
 +          }
 +        }
 +      ],
-+      "version": "0.7.21"
++      "version": "0.7.23"
 +    },
      "ic-xrc-types 1.2.0": {
        "common_attrs": {
@@ -3449,7 +3449,7 @@ index 5c254b6..5936950 100644
      "ic-management-canister-types 0.8.0",
 +    "ic-metrics 0.17.2",
      "ic-metrics-encoder 1.1.1",
-+    "ic-platform 0.7.6",
++    "ic-platform 0.8.1",
      "ic-sha3 1.0.0",
      "ic-stable-structures 0.6.8",
      "ic-stable-structures 0.7.0",
@@ -3457,7 +3457,7 @@ index 5c254b6..5936950 100644
      "ic-verify-bls-signature 0.6.0",
      "ic-vetkeys 0.7.0",
      "ic-wasm 0.11.1",
-+    "ic-wire 0.7.21",
++    "ic-wire 0.7.23",
      "ic-xrc-types 1.2.0",
      "ic0 1.1.0",
      "ic_bls12_381 0.10.1",
@@ -3619,8 +3619,8 @@ index 3bef13b..e9cc273 100644
  
 +[[package]]
 +name = "ic-platform"
-+version = "0.7.6"
-+source = "git+https://github.com/dragginzgame/ic-platform.git?rev=ba98bd33ef1cbe463d6daf34f0511f17d7770c20#ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
++version = "0.8.1"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=c8bbe7e1aee45c905de05ec5083d6bf7ba95819e#c8bbe7e1aee45c905de05ec5083d6bf7ba95819e"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -3634,9 +3634,9 @@ index 3bef13b..e9cc273 100644
  
 +[[package]]
 +name = "ic-wire"
-+version = "0.7.21"
++version = "0.7.23"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "7d9d4dbea25193bd0b891080e44a0fb8a4538d1d7f695423499fe4d8110a40e3"
++checksum = "98860d4ece1147bf4f32218eadde961f34bb6881c5ccf39026c5c298133db0f3"
 +dependencies = [
 + "bytemuck",
 + "ic-wire-derive",
@@ -3648,9 +3648,9 @@ index 3bef13b..e9cc273 100644
 +
 +[[package]]
 +name = "ic-wire-derive"
-+version = "0.7.21"
++version = "0.7.23"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "26896f2c980e27ce375eefd8846fce6d1c5924a96eed0c252b779f5f7af5e12a"
++checksum = "bcd8b95734ebf64025c65ebd651cc6521992af6e3dea92c2b1521d4e1dfe1186"
 +dependencies = [
 + "proc-macro2",
 + "quote",
@@ -4207,8 +4207,8 @@ index 1a6cc43..1a68860 100644
  
 +[[package]]
 +name = "ic-platform"
-+version = "0.7.6"
-+source = "git+https://github.com/dragginzgame/ic-platform.git?rev=ba98bd33ef1cbe463d6daf34f0511f17d7770c20#ba98bd33ef1cbe463d6daf34f0511f17d7770c20"
++version = "0.8.1"
++source = "git+https://github.com/dragginzgame/ic-platform.git?rev=c8bbe7e1aee45c905de05ec5083d6bf7ba95819e#c8bbe7e1aee45c905de05ec5083d6bf7ba95819e"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -4435,9 +4435,9 @@ index 1a6cc43..1a68860 100644
  
 +[[package]]
 +name = "ic-wire"
-+version = "0.7.21"
++version = "0.7.23"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "7d9d4dbea25193bd0b891080e44a0fb8a4538d1d7f695423499fe4d8110a40e3"
++checksum = "98860d4ece1147bf4f32218eadde961f34bb6881c5ccf39026c5c298133db0f3"
 +dependencies = [
 + "bytemuck",
 + "ic-wire-derive",
@@ -4449,9 +4449,9 @@ index 1a6cc43..1a68860 100644
 +
 +[[package]]
 +name = "ic-wire-derive"
-+version = "0.7.21"
++version = "0.7.23"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "26896f2c980e27ce375eefd8846fce6d1c5924a96eed0c252b779f5f7af5e12a"
++checksum = "bcd8b95734ebf64025c65ebd651cc6521992af6e3dea92c2b1521d4e1dfe1186"
 +dependencies = [
 + "proc-macro2",
 + "quote",
@@ -4604,11 +4604,11 @@ index ab16a08..883e8d4 100644
  opt-level = 3
  
  [workspace.dependencies]
-+ic-wire = { version = "0.7.21", default-features = false }
++ic-wire = { version = "0.7.23", default-features = false }
 +ic-host-process = { git = "https://github.com/dragginzgame/ic-tooling.git", rev = "c20dbd11785c17d369651f51fa0967fbec69c57a", default-features = false }
 +ic-metrics = { version = "0.17.2", default-features = false }
 +
-+ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "ba98bd33ef1cbe463d6daf34f0511f17d7770c20", default-features = false, features = ["gzip"] }
++ic-platform = { git = "https://github.com/dragginzgame/ic-platform.git", rev = "c8bbe7e1aee45c905de05ec5083d6bf7ba95819e", default-features = false, features = ["gzip"] }
  actix-rt = "2.10.0"
  actix-web = { version = "4.9.0", default-features = false, features = [
      "macros",
@@ -4632,7 +4632,7 @@ index 41a0bf6..05c671f 100644
 +crate.spec(
 +    default_features = False,
 +    package = "ic-wire",
-+    version = "0.7.21",
++    version = "0.7.23",
 +)
 +crate.spec(
 +    default_features = False,
@@ -4650,7 +4650,7 @@ index 41a0bf6..05c671f 100644
 +    features = ["gzip"],
 +    package = "ic-platform",
 +    git = "https://github.com/dragginzgame/ic-platform.git",
-+    rev = "ba98bd33ef1cbe463d6daf34f0511f17d7770c20",
++    rev = "c8bbe7e1aee45c905de05ec5083d6bf7ba95819e",
 +)
  # Build any crate with `@crate_index//:mycrate`
  # Use particular version with `@crate_index//:mycrate-3.14.16`

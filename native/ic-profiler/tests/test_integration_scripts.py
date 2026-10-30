@@ -380,6 +380,21 @@ exit "${IC_PROFILER_FIXTURE_EXIT:-0}"
         self.assertIn(first, [json.loads(path.read_text()) for path in immutable])
         self.assertEqual(len(list((self.root / ".build/receipts").glob("build-*.json"))), 1)
 
+    def test_clippy_entrypoint_selects_native_server_and_retains_failure(self):
+        self.fake_cargo()
+        self.env["IC_PROFILER_FIXTURE_EXIT"] = "9"
+        result = self.process([
+            sys.executable, self.root / "scripts/ic_profiler.py", "clippy",
+            "--", "--no-deps", "--lib", "--", "-D", "warnings",
+        ], self.root)
+        self.assertNotEqual(result.returncode, 0)
+        receipt = json.loads((self.root / ".build/receipts/latest-clippy.json").read_text())
+        self.assertEqual(receipt["command"], [
+            "cargo", "clippy", "--locked", "-p", "pocket-ic-server",
+            "--message-format=json-render-diagnostics", "--no-deps", "--lib", "--", "-D", "warnings",
+        ])
+        self.assertEqual(receipt["exit_code"], 9)
+
     def test_native_build_records_the_pinned_routing_snapshot(self):
         self.fake_cargo()
         contents = '[{"fixture": "routing snapshot"}]\n'
@@ -662,10 +677,24 @@ class NativeVerifyGateTest(unittest.TestCase):
                 product = [args for command, args in calls if "profiling::" in args]
                 installed = [args for command, args in calls if "system_profiling" in args]
                 self.assertEqual(product, [["--", "-p", "pocket-ic-server", "--lib", "profiling::"]])
+                self.assertEqual(calls[0], ("clippy", ["--", "--no-deps", "--lib", "--", "-D", "warnings"]))
                 self.assertEqual(bool(installed), not refused)
                 self.assertEqual(os.environ["CARGO_TARGET_DIR"], "prior-target")
                 self.assertEqual(os.environ["POCKET_IC_BIN"], "prior-server")
                 self.assertEqual(os.environ["SYSTEM_PROFILE_TEST_SERVER_URL"], "prior-url")
+
+    def test_native_lint_failure_stops_before_build_and_installation(self):
+        spec = importlib.util.spec_from_file_location("profiler_lint_gate_fixture", REPOSITORY / "scripts/ic_profiler.py")
+        provider = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(provider)
+        calls = []
+        def cargo(_root, _manifest, command, args, force):
+            calls.append(command)
+            raise provider.Error("native lint failed")
+        with mock.patch.object(provider, "run"), mock.patch.object(provider, "check_native_graph"), mock.patch.object(provider, "build_directory", return_value=Path("/fixture/.build")), mock.patch.object(provider, "cargo_command", side_effect=cargo):
+            with self.assertRaises(provider.Error):
+                provider.native_verify(Path("/fixture"), {})
+        self.assertEqual(calls, ["clippy"])
 
 
 class NativeToolsTest(unittest.TestCase):

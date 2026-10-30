@@ -1,0 +1,51 @@
+diff --git a/rs/pocket_ic_server/src/lib.rs b/rs/pocket_ic_server/src/lib.rs
+index e1e520a..1316496 100644
+--- a/rs/pocket_ic_server/src/lib.rs
++++ b/rs/pocket_ic_server/src/lib.rs
+@@ -91,7 +91,9 @@ pub type InstanceId = usize;
+ 
+ #[async_trait]
+ pub trait BlobStore: Send + Sync {
++    #[must_use = "poll the future to store the blob"]
+     async fn store(&self, blob: BinaryBlob) -> BlobId;
++    #[must_use = "poll the future to fetch the blob"]
+     async fn fetch(&self, blob_id: BlobId) -> Option<BinaryBlob>;
+ }
+ 
+diff --git a/rs/pocket_ic_server/src/state_api/routes.rs b/rs/pocket_ic_server/src/state_api/routes.rs
+index c6a49b5..e698637 100644
+--- a/rs/pocket_ic_server/src/state_api/routes.rs
++++ b/rs/pocket_ic_server/src/state_api/routes.rs
+@@ -457,6 +457,7 @@ pub struct OpConversionError;
+ 
+ #[async_trait]
+ pub(crate) trait FromOpOut: Sized {
++    #[must_use = "poll the future to convert the operation result"]
+     async fn from(value: OpOut) -> (StatusCode, ApiResponse<Self>);
+ }
+ 
+diff --git a/rs/pocket_ic_server/src/state_api/state.rs b/rs/pocket_ic_server/src/state_api/state.rs
+index 79aff62..ecb2b6b 100644
+--- a/rs/pocket_ic_server/src/state_api/state.rs
++++ b/rs/pocket_ic_server/src/state_api/state.rs
+@@ -597,6 +597,8 @@ impl Client for ReqwestClient {
+ 
+ // END ADAPTED from ic-gateway
+ 
++type ProfilingMetricsRegistry = (InstanceId, String, String, ic_metrics::MetricsRegistry);
++
+ impl ApiState {
+     // Helper function for auto progress mode.
+     // Executes an operation to completion and returns its `OpOut`
+@@ -828,10 +830,7 @@ impl ApiState {
+     pub(crate) fn profiling_metrics_registries(
+         &self,
+         selected: Option<InstanceId>,
+-    ) -> (
+-        Vec<(InstanceId, String, String, ic_metrics::MetricsRegistry)>,
+-        Vec<serde_json::Value>,
+-    ) {
++    ) -> (Vec<ProfilingMetricsRegistry>, Vec<serde_json::Value>) {
+         let mut registries = Vec::new();
+         let mut unavailable = Vec::new();
+         let Ok(instances) = self.instances.try_read() else {

@@ -23,7 +23,7 @@
       },
       {
         "path": "packages/pocket-ic/tests/system_profiling.rs",
-        "sha256": "9eacd594ed7b1edfd36aeadd4f8e6b5b7c6028a1d173be842f290c2344fa46dc"
+        "sha256": "afd24c354a7019bb5baffef39952105dc5ac530cf4df65e0d188c2a7d36ec570"
       },
       {
         "path": "profilingic.md",
@@ -74,7 +74,7 @@
       },
       {
         "path": "0005-native-host-dependencies.patch",
-        "sha256": "032e67d62ff05d9b5c35178ea2771fc04e2fc234b58029c7ced6406706ac3a77"
+        "sha256": "5a7b8eedda03c100e6fcb65bd1f3bfa3ec2cd3da5f78ee149e02b3946998d12b"
       },
       {
         "path": "0006-profiler-request-admission.patch",
@@ -83,6 +83,14 @@
       {
         "path": "0007-compiled-catalog-facts.patch",
         "sha256": "ae7d10eff1a0f4cab0c9d96d9de384f97e83d52de8f6d51754921c3aedbd1d34"
+      },
+      {
+        "path": "0008-client-validation-inputs.patch",
+        "sha256": "cf12cc7b4d41f35c89add77faba69d3af20825c0dda79d09e7b78dfbe3c9b92a"
+      },
+      {
+        "path": "0009-native-lint.patch",
+        "sha256": "1b481eaf2a6b0ca2072edbc0cd712aed9f53b8ed54dfa39d2f7cdb002485238c"
       }
     ],
     "series": "patches/ic/series"

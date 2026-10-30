@@ -947,7 +947,7 @@ impl MemoryAccessTraceRecorder {
         let next_after = events
             .iter()
             .take(limit)
-            .last()
+            .next_back()
             .map(|event| event.sequence_number)
             .or(after);
         let (mut runtime_costs, mut subnet_runtime_costs) = (Vec::new(), Vec::new());
@@ -1154,10 +1154,10 @@ impl WasmMemoryAccessTracer for MemoryAccessTraceRecorder {
             return None;
         }
         let key = (context.kind.to_string(), context.identity.clone());
-        if context.retry {
-            if let Some(id) = trace.logical_retry_slots.get(&key) {
-                return Some(*id);
-            }
+        if context.retry
+            && let Some(id) = trace.logical_retry_slots.get(&key)
+        {
+            return Some(*id);
         }
         // Never shorten an identity and accidentally join different messages.
         if context.identity.len() > 1024
@@ -1268,18 +1268,17 @@ impl WasmMemoryAccessTracer for MemoryAccessTraceRecorder {
             trace.recorded_bytes = trace.recorded_bytes.saturating_sub(bytes);
             traces.recorded_bytes = traces.recorded_bytes.saturating_sub(bytes);
         }
-        if recorded.state != rest::TracedExecutionState::Pending {
-            if let Some(mut pending) = traces
+        if recorded.state != rest::TracedExecutionState::Pending
+            && let Some(mut pending) = traces
                 .canisters
                 .get_mut(&canister_id)
                 .unwrap()
                 .pending_attempts
                 .remove(&attempt_id)
-            {
-                pending.execution.disposition = Some(recorded);
-                Self::publish_attempt(&mut traces, canister_id, pending.execution);
-                return;
-            }
+        {
+            pending.execution.disposition = Some(recorded);
+            Self::publish_attempt(&mut traces, canister_id, pending.execution);
+            return;
         }
         let bytes = serde_json::to_vec(&recorded).map_or(self.memory_limit, |v| {
             v.len().saturating_mul(4).saturating_add(128)

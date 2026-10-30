@@ -1,0 +1,40 @@
+diff --git a/packages/pocket-ic/BUILD.bazel b/packages/pocket-ic/BUILD.bazel
+--- a/packages/pocket-ic/BUILD.bazel
++++ b/packages/pocket-ic/BUILD.bazel
+@@ -318,14 +318,21 @@
+     name = "system_profiling",
+     size = "medium",
+     srcs = ["tests/system_profiling.rs"],
+-    data = ["//rs/pocket_ic_server:pocket-ic-server"],
+-    env = {"POCKET_IC_BIN": "$(rootpath //rs/pocket_ic_server:pocket-ic-server)"},
++    data = [
++        "//rs/pocket_ic_server:pocket-ic-server",
++        "//rs/pocket_ic_server:profiling_python_client",
++    ],
++    env = {
++        "POCKET_IC_BIN": "$(rootpath //rs/pocket_ic_server:pocket-ic-server)",
++        "PROFILER_PYTHON_CLIENT": "$(rootpath //rs/pocket_ic_server:profiling_python_client)",
++    },
+     tags = ["requires-network"],
+     deps = [
+         ":pocket-ic",
+         "@crate_index//:candid",
+         "@crate_index//:reqwest",
+         "@crate_index//:serde_json",
++        "@crate_index//:tempfile",
+         "@crate_index//:wat",
+     ],
+ )
+diff --git a/rs/pocket_ic_server/BUILD.bazel b/rs/pocket_ic_server/BUILD.bazel
+--- a/rs/pocket_ic_server/BUILD.bazel
++++ b/rs/pocket_ic_server/BUILD.bazel
+@@ -444,3 +444,9 @@
+     tags = [],
+     deps = TEST_DEPENDENCIES,
+ )
++
++filegroup(
++    name = "profiling_python_client",
++    srcs = ["profiling/viewer/memory_access_viewer.py"],
++    visibility = ["//packages/pocket-ic:__pkg__"],
++)
