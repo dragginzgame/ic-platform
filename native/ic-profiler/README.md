@@ -136,7 +136,7 @@ Profiler process frames. Track the supplier alignment in
 [Observability #103 — Align Metrics schema traits with published Wire 0.8](https://github.com/dragginzgame/ic-observability/issues/103).
 
 The selected recorder and native graph use published Host Process, Host FS and
-Host Artifacts 0.70.5 plus gzip-only Platform 0.9.1 from crates.io. The published
+Host Artifacts 0.71.0 plus gzip-only Platform 0.10.0 from crates.io. The published
 observation and workload APIs replace the temporary Tooling/Platform Git library
 suppliers. Cargo and Bazel locks record registry checksums; there is no downstream
 Cargo patch or mixed registry/Git Host family. Gzip remains a Platform facade,
@@ -144,7 +144,7 @@ with no new canister/runtime feature. The native source profile itself still
 requires an immutable Platform Git pin for the patched IC source and adapters.
 Native macOS execution remains separate qualification.
 
-Platform 0.9.1 scopes its executor singleton guard to runtime consumers, allowing
+Platform 0.10.0 retains the runtime-only executor singleton guard, allowing
 this gzip-only graph to coexist with the pinned workspace's registry executor.
 The guard remains inactive here; the recorder never enables Platform's runtime.
 See
