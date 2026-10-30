@@ -149,14 +149,14 @@ consumer were verified on 2026-10-26. Prior macOS CI used the earlier unpublishe
 name with unchanged runtime code. These producer checks do not qualify
 installed IC, live provider effects or consumer adoption.
 
-Platform 0.11 removes the `wire-schema` feature, Principal/Account Wire trait
+Platform 0.11 removed the `wire-schema` feature, Principal/Account Wire trait
 implementations and direct Wire/JSON dependencies. Wire owns the opt-in schema
-integration; Platform owns bytes and Serde. The planned Wire `platform-types`
-feature must select only Platform `principal`, separately from endpoint/runtime
-features. Its supplying implementation and consumer qualification are still Wire
-work; no consumer adoption is claimed here.
+integration; Platform owns bytes and Serde. Published Wire 0.10’s `platform-types`
+feature selects only Platform `principal`, separately from endpoint/runtime
+features. Wire owns its schema/endpoint qualification; application adoption
+remains consumer-owned.
 
-Wire 0.9.0 remains a tooling catalog entry for independent call fixtures. The
+Wire 0.10.0 remains a tooling catalog entry for independent call fixtures. The
 production graph checker rejects Wire on both native and Wasm, for every feature
 selection. The runtime fixture lock refresh remains blocked by Timers’ Platform
 0.8 requirement; it is separate from the production lock. All features retain

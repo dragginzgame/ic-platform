@@ -1,40 +1,39 @@
 # Current handoff
 
-## Pending 0.11.0: move schema integration to Wire
+## Released Platform 0.11 / Wire 0.10; pending tooling-only 0.11.1
 
-The maintainer requested a Wire handoff prompt and implementation of Platform’s
-side. The public `wire-schema` feature, both schema implementations, their Rust/TS
-fixture and schema-only CI target are removed. Platform owns unchanged
-Principal/Account bytes and Serde; Wire will own the trait implementations through
-planned opt-in `platform-types`. Wire is not yet implementing that feature here.
-The supplying code/tests are recoverable from Platform commit `421edbc`; see
-[the transfer contract](../migration.md#owned-principal-and-account-wire-metadata).
-Consumers wait for the qualified supplying Wire release before switching pairs.
+The maintainer released Platform 0.11.0 at `b8ecf49` and Wire 0.10.0 at
+`c9d4e7b`. Cargo registry metadata confirms Wire 0.10.0 supplies `platform-types`
+and selects Platform 0.11 for that feature and endpoints. Platform no longer owns
+Wire schema integration. Consumers can now remove Platform `wire-schema`, retain
+`principal`, and enable Wire `platform-types` on the matched published pair.
+Wire owns transferred Rust/TS byte/malformed tests and endpoint qualification;
+see `ic-wire/docs/evidence/platform-types-transfer/published/` at its release.
 
-The facade has no Wire or direct serde_json dependency. The root lock drops six
-package entries: Wire, Wire Derive, Postcard, COBS and two embedded-io versions.
-JSON remains transitively where external integrations require it. Wire 0.9 stays
-in the tooling catalog for standalone call fixtures. Production graph checks
-reject Wire under every feature selection on native and Wasm. Browser Node/npm
-admission now uses the existing compiler-floor fixture; SDK checks retain their
-own TypeScript compiler. No sibling edits or package publication were performed.
+This follow-up raises only Platform’s test/tooling Wire catalog entry to 0.10.0
+and updates the handoff documentation. No published member inherits that entry;
+the facade’s all-feature production graph and root lock remain Wire-free. Root
+Cargo.lock is unchanged. No feature or API changes require another minor:
+pending notes select 0.11.1; workspace package versions remain 0.11.0. No commit
+or release is performed. Full Clippy, inventory, pins, boundaries, docs and format
+pass for this follow-up. Raw/Wire/external-Candid standalone consumer checks
+pass on current Rust and 1.91, native/Wasm
+(`target/prepared-call-consumer.RMsFvd`).
 
-Full Clippy passes. Principal/Account’s 11 tests pass on current Rust and 1.91;
-Wasm/MSRV, independent raw/Wire/external-Candid call consumers, feature-selection/
-closure/refusal regressions, nine feature combinations, governance and format pass.
-Browser’s 16 tests, packed-consumer compiler-floor/current checks and SDK graphs
-pass. All-feature native/Wasm production trees exclude Wire. Evidence and logs:
-`target/schema-boundary.IDd2ew`; consumer `target/prepared-call-consumer.7VEvkX`;
-feature graphs `target/feature-graphs/attempt.IV93hs`;
-browser `target/browser-consumer.ai5g8f`. These do not qualify Wire’s pending
-schema implementation or an installed runtime. The expected metadata-feature
-removal is breaking, so pending notes remain 0.11.0; workspace versions remain
-released 0.10.0 at `421edbc`. No new commit, release or version edit is made.
+Prior removal evidence remains `target/schema-boundary.IDd2ew`: Principal/Account
+bytes/Serde stay unchanged; six root lock entries were removed. Browser SDK
+Node/npm admission uses its compiler-floor fixture independently of retired
+schema tooling. Wire’s own supplier proof covers standalone derives, Rust 1.91,
+host/Wasm feature isolation, exact frames and installed endpoint rollback.
 
-The combined runtime fixture remains blocked by Timers’ Platform 0.8/external
-executor requirement (`target/cdk-runtime.gvd2tS`); its lock is unchanged.
-The separately pinned native Profiler recipe retains earlier qualified inputs;
-its published Platform gzip supplier/Host adoption needs native qualification.
+Next runtime adoption is Timers/Scheduling: latest published Timers remains
+0.32.4. The inspected Scheduling workspace prepares 0.33.0 against Platform 0.9.1,
+which still does not align with Platform 0.11’s runtime identity. The combined
+Platform runtime fixture cannot refresh until a compatible Timers supplier is
+available. Canic’s inspected catalog still selects Platform 0.8.3/Wire 0.7.25;
+Blob selects Platform 0.10/Wire 0.8. Existing sibling checkouts are unchanged.
+Their schema/runtime adoption and installed qualification remain consumer work.
+The separate native Profiler source recipe also retains its qualified old pins.
 
 ## Released 0.10.0: prepared calls and Tooling 0.71
 

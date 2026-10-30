@@ -103,10 +103,10 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-Platform’s pending 0.11 cut removes `wire-schema`. Principal and Account retain
+Platform 0.11 removed `wire-schema`. Principal and Account retain
 their existing Serde representations; Wire owns the schema integration. See the
 [migration contract](docs/migration.md#owned-principal-and-account-wire-metadata)
-for the coordinated Wire handoff and consumer requirements.
+for Wire 0.10’s `platform-types` integration and consumer requirements.
 
 Browser SDK development uses Node 24.21.0 and npm 12.2.0. Run
 `make install-browser-tools` (or `make install-tools`) to prepare its pinned

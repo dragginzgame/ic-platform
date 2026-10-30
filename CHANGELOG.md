@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1] - Unreleased
+
+### ⬆️ Dependencies
+
+- Select published Wire 0.10.0 in standalone tooling consumers and document the
+  completed Platform 0.11/Wire schema handoff. Production dependencies and public
+  APIs are unchanged; the combined runtime fixture still needs compatible Timers.
+
 ## [0.11.0] - 2026-10-30
 
 ### ⚠️ Breaking

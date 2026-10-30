@@ -50,7 +50,7 @@ assert_matches = "1.5"
 ic-representation-independent-hash = "3.0"
 ic-testkit = "0.71.0"
 ic-timers = "0.32.3"
-ic-wire = "0.9.0"
+ic-wire = "0.10.0"
 libfuzzer-sys = "0.4.13"
 serde_test = "1.0.177"
 

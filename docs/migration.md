@@ -955,18 +955,17 @@ Blob's tests. Native macOS and installed/live-provider acceptance remain separat
 
 ## Owned Principal and Account Wire metadata
 
-The maintainer authorized moving this integration into Wire. The pending 0.11
-release removes Platform’s `wire-schema` feature and both Wire trait
+The maintainer authorized moving this integration into Wire. Released Platform
+0.11.0 removed its `wire-schema` feature and both Wire trait
 implementations, plus the production `ic-wire-metadata` and direct JSON edges.
 Platform continues to own Principal/Account and their existing Serde bytes.
 Wire owns schema projection and the Rust/TypeScript integration tests. There is
 no replacement trait, wrapper type, compatibility feature or additional crate.
 
 Consumers remove Platform’s `wire-schema` selection and use `principal`.
-The coordinated Wire change should supply opt-in `platform-types` integration,
-selecting Platform `principal` with defaults disabled and Wire’s host metadata
-support. This feature name is the agreed handoff, not an already published API.
-Wait for the supplying qualified Wire release before migrating schema consumers.
+Published Wire 0.10.0 supplies opt-in `platform-types` integration, selecting
+Platform 0.11 `principal` with defaults disabled and Wire’s host metadata support.
+Use that released pair when migrating schema consumers.
 Wire’s endpoint feature alone selects Platform CDK/runtime; metadata-only builds
 must not acquire that runtime, Candid or an executor. Wire must align both optional
 integrations on one supplying Platform version (0.11 for this cut).
@@ -1006,18 +1005,20 @@ commit `421edbc` (released 0.10.0), recoverable with `git show 421edbc:PATH`:
 - `scripts/fixtures/wire-schema/check.mjs`
 - `scripts/ci/check-principal-wire-schema.sh`
 
-The proof must move into Wire alongside the implementations. Qualify standalone
+Wire 0.10 owns the transferred proof alongside the implementations. Qualify standalone
 derives, Rust 1.91, exact Rust/TypeScript request/response bytes and malformed
 inputs, native/Wasm feature isolation, and combined endpoint/type integration.
-Use an isolated copy of prepared Platform source for development, then the
-published 0.11 supplier. Publish Platform before the Wire package that depends on
-it; existing schema consumers retain their older matched pair until both suppliers
-are qualified. No distribution Cargo patch or sibling checkout edits are required.
+The published pair is Platform 0.11.0 plus Wire 0.10.0. Wire’s supplying release
+qualified the registry Platform source, standalone schemas, MSRV/feature isolation,
+exact Rust/TypeScript bytes and installed endpoint/rollback behavior; its source
+record is `dragginzgame/ic-wire` commit `c9d4e7b`, under
+`docs/evidence/platform-types-transfer/published/`. Existing schema consumers
+adopt both compatible selections together. No distribution Cargo patch is required.
 
 Platform removes its retired schema CI target and fixture; its remaining native
 Principal/Account tests continue to qualify byte/Serde ownership. Historical
-schema runs such as `target/principal-wire-schema.anr7KP` predate this cut and
-are transfer evidence, not proof that Wire has implemented the new feature.
+schema runs such as `target/principal-wire-schema.anr7KP` predate this cut; use
+Wire’s own published-supplier qualification for the new feature.
 The browser SDK keeps its own compiler setup and checks independently.
 
 ## Authenticated canister-signature time (pending 0.6.14)

@@ -1,9 +1,9 @@
 # ic-platform
 
-Pending 0.11 removes `wire-schema` and the production Wire dependency. Principal
-and Account retain their existing bytes and Serde; their schema trait integration
-is moving to Wire’s planned opt-in `platform-types` feature. Host schema consumers
-need the coordinated supplying Wire release; no compatibility feature is retained.
+Platform 0.11 removed `wire-schema` and the production Wire dependency. Principal
+and Account retain their existing bytes and Serde; published Wire 0.10 supplies
+their schema trait integration through opt-in `platform-types`. Host schema
+consumers select that feature alongside Platform `principal`.
 IC Tooling 0.71 remains the gzip supplier.
 
 Source release 0.7.4 adds `candid-endpoint` and `candid::endpoint::{query, update}` for
