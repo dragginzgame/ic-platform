@@ -811,7 +811,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.8.3"
+version = "0.8.4"
 dependencies = [
  "candid",
  "crc32fast",
@@ -846,7 +846,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.8.3"
+version = "0.8.4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1367,7 +1367,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.8.3",
+ "ic-platform 0.8.4",
  "ic-timers",
  "ic-wire",
  "serde",
@@ -1377,7 +1377,7 @@ dependencies = [
 name = "platform-runtime-driver"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.8.3",
+ "ic-platform 0.8.4",
  "ic-testkit",
  "ic-wire",
  "serde",
