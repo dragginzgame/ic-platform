@@ -1,5 +1,16 @@
 # Current handoff
 
+## Registry dependency adoption
+
+This isolated branch stacks on PR #99 head `380a1e8`; do not overwrite its active
+qualification branch. It replaces the native Git library suppliers with published
+Host Process/FS/Artifacts 0.70.3 and gzip-only Platform 0.8.3, retaining Wire 0.7.23.
+Cargo/Bazel locks are regenerated from the selected registry sources. Profiler
+adopts Shared Tooling 0.27.9 and the paired consumer lint fixes from Profiler #10.
+Fresh registry-native qualification is pending; the following parent evidence
+retains its original source and does not qualify changed dependency bytes.
+
+
 ## Pending 0.8.4: paired Profiler boundary and qualification fixes
 
 Main released 0.8.3 at `f69a759`; its checkout was clean at refresh. PR #99 now
@@ -63,10 +74,9 @@ fresh execution or the supplying identity for this refresh.
 ## Supply and retained contracts
 
 The native recipe retains IC `ee8086a9773725fd1058832a9400297cf0990112`, Rust
-1.99.0, Host `c20dbd11785c17d369651f51fa0967fbec69c57a`, Wire 0.7.23 and the
-immutable gzip-only Platform 0.8.1 scaffold. Ordinary Platform registry gzip and
-Testkit/editor selections remain independent. Preserve one native Host source
-family. Private ICPROF03 peers rebuild together; saved formats remain unchanged.
+1.99.0, registry Host Process/FS/Artifacts 0.70.3, Wire 0.7.23 and gzip-only
+registry Platform 0.8.3. Testkit/editor selections remain independent. Preserve
+one registry Host source family. Private ICPROF03 peers rebuild together; saved formats remain unchanged.
 
 Profiler's independent recorder owns retention/report policy and private
 PNG/range mechanics. Platform owns native state/HTTP admission and pricing.
