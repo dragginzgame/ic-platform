@@ -1,22 +1,26 @@
 # Changelog
 
-## [0.11.2]
+## [0.12.0] - Unreleased
+
+### ⚠️ Breaking
+
+- The native Profiler source profile now supplies `ic-host-artifacts/gzip`
+  directly to recorder and server. Adopt the paired consumer imports with this
+  provider pin; the Platform library and duplicate Host Artifacts 0.71 supplier
+  leave the native Cargo/Bazel graph. Saved bundle bytes and limits are unchanged.
+
 
 ### ⬆️ Dependencies
 
 - Adopt published Metrics 0.21.0 in the Profiler native source profile's Cargo and
   Bazel inputs. Preserve arithmetic-only features and existing logical reports.
-- Adopt published Host Process/FS 0.72.0, Wire 0.10.0 and gzip-only
-  Platform 0.11.1 in the native Cargo/Bazel inputs. Its runtime-only singleton
-  guard permits coexistence with the pinned workspace's registry executor
-  ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
+- Adopt published Host Process/FS/Artifacts 0.72.0 and Wire 0.10.0 in the native
+  Cargo/Bazel inputs. The generic gzip codec no longer requires Platform.
 - Keep the explicit ICPROF03 private frame identity and unchanged Wire core
   framing. Metrics and process transport share Wire 0.10; endpoints and
   Platform-type schemas remain disabled, with unchanged arithmetic/Serde layouts
   ([Observability #103 — Published Metrics metadata alignment](https://github.com/dragginzgame/ic-observability/issues/103)).
 
-- Keep Platform-owned gzip on its declared Host Artifacts 0.71 supplier; Host
-  Process/FS 0.72 select Host Artifacts 0.72 without a direct codec dependency.
 
 ### 🧪 Testing
 

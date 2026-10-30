@@ -46,15 +46,11 @@ Dependency updates compose in one current patch after the foundational workspace
 patches. The separate compiled-fact patch exposes the existing resource-charge
 cadence; it changes no scheduler calculation or charging behavior.
 
-Adapters stay inside the provider's IC workspace. The consumer recorder selects
-only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
-Bazel inputs. The recorder also consumes published IC Metrics 0.21 scalar
-arithmetic; this provider owns its native workspace and Bazel locks, distinct
-from the IC workspace's internal `ic-metrics` package. Neither measurement
-counters nor the gzip facade own charging policy. The gzip facade delegates to
-Platform's declared IC Tooling supplier, independently of Host process, and has
-no dependency back to this workspace, PocketIC or the native provider. Compression implementation
-stays in Tooling; the consumer retains levels, import limits and bundle semantics.
+Adapters stay inside the provider's IC workspace. The recorder and server
+select published IC Tooling Host Artifacts 0.72 with its `gzip` feature directly,
+matching Host Process/FS. The generic codec adds no Platform facade or runtime
+dependency. Profiler retains levels, import budgets and bundle semantics;
+Metrics retains arithmetic and neither owns charging policy.
 
 The PocketIC profile selects the `ic-admin` library without its CLI-only NNS
 initialization dependency. The upstream CLI keeps its default feature and binary;
@@ -113,10 +109,10 @@ same; the provider still owns state access, trace capture, HTTP admission and
 Cargo/Bazel dependencies. This source-profile change does not alter the published
 Platform library API.
 
-Server profile bundles import through Platform's shared gzip facade and export
+Server profile bundles import through Tooling's bounded gzip codec and export
 unchanged core gzip bytes. API input/decoded limits remain 128 MiB; the recorder
-retains its separate 256 MiB decoded limit. The maintainer chose to retain this
-facade instead of the proposed direct Host migration in #91. Zlib for PNG remains
+retains its separate 256 MiB decoded limit. This paired provider/consumer change
+supersedes the earlier decision to retain the Platform facade. Zlib for PNG is
 a distinct native dependency; PNG mechanics and budgets stay product-owned.
 
 ## Host process and private Wire inputs
@@ -134,22 +130,12 @@ TypeScript metadata feature is active; endpoints and Platform-type schemas stay
 disabled. Arithmetic and saved layouts are unchanged; see the
 [Metrics metadata adoption](https://github.com/dragginzgame/ic-observability/issues/103).
 
-The selected recorder and native graph use published Host Process/FS 0.72.0
-and gzip-only Platform 0.11.1 from crates.io. Platform selects Host Artifacts
-0.71 for gzip, while the process family selects Host Artifacts 0.72. The published
-observation and workload APIs replace the temporary Tooling/Platform Git library
-suppliers. Cargo and Bazel locks record registry checksums; there is no downstream
-Cargo patch or mixed registry/Git Host family. Gzip remains a Platform facade,
-with no new canister/runtime feature. The native source profile itself still
-requires an immutable Platform Git pin for the patched IC source and adapters.
-Native macOS execution remains separate qualification.
-
-Platform 0.11.1 retains the runtime-only executor singleton guard, allowing
-this gzip-only graph to coexist with the pinned workspace's registry executor.
-The guard remains inactive here; the recorder never enables Platform's runtime.
-See
-[#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)
-for the resolved packaging boundary.
+The native graph selects published Host Process/FS/Artifacts 0.72, Metrics 0.21
+and Wire 0.10. Direct Host gzip removes the Platform 0.11 facade and its separate
+Host Artifacts 0.71 instance from Cargo and Bazel. Cargo and Bazel locks retain
+registry checksums; no downstream override or Git library supplier is added.
+The native source profile still requires an immutable Platform Git pin for IC
+source and adapters. Native macOS and installed acceptance remain separate.
 
 ## Textual client and compiled backend description
 
