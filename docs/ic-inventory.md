@@ -149,17 +149,18 @@ consumer were verified on 2026-10-26. Prior macOS CI used the earlier unpublishe
 name with unchanged runtime code. These producer checks do not qualify
 installed IC, live provider effects or consumer adoption.
 
-The optional native-only `wire-schema` feature adds the upstream Wire metadata
-trait to owned Principal and Account. Principal delegates to Wire's bounded
-byte-buffer schema; Account describes its ordered owner and optional fixed
-32-byte subaccount fields, preserving absent versus explicit zero.
-Platform #48's requested DTO schema integration uses the same Principal identity;
-consumer adoption is not yet claimed. The production alias `ic-wire-metadata`
-selects Wire 0.8.0 metadata independently of the tooling-only Wire 0.8.0
-runtime fixture. The fixture lock refresh remains blocked by Timers’ Platform 0.8
-requirement; the older lock is retained as historical qualification input. Wire owns schema/TypeScript generation; Platform owns this
-projection of its existing serialization. Wasm, default and executor-only graphs
-exclude the added Wire/JSON dependency edges. All features now require Rust 1.91.
+Platform 0.11 removed the `wire-schema` feature, Principal/Account Wire trait
+implementations and direct Wire/JSON dependencies. Wire owns the opt-in schema
+integration; Platform owns bytes and Serde. Published Wire 0.10’s `platform-types`
+feature selects only Platform `principal`, separately from endpoint/runtime
+features. Wire owns its schema/endpoint qualification; application adoption
+remains consumer-owned.
+
+Wire 0.10.0 remains a tooling catalog entry for independent call fixtures. The
+production graph checker rejects Wire on both native and Wasm, for every feature
+selection. The runtime fixture lock refresh remains blocked by Timers’ Platform
+0.8 requirement; it is separate from the production lock. All features retain
+Rust 1.91. See the [migration contract](migration.md#owned-principal-and-account-wire-metadata).
 
 IC Profiler selects the opt-in Git source profile at `native/ic-profiler`, which
 owns the instrumented IC pin, adapters, patches and patched PocketIC client.
@@ -291,7 +292,6 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
 | ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor, ic_principal/serde |
 | ic-platform | stable-structures | dep:ic-stable-structures |
-| ic-platform | wire-schema | dep:ic-wire-metadata, dep:serde_json, principal |
 | ic-platform-runtime-guard | default |  |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
@@ -315,7 +315,6 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |
 | ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
-| ic-platform | ic-wire | ^0.8.0 | normal | cfg(not(target_family = "wasm")) | true | false | typescript |
 | ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert |
 | ic-platform | k256 | ^0.13.4 | normal | all | true | false | ecdsa |
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
@@ -327,7 +326,6 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | serde_bytes | ^0.11 | dev | all | false | true |  |
 | ic-platform | serde_cbor | ^0.11.2 | normal | all | true | true |  |
 | ic-platform | serde_cbor | ^0.11.2 | dev | all | false | true |  |
-| ic-platform | serde_json | ^1.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
 | ic-platform | slotmap | ^1.1.1 | normal | all | true | true |  |

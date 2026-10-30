@@ -1,8 +1,10 @@
 # ic-platform
 
-Pending 0.10 selects Wire 0.8 for native Principal/Account metadata and IC Tooling
-0.71 for gzip. Consumers exchanging Wire metadata traits or Host `GzipError` values
-must align those direct dependencies. Codec bytes and gzip admission are unchanged.
+Platform 0.11 removed `wire-schema` and the production Wire dependency. Principal
+and Account retain their existing bytes and Serde; published Wire 0.10 supplies
+their schema trait integration through opt-in `platform-types`. Host schema
+consumers select that feature alongside Platform `principal`.
+IC Tooling 0.71 remains the gzip supplier.
 
 Source release 0.7.4 adds `candid-endpoint` and `candid::endpoint::{query, update}` for
 required external Candid interfaces with explicit `limits`, `empty_args` and
@@ -53,8 +55,8 @@ the [packaging migration](../../docs/migration.md#minimal-principal-and-selected
 Select `runtime` for prepared one-shot requests through
 `ic_platform::call::{Call, WaitPolicy}`. Methods and argument bytes can be owned
 or borrowed independently; execution delegates to the existing raw transport.
-See the [prepared-call contract](src/call/README.md). This replaces the separate
-`ic-call` package in the upcoming 0.10 line.
+See the [prepared-call contract](src/call/README.md). This replaced the separate
+`ic-call` package in 0.10.0.
 
 For raw calls and system/task adapters, select `runtime` and keep the existing
 `ic_platform::cdk::{api, call, futures, stable}` imports. Select `cdk` when the

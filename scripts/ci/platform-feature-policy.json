@@ -5,14 +5,13 @@
     "cmc-types", "cycles-ledger-types", "default", "ecdsa", "ed25519", "executor", "gzip",
     "ic0", "icp-ledger-types", "icrc-ledger-types", "management-canister-types",
     "nns-registry-types", "pocket-ic", "principal", "principal-external", "principal-self-authenticating", "runtime",
-    "secp256k1", "signature-verification", "stable-structures", "wire-schema"
+    "secp256k1", "signature-verification", "stable-structures"
   ],
   "native_leaves": {
     "agent": {"dependencies": ["ic-agent"], "prerequisites": ["principal-external"]},
     "candid-parser": {"dependencies": ["candid_parser"], "prerequisites": ["principal-external"]},
     "gzip": {"dependencies": ["ic-host-artifacts"], "prerequisites": []},
     "pocket-ic": {"dependencies": ["pocket-ic"], "prerequisites": ["principal-external"]},
-    "secp256k1": {"dependencies": ["ic-secp256k1"], "prerequisites": ["principal-external"]},
-    "wire-schema": {"dependencies": ["ic-wire-metadata", "serde_json"], "prerequisites": ["principal"]}
+    "secp256k1": {"dependencies": ["ic-secp256k1"], "prerequisites": ["principal-external"]}
   }
 }

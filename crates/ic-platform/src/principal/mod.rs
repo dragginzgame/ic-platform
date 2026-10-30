@@ -10,9 +10,6 @@
 //! ic_platform::candid::contract::encode_one(ic_platform::Principal::anonymous()).unwrap();
 //! ```
 
-#[cfg(all(feature = "wire-schema", not(target_family = "wasm")))]
-mod wire_schema;
-
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 

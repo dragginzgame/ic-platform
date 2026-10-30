@@ -41,7 +41,6 @@ function reject(reason) {
     }
     native = target !~ /^wasm/
     parser = native && enabled("candid-parser")
-    wire_schema = native && enabled("wire-schema")
     agent = native && enabled("agent")
     pocket = native && enabled("pocket-ic")
     secp = native && enabled("secp256k1")
@@ -122,7 +121,7 @@ function reject(reason) {
             found_pocket = 1
         }
         if (host_capability == "testkit") reject("Testkit in production")
-        if (name ~ /^(ic-wire|ic-wire-derive)$/ && !wire_schema) reject("unselected host Wire metadata")
+        if (name ~ /^(ic-wire|ic-wire-derive)$/) reject("Wire in production")
         if (host_capability == "candid-parser" && !parser) reject("unselected host parser")
         if (host_capability == "agent" && !agent) reject("unselected host Agent")
         if (platform_forbidden("retired-cdk", name)) reject("external CDK/executor/IC0 supplier is retired")

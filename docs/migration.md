@@ -527,7 +527,7 @@ implementation remains in Tooling. No backend type, default feature, Candid,
 executor, filesystem effect or automatic limit is added. The dependency and
 exports are native-only, including when `gzip` is selected on Wasm.
 
-The pending 0.10 release adopts Tooling 0.71.0 for Host Artifacts, Testkit and
+Release 0.10.0 adopted Tooling 0.71.0 for Host Artifacts, Testkit and
 the contributor release editor. `GzipError` retains its upstream identity;
 consumers exchanging it with direct Host Artifacts APIs must align to 0.71.
 Platform-only imports stay the same. No retained gzip artifact, external IC
@@ -536,8 +536,8 @@ identity change; the earlier 0.8.2 patch exception does not apply.
 
 The opt-in native Profiler profile retains its qualified Platform 0.8.3, Host
 0.70.3 and Wire 0.7.23 Cargo/Bazel inputs. Its gzip facade requires Host 0.70,
-so converging that profile on Host 0.71 requires the next published Platform
-supplier and separate native assembly qualification. Do not mix Host families
+so converging that profile on Host 0.71 requires adopting published Platform
+0.10.0 and separate native assembly qualification. Do not mix Host families
 or substitute the current checkout into its registry-pinned source recipe.
 
 The runtime harness imports raw PocketIC identities from Platform and borrows
@@ -955,90 +955,71 @@ Blob's tests. Native macOS and installed/live-provider acceptance remain separat
 
 ## Owned Principal and Account Wire metadata
 
-Platform requires Rust 1.91 for all features. Principal metadata originally shipped
-in 0.6.9 and Account metadata in 0.6.12; Platform 0.6.15 adopted the Wire 0.7 family.
-Platform 0.6.19 raised both Wire minimums to 0.7.16. The pending 0.10 release
-raises host metadata and tooling minima to published Wire 0.8.0.
-Qualify using a local Platform path until that supplier is published, then select
-its released version with defaults disabled and `features = ["wire-schema"]`.
-Host producers must also select `ic-wire = { version = "0.8.0", features = ["typescript"] }`
-for their derives and generation. Wire 0.7 and 0.8 metadata traits are different
-Rust identities; update both selections together. Wire 0.8 preserves codec bytes,
-limits and accepted inputs; its optional endpoint integration now uses Platform 0.9. No direct Candid dependency is needed:
+The maintainer authorized moving this integration into Wire. Released Platform
+0.11.0 removed its `wire-schema` feature and both Wire trait
+implementations, plus the production `ic-wire-metadata` and direct JSON edges.
+Platform continues to own Principal/Account and their existing Serde bytes.
+Wire owns schema projection and the Rust/TypeScript integration tests. There is
+no replacement trait, wrapper type, compatibility feature or additional crate.
 
-```rust,ignore
-#[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
-struct Request {
-    caller: ic_platform::Principal,
-}
-let schema = ic_wire::typescript::native_schema::<Request>()?;
-```
+Consumers remove Platform’s `wire-schema` selection and use `principal`.
+Published Wire 0.10.0 supplies opt-in `platform-types` integration, selecting
+Platform 0.11 `principal` with defaults disabled and Wire’s host metadata support.
+Use that released pair when migrating schema consumers.
+Wire’s endpoint feature alone selects Platform CDK/runtime; metadata-only builds
+must not acquire that runtime, Candid or an executor. Wire must align both optional
+integrations on one supplying Platform version (0.11 for this cut).
 
-`wire-schema` implies `principal`. Only native builds implement Wire's metadata
-trait and select Wire/JSON dependencies. Canister builds keep the original
-Principal Serde implementation even if a unified feature selection includes
-`wire-schema`; no metadata trait implementation or metadata dependency enters
-that target. Use ordinary `principal` in deployed consumer manifests.
+This makes the production dependency direction Wire → Platform. Future changes
+to Wire’s schema trait identity no longer force Platform to adopt Wire or issue
+a new release. Changes to Platform’s own public type identities still require
+ordinary consumer coordination. Wire remains a test/tooling catalog dependency
+for Platform’s independent call fixtures; it is absent from the facade’s native
+and Wasm production graphs, including all-feature selections.
 
-The projection delegates to Wire's bounded byte-buffer schema with Principal's
-existing 29-byte maximum. Generated TypeScript uses `Uint8Array`, not textual
-principals or a Candid marker. It preserves empty and anonymous identities and
-rejects longer values during encoding and decoding. External Candid DTOs still
-use `ExternalPrincipal` with explicit conversions. Account metadata now describes
-its existing owner and optional fixed 32-byte subaccount fields; no runtime codec,
-cryptographic primitive, persisted format or retry policy changes.
+### Preserved schema and byte contract
 
-The workspace alias `ic-wire-metadata` names the modern host metadata dependency.
-The independent installed-runtime fixture also declares Wire 0.8.0 and Testkit
-0.71.0. Its lock refresh remains blocked by the Timers executor conflict described
-above. Installed qualification remains independent of host metadata generation.
+Principal describes a bounded byte buffer with its existing 29-byte maximum;
+generated TypeScript uses `Uint8Array`. Preserve empty and anonymous principals,
+maximum-length values and overlength refusals. Account describes an ordered
+record with owner and optional fixed 32-byte subaccount. Its generated subaccount
+shape remains `null | { readonly some: readonly number[] }`, with exactly 32
+elements. Preserve missing, explicit zero and nonzero subaccounts in both request
+and response frames. Equality, ordering and hashing may treat missing and zero
+equally; serialization must keep them distinct.
 
-[#55](https://github.com/dragginzgame/ic-platform/issues/55) records the original
-Wire 0.6-to-0.7 supplying cut; older Platform 0.6.14 cannot satisfy a Wire 0.7
-trait bound. After the supplying release is published and registry caches are prepared,
-run `bash scripts/ci/check-principal-wire-schema.sh /path/to/tsc.js --published X.Y.Z`
-with that exact released version.
-This mode refuses a path/Git replacement and checks the exact registry version.
-Local-path qualification is not evidence that the new artifact is published.
+Platform’s serializers, external conversions, Candid separation and consumer-owned
+range/subaccount policy are unchanged. Wire must preserve the existing Rust/TS
+byte vectors and malformed-input refusals. Required external Candid and persisted
+formats are outside this move. No application schema, budget, retry or storage
+policy moves to Platform.
 
-Blob Contracts must subsequently publish its paired Platform/Wire selection
-before Canic consumes its Wire `Limits` and `GenerationError` identities. Do not
-add cross-version adapters, consumer-local wrappers or a distribution Cargo patch.
+### Wire transfer evidence and release order
 
-Wire 0.7 decodes in one pass with only `Deserialize`; it no longer reserializes
-the result to compare canonical bytes. Encoder bytes and frame identities are
-unchanged, but maps, sets and custom visitors can normalize accepted input.
-Consumers retain ordering/uniqueness admission and must keep original frame bytes
-for exact retries, signatures and hashes. Do not reconstruct those bytes from a
-decoded value. Required external Candid and existing persisted formats are outside
-this adoption. The owned Principal/Account serializers and subaccount policy do
-not change.
+The former implementation and complete proof inputs are retained in Platform
+commit `421edbc` (released 0.10.0), recoverable with `git show 421edbc:PATH`:
 
-Remove exhaustive matches on Wire's retired `Noncanonical` error: nonminimal
-varints and malformed character payloads now report `Malformed`. Configure encode
-and decode allowances independently; decode no longer charges a second serializer
-pass. Platform adds no automatic quotas, normalization or compatibility codec.
-The existing runtime fixture budgets remain consumer-owned and are not increased.
+- `crates/ic-platform/src/principal/wire_schema/mod.rs`
+- `crates/ic-platform/src/account/wire_schema/mod.rs`
+- `crates/ic-platform/tests/wire_schema_consumer.rs`
+- `scripts/fixtures/wire-schema/check.mjs`
+- `scripts/ci/check-principal-wire-schema.sh`
 
-### Account adoption
+Wire 0.10 owns the transferred proof alongside the implementations. Qualify standalone
+derives, Rust 1.91, exact Rust/TypeScript request/response bytes and malformed
+inputs, native/Wasm feature isolation, and combined endpoint/type integration.
+The published pair is Platform 0.11.0 plus Wire 0.10.0. Wire’s supplying release
+qualified the registry Platform source, standalone schemas, MSRV/feature isolation,
+exact Rust/TypeScript bytes and installed endpoint/rollback behavior; its source
+record is `dragginzgame/ic-wire` commit `c9d4e7b`, under
+`docs/evidence/platform-types-transfer/published/`. Existing schema consumers
+adopt both compatible selections together. No distribution Cargo patch is required.
 
-Account metadata was first supplied by published Platform 0.6.12. No new feature is required: host schema
-producers select `wire-schema`, while canister consumers select `principal`.
-Use `ic_platform::Account` for ICRC owner/subaccount identities in shared DTOs;
-its enclosing DTO can derive `ic_wire::Wire` just like the Principal example.
-Generated TypeScript represents the owner as `Uint8Array` and the subaccount as
-`null | { readonly some: readonly number[] }`, with exactly 32 elements when present.
-It is not a legacy ICP AccountIdentifier or a ledger/asset identifier.
-
-`None` and `Some([0; 32])` compare, order and hash equally, but their serialized
-representations remain distinct. The metadata and codec do not normalize them.
-Consumers needing canonical bytes for signatures, request deduplication or content
-hashes must define that policy explicitly before encoding; do not silently rewrite
-existing stored data. Ledger identity, authorization, allocation and migration
-policies remain consumer-owned. Convert to `account::ExternalAccount` only at an
-external ledger DTO boundary, selecting `icrc-ledger-types` there. Conversions
-preserve the absent/explicit-zero distinction. No Candid dependency is required
-for the owned Account or its Wire metadata.
+Platform removes its retired schema CI target and fixture; its remaining native
+Principal/Account tests continue to qualify byte/Serde ownership. Historical
+schema runs such as `target/principal-wire-schema.anr7KP` predate this cut; use
+Wire’s own published-supplier qualification for the new feature.
+The browser SDK keeps its own compiler setup and checks independently.
 
 ## Authenticated canister-signature time (pending 0.6.14)
 
@@ -2797,7 +2778,7 @@ checks separately require exact registry type identity, including the two distin
 
 ## Prepared one-shot calls (issue #75)
 
-The upcoming 0.10 line moves prepared calls from the separate `ic-call` package
+Release 0.10.0 moved prepared calls from the separate `ic-call` package
 into `ic_platform::call`, enabled by the existing `runtime` feature (also selected
 by `cdk`). Remove the `ic-call` dependency and replace `ic_call::` imports with
 `ic_platform::call::`. No compatibility crate is retained. The module owns generic
@@ -2821,9 +2802,8 @@ fn prepare(target: Principal) -> Call<'static, 'static> {
 ```
 
 Select `ic-platform` with defaults disabled and `features = ["runtime"]` in the
-workspace production catalog and inherit it from the consumer. The module needs
-the supplying 0.10 release before registry adoption; current package versions
-remain 0.9.1 until the maintainer releases. Remove the local generic builder/execution wrapper,
+workspace production catalog and inherit it from the consumer. The module is supplied by
+published Platform 0.10.0. Remove the local generic builder/execution wrapper,
 replace its repeated attachment-plus-cost formula with `get_cost()`, and call
 `execute().await`. Keep domain facades and stage-specific metrics with their
 consumer; observing construction is different from observing actual submission.

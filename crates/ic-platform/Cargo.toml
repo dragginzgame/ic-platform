@@ -58,7 +58,6 @@ signature-verification = [
 pocket-ic = ["principal-external", "dep:pocket-ic"]
 secp256k1 = ["principal-external", "dep:ic-secp256k1"]
 stable-structures = ["dep:ic-stable-structures"]
-wire-schema = ["principal", "dep:ic-wire-metadata", "dep:serde_json"]
 
 [dependencies]
 blake3 = { workspace = true, optional = true }
@@ -91,9 +90,7 @@ ic-agent = { workspace = true, optional = true }
 ic-host-artifacts = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-secp256k1 = { workspace = true, optional = true }
-ic-wire-metadata = { workspace = true, optional = true }
 pocket-ic = { workspace = true, optional = true }
-serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 assert_matches.workspace = true
@@ -251,11 +248,6 @@ required-features = ["principal-self-authenticating"]
 name = "stable_structures_consumer"
 path = "tests/stable_structures_consumer.rs"
 required-features = ["stable-structures"]
-
-[[test]]
-name = "wire_schema_consumer"
-path = "tests/wire_schema_consumer.rs"
-required-features = ["wire-schema"]
 
 [[test]]
 name = "external_contract_consumer"

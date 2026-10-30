@@ -38,8 +38,7 @@ executor|ic-platform-runtime-guard v0.1.12 (/fixture)|reject
 runtime|ic-platform-runtime-guard v0.1.13 (/other)|reject
 none|ic-wire v0.6.4|reject
 principal|ic-wire v0.6.4|reject
-wire-schema|ic-wire v0.6.4|pass
-wire-schema|ic-wire-derive v0.6.4|pass
+principal|ic-wire-derive v0.9.0|reject
 executor|ic_principal v0.1.5|reject
 ic0|serde v1.0.229|reject
 executor,ic0|sha2 v0.10.9|reject
@@ -215,13 +214,13 @@ for selection in agent candid-parser pocket-ic secp256k1; do
     rg -q 'unselected RNG/entropy scaffolding' "$fixture/log"
 done
 echo 'Native-only feature names cannot admit Wasm entropy dependencies'
-# Selecting metadata cannot admit its native dependencies into deployed graphs.
+# Wire belongs to tooling only; Principal cannot admit it into deployed graphs.
 for package in ic-wire ic-wire-derive; do
     printf '%s v0.6.4\n' "$package" > "$fixture/wasm32-unknown-unknown-wire.txt"
-    printf 'wire-schema\twire\n' > "$fixture/mapping"
+    printf 'principal\twire\n' > "$fixture/mapping"
     if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \
         -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then
-        echo 'Wasm graph admitted host Wire metadata' >&2; exit 1
+        echo 'Wasm production graph admitted Wire' >&2; exit 1
     fi
 done
 # Admit only the declared codec identity, on native gzip selections. Registry

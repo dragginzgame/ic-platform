@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.10.1]
+## [0.11.2]
 
 ### ⬆️ Dependencies
 
@@ -21,6 +21,29 @@
   pricing regression. Keep the real cycle-balance comparison, leave metadata
   headroom and report complete pricing evidence on failure
   ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
+
+## [0.11.1] - 2026-10-30
+
+### ⬆️ Dependencies
+
+- Select published Wire 0.10.0 in standalone tooling consumers and document the
+  completed Platform 0.11/Wire schema handoff. Production dependencies and public
+  APIs are unchanged; the combined runtime fixture still needs compatible Timers.
+
+## [0.11.0] - 2026-10-30
+
+### ⚠️ Breaking
+
+- Remove `wire-schema` and Platform’s Principal/Account Wire trait implementations.
+  Schema integration moves to Wire; consumers must remove the Platform feature
+  and adopt the coordinated Wire integration when supplied. Principal/Account
+  bytes and Serde stay unchanged. No compatibility feature or wrapper is retained.
+
+### 🧹 Cleanup
+
+- Remove the production Wire and direct JSON dependencies and retire schema-only
+  CI/fixtures. Keep Wire 0.9 in independent test/tooling consumers. Browser setup
+  now uses its existing compiler-floor fixture for Node/npm identities.
 
 ## [0.10.0] - 2026-10-30
 

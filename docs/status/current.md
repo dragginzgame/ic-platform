@@ -1,50 +1,56 @@
 # Current handoff
 
-## Pending 0.10.0: prepared-call module and upstream adoption
+## Released Platform 0.11 / Wire 0.10; pending tooling-only 0.11.1
 
-The maintainer requested moving `ic-call` into `ic_platform::call`, selected by
-the existing `runtime` feature (also included by `cdk`). The separate package,
-workspace catalog edge and publication entry are removed. Consumers remove their
-`ic-call` dependency and change `ic_call::` imports to `ic_platform::call::`.
-This is a breaking packaging/import change: pending notes select 0.10.0; actual
-package versions remain 0.9.1. No commit, release or sibling adoption is performed.
-The prepared-call implementation, raw `cdk::call`, executor and transport
-response/error identities stay unchanged. No new dependency or feature is introduced.
+The maintainer released Platform 0.11.0 at `b8ecf49` and Wire 0.10.0 at
+`c9d4e7b`. Cargo registry metadata confirms Wire 0.10.0 supplies `platform-types`
+and selects Platform 0.11 for that feature and endpoints. Platform no longer owns
+Wire schema integration. Consumers can now remove Platform `wire-schema`, retain
+`principal`, and enable Wire `platform-types` on the matched published pair.
+Wire owns transferred Rust/TS byte/malformed tests and endpoint qualification;
+see `ic-wire/docs/evidence/platform-types-transfer/published/` at its release.
 
-Full Clippy, focused runtime call tests and module doctests pass. The standalone
-raw/Wire/external-Candid consumer passes native/Wasm checks on current Rust and
-1.91 (`target/prepared-call-consumer.WNXj4b`). Admission tests
-cover raw/Wire/external-Candid selections, build failures and concurrent artifact
-custody. Singleton coexistence/refusal (`target/runtime-singleton.EceTCC`),
-boundary/source/runtime-lock, inventory,
-pins, documentation links and formatting pass. Package listing includes the module
-and its documentation. The installed graph remains blocked by Timers 0.32.3’s
-Platform 0.8 requirement (`target/cdk-runtime.EhNaOV`); no installed pass is claimed.
-The runtime fixture now uses `--prepared-call`, with no disposable package addition.
+This follow-up raises only Platform’s test/tooling Wire catalog entry to 0.10.0
+and updates the handoff documentation. No published member inherits that entry;
+the facade’s all-feature production graph and root lock remain Wire-free. Root
+Cargo.lock is unchanged. No feature or API changes require another minor:
+pending notes select 0.11.1; workspace package versions remain 0.11.0. No commit
+or release is performed. Full Clippy, inventory, pins, boundaries, docs and format
+pass for this follow-up. Raw/Wire/external-Candid standalone consumer checks
+pass on current Rust and 1.91, native/Wasm
+(`target/prepared-call-consumer.RMsFvd`).
 
-The maintainer also requested latest IC Tooling and Wire adoption. Registry
-metadata confirms Wire 0.8.0 and Tooling 0.71.0. Both Wire catalog entries, Host
-Artifacts, Testkit and the IC Build release editor select these versions. The
-root lock updates only Host Artifacts and Wire/derive beyond the package removal.
-Direct consumers sharing Wire metadata or Host GzipError must align versions;
-codec bytes and gzip admission stay unchanged. This also belongs in 0.10.0.
+Prior removal evidence remains `target/schema-boundary.IDd2ew`: Principal/Account
+bytes/Serde stay unchanged; six root lock entries were removed. Browser SDK
+Node/npm admission uses its compiler-floor fixture independently of retired
+schema tooling. Wire’s own supplier proof covers standalone derives, Rust 1.91,
+host/Wasm feature isolation, exact frames and installed endpoint rollback.
 
-Full Clippy, Rust/TypeScript Principal/Account frames and malformed controls, gzip
-current/MSRV tests, Wasm host-dependency exclusions, raw/Wire/external-Candid call
-consumers, and nine feature selections pass. The unmodified native driver source
-passes strict Clippy, six tests and MSRV compilation with Testkit 0.71/Wire 0.8
-in `target/upstream-driver.wY2Z0P`. IC Build 0.71’s editor is installed/admitted
-and passes lock/pin mutation regression checks. Logs: `target/upstream-adoption.NKKWnS`.
+Next runtime adoption is Timers/Scheduling: latest published Timers remains
+0.32.4. The inspected Scheduling workspace prepares 0.33.0 against Platform 0.9.1,
+which still does not align with Platform 0.11’s runtime identity. The combined
+Platform runtime fixture cannot refresh until a compatible Timers supplier is
+available. Canic’s inspected catalog still selects Platform 0.8.3/Wire 0.7.25;
+Blob selects Platform 0.10/Wire 0.8. Existing sibling checkouts are unchanged.
+Their schema/runtime adoption and installed qualification remain consumer work.
+The separate native Profiler source recipe also retains its qualified old pins.
 
-The maintained combined runtime lock stays unchanged: refresh is blocked by
-Timers’ external executor (`target/cdk-runtime.T9ffuE`). No installed pass is
-claimed. The separately pinned native Profiler graph needs the next published
-Platform gzip supplier before Host 0.71 convergence and native qualification;
-its existing Cargo/Bazel pins remain intact.
+## Released 0.10.0: prepared calls and Tooling 0.71
+
+Prepared calls now live at `ic_platform::call`, selected by `runtime` (also
+included by `cdk`). The separate `ic-call` package and publication entry are
+retired. Consumers remove that dependency and change `ic_call::` imports.
+Raw transport/executor and response/error identities are unchanged.
+
+Platform 0.10 adopted Host Artifacts/Testkit/IC Build 0.71 and Wire 0.8. The managed
+release editor is installed and admitted. Direct GzipError consumers align Host
+0.71. Original adoption logs: `target/upstream-adoption.NKKWnS`; native driver
+Clippy, six tests and MSRV compilation: `target/upstream-driver.wY2Z0P`.
+Those receipts predate this Wire 0.9 update and are not new installed evidence.
 
 ## Released 0.9.1: runtime-only singleton packaging
 
-The maintainer released 0.9.1 at `8e21a5e`; workspace versions are 0.9.1.
+The maintainer released 0.9.1 at `8e21a5e`.
 The [#103 fix](https://github.com/dragginzgame/ic-platform/issues/103) moves only
 Cargo's inherited executor links guard into the optional, dependency-free
 `ic-platform-runtime-guard` package. `executor` selects its exact coordinated
@@ -69,7 +75,7 @@ packages passed the pre-release 0.9.1 dry run in `/tmp/platform-103-package/publ
 The combined installed fixture remains blocked at resolution: Timers 0.32.3
 requires Platform 0.8 and therefore the old external executor, conflicting with
 the 0.9 runtime. No sibling adoption is made here. The native Profiler profile still
-selects gzip-only published Platform 0.8.3 until a supplying release is adopted.
+selects gzip-only published Platform 0.8.3; registry adoption remains separate.
 Publication and installed evidence for the released runtime remain distinct.
 
 The 2026-10-30 registry check also found Timers 0.32.4 still requires Platform 0.8.
