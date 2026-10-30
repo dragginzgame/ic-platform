@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1]
+
+### ⬆️ Dependencies
+
+- Adopt published Metrics 0.18.0 in the Profiler native source profile's Cargo and
+  Bazel inputs. Preserve arithmetic-only features and existing logical reports.
+
 ## [0.9.0] - 2026-10-30
 
 ### ⚠️ Breaking
