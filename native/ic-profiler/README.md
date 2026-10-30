@@ -131,7 +131,7 @@ and child/gate mechanics belong to Host; Profiler retains capture activation,
 pinned root selection, cadence, aggregation, diagnostics and CLI output.
 
 The selected recorder and native graph use published Host Process, Host FS and
-Host Artifacts 0.70.5 plus gzip-only Platform 0.8.3 from crates.io. The published
+Host Artifacts 0.70.5 plus gzip-only Platform 0.9.1 from crates.io. The published
 observation and workload APIs replace the temporary Tooling/Platform Git library
 suppliers. Cargo and Bazel locks record registry checksums; there is no downstream
 Cargo patch or mixed registry/Git Host family. Gzip remains a Platform facade,
@@ -139,12 +139,12 @@ with no new canister/runtime feature. The native source profile itself still
 requires an immutable Platform Git pin for the patched IC source and adapters.
 Native macOS execution remains separate qualification.
 
-Platform 0.9.0 is currently incompatible with this native workspace: its facade
-declares the executor singleton `links` identity even for gzip-only consumers,
-conflicting with the pinned IC workspace's registry executor. Platform 0.8.3 is
-the latest compatible published 0.8 release. Keep it until
+Platform 0.9.1 scopes its executor singleton guard to runtime consumers, allowing
+this gzip-only graph to coexist with the pinned workspace's registry executor.
+The guard remains inactive here; the recorder never enables Platform's runtime.
+See
 [#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)
-is resolved; independent gzip-only consumers may adopt 0.9.0 separately.
+for the resolved packaging boundary.
 
 ## Textual client and compiled backend description
 

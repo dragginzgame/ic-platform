@@ -6,7 +6,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "ic-wasm 0.11.1"
    ],
 -  "checksum": "d4e719583881cf898774f83b5661851ff3da30493e262b0832a817b5022e50da",
-+  "checksum": "4e3b24309b48b6746a86d4255122a347504b748d44b27bba2224f7b020c6b3fd",
++  "checksum": "c8ded506aa52bb962083343b499911d7d825e69e587101b5e58b9aed81f9fedd",
    "conditions": {
      "aarch64-apple-darwin": [
        "aarch64-apple-darwin"
@@ -762,7 +762,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "ic_metrics_encoder"
 +          },
 +          {
-+            "id": "ic-platform 0.8.3",
++            "id": "ic-platform 0.9.1",
 +            "target": "ic_platform"
            },
            {
@@ -805,7 +805,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "serde_bytes"
            },
            {
-@@ -18470,13 +18530,13 @@
+@@ -18470,7 +18530,7 @@
              ],
              "cfg(unix)": [
                {
@@ -814,13 +814,6 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-             "cfg(windows)": [
-               {
--                "id": "windows-sys 0.61.2",
-+                "id": "windows-sys 0.60.2",
-                 "target": "windows_sys"
-               }
-             ]
 @@ -18522,7 +18582,7 @@
              ],
              "cfg(unix)": [
@@ -884,7 +877,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -20048,25 +20108,25 @@
+@@ -20048,19 +20108,19 @@
            "selects": {
              "cfg(target_os = \"hermit\")": [
                {
@@ -907,13 +900,6 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-             "cfg(windows)": [
-               {
--                "id": "windows-sys 0.59.0",
-+                "id": "windows-sys 0.52.0",
-                 "target": "windows_sys"
-               }
-             ]
 @@ -20837,7 +20897,7 @@
              ],
              "cfg(unix)": [
@@ -1500,7 +1486,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
        ],
        "version": "1.1.1"
      },
-+    "ic-platform 0.8.3": {
++    "ic-platform 0.9.1": {
 +      "common_attrs": {
 +        "crate_features": [
 +          "gzip"
@@ -1547,8 +1533,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-platform",
 +      "repository": {
 +        "Http": {
-+          "sha256": "0eea5f893ad0a151e18deaaada094e68dc07a50e4f695094d21410869e580eae",
-+          "url": "https://static.crates.io/crates/ic-platform/0.8.3/download"
++          "sha256": "4727a6baf3600d8784cb4b2a5f7970d25173f7c1f5f363006bba89fdddb0ded6",
++          "url": "https://static.crates.io/crates/ic-platform/0.9.1/download"
 +        }
 +      },
 +      "targets": [
@@ -1559,7 +1545,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.8.3"
++      "version": "0.9.1"
 +    },
      "ic-representation-independent-hash 3.1.0": {
        "common_attrs": {
@@ -2540,15 +2526,6 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -46940,7 +47436,7 @@
-                 "target": "errno"
-               },
-               {
--                "id": "windows-sys 0.59.0",
-+                "id": "windows-sys 0.52.0",
-                 "target": "windows_sys"
-               }
-             ],
 @@ -46951,7 +47447,7 @@
                  "target": "errno"
                },
@@ -2621,15 +2598,6 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -47064,7 +47573,7 @@
-                 "target": "errno"
-               },
-               {
--                "id": "windows-sys 0.61.2",
-+                "id": "windows-sys 0.52.0",
-                 "target": "windows_sys"
-               }
-             ],
 @@ -47075,7 +47584,7 @@
                  "target": "errno"
                },
@@ -2637,24 +2605,6 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 -                "id": "libc 0.2.186",
 +                "id": "libc 0.2.191",
                  "target": "libc"
-               }
-             ]
-@@ -47556,7 +48065,7 @@
-             ],
-             "cfg(windows)": [
-               {
--                "id": "windows-sys 0.61.2",
-+                "id": "windows-sys 0.52.0",
-                 "target": "windows_sys"
-               }
-             ]
-@@ -47661,7 +48170,7 @@
-             ],
-             "cfg(windows)": [
-               {
--                "id": "windows-sys 0.61.2",
-+                "id": "windows-sys 0.52.0",
-                 "target": "windows_sys"
                }
              ]
 @@ -48204,7 +48713,7 @@
@@ -3125,15 +3075,6 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -54230,7 +54803,7 @@
-             ],
-             "cfg(windows)": [
-               {
--                "id": "windows-sys 0.61.2",
-+                "id": "windows-sys 0.52.0",
-                 "target": "windows_sys"
-               }
-             ],
 @@ -54472,7 +55045,7 @@
            "selects": {
              "cfg(not(windows))": [
@@ -3529,7 +3470,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "ic-management-canister-types 0.8.0",
 +    "ic-metrics 0.18.0",
      "ic-metrics-encoder 1.1.1",
-+    "ic-platform 0.8.3",
++    "ic-platform 0.9.1",
      "ic-sha3 1.0.0",
      "ic-stable-structures 0.6.8",
      "ic-stable-structures 0.7.0",
@@ -3622,24 +3563,6 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
   "ic-xrc-types",
   "ic0",
   "ic_bls12_381",
-@@ -4121,7 +4135,7 @@
-  "libc",
-  "option-ext",
-  "redox_users 0.5.0",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.60.2",
- ]
- 
- [[package]]
-@@ -4474,7 +4488,7 @@
- checksum = "33d852cb9b869c2a9b3df2f71a3074817f01e1844f839a144f5fcef059a4eb5d"
- dependencies = [
-  "libc",
-- "windows-sys 0.59.0",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
 @@ -4707,12 +4721,13 @@
  
  [[package]]
@@ -3720,9 +3643,9 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
 +
 +[[package]]
 +name = "ic-platform"
-+version = "0.8.3"
++version = "0.9.1"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "0eea5f893ad0a151e18deaaada094e68dc07a50e4f695094d21410869e580eae"
++checksum = "4727a6baf3600d8784cb4b2a5f7970d25173f7c1f5f363006bba89fdddb0ded6"
 +dependencies = [
 + "ic-host-artifacts",
 +]
@@ -3800,42 +3723,6 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  dependencies = [
   "unicode-ident",
  ]
-@@ -10364,7 +10457,7 @@
-  "errno",
-  "libc",
-  "linux-raw-sys 0.4.15",
-- "windows-sys 0.59.0",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
-@@ -10377,7 +10470,7 @@
-  "errno",
-  "libc",
-  "linux-raw-sys 0.12.1",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
-@@ -10473,7 +10566,7 @@
-  "security-framework 3.5.1",
-  "security-framework-sys",
-  "webpki-root-certs",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
-@@ -10494,7 +10587,7 @@
-  "security-framework 3.5.1",
-  "security-framework-sys",
-  "webpki-root-certs",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
 @@ -10859,11 +10952,12 @@
  
  [[package]]
@@ -3885,15 +3772,6 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  dependencies = [
   "proc-macro2",
   "quote",
-@@ -11958,7 +12063,7 @@
-  "getrandom 0.3.4",
-  "once_cell",
-  "rustix 1.1.4",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
 @@ -14577,6 +14682,12 @@
  ]
  
@@ -3910,24 +3788,6 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
 diff --git a/Cargo.lock b/Cargo.lock
 --- a/Cargo.lock
 +++ b/Cargo.lock
-@@ -765,7 +765,7 @@
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "40c48f72fd53cd289104fc64099abca73db4166ad86ea0b4341abe65af83dadc"
- dependencies = [
-- "windows-sys 0.61.2",
-+ "windows-sys 0.60.2",
- ]
- 
- [[package]]
-@@ -776,7 +776,7 @@
- dependencies = [
-  "anstyle",
-  "once_cell_polyfill",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.60.2",
- ]
- 
- [[package]]
 @@ -1671,7 +1671,7 @@
   "addr2line 0.25.1",
   "cfg-if",
@@ -3967,24 +3827,6 @@ diff --git a/Cargo.lock b/Cargo.lock
  
  [[package]]
  name = "command_runner"
-@@ -4318,7 +4328,7 @@
-  "libc",
-  "option-ext",
-  "redox_users 0.5.2",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.59.0",
- ]
- 
- [[package]]
-@@ -4680,7 +4690,7 @@
- checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
- dependencies = [
-  "libc",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
 @@ -4776,7 +4786,7 @@
   "ic-interfaces",
   "ic-limits",
@@ -4402,9 +4244,9 @@ diff --git a/Cargo.lock b/Cargo.lock
 +
 +[[package]]
 +name = "ic-platform"
-+version = "0.8.3"
++version = "0.9.1"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "0eea5f893ad0a151e18deaaada094e68dc07a50e4f695094d21410869e580eae"
++checksum = "4727a6baf3600d8784cb4b2a5f7970d25173f7c1f5f363006bba89fdddb0ded6"
 +dependencies = [
 + "ic-host-artifacts",
  ]
@@ -4664,15 +4506,6 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
-@@ -16654,7 +16745,7 @@
- dependencies = [
-  "hermit-abi",
-  "libc",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
 @@ -17124,9 +17215,9 @@
  
  [[package]]
@@ -4702,15 +4535,6 @@ diff --git a/Cargo.lock b/Cargo.lock
  dependencies = [
   "adler2",
   "simd-adler32",
-@@ -18354,7 +18454,7 @@
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
- dependencies = [
-- "windows-sys 0.61.2",
-+ "windows-sys 0.59.0",
- ]
- 
- [[package]]
 @@ -18840,7 +18940,7 @@
   "ic-limits",
   "ic-logger",
@@ -4771,42 +4595,6 @@ diff --git a/Cargo.lock b/Cargo.lock
  dependencies = [
   "proc-macro2",
  ]
-@@ -21297,7 +21399,7 @@
-  "errno",
-  "libc",
-  "linux-raw-sys 0.12.1",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
-@@ -21392,7 +21494,7 @@
-  "security-framework 3.7.0",
-  "security-framework-sys",
-  "webpki-root-certs",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
-@@ -21413,7 +21515,7 @@
-  "security-framework 3.7.0",
-  "security-framework-sys",
-  "webpki-root-certs",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
-@@ -22612,7 +22714,7 @@
- checksum = "3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e"
- dependencies = [
-  "libc",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.60.2",
- ]
- 
- [[package]]
 @@ -22941,6 +23043,17 @@
  ]
  
@@ -4825,24 +4613,6 @@ diff --git a/Cargo.lock b/Cargo.lock
  name = "syn-solidity"
  version = "1.7.1"
  source = "registry+https://github.com/rust-lang/crates.io-index"
-@@ -23130,7 +23243,7 @@
-  "getrandom 0.4.2",
-  "once_cell",
-  "rustix 1.1.4",
-- "windows-sys 0.61.2",
-+ "windows-sys 0.52.0",
- ]
- 
- [[package]]
-@@ -23161,7 +23274,7 @@
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "d8c27177b12a6399ffc08b98f76f7c9a1f4fe9fc967c784c5a071fa8d93cf7e1"
- dependencies = [
-- "windows-sys 0.61.2",
-+ "windows-sys 0.59.0",
- ]
- 
- [[package]]
 @@ -24557,7 +24670,7 @@
   "ic-limits",
   "ic-logger",
@@ -4852,15 +4622,6 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-registry-subnet-type",
   "ic-replicated-state",
   "ic-test-utilities",
-@@ -24932,7 +25045,7 @@
- source = "registry+https://github.com/rust-lang/crates.io-index"
- checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
- dependencies = [
-- "windows-sys 0.61.2",
-+ "windows-sys 0.48.0",
- ]
- 
- [[package]]
 @@ -25717,6 +25830,12 @@
  ]
  
@@ -4885,7 +4646,7 @@ diff --git a/Cargo.toml b/Cargo.toml
 +ic-host-process = { version = "0.70.5", default-features = false }
 +ic-metrics = { version = "0.18.0", default-features = false }
 +
-+ic-platform = { version = "0.8.3", default-features = false, features = ["gzip"] }
++ic-platform = { version = "0.9.1", default-features = false, features = ["gzip"] }
  actix-rt = "2.10.0"
  actix-web = { version = "4.9.0", default-features = false, features = [
      "macros",
@@ -4924,7 +4685,7 @@ diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
 +    default_features = False,
 +    features = ["gzip"],
 +    package = "ic-platform",
-+    version = "0.8.3",
++    version = "0.9.1",
 +)
  # Build any crate with `@crate_index//:mycrate`
  # Use particular version with `@crate_index//:mycrate-3.14.16`
