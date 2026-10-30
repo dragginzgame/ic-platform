@@ -6,11 +6,13 @@
 //! resource budgets, authentication, retry and settlement policy remain caller-owned.
 //! A rejected or malformed reply never grants permission to repeat an effect.
 
+#![doc = include_str!("README.md")]
+
 use std::borrow::Cow;
 
-pub use ic_platform::Principal;
-use ic_platform::cdk::call::Call as RawCall;
-pub use ic_platform::cdk::call::{
+pub use crate::Principal;
+use crate::cdk::call::Call as RawCall;
+pub use crate::cdk::call::{
     CallFailed, CallPerformFailed, CallRejected, InsufficientLiquidCycleBalance, RejectCode,
     Response, UnrecognizedRejectCode, WaitPolicy,
 };

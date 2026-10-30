@@ -59,7 +59,7 @@ PLATFORM_SINGLETON_CURRENT="$version" PLATFORM_SINGLETON_NEXT="$next" perl -0pi 
     my ($old, $new) = @ENV{qw(PLATFORM_SINGLETON_CURRENT PLATFORM_SINGLETON_NEXT)};
     my $count = s/^version = "\Q$old\E"$/version = "$new"/m;
     $count += s/^(ic-platform(?:-macros|-runtime-guard)? = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm;
-    $count == 4 or die "expected four coordinated package versions\n";
+    $count == 3 or die "expected three coordinated package versions\n";
 ' "$fixture-next-platform/Cargo.toml"
 # Bind inherited metadata to the copied workspace when Cargo traverses both
 # path suppliers from a consumer nested in the original workspace.

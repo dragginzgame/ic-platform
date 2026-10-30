@@ -1,0 +1,75 @@
+--- a/src/de/mod.rs
++++ b/src/de/mod.rs
+@@ -570,13 +570,11 @@
+             }
+             self.config.decoding_quota = Some(n - cost);
+         }
+-        if self.is_untyped {
+-            if let Some(n) = self.config.skipping_quota {
++        if self.is_untyped && let Some(n) = self.config.skipping_quota {
+                 if n < cost {
+                     return Err(Error::msg("Skipping cost exceeds the limit"));
+                 }
+                 self.config.skipping_quota = Some(n - cost);
+-            }
+         }
+         Ok(())
+     }
+@@ -1207,7 +1205,7 @@
+                     self.expect_type = expect.clone();
+                     self.wire_type = wire.clone();
+                 }
+-                let result = visitor.visit_seq(Compound::new(
++                visitor.visit_seq(Compound::new(
+                     self,
+                     Style::Vector {
+                         len,
+@@ -1215,8 +1213,7 @@
+                         wire,
+                         exact_primitive,
+                     },
+-                ));
+-                result
++                ))
+             }
+             (TypeInner::Record(_), TypeInner::Record(_)) => {
+                 let expect = self.expect_type.clone();
+--- a/src/binary_parser/mod.rs
++++ b/src/binary_parser/mod.rs
+@@ -366,10 +366,8 @@
+                 let mut res = Vec::new();
+                 let mut prev = None;
+                 for f in &fs.inner {
+-                    if let Some(prev) = prev {
+-                        if prev >= f.id {
++                    if let Some(prev) = prev && prev >= f.id {
+                             return Err(anyhow!("field id {} collision or not sorted", f.id));
+-                        }
+                     }
+                     prev = Some(f.id);
+                     let field = Field {
+@@ -403,10 +401,8 @@
+                 let mut res = Vec::new();
+                 let mut prev = None;
+                 for m in &serv.meths {
+-                    if let Some(prev) = prev {
+-                        if prev >= &m.name {
++                    if let Some(prev) = prev && prev >= &m.name {
+                             return Err(anyhow!("method name {} duplicate or not sorted", m.name));
+-                        }
+                     }
+                     prev = Some(&m.name);
+                     res.push((m.name.clone(), m.ty.to_type(len)?));
+@@ -432,10 +428,8 @@
+         for t in env.values() {
+             if let TypeInner::Service(ms) = t.as_ref() {
+                 for (name, ty) in ms {
+-                    if let TypeInner::Var(id) = ty.as_ref() {
+-                        if matches!(env.get(id).map(|t| t.as_ref()), Some(TypeInner::Func(_))) {
+-                            continue;
+-                        }
++                    if let TypeInner::Var(id) = ty.as_ref() && matches!(env.get(id).map(|t| t.as_ref()), Some(TypeInner::Func(_))) {
++                        continue;
+                     }
+                     return Err(anyhow!("Method {name} has a non-function type {ty}"));
+                 }

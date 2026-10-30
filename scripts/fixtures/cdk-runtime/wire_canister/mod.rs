@@ -1,6 +1,6 @@
 //! Qualify caller-owned Wire codecs with the original CDK lifecycle.
 
-#[cfg(not(feature = "ic-call"))]
+#[cfg(not(feature = "prepared-call"))]
 use crate::transport::Execute as _;
 use crate::wire_protocol::*;
 use ic_platform::cdk::{api, futures};

@@ -13,9 +13,9 @@ commit="$(git rev-parse --verify HEAD)"
 mkdir -p target/publication
 attempt="$(mktemp -d target/publication/attempt.XXXXXX)"
 printf 'Publication evidence: %s\n' "$attempt"
-printf '%s\n' "$1" "$commit" "ic-platform-runtime-guard@$version" "ic-platform-macros@$version" "ic-platform@$version" "ic-call@$version" crates-io > "$attempt/intent"
+printf '%s\n' "$1" "$commit" "ic-platform-runtime-guard@$version" "ic-platform-macros@$version" "ic-platform@$version" crates-io > "$attempt/intent"
 git status --porcelain=v1 > "$attempt/working-status"
-args=(publish --locked --registry crates-io --package "ic-platform-runtime-guard@$version" --package "ic-platform-macros@$version" --package "ic-platform@$version" --package "ic-call@$version" --all-features)
+args=(publish --locked --registry crates-io --package "ic-platform-runtime-guard@$version" --package "ic-platform-macros@$version" --package "ic-platform@$version" --all-features)
 args+=(${options[@]+"${options[@]}"})
 printf '%s\0' cargo "${args[@]}" > "$attempt/arguments"
 if [[ "$1" == publish ]]; then

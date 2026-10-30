@@ -55,11 +55,11 @@ fn explicit_configuration_preserves_zero_and_last_attachment() {
 
 #[test]
 fn rejection_types_retain_platform_identity_and_unknown_codes() {
-    let rejected: ic_platform::cdk::call::CallRejected =
+    let rejected: crate::cdk::call::CallRejected =
         CallRejected::with_rejection(12345, "opaque".into());
     assert_eq!(rejected.raw_reject_code(), 12345);
     assert!(rejected.reject_code().is_err());
-    let failure: CallFailed = ic_platform::cdk::call::CallFailed::CallRejected(rejected);
+    let failure: CallFailed = crate::cdk::call::CallFailed::CallRejected(rejected);
     assert!(matches!(failure, CallFailed::CallRejected(error) if error.raw_reject_code() == 12345));
 }
 

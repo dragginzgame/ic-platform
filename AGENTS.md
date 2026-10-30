@@ -9,9 +9,10 @@ Read [the current handoff](docs/status/current.md), then
   [the migration contract](docs/migration.md) before changing its public surface.
   Keep [the IC inventory](docs/ic-inventory.md) aligned with dependency, feature,
   export and ownership changes; `make check-inventory` checks manifest facts.
-- The maintainer authorized `crates/ic-call` as the additional prepared one-shot
-  ICC library for #75. It depends downward on `ic-platform` and reuses its sole
-  call implementation and executor. It owns method/argument custody, not codecs,
+- The maintainer moved #75’s prepared one-shot calls into `ic_platform::call`,
+  selected by the existing `runtime` feature. There is no separate `ic-call`
+  package. It reuses the sole call implementation and executor and owns
+  method/argument custody, not codecs,
   retries, Relay delivery, timers, domain endpoints or application policy.
 - Keep the low-level consumer boundary under `crates/ic-platform`. Add no blanket upstream
   re-exports, automatic resource limits beyond the authorized Candid ceiling below,

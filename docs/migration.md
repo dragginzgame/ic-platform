@@ -36,6 +36,51 @@ use Debug formatting. Native tools retain the printer for diagnosis. Another
 dependency explicitly selecting Candid's printer can re-enable it; graph checks
 reject its implicit selection through the management-only Wasm profile.
 
+## Candid codec packaging investigation
+
+The 2026-10-30 investigation tests shipping the lean reader without requiring a
+consumer Cargo patch. Registry Candid 0.10.39 still owns CandidType, Nat/Int,
+Principal, Type/TypeEnv and Error. An isolated codec package supplies the framing
+reader, serializer, deserializer and required private helper copies. It accepts
+existing registry-derived management DTOs without conversions. The same modules
+could live inside Platform; the experimental crate is not a new public offering.
+
+This preserves data-type/trait identities but does **not** transparently replace
+the current codec contract. Registry ArgumentDecoder/ArgumentEncoder accept
+concrete upstream IDLDeserialize/IDLBuilder values. DecoderConfig also has private
+state. Three compile-failure probes demonstrate those incompatible identities.
+The candidate retains registry Error identity but maps parser failures to Custom
+instead of Binread; diagnostics and public binrw parser interfaces differ.
+A production migration would have to resolve these obligations explicitly.
+
+| Status-codec probe, custom sections removed | Bytes |
+| --- | ---: |
+| One endpoint, registry codec | 793,631 |
+| One endpoint, owned codec + registry Candid types | 786,000 |
+| Two endpoints, registry codec only | 803,444 |
+| Two endpoints, one owned and one registry codec | 1,131,626 |
+
+The reproducible single-codec saving is 7,631 bytes (0.96%); mixed use adds
+328,182 bytes (40.85%). The earlier 22,867-byte result replaced the whole Candid
+package and does not establish savings for this identity-preserving arrangement.
+Cargo still includes binrw, array-init, bytemuck and byteorder, plus build-only
+binrw_derive, because registry Candid declares them unconditionally. Maintaining
+this candidate copies about 3,040 source lines including comments and helpers.
+
+Recommendation: do not adopt this as an incremental optimization. It would need
+a coordinated codec/configuration/argument-API migration and a consumer graph
+that excludes calls into the registry codec. Existing external data identities,
+Wire ownership and the 16-level admission rule remain required. No production
+codec, dependency selection or sibling source changes in this investigation.
+
+Reproduce with `bash scripts/benchmarks/0.9/candid-packaging/run.sh` using prepared
+Rust/Node caches. The pinned upstream inputs, generation/edition patch and Apache
+license remain in that directory. Its `evidence.json` records source/artifact and
+lock hashes; detailed receipts are in `target/candid-packaging.n6WZul`.
+Owner/candidate/consumer strict Clippy, two native identity/DTO tests per variant,
+191,205 differential cases, the API refusals and Rust 1.91 Wasm compilation pass.
+These are probe results, not installed-canister, fuzz or production qualification.
+
 ## Runtime-only Cargo singleton guard (#103)
 
 Pending 0.9.1 moves only Cargo's inherited executor `links` declaration and empty
@@ -299,7 +344,7 @@ let provider_result = notify_top_up::decode(&reply_bytes, reply_limits, ReplyAri
 
 | Consumer responsibility / existing implementation | Shared operation(s) |
 | --- | --- |
-| `canic-core` infra/API/workflow generic Candid call glue | Typed `protocols` request/reply codecs; existing `ic-call` owns prepared one-shot execution separately |
+| `canic-core` infra/API/workflow generic Candid call glue | Typed `protocols` request/reply codecs; `ic_platform::call` owns prepared one-shot execution separately |
 | Management history, controller handoff, installation, snapshots and signing envelopes | `management::{canister_info, canister_status, update_settings, upload_chunk, stored_chunks, clear_chunk_store, install_chunked_code, uninstall_code, start_canister, stop_canister, delete_canister, deposit_cycles, list_canister_snapshots, delete_canister_snapshot, raw_rand, ecdsa_public_key, sign_with_ecdsa}` |
 | Host `icp/{candid,management}` and operator-mint transport | Same pure operations over the existing Host/Agent transport; no generic Candid encode/decode owner remains necessary |
 | Operator mint/rate/top-up and ICP receipt requests | `cmc::{get_icp_xdr_conversion_rate, notify_top_up, notify_mint_cycles}` and `icp_ledger::{transfer, query_encoded_blocks}` |
@@ -339,7 +384,7 @@ service metadata. Independent management bytes and pinned provider DIDs anchor
 compatibility; the provider `Nat64` regression is generated from the pinned DID.
 
 The existing installed runner includes the endpoint cases for local sources:
-`POCKET_IC_BIN=... bash scripts/ci/check-platform-runtime.sh --ic-call`.
+`POCKET_IC_BIN=... bash scripts/ci/check-platform-runtime.sh --prepared-call`.
 It checks valid and refused arguments, every budget, guard order, scalar/tuple/
 zero/null results, synchronous rollback, composite query and management await,
 alongside its existing callback/trap/upgrade subjects. Published historical
@@ -477,27 +522,32 @@ native/Wasm benchmark Clippy checks pass with warnings denied before execution.
 The maintainer requested that IC Profiler access gzip through Platform rather
 than depend directly on `flate2`. Select optional `gzip` and use
 `ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`. These explicit exports
-delegate to published IC Tooling `ic-host-artifacts` 0.70.0; general compression
+delegate to published IC Tooling `ic-host-artifacts` 0.71.0; general compression
 implementation remains in Tooling. No backend type, default feature, Candid,
 executor, filesystem effect or automatic limit is added. The dependency and
 exports are native-only, including when `gzip` is selected on Wasm.
 
-Platform source release 0.8.2 selects Tooling 0.70.0. `GzipError` retains its
-upstream identity, so consumers exchanging it with direct Host Artifacts APIs
-must align those dependencies to 0.70. Platform-only imports stay the same.
-The maintainer approved this patch release as a one-time exception, confirming
-the gzip surface has no consumers yet; future compatibility policy is unchanged.
-No retained gzip artifact, external IC payload or consumer retry policy is
-migrated. The release editor
-and independent Testkit qualification also select 0.70.0. The opt-in native
-Profiler source profile retains its separately qualified Cargo/Bazel pins.
+The pending 0.10 release adopts Tooling 0.71.0 for Host Artifacts, Testkit and
+the contributor release editor. `GzipError` retains its upstream identity;
+consumers exchanging it with direct Host Artifacts APIs must align to 0.71.
+Platform-only imports stay the same. No retained gzip artifact, external IC
+payload or consumer retry policy is migrated. This is a breaking dependency
+identity change; the earlier 0.8.2 patch exception does not apply.
+
+The opt-in native Profiler profile retains its qualified Platform 0.8.3, Host
+0.70.3 and Wire 0.7.23 Cargo/Bazel inputs. Its gzip facade requires Host 0.70,
+so converging that profile on Host 0.71 requires the next published Platform
+supplier and separate native assembly qualification. Do not mix Host families
+or substitute the current checkout into its registry-pinned source recipe.
+
 The runtime harness imports raw PocketIC identities from Platform and borrows
-Testkit's managed instance through `instance()`. Its direct Platform dependency
-uses local source during development; Testkit keeps its published Platform 0.8
-dependency without a global Cargo patch. This preserves Testkit's dependency
-constraint across future Platform releases and keeps registry records
-unchanged during release lock preparation. Both routes retain the same upstream
-PocketIC and executor identities; no retry or lifecycle policy moves to Platform.
+Testkit’s managed instance through `instance()`. Testkit 0.71 uses Platform 0.9
+and Wire 0.8. The combined fixture’s maintained lock cannot yet refresh because
+Timers 0.32.3 still selects Platform 0.8’s external executor. Keep the existing
+lock until Timers has a compatible supplier; do not weaken singleton admission.
+Standalone native driver compilation and Wire codec checks are separate evidence
+from the blocked installed lifecycle matrix. No retry or lifecycle policy moves
+to Platform.
 
 Consumers own compression levels, compressed/decoded byte allowances and payload
 interpretation. Decoding admits one complete member and rejects trailing bytes;
@@ -907,13 +957,14 @@ Blob's tests. Native macOS and installed/live-provider acceptance remain separat
 
 Platform requires Rust 1.91 for all features. Principal metadata originally shipped
 in 0.6.9 and Account metadata in 0.6.12; Platform 0.6.15 adopted the Wire 0.7 family.
-Platform 0.6.19 raised both Wire minimums to 0.7.16. The next compatible
-Platform release raises the host metadata and tooling minima to published 0.7.22.
+Platform 0.6.19 raised both Wire minimums to 0.7.16. The pending 0.10 release
+raises host metadata and tooling minima to published Wire 0.8.0.
 Qualify using a local Platform path until that supplier is published, then select
 its released version with defaults disabled and `features = ["wire-schema"]`.
-Host producers must also select `ic-wire = { version = "0.7.22", features = ["typescript"] }`
-for their derives and generation. Wire 0.6 and 0.7 metadata traits are different
-identities; update both selections together. No direct Candid dependency is needed:
+Host producers must also select `ic-wire = { version = "0.8.0", features = ["typescript"] }`
+for their derives and generation. Wire 0.7 and 0.8 metadata traits are different
+Rust identities; update both selections together. Wire 0.8 preserves codec bytes,
+limits and accepted inputs; its optional endpoint integration now uses Platform 0.9. No direct Candid dependency is needed:
 
 ```rust,ignore
 #[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
@@ -938,8 +989,9 @@ its existing owner and optional fixed 32-byte subaccount fields; no runtime code
 cryptographic primitive, persisted format or retry policy changes.
 
 The workspace alias `ic-wire-metadata` names the modern host metadata dependency.
-The independent installed-runtime fixture also selects Wire 0.7.22. Its separate
-lock and installed qualification remain independent of host metadata generation.
+The independent installed-runtime fixture also declares Wire 0.8.0 and Testkit
+0.71.0. Its lock refresh remains blocked by the Timers executor conflict described
+above. Installed qualification remains independent of host metadata generation.
 
 [#55](https://github.com/dragginzgame/ic-platform/issues/55) records the original
 Wire 0.6-to-0.7 supplying cut; older Platform 0.6.14 cannot satisfy a Wire 0.7
@@ -2745,19 +2797,21 @@ checks separately require exact registry type identity, including the two distin
 
 ## Prepared one-shot calls (issue #75)
 
-The new `ic-call` workspace crate owns generic request custody and delegates every
-physical submission to Platform's existing raw runtime. It deliberately expands
-the single-consumer-library contract: `ic-platform` remains the sole owner of the
-IC dependency/runtime boundary, and `ic-call` depends downward on it. No callback
+The upcoming 0.10 line moves prepared calls from the separate `ic-call` package
+into `ic_platform::call`, enabled by the existing `runtime` feature (also selected
+by `cdk`). Remove the `ic-call` dependency and replace `ic_call::` imports with
+`ic_platform::call::`. No compatibility crate is retained. The module owns generic
+request custody and delegates every physical submission to Platform’s existing
+raw runtime. No dependency or feature is added. No callback
 body, executor, codec, timer, Relay dispatch or cryptographic implementation is
 copied. Existing raw Platform callers remain supported.
 
 Canic #700 demonstrated the gap against published Platform 0.7.1: a raw call
 cannot be returned after dropping its dynamically selected method String.
-Use the new crate to retire the local generic request/execute owner:
+Use the module to retire the local generic request/execute owner:
 
 ```rust
-use ic_call::{Call, Principal, WaitPolicy};
+use ic_platform::call::{Call, Principal, WaitPolicy};
 
 fn prepare(target: Principal) -> Call<'static, 'static> {
     let method = String::from("runtime-selected-method");
@@ -2766,10 +2820,10 @@ fn prepare(target: Principal) -> Call<'static, 'static> {
 }
 ```
 
-Add `ic-call` with defaults disabled to the workspace production catalog and
-inherit it from the consumer. The initial supplying version is published `ic-call` 0.7.2 with Platform 0.7.2;
-select `ic-call = { version = "0.7.2", default-features = false }` or a newer
-qualified compatible release. Remove the local generic builder/execution wrapper,
+Select `ic-platform` with defaults disabled and `features = ["runtime"]` in the
+workspace production catalog and inherit it from the consumer. The module needs
+the supplying 0.10 release before registry adoption; current package versions
+remain 0.9.1 until the maintainer releases. Remove the local generic builder/execution wrapper,
 replace its repeated attachment-plus-cost formula with `get_cost()`, and call
 `execute().await`. Keep domain facades and stage-specific metrics with their
 consumer; observing construction is different from observing actual submission.
@@ -2804,11 +2858,11 @@ implicit Candid or retire consumer policy. Producer completion is independent
 of later consumer adoption.
 
 `make check-consumer` includes a standalone crate exercising raw calls with only
-`ic-call`, then explicit Wire and external-Candid selections on the development
+Platform `runtime`, then explicit Wire and external-Candid selections on the development
 compiler and Rust 1.91, native and Wasm. `bash scripts/ci/check-platform-runtime.sh
---ic-call` qualifies owned dynamic methods alongside the raw control in the existing installed lifecycle
-fixture. Its disposable lock may add the local crate, but all maintained registry
-identities and dependency edges must match exactly. The original raw/published
+--prepared-call` qualifies owned dynamic methods alongside the raw control in the existing installed lifecycle
+fixture. Both modes use the same maintained lock; the prepared-call selection
+adds no package or dependency edge. The original raw/published
 fixture remains independently selectable. Local Linux/PocketIC evidence and
 native macOS qualification must be reported separately. Neither graph isolation
 nor this wrapper alone proves smaller application Wasm. Candid's unresolved Wasm

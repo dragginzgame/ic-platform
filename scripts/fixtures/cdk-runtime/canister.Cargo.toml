@@ -6,7 +6,7 @@ publish.workspace = true
 rust-version.workspace = true
 
 [features]
-ic-call = []
+prepared-call = []
 external-candid = ["ic-platform/candid", "ic-platform/management-canister-types"]
 external-adapters = ["external-candid"]
 

@@ -1,0 +1,14 @@
+fn config(value: &codec::de::DecoderConfig) -> &candid::de::DecoderConfig {
+    value
+}
+fn decode<'a, T: candid::utils::ArgumentDecoder<'a>>(
+    decoder: &mut codec::de::IDLDeserialize<'a>,
+) -> candid::Result<T> {
+    T::decode(decoder)
+}
+fn encode<T: candid::utils::ArgumentEncoder>(
+    value: T, builder: &mut codec::ser::IDLBuilder,
+) -> candid::Result<()> {
+    value.encode(builder)
+}
+fn main() {}

@@ -1,11 +1,11 @@
 //! One fixture selects either the existing raw transport or the owned request.
-#[cfg(feature = "ic-call")]
-use ic_call::{Call, WaitPolicy};
 use ic_platform::Principal;
-#[cfg(not(feature = "ic-call"))]
+#[cfg(feature = "prepared-call")]
+use ic_platform::call::{Call, WaitPolicy};
+#[cfg(not(feature = "prepared-call"))]
 use ic_platform::cdk::call::Call;
 
-#[cfg(feature = "ic-call")]
+#[cfg(feature = "prepared-call")]
 pub fn bounded_wait(target: Principal, method: &str) -> Call<'static, 'static> {
     // Returning an owned dynamic method exercises Canic's reported gap.
     Call::new(
@@ -16,22 +16,22 @@ pub fn bounded_wait(target: Principal, method: &str) -> Call<'static, 'static> {
         },
     )
 }
-#[cfg(not(feature = "ic-call"))]
+#[cfg(not(feature = "prepared-call"))]
 pub fn bounded_wait(target: Principal, method: &str) -> Call<'_, 'static> {
     Call::bounded_wait(target, method)
 }
 
-#[cfg(feature = "ic-call")]
+#[cfg(feature = "prepared-call")]
 pub fn unbounded_wait(target: Principal, method: &str) -> Call<'static, 'static> {
     Call::new(target, method.to_owned(), WaitPolicy::Unbounded)
 }
-#[cfg(not(feature = "ic-call"))]
+#[cfg(not(feature = "prepared-call"))]
 pub fn unbounded_wait(target: Principal, method: &str) -> Call<'_, 'static> {
     Call::unbounded_wait(target, method)
 }
 
 // Test-only spelling adapter; the shipped raw API stays unchanged.
-#[cfg(not(feature = "ic-call"))]
+#[cfg(not(feature = "prepared-call"))]
 pub trait Execute: std::future::IntoFuture {
     fn execute(self) -> Self::IntoFuture
     where
@@ -40,5 +40,5 @@ pub trait Execute: std::future::IntoFuture {
         self.into_future()
     }
 }
-#[cfg(not(feature = "ic-call"))]
+#[cfg(not(feature = "prepared-call"))]
 impl<'m, 'a> Execute for Call<'m, 'a> {}

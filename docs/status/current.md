@@ -1,8 +1,50 @@
 # Current handoff
 
-## Pending 0.9.1: runtime-only singleton packaging
+## Pending 0.10.0: prepared-call module and upstream adoption
 
-Platform 0.9.0 is released at `47dae924`; workspace versions remain 0.9.0.
+The maintainer requested moving `ic-call` into `ic_platform::call`, selected by
+the existing `runtime` feature (also included by `cdk`). The separate package,
+workspace catalog edge and publication entry are removed. Consumers remove their
+`ic-call` dependency and change `ic_call::` imports to `ic_platform::call::`.
+This is a breaking packaging/import change: pending notes select 0.10.0; actual
+package versions remain 0.9.1. No commit, release or sibling adoption is performed.
+The prepared-call implementation, raw `cdk::call`, executor and transport
+response/error identities stay unchanged. No new dependency or feature is introduced.
+
+Full Clippy, focused runtime call tests and module doctests pass. The standalone
+raw/Wire/external-Candid consumer passes native/Wasm checks on current Rust and
+1.91 (`target/prepared-call-consumer.WNXj4b`). Admission tests
+cover raw/Wire/external-Candid selections, build failures and concurrent artifact
+custody. Singleton coexistence/refusal (`target/runtime-singleton.EceTCC`),
+boundary/source/runtime-lock, inventory,
+pins, documentation links and formatting pass. Package listing includes the module
+and its documentation. The installed graph remains blocked by Timers 0.32.3’s
+Platform 0.8 requirement (`target/cdk-runtime.EhNaOV`); no installed pass is claimed.
+The runtime fixture now uses `--prepared-call`, with no disposable package addition.
+
+The maintainer also requested latest IC Tooling and Wire adoption. Registry
+metadata confirms Wire 0.8.0 and Tooling 0.71.0. Both Wire catalog entries, Host
+Artifacts, Testkit and the IC Build release editor select these versions. The
+root lock updates only Host Artifacts and Wire/derive beyond the package removal.
+Direct consumers sharing Wire metadata or Host GzipError must align versions;
+codec bytes and gzip admission stay unchanged. This also belongs in 0.10.0.
+
+Full Clippy, Rust/TypeScript Principal/Account frames and malformed controls, gzip
+current/MSRV tests, Wasm host-dependency exclusions, raw/Wire/external-Candid call
+consumers, and nine feature selections pass. The unmodified native driver source
+passes strict Clippy, six tests and MSRV compilation with Testkit 0.71/Wire 0.8
+in `target/upstream-driver.wY2Z0P`. IC Build 0.71’s editor is installed/admitted
+and passes lock/pin mutation regression checks. Logs: `target/upstream-adoption.NKKWnS`.
+
+The maintained combined runtime lock stays unchanged: refresh is blocked by
+Timers’ external executor (`target/cdk-runtime.T9ffuE`). No installed pass is
+claimed. The separately pinned native Profiler graph needs the next published
+Platform gzip supplier before Host 0.71 convergence and native qualification;
+its existing Cargo/Bazel pins remain intact.
+
+## Released 0.9.1: runtime-only singleton packaging
+
+The maintainer released 0.9.1 at `8e21a5e`; workspace versions are 0.9.1.
 The [#103 fix](https://github.com/dragginzgame/ic-platform/issues/103) moves only
 Cargo's inherited executor links guard into the optional, dependency-free
 `ic-platform-runtime-guard` package. `executor` selects its exact coordinated
@@ -21,34 +63,36 @@ Full owner Clippy passed before tests. Real Cargo coexistence/refusal evidence:
 Current/MSRV executor native/Wasm consumer:
 `target/boundary-consumer.qCbvBR`. All 33 selections of executor/ic0/gzip/runtime/CDK
 pass native/Wasm graph admission in `target/feature-graphs/attempt.vdfqz7`.
-Feature mutations/closures, published identity admission, consumer runners,
-source/license guards, release lock/pin transitions, formatting, inventory,
-dependency boundary/pins and documentation checks pass. All four packages pass
-a coordinated 0.9.1 dry run in `/tmp/platform-103-package/publish.log`; the main
-checkout stays at 0.9.0. No upload occurred.
+Feature/source/consumer/release/governance checks passed before release. All four
+packages passed the pre-release 0.9.1 dry run in `/tmp/platform-103-package/publish.log`.
 
 The combined installed fixture remains blocked at resolution: Timers 0.32.3
 requires Platform 0.8 and therefore the old external executor, conflicting with
-local 0.9.0. No sibling adoption is made here. The native Profiler profile still
+the 0.9 runtime. No sibling adoption is made here. The native Profiler profile still
 selects gzip-only published Platform 0.8.3 until a supplying release is adopted.
 Publication and installed evidence for the released runtime remain distinct.
 
-The user authorized any actionable issues; the open Platform issues are #103
-and #50. Fresh registry evidence shows Timers 0.32.4 still requires Platform 0.8.
-Existing dirty Wire/derive 0.7.25 lock selections are preserved. No main-checkout
-commit, release, upload or sibling dependency adoption is performed.
+The 2026-10-30 registry check also found Timers 0.32.4 still requires Platform 0.8.
 
-## Candid size work awaiting adoption decisions
+## Candid codec packaging investigation
 
-The reader experiment is retained under `scripts/benchmarks/0.9/candid-reader`;
-production still uses registry Candid. Evidence in `target/candid-reader.XD3MEw`
-compares upstream 0.10.39 with framing-reader and fixed-endian variants.
-191,205 differential cases agree per variant; native tests, Rust 1.91 Wasm and
-installed comparisons pass. The compact stripped probe is 771,338 bytes versus
-794,205 baseline, saving 22,867 bytes (2.9%). This is not a production Canic size.
-The experiment removes binrw/array-init/bytemuck/byteorder from that probe's
-runtime graph and binrw_derive from its build graph; other consumers can retain
-them. No Candid fork is adopted and no protected crypto code changes.
+The user selected investigation of shipping the lean reader without consumer
+patches. The original full-package experiment saved 22,867 stripped probe bytes;
+that result does not carry over when registry Candid keeps its type identities.
+The new independent consumer accepts registry DTOs without conversion, but the
+single-codec saving is 7,631 bytes (0.96%). Mixing owned and registry codecs adds
+328,182 bytes (40.85%). Cargo retains all five targeted dependencies. The candidate
+copies about 3,040 source lines including comments and private helpers.
+Concrete configuration and argument-trait identities differ, as do parser error
+variants. The maintainer rejected adoption: retain registry production Candid. The prototype
+remains evidence only; maintaining about 3k lines for this saving is not accepted.
+
+Repro: `scripts/benchmarks/0.9/candid-packaging/run.sh`; summary `evidence.json` in
+that directory; receipts `target/candid-packaging.n6WZul`. Strict owner/candidate/
+consumer Clippy, native DTO/Error identity tests, 191,205 differential cases,
+three API identity refusals and Rust 1.91 Wasm checks pass. No new installed,
+fuzz, production or sibling qualification is claimed. See the
+[packaging findings](../migration.md#candid-codec-packaging-investigation).
 
 [Canic PR #717](https://github.com/dragginzgame/canic/pull/717), commit `b173944`,
 gates service printing to host/export builds and propagates its explicit feature

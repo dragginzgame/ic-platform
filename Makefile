@@ -1,8 +1,9 @@
 .DEFAULT_GOAL := help
 SHARED_TOOLING_RUST := 1
-FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/ic-call-consumer/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
+FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/prepared-call-consumer/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
+FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs)
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
@@ -68,23 +69,23 @@ publish-check: host-tools-check
 	bash scripts/release/publish.sh check
 
 check:
-	cargo check -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked
+	cargo check -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked
 test:
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
-	cargo test -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
+	cargo test -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
 clippy:
-	cargo clippy -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked -- -D warnings
+	cargo clippy -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked -- -D warnings
 docs-check:
-	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
 wasm-check:
-	cargo check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
+	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 msrv: host-tools-check
 	@set -eu; \
 	platform_msrv="$$(bash scripts/ci/read-platform-msrv.sh)"; \
-	cargo +"$$platform_msrv" test -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked; \
-	cargo +"$$platform_msrv" check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
+	cargo +"$$platform_msrv" test -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked; \
+	cargo +"$$platform_msrv" check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 .PHONY: check-primitives
@@ -98,8 +99,8 @@ check-consumer:
 	bash scripts/ci/test-runtime-singleton.sh
 	bash scripts/ci/test-platform-msrv.sh
 	bash scripts/ci/test-platform-consumer-admission.sh
-	bash scripts/ci/test-ic-call-consumer-admission.sh
-	bash scripts/ci/check-ic-call-consumer.sh
+	bash scripts/ci/test-prepared-call-consumer-admission.sh
+	bash scripts/ci/check-prepared-call-consumer.sh
 	bash scripts/ci/check-platform-consumer.sh
 check-features:
 	bash scripts/ci/test-platform-feature-selections.sh
@@ -116,7 +117,7 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-call/README.md crates/ic-platform/README.md crates/ic-platform-macros/README.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform/src/call/README.md crates/ic-platform-macros/README.md
 .PHONY: check-inventory
 .PHONY: check-native-provider
 check-native-provider:
@@ -152,7 +153,7 @@ release-files:
 
 .PHONY: check-runtime
 check-runtime:
-	bash scripts/ci/check-platform-runtime.sh --ic-call
+	bash scripts/ci/check-platform-runtime.sh --prepared-call
 
 .PHONY: check-runtime-lock
 check-runtime-lock:
