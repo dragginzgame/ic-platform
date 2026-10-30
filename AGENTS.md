@@ -18,6 +18,8 @@ Read [the current handoff](docs/status/current.md), then
   re-exports, automatic resource limits beyond the authorized Candid ceiling below,
   or alternative executor implementation.
   Explicit upstream-coupled exports belong to the documented contract.
+- Generic gzip codecs belong to IC Tooling. Consumers use its Host Artifacts
+  API directly; keep Platform free of the forwarding surface and dependency.
 - No default features. Executor-only builds must remain Candid-free; host parser
   features must never be enabled by canister/runtime features.
 - The maintainer moved Principal/Account Wire schema integration to Wire. The

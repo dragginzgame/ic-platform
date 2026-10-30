@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.12.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Remove the native gzip forwarding feature and exports. Consumers select
+  `ic-host-artifacts/gzip` and import its `artifact` codecs directly. Platform
+  no longer depends on generic Host artifacts; codec bytes and admission stay
+  owned by Tooling. See the [migration](docs/migration.md#host-gzip-boundary).
+
 ## [0.11.1] - 2026-10-30
 
 ### ⬆️ Dependencies

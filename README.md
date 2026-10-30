@@ -34,7 +34,6 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | Feature | Implemented contract |
 | --- | --- |
 | `blake3` | Upstream `hash`, `Hasher` and `Hash`; native/Wasm with `std`, no IC codecs, threading or memory mapping |
-| `gzip` | Native bounded gzip encode/decode and typed decoding errors from IC Tooling; consumer-owned levels and limits |
 | `principal` | Owned Principal/Account bytes, text and Serde; no external Principal, hashing or Candid |
 | `principal-external` | Registry Principal identity and byte conversions; implies principal, no hashing or Candid |
 | `principal-self-authenticating` | Explicit unchanged upstream self-authentication; implies principal-external |
@@ -317,7 +316,7 @@ trust roots, authentication and application interpretation remain consumer-owned
 Platform embeds the executor and IC0 implementations from upstream 2.0.0/1.2.0.
 Their registry packages are absent. The inherited Cargo singleton guard lives in
 an internal helper selected only by `executor`, requiring one Platform runtime
-owner across Timers and applications. Native gzip-only consumers can coexist with
+owner across Timers and applications. Native consumers without runtime can coexist with
 an unrelated registry executor; task/method handles
 now have Platform identity. See the [breaking migration](docs/migration.md#embedded-ic0-and-executor).
 Changes require combined callback/trap/cancellation/upgrade qualification.

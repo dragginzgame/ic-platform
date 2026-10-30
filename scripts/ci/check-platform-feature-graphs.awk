@@ -44,7 +44,6 @@ function reject(reason) {
     agent = native && enabled("agent")
     pocket = native && enabled("pocket-ic")
     secp = native && enabled("secp256k1")
-    gzip = native && enabled("gzip")
     external_endpoint = enabled("candid-endpoint")
     cdk = enabled("cdk")
     runtime = enabled("runtime")
@@ -60,8 +59,8 @@ function reject(reason) {
     candid = external_endpoint || pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
     external_principal = enabled("principal-external")
     principal = enabled("principal")
-    hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp || gzip
-    minimal = !principal && !gzip && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
+    hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp
+    minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
     found_storage = 0
     found_ed = 0
     found_curve = 0
@@ -69,7 +68,6 @@ function reject(reason) {
     found_k256 = 0
     found_pocket = 0
     found_blake3 = 0
-    found_gzip = 0
     found_guard = 0
     for (i = 1; i <= count[key]; i++) {
         line = lines[key, i]
@@ -89,12 +87,7 @@ function reject(reason) {
         if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || (native && management)))
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
-        if (name == "ic-host-artifacts") {
-            qualified_gzip = gzip_source == "" ? registry : \
-                (f[3] == gzip_source && (n == 3 || (n == 4 && f[4] == "(*)")))
-            if (!gzip || !qualified_gzip) reject("unselected or unqualified host gzip codec")
-            found_gzip = 1
-        }
+        if (name == "ic-host-artifacts") reject("host artifact codecs belong to Tooling consumers")
         if (name == "blake3") {
             if (!enabled("blake3") || !registry) reject("unselected or non-registry BLAKE3")
             found_blake3 = 1
@@ -150,5 +143,4 @@ function reject(reason) {
     if (secp && !found_secp) reject("missing selected secp256k1")
     if (enabled("ecdsa") && !found_k256) reject("missing selected K256")
     if (enabled("blake3") && !found_blake3) reject("missing selected BLAKE3")
-    if (gzip && !found_gzip) reject("missing selected host gzip codec")
 }

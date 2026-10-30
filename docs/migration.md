@@ -93,10 +93,10 @@ includes the helper before the facade. It exports no API, implementation or
 runtime symbols; the executor and IC0 sources, licenses and callback semantics
 stay unchanged in Platform.
 
-Native default/gzip-only and IC0-only consumers can resolve alongside registry
+Native default and IC0-only consumers can resolve alongside registry
 `ic-cdk-executor =2.0.0`. Enabling `executor`, `runtime` or `cdk` still rejects
-that mixed graph, with and without gzip. `scripts/ci/test-runtime-singleton.sh`
-checks real registry resolution and compiles the gzip consumer. It also checks
+that mixed graph. `scripts/ci/test-runtime-singleton.sh`
+checks real registry resolution and compiles the IC0-only consumer. It also checks
 two facade patch versions: native-only and single-runtime graphs resolve, while
 two enabled runtime owners fail. Cargo resolves all
 features declared by workspace roots when making a lockfile: a native root that
@@ -519,46 +519,17 @@ native/Wasm benchmark Clippy checks pass with warnings denied before execution.
 
 ## Host gzip boundary
 
-The maintainer requested that IC Profiler access gzip through Platform rather
-than depend directly on `flate2`. Select optional `gzip` and use
-`ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`. These explicit exports
-delegate to published IC Tooling `ic-host-artifacts` 0.71.0; general compression
-implementation remains in Tooling. No backend type, default feature, Candid,
-executor, filesystem effect or automatic limit is added. The dependency and
-exports are native-only, including when `gzip` is selected on Wasm.
+The next 0.12 contract removes Platform's native `gzip` feature and
+`ic_platform::gzip` exports. Generic compression belongs to IC Tooling; callers
+select `ic-host-artifacts` with `default-features = false, features = ["gzip"]`
+and use `ic_host_artifacts::artifact::{encode_gzip, decode_gzip, GzipError}`.
+Remove Platform entirely where gzip was its only use. Keep the qualified Host
+version, caller levels, byte bounds and retained artifact obligations unchanged.
 
-Release 0.10.0 adopted Tooling 0.71.0 for Host Artifacts, Testkit and
-the contributor release editor. `GzipError` retains its upstream identity;
-consumers exchanging it with direct Host Artifacts APIs must align to 0.71.
-Platform-only imports stay the same. No retained gzip artifact, external IC
-payload or consumer retry policy is migrated. This is a breaking dependency
-identity change; the earlier 0.8.2 patch exception does not apply.
-
-The opt-in native Profiler profile retains its qualified Platform 0.8.3, Host
-0.70.3 and Wire 0.7.23 Cargo/Bazel inputs. Its gzip facade requires Host 0.70,
-so converging that profile on Host 0.71 requires adopting published Platform
-0.10.0 and separate native assembly qualification. Do not mix Host families
-or substitute the current checkout into its registry-pinned source recipe.
-
-The runtime harness imports raw PocketIC identities from Platform and borrows
-Testkit’s managed instance through `instance()`. Testkit 0.71 uses Platform 0.9
-and Wire 0.8. The combined fixture’s maintained lock cannot yet refresh because
-Timers 0.32.3 still selects Platform 0.8’s external executor. Keep the existing
-lock until Timers has a compatible supplier; do not weaken singleton admission.
-Standalone native driver compilation and Wire codec checks are separate evidence
-from the blocked installed lifecycle matrix. No retry or lifecycle policy moves
-to Platform.
-
-Consumers own compression levels, compressed/decoded byte allowances and payload
-interpretation. Decoding admits one complete member and rejects trailing bytes;
-callers migrating permissive readers must qualify that admission change. Existing
-compressed artifacts retain their recorded byte identities; deterministic headers
-do not promise identical bytes across backend/feature selections.
-
-Compatibility changes are handled in the affected producer/consumer issues.
-Record agreed versions, identities and migration requirements in this contract
-and the existing dependency inventory. There is no central approval queue or
-mandatory cross-repository acknowledgement before independent work proceeds.
+This removes the production dependency back to Tooling. The independently
+revision-pinned native Profiler source profile retains its published supplier
+until its paired Cargo/Bazel inputs and consumer sources adopt the direct codec.
+A facade release does not rewrite that frozen provider input or its evidence.
 
 ## External DTO additions for Canic
 
