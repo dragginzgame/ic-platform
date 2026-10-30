@@ -14,7 +14,8 @@
 ### 🩹 Fixed
 
 - Select Testkit's required `cli` feature when preparing the installed-runtime
-  server in CI.
+  server in CI, and remove its redundant runtime-lock source qualifier left by
+  the local version update. Registry identities, checksums and edges stay fixed.
 - Lock shared runtime targets through build and artifact retention, preventing
   concurrent qualification runs from copying another selection's output.
 
@@ -29,6 +30,8 @@
 - Adopt Profiler 0.11.0's query-product and recorder-description interfaces with
   this native source profile. Older consumers retain their previous provider pin
   until adopting the paired interface; existing raw PocketIC routes stay intact.
+- The strict native lint gate also needs the consumer-owned conditionals from
+  [Profiler #10](https://github.com/dragginzgame/ic-profiler/pull/10).
 
 ## [0.8.3] - 2026-10-30
 

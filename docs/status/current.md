@@ -26,7 +26,11 @@ saved schema-1 reports remain. Profiler owns export-before-clear, file publicati
 capture/report policy and rendering. The delivered 0.11.0 paired product interface
 remains required; older consumers retain their previous provider pin.
 
-Installed-runtime CI now selects Testkit's required `cli` feature. Runtime proofs
+Installed-runtime CI now selects Testkit's required `cli` feature. Its first
+refreshed run passed server setup, then exposed a stale source qualifier in the
+maintained runtime lock after the local version update. Remove that redundant
+qualifier without changing registry identities, checksums or edges; retain strict
+registry comparison. Runtime proofs
 retain shared dependency caches, but a kernel file lock covers each build and
 artifact copy. The inherited descriptor survives child execution and releases on
 exit. A concurrent-run regression pauses after Cargo and before retention, proves
@@ -43,14 +47,15 @@ checks it before native builds/tests. The existing provider command also exposes
 Provider-owned fixes keep retry/disposition order, use the final event directly,
 name the metrics-registry tuple and add meaningful must-use messages before
 unchanged async-trait expansion. The native patch changes no cryptographic body.
-Three consumer-owned CLI/render conditionals are prepared separately in an
-isolated Profiler contribution. #98 remains open until its consumer/main and
-native qualification obligations are complete; do not claim closure from a probe.
+Three consumer-owned CLI/render conditionals are supplied separately by
+[Profiler #10](https://github.com/dragginzgame/ic-profiler/pull/10), commit
+`a947b33`. Adopt that source with this profile. #98 remains open until the paired
+consumer contribution is integrated; its working checkout remains untouched.
 
-## Qualification in progress
+## Qualification
 
 Current evidence is under `/tmp/platform-pr99-evidence-20261030`. Full owner
-all-target/all-feature Clippy passes before longer tests. All 46 assembler tests,
+all-target/all-feature Clippy passes before longer tests. All 47 assembler tests,
 locked-build/concurrency/failure admission and the actual native graph pass.
 The canonical assembler prepares the combined provider/paired-product source.
 A comparison of 7,126 source files confirms every change from the prior native
@@ -58,11 +63,16 @@ assembly is within `rs/pocket_ic_server`; dependency source bodies are unchanged
 
 Strict native primary-package Clippy also passes using the prepared exact
 external dependency artifacts and the original IC Clippy configuration. This is
-not a new upstream dependency-workspace lint pass. Fresh linking, native product
-and installed scenarios are being qualified before integration; the previous
-server's passes alone do not qualify these changed inputs. Hosted checks run
-asynchronously. Native-server Darwin, full Bazel/NNS, fresh-host and live-provider
-acceptance remain separate. Do not infer size or speed savings from this work.
+not a new upstream dependency-workspace lint pass. Fresh server library, executable
+and test links reuse those exact dependency artifacts. All 110 freshly compiled
+server/product tests and six installed-canister scenarios pass on Linux, including
+the actual Python export/guarded-clear client. The unchanged installed-test source
+uses its qualified cached executable; the server is newly linked. Its SHA-256 is
+`71a87f9ec8a0f92f225762c6d335408f191dcf832ad24e228a95d545f3ccf49b`.
+The initial product run was denied local sockets by the sandbox; it passed with
+socket access. Hosted checks run asynchronously. Native-server Darwin, full
+Bazel/NNS, fresh-host and live-provider acceptance remain separate. Do not infer
+size or speed savings from this work.
 
 Prior PR #99 qualification at provider `fd845c4` used Profiler 0.11.0's source:
 78 recorder, 109 server-product and six installed tests, including actual Python

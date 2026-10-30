@@ -862,7 +862,7 @@ dependencies = [
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
- "ic-platform 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.8.1",
  "libc",
  "thiserror 2.0.18",
  "tokio",

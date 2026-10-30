@@ -690,7 +690,7 @@ def main(argv=None, *, root=None):
                     check_native_graph(root, manifest)
                 elif options.command == "native-verify":
                     native_verify(root, manifest)
-                elif options.command in ("build", "test"):
+                elif options.command in ("build", "test", "clippy"):
                     cargo_command(root, manifest, options.command, options.cargo_args, options.force)
                 else:
                     update_upstream(root, manifest, options.revision, options.fetch, options.force)
