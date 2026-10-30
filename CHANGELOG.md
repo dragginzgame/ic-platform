@@ -23,9 +23,9 @@
 
 ### ⬆️ Dependencies
 
-- Select Wire 0.7.23 and gzip-only Platform 0.8.1 in the native Cargo/Bazel graph,
-  retaining one immutable Host supplier for process observations. The published
-  Platform registry gzip graph remains independent.
+- Select published Host Process/FS/Artifacts 0.70.3 and gzip-only Platform 0.8.3
+  in the native Cargo/Bazel graph, replacing temporary Git library suppliers.
+  Preserve Wire 0.7.23, consumer policy and registry checksum admission.
 
 ### 🧭 Migration Notes
 

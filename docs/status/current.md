@@ -1,5 +1,29 @@
 # Current handoff
 
+## Registry dependency adoption
+
+This isolated branch stacks on PR #99 head `2382502`; its qualification branch
+remains separate. It replaces the native Git library suppliers with published
+Host Process/FS/Artifacts 0.70.3 and gzip-only Platform 0.8.3, retaining Wire 0.7.23.
+Cargo/Bazel locks are regenerated from the selected registry sources. Profiler
+adopts Shared Tooling 0.27.9 and the paired consumer lint fixes from Profiler #10.
+Registry code revision `62a165b12f5ffe94808cde95dfde3ab793f6a218` passes full owner
+Clippy, native primary-package Clippy, a fresh Cargo server build, 78 native
+recorder tests, 110 server-product tests and all six installed scenarios. The
+consumer additionally passes all 78 recorder tests on current Rust and 1.91,
+governance and its actual patch/minor/major/refusal/recovery release fixtures
+(CI/native execution substituted; no real release). Canonical assembly matches
+all five generated dependency inputs, and the selected native graph excludes
+lifeline and CLI-only NNS initialization. Bazel repin/target loading passes.
+
+Profiler retains exact inputs, hashes and fresh receipts in
+`artifacts/registry-20261030-qualification.json` and `.build/receipts`. Server
+SHA-256: `288f4c7c0bfcf3a374822e9cd97ae8e01dca2e7afb521e1027f4f182dc28350e`.
+The following handoff change is documentation only. Older parent execution
+records below retain their original source identities; native macOS, full
+replica Bazel/NNS, fresh-host and live acceptance remain separate.
+
+
 ## Pending 0.8.4: paired Profiler boundary and qualification fixes
 
 Main released 0.8.3 at `f69a759`; its checkout was clean at refresh. PR #99 now
@@ -73,10 +97,9 @@ fresh execution or the supplying identity for this refresh.
 ## Supply and retained contracts
 
 The native recipe retains IC `ee8086a9773725fd1058832a9400297cf0990112`, Rust
-1.99.0, Host `c20dbd11785c17d369651f51fa0967fbec69c57a`, Wire 0.7.23 and the
-immutable gzip-only Platform 0.8.1 scaffold. Ordinary Platform registry gzip and
-Testkit/editor selections remain independent. Preserve one native Host source
-family. Private ICPROF03 peers rebuild together; saved formats remain unchanged.
+1.99.0, registry Host Process/FS/Artifacts 0.70.3, Wire 0.7.23 and gzip-only
+registry Platform 0.8.3. Testkit/editor selections remain independent. Preserve
+one registry Host source family. Private ICPROF03 peers rebuild together; saved formats remain unchanged.
 
 Profiler's independent recorder owns retention/report policy and private
 PNG/range mechanics. Platform owns native state/HTTP admission and pricing.
