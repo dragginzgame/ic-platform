@@ -74,17 +74,8 @@ fn full_account_checksum(owner: &[u8], subaccount: &[u8]) -> String {
 
 impl fmt::Display for Account {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-1/TextualEncoding.md#textual-encoding-of-icrc-1-accounts
-        match &self.subaccount {
-            None => write!(f, "{}", self.owner),
-            Some(subaccount) if subaccount == &[0; 32] => write!(f, "{}", self.owner),
-            Some(subaccount) => {
-                let checksum = full_account_checksum(self.owner.as_slice(), subaccount.as_slice());
-                let hex_subaccount = hex::encode(subaccount.as_slice());
-                let hex_subaccount = hex_subaccount.trim_start_matches('0');
-                write!(f, "{}-{}.{}", self.owner, checksum, hex_subaccount)
-            }
-        }
+        // Both identities share canonical text; external parsing/errors stay separate.
+        fmt::Display::fmt(&crate::Account::from(*self), f)
     }
 }
 

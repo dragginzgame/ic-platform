@@ -13,7 +13,7 @@ Upstream type members are not individually covered; this is not removal approval
 
 ## APIs, consumers and maintenance ownership
 
-The authorized pending 0.8 packaging cut makes `principal` independent of
+The released 0.8 packaging cut makes `principal` independent of
 `ic_principal` and SHA-2. `principal-external` adds registry identity and byte
 conversions; `principal-self-authenticating` explicitly adds unchanged upstream
 hashing. Runtime selects only the owned capability. Required external integrations
@@ -27,18 +27,18 @@ Original source/license fingerprints and an independently frozen 28-type schema
 qualify this cut; see the [packaging contract](migration.md#minimal-principal-and-selected-icrc-packaging).
 Earlier supplier/adoption observations below retain their historical scope.
 
-Pending 0.7.5 adds `icrc_ledger_types::icrc10::SupportedStandard` under existing
+Source release 0.7.5 added `icrc_ledger_types::icrc10::SupportedStandard` under existing
 `icrc-ledger-types`. Platform maintains the named external discovery record from
 ICRC protocol facts; it is not a registry Rust identity. The feature now names
 `dep:candid` for its derive, without selecting the facade's codec feature.
-The existing registry ledger edge already supplies that Candid identity/features;
-native/Wasm dependency identities and effective-feature sets are unchanged.
+The current selected DTO implementation supplies Candid directly; the registry
+ledger package is absent. Candid Principal/Nat and external wire schemas remain.
 Default/executor isolation remains. Canic owns opt-in mounting, advertised
 standards and consent policy; its [integration issue #706](https://github.com/dragginzgame/canic/issues/706)
 tracks adoption after supplying publication. No consumer adoption or size saving
 is inferred from this export.
 
-Pending 0.7.5 also adds a fixed 16-level admission ceiling in bounded Candid
+Source release 0.7.5 also added a fixed 16-level admission ceiling in bounded Candid
 helpers, protocol decoders and external endpoint adapters, plus
 `candid::nesting::{MAX_DEPTH, NestingError, check}` and typed error accessors.
 Platform owns this bounded nonrecursive framing admission; Candid still owns

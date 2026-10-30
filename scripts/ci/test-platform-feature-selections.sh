@@ -51,6 +51,13 @@ MUTATIONS
 # not materialize millions of production combinations before its routine matrix.
 printf '%s\n' '["alpha","beta","gamma","delta"]' > "$fixture/small.json"
 "$jq" --arg mode exhaustive --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-selections.jq "$fixture/small.json" > "$fixture/exhaustive.json"
+if "$jq" --arg mode exhaustive --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-selections.jq "$fixture/features.json" > "$fixture/oversized.json" 2> "$fixture/oversized.log"; then
+    echo 'Unbounded production power set was admitted' >&2; exit 1
+fi
+grep -q 'limited to 12' "$fixture/oversized.log"
+if bash scripts/ci/check-platform-features.sh --exhaustive > "$fixture/missing.log" 2>&1; then
+    echo 'Exhaustive audit without an explicit scope was admitted' >&2; exit 1
+fi
 # shellcheck disable=SC2016 # The quoted expression contains jq variables.
 "$jq" -en --slurpfile features "$fixture/features.json" --slurpfile small "$fixture/small.json" --slurpfile routine "$fixture/routine.json" --slurpfile exhaustive "$fixture/exhaustive.json" '
   $features[0] as $f | $small[0] as $s | $routine[0] as $r | $exhaustive[0] as $e |

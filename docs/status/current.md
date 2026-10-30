@@ -1,127 +1,93 @@
 # Current handoff
 
-## Pending 0.8.3: paired native Profiler boundary
+## Pending 0.8.4: paired Profiler boundary and qualification fixes
 
-[PR #99](https://github.com/dragginzgame/ic-platform/pull/99) is refreshed onto
-released Platform 0.8.2 at `b0bf82f`. Package versions remain 0.8.2. Preserve its
-published Host 0.70 gzip error identity, Testkit/managed editor adoption, runtime
-fixtures and released notes. Release/publication remain maintainer-owned.
-Shared Tooling 0.27.7 stays at `a8baa51099ca48cdb12e2171f031d488db89d67d`;
-do not replace it with an older supplying snapshot.
+Main released 0.8.3 at `f69a759`; its checkout was clean at refresh. PR #99 now
+merges that release without rewriting history. Package versions remain 0.8.3.
+Keep all released notes unchanged. Release/publication remain maintainer-owned.
+Shared Tooling 0.27.7 stays at `a8baa51099ca48cdb12e2171f031d488db89d67d`.
+Siblings stay read-only; separate isolated contributions supply consumer fixes.
 
-Profiler 0.11.0 at `651448415a3a7eaed799c43be6662000fe0659cd` already supplies the
-paired query/cache/render and recorder-description interfaces. Profiler #8 is
-completed and #9 is closed as incorporated by that release. Older consumers keep
-their provider pin until adopting the paired interface. PR #99 is not merged;
-Profiler currently selects its qualified code revision `fd845c4`.
+PR #99 owns textual-canister requests, Busy/Started completion, successful-result
+pruning and compiled backend descriptions. Domain errors are not resubmitted;
+timeouts retain uncertainty about started operations. Raw PocketIC JSON and
+saved schema-1 reports remain. Profiler owns export-before-clear, file publication,
+capture/report policy and rendering. The delivered 0.11.0 paired product interface
+remains required; older consumers retain their previous provider pin.
 
-This refresh preserves the complete native profile tree from
-`fd845c4a633f0c82e80e2edaeec9963a3fe14144`. Its Cargo/Bazel inputs select Wire
-0.7.23, gzip-only Platform 0.8.1 at `c8bbe7e` and Tooling `c20dbd1`. The ordinary
-Platform 0.8.2 registry Host 0.70 gzip graph is separate. Do not silently switch
-the native graph or mix supplying identities during this merge refresh.
+Installed-runtime CI now selects Testkit's required `cli` feature. Runtime proofs
+retain shared dependency caches, but a kernel file lock covers each build and
+artifact copy. The inherited descriptor survives child execution and releases on
+exit. A concurrent-run regression pauses after Cargo and before retention, proves
+a second run is blocked and checks every retained Wasm's run identity. Failed
+builds propagate without copying stale outputs. Protocol/feature graphs stay fixed.
 
-Tooling #265 is merged, but published Host process 0.70.0 still lacks the consumed
-observation module at the latest registry inspection. Published adoption remains
-separate. Profiler owns capture activation, process selection/identity admission,
-cadence, aggregation, retention, diagnostics and reports; Host owns raw OS facts
-and workload custody. Rebuild private ICPROF03 peers together.
+## Native lint boundary
 
-## Native behavior and qualification
+Platform #98's supported check is strict `pocket-ic-server --lib --no-deps` on
+Rust 1.99.0, with the IC pin's existing Clippy configuration. `native-verify`
+checks it before native builds/tests. The existing provider command also exposes
+`clippy -- --no-deps --lib -- -D warnings`. No warning allowance is added.
 
-Platform owns textual-canister admission, native DTOs, Busy/Started operation
-completion and successful-result pruning. Domain errors are not resubmitted;
-a timeout can leave an already-started operation running. Raw PocketIC JSON
-routes remain unchanged. Python retains export-before-clear and file policy.
+Provider-owned fixes keep retry/disposition order, use the final event directly,
+name the metrics-registry tuple and add meaningful must-use messages before
+unchanged async-trait expansion. The native patch changes no cryptographic body.
+Three consumer-owned CLI/render conditionals are prepared separately in an
+isolated Profiler contribution. #98 remains open until its consumer/main and
+native qualification obligations are complete; do not claim closure from a probe.
 
-Compiled scheduler/defaults, round interpretations, source hashes and component
-coverage belong here. Captures retain those facts for offline reporting; arbitrary
-backend labels infer nothing. Profiler preserves schema-1 recorded dictionaries
-with bounded admission. No runtime, crypto or charging body changes in this PR.
-Retain query admission order, diagnostics, 8 MiB/query, 32 MiB total, 128-entry FIFO
-and cross-run cache checks. Existing Value routes and saved formats remain.
+## Qualification in progress
 
-Qualified native server SHA-256 at `fd845c4`:
+Current evidence is under `/tmp/platform-pr99-evidence-20261030`. Full owner
+all-target/all-feature Clippy passes before longer tests. All 46 assembler tests,
+locked-build/concurrency/failure admission and the actual native graph pass.
+The canonical assembler prepares the combined provider/paired-product source.
+A comparison of 7,126 source files confirms every change from the prior native
+assembly is within `rs/pocket_ic_server`; dependency source bodies are unchanged.
+
+Strict native primary-package Clippy also passes using the prepared exact
+external dependency artifacts and the original IC Clippy configuration. This is
+not a new upstream dependency-workspace lint pass. Fresh linking, native product
+and installed scenarios are being qualified before integration; the previous
+server's passes alone do not qualify these changed inputs. Hosted checks run
+asynchronously. Native-server Darwin, full Bazel/NNS, fresh-host and live-provider
+acceptance remain separate. Do not infer size or speed savings from this work.
+
+Prior PR #99 qualification at provider `fd845c4` used Profiler 0.11.0's source:
+78 recorder, 109 server-product and six installed tests, including actual Python
+export/guarded clear. Its server SHA-256 was
 `1bff7f3c31ce8dd2a2bd679593c6af64a17f0e06f8497384fdebee0403c57571`.
-Its actual build passes 78 recorder, 109 server-product and six installed tests,
-including the real Python export/guarded-clear command. Evidence remains in
-Profiler's `artifacts/wire-0723-qualification.json` and `.build/receipts`.
-Merge refresh `53879d5` passes full owner Clippy, snapshot/pin/inventory, formatting,
-links and source-manifest checks. Its fresh candidate assembly matches all three
-input digests and the complete qualified source-tree digest; its native graph
-excludes lifeline and CLI-only NNS initialization. Evidence is retained in
-Profiler's `artifacts/platform99-refresh-assembly-equivalence.json`. Native
-execution evidence is reused, not a new binary build. The following handoff
-change is documentation only.
+Those historical receipts remain in Profiler's artifacts/.build; they are not a
+fresh execution or the supplying identity for this refresh.
 
-Wire and derive src trees match 0.7.22 exactly; the prior all-fields frame proof
-remains applicable. Earlier Python/browser/assembler/script, offline CLI, MSRV
-and substituted release-fixture evidence retains its exact input scope. Profiler
-0.11.0's delivered Linux, Intel/Apple Silicon macOS core and browser CI passes.
-Do not relabel those core jobs as native-server macOS qualification.
+## Supply and retained contracts
 
-Native IC-server Darwin, full replica Bazel/NNS, fresh-host provisioning and
-live-provider/release acceptance remain separate. #98 owns the extra strict
-native lint findings; that probe is not claimed as passing. #50 stays deferred
-with its advisory check intact. Hosted qualification runs asynchronously.
+The native recipe retains IC `ee8086a9773725fd1058832a9400297cf0990112`, Rust
+1.99.0, Host `c20dbd11785c17d369651f51fa0967fbec69c57a`, Wire 0.7.23 and the
+immutable gzip-only Platform 0.8.1 scaffold. Ordinary Platform registry gzip and
+Testkit/editor selections remain independent. Preserve one native Host source
+family. Private ICPROF03 peers rebuild together; saved formats remain unchanged.
 
-The maintainer retained Platform gzip. API input/decoded limits remain 128 MiB;
-the recorder decoded limit remains 256 MiB. Strict single-member framing rejects
-corrupt, truncated, concatenated and trailing input. PNG remains distinct zlib.
-The IC pin stays `ee8086a9773725fd1058832a9400297cf0990112`, Rust 1.99.0.
+Profiler's independent recorder owns retention/report policy and private
+PNG/range mechanics. Platform owns native state/HTTP admission and pricing.
+Keep 8 MiB/query, 32 MiB total, 128-entry FIFO, cross-run checks, diagnostic order,
+128 MiB API import and separate 256 MiB recorder decoded limits. Preserve exact
+read/write PNG/JSON schemas and absent/unknown coverage semantics.
 
-## Released 0.8.0: Principal and selected ICRC packaging
+Owned Principal/Account remain Candid-free under `principal`. External DTOs are
+separate Platform-maintained types; registry Principal/Nat/function identities
+and required external Candid/Serde bytes stay unchanged. Account Display shares
+the owned formatter; external parsing/errors and absent/explicit zero fields stay.
+The [packaging contract](../migration.md#minimal-principal-and-selected-icrc-packaging)
+retains 28 independently frozen selected-ledger schemas. Value hashes are intact.
 
-`principal` supplies owned Principal/Account bytes, bounded text and Serde without
-registry Principal or hashing. Runtime/CDK use that capability. Select
-`principal-external` for registry identities/byte conversions and
-`principal-self-authenticating` for unchanged upstream hashing. Required external
-protocol/client and signature profiles select their own prerequisites explicitly.
-
-Selected ledger DTOs/callbacks now have Platform Rust identities under the existing
-feature/module. Candid/Serde bytes, effective-zero accounts, absent versus explicit
-zero fields, legacy Nat64 and unchanged upstream value hashes/vectors remain.
-The registry ledger package and unused storage/CBOR, metadata-key and consent
-formatting machinery are retired. The [packaging contract](../migration.md#minimal-principal-and-selected-icrc-packaging)
-retains the migration and 28 independent frozen external schema obligations.
-
-The released handoff at `80b424a:docs/status/current.md` records 505 native/Wasm
-feature selections, eight standalone profiles, schema/type/byte/hash proofs,
-source/license guards and MSRV/Rustdoc/format checks. Evidence locations include
-`/tmp/platform-dependencies-20261029` and `target/feature-graphs/attempt.FZeIyu`.
-Do not infer installed-runtime, registry publication or consumer adoption from
-those package checks, or claim a Wasm-size saving from removed dependency edges.
-
-Standalone verification additionally requires `ic_principal/serde` to decode
-certified canister ranges. That release correction preserves protected verifier
-bodies and is not supplied by unrelated Candid features. Full owner Clippy and
-four standalone native/MSRV/Wasm profiles pass; only verification adds external
-Serde. Minimal Principal, external conversion and creation graphs remain narrow.
-Its retained evidence is `target/signature-serde-fix`.
-
-## Retained library and safety contracts
-
-#73's Candid guard permits exactly 16 constructed wire levels and rejects more
-before upstream decoding, retaining its quotas and combined decode/skip budget.
-It does not repair upstream Candid or bound arbitrary trusted schemas/visitors.
-Installed/frozen cost evidence and its limits remain in
-[the migration contract](../migration.md#admission-cost-2026-10-29).
-Owned endpoints remain Wire; external identities, bytes and persisted contracts
-retain their owners. Do not restore retired CDK/compiler paths.
-
-#86 supplies external ICRC-10 SupportedStandard; Canic #706 owns optional adoption
-on its pending base. Source/installed proofs do not establish registry adoption;
-mounting, consent, authorization and budgets remain consumer-owned.
-
-#72's narrow short-form DER refusal is the sole protected-source exception.
-Crypto bodies, constants, vectors and licenses remain intact; long-form support
-and oversized encoder conversions are outside that change. #74 retains native
-Host/Origin protection and local nonbrowser access.
-
-#50 remains set aside for integration only, with its advisory check intact.
-No ignore, suppression, incompatible override, Agent fork or in-house crypto is
-authorized. Original #97 scratch receipts/binary were externally removed after
-qualification; its PR retains those historical observations. Older evidence and
-recovery locations remain in the
-[previous committed handoff](https://github.com/dragginzgame/ic-platform/blob/d662c19501a16047030e9afb40ac635470a6942d/docs/status/current.md).
-Do not delete retained build/recovery artifacts when refreshing this summary.
+Management =0.11.0, executor =2.0.0, ic0 =1.2.0 and stable structures =0.7.2 remain
+fixed. Memory/Storage own allocation, checked reopening and leases. Owned endpoints
+use Wire; required external Candid and legacy checkpoints retain their contracts.
+Bounded Candid admits at most 16 constructed wire levels, including unused and
+skipped data, within existing quotas; arbitrary trusted visitors are not covered.
+The [nesting contract](../migration.md#external-candid-nesting-qualification-73)
+retains original trap/16–17-level and cost evidence. #72's narrow DER envelope
+exception and #74 Host/Origin admission stay unchanged. Protected crypto bodies,
+encodings, vectors and licenses are preserved. #50 remains deferred with its
+advisory check intact; no ignore, incompatible crypto override or Agent fork.

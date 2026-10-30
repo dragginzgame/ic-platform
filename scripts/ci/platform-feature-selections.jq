@@ -3,7 +3,9 @@ def selection: sort | join(",");
 def powerset:
   reduce .[] as $feature ([[]]; . + map(. + [$feature]));
 . as $features |
-(if $mode == "exhaustive" then powerset | map(selection)
+(if $mode == "exhaustive" then
+   if length > 12 then error("exhaustive audit is limited to 12 explicitly selected features")
+   else powerset | map(selection) end
  elif $mode == "routine" then
    [[], $features] +
    [$features[] | [.]] +

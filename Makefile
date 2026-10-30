@@ -30,7 +30,7 @@ help:
 	@echo 'Focused: check, test, clippy, docs-check, wasm-check, msrv, check-boundary'
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Exact saved recovery: release-resume VERSION=X.Y.Z'
-	@echo 'Feature graphs: check-features (routine); check-features-exhaustive (manual audit)'
+	@echo 'Feature graphs: check-features; check-features-exhaustive FEATURES=a,b (1–12 features)'
 	@echo 'Registry: publish-check (dry run), publish (upload current committed version)'
 	@echo 'Release editor: install-release-editor; release-editor-check (offline)'
 	@echo 'Browser SDK: install-browser-tools, check-browser; check-browser-runtime needs prepared Chromium'
@@ -109,7 +109,7 @@ check-features-exhaustive:
 	bash scripts/ci/test-platform-feature-selections.sh
 	bash scripts/ci/test-platform-feature-closures.sh
 	bash scripts/ci/test-platform-feature-graphs.sh
-	bash scripts/ci/check-platform-features.sh --exhaustive
+	bash scripts/ci/check-platform-features.sh --exhaustive "$(FEATURES)"
 .PHONY: check-upstream-scaffolding
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh

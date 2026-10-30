@@ -497,50 +497,57 @@ async fn start_profiling(
     Path((instance_id, canister_id)): Path<(InstanceId, String)>,
     Json(body): Json<Value>,
 ) -> Response {
-    let limit = match integer_argument(&body, "max_executions") {
-        Ok(Some(0)) => {
-            return respond(Err((
-                StatusCode::BAD_REQUEST,
-                "max_executions must be positive.".to_string(),
-            )));
-        }
-        Ok(limit) => limit.unwrap_or(20).min(10_000),
+    let profile = match ProfileRequest::parse(&body) {
+        Ok(profile) => profile,
         Err(message) => return respond(Err((StatusCode::BAD_REQUEST, message))),
-    };
-    let read_mask = match body.get("read_mask") {
-        None => false,
-        Some(Value::Bool(value)) => *value,
-        _ => {
-            return respond(Err((
-                StatusCode::BAD_REQUEST,
-                "read_mask must be a boolean".to_string(),
-            )));
-        }
-    };
-    let write_mask = match body.get("write_mask") {
-        None => false,
-        Some(Value::Bool(value)) => *value,
-        _ => {
-            return respond(Err((
-                StatusCode::BAD_REQUEST,
-                "write_mask must be a boolean".to_string(),
-            )));
-        }
     };
     respond(
         control(
             &viewer,
             instance_id,
             &canister_id,
-            Control::Profile(limit, read_mask, write_mask),
+            Control::Profile(profile),
         )
         .await,
     )
 }
 
-fn clear_condition(
-    body: &Value,
-) -> Result<Option<(u64, Option<u64>, Option<Option<u64>>)>, String> {
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct ProfileRequest {
+    max_executions: u64,
+    read_mask: bool,
+    write_mask: bool,
+}
+
+impl ProfileRequest {
+    fn parse(body: &Value) -> Result<Self, String> {
+        let maximum = pocket_ic::common::rest::MAX_INSTRUCTION_PROFILING_EXECUTIONS;
+        let max_executions = integer_argument(body, "max_executions")?.unwrap_or(20);
+        if max_executions == 0 {
+            return Err("max_executions must be positive.".to_string());
+        }
+        let mask = |key: &str| match body.get(key) {
+            None => Ok(false),
+            Some(Value::Bool(value)) => Ok(*value),
+            _ => Err(format!("{key} must be a boolean")),
+        };
+        Ok(Self {
+            max_executions: max_executions.min(maximum),
+            read_mask: mask("read_mask")?,
+            write_mask: mask("write_mask")?,
+        })
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct ClearCondition {
+    generation: u64,
+    last_sequence: Option<u64>,
+    // None omits this guard; Some(None) requires no runtime-cost events.
+    runtime_sequence: Option<Option<u64>>,
+}
+
+fn clear_condition(body: &Value) -> Result<Option<ClearCondition>, String> {
     if body.get("trace_generation").is_none()
         && body.get("last_sequence_number").is_none()
         && body
@@ -576,7 +583,11 @@ fn clear_condition(
         Some(Value::Null) => Some(None),
         Some(_) => Some(integer_argument(body, runtime_key)?),
     };
-    Ok(Some((generation, last, runtime)))
+    Ok(Some(ClearCondition {
+        generation,
+        last_sequence: last,
+        runtime_sequence: runtime,
+    }))
 }
 
 /// Returns the recorder of a PocketIC instance and the parsed canister id.
@@ -1306,9 +1317,9 @@ fn page_history(
 #[derive(Clone, Copy)]
 enum Control {
     Start,
-    Profile(u64, bool, bool),
+    Profile(ProfileRequest),
     Stop,
-    Clear(Option<(u64, Option<u64>, Option<Option<u64>>)>),
+    Clear(Option<ClearCondition>),
 }
 
 async fn control(
@@ -1319,7 +1330,7 @@ async fn control(
 ) -> ApiResult {
     let (recorder, canister_id) = lookup(viewer, instance_id, canister_id)?;
     match control {
-        Control::Start | Control::Profile(_, _, _) => {
+        Control::Start | Control::Profile(_) => {
             if recorder.deleted {
                 return Err((
                     StatusCode::BAD_REQUEST,
@@ -1327,32 +1338,41 @@ async fn control(
                 ));
             }
             // Tracing is started by the instance, which checks that the canister exists.
-            let (code, response) =
-                if let Control::Profile(max_executions, read_mask, write_mask) = control {
-                    run_operation::<()>(
-                        viewer.app.api_state.clone(),
-                        instance_id,
-                        Some(START_TRACING_TIMEOUT),
-                        StartInstructionProfiling {
-                            canister_id,
-                            max_executions,
-                            read_mask,
-                            write_mask,
-                        },
-                    )
-                    .await
-                } else {
-                    run_operation::<()>(
-                        viewer.app.api_state.clone(),
-                        instance_id,
-                        Some(START_TRACING_TIMEOUT),
-                        StartMemoryAccessTracing { canister_id },
-                    )
-                    .await
-                };
+            let (code, response) = if let Control::Profile(ProfileRequest {
+                max_executions,
+                read_mask,
+                write_mask,
+            }) = control
+            {
+                run_operation::<()>(
+                    viewer.app.api_state.clone(),
+                    instance_id,
+                    Some(START_TRACING_TIMEOUT),
+                    StartInstructionProfiling {
+                        canister_id,
+                        max_executions,
+                        read_mask,
+                        write_mask,
+                    },
+                )
+                .await
+            } else {
+                run_operation::<()>(
+                    viewer.app.api_state.clone(),
+                    instance_id,
+                    Some(START_TRACING_TIMEOUT),
+                    StartMemoryAccessTracing { canister_id },
+                )
+                .await
+            };
             match response {
                 ApiResponse::Success(()) => {
-                    if let Control::Profile(max_executions, read_mask, write_mask) = control {
+                    if let Control::Profile(ProfileRequest {
+                        max_executions,
+                        read_mask,
+                        write_mask,
+                    }) = control
+                    {
                         let remaining = recorder
                             .recorder
                             .canisters()
@@ -1380,7 +1400,12 @@ async fn control(
             Ok(json!({ "tracing": false }))
         }
         Control::Clear(expected) => {
-            if let Some((generation, last, runtime)) = expected {
+            if let Some(ClearCondition {
+                generation,
+                last_sequence: last,
+                runtime_sequence: runtime,
+            }) = expected
+            {
                 if !recorder
                     .recorder
                     .clear_if_unchanged(canister_id, generation, last, runtime)
@@ -2401,26 +2426,12 @@ async fn run_tool(
             .await)
         }
         "start_profiling" => {
-            let max_executions = number("max_executions")?.unwrap_or(20);
-            if max_executions == 0 {
-                return Err("max_executions must be positive.".to_string());
-            }
-            let max_executions = max_executions.min(10_000);
-            let read_mask = match arguments.get("read_mask") {
-                None => false,
-                Some(Value::Bool(value)) => *value,
-                _ => return Err("read_mask must be a boolean".to_string()),
-            };
-            let write_mask = match arguments.get("write_mask") {
-                None => false,
-                Some(Value::Bool(value)) => *value,
-                _ => return Err("write_mask must be a boolean".to_string()),
-            };
+            let profile = ProfileRequest::parse(arguments)?;
             api(control(
                 viewer,
                 instance_id()?,
                 canister_id()?,
-                Control::Profile(max_executions, read_mask, write_mask),
+                Control::Profile(profile),
             )
             .await)
         }
@@ -2493,6 +2504,27 @@ fn integer_argument(arguments: &Value, key: &str) -> Result<Option<u64>, String>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn profile_requests_preserve_defaults_limits_masks_and_refusals() {
+        let defaults = ProfileRequest {
+            max_executions: 20,
+            read_mask: false,
+            write_mask: false,
+        };
+        assert_eq!(ProfileRequest::parse(&json!({})).unwrap(), defaults);
+        assert_eq!(ProfileRequest::parse(&json!({"max_executions": "18446744073709551615", "read_mask": true, "write_mask": true})).unwrap(),
+            ProfileRequest { max_executions: pocket_ic::common::rest::MAX_INSTRUCTION_PROFILING_EXECUTIONS, read_mask: true, write_mask: true });
+        for input in [
+            json!({"max_executions": 0}),
+            json!({"max_executions": -1}),
+            json!({"max_executions": "1.5"}),
+            json!({"read_mask": "true"}),
+            json!({"write_mask": null}),
+        ] {
+            assert!(ProfileRequest::parse(&input).is_err(), "{input}");
+        }
+    }
     use pocket_ic::common::rest::TracedExecutionOutcome;
 
     fn execution(
@@ -3158,13 +3190,21 @@ mod tests {
             "expected_last_runtime_cost_sequence_number":"18446744073709551615"});
         assert_eq!(
             clear_condition(&request).unwrap(),
-            Some((3, None, Some(Some(u64::MAX))))
+            Some(ClearCondition {
+                generation: 3,
+                last_sequence: None,
+                runtime_sequence: Some(Some(u64::MAX))
+            })
         );
         assert_eq!(
             clear_condition(&json!({"trace_generation":"3", "last_sequence_number":null,
             "expected_last_runtime_cost_sequence_number":null}))
             .unwrap(),
-            Some((3, None, Some(None)))
+            Some(ClearCondition {
+                generation: 3,
+                last_sequence: None,
+                runtime_sequence: Some(None)
+            })
         );
         assert!(
             clear_condition(&json!({"expected_last_runtime_cost_sequence_number":null})).is_err()
@@ -3179,12 +3219,20 @@ mod tests {
                 &json!({ "trace_generation": "3", "last_sequence_number": "9007199254740993" })
             )
             .unwrap(),
-            Some((3, Some(9_007_199_254_740_993), None))
+            Some(ClearCondition {
+                generation: 3,
+                last_sequence: Some(9_007_199_254_740_993),
+                runtime_sequence: None
+            })
         );
         assert_eq!(
             clear_condition(&json!({ "trace_generation": "3", "last_sequence_number": null }))
                 .unwrap(),
-            Some((3, None, None))
+            Some(ClearCondition {
+                generation: 3,
+                last_sequence: None,
+                runtime_sequence: None
+            })
         );
         assert!(clear_condition(&json!({ "trace_generation": 3 })).is_err());
         assert!(clear_condition(&json!({ "last_sequence_number": 9 })).is_err());

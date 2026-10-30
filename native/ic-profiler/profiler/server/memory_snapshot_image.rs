@@ -61,26 +61,10 @@ pub(crate) struct MemorySnapshotImage {
     pub summary: Value,
 }
 
-/// A retained byte-read frequency range, independent of snapshot contents.
-/// Ranges from different executions may overlap; their counters are added.
-#[derive(Clone, Debug)]
-pub(crate) struct MemorySnapshotReadRange {
-    pub memory: String,
-    pub start: u64,
-    pub end: u64,
-    pub heap_reads: u64,
-    pub stable_direct_reads: u64,
-    pub stable_native_reads: u64,
-}
-
-#[derive(Clone, Debug)]
-pub(crate) struct MemorySnapshotWriteRange {
-    pub memory: String,
-    pub start: u64,
-    pub end: u64,
-    pub heap_writes: u64,
-    pub stable_writes: u64,
-}
+// The recorder and renderer share the native DTOs without an internal JSON round trip.
+pub(crate) use pocket_ic::common::rest::{
+    WasmReadRange as MemorySnapshotReadRange, WasmWriteRange as MemorySnapshotWriteRange,
+};
 
 fn page_canvas(page_count: usize) -> (Canvas, usize, usize, usize) {
     let columns = (1..=MAX_IMAGE_COLUMNS)
@@ -468,7 +452,21 @@ pub(crate) fn render_reads(
     ranges: &[MemorySnapshotReadRange],
     profile: &Value,
 ) -> Result<MemorySnapshotImage, String> {
-    render_mask(input, ranges, profile, false)
+    render_mask(
+        input,
+        ranges.iter().map(|range| MaskRange {
+            memory: &range.memory,
+            start: range.start,
+            end: range.end,
+            counts: [
+                range.heap_reads,
+                range.stable_direct_reads,
+                range.stable_native_reads,
+            ],
+        }),
+        profile,
+        false,
+    )
 }
 
 /// Writes use the same bounded range-sweep and layout as reads. Their counters
@@ -478,33 +476,52 @@ pub(crate) fn render_writes(
     ranges: &[MemorySnapshotWriteRange],
     profile: &Value,
 ) -> Result<MemorySnapshotImage, String> {
-    let ranges: Vec<_> = ranges
-        .iter()
-        .map(|range| MemorySnapshotReadRange {
-            memory: range.memory.clone(),
+    render_mask(
+        input,
+        ranges.iter().map(|range| MaskRange {
+            memory: &range.memory,
             start: range.start,
             end: range.end,
-            heap_reads: range.heap_writes,
-            stable_direct_reads: range.stable_writes,
-            stable_native_reads: 0,
-        })
-        .collect();
-    render_mask(input, &ranges, profile, true)
+            counts: [range.heap_writes, range.stable_writes, 0],
+        }),
+        profile,
+        true,
+    )
 }
 
-fn render_mask(
+#[derive(Clone, Copy)]
+struct MaskRange<'a> {
+    memory: &'a str,
+    start: u64,
+    end: u64,
+    counts: [u64; 3],
+}
+
+struct MaskFields {
+    frequency: &'static [&'static str],
+    bytes: &'static [&'static str],
+    distinct: &'static [&'static str],
+    maximum: &'static [&'static str],
+}
+
+fn add_counts(value: &mut Value, fields: &[&str], counts: [u128; 3]) {
+    for (field, count) in fields.iter().zip(counts) {
+        value[*field] = json!(count.to_string());
+    }
+}
+
+fn render_mask<'a>(
     input: &MemorySnapshotImageInput,
-    ranges: &[MemorySnapshotReadRange],
+    ranges: impl Clone + Iterator<Item = MaskRange<'a>>,
     profile: &Value,
     writes: bool,
 ) -> Result<MemorySnapshotImage, String> {
     validate(input)?;
-    for range in ranges {
+    for range in ranges.clone() {
         if range.start >= range.end
-            || !matches!(range.memory.as_str(), "heap" | "stable")
-            || (range.memory == "heap"
-                && (range.stable_direct_reads != 0 || range.stable_native_reads != 0))
-            || (range.memory == "stable" && range.heap_reads != 0)
+            || !matches!(range.memory, "heap" | "stable")
+            || (range.memory == "heap" && (range.counts[1] != 0 || range.counts[2] != 0))
+            || (range.memory == "stable" && range.counts[0] != 0)
         {
             return Err("Byte-access ranges require a nonempty address interval and counters for their own memory kind.".to_string());
         }
@@ -512,6 +529,37 @@ fn render_mask(
     let (mut canvas, columns, rows, width) = page_canvas(input.pages.len());
     let height = canvas.height;
     let mut pages = Vec::with_capacity(input.pages.len());
+    let section = if writes { "writes" } else { "reads" };
+    let fields = if writes {
+        MaskFields {
+            frequency: &["heap_writes", "stable_writes"],
+            bytes: &["heap_byte_writes", "stable_byte_writes"],
+            distinct: &["distinct_heap_bytes", "distinct_stable_bytes"],
+            maximum: &[
+                "maximum_heap_writes_per_byte",
+                "maximum_stable_writes_per_byte",
+            ],
+        }
+    } else {
+        MaskFields {
+            frequency: &["heap_reads", "stable_direct_reads", "stable_native_reads"],
+            bytes: &[
+                "heap_byte_reads",
+                "stable_direct_byte_reads",
+                "stable_native_byte_reads",
+            ],
+            distinct: &[
+                "distinct_heap_bytes",
+                "distinct_stable_direct_bytes",
+                "distinct_stable_native_bytes",
+            ],
+            maximum: &[
+                "maximum_heap_reads_per_byte",
+                "maximum_stable_direct_reads_per_byte",
+                "maximum_stable_native_reads_per_byte",
+            ],
+        }
+    };
     let mut total_distinct = 0_u64;
     let mut total_reads = [0_u128; 3];
     let mut frequency_ranges_remaining = READ_FREQUENCY_RANGES_LIMIT;
@@ -524,17 +572,13 @@ fn render_mask(
         let base = page.page_index as u128 * WASM_PAGE_BYTES as u128;
         let end = base + WASM_PAGE_BYTES as u128;
         let mut events: BTreeMap<usize, [i128; 3]> = BTreeMap::new();
-        for range in ranges.iter().filter(|range| range.memory == page.memory) {
+        for range in ranges.clone().filter(|range| range.memory == page.memory) {
             let start = (range.start as u128).max(base);
             let stop = (range.end as u128).min(end);
             if start >= stop {
                 continue;
             }
-            let counts = [
-                range.heap_reads,
-                range.stable_direct_reads,
-                range.stable_native_reads,
-            ];
+            let counts = range.counts;
             for (at, sign) in [
                 ((start - base) as usize, 1_i128),
                 ((stop - base) as usize, -1_i128),
@@ -573,15 +617,14 @@ fn render_mask(
             if counts != previous || offset == WASM_PAGE_BYTES {
                 if previous != [0; 3] && run_start < offset {
                     if frequency_ranges_remaining > 0 {
-                        frequency_ranges.push(json!({
+                        let mut range = json!({
                             "start": (base + run_start as u128).to_string(),
                             "end": (base + offset as u128).to_string(),
                             "start_page_byte_offset": run_start.to_string(),
                             "end_page_byte_offset_exclusive": offset.to_string(),
-                            "heap_reads": previous[0].to_string(),
-                            "stable_direct_reads": previous[1].to_string(),
-                            "stable_native_reads": previous[2].to_string(),
-                        }));
+                        });
+                        add_counts(&mut range, fields.frequency, previous.map(u128::from));
+                        frequency_ranges.push(range);
                         frequency_ranges_remaining -= 1;
                     } else {
                         page_ranges_truncated = true;
@@ -610,6 +653,17 @@ fn render_mask(
         for (total, count) in total_reads.iter_mut().zip(reads) {
             *total += count;
         }
+        let mut counts = json!({
+            "distinct_observed_bytes": distinct.to_string(),
+            "frequency_ranges": frequency_ranges, "frequency_ranges_truncated": page_ranges_truncated,
+        });
+        add_counts(&mut counts, fields.bytes, reads);
+        add_counts(
+            &mut counts,
+            fields.distinct,
+            distinct_by_path.map(u128::from),
+        );
+        add_counts(&mut counts, fields.maximum, maximum.map(u128::from));
         pages.push(json!({
             "id": id, "memory": page.memory, "page_index": page.page_index.to_string(),
             "allocated_bytes": page.allocated_bytes.to_string(),
@@ -617,13 +671,7 @@ fn render_mask(
             "start_address": base.to_string(), "end_address_exclusive": end.to_string(),
             "byte_pixel_body": {"x": body_x, "y": body_y, "width": BYTE_WIDTH, "height": BYTE_HEIGHT},
             "label_strip": {"x": body_x, "y": label_y, "width": BYTE_WIDTH, "height": LABEL_HEIGHT},
-            "reads": {
-                "distinct_observed_bytes": distinct.to_string(),
-                "heap_byte_reads": reads[0].to_string(), "stable_direct_byte_reads": reads[1].to_string(), "stable_native_byte_reads": reads[2].to_string(),
-                "distinct_heap_bytes": distinct_by_path[0].to_string(), "distinct_stable_direct_bytes": distinct_by_path[1].to_string(), "distinct_stable_native_bytes": distinct_by_path[2].to_string(),
-                "maximum_heap_reads_per_byte": maximum[0].to_string(), "maximum_stable_direct_reads_per_byte": maximum[1].to_string(), "maximum_stable_native_reads_per_byte": maximum[2].to_string(),
-                "frequency_ranges": frequency_ranges, "frequency_ranges_truncated": page_ranges_truncated,
-            },
+            (section): counts,
             "page_evidence": {"memory": page.memory, "granularity_bytes": WASM_PAGE_BYTES.to_string(), "accessed": page.accessed, "dirty": page.dirty},
         }));
     }
@@ -634,12 +682,14 @@ fn render_mask(
         "brightness": value,
         "heap_rgb": [0, value, value], "stable_direct_rgb": [0, value, 0], "stable_native_rgb": [value, (u16::from(value) * 2 / 5) as u8, 0],
     })).collect();
+    let mut totals = json!({"distinct_observed_bytes": total_distinct.to_string(), "counters_saturated": counters_saturated});
+    add_counts(&mut totals, fields.bytes, total_reads);
     let mut summary = json!({
-        "format_version": 1, "view": "reads", "kind": "memory_read_mask", "scope": "snapshot_window_comparison", "memory": input.memory,
+        "format_version": 1, "view": section, "kind": if writes { "memory_write_mask" } else { "memory_read_mask" }, "scope": "snapshot_window_comparison", "memory": input.memory,
         "snapshot_id": input.snapshot_id, "comparison_snapshot_id": input.comparison_snapshot_id,
         "selected_pages": input.pages.len().to_string(), "selected_byte_positions": (input.pages.len() * WASM_PAGE_BYTES).to_string(),
         "pages": pages,
-        "reads": {"distinct_observed_bytes": total_distinct.to_string(), "heap_byte_reads": total_reads[0].to_string(), "stable_direct_byte_reads": total_reads[1].to_string(), "stable_native_byte_reads": total_reads[2].to_string(), "counters_saturated": counters_saturated},
+        (section): totals,
         "palette": {"unobserved_rgb": [0, 0, 0], "brightness": brightness,
             "frequency_rule": "Brightness uses total reads per byte: floor(log2(count)), capped at bin 8 (256 or more). It represents frequency, not instructions or cycle costs.",
             "path_rule": "Heap reads are cyan. Stable direct reads are green; any stable native read gives orange precedence. JSON frequency ranges retain both stable channel counts.",
@@ -658,66 +708,13 @@ fn render_mask(
         "limits": {"max_pages": MAX_IMAGE_PAGES, "max_columns": MAX_IMAGE_COLUMNS, "max_png_bytes": MAX_PNG_BYTES.to_string()},
     });
     if writes {
-        adapt_write_summary(&mut summary);
+        write_metadata(&mut summary);
     }
     Ok(MemorySnapshotImage { png, summary })
 }
 
-fn rename_field(value: &mut Value, old: &str, new: &str) {
-    if let Some(object) = value.as_object_mut()
-        && let Some(field) = object.remove(old)
-    {
-        object.insert(new.to_string(), field);
-    }
-}
-
-/// The shared sweep uses three channels for read-path counts; write masks use
-/// its first two channels and expose a separate, correctly named public schema.
-fn adapt_write_summary(summary: &mut Value) {
-    fn write_counts(value: &mut Value) {
-        for (old, new) in [
-            ("heap_byte_reads", "heap_byte_writes"),
-            ("stable_direct_byte_reads", "stable_byte_writes"),
-            ("distinct_stable_direct_bytes", "distinct_stable_bytes"),
-            (
-                "maximum_heap_reads_per_byte",
-                "maximum_heap_writes_per_byte",
-            ),
-            (
-                "maximum_stable_direct_reads_per_byte",
-                "maximum_stable_writes_per_byte",
-            ),
-        ] {
-            rename_field(value, old, new);
-        }
-        if let Some(object) = value.as_object_mut() {
-            for field in [
-                "stable_native_byte_reads",
-                "distinct_stable_native_bytes",
-                "maximum_stable_native_reads_per_byte",
-            ] {
-                object.remove(field);
-            }
-        }
-        if let Some(ranges) = value
-            .get_mut("frequency_ranges")
-            .and_then(Value::as_array_mut)
-        {
-            for range in ranges {
-                rename_field(range, "heap_reads", "heap_writes");
-                rename_field(range, "stable_direct_reads", "stable_writes");
-                range.as_object_mut().unwrap().remove("stable_native_reads");
-            }
-        }
-    }
-    summary["view"] = json!("writes");
-    summary["kind"] = json!("memory_write_mask");
-    rename_field(summary, "reads", "writes");
-    write_counts(&mut summary["writes"]);
-    for page in summary["pages"].as_array_mut().unwrap() {
-        rename_field(page, "reads", "writes");
-        write_counts(&mut page["writes"]);
-    }
+/// Write-specific palette and explanatory metadata; numeric output is emitted directly.
+fn write_metadata(summary: &mut Value) {
     let brightness: Vec<_> = READ_BRIGHTNESS.into_iter().enumerate().map(|(bin, value)| json!({
         "minimum_writes": (1_u64 << bin).to_string(),
         "maximum_writes": (bin + 1 < READ_BRIGHTNESS.len()).then(|| ((1_u64 << (bin + 1)) - 1).to_string()),

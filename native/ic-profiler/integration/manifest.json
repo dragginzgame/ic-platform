@@ -87,6 +87,10 @@
       {
         "path": "0008-client-validation-inputs.patch",
         "sha256": "cf12cc7b4d41f35c89add77faba69d3af20825c0dda79d09e7b78dfbe3c9b92a"
+      },
+      {
+        "path": "0009-native-lint.patch",
+        "sha256": "1b481eaf2a6b0ca2072edbc0cd712aed9f53b8ed54dfa39d2f7cdb002485238c"
       }
     ],
     "series": "patches/ic/series"

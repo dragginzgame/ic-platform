@@ -184,6 +184,54 @@ impl ExecutionFilter<'_> {
     }
 }
 
+/// Native rendering consumes numeric ranges; JSON is produced only for the response.
+#[derive(Default)]
+pub(crate) struct SnapshotEvidence {
+    pub metadata: serde_json::Value,
+    pub touched: [Vec<(u64, u64)>; 2],
+    pub dirty: [Vec<(u64, u64)>; 2],
+    pub reads: Vec<rest::WasmReadRange>,
+    pub writes: Vec<rest::WasmWriteRange>,
+}
+
+impl SnapshotEvidence {
+    pub(crate) fn unavailable(reason: &str) -> Self {
+        Self {
+            metadata: serde_json::json!({"available": false, "reason": reason}),
+            ..Self::default()
+        }
+    }
+
+    pub(crate) fn into_summary(mut self) -> serde_json::Value {
+        use serde_json::json;
+        let encode = |ranges: [Vec<(u64, u64)>; 2]| {
+            let [heap, stable] = ranges.map(|ranges| {
+                ranges
+                    .into_iter()
+                    .map(|(start, end)| [start.to_string(), end.to_string()])
+                    .collect::<Vec<_>>()
+            });
+            json!({"heap": heap, "stable": stable})
+        };
+        if self.metadata["available"] == true {
+            self.metadata["known_touched_ranges"] = encode(self.touched);
+            self.metadata["known_dirty_ranges"] = encode(self.dirty);
+        }
+        for (field, count) in [
+            ("read_profile", self.reads.len()),
+            ("write_profile", self.writes.len()),
+        ] {
+            if let Some(profile) = self.metadata[field].as_object_mut() {
+                profile.insert("retained_input_ranges".into(), json!(count.to_string()));
+                profile.insert("raw_profile_retrieval".into(), json!(format!(
+                    "Full bounded per-execution {field}.ranges are available in the execution trace export. Image JSON contains overlap-merged frequency ranges for selected pages, with its own explicit output limit."
+                )));
+            }
+        }
+        self.metadata
+    }
+}
+
 impl MemoryAccessTraceRecorder {
     /// Sets the retained host-memory estimate budget for this instance. This
     /// does not alter canister memory fees or execution budgets.
@@ -210,21 +258,13 @@ impl MemoryAccessTraceRecorder {
         through: Option<u64>,
         attempt_id: Option<u64>,
         logical_execution_id: Option<u64>,
-    ) -> serde_json::Value {
+    ) -> SnapshotEvidence {
         use serde_json::json;
-        fn encoded(ranges: Vec<(u64, u64)>) -> serde_json::Value {
-            json!(
-                super::rendering::merge_ranges(
-                    ranges.into_iter().filter(|&(start, end)| start < end)
-                )
-                .into_iter()
-                .map(|(start, end)| [start.to_string(), end.to_string()])
-                .collect::<Vec<_>>()
-            )
-        }
         let traces = self.traces.lock().unwrap();
         let Some(trace) = traces.canisters.get(&canister_id) else {
-            return json!({"available": false, "reason": "No retained execution trace; enable tracing before the operation and both captures."});
+            return SnapshotEvidence::unavailable(
+                "No retained execution trace; enable tracing before the operation and both captures.",
+            );
         };
         if trace
             .generation
@@ -234,7 +274,9 @@ impl MemoryAccessTraceRecorder {
             || after.zip(through).is_some_and(|(start, end)| start > end)
             || (attempt_id.is_some() && logical_execution_id.is_some())
         {
-            return json!({"available": false, "reason": "Trace generation or cursor changed, no completed trace cursor is available, or selection IDs conflict."});
+            return SnapshotEvidence::unavailable(
+                "Trace generation or cursor changed, no completed trace cursor is available, or selection IDs conflict.",
+            );
         }
         let mut heap = Vec::new();
         let mut heap_dirty = Vec::new();
@@ -296,13 +338,7 @@ impl MemoryAccessTraceRecorder {
                 read_coverage.extend(reads.coverage.iter().cloned());
                 let remaining = MAX_WINDOW_READ_RANGES.saturating_sub(read_ranges.len());
                 reads_truncated |= reads.ranges.len() > remaining;
-                read_ranges.extend(
-                    reads
-                        .ranges
-                        .iter()
-                        .take(remaining)
-                        .map(|range| json!(range)),
-                );
+                read_ranges.extend(reads.ranges.iter().take(remaining).cloned());
                 for range in &reads.ranges {
                     if range.start < range.end
                         && (range.heap_reads > 0
@@ -333,13 +369,7 @@ impl MemoryAccessTraceRecorder {
                 write_coverage.extend(writes.coverage.iter().cloned());
                 let remaining = MAX_WINDOW_WRITE_RANGES.saturating_sub(write_ranges.len());
                 writes_truncated |= writes.ranges.len() > remaining;
-                write_ranges.extend(
-                    writes
-                        .ranges
-                        .iter()
-                        .take(remaining)
-                        .map(|range| json!(range)),
-                );
+                write_ranges.extend(writes.ranges.iter().take(remaining).cloned());
                 for range in &writes.ranges {
                     if range.start < range.end && (range.heap_writes > 0 || range.stable_writes > 0)
                     {
@@ -394,16 +424,13 @@ impl MemoryAccessTraceRecorder {
                 }));
             }
         }
-        json!({
+        let metadata = json!({
             "available": true,
             "window_after": after.map(|v| v.to_string()), "window_through": through.map(|v| v.to_string()),
             "attempt_id": attempt_id.map(|v| v.to_string()), "logical_execution_id": logical_execution_id.map(|v| v.to_string()),
             "execution_count": count.to_string(), "attempts": attempts, "attempt_list_truncated": count > 128,
-            "known_touched_ranges": {"heap": encoded(heap), "stable": encoded(stable)},
-            "known_dirty_ranges": {"heap": encoded(heap_dirty), "stable": encoded(stable_dirty)},
             "read_profile": {
                 "available": read_profiles > 0,
-                "ranges": read_ranges,
                 "observed_reads": observed_reads.to_string(),
                 "observed_bytes": observed_read_bytes.to_string(),
                 "profiled_executions": read_profiles.to_string(),
@@ -417,7 +444,6 @@ impl MemoryAccessTraceRecorder {
             },
             "write_profile": {
                 "available": write_profiles > 0,
-                "ranges": write_ranges,
                 "observed_writes": observed_writes.to_string(),
                 "observed_bytes": observed_write_bytes.to_string(),
                 "profiled_executions": write_profiles.to_string(),
@@ -439,7 +465,17 @@ impl MemoryAccessTraceRecorder {
             "heap_page_fee_total_complete": heap_complete && count > 0,
             "known_stable_page_instructions": stable_fees.to_string(), "stable_page_fee_total_complete": fee_complete && count > 0,
             "semantics": "Positive 64 KiB region coverage from native access tracking and opt-in logical byte-read/write profiles. Logical access ranges may include JIT-elided native accesses; actual page fees and native dirty ranges remain separate observations. Stable coverage includes direct first reads when stable_pages_tracked is true. Byte differences do not establish access history. Missing attempts and recording gaps keep absence unknown."
-        })
+        });
+        let merge = |ranges: Vec<(u64, u64)>| {
+            super::rendering::merge_ranges(ranges.into_iter().filter(|&(start, end)| start < end))
+        };
+        SnapshotEvidence {
+            metadata,
+            touched: [merge(heap), merge(stable)],
+            dirty: [merge(heap_dirty), merge(stable_dirty)],
+            reads: read_ranges,
+            writes: write_ranges,
+        }
     }
 
     fn logical_dictionary(
@@ -911,7 +947,7 @@ impl MemoryAccessTraceRecorder {
         let next_after = events
             .iter()
             .take(limit)
-            .last()
+            .next_back()
             .map(|event| event.sequence_number)
             .or(after);
         let (mut runtime_costs, mut subnet_runtime_costs) = (Vec::new(), Vec::new());
@@ -1118,10 +1154,10 @@ impl WasmMemoryAccessTracer for MemoryAccessTraceRecorder {
             return None;
         }
         let key = (context.kind.to_string(), context.identity.clone());
-        if context.retry {
-            if let Some(id) = trace.logical_retry_slots.get(&key) {
-                return Some(*id);
-            }
+        if context.retry
+            && let Some(id) = trace.logical_retry_slots.get(&key)
+        {
+            return Some(*id);
         }
         // Never shorten an identity and accidentally join different messages.
         if context.identity.len() > 1024
@@ -1232,18 +1268,17 @@ impl WasmMemoryAccessTracer for MemoryAccessTraceRecorder {
             trace.recorded_bytes = trace.recorded_bytes.saturating_sub(bytes);
             traces.recorded_bytes = traces.recorded_bytes.saturating_sub(bytes);
         }
-        if recorded.state != rest::TracedExecutionState::Pending {
-            if let Some(mut pending) = traces
+        if recorded.state != rest::TracedExecutionState::Pending
+            && let Some(mut pending) = traces
                 .canisters
                 .get_mut(&canister_id)
                 .unwrap()
                 .pending_attempts
                 .remove(&attempt_id)
-            {
-                pending.execution.disposition = Some(recorded);
-                Self::publish_attempt(&mut traces, canister_id, pending.execution);
-                return;
-            }
+        {
+            pending.execution.disposition = Some(recorded);
+            Self::publish_attempt(&mut traces, canister_id, pending.execution);
+            return;
         }
         let bytes = serde_json::to_vec(&recorded).map_or(self.memory_limit, |v| {
             v.len().saturating_mul(4).saturating_add(128)
@@ -1936,14 +1971,9 @@ mod tests {
             },
         );
         let trace = recorder.get(canister);
-        let evidence = recorder.snapshot_touched_pages(
-            canister,
-            trace.trace_generation,
-            None,
-            Some(0),
-            None,
-            None,
-        );
+        let evidence = recorder
+            .snapshot_touched_pages(canister, trace.trace_generation, None, Some(0), None, None)
+            .into_summary();
         assert_eq!(
             evidence["known_touched_ranges"]["heap"],
             serde_json::json!([["42", "43"]])
@@ -1986,14 +2016,16 @@ mod tests {
             );
         }
         let trace = recorder.get(canister);
-        let all = recorder.snapshot_touched_pages(
-            canister,
-            trace.trace_generation,
-            None,
-            Some(1),
-            None,
-            Some(logical),
-        );
+        let all = recorder
+            .snapshot_touched_pages(
+                canister,
+                trace.trace_generation,
+                None,
+                Some(1),
+                None,
+                Some(logical),
+            )
+            .into_summary();
         assert_eq!(
             all["known_touched_ranges"]["heap"],
             serde_json::json!([["0", "2"], ["5", "6"]])
@@ -2012,14 +2044,16 @@ mod tests {
             "coverage is not a page-fee estimate"
         );
         assert_eq!(all["known_stable_page_instructions"], "0");
-        let first = recorder.snapshot_touched_pages(
-            canister,
-            trace.trace_generation,
-            None,
-            Some(1),
-            Some(1),
-            None,
-        );
+        let first = recorder
+            .snapshot_touched_pages(
+                canister,
+                trace.trace_generation,
+                None,
+                Some(1),
+                Some(1),
+                None,
+            )
+            .into_summary();
         assert_eq!(first["execution_count"], "1");
         assert_eq!(
             first["known_touched_ranges"]["stable"],
@@ -2028,14 +2062,9 @@ mod tests {
         assert_eq!(trace.executions[0].stable_memory_size, 8_000_000);
         recorder.clear(canister);
         assert_eq!(
-            recorder.snapshot_touched_pages(
-                canister,
-                trace.trace_generation,
-                None,
-                Some(1),
-                None,
-                None
-            )["available"],
+            recorder
+                .snapshot_touched_pages(canister, trace.trace_generation, None, Some(1), None, None)
+                .into_summary()["available"],
             false
         );
     }
@@ -2050,14 +2079,9 @@ mod tests {
         observed.trace.stable_pages_tracked = false;
         recorder.record(canister, observed);
         let trace = recorder.get(canister);
-        let evidence = recorder.snapshot_touched_pages(
-            canister,
-            trace.trace_generation,
-            None,
-            Some(0),
-            None,
-            None,
-        );
+        let evidence = recorder
+            .snapshot_touched_pages(canister, trace.trace_generation, None, Some(0), None, None)
+            .into_summary();
         assert_eq!(evidence["retained_stable_coverage_complete"], false);
         assert_eq!(
             evidence["known_touched_ranges"]["stable"],

@@ -284,11 +284,12 @@ admits PocketIC only with its explicit native feature, rejects `ic-testkit` and 
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
 direct dependency ownership; role comments themselves are not executable policy.
-`make check-features-exhaustive` manually audits every feature combination and
-actual defaults using the same admission rules. It is not invoked by routine
-CI or release validation. The routine matrix deliberately does not cover every
-higher-order interaction; the exhaustive audit remains available for that scope.
-Wasm cache keys omit the four native-only leaves
+`make check-features-exhaustive FEATURES=cdk,candid,executor` audits every subset
+of 1–12 explicitly selected features and actual defaults using the same admission
+rules. Missing, unknown and oversized scopes are refused before graph queries;
+the whole 31-feature power set would exceed two billion selections. This manual
+audit is outside routine CI/release validation. Routine coverage deliberately
+omits other higher-order combinations. Wasm cache keys omit native-only leaves
 only after their exact feature/dependency/target contracts pass validation.
 Changed contracts fail closed. Defaults remain a separate observation. One batch
 validator per target checks every original selection against its graph; cached

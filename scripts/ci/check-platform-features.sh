@@ -3,10 +3,13 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mode=routine
+scope=""
 case "${1:-}" in
     "") [[ $# == 0 ]] || exit 2 ;;
-    --exhaustive) [[ $# == 1 ]] || exit 2; mode=exhaustive ;;
-    *) echo 'usage: check-platform-features.sh [--exhaustive]' >&2; exit 2 ;;
+    --exhaustive)
+        [[ $# == 2 && -n "$2" ]] || { echo 'Select 1–12 comma-separated features for --exhaustive' >&2; exit 2; }
+        mode=exhaustive; scope="$2" ;;
+    *) echo 'usage: check-platform-features.sh [--exhaustive FEATURE,...]' >&2; exit 2 ;;
 esac
 mkdir -p target/feature-graphs
 cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/metadata.json
@@ -28,6 +31,11 @@ gzip_source="$("$root/.tools/host/bin/jq" -er '
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
 cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"
 "$root/.tools/host/bin/jq" '.packages[] | select(.name == "ic-platform") | .features | keys - ["default"]' target/feature-graphs/metadata.json |
+    "$root/.tools/host/bin/jq" --arg scope "$scope" '
+        . as $known | if $scope == "" then . else
+        ($scope | split(",")) as $selected |
+        if ($selected | length) > 12 or any($selected[]; . as $name | . == "" or ($known | index($name)) == null)
+        then error("select 1–12 known feature names") else $selected | unique end end' |
     "$root/.tools/host/bin/jq" --arg mode "$mode" --slurpfile policy scripts/ci/platform-feature-policy.json \
         -f scripts/ci/platform-feature-selections.jq > "$cache/selections.json"
 selection_count="$("$root/.tools/host/bin/jq" length "$cache/selections.json")"

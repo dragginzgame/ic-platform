@@ -662,10 +662,24 @@ class NativeVerifyGateTest(unittest.TestCase):
                 product = [args for command, args in calls if "profiling::" in args]
                 installed = [args for command, args in calls if "system_profiling" in args]
                 self.assertEqual(product, [["--", "-p", "pocket-ic-server", "--lib", "profiling::"]])
+                self.assertEqual(calls[0], ("clippy", ["--", "--no-deps", "--lib", "--", "-D", "warnings"]))
                 self.assertEqual(bool(installed), not refused)
                 self.assertEqual(os.environ["CARGO_TARGET_DIR"], "prior-target")
                 self.assertEqual(os.environ["POCKET_IC_BIN"], "prior-server")
                 self.assertEqual(os.environ["SYSTEM_PROFILE_TEST_SERVER_URL"], "prior-url")
+
+    def test_native_lint_failure_stops_before_build_and_installation(self):
+        spec = importlib.util.spec_from_file_location("profiler_lint_gate_fixture", REPOSITORY / "scripts/ic_profiler.py")
+        provider = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(provider)
+        calls = []
+        def cargo(_root, _manifest, command, args, force):
+            calls.append(command)
+            raise provider.Error("native lint failed")
+        with mock.patch.object(provider, "run"), mock.patch.object(provider, "check_native_graph"), mock.patch.object(provider, "build_directory", return_value=Path("/fixture/.build")), mock.patch.object(provider, "cargo_command", side_effect=cargo):
+            with self.assertRaises(provider.Error):
+                provider.native_verify(Path("/fixture"), {})
+        self.assertEqual(calls, ["clippy"])
 
 
 class NativeToolsTest(unittest.TestCase):

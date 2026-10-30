@@ -534,7 +534,7 @@ def cargo_command(root, manifest, command, arguments, force):
         arguments = arguments[1:]
     if any(arg == "--message-format" or arg.startswith("--message-format=") for arg in arguments):
         raise Error("The scripts manage Cargo's message format to record artifact hashes")
-    package = "pocket-ic-server" if command == "build" else "ic-system-profiler"
+    package = "pocket-ic-server" if command in ("build", "clippy") else "ic-system-profiler"
     # An explicit package selection replaces the default, allowing native
     # integration tests whose test target does not exist in the core package.
     selected = any(arg in ("-p", "--package", "--workspace") or arg.startswith(("-p", "--package="))
@@ -624,6 +624,7 @@ def native_verify(root, manifest):
         target = build_directory(root) / "target"
         os.environ["CARGO_TARGET_DIR"] = str(target)
         os.environ.pop("SYSTEM_PROFILE_TEST_SERVER_URL", None)
+        cargo_command(root, manifest, "clippy", ["--", "--no-deps", "--lib", "--", "-D", "warnings"], False)
         cargo_command(root, manifest, "build", [], False)
         cargo_command(root, manifest, "test", ["--", "--lib"], False)
         cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic-server", "--lib", "profiling::"], False)
@@ -666,7 +667,7 @@ def main(argv=None, *, root=None):
     command.add_argument("--force", action="store_true", help="Regenerate only a checkout already owned by this repository")
     commands.add_parser("check-native-graph", help="Check the selected native server graph without building")
     commands.add_parser("native-verify", help="Build and qualify this provider against the actual server")
-    for name in ("build", "test"):
+    for name in ("build", "test", "clippy"):
         command = commands.add_parser(name, help=f"Prepare and run native cargo {name}; record provenance")
         command.add_argument("--force", action="store_true", help="Regenerate an existing owned checkout after source edits")
         command.add_argument("cargo_args", nargs=argparse.REMAINDER, help="Additional native Cargo arguments after --")

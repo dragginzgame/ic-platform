@@ -22,10 +22,16 @@ at `.build/ic/.git/ic-profiler-receipt.json`; check its provider/consumer identi
 before retaining it with measurements.
 
 `scripts/ic_profiler.py native-verify` owns the complete native gate: prerequisite
-and graph admission, server build, recorder and server-library product tests,
+and graph admission, strict primary-package Clippy, server build, recorder and server-library product tests,
 and the installed profiling tests
 against that exact server. Profiling tests serialize their whole-server recording
 windows; independent workloads must not contaminate one another's cycle totals.
+
+`scripts/ic_profiler.py clippy -- --no-deps --lib -- -D warnings` checks the
+native server package without linting the full upstream dependency workspace.
+Retain the pinned IC Clippy configuration; no blanket warning allowances apply.
+The paired Profiler product sources also need the narrow CLI/rendering lint
+correction tracked by Platform #98. Old source pins retain their prior gate.
 
 The provider's `profiler/` sources and the consumer's `profiler/` sources merge at
 the declared IC destination. Overlapping files are rejected. Their separate
