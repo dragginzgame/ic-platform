@@ -4,16 +4,19 @@
 
 ### ⬆️ Dependencies
 
-- Adopt published Metrics 0.19.0 in the Profiler native source profile's Cargo and
+- Adopt published Metrics 0.21.0 in the Profiler native source profile's Cargo and
   Bazel inputs. Preserve arithmetic-only features and existing logical reports.
-- Adopt published Host Process/FS/Artifacts 0.71.0, Wire 0.9.0 and gzip-only
-  Platform 0.10.0 in the native Cargo/Bazel inputs. Its runtime-only singleton
+- Adopt published Host Process/FS 0.72.0, Wire 0.10.0 and gzip-only
+  Platform 0.11.1 in the native Cargo/Bazel inputs. Its runtime-only singleton
   guard permits coexistence with the pinned workspace's registry executor
   ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
 - Keep the explicit ICPROF03 private frame identity and unchanged Wire core
-  framing. Endpoint features stay disabled; Metrics 0.19 supplies its own native
-  Wire 0.8 metadata without changing arithmetic or Serde layouts
+  framing. Metrics and process transport share Wire 0.10; endpoints and
+  Platform-type schemas remain disabled, with unchanged arithmetic/Serde layouts
   ([Observability #103 — Published Metrics metadata alignment](https://github.com/dragginzgame/ic-observability/issues/103)).
+
+- Keep Platform-owned gzip on its declared Host Artifacts 0.71 supplier; Host
+  Process/FS 0.72 select Host Artifacts 0.72 without a direct codec dependency.
 
 ### 🧪 Testing
 

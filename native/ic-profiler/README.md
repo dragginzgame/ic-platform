@@ -48,13 +48,12 @@ cadence; it changes no scheduler calculation or charging behavior.
 
 Adapters stay inside the provider's IC workspace. The consumer recorder selects
 only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
-Bazel inputs. The recorder also consumes published IC Metrics 0.19 scalar
+Bazel inputs. The recorder also consumes published IC Metrics 0.21 scalar
 arithmetic; this provider owns its native workspace and Bazel locks, distinct
 from the IC workspace's internal `ic-metrics` package. Neither measurement
 counters nor the gzip facade own charging policy. The gzip facade delegates to
-the same pinned IC Tooling supplier as Host process and has no dependency back
-to this workspace, PocketIC or
-the native provider. Compression implementation
+Platform's declared IC Tooling supplier, independently of Host process, and has
+no dependency back to this workspace, PocketIC or the native provider. Compression implementation
 stays in Tooling; the consumer retains levels, import limits and bundle semantics.
 
 The PocketIC profile selects the `ic-admin` library without its CLI-only NNS
@@ -123,21 +122,21 @@ a distinct native dependency; PNG mechanics and budgets stay product-owned.
 ## Host process and private Wire inputs
 
 The paired Profiler consumer supplies the Host process policy adapter and the
-IC Wire private process DTOs. This profile wires IC Wire 0.9.0 and
+IC Wire private process DTOs. This profile wires IC Wire 0.10.0 and
 `ic-host-process` into both Cargo and Bazel, retaining the 60 KiB consumer frame
 limit. Old ICP2/JSON process senders and receivers must be rebuilt together.
 Saved reports and profile bundle formats do not change. Generic OS observations
 and child/gate mechanics belong to Host; Profiler retains capture activation,
 pinned root selection, cadence, aggregation, diagnostics and CLI output.
 
-The direct Wire 0.9 transport keeps endpoint features disabled. Metrics 0.19
-uses Wire 0.8.0 for its own native schema metadata; these traits are not used by
-the Serde-based Profiler process frames. Arithmetic and saved layouts are
-unchanged; see the
+Process frames and Metrics 0.21 metadata share Wire 0.10. Only Metrics' native
+TypeScript metadata feature is active; endpoints and Platform-type schemas stay
+disabled. Arithmetic and saved layouts are unchanged; see the
 [Metrics metadata adoption](https://github.com/dragginzgame/ic-observability/issues/103).
 
-The selected recorder and native graph use published Host Process, Host FS and
-Host Artifacts 0.71.0 plus gzip-only Platform 0.10.0 from crates.io. The published
+The selected recorder and native graph use published Host Process/FS 0.72.0
+and gzip-only Platform 0.11.1 from crates.io. Platform selects Host Artifacts
+0.71 for gzip, while the process family selects Host Artifacts 0.72. The published
 observation and workload APIs replace the temporary Tooling/Platform Git library
 suppliers. Cargo and Bazel locks record registry checksums; there is no downstream
 Cargo patch or mixed registry/Git Host family. Gzip remains a Platform facade,
@@ -145,7 +144,7 @@ with no new canister/runtime feature. The native source profile itself still
 requires an immutable Platform Git pin for the patched IC source and adapters.
 Native macOS execution remains separate qualification.
 
-Platform 0.10.0 retains the runtime-only executor singleton guard, allowing
+Platform 0.11.1 retains the runtime-only executor singleton guard, allowing
 this gzip-only graph to coexist with the pinned workspace's registry executor.
 The guard remains inactive here; the recorder never enables Platform's runtime.
 See
