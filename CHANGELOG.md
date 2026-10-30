@@ -11,6 +11,13 @@
   guard permits coexistence with the pinned workspace's registry executor
   ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
 
+### 🧪 Testing
+
+- Separate event-detail truncation from metadata exhaustion in the installed
+  pricing regression. Keep the real cycle-balance comparison, leave metadata
+  headroom and report complete pricing evidence on failure
+  ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
+
 ## [0.9.1] - 2026-10-30
 
 ### 🐛 Fixed
