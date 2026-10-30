@@ -123,12 +123,17 @@ a distinct native dependency; PNG mechanics and budgets stay product-owned.
 ## Host process and private Wire inputs
 
 The paired Profiler consumer supplies the Host process policy adapter and the
-IC Wire private process DTOs. This profile wires IC Wire 0.7.25 and
+IC Wire private process DTOs. This profile wires IC Wire 0.8.0 and
 `ic-host-process` into both Cargo and Bazel, retaining the 60 KiB consumer frame
 limit. Old ICP2/JSON process senders and receivers must be rebuilt together.
 Saved reports and profile bundle formats do not change. Generic OS observations
 and child/gate mechanics belong to Host; Profiler retains capture activation,
 pinned root selection, cadence, aggregation, diagnostics and CLI output.
+
+The direct Wire 0.8 transport keeps endpoint features disabled. Metrics retains
+Wire 0.7.25 for its own native schema metadata; these traits are not used by the
+Profiler process frames. Track the supplier alignment in
+[Observability #103 — Align Metrics schema traits with published Wire 0.8](https://github.com/dragginzgame/ic-observability/issues/103).
 
 The selected recorder and native graph use published Host Process, Host FS and
 Host Artifacts 0.70.5 plus gzip-only Platform 0.9.1 from crates.io. The published
