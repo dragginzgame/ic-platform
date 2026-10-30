@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Remove `wire-schema` and Platform’s Principal/Account Wire trait implementations.
+  Schema integration moves to Wire; consumers must remove the Platform feature
+  and adopt the coordinated Wire integration when supplied. Principal/Account
+  bytes and Serde stay unchanged. No compatibility feature or wrapper is retained.
+
+### 🧹 Cleanup
+
+- Remove the production Wire and direct JSON dependencies and retire schema-only
+  CI/fixtures. Keep Wire 0.9 in independent test/tooling consumers. Browser setup
+  now uses its existing compiler-floor fixture for Node/npm identities.
+
 ## [0.10.0] - 2026-10-30
 
 ### ⚠️ Breaking

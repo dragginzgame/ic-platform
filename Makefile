@@ -8,8 +8,6 @@ export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
-LOCAL_TOOL_INSTALL_TARGETS += install-wire-tools
-LOCAL_TOOL_CHECK_TARGETS += wire-tools-check
 LOCAL_TOOL_INSTALL_TARGETS += install-browser-tools
 LOCAL_TOOL_CHECK_TARGETS += browser-tools-check
 include make/consumer.mk
@@ -43,16 +41,9 @@ install-release-editor:
 release-editor-check:
 	+bash scripts/release/editor.sh check
 
-.PHONY: install-wire-tools wire-tools-check check-wire-schema
-install-wire-tools:
-	bash scripts/dev/wire-tools.sh install
-wire-tools-check:
-	bash scripts/dev/wire-tools.sh check
-check-wire-schema: wire-tools-check
-	bash scripts/ci/check-principal-wire-schema.sh scripts/fixtures/wire-schema/node_modules/typescript/lib/tsc.js
-
 .PHONY: install-browser-tools browser-tools-check check-browser check-browser-runtime
-install-browser-tools: wire-tools-check
+install-browser-tools:
+	node scripts/ci/browser-toolchain.mjs
 	npm ci --prefix packages/browser --ignore-scripts --no-audit --no-fund
 	npm ci --prefix scripts/fixtures/browser-compiler-floor --ignore-scripts --no-audit --no-fund
 browser-tools-check:
@@ -127,14 +118,14 @@ check-native-provider:
 check-inventory:
 	bash scripts/ci/check-platform-inventory.sh
 check-pins:
-	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/wire-schema --node-version "$$(node -p 'require("./scripts/fixtures/wire-schema/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/wire-schema/package.json").engines.npm')"
-	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/wire-schema/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/wire-schema/package.json").engines.npm')"
+	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/browser-compiler-floor --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
+	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
 	bash scripts/release/test-editor-bootstrap.sh
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 	bash scripts/ci/test-release-changelog.sh
 ci:
-	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-wire-schema check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
+	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
 
 version release-version:
 	@bash scripts/release/adapter.sh version

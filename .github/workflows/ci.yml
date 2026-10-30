@@ -66,7 +66,7 @@ jobs:
           node-version: '24.21.0'
           package-manager-cache: false
       - name: Prepare pinned npm
-        run: npm install --global --ignore-scripts "$(node -p 'require("./scripts/fixtures/wire-schema/package.json").packageManager')"
+        run: npm install --global --ignore-scripts "$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").packageManager')"
       - name: Prepare shared tools
         run: make install-tools
       - name: Verify tools

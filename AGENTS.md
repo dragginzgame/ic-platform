@@ -20,6 +20,9 @@ Read [the current handoff](docs/status/current.md), then
   Explicit upstream-coupled exports belong to the documented contract.
 - No default features. Executor-only builds must remain Candid-free; host parser
   features must never be enabled by canister/runtime features.
+- The maintainer moved Principal/Account Wire schema integration to Wire. The
+  published Platform facade must not depend on Wire or implement its schema
+  trait. Keep Principal/Account bytes and Serde here; Wire remains tooling-only.
 - Storage implementation and allocation are out of scope. The reviewed CDK
   stable passthroughs preserve upstream bytes and semantics; they do
   not transfer storage ownership. Wire, Testkit, Host, Canic and Query

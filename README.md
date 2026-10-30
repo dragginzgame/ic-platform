@@ -38,7 +38,6 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `principal` | Owned Principal/Account bytes, text and Serde; no external Principal, hashing or Candid |
 | `principal-external` | Registry Principal identity and byte conversions; implies principal, no hashing or Candid |
 | `principal-self-authenticating` | Explicit unchanged upstream self-authentication; implies principal-external |
-| `wire-schema` | Native-only Wire metadata for owned Principal and Account; implies principal, excludes metadata dependencies on Wasm |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
@@ -104,19 +103,17 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-`wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.8.0.
-It is excluded from Wasm dependencies, even when selected. See the
-[migration contract](docs/migration.md#owned-principal-and-account-wire-metadata).
-Prepare Node 24.21.0 and npm 12.2.0, then run `make install-wire-tools`
-(or `make install-tools`) to install integrity-locked TypeScript 7.0.2.
-`make check-wire-schema` qualifies a standalone Rust 1.91 consumer against generated
-TS request/response bytes and malformed-frame refusals. It runs after Clippy in
-`make ci` on Linux and both macOS architectures. Validation installs nothing and
-retains its fixture under `target/`. `make wire-tools-check` admits prepared tools
-offline; versions are declared in `scripts/fixtures/wire-schema/package.json`.
-After explicitly preparing a published Platform release in Cargo's registry cache,
-append `--published X.Y.Z` to `check-principal-wire-schema.sh` to verify that exact
-registry artifact rather than the checkout. This checks both owned metadata types.
+Platform’s pending 0.11 cut removes `wire-schema`. Principal and Account retain
+their existing Serde representations; Wire owns the schema integration. See the
+[migration contract](docs/migration.md#owned-principal-and-account-wire-metadata)
+for the coordinated Wire handoff and consumer requirements.
+
+Browser SDK development uses Node 24.21.0 and npm 12.2.0. Run
+`make install-browser-tools` (or `make install-tools`) to prepare its pinned
+TypeScript compilers and SDK fixtures. `make check-browser` checks strict
+TypeScript, adapters and packed consumers. Node/npm setup identities live in
+`scripts/fixtures/browser-compiler-floor/package.json`; the browser package
+selects its development compiler independently.
 
 `bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git /tmp/platform-advisory-attempt`
 audits both maintained lockfiles without compiling feature matrices. Prepare
