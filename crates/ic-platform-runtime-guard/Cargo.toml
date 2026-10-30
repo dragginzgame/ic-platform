@@ -1,0 +1,17 @@
+[package]
+name = "ic-platform-runtime-guard"
+description = "Internal Cargo singleton guard for the IC Platform executor"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = ["crates-io"]
+links = "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md"
+include = ["src/**", "LICENSE", "Cargo.toml", "build.rs"]
+
+[features]
+default = []
+
+[lints]
+workspace = true

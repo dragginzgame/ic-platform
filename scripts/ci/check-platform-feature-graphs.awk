@@ -71,6 +71,7 @@ function reject(reason) {
     found_pocket = 0
     found_blake3 = 0
     found_gzip = 0
+    found_guard = 0
     for (i = 1; i <= count[key]; i++) {
         line = lines[key, i]
         n = split(line, f, " ")
@@ -125,6 +126,10 @@ function reject(reason) {
         if (host_capability == "candid-parser" && !parser) reject("unselected host parser")
         if (host_capability == "agent" && !agent) reject("unselected host Agent")
         if (platform_forbidden("retired-cdk", name)) reject("external CDK/executor/IC0 supplier is retired")
+        if (name == "ic-platform-runtime-guard") {
+            if (!executor || (line != guard && line != guard " (*)")) reject("unqualified runtime singleton guard")
+            found_guard = 1
+        }
         if (name == "ic-platform-macros" && (!cdk || (line != generator && line != generator " (*)"))) reject("unqualified generator")
         if (name == "ic-canister-sig-creation" || name == "ic-signature-verification") reject("retired signature package")
         if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified BLS")
@@ -139,6 +144,7 @@ function reject(reason) {
         }
         if ((name == "candid" || name == "candid_derive") && !candid) reject("unexpected Candid")
     }
+    if (executor && !found_guard) reject("missing runtime singleton guard")
     if (enabled("stable-structures") && !found_storage) reject("missing selected storage substrate")
     if (enabled("ed25519") && (!found_ed || !found_curve)) reject("missing selected Dalek")
     if (pocket && !found_pocket) reject("missing selected PocketIC")

@@ -1,0 +1,74 @@
+{
+  "scope": "Isolated Candid 0.10.39 reader experiment; no production codec adoption",
+  "sizes": {
+    "baseline": {
+      "raw_bytes": 977025,
+      "stripped_bytes": 794205,
+      "sha256": "86bd777e82c53747b3068af5c71c01bf515f46f3de11dacb8396e9f4f3053165"
+    },
+    "reader": {
+      "raw_bytes": 943165,
+      "stripped_bytes": 771936,
+      "sha256": "f735f9b153eaabed67ce79a561ad594e5a9e890ec67ba0cfdd2a3217df71c26a",
+      "saved_bytes": 22269
+    },
+    "compact": {
+      "raw_bytes": 942875,
+      "stripped_bytes": 771338,
+      "sha256": "9d80ad846c0ce3cb04f87b965f6ad3096431b01a42577ac3535e27bfb987bf8e",
+      "saved_bytes": 22867
+    }
+  },
+  "results": {
+    "reader-results": {
+      "cases": 159960,
+      "sha256": "c18476075615f46187aecba16c9749d0fa1587fc204eb1139166bfe0e914b7be"
+    },
+    "compact-results": {
+      "cases": 159960,
+      "sha256": "c18476075615f46187aecba16c9749d0fa1587fc204eb1139166bfe0e914b7be"
+    },
+    "reader-typed-results": {
+      "cases": 31245,
+      "sha256": "c79fffeeb58390ca932183831cd76d763f99d7ed9bb55a69c5668015a8da6736"
+    },
+    "compact-typed-results": {
+      "cases": 31245,
+      "sha256": "c79fffeeb58390ca932183831cd76d763f99d7ed9bb55a69c5668015a8da6736"
+    }
+  },
+  "limits": [
+    "Status-codec fixture; not a production application size measurement",
+    "Diagnostic text and public binrw traits are not preserved",
+    "Corpus comparison is not exhaustive protocol or fuzz qualification",
+    "Cargo patches are experiment supply only, not downstream distribution"
+  ],
+  "date": "2026-10-30",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "target": "wasm32-unknown-unknown",
+  "profile": "Default Cargo release (opt-level 3), custom sections excluded from size comparison",
+  "canic": {
+    "pull_request": "https://github.com/dragginzgame/canic/pull/717",
+    "commit": "b17394409ed0c3c7eac7dbea7c215d0034cfa8dc",
+    "isolated_checkout": "/tmp/canic-candid-printer-20261030",
+    "validation": "Strict Host/macro and Wasm facade lint; 58 macro, 17 protocol/discovery and 3 build-command tests; formatting pass"
+  },
+  "dependencies_removed_from_probe_runtime": [
+    "binrw 0.15.2",
+    "array-init 2.1.0",
+    "bytemuck 1.25.2",
+    "byteorder 1.5.0"
+  ],
+  "build_dependency_removed": "binrw_derive 0.15.2; not embedded in Wasm",
+  "validation": {
+    "owner_clippy": "passed before tests",
+    "variant_clippy": "all three harnesses; both changed upstream source variants",
+    "differential_cases_per_candidate": 191205,
+    "frozen_management_tests_per_variant": 5,
+    "upstream_unit_tests": "15 passed, 1 ignored",
+    "msrv": "Rust 1.91.0 compact Wasm check; candidate sources identical to final reproduction",
+    "installed": "PocketIC 16.1.0 Linux; final three variants installed; 3 frozen statuses, 246 matching refusals, 15 matching accepted mutations",
+    "formatting": "make fmt-check check-formatting; shellcheck and JS syntax checks pass"
+  },
+  "receipt_directory": "target/candid-reader.XD3MEw"
+}

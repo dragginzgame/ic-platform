@@ -155,8 +155,11 @@ Candid contract types stay external. Do not add Candid to the owned type.
 Platform now owns the embedded executor and IC0 implementations. This supersedes
 the registry =2.0.0 / =1.2.0 constraints and no-executor-fork restriction. Keep
 exactly one executor across Platform, Timers and application callbacks. Preserve
-the inherited Cargo links guard; never admit an external ic-cdk-executor beside
-the embedded owner. Existing public module paths remain; task/method handles
+the inherited Cargo links guard in the optional, dependency-free internal
+`ic-platform-runtime-guard` package, selected only by `executor`. Its requirement
+must exactly match the facade version so different runtime owners cannot share a
+guard. Non-runtime consumers may coexist with an unrelated external executor;
+never admit an external ic-cdk-executor beside the enabled embedded owner. Existing public module paths remain; task/method handles
 now have Platform identity and require coordinated consumer adoption.
 
 Retain SlotMap generation checks. The maintainer selected standard Vec task lists

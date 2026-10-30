@@ -3,6 +3,7 @@ def require(condition; $message):
   [condition] as $results |
   if ($results | length) > 0 and all($results[]; . == true)
   then . else error($message) end;
+. as $metadata |
 [.packages[] | select(.name == "ic-platform")] |
 if length == 1 then .[0] else error("expected exactly one ic-platform package") end |
 require((.features.candid == ["principal-external", "dep:candid", "candid/bignum"] and
@@ -11,7 +12,12 @@ require(((.features | keys) == $policy[0].features); "Platform feature inventory
 require((.features["candid-endpoint"] == ["cdk", "candid"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
 require((.features.principal == ["dep:crc32fast", "dep:data-encoding", "dep:serde", "dep:thiserror"] and .features["principal-external"] == ["principal", "dep:ic_principal"] and .features["principal-self-authenticating"] == ["principal-external", "ic_principal/self_authenticating"] and ([.dependencies[] | select(.name == "ic_principal")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["convert"])); "Owned Principal, external byte conversion and self-authentication must remain separate") |
 require((.features.default == []); "Platform must declare empty default features") |
-require((.features.executor == ["ic0", "dep:slotmap"] and ([.dependencies[] | select(.name == "ic-cdk-executor" or .name == "ic0" or .name == "smallvec")] | length == 0) and .links == "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md"); "Platform must own the sole executor, use Vec task lists and retain its Cargo singleton guard") |
+require((.features.executor == ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"] and ([.dependencies[] | select(.name == "ic-cdk-executor" or .name == "ic0" or .name == "smallvec")] | length == 0) and .links == null); "Platform must own the sole executor, use Vec task lists and retain its Cargo singleton guard") |
+require((. as $p | ([.dependencies[] | select(.name == "ic-platform-runtime-guard")] |
+    length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].target == null and .[0].req == ("=" + $p.version)) and
+    ([$metadata.packages[] | select(.name == "ic-platform-runtime-guard")] |
+    length == 1 and .[0].version == $p.version and .[0].dependencies == [] and .[0].features == {default: []} and
+    .[0].links == "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md")); "Executor must select the exact coordinated, dependency-free singleton guard") |
 require((. as $p | .features.cdk == ["runtime", "dep:ic-platform-macros"] and .features.runtime == ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))); "CDK must select only the owned adapters, qualified executor/ic0 and coordinated generator") |
 require((.features.secp256k1 == ["principal-external", "dep:ic-secp256k1"] and ([.dependencies[] | select(.name == "ic-secp256k1")] | length == 1 and .[0].optional and .[0].req == "=0.3.0" and .[0].target == "cfg(not(target_family = \"wasm\"))")); "secp256k1 must remain exact, optional and native-only") |
 require((.features.ic0 == []); "IC0 must use owned bindings without package dependencies") |

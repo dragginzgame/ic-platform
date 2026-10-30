@@ -18,7 +18,7 @@ function platform_forbidden(family, name) {
     if (family == "retired-cdk")
         return name ~ /^ic-cdk/ || name == "ic0"
     if (family == "external-codecs")
-        return name ~ /^(ic-cdk[^ ]*|ic0|ic-platform-macros|ic-agent|pocket-ic|ic-testkit|candid_parser|reqwest|tokio)$/
+        return name ~ /^(ic-cdk[^ ]*|ic0|ic-platform-macros|ic-platform-runtime-guard|ic-agent|pocket-ic|ic-testkit|candid_parser|reqwest|tokio)$/
     return 0
 }
 # Standalone use reports whether the graph contains a forbidden package.

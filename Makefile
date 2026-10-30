@@ -2,6 +2,7 @@
 SHARED_TOOLING_RUST := 1
 FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/ic-call-consumer/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
+FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
@@ -67,22 +68,22 @@ publish-check: host-tools-check
 	bash scripts/release/publish.sh check
 
 check:
-	cargo check -p ic-call -p ic-platform -p ic-platform-macros --all-targets --all-features --locked
+	cargo check -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked
 test:
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
-	cargo test -p ic-call -p ic-platform -p ic-platform-macros --all-features --locked
+	cargo test -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
 clippy:
-	cargo clippy -p ic-call -p ic-platform -p ic-platform-macros --all-targets --all-features --locked -- -D warnings
+	cargo clippy -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked -- -D warnings
 docs-check:
-	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-call -p ic-platform -p ic-platform-macros --all-features --no-deps --locked
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
 wasm-check:
 	cargo check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 msrv: host-tools-check
 	@set -eu; \
 	platform_msrv="$$(bash scripts/ci/read-platform-msrv.sh)"; \
-	cargo +"$$platform_msrv" test -p ic-call -p ic-platform -p ic-platform-macros --all-features --locked; \
+	cargo +"$$platform_msrv" test -p ic-call -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked; \
 	cargo +"$$platform_msrv" check -p ic-call -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
@@ -94,6 +95,7 @@ check-primitives:
 		done; \
 	done
 check-consumer:
+	bash scripts/ci/test-runtime-singleton.sh
 	bash scripts/ci/test-platform-msrv.sh
 	bash scripts/ci/test-platform-consumer-admission.sh
 	bash scripts/ci/test-ic-call-consumer-admission.sh
@@ -146,7 +148,7 @@ release-prepared-check release-committed-check release-tagged-check release-push
 release-commit-check:
 	@bash scripts/release/adapter.sh commit-check
 release-files:
-	@printf 'Cargo.toml\0Cargo.lock\0CHANGELOG.md\0scripts/fixtures/cdk-runtime/Cargo.lock\0'
+	@printf 'Cargo.toml\0Cargo.lock\0CHANGELOG.md\0scripts/fixtures/cdk-runtime/Cargo.lock\0ci/dependency-pinning-exceptions.json\0'
 
 .PHONY: check-runtime
 check-runtime:
@@ -160,5 +162,6 @@ check-runtime-lock:
 	bash scripts/ci/check-icrc-source.sh
 	bash scripts/ci/test-icrc-source.sh
 	bash scripts/release/runtime-lock.sh check
+	bash scripts/release/runtime-pin.sh check
 	bash scripts/ci/test-runtime-lock.sh
 	bash scripts/ci/test-platform-runtime-graph.sh

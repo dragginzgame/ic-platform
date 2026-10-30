@@ -36,6 +36,34 @@ use Debug formatting. Native tools retain the printer for diagnosis. Another
 dependency explicitly selecting Candid's printer can re-enable it; graph checks
 reject its implicit selection through the management-only Wasm profile.
 
+## Runtime-only Cargo singleton guard (#103)
+
+Pending 0.9.1 moves only Cargo's inherited executor `links` declaration and empty
+build script into `ic-platform-runtime-guard`. The facade's `executor` feature
+selects this optional, dependency-free internal package. Its exact version must
+match the facade; a compatible range could let different executor owners share
+one guard and evade Cargo's refusal. Release preparation coordinates that exact
+requirement, the documented pin exception and the qualification lock. Publication
+includes the helper before the facade. It exports no API, implementation or
+runtime symbols; the executor and IC0 sources, licenses and callback semantics
+stay unchanged in Platform.
+
+Native default/gzip-only and IC0-only consumers can resolve alongside registry
+`ic-cdk-executor =2.0.0`. Enabling `executor`, `runtime` or `cdk` still rejects
+that mixed graph, with and without gzip. `scripts/ci/test-runtime-singleton.sh`
+checks real registry resolution and compiles the gzip consumer. It also checks
+two facade patch versions: native-only and single-runtime graphs resolve, while
+two enabled runtime owners fail. Cargo resolves all
+features declared by workspace roots when making a lockfile: a native root that
+itself offers a Platform-runtime feature still requires compatible executor
+suppliers, even when that feature is inactive. Merely using a non-runtime
+capability through a dependency does not activate Platform's optional guard.
+
+This fixes the packaging prerequisite for native Profiler adoption tracked in
+[#103](https://github.com/dragginzgame/ic-platform/issues/103). Publication and
+adoption of the supplying release remain separate; the native source profile
+continues to select its existing published Platform version.
+
 ## Embedded IC0 and executor
 
 The maintainer authorized this breaking production-dependency cut on 2026-10-30.
@@ -63,8 +91,9 @@ harness, source variants and artifact hashes are retained under
 `target/vec-smallvec-benchmark/`.
 
 Cargo's inherited executor `links` value rejects combining this owner with the
-registry executor, and rejects two new Platform package identities. Cargo applies
-this guard package-wide, including native/default-only selections. Rebuild the
+registry executor, and rejects two new Platform package identities. Release 0.9.0 applies
+this guard package-wide, including native/default-only selections; the pending
+[#103 fix](#runtime-only-cargo-singleton-guard-103) narrows it to executor selections. Rebuild the
 application and all runtime consumers against the same new Platform line. Timers
 must adopt that requirement before production migration; a transitive old
 Platform requirement cannot be bridged with handle conversions. The installed

@@ -1,0 +1,188 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -79,9 +79,6 @@
+ [dependencies.anyhow]
+ version = "1.0"
+ 
+-[dependencies.byteorder]
+-version = "1.5.0"
+-
+ [dependencies.candid_derive]
+ version = "=0.10.39"
+ 
+--- a/src/de.rs
++++ b/src/de.rs
+@@ -15,7 +15,6 @@
+     types::subtype::{subtype_with_config, Gamma, OptReport},
+ };
+ use anyhow::{anyhow, Context};
+-use byteorder::{LittleEndian, ReadBytesExt};
+ use serde::de::{self, Visitor};
+ use std::fmt::Write;
+ use std::{collections::VecDeque, io::Cursor, mem::replace, rc::Rc};
+@@ -492,7 +491,7 @@
+     }
+     #[inline]
+     fn read_bool_val(&mut self) -> Result<bool> {
+-        let byte = self.input.read_u8()?;
++        let byte = u8::from_le_bytes(read_number(&mut self.input)?);
+         match byte {
+             0 => Ok(false),
+             1 => Ok(true),
+@@ -890,19 +889,25 @@
+     }
+ }
+ 
++fn read_number<const N: usize>(input: &mut impl std::io::Read) -> std::io::Result<[u8; N]> {
++    let mut bytes = [0; N];
++    input.read_exact(&mut bytes)?;
++    Ok(bytes)
++}
++
+ macro_rules! primitive_impl {
+-    ($ty:ident, $type:expr, $fast:expr, $cost:literal, $($value:tt)*) => {
++    ($ty:ident, $type:expr, $fast:expr, $cost:literal) => {
+         paste::item! {
+             fn [<deserialize_ $ty>]<V>(self, visitor: V) -> Result<V::Value>
+             where V: Visitor<'de> {
+                 if self.primitive_vec_fast_path == Some($fast) {
+-                    let val = self.input.$($value)*().map_err(|_| Error::msg(format!("Cannot read {} value", stringify!($type))))?;
++                    let val = read_number::<{ std::mem::size_of::<$ty>() }>(&mut self.input).map($ty::from_le_bytes).map_err(|_| Error::msg(format!("Cannot read {} value", stringify!($type))))?;
+                     return visitor.[<visit_ $ty>](val);
+                 }
+                 self.unroll_type()?;
+                 check!(*self.expect_type == $type && *self.wire_type == $type, stringify!($type));
+                 self.add_cost($cost)?;
+-                let val = self.input.$($value)*().map_err(|_| Error::msg(format!("Cannot read {} value", stringify!($type))))?;
++                let val = read_number::<{ std::mem::size_of::<$ty>() }>(&mut self.input).map($ty::from_le_bytes).map_err(|_| Error::msg(format!("Cannot read {} value", stringify!($type))))?;
+                 visitor.[<visit_ $ty>](val)
+             }
+         }
+@@ -982,64 +987,16 @@
+         v
+     }
+ 
+-    primitive_impl!(i8, TypeInner::Int8, PrimitiveType::Int8, 1, read_i8);
+-    primitive_impl!(
+-        i16,
+-        TypeInner::Int16,
+-        PrimitiveType::Int16,
+-        2,
+-        read_i16::<LittleEndian>
+-    );
+-    primitive_impl!(
+-        i32,
+-        TypeInner::Int32,
+-        PrimitiveType::Int32,
+-        4,
+-        read_i32::<LittleEndian>
+-    );
+-    primitive_impl!(
+-        i64,
+-        TypeInner::Int64,
+-        PrimitiveType::Int64,
+-        8,
+-        read_i64::<LittleEndian>
+-    );
+-    primitive_impl!(u8, TypeInner::Nat8, PrimitiveType::Nat8, 1, read_u8);
+-    primitive_impl!(
+-        u16,
+-        TypeInner::Nat16,
+-        PrimitiveType::Nat16,
+-        2,
+-        read_u16::<LittleEndian>
+-    );
+-    primitive_impl!(
+-        u32,
+-        TypeInner::Nat32,
+-        PrimitiveType::Nat32,
+-        4,
+-        read_u32::<LittleEndian>
+-    );
+-    primitive_impl!(
+-        u64,
+-        TypeInner::Nat64,
+-        PrimitiveType::Nat64,
+-        8,
+-        read_u64::<LittleEndian>
+-    );
+-    primitive_impl!(
+-        f32,
+-        TypeInner::Float32,
+-        PrimitiveType::Float32,
+-        4,
+-        read_f32::<LittleEndian>
+-    );
+-    primitive_impl!(
+-        f64,
+-        TypeInner::Float64,
+-        PrimitiveType::Float64,
+-        8,
+-        read_f64::<LittleEndian>
+-    );
++    primitive_impl!(i8, TypeInner::Int8, PrimitiveType::Int8, 1);
++    primitive_impl!(i16, TypeInner::Int16, PrimitiveType::Int16, 2);
++    primitive_impl!(i32, TypeInner::Int32, PrimitiveType::Int32, 4);
++    primitive_impl!(i64, TypeInner::Int64, PrimitiveType::Int64, 8);
++    primitive_impl!(u8, TypeInner::Nat8, PrimitiveType::Nat8, 1);
++    primitive_impl!(u16, TypeInner::Nat16, PrimitiveType::Nat16, 2);
++    primitive_impl!(u32, TypeInner::Nat32, PrimitiveType::Nat32, 4);
++    primitive_impl!(u64, TypeInner::Nat64, PrimitiveType::Nat64, 8);
++    primitive_impl!(f32, TypeInner::Float32, PrimitiveType::Float32, 4);
++    primitive_impl!(f64, TypeInner::Float64, PrimitiveType::Float64, 8);
+ 
+     fn is_human_readable(&self) -> bool {
+         false
+--- a/src/ser.rs
++++ b/src/ser.rs
+@@ -5,7 +5,6 @@
+ #[cfg(feature = "value")]
+ use super::types::value::IDLValue;
+ use super::types::{internal::Opcode, Field, Type, TypeEnv, TypeInner};
+-use byteorder::{LittleEndian, WriteBytesExt};
+ use leb128::write::{signed as sleb128_encode, unsigned as leb128_encode};
+ use std::collections::{BTreeMap, TryReserveError};
+ use std::io;
+@@ -114,10 +113,10 @@
+ }
+ 
+ macro_rules! serialize_num {
+-    ($name:ident, $ty:ty, $($method:tt)*) => {
++    ($name:ident, $ty:ty) => {
+         paste::item! {
+             fn [<serialize_ $name>](self, v: $ty) -> Result<()> {
+-                self.value.$($method)*(v)?;
++                self.write(&v.to_le_bytes())?;
+                 Ok(())
+             }
+         }
+@@ -145,18 +144,18 @@
+     fn serialize_u128(self, v: u128) -> Result<()> {
+         crate::types::leb128::encode_nat(&mut self.value, v)
+     }
+-    serialize_num!(nat8, u8, write_u8);
+-    serialize_num!(nat16, u16, write_u16::<LittleEndian>);
+-    serialize_num!(nat32, u32, write_u32::<LittleEndian>);
+-    serialize_num!(nat64, u64, write_u64::<LittleEndian>);
+-
+-    serialize_num!(int8, i8, write_i8);
+-    serialize_num!(int16, i16, write_i16::<LittleEndian>);
+-    serialize_num!(int32, i32, write_i32::<LittleEndian>);
+-    serialize_num!(int64, i64, write_i64::<LittleEndian>);
++    serialize_num!(nat8, u8);
++    serialize_num!(nat16, u16);
++    serialize_num!(nat32, u32);
++    serialize_num!(nat64, u64);
++
++    serialize_num!(int8, i8);
++    serialize_num!(int16, i16);
++    serialize_num!(int32, i32);
++    serialize_num!(int64, i64);
+ 
+-    serialize_num!(float32, f32, write_f32::<LittleEndian>);
+-    serialize_num!(float64, f64, write_f64::<LittleEndian>);
++    serialize_num!(float32, f32);
++    serialize_num!(float64, f64);
+ 
+     fn serialize_text(self, v: &str) -> Result<()> {
+         let buf = v.as_bytes();

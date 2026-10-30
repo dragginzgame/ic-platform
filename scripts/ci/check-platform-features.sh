@@ -72,6 +72,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     done < "$mapping"
     awk -v target="$target" -v cache="$cache" -v activation="$cache/$target-activation.tsv" \
         -v gzip_source="$gzip_source" \
+        -v guard="ic-platform-runtime-guard v$generator_version ($root/crates/ic-platform-runtime-guard)" \
         -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" \
         -f scripts/ci/platform-graph-policy.awk -f scripts/ci/check-platform-feature-graphs.awk "$mapping"
 done

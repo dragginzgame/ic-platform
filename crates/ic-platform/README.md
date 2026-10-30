@@ -278,7 +278,11 @@ and trap cleanup; native compilation does not qualify installed IC behavior.
 The implementation is maintained from ic-cdk-executor 2.0.0, with protected-query
 wake routing, wake coalescing, cached wakers and task-bookkeeping reclamation.
 The Cargo singleton guard rejects old registry executors and multiple new Platform
-versions; coordinate Timers/application adoption of the same Platform minor line.
+runtime versions; coordinate Timers/application adoption of the same Platform minor
+line. The internal, dependency-free `ic-platform-runtime-guard` package is selected
+only by `executor` and exactly matches the facade version. Native gzip-only and
+IC0-only consumers select no guard and can coexist with unrelated executors.
+The executor implementation stays here; the helper exports no API.
 
 Enable `ic0` for `ic_platform::ic0`: the explicit IC 1.2.0 calls used by Timers
 for time/version/counters/stable page count, one timer, self/caller/argument

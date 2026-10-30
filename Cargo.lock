@@ -1454,6 +1454,7 @@ dependencies = [
  "ic-host-artifacts",
  "ic-management-canister-types 0.11.0",
  "ic-platform-macros",
+ "ic-platform-runtime-guard",
  "ic-representation-independent-hash",
  "ic-secp256k1",
  "ic-stable-structures",
@@ -1483,6 +1484,10 @@ dependencies = [
  "quote",
  "syn 2.0.119",
 ]
+
+[[package]]
+name = "ic-platform-runtime-guard"
+version = "0.9.0"
 
 [[package]]
 name = "ic-representation-independent-hash"
@@ -1556,9 +1561,9 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.7.24"
+version = "0.7.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e647cbceb182a83b24aae6f196a0d969ad67a44fdc30708d1fbafaea8323087"
+checksum = "4a29060e749a810af0085589e3229e6e77accbf1d194e6f13de81abeb29af8ac"
 dependencies = [
  "bytemuck",
  "ic-wire-derive",
@@ -1570,9 +1575,9 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.7.24"
+version = "0.7.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d1856ebd9b3c9068b03b3085f17e32de5bff3c2c631932197dc37b5884f466a"
+checksum = "ea360c414a9c5061b08ec4b5ff5312be40315f3e96bd6dc06376cf78c08e5cce"
 dependencies = [
  "proc-macro2",
  "quote",

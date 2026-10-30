@@ -3,7 +3,15 @@
 # the exact supplier/generator pair. Standalone proofs retain one facade.
 [.packages[] | select(.name == "ic-platform")] as $facades |
 [.packages[] | select(.name == "ic-platform-macros")] as $generators |
-($facades + $generators) as $packages |
+[.packages[] | select(.name == "ic-platform-runtime-guard")] as $guards |
+($facades + $generators + $guards) as $packages |
+# Historical facades had no helper; current executor selections must resolve it.
+. as $metadata |
+all($facades[]; . as $facade |
+    if any(($facade.dependencies // [])[]; .name == "ic-platform-runtime-guard") and
+       any(($metadata.resolve.nodes // [])[]; .id == $facade.id and (.features | index("executor")) != null)
+    then any($guards[]; .version == $facade.version) else true end) and
+($guards | length) <= 1 and all($guards[]; .version == $version) and
 ($require_generator | type) == "boolean" and
 all($packages[]; .source == "registry+https://github.com/rust-lang/crates.io-index") and
 ($packages | map([.name, .version]) | unique | length) == ($packages | length) and
