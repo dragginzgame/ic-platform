@@ -380,6 +380,21 @@ exit "${IC_PROFILER_FIXTURE_EXIT:-0}"
         self.assertIn(first, [json.loads(path.read_text()) for path in immutable])
         self.assertEqual(len(list((self.root / ".build/receipts").glob("build-*.json"))), 1)
 
+    def test_clippy_entrypoint_selects_native_server_and_retains_failure(self):
+        self.fake_cargo()
+        self.env["IC_PROFILER_FIXTURE_EXIT"] = "9"
+        result = self.process([
+            sys.executable, self.root / "scripts/ic_profiler.py", "clippy",
+            "--", "--no-deps", "--lib", "--", "-D", "warnings",
+        ], self.root)
+        self.assertNotEqual(result.returncode, 0)
+        receipt = json.loads((self.root / ".build/receipts/latest-clippy.json").read_text())
+        self.assertEqual(receipt["command"], [
+            "cargo", "clippy", "--locked", "-p", "pocket-ic-server",
+            "--message-format=json-render-diagnostics", "--no-deps", "--lib", "--", "-D", "warnings",
+        ])
+        self.assertEqual(receipt["exit_code"], 9)
+
     def test_native_build_records_the_pinned_routing_snapshot(self):
         self.fake_cargo()
         contents = '[{"fixture": "routing snapshot"}]\n'
