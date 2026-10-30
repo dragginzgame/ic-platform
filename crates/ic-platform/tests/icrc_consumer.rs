@@ -163,6 +163,23 @@ fn owned_accounts_preserve_external_semantics_and_wire() {
 }
 
 #[test]
+fn external_account_display_keeps_the_frozen_nondefault_text() {
+    const TEXT: &str = "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae-6cc627i.1";
+    let owner = TEXT.split_once("-6cc627i").unwrap().0.parse().unwrap();
+    let mut subaccount = [0; 32];
+    subaccount[31] = 1;
+    let account = Account {
+        owner,
+        subaccount: Some(subaccount),
+    };
+    assert_eq!(account.to_string(), TEXT);
+    assert_eq!(TEXT.parse::<Account>().unwrap(), account);
+    for subaccount in [None, Some([0; 32])] {
+        assert_eq!(Account { owner, subaccount }.to_string(), owner.to_string());
+    }
+}
+
+#[test]
 fn owned_account_parser_and_order_match_external_owner() {
     use ic_platform::account::{Account as OwnedAccount, ExternalAccount};
     use std::hash::{Hash, Hasher};

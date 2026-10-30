@@ -3,8 +3,9 @@
 ## Minimal Principal and selected ICRC packaging
 
 The maintainer authorized this breaking packaging cut after source release 0.7.6.
-Pending notes use 0.8.0; package versions, publication and consumer adoption are
-separate. This contract supersedes the earlier combined Principal capability and
+It shipped in source release 0.8.0 and remains the current 0.8.2 contract; registry
+publication and consumer adoption are separate. This contract supersedes the
+earlier combined Principal capability and
 registry-ledger Rust identity promises in the historical supplier sections below.
 Registry executor =2.0.0, ic0 =1.2.0 and management DTO =0.11.0 remain unchanged.
 
@@ -56,7 +57,7 @@ and persisted Serde/callback uses need qualification before adoption. Do not
 normalize or reconstruct retained uncertain requests. No Wasm-size saving or
 live provider acceptance follows from removing package edges alone.
 
-## Shared ICRC-10 discovery record (pending 0.7.5)
+## Shared ICRC-10 discovery record (since 0.7.5)
 
 Select `icrc-ledger-types` and import
 `ic_platform::icrc_ledger_types::icrc10::SupportedStandard`. This passive external
@@ -67,9 +68,10 @@ The types feature alone supplies the DTO, without selecting those codec APIs.
 
 The independent source contract is [ICRC-10's DID at 1df0c6a](https://github.com/dfinity/ICRC/blob/1df0c6af6ecca4f4eb1956c67b29c0d13279f1cd/ICRCs/ICRC-10/ICRC-10.did).
 Platform independently represents its protocol facts; no upstream Rust type or
-cryptographic implementation is replaced. ICRC-21 retains existing upstream
-identities. The direct Candid derive edge adds no resolved ledger-profile package
-or effective feature over the pre-existing upstream dependency.
+cryptographic implementation is replaced. ICRC-21 now uses the selected
+Platform-maintained DTO identities described above; external Candid types and
+wire schemas remain upstream-compatible. The ledger-types feature explicitly
+selects the derive dependency without selecting Platform codec APIs.
 
 Canic's prepared optional adapter replaces its local `SupportedStandard`
 declaration/derives with this import, retaining one public type identity. Its
@@ -355,7 +357,7 @@ implementation remains in Tooling. No backend type, default feature, Candid,
 executor, filesystem effect or automatic limit is added. The dependency and
 exports are native-only, including when `gzip` is selected on Wasm.
 
-The pending Platform 0.8.2 release selects Tooling 0.70.0. `GzipError` retains its
+Platform source release 0.8.2 selects Tooling 0.70.0. `GzipError` retains its
 upstream identity, so consumers exchanging it with direct Host Artifacts APIs
 must align those dependencies to 0.70. Platform-only imports stay the same.
 The maintainer approved this patch release as a one-time exception, confirming
@@ -2198,16 +2200,18 @@ adoption qualification. No transitive Candid removal or Wasm-size reduction is c
 
 `make test` and `make msrv` exercise the retained six decoder cases and expanded
 DTO fixture. `make check-consumer` builds separate workspaces with only Platform
-as a direct dependency: native tests on Rust 1.99 and 1.88, plus Wasm compilation
+as a direct dependency: native tests on current Rust and the declared 1.91 MSRV,
+plus Wasm compilation
 on both compilers for Candid, certification, management, raw-system and ledger
 consumers, plus canister-signature creation, signature verification, BLS and the CDK
 canister/service fixture (linked as a Wasm cdylib on both compilers).
 The maintained `make check-runtime` harness separately installs the combined
 CDK/Timers fixture, exercising callbacks, trap cleanup, cancellation and upgrade.
-It uses published Timers/Testkit at their Rust 1.91 floor; it does not raise
-Platform's 1.88 floor. See [runtime setup](../README.md#maintained-cdk-runtime-regression).
+It uses published Timers/Testkit at their Rust 1.91 floor; Platform now also
+declares that floor. See [runtime setup](../README.md#maintained-cdk-runtime-regression).
 Parser/dynamic and Agent consumers are native-only. `make msrv` also
-checks the all-feature library for Wasm at Rust 1.88. CI prepares the Wasm target
+checks the all-feature library for Wasm at the declared MSRV. CI prepares the
+Wasm target
 for both toolchains; local validation never installs it. See
 [Wasm MSRV enforcement](https://github.com/dragginzgame/ic-platform/issues/15).
 It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
@@ -2216,8 +2220,10 @@ This is representative boundary evidence, not a build of migrated siblings.
 
 `make check-features` checks no features, actual defaults, every single feature,
 every pair, all features and explicit critical runtime/DTO/signature/host groups
-on native/Wasm. `make check-features-exhaustive` retains the complete power set
-as a separate manual audit, outside routine CI/release validation. Routine
+on native/Wasm. `make check-features-exhaustive FEATURES=cdk,candid,executor`
+checks the complete power set of 1–12 explicitly selected features as a separate
+manual audit, outside routine CI/release validation. Missing, unknown and oversized
+scopes fail before graph queries. Routine
 coverage deliberately omits other higher-order combinations; this is not an
 equivalent exhaustive proof. Combined CDK/Timers qualification remains separate.
 It derives local feature closures from Cargo metadata and reuses graph queries

@@ -30,11 +30,23 @@ case "$1" in
         case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'candid v0.10.39\n' ;; esac
         ;;
     +*)
+        if [[ "$2" == build ]]; then
+            printf '%s\n' "$CARGO_TARGET_DIR" >> "$ADMISSION_TARGETS"
+            case " $* " in
+                *' --target wasm32-unknown-unknown '*)
+                    mkdir -p "$CARGO_TARGET_DIR/wasm32-unknown-unknown/release"
+                    printf 'fixture-wasm\n' > "$CARGO_TARGET_DIR/wasm32-unknown-unknown/release/platform_runtime_canister.wasm" ;;
+                *)
+                    mkdir -p "$CARGO_TARGET_DIR/debug"
+                    printf '#!/usr/bin/env bash\nexit 0\n' > "$CARGO_TARGET_DIR/debug/platform-runtime-driver"
+                    chmod +x "$CARGO_TARGET_DIR/debug/platform-runtime-driver" ;;
+            esac
+        fi
         if [[ "${ADMISSION_FAIL:-no}" == yes && "$2" == check ]]; then exit 42; fi ;;
 esac
 CARGO
 chmod +x "$fixture/bin/cargo" "$fixture/bin/rustc"
-export PATH="$fixture/bin:$PATH" ADMISSION_CALLS="$fixture/calls"
+export PATH="$fixture/bin:$PATH" ADMISSION_CALLS="$fixture/calls" ADMISSION_TARGETS="$fixture/targets"
 "$BASH" "$fixture/scripts/ci/check-ic-call-consumer.sh" > "$fixture/pass.log" 2>&1 || { cat "$fixture/pass.log"; exit 1; }
 # All three selections reach strict Clippy, tests and both target checks.
 [[ "$(grep -c '^clippy ' "$ADMISSION_CALLS")" == 3 ]]
@@ -53,6 +65,17 @@ fi
 "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --ic-call --check-graph > "$fixture/runtime.log" 2>&1 || { cat "$fixture/runtime.log"; exit 1; }
 [[ "$(grep -c '^tree ' "$ADMISSION_CALLS")" == 8 ]]
 [[ "$(grep '^tree ' "$ADMISSION_CALLS" | grep -c -- ' --features external-adapters ')" == 4 ]]
+for attempt in first second; do
+    : > "$ADMISSION_TARGETS"
+    "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --ic-call --build-only > "$fixture/$attempt-build.log" 2>&1 || { cat "$fixture/$attempt-build.log"; exit 1; }
+    LC_ALL=C sort -u "$ADMISSION_TARGETS" > "$fixture/$attempt-targets"
+done
+cmp "$fixture/first-targets" "$fixture/second-targets"
+[[ "$(wc -l < "$fixture/first-targets" | tr -d ' ')" == 3 ]]
+while IFS= read -r retained; do
+    [[ -f "$retained/artifacts/platform-runtime-driver" ]]
+    [[ "$(find "$retained/artifacts" -name '*.wasm' | wc -l | tr -d ' ')" == 8 ]]
+done < <(sed -n 's/^Runtime sources, lock and metadata retained at //p' "$fixture/first-build.log" "$fixture/second-build.log")
 if "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --published invalid --check-graph > "$fixture/version.log" 2>&1; then
     echo 'Runtime admitted an invalid published version' >&2; exit 1
 else

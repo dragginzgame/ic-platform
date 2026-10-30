@@ -34,7 +34,11 @@ if [[ $# -gt 0 ]]; then
 fi
 for capability in "${capabilities[@]}"; do
 profile="$(awk -F '\t' -v capability="$capability" '$1 == capability { print }' "$profiles")"
-IFS=$'\t' read -r _ features source assets wasm <<< "$profile"
+IFS=$'\t' read -r _ features source assets wasm graph_family <<< "$profile"
+case "$graph_family" in
+    -|minimal|principal|principal-external|principal-self-authenticating|ledger|cdk|runtime|external-candid|blake3|external-codecs) ;;
+    *) echo "Unknown consumer graph family: $graph_family" >&2; exit 2 ;;
+esac
 features="\"${features//,/\", \"}\""
 selection='path = "../../crates/ic-platform"'
 if [[ -n "$published" ]]; then selection="version = \"=$published\""; fi
@@ -86,62 +90,51 @@ if [[ -n "$published" ]]; then
         echo 'Published consumer must resolve the exact registry facade and registry generator' >&2; exit 1;
     }
 fi
-if [[ "$capability" == executor || "$capability" == ic0 ]]; then
+if [[ "$graph_family" != - ]]; then
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
-        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
-        if grep -Eq '^(ic_principal|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding|candid|ic-agent) ' "$fixture/$graph_target.graph"; then
-            echo 'Minimal consumer acquired application types/codecs/crypto' >&2; exit 1
-        fi
-    done
-fi
-if [[ "$capability" == principal || "$capability" == principal-external || "$capability" == principal-self-authenticating || "$capability" == icrc || "$capability" == icrc10-types ]]; then
-    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
-        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
-        if grep -Eq '^(icrc-ledger-types|icrc-cbor|minicbor|base32|candid_parser|ic-agent|pocket-ic) ' "$fixture/$graph_target.graph"; then
-            echo 'Identity/ledger consumer acquired retired or unrelated integration machinery' >&2; exit 1
-        fi
-        if [[ "$capability" == principal || "$capability" == principal-external ]]; then
-            if grep -Eq '^(sha2|digest|candid) ' "$fixture/$graph_target.graph"; then
-                echo 'Principal byte/text capability acquired hashing or Candid' >&2; exit 1
-            fi
-        fi
-        if [[ "$capability" == principal ]] && grep -q '^ic_principal ' "$fixture/$graph_target.graph"; then
-            echo 'Owned Principal acquired the external identity' >&2; exit 1
-        fi
-    done
-fi
-if [[ "$capability" == cdk || "$capability" == runtime || "$capability" == external-candid ]]; then
-    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
-        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
-        # Bash 3.2 treats an empty array as unset under nounset.
-        if [[ "$capability" == external-candid ]]; then
-            bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph" --external-candid
+        graph="$fixture/$graph_target.graph"
+        if [[ "$graph_family" == blake3 ]]; then
+            BLAKE3_PACKAGES_OUTPUT="$graph" bash scripts/ci/check-blake3-graph.sh "$fixture" platform-consumer-proof "$graph_target" -
         else
-            bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target.graph"
+            cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$graph"
         fi
-        if grep -Eq '^(darling|darling_core|darling_macro) ' "$fixture/$graph_target.graph"; then
-            echo 'Runtime/entrypoint consumer acquired retired Darling scaffolding' >&2; exit 1
-        fi
-        if [[ "$capability" == runtime ]] && grep -q '^ic-platform-macros ' "$fixture/$graph_target.graph"; then
-            echo 'Runtime-only consumer acquired the entrypoint generator' >&2; exit 1
-        fi
-    done
-fi
-if [[ "$capability" == blake3 ]]; then
-    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
-        BLAKE3_PACKAGES_OUTPUT="$fixture/$graph_target.graph" \
-            bash scripts/ci/check-blake3-graph.sh "$fixture" platform-consumer-proof "$graph_target" -
-        if grep -Eq '^(candid|ic-cdk|ic-platform-macros|ic-agent|pocket-ic|ic_principal|serde) ' "$fixture/$graph_target.graph"; then
-            echo 'BLAKE3 consumer acquired unrelated IC/application dependencies' >&2; exit 1
-        fi
-    done
-fi
-if [[ "$capability" == external-codecs ]]; then
-    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
-        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target.graph"
-        if grep -Eq '^(ic-cdk[^ ]*|ic0|ic-platform-macros|ic-agent|pocket-ic|ic-testkit|candid_parser|reqwest|tokio) ' "$fixture/$graph_target.graph"; then
-            echo 'External codecs acquired transport, executor or host parsing' >&2; exit 1
-        fi
+        case "$graph_family" in
+            minimal)
+                if grep -Eq '^(ic_principal|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding|candid|ic-agent) ' "$graph"; then
+                    echo 'Minimal consumer acquired application types/codecs/crypto' >&2; exit 1
+                fi ;;
+            principal|principal-external|principal-self-authenticating|ledger)
+                if grep -Eq '^(icrc-ledger-types|icrc-cbor|minicbor|base32|candid_parser|ic-agent|pocket-ic) ' "$graph"; then
+                    echo 'Identity/ledger consumer acquired retired or unrelated integration machinery' >&2; exit 1
+                fi
+                if [[ "$graph_family" == principal || "$graph_family" == principal-external ]] &&
+                    grep -Eq '^(sha2|digest|candid) ' "$graph"; then
+                    echo 'Principal byte/text capability acquired hashing or Candid' >&2; exit 1
+                fi
+                if [[ "$graph_family" == principal ]] && grep -q '^ic_principal ' "$graph"; then
+                    echo 'Owned Principal acquired the external identity' >&2; exit 1
+                fi ;;
+            cdk|runtime|external-candid)
+                if [[ "$graph_family" == external-candid ]]; then
+                    bash scripts/ci/check-platform-runtime-graph.sh "$graph" --external-candid
+                else
+                    bash scripts/ci/check-platform-runtime-graph.sh "$graph"
+                fi
+                if grep -Eq '^(darling|darling_core|darling_macro) ' "$graph"; then
+                    echo 'Runtime/entrypoint consumer acquired retired Darling scaffolding' >&2; exit 1
+                fi
+                if [[ "$graph_family" == runtime ]] && grep -q '^ic-platform-macros ' "$graph"; then
+                    echo 'Runtime-only consumer acquired the entrypoint generator' >&2; exit 1
+                fi ;;
+            blake3)
+                if grep -Eq '^(candid|ic-cdk|ic-platform-macros|ic-agent|pocket-ic|ic_principal|serde) ' "$graph"; then
+                    echo 'BLAKE3 consumer acquired unrelated IC/application dependencies' >&2; exit 1
+                fi ;;
+            external-codecs)
+                if grep -Eq '^(ic-cdk[^ ]*|ic0|ic-platform-macros|ic-agent|pocket-ic|ic-testkit|candid_parser|reqwest|tokio) ' "$graph"; then
+                    echo 'External codecs acquired transport, executor or host parsing' >&2; exit 1
+                fi ;;
+        esac
     done
 fi
 CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen

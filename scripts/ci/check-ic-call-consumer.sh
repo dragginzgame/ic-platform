@@ -29,6 +29,9 @@ ic-wire = { version = "$wire", optional = true }
 MANIFEST
 cp scripts/fixtures/ic-call-consumer/lib.rs "$fixture/src/lib.rs"
 consumer_metadata "$root"
+# Reuse dependencies across disposable sources without switching compilers in one target.
+build="${CARGO_TARGET_DIR:-$root/target/ic-call-consumer-build}"
+development_toolchain="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.toolchain.channel' rust-toolchain.toml)"
 for profile in raw wire external-candid; do
     features=()
     admission=()
@@ -42,10 +45,10 @@ for profile in raw wire external-candid; do
         fi
     done
     # Strict standalone Clippy precedes all tests of each actual selection.
-    cargo clippy --manifest-path "$fixture/Cargo.toml" --frozen --all-targets ${features[@]+"${features[@]}"} -- -D warnings
-    for compiler in "$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.toolchain.channel' rust-toolchain.toml)" "$msrv"; do
-        cargo +"$compiler" test --manifest-path "$fixture/Cargo.toml" --frozen ${features[@]+"${features[@]}"}
-        cargo +"$compiler" check --manifest-path "$fixture/Cargo.toml" --frozen ${features[@]+"${features[@]}"} --target wasm32-unknown-unknown
+    CARGO_TARGET_DIR="$build/$development_toolchain" cargo clippy --manifest-path "$fixture/Cargo.toml" --frozen --all-targets ${features[@]+"${features[@]}"} -- -D warnings
+    for compiler in "$development_toolchain" "$msrv"; do
+        CARGO_TARGET_DIR="$build/$compiler" cargo +"$compiler" test --manifest-path "$fixture/Cargo.toml" --frozen ${features[@]+"${features[@]}"}
+        CARGO_TARGET_DIR="$build/$compiler" cargo +"$compiler" check --manifest-path "$fixture/Cargo.toml" --frozen ${features[@]+"${features[@]}"} --target wasm32-unknown-unknown
     done
 done
 printf 'Standalone ic-call consumer evidence retained at %s\n' "$fixture"

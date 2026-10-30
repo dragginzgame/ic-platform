@@ -139,26 +139,29 @@ if [[ "$mode" == --check-graph ]]; then
     printf 'Runtime graph evidence retained at %s\n' "$fixture"
     exit 0
 fi
-CARGO_TARGET_DIR="$fixture/build/host" cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
-CARGO_TARGET_DIR="$fixture/build/host" cargo +"$msrv" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
+build="${CARGO_TARGET_DIR:-$root/target/runtime-build}"
+CARGO_TARGET_DIR="$build/host-$msrv" cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
+CARGO_TARGET_DIR="$build/host-$msrv" cargo +"$msrv" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver
+mkdir -p "$fixture/artifacts"
+cp "$build/host-$msrv/debug/platform-runtime-driver" "$fixture/artifacts/platform-runtime-driver"
 for transport in "${transports[@]}"; do
 for toolchain in "$development_toolchain" "$msrv"; do
     for protocol in wire external-candid; do
         select_runtime_profile "$transport" "$protocol"
-        CARGO_TARGET_DIR="$fixture/build/$toolchain" cargo +"$toolchain" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${selected_features[@]+"${selected_features[@]}"} --release --target wasm32-unknown-unknown
+        CARGO_TARGET_DIR="$build/$toolchain" cargo +"$toolchain" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${selected_features[@]+"${selected_features[@]}"} --release --target wasm32-unknown-unknown
         mkdir -p "$fixture/artifacts/$toolchain"
-        cp "$fixture/build/$toolchain/wasm32-unknown-unknown/release/platform_runtime_canister.wasm" "$fixture/artifacts/$toolchain/$selected_artifact.wasm"
+        cp "$build/$toolchain/wasm32-unknown-unknown/release/platform_runtime_canister.wasm" "$fixture/artifacts/$toolchain/$selected_artifact.wasm"
         if [[ "$mode" == run ]]; then
             if [[ -n "$selected_external" ]]; then
                 (
                     export PLATFORM_EXTERNAL_CANDID=1
                     if [[ -n "$adapters" ]]; then export PLATFORM_EXTERNAL_ADAPTERS=1; else unset PLATFORM_EXTERNAL_ADAPTERS; fi
-                    "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$selected_artifact.wasm"
+                    "$fixture/artifacts/platform-runtime-driver" "$fixture/artifacts/$toolchain/$selected_artifact.wasm"
                 )
             else
                 (
                     unset PLATFORM_EXTERNAL_CANDID PLATFORM_EXTERNAL_ADAPTERS
-                    "$fixture/build/host/debug/platform-runtime-driver" "$fixture/artifacts/$toolchain/$selected_artifact.wasm"
+                    "$fixture/artifacts/platform-runtime-driver" "$fixture/artifacts/$toolchain/$selected_artifact.wasm"
                 )
             fi
         fi

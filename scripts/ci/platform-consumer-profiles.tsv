@@ -1,32 +1,32 @@
-executor	executor,ic0	executor_consumer	-	check
-principal	principal	principal	-	check
-principal-external	principal-external	principal_external_consumer	-	check
-principal-self-authenticating	principal-self-authenticating	principal_self_authenticating_consumer	-	check
-ecdsa	ecdsa	ecdsa_consumer	-	check
-blake3	blake3	blake3_consumer	-	check
-ed25519	ed25519	ed25519_consumer	-	check
-candid	candid	candid_consumer	candid_malformed.rs	check
-nesting	candid	nesting_consumer	-	check
-candid-service	candid-service	service_consumer	-	check
-external-candid	cdk,candid-service	external_candid_consumer	-	build
-certification	certification	certification_consumer	-	check
-candid-parser	candid-parser	parser_consumer	-	skip
-dynamic	candid,candid-parser	dynamic_consumer	dynamic-*.hex	skip
-agent	agent,certification	agent_consumer	agent-*.hex	skip
-management	management-canister-types,candid	management_consumer	management-*.hex	check
-ic0	ic0	ic0_consumer	-	check
-icrc	icrc-ledger-types,candid	icrc_consumer	icrc-*.hex	check
-icrc10-types	icrc-ledger-types	icrc10_types_consumer	-	check
-bls	bls	bls_consumer	bls-*.hex	check
-canister-sig-creation	canister-sig-creation	canister_sig_consumer	-	check
-signature-verification	signature-verification	signature_consumer	bls-*.hex,signature-*.hex	check
-cdk	cdk	cdk_consumer	-	build
-runtime	runtime	runtime_consumer	-	check
-secp256k1	secp256k1	secp256k1_consumer	-	check
-pocket-ic	pocket-ic	pocket_ic_consumer	-	check
-stable-structures	stable-structures	stable_structures_consumer	-	check
-external-contracts	cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types	external_contract_consumer	-	check
-asset-contracts	certified-assets-types	asset_contract_consumer	-	check
-external-contract-schema	icrc-ledger-types,cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types,certified-assets-types,candid-parser	external_contract_schema	external-*.did,icrc-reference.did	skip
-external-codecs	candid,management-canister-types,cmc-types,icp-ledger-types,icrc-ledger-types,nns-registry-types,cycles-ledger-types,certified-assets-types	protocol_consumer	management-info-*.hex	check
-candid-endpoint	candid-endpoint,candid-service	candid_endpoint_consumer	-	build
+executor	executor,ic0	executor_consumer	-	check	minimal
+principal	principal	principal	-	check	principal
+principal-external	principal-external	principal_external_consumer	-	check	principal-external
+principal-self-authenticating	principal-self-authenticating	principal_self_authenticating_consumer	-	check	principal-self-authenticating
+ecdsa	ecdsa	ecdsa_consumer	-	check	-
+blake3	blake3	blake3_consumer	-	check	blake3
+ed25519	ed25519	ed25519_consumer	-	check	-
+candid	candid	candid_consumer	candid_malformed.rs	check	-
+nesting	candid	nesting_consumer	-	check	-
+candid-service	candid-service	service_consumer	-	check	-
+external-candid	cdk,candid-service	external_candid_consumer	-	build	external-candid
+certification	certification	certification_consumer	-	check	-
+candid-parser	candid-parser	parser_consumer	-	skip	-
+dynamic	candid,candid-parser	dynamic_consumer	dynamic-*.hex	skip	-
+agent	agent,certification	agent_consumer	agent-*.hex	skip	-
+management	management-canister-types,candid	management_consumer	management-*.hex	check	-
+ic0	ic0	ic0_consumer	-	check	minimal
+icrc	icrc-ledger-types,candid	icrc_consumer	icrc-*.hex	check	ledger
+icrc10-types	icrc-ledger-types	icrc10_types_consumer	-	check	ledger
+bls	bls	bls_consumer	bls-*.hex	check	-
+canister-sig-creation	canister-sig-creation	canister_sig_consumer	-	check	-
+signature-verification	signature-verification	signature_consumer	bls-*.hex,signature-*.hex	check	-
+cdk	cdk	cdk_consumer	-	build	cdk
+runtime	runtime	runtime_consumer	-	check	runtime
+secp256k1	secp256k1	secp256k1_consumer	-	check	-
+pocket-ic	pocket-ic	pocket_ic_consumer	-	check	-
+stable-structures	stable-structures	stable_structures_consumer	-	check	-
+external-contracts	cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types	external_contract_consumer	-	check	-
+asset-contracts	certified-assets-types	asset_contract_consumer	-	check	-
+external-contract-schema	icrc-ledger-types,cmc-types,cycles-ledger-types,icp-ledger-types,nns-registry-types,certified-assets-types,candid-parser	external_contract_schema	external-*.did,icrc-reference.did	skip	-
+external-codecs	candid,management-canister-types,cmc-types,icp-ledger-types,icrc-ledger-types,nns-registry-types,cycles-ledger-types,certified-assets-types	protocol_consumer	management-info-*.hex	check	external-codecs
+candid-endpoint	candid-endpoint,candid-service	candid_endpoint_consumer	-	build	-

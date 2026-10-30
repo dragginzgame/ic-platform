@@ -1,108 +1,106 @@
 # Current handoff
 
-## Pending 0.8.2: adoption and integrated cleanup
+## Pending 0.8.3: focused complexity cleanup
 
-Resolve local `1971797` with incoming `c8bbe7e` (#95/#97), retaining both
-batches. Package versions remain 0.8.1. The maintainer approved 0.8.2 once for
-the unused gzip surface, including Host 0.70's error identity; future compatibility
-policy is unchanged. Release/publication remain maintainer-owned. Siblings stay
-read-only; the incoming native recipe and cryptographic bodies are preserved.
+Source release `b0bf82f` is 0.8.2; its merge is complete. Package versions remain
+0.8.2. Pending notes use 0.8.3 for compatible implementation/tooling cleanup;
+release, publication, staging and commits remain maintainer-owned. Preserve the
+pre-existing dirty Cargo.lock selections, including Host Artifacts 0.70.2.
+Siblings stay read-only. Shared Tooling payloads and protected crypto stay intact.
 
-Keep published Tooling 0.70.0 for the ordinary gzip facade, Testkit and managed
-release editor with `cli`. Testkit's raw PocketIC imports route through Platform;
-managed instances use `instance()`. Its registry Platform dependency stays
-independent of local release versions. The runtime lock retains Wire 0.7.22;
-workspace Wire minima remain 0.7.22 with the main lock's existing 0.7.23 selection.
-Shared Tooling 0.27.7 remains at `a8baa51099ca48cdb12e2171f031d488db89d67d`,
-including #322's graph observations. Do not replace it with the older revision.
+Owned `ic_platform::Account` remains under `principal`, without Candid or a
+registry ledger dependency. The separate selected external Candid Account DTO
+is also Platform-maintained. Its Display now delegates to the owned formatter;
+external parsing/errors, Candid/Serde, effective-zero equality/order/hash and
+absent versus explicit zero fields retain their contracts. Required external
+Principal/Nat/function identities remain upstream. Value-hash bodies are unchanged.
 
-Incoming #97 derives feature activation from metadata, shares consumer setup and
-private macro syntax facts, and reuses one locked BLAKE3 graph observation.
-Preserve Principal tiers, ICRC exclusions, admission order, diagnostics and codecs.
-Its native dependency patches consolidate without changing seven assembled inputs.
-Profiler #9 owns query/cache/tool/render plumbing; Platform retains HTTP admission,
-native start/stop, cleanup, metrics and pricing. Retain 8 MiB/query, 32 MiB total,
-128-entry FIFO and cross-run checks. Older consumers keep their previous pin until
-paired product adoption. Catalog cadence reads the unchanged compiled constant.
+Manual exhaustive feature auditing now requires 1–12 explicit features, e.g.
+`make check-features-exhaustive FEATURES=runtime,blake3`; the production power set
+would exceed two billion selections. Routine 505-selection coverage is unchanged.
+Consumer profiles now carry graph families, with one target iteration and the
+same admission rules. Unknown families fail before compilation. ic-call/runtime
+proofs reuse Cargo targets; runtime proofs retain their own executable/Wasm copies.
 
-The native profile stays exactly at incoming `c8bbe7e`: Host supplier
-`c20dbd11785c17d369651f51fa0967fbec69c57a`, Wire 0.7.21 and gzip-only Platform
-scaffold `ba98bd33ef1cbe463d6daf34f0511f17d7770c20`. All its Host packages retain
-one Git family; ordinary Platform gzip 0.70 is a separate graph. Rebuild private
-ICPROF03 peers together; saved reports, external bytes and retry authority remain.
+Native REST/MCP profiling requests share parsing, including diagnostic order and
+existing defaults/clamps. Conditional-clear fields are named without changing
+absent/null cursor semantics. Pricing comparison borrows JSON rows. Snapshot
+ranges remain numeric from recorder to renderer; only response construction
+formats counters. Read/write masks share the sweep without fake read records or
+counter-key renaming. PNG bytes, response schemas and limits remain unchanged.
 
-Prior native qualification is provider `f5051bf` + Profiler `e9f68b6`: 74 recorder,
-26 product, three catalog and five installed tests; Linux server SHA-256
-`b863005e0272c82e2f94a6a3684bbdeb0652fdb8162b6aa823d1da02b2b290e1`.
-Original scratch receipts/executable were externally removed; PR #97 retains the
-observations. These unchanged-source results are reused, not a new server build.
+[PR #99](https://github.com/dragginzgame/ic-platform/pull/99) is open and no longer
+draft at this inspection. It separately supplies native operation completion and
+backend descriptions with Profiler 0.11.0's paired product interface. Do not
+replace it with these edits or claim it is merged. Integrate the paired changes
+before consumer pin adoption and renewed complete native-server qualification.
+Extra native strict-Clippy debt remains [#98](https://github.com/dragginzgame/ic-platform/issues/98).
+[#50](https://github.com/dragginzgame/ic-platform/issues/50) remains deferred with
+its advisory check unchanged; no crypto override, ignore or Agent fork is admitted.
 
-Merge evidence is under `target/merge-resolution-20261029`. Full owner Clippy
-passed before longer checks. All 505 native/Wasm selections, 14 macro tests on
-both compilers, standalone CDK/external-Candid/BLAKE3 native/MSRV/Wasm proofs,
-admission/refusal fixtures, 45 assembler tests, source guards, snapshot provenance,
-inventory, formatting, links and 0.8.2 changelog admission pass. Prior supplying
-proofs remain in PRs #95/#97 and `target/ic-tooling-adoption-20261029`.
-Full CI, installed-canister/native-server execution, native macOS, full Bazel/NNS
-and live acceptance remain separate. #98 owns extra native Clippy debt; #99 stays
-draft. #50's advisory failure remains deferred and unchanged. Profiler #9 needs
-its paired product module and final qualified provider pin before integration.
+## Cleanup evidence and limits
 
-## Released 0.8.0: Principal and selected ICRC packaging
+Evidence is retained under `target/complexity-cleanup-20261030`. Full owner
+all-target/all-feature `make clippy` passes before longer tests. Principal/ICRC
+standalone native and Wasm proofs pass on current Rust and MSRV 1.91, including
+frozen Account text, external wire and ownership isolation. Feature/consumer
+admission fixtures cover scope/family refusal, failure propagation, concurrent
+script edits and repeated runtime target reuse with retained artifacts. A real
+scoped runtime/BLAKE3 audit passes for native/Wasm. Source/license guards pass.
 
-`principal` supplies owned Principal/Account bytes, bounded text and Serde without
-registry Principal or hashing. Runtime/CDK use that capability. Select
-`principal-external` for registry identities/byte conversions and
-`principal-self-authenticating` for unchanged upstream hashing. Required external
-protocol/client and signature profiles select their own prerequisites explicitly.
+An isolated copy of the prepared PR #99 native dependency context compiles the
+changed modules with Rust 1.99.0 and warnings denied. Focused memory/recorder/
+viewer/snapshot and pricing tests pass. The separate before/after image control
+compares complete JSON and exact PNG bytes for data/read/write views at seven
+counter magnitudes, including u64::MAX. Compiler inputs and logs are retained.
+This uses prepared compiled dependencies; it is not a fresh Cargo assembly,
+server build, installed-canister run or qualification of #99's whole integration.
+No native macOS, full Bazel/NNS or live-provider acceptance is added. No new
+optimized-Wasm-size or runtime-speed saving is measured.
 
-Selected ledger DTOs/callbacks now have Platform Rust identities under the existing
-feature/module. Candid/Serde bytes, effective-zero accounts, absent versus explicit
-zero fields, legacy Nat64 and unchanged upstream value hashes/vectors remain.
-The registry ledger package and unused storage/CBOR, metadata-key and consent
-formatting machinery are retired. The [packaging contract](../migration.md#minimal-principal-and-selected-icrc-packaging)
-retains the migration and 28 independent frozen external schema obligations.
+## Released supply and native source pins
 
-The released handoff at `80b424a:docs/status/current.md` records 505 native/Wasm
-feature selections, eight standalone profiles, schema/type/byte/hash proofs,
-source/license guards and MSRV/Rustdoc/format checks. Evidence locations include
-`/tmp/platform-dependencies-20261029` and `target/feature-graphs/attempt.FZeIyu`.
-Do not infer installed-runtime, registry publication or consumer adoption from
-those package checks, or claim a Wasm-size saving from removed dependency edges.
+0.8.2 adopted ordinary registry Host Artifacts/Testkit 0.70.0 and the managed
+release editor with `cli`. Runtime drivers import raw PocketIC through Platform
+and borrow Testkit instances with `instance()`. Testkit's registry Platform
+requirement stays independent of local release versions; no global Cargo patch.
+Workspace Wire minima remain 0.7.22; the main lock selects 0.7.23 and the separate
+runtime qualification lock retains 0.7.22. Shared Tooling 0.27.7 stays at
+`a8baa51099ca48cdb12e2171f031d488db89d67d`, including graph observations.
+The maintainer's one-time 0.8.2 exception for the unused gzip error identity does
+not alter future compatibility policy. Ordinary gzip and native source graphs
+remain separate.
 
-Standalone verification additionally requires `ic_principal/serde` to decode
-certified canister ranges. That release correction preserves protected verifier
-bodies and is not supplied by unrelated Candid features. Full owner Clippy and
-four standalone native/MSRV/Wasm profiles pass; only verification adds external
-Serde. Minimal Principal, external conversion and creation graphs remain narrow.
-Its retained evidence is `target/signature-serde-fix`.
+The main native recipe retains IC `ee8086a9773725fd1058832a9400297cf0990112`,
+Rust 1.99.0, Host `c20dbd11785c17d369651f51fa0967fbec69c57a`, Wire 0.7.21 and
+Platform scaffold `ba98bd33ef1cbe463d6daf34f0511f17d7770c20`. #99 updates its
+Wire/scaffold separately. Profiler owns query/cache/tool/rendering and PNG/range
+mechanics; Platform retains native integration/state, HTTP admission and pricing.
+Keep 8 MiB/query, 32 MiB aggregate, 128-entry FIFO and cross-run checks. Rebuild
+private ICPROF03 peers together; saved formats and retry authority stay unchanged.
 
-## Retained protocol and safety boundaries
+Historical #97 qualification used provider `f5051bf` + Profiler `e9f68b6`, with
+74 recorder, 26 product, three catalog and five installed tests. Its Linux server
+SHA-256 is `b863005e0272c82e2f94a6a3684bbdeb0652fdb8162b6aa823d1da02b2b290e1`.
+Original scratch executable/receipts were externally removed; the PR retains
+observations. Those results do not qualify the pending changed native modules.
+Earlier adoption/merge observations remain in the handoff at `b0bf82f` and PRs
+#95/#97; retain artifacts that remain available.
 
-Owned endpoints use Wire. Required external Candid and existing checkpoint bytes
-retain their contracts. Bounded Candid admission rejects more than 16 constructed
-wire levels, including unused definitions/skipped values, using existing work
-quotas. This does not repair arbitrary trusted Rust schemas/custom visitors.
-The original 16/17-level and 8,192-opt trap, management, callback, timer and upgrade
-proofs are recorded in the released handoff and `/tmp/platform-fixed-depth-20261029`.
-The [cost report](../migration.md#admission-cost-2026-10-29) retains measured decoder
-costs; further tuning awaits consumer metrics.
+## Retained safety and protocol contracts
 
-Management =0.11.0, executor =2.0.0 and ic0 =1.2.0 identities remain fixed.
-Memory/Storage retain allocation, checked reopening, layout and exclusive leases.
-Crypto bodies, encodings, constants, vectors and licenses remain protected.
-#72 admits only its reviewed short-form DER envelope check; long-form support
-and oversized encoder conversions are outside that exception. #74 retains native
-Origin/Host admission and explicitly supported local nonbrowser clients.
+Owned endpoints use Wire; required external Candid and legacy checkpoint bytes
+retain their contracts. Bounded Candid rejects more than 16 constructed wire
+levels, including unused definitions/skipped values, within existing work quotas.
+This does not guarantee arbitrary trusted Rust schemas/custom visitors are safe.
+The [migration contract](../migration.md#external-candid-nesting-qualification-73)
+retains the 16/17-level, original 8,192-opt trap and measured admission evidence.
 
-[#50](https://github.com/dragginzgame/ic-platform/issues/50) remains the retained
-RUSTSEC-2026-0387 blocker, set aside for integration only. Keep its advisory check;
-no ignore, incompatible crypto override, Agent fork or in-house primitive is
-admitted. Follow-up remains in GitHub, not a separate local issue queue.
-
-## Prior native qualification
-
-The native profile retains IC pin `ee8086a9773725fd1058832a9400297cf0990112`
-and Rust 1.99.0. Frozen server hashes and exact receipt scope remain in the
-handoffs at `80b424a` and `c5740cd`; no artifacts are removed. This adoption adds
-no installed/native-server, macOS, full Bazel/NNS or live-provider qualification.
+Management =0.11.0, executor =2.0.0, ic0 =1.2.0 and stable-structures =0.7.2
+identities remain fixed. Memory/Storage own allocation, reopening and leases.
+Protected crypto bodies, encodings, constants, vectors and licenses stay intact.
+#72 permits only its reviewed short-form DER admission check; long-form and
+encoder changes remain outside that exception. #74's Host/Origin admission stays.
+`signature-verification` explicitly selects external Principal Serde for certified
+ranges; other Principal tiers stay narrow. The [packaging contract](../migration.md#minimal-principal-and-selected-icrc-packaging)
+retains the 28 independently frozen selected-ledger schemas and migration rules.

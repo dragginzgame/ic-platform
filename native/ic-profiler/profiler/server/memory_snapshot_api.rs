@@ -1,9 +1,11 @@
 //! Agent-facing PNG exports and exact snapshot comparisons.
 use crate::InstanceId;
+use crate::memory_access_tracing::SnapshotEvidence;
 use crate::memory_snapshot_image::{
     MemorySnapshotImage, MemorySnapshotImageInput, MemorySnapshotImagePage,
-    MemorySnapshotReadRange, MemorySnapshotWriteRange,
 };
+#[cfg(test)]
+use crate::memory_snapshot_image::{MemorySnapshotReadRange, MemorySnapshotWriteRange};
 use crate::memory_snapshots::{self, MemoryKind, MemorySnapshotMetadata};
 use crate::pocket_ic::CaptureMemorySnapshot;
 use crate::state_api::routes::{AppState, run_operation};
@@ -179,24 +181,10 @@ pub(crate) fn delete(snapshot_id: &str) -> SnapshotResult<Value> {
     Ok(json!({"snapshot_id": snapshot_id, "deleted": deleted}))
 }
 
-fn ranges(evidence: &Value, field: &str, memory: &str) -> Vec<(u64, u64)> {
-    evidence[field][memory]
-        .as_array()
-        .into_iter()
-        .flatten()
-        .filter_map(|row| {
-            Some((
-                row[0].as_str()?.parse().ok()?,
-                row[1].as_str()?.parse().ok()?,
-            ))
-        })
-        .collect()
-}
-
 /// Skip compressed ranges arithmetically: even a 500 GiB stable allocation
 /// cannot turn a bounded image request into a dense page scan.
 fn touched_window(
-    evidence: &Value,
+    known: &[Vec<(u64, u64)>; 2],
     memory: SnapshotMemory,
     offset: u64,
     limit: u64,
@@ -204,13 +192,16 @@ fn touched_window(
     let mut pages = Vec::new();
     let mut skip = offset;
     let mut total = 0_u64;
-    for (kind, name) in [(MemoryKind::Heap, "heap"), (MemoryKind::Stable, "stable")] {
+    for (kind, ranges) in [
+        (MemoryKind::Heap, &known[0]),
+        (MemoryKind::Stable, &known[1]),
+    ] {
         if (memory == SnapshotMemory::Heap && kind != MemoryKind::Heap)
             || (memory == SnapshotMemory::Stable && kind != MemoryKind::Stable)
         {
             continue;
         }
-        for (start, end) in ranges(evidence, "known_touched_ranges", name) {
+        for &(start, end) in ranges {
             let length = end.saturating_sub(start);
             total = total.saturating_add(length);
             let skipped = skip.min(length);
@@ -229,63 +220,6 @@ fn memory_name(memory: MemoryKind) -> &'static str {
         MemoryKind::Heap => "heap",
         MemoryKind::Stable => "stable",
     }
-}
-
-fn read_ranges(profile: &Value) -> Result<Vec<MemorySnapshotReadRange>, String> {
-    let integer = |row: &Value, field: &str| {
-        row[field].as_u64().map(Ok).unwrap_or_else(|| {
-            row[field]
-                .as_str()
-                .ok_or_else(|| format!("Retained read range has no {field} counter/address."))
-                .and_then(|value| parse_quantity(value, field))
-        })
-    };
-    profile["ranges"]
-        .as_array()
-        .ok_or_else(|| "Retained byte-read ranges are unavailable.".to_string())?
-        .iter()
-        .map(|row| {
-            Ok(MemorySnapshotReadRange {
-                memory: row["memory"]
-                    .as_str()
-                    .ok_or_else(|| "Retained read range has no memory kind.".to_string())?
-                    .to_string(),
-                start: integer(row, "start")?,
-                end: integer(row, "end")?,
-                heap_reads: integer(row, "heap_reads")?,
-                stable_direct_reads: integer(row, "stable_direct_reads")?,
-                stable_native_reads: integer(row, "stable_native_reads")?,
-            })
-        })
-        .collect()
-}
-
-fn write_ranges(profile: &Value) -> Result<Vec<MemorySnapshotWriteRange>, String> {
-    let integer = |row: &Value, field: &str| {
-        row[field].as_u64().map(Ok).unwrap_or_else(|| {
-            row[field]
-                .as_str()
-                .ok_or_else(|| format!("Retained write range has no {field} counter/address."))
-                .and_then(|value| parse_quantity(value, field))
-        })
-    };
-    profile["ranges"]
-        .as_array()
-        .ok_or_else(|| "Retained byte-write ranges are unavailable.".to_string())?
-        .iter()
-        .map(|row| {
-            Ok(MemorySnapshotWriteRange {
-                memory: row["memory"]
-                    .as_str()
-                    .ok_or_else(|| "Retained write range has no memory kind.".to_string())?
-                    .to_string(),
-                start: integer(row, "start")?,
-                end: integer(row, "end")?,
-                heap_writes: integer(row, "heap_writes")?,
-                stable_writes: integer(row, "stable_writes")?,
-            })
-        })
-        .collect()
 }
 
 pub(crate) fn render(
@@ -347,7 +281,7 @@ pub(crate) fn render(
             crate::memory_snapshot_image::MAX_IMAGE_PAGES
         )));
     }
-    let mut evidence = match &before {
+    let window = match &before {
         Some(before) if before.metadata().trace_generation == metadata.trace_generation => {
             let old = before.metadata();
             let recorder = app
@@ -365,41 +299,34 @@ pub(crate) fn render(
                     attempt,
                     logical,
                 );
-                evidence["tracing_enabled_at_both_boundaries"] =
+                evidence.metadata["tracing_enabled_at_both_boundaries"] =
                     json!(old.tracing_enabled && metadata.tracing_enabled);
                 evidence
             } else {
-                json!({"available": false, "reason": "Execution recorder is unavailable."})
+                SnapshotEvidence::unavailable("Execution recorder is unavailable.")
             }
         }
-        Some(_) => {
-            json!({"available": false, "reason": "Trace generation changed between captures."})
-        }
-        None => {
-            json!({"available": false, "reason": "Provide compare_to for execution evidence between captures."})
-        }
+        Some(_) => SnapshotEvidence::unavailable("Trace generation changed between captures."),
+        None => SnapshotEvidence::unavailable(
+            "Provide compare_to for execution evidence between captures.",
+        ),
     };
+    let evidence = &window.metadata;
     let start_page = quantity(&query.start_page, "start_page")?.unwrap_or(0);
-    let reads = if view == SnapshotView::Reads {
-        if before.is_none() || evidence["read_profile"]["available"] != true {
-            return Err(snapshot_error(
+    if view == SnapshotView::Reads
+        && (before.is_none() || evidence["read_profile"]["available"] != true)
+    {
+        return Err(snapshot_error(
                 "view=reads requires matching before/after captures with retained opt-in byte-read profiling. Enable byte-read profiling before the call/install; existing page traces and snapshot bytes cannot reconstruct reads.".to_string(),
             ));
-        }
-        Some(read_ranges(&evidence["read_profile"]).map_err(snapshot_error)?)
-    } else {
-        None
-    };
-    let writes = if view == SnapshotView::Writes {
-        if before.is_none() || evidence["write_profile"]["available"] != true {
-            return Err(snapshot_error(
+    }
+    if view == SnapshotView::Writes
+        && (before.is_none() || evidence["write_profile"]["available"] != true)
+    {
+        return Err(snapshot_error(
                 "view=writes requires matching before/after captures with retained opt-in byte-write profiling. Enable byte-write profiling before the call/install; page dirty flags and snapshot differences cannot reconstruct individual writes.".to_string(),
             ));
-        }
-        Some(write_ranges(&evidence["write_profile"]).map_err(snapshot_error)?)
-    } else {
-        None
-    };
+    }
     let (selected, total) = match selection {
         SnapshotSelection::Touched => {
             if query.start_page.is_some() {
@@ -411,7 +338,7 @@ pub(crate) fn render(
                     evidence["reason"].as_str().unwrap_or("")
                 )));
             }
-            let (pages, total) = touched_window(&evidence, memory, offset, count);
+            let (pages, total) = touched_window(&window.touched, memory, offset, count);
             if total == 0 {
                 return Err(snapshot_error("No recorded touched blocks in this selected window. Enable tracing before the call/install, capture both boundaries, and check attempt/logical selection. Missing coverage is not a known empty access set; use selection=range for an explicit byte window.".to_string()));
             }
@@ -447,8 +374,8 @@ pub(crate) fn render(
         .iter()
         .map(|&(kind, page)| {
             let name = memory_name(kind);
-            let positive = |field: &str| {
-                ranges(&evidence, field, name)
+            let positive = |ranges: &[Vec<(u64, u64)>; 2]| {
+                ranges[usize::from(kind == MemoryKind::Stable)]
                     .iter()
                     .any(|&(start, end)| start <= page && page < end)
                     .then_some(true)
@@ -476,8 +403,8 @@ pub(crate) fn render(
                         .transpose()
                         .map_err(snapshot_error)?
                 },
-                accessed: positive("known_touched_ranges"),
-                dirty: positive("known_dirty_ranges"),
+                accessed: positive(&window.touched),
+                dirty: positive(&window.dirty),
             })
         })
         .collect::<SnapshotResult<Vec<_>>>()?;
@@ -504,12 +431,12 @@ pub(crate) fn render(
     let mut rendered = match view {
         SnapshotView::Reads => crate::memory_snapshot_image::render_reads(
             &input,
-            reads.as_ref().unwrap(),
+            &window.reads,
             &evidence["read_profile"],
         ),
         SnapshotView::Writes => crate::memory_snapshot_image::render_writes(
             &input,
-            writes.as_ref().unwrap(),
+            &window.writes,
             &evidence["write_profile"],
         ),
         SnapshotView::Data => crate::memory_snapshot_image::render(&input),
@@ -533,6 +460,7 @@ pub(crate) fn render(
         "attempt_id": attempt.map(|n| n.to_string()), "logical_execution_id": logical.map(|n| n.to_string()),
         "continuous_recording_proven": false,
     });
+    let mut evidence = window.into_summary();
     evidence["selected_blocks"] = json!(
         selected
             .iter()
@@ -545,19 +473,6 @@ pub(crate) fn render(
         if rendered.summary[name]["counters_saturated"] == true {
             evidence[field]["counters_saturated"] = json!(true);
             evidence[field]["retained_coverage_complete"] = json!(false);
-        }
-        if let Some(profile) = evidence[field].as_object_mut() {
-            let retained_ranges = profile
-                .remove("ranges")
-                .and_then(|ranges| ranges.as_array().map(Vec::len))
-                .unwrap_or(0);
-            profile.insert(
-                "retained_input_ranges".to_string(),
-                json!(retained_ranges.to_string()),
-            );
-            profile.insert("raw_profile_retrieval".to_string(), json!(format!(
-                "Full bounded per-execution {field}.ranges are available in the execution trace export. Image JSON contains overlap-merged frequency ranges for selected pages, with its own explicit output limit."
-            )));
         }
         rendered.summary[field] = evidence[field].clone();
     }
@@ -628,10 +543,7 @@ mod tests {
 
     #[test]
     fn touched_pagination_is_a_sparse_stable_heap_union_with_exact_totals() {
-        let evidence = json!({"known_touched_ranges": {
-            "heap": [["0", "2"], ["9", "10"]],
-            "stable": [["7000000", "8000000"]]
-        }});
+        let evidence = [vec![(0, 2), (9, 10)], vec![(7_000_000, 8_000_000)]];
         let (pages, total) = touched_window(&evidence, SnapshotMemory::Both, 2, 3);
         assert_eq!(total, 1_000_003);
         assert_eq!(
@@ -677,15 +589,23 @@ mod tests {
 
     #[test]
     fn byte_read_ranges_preserve_addresses_and_counts_without_rounding() {
-        let ranges = read_ranges(&json!({"ranges": [{
+        let ranges: Vec<MemorySnapshotReadRange> = serde_json::from_value(json!([{
             "memory":"stable", "start":"9007199254740993", "end":"9007199254741000",
             "heap_reads":"0", "stable_direct_reads":"1", "stable_native_reads":"18446744073709551615"
-        }]})).unwrap();
+        }])).unwrap();
         assert_eq!(ranges[0].start, 9_007_199_254_740_993);
         assert_eq!(ranges[0].end, 9_007_199_254_741_000);
         assert_eq!(ranges[0].stable_native_reads, u64::MAX);
-        assert!(read_ranges(&json!({"ranges": [{"memory": "heap", "start": "1.5"}]})).is_err());
-        assert!(read_ranges(&json!({"available": true})).is_err());
+        assert!(
+            serde_json::from_value::<Vec<MemorySnapshotReadRange>>(
+                json!([{"memory": "heap", "start": "1.5"}])
+            )
+            .is_err()
+        );
+        assert!(
+            serde_json::from_value::<Vec<MemorySnapshotReadRange>>(json!({"available": true}))
+                .is_err()
+        );
     }
 
     #[test]
@@ -695,17 +615,25 @@ mod tests {
         }))
         .unwrap();
         assert_eq!(query.view, Some(SnapshotView::Writes));
-        let ranges = write_ranges(&json!({"ranges": [{
+        let ranges: Vec<MemorySnapshotWriteRange> = serde_json::from_value(json!([{
             "memory": "heap", "start": "9007199254740993", "end": "9007199254741001",
             "heap_writes": "18446744073709551615", "stable_writes": 0
-        }]}))
+        }]))
         .unwrap();
         assert_eq!(ranges[0].start, 9_007_199_254_740_993);
         assert_eq!(ranges[0].end, 9_007_199_254_741_001);
         assert_eq!(ranges[0].heap_writes, u64::MAX);
         assert_eq!(ranges[0].stable_writes, 0);
-        assert!(write_ranges(&json!({"ranges": [{"memory": "heap", "start": -1}]})).is_err());
-        assert!(write_ranges(&json!({"available": true})).is_err());
+        assert!(
+            serde_json::from_value::<Vec<MemorySnapshotWriteRange>>(
+                json!([{"memory": "heap", "start": -1}])
+            )
+            .is_err()
+        );
+        assert!(
+            serde_json::from_value::<Vec<MemorySnapshotWriteRange>>(json!({"available": true}))
+                .is_err()
+        );
     }
 
     #[test]

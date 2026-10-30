@@ -60,7 +60,7 @@ export PATH="$fixture/bin:$PATH" TEST_CALLS="$fixture/calls"
 TEST_MSRV="$("$BASH" "$root/scripts/ci/read-platform-msrv.sh")"
 export TEST_MSRV
 export TEST_REJECT=no TEST_CANDID=no
-while IFS=$'\t' read -r capability _ _ _ wasm; do
+while IFS=$'\t' read -r capability _ _ _ wasm _; do
     TEST_CANDID=no
     if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi
     : > "$TEST_CALLS"
@@ -76,6 +76,14 @@ if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" unknown > "$fixture/
     echo 'Unknown consumer profile was admitted' >&2; exit 1
 fi
 [[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled an unknown consumer profile' >&2; exit 1; }
+cp "$fixture/scripts/ci/platform-consumer-profiles.tsv" "$fixture/profiles.before"
+sed 's/minimal$/unknown-graph/' "$fixture/profiles.before" > "$fixture/scripts/ci/platform-consumer-profiles.tsv"
+if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" executor > "$fixture/invalid-family.log" 2>&1; then
+    echo 'Unknown consumer graph family was admitted' >&2; exit 1
+fi
+grep -q 'Unknown consumer graph family' "$fixture/invalid-family.log"
+[[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled an unknown graph family' >&2; exit 1; }
+cp "$fixture/profiles.before" "$fixture/scripts/ci/platform-consumer-profiles.tsv"
 echo 'Every consumer profile prepares its source/assets and selects native/Wasm commands'
 if TEST_CAPABILITY=external-codecs TEST_REJECT=yes "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-codecs > "$fixture/codec-rejection.log" 2>&1; then
     echo 'External codecs admitted host transport' >&2; exit 1

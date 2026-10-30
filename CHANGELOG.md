@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.8.3]
+
+### 🔧 Changed
+
+- Share owned/external Account formatting while preserving external Candid DTOs,
+  text bytes, parsing errors and serialized absent/zero subaccounts.
+- Bound manual exhaustive feature audits to explicit groups, reuse fixture build
+  targets and declare consumer graph admission in the existing profile table.
+- Consolidate native profiling request admission, name conditional-clear guards,
+  borrow pricing snapshots and keep snapshot ranges numeric through rendering.
+  Read/write masks retain their distinct schemas and shared numeric sweep.
+
+### 📚 Documentation
+
+- Refresh current release and Account/ICRC ownership instructions; distinguish
+  this cleanup from PR #99 and retained native qualification.
+
 ## [0.8.2] - 2026-10-29
 
 ### ⬆️ Dependencies

@@ -435,12 +435,12 @@ fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
     let initial_rows = initial
         .get("canisters")
         .and_then(Value::as_array)
-        .cloned()
+        .map(Vec::as_slice)
         .unwrap_or_default();
     let final_rows = final_snapshot
         .get("canisters")
         .and_then(Value::as_array)
-        .cloned()
+        .map(Vec::as_slice)
         .unwrap_or_default();
     let key = |row: &Value| {
         format!(
@@ -457,7 +457,7 @@ fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
     let mut incomplete = initial["truncated"] == true
         || final_snapshot["truncated"] == true
         || baseline.len() != final_rows.len();
-    for end in &final_rows {
+    for end in final_rows {
         let Some(begin) = baseline.get(&key(end)) else {
             incomplete = true;
             continue;
@@ -472,16 +472,16 @@ fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
             continue;
         }
         covered += 1;
-        let totals = |row: &Value| {
+        fn totals(row: &Value) -> &[Value] {
             row.get("totals")
                 .and_then(Value::as_array)
-                .cloned()
+                .map(Vec::as_slice)
                 .unwrap_or_default()
-        };
+        }
         let total_key = |row: &Value| format!("{}:{}:{}", row["rule_id"], row["unit"], row["kind"]);
         let before: BTreeMap<_, _> = totals(begin)
-            .into_iter()
-            .map(|row| (total_key(&row), row))
+            .iter()
+            .map(|row| (total_key(row), row))
             .collect();
         for total in totals(end) {
             let parse = |v: &Value| {
@@ -490,7 +490,7 @@ fn pricing_delta(initial: &Value, final_snapshot: &Value) -> Value {
                     .or_else(|| v.as_u64().map(u128::from))
             };
             let old = before
-                .get(&total_key(&total))
+                .get(&total_key(total))
                 .and_then(|v| parse(&v["amount"]))
                 .unwrap_or(0);
             let Some(amount) = parse(&total["amount"]).and_then(|n| n.checked_sub(old)) else {

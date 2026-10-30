@@ -18,6 +18,8 @@ Packaging changes:
 - Remove account CBOR derives, stable-storage integration and unexposed
   subaccount-allocation helpers. Account text retains CRC32 and unpadded Base32;
   use the already selected `data-encoding` implementation instead of `base32`.
+- Delegate external Account display to the owned Account formatter. External
+  parsing and its error identity remain separate; checksum and text bytes remain.
 - Omit unexposed deprecated archive DTOs, metadata-key helpers and consent
   message construction/number/time formatting. Consumers own consent policy.
 - Preserve the complete value implementation, hash bodies, integer encoders
