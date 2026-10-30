@@ -1,0 +1,10 @@
+[package]
+name = "candid-reader-installed"
+version = "0.0.0"
+edition = "2024"
+publish = false
+[workspace]
+[dependencies]
+pocket-ic = "16.1.0"
+candid = { version = "=0.10.39", default-features = false, features = ["bignum"] }
+ic-management-canister-types = "=0.11.0"

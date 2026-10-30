@@ -44,8 +44,24 @@ done <<'MUTATIONS'
 (.dependencies[] | select(.name == "ed25519-dalek")).uses_default_features = true
 (.dependencies[] | select(.name == "ic-stable-structures")).req = "^0.7"
 (.dependencies[] | select(.name == "k256")).uses_default_features = true
-.links = null
+.links = "unconditional-executor"
+(.dependencies[] | select(.name == "ic-platform-runtime-guard")).optional = false
+(.dependencies[] | select(.name == "ic-platform-runtime-guard")).req = "^0.9.0"
+.dependencies |= map(select(.name != "ic-platform-runtime-guard"))
 .dependencies += [{"name":"ic0"}]
+MUTATIONS
+while IFS= read -r mutation; do
+    "$jq" "$mutation" "$fixture/metadata.json" > "$fixture/invalid.json"
+    if contract "$fixture/invalid.json" 2> "$fixture/error"; then
+        echo "Singleton guard contract admitted mutation: $mutation" >&2; exit 1
+    fi
+    grep -q 'singleton guard' "$fixture/error"
+done <<'MUTATIONS'
+.packages |= map(select(.name != "ic-platform-runtime-guard"))
+.packages += [.packages[] | select(.name == "ic-platform-runtime-guard")]
+(.packages[] | select(.name == "ic-platform-runtime-guard")).version = "99.0.0"
+(.packages[] | select(.name == "ic-platform-runtime-guard")).links = null
+(.packages[] | select(.name == "ic-platform-runtime-guard")).dependencies = [{name: "ic0"}]
 MUTATIONS
 "$jq" --arg mode routine --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-selections.jq "$fixture/features.json" > "$fixture/routine.json"
 # Prove powerset completeness on a bounded universe. Ordinary qualification must

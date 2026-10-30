@@ -1,0 +1,643 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -79,11 +79,6 @@
+ [dependencies.anyhow]
+ version = "1.0"
+ 
+-[dependencies.binrw]
+-version = "0.15"
+-features = ["std"]
+-default-features = false
+-
+ [dependencies.byteorder]
+ version = "1.5.0"
+ 
+--- a/src/binary_parser.rs
++++ b/src/binary_parser.rs
+@@ -1,268 +1,326 @@
+ use crate::types::internal::{Field, Function, Label, Type, TypeInner};
+ use crate::types::{FuncMode, TypeEnv};
+ use anyhow::{anyhow, Context, Result};
+-use binrw::{BinRead, BinResult, Error as BError};
+-use std::convert::TryInto;
++use std::io::{Read, Seek, SeekFrom};
+ 
+-const MAX_TYPE_TABLE_LEN: u64 = 10_000; // Max type entries
+-
+-/// Default bound on the byte length of the type-table header.
+-///
+-/// A header describes types, so its size follows the interface rather than the payload.
+-/// Every element it declares occupies at least one byte, so bounding its length bounds
+-/// each declared count at once. [`MAX_TYPE_TABLE_LEN`] bounds a different dimension:
+-/// the number of type-table entries, whatever their size.
++const MAX_TYPE_TABLE_LEN: u64 = 10_000;
+ pub(crate) const DEFAULT_MAX_HEADER_LEN: usize = 64 * 1024;
+-
+-// Upper bound on a single allocation step while reading a length-prefixed byte
+-// blob. The buffer grows in steps of at most this size.
+ const READ_CHUNK: u64 = 8 * 1024;
+ 
+-/// Marks a header read that stopped because the reader ran out of bytes, rather than
+-/// one that found something malformed. Displays as the plain field name, so error text
+-/// is unchanged; the type is what makes the distinction recoverable.
++/// A binary framing failure, preserving truncation independently of diagnostics.
+ #[derive(Debug)]
+-pub(crate) struct Truncated(pub(crate) &'static str);
+-
+-impl std::fmt::Display for Truncated {
+-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+-        f.write_str(self.0)
++pub struct ReadError {
++    pub(crate) pos: u64,
++    pub(crate) message: String,
++    truncated: bool,
++}
++type ReadResult<T> = std::result::Result<T, ReadError>;
++impl ReadError {
++    fn invalid(pos: u64, message: impl Into<String>) -> Self {
++        Self {
++            pos,
++            message: message.into(),
++            truncated: false,
++        }
++    }
++    fn io(pos: u64, error: std::io::Error) -> Self {
++        Self {
++            pos,
++            message: error.to_string(),
++            truncated: error.kind() == std::io::ErrorKind::UnexpectedEof,
++        }
+     }
+ }
+-
+-fn leb_failure(e: leb128::read::Error, name: &'static str) -> Box<dyn binrw::error::CustomError> {
+-    match e {
+-        // Ran out of input: within a bounded prefix, that is the bound.
+-        leb128::read::Error::IoError(_) => Box::new(Truncated(name)),
+-        // A value too large for the target type is malformed, not truncated.
+-        leb128::read::Error::Overflow => Box::new(name),
++impl std::fmt::Display for ReadError {
++    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
++        write!(f, "{} at byte offset {}", self.message, self.pos)
+     }
+ }
+-
+-/// Whether a header parse stopped because it ran out of input, rather than because the
+-/// header was malformed. Inside a bounded prefix that is the signal that the header
+-/// needed more than the bound.
+-///
+-/// The failure offset cannot serve here: a length-prefixed field and a multi-byte
+-/// LEB128 are reported where they *start*, and binrw reports a failure inside an enum
+-/// variant at the start of the enum, all of which can be short of the boundary actually
+-/// crossed. Hence the marker, and the walk over the error tree.
+-pub(crate) fn is_truncation(e: &BError) -> bool {
+-    match e {
+-        // `Backtrace::error` is guaranteed not to be another backtrace.
+-        BError::Backtrace(bt) => is_truncation(&bt.error),
+-        BError::EnumErrors { variant_errors, .. } => {
+-            variant_errors.iter().any(|(_, inner)| is_truncation(inner))
+-        }
+-        BError::Io(io) => io.kind() == std::io::ErrorKind::UnexpectedEof,
+-        _ => e.custom_err::<Truncated>().is_some(),
++impl std::error::Error for ReadError {}
++pub(crate) fn is_truncation(e: &ReadError) -> bool {
++    e.truncated
++}
++fn position<R: Seek>(r: &mut R) -> ReadResult<u64> {
++    r.stream_position().map_err(|e| ReadError::io(0, e))
++}
++fn byte<R: Read + Seek>(r: &mut R) -> ReadResult<u8> {
++    let pos = position(r)?;
++    let mut b = [0];
++    r.read_exact(&mut b).map_err(|e| ReadError::io(pos, e))?;
++    Ok(b[0])
++}
++fn leb_error(pos: u64, name: &'static str, e: leb128::read::Error) -> ReadError {
++    ReadError {
++        pos,
++        message: name.into(),
++        truncated: matches!(e, leb128::read::Error::IoError(_)),
+     }
+ }
+-
+-/// Read `len` bytes into a fresh `Vec`, growing the buffer in bounded steps.
+-///
+-/// A plain `#[br(count = len)]` on a `Vec<u8>` passes the wire-declared length
+-/// straight to `reserve_exact`, allocating `len` bytes up front before any are
+-/// read. A length prefix need not match the amount of data actually present, so
+-/// a value far larger than the input would reserve a correspondingly large
+-/// buffer instead of failing cleanly on the short read. Growing the buffer in
+-/// bounded chunks keeps the reservation proportional to the bytes available, so
+-/// an out-of-range or truncated length surfaces as an ordinary parse error.
+-fn read_len_prefixed<R: std::io::Read>(reader: &mut R, pos: u64, len: u64) -> BinResult<Vec<u8>> {
+-    use std::io::Read;
+-    let mut buf = Vec::new();
++fn read_leb<R: Read + Seek>(r: &mut R, name: &'static str) -> ReadResult<u64> {
++    let pos = position(r)?;
++    leb128::read::unsigned(r).map_err(|e| leb_error(pos, name, e))
++}
++fn read_sleb<R: Read + Seek>(r: &mut R, name: &'static str) -> ReadResult<i64> {
++    let pos = position(r)?;
++    leb128::read::signed(r).map_err(|e| leb_error(pos, name, e))
++}
++fn read_u32<R: Read + Seek>(r: &mut R, name: &'static str, range: &'static str) -> ReadResult<u32> {
++    let pos = position(r)?;
++    read_leb(r, name)?
++        .try_into()
++        .map_err(|_| ReadError::invalid(pos, range))
++}
++fn read_bytes<R: Read + Seek>(r: &mut R, len: u64) -> ReadResult<Vec<u8>> {
++    let pos = position(r)?;
++    let mut bytes = Vec::new();
+     let mut remaining = len;
+     while remaining > 0 {
+         let want = remaining.min(READ_CHUNK);
+-        // `read_to_end` on a bounded `Take` reserves at most `want`, so the
+-        // buffer never grows faster than the input is consumed.
+-        let read = reader.by_ref().take(want).read_to_end(&mut buf)? as u64;
++        let read = r
++            .by_ref()
++            .take(want)
++            .read_to_end(&mut bytes)
++            .map_err(|e| ReadError::io(pos, e))? as u64;
+         if read < want {
+-            // Fewer bytes were available than declared: short input.
+-            return Err(BError::Custom {
++            return Err(ReadError {
+                 pos,
+-                err: Box::new(Truncated("not enough bytes")),
++                message: "not enough bytes".into(),
++                truncated: true,
+             });
+         }
+         remaining -= read;
+     }
+-    Ok(buf)
+-}
+-
+-#[binrw::parser(reader)]
+-fn read_bytes(len: u64) -> BinResult<Vec<u8>> {
+-    let pos = reader.stream_position()?;
+-    read_len_prefixed(reader, pos, len)
+-}
+-#[binrw::parser(reader)]
+-fn read_text(len: u64) -> BinResult<String> {
+-    let pos = reader.stream_position()?;
+-    let bytes = read_len_prefixed(reader, pos, len)?;
+-    String::from_utf8(bytes).map_err(|_| BError::Custom {
+-        pos,
+-        err: Box::new("invalid utf8"),
+-    })
++    Ok(bytes)
+ }
+-
+-#[binrw::parser(reader)]
+-fn read_leb(name: &'static str) -> BinResult<u64> {
+-    let pos = reader.stream_position()?;
+-    leb128::read::unsigned(reader).map_err(|e| BError::Custom {
+-        pos,
+-        err: leb_failure(e, name),
+-    })
+-}
+-#[binrw::parser(reader)]
+-fn read_sleb(name: &'static str) -> BinResult<i64> {
+-    let pos = reader.stream_position()?;
+-    leb128::read::signed(reader).map_err(|e| BError::Custom {
+-        pos,
+-        err: leb_failure(e, name),
+-    })
+-}
+-#[binrw::parser(reader)]
+-fn read_leb_u32(name: &'static str, range_msg: &'static str) -> BinResult<u32> {
+-    let pos = reader.stream_position()?;
+-    let v = leb128::read::unsigned(reader).map_err(|e| BError::Custom {
+-        pos,
+-        err: leb_failure(e, name),
+-    })?;
+-    v.try_into().map_err(|_| BError::Custom {
+-        pos,
+-        err: Box::new(range_msg),
+-    })
+-}
+-#[binrw::parser(reader)]
+-fn read_leb_usize(name: &'static str, range_msg: &'static str) -> BinResult<usize> {
+-    let pos = reader.stream_position()?;
+-    let v = leb128::read::unsigned(reader).map_err(|e| BError::Custom {
+-        pos,
+-        err: leb_failure(e, name),
+-    })?;
+-    v.try_into().map_err(|_| BError::Custom {
+-        pos,
+-        err: Box::new(range_msg),
+-    })
++fn read_text<R: Read + Seek>(r: &mut R, len: u64) -> ReadResult<String> {
++    let pos = position(r)?;
++    String::from_utf8(read_bytes(r, len)?).map_err(|_| ReadError::invalid(pos, "invalid utf8"))
++}
++fn repeat<R, T>(
++    r: &mut R,
++    count: u64,
++    mut read: impl FnMut(&mut R) -> ReadResult<T>,
++) -> ReadResult<Vec<T>> {
++    let mut values = Vec::new();
++    for _ in 0..count {
++        values.push(read(r)?);
++    }
++    Ok(values)
+ }
+-
+-#[derive(BinRead, Debug)]
+-#[br(magic = b"DIDL")]
+-#[br(import(max_type_len: Option<usize>))]
++#[derive(Debug)]
+ pub struct Header {
+-    #[br(args(max_type_len))]
+     table: Table,
+-    #[br(parse_with = read_leb, args("len"))]
+-    len: u64,
+-    #[br(count = len)]
+     args: Vec<IndexType>,
+ }
+-
+-#[derive(BinRead, Debug)]
+-#[br(import(max_type_len: Option<usize>))]
++#[derive(Debug)]
+ struct Table {
+-    #[br(parse_with = read_leb, args("len"))]
+-    #[br(assert(len <= max_type_len.unwrap_or(MAX_TYPE_TABLE_LEN as usize) as u64, "type table size exceeded"))]
+     len: u64,
+-    #[br(count = len)]
+     table: Vec<ConsType>,
+ }
+-#[derive(BinRead, Debug)]
++#[derive(Debug)]
+ enum ConsType {
+-    #[br(magic = 0x6eu8)]
+     Opt(Box<IndexType>),
+-    #[br(magic = 0x6du8)]
+     Vec(Box<IndexType>),
+-    #[br(magic = 0x6cu8)]
+     Record(Fields),
+-    #[br(magic = 0x6bu8)]
+     Variant(Fields),
+-    #[br(magic = 0x6au8)]
+     Func(FuncType),
+-    #[br(magic = 0x69u8)]
+     Service(ServType),
+     Future(FutureType),
+ }
+-#[derive(BinRead, Debug)]
++#[derive(Debug)]
+ struct IndexType {
+-    #[br(parse_with = read_sleb, args("index"), assert(index >= -17 || index == -24, "unknown opcode {}", index))]
+     index: i64,
+ }
+-#[derive(BinRead, Debug)]
++#[derive(Debug)]
+ struct Fields {
+-    #[br(parse_with = read_leb_u32, args("len", "field length out of 32-bit range"))]
+-    len: u32,
+-    #[br(count = len)]
+     inner: Vec<FieldType>,
+ }
+-#[derive(BinRead, Debug)]
++#[derive(Debug)]
+ struct FieldType {
+-    #[br(parse_with = read_leb_u32, args("id", "field id out of 32-bit range"))]
+     id: u32,
+     index: IndexType,
+ }
+-#[derive(BinRead, Debug)]
++#[derive(Debug)]
+ struct FuncType {
+-    #[br(parse_with = read_leb, args("arg_len"))]
+-    arg_len: u64,
+-    #[br(count = arg_len)]
+     args: Vec<IndexType>,
+-    #[br(parse_with = read_leb, args("ret_len"))]
+-    ret_len: u64,
+-    #[br(count = ret_len)]
+     rets: Vec<IndexType>,
+-    #[br(assert(ann_len <= 1u8, "function annotation length should be at most 1"))]
+-    ann_len: u8,
+-    #[br(count = ann_len)]
+     ann: Vec<Mode>,
+ }
+-#[derive(BinRead, Debug)]
++#[derive(Debug)]
+ struct ServType {
+-    #[br(parse_with = read_leb, args("len"))]
+-    len: u64,
+-    #[br(count = len)]
+     meths: Vec<Meths>,
+ }
+-#[derive(BinRead, Debug)]
+-struct FutureType {
+-    #[br(parse_with = read_sleb, args("opcode"), assert(opcode < -24, "{} is not a valid future type", opcode))]
+-    opcode: i64,
+-    #[br(parse_with = read_leb, args("len"))]
+-    len: u64,
+-    #[br(parse_with = read_bytes, args(len))]
+-    blob: Vec<u8>,
+-}
+-#[derive(BinRead, Debug)]
++#[derive(Debug)]
++struct FutureType;
++#[derive(Debug)]
+ struct Meths {
+-    #[br(parse_with = read_leb, args("len"))]
+-    len: u64,
+-    #[br(parse_with = read_text, args(len))]
+     name: String,
+     ty: IndexType,
+ }
+-#[derive(BinRead, Debug)]
++#[derive(Debug)]
+ struct Mode {
+-    #[br(try_map = |x:u8| match x { 1u8 => Ok(FuncMode::Query), | 2u8 => Ok(FuncMode::Oneway), | 3u8 => Ok(FuncMode::CompositeQuery), | _ => Err("Unknown annotation") })]
+     inner: FuncMode,
+ }
+-
+-#[derive(BinRead)]
+-pub struct BoolValue(
+-    #[br(try_map = |x:u8| match x { 0u8 => Ok(false), | 1u8 => Ok(true), | _ => Err("Expect 00 or 01") } )]
+-    pub bool,
+-);
+-#[derive(BinRead)]
+-pub struct Len(
+-    #[br(parse_with = read_leb_usize, args("len", "length out of usize range"))] pub usize,
+-);
+-#[derive(BinRead)]
++/// Boolean wire scalar.
++pub struct BoolValue(pub bool);
++/// A wire length admitted for the target address space.
++pub struct Len(pub usize);
++/// External Principal bytes with the upstream tag/length admission.
+ pub struct PrincipalBytes {
+-    #[br(assert(flag == 1u8, "Opaque reference not supported"))]
+     pub flag: u8,
+-    #[br(parse_with = read_leb, args("len"), assert(len <= 29, "Principal is longer than 29 bytes"))]
+     pub len: u64,
+-    #[br(count = len)]
+     pub inner: Vec<u8>,
+ }
++impl Header {
++    pub fn read_le_args<R: Read + Seek>(
++        r: &mut R,
++        (max_type_len,): (Option<usize>,),
++    ) -> ReadResult<Self> {
++        let pos = position(r)?;
++        let mut magic = [0; 4];
++        r.read_exact(&mut magic)
++            .map_err(|e| ReadError::io(pos, e))?;
++        if &magic != b"DIDL" {
++            return Err(ReadError::invalid(pos, "Unexpected bytes"));
++        }
++        let pos = position(r)?;
++        let len = read_leb(r, "len")?;
++        if len > max_type_len.unwrap_or(MAX_TYPE_TABLE_LEN as usize) as u64 {
++            return Err(ReadError::invalid(pos, "type table size exceeded"));
++        }
++        let table = Table {
++            len,
++            table: repeat(r, len, ConsType::read)?,
++        };
++        let len = read_leb(r, "len")?;
++        Ok(Self {
++            table,
++            args: repeat(r, len, IndexType::read)?,
++        })
++    }
++}
++impl IndexType {
++    fn read<R: Read + Seek>(r: &mut R) -> ReadResult<Self> {
++        let pos = position(r)?;
++        let index = read_sleb(r, "index")?;
++        if index < -17 && index != -24 {
++            return Err(ReadError::invalid(pos, format!("unknown opcode {index}")));
++        }
++        Ok(Self { index })
++    }
++}
++impl Fields {
++    fn read<R: Read + Seek>(r: &mut R) -> ReadResult<Self> {
++        let count = read_u32(r, "len", "field length out of 32-bit range")?;
++        Ok(Self {
++            inner: repeat(r, count as u64, |r| {
++                Ok(FieldType {
++                    id: read_u32(r, "id", "field id out of 32-bit range")?,
++                    index: IndexType::read(r)?,
++                })
++            })?,
++        })
++    }
++}
++impl ConsType {
++    fn read<R: Read + Seek>(r: &mut R) -> ReadResult<Self> {
++        let pos = position(r)?;
++        Ok(match byte(r)? {
++            0x6e => Self::Opt(Box::new(IndexType::read(r)?)),
++            0x6d => Self::Vec(Box::new(IndexType::read(r)?)),
++            0x6c => Self::Record(Fields::read(r)?),
++            0x6b => Self::Variant(Fields::read(r)?),
++            0x6a => {
++                let count = read_leb(r, "arg_len")?;
++                let args = repeat(r, count, IndexType::read)?;
++                let count = read_leb(r, "ret_len")?;
++                let rets = repeat(r, count, IndexType::read)?;
++                let ann_pos = position(r)?;
++                let count = byte(r)?;
++                if count > 1 {
++                    return Err(ReadError::invalid(
++                        ann_pos,
++                        "function annotation length should be at most 1",
++                    ));
++                }
++                let ann = repeat(r, count as u64, |r| {
++                    let pos = position(r)?;
++                    let inner = match byte(r)? {
++                        1 => FuncMode::Query,
++                        2 => FuncMode::Oneway,
++                        3 => FuncMode::CompositeQuery,
++                        _ => return Err(ReadError::invalid(pos, "Unknown annotation")),
++                    };
++                    Ok(Mode { inner })
++                })?;
++                Self::Func(FuncType { args, rets, ann })
++            }
++            0x69 => {
++                let count = read_leb(r, "len")?;
++                let meths = repeat(r, count, |r| {
++                    let len = read_leb(r, "len")?;
++                    Ok(Meths {
++                        name: read_text(r, len)?,
++                        ty: IndexType::read(r)?,
++                    })
++                })?;
++                Self::Service(ServType { meths })
++            }
++            _ => {
++                r.seek(SeekFrom::Start(pos))
++                    .map_err(|e| ReadError::io(pos, e))?;
++                let opcode = read_sleb(r, "opcode")?;
++                if opcode >= -24 {
++                    return Err(ReadError::invalid(
++                        pos,
++                        format!("{opcode} is not a valid future type"),
++                    ));
++                }
++                let len = read_leb(r, "len")?;
++                let _ = read_bytes(r, len)?;
++                Self::Future(FutureType)
++            }
++        })
++    }
++}
++impl BoolValue {
++    pub fn read_le<R: Read + Seek>(r: &mut R) -> ReadResult<Self> {
++        let pos = position(r)?;
++        match byte(r)? {
++            0 => Ok(Self(false)),
++            1 => Ok(Self(true)),
++            _ => Err(ReadError::invalid(pos, "Expect 00 or 01")),
++        }
++    }
++}
++impl Len {
++    pub fn read_le<R: Read + Seek>(r: &mut R) -> ReadResult<Self> {
++        let pos = position(r)?;
++        let len = read_leb(r, "len")?
++            .try_into()
++            .map_err(|_| ReadError::invalid(pos, "length out of usize range"))?;
++        Ok(Self(len))
++    }
++}
++impl PrincipalBytes {
++    pub fn read_le<R: Read + Seek>(r: &mut R) -> ReadResult<Self> {
++        let pos = position(r)?;
++        let flag = byte(r)?;
++        if flag != 1 {
++            return Err(ReadError::invalid(pos, "Opaque reference not supported"));
++        }
++        let pos = position(r)?;
++        let len = read_leb(r, "len")?;
++        if len > 29 {
++            return Err(ReadError::invalid(pos, "Principal is longer than 29 bytes"));
++        }
++        Ok(Self {
++            flag,
++            len,
++            inner: read_bytes(r, len)?,
++        })
++    }
++}
+ 
+ fn index_to_var(ind: i64) -> String {
+     format!("table{ind}")
+--- a/src/de.rs
++++ b/src/de.rs
+@@ -15,7 +15,6 @@
+     types::subtype::{subtype_with_config, Gamma, OptReport},
+ };
+ use anyhow::{anyhow, Context};
+-use binrw::BinRead;
+ use byteorder::{LittleEndian, ReadBytesExt};
+ use serde::de::{self, Visitor};
+ use std::fmt::Write;
+--- a/src/error.rs
++++ b/src/error.rs
+@@ -37,78 +37,6 @@
+     }
+ }
+ 
+-fn get_binread_labels(e: &binrw::Error) -> Vec<Label> {
+-    use binrw::Error::*;
+-    match e {
+-        BadMagic { pos, .. } => {
+-            let pos = (*pos * 2) as usize;
+-            vec![Label {
+-                pos,
+-                message: "Unexpected bytes".to_string(),
+-            }]
+-        }
+-        Custom { pos, err } => {
+-            let pos = (*pos * 2) as usize;
+-            // `Truncated` carries the same field name as the plain `&str` case; it is a
+-            // distinct type only so a read that ran out of input stays distinguishable
+-            // from a malformed one. Both render identically here.
+-            let message = err
+-                .downcast_ref::<&str>()
+-                .map(|s| (*s).to_string())
+-                .or_else(|| {
+-                    err.downcast_ref::<crate::binary_parser::Truncated>()
+-                        .map(|t| t.0.to_string())
+-                })
+-                .unwrap_or_else(|| "unknown error (there's a bug in error reporting)".to_string());
+-            vec![Label { pos, message }]
+-        }
+-        EnumErrors {
+-            pos,
+-            variant_errors,
+-        } => {
+-            let pos = (*pos * 2) as usize;
+-            let variant = variant_errors
+-                .iter()
+-                .find(|(_, e)| !matches!(e, BadMagic { .. }));
+-            // Should have at most one non-magic error
+-            match variant {
+-                None => vec![Label {
+-                    pos,
+-                    message: "Unknown opcode".to_string(),
+-                }],
+-                Some((id, e)) => {
+-                    let mut labels = get_binread_labels(e);
+-                    labels.push(Label {
+-                        pos,
+-                        message: (*id).to_string(),
+-                    });
+-                    labels
+-                }
+-            }
+-        }
+-        NoVariantMatch { pos } => {
+-            let pos = (*pos * 2) as usize;
+-            vec![Label {
+-                pos,
+-                message: "No variant match".to_string(),
+-            }]
+-        }
+-        AssertFail { pos, message } => {
+-            let pos = (*pos * 2) as usize;
+-            vec![Label {
+-                pos,
+-                message: message.to_string(),
+-            }]
+-        }
+-        Io(_) => vec![],
+-        Backtrace(backtrace) => get_binread_labels(&backtrace.error),
+-        // `binrw::Error` is `#[non_exhaustive]`. Decoding runs on untrusted
+-        // input, so degrade to a label-less error instead of panicking if a
+-        // future version of binrw adds a variant.
+-        _ => vec![],
+-    }
+-}
+-
+ impl ser::Error for Error {
+     fn custom<T: std::fmt::Display>(msg: T) -> Self {
+         Error::msg(format!("Serialize error: {msg}"))
+@@ -135,9 +63,12 @@
+     }
+ }
+ 
+-impl From<binrw::Error> for Error {
+-    fn from(e: binrw::Error) -> Error {
+-        Error::Binread(get_binread_labels(&e))
++impl From<crate::binary_parser::ReadError> for Error {
++    fn from(e: crate::binary_parser::ReadError) -> Error {
++        Error::Binread(vec![Label {
++            pos: e.pos as usize * 2,
++            message: e.message,
++        }])
+     }
+ }
+ 

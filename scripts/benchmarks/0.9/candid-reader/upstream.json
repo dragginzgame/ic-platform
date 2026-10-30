@@ -1,0 +1,13 @@
+{
+  "package": "candid",
+  "version": "0.10.39",
+  "prepared_manifest": "Registry manifest with an empty [workspace] appended for isolation",
+  "files": {
+    "Cargo.toml": "def3fce8db9ad7fb1239837dd448d70f24de9ae06175170210448dae49769ceb",
+    "src/binary_parser.rs": "df436d040f5ce6f95fc8b2bc406b9045b56ed3d69dcb68bcb2518b93694bf2b9",
+    "src/de.rs": "32e166efe5e6eb9bf1db0e952b3cb4f0518891dfc2264a164bcf377d4da327d6",
+    "src/error.rs": "38d646c8a0563f2276c37ce3be9297224d94bfa0b537e41acf28885c9e3c0d0c",
+    "src/ser.rs": "8f0b1b71eac4a801cff8a9e95cb0587d50b05b472858a9225284a267cd533aac",
+    "LICENSE": "3ec7531366b7e2440aa35dd675edc479f7690099821ce68b64c5548ba4849daa"
+  }
+}

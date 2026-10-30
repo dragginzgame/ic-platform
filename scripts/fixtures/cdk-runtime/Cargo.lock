@@ -793,7 +793,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "candid",
  "crc32fast",
@@ -801,6 +801,7 @@ dependencies = [
  "ic-certification",
  "ic-management-canister-types 0.11.0",
  "ic-platform-macros",
+ "ic-platform-runtime-guard",
  "ic_principal",
  "pin-project-lite",
  "pocket-ic",
@@ -811,12 +812,16 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.119",
 ]
+
+[[package]]
+name = "ic-platform-runtime-guard"
+version = "0.9.1"
 
 [[package]]
 name = "ic-testkit"

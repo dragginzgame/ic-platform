@@ -1,0 +1,17 @@
+[package]
+name = "candid-reader-probe"
+version = "0.0.0"
+edition = "2024"
+publish = false
+[workspace]
+[lib]
+crate-type = ["rlib", "cdylib"]
+[dependencies]
+ic-platform = { path = "../platform/crates/ic-platform", default-features = false, features = ["cdk", "candid", "management-canister-types"] }
+candid = { version = "=0.10.39", default-features = false, features = ["bignum", "serde_bytes"] }
+[patch.crates-io]
+candid = { path = "../candid-reader" }
+[features]
+baseline-reader = ["dep:binrw"]
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+binrw = { version = "0.15", optional = true, default-features = false, features = ["std"] }

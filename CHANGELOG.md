@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.9.1]
+## [0.9.2]
 
 ### ⬆️ Dependencies
 
@@ -10,6 +10,22 @@
   Cargo/Bazel inputs. Retain gzip-only Platform 0.8.3 until its runtime singleton
   guard permits the pinned native workspace
   ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
+
+## [0.9.1] - 2026-10-30
+
+### 🐛 Fixed
+
+- Scope the executor singleton guard to the optional executor/runtime features.
+  Native gzip-only consumers can coexist with an unrelated registry executor;
+  mixed runtime owners still fail Cargo resolution. The new internal guard package
+  is versioned and published with the facade (#103). Regression tests cover
+  registry executors and two facade versions with zero, one or two runtime owners.
+
+### 🧪 Testing
+
+- Add a reproducible Candid binary-reader dependency experiment with differential
+  decoding checks, stripped Wasm measurements and optional installed comparisons.
+  Production continues to use the registry Candid codec.
 
 ## [0.9.0] - 2026-10-30
 

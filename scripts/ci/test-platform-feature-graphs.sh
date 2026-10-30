@@ -18,14 +18,24 @@ admit() {
 count=0
 while IFS='|' read -r selection package expected; do
     printf 'ic-platform v0.1.13\n%s\n' "$package" > "$fixture/native-case.txt"
+    # Supply the required guard for ordinary runtime cases; explicit guard cases
+    # below exercise identity and feature-selection refusals.
+    if [[ "$package" != ic-platform-runtime-guard* && ",$selection," =~ ,(executor|runtime|cdk|candid-endpoint), ]]; then
+        printf 'ic-platform-runtime-guard v0.1.13 (/fixture)\n' >> "$fixture/native-case.txt"
+    fi
     printf '%s\tcase\n' "$selection" > "$fixture/mapping"
     actual=reject
-    if admit -v target=native -v cache="$fixture" -v generator='ic-platform-macros v0.1.13 (proc-macro) (/fixture)' \
+    if admit -v target=native -v cache="$fixture" -v guard='ic-platform-runtime-guard v0.1.13 (/fixture)' -v generator='ic-platform-macros v0.1.13 (proc-macro) (/fixture)' \
         -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
     [[ "$actual" == "$expected" ]] || { echo "Unexpected $actual for $selection: $package" >&2; cat "$fixture/log" >&2; exit 1; }
     count=$((count + 1))
 done <<'CASES'
 none||pass
+executor|ic-platform-runtime-guard v0.1.13 (/fixture)|pass
+none|ic-platform-runtime-guard v0.1.13 (/fixture)|reject
+ic0|ic-platform-runtime-guard v0.1.13 (/fixture)|reject
+executor|ic-platform-runtime-guard v0.1.12 (/fixture)|reject
+runtime|ic-platform-runtime-guard v0.1.13 (/other)|reject
 none|ic-wire v0.6.4|reject
 principal|ic-wire v0.6.4|reject
 wire-schema|ic-wire v0.6.4|pass
@@ -149,6 +159,12 @@ stable-structures|ic-stable-structures v0.7.2 (/tmp/override)|reject
 stable-structures|ic-platform v0.1.18|reject
 stable-structures|candid v0.10.38|reject
 CASES
+# A runtime selection must actually contain its guard, not merely avoid outsiders.
+printf 'ic-platform v0.1.13\n' > "$fixture/native-case.txt"
+printf 'executor\tcase\n' > "$fixture/mapping"
+if admit -v target=native -v cache="$fixture" -v guard='ic-platform-runtime-guard v0.1.13 (/fixture)' \
+    -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
+grep -q 'missing runtime singleton guard' "$fixture/log"
 # A shared key must still be admitted separately for each original selection.
 printf 'ic-platform v0.1.13\nic-agent v0.49.2\n' > "$fixture/native-case.txt"
 printf 'agent\tcase\nnone\tcase\n' > "$fixture/mapping"

@@ -57,6 +57,7 @@ if [[ -z "$published" ]]; then
 [patch.crates-io]
 ic-platform = { path = "../../crates/ic-platform" }
 ic-platform-macros = { path = "../../crates/ic-platform-macros" }
+ic-platform-runtime-guard = { path = "../../crates/ic-platform-runtime-guard" }
 PATCH
 fi
 cp scripts/fixtures/cdk-runtime/canister.Cargo.toml "$fixture/crates/canister/Cargo.toml"

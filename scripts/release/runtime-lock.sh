@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Keep only the two local package identities coordinated; never resolve dependencies.
+# Keep only the three local package identities coordinated; never resolve dependencies.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 export YQ="$root/.tools/host/bin/yq"
@@ -11,8 +11,8 @@ lock=scripts/fixtures/cdk-runtime/Cargo.lock
 version="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
 observed="$("$root/.tools/host/bin/yq" -p toml -o json '.' "$lock" |
     "$root/.tools/host/bin/jq" -er '
-      [.package[] | select(.source == null and (.name == "ic-platform" or .name == "ic-platform-macros"))] as $p |
-      if ($p | length) == 2 and ($p | map(.name) | unique | length) == 2 and
+      [.package[] | select(.source == null and (.name == "ic-platform" or .name == "ic-platform-macros" or .name == "ic-platform-runtime-guard"))] as $p |
+      if ($p | length) == 3 and ($p | map(.name) | unique | length) == 3 and
          ($p | map(.version) | unique | length) == 1
       then $p[0].version else error("invalid qualification package identities") end')"
 if [[ "$observed" != "$version" ]]; then
@@ -25,6 +25,6 @@ if [[ "$observed" != "$version" ]]; then
     source "$root/ci/release-editor.env"
     editor="$(bash "$root/scripts/release/editor.sh" check)"
     "$editor" --max-input-bytes "$PLATFORM_RELEASE_EDITOR_MAX_BYTES" lock "$lock" "$observed" "$version" \
-        ic-platform ic-platform-macros > "$temporary"
+        ic-platform ic-platform-macros ic-platform-runtime-guard > "$temporary"
     cat "$temporary" > "$lock"
 fi

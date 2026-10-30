@@ -45,4 +45,14 @@ fi
 if admit true "$fixture/bad.json"; then
     echo 'Runtime admission accepted a replaced transitive facade' >&2; exit 1
 fi
+"$jq" '.packages += [{name: "ic-platform-runtime-guard", version: "0.4.0", source: "registry+https://github.com/rust-lang/crates.io-index"}] |
+    .packages[0] += {id: "facade", dependencies: [{name: "ic-platform-runtime-guard"}]} |
+    .resolve.nodes = [{id: "facade", features: ["executor"]}]' "$fixture/good.json" > "$fixture/guard.json"
+admit true "$fixture/guard.json"
+for mutation in '.packages[2].source = null' '.packages[2].version = "0.3.0"' '.packages += [.packages[2]]' '.packages |= map(select(.name != "ic-platform-runtime-guard"))'; do
+    "$jq" "$mutation" "$fixture/guard.json" > "$fixture/bad.json"
+    if admit true "$fixture/bad.json"; then
+        echo "Registry guard admission accepted: $mutation" >&2; exit 1
+    fi
+done
 echo 'Published runtime admits exact registry identities and refuses replacements/missing versions.'

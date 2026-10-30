@@ -9,7 +9,8 @@ case "$operation" in
     version) bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml ;;
     preflight)
         bash scripts/release/runtime-lock.sh check
-        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock
+        bash scripts/release/runtime-pin.sh check
+        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock --allow ci/dependency-pinning-exceptions.json
         current="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
         [[ "$current" == "${RELEASE_PREVIOUS:?}" ]] || exit 1
         bash scripts/ci/check-release-changelog.sh "${RELEASE_VERSION:?}" "$current" "${RELEASE_DATE:?}" CHANGELOG.md
@@ -18,7 +19,7 @@ case "$operation" in
             --check tools-check --prepare install-tools --prepare tools-check
         ;;
     prepare)
-        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock
+        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock --allow ci/dependency-pinning-exceptions.json
         current="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
         if [[ "$current" == "${RELEASE_VERSION:?}" ]]; then
             bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order-grouped
@@ -32,15 +33,17 @@ case "$operation" in
             bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order-grouped
         fi
         bash scripts/release/runtime-lock.sh prepare "${RELEASE_PREVIOUS:?}"
+        bash scripts/release/runtime-pin.sh prepare "${RELEASE_PREVIOUS:?}"
         ;;
     check|commit-check)
         bash scripts/release/runtime-lock.sh check
-        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock
+        bash scripts/release/runtime-pin.sh check
+        bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock --allow ci/dependency-pinning-exceptions.json
         bash scripts/ci/cargo-release-metadata.sh check ic-platform --manifest-order-grouped
         if [[ "$operation" == commit-check ]]; then
             [[ -z "${RELEASE_COMMIT:-}" ]] || exit 1
-            git diff --quiet -- Cargo.toml Cargo.lock CHANGELOG.md scripts/fixtures/cdk-runtime/Cargo.lock
-            for path in Cargo.toml Cargo.lock CHANGELOG.md scripts/fixtures/cdk-runtime/Cargo.lock; do git cat-file -e ":$path"; done
+            git diff --quiet -- Cargo.toml Cargo.lock CHANGELOG.md scripts/fixtures/cdk-runtime/Cargo.lock ci/dependency-pinning-exceptions.json
+            for path in Cargo.toml Cargo.lock CHANGELOG.md scripts/fixtures/cdk-runtime/Cargo.lock ci/dependency-pinning-exceptions.json; do git cat-file -e ":$path"; done
         fi
         ;;
     *) echo 'usage: adapter.sh version|preflight|prepare|check|commit-check' >&2; exit 2 ;;

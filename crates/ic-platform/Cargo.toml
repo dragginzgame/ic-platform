@@ -8,9 +8,7 @@ license = "MIT AND Apache-2.0"
 repository.workspace = true
 readme = "README.md"
 publish = ["crates-io"]
-# Preserve the executor's Cargo singleton guard, including against the old supplier.
-links = "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md"
-include = ["src/**", "README.md", "LICENSE", "Cargo.toml", "build.rs"]
+include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [features]
 default = []
@@ -35,7 +33,7 @@ runtime = ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserro
 certification = ["dep:ic-certification"]
 ecdsa = ["dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
-executor = ["ic0", "dep:slotmap"]
+executor = ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"]
 gzip = ["dep:ic-host-artifacts"]
 ic0 = []
 icrc-ledger-types = [
@@ -72,6 +70,7 @@ ed25519-dalek = { workspace = true, optional = true }
 hex = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
+ic-platform-runtime-guard = { workspace = true, optional = true }
 ic-stable-structures = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 ic_principal = { workspace = true, optional = true }

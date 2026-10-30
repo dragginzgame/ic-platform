@@ -27,7 +27,10 @@ variants, Serde bytes and function signatures remain. See the
 The pending embedded-runtime cut replaces registry IC0/executor packages with
 maintained source inside Platform. Public module paths stay; method/task handles
 have Platform identity. Executor selects only owned IC0 and SlotMap.
-The inherited Cargo singleton guard and final graph checks prevent mixed owners;
+The inherited Cargo singleton guard lives in an internal, dependency-free helper
+selected only by `executor`, at exactly the facade version. It adds no runtime
+implementation or public API. Non-runtime/native gzip consumers can coexist with
+an unrelated executor; the guard and final runtime graph checks prevent mixed owners;
 Timers consumers must adopt the supplying minor line together. Original source
 and license identities, deviations and qualification are in the
 [embedded runtime contract](migration.md#embedded-ic0-and-executor).
@@ -273,7 +276,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | default |  |
 | ic-platform | ecdsa | dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
-| ic-platform | executor | dep:slotmap, ic0 |
+| ic-platform | executor | dep:ic-platform-runtime-guard, dep:slotmap, ic0 |
 | ic-platform | gzip | dep:ic-host-artifacts |
 | ic-platform | ic0 |  |
 | ic-platform | icp-ledger-types | candid |
@@ -289,6 +292,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor, ic_principal/serde |
 | ic-platform | stable-structures | dep:ic-stable-structures |
 | ic-platform | wire-schema | dep:ic-wire-metadata, dep:serde_json, principal |
+| ic-platform-runtime-guard | default |  |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -307,6 +311,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-host-artifacts | ^0.70.0 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
+| ic-platform | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |

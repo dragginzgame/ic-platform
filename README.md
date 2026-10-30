@@ -218,13 +218,13 @@ authorized operation after a clean committed source and native qualification.
 Run `make publish-check` to package and verify the current version with all
 features without uploading; this dry run allows working-tree changes. After
 release and native qualification, `make publish` uploads the current committed
-`ic-platform-macros`, `ic-platform` and `ic-call` versions to crates.io using Cargo's
+`ic-platform-runtime-guard`, `ic-platform-macros`, `ic-platform` and `ic-call` versions to crates.io using Cargo's
 configured credentials and dependency ordering. It
 requires a clean checkout and does not bump versions, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are
-automatic: after an interrupted dispatch, reconcile all three exact registry package versions
+automatic: after an interrupted dispatch, reconcile all four exact registry package versions
 before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
 prove registry visibility or consumer adoption.
 
@@ -318,8 +318,10 @@ selection; no runtime feature enables them. Host retains strict bounded CBOR dec
 trust roots, authentication and application interpretation remain consumer-owned.
 
 Platform embeds the executor and IC0 implementations from upstream 2.0.0/1.2.0.
-Their registry packages are absent. The inherited Cargo singleton guard requires
-one Platform runtime owner across Timers and applications; task/method handles
+Their registry packages are absent. The inherited Cargo singleton guard lives in
+an internal helper selected only by `executor`, requiring one Platform runtime
+owner across Timers and applications. Native gzip-only consumers can coexist with
+an unrelated registry executor; task/method handles
 now have Platform identity. See the [breaking migration](docs/migration.md#embedded-ic0-and-executor).
 Changes require combined callback/trap/cancellation/upgrade qualification.
 Use `candid::decoder` when preserving upstream configuration/defaults or observing

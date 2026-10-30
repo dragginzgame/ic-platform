@@ -22,5 +22,13 @@
     "value": "=0.7.2",
     "reason": "Preserve the Memory/Storable and persisted collection identities shared with IC Memory, IC Storage and Testkit instrumentation.",
     "evidence": "docs/migration.md#stable-structures-substrate"
+  },
+  {
+    "rule": "cargo-exact",
+    "file": "Cargo.toml",
+    "subject": "ic-platform-runtime-guard",
+    "value": "=0.9.1",
+    "reason": "Every executor owner requires its exact coordinated guard identity so distinct Platform versions cannot unify their Cargo singleton guards.",
+    "evidence": "docs/migration.md#runtime-only-cargo-singleton-guard-103"
   }
 ]
