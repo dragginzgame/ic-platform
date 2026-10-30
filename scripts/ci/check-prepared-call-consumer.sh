@@ -6,12 +6,12 @@ cd "$root"
 source "$root/scripts/ci/consumer-fixture.sh"
 msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 mkdir -p target
-consumer_fixture "$root" ic-call-consumer src
+consumer_fixture "$root" prepared-call-consumer src
 wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 [package]
-name = "ic-call-consumer-proof"
+name = "prepared-call-consumer-proof"
 version = "0.0.0"
 edition = "2024"
 rust-version = "$msrv"
@@ -21,16 +21,15 @@ warnings = "deny"
 [features]
 default = []
 wire = ["dep:ic-wire"]
-external-candid = ["dep:ic-platform"]
+external-candid = ["ic-platform/candid"]
 [dependencies]
-ic-call = { path = "../../crates/ic-call", default-features = false }
-ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["candid"], optional = true }
+ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["runtime"] }
 ic-wire = { version = "$wire", optional = true }
 MANIFEST
-cp scripts/fixtures/ic-call-consumer/lib.rs "$fixture/src/lib.rs"
+cp scripts/fixtures/prepared-call-consumer/lib.rs "$fixture/src/lib.rs"
 consumer_metadata "$root"
 # Reuse dependencies across disposable sources without switching compilers in one target.
-build="${CARGO_TARGET_DIR:-$root/target/ic-call-consumer-build}"
+build="${CARGO_TARGET_DIR:-$root/target/prepared-call-consumer-build}"
 development_toolchain="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.toolchain.channel' rust-toolchain.toml)"
 for profile in raw wire external-candid; do
     features=()
@@ -51,4 +50,4 @@ for profile in raw wire external-candid; do
         CARGO_TARGET_DIR="$build/$compiler" cargo +"$compiler" check --manifest-path "$fixture/Cargo.toml" --frozen ${features[@]+"${features[@]}"} --target wasm32-unknown-unknown
     done
 done
-printf 'Standalone ic-call consumer evidence retained at %s\n' "$fixture"
+printf 'Standalone prepared-call consumer evidence retained at %s\n' "$fixture"

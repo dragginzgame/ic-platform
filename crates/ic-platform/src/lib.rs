@@ -18,7 +18,7 @@
 //! `canister-sig-creation` selects canister public-key formats and hashing.
 //! `signature-verification` selects upstream canister-signature verification.
 //! `cdk` selects owned explicit-codec entrypoints and a Candid-free runtime.
-//! `runtime` selects those same runtime adapters without the entrypoint generator.
+//! `runtime` selects those adapters and prepared `call` requests without the entrypoint generator.
 //! `ic0` selects qualified raw system calls without Candid or an executor.
 //! `management-canister-types` selects external management HTTP/history/snapshot/status DTOs.
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
@@ -44,6 +44,8 @@ pub mod agent;
 pub mod blake3;
 #[cfg(feature = "bls")]
 pub mod bls;
+#[cfg(feature = "runtime")]
+pub mod call;
 #[cfg(feature = "candid")]
 pub mod candid;
 #[cfg(all(feature = "candid-parser", not(target_family = "wasm")))]

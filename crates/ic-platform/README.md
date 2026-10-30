@@ -1,5 +1,9 @@
 # ic-platform
 
+Pending 0.10 selects Wire 0.8 for native Principal/Account metadata and IC Tooling
+0.71 for gzip. Consumers exchanging Wire metadata traits or Host `GzipError` values
+must align those direct dependencies. Codec bytes and gzip admission are unchanged.
+
 Source release 0.7.4 adds `candid-endpoint` and `candid::endpoint::{query, update}` for
 required external Candid interfaces with explicit `limits`, `empty_args` and
 ordered caller guards. It reuses the existing generator/executor; select
@@ -45,6 +49,12 @@ unchanged upstream self-authentication. External protocol/client features select
 conversions automatically. The selected ledger DTOs now have Platform identities
 and omit the upstream package, storage/CBOR adapters and consent formatting. See
 the [packaging migration](../../docs/migration.md#minimal-principal-and-selected-icrc-packaging).
+
+Select `runtime` for prepared one-shot requests through
+`ic_platform::call::{Call, WaitPolicy}`. Methods and argument bytes can be owned
+or borrowed independently; execution delegates to the existing raw transport.
+See the [prepared-call contract](src/call/README.md). This replaces the separate
+`ic-call` package in the upcoming 0.10 line.
 
 For raw calls and system/task adapters, select `runtime` and keep the existing
 `ic_platform::cdk::{api, call, futures, stable}` imports. Select `cdk` when the

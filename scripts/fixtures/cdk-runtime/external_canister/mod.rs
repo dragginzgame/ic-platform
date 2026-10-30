@@ -1,5 +1,5 @@
 //! Installed external-codec qualification; caller policies live in this fixture.
-#[cfg(not(feature = "ic-call"))]
+#[cfg(not(feature = "prepared-call"))]
 use crate::transport::Execute as _;
 use ic_platform::{
     Principal,

@@ -1,5 +1,5 @@
-//! This package declares only ic-call for raw calls; codecs are separate selections.
-use ic_call::{Call, Principal, WaitPolicy};
+//! This package selects only Platform runtime for raw calls; codecs are separate selections.
+use ic_platform::call::{Call, Principal, WaitPolicy};
 
 pub fn prepare(target: Principal) -> Call<'static, 'static> {
     let method = String::from("runtime-selected-method");
@@ -14,11 +14,11 @@ pub fn prepare(target: Principal) -> Call<'static, 'static> {
     .take_raw_args(args)
 }
 
-pub async fn roundtrip_raw(target: Principal) -> Result<Vec<u8>, ic_call::CallFailed> {
+pub async fn roundtrip_raw(target: Principal) -> Result<Vec<u8>, ic_platform::call::CallFailed> {
     prepare(target)
         .execute()
         .await
-        .map(ic_call::Response::into_bytes)
+        .map(ic_platform::call::Response::into_bytes)
 }
 
 #[cfg(feature = "wire")]

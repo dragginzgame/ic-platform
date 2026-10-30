@@ -1,0 +1,76 @@
+{
+  "scope": "Unpublished codec packaging investigation using registry Candid types; no production adoption",
+  "registry_candid": {
+    "version": "0.10.39",
+    "source": "registry+https://github.com/rust-lang/crates.io-index"
+  },
+  "sizes": {
+    "baseline": {
+      "raw_bytes": 980935,
+      "stripped_bytes": 793631,
+      "sha256": "24b99bb413f40af8f5748e45d2d8e0ef0473c6d4b5b67c1f8996e51b44dee4ac"
+    },
+    "owned": {
+      "raw_bytes": 987083,
+      "stripped_bytes": 786000,
+      "sha256": "47f0a4aeac5739a70d783e4a82565e4f645e1af8b3b5629594fc14d99ab4826f"
+    },
+    "baseline-two": {
+      "raw_bytes": 995417,
+      "stripped_bytes": 803444,
+      "sha256": "091b77f6d38c3bec4b4655c743df05b8931b7eec8c3243cf6fb0e3e89e6bd8bb"
+    },
+    "mixed": {
+      "raw_bytes": 1407876,
+      "stripped_bytes": 1131626,
+      "sha256": "f41eff889cfbacca7a2fb16ed25bf86f9da2a25b578f614e6ecfc1ce1db6a2f3"
+    }
+  },
+  "owned_saved_bytes": 7631,
+  "mixed_added_bytes": 328182,
+  "cases": {
+    "corpus": {
+      "count": 159960,
+      "sha256": "c18476075615f46187aecba16c9749d0fa1587fc204eb1139166bfe0e914b7be"
+    },
+    "typed-corpus": {
+      "count": 31245,
+      "sha256": "c79fffeeb58390ca932183831cd76d763f99d7ed9bb55a69c5668015a8da6736"
+    }
+  },
+  "retained_cargo_dependencies": [
+    "binrw",
+    "binrw_derive",
+    "array-init",
+    "bytemuck",
+    "byteorder"
+  ],
+  "maintained_source_lines_including_comments": 3040,
+  "source_sha256": {
+    "src/lib.rs": "25b969b3a7ad5772bbcca913a1bee39f5509ba18d8889872edbc1d41531c4490",
+    "src/de/mod.rs": "9810fd59ea55c8e29a63f61c37f813602360126938dce557c61500746b5cd329",
+    "src/ser/mod.rs": "8cb538e9e9f48a2b70c53a8604b3b6a147b1a9024dd1730f0934328e566ed35c",
+    "src/binary_parser/mod.rs": "12f863396c92e617b400889651b1ee7a00db25da0f9746f66253e9e91d2df499",
+    "src/compat/mod.rs": "dc4e73c77bd612dac2e8f494cba517261438594617d6dfc327156e0134ed9bd5"
+  },
+  "consumer_lock_sha256": "db32ff3850d112f29f0090115128c446502f0b0294b267edb3908a572516bdcf",
+  "validation": [
+    "Owner and codec/consumer strict Clippy",
+    "Registry DTO round trips and Error identity",
+    "Three expected concrete API identity refusals",
+    "Rust 1.91 Wasm check"
+  ],
+  "limits": [
+    "One status-codec fixture, not application Wasm",
+    "Configuration/encoder/decoder and argument-trait identities are not interchangeable",
+    "Parser errors retain registry Error identity but use Custom instead of Binread",
+    "Public binrw parser API is not preserved",
+    "No new installed, fuzz or production qualification",
+    "Registry Candid dependencies remain in Cargo; savings require the original codec to be unused"
+  ],
+  "receipt_directory": "target/candid-packaging.n6WZul",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "profile": "Cargo release opt-level 3; custom sections excluded from size comparisons",
+  "platform_version": "0.9.1",
+  "recommendation": "Do not adopt incrementally: modest single-codec savings, large mixed-codec growth, unchanged Cargo dependencies and concrete API migration obligations."
+}

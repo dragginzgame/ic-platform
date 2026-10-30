@@ -5,8 +5,8 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 adapters=""
 if [[ "${1:-}" == --external-adapters ]]; then adapters=1; shift; fi
-ic_call=""
-if [[ "${1:-}" == --ic-call ]]; then ic_call=1; shift; fi
+prepared_call=""
+if [[ "${1:-}" == --prepared-call ]]; then prepared_call=1; shift; fi
 published=""
 if [[ "${1:-}" == --published ]]; then
     stable_version='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
@@ -14,15 +14,15 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-[[ -z "$ic_call" || -z "$published" ]] || { echo 'The ic-call fixture selects local sources; omit --published' >&2; exit 2; }
+[[ -z "$prepared_call" || -z "$published" ]] || { echo 'The prepared-call fixture selects local sources; omit --published' >&2; exit 2; }
 if [[ -z "$published" ]]; then adapters=1; fi
 external_feature=external-candid
 if [[ -n "$adapters" ]]; then external_feature=external-adapters; fi
 mode="${1:-run}"
-[[ $# -le 1 ]] || { echo "Expected [--external-adapters] [--ic-call | --published X.Y.Z] [mode]" >&2; exit 2; }
-case "$mode" in run|--prepare|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--external-adapters] [--ic-call | --published X.Y.Z] [run|--prepare|--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
-[[ ( -z "$published" && -z "$ic_call" ) || "$mode" != --refresh-lock ]] || {
-    echo 'Published or ic-call qualification cannot rewrite the maintained local lock' >&2; exit 2;
+[[ $# -le 1 ]] || { echo "Expected [--external-adapters] [--prepared-call | --published X.Y.Z] [mode]" >&2; exit 2; }
+case "$mode" in run|--prepare|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--external-adapters] [--prepared-call | --published X.Y.Z] [run|--prepare|--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
+[[ ( -z "$published" && -z "$prepared_call" ) || "$mode" != --refresh-lock ]] || {
+    echo 'Published or prepared-call qualification cannot rewrite the maintained local lock' >&2; exit 2;
 }
 if [[ "$mode" == run && -z "${POCKET_IC_BIN:-}" && -z "${IC_TESTKIT_POCKET_IC_URL:-}" ]]; then
     echo 'Set POCKET_IC_BIN (Testkit-admitted binary) or IC_TESTKIT_POCKET_IC_URL first' >&2
@@ -65,11 +65,7 @@ if [[ -n "$adapters" ]]; then
     sed -i.bak 's/external-adapters = \["external-candid"\]/external-adapters = ["external-candid", "ic-platform\/candid-endpoint"]/' "$fixture/crates/canister/Cargo.toml"
     rm "$fixture/crates/canister/Cargo.toml.bak"
 fi
-if [[ -n "$ic_call" ]]; then
-    sed -i.bak 's/ic-call = \[\]/ic-call = ["dep:ic-call"]/' "$fixture/crates/canister/Cargo.toml"
-    rm "$fixture/crates/canister/Cargo.toml.bak"
-    printf '\nic-call = { path = "../../../../crates/ic-call", default-features = false, optional = true }\n' >> "$fixture/crates/canister/Cargo.toml"
-fi
+
 cp scripts/fixtures/cdk-runtime/driver.Cargo.toml "$fixture/apps/driver/Cargo.toml"
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
 mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
@@ -91,20 +87,7 @@ if [[ "$mode" == --refresh-lock ]]; then
     exit 0
 fi
 cp "$lock" "$fixture/Cargo.lock"
-if [[ -n "$ic_call" ]]; then
-    # Add only local request-custody packages in the disposable consumer lock.
-    # Registry package identities and edges must remain exactly the maintained set.
-    resolution=(--offline)
-    if [[ "$mode" == --prepare ]]; then resolution=(); fi
-    cargo metadata --manifest-path "$fixture/Cargo.toml" ${resolution[@]+"${resolution[@]}"} --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
-    for side in baseline consumer; do
-        selected="$lock"
-        if [[ "$side" == consumer ]]; then selected="$fixture/Cargo.lock"; fi
-        "$root/.tools/host/bin/yq" -p toml -o json '.' "$selected" |
-            "$root/.tools/host/bin/jq" -S '[.package[] | select(.source != null)] | sort_by(.name, .version, .source)' > "$fixture/$side-registry.json"
-    done
-    cmp "$fixture/baseline-registry.json" "$fixture/consumer-registry.json"
-fi
+
 if [[ "$mode" == --prepare ]]; then
     [[ -z "$published" ]] || { echo "Prepare published caches explicitly before qualification" >&2; exit 2; }
     cargo fetch --manifest-path "$fixture/Cargo.toml" --locked
@@ -126,8 +109,8 @@ select_runtime_profile() {
     selected_admission=()
     selected_external=""
     selected_artifact="$2"
-    if [[ -n "$ic_call" ]]; then selected_artifact="$1-$2"; fi
-    if [[ "$1" == owned ]]; then selected_features+=(--features ic-call); fi
+    if [[ -n "$prepared_call" ]]; then selected_artifact="$1-$2"; fi
+    if [[ "$1" == owned ]]; then selected_features+=(--features prepared-call); fi
     if [[ "$2" == external-candid ]]; then
         selected_features+=(--features "$external_feature")
         selected_admission=(--external-candid)
@@ -135,7 +118,7 @@ select_runtime_profile() {
     fi
 }
 transports=(raw)
-if [[ -n "$ic_call" ]]; then transports+=(owned); fi
+if [[ -n "$prepared_call" ]]; then transports+=(owned); fi
 for transport in "${transports[@]}"; do
 for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     for protocol in wire external-candid; do

@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.9.2]
+## [0.10.1]
 
 ### ⬆️ Dependencies
 
@@ -21,6 +21,31 @@
   pricing regression. Keep the real cycle-balance comparison, leave metadata
   headroom and report complete pricing evidence on failure
   ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
+
+## [0.10.0] - 2026-10-30
+
+### ⚠️ Breaking
+
+- Move prepared one-shot calls into `ic_platform::call` under the existing
+  `runtime` feature. Remove the `ic-call` dependency and change `ic_call::` imports
+  to `ic_platform::call::`. The separate package is retired; raw transport,
+  executor, response/error identities and wire bytes are unchanged.
+
+- Adopt IC Wire 0.8.0 metadata and IC Tooling 0.71.0 gzip identities. Align direct
+  Wire/Host dependencies when sharing metadata traits or `GzipError`; public
+  import paths, protocol bytes and gzip admission remain unchanged.
+
+### ⬆️ Dependencies
+
+- Update Testkit and the managed IC Build release editor to 0.71.0. The combined
+  runtime lock refresh remains blocked by Timers’ older Platform executor; the
+  separate native Profiler profile requires the next published Platform supplier.
+
+### 🧪 Testing
+
+- Add a reproducible Candid codec packaging probe that preserves registry DTO
+  identities without Cargo patches, measures single/mixed-codec Wasm, and proves
+  configuration/argument-trait compatibility limits. Production Candid is unchanged.
 
 ## [0.9.1] - 2026-10-30
 

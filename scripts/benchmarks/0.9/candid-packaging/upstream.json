@@ -1,0 +1,13 @@
+{
+  "package": "candid",
+  "version": "0.10.39",
+  "files": {
+    "src/de.rs": "32e166efe5e6eb9bf1db0e952b3cb4f0518891dfc2264a164bcf377d4da327d6",
+    "src/ser.rs": "8f0b1b71eac4a801cff8a9e95cb0587d50b05b472858a9225284a267cd533aac",
+    "src/binary_parser.rs": "df436d040f5ce6f95fc8b2bc406b9045b56ed3d69dcb68bcb2518b93694bf2b9",
+    "src/types/internal.rs": "0f11c5f26f4b3a43aefc327d468ba3fb45f417f8e0bda03509250c309c42143d",
+    "src/types/type_env.rs": "88f68330f0d090305d9b067ecc95fceccf00d0cdded965d2b36ed3854d5c05b2",
+    "src/utils.rs": "af2d31e8a96b41b42cae96f6914d3e0e7297bdd76574a239663f4a5978f0fe86",
+    "LICENSE": "3ec7531366b7e2440aa35dd675edc479f7690099821ce68b64c5548ba4849daa"
+  }
+}

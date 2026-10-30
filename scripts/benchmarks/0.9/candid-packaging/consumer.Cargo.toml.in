@@ -1,0 +1,18 @@
+[package]
+name = "candid-packaging-consumer"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.91.0"
+publish = false
+[workspace]
+[lib]
+crate-type = ["rlib", "cdylib"]
+[features]
+mixed-codec = []
+owned-codec = ["dep:codec"]
+baseline-reader = ["dep:binrw"]
+[dependencies]
+ic-platform = { path = "../platform/crates/ic-platform", default-features = false, features = ["cdk", "candid", "management-canister-types"] }
+candid = { version = "=0.10.39", default-features = false, features = ["bignum", "serde_bytes"] }
+codec = { package = "candid-codec-packaging-probe", path = "../codec", optional = true }
+binrw = { version = "0.15", default-features = false, features = ["std"], optional = true }

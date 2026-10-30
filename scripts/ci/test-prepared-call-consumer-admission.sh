@@ -2,7 +2,7 @@
 # Run with Bash 3.2 on macOS as well as the prepared development shell.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/ic-call-admission.XXXXXX")"
+fixture="$(mktemp -d "${TMPDIR:-/tmp}/prepared-call-admission.XXXXXX")"
 first_pid="" second_pid=""
 finish() {
     local status=$?
@@ -14,10 +14,10 @@ finish() {
     exit "$status"
 }
 trap finish EXIT
-mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/ic-call-consumer" "$fixture/.tools" "$fixture/bin"
-cp "$root/scripts/ci/"{check-ic-call-consumer.sh,check-platform-runtime.sh,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
+mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/prepared-call-consumer" "$fixture/.tools" "$fixture/bin"
+cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
-cp "$root/scripts/fixtures/ic-call-consumer/lib.rs" "$fixture/scripts/fixtures/ic-call-consumer/"
+cp "$root/scripts/fixtures/prepared-call-consumer/lib.rs" "$fixture/scripts/fixtures/prepared-call-consumer/"
 cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
 mkdir -p "$fixture/crates/ic-platform/tests/fixtures"
 cp "$root/crates/ic-platform/tests/management_consumer.rs" "$fixture/crates/ic-platform/tests/"
@@ -62,7 +62,7 @@ esac
 CARGO
 chmod +x "$fixture/bin/cargo" "$fixture/bin/rustc"
 export PATH="$fixture/bin:$PATH" ADMISSION_CALLS="$fixture/calls" ADMISSION_TARGETS="$fixture/targets"
-"$BASH" "$fixture/scripts/ci/check-ic-call-consumer.sh" > "$fixture/pass.log" 2>&1 || { cat "$fixture/pass.log"; exit 1; }
+"$BASH" "$fixture/scripts/ci/check-prepared-call-consumer.sh" > "$fixture/pass.log" 2>&1 || { cat "$fixture/pass.log"; exit 1; }
 # All three selections reach strict Clippy, tests and both target checks.
 [[ "$(grep -c '^clippy ' "$ADMISSION_CALLS")" == 3 ]]
 [[ "$(grep -c '^+.* test ' "$ADMISSION_CALLS")" == 6 ]]
@@ -71,18 +71,18 @@ export PATH="$fixture/bin:$PATH" ADMISSION_CALLS="$fixture/calls" ADMISSION_TARG
 [[ "$(grep '^tree ' "$ADMISSION_CALLS" | grep -c -- ' --features wire ')" == 2 ]]
 [[ "$(grep '^tree ' "$ADMISSION_CALLS" | grep -c -- ' --features external-candid ')" == 2 ]]
 [[ "$(grep '^tree ' "$ADMISSION_CALLS" | grep -vc -- ' --features ')" == 2 ]]
-if ADMISSION_FAIL=yes "$BASH" "$fixture/scripts/ci/check-ic-call-consumer.sh" > "$fixture/fail.log" 2>&1; then
+if ADMISSION_FAIL=yes "$BASH" "$fixture/scripts/ci/check-prepared-call-consumer.sh" > "$fixture/fail.log" 2>&1; then
     echo 'Consumer hid a failing Wasm check' >&2; exit 1
 else
     [[ $? == 42 ]] || { cat "$fixture/fail.log"; exit 1; }
 fi
 : > "$ADMISSION_CALLS"
-"$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --ic-call --check-graph > "$fixture/runtime.log" 2>&1 || { cat "$fixture/runtime.log"; exit 1; }
+"$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --prepared-call --check-graph > "$fixture/runtime.log" 2>&1 || { cat "$fixture/runtime.log"; exit 1; }
 [[ "$(grep -c '^tree ' "$ADMISSION_CALLS")" == 8 ]]
 [[ "$(grep '^tree ' "$ADMISSION_CALLS" | grep -c -- ' --features external-adapters ')" == 4 ]]
 for attempt in first second; do
     : > "$ADMISSION_TARGETS"
-    "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --ic-call --build-only > "$fixture/$attempt-build.log" 2>&1 || { cat "$fixture/$attempt-build.log"; exit 1; }
+    "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --prepared-call --build-only > "$fixture/$attempt-build.log" 2>&1 || { cat "$fixture/$attempt-build.log"; exit 1; }
     LC_ALL=C sort -u "$ADMISSION_TARGETS" > "$fixture/$attempt-targets"
 done
 cmp "$fixture/first-targets" "$fixture/second-targets"
@@ -125,10 +125,10 @@ fi
 exec "$ADMISSION_REAL_PERL" "$@"
 PERL
 chmod +x "$fixture/bin/cp" "$fixture/bin/perl"
-ADMISSION_RUN=A "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --ic-call --build-only > "$fixture/concurrent-a.log" 2>&1 &
+ADMISSION_RUN=A "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --prepared-call --build-only > "$fixture/concurrent-a.log" 2>&1 &
 first_pid=$!
 read -r -t 15 _ <&6
-ADMISSION_RUN=B "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --ic-call --build-only > "$fixture/concurrent-b.log" 2>&1 &
+ADMISSION_RUN=B "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --prepared-call --build-only > "$fixture/concurrent-b.log" 2>&1 &
 second_pid=$!
 read -r -t 15 _ <&7
 "$ADMISSION_REAL_PERL" -MFcntl=:flock -e 'open my $lock, ">>", $ARGV[0] or die $!; exit(flock($lock, LOCK_EX | LOCK_NB) ? 1 : 0)' "$ADMISSION_WASM_LOCK"
@@ -149,4 +149,4 @@ if "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --published invalid -
 else
     [[ $? == 2 ]] || { cat "$fixture/version.log"; exit 1; }
 fi
-echo "ic-call admission: raw/Wire/external-Candid arguments and failure propagation passed on Bash $BASH_VERSION"
+echo "prepared-call admission: raw/Wire/external-Candid arguments and failure propagation passed on Bash $BASH_VERSION"

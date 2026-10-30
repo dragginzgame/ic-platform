@@ -104,7 +104,7 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-`wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.7.19.
+`wire-schema` enables native Wire metadata for owned Principal and Account with Wire 0.8.0.
 It is excluded from Wasm dependencies, even when selected. See the
 [migration contract](docs/migration.md#owned-principal-and-account-wire-metadata).
 Prepare Node 24.21.0 and npm 12.2.0, then run `make install-wire-tools`
@@ -154,7 +154,7 @@ Installed-runtime CI prepares only the common tools, in order with
 release editor or Node/npm/TypeScript. Normal `make install-tools` still prepares
 the complete contributor set, and standard CI retains the Wire frontend proof.
 
-Tool setup includes the pinned IC Build 0.70.0 release editor with its `cli`
+Tool setup includes the pinned IC Build 0.71.0 release editor with its `cli`
 feature, which requires Rust 1.91 or later to build. `make install-release-editor`
 prepares it separately;
 `make release-editor-check` admits it offline. Standard release commands prepare
@@ -218,13 +218,13 @@ authorized operation after a clean committed source and native qualification.
 Run `make publish-check` to package and verify the current version with all
 features without uploading; this dry run allows working-tree changes. After
 release and native qualification, `make publish` uploads the current committed
-`ic-platform-runtime-guard`, `ic-platform-macros`, `ic-platform` and `ic-call` versions to crates.io using Cargo's
+`ic-platform-runtime-guard`, `ic-platform-macros` and `ic-platform` versions to crates.io using Cargo's
 configured credentials and dependency ordering. It
 requires a clean checkout and does not bump versions, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are
-automatic: after an interrupted dispatch, reconcile all four exact registry package versions
+automatic: after an interrupted dispatch, reconcile all three exact registry package versions
 before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
 prove registry visibility or consumer adoption.
 
@@ -235,10 +235,10 @@ checks establish target compatibility, not installed executor/trap behavior.
 ## Dependency roles and deployment admission
 
 The reviewed Shared Tooling revision is recorded in [the snapshot](.shared-tooling.snapshot).
-`ic-platform` owns the low-level boundary; `ic-call` adds prepared one-shot
+`ic-platform` owns the low-level boundary; its `call` module adds prepared one-shot
 requests with owned or borrowed methods and bytes through its existing runtime.
-It has no default features or codecs and never depends on Relay or Timers.
-See [the call contract](crates/ic-call/README.md). `ic-platform-macros` is the production
+The module uses the existing `runtime` feature and adds no dependencies or codecs.
+See [the call contract](crates/ic-platform/src/call/README.md). `ic-platform-macros` is the production
 proc-macro support package. Its Syn/Quote dependencies generate consumer
 entrypoints. Principal, Candid, the host parser, Agent, certification, raw IC calls,
 management/ledger DTOs, signature/BLS APIs, the executor and Serde are production
@@ -344,7 +344,7 @@ IC Testkit's copyright notice. The maintained generator is Apache-2.0.
 
 ### Maintained runtime regression
 
-`make check-runtime` qualifies both raw calls and owned `ic-call` requests in one
+`make check-runtime` qualifies both raw calls and owned `ic_platform::call` requests in one
 fixture, sharing the host-driver and compiler builds. It installs Wire canisters
 through Testkit-managed
 PocketIC on Rust 1.99 and 1.91. The pure `cdk` selection rejects Candid, parser,

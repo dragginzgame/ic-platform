@@ -6,7 +6,7 @@ use ic_platform::{
     cdk::{api, futures},
 };
 use std::cell::Cell;
-#[cfg(not(feature = "ic-call"))]
+#[cfg(not(feature = "prepared-call"))]
 use transport::Execute as _;
 #[cfg(feature = "external-candid")]
 // Copied from the workspace-formatted management_consumer.rs by the runtime script.

@@ -1369,13 +1369,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-call"
-version = "0.9.1"
-dependencies = [
- "ic-platform",
-]
-
-[[package]]
 name = "ic-certification"
 version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1406,9 +1399,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.70.5"
+version = "0.71.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c09ffb7d87f4099b984b9c08d351ab4a910c03913ebbd70729f4dacb8ab72fe"
+checksum = "f9df218c9f7478ea217823e31a9a46242d545d2f74270ac93e206e71c5b97f97"
 dependencies = [
  "flate2",
  "sha2 0.10.9",
@@ -1438,7 +1431,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.9.1"
+version = "0.10.0"
 dependencies = [
  "assert_matches",
  "blake3",
@@ -1478,7 +1471,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.9.1"
+version = "0.10.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1487,7 +1480,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.9.1"
+version = "0.10.0"
 
 [[package]]
 name = "ic-representation-independent-hash"
@@ -1561,9 +1554,9 @@ dependencies = [
 
 [[package]]
 name = "ic-wire"
-version = "0.7.25"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a29060e749a810af0085589e3229e6e77accbf1d194e6f13de81abeb29af8ac"
+checksum = "648a84871207b14a7c50266bbcb2e74f9b790a6d9726c74054d0fcea928931fa"
 dependencies = [
  "bytemuck",
  "ic-wire-derive",
@@ -1575,9 +1568,9 @@ dependencies = [
 
 [[package]]
 name = "ic-wire-derive"
-version = "0.7.25"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea360c414a9c5061b08ec4b5ff5312be40315f3e96bd6dc06376cf78c08e5cce"
+checksum = "9202c59407092909fab5c49be3413e77d2ad4b14d355ce2b3679971e1e4bfa43"
 dependencies = [
  "proc-macro2",
  "quote",
