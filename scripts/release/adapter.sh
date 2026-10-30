@@ -16,7 +16,8 @@ case "$operation" in
         bash scripts/ci/check-release-changelog.sh "${RELEASE_VERSION:?}" "$current" "${RELEASE_DATE:?}" CHANGELOG.md
         bash scripts/ci/cargo-release-preflight.sh "$PWD" "$prepare" \
             --pin ci/tool-versions.env --pin ci/release-editor.env \
-            --check tools-check --prepare install-tools --prepare tools-check
+            --check tools-check --prepare install-tools \
+            --prepare prepare-consumer-dependencies --prepare tools-check
         ;;
     prepare)
         bash scripts/ci/check-release-source.sh --allow Cargo.toml --allow Cargo.lock --allow CHANGELOG.md --allow scripts/fixtures/cdk-runtime/Cargo.lock --allow ci/dependency-pinning-exceptions.json

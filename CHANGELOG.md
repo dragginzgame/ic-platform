@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.2]
+
+### 🩹 Fixed
+
+- Prepare the registry executor used by standalone singleton checks before
+  offline CI and release validation. Cold caches now receive an explicit setup
+  command and readable failure diagnostics without changing runtime ownership
+  ([#111 — Prepare singleton fixture dependencies](https://github.com/dragginzgame/ic-platform/issues/111)).
+
 ## [0.11.1] - 2026-10-30
 
 ### ⬆️ Dependencies

@@ -73,7 +73,9 @@ jobs:
         run: make tools-check
       - name: Prepare declared MSRV
         run: rustup toolchain install "$(bash scripts/ci/read-platform-msrv.sh)" --profile minimal --target wasm32-unknown-unknown
-      - name: Prepare all locked dependency targets
-        run: cargo fetch --locked
+      - name: Prepare locked and standalone consumer dependencies
+        run: |
+          cargo fetch --locked
+          make prepare-consumer-dependencies
       - name: Validate
         run: make ci
