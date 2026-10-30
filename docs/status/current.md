@@ -1,5 +1,20 @@
 # Current handoff
 
+## Pending Wire 0.9 metadata alignment
+
+Published 0.10.0 supplies Wire 0.8 metadata. The subsequent Wire 0.9 consumer
+request in [#105](https://github.com/dragginzgame/ic-platform/issues/105) fails
+because its schema trait has a different Rust identity. The isolated contribution
+from released `421edbc` aligns both Wire catalog entries and their lock with 0.9,
+preserving Principal/Account schema source and native-only packaging. Notes select
+0.11.0 for the optional public trait change; package metadata stays 0.10.0.
+
+Required full Clippy, independent Rust 1.91/TypeScript schema/frame/refusal tests,
+Wasm metadata-feature compilation, inventory, dependency boundaries and doc links
+pass. Consumer adoption still needs a compatible publication and matching Testkit
+limits from [Tooling #271](https://github.com/dragginzgame/ic-tooling/issues/271).
+No normal sibling work, runtime, crypto or codec implementation changes here.
+
 ## Pending 0.10.0: prepared-call module and upstream adoption
 
 The maintainer requested moving `ic-call` into `ic_platform::call`, selected by

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.11.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Align native Principal/Account schema metadata with IC Wire 0.9. Consumers
+  sharing the schema trait must adopt Wire 0.9 together; schema/frame bytes and
+  native-only metadata packaging are unchanged.
+  [Migration](docs/migration.md#owned-principal-and-account-wire-metadata)
+  ([#105](https://github.com/dragginzgame/ic-platform/issues/105)).
+
 ## [0.10.0] - 2026-10-30
 
 ### ⚠️ Breaking

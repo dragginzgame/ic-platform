@@ -957,14 +957,16 @@ Blob's tests. Native macOS and installed/live-provider acceptance remain separat
 
 Platform requires Rust 1.91 for all features. Principal metadata originally shipped
 in 0.6.9 and Account metadata in 0.6.12; Platform 0.6.15 adopted the Wire 0.7 family.
-Platform 0.6.19 raised both Wire minimums to 0.7.16. The pending 0.10 release
-raises host metadata and tooling minima to published Wire 0.8.0.
+Platform 0.6.19 raised both Wire minimums to 0.7.16; Platform 0.10 adopted Wire 0.8.
+The pending 0.11 release raises host metadata and tooling minima to Wire 0.9.0.
 Qualify using a local Platform path until that supplier is published, then select
 its released version with defaults disabled and `features = ["wire-schema"]`.
-Host producers must also select `ic-wire = { version = "0.8.0", features = ["typescript"] }`
-for their derives and generation. Wire 0.7 and 0.8 metadata traits are different
-Rust identities; update both selections together. Wire 0.8 preserves codec bytes,
-limits and accepted inputs; its optional endpoint integration now uses Platform 0.9. No direct Candid dependency is needed:
+Host producers must also select `ic-wire = { version = "0.9.0", features = ["typescript"] }`
+for their derives and generation. Wire 0.8 and 0.9 metadata traits are different
+Rust identities; update both selections together. Wire 0.9 preserves codec bytes,
+limits and accepted inputs; its optional endpoint integration uses Platform 0.10.
+Package metadata remains 0.10.0 until the maintainer prepares the minor release.
+No direct Candid dependency is needed:
 
 ```rust,ignore
 #[derive(serde::Serialize, serde::Deserialize, ic_wire::Wire)]
