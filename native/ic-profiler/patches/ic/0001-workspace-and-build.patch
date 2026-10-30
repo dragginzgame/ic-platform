@@ -262,7 +262,7 @@ index a36f12cee3..ab16a08676 100644
      "rs/monitoring/adapter_metrics/service",
      "rs/monitoring/logger",
      "rs/monitoring/metrics",
-+    "rs/pocket_ic_server/profiling/system",
++    "rs/pocket_ic_server/src/profiling/system",
      "rs/monitoring/metrics_proxy",
      "rs/monitoring/pprof",
      "rs/monitoring/tracing",
@@ -364,7 +364,7 @@ index d1d69b7fb6..184805a137 100644
          "//rs/http_endpoints/async_utils",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "@crate_index//:bitcoin_dogecoin",
          "@crate_index//:futures",
          "@crate_index//:hashlink",
@@ -376,7 +376,7 @@ index 73411efa55..5d3eebaf8b 100644
  ic-config = { path = "../../config" }
  ic-logger = { path = "../../monitoring/logger" }
  ic-metrics = { path = "../../monitoring/metrics" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  lmdb-rkv = { workspace = true }
  prometheus = { workspace = true }
  rand = { workspace = true }
@@ -388,7 +388,7 @@ index a452093893..457c3f68b8 100644
          "//rs/interfaces/state_manager",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/replicated_state",
          "//rs/types/management_canister_types",
          "//rs/types/types",
@@ -400,7 +400,7 @@ index bdb1af0682..11290c82de 100644
  ic-metrics = { path = "../monitoring/metrics" }
  ic-registry-subnet-type = { path = "../registry/subnet_type" }
  ic-replicated-state = { path = "../replicated_state" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../types/types" }
  ic-wasm-types = { path = "../types/wasm_types" }
  lazy_static = { workspace = true }
@@ -433,7 +433,7 @@ index 594e1bcf88..7e32b31b3c 100644
          "//rs/interfaces/state_manager",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/registry/helpers",
          "//rs/registry/keys",
@@ -445,7 +445,7 @@ index 0187b3c987..e5735520ae 100644
  ic-registry-subnet-features = { path = "../registry/subnet_features" }
  ic-registry-subnet-type = { path = "../registry/subnet_type" }
  ic-replicated-state = { path = "../replicated_state" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../types/types" }
  num-traits = { workspace = true }
  prometheus = { workspace = true }
@@ -457,7 +457,7 @@ index abd6b2dcf7..0d36b47d74 100644
          "//rs/interfaces/state_manager",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/replicated_state",
          "//rs/types/types",
          "@crate_index//:prometheus",
@@ -469,7 +469,7 @@ index ee085c64d8..80f427e9dd 100644
  ic-logger = { path = "../../monitoring/logger" }
  ic-metrics = { path = "../../monitoring/metrics" }
  ic-replicated-state = { path = "../../replicated_state" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../../types/types" }
  prometheus = { workspace = true }
  slog = { workspace = true }
@@ -481,7 +481,7 @@ index b8412076d1..a687b96d93 100644
          "//rs/interfaces/state_manager",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/registry/helpers",
          "//rs/replicated_state",
@@ -493,7 +493,7 @@ index 487742587c..f0d5514222 100644
  ic-protobuf = { path = "../../protobuf" }
  ic-registry-client-helpers = { path = "../../registry/helpers" }
  ic-replicated-state = { path = "../../replicated_state" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../../types/types" }
  prometheus = { workspace = true }
  slog = { workspace = true }
@@ -505,7 +505,7 @@ index 3f658e7914..0af6ad17ec 100644
          "//rs/interfaces/state_manager",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/registry/helpers",
          "//rs/registry/subnet_features",
@@ -517,7 +517,7 @@ index 81334c8f83..9829e4830a 100644
  ic-registry-client-helpers = { path = "../../registry/helpers" }
  ic-registry-subnet-features = { path = "../../registry/subnet_features" }
  ic-replicated-state = { path = "../../replicated_state" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../../types/types" }
  prometheus = { workspace = true }
  rand = { workspace = true }
@@ -529,7 +529,7 @@ index 71fa3bdd9a..42fddbb731 100644
          "//rs/crypto/internal/crypto_lib/basic_sig/der_utils",
          "//rs/crypto/internal/crypto_lib/basic_sig/rsa_pkcs1",
          "//rs/crypto/sha2",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/types/types",
          "@crate_index//:p256",
          "@crate_index//:simple_asn1",
@@ -541,7 +541,7 @@ index d3b47dce4a..de40fcb60b 100644
  ic-crypto-internal-basic-sig-cose = { path = "../internal/crypto_lib/basic_sig/cose" }
  ic-crypto-internal-basic-sig-der-utils = { path = "../internal/crypto_lib/basic_sig/der_utils" }
  ic-crypto-internal-basic-sig-rsa-pkcs1 = { path = "../internal/crypto_lib/basic_sig/rsa_pkcs1" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../../types/types" }
  simple_asn1 = { workspace = true }
  
@@ -567,7 +567,7 @@ index 4964d04fec..e637b8fea1 100644
          "//rs/interfaces",
          "//rs/monitoring/logger",
          "//rs/nns/constants",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/registry/subnet_type",
          "//rs/replicated_state",
          "//rs/types/base_types",
@@ -579,7 +579,7 @@ index c470937adc..1ada53be84 100644
  ic-nns-constants = { path = "../nns/constants" }
  ic-registry-subnet-type = { path = "../registry/subnet_type" }
  ic-replicated-state = { path = "../replicated_state" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../types/types" }
  ic-types-cycles = { path = "../types/cycles" }
  prometheus = { workspace = true }
@@ -622,7 +622,7 @@ index a6c280e922..495292304e 100644
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
          "//rs/nns/constants",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/registry/subnet_type",
          "//rs/replicated_state",
          "//rs/sys",
@@ -658,7 +658,7 @@ index d32079e321..637bd73eec 100644
  ic-registry-subnet-type = { path = "../registry/subnet_type" }
  ic-replicated-state = { path = "../replicated_state" }
  ic-sys = { path = "../sys" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../types/types" }
  ic-types-cycles = { path = "../types/cycles" }
  ic-utils = { path = "../utils" }
@@ -693,7 +693,7 @@ index 537254ac2a..10963fad36 100644
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
          "//rs/phantom_newtype",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/query_stats",
          "//rs/registry/provisional_whitelist",
          "//rs/registry/resource_limits",
@@ -705,7 +705,7 @@ index d169371e36..9155900e7a 100644
  ic-registry-subnet-type = { path = "../registry/subnet_type" }
  ic-replicated-state = { path = "../replicated_state" }
  ic-sys = { path = "../sys" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../types/types" }
  ic-types-cycles = { path = "../types/cycles" }
  ic-utils = { path = "../utils" }
@@ -717,7 +717,7 @@ index fa4e7f97ac..bc68c28f02 100644
          "//rs/monitoring/metrics",
          "//rs/monitoring/pprof",
          "//rs/monitoring/tracing",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/registry/helpers",
          "//rs/registry/provisional_whitelist",
          "//rs/registry/subnet_type",
@@ -729,7 +729,7 @@ index 51db3afd9f..7aca82b564 100644
  ic-registry-provisional-whitelist = { path = "../../registry/provisional_whitelist" }
  ic-registry-subnet-type = { path = "../../registry/subnet_type" }
  ic-replicated-state = { path = "../../replicated_state" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  ic-tracing = { path = "../../monitoring/tracing" }
  ic-types = { path = "../../types/types" }
  ic-utils = { path = "../../utils" }
@@ -741,7 +741,7 @@ index 8cbcac97b2..44faa242a4 100644
          "//rs/interfaces/registry",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/registry/helpers",
          "//rs/types/types",
@@ -753,7 +753,7 @@ index 7e625440f0..42f04f1cfa 100644
  ic-metrics = { path = "../../monitoring/metrics" }
  ic-protobuf = { path = "../../protobuf" }
  ic-registry-client-helpers = { path = "../../registry/helpers" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../../types/types" }
  prometheus = { workspace = true }
  serde = { workspace = true }
@@ -765,7 +765,7 @@ index 93a5b3fc77..785e0fbaa5 100644
          "//rs/https_outcalls/service",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "@crate_index//:futures",
          "@crate_index//:http",
          "@crate_index//:http-body-util",
@@ -777,7 +777,7 @@ index af57347a9f..8325708a5c 100644
  ic-https-outcalls-service = { path = "../service" }
  ic-logger = { path = "../../monitoring/logger" }
  ic-metrics = { path = "../../monitoring/metrics" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  parking_lot = { workspace = true }
  prometheus = { workspace = true }
  rand = { workspace = true }
@@ -807,7 +807,7 @@ index 6cad6d97c6..6a1bc38a1b 100644
          "//rs/limits",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/registry/helpers",
          "//rs/replicated_state",
          "//rs/types/cycles",
@@ -819,7 +819,7 @@ index a0b9aa1b79..54b53e2ddd 100644
  ic-metrics = { path = "../monitoring/metrics" }
  ic-registry-client-helpers = { path = "../registry/helpers" }
  ic-replicated-state = { path = "../replicated_state" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types-cycles = { path = "../types/cycles" }
  ic-types = { path = "../types/types" }
  ic-validator = { path = "../validator" }
@@ -897,7 +897,7 @@ index 991ac46c7b..17245c9de5 100644
          "//rs/limits",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/query_stats",
          "//rs/registry/helpers",
@@ -909,7 +909,7 @@ index d1c39c1bb9..58e3f32ff0 100644
  ic-registry-subnet-features = { path = "../registry/subnet_features" }
  ic-registry-subnet-type = { path = "../registry/subnet_type" }
  ic-replicated-state = { path = "../replicated_state" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types-cycles = { path = "../types/cycles" }
  ic-types = { path = "../types/types" }
  ic-utils-thread = { path = "../utils/thread" }
@@ -921,7 +921,7 @@ index bb3efa5b80..9954315c6c 100644
          "//rs/monitoring/metrics",
          "//rs/p2p/quic_transport",
          "//rs/phantom_newtype",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/types/base_types",
          "//rs/types/types",
@@ -933,7 +933,7 @@ index e4b88642ca..5295d22465 100644
  ic-metrics = { path = "../../monitoring/metrics" }
  ic-protobuf = { path = "../../protobuf" }
  ic-quic-transport = { path = "../quic_transport" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../../types/types" }
  phantom_newtype = { path = "../../phantom_newtype" }
  prometheus = { workspace = true }
@@ -945,7 +945,7 @@ index b2192b5da4..e29d5f1c58 100644
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
          "//rs/phantom_newtype",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/types/base_types",
          "@crate_index//:axum",
@@ -957,7 +957,7 @@ index 8e3bafdf80..1f211d0351 100644
  ic-logger = { path = "../../monitoring/logger" }
  ic-metrics = { path = "../../monitoring/metrics" }
  ic-protobuf = { path = "../../protobuf" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  phantom_newtype = { path = "../../phantom_newtype" }
  prometheus = { workspace = true }
  prost = { workspace = true }
@@ -978,7 +978,7 @@ index f3262d67a0..cb50b6ac44 100644
      "//rs/nns/governance/init",
      "//rs/nns/handlers/root/impl:root",
      "//rs/nns/sns-wasm",
-+    "//rs/pocket_ic_server/profiling/system:system_profiler",
++    "//rs/pocket_ic_server/src/profiling/system:system_profiler",
      "//rs/registry/canister",
      "//rs/registry/canister/api",
      "//rs/registry/client",
@@ -1013,8 +1013,8 @@ index f3262d67a0..cb50b6ac44 100644
              "src/pocket_ic.rs",
          ] + glob([
              "src/state_api/**/*.rs",
-+            "profiling/mod.rs",
-+            "profiling/server/**/*.rs",
++            "src/profiling/**/*.rs",
++            "src/pocket_ic/**/*.rs",
          ]),
 -        compile_data = EXTERNAL_CANISTER_DATA + nns_canister_data + ["templates/dashboard.html"],
 +        compile_data = EXTERNAL_CANISTER_DATA + nns_canister_data + [
@@ -1030,8 +1030,8 @@ index f3262d67a0..cb50b6ac44 100644
 +            "//rs/replicated_state:instruction_charge_rule_sources",
 +            "//rs/state_machine_tests:computation_catalog_sources",
 +            "//rs/types/types:computation_catalog_sources",
-+            "profiling/viewer/agent_guide.md",
-+            "profiling/viewer/viewer.html",
++            "src/profiling/viewer/agent_guide.md",
++            "src/profiling/viewer/viewer.html",
 +            "templates/dashboard.html",
 +        ],
          crate_name = "pocket_ic_server",
@@ -1062,7 +1062,7 @@ index 2ffd407043..f270f79a39 100644
  ic-state-machine-tests = { path = "../state_machine_tests" }
  ic-state-manager = { path = "../state_manager" }
  ic-sys = { path = "../sys" }
-+ic-system-profiler = { path = "profiling/system" }
++ic-system-profiler = { path = "src/profiling/system" }
  ic-types = { path = "../types/types" }
  ic-types-cycles = { path = "../types/cycles" }
  ic-utils = { workspace = true }
@@ -1106,7 +1106,7 @@ index d5489ea1b3..80d9e43ad1 100644
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
          "//rs/phantom_newtype",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/registry/resource_limits",
          "//rs/registry/routing_table",
@@ -1118,7 +1118,7 @@ index 3b91038881..ae0797c83f 100644
  ic-registry-subnet-features = { path = "../registry/subnet_features" }
  ic-registry-subnet-type = { path = "../registry/subnet_type" }
  ic-sys = { path = "../sys" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../types/types" }
  ic-types-cycles = { path = "../types/cycles" }
  ic-utils = { path = "../utils" }
@@ -1142,7 +1142,7 @@ index f332a636f2..0f444bf933 100644
          "//rs/messaging",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/query_stats",
          "//rs/registry/fake",
@@ -1154,7 +1154,7 @@ index 2f8b85a992..f79ec02b0e 100644
  ic-secp256r1 = { path = "../../packages/ic-secp256r1" }
  ic-state-layout = { path = "../state_layout" }
  ic-state-manager = { path = "../state_manager" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-test-state-machine-client = "3.0"
  ic-test-utilities-consensus = { path = "../test_utilities/consensus" }
  ic-test-utilities-metrics = { path = "../test_utilities/metrics" }
@@ -1166,7 +1166,7 @@ index 6c2203453c..e7956e4916 100644
          "//rs/interfaces/state_manager",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/registry/routing_table",
          "//rs/registry/subnet_type",
@@ -1178,7 +1178,7 @@ index 1ac017b507..c9c6508738 100644
  ic-replicated-state = { path = "../replicated_state" }
  ic-state-layout = { path = "../state_layout" }
  ic-sys = { path = "../sys" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../types/types" }
  ic-types-cycles = { path = "../types/cycles" }
  ic-utils = { path = "../utils" }
@@ -1206,7 +1206,7 @@ index ae4f5fe970..ed7af96e8f 100644
          "//rs/crypto/standalone-sig-verifier",
          "//rs/crypto/tree_hash",
          "//rs/limits",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/types/types",
          "@crate_index//:hex",
          "@crate_index//:thiserror",
@@ -1218,7 +1218,7 @@ index 832ffa5840..fa2b4baedd 100644
  ic-crypto-sha2 = { path = "../crypto/sha2" }
  ic-crypto-standalone-sig-verifier = { path = "../crypto/standalone-sig-verifier" }
  ic-crypto-tree-hash = { path = "../crypto/tree_hash" }
-+ic-system-profiler = { path = "../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../types/types" }
  thiserror = { workspace = true }
  
@@ -1230,7 +1230,7 @@ index 66bf45e134..264fecec53 100644
          "//rs/limits",
          "//rs/monitoring/logger",
          "//rs/monitoring/metrics",
-+        "//rs/pocket_ic_server/profiling/system:system_profiler",
++        "//rs/pocket_ic_server/src/profiling/system:system_profiler",
          "//rs/protobuf",
          "//rs/registry/helpers",
          "//rs/registry/keys",
@@ -1242,7 +1242,7 @@ index face7564f5..1da53fbd2a 100644
  ic-registry-keys = { path = "../../registry/keys" }
  ic-registry-subnet-type = { path = "../../registry/subnet_type" }
  ic-replicated-state = { path = "../../replicated_state" }
-+ic-system-profiler = { path = "../../pocket_ic_server/profiling/system" }
++ic-system-profiler = { path = "../../pocket_ic_server/src/profiling/system" }
  ic-types = { path = "../../types/types" }
  ic-xnet-hyper = { path = "../hyper" }
  ic-xnet-uri = { path = "../uri" }

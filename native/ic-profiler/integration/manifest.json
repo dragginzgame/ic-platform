@@ -23,11 +23,11 @@
       },
       {
         "path": "packages/pocket-ic/tests/system_profiling.rs",
-        "sha256": "afd24c354a7019bb5baffef39952105dc5ac530cf4df65e0d188c2a7d36ec570"
+        "sha256": "ca31c16b4a97406b2464490d929acd129da052529d4a88ee572b31196e080b5c"
       },
       {
         "path": "profilingic.md",
-        "sha256": "5cdfc689d24dce12e18bcc66203f276e64fff9502f7fbc5c9ff47126f8079cfd",
+        "sha256": "ce3db630f053ca21d2008d2af1c5784998e35cab4f85b8e8bda89e621dedccd3",
         "source": "docs/profiling-design.md"
       },
       {
@@ -49,6 +49,14 @@
       {
         "path": "rs/messaging/src/system_profile.rs",
         "sha256": "c2908f894e263926adf7c1b454dac24956b1b5db935cdbacb4f78fff76b8db71"
+      },
+      {
+        "path": "rs/pocket_ic_server/src/pocket_ic/profiling_operations.rs",
+        "sha256": "6aa7686cf8ef08946f1188f2af997d7765f6aa4bb62e56f20b9e5a2dac0d178a"
+      },
+      {
+        "path": "rs/pocket_ic_server/src/state_api/routes/profiling_routes.rs",
+        "sha256": "371d89471c7d9cb77862de2607431f7e85df1e5fc0386aabd529e48bf43c6c3e"
       }
     ],
     "path": "overlay"
@@ -58,7 +66,7 @@
     "files": [
       {
         "path": "0001-workspace-and-build.patch",
-        "sha256": "246014891a365fa9eea2aa8e0cf36c4b97cba63fe71a0f9d44f30ca9b23aea46"
+        "sha256": "1b290a366037e49d0bae507f4f238298a418778309b93c3d9c5c6f7c61c087f0"
       },
       {
         "path": "0002-replica-runtime-hooks.patch",
@@ -66,7 +74,7 @@
       },
       {
         "path": "0003-pocketic-client-and-server.patch",
-        "sha256": "7f410196b9afc49b790092886ec7df292237df049bf4b0adabbff27fd9fa62c5"
+        "sha256": "8c49f6f9a5c38e3ef0713400a16c9e388022f1d11e056a10e53c60265c2e335e"
       },
       {
         "path": "0004-native-library-dependencies.patch",
@@ -74,7 +82,7 @@
       },
       {
         "path": "0005-native-host-dependencies.patch",
-        "sha256": "179987e7403e8ea42003dbdf79a062d54a6c708ed0a5d65e42a165e253785b0b"
+        "sha256": "445a065a5e0130c6a93c601fbab9f3914f478e6feda0091d6a12a863d367c4a7"
       },
       {
         "path": "0006-profiler-request-admission.patch",
@@ -86,7 +94,7 @@
       },
       {
         "path": "0008-client-validation-inputs.patch",
-        "sha256": "cf12cc7b4d41f35c89add77faba69d3af20825c0dda79d09e7b78dfbe3c9b92a"
+        "sha256": "213dfa80a7285e44832576c1127e6e2ba43840e4b2bcc67d9aa6deac1e12f8a2"
       },
       {
         "path": "0009-native-lint.patch",
@@ -96,7 +104,7 @@
     "series": "patches/ic/series"
   },
   "profiler": {
-    "destination": "rs/pocket_ic_server/profiling",
+    "destination": "rs/pocket_ic_server/src/profiling",
     "path": "profiler"
   },
   "provenance": {

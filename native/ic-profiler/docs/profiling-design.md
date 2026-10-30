@@ -4,7 +4,7 @@ Research, design and implementation notes, 2026-10-26. The earlier canister prof
 
 ## Implemented system profiler
 
-The implementation adds the [`ic-system-profiler` crate](rs/pocket_ic_server/profiling/system), [runtime instrumentation](rs/pocket_ic_server/profiling/system/src/flow.rs), [HTTP/MCP API](rs/pocket_ic_server/profiling/server/system_profile_api/mod.rs), [CLI](rs/pocket_ic_server/profiling/server/system_profile_cli.rs), [IC metric snapshots](rs/pocket_ic_server/profiling/server/system_profile_metrics.rs), [image renderer](rs/pocket_ic_server/profiling/server/system_profile_render.rs) and the System workspace in the existing viewer. It does not change deterministic instruction or cycle prices.
+The implementation adds the [`ic-system-profiler` crate](rs/pocket_ic_server/src/profiling/system), [runtime instrumentation](rs/pocket_ic_server/src/profiling/system/src/flow.rs), [HTTP/MCP API](rs/pocket_ic_server/src/profiling/server/system_profile_api/mod.rs), [CLI](rs/pocket_ic_server/src/profiling/server/system_profile_cli.rs), [IC metric snapshots](rs/pocket_ic_server/src/profiling/server/system_profile_metrics.rs), [image renderer](rs/pocket_ic_server/src/profiling/server/system_profile_render.rs) and the System workspace in the existing viewer. It does not change deterministic instruction or cycle prices.
 
 Available now:
 
@@ -178,7 +178,7 @@ Use a versioned component dictionary with stable identifiers, descriptions, owne
 | DKG and chain-key protocols | DKG/IDKG/resharing, transcript/share production and validation, threshold BLS/ECDSA/Schnorr/vetKD, presignature inventory/replenishment, aggregation and request completion | [DKG metrics](rs/consensus/dkg/src/metrics.rs), [IDKG metrics](rs/consensus/idkg/src/metrics.rs), [chain-key metrics](rs/consensus/chain_key/src/metrics.rs) |
 | External adapters | HTTPS queue/DNS/connect/TLS/proxy/reuse/upload/download, transform execution, response agreement; BTC/DOGE peer/header/block/cache work, payload construction and transaction submission | [HTTPS adapter](rs/https_outcalls/adapter/src/metrics.rs), [HTTPS consensus](rs/https_outcalls/consensus/src/metrics.rs), [Bitcoin adapter](rs/bitcoin/adapter/src/metrics.rs), [Bitcoin payloads](rs/bitcoin/consensus/src/metrics.rs) |
 | Control plane and infrastructure | Registry/topology changes, routing/key changes, orchestrator/restarts/upgrades/CUP, firewall/trim, crypto service, GuestOS/QEMU/HostOS, filesystem/encryption/device contention | [Orchestrator](rs/orchestrator/src/processes.rs), [orchestrator metrics](rs/orchestrator/src/metrics.rs), [GuestOS service](ic-os/components/guestos/ic-replica.service) |
-| Observability | Collector/metrics/logging/tracing CPU and memory; dictionary retention; serialization/compression/export bytes; UI/API serving; lost events and collector backpressure | [Monitoring](rs/monitoring), [existing viewer/API](rs/pocket_ic_server/profiling/server/memory_access_viewer.rs) |
+| Observability | Collector/metrics/logging/tracing CPU and memory; dictionary retention; serialization/compression/export bytes; UI/API serving; lost events and collector backpressure | [Monitoring](rs/monitoring), [existing viewer/API](rs/pocket_ic_server/src/profiling/server/memory_access_viewer.rs) |
 
 Chain Fusion is a composed workflow through canisters, adapters, chain-key protocols and external networks, not an extra additive resource bucket. System canisters such as ledgers, registry and governance should likewise appear as workload identities through the same component model, rather than being double-counted as both guest work and another resource family.
 
@@ -309,7 +309,7 @@ Deduplicate logical work when combining replicated traces, but retain each node'
 
 ## 7. UI design
 
-Extend the existing compact viewer instead of making a second unrelated dashboard. The starting references are [Memory](rs/pocket_ic_server/profiling/viewer/design/reference-memory.png), [Compute](rs/pocket_ic_server/profiling/viewer/design/reference-compute.png), and the current [live-viewer capture](../demo/pocketic-live/memory-20261026-data.png). Preserve the large memory visualization and existing Data/Reads/Writes behavior when drilling into a canister.
+Extend the existing compact viewer instead of making a second unrelated dashboard. The starting references are [Memory](rs/pocket_ic_server/src/profiling/viewer/design/reference-memory.png), [Compute](rs/pocket_ic_server/src/profiling/viewer/design/reference-compute.png), and the current [live-viewer capture](../demo/pocketic-live/memory-20261026-data.png). Preserve the large memory visualization and existing Data/Reads/Writes behavior when drilling into a canister.
 
 Add one primary **System** workspace beside **Memory / Compute / Executions**. System contains **Overview / Calls / Components / Resources / Pricing**. Deep resource details have secondary CPU / Memory / Storage / Network views rather than one dashboard showing every chart.
 
@@ -497,7 +497,7 @@ Primary external references for collection and trace semantics:
 ## 13. Consolidation and inactive profiling (2026-10-27)
 
 The implementation is now collected under
-[`rs/pocket_ic_server/profiling`](rs/pocket_ic_server/profiling/README.md):
+[`rs/pocket_ic_server/src/profiling`](rs/pocket_ic_server/src/profiling/README.md):
 `server/` holds APIs, operations, CLI, catalogs and snapshots; `viewer/` holds
 browser/agent tooling; `system/` is the independent `ic-system-profiler` crate.
 Existing public module aliases and REST interfaces remain usable. The integration

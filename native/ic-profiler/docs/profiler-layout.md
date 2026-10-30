@@ -24,8 +24,8 @@ know the physical locations of the server implementation files.
 
 The core package remains `ic-system-profiler`, imported as
 `ic_system_profiler`. Its Bazel library is
-`//rs/pocket_ic_server/profiling/system:system_profiler`; the independent test
-target is `//rs/pocket_ic_server/profiling/system:system_profiler_test`.
+`//rs/pocket_ic_server/src/profiling/system:system_profiler`; the independent test
+target is `//rs/pocket_ic_server/src/profiling/system:system_profiler_test`.
 Cargo workspace membership and dependent crates' path declarations point to
 `system/`; this package has no server, execution-engine or replicated-state
 dependency.
@@ -41,9 +41,9 @@ the actual binary hash recorded for each measurement.
 When updating IC source, review both layers:
 
 ```sh
-git diff --stat ee8086a977 -- rs/pocket_ic_server/profiling
-git diff --stat 49a94778d9 -- . ':(exclude)rs/pocket_ic_server/profiling'
-git diff ee8086a977 -- . ':(exclude)rs/pocket_ic_server/profiling'
+git diff --stat ee8086a977 -- rs/pocket_ic_server/src/profiling
+git diff --stat 49a94778d9 -- . ':(exclude)rs/pocket_ic_server/src/profiling'
+git diff ee8086a977 -- . ':(exclude)rs/pocket_ic_server/src/profiling'
 ```
 
 The first command covers central implementation. The second isolates newer

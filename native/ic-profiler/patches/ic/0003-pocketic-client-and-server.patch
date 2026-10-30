@@ -167,7 +167,7 @@ index 30948412af..03296cd184 100644
 +// `pic`, `canister_id` and `payload` have already been initialized.
 +let capture = |label: &str, output: &str| {
 +    assert!(Command::new("python3")
-+        .arg("rs/pocket_ic_server/profiling/viewer/memory_access_viewer.py")
++        .arg("rs/pocket_ic_server/src/profiling/viewer/memory_access_viewer.py")
 +        .arg("snapshot")
 +        .arg("--server").arg(pic.get_server_url().as_str())
 +        .arg("--instance").arg(pic.instance_id().to_string())
@@ -374,7 +374,7 @@ index 30948412af..03296cd184 100644
 +Agents can download and analyze the traces through a JSON API and an MCP server described at `<url>/llms.txt`,
 +e.g., after adding the MCP server to Claude Code with `claude mcp add --transport http pocket-ic-memory <url>mcp`.
 +
-+The script `rs/pocket_ic_server/profiling/viewer/memory_access_viewer.py` in the [IC repository](https://github.com/dfinity/ic)
++The script `rs/pocket_ic_server/src/profiling/viewer/memory_access_viewer.py` in the [IC repository](https://github.com/dfinity/ic)
 +turns a trace into an interactive web page and into a video:
 +
 +```rust
@@ -391,7 +391,7 @@ index 30948412af..03296cd184 100644
 +Run `pocket-ic explain` for the complete compiled profiling manual and command
 +inventory, or `pocket-ic profile explain` for the system component/measurement
 +dictionary. Neither requires Markdown files or a running server. The shared
-+implementation and agent tools live under `rs/pocket_ic_server/profiling/`.
++implementation and agent tools live under `rs/pocket_ic_server/src/profiling/`.
 +
 +System profiling measures actual host CPU, resident memory, storage accounting,
 +component execution scopes, logical scheduling events and observed inter-canister
@@ -3375,11 +3375,10 @@ diff --git a/rs/pocket_ic_server/src/lib.rs b/rs/pocket_ic_server/src/lib.rs
 index bf9b1fda74..e1e520aa8c 100644
 --- a/rs/pocket_ic_server/src/lib.rs
 +++ b/rs/pocket_ic_server/src/lib.rs
-@@ -35,6 +35,17 @@
+@@ -35,6 +35,16 @@
  //! been carried out. A state which has no outcoming computations is called a leaf.
  
  mod beta_features;
-+#[path = "../profiling/mod.rs"]
 +pub mod profiling;
 +pub use profiling::{
 +    computation_catalog, instruction_profiler_config, memory_access_viewer, system_profile_api,
@@ -4041,8 +4040,7 @@ diff --git a/rs/pocket_ic_server/src/pocket_ic.rs b/rs/pocket_ic_server/src/pock
 index c7d6de4e59..8bd7a60058 100644
 --- a/rs/pocket_ic_server/src/pocket_ic.rs
 +++ b/rs/pocket_ic_server/src/pocket_ic.rs
-@@ -1,8 +1,17 @@
-+#[path = "../profiling/server/operations.rs"]
+@@ -1,8 +1,16 @@
 +mod profiling_operations;
 +pub(crate) use profiling_operations::profile_direct_request;
 +pub use profiling_operations::{
@@ -4249,11 +4247,10 @@ diff --git a/rs/pocket_ic_server/src/state_api/routes.rs b/rs/pocket_ic_server/s
 index 2c3d1a4f37..f872c54e99 100644
 --- a/rs/pocket_ic_server/src/state_api/routes.rs
 +++ b/rs/pocket_ic_server/src/state_api/routes.rs
-@@ -5,6 +5,16 @@
+@@ -5,6 +5,15 @@
  /// body. This has to be canonicalized into a PocketIc Operation before we can
  /// deterministically update the PocketIc state machine.
  ///
-+#[path = "../../profiling/server/routes.rs"]
 +mod profiling_routes;
 +pub(crate) use profiling_routes::handler_capture_memory_snapshot;
 +pub use profiling_routes::{

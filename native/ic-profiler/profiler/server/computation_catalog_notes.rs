@@ -30,7 +30,7 @@ const COLLECTOR: (&str, &str) = (
     include_str!("../../../embedders/src/wasmtime_embedder/profiling.rs"),
 );
 const RECORDER: (&str, &str) = (
-    "rs/pocket_ic_server/profiling/server/memory_access_tracing.rs",
+    "rs/pocket_ic_server/src/profiling/server/memory_access_tracing.rs",
     include_str!("memory_access_tracing.rs"),
 );
 const HTTP: (&str, &str) = (

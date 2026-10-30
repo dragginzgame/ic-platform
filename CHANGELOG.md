@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.6]
+
+### 🧹 Cleanup
+
+- Use an ordinary server module for native profiler sources while preserving
+  public aliases and provider/consumer source ownership. Give malformed Candid
+  tests an ordinary module layout.
+
 ## [0.8.5] - 2026-10-30
 
 ## [0.8.4] - 2026-10-30

@@ -4704,18 +4704,18 @@ diff --git a/rs/pocket_ic_server/BUILD.bazel b/rs/pocket_ic_server/BUILD.bazel
      "@crate_index//:prometheus",
 @@ -276,6 +280,7 @@
              "src/state_api/**/*.rs",
-             "profiling/mod.rs",
-             "profiling/server/**/*.rs",
-+            "profiling/rendering/**/*.rs",
+             "src/profiling/**/*.rs",
+             "src/pocket_ic/**/*.rs",
++            "src/profiling/rendering/**/*.rs",
          ]),
          compile_data = EXTERNAL_CANISTER_DATA + nns_canister_data + [
              "//rs/config:instruction_charge_rule_sources",
 @@ -293,7 +298,7 @@
-             "profiling/viewer/agent_guide.md",
-             "profiling/viewer/viewer.html",
+             "src/profiling/viewer/agent_guide.md",
+             "src/profiling/viewer/viewer.html",
              "templates/dashboard.html",
 -        ],
-+        ] + glob(["profiling/rendering/fixtures/*.png"]),
++        ] + glob(["src/profiling/rendering/fixtures/*.png"]),
          crate_name = "pocket_ic_server",
          proc_macro_deps = [
              # Keep sorted.
@@ -4733,7 +4733,7 @@ diff --git a/rs/pocket_ic_server/Cargo.toml b/rs/pocket_ic_server/Cargo.toml
 @@ -80,6 +81,7 @@
  ic-state-manager = { path = "../state_manager" }
  ic-sys = { path = "../sys" }
- ic-system-profiler = { path = "profiling/system" }
+ ic-system-profiler = { path = "src/profiling/system" }
 +ic-platform = { workspace = true }
  ic-types = { path = "../types/types" }
  ic-types-cycles = { path = "../types/cycles" }

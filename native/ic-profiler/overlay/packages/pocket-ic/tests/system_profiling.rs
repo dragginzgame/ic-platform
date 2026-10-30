@@ -760,7 +760,7 @@ fn platform_client_boundary_completes_operations_and_preserves_trace_guards() {
         .unwrap_or_else(|| {
             std::path::PathBuf::from(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../rs/pocket_ic_server/profiling/viewer/memory_access_viewer.py"
+                "/../../rs/pocket_ic_server/src/profiling/viewer/memory_access_viewer.py"
             ))
         });
     let python = std::process::Command::new("python3")

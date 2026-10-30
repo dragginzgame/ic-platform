@@ -42,6 +42,15 @@ and its tests. It owns query admission, immutable images, command metadata and
 render/bundle plumbing. Native capture and scope cleanup stay in this provider.
 Keep older consumers pinned until that product source is present.
 
+The ordinary Rust module layout now assembles the provider and consumer trees at
+`rs/pocket_ic_server/src/profiling`. Native operation and route adapters are
+ordinary children of `src/pocket_ic` and `src/state_api/routes`. Cargo paths,
+Bazel labels and viewer assets use that destination. When adopting this provider,
+refresh consumer source-location metadata that names the earlier
+`rs/pocket_ic_server/profiling` directory. Existing consumer module source paths
+under `profiler/` and public Rust aliases are preserved. Requalify the assembled
+native server; prior binary evidence does not qualify this layout.
+
 Dependency updates compose in one current patch after the foundational workspace
 patches. The separate compiled-fact patch exposes the existing resource-charge
 cadence; it changes no scheduler calculation or charging behavior.

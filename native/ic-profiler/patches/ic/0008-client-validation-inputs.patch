@@ -35,6 +35,6 @@ diff --git a/rs/pocket_ic_server/BUILD.bazel b/rs/pocket_ic_server/BUILD.bazel
 +
 +filegroup(
 +    name = "profiling_python_client",
-+    srcs = ["profiling/viewer/memory_access_viewer.py"],
++    srcs = ["src/profiling/viewer/memory_access_viewer.py"],
 +    visibility = ["//packages/pocket-ic:__pkg__"],
 +)

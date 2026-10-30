@@ -93,7 +93,7 @@ class IntegrationScriptsTest(unittest.TestCase):
             "schema_version": 1,
             "upstream": {"path": "upstream/ic", "commit": self.pin,
                          "baseline_commit": self.pin, "url": str(self.remote)},
-            "profiler": {"path": "profiler", "destination": "rs/pocket_ic_server/profiling"},
+            "profiler": {"path": "profiler", "destination": "rs/pocket_ic_server/src/profiling"},
             "patches": {"directory": "patches/ic", "series": "patches/ic/series", "files": []},
             "overlay": {"path": "overlay", "files": [
                 {"path": "docs/profiling-design.md", "source": "docs/profiling-design.md",
@@ -158,11 +158,11 @@ class IntegrationScriptsTest(unittest.TestCase):
     def test_prepare_applies_ordered_patches_and_mapped_owned_sources(self):
         self.script("prepare")
         self.assertEqual((self.checkout / "src/base.txt").read_text(), "second integration patch\n")
-        self.assertEqual((self.checkout / "rs/pocket_ic_server/profiling/server.rs").read_bytes(),
+        self.assertEqual((self.checkout / "rs/pocket_ic_server/src/profiling/server.rs").read_bytes(),
                          (self.root / "profiler/server.rs").read_bytes())
-        self.assertEqual((self.checkout / "rs/pocket_ic_server/profiling/system/.metadata").read_text(),
+        self.assertEqual((self.checkout / "rs/pocket_ic_server/src/profiling/system/.metadata").read_text(),
                          "hidden owned source\n")
-        self.assertTrue(os.access(self.checkout / "rs/pocket_ic_server/profiling/bin/inspect", os.X_OK))
+        self.assertTrue(os.access(self.checkout / "rs/pocket_ic_server/src/profiling/bin/inspect", os.X_OK))
         self.assertEqual((self.checkout / "docs/profiling-design.md").read_bytes(),
                          (self.root / "docs/profiling-design.md").read_bytes())
         self.assertTrue((self.checkout / "rs/embedders/owned_hook.rs").is_file())
@@ -192,7 +192,7 @@ class IntegrationScriptsTest(unittest.TestCase):
         self.env["IC_PROFILER_CONSUMER_ROOT"] = str(consumer)
         self.script("prepare")
         checkout = consumer / ".build/ic"
-        self.assertEqual((checkout / "rs/pocket_ic_server/profiling/system/core.rs").read_text(),
+        self.assertEqual((checkout / "rs/pocket_ic_server/src/profiling/system/core.rs").read_text(),
                          "// IC-free recorder\n")
         state = self.receipt(checkout)["sources"]["profiler"]
         self.assertEqual({entry["origin"] for entry in state}, {"provider", "consumer"})
@@ -249,12 +249,12 @@ class IntegrationScriptsTest(unittest.TestCase):
         result = self.script("prepare")
         self.assertIn("Verified existing assembly", result.stdout)
         self.assertEqual(self.receipt(), original_receipt)
-        self.assertFalse((self.checkout / "rs/pocket_ic_server/profiling/viewer/__pycache__").exists())
+        self.assertFalse((self.checkout / "rs/pocket_ic_server/src/profiling/viewer/__pycache__").exists())
         # A real source edit must still regenerate, without copying cache artifacts.
         self.write(self.root, "profiler/server.rs", "// revised owned source\n")
         self.script("prepare", "--force")
         self.assertNotEqual(self.receipt()["recipe_sha256"], original_receipt["recipe_sha256"])
-        self.assertFalse((self.checkout / "rs/pocket_ic_server/profiling/viewer/__pycache__").exists())
+        self.assertFalse((self.checkout / "rs/pocket_ic_server/src/profiling/viewer/__pycache__").exists())
 
     def test_generated_edits_are_preserved_until_explicit_force(self):
         self.script("prepare")
@@ -285,11 +285,11 @@ class IntegrationScriptsTest(unittest.TestCase):
         before = self.receipt()["recipe_sha256"]
         self.write(self.root, "profiler/server.rs", "// revised profiler source\n")
         self.script("prepare", success=False)
-        self.assertEqual((self.checkout / "rs/pocket_ic_server/profiling/server.rs").read_text(),
+        self.assertEqual((self.checkout / "rs/pocket_ic_server/src/profiling/server.rs").read_text(),
                          "// profiler server\n")
         self.script("prepare", "--force")
         self.assertNotEqual(self.receipt()["recipe_sha256"], before)
-        self.assertEqual((self.checkout / "rs/pocket_ic_server/profiling/server.rs").read_text(),
+        self.assertEqual((self.checkout / "rs/pocket_ic_server/src/profiling/server.rs").read_text(),
                          "// revised profiler source\n")
 
     def test_tracked_untracked_and_ignored_upstream_edits_are_rejected(self):
@@ -472,7 +472,7 @@ exit "${IC_PROFILER_FIXTURE_EXIT:-0}"
         self.assert_pristine_pin()
 
     def test_overlay_cannot_overwrite_profiler_owned_file(self):
-        self.write(self.root, "overlay/rs/pocket_ic_server/profiling/server.rs", "collision\n")
+        self.write(self.root, "overlay/rs/pocket_ic_server/src/profiling/server.rs", "collision\n")
         self.script("refresh-manifest")
         self.script("prepare", success=False)
         self.assertFalse(self.checkout.exists())
