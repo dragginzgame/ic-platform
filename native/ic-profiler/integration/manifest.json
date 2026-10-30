@@ -74,7 +74,7 @@
       },
       {
         "path": "0005-native-host-dependencies.patch",
-        "sha256": "da8b99602da0aedd94272058ceae956a95097ca27b91422612f471491fdb2e6c"
+        "sha256": "636963ae03c39ad6f523a9c7232e7773355c5ae5463ed39c36d8cbb2f4ac5dcf"
       },
       {
         "path": "0006-profiler-request-admission.patch",

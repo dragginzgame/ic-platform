@@ -48,7 +48,7 @@ cadence; it changes no scheduler calculation or charging behavior.
 
 Adapters stay inside the provider's IC workspace. The consumer recorder selects
 only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
-Bazel inputs. The recorder also consumes published IC Metrics 0.18 scalar
+Bazel inputs. The recorder also consumes published IC Metrics 0.19 scalar
 arithmetic; this provider owns its native workspace and Bazel locks, distinct
 from the IC workspace's internal `ic-metrics` package. Neither measurement
 counters nor the gzip facade own charging policy. The gzip facade delegates to
@@ -123,17 +123,18 @@ a distinct native dependency; PNG mechanics and budgets stay product-owned.
 ## Host process and private Wire inputs
 
 The paired Profiler consumer supplies the Host process policy adapter and the
-IC Wire private process DTOs. This profile wires IC Wire 0.8.0 and
+IC Wire private process DTOs. This profile wires IC Wire 0.9.0 and
 `ic-host-process` into both Cargo and Bazel, retaining the 60 KiB consumer frame
 limit. Old ICP2/JSON process senders and receivers must be rebuilt together.
 Saved reports and profile bundle formats do not change. Generic OS observations
 and child/gate mechanics belong to Host; Profiler retains capture activation,
 pinned root selection, cadence, aggregation, diagnostics and CLI output.
 
-The direct Wire 0.8 transport keeps endpoint features disabled. Metrics retains
-Wire 0.7.25 for its own native schema metadata; these traits are not used by the
-Profiler process frames. Track the supplier alignment in
-[Observability #103 — Align Metrics schema traits with published Wire 0.8](https://github.com/dragginzgame/ic-observability/issues/103).
+The direct Wire 0.9 transport keeps endpoint features disabled. Metrics 0.19
+uses Wire 0.8.0 for its own native schema metadata; these traits are not used by
+the Serde-based Profiler process frames. Arithmetic and saved layouts are
+unchanged; see the
+[Metrics metadata adoption](https://github.com/dragginzgame/ic-observability/issues/103).
 
 The selected recorder and native graph use published Host Process, Host FS and
 Host Artifacts 0.71.0 plus gzip-only Platform 0.10.0 from crates.io. The published
