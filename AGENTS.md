@@ -18,6 +18,8 @@ Read [the current handoff](docs/status/current.md), then
   re-exports, automatic resource limits beyond the authorized Candid ceiling below,
   or alternative executor implementation.
   Explicit upstream-coupled exports belong to the documented contract.
+- Generic gzip codecs belong to IC Tooling. Consumers use its Host Artifacts
+  API directly; keep Platform free of the forwarding surface and dependency.
 - No default features. Executor-only builds must remain Candid-free; host parser
   features must never be enabled by canister/runtime features.
 - The maintainer moved Principal/Account Wire schema integration to Wire. The
@@ -196,8 +198,9 @@ The maintainer explicitly authorized transferring IC Profiler's native provider,
 including its existing assembler/fixtures, into `native/ic-profiler`. Profiler
 #4 / Platform #90 return the product CLI/query renderer and shared PNG/range
 mechanics to the consumer; keep only their native integration/state adapters here.
-The maintainer retained Platform's gzip facade for Profiler; #91 retirement is
-outside this paired change. That opt-in
+The native profile retains its revision-pinned published gzip facade until its
+paired direct-Host migration is qualified. The current consumer library has no
+gzip surface. That opt-in
 source profile owns replica adapters and the patched client below this facade;
 its IC-free recorder/viewer remain consumer-owned. Preserve the legacy tooling
 during this transfer; this is no general permission to introduce Python tooling.

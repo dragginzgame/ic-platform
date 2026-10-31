@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.12.1]
+## [0.13.0]
+
+### ⚠️ Breaking
+
+- Remove the native gzip forwarding feature and exports. Consumers select
+  `ic-host-artifacts/gzip` and import its `artifact` codecs directly. Platform
+  no longer depends on generic Host artifacts; codec bytes and admission stay
+  owned by Tooling. See the [migration](docs/migration.md#host-gzip-boundary).
 
 ### 🩹 Fixed
 
@@ -25,8 +32,10 @@
   Platform-type schemas remain disabled, with unchanged arithmetic/Serde layouts
   ([Observability #103 — Published Metrics metadata alignment](https://github.com/dragginzgame/ic-observability/issues/103)).
 
-- Unify Platform-owned gzip and Host Process/FS on Host Artifacts 0.72.1,
-  preserving codec bytes, limits and the consumer boundary.
+- Keep the native profile on published Platform 0.12.0 for its existing gzip
+  consumer contract, independent of the upcoming root facade removal. Unify its
+  gzip and Host Process/FS on Host Artifacts 0.72.1 while preserving codec bytes
+  and limits.
 
 ### 🧪 Testing
 

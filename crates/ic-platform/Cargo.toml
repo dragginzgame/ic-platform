@@ -34,7 +34,6 @@ certification = ["dep:ic-certification"]
 ecdsa = ["dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"]
-gzip = ["dep:ic-host-artifacts"]
 ic0 = []
 icrc-ledger-types = [
     "principal-external",
@@ -47,7 +46,14 @@ icrc-ledger-types = [
     "dep:serde_bytes",
     "dep:sha2",
 ]
-management-canister-types = ["principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:serde_bytes", "dep:ic-management-canister-types"]
+management-canister-types = [
+    "principal-external",
+    "dep:candid",
+    "candid/bignum",
+    "candid/serde_bytes",
+    "dep:serde_bytes",
+    "dep:ic-management-canister-types",
+]
 signature-verification = [
     "canister-sig-creation",
     "ic_principal/serde",
@@ -87,7 +93,6 @@ thiserror = { workspace = true, optional = true }
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }
 ic-agent = { workspace = true, optional = true }
-ic-host-artifacts = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-secp256k1 = { workspace = true, optional = true }
 pocket-ic = { workspace = true, optional = true }
@@ -98,11 +103,6 @@ ic-representation-independent-hash.workspace = true
 serde_bytes.workspace = true
 serde_cbor.workspace = true
 serde_test.workspace = true
-
-[[test]]
-name = "gzip_consumer"
-path = "tests/gzip_consumer.rs"
-required-features = ["gzip"]
 
 [[test]]
 name = "blake3_consumer"
