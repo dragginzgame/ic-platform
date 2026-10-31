@@ -113,11 +113,11 @@ same; the provider still owns state access, trace capture, HTTP admission and
 Cargo/Bazel dependencies. This source-profile change does not alter the published
 Platform library API.
 
-Server profile bundles import through Platform's shared gzip facade and export
+Server profile bundles import through IC Tooling Host Artifacts gzip and export
 unchanged core gzip bytes. API input/decoded limits remain 128 MiB; the recorder
-retains its separate 256 MiB decoded limit. The maintainer chose to retain this
-facade instead of the proposed direct Host migration in #91. Zlib for PNG remains
-a distinct native dependency; PNG mechanics and budgets stay product-owned.
+retains its separate 256 MiB decoded limit. The maintainer approved this paired
+Platform 0.13 migration to direct Host compression. Zlib for PNG remains a
+distinct native dependency; PNG mechanics and budgets stay product-owned.
 
 ## Host process and private Wire inputs
 
@@ -137,22 +137,18 @@ Wire 0.11 preserves core codec bytes and budgets, ICPROF03 identity, arithmetic
 and saved layouts. See the
 [Metrics 0.22 migration](https://github.com/dragginzgame/ic-observability/blob/main/docs/migration-022.md).
 
-The selected recorder and native graph use published Host Process/FS 0.72.1
-and gzip-only Platform 0.12.0 from crates.io. Its gzip facade and the process
-family share Host Artifacts 0.72.1. The published
-observation and workload APIs replace the temporary Tooling/Platform Git library
-suppliers. Cargo and Bazel locks record registry checksums; there is no downstream
-Cargo patch or mixed registry/Git Host family. Gzip remains a Platform facade,
-with no new canister/runtime feature. The native source profile itself still
-requires an immutable Platform Git pin for the patched IC source and adapters.
+The selected recorder and native graph use published Host Process/FS/Artifacts
+0.72.1 from crates.io. Generic gzip calls `ic_host_artifacts::artifact` directly,
+with `default-features = false, features = ["gzip"]`. Platform 0.13 removes its
+forwarding API; gzip was the recorder/server's only registry Platform use, so
+both Cargo and Bazel drop that package entirely. The same Host codec retains
+levels, strict framing, byte limits and saved formats. No runtime singleton
+guard is introduced. Cargo and Bazel locks record registry checksums; there is
+no downstream patch or mixed registry/Git Host family. The native source profile
+still requires an immutable Platform Git pin for patched IC source and adapters.
 Native macOS execution remains separate qualification.
-
-Platform 0.12.0 retains the runtime-only executor singleton guard, allowing
-this gzip-only graph to coexist with the pinned workspace's registry executor.
-The guard remains inactive here; the recorder never enables Platform's runtime.
-See
-[#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)
-for the resolved packaging boundary.
+Consumers selecting this revision must supply the paired direct Host imports,
+Cargo and Bazel declarations. Older consumers retain their previous provider pin.
 
 ## Textual client and compiled backend description
 

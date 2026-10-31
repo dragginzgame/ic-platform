@@ -4,9 +4,9 @@
 
 ### ⬆️ Dependencies
 
-- Update the native Profiler profile to published Platform 0.12.0 and share one
-  Host Artifacts 0.72.1 gzip supplier with Host Process/FS. Preserve the pinned
-  profile’s existing codec contract independently of the current library.
+- Migrate the native Profiler profile to Platform 0.13's compression ownership
+  split: use Host Artifacts 0.72.1 gzip directly and remove the forwarding-only
+  registry Platform dependency. Preserve codec bytes, levels and byte limits.
 - Adopt Wire 0.11 for private process frames and arithmetic-only Metrics 0.22.
   Disable unused Metrics Wire metadata, leaving one Wire generation while
   preserving counter arithmetic, saved reports and ICPROF03 framing.
