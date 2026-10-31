@@ -129,13 +129,13 @@ Saved reports and profile bundle formats do not change. Generic OS observations
 and child/gate mechanics belong to Host; Profiler retains capture activation,
 pinned root selection, cadence, aggregation, diagnostics and CLI output.
 
-Profiler process frames use Wire 0.11; Host Process and Metrics 0.21 retain
-their independent Wire 0.10 requirements. No Wire types cross those boundaries.
-Only Metrics' native TypeScript metadata feature is active; endpoints and
-Platform-type schemas stay disabled in both generations. Wire 0.11 preserves
-core codec bytes and budgets, ICPROF03 identity, arithmetic and saved layouts;
-see the
-[Metrics metadata adoption](https://github.com/dragginzgame/ic-observability/issues/103).
+Profiler process frames use Wire 0.11. Metrics 0.22 retains its arithmetic and
+validated Serde contract with defaults and `native-wire` disabled. It adds no
+Wire or TypeScript metadata dependency, leaving one Wire generation in the
+recorder and native graph. Endpoints and Platform-type schemas stay disabled.
+Wire 0.11 preserves core codec bytes and budgets, ICPROF03 identity, arithmetic
+and saved layouts. See the
+[Metrics 0.22 migration](https://github.com/dragginzgame/ic-observability/blob/main/docs/migration-022.md).
 
 The selected recorder and native graph use published Host Process/FS 0.72.1
 and gzip-only Platform 0.12.0 from crates.io. Its gzip facade and the process
