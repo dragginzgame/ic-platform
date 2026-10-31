@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.0]
+
+### ⚠️ Breaking
+
+- Adopt IC Tooling 0.72 for the optional native gzip facade. `GzipError` now has
+  the Host Artifacts 0.72 identity; consumers exchanging that type must align
+  direct Host dependencies and rebuild together. Codec behavior is unchanged.
+
+### ⬆️ Dependencies
+
+- Update Testkit to 0.72 and the managed IC Build release editor to 0.72.0,
+  aligned with Platform 0.11 and Wire 0.10.
+
 ## [0.11.1] - 2026-10-30
 
 ### ⬆️ Dependencies

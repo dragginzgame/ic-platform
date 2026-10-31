@@ -151,7 +151,7 @@ Installed-runtime CI prepares only the common tools, in order with
 release editor or Node/npm/TypeScript. Normal `make install-tools` still prepares
 the complete contributor set, and standard CI retains the Wire frontend proof.
 
-Tool setup includes the pinned IC Build 0.71.0 release editor with its `cli`
+Tool setup includes the pinned IC Build 0.72.0 release editor with its `cli`
 feature, which requires Rust 1.91 or later to build. `make install-release-editor`
 prepares it separately;
 `make release-editor-check` admits it offline. Standard release commands prepare

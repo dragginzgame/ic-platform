@@ -22,7 +22,7 @@ ed25519-dalek = { version = "2.2", default-features = false }
 hex = "0.4.3"
 ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
-ic-host-artifacts = { version = "0.71.0", default-features = false, features = ["gzip"] }
+ic-host-artifacts = { version = "0.72.0", default-features = false, features = ["gzip"] }
 ic-management-canister-types = "=0.11.0"
 ic-platform-macros = { version = "0.11.1", path = "crates/ic-platform-macros" }
 ic-platform-runtime-guard = { version = "=0.11.1", path = "crates/ic-platform-runtime-guard", default-features = false }
@@ -48,7 +48,7 @@ thiserror = "2.0.18"
 # Tests and tooling only
 assert_matches = "1.5"
 ic-representation-independent-hash = "3.0"
-ic-testkit = "0.71.0"
+ic-testkit = "0.72.0"
 ic-timers = "0.32.3"
 ic-wire = "0.10.0"
 libfuzzer-sys = "0.4.13"
