@@ -4,13 +4,13 @@
     {
       "name": "platform",
       "primary": "ic-platform",
-      "version": "workspace",
+      "version": "package",
       "members": [
         "ic-platform",
         "ic-platform-macros",
         "ic-platform-runtime-guard"
       ],
-      "changelog": "CHANGELOG.md",
+      "changelog": "releases/platform/CHANGELOG.md",
       "dependencies": [
         "ic-platform-macros",
         "ic-platform-runtime-guard"
@@ -26,7 +26,7 @@
       "members": [
         "ic-platform-types"
       ],
-      "changelog": "crates/ic-platform-types/CHANGELOG.md",
+      "changelog": "releases/types/CHANGELOG.md",
       "dependencies": [
         "ic-platform-types"
       ]

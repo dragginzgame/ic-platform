@@ -31,18 +31,17 @@ PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '
 diff -qr "${wire_manifest%/*}/src" "$fixture/wire/src"
 cp Cargo.toml "$fixture/next/"
 cp -R crates "$fixture/next/"
-version="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
+version="$("$root/.tools/host/bin/yq" -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)"
 major="${version%%.*}" minor="${version#*.}"; minor="${minor%%.*}"
 next="$major.$((minor + 1)).0"
 PLATFORM_IDENTITY_CURRENT="$version" PLATFORM_IDENTITY_NEXT="$next" PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '
     my ($old,$new,$source)=@ENV{qw(PLATFORM_IDENTITY_CURRENT PLATFORM_IDENTITY_NEXT PLATFORM_IDENTITY_SOURCE)};
-    s/^version = "\Q$old\E"$/version = "$new"/m == 1 or die "workspace version changed\n";
     s/^(ic-platform-(?:macros|runtime-guard) = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm == 2 or die "runtime identities changed\n";
     s/^    "crates\/ic-platform-types",\n//m == 1 or die "identity member changed\n";
     s/path = "crates\/ic-platform-types"/path = "$source"/ == 1 or die "identity selection changed\n";
 ' "$fixture/next/Cargo.toml"
 for package in ic-platform ic-platform-macros ic-platform-runtime-guard; do
-    perl -pi -e 's/^\[package\]$/[package]\nworkspace = "..\/.."/' "$fixture/next/crates/$package/Cargo.toml"
+    PLATFORM_NEXT_VERSION="$next" perl -pi -e 's/^version = "[^" ]+"$/version = "$ENV{PLATFORM_NEXT_VERSION}"/; s/^\[package\]$/[package]\nworkspace = "..\/.."/' "$fixture/next/crates/$package/Cargo.toml"
 done
 cat > "$fixture/consumer/Cargo.toml" <<MANIFEST
 [workspace]

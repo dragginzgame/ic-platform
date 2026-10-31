@@ -73,14 +73,16 @@ mkdir "$fixture-next-platform"
 printf 'Next-version source evidence: %s\n' "$fixture-next-platform"
 cp Cargo.toml "$fixture-next-platform/"
 cp -R crates "$fixture-next-platform/"
-version="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
+version="$("$root/.tools/host/bin/yq" -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)"
 next="${version%.*}.$(( ${version##*.} + 1 ))"
 PLATFORM_SINGLETON_CURRENT="$version" PLATFORM_SINGLETON_NEXT="$next" perl -0pi -e '
     my ($old, $new) = @ENV{qw(PLATFORM_SINGLETON_CURRENT PLATFORM_SINGLETON_NEXT)};
-    my $count = s/^version = "\Q$old\E"$/version = "$new"/m;
-    $count += s/^(ic-platform(?:-macros|-runtime-guard)? = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm;
-    $count == 3 or die "expected three coordinated package versions\n";
+    my $count = s/^(ic-platform(?:-macros|-runtime-guard)? = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm;
+    $count == 2 or die "expected two coordinated dependency requirements\n";
 ' "$fixture-next-platform/Cargo.toml"
+for package in ic-platform ic-platform-macros ic-platform-runtime-guard; do
+    PLATFORM_NEXT_VERSION="$next" perl -pi -e 's/^version = "[^" ]+"$/version = "$ENV{PLATFORM_NEXT_VERSION}"/' "$fixture-next-platform/crates/$package/Cargo.toml"
+done
 # Both facade generations must retain the canonical identity owner, rather than
 # copying a second definition along with their runtime source.
 PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '

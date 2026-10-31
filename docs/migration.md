@@ -519,7 +519,7 @@ native/Wasm benchmark Clippy checks pass with warnings denied before execution.
 
 ## Host gzip boundary
 
-The next 0.13 contract removes Platform's native `gzip` feature and
+The 0.13 contract removed Platform's native `gzip` feature and
 `ic_platform::gzip` exports. Generic compression belongs to IC Tooling; callers
 select `ic-host-artifacts` with `default-features = false, features = ["gzip"]`
 and use `ic_host_artifacts::artifact::{encode_gzip, decode_gzip, GzipError}`.
@@ -527,9 +527,12 @@ Remove Platform entirely where gzip was its only use. Keep the qualified Host
 version, caller levels, byte bounds and retained artifact obligations unchanged.
 
 This removes the production dependency back to Tooling. The independently
-revision-pinned native Profiler source profile retains its published supplier
-until its paired Cargo/Bazel inputs and consumer sources adopt the direct codec.
-A facade release does not rewrite that frozen provider input or its evidence.
+revision-pinned native Profiler source profile now selects Host Artifacts 0.72.1
+directly in its paired Cargo/Bazel inputs and drops registry Platform. Its
+qualified payload is unchanged from provider `6c054c8`; consumers selecting a new
+provider commit must supply the paired direct Host imports and retain their normal
+source-binding qualification. Older consumers keep their qualified source pin.
+A facade release does not rewrite a frozen provider input or its evidence.
 
 ## External DTO additions for Canic
 
@@ -2837,10 +2840,11 @@ schema implementations with its trait owner. No source bodies, representations,
 Serde, bounds, absent-versus-zero fields or cryptographic behavior change.
 
 The maintainer's revised #118 decision restores independent release groups in
-one Cargo workspace. Platform, macros and the exact runtime guard inherit
-`workspace.package.version`; Types owns a literal version in its existing
-manifest. Both start from the published 0.15.0 baseline. No existing numeric
-version, tag, archive or published dependency declaration is rewritten.
+one Cargo workspace. Every member now owns a literal package.version in its
+existing manifest; root workspace.package retains common metadata without a
+version. Platform/macros/guard retain 0.15.1 and Types retains 0.15.0 during the
+symmetric-layout adoption. No existing numeric version, tag, archive or published
+dependency declaration is rewritten.
 
 The root Cargo comment map documents the two groups, version sources and ledgers;
 `ci/cargo-release-groups.json` remains executable policy. One root dependency
@@ -2849,25 +2853,31 @@ Types' compatible requirement, supplying identity and ledger unchanged. A Types
 release updates its admitted requirement and requires separate consumer
 compatibility/publication assessment; it does not silently publish the facade.
 
-The root changelog owns future Platform/macros/guard notes. The Types ledger owns
-future Types notes and links to the intact coordinated history through 0.15.0
-in root. Its initial 0.1 publication remains historical, without a version reset
-or duplicate 0.15 notes. This supersedes the temporary synchronized-version
-policy shipped in 0.15, while retaining its canonical type owner and bytes.
+releases/platform/CHANGELOG.md owns Platform/macros/guard notes, and
+releases/types/CHANGELOG.md owns Types notes. Root CHANGELOG.md is an index. The
+intact coordinated history through 0.15.0 lives once in releases/history.md;
+Types' initial 0.1 history remains in its own ledger. Existing relative links
+are rebased without rewriting release identities or prose. This supersedes the
+temporary synchronized-version policy shipped in 0.15, while retaining its
+canonical type owner and bytes.
 
 ### Release command routing
 
-`make release-*` defaults to `platform`; `RELEASE_GROUP=types` explicitly selects
-the independent type version and ledger. Publication follows the same selection,
-so runtime-only changes do not re-upload unchanged Types. Explicit `PACKAGE`
-batches support supplier-first publication when both groups actually change and
-reconciled partial-publication recovery. All workspace release gates and full
-publication Clippy remain required; npm publication stays separate.
+Every release, resume and publication command must explicitly select
+RELEASE_GROUP=platform or RELEASE_GROUP=types. Missing, empty and unknown groups
+refuse before setup or validation. An explicit environment selection is valid.
+Publication follows the same selection, so runtime-only changes do not re-upload
+unchanged Types. Explicit PACKAGE subsets stay within the selected group and
+support reconciled partial-publication recovery. When both groups change, publish
+Types first and then the separately released compatible Platform group; PACKAGE
+never infers a group or admits a mixed batch. All workspace release gates and
+full publication Clippy remain required; npm publication stays separate.
 
 The runtime qualification lock is explicitly common consumer metadata, included
 once in both groups' exact plans. The exact runtime-guard pin remains private to
 the Platform group. Semantic checks compare the recorded runtime trio to the
-workspace version and an optional recorded Types owner to its literal version.
+Platform primary package version and an optional recorded Types owner to its
+literal version.
 Preparation changes only the selected group's recorded identities. Historical
 locks without Types remain unchanged during Types releases; adding a qualified
 owner requires actual composition qualification, not a fabricated lock refresh.

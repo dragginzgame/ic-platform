@@ -4,9 +4,9 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 [[ $# == 1 ]] || exit 2
-group="${RELEASE_GROUP:-platform}"
+group="${RELEASE_GROUP:-}"
 helper="$root/scripts/ci/cargo-release-group.sh"
-case "$group" in platform|types) ;; *) echo "Unknown Platform release group: $group" >&2; exit 2 ;; esac
+case "$group" in platform|types) ;; *) echo "Select RELEASE_GROUP=platform or RELEASE_GROUP=types (received: $group)" >&2; exit 2 ;; esac
 case "$1" in
     version) exec bash "$helper" version "$group" ;;
     primary|changelog|members)

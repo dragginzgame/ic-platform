@@ -2,14 +2,14 @@
 set -euo pipefail
 operation="${1:-}"
 [[ $# -eq 1 ]] || exit 2
-bash scripts/ci/check-release-delivery.sh ci/release-delivery.txt "${RELEASE_DELIVERY:-direct}"
 prepare="${IC_PLATFORM_RELEASE_PREPARE:-0}"
 unset IC_PLATFORM_RELEASE_PREPARE
-export RELEASE_GROUP="${RELEASE_GROUP:-platform}"
+export RELEASE_GROUP
 case "$operation" in
     version|files) exec bash scripts/release/group.sh "$operation" ;;
 esac
 primary="$(bash scripts/release/group.sh primary)"
+bash scripts/ci/check-release-delivery.sh ci/release-delivery.txt "${RELEASE_DELIVERY:-direct}"
 changelog="$(bash scripts/release/group.sh changelog)"
 metadata_files="$(mktemp "${TMPDIR:-/tmp}/platform-release-files.XXXXXX")"
 trap 'rm -f "$metadata_files"' EXIT

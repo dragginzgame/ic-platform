@@ -2,8 +2,9 @@
 
 Platform re-exports canonical Principal/Account identities from ic-platform-types.
 The facade/macros/runtime guard and Types remain in one workspace with independent
-release groups, versions and changelogs. Unrelated runtime releases retain the
-same compatible type supplier; see [the migration contract](docs/migration.md#stable-owned-identity-package-118).
+release groups, explicit package versions and releases/ ledgers. Unrelated runtime
+releases retain the same compatible type supplier; see
+[the migration contract](docs/migration.md#stable-owned-identity-package-118).
 
 One controlled dependency boundary for IC runtime integration and required IC
 Candid interfaces. All application endpoints we own use IC Wire, including public
@@ -217,17 +218,23 @@ Wasm, including with all features enabled.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.
-The default group is platform (facade, macros and exact runtime guard).
-`RELEASE_GROUP=types` selects the independent type version and ledger. Both keep
-full workspace gates and declared runtime metadata custody. Release commands do
-not publish crates.
+Every release, resume and publication command requires an explicit group:
 
-`make publish-check` packages/verifies the selected group without uploading;
-`make publish` uploads clean committed packages in Cargo dependency order. The
-default Platform batch excludes unchanged Types. Select `RELEASE_GROUP=types`
-for its publication, or use `PACKAGE='name ...'` for an explicit eligible batch
-when both groups change or after reconciling partial publication. Each package
-uses its own actual version; publication does not bump, commit, tag or push.
+`make release-patch RELEASE_GROUP=platform` releases the facade, macros and
+exact runtime guard. `make release-patch RELEASE_GROUP=types` releases the
+canonical type supplier. No group is inferred from changed files or PACKAGE.
+All members use literal package versions; root Cargo stores common metadata and
+dependencies. The [root changelog](CHANGELOG.md) indexes the two group ledgers
+and preserved coordinated history.
+
+`make publish-check RELEASE_GROUP=platform` packages/verifies that group without
+uploading; `make publish RELEASE_GROUP=platform` uploads clean committed packages
+in Cargo dependency order. Select types explicitly for its separate publication.
+`PACKAGE='name ...'` may narrow the selected group after partial-publication
+reconciliation; cross-group batches refuse. When both groups change, publish the
+supplier group first, then its compatible consumer group. Both retain full gates,
+transactional runtime metadata and exact source/group-bound resume. Publication
+does not bump versions, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are

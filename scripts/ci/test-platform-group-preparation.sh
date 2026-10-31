@@ -69,7 +69,7 @@ for group in platform types; do
     printf '/.tools\n' >> .git/info/exclude
     export RELEASE_GROUP="$group"
     previous="$(bash scripts/release/group.sh version)"
-    platform_before="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
+    platform_before="$(yq -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)"
     types_before="$(yq -p toml -o json -r '.package.version' crates/ic-platform-types/Cargo.toml)"
     kind=minor
     [[ "$group" != types ]] || kind='patch'
@@ -89,19 +89,20 @@ for group in platform types; do
     grep -q 'fixture: metadata rendering failure' "$fixture/$group-failure.log"
     git diff --exit-code HEAD
     bash scripts/release/adapter.sh prepare > "$fixture/$group-prepare.log" 2>&1
+    git diff --exit-code -- CHANGELOG.md releases/history.md
     git diff --binary > "$fixture/$group-prepared.patch"
     bash scripts/release/adapter.sh prepare > "$fixture/$group-retry.log" 2>&1
     git diff --binary > "$fixture/$group-retry.patch"
     cmp "$fixture/$group-prepared.patch" "$fixture/$group-retry.patch"
     bash scripts/release/adapter.sh check
     if [[ "$group" == platform ]]; then
-        git diff --exit-code -- crates/ic-platform-types/Cargo.toml crates/ic-platform-types/CHANGELOG.md
+        git diff --exit-code -- crates/ic-platform-types/Cargo.toml releases/types/CHANGELOG.md
         [[ "$(yq -p toml -o json -r '.workspace.dependencies.ic-platform-types.version' Cargo.toml)" == "$types_before" ]]
         if git diff --quiet -- scripts/fixtures/cdk-runtime/Cargo.lock; then exit 1; fi
         if git diff --quiet -- ci/dependency-pinning-exceptions.json; then exit 1; fi
     else
-        git diff --exit-code -- CHANGELOG.md ci/dependency-pinning-exceptions.json scripts/fixtures/cdk-runtime/Cargo.lock
-        [[ "$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)" == "$platform_before" ]]
+        git diff --exit-code -- CHANGELOG.md releases/platform/CHANGELOG.md releases/history.md crates/ic-platform/Cargo.toml crates/ic-platform-macros/Cargo.toml crates/ic-platform-runtime-guard/Cargo.toml ci/dependency-pinning-exceptions.json scripts/fixtures/cdk-runtime/Cargo.lock
+        [[ "$(yq -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)" == "$platform_before" ]]
         [[ "$(yq -p toml -o json -r '.workspace.dependencies.ic-platform-types.version' Cargo.toml)" == "$next" ]]
     fi
     # Use real prepared metadata when group versions differ; the selected batch
@@ -139,13 +140,20 @@ for group in platform types; do
     if RELEASE_GROUP="$other" bash scripts/ci/run-release.sh resume "$next" origin main > "$fixture/$group-wrong-resume.log" 2>&1; then exit 1; fi
     grep -q 'release group changed' "$fixture/$group-wrong-resume.log"
     [[ "$(git rev-parse HEAD)" == "$commit" ]]
-    bash scripts/ci/run-release.sh resume "$next" origin main > "$fixture/$group-resume.log" 2>&1
+    # A saved unfinished attempt cannot be reinterpreted under a changed policy.
+    cp ci/cargo-release-groups.json "$fixture/$group-policy"
+    printf '\n' >> ci/cargo-release-groups.json
+    if make --no-print-directory release-resume VERSION="$next" RELEASE_GROUP="$group" > "$fixture/$group-policy-refusal.log" 2>&1; then exit 1; fi
+    grep -q 'Release policy changed since the saved attempt' "$fixture/$group-policy-refusal.log"
+    [[ "$(git --git-dir="$fixture/$group.git" rev-parse refs/heads/main)" != "$commit" ]]
+    cp "$fixture/$group-policy" ci/cargo-release-groups.json
+    make --no-print-directory release-resume VERSION="$next" RELEASE_GROUP="$group" > "$fixture/$group-resume.log" 2>&1
     [[ "$(git --git-dir="$fixture/$group.git" rev-parse refs/heads/main)" == "$commit" ]]
     [[ "$(git --git-dir="$fixture/$group.git" rev-parse "$group-v$next^{commit}")" == "$commit" ]]
     [[ "$(git rev-parse HEAD)" == "$commit" ]]
     git diff --exit-code HEAD
     # A second resume reconciles the same commit/tag without another bump.
-    bash scripts/ci/run-release.sh resume "$next" origin main > "$fixture/$group-resume-again.log" 2>&1
+    make --no-print-directory release-resume VERSION="$next" RELEASE_GROUP="$group" > "$fixture/$group-resume-again.log" 2>&1
     [[ "$(git rev-parse HEAD)" == "$commit" ]]
 done
 echo 'Independent group preparation, failure/rollback, retry, exact custody and local delivery/resume passed.'
