@@ -1,5 +1,26 @@
 # Changelog
 
+The Platform group covers ic-platform, ic-platform-macros and
+ic-platform-runtime-guard. [Types release notes](crates/ic-platform-types/CHANGELOG.md)
+cover the independent identity supplier. Release 0.15.0 was the last coordinated
+four-package release; its notes and all earlier history remain below with their
+original scope intact.
+
+## [0.15.1]
+
+### 🩹 Fixed
+
+- Restore independent Platform/Types release groups in one workspace, starting
+  from existing 0.15.0 identities. Preserve Types during runtime-only releases,
+  qualify transactional runtime metadata custody and select publication by group.
+  [#118 — Independent identity releases](https://github.com/dragginzgame/ic-platform/issues/118).
+
+### ⬆️ Dependencies
+
+- Adopt Shared Tooling release commit 0.27.17 (`39ba983`), including
+  common metadata custody, Cargo group comments and canonical-ledger policy,
+  through the snapshot exporter.
+
 ## [0.15.0] - 2026-10-31
 
 ### ⚠️ Breaking

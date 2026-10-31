@@ -6,7 +6,7 @@ cd "$root"
 [[ $# == 1 ]] || exit 2
 group="${RELEASE_GROUP:-platform}"
 helper="$root/scripts/ci/cargo-release-group.sh"
-[[ "$group" == platform ]] || { echo "Unknown Platform release group: $group (all Rust packages release together as platform)" >&2; exit 2; }
+case "$group" in platform|types) ;; *) echo "Unknown Platform release group: $group" >&2; exit 2 ;; esac
 case "$1" in
     version) exec bash "$helper" version "$group" ;;
     primary|changelog|members)
@@ -28,7 +28,7 @@ case "$1" in
             esac
         done < "$declared"
         [[ "$has_lock" == true ]] || printf 'scripts/fixtures/cdk-runtime/Cargo.lock\0'
-        [[ "$has_pin" == true ]] || printf 'ci/dependency-pinning-exceptions.json\0'
+        if [[ "$group" == platform && "$has_pin" != true ]]; then printf 'ci/dependency-pinning-exceptions.json\0'; fi
         ;;
     ready)
         scratch="$(mktemp -d "${TMPDIR:-/tmp}/platform-group-readiness.XXXXXX")"

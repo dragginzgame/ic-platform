@@ -1,9 +1,9 @@
 # IC Platform
 
-Platform re-exports canonical Principal/Account identities from `ic-platform-types`.
-All four Rust workspace packages share one version and release together. The
-separate type owner keeps one definition; it does not promise identity stability
-across incompatible Platform minor releases.
+Platform re-exports canonical Principal/Account identities from ic-platform-types.
+The facade/macros/runtime guard and Types remain in one workspace with independent
+release groups, versions and changelogs. Unrelated runtime releases retain the
+same compatible type supplier; see [the migration contract](docs/migration.md#stable-owned-identity-package-118).
 
 One controlled dependency boundary for IC runtime integration and required IC
 Candid interfaces. All application endpoints we own use IC Wire, including public
@@ -217,19 +217,17 @@ Wasm, including with all features enabled.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.
-All four Rust packages belong to the sole `platform` release group and inherit
-`workspace.package.version`. The root changelog covers them together. The group
-retains full workspace gates and explicit runtime lock/pin custody; see
-[the handoff](docs/status/current.md) for qualification. Release commands do not
-publish crates.
+The default group is platform (facade, macros and exact runtime guard).
+`RELEASE_GROUP=types` selects the independent type version and ledger. Both keep
+full workspace gates and declared runtime metadata custody. Release commands do
+not publish crates.
 
-Run `make publish-check` to package and verify all four packages with all features
-without uploading; the dry run permits working-tree changes. After release and
-native qualification, `make publish` uploads the four committed packages to
-crates.io in Cargo dependency order. `PACKAGE='name ...'` selects an explicit
-eligible subset for partial-publication recovery. There is no separate types
-release or first-publication command. Upload requires a clean checkout and does
-not bump versions, commit, tag or push.
+`make publish-check` packages/verifies the selected group without uploading;
+`make publish` uploads clean committed packages in Cargo dependency order. The
+default Platform batch excludes unchanged Types. Select `RELEASE_GROUP=types`
+for its publication, or use `PACKAGE='name ...'` for an explicit eligible batch
+when both groups change or after reconciling partial publication. Each package
+uses its own actual version; publication does not bump, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are

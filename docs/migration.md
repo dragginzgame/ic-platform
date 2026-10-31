@@ -2828,58 +2828,61 @@ at their existing owner. Published Rust consumers need no import changes.
 
 ## Stable owned identity package (#118)
 
-`ic-platform-types` owns the sole definitions of Principal, Account, Subaccount,
-DEFAULT_SUBACCOUNT, PrincipalError and AccountError. Platform's root and
-`principal`/`account` paths explicitly re-export them. Registry Principal
-conversions and unchanged upstream self-authentication live with the type owner
-for Rust trait coherence; ledger DTO conversions stay with Platform, which owns
-those maintained DTOs. Wire's schema implementations remain with its trait owner.
-No bytes, bounds, ordering, Serde, zero-subaccount semantics or cryptography change.
+`ic-platform-types` owns the sole Principal, Account, Subaccount,
+DEFAULT_SUBACCOUNT, PrincipalError and AccountError definitions. The facade's root
+and `principal`/`account` paths explicitly re-export them. Registry Principal
+conversions and unchanged upstream self-authentication stay with their type owner;
+ledger DTO conversions stay with Platform, which owns those DTOs. Wire keeps its
+schema implementations with its trait owner. No source bodies, representations,
+Serde, bounds, absent-versus-zero fields or cryptographic behavior change.
 
-After the initial independent 0.1.0 publication, the maintainer explicitly chose
-one coordinated Rust version for all four workspace packages. This supersedes
-#118's independent-version policy. `ic-platform-types` now inherits
-`workspace.package.version`; the facade's path-plus-registry requirement follows
-that version. The current development manifests align at 0.14.0. Pending 0.15.0
-notes cover the next release; published Platform 0.14.0 still requires its original
-types 0.1 supplier and is not rewritten or re-uploaded by this change.
+The maintainer's revised #118 decision restores independent release groups in
+one Cargo workspace. Platform, macros and the exact runtime guard inherit
+`workspace.package.version`; Types owns a literal version in its existing
+manifest. Both start from the published 0.15.0 baseline. No existing numeric
+version, tag, archive or published dependency declaration is rewritten.
 
-A separate canonical source owner alone does not preserve Rust identity across
-incompatible package minors. Future workspace minor releases advance the type
-package too and can require coordinated Wire schema/caller adoption, including
-when representations are unchanged. Existing independent 0.1 consumers remain
-valid for their originally published facade; no conversion shim or parallel
-runtime is added here. Wire #36 owns its integration packaging and adoption.
+The root Cargo comment map documents the two groups, version sources and ledgers;
+`ci/cargo-release-groups.json` remains executable policy. One root dependency
+catalog and Cargo.lock cover the complete workspace. Platform-only releases leave
+Types' compatible requirement, supplying identity and ledger unchanged. A Types
+release updates its admitted requirement and requires separate consumer
+compatibility/publication assessment; it does not silently publish the facade.
 
-The maintained `scripts/ci/test-stable-identities.sh` proof now compiles the
-facade and canonical owner at the same version, using real Wire 0.11 schema trait
-and implementation source with temporary manifest-only integration changes.
-Current/MSRV native/Wasm profiles check schemas, explicit ledger conversions and
-one runtime. It does not claim cross-minor identity stability, published Wire
-adoption or new installed-runtime qualification.
+The root changelog owns future Platform/macros/guard notes. The Types ledger owns
+future Types notes and links to the intact coordinated history through 0.15.0
+in root. Its initial 0.1 publication remains historical, without a version reset
+or duplicate 0.15 notes. This supersedes the temporary synchronized-version
+policy shipped in 0.15, while retaining its canonical type owner and bytes.
 
 ### Release command routing
 
-All four Rust packages belong to the sole `platform` group in
-`ci/cargo-release-groups.json`. Normal `make release-*` commands select it by
-default, update every workspace package and local dependency requirement, and
-use the root changelog. The retired `RELEASE_GROUP=types` selection refuses.
+`make release-*` defaults to `platform`; `RELEASE_GROUP=types` explicitly selects
+the independent type version and ledger. Publication follows the same selection,
+so runtime-only changes do not re-upload unchanged Types. Explicit `PACKAGE`
+batches support supplier-first publication when both groups actually change and
+reconciled partial-publication recovery. All workspace release gates and full
+publication Clippy remain required; npm publication stays separate.
 
-Committed Shared Tooling `ef14942393871e3e2f0c094532dd2a0ea835485a` supplies
-exact metadata custody; published IC Build 0.73.0 supplies `group-manifest`.
-The platform group includes its runtime qualification lock and exact guard-pin
-exception. Preparation coordinates the versions actually recorded in that
-historical lock without resolving or inventing a new qualified dependency graph.
-The existing Timers/executor qualification constraint remains separate.
+The runtime qualification lock is explicitly common consumer metadata, included
+once in both groups' exact plans. The exact runtime-guard pin remains private to
+the Platform group. Semantic checks compare the recorded runtime trio to the
+workspace version and an optional recorded Types owner to its literal version.
+Preparation changes only the selected group's recorded identities. Historical
+locks without Types remain unchanged during Types releases; adding a qualified
+owner requires actual composition qualification, not a fabricated lock refresh.
 
-`make publish-check` and `make publish` select all four packages at the common
-workspace version. Cargo owns dependency ordering. Explicit `PACKAGE='name ...'`
-subsets remain available after reconciling a partial publication. Shared retains
-attempt evidence; no upload retries or registry discovery are automatic. All
-workspace release gates and publication's full Clippy gate remain required.
+Preparation uses Shared's transaction for every selected file, rendering the core
+metadata and consumer lock/pin in disposable committed source before installing
+any candidate. A failed substep restores/preserves every original byte. Group,
+source, file roster, staged tree, tag and exact resume identities remain bound by
+the existing runner; no alternative release runner or validation exclusion is added.
+The separate Timers composition constraint in #116 remains unchanged.
 
-`scripts/ci/test-platform-group-preparation.sh` exercises real preparation,
-retry, staged/committed checks and delivery/resume to a disposable local Git
-remote. It substitutes tool installation and full CI, so it does not authorize
-production release or claim installed-runtime acceptance. npm browser package
-versions and publication remain separate maintainer actions.
+The maintained identity fixture simulates a runtime minor change with the same
+exact Types supplier. It uses published Wire 0.12.1's actual schema trait and
+implementation source with only its Types dependency aligned to the local 0.15
+owner. Published Wire 0.12.1 itself selected Types 0.1, so this is source-aligned
+qualification, not published compatibility/adoption. Current/MSRV native/Wasm
+profiles cover identities, schemas, conversions and one runtime; identity-only
+graphs remain runtime/Candid-free. Wire #36 owns actual product adoption.

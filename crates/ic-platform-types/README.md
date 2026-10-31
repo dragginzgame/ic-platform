@@ -1,10 +1,10 @@
 # ic-platform-types
 
 The canonical Principal, Account, Subaccount and public identity errors used by
-IC Platform. This package inherits the Rust workspace version and releases with
-Platform, its macros and its runtime guard. Platform re-exports these exact types;
-Wire owns implementations of its schema trait. Incompatible workspace minors can
-require matching Wire adoption even when identity representations are unchanged.
+IC Platform. This group owns a literal package version and changelog, independently
+of facade/runtime releases, while sharing the same workspace, dependency catalog
+and lockfile. Platform re-exports these exact definitions; Wire owns its schema
+implementations. The independent series continues from published Types 0.15.0.
 
 The default feature set is empty. Bytes, bounded text and Serde are always
 available; `principal-external` adds registry Principal identities/conversions,
@@ -12,5 +12,5 @@ and `principal-self-authenticating` selects unchanged upstream public-key hashin
 There is no runtime, executor, Wire or Candid dependency.
 
 Existing Platform consumers keep their import paths. External bytes and account
-semantics remain unchanged. Coordinated release notes live in the workspace's
-root changelog; this package's changelog retains its initial publication history.
+semantics remain unchanged. This package's changelog owns its group notes and links the earlier coordinated
+0.15 history in root; initial 0.1 notes remain historical.

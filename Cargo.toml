@@ -1,3 +1,9 @@
+# Release groups: ci/cargo-release-groups.json
+# platform: ic-platform, ic-platform-macros, ic-platform-runtime-guard
+#   version: workspace.package.version; changelog: CHANGELOG.md
+# types: ic-platform-types
+#   version: crates/ic-platform-types/Cargo.toml package.version
+#   changelog: crates/ic-platform-types/CHANGELOG.md
 [workspace]
 members = [
     "crates/ic-platform",

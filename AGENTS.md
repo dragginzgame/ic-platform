@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`ef14942393871e3e2f0c094532dd2a0ea835485a` (Shared Tooling 0.27.14) is recorded in
+`39ba9836a269ee7ea7f073a3f23d9cefe3c7d03c` is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -139,16 +139,16 @@ dependency; Agent/PocketIC codes keep their external identities.
 
 ## Stable identity supplier (#118)
 
-The maintainer requested fixing #118: `ic-platform-types` owns the sole Principal,
-Account, Subaccount and public identity errors. The maintainer subsequently chose
-one coordinated Rust workspace version, including this package; inherit
-workspace.package.version and release/publish all four packages together in the
-platform group. Platform explicitly re-exports the types. Keep registry Principal conversion
-impls with the type owner; ledger DTO conversions stay with Platform. Preserve
-all bodies, bytes, Serde, bounds and provenance. This supersedes independent
-identity versioning: incompatible workspace minors can require coordinated Wire
-adoption again. Keep admitted metadata custody and full validation; no vendored
-workaround or validation exclusion.
+The maintainer's revised #118 approval keeps one Cargo workspace with independent
+Platform and Types release groups. Facade/macros/exact runtime guard inherit
+workspace.package.version; ic-platform-types owns a same-valued literal starting
+from published 0.15.0. Preserve numeric versions during implementation. Keep the
+root Cargo comment map and both canonical group ledgers aligned with policy.
+Platform explicitly re-exports the sole canonical types. Keep registry Principal
+conversions with the type owner and ledger DTO conversions with Platform; preserve
+all bodies, bytes, bounds, Serde, zero fields and provenance. Keep exact common
+runtime-lock custody and platform-only guard-pin custody, full graph validation
+and source/group-bound resume. This supersedes the temporary synchronized policy.
 
 ## Owned Principal
 

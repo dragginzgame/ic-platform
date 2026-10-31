@@ -83,7 +83,7 @@ admit() {
         manifest="$(jq -er --arg name "$package" '.packages[] | select(.name == $name and .source == null) | .manifest_path' "$evidence/metadata.json")" || return
         [[ "$canonical" == "$manifest" ]] || { echo 'selected requirement is not an owned member' >&2; return 1; }
     done < "$evidence/dependencies"
-    jq -r '.groups[] | .changelog, (.metadata_files // [])[]' "$root/$policy" > "$evidence/ledgers" || return
+    jq -r '(.shared_metadata_files // [])[], (.groups[] | .changelog, (.metadata_files // [])[])' "$root/$policy" > "$evidence/ledgers" || return
     while IFS= read -r path; do release_metadata_regular "$root" "$path" || return 1; done < "$evidence/ledgers"
     jq -r '.files[]' "$evidence/plan.json" > "$evidence/files" || return
     while IFS= read -r path; do release_metadata_regular "$root" "$path" || return 1; done < "$evidence/files"

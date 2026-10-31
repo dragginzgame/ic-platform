@@ -198,7 +198,8 @@ workspaces additionally use owned Wire, Timers and Testkit; their locks and runt
 graph admission remain separate from the four-package workspace inventory.
 
 Canonical owned Principal/Account identities live in `ic-platform-types`, which
-shares the coordinated workspace version and is explicitly re-exported by Platform. The selected
+has its own version within the same workspace and is explicitly re-exported by
+Platform. The selected
 registry Principal conversions live with those owned types; ledger DTO conversions
 stay in Platform. See the [identity decision](migration.md#stable-owned-identity-package-118).
 

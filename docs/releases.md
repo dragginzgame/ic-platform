@@ -849,6 +849,12 @@ when qualifying this adapter; it is not a fleet-wide automatic replacement.
 Independent release groups require the maintainer agreement described in
 [workspace boundaries](../rules/rust-workspaces.md#coordinated-versions-and-workspace-boundaries).
 Ordinary coordinated workspaces need no configuration or invocation changes.
+Keep related packages in their existing workspace; separate release identities
+do not require package moves or another lockfile. Make the declared groups easy
+to inspect using the root
+[`Cargo.toml` comment map](../rules/rust-workspaces.md#visible-release-group-map-in-cargotoml).
+Use [one changelog per group and retained shared history](../rules/changelogs.md#release-group-changelogs-and-shared-history);
+comments and a historical ledger are not executable release inputs.
 An approved consumer declares `ci/cargo-release-groups.json`, for example:
 
 ```json
@@ -868,7 +874,7 @@ An approved consumer declares `ci/cargo-release-groups.json`, for example:
       "primary": "ic-wire-endpoint",
       "version": "package",
       "members": ["ic-wire-endpoint"],
-      "changelog": "docs/changelog/endpoint.md",
+      "changelog": "crates/ic-wire-endpoint/CHANGELOG.md",
       "dependencies": ["ic-wire-endpoint"]
     }
   ]
@@ -890,6 +896,15 @@ the repository, without symlink components. They must be unique across groups
 and cannot overlap workspace manifests, the root lockfile, group ledgers, the
 group policy or Git state. They are appended in declared order to the exact
 release-file plan and bound by the existing source/receipt checks.
+
+A workspace may additionally declare top-level `shared_metadata_files` for
+consumer metadata needed by multiple groups, such as one combined qualification
+lock. These paths have one explicit common declaration and are included exactly
+once in every group's file plan. The same regular-file, reserved-path and
+uniqueness rules apply across common and group-local metadata; repeating a common
+path in any group is rejected. Consumers retain selective rendering and semantic
+checks so a release preserves unrelated portions of common files. This is not
+permission to share conflicting group ownership or stage undeclared files.
 
 Shared preparation preserves these files byte-for-byte and restores them with
 its transaction on failure. The consumer owns their rendering, semantic checks

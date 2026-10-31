@@ -1,45 +1,51 @@
 # Current handoff
 
-## Pending 0.15: one coordinated Rust workspace version
+## #118: restore independent Platform and Types groups
 
-After publishing Platform 0.14.0 and the initial types 0.1.0 supplier, the
-maintainer explicitly chose the same version for all four Rust packages.
-`ic-platform-types` now inherits `workspace.package.version`; the facade's local
-registry requirement follows it. All development packages resolve at 0.14.0.
-The root changelog selects pending 0.15.0 for the changed type dependency and
-release policy. Existing registry artifacts, tags and journals are unchanged.
-Do not re-upload the modified source as the already published facade 0.14.0.
+Latest approval is the implementation section of Platform #118. It supersedes the
+synchronized 0.15 policy: keep one workspace, dependency catalog and root lockfile,
+with platform (facade/macros/exact runtime guard) and types (ic-platform-types)
+versioned independently. Both numeric baselines remain published 0.15.0. Types
+now owns a literal version; root requirements and numeric package versions stay
+unchanged. No existing release is rewritten or re-uploaded. Pending group notes
+select 0.15.1 separately; root retains coordinated history through 0.15 intact.
 
-The sole `platform` group includes facade, macros, runtime guard and types. Normal
-release commands update all four and their local requirements; normal publication
-selects all four in Cargo dependency order. The separate `types` group is retired.
-Explicit `PACKAGE` subsets remain for reconciled partial-publication recovery.
-The root changelog owns future release notes; the types ledger retains its initial
-publication history. Browser npm versioning/publication remains separate.
+Root Cargo comments map every member, canonical version source and ledger; JSON
+is executable policy. Platform releases preserve Types' selection/requirement and
+ledger; Types releases select their own version/notes and affected requirements.
+Default publication excludes unchanged Types. Explicit group and PACKAGE batches
+retain full gates, retained attempts and supplier-first Cargo ordering.
 
-This supersedes #118's independent-version policy. One canonical type definition
-and explicit facade re-exports remain, with unchanged bytes, Serde, bounds,
-account semantics, conversion ownership, source bodies and provenance. Shared
-version numbers do not preserve Rust identity across incompatible minors; matching
-Wire/schema/caller adoption can be needed again. Wire #36 owns that integration.
-The maintained identity fixture checks one release's actual facade/type identity,
-real Wire trait source, ledger conversions and single-runtime profiles on current
-and Rust 1.91 native/Wasm. It makes no cross-minor stability claim.
+Shared release commit 0.27.17 is canonically exported from revision
+39ba9836a269ee7ea7f073a3f23d9cefe3c7d03c, including Shared PR #330's reviewed common
+metadata custody. All 117 payloads verify; none was edited in place. Top-level
+shared_metadata_files declares one common lock, retaining duplicate/reserved-path
+rejection and the existing transaction/receipt/runner. IC Build 0.73.0 remains the
+admitted published editor. The supplier custody gap is cleared. The supplier
+VERSION still says 0.27.16; snapshot metadata preserves that supplied value,
+following the maintainer's earlier instruction to ignore the version-label wrinkle.
 
-Shared remains canonically exported from committed
-`ef14942393871e3e2f0c094532dd2a0ea835485a`. Its commit title is 0.27.15 while VERSION
-records 0.27.14; the maintainer accepted that discrepancy. Preserve the snapshot's
-actual version/revision. IC Build 0.73.0 is the admitted metadata editor. The
-platform group's exact file plan retains the runtime qualification lock and guard
-pin exception. Runtime metadata updates include types when the qualified lock
-actually records that owner; historical locks are not resolved or invented.
+The combined runtime lock is common to both groups; the exact guard pin remains
+platform-only. Consumer preparation renders all selected metadata in disposable
+committed source and installs it through Shared's transaction. Failed rendering
+must leave real metadata byte-identical, so exact resume safely retries.
+Runtime semantic checks treat the optional recorded Types owner independently;
+historical locks without it are preserved rather than resolved or invented.
 
-Full Clippy passes. Focused qualification logs are `/tmp/platform-align-*.log`:
-admission, routing, runtime lock, identity/schema and actual coordinated release
-preparation/retry/local delivery/resume all pass. The real disposable release
-proof is `/tmp/platform-group-preparation.JHBtsy`. Disposable tests substitute tool
-installation and full CI; they do not establish production release acceptance.
-No real-checkout staging, commit, tag, push, upload or cleanup is authorized here.
+Full Clippy, current/MSRV native/Wasm cross-minor identity/schema profiles,
+independent runtime-lock and both real group preparation/resume tests pass.
+Failed consumer rendering preserves all originals; wrong-group resume refuses.
+Evidence is /tmp/platform-group-preparation.9w8ueo. The identity fixture uses actual Wire 0.12.1
+trait/implementation source with only its Types dependency aligned to local 0.15;
+published Wire 0.12.1 originally selected Types 0.1, so published adoption is not
+claimed. Wire #36 owns that product change. Disposable release qualification uses
+the committed PR snapshot; all
+117 payload hashes and release-policy/adapter inputs match the merged adoption.
+It substitutes tool installation/full CI, retaining real editor, metadata and
+local Git effects. Production release and installed-runtime acceptance are separate.
+Release evidence: /tmp/platform-118-independent-preparation.log. Other focused
+logs use /tmp/platform-118-*.log. No normal-checkout staging, commit, tag, push,
+upload or cleanup was performed. The Shared fix is delivered through merged #330.
 
 ## Retained constraints and evidence
 
