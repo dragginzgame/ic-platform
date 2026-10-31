@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Real facade generations and Wire schema ownership; disposable sources/locks only.
+# Canonical facade/type identities and real Wire schema ownership; disposable sources/locks only.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
@@ -8,7 +8,7 @@ case "${1:-}" in '') [[ $# == 0 ]] ;; --prepare) [[ $# == 1 ]]; prepare=true ;; 
 mkdir -p target
 fixture="$(mktemp -d "$root/target/stable-identities.XXXXXX")"
 printf 'Stable identity evidence: %s\n' "$fixture"
-mkdir -p "$fixture/supplier/src" "$fixture/consumer/src" "$fixture/next"
+mkdir -p "$fixture/supplier/src" "$fixture/consumer/src"
 printf '[workspace]\n[package]\nname="identity-schema-supplier"\nversion="0.0.0"\nedition="2024"\n[dependencies]\nic-wire="=0.11.0"\n' > "$fixture/supplier/Cargo.toml"
 touch "$fixture/supplier/src/lib.rs"
 if [[ "$prepare" == true ]]; then
@@ -31,21 +31,6 @@ PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '
     $_ .= "\n[workspace]\n";
 ' "$fixture/wire/Cargo.toml"
 diff -qr "${wire_manifest%/*}/src" "$fixture/wire/src"
-cp Cargo.toml "$fixture/next/"
-cp -R crates "$fixture/next/"
-version="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
-major="${version%%.*}" minor="${version#*.}"; minor="${minor%%.*}"
-next="$major.$((minor + 1)).0"
-PLATFORM_IDENTITY_CURRENT="$version" PLATFORM_IDENTITY_NEXT="$next" PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '
-    my ($old,$new,$source)=@ENV{qw(PLATFORM_IDENTITY_CURRENT PLATFORM_IDENTITY_NEXT PLATFORM_IDENTITY_SOURCE)};
-    s/^version = "\Q$old\E"$/version = "$new"/m == 1 or die "workspace version changed\n";
-    s/^(ic-platform-(?:macros|runtime-guard) = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm == 2 or die "runtime identities changed\n";
-    s/^    "crates\/ic-platform-types",\n//m == 1 or die "identity member changed\n";
-    s/path = "crates\/ic-platform-types"/path = "$source"/ == 1 or die "identity selection changed\n";
-' "$fixture/next/Cargo.toml"
-for package in ic-platform ic-platform-macros ic-platform-runtime-guard; do
-    perl -pi -e 's/^\[package\]$/[package]\nworkspace = "..\/.."/' "$fixture/next/crates/$package/Cargo.toml"
-done
 cat > "$fixture/consumer/Cargo.toml" <<MANIFEST
 [workspace]
 [package]
@@ -58,7 +43,6 @@ external-ledger = ["current/icrc-ledger-types"]
 current-runtime = ["current/runtime"]
 [dependencies]
 current = { package = "ic-platform", path = "$root/crates/ic-platform", default-features = false, features = ["principal-external"] }
-next = { package = "ic-platform", path = "$fixture/next/crates/ic-platform", default-features = false, features = ["principal-external"] }
 ic-platform-types = { path = "$root/crates/ic-platform-types", features = ["principal-external"] }
 ic-wire = { path = "$fixture/wire", features = ["platform-types"] }
 MANIFEST
@@ -81,4 +65,4 @@ fi
 jq -e --arg path "$root/crates/ic-platform-types/Cargo.toml" '
  [.packages[] | select(.name=="ic-platform-types")] | length==1 and .[0].manifest_path==$path
 ' "$fixture/metadata.json" >/dev/null
-printf 'Stable identity, real Wire schema, ledger conversion and single-runtime proofs passed.\n'
+printf 'Canonical identity, real Wire schema, ledger conversion and single-runtime proofs passed.\n'

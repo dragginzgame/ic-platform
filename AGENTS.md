@@ -140,12 +140,15 @@ dependency; Agent/PocketIC codes keep their external identities.
 ## Stable identity supplier (#118)
 
 The maintainer requested fixing #118: `ic-platform-types` owns the sole Principal,
-Account, Subaccount and public identity errors, with independent candidate version
-0.1.0. Platform explicitly re-exports them. Keep registry Principal conversion
+Account, Subaccount and public identity errors. The maintainer subsequently chose
+one coordinated Rust workspace version, including this package; inherit
+workspace.package.version and release/publish all four packages together in the
+platform group. Platform explicitly re-exports the types. Keep registry Principal conversion
 impls with the type owner; ledger DTO conversions stay with Platform. Preserve
-all bodies, bytes, Serde, bounds and provenance. Do not synchronize this version
-with unrelated facade/runtime releases. Release/publication requires admitted
-Shared #328 release groups; no vendored workaround or validation exclusion.
+all bodies, bytes, Serde, bounds and provenance. This supersedes independent
+identity versioning: incompatible workspace minors can require coordinated Wire
+adoption again. Keep admitted metadata custody and full validation; no vendored
+workaround or validation exclusion.
 
 ## Owned Principal
 

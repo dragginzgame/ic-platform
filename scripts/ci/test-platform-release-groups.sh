@@ -19,24 +19,20 @@ set -euo pipefail
 printf '%s\n' "$RELEASE_GROUP" > "$ROUTING_OUTPUT"
 RUNNER
 export ROUTING_OUTPUT="$fixture/release-selection"
-for group in platform types; do
-    if [[ "$group" == platform ]]; then
-        (unset RELEASE_GROUP; EXPECTED_GROUP=platform make --no-print-directory -s -C "$fixture" "SHARED_TOOLING_ROOT=$fixture" release-minor)
-    else
-        EXPECTED_GROUP=types make --no-print-directory -s -C "$fixture" "SHARED_TOOLING_ROOT=$fixture" RELEASE_GROUP=types release-minor
-    fi
-    [[ "$(cat "$ROUTING_OUTPUT")" == "$group" ]]
-    expected="$(bash scripts/ci/cargo-release-group.sh version "$group")"
-    [[ "$(make --no-print-directory -s release-version RELEASE_GROUP="$group")" == "$expected" ]]
-done
+(unset RELEASE_GROUP; EXPECTED_GROUP=platform make --no-print-directory -s -C "$fixture" "SHARED_TOOLING_ROOT=$fixture" release-minor)
+[[ "$(cat "$ROUTING_OUTPUT")" == platform ]]
+EXPECTED_GROUP=platform make --no-print-directory -s -C "$fixture" "SHARED_TOOLING_ROOT=$fixture" RELEASE_GROUP=platform release-minor
+expected="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
+[[ "$(make --no-print-directory -s release-version)" == "$expected" ]]
 make --no-print-directory -s release-files > "$fixture/platform-files"
 tr '\0' '\n' < "$fixture/platform-files" > "$fixture/platform-lines"
 grep -Fx 'scripts/fixtures/cdk-runtime/Cargo.lock' "$fixture/platform-lines"
 grep -Fx 'ci/dependency-pinning-exceptions.json' "$fixture/platform-lines"
-make --no-print-directory -s release-files RELEASE_GROUP=types > "$fixture/types-files"
-bash scripts/ci/cargo-release-group.sh files types > "$fixture/expected-types-files"
-cmp "$fixture/types-files" "$fixture/expected-types-files"
-if make --no-print-directory -s release-version RELEASE_GROUP=unknown > "$fixture/unknown.log" 2>&1; then exit 1; fi
+bash scripts/ci/cargo-release-group.sh files platform > "$fixture/expected-platform-files"
+cmp "$fixture/platform-files" "$fixture/expected-platform-files"
+for group in types unknown; do
+    if make --no-print-directory -s release-version RELEASE_GROUP="$group" > "$fixture/$group.log" 2>&1; then exit 1; fi
+done
 # Keep real group selection; replace only the effectful Shared publication provider.
 cp scripts/release/publish.sh "$fixture/scripts/release/"
 export PLATFORM_RELEASE_TEST_ROOT="$root"
@@ -55,9 +51,10 @@ set -euo pipefail
 printf '%s\n' "$CARGO_PUBLISH_SELECTION" > "$ROUTING_OUTPUT"
 PUBLISH
 export PLATFORM_RELEASE_TEST_FIXTURE="$fixture"
-for group in platform types; do
-    RELEASE_GROUP="$group" bash "$fixture/scripts/release/publish.sh" check
-    [[ "$(cat "$ROUTING_OUTPUT")" == "$(RELEASE_GROUP="$group" bash scripts/release/group.sh members)" ]]
+bash "$fixture/scripts/release/publish.sh" check
+[[ "$(cat "$ROUTING_OUTPUT")" == "$(bash scripts/release/group.sh members)" ]]
+for package in ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform; do
+    [[ " $(cat "$ROUTING_OUTPUT") " == *" $package "* ]]
 done
 PACKAGE='ic-platform-types ic-platform' bash "$fixture/scripts/release/publish.sh" check
 [[ "$(cat "$ROUTING_OUTPUT")" == 'ic-platform-types ic-platform' ]]
@@ -68,4 +65,7 @@ perl scripts/ci/cargo-publication-selection.pl "$fixture/metadata.json" \
     'ic-platform-types' crates-io > "$fixture/type-package"
 expected="$(jq -er '.packages[] | select(.name=="ic-platform-types") | .name+"@"+.version' "$fixture/metadata.json")"
 [[ "$(tr -d '\0' < "$fixture/type-package")" == "$expected" ]]
-echo 'Default/explicit release groups, metadata custody and independent publication selection passed.'
+jq -e --arg version "$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)" '
+    [.packages[] | select(.name | startswith("ic-platform"))] |
+    length == 4 and all(.[]; .version == $version)' "$fixture/metadata.json" > /dev/null
+echo 'One coordinated four-package release/publication, metadata custody and explicit subset selection passed.'

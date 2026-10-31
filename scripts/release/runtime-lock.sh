@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Keep only the three local package identities coordinated; never resolve dependencies.
+# Coordinate recorded local workspace identities; never resolve dependencies.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 export YQ="$root/.tools/host/bin/yq"
@@ -10,9 +10,10 @@ case "$mode" in check) [[ $# -eq 1 ]] ;; prepare) [[ $# -eq 2 ]] ;; *) exit 2 ;;
 lock=scripts/fixtures/cdk-runtime/Cargo.lock
 version="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
 observed="$("$root/.tools/host/bin/yq" -p toml -o json '.' "$lock" |
-    "$root/.tools/host/bin/jq" -er '
-      [.package[] | select(.source == null and (.name == "ic-platform" or .name == "ic-platform-macros" or .name == "ic-platform-runtime-guard"))] as $p |
-      if ($p | length) == 3 and ($p | map(.name) | unique | length) == 3 and
+    jq -er '
+      [.package[] | select(.source == null and (.name == "ic-platform" or .name == "ic-platform-macros" or .name == "ic-platform-runtime-guard" or .name == "ic-platform-types"))] as $p |
+      if (($p | map(.name) | sort) == ["ic-platform", "ic-platform-macros", "ic-platform-runtime-guard"] or
+          ($p | map(.name) | sort) == ["ic-platform", "ic-platform-macros", "ic-platform-runtime-guard", "ic-platform-types"]) and
          ($p | map(.version) | unique | length) == 1
       then $p[0].version else error("invalid qualification package identities") end')"
 if [[ "$observed" != "$version" ]]; then
@@ -24,7 +25,13 @@ if [[ "$observed" != "$version" ]]; then
     trap 'rm -f "$temporary"' EXIT
     source "$root/ci/release-editor.env"
     editor="$(bash "$root/scripts/release/editor.sh" check)"
+    packages=(ic-platform ic-platform-macros ic-platform-runtime-guard)
+    # Historical qualification locks predate the type extraction. If the actual
+    # qualified graph records its local owner, advance that package as well.
+    if "$YQ" -p toml -o json '.' "$lock" | jq -e 'any(.package[]; .source == null and .name == "ic-platform-types")' > /dev/null; then
+        packages+=(ic-platform-types)
+    fi
     "$editor" --max-input-bytes "$PLATFORM_RELEASE_EDITOR_MAX_BYTES" lock "$lock" "$observed" "$version" \
-        ic-platform ic-platform-macros ic-platform-runtime-guard > "$temporary"
+        "${packages[@]}" > "$temporary"
     cat "$temporary" > "$lock"
 fi

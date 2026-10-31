@@ -2828,77 +2828,58 @@ at their existing owner. Published Rust consumers need no import changes.
 
 ## Stable owned identity package (#118)
 
-The maintainer-requested identity extraction selects `ic-platform-types` as the
-one canonical owner of Principal, Account, Subaccount, DEFAULT_SUBACCOUNT,
-PrincipalError and AccountError. Its initial candidate version is 0.1.0,
-independent of the facade/macros/runtime-guard coordinated group. Other package
-metadata and dependency declarations inherit the root workspace. Future unrelated
-Platform runtime/host/DTO changes must retain the identity requirement and package
-selection; feature gates and batching cannot make different Rust definitions equal.
+`ic-platform-types` owns the sole definitions of Principal, Account, Subaccount,
+DEFAULT_SUBACCOUNT, PrincipalError and AccountError. Platform's root and
+`principal`/`account` paths explicitly re-export them. Registry Principal
+conversions and unchanged upstream self-authentication live with the type owner
+for Rust trait coherence; ledger DTO conversions stay with Platform, which owns
+those maintained DTOs. Wire's schema implementations remain with its trait owner.
+No bytes, bounds, ordering, Serde, zero-subaccount semantics or cryptography change.
 
-Platform keeps the existing root and `principal`/`account` imports as explicit
-re-exports of those definitions. The initial extraction changes Rust identity once;
-coordinate Wire schema and real caller adoption before publishing the facade.
-It changes no bytes, bounds, ordering, account equality/hash, absent-versus-zero
-serialization, text errors or upstream self-authentication. RejectCode, transport
-errors, external Candid Principal/Nat, ledger DTO Account and Wire metadata errors
-retain their separate runtime, registry, DTO or Wire owners. No Candid or runtime
-implementation moves into the stable package.
+After the initial independent 0.1.0 publication, the maintainer explicitly chose
+one coordinated Rust version for all four workspace packages. This supersedes
+#118's independent-version policy. `ic-platform-types` now inherits
+`workspace.package.version`; the facade's path-plus-registry requirement follows
+that version. The current development manifests align at 0.14.0. Pending 0.15.0
+notes cover the next release; published Platform 0.14.0 still requires its original
+types 0.1 supplier and is not rewritten or re-uploaded by this change.
 
-The identity package must own the optional registry Principal From impls and
-inherent self-authentication method: a facade defining neither source nor target
-Principal cannot implement those foreign-trait conversions. Registry identity and
-byte conversions remain behind `principal-external`; self-authentication separately
-delegates to unchanged upstream code. Ledger Account conversions stay in Platform,
-which owns the maintained external DTO and can validly implement both conversion
-directions. Wire keeps its schema implementations with the schema trait owner,
-selecting these canonical types directly, without wrappers or duplicate identities.
+A separate canonical source owner alone does not preserve Rust identity across
+incompatible package minors. Future workspace minor releases advance the type
+package too and can require coordinated Wire schema/caller adoption, including
+when representations are unchanged. Existing independent 0.1 consumers remain
+valid for their originally published facade; no conversion shim or parallel
+runtime is added here. Wire #36 owns its integration packaging and adoption.
 
-The maintained `scripts/ci/test-stable-identities.sh` proof simulates an unrelated
-next-minor facade while sharing the exact identity supplier. Its temporary Wire
-0.11 source variant changes only manifest integration selection, retaining the real
-schema trait and Principal/Account implementation source. It is qualification of
-the proposed owner arrangement, not adoption by published Wire or a production
-codec fork. Current/MSRV native/Wasm profiles cover identity-only, external-ledger
-and one-runtime selections. Ordinary tests retain representation/conversion vectors.
-
-Shared Tooling committed revision
-`ef14942393871e3e2f0c094532dd2a0ea835485a` is adopted through its exporter.
-The explicit groups in `ci/cargo-release-groups.json` preserve the coordinated
-facade/macros/exact-guard identity and independently version the types supplier.
-The platform group explicitly owns its runtime qualification lock and exact
-runtime-guard pin exception as additional metadata. Types-only preparation leaves
-those files and the Platform version unchanged. The common conversion-owner
-exception admits only `ic-platform-types -> ic_principal`.
-
-Published IC Build 0.73.0 supplies the required `group-manifest` renderer. Both
-groups undergo real metadata preparation, idempotent retry, staged/committed
-checks and delivery/resume to disposable local Git remotes in
-`scripts/ci/test-platform-group-preparation.sh`. That fixture substitutes tool
-installation and the expensive full CI gate, so it does not claim production
-release or installed-runtime qualification. A real types-package publication dry
-run packages and verifies the standalone supplier without uploading. Current/MSRV
-native/Wasm identity/schema proofs remain separate from production Wire adoption.
-
-The extraction changes Rust identity once. Publish the stable supplier first and
-coordinate Wire's schema dependency with the facade's initial adoption; Wire #36
-owns that product change. Later unrelated Platform minors retain the same stable
-identity requirement. Changes to the identity contract itself still require normal
-versioning and consumer qualification. No package version, tag or registry release
-is changed by these checks.
+The maintained `scripts/ci/test-stable-identities.sh` proof now compiles the
+facade and canonical owner at the same version, using real Wire 0.11 schema trait
+and implementation source with temporary manifest-only integration changes.
+Current/MSRV native/Wasm profiles check schemas, explicit ledger conversions and
+one runtime. It does not claim cross-minor identity stability, published Wire
+adoption or new installed-runtime qualification.
 
 ### Release command routing
 
-`make release-*` exports `platform` by default, preserving the normal command
-spelling. `RELEASE_GROUP=types` selects the independent identity version and
-ledger. The adapter selects the primary package and exact file roster from that
-group, checks editor capability and metadata custody before mutation, and retains
-full workspace qualification. Platform preparation updates the maintained runtime
-lock and guard pin; both groups check their consistency.
+All four Rust packages belong to the sole `platform` group in
+`ci/cargo-release-groups.json`. Normal `make release-*` commands select it by
+default, update every workspace package and local dependency requirement, and
+use the root changelog. The retired `RELEASE_GROUP=types` selection refuses.
 
-Publication delegates retained attempts to Shared. Its default batch contains the
-selected group's packages, each at its actual Cargo version. The eligible roster
-includes the stable identity supplier. Explicit `PACKAGE='name ...'` batches
-support first-supplier publication and partial-upload reconciliation. Subsequent
-Platform publications do not implicitly upload unchanged types. Every batch runs
-full Clippy; selecting a group never narrows the workspace release gate.
+Committed Shared Tooling `ef14942393871e3e2f0c094532dd2a0ea835485a` supplies
+exact metadata custody; published IC Build 0.73.0 supplies `group-manifest`.
+The platform group includes its runtime qualification lock and exact guard-pin
+exception. Preparation coordinates the versions actually recorded in that
+historical lock without resolving or inventing a new qualified dependency graph.
+The existing Timers/executor qualification constraint remains separate.
+
+`make publish-check` and `make publish` select all four packages at the common
+workspace version. Cargo owns dependency ordering. Explicit `PACKAGE='name ...'`
+subsets remain available after reconciling a partial publication. Shared retains
+attempt evidence; no upload retries or registry discovery are automatic. All
+workspace release gates and publication's full Clippy gate remain required.
+
+`scripts/ci/test-platform-group-preparation.sh` exercises real preparation,
+retry, staged/committed checks and delivery/resume to a disposable local Git
+remote. It substitutes tool installation and full CI, so it does not authorize
+production release or claim installed-runtime acceptance. npm browser package
+versions and publication remain separate maintainer actions.

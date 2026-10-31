@@ -1,5 +1,8 @@
 # Changelog
 
+Subsequent releases share the workspace version and root changelog. The initial
+independent publication is retained below as historical context.
+
 ## [0.1.0]
 
 ### ➕ Added

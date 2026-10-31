@@ -1,9 +1,9 @@
 # IC Platform
 
-The prepared #118 boundary re-exports the canonical Principal/Account identities
-from `ic-platform-types`. Its independent release identity prevents unrelated
-runtime changes from replacing those types. The initial facade publication needs
-coordinated Wire integration; grouped release tooling is qualified locally.
+Platform re-exports canonical Principal/Account identities from `ic-platform-types`.
+All four Rust workspace packages share one version and release together. The
+separate type owner keeps one definition; it does not promise identity stability
+across incompatible Platform minor releases.
 
 One controlled dependency boundary for IC runtime integration and required IC
 Candid interfaces. All application endpoints we own use IC Wire, including public
@@ -217,25 +217,19 @@ Wasm, including with all features enabled.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.
-They default to `RELEASE_GROUP=platform`; `RELEASE_GROUP=types` selects the
-independent identity version and ledger. Both groups retain full workspace gates
-and explicit metadata custody; see [the handoff](docs/status/current.md) for
-qualification and outstanding release constraints. They do not publish crates. Initial
-registry publication remains a separately
-authorized operation after a clean committed source and native qualification.
+All four Rust packages belong to the sole `platform` release group and inherit
+`workspace.package.version`. The root changelog covers them together. The group
+retains full workspace gates and explicit runtime lock/pin custody; see
+[the handoff](docs/status/current.md) for qualification. Release commands do not
+publish crates.
 
-Run `make publish-check` to package and verify the current version with all
-features without uploading; this dry run allows working-tree changes. After
-release and native qualification, `make publish` uploads the selected group’s committed packages to crates.io using each package's own version, configured
-credentials and Cargo dependency ordering. The default Platform group contains
-`ic-platform-runtime-guard`, `ic-platform-macros` and `ic-platform`;
-`RELEASE_GROUP=types` selects `ic-platform-types`. `PACKAGE='name ...'` selects an
-explicit eligible batch for supplier-first publication. An unchanged identity
-supplier is not re-uploaded during subsequent Platform publications. It
-requires a clean checkout and does not bump versions, commit, tag or push.
-For the initial extraction, publish the new types supplier first with
-`make publish RELEASE_GROUP=types`, then publish the Platform group, or select
-all four packages explicitly in one batch after release qualification.
+Run `make publish-check` to package and verify all four packages with all features
+without uploading; the dry run permits working-tree changes. After release and
+native qualification, `make publish` uploads the four committed packages to
+crates.io in Cargo dependency order. `PACKAGE='name ...'` selects an explicit
+eligible subset for partial-publication recovery. There is no separate types
+release or first-publication command. Upload requires a clean checkout and does
+not bump versions, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are

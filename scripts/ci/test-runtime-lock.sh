@@ -36,12 +36,13 @@ for side in before after; do
     source="$lock"
     if [[ "$side" == before ]]; then source="$fixture/before.lock"; fi
     "$YQ" -p toml -o json '.' "$source" | jq -S --arg before "$version" '
-        [.package[] | select(.source != null or (.name != "ic-platform" and .name != "ic-platform-macros" and .name != "ic-platform-runtime-guard")) |
+        [.package[] | select(.source != null or (.name != "ic-platform" and .name != "ic-platform-macros" and .name != "ic-platform-runtime-guard" and .name != "ic-platform-types")) |
             if .source == null and .dependencies != null then
                 .dependencies |= map(
                     if . == "ic-platform 99.0.0" then "ic-platform " + $before
                     elif . == "ic-platform-macros 99.0.0" then "ic-platform-macros " + $before
                     elif . == "ic-platform-runtime-guard 99.0.0" then "ic-platform-runtime-guard " + $before
+                    elif . == "ic-platform-types 99.0.0" then "ic-platform-types " + $before
                     else . end)
             else . end]' > "$fixture/$side.json"
 done
@@ -49,6 +50,16 @@ cmp "$fixture/before.json" "$fixture/after.json"
 cp "$lock" "$fixture/prepared.lock"
 bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
 cmp "$fixture/prepared.lock" "$lock"
+# Once a qualified graph includes types, it follows the same workspace version.
+if ! "$YQ" -p toml -o json '.' "$lock" | jq -e 'any(.package[]; .source == null and .name == "ic-platform-types")' > /dev/null; then
+    printf '\n[[package]]\nname = "ic-platform-types"\nversion = "99.0.0"\n' >> "$lock"
+fi
+printf '[workspace]\n[workspace.package]\nversion = "99.0.1"\n' > "$fixture/Cargo.toml"
+bash "$fixture/scripts/release/runtime-lock.sh" prepare 99.0.0
+bash "$fixture/scripts/release/runtime-lock.sh" check
+"$YQ" -p toml -o json '.' "$lock" | jq -e '
+    [.package[] | select(.source == null and (.name | startswith("ic-platform"))) | .version] |
+    length == 4 and all(.[]; . == "99.0.1")' > /dev/null
 # Exact helper constraints and their policy exception advance together, and
 # a stale/wrong-base exception must fail closed without changing other pins.
 bash "$fixture/scripts/release/runtime-pin.sh" check > "$fixture/pin-stale.log" 2>&1 && exit 1

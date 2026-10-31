@@ -45,10 +45,8 @@ case "$operation" in
             bash scripts/ci/cargo-release-metadata.sh prepare "$primary"
             bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
         fi
-        if [[ "$RELEASE_GROUP" == platform ]]; then
-            bash scripts/release/runtime-lock.sh prepare "${RELEASE_PREVIOUS:?}"
-            bash scripts/release/runtime-pin.sh prepare "${RELEASE_PREVIOUS:?}"
-        fi
+        bash scripts/release/runtime-lock.sh prepare "${RELEASE_PREVIOUS:?}"
+        bash scripts/release/runtime-pin.sh prepare "${RELEASE_PREVIOUS:?}"
         ;;
     check|commit-check)
         bash scripts/release/runtime-lock.sh check

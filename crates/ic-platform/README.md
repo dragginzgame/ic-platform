@@ -1,9 +1,9 @@
 # ic-platform
 
-The prepared #118 boundary re-exports the canonical Principal/Account identities
-from `ic-platform-types`. Its independent release identity prevents unrelated
-runtime changes from replacing those types. Release/adoption awaits coordinated
-Wire integration and admitted Shared release-group support.
+Platform re-exports canonical Principal/Account identities from `ic-platform-types`.
+All four Rust workspace packages share one version and release together. The
+separate type owner keeps one definition; it does not promise identity stability
+across incompatible Platform minor releases.
 
 Platform 0.11 removed `wire-schema` and the production Wire dependency. Principal
 and Account retain their existing bytes and Serde; published Wire 0.10 supplies

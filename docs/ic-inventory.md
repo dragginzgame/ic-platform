@@ -195,10 +195,10 @@ proc-macro libraries) are also included in the manifest inventory so additions
 cannot escape review by having a non-IC name. SHA-2 and upstream cryptographic
 primitives remain outside our implementation authority. Tooling-only fixture
 workspaces additionally use owned Wire, Timers and Testkit; their locks and runtime
-graph admission remain separate from the two-package workspace inventory.
+graph admission remain separate from the four-package workspace inventory.
 
-Canonical owned Principal/Account identities now live in the independently versioned
-`ic-platform-types` package and are explicitly re-exported by Platform. The selected
+Canonical owned Principal/Account identities live in `ic-platform-types`, which
+shares the coordinated workspace version and is explicitly re-exported by Platform. The selected
 registry Principal conversions live with those owned types; ledger DTO conversions
 stay in Platform. See the [identity decision](migration.md#stable-owned-identity-package-118).
 

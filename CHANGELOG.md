@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.15.0]
+
+### ⚠️ Breaking
+
+- Align `ic-platform-types` with the Rust workspace version and include all four
+  packages in every coordinated release and default publication. Keep the canonical
+  type owner and existing re-exports. The types requirement changes from 0.1;
+  matching Wire/caller adoption is required. Independent identity versioning and
+  the separate types release group are retired. Existing registry releases stay
+  unchanged.
+
 ## [0.14.0] - 2026-10-31
 
 ### ⚠️ Breaking
