@@ -6,7 +6,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "ic-wasm 0.11.1"
    ],
 -  "checksum": "d4e719583881cf898774f83b5661851ff3da30493e262b0832a817b5022e50da",
-+  "checksum": "ff598988f6fbc86c3afb7f2ff9adadc7abe73d434bd1f83ee2b593f8968f2941",
++  "checksum": "e7ca1b62b7da4cf039ea199e36e32c26e3a7c157cef97ca511f82bfe157d43f9",
    "conditions": {
      "aarch64-apple-darwin": [
        "aarch64-apple-darwin"
@@ -754,7 +754,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "ic_management_canister_types"
            },
            {
-+            "id": "ic-metrics 0.21.0",
++            "id": "ic-metrics 0.22.0",
 +            "target": "ic_metrics"
 +          },
 +          {
@@ -771,7 +771,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "ic_wasm"
            },
            {
-+            "id": "ic-wire 0.10.0",
++            "id": "ic-wire 0.11.0",
 +            "target": "ic_wire"
 +          },
 +          {
@@ -1431,29 +1431,19 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "serde_bytes"
            }
          ],
-@@ -27759,6 +28009,50 @@
+@@ -27759,6 +28009,40 @@
          }
        ],
        "version": "0.8.0"
 +    },
-+    "ic-metrics 0.21.0": {
++    "ic-metrics 0.22.0": {
 +      "common_attrs": {
-+        "deps": {
-+          "common": [
-+            {
-+              "id": "serde 1.0.228",
-+              "target": "serde"
-+            }
-+          ],
-+          "selects": {
-+            "cfg(not(target_family = \"wasm\"))": [
-+              {
-+                "id": "ic-wire 0.10.0",
-+                "target": "ic_wire"
-+              }
-+            ]
++        "deps": [
++          {
++            "id": "serde 1.0.228",
++            "target": "serde"
 +          }
-+        },
++        ],
 +        "edition": "2024"
 +      },
 +      "library_target_name": "ic_metrics",
@@ -1466,8 +1456,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-observability",
 +      "repository": {
 +        "Http": {
-+          "sha256": "ed5e41d6a6250132253a0a0ac775843dec4cebec2bc6d8068dcbbd4fa9a53ac3",
-+          "url": "https://static.crates.io/crates/ic-metrics/0.21.0/download"
++          "sha256": "ff47b21318777d1965036e7200eb21833dee9aa8c6309d30381010da230d29cd",
++          "url": "https://static.crates.io/crates/ic-metrics/0.22.0/download"
 +        }
 +      },
 +      "targets": [
@@ -1478,11 +1468,11 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.21.0"
++      "version": "0.22.0"
      },
      "ic-metrics-encoder 1.1.1": {
        "common_attrs": {
-@@ -27788,6 +28082,67 @@
+@@ -27788,6 +28072,67 @@
        ],
        "version": "1.1.1"
      },
@@ -1550,7 +1540,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "ic-representation-independent-hash 3.1.0": {
        "common_attrs": {
          "deps": [
-@@ -27837,7 +28192,7 @@
+@@ -27837,7 +28182,7 @@
              "target": "candid"
            },
            {
@@ -1559,7 +1549,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "flate2"
            },
            {
-@@ -28082,7 +28437,7 @@
+@@ -28082,7 +28427,7 @@
              "target": "serde"
            },
            {
@@ -1568,7 +1558,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "serde_bytes"
            }
          ],
-@@ -28136,7 +28491,7 @@
+@@ -28136,7 +28481,7 @@
              "target": "serde"
            },
            {
@@ -1577,7 +1567,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "serde_bytes"
            },
            {
-@@ -28218,7 +28573,7 @@
+@@ -28218,7 +28563,7 @@
              "target": "serde"
            },
            {
@@ -1586,7 +1576,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "serde_bytes"
            },
            {
-@@ -28397,7 +28752,7 @@
+@@ -28397,7 +28742,7 @@
              "target": "serde"
            },
            {
@@ -1595,80 +1585,35 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "serde_bytes"
            },
            {
-@@ -28544,6 +28899,145 @@
+@@ -28544,6 +28889,100 @@
          }
        ],
        "version": "0.11.1"
 +    },
-+    "ic-wire 0.10.0": {
++    "ic-wire 0.11.0": {
 +      "common_attrs": {
-+        "crate_features": {
-+          "common": [],
-+          "selects": {
-+            "aarch64-apple-darwin": [
-+              "typescript"
-+            ],
-+            "aarch64-unknown-linux-gnu": [
-+              "typescript"
-+            ],
-+            "x86_64-apple-darwin": [
-+              "typescript"
-+            ],
-+            "x86_64-unknown-linux-gnu": [
-+              "typescript"
-+            ]
++        "deps": [
++          {
++            "id": "bytemuck 1.25.2",
++            "target": "bytemuck"
++          },
++          {
++            "id": "postcard 1.1.3",
++            "target": "postcard"
++          },
++          {
++            "id": "serde 1.0.228",
++            "target": "serde"
++          },
++          {
++            "id": "serde_bytes 0.11.19",
++            "target": "serde_bytes"
 +          }
-+        },
-+        "deps": {
-+          "common": [
-+            {
-+              "id": "bytemuck 1.25.2",
-+              "target": "bytemuck"
-+            },
-+            {
-+              "id": "postcard 1.1.3",
-+              "target": "postcard"
-+            },
-+            {
-+              "id": "serde 1.0.228",
-+              "target": "serde"
-+            },
-+            {
-+              "id": "serde_bytes 0.11.19",
-+              "target": "serde_bytes"
-+            }
-+          ],
-+          "selects": {
-+            "aarch64-apple-darwin": [
-+              {
-+                "id": "serde_json 1.0.145",
-+                "target": "serde_json"
-+              }
-+            ],
-+            "aarch64-unknown-linux-gnu": [
-+              {
-+                "id": "serde_json 1.0.145",
-+                "target": "serde_json"
-+              }
-+            ],
-+            "x86_64-apple-darwin": [
-+              {
-+                "id": "serde_json 1.0.145",
-+                "target": "serde_json"
-+              }
-+            ],
-+            "x86_64-unknown-linux-gnu": [
-+              {
-+                "id": "serde_json 1.0.145",
-+                "target": "serde_json"
-+              }
-+            ]
-+          }
-+        },
++        ],
 +        "edition": "2024",
 +        "proc_macro_deps": [
 +          {
-+            "id": "ic-wire-derive 0.10.0",
++            "id": "ic-wire-derive 0.11.0",
 +            "target": "ic_wire_derive"
 +          }
 +        ]
@@ -1683,8 +1628,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-wire",
 +      "repository": {
 +        "Http": {
-+          "sha256": "48f893870aa83178fedf3b94b65d240850b2920bdc0acf3fb9961fe04312fc75",
-+          "url": "https://static.crates.io/crates/ic-wire/0.10.0/download"
++          "sha256": "1fe3cd2ff538068d5dfbfaf1a2c8ca6ebec28ef95b4c5d4ce0961578971fe468",
++          "url": "https://static.crates.io/crates/ic-wire/0.11.0/download"
 +        }
 +      },
 +      "targets": [
@@ -1695,9 +1640,9 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.10.0"
++      "version": "0.11.0"
 +    },
-+    "ic-wire-derive 0.10.0": {
++    "ic-wire-derive 0.11.0": {
 +      "common_attrs": {
 +        "deps": [
 +          {
@@ -1725,8 +1670,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-wire",
 +      "repository": {
 +        "Http": {
-+          "sha256": "92949aebfeaf4a97479c80b8c38ad739695592231fc37ed2eedab7b5fe7c3428",
-+          "url": "https://static.crates.io/crates/ic-wire-derive/0.10.0/download"
++          "sha256": "a8743a922f9b3b291c412c3366475356ecd4f808b5a3b5f4d60173cb5d00ef6b",
++          "url": "https://static.crates.io/crates/ic-wire-derive/0.11.0/download"
 +        }
 +      },
 +      "targets": [
@@ -1737,11 +1682,11 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.10.0"
++      "version": "0.11.0"
      },
      "ic-xrc-types 1.2.0": {
        "common_attrs": {
-@@ -29315,7 +29809,7 @@
+@@ -29315,7 +29754,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1750,7 +1695,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -29655,7 +30149,7 @@
+@@ -29655,7 +30094,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1759,7 +1704,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -30018,7 +30512,7 @@
+@@ -30018,7 +30457,7 @@
              "target": "inotify_sys"
            },
            {
@@ -1768,7 +1713,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -30056,7 +30550,7 @@
+@@ -30056,7 +30495,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1777,7 +1722,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -30185,7 +30679,7 @@
+@@ -30185,7 +30624,7 @@
              "target": "darling"
            },
            {
@@ -1786,7 +1731,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -31090,7 +31584,7 @@
+@@ -31090,7 +31529,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1795,7 +1740,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -31250,7 +31744,7 @@
+@@ -31250,7 +31689,7 @@
            "selects": {
              "cfg(unix)": [
                {
@@ -1804,7 +1749,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -32290,7 +32784,7 @@
+@@ -32290,7 +32729,7 @@
        ],
        "version": "0.1.0"
      },
@@ -1813,7 +1758,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
        "build_script_attrs": {},
        "common_attrs": {
          "crate_features": [
-@@ -32314,8 +32808,8 @@
+@@ -32314,8 +32753,8 @@
        "package_url": "https://github.com/rust-lang/libc",
        "repository": {
          "Http": {
@@ -1824,7 +1769,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
          }
        },
        "targets": [
-@@ -32332,7 +32826,7 @@
+@@ -32332,7 +32771,7 @@
            }
          }
        ],
@@ -1833,7 +1778,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      },
      "libcryptsetup-rs 0.15.0": {
        "build_script_attrs": {
-@@ -32361,7 +32855,7 @@
+@@ -32361,7 +32800,7 @@
              "target": "either"
            },
            {
@@ -1842,7 +1787,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -32850,7 +33344,7 @@
+@@ -32850,7 +33289,7 @@
              "target": "lazy_static"
            },
            {
@@ -1851,7 +1796,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -32893,7 +33387,7 @@
+@@ -32893,7 +33332,7 @@
              "target": "bitflags"
            },
            {
@@ -1860,7 +1805,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -32951,7 +33445,7 @@
+@@ -32951,7 +33390,7 @@
          ],
          "deps": [
            {
@@ -1869,7 +1814,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -33101,7 +33595,7 @@
+@@ -33101,7 +33540,7 @@
          "deps": {
            "common": [
              {
@@ -1878,7 +1823,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                "target": "libc"
              },
              {
-@@ -33167,7 +33661,7 @@
+@@ -33167,7 +33606,7 @@
              "target": "hmac"
            },
            {
@@ -1887,7 +1832,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -33263,7 +33757,7 @@
+@@ -33263,7 +33702,7 @@
          ],
          "deps": [
            {
@@ -1896,7 +1841,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -33333,7 +33827,7 @@
+@@ -33333,7 +33772,7 @@
          ],
          "deps": [
            {
@@ -1905,7 +1850,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -33414,7 +33908,7 @@
+@@ -33414,7 +33853,7 @@
              "target": "bitflags"
            },
            {
@@ -1914,7 +1859,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -33452,7 +33946,8 @@
+@@ -33452,7 +33891,8 @@
            "errno",
            "general",
            "ioctl",
@@ -1924,7 +1869,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
          ],
          "edition": "2021"
        },
-@@ -33608,7 +34103,7 @@
+@@ -33608,7 +34048,7 @@
              "target": "byteorder"
            },
            {
@@ -1933,7 +1878,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -33671,7 +34166,7 @@
+@@ -33671,7 +34111,7 @@
          ],
          "deps": [
            {
@@ -1942,7 +1887,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -33958,7 +34453,7 @@
+@@ -33958,7 +34398,7 @@
              "target": "fnv"
            },
            {
@@ -1951,7 +1896,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -34016,7 +34511,7 @@
+@@ -34016,7 +34456,7 @@
              "target": "lazy_static"
            },
            {
@@ -1960,7 +1905,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -34144,7 +34639,7 @@
+@@ -34144,7 +34584,7 @@
              "target": "errno"
            },
            {
@@ -1969,7 +1914,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -34426,7 +34921,7 @@
+@@ -34426,7 +34866,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -1978,7 +1923,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -34475,7 +34970,7 @@
+@@ -34475,7 +34915,7 @@
          ],
          "deps": [
            {
@@ -1987,7 +1932,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -34530,7 +35025,7 @@
+@@ -34530,7 +34970,7 @@
              "target": "proc_macro_utils"
            },
            {
@@ -1996,7 +1941,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -34641,7 +35136,7 @@
+@@ -34641,7 +35081,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2005,7 +1950,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -34913,7 +35408,7 @@
+@@ -34913,7 +35353,7 @@
            "selects": {
              "cfg(unix)": [
                {
@@ -2014,7 +1959,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -34953,7 +35448,7 @@
+@@ -34953,7 +35393,7 @@
            "selects": {
              "cfg(unix)": [
                {
@@ -2023,7 +1968,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -35220,7 +35715,7 @@
+@@ -35220,7 +35660,7 @@
          ],
          "deps": [
            {
@@ -2032,7 +1977,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -35326,9 +35821,10 @@
+@@ -35326,9 +35766,10 @@
        ],
        "version": "0.7.1"
      },
@@ -2044,7 +1989,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
            "simd",
            "simd-adler32",
            "with-alloc"
-@@ -35339,7 +35835,7 @@
+@@ -35339,7 +35780,7 @@
              "target": "adler2"
            },
            {
@@ -2053,7 +1998,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "simd_adler32"
            }
          ],
-@@ -35357,8 +35853,8 @@
+@@ -35357,8 +35798,8 @@
        "package_url": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
        "repository": {
          "Http": {
@@ -2064,7 +2009,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
          }
        },
        "targets": [
-@@ -35369,7 +35865,7 @@
+@@ -35369,7 +35810,7 @@
            }
          }
        ],
@@ -2073,7 +2018,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      },
      "mio 0.8.10": {
        "common_attrs": {
-@@ -35389,7 +35885,7 @@
+@@ -35389,7 +35830,7 @@
            "selects": {
              "cfg(target_os = \"wasi\")": [
                {
@@ -2082,7 +2027,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                },
                {
-@@ -35399,7 +35895,7 @@
+@@ -35399,7 +35840,7 @@
              ],
              "cfg(unix)": [
                {
@@ -2091,7 +2036,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -35488,7 +35984,7 @@
+@@ -35488,7 +35929,7 @@
              ],
              "cfg(target_os = \"wasi\")": [
                {
@@ -2100,7 +2045,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                },
                {
-@@ -35498,7 +35994,7 @@
+@@ -35498,7 +35939,7 @@
              ],
              "cfg(unix)": [
                {
@@ -2109,7 +2054,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -35624,7 +36120,7 @@
+@@ -35624,7 +36065,7 @@
              "target": "cfg_if"
            },
            {
@@ -2118,7 +2063,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -36066,7 +36562,7 @@
+@@ -36066,7 +36507,7 @@
              "target": "cfg_if"
            },
            {
@@ -2127,7 +2072,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -36136,7 +36632,7 @@
+@@ -36136,7 +36577,7 @@
              "target": "cfg_if"
            },
            {
@@ -2136,7 +2081,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -36212,7 +36708,7 @@
+@@ -36212,7 +36653,7 @@
              "target": "cfg_if"
            },
            {
@@ -2145,7 +2090,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -37334,7 +37830,7 @@
+@@ -37334,7 +37775,7 @@
            "selects": {
              "cfg(not(windows))": [
                {
@@ -2154,7 +2099,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -37518,7 +38014,7 @@
+@@ -37518,7 +37959,7 @@
          ],
          "deps": [
            {
@@ -2163,7 +2108,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "flate2"
            },
            {
-@@ -37881,7 +38377,7 @@
+@@ -37881,7 +38322,7 @@
              "target": "foreign_types"
            },
            {
@@ -2172,7 +2117,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -37935,7 +38431,7 @@
+@@ -37935,7 +38376,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2181,7 +2126,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -38067,7 +38563,7 @@
+@@ -38067,7 +38508,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2190,7 +2135,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -38821,7 +39317,7 @@
+@@ -38821,7 +39262,7 @@
              "target": "proc_macro_crate"
            },
            {
@@ -2199,7 +2144,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -39001,7 +39497,7 @@
+@@ -39001,7 +39442,7 @@
              ],
              "cfg(unix)": [
                {
@@ -2208,7 +2153,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -39072,7 +39568,7 @@
+@@ -39072,7 +39513,7 @@
              ],
              "cfg(unix)": [
                {
@@ -2217,7 +2162,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -39178,7 +39674,7 @@
+@@ -39178,7 +39619,7 @@
          ],
          "deps": [
            {
@@ -2226,7 +2171,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -39537,7 +40033,7 @@
+@@ -39537,7 +39978,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2235,7 +2180,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -39706,7 +40202,7 @@
+@@ -39706,7 +40147,7 @@
              "target": "pest_meta"
            },
            {
@@ -2244,7 +2189,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -40045,7 +40541,7 @@
+@@ -40045,7 +40486,7 @@
              "target": "phf_shared"
            },
            {
@@ -2253,7 +2198,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -40187,7 +40683,7 @@
+@@ -40187,7 +40628,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2262,7 +2207,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -41045,7 +41541,7 @@
+@@ -41045,7 +41486,7 @@
              "target": "inferno"
            },
            {
@@ -2271,7 +2216,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -41453,7 +41949,7 @@
+@@ -41453,7 +41894,7 @@
          },
          "deps": [
            {
@@ -2280,7 +2225,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -41648,7 +42144,7 @@
+@@ -41648,7 +42089,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2289,7 +2234,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -41687,7 +42183,7 @@
+@@ -41687,7 +42128,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2298,7 +2243,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -41730,7 +42226,7 @@
+@@ -41730,7 +42171,7 @@
          ],
          "deps": [
            {
@@ -2307,7 +2252,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -41783,7 +42279,7 @@
+@@ -41783,7 +42224,7 @@
          ],
          "deps": [
            {
@@ -2316,7 +2261,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -41840,7 +42336,7 @@
+@@ -41840,7 +42281,7 @@
          ],
          "deps": [
            {
@@ -2325,7 +2270,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -41879,7 +42375,7 @@
+@@ -41879,7 +42320,7 @@
        ],
        "version": "0.10.0"
      },
@@ -2334,7 +2279,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
        "build_script_attrs": {},
        "common_attrs": {
          "crate_features": {
-@@ -41924,8 +42420,8 @@
+@@ -41924,8 +42365,8 @@
        "package_url": "https://github.com/dtolnay/proc-macro2",
        "repository": {
          "Http": {
@@ -2345,7 +2290,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
          }
        },
        "targets": [
-@@ -41942,7 +42438,7 @@
+@@ -41942,7 +42383,7 @@
            }
          }
        ],
@@ -2354,7 +2299,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      },
      "procfs 0.17.0": {
        "build_script_attrs": {},
-@@ -42065,7 +42561,7 @@
+@@ -42065,7 +42506,7 @@
                "target": "lazy_static"
              },
              {
@@ -2363,7 +2308,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                "target": "libc"
              },
              {
-@@ -42275,7 +42771,7 @@
+@@ -42275,7 +42716,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2372,7 +2317,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -42458,7 +42954,7 @@
+@@ -42458,7 +42899,7 @@
              "target": "itertools"
            },
            {
@@ -2381,7 +2326,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -42887,7 +43383,7 @@
+@@ -42887,7 +43328,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2390,7 +2335,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -43016,7 +43512,7 @@
+@@ -43016,7 +43457,7 @@
              ],
              "cfg(not(any(target_os = \"windows\", target_arch = \"wasm32\")))": [
                {
@@ -2399,7 +2344,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -43395,7 +43891,7 @@
+@@ -43395,7 +43836,7 @@
          "deps": {
            "common": [
              {
@@ -2408,7 +2353,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                "target": "libc"
              },
              {
-@@ -43456,7 +43952,7 @@
+@@ -43456,7 +43897,7 @@
          ],
          "deps": [
            {
@@ -2417,7 +2362,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            }
          ],
-@@ -43669,25 +44165,25 @@
+@@ -43669,25 +44110,25 @@
            "selects": {
              "aarch64-apple-darwin": [
                {
@@ -2447,7 +2392,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -44691,7 +45187,7 @@
+@@ -44691,7 +45132,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2456,7 +2401,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -45786,7 +46282,7 @@
+@@ -45786,7 +46227,7 @@
          ],
          "deps": [
            {
@@ -2465,7 +2410,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "bytemuck"
            }
          ],
-@@ -45867,13 +46363,13 @@
+@@ -45867,13 +46308,13 @@
              ],
              "cfg(all(all(target_arch = \"aarch64\", target_endian = \"little\"), target_vendor = \"apple\", any(target_os = \"ios\", target_os = \"macos\", target_os = \"tvos\", target_os = \"visionos\", target_os = \"watchos\")))": [
                {
@@ -2481,7 +2426,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -46029,7 +46525,7 @@
+@@ -46029,7 +46470,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2490,7 +2435,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -46262,7 +46758,7 @@
+@@ -46262,7 +46703,7 @@
              "target": "glob"
            },
            {
@@ -2499,7 +2444,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -46413,7 +46909,7 @@
+@@ -46413,7 +46854,7 @@
          ],
          "deps": [
            {
@@ -2508,7 +2453,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -46906,7 +47402,7 @@
+@@ -46906,7 +47347,7 @@
                  "target": "errno"
                },
                {
@@ -2517,7 +2462,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -46929,7 +47425,7 @@
+@@ -46929,7 +47370,7 @@
                  "target": "errno"
                },
                {
@@ -2526,7 +2471,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -46951,7 +47447,7 @@
+@@ -46951,7 +47392,7 @@
                  "target": "errno"
                },
                {
@@ -2535,7 +2480,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -46962,7 +47458,7 @@
+@@ -46962,7 +47403,7 @@
                  "target": "errno"
                },
                {
@@ -2544,7 +2489,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -47007,14 +47503,27 @@
+@@ -47007,14 +47448,27 @@
      "rustix 1.1.4": {
        "build_script_attrs": {},
        "common_attrs": {
@@ -2580,7 +2525,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
          "deps": {
            "common": [
              {
-@@ -47030,7 +47539,7 @@
+@@ -47030,7 +47484,7 @@
                  "target": "errno"
                },
                {
@@ -2589,7 +2534,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -47053,7 +47562,7 @@
+@@ -47053,7 +47507,7 @@
                  "target": "errno"
                },
                {
@@ -2598,7 +2543,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -47075,7 +47584,7 @@
+@@ -47075,7 +47529,7 @@
                  "target": "errno"
                },
                {
@@ -2607,7 +2552,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -48204,7 +48713,7 @@
+@@ -48204,7 +48658,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2616,7 +2561,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -48845,7 +49354,7 @@
+@@ -48845,7 +49299,7 @@
              "target": "core_foundation_sys"
            },
            {
@@ -2625,7 +2570,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -48900,7 +49409,7 @@
+@@ -48900,7 +49354,7 @@
              "target": "core_foundation_sys"
            },
            {
@@ -2634,7 +2579,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -48959,7 +49468,7 @@
+@@ -48959,7 +49413,7 @@
              "target": "core_foundation_sys"
            },
            {
@@ -2643,7 +2588,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -49288,18 +49797,29 @@
+@@ -49288,18 +49742,29 @@
        ],
        "version": "0.3.0"
      },
@@ -2680,7 +2625,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
          "edition": "2018"
        },
        "library_target_name": "serde_bytes",
-@@ -49313,8 +49833,8 @@
+@@ -49313,8 +49778,8 @@
        "package_url": "https://github.com/serde-rs/bytes",
        "repository": {
          "Http": {
@@ -2691,7 +2636,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
          }
        },
        "targets": [
-@@ -49325,7 +49845,7 @@
+@@ -49325,7 +49790,7 @@
            }
          }
        ],
@@ -2700,7 +2645,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      },
      "serde_cbor 0.11.2": {
        "common_attrs": {
-@@ -49434,7 +49954,7 @@
+@@ -49434,7 +49899,7 @@
          ],
          "deps": [
            {
@@ -2709,7 +2654,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -49477,7 +49997,7 @@
+@@ -49477,7 +49942,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2718,7 +2663,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -49522,6 +50042,7 @@
+@@ -49522,6 +49987,7 @@
          "crate_features": [
            "alloc",
            "default",
@@ -2726,7 +2671,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
            "raw_value",
            "std",
            "unbounded_depth"
-@@ -49715,7 +50236,7 @@
+@@ -49715,7 +50181,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2735,7 +2680,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -49894,7 +50415,7 @@
+@@ -49894,7 +50360,7 @@
              "target": "darling"
            },
            {
@@ -2744,7 +2689,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -50153,7 +50674,7 @@
+@@ -50153,7 +50619,7 @@
                "target": "lazy_static"
              },
              {
@@ -2753,7 +2698,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                "target": "libc"
              },
              {
-@@ -50788,7 +51309,7 @@
+@@ -50788,7 +51254,7 @@
          ],
          "deps": [
            {
@@ -2762,7 +2707,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -50840,7 +51361,7 @@
+@@ -50840,7 +51306,7 @@
          ],
          "deps": [
            {
@@ -2771,7 +2716,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -50884,7 +51405,7 @@
+@@ -50884,7 +51350,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2780,7 +2725,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -50960,7 +51481,7 @@
+@@ -50960,7 +51426,7 @@
        ],
        "version": "2.2.0"
      },
@@ -2789,7 +2734,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
        "common_attrs": {
          "edition": "2018"
        },
-@@ -50974,8 +51495,8 @@
+@@ -50974,8 +51440,8 @@
        "package_url": "https://github.com/mcountryman/simd-adler32",
        "repository": {
          "Http": {
@@ -2800,7 +2745,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
          }
        },
        "targets": [
-@@ -50986,7 +51507,7 @@
+@@ -50986,7 +51452,7 @@
            }
          }
        ],
@@ -2809,7 +2754,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      },
      "simd_cesu8 1.1.1": {
        "common_attrs": {
-@@ -51757,7 +52278,7 @@
+@@ -51757,7 +52223,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2818,7 +2763,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -51847,7 +52368,7 @@
+@@ -51847,7 +52313,7 @@
              "target": "heck"
            },
            {
@@ -2827,7 +2772,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -51896,7 +52417,7 @@
+@@ -51896,7 +52362,7 @@
            "selects": {
              "cfg(unix)": [
                {
@@ -2836,7 +2781,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -51945,7 +52466,7 @@
+@@ -51945,7 +52411,7 @@
            "selects": {
              "cfg(unix)": [
                {
@@ -2845,7 +2790,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -51994,7 +52515,7 @@
+@@ -51994,7 +52460,7 @@
            "selects": {
              "cfg(unix)": [
                {
@@ -2854,7 +2799,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -52225,7 +52746,7 @@
+@@ -52225,7 +52691,7 @@
              "target": "bitflags"
            },
            {
@@ -2863,7 +2808,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -52315,7 +52836,7 @@
+@@ -52315,7 +52781,7 @@
                "target": "cfg_if"
              },
              {
@@ -2872,7 +2817,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                "target": "libc"
              },
              {
-@@ -52568,7 +53089,7 @@
+@@ -52568,7 +53034,7 @@
              "target": "phf_shared"
            },
            {
@@ -2881,7 +2826,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -52635,7 +53156,7 @@
+@@ -52635,7 +53101,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2890,7 +2835,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -52683,7 +53204,7 @@
+@@ -52683,7 +53149,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -2899,7 +2844,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -52849,7 +53370,7 @@
+@@ -52849,7 +53315,7 @@
              "target": "heck"
            },
            {
@@ -2908,7 +2853,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -52901,7 +53422,7 @@
+@@ -52901,7 +53367,7 @@
              "target": "heck"
            },
            {
@@ -2917,7 +2862,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -52953,7 +53474,7 @@
+@@ -52953,7 +53419,7 @@
              "target": "heck"
            },
            {
@@ -2926,7 +2871,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -53208,7 +53729,7 @@
+@@ -53208,7 +53674,7 @@
          ],
          "deps": [
            {
@@ -2935,7 +2880,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -53288,7 +53809,7 @@
+@@ -53288,7 +53754,7 @@
          },
          "deps": [
            {
@@ -2944,7 +2889,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -53327,6 +53848,58 @@
+@@ -53327,6 +53793,58 @@
        ],
        "version": "2.0.119"
      },
@@ -3003,7 +2948,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "syn-solidity 1.7.1": {
        "common_attrs": {
          "crate_features": [
-@@ -53335,7 +53908,7 @@
+@@ -53335,7 +53853,7 @@
          ],
          "deps": [
            {
@@ -3012,7 +2957,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -53425,7 +53998,7 @@
+@@ -53425,7 +53943,7 @@
          ],
          "deps": [
            {
@@ -3021,7 +2966,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -53476,7 +54049,7 @@
+@@ -53476,7 +53994,7 @@
              "target": "bitflags"
            },
            {
@@ -3030,7 +2975,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -53633,7 +54206,7 @@
+@@ -53633,7 +54151,7 @@
              "target": "core_foundation_sys"
            },
            {
@@ -3039,7 +2984,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -53686,7 +54259,7 @@
+@@ -53686,7 +54204,7 @@
                "target": "lazy_static"
              },
              {
@@ -3048,7 +2993,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                "target": "libc"
              },
              {
-@@ -53799,7 +54372,7 @@
+@@ -53799,7 +54317,7 @@
              "target": "proc_macro_error2"
            },
            {
@@ -3057,7 +3002,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -53950,7 +54523,7 @@
+@@ -53950,7 +54468,7 @@
              ],
              "cfg(unix)": [
                {
@@ -3066,7 +3011,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -54151,7 +54724,7 @@
+@@ -54151,7 +54669,7 @@
          ],
          "deps": [
            {
@@ -3075,7 +3020,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -54472,7 +55045,7 @@
+@@ -54472,7 +54990,7 @@
            "selects": {
              "cfg(not(windows))": [
                {
@@ -3084,7 +3029,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -54515,7 +55088,7 @@
+@@ -54515,7 +55033,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3093,7 +3038,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -54577,7 +55150,7 @@
+@@ -54577,7 +55095,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3102,7 +3047,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -54798,7 +55371,7 @@
+@@ -54798,7 +55316,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3111,7 +3056,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -54841,7 +55414,7 @@
+@@ -54841,7 +55359,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3120,7 +3065,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -54962,7 +55535,7 @@
+@@ -54962,7 +55480,7 @@
          ],
          "deps": [
            {
@@ -3129,7 +3074,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -55037,7 +55610,7 @@
+@@ -55037,7 +55555,7 @@
          ],
          "deps": [
            {
@@ -3138,7 +3083,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -55085,7 +55658,7 @@
+@@ -55085,7 +55603,7 @@
          ],
          "deps": [
            {
@@ -3147,7 +3092,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -55504,7 +56077,7 @@
+@@ -55504,7 +56022,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3156,7 +3101,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -55590,7 +56163,7 @@
+@@ -55590,7 +56108,7 @@
            "selects": {
              "aarch64-apple-darwin": [
                {
@@ -3165,7 +3110,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                },
                {
-@@ -55604,7 +56177,7 @@
+@@ -55604,7 +56122,7 @@
              ],
              "aarch64-unknown-linux-gnu": [
                {
@@ -3174,7 +3119,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                },
                {
-@@ -55618,7 +56191,7 @@
+@@ -55618,7 +56136,7 @@
              ],
              "x86_64-apple-darwin": [
                {
@@ -3183,7 +3128,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                },
                {
-@@ -55632,7 +56205,7 @@
+@@ -55632,7 +56150,7 @@
              ],
              "x86_64-unknown-linux-gnu": [
                {
@@ -3192,7 +3137,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                },
                {
-@@ -55721,7 +56294,7 @@
+@@ -55721,7 +56239,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3201,7 +3146,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -56273,7 +56846,7 @@
+@@ -56273,7 +56791,7 @@
              "target": "futures"
            },
            {
@@ -3210,7 +3155,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -56797,7 +57370,7 @@
+@@ -56797,7 +57315,7 @@
              "target": "prettyplease"
            },
            {
@@ -3219,7 +3164,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -56889,7 +57462,7 @@
+@@ -56889,7 +57407,7 @@
              "target": "prettyplease"
            },
            {
@@ -3228,7 +3173,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -57722,7 +58295,7 @@
+@@ -57722,7 +58240,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3237,7 +3182,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -57849,7 +58422,7 @@
+@@ -57849,7 +58367,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3246,7 +3191,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -59739,7 +60312,7 @@
+@@ -59739,7 +60257,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3255,7 +3200,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -59789,7 +60362,7 @@
+@@ -59789,7 +60307,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3264,7 +3209,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            }
          ],
-@@ -60006,7 +60579,7 @@
+@@ -60006,7 +60524,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3273,7 +3218,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -60047,7 +60620,7 @@
+@@ -60047,7 +60565,7 @@
            "selects": {
              "cfg(unix)": [
                {
@@ -3282,7 +3227,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -60227,7 +60800,7 @@
+@@ -60227,7 +60745,7 @@
              "target": "heck"
            },
            {
@@ -3291,7 +3236,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -60565,7 +61138,7 @@
+@@ -60565,7 +61083,7 @@
              "target": "bumpalo"
            },
            {
@@ -3300,7 +3245,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -61361,7 +61934,7 @@
+@@ -61361,7 +61879,7 @@
                "target": "bumpalo"
              },
              {
@@ -3309,7 +3254,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                "target": "libc"
              },
              {
-@@ -61902,7 +62475,7 @@
+@@ -61902,7 +62420,7 @@
            "selects": {
              "cfg(unix)": [
                {
@@ -3318,7 +3263,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                },
                {
-@@ -62031,7 +62604,7 @@
+@@ -62031,7 +62549,7 @@
            "selects": {
              "cfg(any(target_os = \"linux\", target_vendor = \"apple\", target_os = \"freebsd\", target_os = \"android\"))": [
                {
@@ -3327,7 +3272,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ],
-@@ -62132,7 +62705,7 @@
+@@ -62132,7 +62650,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3336,7 +3281,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -65174,7 +65747,7 @@
+@@ -65174,7 +65692,7 @@
              "target": "prettyplease"
            },
            {
@@ -3345,7 +3290,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -65801,7 +66374,7 @@
+@@ -65801,7 +66319,7 @@
              ],
              "cfg(any(target_os = \"freebsd\", target_os = \"netbsd\"))": [
                {
@@ -3354,7 +3299,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
                  "target": "libc"
                }
              ]
-@@ -65991,7 +66564,7 @@
+@@ -65991,7 +66509,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3363,7 +3308,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -66161,7 +66734,7 @@
+@@ -66161,7 +66679,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3372,7 +3317,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -66205,7 +66778,7 @@
+@@ -66205,7 +66723,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3381,7 +3326,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -66287,7 +66860,7 @@
+@@ -66287,7 +66805,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3390,7 +3335,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -66374,7 +66947,7 @@
+@@ -66374,7 +66892,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3399,7 +3344,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -66465,7 +67038,7 @@
+@@ -66465,7 +66983,7 @@
        "common_attrs": {
          "deps": [
            {
@@ -3408,7 +3353,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "proc_macro2"
            },
            {
-@@ -66502,6 +67075,34 @@
+@@ -66502,6 +67020,34 @@
          }
        ],
        "version": "0.10.3"
@@ -3443,7 +3388,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      },
      "zstd 0.12.4": {
        "common_attrs": {
-@@ -66592,7 +67193,7 @@
+@@ -66592,7 +67138,7 @@
          ],
          "deps": [
            {
@@ -3452,7 +3397,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "libc"
            },
            {
-@@ -66830,7 +67431,7 @@
+@@ -66830,7 +67376,7 @@
      "evm_rpc_client 0.4.0",
      "evm_rpc_types 3.1.1",
      "ff 0.12.1",
@@ -3461,28 +3406,28 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "form_urlencoded 1.2.1",
      "fqdn 0.5.2",
      "fs_extra 1.3.0",
-@@ -66871,9 +67472,12 @@
+@@ -66871,9 +67417,12 @@
      "ic-certified-map 0.3.4",
      "ic-doge-interface 0.3.0",
      "ic-gateway 0.0.0-git",
 +    "ic-host-process 0.72.1",
      "ic-identity-hsm 0.49.1",
      "ic-management-canister-types 0.8.0",
-+    "ic-metrics 0.21.0",
++    "ic-metrics 0.22.0",
      "ic-metrics-encoder 1.1.1",
 +    "ic-platform 0.12.0",
      "ic-sha3 1.0.0",
      "ic-stable-structures 0.6.8",
      "ic-stable-structures 0.7.0",
-@@ -66883,6 +67487,7 @@
+@@ -66883,6 +67432,7 @@
      "ic-verify-bls-signature 0.6.0",
      "ic-vetkeys 0.7.0",
      "ic-wasm 0.11.1",
-+    "ic-wire 0.10.0",
++    "ic-wire 0.11.0",
      "ic-xrc-types 1.2.0",
      "ic0 1.1.0",
      "ic_bls12_381 0.10.1",
-@@ -66905,7 +67510,7 @@
+@@ -66905,7 +67455,7 @@
      "keyring 3.4.0",
      "lazy_static 1.5.0",
      "leb128 0.2.5",
@@ -3491,7 +3436,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "libcryptsetup-rs 0.15.0",
      "libfuzzer-sys 0.4.7",
      "libnss 0.5.0",
-@@ -66948,7 +67553,7 @@
+@@ -66948,7 +67498,7 @@
      "pprof 0.15.0",
      "predicates 3.1.2",
      "pretty_assertions 1.4.0",
@@ -3500,7 +3445,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "procfs 0.17.0",
      "prometheus 0.14.0",
      "prometheus-parse 0.2.4",
-@@ -67004,7 +67609,7 @@
+@@ -67004,7 +67554,7 @@
      "semver 1.0.27",
      "serde 1.0.228",
      "serde-bytes-repr 0.3.0",
@@ -3622,16 +3567,15 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  name = "ic-http-certification"
  version = "3.1.0"
  source = "registry+https://github.com/rust-lang/crates.io-index"
-@@ -6207,10 +6256,29 @@
+@@ -6207,10 +6256,28 @@
  ]
  
  [[package]]
 +name = "ic-metrics"
-+version = "0.21.0"
++version = "0.22.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "ed5e41d6a6250132253a0a0ac775843dec4cebec2bc6d8068dcbbd4fa9a53ac3"
++checksum = "ff47b21318777d1965036e7200eb21833dee9aa8c6309d30381010da230d29cd"
 +dependencies = [
-+ "ic-wire",
 + "serde",
 +]
 +
@@ -3652,28 +3596,27 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  
  [[package]]
  name = "ic-representation-independent-hash"
-@@ -6391,6 +6459,31 @@
+@@ -6391,6 +6458,30 @@
  ]
  
  [[package]]
 +name = "ic-wire"
-+version = "0.10.0"
++version = "0.11.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "48f893870aa83178fedf3b94b65d240850b2920bdc0acf3fb9961fe04312fc75"
++checksum = "1fe3cd2ff538068d5dfbfaf1a2c8ca6ebec28ef95b4c5d4ce0961578971fe468"
 +dependencies = [
 + "bytemuck",
 + "ic-wire-derive",
 + "postcard",
 + "serde",
 + "serde_bytes",
-+ "serde_json",
 +]
 +
 +[[package]]
 +name = "ic-wire-derive"
-+version = "0.10.0"
++version = "0.11.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "92949aebfeaf4a97479c80b8c38ad739695592231fc37ed2eedab7b5fe7c3428"
++checksum = "a8743a922f9b3b291c412c3366475356ecd4f808b5a3b5f4d60173cb5d00ef6b"
 +dependencies = [
 + "proc-macro2",
 + "quote",
@@ -3684,7 +3627,7 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  name = "ic-xrc-types"
  version = "1.2.0"
  source = "registry+https://github.com/rust-lang/crates.io-index"
-@@ -7236,9 +7329,9 @@
+@@ -7236,9 +7327,9 @@
  
  [[package]]
  name = "libc"
@@ -3697,7 +3640,7 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  
  [[package]]
  name = "libcryptsetup-rs"
-@@ -7873,9 +7966,9 @@
+@@ -7873,9 +7964,9 @@
  
  [[package]]
  name = "miniz_oxide"
@@ -3710,7 +3653,7 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  dependencies = [
   "adler2",
   "simd-adler32",
-@@ -9293,9 +9386,9 @@
+@@ -9293,9 +9384,9 @@
  
  [[package]]
  name = "proc-macro2"
@@ -3723,7 +3666,7 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  dependencies = [
   "unicode-ident",
  ]
-@@ -10859,11 +10952,12 @@
+@@ -10859,11 +10950,12 @@
  
  [[package]]
  name = "serde_bytes"
@@ -3741,7 +3684,7 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  ]
  
  [[package]]
-@@ -11244,9 +11338,9 @@
+@@ -11244,9 +11336,9 @@
  
  [[package]]
  name = "simd-adler32"
@@ -3754,7 +3697,7 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  
  [[package]]
  name = "simd_cesu8"
-@@ -11760,6 +11854,17 @@
+@@ -11760,6 +11852,17 @@
  version = "2.0.119"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297"
@@ -3772,7 +3715,7 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  dependencies = [
   "proc-macro2",
   "quote",
-@@ -14577,6 +14682,12 @@
+@@ -14577,6 +14680,12 @@
  ]
  
  [[package]]
@@ -4192,7 +4135,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-query-stats",
   "ic-registry-client-fake",
-@@ -11078,6 +11123,16 @@
+@@ -11078,6 +11123,15 @@
   "procfs",
   "prometheus",
   "tokio-metrics",
@@ -4200,16 +4143,15 @@ diff --git a/Cargo.lock b/Cargo.lock
 +
 +[[package]]
 +name = "ic-metrics"
-+version = "0.21.0"
++version = "0.22.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "ed5e41d6a6250132253a0a0ac775843dec4cebec2bc6d8068dcbbd4fa9a53ac3"
++checksum = "ff47b21318777d1965036e7200eb21833dee9aa8c6309d30381010da230d29cd"
 +dependencies = [
-+ "ic-wire",
 + "serde",
  ]
  
  [[package]]
-@@ -11810,7 +11865,7 @@
+@@ -11810,7 +11864,7 @@
   "ic-interfaces-state-manager",
   "ic-interfaces-state-manager-mocks",
   "ic-logger",
@@ -4218,7 +4160,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-nns-delegation-reader",
   "ic-protobuf",
   "ic-registry-client-fake",
-@@ -12467,7 +12522,7 @@
+@@ -12467,7 +12521,7 @@
   "ic-interfaces",
   "ic-interfaces-mocks",
   "ic-logger",
@@ -4227,7 +4169,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-peer-manager",
   "ic-protobuf",
   "ic-quic-transport",
-@@ -12501,7 +12556,7 @@
+@@ -12501,7 +12555,7 @@
   "ic-interfaces-mocks",
   "ic-interfaces-registry",
   "ic-logger",
@@ -4236,7 +4178,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-p2p-test-utils",
   "ic-quic-transport",
   "ic-registry-client-fake",
-@@ -12513,6 +12568,15 @@
+@@ -12513,6 +12567,15 @@
   "ic-types-test-utils",
   "prometheus",
   "tokio",
@@ -4252,7 +4194,7 @@ diff --git a/Cargo.lock b/Cargo.lock
  ]
  
  [[package]]
-@@ -12547,7 +12611,7 @@
+@@ -12547,7 +12610,7 @@
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -4261,7 +4203,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-registry-client",
   "ic-registry-keys",
-@@ -12629,7 +12693,7 @@
+@@ -12629,7 +12692,7 @@
   "ic-interfaces-state-manager",
   "ic-interfaces-state-manager-mocks",
   "ic-logger",
@@ -4270,7 +4212,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-replicated-state",
   "ic-test-utilities-state",
   "ic-types",
-@@ -12677,7 +12741,7 @@
+@@ -12677,7 +12740,7 @@
   "ic-interfaces-registry",
   "ic-limits",
   "ic-logger",
@@ -4279,7 +4221,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-p2p-test-utils",
   "ic-protobuf",
   "ic-system-profiler",
-@@ -12733,7 +12797,7 @@
+@@ -12733,7 +12796,7 @@
   "ic-interfaces",
   "ic-interfaces-registry",
   "ic-management-canister-types-private",
@@ -4288,7 +4230,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-registry-client-helpers",
   "ic-registry-keys",
-@@ -12840,7 +12904,7 @@
+@@ -12840,7 +12903,7 @@
   "assert_matches",
   "crossbeam-channel",
   "ic-interfaces-registry",
@@ -4297,7 +4239,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-registry-client-helpers",
   "ic-registry-common-proto",
   "ic-registry-proto-data-provider",
-@@ -13056,7 +13120,7 @@
+@@ -13056,7 +13119,7 @@
   "ic-http-endpoints-metrics",
   "ic-interfaces-registry",
   "ic-logger",
@@ -4306,7 +4248,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-nervous-system-integration-tests",
   "ic-nns-constants",
   "ic-nns-test-utils",
-@@ -13188,7 +13252,7 @@
+@@ -13188,7 +13251,7 @@
   "ic-interfaces-state-manager-mocks",
   "ic-logger",
   "ic-messaging",
@@ -4315,7 +4257,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-nervous-system-agent",
   "ic-nervous-system-chunks",
   "ic-nervous-system-common",
-@@ -13258,7 +13322,7 @@
+@@ -13258,7 +13321,7 @@
   "ic-interfaces-state-manager",
   "ic-logger",
   "ic-messaging",
@@ -4324,7 +4266,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-nns-delegation-manager",
   "ic-pprof",
   "ic-protobuf",
-@@ -13318,7 +13382,7 @@
+@@ -13318,7 +13381,7 @@
   "ic-interfaces-registry",
   "ic-interfaces-state-manager",
   "ic-logger",
@@ -4333,7 +4275,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-peer-manager",
   "ic-quic-transport",
   "ic-registry-client-helpers",
-@@ -13351,7 +13415,7 @@
+@@ -13351,7 +13414,7 @@
   "ic-interfaces-registry",
   "ic-interfaces-state-manager",
   "ic-management-canister-types-private",
@@ -4342,7 +4284,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-prep",
   "ic-protobuf",
   "ic-registry-client-fake",
-@@ -13405,7 +13469,7 @@
+@@ -13405,7 +13468,7 @@
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -4351,7 +4293,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-nns-delegation-reader",
   "ic-protobuf",
   "ic-registry-resource-limits",
-@@ -14314,7 +14378,7 @@
+@@ -14314,7 +14377,7 @@
   "ic-interfaces",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -4360,7 +4302,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-replicated-state",
   "ic-sys",
-@@ -14377,7 +14441,7 @@
+@@ -14377,7 +14440,7 @@
   "ic-logger",
   "ic-management-canister-types-private",
   "ic-messaging",
@@ -4369,7 +4311,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-query-stats",
   "ic-registry-client-fake",
-@@ -14444,7 +14508,7 @@
+@@ -14444,7 +14507,7 @@
   "ic-interfaces-state-manager",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -4378,7 +4320,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-registry-routing-table",
   "ic-registry-subnet-features",
-@@ -14499,7 +14563,7 @@
+@@ -14499,7 +14562,7 @@
   "ic-interfaces",
   "ic-logger",
   "ic-memory-transport",
@@ -4387,7 +4329,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-p2p-test-utils",
   "ic-protobuf",
   "ic-quic-transport",
-@@ -14527,7 +14591,7 @@
+@@ -14527,7 +14590,7 @@
   "hex",
   "ic-config",
   "ic-logger",
@@ -4396,7 +4338,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-registry-routing-table",
   "ic-registry-subnet-type",
-@@ -14563,7 +14627,7 @@
+@@ -14563,7 +14626,7 @@
   "csv",
   "ic-base-types",
   "ic-management-canister-types-private",
@@ -4405,13 +4347,13 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-recovery",
   "ic-registry-routing-table",
-@@ -14632,10 +14696,12 @@
+@@ -14632,10 +14695,12 @@
  name = "ic-system-profiler"
  version = "0.9.0"
  dependencies = [
 - "flate2",
 + "ic-host-process",
-+ "ic-metrics 0.21.0",
++ "ic-metrics 0.22.0",
 + "ic-platform",
 + "ic-wire",
   "libc",
@@ -4420,7 +4362,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "serde_json",
  ]
  
-@@ -14783,7 +14849,7 @@
+@@ -14783,7 +14848,7 @@
   "ic-interfaces-registry",
   "ic-interfaces-state-manager",
   "ic-logger",
@@ -4429,7 +4371,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-registry-client-helpers",
   "ic-replicated-state",
   "ic-test-utilities-consensus",
-@@ -14833,7 +14899,7 @@
+@@ -14833,7 +14898,7 @@
   "ic-interfaces-certified-stream-store",
   "ic-interfaces-state-manager",
   "ic-interfaces-state-manager-mocks",
@@ -4438,7 +4380,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-registry-subnet-type",
   "ic-replicated-state",
   "ic-test-utilities-logger",
-@@ -14923,7 +14989,7 @@
+@@ -14923,7 +14988,7 @@
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -4447,7 +4389,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-registry-provisional-whitelist",
   "ic-registry-resource-limits",
   "ic-registry-routing-table",
-@@ -14987,7 +15053,7 @@
+@@ -14987,7 +15052,7 @@
  name = "ic-test-utilities-metrics"
  version = "0.9.0"
  dependencies = [
@@ -4456,7 +4398,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "prometheus",
  ]
  
-@@ -15429,7 +15495,7 @@
+@@ -15429,7 +15494,7 @@
  version = "0.9.0"
  dependencies = [
   "crossbeam-channel",
@@ -4465,28 +4407,27 @@ diff --git a/Cargo.lock b/Cargo.lock
   "prometheus",
  ]
  
-@@ -15633,6 +15699,31 @@
+@@ -15633,6 +15698,30 @@
  ]
  
  [[package]]
 +name = "ic-wire"
-+version = "0.10.0"
++version = "0.11.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "48f893870aa83178fedf3b94b65d240850b2920bdc0acf3fb9961fe04312fc75"
++checksum = "1fe3cd2ff538068d5dfbfaf1a2c8ca6ebec28ef95b4c5d4ce0961578971fe468"
 +dependencies = [
 + "bytemuck",
 + "ic-wire-derive",
 + "postcard",
 + "serde",
 + "serde_bytes",
-+ "serde_json",
 +]
 +
 +[[package]]
 +name = "ic-wire-derive"
-+version = "0.10.0"
++version = "0.11.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "92949aebfeaf4a97479c80b8c38ad739695592231fc37ed2eedab7b5fe7c3428"
++checksum = "a8743a922f9b3b291c412c3366475356ecd4f808b5a3b5f4d60173cb5d00ef6b"
 +dependencies = [
 + "proc-macro2",
 + "quote",
@@ -4497,7 +4438,7 @@ diff --git a/Cargo.lock b/Cargo.lock
  name = "ic-xnet-hyper"
  version = "0.9.0"
  dependencies = [
-@@ -15670,7 +15761,7 @@
+@@ -15670,7 +15759,7 @@
   "ic-interfaces-state-manager-mocks",
   "ic-limits",
   "ic-logger",
@@ -4506,7 +4447,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-protobuf",
   "ic-registry-client-fake",
   "ic-registry-client-helpers",
-@@ -17124,9 +17215,9 @@
+@@ -17124,9 +17213,9 @@
  
  [[package]]
  name = "libc"
@@ -4519,7 +4460,7 @@ diff --git a/Cargo.lock b/Cargo.lock
  
  [[package]]
  name = "libcryptsetup-rs"
-@@ -17891,6 +17982,15 @@
+@@ -17891,6 +17980,15 @@
  version = "0.8.9"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "1fa76a2c86f704bdb222d66965fb3d63269ce38518b83cb0575fca855ebb6316"
@@ -4535,7 +4476,7 @@ diff --git a/Cargo.lock b/Cargo.lock
  dependencies = [
   "adler2",
   "simd-adler32",
-@@ -18840,7 +18940,7 @@
+@@ -18840,7 +18938,7 @@
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -4544,7 +4485,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-nns-constants",
   "ic-protobuf",
   "ic-registry-canister-api",
-@@ -19508,6 +19608,7 @@
+@@ -19508,6 +19606,7 @@
   "ic-error-types 0.2.0",
   "ic-execution-environment",
   "ic-gateway",
@@ -4552,7 +4493,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-http-endpoints-public",
   "ic-https-outcalls-adapter",
   "ic-https-outcalls-adapter-client",
-@@ -19522,7 +19623,7 @@
+@@ -19522,7 +19621,7 @@
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -4561,7 +4502,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-nervous-system-common",
   "ic-nns-common",
   "ic-nns-constants",
-@@ -19530,6 +19631,7 @@
+@@ -19530,6 +19629,7 @@
   "ic-nns-governance-api",
   "ic-nns-governance-init",
   "ic-nns-handler-root",
@@ -4569,7 +4510,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-registry-canister-api",
   "ic-registry-client",
   "ic-registry-client-helpers",
-@@ -19855,9 +19957,9 @@
+@@ -19855,9 +19955,9 @@
  
  [[package]]
  name = "proc-macro2"
@@ -4582,7 +4523,7 @@ diff --git a/Cargo.lock b/Cargo.lock
  dependencies = [
   "unicode-ident",
  ]
-@@ -20181,9 +20283,9 @@
+@@ -20181,9 +20281,9 @@
  
  [[package]]
  name = "quote"
@@ -4595,7 +4536,7 @@ diff --git a/Cargo.lock b/Cargo.lock
  dependencies = [
   "proc-macro2",
  ]
-@@ -22941,6 +23043,17 @@
+@@ -22941,6 +23041,17 @@
  ]
  
  [[package]]
@@ -4613,7 +4554,7 @@ diff --git a/Cargo.lock b/Cargo.lock
  name = "syn-solidity"
  version = "1.7.1"
  source = "registry+https://github.com/rust-lang/crates.io-index"
-@@ -24557,7 +24670,7 @@
+@@ -24557,7 +24668,7 @@
   "ic-limits",
   "ic-logger",
   "ic-management-canister-types-private",
@@ -4622,7 +4563,7 @@ diff --git a/Cargo.lock b/Cargo.lock
   "ic-registry-subnet-type",
   "ic-replicated-state",
   "ic-test-utilities",
-@@ -25717,6 +25830,12 @@
+@@ -25717,6 +25828,12 @@
  ]
  
  [[package]]
@@ -4642,9 +4583,9 @@ diff --git a/Cargo.toml b/Cargo.toml
  opt-level = 3
  
  [workspace.dependencies]
-+ic-wire = { version = "0.10.0", default-features = false }
++ic-wire = { version = "0.11.0", default-features = false }
 +ic-host-process = { version = "0.72.1", default-features = false }
-+ic-metrics = { version = "0.21.0", default-features = false }
++ic-metrics = { version = "0.22.0", default-features = false }
 +
 +ic-platform = { version = "0.12.0", default-features = false, features = ["gzip"] }
  actix-rt = "2.10.0"
@@ -4669,7 +4610,7 @@ diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
 +crate.spec(
 +    default_features = False,
 +    package = "ic-wire",
-+    version = "0.10.0",
++    version = "0.11.0",
 +)
 +crate.spec(
 +    default_features = False,
@@ -4679,7 +4620,7 @@ diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
 +crate.spec(
 +    default_features = False,
 +    package = "ic-metrics",
-+    version = "0.21.0",
++    version = "0.22.0",
 +)
 +crate.spec(
 +    default_features = False,
