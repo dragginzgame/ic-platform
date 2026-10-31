@@ -764,10 +764,10 @@ For direct low-level invocation, explicitly prepare the pinned published package
 then capture its offline-admitted selection before running the helper:
 
 ```sh
-bash scripts/dev/install-rust-tools.sh --package ic-build --version 0.18.0 \
-  --bin ic-build-release-metadata --profile debug || exit "$?"
+bash scripts/dev/install-rust-tools.sh --package ic-build --version 0.73.0 \
+  --bin ic-build-release-metadata --profile debug --features cli || exit "$?"
 CARGO_RELEASE_METADATA_EDITOR="$(bash scripts/dev/install-rust-tools.sh \
-  --package ic-build --version 0.18.0 --bin ic-build-release-metadata --profile debug \
+  --package ic-build --version 0.73.0 --bin ic-build-release-metadata --profile debug --features cli \
   --check --wait-seconds 30)" || exit "$?"
 export CARGO_RELEASE_METADATA_EDITOR
 export CARGO_RELEASE_METADATA_MAX_BYTES=8388608
@@ -883,6 +883,20 @@ group uses that source. A `package` group owns literal `package.version` values
 in every member, all matching its primary member. No shadow version file is
 introduced. Member paths come from successful locked Cargo metadata.
 
+A group may declare an optional `metadata_files` array for additional
+consumer-owned release metadata, for example a runtime qualification lockfile
+and an exact runtime-guard pin. Paths must name existing regular files beneath
+the repository, without symlink components. They must be unique across groups
+and cannot overlap workspace manifests, the root lockfile, group ledgers, the
+group policy or Git state. They are appended in declared order to the exact
+release-file plan and bound by the existing source/receipt checks.
+
+Shared preparation preserves these files byte-for-byte and restores them with
+its transaction on failure. The consumer owns their rendering, semantic checks
+and any recovery spanning its additional preparation steps; listing a file does
+not supply those checks or make the whole consumer adapter transactional.
+An unselected group's additional metadata remains outside the staging roster.
+
 `dependencies` explicitly lists root `workspace.dependencies` aliases with both
 path and version that refer to members of that group, including renamed aliases
 and requirements used by other groups. It must match that complete set. Simple
@@ -929,10 +943,10 @@ the existing bounded input contract. Its selection JSON explicitly names a
 projections. The existing lock editor already accepts a selected package set.
 Adopt a published supplying editor through the normal tool-selection mechanism;
 do not patch vendored scripts or silently use an unrelated executable. The
-standalone `test-cargo-release-groups.sh` fixture accepts an explicitly selected
-candidate editor for producer integration qualification; that evidence is not
-registry delivery. The default portable roster retains its released editor until
-a supplying release is available.
+`test-cargo-release-groups.sh` fixture is part of the portable CI roster and uses
+Shared's selected IC Build 0.73.0 editor with its explicit `cli` feature. Direct
+producer integration qualification may select a compiled candidate explicitly;
+that evidence is not registry delivery or installed-tool admission.
 
 Publication remains separate. Use the consumer's explicit selected package batch
 with the existing publication adapter; it admits each package's own version and

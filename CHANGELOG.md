@@ -9,12 +9,21 @@
   those exact types. Coordinate the one-time Wire/type-owner migration; external
   bytes and account semantics stay unchanged.
   [#118 — Stable owned identity boundary](https://github.com/dragginzgame/ic-platform/issues/118).
-  Release preparation awaits admitted Shared release-group support.
+
+### 🩹 Fixed
+
+- Default release commands to the Platform group and select each group’s version
+  and ledger explicitly. Publication selects the group’s packages using their
+  individual versions, with explicit batches available for supplier-first uploads.
+- Admit the published group-capable metadata editor and declare runtime lock/pin
+  custody explicitly. Preserve their checks; qualify both groups through real
+  preparation, retry, staged/committed checks and local delivery/resume.
 
 ### ⬆️ Dependencies
 
-- Adopt Shared Tooling 0.27.14 with explicit Platform/types release-group
-  admission and the canonical Principal conversion-owner boundary.
+- Adopt committed Shared Tooling `ef14942` with explicit Platform/types release
+  groups, additional metadata custody and the canonical Principal conversion-owner
+  boundary. Select published IC Build 0.73.0 for grouped metadata editing.
 
 - Update the native Profiler profile to published Platform 0.12.0 and share one
   Host Artifacts 0.72.1 gzip supplier with Host Process/FS. Preserve the pinned

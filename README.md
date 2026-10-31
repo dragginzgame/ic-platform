@@ -2,8 +2,8 @@
 
 The prepared #118 boundary re-exports the canonical Principal/Account identities
 from `ic-platform-types`. Its independent release identity prevents unrelated
-runtime changes from replacing those types. Release/adoption awaits coordinated
-Wire integration and admitted Shared release-group support.
+runtime changes from replacing those types. The initial facade publication needs
+coordinated Wire integration; grouped release tooling is qualified locally.
 
 One controlled dependency boundary for IC runtime integration and required IC
 Candid interfaces. All application endpoints we own use IC Wire, including public
@@ -159,7 +159,7 @@ Installed-runtime CI prepares only the common tools, in order with
 release editor or Node/npm/TypeScript. Normal `make install-tools` still prepares
 the complete contributor set, and standard CI retains the Wire frontend proof.
 
-Tool setup includes the pinned IC Build 0.72.0 release editor with its `cli`
+Tool setup includes the pinned IC Build 0.73.0 release editor with its `cli`
 feature, which requires Rust 1.91 or later to build. `make install-release-editor`
 prepares it separately;
 `make release-editor-check` admits it offline. Standard release commands prepare
@@ -217,20 +217,30 @@ Wasm, including with all features enabled.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.
-They do not publish crates. Initial registry publication remains a separately
+They default to `RELEASE_GROUP=platform`; `RELEASE_GROUP=types` selects the
+independent identity version and ledger. Both groups retain full workspace gates
+and explicit metadata custody; see [the handoff](docs/status/current.md) for
+qualification and outstanding release constraints. They do not publish crates. Initial
+registry publication remains a separately
 authorized operation after a clean committed source and native qualification.
 
 Run `make publish-check` to package and verify the current version with all
 features without uploading; this dry run allows working-tree changes. After
-release and native qualification, `make publish` uploads the current committed
-`ic-platform-runtime-guard`, `ic-platform-macros` and `ic-platform` versions to crates.io using Cargo's
-configured credentials and dependency ordering. It
+release and native qualification, `make publish` uploads the selected group’s committed packages to crates.io using each package's own version, configured
+credentials and Cargo dependency ordering. The default Platform group contains
+`ic-platform-runtime-guard`, `ic-platform-macros` and `ic-platform`;
+`RELEASE_GROUP=types` selects `ic-platform-types`. `PACKAGE='name ...'` selects an
+explicit eligible batch for supplier-first publication. An unchanged identity
+supplier is not re-uploaded during subsequent Platform publications. It
 requires a clean checkout and does not bump versions, commit, tag or push.
+For the initial extraction, publish the new types supplier first with
+`make publish RELEASE_GROUP=types`, then publish the Platform group, or select
+all four packages explicitly in one batch after release qualification.
 Both commands use the lockfile and retain evidence under `target/publication/`.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are
-automatic: after an interrupted dispatch, reconcile all three exact registry package versions
-before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
+automatic: after an interrupted dispatch, reconcile every dispatched exact registry
+package version before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
 prove registry visibility or consumer adoption.
 
 Linux x86-64 and macOS 15 on Intel and Apple Silicon are supported hosts.

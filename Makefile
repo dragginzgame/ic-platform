@@ -4,6 +4,7 @@ FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/ver
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs scripts/fixtures/stable-identities/*.rs)
+export RELEASE_GROUP ?= platform
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
@@ -32,7 +33,8 @@ help:
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Exact saved recovery: release-resume VERSION=X.Y.Z'
 	@echo 'Feature graphs: check-features; check-features-exhaustive FEATURES=a,b (1–12 features)'
-	@echo 'Registry: publish-check (dry run), publish (upload current committed version)'
+	@echo 'Release/publish group: platform by default; RELEASE_GROUP=types selects the independent identities'
+	@echo 'Registry: publish-check (dry run), publish (selected group); PACKAGE= selects an explicit batch'
 	@echo 'Release editor: install-release-editor; release-editor-check (offline)'
 	@echo 'Browser SDK: install-browser-tools, check-browser; check-browser-runtime needs prepared Chromium'
 
@@ -131,6 +133,8 @@ check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/browser-compiler-floor --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
+	bash scripts/ci/test-platform-release-groups.sh
+	bash scripts/ci/test-platform-group-preparation.sh
 	bash scripts/release/test-editor-bootstrap.sh
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 	bash scripts/ci/test-release-changelog.sh
@@ -150,7 +154,7 @@ release-prepared-check release-committed-check release-tagged-check release-push
 release-commit-check:
 	@bash scripts/release/adapter.sh commit-check
 release-files:
-	@printf 'Cargo.toml\0Cargo.lock\0CHANGELOG.md\0scripts/fixtures/cdk-runtime/Cargo.lock\0ci/dependency-pinning-exceptions.json\0'
+	@bash scripts/release/adapter.sh files
 
 .PHONY: check-runtime
 check-runtime:

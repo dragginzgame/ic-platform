@@ -2862,34 +2862,43 @@ the proposed owner arrangement, not adoption by published Wire or a production
 codec fork. Current/MSRV native/Wasm profiles cover identity-only, external-ledger
 and one-runtime selections. Ordinary tests retain representation/conversion vectors.
 
-Shared Tooling 0.27.14 (committed revision
-b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57) is now adopted through its exporter.
-The two explicit groups in `ci/cargo-release-groups.json` admit the independent
-identity version and preserve the facade/macros/exact-guard coordinated group.
-Pin checks and both group graph projections pass. Merged
-[Shared PR #329](https://github.com/dragginzgame/shared-tooling/pull/329) supplies
-only the common `ic-platform-types -> ic_principal` owner exception; the actual
-provider boundary now passes without editing vendored payloads.
+Shared Tooling committed revision
+`ef14942393871e3e2f0c094532dd2a0ea835485a` is adopted through its exporter.
+The explicit groups in `ci/cargo-release-groups.json` preserve the coordinated
+facade/macros/exact-guard identity and independently version the types supplier.
+The platform group explicitly owns its runtime qualification lock and exact
+runtime-guard pin exception as additional metadata. Types-only preparation leaves
+those files and the Platform version unchanged. The common conversion-owner
+exception admits only `ic-platform-types -> ic_principal`.
 
-Release execution is still unqualified. The current published IC Build editor
-does not supply Shared's `group-manifest` command. A disposable preparation with
-the selected real editor fails and restores every selected input. Platform's
-consumer release adapter also retains two required metadata files outside the
-new platform group plan: its maintained runtime qualification lock and exact
-guard-pin exception. Do not omit their updates/custody or skip their checks.
-Supply and adopt the group-capable editor, agree explicit custody of those
-additional metadata files with the Shared owner, and qualify the real consumer
-preparation/resume/publication path before enabling grouped releases.
+Published IC Build 0.73.0 supplies the required `group-manifest` renderer. Both
+groups undergo real metadata preparation, idempotent retry, staged/committed
+checks and delivery/resume to disposable local Git remotes in
+`scripts/ci/test-platform-group-preparation.sh`. That fixture substitutes tool
+installation and the expensive full CI gate, so it does not claim production
+release or installed-runtime qualification. A real types-package publication dry
+run packages and verifies the standalone supplier without uploading. Current/MSRV
+native/Wasm identity/schema proofs remain separate from production Wire adoption.
 
-Current read-only admission commands are:
+The extraction changes Rust identity once. Publish the stable supplier first and
+coordinate Wire's schema dependency with the facade's initial adoption; Wire #36
+owns that product change. Later unrelated Platform minors retain the same stable
+identity requirement. Changes to the identity contract itself still require normal
+versioning and consumer qualification. No package version, tag or registry release
+is changed by these checks.
 
-```sh
-make shared-tooling-check check-pins check-boundary
-RELEASE_GROUP=platform bash scripts/ci/cargo-release-metadata.sh check-graph ic-platform
-RELEASE_GROUP=types bash scripts/ci/cargo-release-metadata.sh check-graph ic-platform-types
-```
+### Release command routing
 
-These commands do not establish runnable `make release-*` or publication
-qualification. Keep #118 open until the actual group preparation/publication and
-real Wire consumer adoption pass. No existing package version or publication is
-changed by this preparation.
+`make release-*` exports `platform` by default, preserving the normal command
+spelling. `RELEASE_GROUP=types` selects the independent identity version and
+ledger. The adapter selects the primary package and exact file roster from that
+group, checks editor capability and metadata custody before mutation, and retains
+full workspace qualification. Platform preparation updates the maintained runtime
+lock and guard pin; both groups check their consistency.
+
+Publication delegates retained attempts to Shared. Its default batch contains the
+selected group's packages, each at its actual Cargo version. The eligible roster
+includes the stable identity supplier. Explicit `PACKAGE='name ...'` batches
+support first-supplier publication and partial-upload reconciliation. Subsequent
+Platform publications do not implicitly upload unchanged types. Every batch runs
+full Clippy; selecting a group never narrows the workspace release gate.

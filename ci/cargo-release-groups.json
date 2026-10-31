@@ -5,17 +5,32 @@
       "name": "platform",
       "primary": "ic-platform",
       "version": "workspace",
-      "members": ["ic-platform", "ic-platform-macros", "ic-platform-runtime-guard"],
+      "members": [
+        "ic-platform",
+        "ic-platform-macros",
+        "ic-platform-runtime-guard"
+      ],
       "changelog": "CHANGELOG.md",
-      "dependencies": ["ic-platform-macros", "ic-platform-runtime-guard"]
+      "dependencies": [
+        "ic-platform-macros",
+        "ic-platform-runtime-guard"
+      ],
+      "metadata_files": [
+        "scripts/fixtures/cdk-runtime/Cargo.lock",
+        "ci/dependency-pinning-exceptions.json"
+      ]
     },
     {
       "name": "types",
       "primary": "ic-platform-types",
       "version": "package",
-      "members": ["ic-platform-types"],
+      "members": [
+        "ic-platform-types"
+      ],
       "changelog": "crates/ic-platform-types/CHANGELOG.md",
-      "dependencies": ["ic-platform-types"]
+      "dependencies": [
+        "ic-platform-types"
+      ]
     }
   ]
 }

@@ -1,5 +1,56 @@
 # Current handoff
 
+## #118 identity owner and grouped release qualification
+
+The canonical identity extraction is committed by the maintainer at `6dc3b09`:
+`ic-platform-types` 0.1.0 owns Principal/Account/Subaccount and their errors;
+Platform explicitly re-exports them. The pending facade release is 0.14.0 for the
+one-time Rust identity change; actual workspace versions remain 0.13.0. The real
+Wire trait/implementation fixture proves unchanged identities across unrelated
+facade minors on current/MSRV native/Wasm. Published Wire adoption remains Wire
+#36; coordinate that dependency change before the initial facade publication.
+
+Shared committed revision `ef14942393871e3e2f0c094532dd2a0ea835485a` is now
+canonically exported. The supplier commit is titled 0.27.15 but its VERSION still
+records 0.27.14; the maintainer accepted that discrepancy. Snapshot metadata
+preserves the supplied version and exact revision. The payload adds explicit
+`metadata_files` custody. The Platform group declares its runtime qualification
+lock and exact guard-pin exception, so Shared and consumer staging plans agree.
+The published IC Build 0.73.0 editor is installed and admitted, including its
+actual `group-manifest` capability. The historical supplier blockers below are
+superseded; no vendored payload was edited directly.
+
+Normal release commands explicitly default to `platform`; `RELEASE_GROUP=types`
+selects its independent version and ledger. Publication delegates retained
+attempts to Shared, using each selected package's actual version. Explicit
+`PACKAGE='name ...'` batches support publishing the new supplier first. Unchanged
+types are excluded from later default Platform uploads. Both paths retain the
+full workspace validation gates.
+
+Full Clippy, snapshot/pin/boundary/inventory/docs/format admission and routing
+checks pass. A real `make publish-check RELEASE_GROUP=types` packages and verifies
+`ic-platform-types` 0.1.0, then aborts the upload as a dry run. Evidence:
+`target/publication/check.selection.ntJ50I` and
+`/tmp/platform-118-types-publish-check.log`.
+The real explicit four-package batch also packages/verifies successfully with
+Cargo dependency ordering and no upload:
+`target/publication/check.selection.pDf3lL` and
+`/tmp/platform-118-initial-batch-publish-check.log`. These use current working
+versions; they do not permit re-uploading the already released 0.13.0 packages.
+
+The maintained grouped-preparation fixture exercises the real editor, both group
+plans, metadata retries, staged/committed checks and delivery/resume with only
+local disposable Git remotes. It substitutes tool installation and full CI, so
+its Git effects do not establish production release acceptance. The separate
+full-CI/runtime qualification constraint from Timers' old Platform/executor
+selection remains; do not weaken singleton checks to bypass it. Existing
+identity/schema, source, MSRV and installed evidence keep their original scope.
+Clean grouped fixture evidence: `/tmp/platform-group-preparation.A6QMwQ` and
+`/tmp/platform-118-group-preparation-final.log`; focused admission:
+`/tmp/platform-118-final-admission.log`.
+No normal-checkout version, commit, tag, push, registry upload or cleanup was
+performed. The following entries retain historical context.
+
 ## Shared 0.27.14 metadata refresh
 
 Canonical refresh selects committed revision b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57. Relative
