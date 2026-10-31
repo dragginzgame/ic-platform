@@ -1,5 +1,23 @@
 # Current handoff
 
+## Pending 0.13.1: qualified native Profiler supplier alignment
+
+PRs #115/#117/#119 adopt the independently pinned Platform 0.12.0 gzip surface,
+Host Artifacts/Process/FS 0.72.1, Wire 0.11 and arithmetic-only Metrics 0.22.
+Metrics defaults/native-wire stay disabled; the profile has one Wire generation
+and no endpoint/platform-types or runtime-guard activation. Codec bytes, limits,
+ICPROF03 framing, counter arithmetic and saved formats stay unchanged. The root
+library remains gzip-free. Package versions stay at released 0.13.0; compatible
+native-profile adoption selects pending patch notes 0.13.1. No release is run.
+
+The final native source tree matches qualified provider
+26ce82a78759f626fc177259eb6f73b75eafc526 byte-for-byte. Its retained qualification
+records a fresh native server build, 83 recorder tests, 114 product tests and six
+installed scenarios passing; server SHA-256 is
+10c53a828fb12a99cf5bb41cbe8802be2f7e3209c2ca320cf7081d7c12ed42c7. Evidence is in
+Profiler artifacts/metrics-update-20261031/qualification.json. Historical notes
+below describe earlier supplier selections.
+
 ## Pending 0.13: remove the gzip forwarding boundary
 
 PR #109 removes the optional native gzip surface and production Host Artifacts
