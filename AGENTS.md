@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`39ba9836a269ee7ea7f073a3f23d9cefe3c7d03c` is recorded in
+`54fc49e12f439dbe18d232f622a6d78e61773353` is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -139,16 +139,18 @@ dependency; Agent/PocketIC codes keep their external identities.
 
 ## Stable identity supplier (#118)
 
-The maintainer's revised #118 approval keeps one Cargo workspace with independent
-Platform and Types release groups. Facade/macros/exact runtime guard inherit
-workspace.package.version; ic-platform-types owns a same-valued literal starting
-from published 0.15.0. Preserve numeric versions during implementation. Keep the
-root Cargo comment map and both canonical group ledgers aligned with policy.
-Platform explicitly re-exports the sole canonical types. Keep registry Principal
-conversions with the type owner and ledger DTO conversions with Platform; preserve
-all bodies, bytes, bounds, Serde, zero fields and provenance. Keep exact common
-runtime-lock custody and platform-only guard-pin custody, full graph validation
-and source/group-bound resume. This supersedes the temporary synchronized policy.
+The maintainer approved independent Platform and Types groups in one workspace.
+All four packages own explicit versions; root workspace.package has no version.
+Keep crate paths, numeric versions, dependency selections and one lockfile intact
+when migrating ownership. The root Cargo comment map names each group's primary
+version source and releases/<group>/CHANGELOG.md. Root CHANGELOG.md is an index;
+releases/history.md preserves coordinated history through 0.15.0 once.
+Release, resume and publication require explicit RELEASE_GROUP=platform or types,
+including environment selection; no default or PACKAGE inference is allowed.
+Publication subsets must stay within the selected group. Preserve shared runtime
+lock and platform-only pin custody, full validation and recorded recovery.
+Platform re-exports the sole canonical types; conversions, source bodies, bytes,
+Serde, zero fields and provenance stay with their current owners.
 
 ## Owned Principal
 

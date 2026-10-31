@@ -2837,10 +2837,11 @@ schema implementations with its trait owner. No source bodies, representations,
 Serde, bounds, absent-versus-zero fields or cryptographic behavior change.
 
 The maintainer's revised #118 decision restores independent release groups in
-one Cargo workspace. Platform, macros and the exact runtime guard inherit
-`workspace.package.version`; Types owns a literal version in its existing
-manifest. Both start from the published 0.15.0 baseline. No existing numeric
-version, tag, archive or published dependency declaration is rewritten.
+one Cargo workspace. Every member now owns a literal package.version in its
+existing manifest; root workspace.package retains common metadata without a
+version. Platform/macros/guard retain 0.15.1 and Types retains 0.15.0 during the
+symmetric-layout adoption. No existing numeric version, tag, archive or published
+dependency declaration is rewritten.
 
 The root Cargo comment map documents the two groups, version sources and ledgers;
 `ci/cargo-release-groups.json` remains executable policy. One root dependency
@@ -2849,25 +2850,31 @@ Types' compatible requirement, supplying identity and ledger unchanged. A Types
 release updates its admitted requirement and requires separate consumer
 compatibility/publication assessment; it does not silently publish the facade.
 
-The root changelog owns future Platform/macros/guard notes. The Types ledger owns
-future Types notes and links to the intact coordinated history through 0.15.0
-in root. Its initial 0.1 publication remains historical, without a version reset
-or duplicate 0.15 notes. This supersedes the temporary synchronized-version
-policy shipped in 0.15, while retaining its canonical type owner and bytes.
+releases/platform/CHANGELOG.md owns Platform/macros/guard notes, and
+releases/types/CHANGELOG.md owns Types notes. Root CHANGELOG.md is an index. The
+intact coordinated history through 0.15.0 lives once in releases/history.md;
+Types' initial 0.1 history remains in its own ledger. Existing relative links
+are rebased without rewriting release identities or prose. This supersedes the
+temporary synchronized-version policy shipped in 0.15, while retaining its
+canonical type owner and bytes.
 
 ### Release command routing
 
-`make release-*` defaults to `platform`; `RELEASE_GROUP=types` explicitly selects
-the independent type version and ledger. Publication follows the same selection,
-so runtime-only changes do not re-upload unchanged Types. Explicit `PACKAGE`
-batches support supplier-first publication when both groups actually change and
-reconciled partial-publication recovery. All workspace release gates and full
-publication Clippy remain required; npm publication stays separate.
+Every release, resume and publication command must explicitly select
+RELEASE_GROUP=platform or RELEASE_GROUP=types. Missing, empty and unknown groups
+refuse before setup or validation. An explicit environment selection is valid.
+Publication follows the same selection, so runtime-only changes do not re-upload
+unchanged Types. Explicit PACKAGE subsets stay within the selected group and
+support reconciled partial-publication recovery. When both groups change, publish
+Types first and then the separately released compatible Platform group; PACKAGE
+never infers a group or admits a mixed batch. All workspace release gates and
+full publication Clippy remain required; npm publication stays separate.
 
 The runtime qualification lock is explicitly common consumer metadata, included
 once in both groups' exact plans. The exact runtime-guard pin remains private to
 the Platform group. Semantic checks compare the recorded runtime trio to the
-workspace version and an optional recorded Types owner to its literal version.
+Platform primary package version and an optional recorded Types owner to its
+literal version.
 Preparation changes only the selected group's recorded identities. Historical
 locks without Types remain unchanged during Types releases; adding a qualified
 owner requires actual composition qualification, not a fabricated lock refresh.

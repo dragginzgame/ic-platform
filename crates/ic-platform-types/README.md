@@ -12,5 +12,6 @@ and `principal-self-authenticating` selects unchanged upstream public-key hashin
 There is no runtime, executor, Wire or Candid dependency.
 
 Existing Platform consumers keep their import paths. External bytes and account
-semantics remain unchanged. This package's changelog owns its group notes and links the earlier coordinated
-0.15 history in root; initial 0.1 notes remain historical.
+semantics remain unchanged. Its [group ledger](https://github.com/dragginzgame/ic-platform/blob/main/releases/types/CHANGELOG.md)
+owns release notes and links the earlier coordinated history. Initial 0.1 notes
+remain historical. Release and publication require explicit RELEASE_GROUP=types.

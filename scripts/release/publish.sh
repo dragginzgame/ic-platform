@@ -4,9 +4,9 @@ set -euo pipefail
 [[ $# == 1 && ( "$1" == check || "$1" == publish ) ]] || exit 2
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
-export RELEASE_GROUP="${RELEASE_GROUP:-platform}"
-export CARGO_PUBLISH_PACKAGES='ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform'
+export RELEASE_GROUP
 members="$(bash scripts/release/group.sh members)"
+export CARGO_PUBLISH_PACKAGES="$members"
 if [[ "${PACKAGE+x}" == x ]]; then
     [[ -n "$PACKAGE" ]] || { echo 'Explicit PACKAGE must not be empty' >&2; exit 2; }
     export CARGO_PUBLISH_SELECTION="$PACKAGE"

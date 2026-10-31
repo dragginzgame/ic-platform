@@ -4,7 +4,15 @@ FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/ver
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs scripts/fixtures/stable-identities/*.rs)
-export RELEASE_GROUP ?= platform
+# Independent groups require a visible selection before any recipe or setup.
+ifneq ($(filter-out release-editor-check,$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
+ifeq ($(RELEASE_GROUP),platform)
+else ifeq ($(RELEASE_GROUP),types)
+else
+$(error Select RELEASE_GROUP=platform or RELEASE_GROUP=types)
+endif
+endif
+export RELEASE_GROUP
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
@@ -33,7 +41,7 @@ help:
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Exact saved recovery: release-resume VERSION=X.Y.Z'
 	@echo 'Feature graphs: check-features; check-features-exhaustive FEATURES=a,b (1–12 features)'
-	@echo 'Release/publish defaults to platform; RELEASE_GROUP=types selects the independent identity group'
+	@echo 'Release/publish requires RELEASE_GROUP=platform or RELEASE_GROUP=types'
 	@echo 'Registry: publish-check (dry run), publish (selected group); PACKAGE= selects an explicit batch'
 	@echo 'Release editor: install-release-editor; release-editor-check (offline)'
 	@echo 'Browser SDK: install-browser-tools, check-browser; check-browser-runtime needs prepared Chromium'
@@ -120,7 +128,7 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform/src/call/README.md crates/ic-platform-macros/README.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform/src/call/README.md crates/ic-platform-macros/README.md
 .PHONY: check-inventory
 .PHONY: check-native-provider
 check-native-provider:
@@ -136,10 +144,14 @@ check-release-commands:
 	bash scripts/ci/test-platform-release-groups.sh
 	bash scripts/ci/test-platform-group-preparation.sh
 	bash scripts/release/test-editor-bootstrap.sh
-	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 	bash scripts/ci/test-release-changelog.sh
 ci:
 	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
+
+release-resume: check-release-resume-policy
+.PHONY: check-release-resume-policy
+check-release-resume-policy:
+	@bash scripts/release/check-resume-policy.sh "$(VERSION)"
 
 version release-version:
 	@bash scripts/release/adapter.sh version

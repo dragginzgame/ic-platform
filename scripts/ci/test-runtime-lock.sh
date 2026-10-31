@@ -7,10 +7,9 @@ source "$root/scripts/ci/fixture-lifecycle.sh"
 fixture="$(fixture_create "${TMPDIR:-/tmp}/platform-runtime-lock.XXXXXX")"
 fixture_complete=false
 trap 'fixture_finish "$?" "$fixture" "Runtime lock fixture retained"' EXIT
-mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/fixtures/cdk-runtime" "$fixture/.tools" "$fixture/ci" "$fixture/crates/ic-platform-types"
+mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/fixtures/cdk-runtime" "$fixture/.tools" "$fixture/ci" "$fixture/crates/ic-platform-types" "$fixture/crates/ic-platform"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 cp "$root/scripts/release/"{runtime-lock.sh,runtime-pin.sh} "$fixture/scripts/release/"
-cp "$root/scripts/ci/"{read-cargo-workspace-version.sh,StableVersion.pm} "$fixture/scripts/ci/"
 cp "$root/ci/"{release-editor.env,dependency-pinning-exceptions.json} "$fixture/ci/"
 editor="$(bash "$root/scripts/release/editor.sh" check)"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" %q\n' "$editor" > "$fixture/scripts/release/editor.sh"
@@ -18,9 +17,10 @@ lock="$fixture/scripts/fixtures/cdk-runtime/Cargo.lock"
 cp "$root/scripts/fixtures/cdk-runtime/Cargo.lock" "$lock"
 export YQ="$root/.tools/host/bin/yq"
 export PATH="$root/.tools/host/bin:$PATH"
-version="$(bash "$root/scripts/ci/read-cargo-workspace-version.sh" --stable "$root/Cargo.toml")"
+version="$("$YQ" -p toml -o json -r '.package.version' "$root/crates/ic-platform/Cargo.toml")"
 types="$("$YQ" -p toml -o json -r '.package.version' "$root/crates/ic-platform-types/Cargo.toml")"
-printf '[workspace]\n[workspace.package]\nversion = "%s"\n' "$version" > "$fixture/Cargo.toml"
+printf '[workspace]\n' > "$fixture/Cargo.toml"
+printf '[package]\nversion = "%s"\n' "$version" > "$fixture/crates/ic-platform/Cargo.toml"
 printf '[package]\nversion = "%s"\n' "$types" > "$fixture/crates/ic-platform-types/Cargo.toml"
 bash "$fixture/scripts/release/runtime-lock.sh" check
 # The historical actual lock contains no local Types record. Types preparation
@@ -34,11 +34,11 @@ if ! "$YQ" -p toml -o json '.' "$lock" | jq -e 'any(.package[]; .source == null 
     printf '\n[[package]]\nname = "ic-platform-types"\nversion = "%s"\n' "$types" >> "$lock"
 fi
 cp "$lock" "$fixture/before.lock"
-printf '[workspace]\n[workspace.package]\nversion = "99.0.0"\n' > "$fixture/Cargo.toml"
+printf '[package]\nversion = "99.0.0"\n' > "$fixture/crates/ic-platform/Cargo.toml"
 if bash "$fixture/scripts/release/runtime-lock.sh" check > "$fixture/stale.log" 2>&1; then exit 1; fi
-if bash "$fixture/scripts/release/runtime-lock.sh" prepare 98.0.0 > "$fixture/wrong-base.log" 2>&1; then exit 1; fi
+if RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" prepare 98.0.0 > "$fixture/wrong-base.log" 2>&1; then exit 1; fi
 cmp "$lock" "$fixture/before.lock"
-bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
+RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
 bash "$fixture/scripts/release/runtime-lock.sh" check
 # Runtime-only changes preserve the independent owner and all registry records.
 for side in before after; do
@@ -53,7 +53,7 @@ for side in before after; do
 done
 cmp "$fixture/before.json" "$fixture/after.json"
 cp "$lock" "$fixture/runtime.lock"
-bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
+RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
 cmp "$lock" "$fixture/runtime.lock"
 # The reverse direction updates only the recorded Types owner.
 printf '[package]\nversion = "99.1.0"\n' > "$fixture/crates/ic-platform-types/Cargo.toml"
@@ -72,9 +72,9 @@ cmp "$lock" "$fixture/types.lock"
 # Exact guard-pin custody remains with the platform group.
 if bash "$fixture/scripts/release/runtime-pin.sh" check > "$fixture/pin-stale.log" 2>&1; then exit 1; fi
 cp "$fixture/ci/dependency-pinning-exceptions.json" "$fixture/before-pins.json"
-if bash "$fixture/scripts/release/runtime-pin.sh" prepare 98.0.0 > "$fixture/pin-wrong.log" 2>&1; then exit 1; fi
+if RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-pin.sh" prepare 98.0.0 > "$fixture/pin-wrong.log" 2>&1; then exit 1; fi
 cmp "$fixture/before-pins.json" "$fixture/ci/dependency-pinning-exceptions.json"
-bash "$fixture/scripts/release/runtime-pin.sh" prepare "$version"
+RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-pin.sh" prepare "$version"
 bash "$fixture/scripts/release/runtime-pin.sh" check
 for side in before after; do
     selected="$fixture/ci/dependency-pinning-exceptions.json"; [[ "$side" != before ]] || selected="$fixture/before-pins.json"

@@ -1,51 +1,64 @@
 # Current handoff
 
-## #118: restore independent Platform and Types groups
+## Shared 0.27.19: symmetric groups and delegated delivery
 
-Latest approval is the implementation section of Platform #118. It supersedes the
-synchronized 0.15 policy: keep one workspace, dependency catalog and root lockfile,
-with platform (facade/macros/exact runtime guard) and types (ic-platform-types)
-versioned independently. Both numeric baselines remain published 0.15.0. Types
-now owns a literal version; root requirements and numeric package versions stay
-unchanged. No existing release is rewritten or re-uploaded. Pending group notes
-select 0.15.1 separately; root retains coordinated history through 0.15 intact.
+Canonical adoption selects committed Shared revision
+54fc49e12f439dbe18d232f622a6d78e61773353 (Shared Tooling 0.27.19).
+Exported payloads are never edited in place. The new rules require
+explicit versions for every independent-group member, symmetric releases/ ledgers,
+a root changelog index and explicit command selection.
 
-Root Cargo comments map every member, canonical version source and ledger; JSON
-is executable policy. Platform releases preserve Types' selection/requirement and
-ledger; Types releases select their own version/notes and affected requirements.
-Default publication excludes unchanged Types. Explicit group and PACKAGE batches
-retain full gates, retained attempts and supplier-first Cargo ordering.
+At adoption, numeric versions and dependency selections are unchanged: Platform,
+macros and exact runtime guard are 0.15.1; Types is 0.15.0. Root Cargo has
+no workspace.package.version. Every member owns a literal matching its group's
+primary, with the same crate paths, common metadata, catalog and one lockfile.
+The root Cargo comment map and ci/cargo-release-groups.json record both groups.
 
-Shared release commit 0.27.17 is canonically exported from revision
-39ba9836a269ee7ea7f073a3f23d9cefe3c7d03c, including Shared PR #330's reviewed common
-metadata custody. All 117 payloads verify; none was edited in place. Top-level
-shared_metadata_files declares one common lock, retaining duplicate/reserved-path
-rejection and the existing transaction/receipt/runner. IC Build 0.73.0 remains the
-admitted published editor. The supplier custody gap is cleared. The supplier
-VERSION still says 0.27.16; snapshot metadata preserves that supplied value,
-following the maintainer's earlier instruction to ignore the version-label wrinkle.
+releases/platform/CHANGELOG.md owns Platform notes and released 0.15.1;
+releases/types/CHANGELOG.md owns Types notes and its initial 0.1 history.
+Coordinated releases through 0.15.0 are preserved once in releases/history.md;
+relative links are rebased to keep their targets. Root CHANGELOG.md is an index.
+The old Types ledger path is a short pointer and is excluded from crate archives.
+Delivery selects Platform 0.15.2 and Types 0.15.1 for compatible contributor
+tooling/layout changes; runtime APIs and type bytes are unchanged. Adoption alone
+does not change numeric versions; delegated release preparation owns those edits.
 
-The combined runtime lock is common to both groups; the exact guard pin remains
-platform-only. Consumer preparation renders all selected metadata in disposable
-committed source and installs it through Shared's transaction. Failed rendering
-must leave real metadata byte-identical, so exact resume safely retries.
-Runtime semantic checks treat the optional recorded Types owner independently;
-historical locks without it are preserved rather than resolved or invented.
+Every release, resume and publication requires RELEASE_GROUP=platform or types.
+Explicit environment selection works; missing/empty/unknown values refuse before
+setup/validation/effects. PACKAGE may select only a subset of that group. When
+both groups change, publish supplier and consumer groups separately in order.
+The former implicit platform default and mixed publication batches are retired.
 
-Full Clippy, current/MSRV native/Wasm cross-minor identity/schema profiles,
-independent runtime-lock and both real group preparation/resume tests pass.
-Failed consumer rendering preserves all originals; wrong-group resume refuses.
-Evidence is /tmp/platform-group-preparation.9w8ueo. The identity fixture uses actual Wire 0.12.1
-trait/implementation source with only its Types dependency aligned to local 0.15;
-published Wire 0.12.1 originally selected Types 0.1, so published adoption is not
-claimed. Wire #36 owns that product change. Disposable release qualification uses
-the committed PR snapshot; all
-117 payload hashes and release-policy/adapter inputs match the merged adoption.
-It substitutes tool installation/full CI, retaining real editor, metadata and
-local Git effects. Production release and installed-runtime acceptance are separate.
-Release evidence: /tmp/platform-118-independent-preparation.log. Other focused
-logs use /tmp/platform-118-*.log. No normal-checkout staging, commit, tag, push,
-upload or cleanup was performed. The Shared fix is delivered through merged #330.
+Common runtime-lock and platform-only exact guard-pin custody are preserved.
+Version readers, metadata transactions and fixtures use each primary package.
+A read-only resume guard rejects unfinished plans when their recorded policy
+blob differs; Shared's runner still owns all recovery authorization and effects.
+Older completed observations remain subject to its existing exact-source checks.
+No release journals or artifacts are removed. Current platform 0.14/0.15/0.15.1
+journals were complete at adoption; older legacy push-phase journals remain
+retained and must be reconciled in their original source/policy context if needed.
+
+Full Clippy, current/MSRV native/Wasm canonical identity/schema and singleton
+proofs pass. Public Make/CLI refusal and roster tests, runtime lock tests, both
+real group transaction/retry/local delivery/resume proofs and final governance
+checks are retained under /tmp/platform-groups-018-*.log. The complete group proof
+is /tmp/platform-groups-018-preparation-final.log; its disposable repositories are
+retained at /tmp/platform-group-preparation.L80Dns. Fixtures substitute tool
+installation/full CI, while retaining the actual editor, metadata,
+staged/committed checks and local Git effects. No production release, publication
+or new installed-runtime/macOS qualification is claimed.
+
+The only open native adoption PR at the start was #122, updated at 2fb05d2.
+It preserves qualified native inputs at 6c054c8 and uses pending root-ledger notes;
+after this layout migration is delivered, its notes need the Platform ledger.
+The maintainer now requested adoption and deployment. Shared's delegated-delivery
+rules authorize the necessary scoped source commit, Types patch release and
+crates.io publication, followed by Platform patch release and publication through
+the existing adapters. Both groups have packaging changes; npm is unaffected.
+The complete release gates and exact metadata/source admission remain required.
+Observe Git-owned release journals and registry state for actual delivery status;
+this plan alone is not a release or upload receipt. Preserve failed evidence and
+reconcile uncertain effects before recovery. Sibling checkout edits stay excluded.
 
 ## Retained constraints and evidence
 

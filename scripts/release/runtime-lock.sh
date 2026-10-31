@@ -7,10 +7,12 @@ export YQ="$root/.tools/host/bin/yq"
 export PATH="$root/.tools/host/bin:$PATH"
 mode="${1:-check}"
 case "$mode" in check) [[ $# -eq 1 ]] ;; prepare) [[ $# -eq 2 ]] ;; *) exit 2 ;; esac
-group="${RELEASE_GROUP:-platform}"
-case "$group" in platform|types) ;; *) exit 2 ;; esac
+group="${RELEASE_GROUP:-}"
+if [[ "$mode" == prepare ]]; then
+    case "$group" in platform|types) ;; *) echo 'Select RELEASE_GROUP=platform or RELEASE_GROUP=types' >&2; exit 2 ;; esac
+fi
 lock=scripts/fixtures/cdk-runtime/Cargo.lock
-platform="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
+platform="$("$YQ" -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)"
 types="$("$YQ" -p toml -o json -r '.package.version' crates/ic-platform-types/Cargo.toml)"
 records="$("$YQ" -p toml -o json '.' "$lock" | jq -ce '
     [.package[] | select(.source == null and (.name == "ic-platform" or .name == "ic-platform-macros" or .name == "ic-platform-runtime-guard" or .name == "ic-platform-types"))] as $p |

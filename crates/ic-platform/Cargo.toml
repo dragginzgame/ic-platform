@@ -1,7 +1,7 @@
 [package]
 name = "ic-platform"
 description = "Controlled Candid and IC runtime dependency boundary"
-version.workspace = true
+version = "0.15.1"
 edition.workspace = true
 rust-version.workspace = true
 license = "MIT AND Apache-2.0"
