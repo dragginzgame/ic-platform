@@ -6,7 +6,7 @@ cover the independent identity supplier. Release 0.15.0 was the last coordinated
 four-package release; its notes and all earlier history remain below with their
 original scope intact.
 
-## [0.15.1]
+## [0.15.1] - 2026-10-31
 
 ### 🩹 Fixed
 
