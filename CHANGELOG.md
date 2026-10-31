@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.13.1]
+
+### ⬆️ Dependencies
+
+- Adopt Platform 0.12.0/gzip in the native Profiler source profile, sharing Host
+  Artifacts 0.72.1 with Host Process/FS while preserving codec bytes and limits
+  ([#115 — Adopt Platform 0.12 in native Profiler](https://github.com/dragginzgame/ic-platform/pull/115)).
+- Adopt Wire 0.11.0 for private process frames without changing ICPROF03 identity,
+  frame admission or saved formats
+  ([#117 — Adopt Wire 0.11 for native Profiler transport](https://github.com/dragginzgame/ic-platform/pull/117)).
+- Adopt arithmetic-only Metrics 0.22.0 with defaults and native Wire metadata
+  disabled. Preserve overflow quality and Serde layouts, removing unused Wire
+  0.10 and TypeScript metadata dependencies
+  ([#119 — Adopt arithmetic-only Metrics 0.22 in native Profiler](https://github.com/dragginzgame/ic-platform/pull/119)).
+
 ## [0.13.0] - 2026-10-31
 
 ### ⚠️ Breaking
@@ -8,6 +23,29 @@
   `ic-host-artifacts/gzip` and import its `artifact` codecs directly. Platform
   no longer depends on generic Host artifacts; codec bytes and admission stay
   owned by Tooling. See the [migration](docs/migration.md#host-gzip-boundary).
+
+### ⬆️ Dependencies
+
+- Adopt published Metrics 0.21.0 in the Profiler native source profile's Cargo and
+  Bazel inputs. Preserve arithmetic-only features and existing logical reports.
+- Adopt published Host Process/FS 0.72.1, Wire 0.10.0 and gzip-only
+  Platform 0.11.1 in the native Cargo/Bazel inputs. Its runtime-only singleton
+  guard permits coexistence with the pinned workspace's registry executor
+  ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
+- Keep the explicit ICPROF03 private frame identity and unchanged Wire core
+  framing. Metrics and process transport share Wire 0.10; endpoints and
+  Platform-type schemas remain disabled, with unchanged arithmetic/Serde layouts
+  ([Observability #103 — Published Metrics metadata alignment](https://github.com/dragginzgame/ic-observability/issues/103)).
+
+- Keep Platform-owned gzip on its declared Host Artifacts 0.71 supplier; Host
+  Process/FS 0.72 select Host Artifacts 0.72 without a direct codec dependency.
+
+### 🧪 Testing
+
+- Separate event-detail truncation from metadata exhaustion in the installed
+  pricing regression. Keep the real cycle-balance comparison, leave metadata
+  headroom and report complete pricing evidence on failure
+  ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
 
 ### 🩹 Fixed
 
@@ -18,32 +56,6 @@
 - Canonicalize standalone admission-fixture paths so macOS temporary directories
   with a trailing slash retain the runtime artifact-lock coordination proof
   ([#113 — Canonicalize fixture lock paths](https://github.com/dragginzgame/ic-platform/issues/113)).
-
-### ⬆️ Dependencies
-
-- Adopt published Metrics 0.22.0 in the Profiler native source profile's Cargo and
-  Bazel inputs. Disable unused native Wire metadata while preserving arithmetic,
-  overflow quality and existing saved reports.
-- Adopt published Host Process/FS 0.72.1, Wire 0.11.0 and gzip-only
-  Platform 0.12.0 in the native Cargo/Bazel inputs. Its runtime-only singleton
-  guard permits coexistence with the pinned workspace's registry executor
-  ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
-- Keep the explicit ICPROF03 private frame identity and unchanged Wire 0.11 core
-  framing. Metrics disables defaults and `native-wire`, leaving one Wire
-  generation without TypeScript metadata, endpoints or Platform-type schemas.
-  Arithmetic and Serde layouts remain unchanged.
-
-- Keep the native profile on published Platform 0.12.0 for its existing gzip
-  consumer contract, independent of the upcoming root facade removal. Unify its
-  gzip and Host Process/FS on Host Artifacts 0.72.1 while preserving codec bytes
-  and limits.
-
-### 🧪 Testing
-
-- Separate event-detail truncation from metadata exhaustion in the installed
-  pricing regression. Keep the real cycle-balance comparison, leave metadata
-  headroom and report complete pricing evidence on failure
-  ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
 
 ## [0.12.0] - 2026-10-31
 
