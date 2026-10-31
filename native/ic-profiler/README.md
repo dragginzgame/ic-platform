@@ -134,7 +134,7 @@ TypeScript metadata feature is active; endpoints and Platform-type schemas stay
 disabled. Arithmetic and saved layouts are unchanged; see the
 [Metrics metadata adoption](https://github.com/dragginzgame/ic-observability/issues/103).
 
-The selected recorder and native graph use published Host Process/FS 0.72.0
+The selected recorder and native graph use published Host Process/FS 0.72.1
 and gzip-only Platform 0.11.1 from crates.io. Platform selects Host Artifacts
 0.71 for gzip, while the process family selects Host Artifacts 0.72. The published
 observation and workload APIs replace the temporary Tooling/Platform Git library

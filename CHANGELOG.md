@@ -6,7 +6,7 @@
 
 - Adopt published Metrics 0.21.0 in the Profiler native source profile's Cargo and
   Bazel inputs. Preserve arithmetic-only features and existing logical reports.
-- Adopt published Host Process/FS 0.72.0, Wire 0.10.0 and gzip-only
+- Adopt published Host Process/FS 0.72.1, Wire 0.10.0 and gzip-only
   Platform 0.11.1 in the native Cargo/Bazel inputs. Its runtime-only singleton
   guard permits coexistence with the pinned workspace's registry executor
   ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
