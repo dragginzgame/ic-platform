@@ -4,6 +4,14 @@ This group covers ic-platform, ic-platform-macros and ic-platform-runtime-guard.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.15.4]
+
+### ⬆️ Dependencies
+
+- Adopt Host Process/FS/Artifacts 0.73.2 and core Wire 0.13.1 in the native
+  Profiler Cargo/Bazel inputs. Keep Metrics 0.24.0 independently locked and
+  preserve process observations, gzip bytes, frame admission and saved reports.
+
 ## [0.15.3] - 2026-10-31
 
 ### ⬆️ Dependencies
