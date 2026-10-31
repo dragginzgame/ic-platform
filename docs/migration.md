@@ -519,7 +519,7 @@ native/Wasm benchmark Clippy checks pass with warnings denied before execution.
 
 ## Host gzip boundary
 
-The next 0.12 contract removes Platform's native `gzip` feature and
+The next 0.13 contract removes Platform's native `gzip` feature and
 `ic_platform::gzip` exports. Generic compression belongs to IC Tooling; callers
 select `ic-host-artifacts` with `default-features = false, features = ["gzip"]`
 and use `ic_host_artifacts::artifact::{encode_gzip, decode_gzip, GzipError}`.

@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.12.0] - Unreleased
+## [0.13.0]
 
 ### ⚠️ Breaking
 
@@ -8,6 +8,52 @@
   `ic-host-artifacts/gzip` and import its `artifact` codecs directly. Platform
   no longer depends on generic Host artifacts; codec bytes and admission stay
   owned by Tooling. See the [migration](docs/migration.md#host-gzip-boundary).
+
+### ⬆️ Dependencies
+
+- Adopt published Metrics 0.21.0 in the Profiler native source profile's Cargo and
+  Bazel inputs. Preserve arithmetic-only features and existing logical reports.
+- Adopt published Host Process/FS 0.72.1, Wire 0.10.0 and gzip-only
+  Platform 0.11.1 in the native Cargo/Bazel inputs. Its runtime-only singleton
+  guard permits coexistence with the pinned workspace's registry executor
+  ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
+- Keep the explicit ICPROF03 private frame identity and unchanged Wire core
+  framing. Metrics and process transport share Wire 0.10; endpoints and
+  Platform-type schemas remain disabled, with unchanged arithmetic/Serde layouts
+  ([Observability #103 — Published Metrics metadata alignment](https://github.com/dragginzgame/ic-observability/issues/103)).
+
+- Keep Platform-owned gzip on its declared Host Artifacts 0.71 supplier; Host
+  Process/FS 0.72 select Host Artifacts 0.72 without a direct codec dependency.
+
+### 🧪 Testing
+
+- Separate event-detail truncation from metadata exhaustion in the installed
+  pricing regression. Keep the real cycle-balance comparison, leave metadata
+  headroom and report complete pricing evidence on failure
+  ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
+
+### 🩹 Fixed
+
+- Prepare the registry executor and Wire used by standalone consumer checks before
+  offline CI and release validation. Cold caches now receive an explicit setup
+  command and readable failure diagnostics without changing runtime ownership
+  ([#111 — Prepare singleton fixture dependencies](https://github.com/dragginzgame/ic-platform/issues/111)).
+- Canonicalize standalone admission-fixture paths so macOS temporary directories
+  with a trailing slash retain the runtime artifact-lock coordination proof
+  ([#113 — Canonicalize fixture lock paths](https://github.com/dragginzgame/ic-platform/issues/113)).
+
+## [0.12.0] - 2026-10-31
+
+### ⚠️ Breaking
+
+- Adopt IC Tooling 0.72 for the optional native gzip facade. `GzipError` now has
+  the Host Artifacts 0.72 identity; consumers exchanging that type must align
+  direct Host dependencies and rebuild together. Codec behavior is unchanged.
+
+### ⬆️ Dependencies
+
+- Update Testkit to 0.72 and the managed IC Build release editor to 0.72.0,
+  aligned with Platform 0.11 and Wire 0.10.
 
 ## [0.11.1] - 2026-10-30
 

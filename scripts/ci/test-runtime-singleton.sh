@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # Use Cargo's real registry executor/links identity, not a simulated resolver.
+prepare=false
+case "$#:${1:-}" in
+    0:) ;;
+    1:--prepare) prepare=true ;;
+    *) echo "usage: $0 [--prepare]" >&2; exit 2 ;;
+esac
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target
@@ -21,12 +27,26 @@ ic-cdk-executor = "=2.0.0"
 MANIFEST
 }
 cp Cargo.lock "$fixture/Cargo.lock"
+if [[ "$prepare" == true ]]; then
+    # The embedded runtime removed this registry supplier from the root lock.
+    # Resolve and fetch it only during explicitly requested fixture setup.
+    manifest '"ic0"'
+    cargo fetch --manifest-path "$fixture/Cargo.toml"
+    echo 'Registry singleton dependencies prepared; normal checks remain offline.'
+    exit 0
+fi
 # Only this disposable lock resolves. The native source profile's unrelated
 # registry executor must coexist with every selection lacking Platform's executor.
 for features in default ic0; do
     manifest "\"$features\""
+    result=0
     cargo tree --manifest-path "$fixture/Cargo.toml" --offline \
-        --edges normal,build --prefix none > "$fixture/$features.tree" 2> "$fixture/$features.log"
+        --edges normal,build --prefix none > "$fixture/$features.tree" 2> "$fixture/$features.log" || result=$?
+    if [[ "$result" != 0 ]]; then
+        cat "$fixture/$features.log" >&2
+        echo 'Prepare fixture dependencies with make prepare-consumer-dependencies.' >&2
+        exit "$result"
+    fi
     grep -q '^ic-cdk-executor v2.0.0$' "$fixture/$features.tree"
     if grep -q '^ic-platform-runtime-guard ' "$fixture/$features.tree"; then
         echo "Non-runtime $features selection acquired an executor guard" >&2; exit 1

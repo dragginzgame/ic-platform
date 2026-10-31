@@ -1,6 +1,44 @@
 # Current handoff
 
-## Released Platform 0.11 / Wire 0.10; pending tooling-only 0.11.1
+## Pending 0.13: remove the gzip forwarding boundary
+
+PR #109 removes the optional native gzip surface and production Host Artifacts
+dependency. Consumers use IC Tooling Host Artifacts directly, preserving their
+qualified codec version, levels and limits. The released base is 0.12.0; pending
+notes select 0.13.0 for this feature/export removal. Package versions stay 0.12.0.
+The independently pinned native source profile retains its qualified Platform
+0.11.1 gzip supplier until draft #110 has installed qualification.
+
+PRs #112/#114 add explicit standalone-consumer cache preparation and canonical
+fixture paths. PR #104 supplies the qualified native dependency/pricing update;
+its final Host 0.72.1 inputs passed a fresh server build and all six installed
+scenarios on provider ae60deac99e3ff8e993c42e071d63510e61f7f6d. The merge preserves
+those native inputs. Draft #102 still requires native layout qualification.
+
+## Tooling 0.72 adoption
+
+The root catalog selects published Host Artifacts/Testkit 0.72.0 and the managed
+IC Build 0.72.0 release editor. Only Host Artifacts changes in the root lock;
+Testkit remains confined to standalone qualification. The gzip supplier remains
+native-only and opt-in. Its public GzipError identity changes to Host 0.72;
+consumers exchanging that type must align their direct Host dependency. Pending
+notes therefore select 0.12.0 for this exposed type change, rather than for the
+contributor-tool update. Workspace versions remain 0.11.1. No release is run.
+
+Full Clippy, gzip consumer test, inventory, pins, boundaries, documentation links,
+formatting and routine native/Wasm feature graphs pass. The installed 0.72 editor
+passes offline admission and renders valid manifest/lock candidates. The existing
+standalone driver passes strict Clippy, all six tests and Rust 1.91 compilation
+against Testkit 0.72/Wire 0.10 (`target/tooling-072-driver`). The gzip-only library
+also compiles on 1.91. Registry gzip source matches 0.71 byte-for-byte. Graph/MSRV
+logs are `/tmp/platform-tooling-072-{features,msrv}.log`; no installed canister
+execution or full CI is claimed.
+
+The separate native Profiler source profile and maintained combined runtime
+qualification lock retain their existing selections. Timers supplier alignment
+remains required before combined installed-runtime qualification can refresh.
+
+## Released Platform 0.11.1 / Wire 0.10
 
 The maintainer released Platform 0.11.0 at `b8ecf49` and Wire 0.10.0 at
 `c9d4e7b`. Cargo registry metadata confirms Wire 0.10.0 supplies `platform-types`
@@ -10,13 +48,10 @@ Wire schema integration. Consumers can now remove Platform `wire-schema`, retain
 Wire owns transferred Rust/TS byte/malformed tests and endpoint qualification;
 see `ic-wire/docs/evidence/platform-types-transfer/published/` at its release.
 
-This follow-up raises only Platform’s test/tooling Wire catalog entry to 0.10.0
-and updates the handoff documentation. No published member inherits that entry;
-the facade’s all-feature production graph and root lock remain Wire-free. Root
-Cargo.lock is unchanged. No feature or API changes require another minor:
-pending notes select 0.11.1; workspace package versions remain 0.11.0. No commit
-or release is performed. Full Clippy, inventory, pins, boundaries, docs and format
-pass for this follow-up. Raw/Wire/external-Candid standalone consumer checks
+Released 0.11.1 raises only Platform’s test/tooling Wire catalog entry to 0.10.0.
+No published member inherits that entry; the facade’s all-feature production graph
+and root lock remain Wire-free. Full Clippy, inventory, pins, boundaries, docs and
+format passed for that follow-up. Raw/Wire/external-Candid standalone consumer checks
 pass on current Rust and 1.91, native/Wasm
 (`target/prepared-call-consumer.RMsFvd`).
 

@@ -140,7 +140,11 @@ for Storage/Testkit and manager identities for Memory infrastructure; see the
 Prepare common tools explicitly with `make install-tools`; `make tools-check`
 verifies them offline. Prepare locked dependency sources with
 `cargo fetch --locked` before validation, including the Wasm target dependencies
-used by frozen standalone consumer checks. Checks never install executables. Rust 1.99.1 is the
+used by frozen standalone consumer checks. Then run
+`make prepare-consumer-dependencies` to fetch the registry executor and Wire used
+only by standalone fixtures; the embedded runtime and schema transfer removed
+them from the root lock. CI and admitted release preparation run this setup too.
+Normal consumer checks remain offline and never install executables. Rust 1.99.1 is the
 development compiler; Rust 1.91.0 is the minimum. Prepare both toolchains with the
 `wasm32-unknown-unknown` target for each compiler before their checks. For an
 existing MSRV toolchain, use `rustup target add --toolchain 1.91.0 wasm32-unknown-unknown`.
@@ -150,7 +154,7 @@ Installed-runtime CI prepares only the common tools, in order with
 release editor or Node/npm/TypeScript. Normal `make install-tools` still prepares
 the complete contributor set, and standard CI retains the Wire frontend proof.
 
-Tool setup includes the pinned IC Build 0.71.0 release editor with its `cli`
+Tool setup includes the pinned IC Build 0.72.0 release editor with its `cli`
 feature, which requires Rust 1.91 or later to build. `make install-release-editor`
 prepares it separately;
 `make release-editor-check` admits it offline. Standard release commands prepare
