@@ -5,7 +5,7 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
-## [0.15.1]
+## [0.15.1] - 2026-10-31
 
 ### 🩹 Fixed
 
