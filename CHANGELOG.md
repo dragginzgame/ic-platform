@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.11.2]
+## [0.12.1]
 
 ### ⬆️ Dependencies
 
@@ -24,6 +24,30 @@
   pricing regression. Keep the real cycle-balance comparison, leave metadata
   headroom and report complete pricing evidence on failure
   ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
+
+
+### 🩹 Fixed
+
+- Prepare the registry executor and Wire used by standalone consumer checks before
+  offline CI and release validation. Cold caches now receive an explicit setup
+  command and readable failure diagnostics without changing runtime ownership
+  ([#111 — Prepare singleton fixture dependencies](https://github.com/dragginzgame/ic-platform/issues/111)).
+- Canonicalize standalone admission-fixture paths so macOS temporary directories
+  with a trailing slash retain the runtime artifact-lock coordination proof
+  ([#113 — Canonicalize fixture lock paths](https://github.com/dragginzgame/ic-platform/issues/113)).
+
+## [0.12.0] - 2026-10-31
+
+### ⚠️ Breaking
+
+- Adopt IC Tooling 0.72 for the optional native gzip facade. `GzipError` now has
+  the Host Artifacts 0.72 identity; consumers exchanging that type must align
+  direct Host dependencies and rebuild together. Codec behavior is unchanged.
+
+### ⬆️ Dependencies
+
+- Update Testkit to 0.72 and the managed IC Build release editor to 0.72.0,
+  aligned with Platform 0.11 and Wire 0.10.
 
 ## [0.11.1] - 2026-10-30
 
