@@ -23,7 +23,7 @@
       },
       {
         "path": "packages/pocket-ic/tests/system_profiling.rs",
-        "sha256": "afd24c354a7019bb5baffef39952105dc5ac530cf4df65e0d188c2a7d36ec570"
+        "sha256": "ddeef97e7fe1df6a52d19b344b24683138abd38bc27476e257b8caa1122c7ef5"
       },
       {
         "path": "profilingic.md",
@@ -74,7 +74,7 @@
       },
       {
         "path": "0005-native-host-dependencies.patch",
-        "sha256": "179987e7403e8ea42003dbdf79a062d54a6c708ed0a5d65e42a165e253785b0b"
+        "sha256": "2a2ebe49fb79263f2e8ccf491ed129721f0b2ccb0cb58bddfde28b1bebc59787"
       },
       {
         "path": "0006-profiler-request-admission.patch",

@@ -455,7 +455,9 @@ fn prices_reconcile_without_instruction_traces_even_when_event_details_drop() {
     let started = pic.start_system_profile(SystemProfileConfig {
         name: "Bounded details, independent price totals".into(),
         max_events: 1,
-        max_retained_bytes: 1024 * 1024,
+        // Exhaust detail retention only. The independent metadata allowance
+        // must still hold the physical dictionaries and logical price totals.
+        max_retained_bytes: 16 * 1024 * 1024,
         ..Default::default()
     });
     let id = started["run_id"].as_str().unwrap();
@@ -480,12 +482,12 @@ fn prices_reconcile_without_instruction_traces_even_when_event_details_drop() {
         true
     );
     assert_eq!(
-        pricing["pricing"]["totals"]["cycles_net_burned"]
-            .as_str()
-            .unwrap()
-            .parse::<u128>()
-            .unwrap(),
-        consumed,
+        pricing["quality"]["metadata_retention_overflow"], false,
+        "event-detail fixture exhausted aggregate metadata: {pricing}",
+    );
+    assert_eq!(
+        pricing["pricing"]["totals"]["cycles_net_burned"],
+        consumed.to_string(),
         "committed host-ledger bridge did not reconcile with actual cycle balance: {pricing}",
     );
     assert!(pic.get_memory_access_trace(canister).executions.is_empty());

@@ -2,6 +2,30 @@
 
 ## [0.12.1]
 
+### ⬆️ Dependencies
+
+- Adopt published Metrics 0.21.0 in the Profiler native source profile's Cargo and
+  Bazel inputs. Preserve arithmetic-only features and existing logical reports.
+- Adopt published Host Process/FS 0.72.1, Wire 0.10.0 and gzip-only
+  Platform 0.11.1 in the native Cargo/Bazel inputs. Its runtime-only singleton
+  guard permits coexistence with the pinned workspace's registry executor
+  ([#103 — Scope the executor singleton guard to runtime consumers](https://github.com/dragginzgame/ic-platform/issues/103)).
+- Keep the explicit ICPROF03 private frame identity and unchanged Wire core
+  framing. Metrics and process transport share Wire 0.10; endpoints and
+  Platform-type schemas remain disabled, with unchanged arithmetic/Serde layouts
+  ([Observability #103 — Published Metrics metadata alignment](https://github.com/dragginzgame/ic-observability/issues/103)).
+
+- Keep Platform-owned gzip on its declared Host Artifacts 0.71 supplier; Host
+  Process/FS 0.72 select Host Artifacts 0.72 without a direct codec dependency.
+
+### 🧪 Testing
+
+- Separate event-detail truncation from metadata exhaustion in the installed
+  pricing regression. Keep the real cycle-balance comparison, leave metadata
+  headroom and report complete pricing evidence on failure
+  ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
+
+
 ### 🩹 Fixed
 
 - Prepare the registry executor and Wire used by standalone consumer checks before
