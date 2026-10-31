@@ -1,90 +1,84 @@
 # Current handoff
 
-## Shared 0.27.19: symmetric groups and delegated delivery
+## Delivered Shared and Rust groups
 
-Canonical adoption selects committed Shared revision
-54fc49e12f439dbe18d232f622a6d78e61773353 (Shared Tooling 0.27.19).
-Exported payloads are never edited in place. The new rules require
-explicit versions for every independent-group member, symmetric releases/ ledgers,
-a root changelog index and explicit command selection.
+Shared Tooling 0.27.19 is adopted at committed revision
+54fc49e12f439dbe18d232f622a6d78e61773353 through the canonical exporter.
+Snapshot payloads remain intact. Platform/macros/runtime guard 0.15.2 and Types
+0.15.1 are released and published. Types delivered first at 668e44f, then Platform
+at 3587cd2; GitHub main/tags, registry visibility, unyanked versions, archive
+checksums and embedded clean source identities were verified. Both complete
+release gates passed. Publication evidence is retained under target/publication/
+and /tmp/platform-deploy-*-publication.log; release plans are Git-owned.
 
-At adoption, numeric versions and dependency selections are unchanged: Platform,
-macros and exact runtime guard are 0.15.1; Types is 0.15.0. Root Cargo has
-no workspace.package.version. Every member owns a literal matching its group's
-primary, with the same crate paths, common metadata, catalog and one lockfile.
-The root Cargo comment map and ci/cargo-release-groups.json record both groups.
+Every package has a literal version, with no workspace.package.version. Root
+Cargo keeps common metadata/dependencies and the group comment map. One lockfile
+and existing crate paths remain. Group policy is ci/cargo-release-groups.json.
+Canonical notes live in releases/platform/CHANGELOG.md and
+releases/types/CHANGELOG.md. Root CHANGELOG.md is an index. Coordinated history
+through 0.15.0 is preserved once in releases/history.md, with links rebased.
+Initial Types 0.1 history stays in its own ledger; the old crate ledger is a
+navigation pointer excluded from archives.
 
-releases/platform/CHANGELOG.md owns Platform notes and released 0.15.1;
-releases/types/CHANGELOG.md owns Types notes and its initial 0.1 history.
-Coordinated releases through 0.15.0 are preserved once in releases/history.md;
-relative links are rebased to keep their targets. Root CHANGELOG.md is an index.
-The old Types ledger path is a short pointer and is excluded from crate archives.
-Delivery selects Platform 0.15.2 and Types 0.15.1 for compatible contributor
-tooling/layout changes; runtime APIs and type bytes are unchanged. Adoption alone
-does not change numeric versions; delegated release preparation owns those edits.
+Release, resume and publication require explicit RELEASE_GROUP=platform or types,
+including environment selection. Missing/empty/unknown groups refuse before
+setup/validation/effects. PACKAGE only narrows that group; publish changed groups
+separately in supplier order. Common runtime-lock and Platform-only exact guard
+pin custody remain transactional. A read-only guard rejects unfinished saved
+attempts under changed group policy; Shared retains recovery/effect ownership.
+Older legacy push-phase journals remain retained and require their original
+source/policy context. Never reinterpret or discard their evidence implicitly.
 
-Every release, resume and publication requires RELEASE_GROUP=platform or types.
-Explicit environment selection works; missing/empty/unknown values refuse before
-setup/validation/effects. PACKAGE may select only a subset of that group. When
-both groups change, publish supplier and consumer groups separately in order.
-The former implicit platform default and mixed publication batches are retired.
+## Native Profiler PR #122
 
-Common runtime-lock and platform-only exact guard-pin custody are preserved.
-Version readers, metadata transactions and fixtures use each primary package.
-A read-only resume guard rejects unfinished plans when their recorded policy
-blob differs; Shared's runner still owns all recovery authorization and effects.
-Older completed observations remain subject to its existing exact-source checks.
-No release journals or artifacts are removed. Current platform 0.14/0.15/0.15.1
-journals were complete at adoption; older legacy push-phase journals remain
-retained and must be reconciled in their original source/policy context if needed.
+PR #122 removes native Profiler's forwarding-only registry Platform dependency
+and selects Host Artifacts 0.72.1/gzip directly. Host Process/FS/Artifacts 0.72.1,
+core Wire 0.11 and arithmetic-only Metrics 0.22 remain selected. Consumer product
+imports, levels, strict gzip framing, 128 MiB API and 256 MiB recorder ceilings,
+ICPROF03 bytes and source-pin qualification obligations are unchanged. Older
+consumers keep their qualified provider; no new generic facade is restored.
 
-Full Clippy, current/MSRV native/Wasm canonical identity/schema and singleton
-proofs pass. Public Make/CLI refusal and roster tests, runtime lock tests, both
-real group transaction/retry/local delivery/resume proofs and final governance
-checks are retained under /tmp/platform-groups-018-*.log. The complete group proof
-is /tmp/platform-groups-018-preparation-final.log; its disposable repositories are
-retained at /tmp/platform-group-preparation.L80Dns. Fixtures substitute tool
-installation/full CI, while retaining the actual editor, metadata,
-staged/committed checks and local Git effects. No production release, publication
-or new installed-runtime/macOS qualification is claimed.
+Current released main is merged into the PR without rewriting its history.
+The root changelog remains the index; published group entries and Types metadata
+are preserved. Pending Platform 0.15.3 collects this compatible native packaging
+change, without changing any package version. The user requested this PR's merge;
+that instruction does not select another release/publication operation.
 
-The only open native adoption PR at the start was #122, updated at 2fb05d2.
-It preserves qualified native inputs at 6c054c8 and uses pending root-ledger notes;
-after this layout migration is delivered, its notes need the Platform ledger.
-The maintainer now requested adoption and deployment. Shared's delegated-delivery
-rules authorize the necessary scoped source commit, Types patch release and
-crates.io publication, followed by Platform patch release and publication through
-the existing adapters. Both groups have packaging changes; npm is unaffected.
-The complete release gates and exact metadata/source admission remain required.
-Observe Git-owned release journals and registry state for actual delivery status;
-this plan alone is not a release or upload receipt. Preserve failed evidence and
-reconcile uncertain effects before recovery. Sibling checkout edits stay excluded.
+The native manifest and dependency patch remain byte-identical to qualified
+provider 6c054c86bb10c2630e61ecd5b9b24d8a06de3902. Patch SHA-256 is
+572c0a88309f6990cfd487f494909b484f63452433a607b58efd262f7adf0aac.
+Retained qualification includes strict native/standalone Clippy, 83 recorder
+tests on current Rust and 1.91, 114 server tests, six installed scenarios, actual
+Bazel repin/alias loading and reconstruction of all seven dependency/build files.
+Executed server SHA-256 was
+3a912fa302cdd9aad9f2f9fdad285a1fe95e9388a0073ae9d5d02d412d63c74e;
+paired Profiler artifacts/platform-013-adoption-20261031/ owns those receipts.
+They bind that immutable provider, not a later merge commit. A new consumer pin
+retains its normal native/installed and macOS qualification requirements.
+
+The original PR native-provider-source and browser jobs passed. Its old root
+release-routing fixture failed; current main's replacement passed both releases.
+Installed-runtime and advisory preparation failed at the separately tracked
+Timers/executor conflict (#116), before their intended qualification. Do not
+weaken guards, claim those jobs passed or infer a new installed-runtime proof.
+Hosted checks on updated source remain asynchronous unless GitHub enforces them.
 
 ## Retained constraints and evidence
 
-The maintained combined installed-runtime lock still selects Timers 0.32.3 and
-its older Platform/executor graph. Its existing singleton/qualification conflict
-remains separate from this packaging change. Preserve all release/runtime gates;
-source and graph fixtures do not establish new installed, macOS or live IC proof.
+The maintained installed-runtime lock still selects Timers 0.32.3 and its older
+Platform/executor graph. Preserve every runtime/release gate and source guard.
+Profiler owns recorder/viewer and PNG/range product mechanics; Platform owns
+native integration/state adapters. Preserve the IC source pin and copyrights.
 
-Native Profiler's qualified profile retains published Platform 0.12 gzip,
-Host Artifacts/Process/FS 0.72.1, Wire 0.11 and arithmetic-only Metrics 0.22;
-its source remains the qualified provider `26ce82a78759f626fc177259eb6f73b75eafc526`.
-Recorded server SHA-256:
-`10c53a828fb12a99cf5bb41cbe8802be2f7e3209c2ca320cf7081d7c12ed42c7`.
-Profiler owns recorder/viewer and shared PNG/range product mechanics; Platform
-owns native integration/state adapters. No generic gzip facade is restored.
+#50 remains unresolved: retained evidence at target/issue50-20261030/evidence.json
+found crypto-bigint 0.5.5 without a complete compatible correction; yanked checks
+were explicitly excluded. Protected crypto bodies, DER exception, fingerprints
+and vectors remain unchanged. External Candid's fixed 16-level admission and
+legacy checkpoint compatibility remain required.
 
-#50 remains unresolved: retained RustSec evidence at
-`target/issue50-20261030/evidence.json` found crypto-bigint 0.5.5 without a complete
-compatible correction; yanked checks were explicitly excluded. Keep protected
-crypto bodies, DER exception, fingerprints and vectors unchanged. Candid's fixed
-16-level external admission and legacy checkpoint compatibility remain required.
-
-The rejected lean Candid reader saved 7,631 probe bytes while adding about 3k
-maintained source lines; registry Candid remains selected. Historical runtime Vec
-and selected management DTO evidence is retained under `target/vec-runtime-20261030`
-and `target/management-adoption`; do not infer fresh acceptance from those receipts.
-The migration contract remains the detailed owner/provenance/qualification source.
-Earlier installed receipts and consumer-adoption context remain in the
+Registry Candid remains selected: the rejected lean reader saved 7,631 probe
+bytes but added about 3k maintained source lines. Earlier Vec/management evidence
+remains at target/vec-runtime-20261030 and target/management-adoption; it is not
+fresh acceptance. The migration contract owns detailed provenance and contracts.
+Earlier installed/consumer context remains in the
 [0.14 release handoff](https://github.com/dragginzgame/ic-platform/blob/7b4ed265804a60b796c4680880cb7a4e66e53d1e/docs/status/current.md).

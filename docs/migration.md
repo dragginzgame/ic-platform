@@ -519,7 +519,7 @@ native/Wasm benchmark Clippy checks pass with warnings denied before execution.
 
 ## Host gzip boundary
 
-The next 0.13 contract removes Platform's native `gzip` feature and
+The 0.13 contract removed Platform's native `gzip` feature and
 `ic_platform::gzip` exports. Generic compression belongs to IC Tooling; callers
 select `ic-host-artifacts` with `default-features = false, features = ["gzip"]`
 and use `ic_host_artifacts::artifact::{encode_gzip, decode_gzip, GzipError}`.
@@ -527,9 +527,12 @@ Remove Platform entirely where gzip was its only use. Keep the qualified Host
 version, caller levels, byte bounds and retained artifact obligations unchanged.
 
 This removes the production dependency back to Tooling. The independently
-revision-pinned native Profiler source profile retains its published supplier
-until its paired Cargo/Bazel inputs and consumer sources adopt the direct codec.
-A facade release does not rewrite that frozen provider input or its evidence.
+revision-pinned native Profiler source profile now selects Host Artifacts 0.72.1
+directly in its paired Cargo/Bazel inputs and drops registry Platform. Its
+qualified payload is unchanged from provider `6c054c8`; consumers selecting a new
+provider commit must supply the paired direct Host imports and retain their normal
+source-binding qualification. Older consumers keep their qualified source pin.
+A facade release does not rewrite a frozen provider input or its evidence.
 
 ## External DTO additions for Canic
 

@@ -4,6 +4,15 @@ This group covers ic-platform, ic-platform-macros and ic-platform-runtime-guard.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.15.3]
+
+### ⬆️ Dependencies
+
+- Move native Profiler gzip to Host Artifacts 0.72.1 directly and remove the
+  forwarding-only registry Platform dependency. Preserve codec bytes, levels,
+  strict admission and existing API/recorder byte limits.
+  [#122 — Native Profiler Host gzip](https://github.com/dragginzgame/ic-platform/pull/122).
+
 ## [0.15.2] - 2026-10-31
 
 ### 🩹 Fixed
