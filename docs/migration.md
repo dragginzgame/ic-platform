@@ -1330,7 +1330,7 @@ This is a breaking next-minor change. Package versions remain at the maintainer'
 current release until the coordinated release process; do not publish this source
 as a 0.2 patch. The root `Principal` and `PrincipalError` now belong to Platform.
 The implementation is adapted from ic_principal 0.1.5 under Apache-2.0, with
-provenance/license retained in `src/principal/`. It is not a clean-room rewrite.
+provenance/license retained in `crates/ic-platform-types/src/principal/`. It is not a clean-room rewrite.
 
 Application and runtime identities use the owned type. Agent, PocketIC, management,
 ledger, parser and cryptographic APIs retain their original parameter/DTO types.
@@ -2825,3 +2825,64 @@ older consumers retain their previous provider. HTTP/MCP admission, errors,
 response fields, immutable query ownership and budgets stay unchanged. The
 Platform gzip facade and native start/stop, IC metrics and pricing adapters stay
 at their existing owner. Published Rust consumers need no import changes.
+
+## Stable owned identity package (#118)
+
+`ic-platform-types` owns the sole Principal, Account, Subaccount,
+DEFAULT_SUBACCOUNT, PrincipalError and AccountError definitions. The facade's root
+and `principal`/`account` paths explicitly re-export them. Registry Principal
+conversions and unchanged upstream self-authentication stay with their type owner;
+ledger DTO conversions stay with Platform, which owns those DTOs. Wire keeps its
+schema implementations with its trait owner. No source bodies, representations,
+Serde, bounds, absent-versus-zero fields or cryptographic behavior change.
+
+The maintainer's revised #118 decision restores independent release groups in
+one Cargo workspace. Platform, macros and the exact runtime guard inherit
+`workspace.package.version`; Types owns a literal version in its existing
+manifest. Both start from the published 0.15.0 baseline. No existing numeric
+version, tag, archive or published dependency declaration is rewritten.
+
+The root Cargo comment map documents the two groups, version sources and ledgers;
+`ci/cargo-release-groups.json` remains executable policy. One root dependency
+catalog and Cargo.lock cover the complete workspace. Platform-only releases leave
+Types' compatible requirement, supplying identity and ledger unchanged. A Types
+release updates its admitted requirement and requires separate consumer
+compatibility/publication assessment; it does not silently publish the facade.
+
+The root changelog owns future Platform/macros/guard notes. The Types ledger owns
+future Types notes and links to the intact coordinated history through 0.15.0
+in root. Its initial 0.1 publication remains historical, without a version reset
+or duplicate 0.15 notes. This supersedes the temporary synchronized-version
+policy shipped in 0.15, while retaining its canonical type owner and bytes.
+
+### Release command routing
+
+`make release-*` defaults to `platform`; `RELEASE_GROUP=types` explicitly selects
+the independent type version and ledger. Publication follows the same selection,
+so runtime-only changes do not re-upload unchanged Types. Explicit `PACKAGE`
+batches support supplier-first publication when both groups actually change and
+reconciled partial-publication recovery. All workspace release gates and full
+publication Clippy remain required; npm publication stays separate.
+
+The runtime qualification lock is explicitly common consumer metadata, included
+once in both groups' exact plans. The exact runtime-guard pin remains private to
+the Platform group. Semantic checks compare the recorded runtime trio to the
+workspace version and an optional recorded Types owner to its literal version.
+Preparation changes only the selected group's recorded identities. Historical
+locks without Types remain unchanged during Types releases; adding a qualified
+owner requires actual composition qualification, not a fabricated lock refresh.
+
+Preparation uses Shared's transaction for every selected file, rendering the core
+metadata and consumer lock/pin in disposable committed source before installing
+any candidate. A failed substep restores/preserves every original byte. Group,
+source, file roster, staged tree, tag and exact resume identities remain bound by
+the existing runner; no alternative release runner or validation exclusion is added.
+The separate Timers composition constraint in #116 remains unchanged.
+
+The maintained identity fixture simulates a runtime minor change with the same
+exact Types supplier. It uses published Wire 0.12.1's actual schema trait and
+implementation source with only its Types dependency aligned to the local 0.15
+owner. Published Wire 0.12.1 itself selected Types 0.1, so this is source-aligned
+qualification, not published compatibility/adoption. Current/MSRV native/Wasm
+profiles cover identities, schemas, conversions and one runtime; identity-only
+graphs remain runtime/Candid-free. Wire #36 owns actual product adoption.

@@ -13,9 +13,9 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 [features]
 default = []
 blake3 = ["dep:blake3"]
-principal = ["dep:crc32fast", "dep:data-encoding", "dep:serde", "dep:thiserror"]
-principal-external = ["principal", "dep:ic_principal"]
-principal-self-authenticating = ["principal-external", "ic_principal/self_authenticating"]
+principal = ["dep:ic-platform-types", "dep:serde", "dep:thiserror"]
+principal-external = ["principal", "ic-platform-types/principal-external", "dep:ic_principal"]
+principal-self-authenticating = ["principal-external", "ic-platform-types/principal-self-authenticating"]
 agent = ["principal-external", "dep:ic-agent"]
 bls = ["dep:ic-verify-bls-signature"]
 candid = ["principal-external", "dep:candid", "candid/bignum"]
@@ -36,6 +36,8 @@ ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"]
 ic0 = []
 icrc-ledger-types = [
+    "dep:crc32fast",
+    "dep:data-encoding",
     "principal-external",
     "dep:candid",
     "candid/bignum",
@@ -76,6 +78,7 @@ hex = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-platform-runtime-guard = { workspace = true, optional = true }
+ic-platform-types = { workspace = true, optional = true }
 ic-stable-structures = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 ic_principal = { workspace = true, optional = true }

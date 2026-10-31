@@ -1,5 +1,10 @@
 # IC Platform
 
+Platform re-exports canonical Principal/Account identities from ic-platform-types.
+The facade/macros/runtime guard and Types remain in one workspace with independent
+release groups, versions and changelogs. Unrelated runtime releases retain the
+same compatible type supplier; see [the migration contract](docs/migration.md#stable-owned-identity-package-118).
+
 One controlled dependency boundary for IC runtime integration and required IC
 Candid interfaces. All application endpoints we own use IC Wire, including public
 endpoints called by third parties. Candid is the adapter for management canisters,
@@ -154,7 +159,7 @@ Installed-runtime CI prepares only the common tools, in order with
 release editor or Node/npm/TypeScript. Normal `make install-tools` still prepares
 the complete contributor set, and standard CI retains the Wire frontend proof.
 
-Tool setup includes the pinned IC Build 0.72.0 release editor with its `cli`
+Tool setup includes the pinned IC Build 0.73.0 release editor with its `cli`
 feature, which requires Rust 1.91 or later to build. `make install-release-editor`
 prepares it separately;
 `make release-editor-check` admits it offline. Standard release commands prepare
@@ -212,20 +217,22 @@ Wasm, including with all features enabled.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.
-They do not publish crates. Initial registry publication remains a separately
-authorized operation after a clean committed source and native qualification.
+The default group is platform (facade, macros and exact runtime guard).
+`RELEASE_GROUP=types` selects the independent type version and ledger. Both keep
+full workspace gates and declared runtime metadata custody. Release commands do
+not publish crates.
 
-Run `make publish-check` to package and verify the current version with all
-features without uploading; this dry run allows working-tree changes. After
-release and native qualification, `make publish` uploads the current committed
-`ic-platform-runtime-guard`, `ic-platform-macros` and `ic-platform` versions to crates.io using Cargo's
-configured credentials and dependency ordering. It
-requires a clean checkout and does not bump versions, commit, tag or push.
+`make publish-check` packages/verifies the selected group without uploading;
+`make publish` uploads clean committed packages in Cargo dependency order. The
+default Platform batch excludes unchanged Types. Select `RELEASE_GROUP=types`
+for its publication, or use `PACKAGE='name ...'` for an explicit eligible batch
+when both groups change or after reconciling partial publication. Each package
+uses its own actual version; publication does not bump, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are
-automatic: after an interrupted dispatch, reconcile all three exact registry package versions
-before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
+automatic: after an interrupted dispatch, reconcile every dispatched exact registry
+package version before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
 prove registry visibility or consumer adoption.
 
 Linux x86-64 and macOS 15 on Intel and Apple Silicon are supported hosts.

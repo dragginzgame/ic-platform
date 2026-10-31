@@ -1,12 +1,73 @@
 # Changelog
 
-## [0.13.1]
+The Platform group covers ic-platform, ic-platform-macros and
+ic-platform-runtime-guard. [Types release notes](crates/ic-platform-types/CHANGELOG.md)
+cover the independent identity supplier. Release 0.15.0 was the last coordinated
+four-package release; its notes and all earlier history remain below with their
+original scope intact.
+
+## [0.15.2]
 
 ### ⬆️ Dependencies
 
-- Migrate the native Profiler profile to Platform 0.13's compression ownership
-  split: use Host Artifacts 0.72.1 gzip directly and remove the forwarding-only
-  registry Platform dependency. Preserve codec bytes, levels and byte limits.
+- Move native Profiler gzip to Host Artifacts 0.72.1 directly and remove the
+  forwarding-only registry Platform dependency. Preserve codec bytes, levels,
+  strict admission and existing API/recorder byte limits.
+
+## [0.15.1] - 2026-10-31
+
+### 🩹 Fixed
+
+- Restore independent Platform/Types release groups in one workspace, starting
+  from existing 0.15.0 identities. Preserve Types during runtime-only releases,
+  qualify transactional runtime metadata custody and select publication by group.
+  [#118 — Independent identity releases](https://github.com/dragginzgame/ic-platform/issues/118).
+
+### ⬆️ Dependencies
+
+- Adopt Shared Tooling release commit 0.27.17 (`39ba983`), including
+  common metadata custody, Cargo group comments and canonical-ledger policy,
+  through the snapshot exporter.
+
+## [0.15.0] - 2026-10-31
+
+### ⚠️ Breaking
+
+- Align `ic-platform-types` with the Rust workspace version and include all four
+  packages in every coordinated release and default publication. Keep the canonical
+  type owner and existing re-exports. The types requirement changes from 0.1;
+  matching Wire/caller adoption is required. Independent identity versioning and
+  the separate types release group are retired. Existing registry releases stay
+  unchanged.
+
+## [0.14.0] - 2026-10-31
+
+### ⚠️ Breaking
+
+- Move owned Principal/Account identities and errors into the independently
+  versioned `ic-platform-types` supplier. Existing Platform import paths re-export
+  those exact types. Coordinate the one-time Wire/type-owner migration; external
+  bytes and account semantics stay unchanged.
+  [#118 — Stable owned identity boundary](https://github.com/dragginzgame/ic-platform/issues/118).
+
+### 🩹 Fixed
+
+- Default release commands to the Platform group and select each group’s version
+  and ledger explicitly. Publication selects the group’s packages using their
+  individual versions, with explicit batches available for supplier-first uploads.
+- Admit the published group-capable metadata editor and declare runtime lock/pin
+  custody explicitly. Preserve their checks; qualify both groups through real
+  preparation, retry, staged/committed checks and local delivery/resume.
+
+### ⬆️ Dependencies
+
+- Adopt committed Shared Tooling `ef14942` with explicit Platform/types release
+  groups, additional metadata custody and the canonical Principal conversion-owner
+  boundary. Select published IC Build 0.73.0 for grouped metadata editing.
+
+- Update the native Profiler profile to published Platform 0.12.0 and share one
+  Host Artifacts 0.72.1 gzip supplier with Host Process/FS. Preserve the pinned
+  profile’s existing codec contract independently of the current library.
 - Adopt Wire 0.11 for private process frames and arithmetic-only Metrics 0.22.
   Disable unused Metrics Wire metadata, leaving one Wire generation while
   preserving counter arithmetic, saved reports and ICPROF03 framing.

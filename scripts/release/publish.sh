@@ -1,38 +1,22 @@
 #!/usr/bin/env bash
+# Preserve full workspace qualification; Shared owns publication attempts/custody.
 set -euo pipefail
-# Local coordinated-package adapter. Cargo owns dependency order and upload.
-[[ $# == 1 ]] || exit 2
-case "$1" in
-    check) options=(--dry-run --allow-dirty) ;;
-    publish) options=(); bash scripts/ci/check-release-source.sh ;;
-    *) echo 'usage: publish.sh check|publish' >&2; exit 2 ;;
-esac
-make --no-print-directory clippy
-version="$(bash scripts/ci/read-cargo-workspace-version.sh --stable Cargo.toml)"
-commit="$(git rev-parse --verify HEAD)"
-mkdir -p target/publication
-attempt="$(mktemp -d target/publication/attempt.XXXXXX)"
-printf 'Publication evidence: %s\n' "$attempt"
-printf '%s\n' "$1" "$commit" "ic-platform-runtime-guard@$version" "ic-platform-macros@$version" "ic-platform@$version" crates-io > "$attempt/intent"
-git status --porcelain=v1 > "$attempt/working-status"
-args=(publish --locked --registry crates-io --package "ic-platform-runtime-guard@$version" --package "ic-platform-macros@$version" --package "ic-platform@$version" --all-features)
-args+=(${options[@]+"${options[@]}"})
-printf '%s\0' cargo "${args[@]}" > "$attempt/arguments"
-if [[ "$1" == publish ]]; then
-    bash scripts/ci/check-release-source.sh
-    [[ "$(git rev-parse --verify HEAD)" == "$commit" ]] || {
-        echo 'Publication source changed during preparation' >&2; exit 1;
-    }
+[[ $# == 1 && ( "$1" == check || "$1" == publish ) ]] || exit 2
+root="$(cd "$(dirname "$0")/../.." && pwd -P)"
+cd "$root"
+export RELEASE_GROUP="${RELEASE_GROUP:-platform}"
+export CARGO_PUBLISH_PACKAGES='ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform'
+members="$(bash scripts/release/group.sh members)"
+if [[ "${PACKAGE+x}" == x ]]; then
+    [[ -n "$PACKAGE" ]] || { echo 'Explicit PACKAGE must not be empty' >&2; exit 2; }
+    export CARGO_PUBLISH_SELECTION="$PACKAGE"
+else
+    export CARGO_PUBLISH_SELECTION="$members"
 fi
-# A dispatch without status is uncertain: inspect registry state before retrying.
-touch "$attempt/dispatch"
-set +e
-cargo "${args[@]}" 2>&1 | tee "$attempt/cargo.log"
-statuses=("${PIPESTATUS[@]}")
-set -e
-printf '%s\n' "${statuses[0]}" > "$attempt/cargo-status"
-printf '%s\n' "${statuses[1]}" > "$attempt/log-status"
-status="${statuses[0]}"
-[[ "$status" != 0 ]] || status="${statuses[1]}"
-printf '%s\n' "$status" > "$attempt/status"
-exit "$status"
+export CARGO_PUBLISH_EVIDENCE_ROOT="${CARGO_PUBLISH_EVIDENCE_ROOT:-$root/target/publication}"
+export CARGO_PUBLISH_REGISTRY=crates-io
+export CARGO_PUBLISH_VERIFY_TARGETS=clippy
+export CARGO_PUBLISH_MAKE="$root/scripts/release/verify-publication.sh"
+export CARGO_PUBLISH_ALL_FEATURES=1
+export CARGO_PUBLISH_CHECK_ALLOW_DIRTY=1
+exec bash scripts/ci/cargo-publication-adapter.sh "$1"

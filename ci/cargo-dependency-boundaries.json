@@ -9,7 +9,7 @@
   {"dependency": "ic-management-canister-types", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-signature-verification", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-verify-bls-signature", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic_principal", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic_principal", "allowed_packages": ["ic-platform", "ic-platform-types"]},
   {"dependency": "icrc-ledger-types", "allowed_packages": ["ic-platform"]},
   {"dependency": "candid", "allowed_packages": ["ic-platform"]},
   {"dependency": "candid_derive", "allowed_packages": []},

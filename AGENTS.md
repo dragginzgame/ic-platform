@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`a8baa51099ca48cdb12e2171f031d488db89d67d` (Shared Tooling 0.27.7) is recorded in
+`39ba9836a269ee7ea7f073a3f23d9cefe3c7d03c` is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -136,6 +136,19 @@ only the documented imports and omitting the unexposed store module. Enforce exa
 source/license fingerprints; do not refresh hashes to permit algorithm changes.
 The owned runtime RejectCode similarly replaces only its external catalogue
 dependency; Agent/PocketIC codes keep their external identities.
+
+## Stable identity supplier (#118)
+
+The maintainer's revised #118 approval keeps one Cargo workspace with independent
+Platform and Types release groups. Facade/macros/exact runtime guard inherit
+workspace.package.version; ic-platform-types owns a same-valued literal starting
+from published 0.15.0. Preserve numeric versions during implementation. Keep the
+root Cargo comment map and both canonical group ledgers aligned with policy.
+Platform explicitly re-exports the sole canonical types. Keep registry Principal
+conversions with the type owner and ledger DTO conversions with Platform; preserve
+all bodies, bytes, bounds, Serde, zero fields and provenance. Keep exact common
+runtime-lock custody and platform-only guard-pin custody, full graph validation
+and source/group-bound resume. This supersedes the temporary synchronized policy.
 
 ## Owned Principal
 

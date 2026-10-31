@@ -1400,7 +1400,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.13.0"
+version = "0.15.1"
 dependencies = [
  "assert_matches",
  "blake3",
@@ -1416,6 +1416,7 @@ dependencies = [
  "ic-management-canister-types 0.11.0",
  "ic-platform-macros",
  "ic-platform-runtime-guard",
+ "ic-platform-types",
  "ic-representation-independent-hash",
  "ic-secp256k1",
  "ic-stable-structures",
@@ -1437,7 +1438,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.13.0"
+version = "0.15.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1446,7 +1447,20 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.13.0"
+version = "0.15.1"
+
+[[package]]
+name = "ic-platform-types"
+version = "0.15.0"
+dependencies = [
+ "crc32fast",
+ "data-encoding",
+ "ic_principal",
+ "serde",
+ "serde_bytes",
+ "serde_test",
+ "thiserror 2.0.18",
+]
 
 [[package]]
 name = "ic-representation-independent-hash"

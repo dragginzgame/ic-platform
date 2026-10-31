@@ -46,15 +46,14 @@ Dependency updates compose in one current patch after the foundational workspace
 patches. The separate compiled-fact patch exposes the existing resource-charge
 cadence; it changes no scheduler calculation or charging behavior.
 
-Adapters stay inside the provider's IC workspace. The consumer recorder selects
-only Platform's optional native `gzip` feature, pinned in the provider's Cargo and
-Bazel inputs. The recorder also consumes published IC Metrics 0.21 scalar
-arithmetic; this provider owns its native workspace and Bazel locks, distinct
-from the IC workspace's internal `ic-metrics` package. Neither measurement
-counters nor the gzip facade own charging policy. The gzip facade delegates to
-Platform's declared IC Tooling supplier, independently of Host process, and has
-no dependency back to this workspace, PocketIC or the native provider. Compression implementation
+Adapters stay inside the provider's IC workspace. The consumer recorder and
+native server select Host Artifacts 0.72.1 directly with only its `gzip` feature,
+pinned in the provider's Cargo and Bazel inputs. The recorder also consumes
+published IC Metrics 0.22 scalar arithmetic, with defaults and `native-wire`
+disabled. This provider owns those native workspace and Bazel locks, distinct
+from the IC workspace's internal `ic-metrics` package. Compression implementation
 stays in Tooling; the consumer retains levels, import limits and bundle semantics.
+Measurement counters and compression mechanics confer no charging policy.
 
 The PocketIC profile selects the `ic-admin` library without its CLI-only NNS
 initialization dependency. The upstream CLI keeps its default feature and binary;

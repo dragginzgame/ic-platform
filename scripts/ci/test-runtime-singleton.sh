@@ -81,6 +81,12 @@ PLATFORM_SINGLETON_CURRENT="$version" PLATFORM_SINGLETON_NEXT="$next" perl -0pi 
     $count += s/^(ic-platform(?:-macros|-runtime-guard)? = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm;
     $count == 3 or die "expected three coordinated package versions\n";
 ' "$fixture-next-platform/Cargo.toml"
+# Both facade generations must retain the canonical identity owner, rather than
+# copying a second definition along with their runtime source.
+PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '
+    s/^    "crates\/ic-platform-types",\n//m == 1 or die "identity member changed\n";
+    s/path = "crates\/ic-platform-types"/"path = \"".$ENV{PLATFORM_IDENTITY_SOURCE}."\""/e == 1 or die "identity selection changed\n";
+' "$fixture-next-platform/Cargo.toml"
 # Bind inherited metadata to the copied workspace when Cargo traverses both
 # path suppliers from a consumer nested in the original workspace.
 for manifest_path in "$fixture-next-platform"/crates/*/Cargo.toml; do

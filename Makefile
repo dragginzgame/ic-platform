@@ -3,7 +3,8 @@ SHARED_TOOLING_RUST := 1
 FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/prepared-call-consumer/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
-FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs)
+FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs scripts/fixtures/stable-identities/*.rs)
+export RELEASE_GROUP ?= platform
 export RELEASE_DELIVERY := direct
 export RELEASE_DELIVERY_POLICY := $(CURDIR)/ci/release-delivery.txt
 LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
@@ -32,7 +33,8 @@ help:
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Exact saved recovery: release-resume VERSION=X.Y.Z'
 	@echo 'Feature graphs: check-features; check-features-exhaustive FEATURES=a,b (1–12 features)'
-	@echo 'Registry: publish-check (dry run), publish (upload current committed version)'
+	@echo 'Release/publish defaults to platform; RELEASE_GROUP=types selects the independent identity group'
+	@echo 'Registry: publish-check (dry run), publish (selected group); PACKAGE= selects an explicit batch'
 	@echo 'Release editor: install-release-editor; release-editor-check (offline)'
 	@echo 'Browser SDK: install-browser-tools, check-browser; check-browser-runtime needs prepared Chromium'
 
@@ -61,22 +63,22 @@ publish-check: host-tools-check
 	bash scripts/release/publish.sh check
 
 check:
-	cargo check -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked
+	cargo check -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked
 test:
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
-	cargo test -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
+	cargo test -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
 clippy:
-	cargo clippy -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked -- -D warnings
+	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked -- -D warnings
 docs-check:
-	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
 wasm-check:
 	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 msrv: host-tools-check
 	@set -eu; \
 	platform_msrv="$$(bash scripts/ci/read-platform-msrv.sh)"; \
-	cargo +"$$platform_msrv" test -p ic-platform -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked; \
+	cargo +"$$platform_msrv" test -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked; \
 	cargo +"$$platform_msrv" check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
@@ -87,8 +89,13 @@ check-primitives:
 			bash scripts/ci/check-blake3-graph.sh "$(CURDIR)" ic-platform "$$target" "$$features" || exit $$?; \
 		done; \
 	done
+.PHONY: check-stable-identities
+check-stable-identities:
+	bash scripts/ci/test-stable-identities.sh
+
 .PHONY: prepare-consumer-dependencies
 prepare-consumer-dependencies:
+	bash scripts/ci/test-stable-identities.sh --prepare
 	bash scripts/ci/test-runtime-singleton.sh --prepare
 	bash scripts/ci/check-prepared-call-consumer.sh --prepare
 check-consumer:
@@ -126,6 +133,8 @@ check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/browser-compiler-floor --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
+	bash scripts/ci/test-platform-release-groups.sh
+	bash scripts/ci/test-platform-group-preparation.sh
 	bash scripts/release/test-editor-bootstrap.sh
 	bash scripts/ci/check-release-commands.sh . make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
 	bash scripts/ci/test-release-changelog.sh
@@ -145,7 +154,7 @@ release-prepared-check release-committed-check release-tagged-check release-push
 release-commit-check:
 	@bash scripts/release/adapter.sh commit-check
 release-files:
-	@printf 'Cargo.toml\0Cargo.lock\0CHANGELOG.md\0scripts/fixtures/cdk-runtime/Cargo.lock\0ci/dependency-pinning-exceptions.json\0'
+	@bash scripts/release/adapter.sh files
 
 .PHONY: check-runtime
 check-runtime:

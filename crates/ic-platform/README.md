@@ -1,5 +1,10 @@
 # ic-platform
 
+Platform re-exports canonical Principal/Account identities from ic-platform-types.
+The facade/macros/runtime guard and Types remain in one workspace with independent
+release groups, versions and changelogs. Unrelated runtime releases retain the
+same compatible type supplier; see [the migration contract](../../docs/migration.md#stable-owned-identity-package-118).
+
 Platform 0.11 removed `wire-schema` and the production Wire dependency. Principal
 and Account retain their existing bytes and Serde; published Wire 0.10 supplies
 their schema trait integration through opt-in `platform-types`. Host schema

@@ -1,202 +1,77 @@
 # Current handoff
 
-## Pending 0.13.1: qualified native Profiler supplier alignment
+## #118: restore independent Platform and Types groups
 
-PRs #115/#117/#119 adopt the independently pinned Platform 0.12.0 gzip surface,
-Host Artifacts/Process/FS 0.72.1, Wire 0.11 and arithmetic-only Metrics 0.22.
-Metrics defaults/native-wire stay disabled; the profile has one Wire generation
-and no endpoint/platform-types or runtime-guard activation. Codec bytes, limits,
-ICPROF03 framing, counter arithmetic and saved formats stay unchanged. The root
-library remains gzip-free. Package versions stay at released 0.13.0; compatible
-native-profile adoption selects pending patch notes 0.13.1. No release is run.
+Latest approval is the implementation section of Platform #118. It supersedes the
+synchronized 0.15 policy: keep one workspace, dependency catalog and root lockfile,
+with platform (facade/macros/exact runtime guard) and types (ic-platform-types)
+versioned independently. Both numeric baselines remain published 0.15.0. Types
+now owns a literal version; root requirements and numeric package versions stay
+unchanged. No existing release is rewritten or re-uploaded. Pending group notes
+select 0.15.1 separately; root retains coordinated history through 0.15 intact.
 
-The final native source tree matches qualified provider
-26ce82a78759f626fc177259eb6f73b75eafc526 byte-for-byte. Its retained qualification
-records a fresh native server build, 83 recorder tests, 114 product tests and six
-installed scenarios passing; server SHA-256 is
-10c53a828fb12a99cf5bb41cbe8802be2f7e3209c2ca320cf7081d7c12ed42c7. Evidence is in
-Profiler artifacts/metrics-update-20261031/qualification.json. Historical notes
-below describe earlier supplier selections.
+Root Cargo comments map every member, canonical version source and ledger; JSON
+is executable policy. Platform releases preserve Types' selection/requirement and
+ledger; Types releases select their own version/notes and affected requirements.
+Default publication excludes unchanged Types. Explicit group and PACKAGE batches
+retain full gates, retained attempts and supplier-first Cargo ordering.
 
-## Pending 0.13: remove the gzip forwarding boundary
+Shared release commit 0.27.17 is canonically exported from revision
+39ba9836a269ee7ea7f073a3f23d9cefe3c7d03c, including Shared PR #330's reviewed common
+metadata custody. All 117 payloads verify; none was edited in place. Top-level
+shared_metadata_files declares one common lock, retaining duplicate/reserved-path
+rejection and the existing transaction/receipt/runner. IC Build 0.73.0 remains the
+admitted published editor. The supplier custody gap is cleared. The supplier
+VERSION still says 0.27.16; snapshot metadata preserves that supplied value,
+following the maintainer's earlier instruction to ignore the version-label wrinkle.
 
-PR #109 removes the optional native gzip surface and production Host Artifacts
-dependency. Consumers use IC Tooling Host Artifacts directly, preserving their
-qualified codec version, levels and limits. The released base is 0.12.0; pending
-notes select 0.13.0 for this feature/export removal. Package versions stay 0.12.0.
-The independently pinned native source profile retains its qualified Platform
-0.11.1 gzip supplier until draft #110 has installed qualification.
+The combined runtime lock is common to both groups; the exact guard pin remains
+platform-only. Consumer preparation renders all selected metadata in disposable
+committed source and installs it through Shared's transaction. Failed rendering
+must leave real metadata byte-identical, so exact resume safely retries.
+Runtime semantic checks treat the optional recorded Types owner independently;
+historical locks without it are preserved rather than resolved or invented.
 
-PRs #112/#114 add explicit standalone-consumer cache preparation and canonical
-fixture paths. PR #104 supplies the qualified native dependency/pricing update;
-its final Host 0.72.1 inputs passed a fresh server build and all six installed
-scenarios on provider ae60deac99e3ff8e993c42e071d63510e61f7f6d. The merge preserves
-those native inputs. Draft #102 still requires native layout qualification.
+Full Clippy, current/MSRV native/Wasm cross-minor identity/schema profiles,
+independent runtime-lock and both real group preparation/resume tests pass.
+Failed consumer rendering preserves all originals; wrong-group resume refuses.
+Evidence is /tmp/platform-group-preparation.9w8ueo. The identity fixture uses actual Wire 0.12.1
+trait/implementation source with only its Types dependency aligned to local 0.15;
+published Wire 0.12.1 originally selected Types 0.1, so published adoption is not
+claimed. Wire #36 owns that product change. Disposable release qualification uses
+the committed PR snapshot; all
+117 payload hashes and release-policy/adapter inputs match the merged adoption.
+It substitutes tool installation/full CI, retaining real editor, metadata and
+local Git effects. Production release and installed-runtime acceptance are separate.
+Release evidence: /tmp/platform-118-independent-preparation.log. Other focused
+logs use /tmp/platform-118-*.log. No normal-checkout staging, commit, tag, push,
+upload or cleanup was performed. The Shared fix is delivered through merged #330.
 
-## Tooling 0.72 adoption
+## Retained constraints and evidence
 
-The root catalog selects published Host Artifacts/Testkit 0.72.0 and the managed
-IC Build 0.72.0 release editor. Only Host Artifacts changes in the root lock;
-Testkit remains confined to standalone qualification. The gzip supplier remains
-native-only and opt-in. Its public GzipError identity changes to Host 0.72;
-consumers exchanging that type must align their direct Host dependency. Pending
-notes therefore select 0.12.0 for this exposed type change, rather than for the
-contributor-tool update. Workspace versions remain 0.11.1. No release is run.
+The maintained combined installed-runtime lock still selects Timers 0.32.3 and
+its older Platform/executor graph. Its existing singleton/qualification conflict
+remains separate from this packaging change. Preserve all release/runtime gates;
+source and graph fixtures do not establish new installed, macOS or live IC proof.
 
-Full Clippy, gzip consumer test, inventory, pins, boundaries, documentation links,
-formatting and routine native/Wasm feature graphs pass. The installed 0.72 editor
-passes offline admission and renders valid manifest/lock candidates. The existing
-standalone driver passes strict Clippy, all six tests and Rust 1.91 compilation
-against Testkit 0.72/Wire 0.10 (`target/tooling-072-driver`). The gzip-only library
-also compiles on 1.91. Registry gzip source matches 0.71 byte-for-byte. Graph/MSRV
-logs are `/tmp/platform-tooling-072-{features,msrv}.log`; no installed canister
-execution or full CI is claimed.
+Native Profiler's qualified profile retains published Platform 0.12 gzip,
+Host Artifacts/Process/FS 0.72.1, Wire 0.11 and arithmetic-only Metrics 0.22;
+its source remains the qualified provider `26ce82a78759f626fc177259eb6f73b75eafc526`.
+Recorded server SHA-256:
+`10c53a828fb12a99cf5bb41cbe8802be2f7e3209c2ca320cf7081d7c12ed42c7`.
+Profiler owns recorder/viewer and shared PNG/range product mechanics; Platform
+owns native integration/state adapters. No generic gzip facade is restored.
 
-The separate native Profiler source profile and maintained combined runtime
-qualification lock retain their existing selections. Timers supplier alignment
-remains required before combined installed-runtime qualification can refresh.
+#50 remains unresolved: retained RustSec evidence at
+`target/issue50-20261030/evidence.json` found crypto-bigint 0.5.5 without a complete
+compatible correction; yanked checks were explicitly excluded. Keep protected
+crypto bodies, DER exception, fingerprints and vectors unchanged. Candid's fixed
+16-level external admission and legacy checkpoint compatibility remain required.
 
-## Released Platform 0.11.1 / Wire 0.10
-
-The maintainer released Platform 0.11.0 at `b8ecf49` and Wire 0.10.0 at
-`c9d4e7b`. Cargo registry metadata confirms Wire 0.10.0 supplies `platform-types`
-and selects Platform 0.11 for that feature and endpoints. Platform no longer owns
-Wire schema integration. Consumers can now remove Platform `wire-schema`, retain
-`principal`, and enable Wire `platform-types` on the matched published pair.
-Wire owns transferred Rust/TS byte/malformed tests and endpoint qualification;
-see `ic-wire/docs/evidence/platform-types-transfer/published/` at its release.
-
-Released 0.11.1 raises only Platform’s test/tooling Wire catalog entry to 0.10.0.
-No published member inherits that entry; the facade’s all-feature production graph
-and root lock remain Wire-free. Full Clippy, inventory, pins, boundaries, docs and
-format passed for that follow-up. Raw/Wire/external-Candid standalone consumer checks
-pass on current Rust and 1.91, native/Wasm
-(`target/prepared-call-consumer.RMsFvd`).
-
-Prior removal evidence remains `target/schema-boundary.IDd2ew`: Principal/Account
-bytes/Serde stay unchanged; six root lock entries were removed. Browser SDK
-Node/npm admission uses its compiler-floor fixture independently of retired
-schema tooling. Wire’s own supplier proof covers standalone derives, Rust 1.91,
-host/Wasm feature isolation, exact frames and installed endpoint rollback.
-
-Next runtime adoption is Timers/Scheduling: latest published Timers remains
-0.32.4. The inspected Scheduling workspace prepares 0.33.0 against Platform 0.9.1,
-which still does not align with Platform 0.11’s runtime identity. The combined
-Platform runtime fixture cannot refresh until a compatible Timers supplier is
-available. Canic’s inspected catalog still selects Platform 0.8.3/Wire 0.7.25;
-Blob selects Platform 0.10/Wire 0.8. Existing sibling checkouts are unchanged.
-Their schema/runtime adoption and installed qualification remain consumer work.
-The separate native Profiler source recipe also retains its qualified old pins.
-
-## Released 0.10.0: prepared calls and Tooling 0.71
-
-Prepared calls now live at `ic_platform::call`, selected by `runtime` (also
-included by `cdk`). The separate `ic-call` package and publication entry are
-retired. Consumers remove that dependency and change `ic_call::` imports.
-Raw transport/executor and response/error identities are unchanged.
-
-Platform 0.10 adopted Host Artifacts/Testkit/IC Build 0.71 and Wire 0.8. The managed
-release editor is installed and admitted. Direct GzipError consumers align Host
-0.71. Original adoption logs: `target/upstream-adoption.NKKWnS`; native driver
-Clippy, six tests and MSRV compilation: `target/upstream-driver.wY2Z0P`.
-Those receipts predate this Wire 0.9 update and are not new installed evidence.
-
-## Released 0.9.1: runtime-only singleton packaging
-
-The maintainer released 0.9.1 at `8e21a5e`.
-The [#103 fix](https://github.com/dragginzgame/ic-platform/issues/103) moves only
-Cargo's inherited executor links guard into the optional, dependency-free
-`ic-platform-runtime-guard` package. `executor` selects its exact coordinated
-version. The executor/IC0 implementations, licenses and callback sources stay
-unchanged. No runtime implementation or public API moves into the helper.
-
-Native default/gzip-only and IC0-only consumers coexist with registry executor
-2.0.0; all six tested executor/runtime/CDK combinations, with and without gzip,
-refuse mixed suppliers. Cargo resolves all features of workspace roots for its
-lock: a native root declaring a Platform-runtime feature still needs compatible
-suppliers. The helper is included in coordinated publication, release metadata,
-pin-exception updates, the maintained runtime lock and feature/source checks.
-
-Full owner Clippy passed before tests. Real Cargo coexistence/refusal evidence:
-`target/runtime-singleton.ah3TQl` also covers two facade patch versions with zero/one/two runtime owners.
-Current/MSRV executor native/Wasm consumer:
-`target/boundary-consumer.qCbvBR`. All 33 selections of executor/ic0/gzip/runtime/CDK
-pass native/Wasm graph admission in `target/feature-graphs/attempt.vdfqz7`.
-Feature/source/consumer/release/governance checks passed before release. All four
-packages passed the pre-release 0.9.1 dry run in `/tmp/platform-103-package/publish.log`.
-
-The combined installed fixture remains blocked at resolution: Timers 0.32.3
-requires Platform 0.8 and therefore the old external executor, conflicting with
-the 0.9 runtime. No sibling adoption is made here. The native Profiler profile still
-selects gzip-only published Platform 0.8.3; registry adoption remains separate.
-Publication and installed evidence for the released runtime remain distinct.
-
-The 2026-10-30 registry check also found Timers 0.32.4 still requires Platform 0.8.
-
-## Candid codec packaging investigation
-
-The user selected investigation of shipping the lean reader without consumer
-patches. The original full-package experiment saved 22,867 stripped probe bytes;
-that result does not carry over when registry Candid keeps its type identities.
-The new independent consumer accepts registry DTOs without conversion, but the
-single-codec saving is 7,631 bytes (0.96%). Mixing owned and registry codecs adds
-328,182 bytes (40.85%). Cargo retains all five targeted dependencies. The candidate
-copies about 3,040 source lines including comments and private helpers.
-Concrete configuration and argument-trait identities differ, as do parser error
-variants. The maintainer rejected adoption: retain registry production Candid. The prototype
-remains evidence only; maintaining about 3k lines for this saving is not accepted.
-
-Repro: `scripts/benchmarks/0.9/candid-packaging/run.sh`; summary `evidence.json` in
-that directory; receipts `target/candid-packaging.n6WZul`. Strict owner/candidate/
-consumer Clippy, native DTO/Error identity tests, 191,205 differential cases,
-three API identity refusals and Rust 1.91 Wasm checks pass. No new installed,
-fuzz, production or sibling qualification is claimed. See the
-[packaging findings](../migration.md#candid-codec-packaging-investigation).
-
-[Canic PR #717](https://github.com/dragginzgame/canic/pull/717), commit `b173944`,
-gates service printing to host/export builds and propagates its explicit feature
-through declaration generation. Its isolated source is
-`/tmp/canic-candid-printer-20261030`; the normal sibling checkout stays untouched.
-Macro/protocol/build-command tests, strict Clippy and formatting passed. The PR
-is open; Platform DTO adoption remains a separate prerequisite for removing
-Canic's other printer edge.
-
-## Released runtime and management contracts
-
-0.9.0 embeds IC0 1.2.0 and the maintained executor 2.0.0 implementation.
-Preserve source/license fingerprints, SlotMap generations, protected wake routing,
-wake coalescing, cached wakers, completed-task reclamation and destructor ordering.
-The selected Vec task lists save 2,762 stripped Wasm bytes in the Wire fixture;
-small methods trade one allocation and some IC instructions for that size saving.
-Eight installed raw/ic-call × Wire/Candid × Rust 1.99.1/1.91 cases passed before
-release: `target/vec-runtime-20261030/evidence.json`, `target/cdk-runtime.gTkMdr`.
-
-Wasm management exposes 43 names backed by 51 complete 0.11.0 declarations;
-native retains all 57 upstream exports. Preserve external schemas, field/variant
-coverage and Principal/Nat identities. Removing the registry DTO/printer edge
-saved 55,386 stripped bytes (6.6%) in the status probe, not measured Canic output.
-Source/schema/current-MSRV/installed evidence: `target/management-adoption/evidence.json`
-and `target/cdk-runtime.Sh5GVo`. Neither change qualifies live IC or macOS.
-
-## Native profile and retained boundaries
-
-The source recipe retains IC `ee8086a9773725fd1058832a9400297cf0990112`, Rust
-1.99.0, registry Host Process/FS/Artifacts 0.70.3, Wire 0.7.23 and Platform 0.8.3.
-Profiler owns recorder/viewer, retention/report policy and PNG/range mechanics;
-Platform owns native state/HTTP admission and pricing. Preserve private ICPROF03
-peer coordination, saved schemas, existing bounds and one registry Host family.
-[#99](https://github.com/dragginzgame/ic-platform/pull/99) and
-[#100](https://github.com/dragginzgame/ic-platform/pull/100) retain prior source,
-registry, native lint and installed receipts. The viewer integer-projection cut
-has separate evidence at `/tmp/platform-json-cut-20261030/qualification.json`:
-113 product tests and six Linux installed scenarios passed. No macOS, fresh-host,
-full replica Bazel/NNS or live IC acceptance is inferred from those records.
-
-Owned Principal/Account remain Candid-free; required external Candid and legacy
-checkpoints retain bytes and identities. Memory/Storage own allocation and leases.
-Keep the fixed 16-level Candid admission, #72 DER envelope exception, #74 Host/Origin
-admission and protected crypto bodies/encodings/vectors/licenses. #50 remains unresolved. Fresh registry records and RustSec revision `2295466`
-still provide no compatible complete correction. The captured workspace audit
-finds crypto-bigint 0.5.5; yanked checks were explicitly excluded. Exact inputs
-and findings: `target/issue50-20261030/evidence.json`. No ignore, override or Agent fork.
-See [the migration contract](../migration.md) for provenance and qualification.
+The rejected lean Candid reader saved 7,631 probe bytes while adding about 3k
+maintained source lines; registry Candid remains selected. Historical runtime Vec
+and selected management DTO evidence is retained under `target/vec-runtime-20261030`
+and `target/management-adoption`; do not infer fresh acceptance from those receipts.
+The migration contract remains the detailed owner/provenance/qualification source.
+Earlier installed receipts and consumer-adoption context remain in the
+[0.14 release handoff](https://github.com/dragginzgame/ic-platform/blob/7b4ed265804a60b796c4680880cb7a4e66e53d1e/docs/status/current.md).
