@@ -26,6 +26,7 @@ check-formatting:
 
 help:
 	@echo 'Setup: install-tools, tools-check, install-hooks'
+	@echo 'Consumer cache setup: prepare-consumer-dependencies (explicit registry fetch)'
 	@echo 'Tool diagnostics: tools-report (offline, no installation)'
 	@echo 'Focused: check, test, clippy, docs-check, wasm-check, msrv, check-boundary'
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
@@ -86,6 +87,10 @@ check-primitives:
 			bash scripts/ci/check-blake3-graph.sh "$(CURDIR)" ic-platform "$$target" "$$features" || exit $$?; \
 		done; \
 	done
+.PHONY: prepare-consumer-dependencies
+prepare-consumer-dependencies:
+	bash scripts/ci/test-runtime-singleton.sh --prepare
+	bash scripts/ci/check-prepared-call-consumer.sh --prepare
 check-consumer:
 	bash scripts/ci/test-runtime-singleton.sh
 	bash scripts/ci/test-platform-msrv.sh
