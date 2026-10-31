@@ -122,21 +122,24 @@ a distinct native dependency; PNG mechanics and budgets stay product-owned.
 ## Host process and private Wire inputs
 
 The paired Profiler consumer supplies the Host process policy adapter and the
-IC Wire private process DTOs. This profile wires IC Wire 0.10.0 and
+IC Wire private process DTOs. This profile wires IC Wire 0.11.0 and
 `ic-host-process` into both Cargo and Bazel, retaining the 60 KiB consumer frame
 limit. Old ICP2/JSON process senders and receivers must be rebuilt together.
 Saved reports and profile bundle formats do not change. Generic OS observations
 and child/gate mechanics belong to Host; Profiler retains capture activation,
 pinned root selection, cadence, aggregation, diagnostics and CLI output.
 
-Process frames and Metrics 0.21 metadata share Wire 0.10. Only Metrics' native
-TypeScript metadata feature is active; endpoints and Platform-type schemas stay
-disabled. Arithmetic and saved layouts are unchanged; see the
-[Metrics metadata adoption](https://github.com/dragginzgame/ic-observability/issues/103).
+Profiler process frames use Wire 0.11. Metrics 0.22 retains its arithmetic and
+validated Serde contract with defaults and `native-wire` disabled. It adds no
+Wire or TypeScript metadata dependency, leaving one Wire generation in the
+recorder and native graph. Endpoints and Platform-type schemas stay disabled.
+Wire 0.11 preserves core codec bytes and budgets, ICPROF03 identity, arithmetic
+and saved layouts. See the
+[Metrics 0.22 migration](https://github.com/dragginzgame/ic-observability/blob/main/docs/migration-022.md).
 
 The selected recorder and native graph use published Host Process/FS 0.72.1
-and gzip-only Platform 0.11.1 from crates.io. Platform selects Host Artifacts
-0.71 for gzip, while the process family selects Host Artifacts 0.72. The published
+and gzip-only Platform 0.12.0 from crates.io. Its gzip facade and the process
+family share Host Artifacts 0.72.1. The published
 observation and workload APIs replace the temporary Tooling/Platform Git library
 suppliers. Cargo and Bazel locks record registry checksums; there is no downstream
 Cargo patch or mixed registry/Git Host family. Gzip remains a Platform facade,
@@ -144,7 +147,7 @@ with no new canister/runtime feature. The native source profile itself still
 requires an immutable Platform Git pin for the patched IC source and adapters.
 Native macOS execution remains separate qualification.
 
-Platform 0.11.1 retains the runtime-only executor singleton guard, allowing
+Platform 0.12.0 retains the runtime-only executor singleton guard, allowing
 this gzip-only graph to coexist with the pinned workspace's registry executor.
 The guard remains inactive here; the recorder never enables Platform's runtime.
 See
