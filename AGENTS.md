@@ -217,7 +217,7 @@ The maintainer explicitly authorized transferring IC Profiler's native provider,
 including its existing assembler/fixtures, into `native/ic-profiler`. Profiler
 #4 / Platform #90 return the product CLI/query renderer and shared PNG/range
 mechanics to the consumer; keep only their native integration/state adapters here.
-The qualified paired native profile selects Host Artifacts 0.72.1 gzip directly
+The qualified paired native profile selects Host Artifacts 0.73.1 gzip directly
 and drops registry Platform. Consumers retain the matching product imports and
 immutable provider pin; older consumers keep their qualified source. The current
 consumer library has no gzip surface. That opt-in

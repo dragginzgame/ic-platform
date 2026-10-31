@@ -527,9 +527,9 @@ Remove Platform entirely where gzip was its only use. Keep the qualified Host
 version, caller levels, byte bounds and retained artifact obligations unchanged.
 
 This removes the production dependency back to Tooling. The independently
-revision-pinned native Profiler source profile now selects Host Artifacts 0.72.1
+revision-pinned native Profiler source profile now selects Host Artifacts 0.73.1
 directly in its paired Cargo/Bazel inputs and drops registry Platform. Its
-qualified payload is unchanged from provider `6c054c8`; consumers selecting a new
+qualified payload is unchanged from provider `b9f4f0f`; consumers selecting a new
 provider commit must supply the paired direct Host imports and retain their normal
 source-binding qualification. Older consumers keep their qualified source pin.
 A facade release does not rewrite a frozen provider input or its evidence.
