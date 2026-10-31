@@ -99,7 +99,7 @@ budgets and durable delivery stay consumer-owned. See the
 [migration](migration.md#prepared-one-shot-calls-issue-75).
 
 The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzip`
-and `GzipError` from published IC Tooling `ic-host-artifacts` 0.71.0 for IC Profiler.
+and `GzipError` from published IC Tooling `ic-host-artifacts` 0.72.0 for IC Profiler.
 The native source provider independently retains its separately pinned published Platform
 gzip facade and Host family. Updating the ordinary facade does not change those inputs.
 Tooling retains codec implementation; callers retain levels, limits and payload
@@ -307,7 +307,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | hex | ^0.4.3 | normal | all | true | true |  |
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
-| ic-platform | ic-host-artifacts | ^0.71.0 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
+| ic-platform | ic-host-artifacts | ^0.72.0 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
