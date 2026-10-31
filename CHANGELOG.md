@@ -8,6 +8,9 @@
   offline CI and release validation. Cold caches now receive an explicit setup
   command and readable failure diagnostics without changing runtime ownership
   ([#111 — Prepare singleton fixture dependencies](https://github.com/dragginzgame/ic-platform/issues/111)).
+- Canonicalize standalone admission-fixture paths so macOS temporary directories
+  with a trailing slash retain the runtime artifact-lock coordination proof
+  ([#113 — Canonicalize fixture lock paths](https://github.com/dragginzgame/ic-platform/issues/113)).
 
 ## [0.11.1] - 2026-10-30
 
