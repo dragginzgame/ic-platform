@@ -4,7 +4,7 @@ Platform 0.11 removed `wire-schema` and the production Wire dependency. Principa
 and Account retain their existing bytes and Serde; published Wire 0.10 supplies
 their schema trait integration through opt-in `platform-types`. Host schema
 consumers select that feature alongside Platform `principal`.
-IC Tooling 0.71 remains the gzip supplier.
+IC Tooling 0.72 remains the gzip supplier.
 
 Source release 0.7.4 adds `candid-endpoint` and `candid::endpoint::{query, update}` for
 required external Candid interfaces with explicit `limits`, `empty_args` and
