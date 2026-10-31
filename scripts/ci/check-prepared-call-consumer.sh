@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
+prepare=false
+case "$#:${1:-}" in
+    0:) ;;
+    1:--prepare) prepare=true ;;
+    *) echo "usage: $0 [--prepare]" >&2; exit 2 ;;
+esac
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 # shellcheck source=scripts/ci/consumer-fixture.sh
@@ -27,6 +33,12 @@ ic-platform = { path = "../../crates/ic-platform", default-features = false, fea
 ic-wire = { version = "$wire", optional = true }
 MANIFEST
 cp scripts/fixtures/prepared-call-consumer/lib.rs "$fixture/src/lib.rs"
+if [[ "$prepare" == true ]]; then
+    cp "$root/Cargo.lock" "$fixture/Cargo.lock"
+    cargo fetch --manifest-path "$fixture/Cargo.toml"
+    printf 'Standalone prepared-call dependencies retained at %s\n' "$fixture"
+    exit 0
+fi
 consumer_metadata "$root"
 # Reuse dependencies across disposable sources without switching compilers in one target.
 build="${CARGO_TARGET_DIR:-$root/target/prepared-call-consumer-build}"

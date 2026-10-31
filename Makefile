@@ -90,6 +90,7 @@ check-primitives:
 .PHONY: prepare-consumer-dependencies
 prepare-consumer-dependencies:
 	bash scripts/ci/test-runtime-singleton.sh --prepare
+	bash scripts/ci/check-prepared-call-consumer.sh --prepare
 check-consumer:
 	bash scripts/ci/test-runtime-singleton.sh
 	bash scripts/ci/test-platform-msrv.sh

@@ -142,9 +142,9 @@ Prepare common tools explicitly with `make install-tools`; `make tools-check`
 verifies them offline. Prepare locked dependency sources with
 `cargo fetch --locked` before validation, including the Wasm target dependencies
 used by frozen standalone consumer checks. Then run
-`make prepare-consumer-dependencies` to fetch the registry executor used only by
-the singleton rejection fixture; the embedded runtime no longer includes it in
-the root lock. CI and admitted release preparation run this explicit setup too.
+`make prepare-consumer-dependencies` to fetch the registry executor and Wire used
+only by standalone fixtures; the embedded runtime and schema transfer removed
+them from the root lock. CI and admitted release preparation run this setup too.
 Normal consumer checks remain offline and never install executables. Rust 1.99.1 is the
 development compiler; Rust 1.91.0 is the minimum. Prepare both toolchains with the
 `wasm32-unknown-unknown` target for each compiler before their checks. For an
