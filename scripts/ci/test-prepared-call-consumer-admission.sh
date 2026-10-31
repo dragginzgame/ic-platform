@@ -3,6 +3,7 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/prepared-call-admission.XXXXXX")"
+fixture="$(CDPATH='' cd "$fixture" && pwd -P)"
 first_pid="" second_pid=""
 finish() {
     local status=$?
@@ -62,7 +63,12 @@ esac
 CARGO
 chmod +x "$fixture/bin/cargo" "$fixture/bin/rustc"
 export PATH="$fixture/bin:$PATH" ADMISSION_CALLS="$fixture/calls" ADMISSION_TARGETS="$fixture/targets"
+"$BASH" "$fixture/scripts/ci/check-prepared-call-consumer.sh" --prepare > "$fixture/prepare.log" 2>&1 || { cat "$fixture/prepare.log"; exit 1; }
+[[ "$(grep -c '^fetch ' "$ADMISSION_CALLS")" == 1 ]]
+[[ "$(grep -vc '^locate-project ' "$ADMISSION_CALLS")" == 1 ]]
+: > "$ADMISSION_CALLS"
 "$BASH" "$fixture/scripts/ci/check-prepared-call-consumer.sh" > "$fixture/pass.log" 2>&1 || { cat "$fixture/pass.log"; exit 1; }
+if grep -q '^fetch ' "$ADMISSION_CALLS"; then echo 'Offline validation fetched dependencies' >&2; exit 1; fi
 # All three selections reach strict Clippy, tests and both target checks.
 [[ "$(grep -c '^clippy ' "$ADMISSION_CALLS")" == 3 ]]
 [[ "$(grep -c '^+.* test ' "$ADMISSION_CALLS")" == 6 ]]
