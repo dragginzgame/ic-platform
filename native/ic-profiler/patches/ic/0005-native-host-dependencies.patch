@@ -6,7 +6,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "ic-wasm 0.11.1"
    ],
 -  "checksum": "d4e719583881cf898774f83b5661851ff3da30493e262b0832a817b5022e50da",
-+  "checksum": "e1f026ed3c6ebfe0b605e152e4ff8a227c5762d0ff5e2055d39b8091f9793563",
++  "checksum": "b0e49ada33dd5ee9543ac1536d0c9e5578991ae48f2ebcf6b3c08c0c33d07a50",
    "conditions": {
      "aarch64-apple-darwin": [
        "aarch64-apple-darwin"
@@ -743,11 +743,11 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "ic_gateway"
            },
            {
-+            "id": "ic-host-artifacts 0.72.1",
++            "id": "ic-host-artifacts 0.73.1",
 +            "target": "ic_host_artifacts"
 +          },
 +          {
-+            "id": "ic-host-process 0.72.1",
++            "id": "ic-host-process 0.73.1",
 +            "target": "ic_host_process"
 +          },
 +          {
@@ -759,7 +759,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "ic_management_canister_types"
 +          },
 +          {
-+            "id": "ic-metrics 0.22.0",
++            "id": "ic-metrics 0.24.0",
 +            "target": "ic_metrics"
            },
            {
@@ -768,7 +768,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
              "target": "ic_wasm"
            },
            {
-+            "id": "ic-wire 0.11.0",
++            "id": "ic-wire 0.13.0",
 +            "target": "ic_wire"
 +          },
 +          {
@@ -1209,7 +1209,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
        ],
        "version": "0.0.0-git"
      },
-+    "ic-host-artifacts 0.72.1": {
++    "ic-host-artifacts 0.73.1": {
 +      "common_attrs": {
 +        "crate_features": [
 +          "gzip"
@@ -1236,8 +1236,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-tooling",
 +      "repository": {
 +        "Http": {
-+          "sha256": "6d51ea50922db8c88b6f515d53fb3d008c20abdddb651be9576c3c02a5a72e29",
-+          "url": "https://static.crates.io/crates/ic-host-artifacts/0.72.1/download"
++          "sha256": "c16a107497531b26280ee7721eb2c0f8779571a58617649a952b7928f46d007e",
++          "url": "https://static.crates.io/crates/ic-host-artifacts/0.73.1/download"
 +        }
 +      },
 +      "targets": [
@@ -1248,14 +1248,14 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.72.1"
++      "version": "0.73.1"
 +    },
-+    "ic-host-fs 0.72.1": {
++    "ic-host-fs 0.73.1": {
 +      "common_attrs": {
 +        "deps": {
 +          "common": [
 +            {
-+              "id": "ic-host-artifacts 0.72.1",
++              "id": "ic-host-artifacts 0.73.1",
 +              "target": "ic_host_artifacts"
 +            },
 +            {
@@ -1284,8 +1284,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-tooling",
 +      "repository": {
 +        "Http": {
-+          "sha256": "0845729e5015d8e3dd3a665aa386ee49c1b2d15c6d96bce04e242bf37a1e11db",
-+          "url": "https://static.crates.io/crates/ic-host-fs/0.72.1/download"
++          "sha256": "0b07ff732b11713e23174cadd5941bdbf40c1c7c869c31e42167136f448eb75e",
++          "url": "https://static.crates.io/crates/ic-host-fs/0.73.1/download"
 +        }
 +      },
 +      "targets": [
@@ -1296,18 +1296,18 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.72.1"
++      "version": "0.73.1"
 +    },
-+    "ic-host-process 0.72.1": {
++    "ic-host-process 0.73.1": {
 +      "common_attrs": {
 +        "deps": {
 +          "common": [
 +            {
-+              "id": "ic-host-artifacts 0.72.1",
++              "id": "ic-host-artifacts 0.73.1",
 +              "target": "ic_host_artifacts"
 +            },
 +            {
-+              "id": "ic-host-fs 0.72.1",
++              "id": "ic-host-fs 0.73.1",
 +              "target": "ic_host_fs"
 +            }
 +          ],
@@ -1346,8 +1346,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-tooling",
 +      "repository": {
 +        "Http": {
-+          "sha256": "624ca62b19ca01d154b20d7d96378126f8b4945a62eb87ac6a46f172053c8eff",
-+          "url": "https://static.crates.io/crates/ic-host-process/0.72.1/download"
++          "sha256": "47eedfec6c05f36dac29a5e99b50698833a1eb8b962fb961db4f39338ff052fa",
++          "url": "https://static.crates.io/crates/ic-host-process/0.73.1/download"
 +        }
 +      },
 +      "targets": [
@@ -1358,7 +1358,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.72.1"
++      "version": "0.73.1"
 +    },
      "ic-http-certification 3.1.0": {
        "common_attrs": {
@@ -1395,7 +1395,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
        ],
        "version": "0.8.0"
 +    },
-+    "ic-metrics 0.22.0": {
++    "ic-metrics 0.24.0": {
 +      "common_attrs": {
 +        "deps": [
 +          {
@@ -1415,8 +1415,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-observability",
 +      "repository": {
 +        "Http": {
-+          "sha256": "ff47b21318777d1965036e7200eb21833dee9aa8c6309d30381010da230d29cd",
-+          "url": "https://static.crates.io/crates/ic-metrics/0.22.0/download"
++          "sha256": "70544c4dc1ae7697e22f2a3dd23a96de8fbcd722e7c320d72fda0c7760c2b9c6",
++          "url": "https://static.crates.io/crates/ic-metrics/0.24.0/download"
 +        }
 +      },
 +      "targets": [
@@ -1427,7 +1427,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.22.0"
++      "version": "0.24.0"
      },
      "ic-metrics-encoder 1.1.1": {
        "common_attrs": {
@@ -1481,7 +1481,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
        ],
        "version": "0.11.1"
 +    },
-+    "ic-wire 0.11.0": {
++    "ic-wire 0.13.0": {
 +      "common_attrs": {
 +        "deps": [
 +          {
@@ -1504,7 +1504,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +        "edition": "2024",
 +        "proc_macro_deps": [
 +          {
-+            "id": "ic-wire-derive 0.11.0",
++            "id": "ic-wire-derive 0.13.0",
 +            "target": "ic_wire_derive"
 +          }
 +        ]
@@ -1519,8 +1519,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-wire",
 +      "repository": {
 +        "Http": {
-+          "sha256": "1fe3cd2ff538068d5dfbfaf1a2c8ca6ebec28ef95b4c5d4ce0961578971fe468",
-+          "url": "https://static.crates.io/crates/ic-wire/0.11.0/download"
++          "sha256": "0345419cb266f26bdaa0dd94558dc7db889fb9b560d1856fd8f5e8d407b0b9e9",
++          "url": "https://static.crates.io/crates/ic-wire/0.13.0/download"
 +        }
 +      },
 +      "targets": [
@@ -1531,9 +1531,9 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.11.0"
++      "version": "0.13.0"
 +    },
-+    "ic-wire-derive 0.11.0": {
++    "ic-wire-derive 0.13.0": {
 +      "common_attrs": {
 +        "deps": [
 +          {
@@ -1561,8 +1561,8 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +      "package_url": "https://github.com/dragginzgame/ic-wire",
 +      "repository": {
 +        "Http": {
-+          "sha256": "a8743a922f9b3b291c412c3366475356ecd4f808b5a3b5f4d60173cb5d00ef6b",
-+          "url": "https://static.crates.io/crates/ic-wire-derive/0.11.0/download"
++          "sha256": "03dda8c8072cd1c09207b3244133bc3d795161b76124dd2d45040945bfb4b4aa",
++          "url": "https://static.crates.io/crates/ic-wire-derive/0.13.0/download"
 +        }
 +      },
 +      "targets": [
@@ -1573,7 +1573,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
 +          }
 +        }
 +      ],
-+      "version": "0.11.0"
++      "version": "0.13.0"
      },
      "ic-xrc-types 1.2.0": {
        "common_attrs": {
@@ -3301,11 +3301,11 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "ic-certified-map 0.3.4",
      "ic-doge-interface 0.3.0",
      "ic-gateway 0.0.0-git",
-+    "ic-host-artifacts 0.72.1",
-+    "ic-host-process 0.72.1",
++    "ic-host-artifacts 0.73.1",
++    "ic-host-process 0.73.1",
      "ic-identity-hsm 0.49.1",
      "ic-management-canister-types 0.8.0",
-+    "ic-metrics 0.22.0",
++    "ic-metrics 0.24.0",
      "ic-metrics-encoder 1.1.1",
      "ic-sha3 1.0.0",
      "ic-stable-structures 0.6.8",
@@ -3313,7 +3313,7 @@ diff --git a/Cargo.Bazel.json.lock b/Cargo.Bazel.json.lock
      "ic-verify-bls-signature 0.6.0",
      "ic-vetkeys 0.7.0",
      "ic-wasm 0.11.1",
-+    "ic-wire 0.11.0",
++    "ic-wire 0.13.0",
      "ic-xrc-types 1.2.0",
      "ic0 1.1.0",
      "ic_bls12_381 0.10.1",
@@ -3420,9 +3420,9 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  
  [[package]]
 +name = "ic-host-artifacts"
-+version = "0.72.1"
++version = "0.73.1"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "6d51ea50922db8c88b6f515d53fb3d008c20abdddb651be9576c3c02a5a72e29"
++checksum = "c16a107497531b26280ee7721eb2c0f8779571a58617649a952b7928f46d007e"
 +dependencies = [
 + "flate2",
 + "sha2 0.10.9",
@@ -3430,9 +3430,9 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
 +
 +[[package]]
 +name = "ic-host-fs"
-+version = "0.72.1"
++version = "0.73.1"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "0845729e5015d8e3dd3a665aa386ee49c1b2d15c6d96bce04e242bf37a1e11db"
++checksum = "0b07ff732b11713e23174cadd5941bdbf40c1c7c869c31e42167136f448eb75e"
 +dependencies = [
 + "ic-host-artifacts",
 + "rustix 1.1.4",
@@ -3441,9 +3441,9 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
 +
 +[[package]]
 +name = "ic-host-process"
-+version = "0.72.1"
++version = "0.73.1"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "624ca62b19ca01d154b20d7d96378126f8b4945a62eb87ac6a46f172053c8eff"
++checksum = "47eedfec6c05f36dac29a5e99b50698833a1eb8b962fb961db4f39338ff052fa"
 +dependencies = [
 + "command-fds",
 + "ic-host-artifacts",
@@ -3464,9 +3464,9 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
 +
 +[[package]]
 +name = "ic-metrics"
-+version = "0.22.0"
++version = "0.24.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "ff47b21318777d1965036e7200eb21833dee9aa8c6309d30381010da230d29cd"
++checksum = "70544c4dc1ae7697e22f2a3dd23a96de8fbcd722e7c320d72fda0c7760c2b9c6"
 +dependencies = [
 + "serde",
  ]
@@ -3477,9 +3477,9 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
  
  [[package]]
 +name = "ic-wire"
-+version = "0.11.0"
++version = "0.13.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "1fe3cd2ff538068d5dfbfaf1a2c8ca6ebec28ef95b4c5d4ce0961578971fe468"
++checksum = "0345419cb266f26bdaa0dd94558dc7db889fb9b560d1856fd8f5e8d407b0b9e9"
 +dependencies = [
 + "bytemuck",
 + "ic-wire-derive",
@@ -3490,9 +3490,9 @@ diff --git a/Cargo.Bazel.toml.lock b/Cargo.Bazel.toml.lock
 +
 +[[package]]
 +name = "ic-wire-derive"
-+version = "0.11.0"
++version = "0.13.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "a8743a922f9b3b291c412c3366475356ecd4f808b5a3b5f4d60173cb5d00ef6b"
++checksum = "03dda8c8072cd1c09207b3244133bc3d795161b76124dd2d45040945bfb4b4aa"
 +dependencies = [
 + "proc-macro2",
 + "quote",
@@ -3894,9 +3894,9 @@ diff --git a/Cargo.lock b/Cargo.lock
  
  [[package]]
 +name = "ic-host-artifacts"
-+version = "0.72.1"
++version = "0.73.1"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "6d51ea50922db8c88b6f515d53fb3d008c20abdddb651be9576c3c02a5a72e29"
++checksum = "c16a107497531b26280ee7721eb2c0f8779571a58617649a952b7928f46d007e"
 +dependencies = [
 + "flate2",
 + "sha2 0.10.9",
@@ -3904,9 +3904,9 @@ diff --git a/Cargo.lock b/Cargo.lock
 +
 +[[package]]
 +name = "ic-host-fs"
-+version = "0.72.1"
++version = "0.73.1"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "0845729e5015d8e3dd3a665aa386ee49c1b2d15c6d96bce04e242bf37a1e11db"
++checksum = "0b07ff732b11713e23174cadd5941bdbf40c1c7c869c31e42167136f448eb75e"
 +dependencies = [
 + "ic-host-artifacts",
 + "rustix 1.1.4",
@@ -3915,9 +3915,9 @@ diff --git a/Cargo.lock b/Cargo.lock
 +
 +[[package]]
 +name = "ic-host-process"
-+version = "0.72.1"
++version = "0.73.1"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "624ca62b19ca01d154b20d7d96378126f8b4945a62eb87ac6a46f172053c8eff"
++checksum = "47eedfec6c05f36dac29a5e99b50698833a1eb8b962fb961db4f39338ff052fa"
 +dependencies = [
 + "command-fds",
 + "ic-host-artifacts",
@@ -4019,9 +4019,9 @@ diff --git a/Cargo.lock b/Cargo.lock
 +
 +[[package]]
 +name = "ic-metrics"
-+version = "0.22.0"
++version = "0.24.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "ff47b21318777d1965036e7200eb21833dee9aa8c6309d30381010da230d29cd"
++checksum = "70544c4dc1ae7697e22f2a3dd23a96de8fbcd722e7c320d72fda0c7760c2b9c6"
 +dependencies = [
 + "serde",
  ]
@@ -4214,7 +4214,7 @@ diff --git a/Cargo.lock b/Cargo.lock
 - "flate2",
 + "ic-host-artifacts",
 + "ic-host-process",
-+ "ic-metrics 0.22.0",
++ "ic-metrics 0.24.0",
 + "ic-wire",
   "libc",
   "serde",
@@ -4272,9 +4272,9 @@ diff --git a/Cargo.lock b/Cargo.lock
  
  [[package]]
 +name = "ic-wire"
-+version = "0.11.0"
++version = "0.13.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "1fe3cd2ff538068d5dfbfaf1a2c8ca6ebec28ef95b4c5d4ce0961578971fe468"
++checksum = "0345419cb266f26bdaa0dd94558dc7db889fb9b560d1856fd8f5e8d407b0b9e9"
 +dependencies = [
 + "bytemuck",
 + "ic-wire-derive",
@@ -4285,9 +4285,9 @@ diff --git a/Cargo.lock b/Cargo.lock
 +
 +[[package]]
 +name = "ic-wire-derive"
-+version = "0.11.0"
++version = "0.13.0"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "a8743a922f9b3b291c412c3366475356ecd4f808b5a3b5f4d60173cb5d00ef6b"
++checksum = "03dda8c8072cd1c09207b3244133bc3d795161b76124dd2d45040945bfb4b4aa"
 +dependencies = [
 + "proc-macro2",
 + "quote",
@@ -4436,11 +4436,11 @@ diff --git a/Cargo.toml b/Cargo.toml
  opt-level = 3
  
  [workspace.dependencies]
-+ic-wire = { version = "0.11.0", default-features = false }
-+ic-host-process = { version = "0.72.1", default-features = false }
-+ic-metrics = { version = "0.22.0", default-features = false }
++ic-wire = { version = "0.13.0", default-features = false }
++ic-host-process = { version = "0.73.1", default-features = false }
++ic-metrics = { version = "0.24.0", default-features = false }
 +
-+ic-host-artifacts = { version = "0.72.1", default-features = false, features = ["gzip"] }
++ic-host-artifacts = { version = "0.73.1", default-features = false, features = ["gzip"] }
  actix-rt = "2.10.0"
  actix-web = { version = "4.9.0", default-features = false, features = [
      "macros",
@@ -4463,23 +4463,23 @@ diff --git a/bazel/rust.MODULE.bazel b/bazel/rust.MODULE.bazel
 +crate.spec(
 +    default_features = False,
 +    package = "ic-wire",
-+    version = "0.11.0",
++    version = "0.13.0",
 +)
 +crate.spec(
 +    default_features = False,
 +    package = "ic-host-process",
-+    version = "0.72.1",
++    version = "0.73.1",
 +)
 +crate.spec(
 +    default_features = False,
 +    package = "ic-metrics",
-+    version = "0.22.0",
++    version = "0.24.0",
 +)
 +crate.spec(
 +    default_features = False,
 +    features = ["gzip"],
 +    package = "ic-host-artifacts",
-+    version = "0.72.1",
++    version = "0.73.1",
 +)
  # Build any crate with `@crate_index//:mycrate`
  # Use particular version with `@crate_index//:mycrate-3.14.16`

@@ -8,6 +8,10 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ### ⬆️ Dependencies
 
+- Adopt published Host Process/FS/Artifacts 0.73.1, arithmetic-only Metrics 0.24
+  and core Wire 0.13 in the native Profiler Cargo/Bazel inputs. Keep gzip bytes,
+  counter quality, frame admission and saved report formats unchanged.
+
 - Move native Profiler gzip to Host Artifacts 0.72.1 directly and remove the
   forwarding-only registry Platform dependency. Preserve codec bytes, levels,
   strict admission and existing API/recorder byte limits.

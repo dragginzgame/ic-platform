@@ -47,9 +47,9 @@ patches. The separate compiled-fact patch exposes the existing resource-charge
 cadence; it changes no scheduler calculation or charging behavior.
 
 Adapters stay inside the provider's IC workspace. The consumer recorder and
-native server select Host Artifacts 0.72.1 directly with only its `gzip` feature,
+native server select Host Artifacts 0.73.1 directly with only its `gzip` feature,
 pinned in the provider's Cargo and Bazel inputs. The recorder also consumes
-published IC Metrics 0.22 scalar arithmetic, with defaults and `native-wire`
+published IC Metrics 0.24 scalar arithmetic, with defaults and `native-wire`
 disabled. This provider owns those native workspace and Bazel locks, distinct
 from the IC workspace's internal `ic-metrics` package. Compression implementation
 stays in Tooling; the consumer retains levels, import limits and bundle semantics.
@@ -121,23 +121,23 @@ distinct native dependency; PNG mechanics and budgets stay product-owned.
 ## Host process and private Wire inputs
 
 The paired Profiler consumer supplies the Host process policy adapter and the
-IC Wire private process DTOs. This profile wires IC Wire 0.11.0 and
+IC Wire private process DTOs. This profile wires IC Wire 0.13.0 and
 `ic-host-process` into both Cargo and Bazel, retaining the 60 KiB consumer frame
 limit. Old ICP2/JSON process senders and receivers must be rebuilt together.
 Saved reports and profile bundle formats do not change. Generic OS observations
 and child/gate mechanics belong to Host; Profiler retains capture activation,
 pinned root selection, cadence, aggregation, diagnostics and CLI output.
 
-Profiler process frames use Wire 0.11. Metrics 0.22 retains its arithmetic and
+Profiler process frames use Wire 0.13. Metrics 0.24 retains its arithmetic and
 validated Serde contract with defaults and `native-wire` disabled. It adds no
 Wire or TypeScript metadata dependency, leaving one Wire generation in the
 recorder and native graph. Endpoints and Platform-type schemas stay disabled.
-Wire 0.11 preserves core codec bytes and budgets, ICPROF03 identity, arithmetic
+Wire 0.13 preserves core codec bytes and budgets, ICPROF03 identity, arithmetic
 and saved layouts. See the
-[Metrics 0.22 migration](https://github.com/dragginzgame/ic-observability/blob/main/docs/migration-022.md).
+[Metrics 0.24 migration](https://github.com/dragginzgame/ic-observability/blob/main/releases/metrics/0.24.md).
 
 The selected recorder and native graph use published Host Process/FS/Artifacts
-0.72.1 from crates.io. Generic gzip calls `ic_host_artifacts::artifact` directly,
+0.73.1 from crates.io. Generic gzip calls `ic_host_artifacts::artifact` directly,
 with `default-features = false, features = ["gzip"]`. Platform 0.13 removes its
 forwarding API; gzip was the recorder/server's only registry Platform use, so
 both Cargo and Bazel drop that package entirely. The same Host codec retains
