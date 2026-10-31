@@ -4,7 +4,7 @@ Platform 0.11 removed `wire-schema` and the production Wire dependency. Principa
 and Account retain their existing bytes and Serde; published Wire 0.10 supplies
 their schema trait integration through opt-in `platform-types`. Host schema
 consumers select that feature alongside Platform `principal`.
-IC Tooling 0.72 remains the gzip supplier.
+Generic gzip codecs are selected directly from IC Tooling.
 
 Source release 0.7.4 adds `candid-endpoint` and `candid::endpoint::{query, update}` for
 required external Candid interfaces with explicit `limits`, `empty_args` and
@@ -21,10 +21,8 @@ Verify registry availability before downstream adoption; see the
 Bounded external codecs automatically reject more than 16 constructed wire levels
 before Candid runs (see #73).
 
-Enable `gzip` for native `ic_platform::gzip::{encode_gzip, decode_gzip, GzipError}`.
-These are IC Tooling's existing bounded codecs, without backend types or a second
-implementation. Consumers retain compression levels, byte limits and artifact
-admission. The optional dependency is absent from Wasm and default graphs.
+Use `ic-host-artifacts` with its `gzip` feature for native bounded gzip codecs.
+Platform has no compression feature or Tooling production dependency.
 
 Published 0.6.20 provides optional `cmc-types`,
 `icp-ledger-types`, `cycles-ledger-types`, `nns-registry-types` and native-only
@@ -292,7 +290,7 @@ wake routing, wake coalescing, cached wakers and task-bookkeeping reclamation.
 The Cargo singleton guard rejects old registry executors and multiple new Platform
 runtime versions; coordinate Timers/application adoption of the same Platform minor
 line. The internal, dependency-free `ic-platform-runtime-guard` package is selected
-only by `executor` and exactly matches the facade version. Native gzip-only and
+only by `executor` and exactly matches the facade version. Native default and
 IC0-only consumers select no guard and can coexist with unrelated executors.
 The executor implementation stays here; the helper exports no API.
 

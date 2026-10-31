@@ -37,7 +37,7 @@ if [[ "$prepare" == true ]]; then
 fi
 # Only this disposable lock resolves. The native source profile's unrelated
 # registry executor must coexist with every selection lacking Platform's executor.
-for features in default ic0 gzip; do
+for features in default ic0; do
     manifest "\"$features\""
     result=0
     cargo tree --manifest-path "$fixture/Cargo.toml" --offline \
@@ -52,11 +52,11 @@ for features in default ic0 gzip; do
         echo "Non-runtime $features selection acquired an executor guard" >&2; exit 1
     fi
 done
-manifest '"gzip"'
+manifest '"ic0"'
 cargo check --manifest-path "$fixture/Cargo.toml" --frozen \
-    --target-dir "$fixture/target" > "$fixture/gzip-check.log" 2>&1
+    --target-dir "$fixture/target" > "$fixture/ic0-check.log" 2>&1
 # Reuse the successful native lock: enabling runtime later must still refuse.
-for features in executor runtime cdk gzip,executor gzip,runtime gzip,cdk; do
+for features in executor runtime cdk; do
     manifest "$(printf '"%s"' "$features" | sed 's/,/", "/g')"
     if cargo tree --manifest-path "$fixture/Cargo.toml" --offline \
         > "$fixture/$features.tree" 2> "$fixture/$features.log"; then
@@ -66,7 +66,7 @@ for features in executor runtime cdk gzip,executor gzip,runtime gzip,cdk; do
     grep -q 'ic-platform-runtime-guard' "$fixture/$features.log"
     grep -q 'ic-cdk-executor' "$fixture/$features.log"
 done
-echo 'Native default/gzip/ic0 coexistence and all six runtime singleton refusals passed.'
+echo 'Native default/ic0 coexistence and all three runtime singleton refusals passed.'
 # Exercise two real facade versions as well as the retired registry executor.
 # Only disposable package metadata changes; both copies retain the actual source.
 mkdir "$fixture-next-platform"
@@ -87,7 +87,7 @@ for manifest_path in "$fixture-next-platform"/crates/*/Cargo.toml; do
     perl -pi -e 's/^\[package\]$/[package]\nworkspace = "..\/.."/' "$manifest_path"
 done
 for selection in native current-runtime next-runtime both-runtime; do
-    current=gzip next_features=gzip
+    current=ic0 next_features=ic0
     case "$selection" in
         current-runtime) current=executor ;;
         next-runtime) next_features=executor ;;

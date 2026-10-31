@@ -1,5 +1,20 @@
 # Current handoff
 
+## Pending 0.13: remove the gzip forwarding boundary
+
+PR #109 removes the optional native gzip surface and production Host Artifacts
+dependency. Consumers use IC Tooling Host Artifacts directly, preserving their
+qualified codec version, levels and limits. The released base is 0.12.0; pending
+notes select 0.13.0 for this feature/export removal. Package versions stay 0.12.0.
+The independently pinned native source profile retains its qualified Platform
+0.11.1 gzip supplier until draft #110 has installed qualification.
+
+PRs #112/#114 add explicit standalone-consumer cache preparation and canonical
+fixture paths. PR #104 supplies the qualified native dependency/pricing update;
+its final Host 0.72.1 inputs passed a fresh server build and all six installed
+scenarios on provider ae60deac99e3ff8e993c42e071d63510e61f7f6d. The merge preserves
+those native inputs. Draft #102 still requires native layout qualification.
+
 ## Tooling 0.72 adoption
 
 The root catalog selects published Host Artifacts/Testkit 0.72.0 and the managed

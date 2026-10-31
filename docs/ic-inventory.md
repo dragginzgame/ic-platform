@@ -29,7 +29,7 @@ maintained source inside Platform. Public module paths stay; method/task handles
 have Platform identity. Executor selects only owned IC0 and SlotMap.
 The inherited Cargo singleton guard lives in an internal, dependency-free helper
 selected only by `executor`, at exactly the facade version. It adds no runtime
-implementation or public API. Non-runtime/native gzip consumers can coexist with
+implementation or public API. Non-runtime/native consumers can coexist with
 an unrelated executor; the guard and final runtime graph checks prevent mixed owners;
 Timers consumers must adopt the supplying minor line together. Original source
 and license identities, deviations and qualification are in the
@@ -98,17 +98,9 @@ budgets and durable delivery stay consumer-owned. See the
 [call contract](../crates/ic-platform/src/call/README.md) and
 [migration](migration.md#prepared-one-shot-calls-issue-75).
 
-The optional native `gzip` surface explicitly exports `encode_gzip`, `decode_gzip`
-and `GzipError` from published IC Tooling `ic-host-artifacts` 0.72.0 for IC Profiler.
-The native source provider independently retains its separately pinned published Platform
-gzip facade and Host family. Updating the ordinary facade does not change those inputs.
-Tooling retains codec implementation; callers retain levels, limits and payload
-admission. No backend types, default/Wasm dependency or IC runtime edge is added.
-The maintainer retained this facade for Profiler instead of #91's proposed direct
-Host migration. Its native server now also imports through this same owner.
-The native profile supplies product CLI/rendering modules from the consuming
-Profiler tree; Platform retains IC state access, HTTP admission and Cargo/Bazel
-inputs. See the [paired source contract](../native/ic-profiler/README.md#paired-product-source-contract).
+Generic gzip codecs are consumed directly from IC Tooling. Platform has no
+compression surface or production dependency on Host Artifacts. The separately
+pinned native Profiler source profile retains its own qualified inputs.
 
 The published 0.6.20 external DTO additions are maintained from pinned protocol
 schemas: `cmc_types`, `icp_ledger_types`, `cycles_ledger_types`,
@@ -278,7 +270,6 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ecdsa | dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
 | ic-platform | executor | dep:ic-platform-runtime-guard, dep:slotmap, ic0 |
-| ic-platform | gzip | dep:ic-host-artifacts |
 | ic-platform | ic0 |  |
 | ic-platform | icp-ledger-types | candid |
 | ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
@@ -307,7 +298,6 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | hex | ^0.4.3 | normal | all | true | true |  |
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
-| ic-platform | ic-host-artifacts | ^0.72.0 | normal | cfg(not(target_family = "wasm")) | true | false | gzip |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |

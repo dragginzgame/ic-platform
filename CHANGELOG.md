@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.12.1]
+## [0.13.0]
+
+### ⚠️ Breaking
+
+- Remove the native gzip forwarding feature and exports. Consumers select
+  `ic-host-artifacts/gzip` and import its `artifact` codecs directly. Platform
+  no longer depends on generic Host artifacts; codec bytes and admission stay
+  owned by Tooling. See the [migration](docs/migration.md#host-gzip-boundary).
 
 ### ⬆️ Dependencies
 
@@ -24,7 +31,6 @@
   pricing regression. Keep the real cycle-balance comparison, leave metadata
   headroom and report complete pricing evidence on failure
   ([#106 — Separate event-detail truncation from metadata exhaustion in installed pricing reconciliation](https://github.com/dragginzgame/ic-platform/issues/106)).
-
 
 ### 🩹 Fixed
 
