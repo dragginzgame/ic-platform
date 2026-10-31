@@ -135,8 +135,8 @@ disabled. Arithmetic and saved layouts are unchanged; see the
 [Metrics metadata adoption](https://github.com/dragginzgame/ic-observability/issues/103).
 
 The selected recorder and native graph use published Host Process/FS 0.72.1
-and gzip-only Platform 0.11.1 from crates.io. Platform selects Host Artifacts
-0.71 for gzip, while the process family selects Host Artifacts 0.72. The published
+and gzip-only Platform 0.12.0 from crates.io. Its gzip facade and the process
+family share Host Artifacts 0.72.1. The published
 observation and workload APIs replace the temporary Tooling/Platform Git library
 suppliers. Cargo and Bazel locks record registry checksums; there is no downstream
 Cargo patch or mixed registry/Git Host family. Gzip remains a Platform facade,
@@ -144,7 +144,7 @@ with no new canister/runtime feature. The native source profile itself still
 requires an immutable Platform Git pin for the patched IC source and adapters.
 Native macOS execution remains separate qualification.
 
-Platform 0.11.1 retains the runtime-only executor singleton guard, allowing
+Platform 0.12.0 retains the runtime-only executor singleton guard, allowing
 this gzip-only graph to coexist with the pinned workspace's registry executor.
 The guard remains inactive here; the recorder never enables Platform's runtime.
 See
