@@ -1,5 +1,10 @@
 # IC Platform
 
+The prepared #118 boundary re-exports the canonical Principal/Account identities
+from `ic-platform-types`. Its independent release identity prevents unrelated
+runtime changes from replacing those types. Release/adoption awaits coordinated
+Wire integration and admitted Shared release-group support.
+
 One controlled dependency boundary for IC runtime integration and required IC
 Candid interfaces. All application endpoints we own use IC Wire, including public
 endpoints called by third parties. Candid is the adapter for management canisters,

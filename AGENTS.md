@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`a8baa51099ca48cdb12e2171f031d488db89d67d` (Shared Tooling 0.27.7) is recorded in
+`b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57` (Shared Tooling 0.27.14) is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -136,6 +136,16 @@ only the documented imports and omitting the unexposed store module. Enforce exa
 source/license fingerprints; do not refresh hashes to permit algorithm changes.
 The owned runtime RejectCode similarly replaces only its external catalogue
 dependency; Agent/PocketIC codes keep their external identities.
+
+## Stable identity supplier (#118)
+
+The maintainer requested fixing #118: `ic-platform-types` owns the sole Principal,
+Account, Subaccount and public identity errors, with independent candidate version
+0.1.0. Platform explicitly re-exports them. Keep registry Principal conversion
+impls with the type owner; ledger DTO conversions stay with Platform. Preserve
+all bodies, bytes, Serde, bounds and provenance. Do not synchronize this version
+with unrelated facade/runtime releases. Release/publication requires admitted
+Shared #328 release groups; no vendored workaround or validation exclusion.
 
 ## Owned Principal
 

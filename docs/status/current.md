@@ -1,5 +1,76 @@
 # Current handoff
 
+## Shared 0.27.14 metadata refresh
+
+Canonical refresh selects committed revision b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57. Relative
+to the previously adopted merge revision, only Shared VERSION/CHANGELOG changed;
+all 117 exported payload hashes and modes are unchanged. The 0.27.14 release
+records the already-adopted Principal conversion-owner fix. Existing identity
+work, package versions, dependency selections and release-group policy remain
+unchanged. Snapshot/pin/boundary/inventory/docs checks pass; prior Clippy,
+formatting and release-command evidence still applies to identical inputs.
+Impact and refresh logs: `/tmp/platform-shared-02714-{impact,refresh}.log`.
+The release execution limitations documented below remain unchanged.
+
+## Shared 0.27.13 adopted; group admission passes, execution remains unqualified
+
+Canonical refresh selects committed Shared revision
+dde3eb7998d66d32af27dcf432636e549651ea9c, including merged #329. The snapshot
+verifies all 117 payload files. `ci/cargo-release-groups.json` explicitly admits
+the facade/macros/exact-guard platform group and independently versioned types
+group, with distinct ledgers. Snapshot integrity, dependency boundaries, pins,
+inventory, full Clippy, formatting and release-command checks pass. Both real
+group graphs/plans admit all four package identities and select only the named
+group’s version fields and local requirements. Existing Cargo package versions
+stay unchanged; the prior identity-source work is preserved.
+
+Do not run a release from this prepared identity extraction yet. The published
+IC Build editor (latest observed 0.72.1; selected editor 0.72.0) has no
+`group-manifest` command. A disposable real types-group preparation refuses that
+command and restores all four selected inputs byte-for-byte. The existing local
+release adapter is also not group-aware: its platform file roster includes the
+maintained runtime fixture lock and exact guard-pin exception beyond Shared’s
+three-file platform group plan. Keep those required consistency checks and file
+custody; do not drop them to make the group roster pass. Qualify this consumer
+adapter and explicit additional metadata custody with the Shared owner, plus a
+published group-capable editor, before preparation/publication. The current publisher also still selects only the
+coordinated trio and needs explicit identity-package selection/ordering.
+
+Evidence: `/tmp/platform-shared-02713-{impact,final-admission,focused,clippy}.log`,
+platform/types plan JSON, and prepare-refusal/rollback logs under the same prefix.
+Historical blocker notes below are superseded by this adoption: pin and common
+IC-owner admission now pass; actual grouped release/publication and Wire adoption
+still remain under #118. The normal source checkout and release journals were
+not committed, tagged, pushed or cleaned by this adoption.
+
+## Prepared #118 identity extraction; release blocked on Shared admission
+
+`ic-platform-types` is the one canonical Principal/Account/Subaccount/error owner,
+with independent candidate version 0.1.0 and its own ledger. The facade retains
+explicit re-exports and ledger DTO conversions; registry Principal conversions
+and unchanged upstream self-authentication live with the type owner. Source
+bodies, tests and Apache notices moved intact; Serde alloc is explicitly selected
+for standalone visitors. Existing package versions stay 0.13.0. Pending facade
+notes select 0.14.0 for the one-time Rust identity change. No release is run.
+
+Full all-target/all-feature Clippy, the facade test suite, 12 owner unit tests,
+current/MSRV native/Wasm Principal/external/self-auth consumers and the real
+singleton checks pass. `scripts/ci/test-stable-identities.sh` additionally compiles
+current and next-minor facade callers with the same exact identity supplier and
+the real Wire 0.11 schema trait/implementations in a manifest-only source variant.
+Identity-only, ledger conversion and one-runtime profiles pass current/MSRV
+native/Wasm; schema shapes remain unchanged. Wire production adoption is not
+claimed. Evidence: `/tmp/platform-types-*.log`, `target/stable-identities.PT0k9y`.
+
+Do not release/merge this extraction yet: the adopted `check-pins` and coordinated
+release graph correctly reject the independent version until Shared #328 supplies
+and qualifies release groups. The common external-IC owner checker additionally
+needs [Shared PR #329](https://github.com/dragginzgame/shared-tooling/pull/329) for
+only `ic-platform-types -> ic_principal`; its isolated tests and actual provider
+policy pass, but the vendored common checker remains unchanged and refuses that
+new owner. Keep #118 open until reviewed Shared adoption, independent group
+preparation/publication qualification and real Wire consumer adoption pass.
+
 ## Pending 0.13.1: qualified native Profiler supplier alignment
 
 PRs #115/#117/#119 adopt the independently pinned Platform 0.12.0 gzip surface,

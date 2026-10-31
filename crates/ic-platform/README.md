@@ -1,5 +1,10 @@
 # ic-platform
 
+The prepared #118 boundary re-exports the canonical Principal/Account identities
+from `ic-platform-types`. Its independent release identity prevents unrelated
+runtime changes from replacing those types. Release/adoption awaits coordinated
+Wire integration and admitted Shared release-group support.
+
 Platform 0.11 removed `wire-schema` and the production Wire dependency. Principal
 and Account retain their existing bytes and Serde; published Wire 0.10 supplies
 their schema trait integration through opt-in `platform-types`. Host schema

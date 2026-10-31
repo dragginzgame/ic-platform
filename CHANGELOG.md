@@ -1,8 +1,20 @@
 # Changelog
 
-## [0.13.1]
+## [0.14.0]
+
+### ⚠️ Breaking
+
+- Move owned Principal/Account identities and errors into the independently
+  versioned `ic-platform-types` supplier. Existing Platform import paths re-export
+  those exact types. Coordinate the one-time Wire/type-owner migration; external
+  bytes and account semantics stay unchanged.
+  [#118 — Stable owned identity boundary](https://github.com/dragginzgame/ic-platform/issues/118).
+  Release preparation awaits admitted Shared release-group support.
 
 ### ⬆️ Dependencies
+
+- Adopt Shared Tooling 0.27.14 with explicit Platform/types release-group
+  admission and the canonical Principal conversion-owner boundary.
 
 - Update the native Profiler profile to published Platform 0.12.0 and share one
   Host Artifacts 0.72.1 gzip supplier with Host Process/FS. Preserve the pinned

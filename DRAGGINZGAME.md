@@ -126,8 +126,11 @@ for justified internal links, packaging and filesystem security boundaries.
 
 ## CLI applications
 
-Use Clap for Rust CLI parsing. Read the [CLI contract](rules/engineering-details.md#cli-applications)
-when adding or changing commands.
+Use Clap for as much Rust CLI behavior as its supported APIs can own, including
+typed values, validation, argument relationships, defaults, help and diagnostics.
+Check its built-ins and extension points before writing custom CLI mechanics.
+Read the [CLI contract](rules/engineering-details.md#cli-applications) when adding,
+changing or reviewing commands.
 
 ## Metrics and logging
 
@@ -181,10 +184,26 @@ storage allocation, admission, backing access or persistence integrations.
 
 ## Rust workspaces and portable tooling
 
+Use ordinary Rust module discovery. `#[path]` module attributes, including
+conditional path overrides, are prohibited. Follow the
+[module layout rule](docs/principles/rust-code-hygiene.md#ownership-and-module-shape)
+for source, tests and generated code.
+
+Prefer `#[expect(..., reason = "...")]` over `#[allow(...)]` for Rust lint
+suppressions. Repositories must review every `allow` for conversion and retain
+one only with a concrete reason why an expectation cannot work. Follow the
+[lint suppression rule](docs/principles/rust-code-hygiene.md#lint-suppressions).
+
 Use root-owned workspace dependencies and versions, reviewed shared tooling,
 explicit setup and the product's declared compiler/host requirements. External
-IC dependencies go through `ic-platform`; npm SDK Core uses
-`@tokostudios/ic-platform`. Do not add Python tooling. Read the applicable
+IC dependencies go through `ic-platform`; its canonical `ic-platform-types`
+identity owner may additionally select only `ic_principal` for explicit registry
+conversions and unchanged self-authentication. npm SDK Core uses
+`@tokostudios/ic-platform`. Keep reusable cores independently upgradable;
+adapters own their matching integration stacks and must not impose consumer
+framework dependencies on core development. Follow the
+[core and integration graph boundary](rules/rust-workspaces.md#core-and-integration-graph-boundary).
+Do not add Python tooling. Read the applicable
 [workspace/tooling contracts](rules/engineering-details.md#rust-workspaces-and-portable-tooling)
 for manifests, dependencies, hooks, installers or shared snapshots, and the
 [Rust hygiene guide](docs/principles/rust-code-hygiene.md) for Rust implementation.

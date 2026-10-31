@@ -1330,7 +1330,7 @@ This is a breaking next-minor change. Package versions remain at the maintainer'
 current release until the coordinated release process; do not publish this source
 as a 0.2 patch. The root `Principal` and `PrincipalError` now belong to Platform.
 The implementation is adapted from ic_principal 0.1.5 under Apache-2.0, with
-provenance/license retained in `src/principal/`. It is not a clean-room rewrite.
+provenance/license retained in `crates/ic-platform-types/src/principal/`. It is not a clean-room rewrite.
 
 Application and runtime identities use the owned type. Agent, PocketIC, management,
 ledger, parser and cryptographic APIs retain their original parameter/DTO types.
@@ -2825,3 +2825,71 @@ older consumers retain their previous provider. HTTP/MCP admission, errors,
 response fields, immutable query ownership and budgets stay unchanged. The
 Platform gzip facade and native start/stop, IC metrics and pricing adapters stay
 at their existing owner. Published Rust consumers need no import changes.
+
+## Stable owned identity package (#118)
+
+The maintainer-requested identity extraction selects `ic-platform-types` as the
+one canonical owner of Principal, Account, Subaccount, DEFAULT_SUBACCOUNT,
+PrincipalError and AccountError. Its initial candidate version is 0.1.0,
+independent of the facade/macros/runtime-guard coordinated group. Other package
+metadata and dependency declarations inherit the root workspace. Future unrelated
+Platform runtime/host/DTO changes must retain the identity requirement and package
+selection; feature gates and batching cannot make different Rust definitions equal.
+
+Platform keeps the existing root and `principal`/`account` imports as explicit
+re-exports of those definitions. The initial extraction changes Rust identity once;
+coordinate Wire schema and real caller adoption before publishing the facade.
+It changes no bytes, bounds, ordering, account equality/hash, absent-versus-zero
+serialization, text errors or upstream self-authentication. RejectCode, transport
+errors, external Candid Principal/Nat, ledger DTO Account and Wire metadata errors
+retain their separate runtime, registry, DTO or Wire owners. No Candid or runtime
+implementation moves into the stable package.
+
+The identity package must own the optional registry Principal From impls and
+inherent self-authentication method: a facade defining neither source nor target
+Principal cannot implement those foreign-trait conversions. Registry identity and
+byte conversions remain behind `principal-external`; self-authentication separately
+delegates to unchanged upstream code. Ledger Account conversions stay in Platform,
+which owns the maintained external DTO and can validly implement both conversion
+directions. Wire keeps its schema implementations with the schema trait owner,
+selecting these canonical types directly, without wrappers or duplicate identities.
+
+The maintained `scripts/ci/test-stable-identities.sh` proof simulates an unrelated
+next-minor facade while sharing the exact identity supplier. Its temporary Wire
+0.11 source variant changes only manifest integration selection, retaining the real
+schema trait and Principal/Account implementation source. It is qualification of
+the proposed owner arrangement, not adoption by published Wire or a production
+codec fork. Current/MSRV native/Wasm profiles cover identity-only, external-ledger
+and one-runtime selections. Ordinary tests retain representation/conversion vectors.
+
+Shared Tooling 0.27.14 (committed revision
+b8d2c6e27a755a7bae46ef25ccd2b5b4f53e8e57) is now adopted through its exporter.
+The two explicit groups in `ci/cargo-release-groups.json` admit the independent
+identity version and preserve the facade/macros/exact-guard coordinated group.
+Pin checks and both group graph projections pass. Merged
+[Shared PR #329](https://github.com/dragginzgame/shared-tooling/pull/329) supplies
+only the common `ic-platform-types -> ic_principal` owner exception; the actual
+provider boundary now passes without editing vendored payloads.
+
+Release execution is still unqualified. The current published IC Build editor
+does not supply Shared's `group-manifest` command. A disposable preparation with
+the selected real editor fails and restores every selected input. Platform's
+consumer release adapter also retains two required metadata files outside the
+new platform group plan: its maintained runtime qualification lock and exact
+guard-pin exception. Do not omit their updates/custody or skip their checks.
+Supply and adopt the group-capable editor, agree explicit custody of those
+additional metadata files with the Shared owner, and qualify the real consumer
+preparation/resume/publication path before enabling grouped releases.
+
+Current read-only admission commands are:
+
+```sh
+make shared-tooling-check check-pins check-boundary
+RELEASE_GROUP=platform bash scripts/ci/cargo-release-metadata.sh check-graph ic-platform
+RELEASE_GROUP=types bash scripts/ci/cargo-release-metadata.sh check-graph ic-platform-types
+```
+
+These commands do not establish runnable `make release-*` or publication
+qualification. Keep #118 open until the actual group preparation/publication and
+real Wire consumer adoption pass. No existing package version or publication is
+changed by this preparation.

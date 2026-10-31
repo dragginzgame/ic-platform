@@ -197,11 +197,16 @@ primitives remain outside our implementation authority. Tooling-only fixture
 workspaces additionally use owned Wire, Timers and Testkit; their locks and runtime
 graph admission remain separate from the two-package workspace inventory.
 
+Canonical owned Principal/Account identities now live in the independently versioned
+`ic-platform-types` package and are explicitly re-exported by Platform. The selected
+registry Principal conversions live with those owned types; ledger DTO conversions
+stay in Platform. See the [identity decision](migration.md#stable-owned-identity-package-118).
+
 Imported-source ownership is recorded beside the code in
 [signature notices](../crates/ic-platform/src/signature_upstream/NOTICE.md),
 [runtime notices](../crates/ic-platform/src/cdk/upstream/NOTICE.md),
-[Principal notices](../crates/ic-platform/src/principal/NOTICE.md) and
-[Account notices](../crates/ic-platform/src/account/NOTICE.md).
+[Principal notices](../crates/ic-platform-types/src/principal/NOTICE.md) and
+[Account notices](../crates/ic-platform-types/src/account/NOTICE.md).
 Existing signature/runtime fingerprint checks enforce their respective admitted
 source changes. Do not refresh fingerprints to approve cryptographic changes.
 
@@ -272,18 +277,21 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | executor | dep:ic-platform-runtime-guard, dep:slotmap, ic0 |
 | ic-platform | ic0 |  |
 | ic-platform | icp-ledger-types | candid |
-| ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
+| ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:crc32fast, dep:data-encoding, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
 | ic-platform | management-canister-types | candid/bignum, candid/serde_bytes, dep:candid, dep:ic-management-canister-types, dep:serde_bytes, principal-external |
 | ic-platform | nns-registry-types | candid |
 | ic-platform | pocket-ic | dep:pocket-ic, principal-external |
-| ic-platform | principal | dep:crc32fast, dep:data-encoding, dep:serde, dep:thiserror |
-| ic-platform | principal-external | dep:ic_principal, principal |
-| ic-platform | principal-self-authenticating | ic_principal/self_authenticating, principal-external |
+| ic-platform | principal | dep:ic-platform-types, dep:serde, dep:thiserror |
+| ic-platform | principal-external | dep:ic_principal, ic-platform-types/principal-external, principal |
+| ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal-external |
 | ic-platform | runtime | dep:pin-project-lite, dep:thiserror, executor, ic0, principal |
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
 | ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor, ic_principal/serde |
 | ic-platform | stable-structures | dep:ic-stable-structures |
 | ic-platform-runtime-guard | default |  |
+| ic-platform-types | default |  |
+| ic-platform-types | principal-external | dep:ic_principal |
+| ic-platform-types | principal-self-authenticating | ic_principal/self_authenticating, principal-external |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -301,6 +309,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
+| ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |
@@ -323,4 +332,11 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^2 | normal | all | false | true | full |
+| ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
+| ic-platform-types | data-encoding | ^2.11 | normal | all | false | true |  |
+| ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | convert |
+| ic-platform-types | serde | ^1.0 | normal | all | false | false | alloc, derive |
+| ic-platform-types | serde_bytes | ^0.11 | dev | all | false | true |  |
+| ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
+| ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->
