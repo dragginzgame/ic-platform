@@ -1400,7 +1400,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "assert_matches",
  "blake3",
@@ -1438,7 +1438,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1447,11 +1447,11 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.14.0"
+version = "0.15.0"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "crc32fast",
  "data-encoding",
