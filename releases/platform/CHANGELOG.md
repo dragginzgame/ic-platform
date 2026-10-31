@@ -4,7 +4,7 @@ This group covers ic-platform, ic-platform-macros and ic-platform-runtime-guard.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
-## [0.15.2]
+## [0.15.2] - 2026-10-31
 
 ### 🩹 Fixed
 
