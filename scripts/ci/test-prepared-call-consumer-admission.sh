@@ -3,6 +3,7 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/prepared-call-admission.XXXXXX")"
+fixture="$(CDPATH='' cd "$fixture" && pwd -P)"
 first_pid="" second_pid=""
 finish() {
     local status=$?

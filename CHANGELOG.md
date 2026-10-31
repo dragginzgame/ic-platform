@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.2]
+
+### 🩹 Fixed
+
+- Canonicalize standalone admission-fixture paths so macOS temporary directories
+  with a trailing slash retain the runtime artifact-lock coordination proof
+  ([#113 — Canonicalize fixture lock paths](https://github.com/dragginzgame/ic-platform/issues/113)).
+
 ## [0.11.1] - 2026-10-30
 
 ### ⬆️ Dependencies
