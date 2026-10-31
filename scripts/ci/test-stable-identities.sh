@@ -36,7 +36,7 @@ major="${version%%.*}" minor="${version#*.}"; minor="${minor%%.*}"
 next="$major.$((minor + 1)).0"
 PLATFORM_IDENTITY_CURRENT="$version" PLATFORM_IDENTITY_NEXT="$next" PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '
     my ($old,$new,$source)=@ENV{qw(PLATFORM_IDENTITY_CURRENT PLATFORM_IDENTITY_NEXT PLATFORM_IDENTITY_SOURCE)};
-    s/^(ic-platform-(?:macros|runtime-guard) = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm == 2 or die "runtime identities changed\n";
+    s/^(ic-platform(?:-macros|-runtime-guard)? = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm == 3 or die "runtime catalog identities changed\n";
     s/^    "crates\/ic-platform-types",\n//m == 1 or die "identity member changed\n";
     s/path = "crates\/ic-platform-types"/path = "$source"/ == 1 or die "identity selection changed\n";
 ' "$fixture/next/Cargo.toml"

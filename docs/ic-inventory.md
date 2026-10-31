@@ -5,6 +5,13 @@ facts below are checked by `make check-inventory` in CI. Requirements are declar
 ranges/pins, not resolved versions; Cargo.lock and the existing feature-graph
 checks own resolution and isolation. No default features are enabled.
 
+The root catalog includes all four workspace members with their current versions
+and paths, including an unused facade declaration. Release policy owns every
+catalog alias. The unused entry adds no edge; the checked direct dependency and
+feature facts below remain determined by member declarations. Catalog comments
+distinguish local groups, external production/native/proc-macro dependencies,
+mixed production/test use and test/tooling-only selections.
+
 The [individual export audit](audits/export-usage-2026-10-21.md) adds dated
 per-symbol evidence for 393 facade exports and owned methods/constants. It
 distinguishes sibling references, generated-code requirements, public contracts

@@ -1,24 +1,45 @@
 # Current handoff
 
-## Delivered Shared and Rust groups
+## Shared 0.27.22 adoption and delivered Rust groups
 
-Shared Tooling 0.27.19 is adopted at committed revision
-54fc49e12f439dbe18d232f622a6d78e61773353 through the canonical exporter.
-Snapshot payloads remain intact. Platform/macros/runtime guard 0.15.2 and Types
-0.15.1 are released and published. Types delivered first at 668e44f, then Platform
-at 3587cd2; GitHub main/tags, registry visibility, unyanked versions, archive
-checksums and embedded clean source identities were verified. Both complete
-release gates passed. Publication evidence is retained under target/publication/
+Shared release commit 0.27.22 is adopted at committed revision
+143a9abb9ae81feae9400ff3844b03b1ddfdd75a through the canonical exporter.
+Supplier VERSION still reads 0.27.21; preserve its metadata as previously authorized.
+Snapshot payloads remain intact. This adoption is local and uncommitted; no
+package versions change. Existing Platform/macros/runtime guard 0.15.2 and Types
+0.15.1 were released and published with Shared 0.27.19. Types delivered first at
+668e44f, then Platform at 3587cd2; GitHub main/tags, registry visibility, unyanked
+versions, archive checksums and embedded clean source identities were verified.
+Both complete release gates passed. Publication evidence is retained under target/publication/
 and /tmp/platform-deploy-*-publication.log; release plans are Git-owned.
 
 Every package has a literal version, with no workspace.package.version. Root
-Cargo keeps common metadata/dependencies and the group comment map. One lockfile
+Cargo keeps common metadata/dependencies and the grouped member catalog. One lockfile
 and existing crate paths remain. Group policy is ci/cargo-release-groups.json.
 Canonical notes live in releases/platform/CHANGELOG.md and
 releases/types/CHANGELOG.md. Root CHANGELOG.md is an index. Coordinated history
 through 0.15.0 is preserved once in releases/history.md, with links rebased.
 Initial Types 0.1 history stays in its own ledger; the old crate ledger is a
 navigation pointer excluded from archives.
+
+Root dependency declarations catalog every member, including the unused facade,
+once under short group titles and separate changelog comments. The duplicate header
+map is removed; owned paths and full versions remain. The facade alias is
+registered in the Platform policy; requirement operators remain unchanged. External
+normal/native/proc-macro and mixed/test roles follow actual member declarations.
+No new dependency edge or member version is selected. Next-version singleton and
+identity fixtures now update all three Platform catalog requirements. Cargo keeps
+its normal target/default members and whole-target explicit cleanup; durable
+evidence belongs outside target. The separate .tools store is unaffected.
+Pending Platform 0.15.3 stays compatible native packaging/tooling; Types is unchanged.
+Snapshot, full Clippy, inventory/boundary/pin, formatting/hook, singleton and
+current/MSRV native/Wasm identity/schema checks pass; full Cargo metadata is unchanged.
+Six unused-catalog faults are refused by release and dependency callers. Disposable
+Platform preparation with the source-selected real editor updates all three aliases
+and preserves Types/history. Evidence: /tmp/platform-shared-021-consumer.ntNnmG
+and /tmp/platform-shared-021-*.log; earlier .20 logs remain separately retained.
+The .22 snapshot, formatting, documentation and disposable formatter roundtrip pass;
+helper code and parsed Cargo data are unchanged. Logs: /tmp/platform-shared-022-*.
 
 Release, resume and publication require explicit RELEASE_GROUP=platform or types,
 including environment selection. Missing/empty/unknown groups refuse before
@@ -38,11 +59,9 @@ imports, levels, strict gzip framing, 128 MiB API and 256 MiB recorder ceilings,
 ICPROF03 bytes and source-pin qualification obligations are unchanged. Older
 consumers keep their qualified provider; no new generic facade is restored.
 
-Current released main is merged into the PR without rewriting its history.
-The root changelog remains the index; published group entries and Types metadata
-are preserved. Pending Platform 0.15.3 collects this compatible native packaging
-change, without changing any package version. The user requested this PR's merge;
-that instruction does not select another release/publication operation.
+PR #122 is merged at af5fa32; published history and Types metadata are preserved.
+Pending Platform 0.15.3 collects compatible native packaging and tooling changes.
+This Shared adoption changes no package version or release/publication selection.
 
 The native manifest and dependency patch remain byte-identical to qualified
 provider 6c054c86bb10c2630e61ecd5b9b24d8a06de3902. Patch SHA-256 is

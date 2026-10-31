@@ -2846,9 +2846,9 @@ version. Platform/macros/guard retain 0.15.1 and Types retains 0.15.0 during the
 symmetric-layout adoption. No existing numeric version, tag, archive or published
 dependency declaration is rewritten.
 
-The root Cargo comment map documents the two groups, version sources and ledgers;
-`ci/cargo-release-groups.json` remains executable policy. One root dependency
-catalog and Cargo.lock cover the complete workspace. Platform-only releases leave
+The root dependency catalog groups members once with short titles and separate
+changelog comments; `ci/cargo-release-groups.json` remains executable policy. One
+root dependency catalog and Cargo.lock cover the complete workspace. Platform-only releases leave
 Types' compatible requirement, supplying identity and ledger unchanged. A Types
 release updates its admitted requirement and requires separate consumer
 compatibility/publication assessment; it does not silently publish the facade.

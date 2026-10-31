@@ -226,6 +226,11 @@ canonical type supplier. No group is inferred from changed files or PACKAGE.
 All members use literal package versions; root Cargo stores common metadata and
 dependencies. The [root changelog](CHANGELOG.md) indexes the two group ledgers
 and preserved coordinated history.
+Root dependency blocks name each group once, with a separate changelog comment.
+Their path entries catalog every member's full version and retain requirement
+operators. The unused facade entry adds no dependency edge. Dependency and release
+checks enforce complete catalog/alias coverage,
+owned paths and current full versions across both groups.
 
 `make publish-check RELEASE_GROUP=platform` packages/verifies that group without
 uploading; `make publish RELEASE_GROUP=platform` uploads clean committed packages
@@ -241,6 +246,10 @@ is not the full release gate or native macOS qualification. No upload retries ar
 automatic: after an interrupted dispatch, reconcile every dispatched exact registry
 package version before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
 prove registry visibility or consumer adoption.
+
+Plain `cargo clean` removes the whole workspace `target/`, including nested build
+caches and evidence. Keep evidence that must survive explicit cleanup elsewhere.
+The separately managed `.tools/` store is outside Cargo cleanup.
 
 Linux x86-64 and macOS 15 on Intel and Apple Silicon are supported hosts.
 CI configures all three; native execution qualifies each separately. Wasm compile
@@ -263,6 +272,10 @@ and Agent dependencies are restricted to non-Wasm targets.
 The root catalog has `Production dependencies` and `Tests and tooling only`
 sections. Fixture-only selections stay in the second section and outside the
 consumer library's production graph.
+Production subsections distinguish local group catalogs, external runtime and
+native-only adapters, host proc-macro dependencies, and mixed production/test use.
+Members declare no build-dependencies tables; their normal macro dependencies run
+on the compiler host. Actual member tables and features determine dependency edges.
 `fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
 sections with grouped ordering. Shared 0.27.7 owns the formatting passes;
 Platform selects its existing standalone Rust source roster and edition 2024

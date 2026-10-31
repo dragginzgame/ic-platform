@@ -78,7 +78,7 @@ next="${version%.*}.$(( ${version##*.} + 1 ))"
 PLATFORM_SINGLETON_CURRENT="$version" PLATFORM_SINGLETON_NEXT="$next" perl -0pi -e '
     my ($old, $new) = @ENV{qw(PLATFORM_SINGLETON_CURRENT PLATFORM_SINGLETON_NEXT)};
     my $count = s/^(ic-platform(?:-macros|-runtime-guard)? = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm;
-    $count == 2 or die "expected two coordinated dependency requirements\n";
+    $count == 3 or die "expected three coordinated catalog requirements\n";
 ' "$fixture-next-platform/Cargo.toml"
 for package in ic-platform ic-platform-macros ic-platform-runtime-guard; do
     PLATFORM_NEXT_VERSION="$next" perl -pi -e 's/^version = "[^" ]+"$/version = "$ENV{PLATFORM_NEXT_VERSION}"/' "$fixture-next-platform/crates/$package/Cargo.toml"

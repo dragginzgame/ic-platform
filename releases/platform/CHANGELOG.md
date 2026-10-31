@@ -13,6 +13,16 @@ See also the [Types ledger](../types/CHANGELOG.md).
   strict admission and existing API/recorder byte limits.
   [#122 — Native Profiler Host gzip](https://github.com/dragginzgame/ic-platform/pull/122).
 
+### 🥾 Governance
+
+- Adopt Shared Tooling 0.27.22 with a complete root member catalog, group alias
+  rosters and cross-group checks for paths and full current versions. Label local
+  groups and external dependency roles without adding a graph edge.
+- Present release groups once in the catalog with short titles and separate
+  changelog comments; remove the duplicate header map and repetitive commentary.
+- Preserve normal whole-target Cargo cleanup and explicit evidence-retention
+  boundaries introduced by Shared 0.27.20.
+
 ## [0.15.2] - 2026-10-31
 
 ### 🩹 Fixed

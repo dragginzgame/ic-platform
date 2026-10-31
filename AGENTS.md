@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`54fc49e12f439dbe18d232f622a6d78e61773353` is recorded in
+`143a9abb9ae81feae9400ff3844b03b1ddfdd75a` is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -142,13 +142,17 @@ dependency; Agent/PocketIC codes keep their external identities.
 The maintainer approved independent Platform and Types groups in one workspace.
 All four packages own explicit versions; root workspace.package has no version.
 Keep crate paths, numeric versions, dependency selections and one lockfile intact
-when migrating ownership. The root Cargo comment map names each group's primary
-version source and releases/<group>/CHANGELOG.md. Root CHANGELOG.md is an index;
+when migrating ownership. Root dependencies group members once under short titles
+and separate Changelog comments. Root CHANGELOG.md is an index;
 releases/history.md preserves coordinated history through 0.15.0 once.
 Release, resume and publication require explicit RELEASE_GROUP=platform or types,
 including environment selection; no default or PACKAGE inference is allowed.
 Publication subsets must stay within the selected group. Preserve shared runtime
 lock and platform-only pin custody, full validation and recorded recovery.
+Catalog every member in root dependencies with its path and full version, and
+register every alias in its group's dependencies roster. Keep group/ledger labels
+nearby, retain requirement operators and classify external dependency use. Unused
+catalog entries add no dependency edges; keep numeric comments out.
 Platform re-exports the sole canonical types; conversions, source bodies, bytes,
 Serde, zero fields and provenance stay with their current owners.
 
