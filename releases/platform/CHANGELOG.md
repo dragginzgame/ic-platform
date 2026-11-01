@@ -6,6 +6,11 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ## [0.16.1]
 
+### 🩹 Fixed
+
+- Use physical workspace paths during grouped release preparation, including
+  aliased macOS temporary directories; retain rollback and resume checks.
+
 ### ⬆️ Dependencies
 
 - Adopt Host Process/FS/Artifacts 0.73.2 and core Wire 0.13.1 in the native

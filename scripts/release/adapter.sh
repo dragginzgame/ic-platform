@@ -34,7 +34,7 @@ render_platform_metadata() {
     done < "$metadata_files"
     ln -s "$PWD/.tools" "$workspace/.tools" || return
     (
-        cd "$workspace" || exit
+        cd -P "$workspace" || exit
         bash scripts/ci/cargo-release-metadata.sh prepare "$primary" || exit
         bash scripts/release/runtime-lock.sh prepare "${RELEASE_PREVIOUS:?}" || exit
         if [[ "$RELEASE_GROUP" == platform ]]; then
