@@ -24,9 +24,11 @@ registry client types must align on the facade. See the
 [client contract](../pocket-ic-client.md) and retained Apache/source fingerprints.
 The simulator, Testkit provisioning/policy and native Profiler stay separate.
 
-Current-main integration passes full Clippy, the four client tests, source/license
+Current-main integration passes full Clippy, the four client tests on current Rust
+and MSRV 1.91, source/license
 and mutation guards, graph/closure refusals, inventory, pins, boundary and runtime
-lock custody. Evidence: /tmp/platform-pr-merges-20261101/pr128-*.log. Prior unchanged
+lock custody. The expanded aliased-TMPDIR regression passes both release groups,
+including rollback, retry, delivery and resume. Evidence: /tmp/platform-pr-merges-20261101/pr128-*.log. Prior unchanged
 client evidence at /tmp/ic-platform-pocketic-client.JQG7s5 includes current/MSRV
 client/archive tests and isolated Tooling Clippy, 28 startup/12 transport tests,
 four installed cycle/reply and six lifecycle scenarios on PocketIC 16.1.0.
