@@ -31,7 +31,7 @@ ic-platform-runtime-guard = { version = "=0.17.0", path = "crates/ic-platform-ru
 
 # Types
 # Changelog : releases/types/CHANGELOG.md
-ic-platform-types = { version = "0.15.1", path = "crates/ic-platform-types", default-features = false }
+ic-platform-types = { version = "0.16.0", path = "crates/ic-platform-types", default-features = false }
 
 # External production dependencies
 blake3 = { version = "1.8.7", default-features = false, features = ["std"] }
