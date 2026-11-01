@@ -101,7 +101,18 @@ for group in platform types; do
         if git diff --quiet -- scripts/fixtures/cdk-runtime/Cargo.lock; then exit 1; fi
         if git diff --quiet -- ci/dependency-pinning-exceptions.json; then exit 1; fi
     else
-        git diff --exit-code -- CHANGELOG.md releases/platform/CHANGELOG.md releases/history.md crates/ic-platform/Cargo.toml crates/ic-platform-macros/Cargo.toml crates/ic-platform-runtime-guard/Cargo.toml ci/dependency-pinning-exceptions.json scripts/fixtures/cdk-runtime/Cargo.lock
+        git diff --exit-code -- CHANGELOG.md releases/platform/CHANGELOG.md releases/history.md crates/ic-platform/Cargo.toml crates/ic-platform-macros/Cargo.toml crates/ic-platform-runtime-guard/Cargo.toml ci/dependency-pinning-exceptions.json
+        # Types preparation owns its recorded local runtime identity and exact
+        # dependent edges; every other lock record must remain unchanged.
+        git show HEAD:scripts/fixtures/cdk-runtime/Cargo.lock | yq -p toml -o json '.' | jq -S '.' > "$fixture/types-runtime-before.json"
+        yq -p toml -o json '.' scripts/fixtures/cdk-runtime/Cargo.lock |
+            jq -S --arg before "$types_before" --arg after "$next" '
+              .package |= map(
+                (if .source == null and .name == "ic-platform-types" then .version = $before else . end) |
+                if .dependencies != null then .dependencies |= map(
+                  if . == "ic-platform-types " + $after then "ic-platform-types " + $before else . end)
+                else . end)' > "$fixture/types-runtime-after.json"
+        cmp "$fixture/types-runtime-before.json" "$fixture/types-runtime-after.json"
         [[ "$(yq -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)" == "$platform_before" ]]
         [[ "$(yq -p toml -o json -r '.workspace.dependencies.ic-platform-types.version' Cargo.toml)" == "$next" ]]
     fi

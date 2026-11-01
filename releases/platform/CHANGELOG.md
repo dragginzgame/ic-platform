@@ -15,6 +15,8 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 - Align the installed runtime fixture with Timers 0.35 and its shared embedded
   executor. Refresh its maintained qualification lock through the fixture owner.
+  Grouped release preparation checks preserve unrelated lock records while
+  admitting the selected local Types identity and its exact dependency edges.
 
 ## [0.15.3] - 2026-10-31
 
