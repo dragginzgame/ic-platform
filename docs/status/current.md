@@ -32,11 +32,11 @@ client/archive tests and isolated Tooling Clippy, 28 startup/12 transport tests,
 four installed cycle/reply and six lifecycle scenarios on PocketIC 16.1.0.
 This is Linux qualification, not macOS or production consumer adoption.
 
-Shared ae4ebb0fb49c0a68b4a043f9c6a2da5ec0ef85ad (0.27.24) is adopted through its
-exporter. Snapshot payloads remain immutable. Shared #332 owns the native client
-boundary exception; its merge is a prerequisite for Platform #128. Its snapshot
+Shared 4c84efa9dd5f4b3ff7bdea89972e747fd394d406 (0.27.24) is adopted through its
+exporter. Snapshot payloads remain immutable. Shared #332 is merged and supplies the native client
+boundary exception for Platform #128. Its snapshot
 fixture closure and bounded startup synchronization repairs pass focused tests.
-The separate merge approval is pending; no supplier release is implied.
+The supplier merge is authorized and complete; no supplier release is implied.
 
 ## Published state and retained recovery evidence
 
