@@ -11,8 +11,8 @@ pub fn verify(key: &[u8; 32], bytes: &[u8], message: &[u8]) -> Result<(), Signat
     key.verify_strict(message, &signature)
 }
 
-#[test]
-fn rfc8032_empty_message_and_rejections() {
+/// Preserve RFC 8032 bytes and the consumer's strict refusal policy on both targets.
+pub fn roundtrip() {
     use ic_platform::ed25519::{Signer, SigningKey};
     // RFC 8032 section 7.1, test 1: independently specified seed, key and signature.
     fn hex<const N: usize>(s: &str) -> [u8; N] {
@@ -36,4 +36,13 @@ fn rfc8032_empty_message_and_rejections() {
     let mut weak = [0; 32];
     weak[0] = 1;
     assert!(verify(&weak, &expected, b"").is_err());
+    let mut altered = expected;
+    altered[0] ^= 1;
+    assert!(verify(&public, &altered, b"").is_err());
+    assert!(verify(&public, &[0; 65], b"").is_err());
+}
+
+#[test]
+fn rfc8032_empty_message_and_rejections() {
+    roundtrip();
 }

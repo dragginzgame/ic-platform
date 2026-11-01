@@ -1,7 +1,7 @@
 [package]
 name = "ic-platform"
 description = "Controlled Candid and IC runtime dependency boundary"
-version = "0.15.3"
+version = "0.16.0"
 edition.workspace = true
 rust-version.workspace = true
 license = "MIT AND Apache-2.0"
@@ -16,8 +16,17 @@ blake3 = ["dep:blake3"]
 principal = ["dep:ic-platform-types", "dep:serde", "dep:thiserror"]
 principal-external = ["principal", "ic-platform-types/principal-external", "dep:ic_principal"]
 principal-self-authenticating = ["principal-external", "ic-platform-types/principal-self-authenticating"]
-agent = ["principal-external", "dep:ic-agent"]
-bls = ["dep:ic-verify-bls-signature"]
+agent = ["principal-external", "dep:ic-agent", "dep:ic-certification"]
+bls = [
+    "dep:digest",
+    "dep:ff",
+    "dep:group",
+    "dep:hex",
+    "dep:pairing",
+    "dep:rand_core",
+    "dep:sha2",
+    "dep:subtle",
+]
 candid = ["principal-external", "dep:candid", "candid/bignum"]
 candid-endpoint = ["cdk", "candid"]
 candid-parser = ["principal-external", "dep:candid_parser"]
@@ -27,11 +36,11 @@ icp-ledger-types = ["candid"]
 cycles-ledger-types = ["candid"]
 nns-registry-types = ["candid"]
 certified-assets-types = ["candid"]
-canister-sig-creation = ["principal-external", "dep:ic-certification", "dep:sha2"]
+canister-sig-creation = ["principal", "certification"]
 cdk = ["runtime", "dep:ic-platform-macros"]
 runtime = ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserror"]
-certification = ["dep:ic-certification"]
-ecdsa = ["dep:k256"]
+certification = ["dep:hex", "dep:serde", "dep:serde_bytes", "dep:sha2"]
+ecdsa = ["dep:crypto-bigint", "dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"]
 ic0 = []
@@ -56,13 +65,7 @@ management-canister-types = [
     "dep:serde_bytes",
     "dep:ic-management-canister-types",
 ]
-signature-verification = [
-    "canister-sig-creation",
-    "ic_principal/serde",
-    "dep:ic-verify-bls-signature",
-    "dep:serde_bytes",
-    "dep:serde_cbor",
-]
+signature-verification = ["bls", "canister-sig-creation", "dep:serde_bytes", "dep:serde_cbor"]
 pocket-ic = ["principal-external", "dep:pocket-ic"]
 secp256k1 = ["principal-external", "dep:ic-secp256k1"]
 stable-structures = ["dep:ic-stable-structures"]
@@ -71,31 +74,37 @@ stable-structures = ["dep:ic-stable-structures"]
 blake3 = { workspace = true, optional = true }
 candid = { workspace = true, optional = true }
 crc32fast = { workspace = true, optional = true }
+crypto-bigint = { workspace = true, optional = true }
 curve25519-dalek = { workspace = true, optional = true }
 data-encoding = { workspace = true, optional = true }
+digest = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true, optional = true }
+ff = { workspace = true, optional = true }
+group = { workspace = true, optional = true }
 hex = { workspace = true, optional = true }
-ic-certification = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-platform-runtime-guard = { workspace = true, optional = true }
 ic-platform-types = { workspace = true, optional = true }
 ic-stable-structures = { workspace = true, optional = true }
-ic-verify-bls-signature = { workspace = true, optional = true }
 ic_principal = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
 num-bigint = { workspace = true, optional = true }
 num-traits = { workspace = true, optional = true }
+pairing = { workspace = true, optional = true }
 pin-project-lite = { workspace = true, optional = true }
+rand_core = { workspace = true, optional = true }
 serde = { workspace = true, optional = true, features = ["alloc"] }
 serde_bytes = { workspace = true, optional = true }
 serde_cbor = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }
 slotmap = { workspace = true, optional = true }
+subtle = { workspace = true, optional = true }
 thiserror = { workspace = true, optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }
 ic-agent = { workspace = true, optional = true }
+ic-certification = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-secp256k1 = { workspace = true, optional = true }
 pocket-ic = { workspace = true, optional = true }
@@ -103,9 +112,12 @@ pocket-ic = { workspace = true, optional = true }
 [dev-dependencies]
 assert_matches.workspace = true
 ic-representation-independent-hash.workspace = true
+rand.workspace = true
+rand_xorshift.workspace = true
 serde_bytes.workspace = true
 serde_cbor.workspace = true
 serde_test.workspace = true
+sha3.workspace = true
 
 [[test]]
 name = "blake3_consumer"

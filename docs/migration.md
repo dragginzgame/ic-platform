@@ -142,8 +142,8 @@ this guard package-wide, including native/default-only selections; the pending
 application and all runtime consumers against the same new Platform line. Timers
 must adopt that requirement before production migration; a transitive old
 Platform requirement cannot be bridged with handle conversions. The installed
-fixture selects published Timers 0.32.3 and patches its compatible 0.8 requirement
-to the local pre-release source solely for qualification. After the minor release,
+fixture selects published Timers 0.35.1 and patches its compatible 0.15 requirement
+to the local source solely for qualification. After a new Platform minor release,
 its dependency requirement must be coordinated; this patch is not consumer supply.
 
 IC0's retained ABI wrappers and raw declarations are byte-for-byte source imports,
@@ -183,7 +183,8 @@ Registry executor =2.0.0, ic0 =1.2.0 and management DTO =0.11.0 remain unchanged
 the registry `ic_principal`, SHA-2, Candid or runtime. `runtime` and `cdk` select
 only this owned capability. `principal-external` adds the registry Principal/error
 identity and byte conversions, without self-authentication or a codec. Required
-Candid/client/DTO and signature features select the conversion capability.
+Candid/client/DTO features select the conversion capability. The pending 0.16
+signature cut selects the owned Principal instead.
 
 For a consumer selecting `principal-external`, conversion is still one step:
 
@@ -201,9 +202,10 @@ unchanged registry implementation. The registry conversion dependency selects
 only `convert`; other integration dependencies may independently unify more
 upstream features. No new Candid implementation is added to the owned type.
 
-`signature-verification` explicitly enables the registry Principal's Serde support
-for certified canister-range CBOR. Its standalone selection remains Candid-free;
-conversion-only and owned Principal selections retain their narrower graphs.
+The pending 0.16 `signature-verification` selection uses owned Principal Serde
+for certified canister-range CBOR and no longer selects registry Principal or its
+Serde feature. External conversions remain explicitly selected by callers that
+need them. Standalone signature selections remain Candid-free.
 
 Keep selecting `icrc-ledger-types` and using the existing flat module and nested
 `icrc21` imports. Platform now maintains only the selected DTOs and helpers from
@@ -1484,6 +1486,37 @@ Query was clean. No sibling builds or edits were performed.
 | Timers `194204d` | `crates/ic-timers/src/platform/{ffi,backend}.rs` use executor method handles, callbacks and trap recovery. Production uses raw IC system calls; unpublished testing packages also use Candid/CDK. |
 | Host `c8cd434` | `crates/ic-host-tools/src/candid/service/mod.rs` parses service facts; pending `candid/decode/mod.rs` adds aggregate byte accounting. That accounting differs from Testkit and must survive consolidation. |
 
+## Maintained certification (pending 0.16)
+
+The Rust SDK ownership decision transfers the selected certification 3.2.0
+implementation into `certification/upstream`. Existing public paths and bytes
+stay; Certificate, Delegation, HashTree, Label, RbTree and associated types now
+have Platform identity on both targets. Creation and verification select the
+same `certification` feature. No default features, Candid or executor are added.
+Only existing SHA-256, hex, Serde and Serde bytes dependencies are selected.
+The unexposed nested_rb_tree module and its rstest dependency are omitted.
+
+Hash/tree/Serde bodies, original tests and Apache licensing are preserved under
+an exact-reconstruction guard. [Provenance and admissions](../crates/ic-platform/src/certification/upstream/NOTICE.md)
+record the source, Rust 2024 adaptations and the review through upstream 4.0.1.
+That newer package changes only its docs.rs attribute relative to this import.
+
+Native Agent still owns its external certificate identity. Its feature alone
+selects the direct native-only registry adapter and exposes ExternalCertificate
+and ExternalHashTree under `agent`. With both features, From conversions preserve
+all node bytes/order and optional delegation; they rebuild boxes and copy labels.
+Convert explicitly before Agent verification or `agent::lookup_value`, and retain
+the external value if making repeated Agent calls. Existing Host/Query callers
+that pass owned certificates directly need coordinated adoption. Decoding budgets,
+trust roots, freshness, verification and retry policy remain consumer-owned.
+PocketIC may independently retain registry types transitively.
+
+Standalone certification and canister-signature graphs exclude the registry
+package on native and Wasm. This is a maintenance/type-ownership change, not a
+claim of complete DFINITY removal or a measured application Wasm reduction.
+The following extension records describe the earlier registry-backed adoption;
+their shared-identity claims are superseded by this pending minor.
+
 ## Certification extension
 
 The optional `certification` feature extends this boundary explicitly beyond
@@ -1539,6 +1572,64 @@ and protocol packages to confirm one upstream certification identity. Native mac
 and installed canisters are separate qualification. Dependency control alone
 does not remove `ic-certification` or establish a smaller Wasm artifact.
 
+## Owned Principal in canister signatures (pending 0.16)
+
+CanisterSigPublicKey's constructor and canister_id field now use the canonical
+owned Principal. Signature creation selects principal, not principal-external;
+verification no longer enables ic_principal/serde. The original DER/raw encoding,
+certificate parsing, range-checking, hashing and verification bodies remain exact.
+The source guard reverses only the Principal import before checking its existing
+fingerprints. There is no new Principal implementation or Candid adapter.
+
+Certified range CBOR retains binary identity bytes and length-first ordering,
+including inclusive endpoints. Differential native tests compare registry and
+owned decoding/encoding and ordering over all lengths, definite/indefinite CBOR,
+self-describing tags, malformed ranges and overlong principals. The registry's
+Candid-specific byte-buffer visitor is not called by serde_cbor, which uses its
+borrowed/temporary byte visitors. No Candid marker handling is added here.
+Public verifier errors remain String; malformed text diagnostics are not a new
+stable contract. Consumers retain issuer/seed, trust roots and resource policy.
+
+Callers already holding Platform Principal can remove conversions at new() and
+canister_id. Callers holding an external Principal convert explicitly at their
+integration boundary. Existing raw/DER and certificate fixtures remain unchanged.
+Four additional signed fixtures cover accepted and refused issuers under both
+legacy and sharded certified range layouts, using literal range bytes and the
+unchanged imported cryptography. Their generator is the owned evidence test
+with PLATFORM_SIGNATURE_RANGE_FIXTURES pointing to an existing output directory.
+
+Standalone creation and verification contain no DFINITY registry package after
+the private curve import below. Other selected profiles can still bring
+registry Principal independently. The root lock retains it for those consumers;
+this change does not claim a workspace-wide package removal or size saving.
+
+## Maintained BLS curve (pending 0.16)
+
+The `bls` capability now owns the existing ic_bls12_381 0.10.1 implementation
+under a private module. No new crate, feature or public curve API is introduced.
+The wrapper's public paths and byte formats remain unchanged by this step;
+the earlier wrapper ownership change still requires the 0.16 release.
+See [curve provenance](../crates/ic-platform/src/bls/curve/NOTICE.md) for the exact
+revision, licenses, upstream review and admitted packaging transformations.
+
+All arithmetic, constants, original source tests and binary vector files remain
+unchanged after reversing module paths and Rust 2024/lint/feature scaffolding.
+The source guard checks both the admitted files and reconstructed originals.
+Allocated pairings, groups and hash-to-curve remain enabled; unused bit access,
+zeroization and upstream std features remain inactive. These selections are
+private and cannot be changed by unrelated Cargo feature unification.
+
+Generic ff/group/pairing/digest/subtle and rand_core traits are still externally
+maintained. They were already under the registry curve; this step makes their
+dependency edges explicit. The original tests add development-only rand_xorshift
+and SHA-3. There is no production RNG/entropy provider and no benchmark framework.
+
+Standalone BLS and canister-signature creation/verification now have zero DFINITY
+registry packages on native and Wasm. Native Agent retains its own registry
+wrapper/curve and Rust identities. Other capabilities still select DFINITY
+packages. Source ownership is not a claim of independent cryptographic review,
+whole-stack removal, fresh-cache offline recovery or smaller application Wasm.
+
 ## Canister signature and BLS extension
 
 Three optional features serve Auth's reviewed signature-store and
@@ -1550,20 +1641,37 @@ surfaces. Their actual transitive dependencies differ:
 | --- | --- | --- |
 | `canister-sig-creation` / `canister_sig_creation` | Imported 1.3.1 `CanisterSigPublicKey`, `hash_bytes`, `hash_with_domain`, `extract_raw_root_pk_from_der`, `IC_ROOT_PK_DER`, `IC_ROOT_PK_DER_PREFIX` | Certification; no Candid, ic0, BLS or executor |
 | `signature-verification` / `signature_verification` | Imported 0.3.0 `verify_canister_sig` | Creation surface, certification and BLS; no Candid, ic0 or executor |
-| `bls` / `bls` | 0.6.0 `PublicKey`, `Signature`, `PrivateKey`, `InvalidPublicKey`, `InvalidSignature`, `InvalidPrivateKey`, `verify_bls_signature` | Upstream alloc enabled; no creation, Candid, certification, ic0 or executor |
+| `bls` / `bls` | Maintained 0.6.0 `PublicKey`, `Signature`, `PrivateKey`, `InvalidPublicKey`, `InvalidSignature`, `InvalidPrivateKey`, `verify_bls_signature` | Optimized allocated path; maintained curve and external pairing/SHA; no creation, Candid, certification, ic0 or executor |
 
-The signature implementation is packaged in Platform for 0.4; BLS remains a direct
-upstream export. See [the identity migration](#runtime-codes-and-signature-packaging-04).
+The signature implementation was packaged in Platform for 0.4. The pending 0.16
+line also packages the upstream BLS wrapper, with one std LazyLock
+cache replacing lazy_static. BLS key/signature/error types now have Platform
+identity; public paths and serialized bytes remain. See
+[BLS provenance](../crates/ic-platform/src/bls/upstream/NOTICE.md) and
+[the earlier identity migration](#runtime-codes-and-signature-packaging-04).
+The reviewed upstream #127 correction rejects identity public keys at verification
+entry and preserves its exact regression vector. All other cryptographic bodies
+and original source fingerprints remain unchanged. Native Agent retains its
+separate registry verifier and does not inherit that correction.
 Public-key constructor/DER/raw methods and
-Principal identities, root constants, domain/hash bytes, serialized BLS keys and
-signatures, typed BLS errors and unit verification errors remain upstream.
+Owned Principal byte semantics, root constants, domain/hash bytes, serialized BLS keys and
+signatures and typed/unit verification error behavior remain upstream-authored.
 `verify_canister_sig` retains four byte-slice arguments and `Result<(), String>`;
 Platform adds no error projection, cryptography or resource/trust policy.
-BLS defaults are disabled and only upstream `alloc` is selected, matching Auth's
-fixtures and the IC verifier. Fixtures derive deterministic keys through
+The optimized allocated BLS path matches Auth's fixtures and the IC verifier.
+`signature-verification` selects the same `bls` capability and implementation.
+The no-alloc alternative remains verbatim but inactive in the imported source.
+The original random helper and random tests compile only in library unit tests;
+Rand is development-only. Fixtures derive deterministic keys through
 `PrivateKey::deserialize` and sign through its inherent methods. No RNG feature
-or entropy source is selected. Consumer feature unification can still enable
-upstream features; qualify the actual final graph and key-custody policy.
+or entropy source is selected. The private curve selections are fixed by the BLS capability; qualify the actual
+final graph and key-custody policy. Native
+Agent retains its independent registry wrapper; Platform does not fork Agent or
+change its Rust identities. Standalone BLS/signature Wasm graphs exclude the
+registry wrapper, curve package and lazy_static while retaining the same curve
+implementation in the private maintained module.
+Source/test/license guards reconstruct the exact import; the canister verifier's
+BLS import alone is remapped before checking its existing immutable fingerprint.
 
 Read-only review used dirty Auth at base `2da4dc0e`. Its
 `crates/ic-auth/src/{signature_store,canister_signature}.rs`, three corresponding
@@ -1928,7 +2036,9 @@ Call/response/future, cost/performance/error and stable-error types are now
 Platform-owned identities. Their corresponding re-exported identities are not
 maintained through aliases, conversion packages or a second CDK dependency.
 The 0.4 runtime RejectCode and signature-key identities are also Platform-owned.
-ExternalPrincipal, external DTO, certification and BLS identities remain upstream.
+ExternalPrincipal, external DTO and certification identities remain upstream.
+The later 0.16 packaging cut gives BLS wrapper types Platform identity while
+preserving their original cryptographic implementation and serialized bytes.
 Replace direct `ic_cdk` identity assertions with reviewed
 behavior/signature tests and compile actual consumers against the new owner.
 
@@ -2400,7 +2510,8 @@ certification-only isolation remain unchanged. These are workspace graph gates,
 not guarantees about feature unification in every downstream application.
 
 Direct dependency isolation does not remove transitive Candid from management DTOs, Agent, PocketIC,
-protocol DTO packages. No Wasm-size reduction has been measured.
+protocol DTO packages. Graph admission alone establishes no Wasm-size saving;
+capability-specific measurements are recorded separately.
 Native Linux, native macOS Intel/Apple Silicon, Wasm compilation and installed IC
 behavior are separate evidence categories. Current delivered-source CI and
 registry qualification are recorded in [the current handoff](status/current.md).
@@ -2535,10 +2646,18 @@ selected and qualified. No supplying release or installed runtime proof is impli
 
 The optional native/Wasm `ed25519` feature explicitly exports `Signature`,
 `SignatureError`, `Signer`, `SigningKey`, `VerifyingKey` and `Scalar` under
-`ic_platform::ed25519`. The owners remain ed25519-dalek 2.2 and curve25519-dalek
-4.1.3 with defaults disabled. These are compatible registry requirements, not
+`ic_platform::ed25519`. Pending Platform 0.16 selects ed25519-dalek 3.0 and
+curve25519-dalek 5.0 with defaults disabled. These are compatible registry requirements, not
 new exact pins. No crypto implementation, RNG, Candid or executor is added.
 Agent can independently bring these dependencies and broader unified features.
+
+This changes exported Rust type/trait identities, including signature 3. Existing
+byte-based signing and strict-verification call sites remain supported; adapt
+callers that exchange concrete Dalek/signature types with independently selected
+older libraries. Native Agent retains its Dalek 2/curve 4 generation. The RFC 8032
+seed/public-key/signature vector, canonical-S/weak-key rejection, changed messages
+and malformed signatures qualify the unchanged consumer byte contract. Rust 1.91
+remains supported. No local curve algorithm is substituted.
 
 Auth can select `ic-platform/ed25519` through its existing portable-signature
 feature, replace its two Dalek imports with this module, and remove exhausted
@@ -2553,12 +2672,29 @@ versions, cryptographic policy or measured Wasm size.
 
 ## Standard secp256k1 ECDSA maintenance boundary
 
-The optional native/Wasm `ecdsa` feature exposes original K256 0.13.4 identities
+The optional native/Wasm `ecdsa` feature exposes original K256 0.14.0 identities
 as `ic_platform::ecdsa::{Signature, SigningKey, VerifyingKey, SignatureError,
 PrehashSigner, PrehashVerifier}`. The compatible registry requirement disables
 upstream defaults and selects only `ecdsa`; no RNG backend, Candid or executor
 is enabled. This is independent of the existing native-only `secp256k1` IC public
 key derivation surface. Agent/public derivation may unify additional K256 features.
+
+This is a breaking Platform minor change: K256 now exposes signature 3 identities.
+Replace `to_encoded_point` with `to_sec1_point`. `normalize_s()` now returns the
+normalized signature directly, rather than an `Option`. Explicit producer
+normalization uses `parsed.normalize_s()`; strict verification can preserve
+high-S refusal with `signature.normalize_s() != signature`. Do not normalize
+input implicitly before verification. Preserve malformed-key/signature/high-S
+error ordering and all consumer-owned trust/prehash policy.
+
+The optional direct `crypto-bigint ^0.7.10` requirement is a published security
+floor, selected only by `ecdsa`. K256's `elliptic-curve ^0.14.1` requirement alone
+permits an older transitive selection, so a corrected workspace lock would not
+protect existing downstream locks. This constraint unifies the existing bigint
+dependency; it adds no replacement arithmetic or public bigint API. The qualified
+graph resolves elliptic-curve 0.14.3 and crypto-bigint 0.7.10 at Rust 1.91.
+Agent and native IC public derivation retain the older K256/bigint family; this
+does not establish complete remediation of the repository's advisory graph.
 
 Auth's `chain-key-verification` should select `dep:ic-platform` and
 `ic-platform/ecdsa` instead of `dep:k256`. Replace K256 imports in production,
@@ -2570,12 +2706,35 @@ consumer locks and dependency guards after publication. Retain Auth's explicit
 high-S refusal, normalization operation, exact prehash bytes, typed errors,
 malformed-key-first ordering, trust decisions and key custody.
 
-An isolated copy of Auth's actual chain-key implementation and tests, changing
-only its two imports, passes Rust 1.88 tests and Wasm checking against local
-Platform. The separate Platform-only consumer covers signing, compressed and
+The original K256 0.13.4 adoption qualified an isolated Auth copy at Rust 1.88.
+The 0.14 upgrade qualifies an isolated copy of Auth's current chain-key policy
+and its nine tests at Rust 1.91, adapting only the upstream API calls described
+above, plus Wasm checking. Auth's checkout remains unchanged. The separate
+Platform-only consumer retains fixed 0.13.4 public-key/signature bytes and covers
+signing, compressed and
 uncompressed keys, malformed/wrong-message rejection and explicit high-S
 normalization. These proofs do not establish published consumer adoption,
-installed-canister behavior, macOS qualification or smaller Wasm.
+installed-canister behavior or macOS qualification. The measured verification
+probe is substantially larger after this security upgrade; see the
+[size and BLS tradeoffs](benchmarks/upstream-2026-10-31/README.md).
+
+For Wasm production builds select RustCrypto's supported `cpubits="32"` backend
+consistently across the whole Cargo target. Upstream cpubits 0.1.1 otherwise
+selects 64-bit limbs on Wasm32, including K256's 5x52 field implementation. The
+32-bit selection uses its unchanged 10x26 implementation and 32-bit bigint limbs;
+it changes no signature/SEC1 encoding or public Platform feature. The measured
+z/fat-LTO verifier falls from 107,421 to 57,575 bytes, compared with 48,583 before
+the security upgrade. Its measured valid verification uses 48.65% fewer IC
+instructions than the new default backend. Retain the corrected versions and
+security floor; no DFINITY dependency or cryptographic fork is needed for this.
+
+Platform's root `.cargo/config.toml` selects the backend only on
+wasm32-unknown-unknown; native defaults remain upstream's. Cargo does not inherit
+a dependency repository's config, and Platform cannot pass compiler flags to
+its own dependencies through a published manifest or build script. Each canister
+build owner must append `--cfg=cpubits="32"` to its target flags, including any
+explicit RUSTFLAGS/CARGO_ENCODED_RUSTFLAGS composition that overrides config.
+Preserve other flags and qualify the actual application's graph and bytes.
 
 ## Owned account migration (0.3)
 

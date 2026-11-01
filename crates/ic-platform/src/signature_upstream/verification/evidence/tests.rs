@@ -1,8 +1,10 @@
 use super::*;
+use crate::bls::PrivateKey;
+use crate::certification::upstream::{
+    Certificate, Delegation, HashTree, empty, fork, labeled, leaf, pruned,
+};
+use crate::principal::Principal;
 use crate::signature_upstream::creation::IC_ROOT_PK_DER_PREFIX;
-use ic_certification::{Certificate, Delegation, HashTree, empty, fork, labeled, leaf, pruned};
-use ic_principal::Principal;
-use ic_verify_bls_signature::PrivateKey;
 use serde::Serialize;
 use serde_bytes::ByteBuf;
 
@@ -59,6 +61,92 @@ fn envelope(time_tree: HashTree, delegation: Option<Delegation>) -> (Vec<u8>, Ve
 }
 fn time(bytes: Vec<u8>) -> HashTree {
     labeled(b"time".to_vec(), leaf(bytes))
+}
+
+#[test]
+fn certified_ranges_preserve_length_first_order_and_boundary_inclusion() {
+    // Length-first Principal order: [255] precedes [0, 0]. Plain byte-slice
+    // ordering would reverse these bounds and reject the valid endpoints.
+    let bytes = [0x81, 0x82, 0x41, 0xff, 0x42, 0, 0];
+    let ranges: Vec<(Principal, Principal)> = serde_cbor::from_slice(&bytes).unwrap();
+    for (raw, accepted) in [
+        (&[][..], false),
+        (&[254][..], false),
+        (&[255][..], true),
+        (&[0, 0][..], true),
+        (&[0, 1][..], false),
+    ] {
+        assert_eq!(
+            super::super::principal_is_within_ranges(&Principal::from_slice(raw), &ranges),
+            accepted
+        );
+    }
+    assert_eq!(serde_cbor::to_vec(&ranges).unwrap(), bytes);
+}
+
+#[cfg(all(feature = "agent", not(target_family = "wasm")))]
+#[test]
+fn certified_range_decoding_and_order_match_the_registry_reference() {
+    use crate::principal::ExternalPrincipal;
+    type OwnedRanges = Vec<(Principal, Principal)>;
+    type ExternalRanges = Vec<(ExternalPrincipal, ExternalPrincipal)>;
+
+    let principals: Vec<_> = (0..=29)
+        .flat_map(|length| {
+            [0, 2, 255].map(move |value| Principal::from_slice(&vec![value; length]))
+        })
+        .collect();
+    for left in &principals {
+        for right in &principals {
+            let external_left = ExternalPrincipal::from(*left);
+            let external_right = ExternalPrincipal::from(*right);
+            assert_eq!(left.cmp(right), external_left.cmp(&external_right));
+            let owned = vec![(*left, *right)];
+            let external = vec![(external_left, external_right)];
+            let bytes = serde_cbor::to_vec(&external).unwrap();
+            assert_eq!(serde_cbor::to_vec(&owned).unwrap(), bytes);
+            assert_eq!(
+                serde_cbor::from_slice::<OwnedRanges>(&bytes).unwrap(),
+                owned
+            );
+        }
+    }
+
+    // Definite/indefinite bytes and arrays, the self-describing tag, empty and
+    // marker-looking principal bytes, and malformed/overlong range components.
+    let cases = [
+        vec![0x81, 0x82, 0x41, 0xff, 0x42, 0, 0],
+        vec![
+            0x81, 0x82, 0x5f, 0x41, 0xff, 0xff, 0x5f, 0x41, 0, 0x41, 0, 0xff,
+        ],
+        vec![0x9f, 0x9f, 0x40, 0x41, 2, 0xff, 0xff],
+        vec![0xd9, 0xd9, 0xf7, 0x81, 0x82, 0x40, 0x41, 2],
+        vec![0x81, 0x81, 0x40],
+        vec![0x81, 0x82, 0, 0x40],
+        vec![0x81, 0x82, 0x41],
+        [vec![0x81, 0x82, 0x58, 30], vec![0; 30], vec![0x40]].concat(),
+    ];
+    for bytes in cases {
+        let owned = serde_cbor::from_slice::<OwnedRanges>(&bytes);
+        let external = serde_cbor::from_slice::<ExternalRanges>(&bytes);
+        assert_eq!(owned.is_ok(), external.is_ok(), "{bytes:x?}");
+        if let (Ok(owned), Ok(external)) = (owned, external) {
+            let converted: OwnedRanges = external
+                .into_iter()
+                .map(|(left, right)| (left.into(), right.into()))
+                .collect();
+            assert_eq!(owned, converted);
+            assert_eq!(
+                serde_cbor::from_reader::<OwnedRanges, _>(&bytes[..]).unwrap(),
+                owned
+            );
+            let external: ExternalRanges = serde_cbor::from_reader(&bytes[..]).unwrap();
+            assert_eq!(
+                serde_cbor::to_vec(&external).unwrap(),
+                serde_cbor::to_vec(&owned).unwrap()
+            );
+        }
+    }
 }
 
 #[test]
@@ -171,6 +259,30 @@ fn original_failures_are_preserved_and_never_return_time() {
 }
 
 #[test]
+fn identity_root_cannot_authenticate_a_certificate() {
+    let (signature, public, root) = envelope(time(vec![42]), None);
+    assert_eq!(
+        verify_canister_sig_with_time(b"message", &signature, &public, &root),
+        Ok(42)
+    );
+    let mut envelope: super::super::CanisterSignature = serde_cbor::from_slice(&signature).unwrap();
+    let cert: Certificate = serde_cbor::from_slice(&envelope.certificate).unwrap();
+    let identity = key(0);
+    let cert = certificate(cert.tree, &identity, None);
+    envelope.certificate = ByteBuf::from(cbor(&cert));
+    let forged = cbor(&envelope);
+    let root = identity.public_key().serialize();
+    let error = super::super::verify_canister_sig(b"message", &forged, &public, &root).unwrap_err();
+    assert_eq!(
+        verify_canister_sig_with_time(b"message", &forged, &public, &root),
+        Err(CanisterSigTimeError::Verification(error))
+    );
+    if let Some(path) = std::env::var_os("PLATFORM_SIGNATURE_IDENTITY_FIXTURE") {
+        std::fs::write(path, hex::encode(&forged) + "\n").unwrap();
+    }
+}
+
+#[test]
 fn delegation_time_is_not_the_signing_time() {
     let subnet = vec![3; 10];
     let mut subnet_key = IC_ROOT_PK_DER_PREFIX.to_vec();
@@ -200,4 +312,71 @@ fn delegation_time_is_not_the_signing_time() {
         verify_canister_sig_with_time(b"message", &signature, &public, &root),
         Ok(42)
     );
+}
+
+#[test]
+fn delegated_range_formats_preserve_owned_principal_admission() {
+    let subnet = vec![3; 10];
+    let mut subnet_key = IC_ROOT_PK_DER_PREFIX.to_vec();
+    subnet_key.extend_from_slice(&key(2).public_key().serialize());
+    for sharded in [false, true] {
+        for allowed in [true, false] {
+            // Literal protocol bytes: one range with equal 10-byte endpoints.
+            // Avoid using the owned serializer to generate its own acceptance oracle.
+            let endpoint = if allowed { 1 } else { 2 };
+            let ranges = [
+                vec![0x81, 0x82, 0x4a],
+                vec![endpoint; 10],
+                vec![0x4a],
+                vec![endpoint; 10],
+            ]
+            .concat();
+            let public_key_tree = labeled(b"public_key".to_vec(), leaf(subnet_key.clone()));
+            let delegation_tree = if sharded {
+                fork(
+                    labeled(
+                        b"canister_ranges".to_vec(),
+                        labeled(subnet.clone(), labeled(vec![0; 10], leaf(ranges))),
+                    ),
+                    labeled(b"subnet".to_vec(), labeled(subnet.clone(), public_key_tree)),
+                )
+            } else {
+                labeled(
+                    b"subnet".to_vec(),
+                    labeled(
+                        subnet.clone(),
+                        fork(
+                            labeled(b"canister_ranges".to_vec(), leaf(ranges)),
+                            public_key_tree,
+                        ),
+                    ),
+                )
+            };
+            let delegation = Delegation {
+                subnet_id: subnet.clone(),
+                certificate: cbor(&certificate(delegation_tree, &key(1), None)),
+            };
+            let (signature, public, root) = envelope(time(vec![42]), Some(delegation));
+            let result = verify_canister_sig_with_time(b"message", &signature, &public, &root);
+            if allowed {
+                assert_eq!(result, Ok(42));
+            } else {
+                assert_eq!(
+                    result,
+                    Err(CanisterSigTimeError::Verification(
+                        "signing canister id not in canister_ranges".into()
+                    ))
+                );
+            }
+            if let Some(directory) = std::env::var_os("PLATFORM_SIGNATURE_RANGE_FIXTURES") {
+                let name = format!(
+                    "signature-range-{}-{}.hex",
+                    if sharded { "sharded" } else { "legacy" },
+                    if allowed { "valid" } else { "outside" }
+                );
+                let text: String = signature.iter().map(|byte| format!("{byte:02x}")).collect();
+                std::fs::write(std::path::Path::new(&directory).join(name), text + "\n").unwrap();
+            }
+        }
+    }
 }

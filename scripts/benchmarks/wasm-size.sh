@@ -12,8 +12,10 @@ toolchain="${WASM_BENCH_TOOLCHAIN:-1.91.0}"
 build_target="${WASM_BENCH_TARGET_DIR:-$output/target}"
 profiles="${WASM_BENCH_PROFILES:-principal principal-binary principal-self-auth runtime external-candid verification}"
 recipes="${WASM_BENCH_RECIPES:-3-none-16 3-thin-1 3-fat-1 s-fat-1 z-fat-1}"
+cpubits="${WASM_BENCH_CPUBITS:-auto}"
+case "$cpubits" in auto|32|64) ;; *) echo 'WASM_BENCH_CPUBITS must be auto, 32 or 64' >&2; exit 2 ;; esac
 for profile in $profiles; do
-    case "$profile" in principal|principal-binary|principal-self-auth|runtime|external-candid|candid-exact|candid-sequence|candid-sequence-one|verification) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
+    case "$profile" in principal|principal-binary|principal-self-auth|runtime|external-candid|candid-exact|candid-sequence|candid-sequence-one|verification|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
 done
 for recipe in $recipes; do
     case "$recipe" in 3-none-16|3-thin-1|3-fat-1|s-fat-1|z-fat-1) ;; *) echo "Unknown size recipe: $recipe" >&2; exit 2 ;; esac
@@ -24,6 +26,11 @@ rustc "+$toolchain" -vV > "$output/rustc-version.txt"
 printf '%s\n' "--remap-path-prefix=$source_root=/platform-source" \
     "--remap-path-prefix=$output=/probe" > "$output/rustflags.txt"
 encoded_flags="$(printf '%s\037%s' "--remap-path-prefix=$source_root=/platform-source" "--remap-path-prefix=$output=/probe")"
+if [[ "$cpubits" != auto ]]; then
+    printf '%s\n' "--cfg=cpubits=\"$cpubits\"" >> "$output/rustflags.txt"
+    encoded_flags="$(printf '%s\037%s' "$encoded_flags" "--cfg=cpubits=\"$cpubits\"")"
+fi
+printf '%s\n' "$cpubits" > "$output/cpubits.txt"
 if [[ "$(git -C "$source_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$source_root" ]] &&
     git -C "$source_root" rev-parse HEAD > "$output/source-head.txt" 2>/dev/null; then
     git -C "$source_root" diff --binary -- crates Cargo.toml Cargo.lock > "$output/source.patch"
@@ -54,6 +61,9 @@ candid-exact = ["ic-platform/candid", "ic-platform/management-canister-types"]
 candid-sequence = ["ic-platform/candid"]
 candid-sequence-one = ["candid-sequence"]
 verification = ["ic-platform/signature-verification"]
+bls = ["ic-platform/bls"]
+ecdsa = ["ic-platform/ecdsa"]
+ecdsa-instructions = ["ecdsa"]
 [dependencies]
 ic-platform = { path = $quoted_source, default-features = false, features = ["ic0"] }
 serde_json = { version = "1.0", optional = true }

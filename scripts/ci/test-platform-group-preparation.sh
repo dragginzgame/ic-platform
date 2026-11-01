@@ -9,6 +9,7 @@ unset MAKEFLAGS MFLAGS MAKEOVERRIDES
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-group-preparation.XXXXXX")"
 trap 'printf "Grouped preparation evidence: %s\n" "$fixture"' EXIT
 cd "$root"
+source ci/release-editor.env
 editor="$(bash scripts/release/editor.sh check)"
 export PLATFORM_GROUP_TEST_EDITOR="$editor"
 export PATH="$root/.tools/host/bin:$PATH"
@@ -101,7 +102,20 @@ for group in platform types; do
         if git diff --quiet -- scripts/fixtures/cdk-runtime/Cargo.lock; then exit 1; fi
         if git diff --quiet -- ci/dependency-pinning-exceptions.json; then exit 1; fi
     else
-        git diff --exit-code -- CHANGELOG.md releases/platform/CHANGELOG.md releases/history.md crates/ic-platform/Cargo.toml crates/ic-platform-macros/Cargo.toml crates/ic-platform-runtime-guard/Cargo.toml ci/dependency-pinning-exceptions.json scripts/fixtures/cdk-runtime/Cargo.lock
+        git diff --exit-code -- CHANGELOG.md releases/platform/CHANGELOG.md releases/history.md crates/ic-platform/Cargo.toml crates/ic-platform-macros/Cargo.toml crates/ic-platform-runtime-guard/Cargo.toml ci/dependency-pinning-exceptions.json
+        # The shared lock may contain the local Types owner. Admit only its
+        # version and qualified dependency references; preserve every other byte.
+        lock=scripts/fixtures/cdk-runtime/Cargo.lock
+        git show "HEAD:$lock" > "$fixture/types-lock-before"
+        if yq -p toml -o json '.' "$fixture/types-lock-before" | jq -e 'any(.package[]; .source == null and .name == "ic-platform-types")' > /dev/null; then
+            yq -p toml -o json '.' "$lock" | jq -e --arg version "$next" \
+                '[.package[] | select(.source == null and .name == "ic-platform-types") | .version] == [$version]' > /dev/null
+            "$editor" --max-input-bytes "$PLATFORM_RELEASE_EDITOR_MAX_BYTES" lock "$lock" "$next" "$types_before" \
+                ic-platform-types > "$fixture/types-lock-restored"
+            cmp "$fixture/types-lock-before" "$fixture/types-lock-restored"
+        else
+            cmp "$fixture/types-lock-before" "$lock"
+        fi
         [[ "$(yq -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)" == "$platform_before" ]]
         [[ "$(yq -p toml -o json -r '.workspace.dependencies.ic-platform-types.version' Cargo.toml)" == "$next" ]]
     fi

@@ -1,0 +1,5 @@
+# RustCrypto's upstream 32-bit backend is smaller and uses fewer IC instructions
+# than its Wasm32 64-bit heuristic in our qualified ECDSA probe. Consumers must
+# select this in their own build configuration; Cargo does not inherit ours.
+[target.wasm32-unknown-unknown]
+rustflags = ['--cfg=cpubits="32"']
