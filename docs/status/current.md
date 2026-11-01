@@ -80,10 +80,13 @@ consumers selecting a new provider pin retain their paired source qualification.
 
 ## Retained constraints
 
-The installed canister runtime lock still selects Timers 0.32.3 and its older
-Platform/executor graph. Fresh installed-runtime/advisory preparation previously
-stopped at the separate Timers/executor conflict (#116). Keep every guard/gate;
-native Profiler acceptance does not establish that canister composition.
+The installed runtime fixture now selects Timers 0.35 with one embedded
+Platform executor; the earlier Timers/executor conflict (#116) is removed.
+Its native/Wasm graph, both compiler builds and local installed Wire/external
+Candid journeys pass. Native entrypoint symbols are scoped by consuming crate,
+with exact Wasm exports retained; the two-library linkage regression passes.
+Hosted checks and the separate production advisory constraint below remain
+independent of these focused proofs.
 #50 remains unresolved: target/issue50-20261030/evidence.json recorded
 crypto-bigint 0.5.5 without a complete compatible correction, excluding yanked
 checks. Preserve crypto bodies, DER exception, fingerprints and upstream vectors.

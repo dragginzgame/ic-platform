@@ -4,6 +4,18 @@ This group covers ic-platform, ic-platform-macros and ic-platform-runtime-guard.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.15.4] - Unreleased
+
+### 🩹 Fixed
+
+- Scope native entrypoint symbols to the consuming Cargo crate so multiple
+  canister libraries can link in one host process. Retain portable method-name
+  encoding and exact Wasm exports, codecs, guards and executor contexts.
+  [#129](https://github.com/dragginzgame/ic-platform/issues/129).
+
+- Align the installed runtime fixture with Timers 0.35 and its shared embedded
+  executor. Refresh its maintained qualification lock through the fixture owner.
+
 ## [0.15.3] - 2026-10-31
 
 ### ⬆️ Dependencies

@@ -40,12 +40,13 @@ if RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" prepar
 cmp "$lock" "$fixture/before.lock"
 RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
 bash "$fixture/scripts/release/runtime-lock.sh" check
-# Runtime-only changes preserve the independent owner and all registry records.
+# Runtime-only changes preserve the independent owner and registry identities.
+# Registry dependents must retarget their selected local runtime edge too.
 for side in before after; do
     selected="$lock"; [[ "$side" != before ]] || selected="$fixture/before.lock"
     "$YQ" -p toml -o json '.' "$selected" | jq -S --arg before "$version" '
       [.package[] | select(.source != null or (.name != "ic-platform" and .name != "ic-platform-macros" and .name != "ic-platform-runtime-guard")) |
-       if .source == null and .dependencies != null then .dependencies |= map(
+       if .dependencies != null then .dependencies |= map(
          if . == "ic-platform 99.0.0" then "ic-platform " + $before
          elif . == "ic-platform-macros 99.0.0" then "ic-platform-macros " + $before
          elif . == "ic-platform-runtime-guard 99.0.0" then "ic-platform-runtime-guard " + $before else . end)
@@ -63,7 +64,11 @@ RELEASE_GROUP=types bash "$fixture/scripts/release/runtime-lock.sh" prepare "$ty
 RELEASE_GROUP=types bash "$fixture/scripts/release/runtime-lock.sh" check
 for side in before after; do
     selected="$lock"; [[ "$side" != before ]] || selected="$fixture/runtime.lock"
-    "$YQ" -p toml -o json '.' "$selected" | jq -S '[.package[] | select(.source != null or .name != "ic-platform-types")]' > "$fixture/$side-types.json"
+    "$YQ" -p toml -o json '.' "$selected" | jq -S --arg before "$types" '
+      [.package[] | select(.source != null or .name != "ic-platform-types") |
+       if .dependencies != null then .dependencies |= map(
+         if . == "ic-platform-types 99.1.0" then "ic-platform-types " + $before else . end)
+       else . end]' > "$fixture/$side-types.json"
 done
 cmp "$fixture/before-types.json" "$fixture/after-types.json"
 cp "$lock" "$fixture/types.lock"
