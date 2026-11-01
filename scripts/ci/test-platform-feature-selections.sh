@@ -53,10 +53,29 @@ done <<'MUTATIONS'
 (.dependencies[] | select(.name == "ic-stable-structures")).req = "^0.7"
 (.dependencies[] | select(.name == "k256")).uses_default_features = true
 .links = "unconditional-executor"
+.dependencies += [{"name":"ic0"}]
+MUTATIONS
+# The runtime owns the optional singleton dependency after extraction. Mutate
+# that package, rather than silently selecting a removed facade dependency.
+while IFS= read -r mutation; do
+    "$jq" "(.packages[] | select(.name == \"ic-platform-runtime\")) |= ($mutation)" \
+        "$fixture/metadata.json" > "$fixture/invalid.json"
+    if contract "$fixture/invalid.json" 2> "$fixture/error"; then
+        echo "Runtime contract admitted mutation: $mutation" >&2; exit 1
+    fi
+    grep -q 'singleton guard' "$fixture/error"
+done <<'MUTATIONS'
+.links = "unconditional-executor"
+.features.default = ["runtime"]
+.features.executor = []
+.features.runtime = []
+.features.cdk = []
+.features.ic0 = ["dep:ic0"]
 (.dependencies[] | select(.name == "ic-platform-runtime-guard")).optional = false
 (.dependencies[] | select(.name == "ic-platform-runtime-guard")).req = "^0.9.0"
 .dependencies |= map(select(.name != "ic-platform-runtime-guard"))
-.dependencies += [{"name":"ic0"}]
+(.dependencies[] | select(.name == "ic-platform-macros")).req = "^99.0.0"
+.dependencies += [{"name":"candid"}]
 MUTATIONS
 while IFS= read -r mutation; do
     "$jq" "$mutation" "$fixture/metadata.json" > "$fixture/invalid.json"
@@ -65,6 +84,8 @@ while IFS= read -r mutation; do
     fi
     grep -q 'singleton guard' "$fixture/error"
 done <<'MUTATIONS'
+.packages |= map(select(.name != "ic-platform-runtime"))
+.packages += [.packages[] | select(.name == "ic-platform-runtime")]
 .packages |= map(select(.name != "ic-platform-runtime-guard"))
 .packages += [.packages[] | select(.name == "ic-platform-runtime-guard")]
 (.packages[] | select(.name == "ic-platform-runtime-guard")).version = "99.0.0"
