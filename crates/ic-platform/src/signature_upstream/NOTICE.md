@@ -6,7 +6,8 @@ library. Both imported modules retain all original function bodies and unit test
 
 - `creation/mod.rs`: ic-canister-sig-creation 1.3.1, upstream revision
   `3e5786bb06f94e898d3f8371ec088be23abec987`, `src/lib.rs`. Changes are
-  `candid::Principal` to the identical registry `ic_principal::Principal`, and
+  originally `candid::Principal` to registry `ic_principal::Principal`, now
+  `crate::principal::Principal` in the pending 0.16 cut, and
   omission of the unexposed `signature_map` module declaration. Store implementation
   and lifecycle ownership are not imported.
   In 0.5.1, the maintainer additionally authorized deleting the unused,
@@ -16,7 +17,9 @@ library. Both imported modules retain all original function bodies and unit test
 - `verification/mod.rs`: ic-signature-verification 0.3.0, dfinity/ic revision
   `b8613a99eb324c313c6080f84964cb670ced517b`,
   `packages/ic-signature-verification/src/canister_sig.rs`. Its creation import
-  points at the sibling imported module. The additive `evidence` child module
+  points at the sibling imported module. The BLS import now points at the
+  maintained `crate::bls` implementation; the guard reverses this import before
+  checking the original fingerprint. The additive `evidence` child module
   declaration is the only later packaging change; its removal reconstructs the
   exact imported verifier hash. Every original function and test remains exact.
 
@@ -46,8 +49,10 @@ Long-form DER remains unsupported by the fixed-offset imported key parser.
 Callers retain byte/depth bounds, issuer/seed, trust and application policy.
 
 Platform now owns the packaging identity of CanisterSigPublicKey. It is no longer
-interchangeable with the registry creation package's type. BLS, certification and
-external Principal identities remain registry types. This requires the 0.4 line.
+interchangeable with the registry creation package's type. In pending 0.16,
+certification and this key's Principal also have Platform identity. The BLS wrapper import
+also gives BLS types Platform identity while retaining upstream source and bytes;
+its separate guard/provenance live under `bls/upstream`.
 
 The new `tests/fixtures/signature-time-valid.hex` fixture is generated only with
 upstream certification/BLS APIs in `verification/evidence/tests.rs`. Set
@@ -55,3 +60,17 @@ upstream certification/BLS APIs in `verification/evidence/tests.rs`. Set
 `authenticated_times_cover_u64_and_existing_nonminimal_encodings` to reproduce
 its fixed test-key-1, `seed`/`message`, 128-nanosecond certificate. This adds a
 vector without modifying any imported upstream vector or cryptographic body.
+
+The pending 0.16 certification import redirects creation/verifier/test imports
+to the maintained certification module. The source guard reverses these paths
+before checking the same original fingerprints; no hash/tree, signature or
+certificate parsing body changes.
+
+The pending 0.16 Principal cut changes only the creation/verifier imports to
+the existing canonical owned type. The same original source fingerprints are
+reconstructed. CBOR byte and ordering parity are tested against the explicit
+native Agent registry reference; standalone production selects no registry
+Principal. The four signature-range fixtures use literal range bytes with the
+unchanged imported tree/BLS implementation, covering legacy/sharded positive
+and outside-range certificates. Generate them with PLATFORM_SIGNATURE_RANGE_FIXTURES
+and the delegated_range_formats_preserve_owned_principal_admission unit test.

@@ -188,7 +188,7 @@ fn signed_update_response_variants_do_not_supply_a_retry_policy() {
 }
 
 #[test]
-fn certificates_keep_their_shared_identity_and_lookups_do_not_authenticate() {
+fn certificates_cross_the_explicit_agent_boundary_and_lookups_do_not_authenticate() {
     let value = leaf(vec![42]);
     let digest = labeled_hash(b"value", &value.digest());
     let tree = labeled(b"value".to_vec(), value);
@@ -202,15 +202,17 @@ fn certificates_keep_their_shared_identity_and_lookups_do_not_authenticate() {
         signature: vec![],
         delegation: None,
     };
+    let external: ic_platform::agent::ExternalCertificate = certificate.clone().into();
+    assert_eq!(Certificate::from(external.clone()), certificate);
     assert_eq!(
-        lookup_value(&certificate, [b"value".as_slice()]),
+        lookup_value(&external, [b"value".as_slice()]),
         Ok([42].as_slice())
     );
     let agent = Agent::builder()
         .with_url("http://127.0.0.1:1")
         .build()
         .unwrap();
-    let result: Result<(), AgentError> = agent.verify(&certificate, Principal::anonymous());
+    let result: Result<(), AgentError> = agent.verify(&external, Principal::anonymous());
     assert!(result.is_err());
 }
 

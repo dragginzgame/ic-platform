@@ -40,7 +40,15 @@ done <<'MUTATIONS'
 .features["icrc-ledger-types"] += ["dep:icrc-ledger-types"]
 .features.principal += ["dep:ic_principal"]
 (.dependencies[] | select(.name == "ic_principal")).features += ["self_authenticating"]
-(.dependencies[] | select(.name == "ic-verify-bls-signature")).uses_default_features = true
+(.dependencies[] | select(.name == "group")).uses_default_features = true
+.features.certification = ["dep:ic-certification"]
+.features["canister-sig-creation"] -= ["certification"]
+.features["canister-sig-creation"] += ["principal-external"]
+.features["signature-verification"] += ["ic_principal/serde"]
+(.dependencies[] | select(.name == "ic-certification")).target = null
+.features.bls = ["dep:ic-verify-bls-signature"]
+.features["signature-verification"] -= ["bls"]
+(.dependencies[] | select(.name == "crypto-bigint")).req = "^0.7.5"
 (.dependencies[] | select(.name == "ed25519-dalek")).uses_default_features = true
 (.dependencies[] | select(.name == "ic-stable-structures")).req = "^0.7"
 (.dependencies[] | select(.name == "k256")).uses_default_features = true

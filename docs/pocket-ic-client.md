@@ -25,7 +25,8 @@ facade's shared Candid/crypto dependencies would also select them on Wasm.
 Every implementation dependency is native-target scoped; defaults and
 executor-only graphs remain free of the client. Its version follows the Platform
 group; publish it before the facade through the existing group publisher.
-Current source versions are unchanged; 0.16.0 is a pending proposal only.
+Existing versions stay at 0.16.0 (Types 0.15.1); the new implementation matches
+its Platform group. The breaking client identity cut is pending 0.17.0.
 
 [Source provenance, retained license and upstream review](../crates/ic-platform-pocket-ic/upstream/NOTICE.md)
 record the source transfer. The source guard checks the reviewed implementation

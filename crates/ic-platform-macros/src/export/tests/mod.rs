@@ -1,3 +1,5 @@
+mod linking;
+
 use super::*;
 
 #[test]

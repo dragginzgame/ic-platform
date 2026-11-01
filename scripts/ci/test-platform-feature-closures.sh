@@ -23,8 +23,8 @@ fi
 echo 'Long closure names retain distinct short cache IDs'
 # Native-only leaves may be removed from a Wasm key only after exact admission.
 native_metadata="$(printf '%s' "$metadata" | "$jq" '
-  .[0].packages[0] |= (.features += {principal:[],"principal-external":["principal"],agent:["principal-external","dep:ic-agent"],"candid-parser":["principal-external","dep:candid_parser"],secp256k1:["principal-external","dep:ic-secp256k1"],"pocket-ic":["principal-external","dep:ic-platform-pocket-ic"]} |
-  .dependencies = ["ic-agent","candid_parser","ic-secp256k1","ic-platform-pocket-ic"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
+  .[0].packages[0] |= (.features += {principal:[],"principal-external":["principal"],agent:["principal-external","dep:ic-agent","dep:ic-certification"],"candid-parser":["principal-external","dep:candid_parser"],secp256k1:["principal-external","dep:ic-secp256k1"],"pocket-ic":["principal-external","dep:ic-platform-pocket-ic"]} |
+  .dependencies = ["ic-agent","candid_parser","ic-secp256k1","ic-platform-pocket-ic","ic-certification"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
 selections='["none","default","agent","agent,candid-parser,secp256k1,pocket-ic","agent,cdk"]'
 actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
 expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tprincipal,principal-external\nagent,candid-parser,secp256k1,pocket-ic\tprincipal,principal-external\nagent,cdk\tcdk,executor,ic0,principal,principal-external')"

@@ -11,6 +11,59 @@ fn reply(bytes: &[u8]) {
     ic_platform::ic0::msg_reply();
 }
 
+#[cfg(feature = "ecdsa")]
+#[unsafe(export_name = "canister_query verify_ecdsa")]
+pub extern "C" fn verify_ecdsa() {
+    use ic_platform::ecdsa::{PrehashVerifier, Signature, VerifyingKey};
+    let bytes = input();
+    let (key, rest) = bytes.split_at(33);
+    let (prehash, signature) = rest.split_at(32);
+    #[cfg(feature = "ecdsa-instructions")]
+    let start = ic_platform::ic0::performance_counter(0);
+    let valid = VerifyingKey::from_sec1_bytes(key).and_then(|key| {
+        let signature = Signature::from_slice(signature)?;
+        key.verify_prehash(prehash, &signature)
+    });
+    #[cfg(feature = "ecdsa-instructions")]
+    {
+        let instructions = ic_platform::ic0::performance_counter(0) - start;
+        let mut result = [0; 9];
+        result[0] = u8::from(valid.is_ok());
+        result[1..].copy_from_slice(&instructions.to_le_bytes());
+        reply(&result);
+    }
+    #[cfg(not(feature = "ecdsa-instructions"))]
+    reply(&[u8::from(valid.is_ok())]);
+}
+
+// Signature/public-key lengths are fixed by the upstream BLS encoding. The
+// remainder is caller-supplied message data; measure verification, not framing.
+#[cfg(feature = "bls")]
+#[unsafe(export_name = "canister_query verify_bls")]
+pub extern "C" fn verify_bls() {
+    run_bls();
+}
+
+#[cfg(feature = "bls")]
+#[unsafe(export_name = "canister_update verify_bls_update")]
+pub extern "C" fn verify_bls_update() {
+    run_bls();
+}
+
+#[cfg(feature = "bls")]
+fn run_bls() {
+    let bytes = input();
+    let (signature, rest) = bytes.split_at(48);
+    let (key, message) = rest.split_at(96);
+    let start = ic_platform::ic0::performance_counter(0);
+    let valid = ic_platform::bls::verify_bls_signature(signature, message, key).is_ok();
+    let instructions = ic_platform::ic0::performance_counter(0) - start;
+    let mut result = [0; 9];
+    result[0] = u8::from(valid);
+    result[1..].copy_from_slice(&instructions.to_le_bytes());
+    reply(&result);
+}
+
 #[cfg(feature = "principal")]
 mod principal {
     use super::*;

@@ -8,7 +8,7 @@
     "secp256k1", "signature-verification", "stable-structures"
   ],
   "native_leaves": {
-    "agent": {"dependencies": ["ic-agent"], "prerequisites": ["principal-external"]},
+    "agent": {"dependencies": ["ic-agent", "ic-certification"], "prerequisites": ["principal-external"]},
     "candid-parser": {"dependencies": ["candid_parser"], "prerequisites": ["principal-external"]},
     "pocket-ic": {"dependencies": ["ic-platform-pocket-ic"], "prerequisites": ["principal-external"]},
     "secp256k1": {"dependencies": ["ic-secp256k1"], "prerequisites": ["principal-external"]}

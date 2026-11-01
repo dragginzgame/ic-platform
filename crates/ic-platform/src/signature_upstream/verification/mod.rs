@@ -1,8 +1,8 @@
-use ic_certification::{
+use crate::certification::upstream::{
     Certificate, Delegation, HashTree, HashTreeNode, LookupResult, SubtreeLookupResult, leaf,
 };
-use ic_principal::Principal;
-use ic_verify_bls_signature::verify_bls_signature;
+use crate::principal::Principal;
+use crate::bls::verify_bls_signature;
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
@@ -235,7 +235,7 @@ fn check_bls_signature(certificate: &Certificate, signing_pk_raw: &[u8]) -> Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ic_certification::{empty, fork, labeled, leaf, pruned};
+    use crate::certification::upstream::{empty, fork, labeled, leaf, pruned};
 
     #[test]
     fn find_leaf_empty_tree_returns_none() {

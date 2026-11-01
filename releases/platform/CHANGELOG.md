@@ -1,16 +1,15 @@
 # Platform changelog
 
-This group covers ic-platform, ic-platform-macros, ic-platform-pocket-ic and
-ic-platform-runtime-guard.
+This group covers ic-platform, ic-platform-macros, ic-platform-pocket-ic and ic-platform-runtime-guard.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
-## [0.16.0] - Unreleased
+## [0.17.0]
 
 ### ⚠️ Breaking
 
 - Maintain the PocketIC 16.1 Rust client in Platform's native implementation
-  package. Keep the existing `ic_platform::pocket_ic` imports, method signatures,
+  package. Keep existing `ic_platform::pocket_ic` imports, method signatures,
   HTTP/JSON protocol and operation behavior; client, builder and client-owned DTOs
   now have Platform implementation identity. Consumers exchanging concrete
   registry `pocket-ic` types must align on the facade after adoption.
@@ -21,6 +20,75 @@ See also the [Types ledger](../types/CHANGELOG.md).
 - Keep client dependencies behind the existing native-only feature, with no
   Candid/crypto expansion in default, executor-only or Wasm PocketIC selections.
   Preserve Apache source provenance and qualify the existing Testkit contract.
+
+## [0.16.0] - 2026-11-01
+
+### ⬆️ Dependencies
+
+- **Breaking:** update the explicit Ed25519 surface to ed25519-dalek 3 and
+  curve25519-dalek 5/signature 3, preserving fixed signing and strict-verification
+  byte fixtures. Native Agent retains its separate older generation.
+- Update the owned entrypoint generator to Syn 3 and the development-only
+  representation-independent hash reference to 4.0.1.
+
+- Maintain the existing BLS12-381 arithmetic inside Platform's private BLS
+  module, preserving algorithms, original tests/vectors and MIT/Apache notices.
+  Remove the registry curve from standalone BLS and canister-signature
+  verification; these profiles now have zero DFINITY registry dependencies.
+  Native Agent retains its independently selected wrapper/curve.
+
+- **Breaking:** use the canonical owned Principal in canister-signature keys and
+  certified subnet-range decoding. Remove registry Principal from standalone
+  creation/verification profiles while preserving DER/CBOR bytes, length-first
+  ordering and the original cryptographic bodies.
+
+- **Breaking:** own certificate, hash-tree and RbTree identities and maintenance
+  inside Platform. Standalone certification and canister-signature profiles no
+  longer select registry certification. Preserve upstream algorithms, Serde
+  bytes and tests; retain explicit native Agent certificate conversions while
+  Agent/PocketIC remain externally maintained.
+
+- **Breaking:** maintain the upstream BLS signature wrapper inside Platform,
+  preserving public paths, crypto bodies and key/signature bytes while changing
+  Rust type ownership. Remove its direct registry dependency and use std's
+  lazy cache; retain upstream curve arithmetic. Native Agent still brings its
+  registry wrapper transitively.
+- **Breaking:** move the optional ECDSA surface to upstream K256 0.14/signature 3
+  identities and enforce corrected bigint selection in downstream locks. Callers
+  must adapt public-key serialization and explicit normalization APIs. This
+  security upgrade retains a modest measured Wasm footprint increase with the
+  qualified backend; Agent and native public derivation retain their older
+  dependency generation.
+  [Migration and compatibility](../../docs/migration.md#standard-secp256k1-ecdsa-maintenance-boundary).
+
+### 🩹 Fixed
+
+- Scope native entrypoint symbols to the consuming Cargo crate so multiple
+  canister libraries can link in one host process. Retain portable method-name
+  encoding and exact Wasm exports, codecs, guards and executor contexts.
+  [#129](https://github.com/dragginzgame/ic-platform/issues/129).
+
+- Apply the exact upstream BLS identity-public-key rejection and regression
+  vector for [#127](https://github.com/dragginzgame/ic-platform/issues/127).
+  Raw BLS and canister-signature verification reject forged identity-key
+  signatures; source guards preserve the original fingerprints and admit only
+  this reviewed correction. Native Agent's registry verifier is unchanged.
+
+- Select RustCrypto's existing 32-bit backend for repository Wasm builds,
+  recovering most of the ECDSA upgrade's size growth and reducing measured IC
+  verification instructions. Canister consumers must carry the same flag in
+  their build configuration; a published dependency cannot impose it.
+
+### 🧪 Testing
+
+- Qualify published Timers 0.35.1 with the current embedded runtime, restoring
+  combined installed callback, cancellation and upgrade coverage. Preserve
+  independent Types release custody when registry consumers reference local
+  package identities.
+- Retain BLS's allocation feature after measuring the upstream alternative:
+  modest Wasm savings cost roughly 51% more verification instructions. Add
+  reproducible size/instruction probes without maintaining cryptographic code.
+  [Measurements and tradeoffs](../../docs/benchmarks/upstream-2026-10-31/README.md).
 
 ## [0.15.3] - 2026-10-31
 

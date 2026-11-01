@@ -19,13 +19,59 @@ pub fn roundtrip() {
     );
     let timed = hex(include_str!("fixtures/signature-time-valid.hex"));
     let key = ic_platform::canister_sig_creation::CanisterSigPublicKey::new(
-        ic_platform::principal::ExternalPrincipal::from_slice(&[1; 10]),
+        ic_platform::principal::Principal::from_slice(&[1; 10]),
         b"seed".to_vec(),
     );
+    let forged = hex(include_str!("fixtures/signature-identity-root.hex"));
+    let mut identity_root = [0; 96];
+    identity_root[0] = 0xc0;
+    assert!(verify_canister_sig(b"message", &forged, &key.to_der(), &identity_root).is_err());
+    assert!(matches!(
+        verify_canister_sig_with_time(b"message", &forged, &key.to_der(), &identity_root),
+        Err(CanisterSigTimeError::Verification(_))
+    ));
     assert_eq!(
         verify_canister_sig_with_time(b"message", &timed, &key.to_der(), &root),
         Ok(128)
     );
+    // Root-signed subnet delegation in both supported range layouts. The range
+    // values use literal protocol bytes; endpoints include/exclude this issuer.
+    for (encoded, allowed) in [
+        (
+            include_str!("fixtures/signature-range-legacy-valid.hex"),
+            true,
+        ),
+        (
+            include_str!("fixtures/signature-range-sharded-valid.hex"),
+            true,
+        ),
+        (
+            include_str!("fixtures/signature-range-legacy-outside.hex"),
+            false,
+        ),
+        (
+            include_str!("fixtures/signature-range-sharded-outside.hex"),
+            false,
+        ),
+    ] {
+        let signature = hex(encoded);
+        let result = verify_canister_sig_with_time(b"message", &signature, &key.to_der(), &root);
+        if allowed {
+            assert_eq!(result, Ok(42));
+            assert_eq!(
+                verify_canister_sig(b"message", &signature, &key.to_der(), &root),
+                Ok(())
+            );
+        } else {
+            assert_eq!(
+                result,
+                Err(CanisterSigTimeError::Verification(
+                    "signing canister id not in canister_ranges".into()
+                ))
+            );
+            assert!(verify_canister_sig(b"message", &signature, &key.to_der(), &root).is_err());
+        }
+    }
     assert!(matches!(
         verify_canister_sig_with_time(b"changed", &timed, &key.to_der(), &root),
         Err(CanisterSigTimeError::Verification(_))

@@ -458,7 +458,7 @@ impl EntryPlan {
 
         quote! {
             #[cfg_attr(target_family = "wasm", unsafe(export_name = #export_name))]
-            #[cfg_attr(not(target_family = "wasm"), unsafe(export_name = #host_compatible_name))]
+            #[cfg_attr(not(target_family = "wasm"), unsafe(export_name = concat!(env!("CARGO_CRATE_NAME"), "__", #host_compatible_name)))]
             fn #outer_function_ident() {
                 #body
             }

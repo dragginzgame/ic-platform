@@ -125,9 +125,9 @@ function reject(reason) {
         }
         if (name == "ic-platform-macros" && (!cdk || (line != generator && line != generator " (*)"))) reject("unqualified generator")
         if (name == "ic-canister-sig-creation" || name == "ic-signature-verification") reject("retired signature package")
-        if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified BLS")
-        if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified BLS curve")
-        if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
+        if (name == "ic-verify-bls-signature" && (!agent || version != "v0.6.0" || !registry)) reject("registry BLS wrapper is reserved for native Agent")
+        if (name == "ic_bls12_381" && (!agent || version != "v0.10.1" || !registry)) reject("registry BLS curve is reserved for native Agent")
+        if (name == "ic-certification" && (!(agent || pocket) || version != "v3.2.0" || !registry)) reject("unqualified certification")
         if (name == "ic-management-canister-types" && !(registry && native && ((management && version == "v0.11.0") || (pocket && version == "v0.8.0")))) reject("unselected or Wasm registry management types")
         if (name == "icrc-ledger-types" || name == "icrc-cbor") reject("retired upstream ledger package")
         if (name == "ic-error-types" && !(agent || pocket)) reject("runtime error catalogue")

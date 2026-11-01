@@ -7,8 +7,7 @@ use ic_platform::canister_sig_creation::{
 /// Preserve the original owner's key format, domain bytes and error identities.
 pub fn roundtrip() {
     let issuer =
-        ic_platform::principal::ExternalPrincipal::from_text("rwlgt-iiaaa-aaaaa-aaaaa-cai")
-            .unwrap();
+        ic_platform::principal::Principal::from_text("rwlgt-iiaaa-aaaaa-aaaaa-cai").unwrap();
     let key = CanisterSigPublicKey::new(issuer, vec![42, 72, 44]);
     // Original 1.3.1 public-key vector, independent of Platform's exports.
     let der = b"\x30\x1f\x30\x0c\x06\x0a\x2b\x06\x01\x04\x01\x83\xb8\x43\x01\x02\x03\x0f\x00\x0a\x00\x00\x00\x00\x00\x00\x00\x00\x01\x01\x2a\x48\x2c";
@@ -19,6 +18,7 @@ pub fn roundtrip() {
         key
     );
     assert_eq!(key.canister_id, issuer);
+    let _: ic_platform::Principal = key.canister_id;
     assert_eq!(key.seed, [42, 72, 44]);
     let error: String = CanisterSigPublicKey::try_from_raw(&[]).unwrap_err();
     assert_eq!(error, "empty raw canister sig pk");
@@ -74,4 +74,27 @@ fn short_der_is_rejected_without_panicking() {
     for length in 0..=20 {
         assert!(CanisterSigPublicKey::try_from(vec![0; length].as_slice()).is_err());
     }
+}
+
+#[test]
+fn owned_issuers_preserve_raw_and_der_bytes_at_all_principal_lengths() {
+    for length in 0..=29 {
+        let issuer = ic_platform::Principal::from_slice(&[255; 29][..length]);
+        let key = CanisterSigPublicKey::new(issuer, vec![0, 255]);
+        let mut raw = vec![length as u8];
+        raw.extend_from_slice(issuer.as_slice());
+        raw.extend_from_slice(&[0, 255]);
+        assert_eq!(key.to_raw(), raw);
+        assert_eq!(CanisterSigPublicKey::try_from_raw(&raw).unwrap(), key);
+        assert_eq!(
+            CanisterSigPublicKey::try_from(key.to_der().as_slice()).unwrap(),
+            key
+        );
+    }
+    let mut oversized = vec![30];
+    oversized.extend_from_slice(&[0; 30]);
+    assert_eq!(
+        CanisterSigPublicKey::try_from_raw(&oversized).unwrap_err(),
+        "invalid canister id in canister sig pk: Bytes is longer than 29 bytes."
+    );
 }
