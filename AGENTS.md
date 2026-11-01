@@ -93,6 +93,19 @@ location or visibility never selects Candid. Existing Candid checkpoint
 bytes are a legacy compatibility exception, never a new storage format or owner.
 Runtime-only raw/executor consumers retain their independent features.
 
+## Rust SDK maintenance ownership
+
+The maintainer authorized taking responsibility for the Rust IC stack; the IC
+network, replica and simulator remain external infrastructure. This supersedes
+the earlier general hard-cut deferral for this adoption work. Keep product owners
+and cryptographic restrictions intact; imports retain licenses and attribution.
+Platform now owns the selected certification 3.2.0 implementation and its types.
+Preserve original hash/tree/Serde bodies and tests with the reconstruction guard.
+Native Agent alone may directly select the external certificate adapter; PocketIC
+retains its transitive identity. Standalone certification and signature graphs
+must exclude the registry certification package. Agent conversions are explicit,
+byte-preserving integration, with no authentication or admission policy.
+
 ## Cryptographic boundary
 
 The maintainer authorized #72's narrow DER admission exception: one owned envelope
@@ -105,6 +118,33 @@ The maintainer authorized the optional BLAKE3 maintenance surface with explicit
 upstream `hash`, `Hasher` and `Hash` identities. Keep the implementation upstream,
 select only `std`, and qualify singleton/source and effective-feature graphs.
 Consumers retain hash-format/domain policy; no existing SHA-256 contract changes.
+
+The maintainer authorized importing ic-verify-bls-signature 0.6.0 into
+`bls::upstream`. Retain its cryptographic bodies, constants, original tests/vectors
+and Apache provenance. Keep the optimized allocated verification path and upstream
+curve/pairing/SHA-256 implementations. The admitted cache scaffolding uses
+std LazyLock with the identical initializer; the RNG helper and Rand remain
+test-only. `check-bls-source.sh` reconstructs the original source and test hashes;
+do not refresh them for algorithm changes. BLS types now have Platform identity.
+Native Agent may retain its registry wrapper transitively; standalone BLS and
+signature verification must exclude that package and production RNG scaffolding.
+
+For #127 the maintainer authorized adopting upstream commit
+`1f423f7b9d2e9c2a4c41e7a252ff999beb5489a5` exactly: reject identity public keys
+at `PublicKey::verify` entry and retain its original regression vector. This is
+the sole additional verification-body exception. The guard validates that exact
+check/vector before reconstructing the unchanged original source fingerprints.
+Do not generalize it into permission for other cryptographic edits.
+
+The authorized Rust stack ownership continues with ic_bls12_381 0.10.1 as the
+private `bls::curve` module for 0.16. Preserve all original arithmetic, constants,
+Rust tests and binary vectors under `check-bls-curve-source.sh`; retain both
+licenses and COPYRIGHT. Only documented path, edition, feature and lint scaffolding
+changes are admitted. Alloc/groups/pairings/hash-to-curve remain selected; bits,
+zeroize and upstream std stay unselected. Keep generic ff/group/pairing/digest,
+rand_core traits and subtle upstream; rand_xorshift and SHA-3 are test-only.
+Standalone BLS and signature verification must exclude the registry curve;
+native Agent keeps its transitive copy. Do not add a public curve API or crate.
 
 For the authorized 0.6 packaging cut, unused creation delegation/CBOR helpers
 compile only in tests. Preserve their complete bodies and vectors. The source
@@ -162,10 +202,13 @@ The maintainer authorized narrowing `principal` to owned Principal/Account bytes
 text and Serde without external Principal or hashing. `principal-external` adds
 registry identity and byte conversions; `principal-self-authenticating` separately
 selects unchanged upstream self-authentication. No default features. Runtime
-selects only the owned capability; Candid, signature creation and external
-DTO/client profiles select external conversions explicitly;
+and canister-signature creation/verification select only the owned capability;
+Candid and external DTO/client profiles select external conversions explicitly;
 raw executor/IC0-only profiles exclude application types and their dependencies.
-This supersedes the earlier unconditional availability decision.
+This supersedes the earlier unconditional availability decision. The pending
+0.16 signature cut uses owned Principal in CanisterSigPublicKey and certified
+range decoding. Preserve original DER/hash/verifier bodies via import-only
+reconstruction and qualify CBOR bytes and length-first range ordering.
 
 The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
 Retain its Apache-2.0 provenance, raw bytes and length-first ordering. Keep parsing

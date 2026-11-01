@@ -1,0 +1,36 @@
+[package]
+name = "ic-certification"
+description = "Types related to the Internet Computer Public Specification."
+readme = "README.md"
+documentation = "https://docs.rs/ic-certification"
+categories = ["api-bindings", "data-structures", "algorithms", "cryptography::cryptocurrencies"]
+keywords = ["internet-computer", "agent", "utility", "icp", "dfinity"]
+include = ["src", "Cargo.toml", "LICENSE", "README.md"]
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+repository.workspace = true
+license.workspace = true
+homepage.workspace = true
+
+[dependencies]
+hex.workspace = true
+sha2.workspace = true
+
+[dependencies.serde]
+workspace = true
+optional = true
+
+[dependencies.serde_bytes]
+workspace = true
+optional = true
+
+[dev-dependencies]
+serde.workspace = true
+serde_cbor.workspace = true
+rstest.workspace = true
+
+[features]
+serde = ['dep:serde', 'dep:serde_bytes']
+default = ['serde']

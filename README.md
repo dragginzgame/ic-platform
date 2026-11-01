@@ -44,7 +44,7 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `principal-external` | Registry Principal identity and byte conversions; implies principal, no hashing or Candid |
 | `principal-self-authenticating` | Explicit unchanged upstream self-authentication; implies principal-external |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
-| `bls` | Upstream BLS keys/signatures, typed errors and verification, with alloc and no RNG feature; Candid-free |
+| `bls` | Maintained BLS wrapper and private curve arithmetic, typed errors and optimized verification; no production RNG, Candid or DFINITY registry dependency |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
 | `candid-service` | Candid service declaration macros and printer; implies `candid` |
 | `candid-endpoint` | Explicit required-external-Candid query/update adapters with artifact-selected limits, empty-envelope policy and existing runtime; implies CDK and Candid, with separate service-printer selection |
@@ -52,7 +52,7 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `candid-parser` | Native external Candid parsing/type checking, service equality and dynamic refusal fixtures; owned bindings use Wire |
 | `canister-sig-creation` | Imported signature public-key formats, root-key constants and hashing; no Candid/ic0 or store API |
 | `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one embedded executor |
-| `certification` | Upstream certificate/hash-tree and mutable tree types, constructors, lookup and hashing; independent of Candid and executor |
+| `certification` | Maintained certificate/hash-tree and mutable tree types, constructors, lookup and hashing; no registry certification, Candid or executor |
 | `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Selected maintained ICRC DTOs and unchanged upstream value hashing, plus ICRC-10; no registry ledger package, storage, CBOR or consent formatting |
@@ -105,6 +105,22 @@ Consumers own schemas, authentication, byte/work budgets, deadlines, retries and
 recovery. IC Wire owns controlled application protocols. Candid remains required
 where external protocols specify it. Moving a dependency behind this boundary
 does not itself remove upstream code or shrink a canister.
+
+For ECDSA Wasm builds, select RustCrypto's upstream 32-bit arithmetic backend.
+This repository's `.cargo/config.toml` selects it only for Wasm; consuming
+canister workspaces must set it in their own build configuration:
+
+```toml
+[target.wasm32-unknown-unknown]
+rustflags = ['--cfg=cpubits="32"']
+```
+
+Merge this with existing flags. `RUSTFLAGS` or `CARGO_ENCODED_RUSTFLAGS` supplied
+by a build tool override Cargo's configured flags; carry the backend selection
+through that tool's flag composition too. A published library cannot impose
+these flags on its dependencies or downstream callers. The qualified backend
+keeps upstream crypto code and bytes while recovering most of the ECDSA upgrade's
+Wasm growth; see [measurements](docs/benchmarks/upstream-2026-10-31/README.md).
 
 ## Development
 
@@ -333,13 +349,17 @@ enable `candid` separately when using Platform's encoding and bounded decoding.
 Ledger DTOs similarly bring transitive Candid without selecting Platform's codec,
 executor, parser or Agent. Upstream defaults/storage integration are disabled;
 the graph gate rejects `ic-stable-structures` and unselected ledger dependencies.
-Canister-signature creation and verification bring upstream certification but
-no Candid or raw ic0; only verification brings BLS and selects the creation surface.
+Canister-signature creation and verification select maintained certification but
+no registry Principal, Candid or raw ic0; only verification brings BLS and selects
+the creation surface. CanisterSigPublicKey accepts/returns the owned Principal.
 BLS alone excludes creation, Candid, certification, CDK and
 host tooling. Its upstream defaults/RNG are disabled and alloc is explicit.
 Graph admission rejects retired registry signature packages and checks BLS and
 certification identities; other consumer graphs still need their own qualification.
-Without certification, native Agent or canister-signature capabilities, builds exclude `ic-certification`.
+Only native Agent or PocketIC graphs retain `ic-certification`. Native Agent APIs
+accept `agent::ExternalCertificate`; explicit `From` conversions to/from owned
+`certification::Certificate` are available with both features. They rebuild tree
+boxes and copy labels, preserving bytes without authenticating them.
 `candid_parser` and `ic-agent` are admitted only with explicit native host
 selection; no runtime feature enables them. Host retains strict bounded CBOR decoding;
 trust roots, authentication and application interpretation remain consumer-owned.

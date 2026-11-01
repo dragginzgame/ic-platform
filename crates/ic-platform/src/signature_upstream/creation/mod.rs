@@ -1,6 +1,6 @@
-use ic_principal::Principal;
+use crate::principal::Principal;
 #[allow(unused_imports)] // Platform: reference-only HashTree.
-use ic_certification::{Hash, HashTree};
+use crate::certification::upstream::{Hash, HashTree};
 #[cfg(test)] // Platform: reference-only.
 use ic_representation_independent_hash::{representation_independent_hash, Value};
 #[cfg(test)] // Platform: reference-only.

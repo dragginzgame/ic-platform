@@ -3,6 +3,9 @@ set -euo pipefail
 # Compare imported call/cleanup machinery and the maintained embedded runtime.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 if [[ $# == 0 ]]; then
+    bash "$root/scripts/ci/check-bls-curve-source.sh"
+    bash "$root/scripts/ci/check-certification-source.sh"
+    bash "$root/scripts/ci/check-bls-source.sh"
     bash "$root/scripts/ci/check-signature-source.sh"
     bash "$root/scripts/ci/check-embedded-runtime-source.sh"
     bash "$root/scripts/ci/check-management-source.sh"

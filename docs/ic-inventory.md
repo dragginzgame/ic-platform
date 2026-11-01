@@ -157,8 +157,10 @@ remains consumer-owned.
 
 Wire 0.10.0 remains a tooling catalog entry for independent call fixtures. The
 production graph checker rejects Wire on both native and Wasm, for every feature
-selection. The runtime fixture lock refresh remains blocked by Timers’ Platform
-0.8 requirement; it is separate from the production lock. All features retain
+selection. The runtime fixture selects published Timers 0.34.0 against one local
+Platform 0.15 runtime, replacing the incompatible Platform 0.8 requirement. Its
+lock remains separate from the production lock. A future Platform minor still
+requires coordinated Timers adoption. All features retain
 Rust 1.91. See the [migration contract](migration.md#owned-principal-and-account-wire-metadata).
 
 IC Profiler selects the opt-in Git source profile at `native/ic-profiler`, which
@@ -189,9 +191,9 @@ API changes or automatically establish whether sibling source still uses an API.
 | `pocket-ic` | native `pocket_ic` client/DTO identities | Tooling Testkit `src/{lib.rs,pic/transport.rs}` | Upstream simulator client; Testkit owns server provisioning, compatibility, lifecycle and transport policy. |
 | `ic-management-canister-types` | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
 | Selected imported ICRC 0.2.0 declarations/value helpers | `icrc_ledger_types` account/metadata/transfer/consent/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Platform maintains selected types and callbacks; external wire/Serde representations and unchanged upstream hashes remain. Registry ledger/CBOR/storage and consent-formatting dependencies are removed. No ledger/storage policy. |
-| `ic-certification` | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Upstream tree/hash implementations. Host owns bounded CBOR decoding; consumers own trust roots and verification policy. |
-| `ic-verify-bls-signature` | `bls`; imported verifier dependency | Auth and Canic test keys; Auth canister verification | Upstream cryptography unchanged. No in-house primitive replacement. |
-| `k256`, `curve25519-dalek`, `ed25519-dalek` | `ecdsa`, `ed25519` | Auth `src/{chain_key_signature,portable_signature}.rs`; Canic tests | General-purpose upstream crypto, not DFINITY-only code. Platform controls selected identities/features, not algorithms. |
+| Maintained certification 3.2.0; registry adapter only for native Agent | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Platform owns selected types and unchanged tree/hash/Serde bodies. Native Agent uses explicit external types/conversions; PocketIC retains its own transitive identity. Host owns bounded CBOR decoding; consumers own trust roots and verification policy. |
+| Imported `ic-verify-bls-signature` 0.6.0 and private `ic_bls12_381` 0.10.1 arithmetic; external `pairing` | `bls`; shared by the imported canister verifier | Auth and Canic test keys; Auth canister verification | Platform owns wrapper and private curve maintenance. Original arithmetic, constants, source tests and binary vectors are fingerprinted. Generic ff/group/pairing/digest/subtle/rand_core dependencies stay external; rand_xorshift/SHA-3 are test-only. Native Agent retains registry wrapper/curve. Standalone BLS/signature graphs contain no DFINITY registry package, production Rand or lazy_static. |
+| `k256`, `curve25519-dalek`, `ed25519-dalek` | `ecdsa`, `ed25519` | Auth `src/{chain_key_signature,portable_signature}.rs`; Canic tests | General-purpose upstream crypto, not DFINITY-only code. Platform controls selected identities/features, not algorithms. Repository Wasm builds select RustCrypto's existing 32-bit backend; application build owners must carry the cfg because dependency Cargo configuration is not inherited. |
 | `ic-secp256k1` | native `secp256k1` public derivation/types | Canic Core native chain-key configuration and public-key fixtures | Upstream key derivation and encoding remain unchanged. Native-only explicit boundary. |
 | Imported `ic-canister-sig-creation` / `ic-signature-verification` | `canister_sig_creation`, `signature_verification`; private `signature_upstream` | Auth `src/{signature_store,canister_signature}.rs` | Platform owns packaging, DER framing admission, evidence extraction and import scaffolding. The additive verifier returns authenticated signing time; consumers own freshness. Original fingerprints reconstruct after removing the single admitted framing call; crypto bodies, vectors and licenses remain protected. |
 | `ic-stable-structures` | `stable_structures` collections, Memory/Storable and `memory_manager::{MemoryId,MemoryManager,VirtualMemory}` | Persistence Storage `src/lib.rs`; Memory runtime and stable-cell modules | Upstream substrate implementation. Memory owns layout validation, growth preflight, allocation and exclusive leases; Storage owns adapters. |
@@ -217,6 +219,29 @@ Imported-source ownership is recorded beside the code in
 [Account notices](../crates/ic-platform-types/src/account/NOTICE.md).
 Existing signature/runtime fingerprint checks enforce their respective admitted
 source changes. Do not refresh fingerprints to approve cryptographic changes.
+
+## Remaining external DFINITY repositories (pending 0.16)
+
+The 2026-11-01 root Rust normal/build graph with all features selected still
+uses seven DFINITY repositories. This counts externally supplied packages, not
+the ancestry of code already maintained here. Individual consumer selections
+can be much smaller; standalone BLS/signature profiles remain DFINITY-package-free.
+
+| Repository | Remaining packages / scope |
+| --- | --- |
+| [candid](https://github.com/dfinity/candid) | Candid and external Principal on selected native/Wasm paths; candid_derive runs on the compiler host; candid_parser is native-only. |
+| [stable-structures](https://github.com/dfinity/stable-structures) | Optional native/Wasm stable-memory substrate, retaining Memory's qualified 0.7.2 identity. |
+| [agent-rs](https://github.com/dfinity/agent-rs) | Native ic-agent and ic-transport-types. |
+| [ic](https://github.com/dfinity/ic) | Native PocketIC, management DTOs, ic-ed25519 and ic-secp256k1; also the opt-in native Profiler source provider. |
+| [response-verification](https://github.com/dfinity/response-verification) | Native Agent/PocketIC registry certification; representation-independent-hash 4.0.1 is development-only. |
+| [verify-bls-signatures](https://github.com/dfinity/verify-bls-signatures) | Native Agent's registry 0.6.0 wrapper; the owned wrapper's #127 fix does not change it. |
+| [bls12_381](https://github.com/dfinity/bls12_381) | Native Agent's transitive curve package; standalone Platform BLS uses its private maintained source. |
+
+Only candid and stable-structures appear as external DFINITY sources in the root
+all-feature Wasm normal/build graph. The browser package separately retains
+[icp-js-core](https://github.com/dfinity/icp-js-core) through SDK Core 6.1.1;
+[icp-js-auth](https://github.com/dfinity/icp-js-auth) is a development compatibility
+fixture. This Rust update does not change browser or native-provider selections.
 
 ## Consumer evidence and its limits
 
@@ -263,24 +288,29 @@ versions are deliberately represented as `workspace-owned` to avoid release-only
 document churn. This is not a transitive dependency, source-integrity or Wasm-size
 report; retain the existing graph, pin and imported-source gates.
 
+The pending 0.16 signature profiles select the canonical owned Principal for
+canister-signature keys and certified ranges. Creation no longer selects external
+Principal; verification also removes its registry Serde edge. Other Candid/client
+profiles retain their explicitly external identities.
+
 <!-- BEGIN MANIFEST INVENTORY -->
 | Package | Feature | Enables |
 | --- | --- | --- |
-| ic-platform | agent | dep:ic-agent, principal-external |
+| ic-platform | agent | dep:ic-agent, dep:ic-certification, principal-external |
 | ic-platform | blake3 | dep:blake3 |
-| ic-platform | bls | dep:ic-verify-bls-signature |
+| ic-platform | bls | dep:digest, dep:ff, dep:group, dep:hex, dep:pairing, dep:rand_core, dep:sha2, dep:subtle |
 | ic-platform | candid | candid/bignum, dep:candid, principal-external |
 | ic-platform | candid-endpoint | candid, cdk |
 | ic-platform | candid-parser | dep:candid_parser, principal-external |
 | ic-platform | candid-service | candid, candid/printer |
-| ic-platform | canister-sig-creation | dep:ic-certification, dep:sha2, principal-external |
+| ic-platform | canister-sig-creation | certification, principal |
 | ic-platform | cdk | dep:ic-platform-macros, runtime |
-| ic-platform | certification | dep:ic-certification |
+| ic-platform | certification | dep:hex, dep:serde, dep:serde_bytes, dep:sha2 |
 | ic-platform | certified-assets-types | candid |
 | ic-platform | cmc-types | candid |
 | ic-platform | cycles-ledger-types | candid |
 | ic-platform | default |  |
-| ic-platform | ecdsa | dep:k256 |
+| ic-platform | ecdsa | dep:crypto-bigint, dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
 | ic-platform | executor | dep:ic-platform-runtime-guard, dep:slotmap, ic0 |
 | ic-platform | ic0 |  |
@@ -294,7 +324,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal-external |
 | ic-platform | runtime | dep:pin-project-lite, dep:thiserror, executor, ic0, principal |
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
-| ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor, ic_principal/serde |
+| ic-platform | signature-verification | bls, canister-sig-creation, dep:serde_bytes, dep:serde_cbor |
 | ic-platform | stable-structures | dep:ic-stable-structures |
 | ic-platform-runtime-guard | default |  |
 | ic-platform-types | default |  |
@@ -308,26 +338,33 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | candid | ^0.10.38 | normal | all | true | false |  |
 | ic-platform | candid_parser | ^0.4.1 | normal | cfg(not(target_family = "wasm")) | true | false |  |
 | ic-platform | crc32fast | ^1.5 | normal | all | true | true |  |
-| ic-platform | curve25519-dalek | ^4.1.3 | normal | all | true | false |  |
+| ic-platform | crypto-bigint | ^0.7.10 | normal | all | true | false |  |
+| ic-platform | curve25519-dalek | ^5.0.0 | normal | all | true | false |  |
 | ic-platform | data-encoding | ^2.11 | normal | all | true | true |  |
-| ic-platform | ed25519-dalek | ^2.2 | normal | all | true | false |  |
+| ic-platform | digest | ^0.10 | normal | all | true | true |  |
+| ic-platform | ed25519-dalek | ^3.0.0 | normal | all | true | false |  |
+| ic-platform | ff | ^0.13 | normal | all | true | false |  |
+| ic-platform | group | ^0.13 | normal | all | true | false | alloc |
 | ic-platform | hex | ^0.4.3 | normal | all | true | true |  |
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
-| ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
+| ic-platform | ic-certification | ^3.2.0 | normal | cfg(not(target_family = "wasm")) | true | false | serde |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
-| ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |
+| ic-platform | ic-representation-independent-hash | ^4.0.1 | dev | all | false | true |  |
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |
-| ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
 | ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert |
-| ic-platform | k256 | ^0.13.4 | normal | all | true | false | ecdsa |
+| ic-platform | k256 | ^0.14.0 | normal | all | true | false | ecdsa |
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
 | ic-platform | num-traits | ^0.2.19 | normal | all | true | true |  |
+| ic-platform | pairing | ^0.23.0 | normal | all | true | false |  |
 | ic-platform | pin-project-lite | ^0.2.17 | normal | all | true | true |  |
 | ic-platform | pocket-ic | ^16.1.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
+| ic-platform | rand | ^0.8 | dev | all | false | true |  |
+| ic-platform | rand_core | ^0.6 | normal | all | true | false |  |
+| ic-platform | rand_xorshift | ^0.3 | dev | all | false | true |  |
 | ic-platform | serde | ^1.0 | normal | all | true | false | alloc, derive |
 | ic-platform | serde_bytes | ^0.11 | normal | all | true | true |  |
 | ic-platform | serde_bytes | ^0.11 | dev | all | false | true |  |
@@ -335,11 +372,13 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | serde_cbor | ^0.11.2 | dev | all | false | true |  |
 | ic-platform | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
+| ic-platform | sha3 | ^0.10 | dev | all | false | true |  |
 | ic-platform | slotmap | ^1.1.1 | normal | all | true | true |  |
+| ic-platform | subtle | ^2.6 | normal | all | true | false |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
-| ic-platform-macros | syn | ^2 | normal | all | false | true | full |
+| ic-platform-macros | syn | ^3 | normal | all | false | true | full |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | true |  |
 | ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | convert |

@@ -4,7 +4,10 @@
 //! feature does not select a runtime, endpoint, trust root, response limit, query
 //! verification mode, deadline, retry or reconciliation policy for consumers.
 //! Consumers retain those choices and upstream internal HTTP retry behavior.
-//! Use `crate::certification` for certificate/hash-tree identities and operations.
+//! Use `crate::certification` for owned certificate/hash-tree operations. Agent
+//! methods and [`lookup_value`] accept [`ExternalCertificate`]; explicit `From`
+//! conversions are available when `certification` is selected. They preserve
+//! bytes, rebuild tree boxes and copy labels; they do not authenticate anything.
 //! [`lookup_value`] only reads a certificate tree; it does not authenticate it.
 //! [`signed_update_inspect`] compares envelope content; it does not verify its
 //! signature or authorize replay. This module and Agent are absent on Wasm.
@@ -25,3 +28,4 @@ pub use ic_agent::identity::{
 pub use ic_agent::{
     Agent, AgentError, Identity, RequestId, TransportCallResponse, lookup_value, to_request_id,
 };
+pub use ic_certification::{Certificate as ExternalCertificate, HashTree as ExternalHashTree};

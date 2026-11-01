@@ -6,6 +6,21 @@ use ic_platform::bls::{
 
 /// Preserve upstream key/signature serialization, verification and typed failures.
 pub fn roundtrip() {
+    // Upstream #127 regression: valid identity point encodings remain parseable,
+    // but an identity public key must never verify an identity signature.
+    let mut identity_key_bytes = [0; 96];
+    identity_key_bytes[0] = 0xc0;
+    let mut identity_signature_bytes = [0; 48];
+    identity_signature_bytes[0] = 0xc0;
+    let identity_key = PublicKey::deserialize(&identity_key_bytes).unwrap();
+    let identity_signature = Signature::deserialize(&identity_signature_bytes).unwrap();
+    for message in [b"".as_slice(), b"identity-key regression"] {
+        assert_eq!(identity_key.verify(message, &identity_signature), Err(()));
+        assert_eq!(
+            verify_bls_signature(&identity_signature_bytes, message, &identity_key_bytes),
+            Err(())
+        );
+    }
     let mut bytes = [0; 32];
     bytes[31] = 1;
     let key = PrivateKey::deserialize(&bytes).unwrap();
