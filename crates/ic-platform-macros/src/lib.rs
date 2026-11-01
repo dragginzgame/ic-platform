@@ -110,3 +110,91 @@ pub fn candid_update(attr: TokenStream, item: TokenStream) -> TokenStream {
         item,
     )
 }
+
+/// Generate a query entrypoint using the canonical runtime owner.
+#[proc_macro_attribute]
+pub fn runtime_query(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| export::runtime_entry(export::MethodType::Query, attr, item),
+        "runtime_query",
+        attr,
+        item,
+    )
+}
+
+/// Generate a update entrypoint using the canonical runtime owner.
+#[proc_macro_attribute]
+pub fn runtime_update(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| export::runtime_entry(export::MethodType::Update, attr, item),
+        "runtime_update",
+        attr,
+        item,
+    )
+}
+
+/// Generate a init entrypoint using the canonical runtime owner.
+#[proc_macro_attribute]
+pub fn runtime_init(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| export::runtime_entry(export::MethodType::Init, attr, item),
+        "runtime_init",
+        attr,
+        item,
+    )
+}
+
+/// Generate a pre_upgrade entrypoint using the canonical runtime owner.
+#[proc_macro_attribute]
+pub fn runtime_pre_upgrade(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| export::runtime_entry(export::MethodType::PreUpgrade, attr, item),
+        "runtime_pre_upgrade",
+        attr,
+        item,
+    )
+}
+
+/// Generate a post_upgrade entrypoint using the canonical runtime owner.
+#[proc_macro_attribute]
+pub fn runtime_post_upgrade(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| export::runtime_entry(export::MethodType::PostUpgrade, attr, item),
+        "runtime_post_upgrade",
+        attr,
+        item,
+    )
+}
+
+/// Generate a heartbeat entrypoint using the canonical runtime owner.
+#[proc_macro_attribute]
+pub fn runtime_heartbeat(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| export::runtime_entry(export::MethodType::Heartbeat, attr, item),
+        "runtime_heartbeat",
+        attr,
+        item,
+    )
+}
+
+/// Generate a inspect_message entrypoint using the canonical runtime owner.
+#[proc_macro_attribute]
+pub fn runtime_inspect_message(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| export::runtime_entry(export::MethodType::InspectMessage, attr, item),
+        "runtime_inspect_message",
+        attr,
+        item,
+    )
+}
+
+/// Generate a on_low_wasm_memory entrypoint using the canonical runtime owner.
+#[proc_macro_attribute]
+pub fn runtime_on_low_wasm_memory(attr: TokenStream, item: TokenStream) -> TokenStream {
+    handle_debug_and_errors(
+        |attr, item| export::runtime_entry(export::MethodType::OnLowWasmMemory, attr, item),
+        "runtime_on_low_wasm_memory",
+        attr,
+        item,
+    )
+}

@@ -1,0 +1,54 @@
+# Production packages
+[package]
+name = "ic-auth"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+description = "Portable authentication, delegation proof verification and local session machinery"
+publish = ["crates-io"]
+
+[features]
+# Every library capability is Candid/runtime-free, including certified signatures.
+# Platform owns the imported creation/verifier code; Auth owns admission policy.
+default = []
+portable-signature-verification = ["ic-platform/ed25519"]
+chain-key-verification = ["ic-platform/ecdsa"]
+canister-signature-preparation = [
+    "ic-platform/canister-sig-creation",
+    "ic-platform/certification",
+    "dep:serde",
+    "dep:serde_bytes",
+    "dep:serde_cbor",
+]
+sessions = ["dep:serde", "dep:serde_bytes", "dep:ic-wire"]
+session-restore = ["sessions"]
+certified-proof-verification = ["canister-signature-verification", "chain-key-verification"]
+canister-signature-verification = [
+    "ic-platform/canister-sig-creation",
+    "ic-platform/certification",
+    "ic-platform/signature-verification",
+]
+
+[dependencies]
+ic-auth-protocol-types.workspace = true
+ic-platform = { workspace = true, features = ["principal-self-authenticating"] }
+ic-wire = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+serde_bytes = { workspace = true, optional = true }
+serde_cbor = { workspace = true, optional = true }
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+ic-platform = { workspace = true, features = ["bls", "ecdsa", "ed25519"] }
+ic-wire.workspace = true
+leb128.workspace = true
+serde.workspace = true
+serde_bytes.workspace = true
+serde_cbor.workspace = true
+
+[lints]
+workspace = true

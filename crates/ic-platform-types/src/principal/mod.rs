@@ -7,6 +7,9 @@
 //! external Principal, converting at the boundary:
 //!
 
+#[cfg(feature = "principal-self-authenticating")]
+mod self_authenticating;
+
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
@@ -97,12 +100,6 @@ impl Principal {
             len: 0,
             bytes: [0; Self::MAX_LENGTH_IN_BYTES],
         }
-    }
-
-    /// Construct a self-authenticating ID from public key
-    #[cfg(feature = "principal-self-authenticating")]
-    pub fn self_authenticating<P: AsRef<[u8]>>(public_key: P) -> Self {
-        ExternalPrincipal::self_authenticating(public_key.as_ref()).into()
     }
 
     /// Construct an anonymous ID.

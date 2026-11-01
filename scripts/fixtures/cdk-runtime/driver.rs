@@ -44,6 +44,7 @@ fn update<R: DeserializeOwned>(
             .unwrap(),
     )
 }
+#[cfg(feature = "timers-composition")]
 fn advance(pic: &PocketIc) {
     pic.advance_time(Duration::from_secs(2));
     for _ in 0..20 {
@@ -94,11 +95,22 @@ fn buffer_copy_frames_fit_fixture_budget() {
 fn main() {
     let wasm = std::fs::read(std::env::args().nth(1).expect("canister Wasm path")).unwrap();
     let legacy = std::env::var_os("PLATFORM_EXTERNAL_CANDID").is_some();
-    let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))
-        .unwrap()
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
-        .unwrap();
-    let pic = owned.instance();
+    // Testkit owns server startup/teardown; cross the client-owner boundary by URL.
+    let config = PocketIcStartupConfig::from_env(Duration::from_secs(60)).unwrap();
+    let (server, url) = match config {
+        PocketIcStartupConfig::Connect { server_url, .. } => (None, server_url),
+        spawn => {
+            let server = spawn.start_managed_server().unwrap();
+            let url = server.url().to_owned();
+            (Some(server), url)
+        }
+    };
+    let instance = PocketIcBuilder::new()
+        .with_server_url(url.parse().unwrap())
+        .with_max_request_time_ms(Some(60_000))
+        .with_application_subnet()
+        .build();
+    let pic = &instance;
     let id = pic.create_canister();
     pic.add_cycles(id, 10_000_000_000_000);
     pic.install_canister(id, wasm.clone(), request("initialize", 10u64), None);
@@ -178,6 +190,7 @@ fn main() {
     assert_eq!(update::<u64>(pic, id, "awaited", 3u64), 4);
     update::<()>(pic, id, "migratory", ());
     assert_eq!(query::<u64>(pic, id, "value", ()), 11);
+    #[cfg(feature = "timers-composition")]
     for (trap, cancel, value, cleaned) in [
         (false, false, 12, 1),
         (true, false, 12, 2),
@@ -202,28 +215,48 @@ fn main() {
         .reject_message
         .contains("protected task outlived its canister method")
     );
+    let checkpoint_value = query::<u64>(pic, id, "value", ());
+    let checkpoint_cleaned = query::<u64>(pic, id, "cleaned", ());
+    assert_eq!(
+        (checkpoint_value, checkpoint_cleaned),
+        if cfg!(feature = "timers-composition") {
+            (13, 2)
+        } else {
+            (11, 1)
+        }
+    );
     pic.upgrade_canister(id, wasm.clone(), request("after_upgrade", 30u64), None)
         .unwrap();
     assert_eq!(query::<u64>(pic, id, "value", ()), 30);
     if legacy {
         assert_eq!(
             query::<(bool, bool, u64, u64)>(pic, id, "checkpoint", ()),
-            (true, false, 13, 2)
+            (true, false, checkpoint_value, checkpoint_cleaned)
         );
         let bytes: Vec<u8> = query(pic, id, "checkpoint_bytes", ());
         // Candid is retained only for this pre-existing persisted checkpoint format.
         assert_eq!(
             bytes,
-            ic_platform::candid::contract::encode_args((true, false, 13u64, 2u64)).unwrap()
+            ic_platform::candid::contract::encode_args((
+                true,
+                false,
+                checkpoint_value,
+                checkpoint_cleaned
+            ))
+            .unwrap()
         );
         assert!(update::<bool>(pic, id, "external_management", ()));
     }
-    update::<()>(pic, id, "timer_start", (false, false));
-    advance(pic);
-    assert_eq!(query::<u64>(pic, id, "value", ()), 31);
+    #[cfg(feature = "timers-composition")]
+    {
+        update::<()>(pic, id, "timer_start", (false, false));
+        advance(pic);
+        assert_eq!(query::<u64>(pic, id, "value", ()), 31);
+    }
     let receiver = pic.create_canister();
     pic.add_cycles(receiver, 10_000_000_000_000);
     pic.install_canister(receiver, wasm, request("initialize", 0u64), None);
+    assert_eq!(update::<u64>(pic, id, "cancel_task", ()), 2);
     let offered = 1_000_000_000u128;
     for (limit, mode, refund) in [
         (300_000_000u128, 0u8, 700_000_000u128),
@@ -267,7 +300,14 @@ fn main() {
             .reject_message
             .contains("fixture cycle callback write trap")
     );
-    assert_eq!(query::<u64>(pic, id, "value", ()), 31);
+    assert_eq!(
+        query::<u64>(pic, id, "value", ()),
+        if cfg!(feature = "timers-composition") {
+            31
+        } else {
+            30
+        }
+    );
     assert_eq!(
         query::<u128>(pic, receiver, "cycle_total", ()),
         1_900_000_000
@@ -329,6 +369,9 @@ fn main() {
         external_driver::qualify(pic, id);
     }
     println!(
-        "Owned runtime: Wire RPCs, raw awaits, trap cleanup, timer cancellation, upgrade, cycles, stable rollback and certificates passed (external Candid: {legacy})"
+        "Runtime: Wire RPCs, raw awaits, trap cleanup, upgrade, cycles, stable rollback and certificates passed (external Candid: {legacy}, Timers composition: {})",
+        cfg!(feature = "timers-composition")
     );
+    drop(instance);
+    drop(server);
 }

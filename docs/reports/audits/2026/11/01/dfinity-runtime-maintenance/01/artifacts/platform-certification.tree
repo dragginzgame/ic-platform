@@ -1,0 +1,25 @@
+0ic-platform v0.16.0 (/home/adam/projects/ic-platform/crates/ic-platform)
+1hex v0.4.3
+1serde v1.0.229
+2serde_core v1.0.229
+2serde_derive v1.0.229 (proc-macro)
+3proc-macro2 v1.0.107
+4unicode-ident v1.0.27
+3quote v1.0.47
+4proc-macro2 v1.0.107 (*)
+3syn v3.0.9
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4unicode-ident v1.0.27
+1serde_bytes v0.11.19
+2serde_core v1.0.229
+1sha2 v0.10.9
+2cfg-if v1.0.5
+2digest v0.10.7
+3block-buffer v0.10.4
+4generic-array v0.14.9
+5typenum v1.20.1
+5version_check v0.9.5
+3crypto-common v0.1.6
+4generic-array v0.14.9 (*)
+4typenum v1.20.1

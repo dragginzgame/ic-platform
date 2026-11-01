@@ -1,0 +1,442 @@
+[
+  {
+    "graph": "canic-control-plane,icrc.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      },
+      {
+        "name": "candid",
+        "version": "0.10.39",
+        "hostMacro": false
+      },
+      {
+        "name": "candid_derive",
+        "version": "0.10.39",
+        "hostMacro": true
+      },
+      {
+        "name": "ic-stable-structures",
+        "version": "0.7.2",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-auth-protocol-types@0.29.0 -> ic-platform@0.15.3 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-auth-protocol-types@0.29.0 -> ic-platform@0.15.3 -> ic_principal@0.1.5",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> candid@0.10.39",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> candid@0.10.39 -> candid_derive@0.10.39",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> candid@0.10.39 -> ic_principal@0.1.5",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2 -> ic_principal@0.1.5",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "canic.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      },
+      {
+        "name": "candid",
+        "version": "0.10.39",
+        "hostMacro": false
+      },
+      {
+        "name": "candid_derive",
+        "version": "0.10.39",
+        "hostMacro": true
+      },
+      {
+        "name": "ic-stable-structures",
+        "version": "0.7.2",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-auth-protocol-types@0.29.0 -> ic-platform@0.15.3 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-auth-protocol-types@0.29.0 -> ic-platform@0.15.3 -> ic_principal@0.1.5",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> candid@0.10.39",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> candid@0.10.39 -> candid_derive@0.10.39",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> candid@0.10.39 -> ic_principal@0.1.5",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2 -> ic_principal@0.1.5",
+      "canic@0.114.0 -> canic-contracts@0.114.0 -> ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "ic-auth-certified-proof-verification,session-restore.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-auth@0.29.0 -> ic-auth-protocol-types@0.29.0 -> ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-auth@0.29.0 -> ic-auth-protocol-types@0.29.0 -> ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "ic-auth.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-auth@0.29.0 -> ic-auth-protocol-types@0.29.0 -> ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-auth@0.29.0 -> ic-auth-protocol-types@0.29.0 -> ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "ic-blob-storage.tree",
+    "dfinityPackages": [
+      {
+        "name": "candid",
+        "version": "0.10.39",
+        "hostMacro": false
+      },
+      {
+        "name": "candid_derive",
+        "version": "0.10.39",
+        "hostMacro": true
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      },
+      {
+        "name": "ic-stable-structures",
+        "version": "0.7.2",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-blob-storage@0.63.0 -> ic-blob-storage-contracts@0.63.0 -> ic-platform@0.16.0 -> candid@0.10.39",
+      "ic-blob-storage@0.63.0 -> ic-blob-storage-contracts@0.63.0 -> ic-platform@0.16.0 -> candid@0.10.39 -> candid_derive@0.10.39",
+      "ic-blob-storage@0.63.0 -> ic-blob-storage-contracts@0.63.0 -> ic-platform@0.16.0 -> candid@0.10.39 -> ic_principal@0.1.5",
+      "ic-blob-storage@0.63.0 -> ic-blob-storage-contracts@0.63.0 -> ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-blob-storage@0.63.0 -> ic-blob-storage-contracts@0.63.0 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2",
+      "ic-blob-storage@0.63.0 -> ic-blob-storage-contracts@0.63.0 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2 -> ic_principal@0.1.5",
+      "ic-blob-storage@0.63.0 -> ic-blob-storage-contracts@0.63.0 -> ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "ic-persistence.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic-stable-structures",
+        "version": "0.7.2",
+        "hostMacro": false
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-memory@0.60.6 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2",
+      "ic-memory@0.60.6 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "ic-relay-runtime.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic-stable-structures",
+        "version": "0.7.2",
+        "hostMacro": false
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-relay@0.21.0 -> ic-memory@0.60.6 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2",
+      "ic-relay@0.21.0 -> ic-memory@0.60.6 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "ic-relay.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic-stable-structures",
+        "version": "0.7.2",
+        "hostMacro": false
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-relay@0.21.0 -> ic-memory@0.60.6 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2",
+      "ic-relay@0.21.0 -> ic-memory@0.60.6 -> ic-platform@0.16.0 -> ic-stable-structures@0.7.2 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "ic-scheduling.tree",
+    "dfinityPackages": [],
+    "paths": []
+  },
+  {
+    "graph": "platform-agent-native.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic-agent",
+        "version": "0.49.3",
+        "hostMacro": false
+      },
+      {
+        "name": "candid",
+        "version": "0.10.39",
+        "hostMacro": false
+      },
+      {
+        "name": "candid_derive",
+        "version": "0.10.39",
+        "hostMacro": true
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      },
+      {
+        "name": "ic-certification",
+        "version": "3.2.0",
+        "hostMacro": false
+      },
+      {
+        "name": "ic-ed25519",
+        "version": "0.6.0",
+        "hostMacro": false
+      },
+      {
+        "name": "ic-transport-types",
+        "version": "0.49.3",
+        "hostMacro": false
+      },
+      {
+        "name": "ic-verify-bls-signature",
+        "version": "0.6.0",
+        "hostMacro": false
+      },
+      {
+        "name": "ic_bls12_381",
+        "version": "0.10.1",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-platform@0.16.0 -> ic-agent@0.49.3",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> candid@0.10.39",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> candid@0.10.39 -> candid_derive@0.10.39",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> candid@0.10.39 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic-certification@3.2.0",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic-ed25519@0.6.0",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic-ed25519@0.6.0 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic-transport-types@0.49.3",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic-transport-types@0.49.3 -> candid@0.10.39",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic-transport-types@0.49.3 -> ic-certification@3.2.0",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic-verify-bls-signature@0.6.0",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic-verify-bls-signature@0.6.0 -> ic_bls12_381@0.10.1",
+      "ic-platform@0.16.0 -> ic-agent@0.49.3 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic-certification@3.2.0",
+      "ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "platform-all.tree",
+    "dfinityPackages": [
+      {
+        "name": "candid",
+        "version": "0.10.39",
+        "hostMacro": false
+      },
+      {
+        "name": "candid_derive",
+        "version": "0.10.39",
+        "hostMacro": true
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      },
+      {
+        "name": "ic-stable-structures",
+        "version": "0.7.2",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-platform@0.16.0 -> candid@0.10.39",
+      "ic-platform@0.16.0 -> candid@0.10.39 -> candid_derive@0.10.39",
+      "ic-platform@0.16.0 -> candid@0.10.39 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic-stable-structures@0.7.2",
+      "ic-platform@0.16.0 -> ic-stable-structures@0.7.2 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "platform-candid-service.tree",
+    "dfinityPackages": [
+      {
+        "name": "candid",
+        "version": "0.10.39",
+        "hostMacro": false
+      },
+      {
+        "name": "candid_derive",
+        "version": "0.10.39",
+        "hostMacro": true
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-platform@0.16.0 -> candid@0.10.39",
+      "ic-platform@0.16.0 -> candid@0.10.39 -> candid_derive@0.10.39",
+      "ic-platform@0.16.0 -> candid@0.10.39 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "platform-cdk.tree",
+    "dfinityPackages": [],
+    "paths": []
+  },
+  {
+    "graph": "platform-certification.tree",
+    "dfinityPackages": [],
+    "paths": []
+  },
+  {
+    "graph": "platform-icrc-ledger-types.tree",
+    "dfinityPackages": [
+      {
+        "name": "candid",
+        "version": "0.10.39",
+        "hostMacro": false
+      },
+      {
+        "name": "candid_derive",
+        "version": "0.10.39",
+        "hostMacro": true
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-platform@0.16.0 -> candid@0.10.39",
+      "ic-platform@0.16.0 -> candid@0.10.39 -> candid_derive@0.10.39",
+      "ic-platform@0.16.0 -> candid@0.10.39 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "platform-management-canister-types.tree",
+    "dfinityPackages": [
+      {
+        "name": "candid",
+        "version": "0.10.39",
+        "hostMacro": false
+      },
+      {
+        "name": "candid_derive",
+        "version": "0.10.39",
+        "hostMacro": true
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-platform@0.16.0 -> candid@0.10.39",
+      "ic-platform@0.16.0 -> candid@0.10.39 -> candid_derive@0.10.39",
+      "ic-platform@0.16.0 -> candid@0.10.39 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "platform-none.tree",
+    "dfinityPackages": [],
+    "paths": []
+  },
+  {
+    "graph": "platform-principal-self-authenticating.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-platform@0.16.0 -> ic-platform-types@0.15.1 -> ic_principal@0.1.5",
+      "ic-platform@0.16.0 -> ic_principal@0.1.5"
+    ]
+  },
+  {
+    "graph": "platform-principal.tree",
+    "dfinityPackages": [],
+    "paths": []
+  },
+  {
+    "graph": "platform-runtime.tree",
+    "dfinityPackages": [],
+    "paths": []
+  },
+  {
+    "graph": "platform-signature-verification.tree",
+    "dfinityPackages": [],
+    "paths": []
+  },
+  {
+    "graph": "platform-stable-structures.tree",
+    "dfinityPackages": [
+      {
+        "name": "ic-stable-structures",
+        "version": "0.7.2",
+        "hostMacro": false
+      },
+      {
+        "name": "ic_principal",
+        "version": "0.1.5",
+        "hostMacro": false
+      }
+    ],
+    "paths": [
+      "ic-platform@0.16.0 -> ic-stable-structures@0.7.2",
+      "ic-platform@0.16.0 -> ic-stable-structures@0.7.2 -> ic_principal@0.1.5"
+    ]
+  }
+]

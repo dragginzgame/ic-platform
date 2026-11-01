@@ -1,0 +1,2 @@
+a783c1bd5dd90322757fe0b1f28ddbc325eb4ac12cd03a2984baade328d2eb66  /home/adam/projects/ic-persistence/Cargo.toml
+ee5ef32d767bed81b06bb2d5bd9f67616e31dfaee5548949e23c19c466ed90aa  /home/adam/projects/ic-persistence/Cargo.lock

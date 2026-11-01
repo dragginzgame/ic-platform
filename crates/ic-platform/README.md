@@ -1,8 +1,9 @@
 # ic-platform
 
 Platform re-exports canonical Principal/Account identities from ic-platform-types.
-The facade/macros/runtime guard and Types remain in one workspace with independent
-release groups, versions and changelogs. Unrelated runtime releases retain the
+Platform (facade and native PocketIC client), Runtime (runtime, macros and exact
+guard), and Types have independent release groups in one workspace. Each group
+owns explicit versions and its canonical releases/ ledger. Unrelated runtime releases retain the
 same compatible type supplier; see [the migration contract](../../docs/migration.md#stable-owned-identity-package-118).
 
 Platform 0.11 removed `wire-schema` and the production Wire dependency. Principal
@@ -58,7 +59,7 @@ the [packaging migration](../../docs/migration.md#minimal-principal-and-selected
 Select `runtime` for prepared one-shot requests through
 `ic_platform::call::{Call, WaitPolicy}`. Methods and argument bytes can be owned
 or borrowed independently; execution delegates to the existing raw transport.
-See the [prepared-call contract](src/call/README.md). This replaced the separate
+See the [prepared-call contract](../ic-platform-runtime/src/call/README.md). This replaced the separate
 `ic-call` package in 0.10.0.
 
 For raw calls and system/task adapters, select `runtime` and keep the existing

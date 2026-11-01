@@ -167,18 +167,18 @@ fn self_authentication_keeps_upstream_vectors() {
     assert_eq!(Principal::self_authenticating([]).as_slice(), expected);
     for input in [&[][..], b"public key bytes", &[42; 1024][..]] {
         let owned = input.to_vec();
-        let expected = ExternalPrincipal::self_authenticating(input);
+        let expected = ic_principal::Principal::self_authenticating(input);
         assert_eq!(
-            ExternalPrincipal::from(Principal::self_authenticating(&owned)),
-            expected
+            Principal::self_authenticating(&owned).as_slice(),
+            expected.as_slice()
         );
         assert_eq!(
-            ExternalPrincipal::from(Principal::self_authenticating(owned)),
-            expected
+            Principal::self_authenticating(owned).as_slice(),
+            expected.as_slice()
         );
         assert_eq!(
-            ExternalPrincipal::from(Principal::self_authenticating(input)),
-            expected
+            Principal::self_authenticating(input).as_slice(),
+            expected.as_slice()
         );
     }
 }
@@ -198,7 +198,7 @@ fn self_authentication_evaluates_custom_as_ref_once() {
     let actual = Principal::self_authenticating(PublicKey(&calls));
     assert_eq!(calls.get(), 1);
     assert_eq!(
-        ExternalPrincipal::from(actual),
-        ExternalPrincipal::self_authenticating(b"public key bytes")
+        actual.as_slice(),
+        ic_principal::Principal::self_authenticating(b"public key bytes").as_slice()
     );
 }

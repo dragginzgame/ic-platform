@@ -1,0 +1,78 @@
+0ic-platform v0.16.0 (/home/adam/projects/ic-platform/crates/ic-platform)
+1candid v0.10.39
+2anyhow v1.0.104
+2binrw v0.15.2
+3array-init v2.1.0
+3binrw_derive v0.15.2 (proc-macro)
+4either v1.19.0
+4proc-macro2 v1.0.107
+5unicode-ident v1.0.27
+4quote v1.0.47
+5proc-macro2 v1.0.107 (*)
+4syn v2.0.119
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5unicode-ident v1.0.27
+3bytemuck v1.25.2
+2byteorder v1.5.0
+2candid_derive v0.10.39 (proc-macro)
+3lazy_static v1.5.1
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v2.0.119 (*)
+2hex v0.4.3
+2ic_principal v0.1.5
+3crc32fast v1.5.3
+4cfg-if v1.0.5
+3data-encoding v2.11.1
+3serde v1.0.229
+4serde_core v1.0.229
+4serde_derive v1.0.229 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v3.0.9
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6unicode-ident v1.0.27
+3sha2 v0.10.9
+4cfg-if v1.0.5
+4digest v0.10.7
+5block-buffer v0.10.4
+6generic-array v0.14.9
+7typenum v1.20.1
+7version_check v0.9.5
+5crypto-common v0.1.6
+6generic-array v0.14.9 (*)
+6typenum v1.20.1
+3thiserror v1.0.69
+4thiserror-impl v1.0.69 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119 (*)
+2leb128 v0.2.7
+2num-bigint v0.4.8
+3num-integer v0.1.47
+4num-traits v0.2.19
+5autocfg v1.5.1
+3num-traits v0.2.19 (*)
+3serde v1.0.229 (*)
+2num-traits v0.2.19 (*)
+2paste v1.0.15 (proc-macro)
+2serde v1.0.229 (*)
+2serde_bytes v0.11.19
+3serde_core v1.0.229
+2thiserror v1.0.69 (*)
+1ic-platform-types v0.15.1 (/home/adam/projects/ic-platform/crates/ic-platform-types)
+2crc32fast v1.5.3 (*)
+2data-encoding v2.11.1
+2ic_principal v0.1.5 (*)
+2serde v1.0.229 (*)
+2thiserror v2.0.18
+3thiserror-impl v2.0.18 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v2.0.119 (*)
+1ic_principal v0.1.5 (*)
+1serde v1.0.229 (*)
+1serde_bytes v0.11.19 (*)
+1thiserror v2.0.18 (*)

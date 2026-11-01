@@ -5,6 +5,15 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.16.0]
+
+### 🔧 Changed
+
+- **Breaking feature selection:** self-authentication no longer enables registry
+  Principal conversions. Retain the exact upstream derivation with upstream
+  SHA-224, protected source/license/vector checks and unchanged Principal bytes.
+  Enable `principal-external` explicitly when conversions are needed.
+
 ## [0.15.1] - 2026-10-31
 
 ### 🩹 Fixed

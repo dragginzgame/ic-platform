@@ -8,8 +8,9 @@ FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consu
 ifneq ($(filter-out release-editor-check,$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
 ifeq ($(RELEASE_GROUP),platform)
 else ifeq ($(RELEASE_GROUP),types)
+else ifeq ($(RELEASE_GROUP),runtime)
 else
-$(error Select RELEASE_GROUP=platform or RELEASE_GROUP=types)
+$(error Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types)
 endif
 endif
 export RELEASE_GROUP
@@ -41,7 +42,7 @@ help:
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Exact saved recovery: release-resume VERSION=X.Y.Z'
 	@echo 'Feature graphs: check-features; check-features-exhaustive FEATURES=a,b (1–12 features)'
-	@echo 'Release/publish requires RELEASE_GROUP=platform or RELEASE_GROUP=types'
+	@echo 'Release/publish requires RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types'
 	@echo 'Registry: publish-check (dry run), publish (selected group); PACKAGE= selects an explicit batch'
 	@echo 'Release editor: install-release-editor; release-editor-check (offline)'
 	@echo 'Browser SDK: install-browser-tools, check-browser; check-browser-runtime needs prepared Chromium'
@@ -71,22 +72,22 @@ publish-check: host-tools-check
 	bash scripts/release/publish.sh check
 
 check:
-	cargo check -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-targets --all-features --locked
+	cargo check -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-targets --all-features --locked
 test:
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
-	cargo test -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --locked
+	cargo test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --locked
 clippy:
-	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-targets --all-features --locked -- -D warnings
+	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-targets --all-features --locked -- -D warnings
 docs-check:
-	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --no-deps --locked
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --no-deps --locked
 wasm-check:
 	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 msrv: host-tools-check
 	@set -eu; \
 	platform_msrv="$$(bash scripts/ci/read-platform-msrv.sh)"; \
-	cargo +"$$platform_msrv" test -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --locked; \
+	cargo +"$$platform_msrv" test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --locked; \
 	cargo +"$$platform_msrv" check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
@@ -129,7 +130,7 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform/src/call/README.md crates/ic-platform-macros/README.md crates/ic-platform-pocket-ic/README.md crates/ic-platform-pocket-ic/upstream/NOTICE.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md crates/ic-platform-pocket-ic/README.md crates/ic-platform-pocket-ic/upstream/NOTICE.md
 .PHONY: check-inventory
 .PHONY: check-native-provider
 check-native-provider:
@@ -160,9 +161,13 @@ release-preflight:
 	@bash scripts/release/adapter.sh preflight
 release-verify:
 	+VALIDATION_FAILURE_LOG_DIR="$$(git rev-parse --git-path release-state)/validation-failures" bash scripts/ci/run-validation-targets.sh ci
+	+$(MAKE) check-runtime-all
 release-prepare-version:
 	@bash scripts/release/adapter.sh prepare
-release-prepared-check release-committed-check release-tagged-check release-push-check:
+release-prepared-check:
+	@bash scripts/release/adapter.sh check
+	@bash scripts/ci/check-platform-runtime.sh --timers --prepared-call --check-graph
+release-committed-check release-tagged-check release-push-check:
 	@bash scripts/release/adapter.sh check
 release-commit-check:
 	@bash scripts/release/adapter.sh commit-check
@@ -173,11 +178,20 @@ release-files:
 check-runtime:
 	bash scripts/ci/check-platform-runtime.sh --prepared-call
 
+.PHONY: check-runtime-composition check-runtime-all check-runtime-independence
+check-runtime-composition:
+	bash scripts/ci/check-platform-runtime.sh --timers --prepared-call
+check-runtime-all:
+	+bash scripts/ci/run-validation-targets.sh check-runtime check-runtime-composition
+check-runtime-independence:
+	bash scripts/ci/test-runtime-independence.sh
+
 .PHONY: check-runtime-lock
 check-runtime-lock:
 	bash scripts/ci/test-published-runtime.sh
 	bash scripts/ci/check-owned-runtime-source.sh
 	bash scripts/ci/test-owned-runtime-source.sh
+	bash scripts/ci/test-principal-source.sh
 	bash scripts/ci/check-icrc-source.sh
 	bash scripts/ci/test-icrc-source.sh
 	bash scripts/release/runtime-lock.sh check

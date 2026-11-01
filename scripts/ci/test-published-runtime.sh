@@ -56,3 +56,17 @@ for mutation in '.packages[2].source = null' '.packages[2].version = "0.3.0"' '.
     fi
 done
 echo 'Published runtime admits exact registry identities and refuses replacements/missing versions.'
+# Independent facades need not share Runtime's version; Runtime/guard/macros do.
+"$jq" '.packages[0].version = "9.0.0" | .packages[1].version = "0.4.0" |
+    .packages += [{name: "ic-platform-runtime", id: "runtime", version: "0.4.0", source: "registry+https://github.com/rust-lang/crates.io-index"},
+    {name: "ic-platform-runtime-guard", version: "0.4.0", source: "registry+https://github.com/rust-lang/crates.io-index"}]' "$fixture/good.json" > "$fixture/runtime.json"
+admit_runtime() {
+    "$jq" -e --arg version 0.4.0 --argjson runtime_owner true --argjson require_generator true -f "$root/scripts/ci/published-runtime.jq" "$1" > /dev/null
+}
+admit_runtime "$fixture/runtime.json"
+for mutation in '.packages[2].source = null' '.packages[2].version = "0.5.0"' '.packages[3].version = "0.3.0"' '.packages |= map(select(.name != "ic-platform-runtime-guard"))' '.packages |= map(select(.name != "ic-platform-runtime"))' '.packages += [.packages[2]]'; do
+    "$jq" "$mutation" "$fixture/runtime.json" > "$fixture/bad.json"
+    if admit_runtime "$fixture/bad.json"; then echo "New runtime admission accepted: $mutation" >&2; exit 1; fi
+done
+"$jq" -e --arg version 9.0.0 --argjson require_generator false -f "$root/scripts/ci/published-runtime.jq" "$fixture/runtime.json" > /dev/null
+echo 'Independent published Runtime identities and facade version separation passed.'

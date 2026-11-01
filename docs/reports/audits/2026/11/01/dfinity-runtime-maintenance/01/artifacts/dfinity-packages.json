@@ -1,0 +1,130 @@
+[
+  {
+    "name": "candid",
+    "version": "0.10.39",
+    "repository": "https://github.com/dfinity/candid",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "candid_derive",
+    "version": "0.10.39",
+    "repository": "https://github.com/dfinity/candid",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": true
+  },
+  {
+    "name": "candid_parser",
+    "version": "0.4.1",
+    "repository": "https://github.com/dfinity/candid",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-agent",
+    "version": "0.49.3",
+    "repository": "https://github.com/dfinity/agent-rs",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-certification",
+    "version": "3.2.0",
+    "repository": "https://github.com/dfinity/response-verification",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-ed25519",
+    "version": "0.6.0",
+    "repository": "https://github.com/dfinity/ic",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-management-canister-types",
+    "version": "0.8.0",
+    "repository": "https://github.com/dfinity/ic",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-management-canister-types",
+    "version": "0.11.0",
+    "repository": "https://github.com/dfinity/ic",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-representation-independent-hash",
+    "version": "4.0.1",
+    "repository": "https://github.com/dfinity/response-verification",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-secp256k1",
+    "version": "0.3.0",
+    "repository": "https://github.com/dfinity/ic",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-stable-structures",
+    "version": "0.7.2",
+    "repository": "https://github.com/dfinity/stable-structures",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-transport-types",
+    "version": "0.49.3",
+    "repository": "https://github.com/dfinity/agent-rs",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic-verify-bls-signature",
+    "version": "0.6.0",
+    "repository": "https://github.com/dfinity/verify-bls-signatures",
+    "repositoryBasis": "manual provenance: crates/ic-platform/src/bls/upstream/NOTICE.md; registry package has no repository field",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic_bls12_381",
+    "version": "0.10.1",
+    "repository": "https://github.com/dfinity/bls12_381",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "ic_principal",
+    "version": "0.1.5",
+    "repository": "https://github.com/dfinity/candid",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  },
+  {
+    "name": "pocket-ic",
+    "version": "16.1.0",
+    "repository": "https://github.com/dfinity/ic",
+    "repositoryBasis": "package metadata",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "hostMacro": false
+  }
+]

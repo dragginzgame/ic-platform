@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`5caa130a8705c43aceaa18993a30c87b959ef823` is recorded in
+`4c84efa9dd5f4b3ff7bdea89972e747fd394d406` is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -179,18 +179,29 @@ dependency; Agent codes retain their external identity. PocketIC catalog
 declarations now belong to the approved native implementation, preserving their
 numeric and protocol names.
 
+## Independent Runtime owner (#131)
+
+Runtime 0.17 owns the sole IC0/executor/CDK/prepared-call implementation and
+releases with macros and the exact guard. Facade paths delegate to it; crypto,
+certification and native clients stay outside its release group. Types remains
+independent. Keep empty defaults, raw executor/IC0 isolation, explicit-codec
+macros, protected source bodies and singleton refusal. Timers and Endpoint must
+select Runtime directly; qualify source/archive consumers before publication.
+Use the current contract in docs/migration.md; older facade-owned descriptions
+below describe provenance, not a second implementation or current version owner.
+
 ## Stable identity supplier (#118)
 
-The maintainer approved independent Platform and Types groups in one workspace.
-All five packages own explicit versions; root workspace.package has no version.
+The maintainer approved independent Platform, Runtime and Types groups in one workspace.
+All six packages own explicit versions; root workspace.package has no version.
 Keep crate paths, numeric versions, dependency selections and one lockfile intact
 when migrating ownership. Root dependencies group members once under short titles
 and separate Changelog comments. Root CHANGELOG.md is an index;
 releases/history.md preserves coordinated history through 0.15.0 once.
-Release, resume and publication require explicit RELEASE_GROUP=platform or types,
+Release, resume and publication require explicit RELEASE_GROUP=platform, runtime or types,
 including environment selection; no default or PACKAGE inference is allowed.
 Publication subsets must stay within the selected group. Preserve shared runtime
-lock and platform-only pin custody, full validation and recorded recovery.
+lock and Runtime-only pin custody, full validation and recorded recovery.
 Catalog every member in root dependencies with its path and full version, and
 register every alias in its group's dependencies roster. Keep group/ledger labels
 nearby, retain requirement operators and classify external dependency use. Unused
@@ -203,7 +214,9 @@ Serde, zero fields and provenance stay with their current owners.
 The maintainer authorized narrowing `principal` to owned Principal/Account bytes,
 text and Serde without external Principal or hashing. `principal-external` adds
 registry identity and byte conversions; `principal-self-authenticating` separately
-selects unchanged upstream self-authentication. No default features. Runtime
+selects the exact imported ic_principal 0.1.5 derivation with upstream SHA-224,
+without implying external conversions. Preserve its source/license/vector guard;
+this packaging permission authorizes no cryptographic algorithm changes. No default features. Runtime
 and canister-signature creation/verification select only the owned capability;
 Candid and external DTO/client profiles select external conversions explicitly;
 raw executor/IC0-only profiles exclude application types and their dependencies.
@@ -215,8 +228,8 @@ reconstruction and qualify CBOR bytes and length-first range ordering.
 The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
 Retain its Apache-2.0 provenance, raw bytes and length-first ordering. Keep parsing
 bounded by the 63-byte text grammar, binary Serde marker-free and range policy
-consumer-owned. Delegate explicitly selected self-authentication to the unchanged upstream crypto
-implementation. External DTO/client principal and error identities remain registry
+consumer-owned. Retain the exact upstream self-authentication body and upstream
+SHA-224 implementation. External DTO/client principal and error identities remain registry
 types, named explicitly through principal::ExternalPrincipal/ExternalPrincipalError;
 Candid contract types stay external. Do not add Candid to the owned type.
 

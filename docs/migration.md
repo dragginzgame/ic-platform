@@ -1,5 +1,81 @@
 # Candid and runtime ownership
 
+## Independent Runtime owner (#131)
+
+The current source separates three release groups in this workspace:
+
+| Group | Packages | Source version |
+| --- | --- | --- |
+| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.17.0 |
+| Platform | ic-platform, ic-platform-pocket-ic | 0.16.0 |
+| Types | ic-platform-types | 0.15.1 |
+
+Runtime 0.17.0 is an explicit, unpublished initial selection. The existing macros
+and guard advance from their published 0.16 generation; no published identity is
+reset. Platform's pending breaking changes and Types' separate pending change
+retain their own ledgers. No release, tag or upload is implied by this extraction.
+
+`ic-platform-runtime` owns the actual IC0 implementation, sole executor, CDK
+system/callback/stable passthrough adapters and prepared raw calls. Its complete
+normal dependency closure is optional SlotMap, pin-project-lite, Serde, Thiserror,
+canonical Types, macros and the exact guard. `ic0` selects no dependencies;
+`executor` adds SlotMap and the guard; `runtime` adds raw calls and Types; `cdk`
+adds entrypoint generation. Defaults are empty. Candid, crypto, certification,
+Agent, PocketIC and storage allocation are outside this owner. Imported licenses,
+protected source bodies and fingerprint values remain unchanged.
+
+Facade `ic0`, `executor`, `call` and CDK paths delegate to the same owner. Existing
+facade macros retain their default facade path; Runtime's macro exports select
+`::ic_platform_runtime::cdk`. Both use the same generator and support the explicit
+`crate` option for renamed dependencies. Wire Endpoint forwards that selected
+runtime path. The generated native symbols remain crate-scoped and all installed
+Wasm exports match the pre-extraction baseline exactly.
+
+Runtime pins its guard to its exact version and retains the existing Cargo
+`links` value. This intentionally rejects both a second incompatible Runtime and
+the legacy executor embedded in published Platform 0.16. A crypto/certification
+facade release leaves Runtime/macros/guard/Types literals and requirements alone;
+two such facades can share Runtime task and call types. It cannot silently move
+an application to another executor generation.
+
+For runtime-only applications select `ic-platform-runtime` with `cdk` (or the
+narrower `executor`/`ic0` capability) and import `ic_platform_runtime::{cdk, call,
+executor, ic0}`. Select Platform separately for required external Candid and
+cryptographic capabilities. Select Types directly when only identities are needed.
+Timers and Wire Endpoint adopt Runtime directly in
+[Scheduling #86](https://github.com/dragginzgame/ic-scheduling/pull/86) and
+[Wire #41](https://github.com/dragginzgame/ic-wire/pull/41). If shipping the pending Principal cut, release/publish its Types group first so
+all new packages select that canonical version. Then publish Runtime’s guard,
+macros and runtime, compatible adapters and the delegating facade, followed by
+application adoption. The adapters' registry lock refreshes wait for
+supplier publication; source/archive proofs are not registry adoption evidence.
+
+Until that publication, the test-only Timers catalog selects immutable adoption
+commit `036fd50c08c2c1d05ab1cb2381abc7b8f1a36103`. Explicit preparation fetches it;
+normal owner/composition validation uses maintained locks and prepared caches.
+The qualification root patches unpublished Platform owners, never dependency-local
+patches or production Git dependencies. Return this test selection to the published
+compatible Timers release after qualification. Owner proof remains Timers-free.
+
+The Runtime group owns its ledger and pin exception. Both qualification locks are
+shared metadata in all three groups' transactional preparation and recovery.
+Every recorded local package is required and checked against its owning group's
+version. Preparation changes only selected identities and references; missing or
+duplicated guard records refuse. Existing release journals retain their policy
+identity and cannot be resumed under a reinterpreted group roster.
+
+Linux source evidence includes full Clippy, native macro linking, current/MSRV
+installed owner and Timers profiles, exact Wasm exports, unchanged source guards,
+and a disposable incompatible-owner refusal. Extracted `.crate` consumers also
+build and run installed Timers/Endpoint checks. Archives are qualified using
+explicit root patches for unpublished suppliers; no source path is shipped in
+their normalized dependency declarations. Detailed receipts are recorded in the
+[current handoff](status/current.md). macOS and publication gates remain separate.
+
+This contract supersedes the facade-owned runtime/group descriptions in the
+historical migration sections below. It changes packaging and release ownership,
+not the executor algorithm, IC ABI, external bytes or application policy.
+
 ## Selected canister management DTOs
 
 The maintainer authorized the canister-used subset of management 0.11.0 for the
@@ -197,8 +273,12 @@ assert_eq!(external.as_slice(), owned.as_slice());
 
 Without that capability, callers can pass `owned.as_slice()` to an external
 constructor at their integration boundary. Select `principal-self-authenticating`
-explicitly to use `Principal::self_authenticating`; its hashing delegates to the
-unchanged registry implementation. The registry conversion dependency selects
+explicitly to use `Principal::self_authenticating`. Pending Platform 0.17 / Types
+0.16 imports the exact ic_principal 0.1.5 derivation, with upstream SHA-224 and
+source/license/vector guards. This feature no longer implies `principal-external`:
+callers using registry Principal or conversions must select that feature too.
+Principal bytes, hashing and the method signature remain unchanged; the base
+owned capability still has no hashing dependency. The registry conversion dependency selects
 only `convert`; other integration dependencies may independently unify more
 upstream features. No new Candid implementation is added to the owned type.
 
@@ -1961,7 +2041,7 @@ the owned generator, registry executor =2.0.0 and ic0 =1.2.0. It selects neither
 Candid nor the full `ic-cdk`/`ic-cdk-macros` packages. Executor-only users retain
 their independent feature. No executor implementation is copied or replaced.
 The imported adapters retain their Apache-2.0 license and provenance in
-`crates/ic-platform/src/cdk/upstream/NOTICE.md`; the combined consumer package is
+`crates/ic-platform-runtime/src/cdk/upstream/NOTICE.md`; the combined consumer package is
 MIT AND Apache-2.0. Unsafe code is confined to imported call ownership/callbacks
 and the existing initialized stable-byte copy, under a workspace deny lint.
 
@@ -3014,7 +3094,8 @@ Types' compatible requirement, supplying identity and ledger unchanged. A Types
 release updates its admitted requirement and requires separate consumer
 compatibility/publication assessment; it does not silently publish the facade.
 
-releases/platform/CHANGELOG.md owns Platform/macros/guard notes, and
+releases/platform/CHANGELOG.md now owns facade/native-client notes;
+releases/runtime/CHANGELOG.md owns Runtime/macros/guard notes, and
 releases/types/CHANGELOG.md owns Types notes. Root CHANGELOG.md is an index. The
 intact coordinated history through 0.15.0 lives once in releases/history.md;
 Types' initial 0.1 history remains in its own ledger. Existing relative links
@@ -3025,7 +3106,7 @@ canonical type owner and bytes.
 ### Release command routing
 
 Every release, resume and publication command must explicitly select
-RELEASE_GROUP=platform or RELEASE_GROUP=types. Missing, empty and unknown groups
+RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types. Missing, empty and unknown groups
 refuse before setup or validation. An explicit environment selection is valid.
 Publication follows the same selection, so runtime-only changes do not re-upload
 unchanged Types. Explicit PACKAGE subsets stay within the selected group and
@@ -3034,14 +3115,24 @@ Types first and then the separately released compatible Platform group; PACKAGE
 never infers a group or admits a mixed batch. All workspace release gates and
 full publication Clippy remain required; npm publication stays separate.
 
-The runtime qualification lock is explicitly common consumer metadata, included
-once in both groups' exact plans. The exact runtime-guard pin remains private to
-the Platform group. Semantic checks compare the recorded runtime trio to the
-Platform primary package version and an optional recorded Types owner to its
-literal version.
-Preparation changes only the selected group's recorded identities. Historical
-locks without Types remain unchanged during Types releases; adding a qualified
-owner requires actual composition qualification, not a fabricated lock refresh.
+The owner-runtime and Timers-composition qualification locks are explicitly common
+consumer metadata, included once in all three groups' exact plans. The exact runtime-guard pin
+belongs to the Runtime group. Semantic checks compare each recorded local owner
+to its group primary version.
+Preparation changes only the selected group's recorded identities. All current locks require the six qualified local owners. Adding or changing
+a supplier requires actual graph qualification, not fabricated lock records.
+
+Platform #116 separates installed producer qualification from scheduler composition.
+`make check-runtime` exercises transport, callback/trap cleanup, direct executor
+cancellation, weak/protected/migratory tasks and upgrade without Timers.
+`make check-runtime-composition` adds Timers dispatch, trap cleanup, cancellation,
+rearming and dispatch after upgrade using the same fixture and runtime singleton.
+Each path records its source hashes, lock, targets, features, compiler and Wasm
+hashes. CI runs independent jobs; `make check-runtime-all` retains both outcomes.
+Release verification requires both, including Types releases conservatively;
+an incompatible scheduler cannot waive composition or falsify producer evidence.
+Advisory preparation/audits likewise retain separate producer/composition statuses.
+#131 moves the implementation into the independent Runtime owner described above.
 
 Preparation uses Shared's transaction for every selected file, rendering the core
 metadata and consumer lock/pin in disposable committed source before installing

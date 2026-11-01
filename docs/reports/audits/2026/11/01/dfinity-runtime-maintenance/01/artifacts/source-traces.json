@@ -1,0 +1,57 @@
+[
+  {
+    "path": "/home/adam/projects/ic-auth/crates/ic-auth/Cargo.toml",
+    "artifact": "ic-auth__crates__ic-auth__Cargo.toml",
+    "sha256": "4d2ff349481634a7f8b896f823ca14c4f7161b29bd7fba095bc1d2a3d02ad49e"
+  },
+  {
+    "path": "/home/adam/projects/ic-auth/crates/ic-auth/src/portable.rs",
+    "artifact": "ic-auth__crates__ic-auth__src__portable.rs",
+    "sha256": "9824787bbadb35f92861c029611bb2c50fc1bd30693fb4bca64287352fd00867"
+  },
+  {
+    "path": "/home/adam/projects/canic/crates/canic/Cargo.toml",
+    "artifact": "canic__crates__canic__Cargo.toml",
+    "sha256": "f246f1d766487413850e1c163994565de491f88d442a57c0d7b76c7eac12e373"
+  },
+  {
+    "path": "/home/adam/projects/canic/crates/canic-core/Cargo.toml",
+    "artifact": "canic__crates__canic-core__Cargo.toml",
+    "sha256": "6fc05a35e979e053bc74f6355bf3d9bb41fbe859eb934ac78f785e10aca689eb"
+  },
+  {
+    "path": "/home/adam/projects/ic-persistence/crates/ic-memory/Cargo.toml",
+    "artifact": "ic-persistence__crates__ic-memory__Cargo.toml",
+    "sha256": "de11ab8fe9adc884a9b59975874465f704938a7fc3fdeb7165f0827ef5fbdabc"
+  },
+  {
+    "path": "/home/adam/projects/ic-blob-storage/crates/ic-blob-storage/Cargo.toml",
+    "artifact": "ic-blob-storage__crates__ic-blob-storage__Cargo.toml",
+    "sha256": "8b558c32024e2777028c1e5a9ae00e9ad1ac6df40b4a99e71ff79b4dea9e32e1"
+  },
+  {
+    "path": "/home/adam/projects/ic-relay/crates/ic-relay/Cargo.toml",
+    "artifact": "ic-relay__crates__ic-relay__Cargo.toml",
+    "sha256": "c5b1c8e8a8b82aeb65bef8cdd912b9d87ae589d99bb829e48571eb4a09fbc7b9"
+  },
+  {
+    "path": "/home/adam/projects/ic-scheduling/crates/ic-timers/Cargo.toml",
+    "artifact": "ic-scheduling__crates__ic-timers__Cargo.toml",
+    "sha256": "42fb88d7c910c24e0a7ff951142a0cc1c4178dc8c8e80489a47419dc41557ef9"
+  },
+  {
+    "path": "/home/adam/projects/ic-platform/Cargo.toml",
+    "artifact": "ic-platform__Cargo.toml",
+    "sha256": "aff708d396f7df2b159b30ba34aae422022753c46f8e9a2fc59c86232e58e3ea"
+  },
+  {
+    "path": "/home/adam/projects/ic-platform/crates/ic-platform-types/Cargo.toml",
+    "artifact": "ic-platform__crates__ic-platform-types__Cargo.toml",
+    "sha256": "6a7189f167a60ea003ea1740d03e6b72e4fd90e283aa74b27eeeb47b6523758e"
+  },
+  {
+    "path": "/home/adam/projects/ic-platform/crates/ic-platform-types/src/principal/mod.rs",
+    "artifact": "ic-platform__crates__ic-platform-types__src__principal__mod.rs",
+    "sha256": "4282592a7ff924c47e73d310f0e2a19cb02490ab5b9f236fe1ae42cf2c81e68c"
+  }
+]

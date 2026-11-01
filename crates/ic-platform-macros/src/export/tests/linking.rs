@@ -20,6 +20,7 @@ fn native_entrypoints_link_across_consuming_crates() {
     fs::write(directory.join("Cargo.toml"), "[workspace]\nmembers=[\"role-a\",\"role-b\",\"consumer\"]\nresolver=\"3\"\n[profile.dev]\ncodegen-units=1\n").unwrap();
     let macros = env!("CARGO_MANIFEST_DIR");
     for (name, value) in [("role-a", 1), ("role-b", 2)] {
+        let entry = if name == "role-a" { "" } else { "runtime_" };
         let role = directory.join(name);
         fs::create_dir_all(role.join("src")).unwrap();
         fs::write(role.join("Cargo.toml"), format!("[package]\nname={name:?}\nversion=\"0.0.0\"\nedition=\"2024\"\n[dependencies]\nic-platform-macros={{path={macros:?}}}\n")).unwrap();
@@ -31,11 +32,11 @@ fn native_entrypoints_link_across_consuming_crates() {
                 pub fn in_executor_context(task: impl FnOnce()) {{ task(); }}
                 pub fn in_query_executor_context(task: impl FnOnce()) {{ task(); }}
             }} }} }}
-            #[ic_platform_macros::inspect_message(crate = "crate::sdk")]
+            #[ic_platform_macros::{entry}inspect_message(crate = "crate::sdk")]
             fn inspect() {{}}
-            #[ic_platform_macros::init(crate = "crate::sdk")]
+            #[ic_platform_macros::{entry}init(crate = "crate::sdk")]
             fn init() {{}}
-            #[ic_platform_macros::post_upgrade(crate = "crate::sdk")]
+            #[ic_platform_macros::{entry}post_upgrade(crate = "crate::sdk")]
             fn upgrade() {{}}
             pub fn value() -> u8 {{ {value} }}
         "#

@@ -25,7 +25,7 @@ fi
 if awk -v family=retired-cdk -f "$policy" "$graph"; then
     echo "Retired full CDK runtime/generator: $graph" >&2; exit 1
 fi
-identities="$(awk '$1 == "ic-platform"' "$graph" | sed 's/ (\*)$//' | LC_ALL=C sort -u)"
+identities="$(awk '$1 == "ic-platform-runtime"' "$graph" | sed 's/ (\*)$//' | LC_ALL=C sort -u)"
 [[ -n "$identities" && "$(printf '%s\n' "$identities" | wc -l | tr -d ' ')" == 1 ]] || {
-    echo "Runtime must have one Platform executor owner: $identities" >&2; exit 1;
+    echo "Runtime must have one canonical Runtime executor owner: $identities" >&2; exit 1;
 }

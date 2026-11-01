@@ -88,7 +88,7 @@ impl ExportAttributes {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-enum MethodType {
+pub(crate) enum MethodType {
     Init,
     PreUpgrade,
     PostUpgrade,
@@ -482,6 +482,19 @@ pub(super) fn external_entry(
         MethodType::Update
     };
     Ok(EntryPlan::build(method, attrs, item.span(), item, Some(function), Ok)?.expand())
+}
+
+pub(crate) fn runtime_entry(
+    method: MethodType,
+    attr: TokenStream,
+    item: TokenStream,
+) -> Result<TokenStream, Error> {
+    let span = attr.span();
+    let mut attrs = ExportAttributes::parse(attr)?;
+    attrs
+        .cratename
+        .get_or_insert_with(|| "::ic_platform_runtime::cdk".into());
+    Ok(EntryPlan::build(method, attrs, span, item, None, |path| parse_str(&path))?.expand())
 }
 
 fn dfn_macro(

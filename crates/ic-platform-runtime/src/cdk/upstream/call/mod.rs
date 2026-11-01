@@ -707,12 +707,11 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "candid")]
     #[test]
     fn external_unit_arguments_are_explicit() {
-        let args = crate::candid::contract::encode_args(()).unwrap();
+        let args = b"DIDL\0\0".to_vec();
         let call =
             Call::unbounded_wait(Principal::management_canister(), "raw_rand").with_raw_args(&args);
-        assert_eq!(call.encoded_args.as_ref(), candid::encode_args(()).unwrap());
+        assert_eq!(call.encoded_args.as_ref(), b"DIDL\0\0");
     }
 }

@@ -13,16 +13,18 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 [features]
 default = []
 principal-external = ["dep:ic_principal"]
-principal-self-authenticating = ["principal-external", "ic_principal/self_authenticating"]
+principal-self-authenticating = ["dep:sha2"]
 
 [dependencies]
 crc32fast.workspace = true
 data-encoding.workspace = true
 ic_principal = { workspace = true, optional = true }
 serde = { workspace = true, features = ["alloc"] }
+sha2 = { workspace = true, optional = true }
 thiserror.workspace = true
 
 [dev-dependencies]
+ic_principal = { workspace = true, features = ["self_authenticating"] }
 serde_bytes.workspace = true
 serde_test.workspace = true
 

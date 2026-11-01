@@ -1,0 +1,62 @@
+0ic-relay v0.21.0 (/home/adam/projects/ic-relay/crates/ic-relay)
+1ic-memory v0.60.6
+2ic-platform v0.16.0
+3ic-stable-structures v0.7.2
+4ic_principal v0.1.5
+2ic-wire v0.13.3
+3bytemuck v1.25.2
+3ic-wire-derive v0.13.3 (proc-macro)
+4proc-macro2 v1.0.107
+5unicode-ident v1.0.27
+4quote v1.0.47
+5proc-macro2 v1.0.107 (*)
+4syn v3.0.9
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5unicode-ident v1.0.27
+3postcard v1.1.3
+4cobs v0.3.0
+5thiserror v2.0.18
+6thiserror-impl v2.0.18 (proc-macro)
+7proc-macro2 v1.0.107 (*)
+7quote v1.0.47 (*)
+7syn v2.0.119
+8proc-macro2 v1.0.107 (*)
+8quote v1.0.47 (*)
+8unicode-ident v1.0.27
+4serde v1.0.229
+5serde_core v1.0.229
+5serde_derive v1.0.229 (proc-macro)
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6syn v3.0.9 (*)
+3serde v1.0.229 (*)
+3serde_bytes v0.11.19
+4serde_core v1.0.229
+2serde v1.0.229 (*)
+2thiserror v2.0.18 (*)
+1ic-platform v0.15.3
+2ic-platform-runtime-guard v0.15.3
+2ic-platform-types v0.15.1
+3crc32fast v1.5.3
+4cfg-if v1.0.5
+3data-encoding v2.11.1
+3serde v1.0.229 (*)
+3thiserror v2.0.18 (*)
+2pin-project-lite v0.2.17
+2serde v1.0.229 (*)
+2slotmap v1.1.1
+3version_check v0.9.5
+2thiserror v2.0.18 (*)
+1ic-platform-types v0.15.1 (*)
+1ic-storage v0.60.6
+2ic-memory v0.60.6 (*)
+2ic-platform v0.16.0 (*)
+2thiserror v2.0.18 (*)
+1ic-timers v0.35.2
+2ic-metrics v0.24.4
+3serde v1.0.229 (*)
+2ic-platform v0.15.3 (*)
+2thiserror v2.0.18 (*)
+1ic-wire v0.13.3 (*)
+1serde v1.0.229 (*)

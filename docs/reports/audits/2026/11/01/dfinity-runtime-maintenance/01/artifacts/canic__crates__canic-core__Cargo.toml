@@ -1,0 +1,82 @@
+[package]
+name = "canic-core"
+edition = { workspace = true }
+rust-version = { workspace = true }
+version = { workspace = true }
+license = { workspace = true }
+description = { workspace = true }
+readme = "README.md"
+documentation = "https://docs.rs/canic-core"
+homepage = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+publish = true
+
+[package.metadata.cargo-machete]
+ignored = ["serde_bytes"]
+
+[features]
+default = []
+sharding = []
+auth-chain-key-ecdsa = ["ic-auth/chain-key-verification"]
+auth-chain-key-root-sign = ["auth-chain-key-ecdsa", "auth-root-delegation-state"]
+auth-delegated-token-issuer-state = []
+auth-root-canister-sig-create = ["ic-auth/canister-signature-preparation", "ic-platform/certification"]
+auth-root-canister-sig-verify = ["ic-auth/canister-signature-verification"]
+auth-issuer-canister-sig-create = [
+    "auth-delegated-token-issuer-state",
+    "ic-auth/canister-signature-preparation",
+    "ic-platform/certification",
+]
+auth-issuer-canister-sig-verify = ["ic-auth/canister-signature-verification"]
+auth-delegated-token-verify = ["auth-chain-key-ecdsa", "auth-issuer-canister-sig-verify"]
+auth-local-application-authorization = [
+    "auth-delegated-token-verify",
+    "ic-auth/session-restore",
+    "ic-auth/certified-proof-verification",
+    "ic-auth/portable-signature-verification",
+]
+auth-root-delegation-state = []
+internal-test-fixtures = []
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ic-platform = { workspace = true, features = ["secp256k1"] }
+proc-macro2 = { workspace = true }
+quote = { workspace = true }
+serde_path_to_error = { workspace = true }
+toml = { workspace = true }
+
+[dependencies]
+async-trait = { workspace = true }
+canic-contracts.workspace = true
+ctor = { workspace = true }
+ic-auth = { workspace = true }
+ic-auth-protocol-types = { workspace = true }
+ic-logging.workspace = true
+ic-memory = { workspace = true }
+ic-metrics.workspace = true
+ic-metrics-stable.workspace = true
+ic-platform = { workspace = true, features = ["cdk", "cmc-types", "nns-registry-types", "cycles-ledger-types", "candid", "management-canister-types", "icrc-ledger-types"] }
+ic-storage.workspace = true
+ic-timers = { workspace = true }
+ic-wire.workspace = true
+num-bigint = { workspace = true, features = ["serde"] }
+remain = { workspace = true }
+serde = { workspace = true }
+serde_bytes = { workspace = true }
+serde_cbor = { workspace = true }
+sha2 = { workspace = true }
+thiserror = { workspace = true }
+
+[build-dependencies]
+
+[dev-dependencies]
+futures = { workspace = true }
+ic-auth = { workspace = true, features = ["session-restore", "certified-proof-verification", "portable-signature-verification"] }
+ic-memory = { workspace = true, features = ["test-support"] }
+ic-platform = { workspace = true, features = ["ecdsa", "ed25519"] }
+syn = { workspace = true, features = ["full", "visit"] }
+
+[lints]
+workspace = true

@@ -5,7 +5,7 @@ facts below are checked by `make check-inventory` in CI. Requirements are declar
 ranges/pins, not resolved versions; Cargo.lock and the existing feature-graph
 checks own resolution and isolation. No default features are enabled.
 
-The root catalog includes all four workspace members with their current versions
+The root catalog includes all six workspace members with their current versions
 and paths, including an unused facade declaration. Release policy owns every
 catalog alias. The unused entry adds no edge; the checked direct dependency and
 feature facts below remain determined by member declarations. Catalog comments
@@ -17,6 +17,15 @@ per-symbol evidence for 393 facade exports and owned methods/constants. It
 distinguishes sibling references, generated-code requirements, public contracts
 and exports with only Platform fixture evidence or no resolved consumer.
 Upstream type members are not individually covered; this is not removal approval.
+
+## Runtime release ownership
+
+The canonical IC0, executor, CDK adapters and prepared calls now live in
+`ic-platform-runtime`; facade paths delegate to that sole implementation. Runtime,
+macros and the exact guard share an independent release group. Crypto, Candid,
+certification and native clients stay in Platform; canonical identities stay in
+Types. See the [runtime contract](migration.md#independent-runtime-owner-131) for
+the complete closure, version choices and source/archive adoption evidence.
 
 ## APIs, consumers and maintenance ownership
 
@@ -55,7 +64,9 @@ generation/reuse behavior; no other arena supplier is selected in this graph.
 The released 0.8 packaging cut makes `principal` independent of
 `ic_principal` and SHA-2. `principal-external` adds registry identity and byte
 conversions; `principal-self-authenticating` explicitly adds unchanged upstream
-hashing. Runtime selects only the owned capability. Required external integrations
+hashing. Pending Platform 0.17 / Types 0.16 retains the exact derivation locally
+and uses upstream SHA-224 directly; self-authentication alone no longer selects
+registry Principal. Runtime selects only the owned capability. Required external integrations
 select conversions automatically.
 
 The `icrc-ledger-types` feature now supplies selected Platform-maintained DTOs
@@ -102,7 +113,7 @@ It owns method/argument custody. Physical calls, response/error identities,
 cost calculation, callbacks and executor remain with Platform. Canic #700 needs
 owned dynamic methods; other audited callers may keep the raw API. Codecs, metrics,
 budgets and durable delivery stay consumer-owned. See the
-[call contract](../crates/ic-platform/src/call/README.md) and
+[call contract](../crates/ic-platform-runtime/src/call/README.md) and
 [migration](migration.md#prepared-one-shot-calls-issue-75).
 
 Generic gzip codecs are consumed directly from IC Tooling. Platform has no
@@ -203,8 +214,9 @@ Generic support dependencies (Serde, SHA-2, encoding/checksum helpers, error and
 proc-macro libraries) are also included in the manifest inventory so additions
 cannot escape review by having a non-IC name. SHA-2 and upstream cryptographic
 primitives remain outside our implementation authority. Tooling-only fixture
-workspaces additionally use owned Wire, Timers and Testkit; their locks and runtime
-graph admission remain separate from the four-package workspace inventory.
+workspaces additionally use owned Wire and Testkit; only the composition profile
+selects Timers (0.35.3). Owner and composition locks and runtime graph admission
+remain separate from the workspace inventory. Both remain release requirements.
 
 Canonical owned Principal/Account identities live in `ic-platform-types`, which
 has its own version within the same workspace and is explicitly re-exported by
@@ -214,7 +226,7 @@ stay in Platform. See the [identity decision](migration.md#stable-owned-identity
 
 Imported-source ownership is recorded beside the code in
 [signature notices](../crates/ic-platform/src/signature_upstream/NOTICE.md),
-[runtime notices](../crates/ic-platform/src/cdk/upstream/NOTICE.md),
+[runtime notices](../crates/ic-platform-runtime/src/cdk/upstream/NOTICE.md),
 [Principal notices](../crates/ic-platform-types/src/principal/NOTICE.md) and
 [Account notices](../crates/ic-platform-types/src/account/NOTICE.md).
 Existing signature/runtime fingerprint checks enforce their respective admitted
@@ -312,8 +324,8 @@ profiles retain their explicitly external identities.
 | ic-platform | default |  |
 | ic-platform | ecdsa | dep:crypto-bigint, dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
-| ic-platform | executor | dep:ic-platform-runtime-guard, dep:slotmap, ic0 |
-| ic-platform | ic0 |  |
+| ic-platform | executor | ic-platform-runtime/executor, ic0 |
+| ic-platform | ic0 | dep:ic-platform-runtime, ic-platform-runtime/ic0 |
 | ic-platform | icp-ledger-types | candid |
 | ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:crc32fast, dep:data-encoding, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
 | ic-platform | management-canister-types | candid/bignum, candid/serde_bytes, dep:candid, dep:ic-management-canister-types, dep:serde_bytes, principal-external |
@@ -321,16 +333,21 @@ profiles retain their explicitly external identities.
 | ic-platform | pocket-ic | dep:ic-platform-pocket-ic, principal-external |
 | ic-platform | principal | dep:ic-platform-types, dep:serde, dep:thiserror |
 | ic-platform | principal-external | dep:ic_principal, ic-platform-types/principal-external, principal |
-| ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal-external |
-| ic-platform | runtime | dep:pin-project-lite, dep:thiserror, executor, ic0, principal |
+| ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal |
+| ic-platform | runtime | executor, ic-platform-runtime/runtime, ic0, principal |
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
 | ic-platform | signature-verification | bls, canister-sig-creation, dep:serde_bytes, dep:serde_cbor |
 | ic-platform | stable-structures | dep:ic-stable-structures |
 | ic-platform-pocket-ic | default |  |
+| ic-platform-runtime | cdk | dep:ic-platform-macros, runtime |
+| ic-platform-runtime | default |  |
+| ic-platform-runtime | executor | dep:ic-platform-runtime-guard, dep:slotmap, ic0 |
+| ic-platform-runtime | ic0 |  |
+| ic-platform-runtime | runtime | dep:ic-platform-types, dep:pin-project-lite, dep:serde, dep:thiserror, executor |
 | ic-platform-runtime-guard | default |  |
 | ic-platform-types | default |  |
 | ic-platform-types | principal-external | dep:ic_principal |
-| ic-platform-types | principal-self-authenticating | ic_principal/self_authenticating, principal-external |
+| ic-platform-types | principal-self-authenticating | dep:sha2 |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -352,7 +369,7 @@ profiles retain their explicitly external identities.
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-platform-pocket-ic | workspace-owned | normal | cfg(not(target_family = "wasm")) | true | false |  |
-| ic-platform | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
+| ic-platform | ic-platform-runtime | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-representation-independent-hash | ^4.0.1 | dev | all | false | true |  |
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
@@ -362,7 +379,6 @@ profiles retain their explicitly external identities.
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
 | ic-platform | num-traits | ^0.2.19 | normal | all | true | true |  |
 | ic-platform | pairing | ^0.23.0 | normal | all | true | false |  |
-| ic-platform | pin-project-lite | ^0.2.17 | normal | all | true | true |  |
 | ic-platform | rand | ^0.8 | dev | all | false | true |  |
 | ic-platform | rand_core | ^0.6 | normal | all | true | false |  |
 | ic-platform | rand_xorshift | ^0.3 | dev | all | false | true |  |
@@ -374,7 +390,6 @@ profiles retain their explicitly external identities.
 | ic-platform | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
 | ic-platform | sha3 | ^0.10 | dev | all | false | true |  |
-| ic-platform | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform | subtle | ^2.6 | normal | all | true | false |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
@@ -404,11 +419,21 @@ profiles retain their explicitly external identities.
 | ic-platform-pocket-ic | tracing | ^0.1.41 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | tracing-appender | ^0.2.3 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | tracing-subscriber | ^0.3.19 | normal | cfg(not(target_family = "wasm")) | false | true | env-filter, fmt, json, time |
+| ic-platform-runtime | ic-platform-macros | workspace-owned | normal | all | true | true |  |
+| ic-platform-runtime | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
+| ic-platform-runtime | ic-platform-types | workspace-owned | normal | all | true | false |  |
+| ic-platform-runtime | pin-project-lite | ^0.2.17 | normal | all | true | true |  |
+| ic-platform-runtime | serde | ^1.0 | normal | all | true | false | alloc, derive |
+| ic-platform-runtime | serde_test | ^1.0.177 | dev | all | false | true |  |
+| ic-platform-runtime | slotmap | ^1.1.1 | normal | all | true | true |  |
+| ic-platform-runtime | thiserror | ^2.0.18 | normal | all | true | true |  |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | true |  |
 | ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | convert |
+| ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert, self_authenticating |
 | ic-platform-types | serde | ^1.0 | normal | all | false | false | alloc, derive |
 | ic-platform-types | serde_bytes | ^0.11 | dev | all | false | true |  |
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
+| ic-platform-types | sha2 | ^0.10 | normal | all | true | true |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->

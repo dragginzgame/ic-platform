@@ -1,0 +1,54 @@
+0ic-platform v0.16.0 (/home/adam/projects/ic-platform/crates/ic-platform)
+1digest v0.10.7
+2block-buffer v0.10.4
+3generic-array v0.14.9
+4typenum v1.20.1
+4version_check v0.9.5
+2crypto-common v0.1.6
+3generic-array v0.14.9 (*)
+3typenum v1.20.1
+1ff v0.13.1
+2rand_core v0.6.4
+2subtle v2.6.1
+1group v0.13.0
+2ff v0.13.1 (*)
+2rand_core v0.6.4
+2subtle v2.6.1
+1hex v0.4.3
+1ic-platform-types v0.15.1 (/home/adam/projects/ic-platform/crates/ic-platform-types)
+2crc32fast v1.5.3
+3cfg-if v1.0.5
+2data-encoding v2.11.1
+2serde v1.0.229
+3serde_core v1.0.229
+3serde_derive v1.0.229 (proc-macro)
+4proc-macro2 v1.0.107
+5unicode-ident v1.0.27
+4quote v1.0.47
+5proc-macro2 v1.0.107 (*)
+4syn v3.0.9
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5unicode-ident v1.0.27
+2thiserror v2.0.18
+3thiserror-impl v2.0.18 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v2.0.119
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5unicode-ident v1.0.27
+1pairing v0.23.0
+2group v0.13.0 (*)
+1rand_core v0.6.4
+1serde v1.0.229 (*)
+1serde_bytes v0.11.19
+2serde_core v1.0.229
+1serde_cbor v0.11.2
+2half v1.8.3
+2serde v1.0.229 (*)
+1sha2 v0.10.9
+2cfg-if v1.0.5
+2digest v0.10.7 (*)
+1subtle v2.6.1
+1thiserror v2.0.18 (*)

@@ -1,12 +1,22 @@
 # Platform changelog
 
-This group covers ic-platform, ic-platform-macros, ic-platform-pocket-ic and ic-platform-runtime-guard.
+This group covers ic-platform and ic-platform-pocket-ic.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
 ## [0.17.0]
 
 ### ⚠️ Breaking
+
+- Delegate runtime capabilities to the independent Runtime 0.17 owner. Align
+  Timers and Wire Endpoint once; later crypto/certification facade releases
+  leave executor and generator identity unchanged. See the
+  [Runtime ledger](../runtime/CHANGELOG.md) for ownership and qualification.
+
+- `principal-self-authenticating` selects only owned Principal and upstream
+  SHA-224. Select `principal-external` separately for registry conversions.
+  The exact upstream derivation and resulting bytes remain unchanged;
+  self-authentication-only production graphs drop `ic_principal`.
 
 - Maintain the PocketIC 16.1 Rust client in Platform's native implementation
   package. Keep existing `ic_platform::pocket_ic` imports, method signatures,
@@ -16,6 +26,10 @@ See also the [Types ledger](../types/CHANGELOG.md).
   The simulator server, execution engine and Testkit server pin are unchanged.
 
 ### 🧹 Cleanup
+
+- Separate installed Platform runtime qualification from Timers composition.
+  Keep both release gates and independent CI/advisory results; preserve the
+  singleton guard and reuse the fixture with separately maintained locks.
 
 - Keep client dependencies behind the existing native-only feature, with no
   Candid/crypto expansion in default, executor-only or Wasm PocketIC selections.

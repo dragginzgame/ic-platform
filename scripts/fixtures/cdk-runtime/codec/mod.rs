@@ -1,6 +1,6 @@
 //! Caller-owned Wire adapters; Platform only owns entrypoint/callback contexts.
 use crate::protocol::{LIMITS, method_id};
-use ic_platform::cdk::api;
+use ic_platform_runtime::cdk::api;
 use serde::{Serialize, de::DeserializeOwned};
 
 pub fn decode<T: DeserializeOwned, const ID: u64>(bytes: Vec<u8>) -> T {
@@ -22,7 +22,7 @@ pub fn response<T: DeserializeOwned>(name: &str, bytes: &[u8]) -> T {
 }
 
 pub fn admit() -> Result<(), String> {
-    if ic_platform::ic0::msg_arg_data_size() > LIMITS.bytes {
+    if ic_platform_runtime::ic0::msg_arg_data_size() > LIMITS.bytes {
         return Err("fixture request exceeds Wire byte allowance".into());
     }
     Ok(())

@@ -782,15 +782,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-metrics"
-version = "0.24.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a6018917ffc653f1ef13e4a09c1aaf10e273b00ec3fe341aef93442d2106f11"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "ic-platform"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -816,20 +807,18 @@ dependencies = [
  "ic-management-canister-types 0.11.0",
  "ic-platform-macros",
  "ic-platform-pocket-ic",
- "ic-platform-runtime-guard",
+ "ic-platform-runtime",
  "ic-platform-types",
  "ic_principal",
- "pin-project-lite",
  "serde",
  "serde_bytes",
  "sha2",
- "slotmap",
  "thiserror 2.0.18",
 ]
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.16.0"
+version = "0.17.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -867,8 +856,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-platform-runtime"
+version = "0.17.0"
+dependencies = [
+ "ic-platform-macros",
+ "ic-platform-runtime-guard",
+ "ic-platform-types",
+ "pin-project-lite",
+ "serde",
+ "slotmap",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "ic-platform-runtime-guard"
-version = "0.16.0"
+version = "0.17.0"
 
 [[package]]
 name = "ic-platform-types"
@@ -894,17 +896,6 @@ dependencies = [
  "libc",
  "thiserror 2.0.18",
  "tokio",
-]
-
-[[package]]
-name = "ic-timers"
-version = "0.35.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4e2d0ee65121e3b42389d9f85326bf94510f254b01d34ef6c9c080e9ae7b1f0"
-dependencies = [
- "ic-metrics",
- "ic-platform 0.16.0",
- "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -1390,7 +1381,7 @@ name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
  "ic-platform 0.16.0",
- "ic-timers",
+ "ic-platform-runtime",
  "ic-wire",
  "serde",
 ]
@@ -1404,6 +1395,38 @@ dependencies = [
  "ic-wire",
  "serde",
  "serde_cbor",
+]
+
+[[package]]
+name = "pocket-ic"
+version = "16.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85135917c845e8fc132f5eca3a0a8cbab696477a5fee3c2dda168a0797f81e1c"
+dependencies = [
+ "backon",
+ "base64 0.22.1",
+ "candid",
+ "flate2",
+ "hex",
+ "ic-certification",
+ "ic-management-canister-types 0.8.0",
+ "ic-transport-types",
+ "reqwest",
+ "schemars",
+ "semver",
+ "serde",
+ "serde_cbor",
+ "serde_json",
+ "sha2",
+ "slog",
+ "strum",
+ "strum_macros",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
 ]
 
 [[package]]

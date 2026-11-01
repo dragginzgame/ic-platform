@@ -8,6 +8,9 @@ printf workspace > "$fixture/repo/Cargo.lock"
 printf runtime > "$fixture/repo/scripts/fixtures/cdk-runtime/Cargo.lock"
 printf workspace > "$fixture/repo/Cargo.toml"
 printf runtime > "$fixture/repo/scripts/fixtures/cdk-runtime/Cargo.toml"
+mkdir -p "$fixture/repo/scripts/fixtures/timers-runtime"
+printf composition > "$fixture/repo/scripts/fixtures/timers-runtime/Cargo.toml"
+printf composition > "$fixture/repo/scripts/fixtures/timers-runtime/Cargo.lock"
 cat > "$fixture/repo/scripts/ci/prepare-rustsec-db.sh" <<'PREPARE'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -18,9 +21,11 @@ PREPARE
 cat > "$fixture/repo/scripts/ci/check-platform-runtime.sh" <<'RUNTIME'
 #!/usr/bin/env bash
 set -euo pipefail
+profile=cdk-runtime
+if [[ "${1:-}" == --timers ]]; then profile=timers-runtime; shift; fi
 [[ $# == 1 && "$1" == --prepare ]]
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-cargo fetch --locked --manifest-path "$root/scripts/fixtures/cdk-runtime/Cargo.toml"
+cargo fetch --locked --manifest-path "$root/scripts/fixtures/$profile/Cargo.toml"
 RUNTIME
 cat > "$fixture/bin/cargo" <<'AUDIT'
 #!/usr/bin/env bash
@@ -30,6 +35,7 @@ if [[ "$1" == fetch ]]; then
     [[ "$CARGO_HOME" == */cargo-home && -d "$CARGO_HOME" ]]
     cat "$4" >> "$FETCH_CALLS"
     if [[ "${FETCH_FAILURE:-no}" == yes ]]; then exit 7; fi
+    if [[ "${COMPOSITION_FAILURE:-no}" == yes && "$4" == *timers-runtime* ]]; then exit 9; fi
     if [[ "${FETCH_MUTATE_LOCK:-no}" == yes ]]; then printf changed >> "${4%Cargo.toml}Cargo.lock"; fi
     exit 0
 fi
@@ -51,11 +57,11 @@ export PATH="$fixture/bin:$PATH" CALLS="$fixture/calls" FETCH_CALLS="$fixture/fe
 script="$fixture/repo/scripts/ci/check-advisories.sh"
 # Warnings are visible but not promoted to vulnerabilities.
 bash "$script" local ok "$fixture/pass" > "$fixture/pass.log"
-[[ "$(cat "$CALLS")" == workspaceruntime ]]
+[[ "$(cat "$CALLS")" == workspaceruntimecomposition ]]
 [[ ! -s "$FETCH_CALLS" && "$(cat "$fixture/pass/workspace.index-status")" == complete ]]
 : > "$CALLS"
 bash "$script" online ok "$fixture/online" > "$fixture/online.log"
-[[ "$(cat "$FETCH_CALLS")" == workspaceruntime && "$(cat "$CALLS")" == workspaceruntime ]]
+[[ "$(cat "$FETCH_CALLS")" == workspaceruntimecomposition && "$(cat "$CALLS")" == workspaceruntimecomposition ]]
 cmp "$fixture/repo/Cargo.lock" "$fixture/online/workspace.lock"
 cmp "$fixture/repo/scripts/fixtures/cdk-runtime/Cargo.lock" "$fixture/online/runtime.lock"
 : > "$CALLS"
@@ -68,13 +74,13 @@ for failure in missing open; do
     if [[ "$failure" == missing ]]; then missing=yes; else opening=yes; fi
     status=0
     MISSING_INDEX="$missing" INDEX_OPEN_FAILURE="$opening" bash "$script" local ok "$fixture/$failure" > "$fixture/$failure.log" 2>&1 || status=$?
-    [[ "$status" == 1 && "$(cat "$CALLS")" == workspaceruntime ]]
+    [[ "$status" == 1 && "$(cat "$CALLS")" == workspaceruntimecomposition ]]
     [[ "$(cat "$fixture/$failure/workspace.status")" == 0 && "$(cat "$fixture/$failure/workspace.index-status")" == incomplete ]]
 done
 : > "$CALLS"
 status=0
 WORKSPACE_STATUS=1 bash "$script" local ok "$fixture/fail" > "$fixture/fail.log" || status=$?
-[[ "$status" == 1 && "$(cat "$CALLS")" == workspaceruntime ]]
+[[ "$status" == 1 && "$(cat "$CALLS")" == workspaceruntimecomposition ]]
 [[ "$(cat "$fixture/fail/workspace.status")" == 1 && "$(cat "$fixture/fail/workspace.index-status")" == complete ]]
 : > "$CALLS"
 status=0
@@ -83,7 +89,15 @@ bash "$script" local fail "$fixture/preparation-failure" > "$fixture/preparation
 : > "$CALLS"
 status=0
 FETCH_FAILURE=yes bash "$script" online ok "$fixture/fetch-failure" > "$fixture/fetch-failure.log" 2>&1 || status=$?
-[[ "$status" == 7 && ! -s "$CALLS" && "$(cat "$fixture/fetch-failure/workspace.registry-prepare.status")" == 7 ]]
+[[ "$status" == 1 && ! -s "$CALLS" && "$(cat "$fixture/fetch-failure/workspace.registry-prepare.status")" == 7 ]]
+: > "$CALLS"
+status=0
+COMPOSITION_FAILURE=yes bash "$script" online ok "$fixture/composition-failure" > "$fixture/composition-failure.log" 2>&1 || status=$?
+[[ "$status" == 1 && "$(cat "$CALLS")" == workspaceruntime ]]
+[[ "$(cat "$fixture/composition-failure/composition.status")" == not-run ]]
+[[ "$(cat "$fixture/composition-failure/workspace.status")" == 0 ]]
+[[ "$(cat "$fixture/composition-failure/runtime.index-status")" == complete ]]
+: > "$CALLS"
 status=0
 FETCH_MUTATE_LOCK=yes bash "$script" online ok "$fixture/lock-change" > "$fixture/lock-change.log" 2>&1 || status=$?
 [[ "$status" == 1 && ! -s "$CALLS" ]]

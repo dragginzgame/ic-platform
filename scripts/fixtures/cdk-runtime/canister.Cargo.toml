@@ -6,15 +6,16 @@ publish.workspace = true
 rust-version.workspace = true
 
 [features]
+timers-composition = []
 prepared-call = []
-external-candid = ["ic-platform/candid", "ic-platform/management-canister-types"]
+external-candid = ["dep:ic-platform", "ic-platform/candid", "ic-platform/management-canister-types"]
 external-adapters = ["external-candid"]
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-ic-platform.workspace = true
-ic-timers.workspace = true
+ic-platform = { workspace = true, optional = true }
+ic-platform-runtime.workspace = true
 ic-wire.workspace = true
 serde.workspace = true

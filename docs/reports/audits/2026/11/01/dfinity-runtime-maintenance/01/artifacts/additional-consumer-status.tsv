@@ -1,0 +1,3 @@
+ic-auth	certified-proof-verification,session-restore	0
+ic-relay	runtime	0
+canic	control-plane,icrc	0

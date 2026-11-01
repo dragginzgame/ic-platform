@@ -57,11 +57,11 @@ for operation in release-patch release-minor release-major release-resume publis
         arguments=()
         case "$selection" in empty) arguments=(RELEASE_GROUP=) ;; unknown) arguments=(RELEASE_GROUP=unknown) ;; esac
         if make --no-print-directory -s -C "$fixture" "$operation" PACKAGE=ic-platform-types ${arguments[@]+"${arguments[@]}"} > "$fixture/refusal.log" 2>&1; then exit 1; fi
-        grep -q 'Select RELEASE_GROUP=platform or RELEASE_GROUP=types' "$fixture/refusal.log"
+        grep -q 'Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types' "$fixture/refusal.log"
         [[ ! -e "$ROUTING_EFFECTS" ]]
     done
 done
-for group in platform types; do
+for group in platform runtime types; do
     for operation in release-patch release-minor release-major release-resume; do
         for result in 0 17; do
             status=0
@@ -81,11 +81,13 @@ for group in platform types; do
     bash scripts/ci/cargo-release-group.sh files "$group" > "$fixture/$group-expected-files"
     cmp "$fixture/$group-files" "$fixture/$group-expected-files"
     tr '\0' '\n' < "$fixture/$group-files" | grep -Fx 'scripts/fixtures/cdk-runtime/Cargo.lock'
+    tr '\0' '\n' < "$fixture/$group-files" | grep -Fx 'scripts/fixtures/timers-runtime/Cargo.lock'
     for operation in publish publish-check; do
         make --no-print-directory -s -C "$fixture" "$operation" RELEASE_GROUP="$group"
         [[ "$(cat "$ROUTING_OUTPUT")" == "$(RELEASE_GROUP="$group" bash scripts/release/group.sh members)" ]]
     done
-    if [[ "$group" == platform ]]; then subset=ic-platform; outside=ic-platform-types; else subset=ic-platform-types; outside=ic-platform; fi
+    subset="$(RELEASE_GROUP="$group" bash scripts/release/group.sh primary)"
+    outside=ic-platform; [[ "$group" != platform ]] || outside=ic-platform-types
     RELEASE_GROUP="$group" PACKAGE="$subset" bash "$fixture/scripts/release/publish.sh" check
     [[ "$(cat "$ROUTING_OUTPUT")" == "$subset" ]]
     if RELEASE_GROUP="$group" PACKAGE="$outside" bash "$fixture/scripts/release/publish.sh" check > "$fixture/cross-group.log" 2>&1; then exit 1; fi
@@ -94,14 +96,14 @@ for group in platform types; do
 done
 for operation in version files primary; do
     if bash scripts/release/group.sh "$operation" > "$fixture/cli-refusal.log" 2>&1; then exit 1; fi
-    grep -q 'Select RELEASE_GROUP=platform or RELEASE_GROUP=types' "$fixture/cli-refusal.log"
+    grep -q 'Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types' "$fixture/cli-refusal.log"
 done
 for operation in preflight prepare check commit-check; do
     if bash scripts/release/adapter.sh "$operation" > "$fixture/adapter-refusal.log" 2>&1; then exit 1; fi
-    grep -q 'Select RELEASE_GROUP=platform or RELEASE_GROUP=types' "$fixture/adapter-refusal.log"
+    grep -q 'Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types' "$fixture/adapter-refusal.log"
 done
 for operation in check publish; do
     if bash scripts/release/publish.sh "$operation" > "$fixture/publication-refusal.log" 2>&1; then exit 1; fi
-    grep -q 'Select RELEASE_GROUP=platform or RELEASE_GROUP=types' "$fixture/publication-refusal.log"
+    grep -q 'Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types' "$fixture/publication-refusal.log"
 done
-echo 'Explicit Make/CLI group admission, both rosters and same-group publication subsets passed.'
+echo 'Explicit Make/CLI group admission, all three rosters and same-group publication subsets passed.'

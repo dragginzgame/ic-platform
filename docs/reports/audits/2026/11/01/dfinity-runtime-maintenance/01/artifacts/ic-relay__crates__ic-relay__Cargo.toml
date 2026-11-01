@@ -1,0 +1,35 @@
+[package]
+license-file.workspace = true
+name = "ic-relay"
+description = "Experimental bounded, storage-backed IC delivery channel"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+readme = "../../README.md"
+publish = false
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+clap.workspace = true
+ic-host-text.workspace = true
+rustyline.workspace = true
+serde_json.workspace = true
+
+[features]
+runtime = ["dep:ic-platform", "dep:ic-timers", "ic-platform/runtime"]
+
+[dependencies]
+ic-memory.workspace = true
+ic-platform = { workspace = true, optional = true }
+ic-platform-types.workspace = true
+ic-storage.workspace = true
+ic-timers = { workspace = true, optional = true }
+ic-wire.workspace = true
+serde.workspace = true
+
+[[example]]
+name = "delivery"
+path = "examples/delivery/main.rs"
+test = true
+
+[lints]
+workspace = true

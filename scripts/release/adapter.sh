@@ -37,7 +37,7 @@ render_platform_metadata() {
         cd -P "$workspace" || exit
         bash scripts/ci/cargo-release-metadata.sh prepare "$primary" || exit
         bash scripts/release/runtime-lock.sh prepare "${RELEASE_PREVIOUS:?}" || exit
-        if [[ "$RELEASE_GROUP" == platform ]]; then
+        if [[ "$RELEASE_GROUP" == runtime ]]; then
             bash scripts/release/runtime-pin.sh prepare "$RELEASE_PREVIOUS" || exit
         fi
         bash scripts/release/runtime-lock.sh check || exit

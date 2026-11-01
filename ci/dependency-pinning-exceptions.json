@@ -27,8 +27,8 @@
     "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "ic-platform-runtime-guard",
-    "value": "=0.16.0",
-    "reason": "Every executor owner requires its exact coordinated guard identity so distinct Platform versions cannot unify their Cargo singleton guards.",
-    "evidence": "docs/migration.md#runtime-only-cargo-singleton-guard-103"
+    "value": "=0.17.0",
+    "reason": "Each canonical runtime owner selects its exact guard; facade versions may share the same runtime owner.",
+    "evidence": "docs/migration.md#independent-runtime-owner-131"
   }
 ]

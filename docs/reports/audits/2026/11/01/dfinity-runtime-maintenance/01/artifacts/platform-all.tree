@@ -1,0 +1,209 @@
+0ic-platform v0.16.0 (/home/adam/projects/ic-platform/crates/ic-platform)
+1blake3 v1.8.7
+2arrayvec v0.7.8
+2cfg-if v1.0.5
+2constant_time_eq v0.4.2
+2cc v1.10.0
+3find-msvc-tools v0.1.15
+3shlex v2.0.1
+1candid v0.10.39
+2anyhow v1.0.104
+2binrw v0.15.2
+3array-init v2.1.0
+3binrw_derive v0.15.2 (proc-macro)
+4either v1.19.0
+4proc-macro2 v1.0.107
+5unicode-ident v1.0.27
+4quote v1.0.47
+5proc-macro2 v1.0.107 (*)
+4syn v2.0.119
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5unicode-ident v1.0.27
+3bytemuck v1.25.2
+2byteorder v1.5.0
+2candid_derive v0.10.39 (proc-macro)
+3lazy_static v1.5.1
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v2.0.119 (*)
+2hex v0.4.3
+2ic_principal v0.1.5
+3crc32fast v1.5.3
+4cfg-if v1.0.5
+3data-encoding v2.11.1
+3serde v1.0.229
+4serde_core v1.0.229
+4serde_derive v1.0.229 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v3.0.9
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6unicode-ident v1.0.27
+3sha2 v0.10.9
+4cfg-if v1.0.5
+4digest v0.10.7
+5block-buffer v0.10.4
+6generic-array v0.14.9
+7typenum v1.20.1
+7version_check v0.9.5
+5crypto-common v0.1.6
+6generic-array v0.14.9 (*)
+6typenum v1.20.1
+3thiserror v1.0.69
+4thiserror-impl v1.0.69 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119 (*)
+2leb128 v0.2.7
+2num-bigint v0.4.8
+3num-integer v0.1.47
+4num-traits v0.2.19
+5autocfg v1.5.1
+3num-traits v0.2.19 (*)
+3serde v1.0.229 (*)
+2num-traits v0.2.19 (*)
+2paste v1.0.15 (proc-macro)
+2pretty v0.12.5
+3arrayvec v0.5.2
+3typed-arena v2.0.2
+3unicode-width v0.2.3
+2serde v1.0.229 (*)
+2serde_bytes v0.11.19
+3serde_core v1.0.229
+2thiserror v1.0.69 (*)
+1crc32fast v1.5.3 (*)
+1crypto-bigint v0.7.10
+2cpubits v0.1.1
+2ctutils v0.4.7
+3cmov v0.5.4
+3subtle v2.6.1
+2hybrid-array v0.4.15
+3subtle v2.6.1
+3typenum v1.20.1
+3zeroize v1.9.1
+2num-traits v0.2.19 (*)
+2rand_core v0.10.1
+2subtle v2.6.1
+2zeroize v1.9.1
+1curve25519-dalek v5.0.0
+2cfg-if v1.0.5
+2digest v0.11.3
+3block-buffer v0.12.1
+4hybrid-array v0.4.15 (*)
+3const-oid v0.10.2
+3crypto-common v0.2.2
+4hybrid-array v0.4.15 (*)
+4rand_core v0.10.1
+3ctutils v0.4.7 (*)
+2subtle v2.6.1
+2rustc_version v0.4.1
+3semver v1.0.28
+1data-encoding v2.11.1
+1digest v0.10.7 (*)
+1ed25519-dalek v3.0.0
+2curve25519-dalek v5.0.0 (*)
+2ed25519 v3.0.0
+3signature v3.0.0
+4digest v0.11.3 (*)
+4rand_core v0.10.1
+2sha2 v0.11.1
+3cfg-if v1.0.5
+3digest v0.11.3 (*)
+2subtle v2.6.1
+1ff v0.13.1
+2rand_core v0.6.4
+2subtle v2.6.1
+1group v0.13.0
+2ff v0.13.1 (*)
+2rand_core v0.6.4
+2subtle v2.6.1
+1hex v0.4.3
+1ic-platform-macros v0.16.0 (proc-macro) (/home/adam/projects/ic-platform/crates/ic-platform-macros)
+2proc-macro2 v1.0.107 (*)
+2quote v1.0.47 (*)
+2syn v3.0.9 (*)
+1ic-platform-runtime-guard v0.16.0 (/home/adam/projects/ic-platform/crates/ic-platform-runtime-guard)
+1ic-platform-types v0.15.1 (/home/adam/projects/ic-platform/crates/ic-platform-types)
+2crc32fast v1.5.3 (*)
+2data-encoding v2.11.1
+2ic_principal v0.1.5 (*)
+2serde v1.0.229 (*)
+2thiserror v2.0.18
+3thiserror-impl v2.0.18 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v2.0.119 (*)
+1ic-stable-structures v0.7.2
+2ic_principal v0.1.5 (*)
+1ic_principal v0.1.5 (*)
+1k256 v0.14.0
+2cpubits v0.1.1
+2ecdsa v0.17.0
+3der v0.8.3
+4const-oid v0.10.2
+4zeroize v1.9.1
+3digest v0.11.3 (*)
+3elliptic-curve v0.14.3
+4base16ct v1.0.0
+4crypto-bigint v0.7.10 (*)
+4crypto-common v0.2.2 (*)
+4digest v0.11.3 (*)
+4ff v0.14.0
+5rand_core v0.10.1
+5subtle v2.6.1
+4group v0.14.0
+5ff v0.14.0 (*)
+5rand_core v0.10.1
+5subtle v2.6.1
+4hybrid-array v0.4.15 (*)
+4rand_core v0.10.1
+4sec1 v0.8.1
+5base16ct v1.0.0
+5ctutils v0.4.7 (*)
+5der v0.8.3 (*)
+5hybrid-array v0.4.15 (*)
+5subtle v2.6.1
+5zeroize v1.9.1
+4subtle v2.6.1
+4zeroize v1.9.1
+3rfc6979 v0.6.0
+4crypto-bigint v0.7.10 (*)
+4hmac v0.13.0
+5digest v0.11.3 (*)
+3signature v3.0.0 (*)
+3zeroize v1.9.1
+2elliptic-curve v0.14.3 (*)
+2primeorder v0.14.0
+3elliptic-curve v0.14.3 (*)
+3primefield v0.14.0
+4crypto-bigint v0.7.10 (*)
+4crypto-common v0.2.2 (*)
+4ff v0.14.0 (*)
+4rand_core v0.10.1
+4subtle v2.6.1
+4zeroize v1.9.1
+3wnaf v0.14.1
+4ff v0.14.0 (*)
+4group v0.14.0 (*)
+4hybrid-array v0.4.15 (*)
+4primefield v0.14.0 (*)
+2sha2 v0.11.1 (*)
+2wnaf v0.14.1 (*)
+1num-bigint v0.4.8 (*)
+1num-traits v0.2.19 (*)
+1pairing v0.23.0
+2group v0.13.0 (*)
+1pin-project-lite v0.2.17
+1rand_core v0.6.4
+1serde v1.0.229 (*)
+1serde_bytes v0.11.19 (*)
+1serde_cbor v0.11.2
+2half v1.8.3
+2serde v1.0.229 (*)
+1sha2 v0.10.9 (*)
+1slotmap v1.1.1
+2version_check v0.9.5
+1subtle v2.6.1
+1thiserror v2.0.18 (*)

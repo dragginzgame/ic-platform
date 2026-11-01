@@ -3,6 +3,7 @@ set -euo pipefail
 # Compare imported call/cleanup machinery and the maintained embedded runtime.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 if [[ $# == 0 ]]; then
+    bash "$root/scripts/ci/check-principal-source.sh"
     bash "$root/scripts/ci/check-bls-curve-source.sh"
     bash "$root/scripts/ci/check-certification-source.sh"
     bash "$root/scripts/ci/check-bls-source.sh"
@@ -10,7 +11,7 @@ if [[ $# == 0 ]]; then
     bash "$root/scripts/ci/check-embedded-runtime-source.sh"
     bash "$root/scripts/ci/check-management-source.sh"
 fi
-source_root="${1:-$root/crates/ic-platform/src/cdk/upstream}"
+source_root="${1:-$root/crates/ic-platform-runtime/src/cdk/upstream}"
 [[ $# -le 1 ]] || exit 2
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-runtime-source.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
@@ -38,9 +39,9 @@ for part in call spawn; do
         $body =~ s/\x01(\d+)\x02/$strings[$1]/ge;
         print $body;
     ' "$part" "$file" > "$fixture/$part"
-    expected="$("$root/.tools/host/bin/jq" -er --arg part "$part" '.qualified_regions[$part]' "$root/crates/ic-platform/src/cdk/upstream/provenance.json")"
+    expected="$("$root/.tools/host/bin/jq" -er --arg part "$part" '.qualified_regions[$part]' "$root/crates/ic-platform-runtime/src/cdk/upstream/provenance.json")"
     bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$expected" "$fixture/$part"
 done
-expected="$("$root/.tools/host/bin/jq" -er '.license_sha256' "$root/crates/ic-platform/src/cdk/upstream/provenance.json")"
+expected="$("$root/.tools/host/bin/jq" -er '.license_sha256' "$root/crates/ic-platform-runtime/src/cdk/upstream/provenance.json")"
 bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$expected" "$source_root/LICENSE-APACHE"
 printf 'Imported call submission, callback/trap cleanup and protected-spawn source regions match CDK 0.20.3.\n'

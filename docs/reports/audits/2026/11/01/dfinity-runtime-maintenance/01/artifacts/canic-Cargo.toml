@@ -1,0 +1,207 @@
+[workspace]
+members = [
+    # Tests and tooling packages
+    "apps/demo/app",
+    "apps/demo/user_hub",
+    "apps/demo/user_shard",
+    "apps/test/app",
+    "apps/test/index_child",
+    "apps/test/index_hub",
+    "apps/test/scale",
+    "apps/test/scale_hub",
+    "apps/test/test",
+    "apps/test/user_hub",
+    "apps/test/user_shard",
+    "canisters/audit/leaf_probe",
+    "canisters/audit/local_authorization_probe",
+    "canisters/audit/minimal",
+    "canisters/audit/minimal_metrics",
+    "canisters/audit/root_probe",
+    "canisters/audit/scaling_probe",
+    "canisters/sandbox/blank",
+    "canisters/test/cycles_ledger_stub",
+    "canisters/test/delegation_issuer_stub",
+    "canisters/test/delegation_root_stub",
+    "canisters/test/icp_refill_stub",
+    "canisters/test/intent_authority",
+    "canisters/test/managed_lifecycle_probe",
+    "canisters/test/payload_limit_probe",
+    "canisters/test/root_funding_probe",
+    "canisters/test/runtime_probe",
+    "canisters/test/sharding_root_stub",
+    # Production packages
+    "crates/canic",
+    "crates/canic-auth",
+    "crates/canic-blob-service",
+    "crates/canic-cli",
+    "crates/canic-contracts",
+    "crates/canic-control-plane",
+    "crates/canic-core",
+    "crates/canic-host",
+    "crates/canic-icydb",
+    "crates/canic-macros",
+    # Tests and tooling packages
+    "crates/canic-testing-internal",
+    "crates/canic-tests",
+]
+exclude = [
+    "integrations/blob-service/consumer",
+    "integrations/blob-service/embedded-consumer",
+]
+resolver = "3"
+
+[workspace.package]
+rust-version = "1.91.0"
+edition = "2024"
+version = "0.114.0"
+license = "MIT"
+authors = ["borovan <84897664+borovan@users.noreply.github.com>"]
+description = "Canic — a canister orchestration and management toolkit for the Internet Computer"
+repository = "https://github.com/dragginzgame/canic"
+homepage = "https://github.com/dragginzgame/canic"
+keywords = ["internet-computer", "canister", "dfinity", "icp", "management"]
+categories = ["wasm"]
+readme = "README.md"
+
+[workspace.dependencies]
+# Production dependencies
+async-trait = "0.1"
+canic = { version = "0.114.0", path = "crates/canic", default-features = false }
+canic-contracts = { version = "0.114.0", path = "crates/canic-contracts" }
+canic-control-plane = { version = "0.114.0", path = "crates/canic-control-plane", default-features = false }
+canic-core = { version = "0.114.0", path = "crates/canic-core" }
+canic-host = { version = "0.114.0", path = "crates/canic-host" }
+canic-macros = { version = "0.114.0", path = "crates/canic-macros" }
+clap = { version = "4.6.1", features = ["derive"] }
+crc32fast = "1.5.2"
+ctor = { version = "1.0", default-features = false, features = ["proc_macro"] }
+futures = "0.3"
+getrandom = "0.4"
+hmac = "0.13.0"
+ic-auth = { version = "0.29.0", default-features = false }
+ic-auth-protocol-types = "0.29.0"
+ic-backup = { version = "0.53.1", default-features = false }
+ic-backup-agent = "0.53.1"
+ic-blob-storage = "0.63.0"
+ic-blob-storage-contracts = "0.63.0"
+ic-build = { version = "0.73.3" }
+ic-host-artifacts = { version = "0.73.3", default-features = false }
+ic-host-fs = { version = "0.73.3", default-features = false }
+ic-host-process = { version = "0.73.3", default-features = false }
+ic-host-text = "0.73.3"
+ic-host-tools = "0.75.2"
+ic-logging = "0.23.3"
+ic-memory = "0.60.3"
+ic-metrics = "0.24.1"
+ic-metrics-stable = "0.61.1"
+ic-platform = { version = "0.16.0", default-features = false }
+ic-query = { version = "0.80.0", default-features = false, features = [
+    "subnet-catalog-host",
+] }
+ic-storage = "0.60.3"
+ic-testkit = { version = "0.75.2" }
+ic-timers = "0.35.3"
+ic-wire = { version = "0.13.2", default-features = false, features = ["platform-types"] }
+num-bigint = { version = "0.4", default-features = false }
+proc-macro2 = "1.0"
+quote = "1.0"
+remain = "0.2"
+reqwest = { version = "0.13.5", default-features = false, features = [
+    "blocking",
+] }
+rustix = { version = "1.1.4", features = ["fs"] }
+serde = { version = "1.0", default-features = false }
+serde_bytes = "0.11"
+serde_cbor = "0.11"
+serde_json = "1.0"
+serde_path_to_error = "0.1.20"
+serde_yaml_ng = "0.10"
+# Keep the runtime SHA-256 dependency on the IC stack’s 0.10 line.
+sha2 = "0.10.9"
+# Host HMAC uses digest 0.11 independently of canister cryptography.
+sha2-host = { package = "sha2", version = "0.11.0" }
+signal-hook = { version = "0.3.18", default-features = false }
+syn = "3.0"
+thiserror = "2.0"
+tokio = { version = "1.53.1", features = ["macros", "rt-multi-thread"] }
+toml = "1.0"
+url = "2.5.8"
+
+# Tests and tooling only
+canic-blob-service = { version = "0.114.0", path = "crates/canic-blob-service" }
+canic-cli = { version = "0.114.0", path = "crates/canic-cli" }
+canic-icydb = { version = "0.114.0", path = "crates/canic-icydb" }
+canic-testing-internal = { version = "0.114.0", path = "crates/canic-testing-internal" }
+prost = "0.14.4"
+
+# Rust lint hygiene
+[workspace.lints.rust]
+dead_code = "deny"
+unfulfilled_lint_expectations = "deny"
+
+# shared clippy rules
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+
+# always warn
+missing_const_for_fn = "warn"
+missing_panics_doc = "warn"
+must_use_candidate = "warn"
+redundant_clone = "warn"
+semicolon_if_nothing_returned = "warn"
+uninlined_format_args = "warn"
+use_self = "warn"
+
+# workspace policy exceptions; Cargo lint tables do not support `expect`
+# Direct emptiness predicates express the invariant without typed empty-value casts.
+assert_is_empty = "allow"
+doc_markdown = "allow"
+empty_line_after_doc_comments = "allow"
+enum_variant_names = "allow"
+missing_errors_doc = "allow"
+module_inception = "allow"
+module_name_repetitions = "allow"
+needless_pass_by_value = "allow"
+option_if_let_else = "allow"
+struct_field_names = "allow"
+wildcard_imports = "allow"
+
+# --------------------------------------------------------------------
+#   IMPORTANT: patch section MUST be at the top level (not nested)
+# --------------------------------------------------------------------
+[patch.crates-io]
+canic = { path = "crates/canic" }
+canic-cli = { path = "crates/canic-cli" }
+canic-control-plane = { path = "crates/canic-control-plane" }
+canic-contracts = { path = "crates/canic-contracts" }
+canic-core = { path = "crates/canic-core" }
+canic-macros = { path = "crates/canic-macros" }
+canic-host = { path = "crates/canic-host" }
+
+# profiles
+[profile.dev]
+opt-level = 1
+lto = false
+codegen-units = 16
+strip = "none"
+# Keep file/line backtraces without full type and variable debug records.
+debug = "line-tables-only"
+overflow-checks = true
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = "symbols"
+debug = false
+panic = "abort"
+overflow-checks = false
+incremental = false
+
+[profile.fast]
+inherits = "release"
+lto = "thin"
+codegen-units = 8
+incremental = false

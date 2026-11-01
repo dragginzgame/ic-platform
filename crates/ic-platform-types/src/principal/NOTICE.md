@@ -13,11 +13,19 @@ implementation is imported. Length-first ordering, zero padding, raw bytes,
 checksum algorithm, Base32 spelling and case-insensitive admission remain intact.
 Overlong input now returns `TextTooLong` before examining its content.
 
-Cryptographic self-authentication delegates to registry `ic_principal` unchanged.
-It is selected only by `principal-self-authenticating`; the base owned type has
+The optional `self_authenticating` module retains the exact `self_authenticating`
+method body and tag from that same ic_principal 0.1.5 revision. Only the surrounding
+module/imports, documentation and a scoped deprecation expectation are added.
+SHA-224 remains the unchanged RustCrypto `sha2` 0.10 implementation. The source
+guard freezes the admitted module, original Apache license, 29-byte capacity and
+existing fixed/differential tests; registry ic_principal is a test oracle only
+unless external conversions are selected. No upstream self-authentication test
+module existed in that package; Platform's existing vectors remain unchanged.
+Self-authentication is selected only by `principal-self-authenticating`; the base owned type has
 no external Principal or hashing dependency. `principal-external` separately adds
 the byte-copy conversions and registry identities without self-authentication.
-No SHA implementation, key encoding or hashing algorithm is copied or rewritten.
+No SHA implementation or key encoding is copied or rewritten; the derivation body
+is imported without alteration, rather than redesigned.
 `ExternalPrincipal` explicitly exposes that registry identity for external client
 and DTO parameters; conversions copy only the significant bytes. Registry identity
 is not retained by the owned root `Principal`. This is a breaking source change.

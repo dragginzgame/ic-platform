@@ -1,0 +1,2 @@
+0cb1c912e083eed88f6e4a0328f610f79103b6b4a75ba6fdae76e3af1943dd07  /home/adam/projects/ic-auth/Cargo.toml
+1cd38c83cb24db0861c431d379d8ff66ab057aa016006ed6c8a0937573647701  /home/adam/projects/ic-auth/Cargo.lock

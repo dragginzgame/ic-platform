@@ -10,17 +10,26 @@ require((.features.candid == ["principal-external", "dep:candid", "candid/bignum
     .features["candid-service"] == ["candid", "candid/printer"]); "Candid service generation must remain explicitly selected") |
 require(((.features | keys) == $policy[0].features); "Platform feature inventory changed; update the graph matrix and isolation policy") |
 require((.features["candid-endpoint"] == ["cdk", "candid"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
-require((.features.principal == ["dep:ic-platform-types", "dep:serde", "dep:thiserror"] and .features["principal-external"] == ["principal", "ic-platform-types/principal-external", "dep:ic_principal"] and .features["principal-self-authenticating"] == ["principal-external", "ic-platform-types/principal-self-authenticating"] and ([.dependencies[] | select(.name == "ic_principal")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["convert"])); "Owned Principal, external byte conversion and self-authentication must remain separate") |
+require((.features.principal == ["dep:ic-platform-types", "dep:serde", "dep:thiserror"] and .features["principal-external"] == ["principal", "ic-platform-types/principal-external", "dep:ic_principal"] and .features["principal-self-authenticating"] == ["principal", "ic-platform-types/principal-self-authenticating"] and ([.dependencies[] | select(.name == "ic_principal")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["convert"])); "Owned Principal, external byte conversion and self-authentication must remain separate") |
 require((.features.default == []); "Platform must declare empty default features") |
-require((.features.executor == ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"] and ([.dependencies[] | select(.name == "ic-cdk-executor" or .name == "ic0" or .name == "smallvec")] | length == 0) and .links == null); "Platform must own the sole executor, use Vec task lists and retain its Cargo singleton guard") |
-require((. as $p | ([.dependencies[] | select(.name == "ic-platform-runtime-guard")] |
-    length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].target == null and .[0].req == ("=" + $p.version)) and
-    ([$metadata.packages[] | select(.name == "ic-platform-runtime-guard")] |
-    length == 1 and .[0].version == $p.version and .[0].dependencies == [] and .[0].features == {default: []} and
-    .[0].links == "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md")); "Executor must select the exact coordinated, dependency-free singleton guard") |
-require((. as $p | .features.cdk == ["runtime", "dep:ic-platform-macros"] and .features.runtime == ["principal", "executor", "ic0", "dep:pin-project-lite", "dep:thiserror"] and ([.dependencies[] | select(.name == "ic-cdk")] | length == 0) and ([.dependencies[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].optional and .[0].req == ("^" + $p.version))); "CDK must select only the owned adapters, qualified executor/ic0 and coordinated generator") |
+require((.features.executor == ["ic0", "ic-platform-runtime/executor"] and
+    .features.runtime == ["principal", "executor", "ic0", "ic-platform-runtime/runtime"] and
+    .features.cdk == ["runtime", "dep:ic-platform-macros"] and
+    .features.ic0 == ["dep:ic-platform-runtime", "ic-platform-runtime/ic0"] and
+    ([.dependencies[] | select(.name == "slotmap" or .name == "pin-project-lite" or .name == "ic-platform-runtime-guard" or .name == "ic-cdk" or .name == "ic-cdk-executor" or .name == "ic0")] | length == 0)); "Facade must delegate runtime ownership without a second implementation") |
+require(([$metadata.packages[] | select(.name == "ic-platform-runtime")] | length == 1 and
+    .[0].features.default == [] and .[0].features.executor == ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"] and
+    .[0].features.ic0 == [] and (.[0] as $r |
+    $r.links == null and
+    $r.features.runtime == ["executor", "dep:ic-platform-types", "dep:pin-project-lite", "dep:serde", "dep:thiserror"] and
+    $r.features.cdk == ["runtime", "dep:ic-platform-macros"] and
+    ([$r.dependencies[] | select(.kind == null) | .name] | sort) == ["ic-platform-macros", "ic-platform-runtime-guard", "ic-platform-types", "pin-project-lite", "serde", "slotmap", "thiserror"] and
+    all($r.dependencies[] | select(.kind == null); .optional and .target == null) and
+    ([$r.dependencies[] | select(.name == "ic-platform-macros")] | .[0].req == ("^" + $r.version)) and
+    ([$r.dependencies[] | select(.name == "ic-platform-runtime-guard")] | length == 1 and .[0].optional and .[0].req == ("=" + $r.version)) and
+    ([$metadata.packages[] | select(.name == "ic-platform-runtime-guard")] | length == 1 and .[0].version == $r.version and .[0].dependencies == [] and .[0].features == {default: []} and .[0].links == "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md") and
+    ([$metadata.packages[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].version == $r.version))); "Canonical runtime must retain the exact singleton guard and coordinated generator") |
 require((.features.secp256k1 == ["principal-external", "dep:ic-secp256k1"] and ([.dependencies[] | select(.name == "ic-secp256k1")] | length == 1 and .[0].optional and .[0].req == "=0.3.0" and .[0].target == "cfg(not(target_family = \"wasm\"))")); "secp256k1 must remain exact, optional and native-only") |
-require((.features.ic0 == []); "IC0 must use owned bindings without package dependencies") |
 require((.features["management-canister-types"] == ["principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:serde_bytes", "dep:ic-management-canister-types"] and ([.dependencies[] | select(.name == "ic-management-canister-types")] | length == 1 and .[0].req == "=0.11.0" and .[0].optional and .[0].target == "cfg(not(target_family = \"wasm\"))")); "Platform must own selected Wasm management DTOs and retain native-only upstream 0.11.0") |
 require((.features["icrc-ledger-types"] == ["dep:crc32fast", "dep:data-encoding", "principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:hex", "dep:num-bigint", "dep:num-traits", "dep:serde_bytes", "dep:sha2"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 0)); "Selected ledger DTOs must not acquire the retired upstream package") |
 require((.features.certification == ["dep:hex", "dep:serde", "dep:serde_bytes", "dep:sha2"] and

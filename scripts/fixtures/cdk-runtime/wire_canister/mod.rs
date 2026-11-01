@@ -3,7 +3,7 @@
 #[cfg(not(feature = "prepared-call"))]
 use crate::transport::Execute as _;
 use crate::wire_protocol::*;
-use ic_platform::cdk::{api, futures};
+use ic_platform_runtime::cdk::{api, futures};
 use serde::{Serialize, de::DeserializeOwned};
 use std::cell::Cell;
 
@@ -13,7 +13,7 @@ thread_local! {
 }
 
 fn admit() -> Result<(), String> {
-    if ic_platform::ic0::msg_arg_data_size() > REQUEST.bytes {
+    if ic_platform_runtime::ic0::msg_arg_data_size() > REQUEST.bytes {
         return Err("Wire fixture request exceeds byte allowance".into());
     }
     Ok(())
@@ -29,7 +29,7 @@ fn encode<T: Serialize, const ID: u64>(value: T) -> Vec<u8> {
         .unwrap_or_else(|error| api::trap(format!("Wire fixture response: {error}")))
 }
 
-#[ic_platform::cdk::query(
+#[ic_platform_runtime::cdk::query(
     guard = "admit",
     decode_with = "decode::<_, ECHO>",
     encode_with = "encode::<_, ECHO>"
@@ -38,7 +38,7 @@ fn wire_echo(input: Vec<u8>) -> Vec<u8> {
     input
 }
 
-#[ic_platform::cdk::update(
+#[ic_platform_runtime::cdk::update(
     guard = "admit",
     decode_with = "decode::<_, SET>",
     encode_with = "encode::<_, SET>"
@@ -48,7 +48,7 @@ fn wire_set(input: Vec<u8>) -> Vec<u8> {
     input
 }
 
-#[ic_platform::cdk::update(
+#[ic_platform_runtime::cdk::update(
     guard = "admit",
     decode_with = "decode::<_, TIGHT>",
     encode_with = "encode::<_, TIGHT>"
@@ -58,7 +58,7 @@ fn wire_tight(input: Vec<u8>) -> Vec<u8> {
     input
 }
 
-#[ic_platform::cdk::update(
+#[ic_platform_runtime::cdk::update(
     guard = "admit",
     decode_with = "decode::<_, ALLOCATION>",
     encode_with = "encode::<_, ALLOCATION>"
@@ -68,7 +68,7 @@ fn wire_allocation(input: Vec<u8>) -> Vec<u8> {
     input
 }
 
-#[ic_platform::cdk::update(
+#[ic_platform_runtime::cdk::update(
     guard = "admit",
     decode_with = "decode::<_, DEPTH>",
     encode_with = "encode::<_, DEPTH>"
@@ -78,7 +78,7 @@ fn wire_depth(input: Vec<u8>) -> Vec<u8> {
     input
 }
 
-#[ic_platform::cdk::query(
+#[ic_platform_runtime::cdk::query(
     guard = "admit",
     decode_with = "decode::<_, OBSERVE>",
     encode_with = "encode::<_, OBSERVE>"
@@ -97,7 +97,7 @@ impl Drop for Cleanup {
     }
 }
 
-#[ic_platform::cdk::update(
+#[ic_platform_runtime::cdk::update(
     guard = "admit",
     decode_with = "decode::<_, AWAIT>",
     encode_with = "encode::<_, AWAIT>"
@@ -113,7 +113,7 @@ async fn wire_await(input: Vec<u8>) -> Vec<u8> {
     ic_wire::native::decode_response(ECHO, &response, RESPONSE).unwrap()
 }
 
-#[ic_platform::cdk::update(
+#[ic_platform_runtime::cdk::update(
     guard = "admit",
     decode_with = "decode::<_, ENCODE_TRAP>",
     encode_with = "encode::<_, ENCODE_TRAP>"

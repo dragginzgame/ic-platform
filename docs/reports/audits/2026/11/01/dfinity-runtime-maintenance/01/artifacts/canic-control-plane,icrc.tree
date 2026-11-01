@@ -1,0 +1,200 @@
+0canic v0.114.0 (/home/adam/projects/canic/crates/canic)
+1canic-contracts v0.114.0 (/home/adam/projects/canic/crates/canic-contracts)
+2ic-auth-protocol-types v0.29.0
+3ic-platform v0.15.3
+4ic-platform-types v0.15.1
+5crc32fast v1.5.3
+6cfg-if v1.0.5
+5data-encoding v2.11.1
+5ic_principal v0.1.5
+6crc32fast v1.5.3 (*)
+6data-encoding v2.11.1
+6serde v1.0.229
+7serde_core v1.0.229
+7serde_derive v1.0.229 (proc-macro)
+8proc-macro2 v1.0.107
+9unicode-ident v1.0.27
+8quote v1.0.47
+9proc-macro2 v1.0.107 (*)
+8syn v3.0.9
+9proc-macro2 v1.0.107 (*)
+9quote v1.0.47 (*)
+9unicode-ident v1.0.27
+6sha2 v0.10.9
+7cfg-if v1.0.5
+7digest v0.10.7
+8block-buffer v0.10.4
+9generic-array v0.14.9
+10typenum v1.20.1
+10version_check v0.9.5
+8crypto-common v0.1.6
+9generic-array v0.14.9 (*)
+9typenum v1.20.1
+6thiserror v1.0.69
+7thiserror-impl v1.0.69 (proc-macro)
+8proc-macro2 v1.0.107 (*)
+8quote v1.0.47 (*)
+8syn v2.0.119
+9proc-macro2 v1.0.107 (*)
+9quote v1.0.47 (*)
+9unicode-ident v1.0.27
+5serde v1.0.229 (*)
+5thiserror v2.0.18
+6thiserror-impl v2.0.18 (proc-macro)
+7proc-macro2 v1.0.107 (*)
+7quote v1.0.47 (*)
+7syn v2.0.119 (*)
+4ic_principal v0.1.5 (*)
+4serde v1.0.229 (*)
+4thiserror v2.0.18 (*)
+3serde v1.0.229 (*)
+3thiserror v2.0.18 (*)
+2ic-platform v0.16.0
+3candid v0.10.39
+4anyhow v1.0.104
+4binrw v0.15.2
+5array-init v2.1.0
+5binrw_derive v0.15.2 (proc-macro)
+6either v1.19.0
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6syn v2.0.119 (*)
+5bytemuck v1.25.2
+4byteorder v1.5.0
+4candid_derive v0.10.39 (proc-macro)
+5lazy_static v1.5.1
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119 (*)
+4hex v0.4.3
+4ic_principal v0.1.5 (*)
+4leb128 v0.2.7
+4num-bigint v0.4.8
+5num-integer v0.1.47
+6num-traits v0.2.19
+7autocfg v1.5.1
+5num-traits v0.2.19 (*)
+5serde v1.0.229 (*)
+4num-traits v0.2.19 (*)
+4paste v1.0.15 (proc-macro)
+4pretty v0.12.5
+5arrayvec v0.5.2
+5typed-arena v2.0.2
+5unicode-width v0.2.3
+4serde v1.0.229 (*)
+4serde_bytes v0.11.19
+5serde_core v1.0.229
+4thiserror v1.0.69 (*)
+3crc32fast v1.5.3 (*)
+3data-encoding v2.11.1
+3hex v0.4.3
+3ic-platform-macros v0.16.0 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+3ic-platform-runtime-guard v0.16.0
+3ic-platform-types v0.15.1 (*)
+3ic-stable-structures v0.7.2
+4ic_principal v0.1.5 (*)
+3ic_principal v0.1.5 (*)
+3num-bigint v0.4.8 (*)
+3num-traits v0.2.19 (*)
+3pin-project-lite v0.2.17
+3serde v1.0.229 (*)
+3serde_bytes v0.11.19 (*)
+3sha2 v0.10.9 (*)
+3slotmap v1.1.1
+4version_check v0.9.5
+3thiserror v2.0.18 (*)
+2ic-wire v0.13.3
+3bytemuck v1.25.2
+3ic-platform-types v0.15.1 (*)
+3ic-wire-derive v0.13.3 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+3postcard v1.1.3
+4cobs v0.3.0
+5thiserror v2.0.18 (*)
+4serde v1.0.229 (*)
+3serde v1.0.229 (*)
+3serde_bytes v0.11.19 (*)
+2num-bigint v0.4.8 (*)
+2remain v0.2.16 (proc-macro)
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v3.0.9 (*)
+2serde v1.0.229 (*)
+2serde_bytes v0.11.19 (*)
+2sha2 v0.10.9 (*)
+2thiserror v2.0.18 (*)
+1canic-control-plane v0.114.0 (/home/adam/projects/canic/crates/canic-control-plane)
+2async-trait v0.1.92 (proc-macro)
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v3.0.9 (*)
+2canic-contracts v0.114.0 (/home/adam/projects/canic/crates/canic-contracts) (*)
+2canic-core v0.114.0 (/home/adam/projects/canic/crates/canic-core)
+3async-trait v0.1.92 (proc-macro) (*)
+3canic-contracts v0.114.0 (/home/adam/projects/canic/crates/canic-contracts) (*)
+3ctor v1.0.13
+4linktime-proc-macro v0.2.3 (proc-macro)
+3ic-auth v0.29.0
+4ic-auth-protocol-types v0.29.0 (*)
+4ic-platform v0.15.3 (*)
+4sha2 v0.10.9 (*)
+4thiserror v2.0.18 (*)
+3ic-auth-protocol-types v0.29.0 (*)
+3ic-logging v0.23.5
+3ic-memory v0.60.6
+4ic-platform v0.16.0 (*)
+4ic-wire v0.13.3 (*)
+4serde v1.0.229 (*)
+4thiserror v2.0.18 (*)
+3ic-metrics v0.24.4
+4serde v1.0.229 (*)
+3ic-metrics-stable v0.61.4
+4ic-memory v0.60.6 (*)
+4ic-metrics v0.24.4 (*)
+4ic-storage v0.60.6
+5ic-memory v0.60.6 (*)
+5ic-platform v0.16.0 (*)
+5thiserror v2.0.18 (*)
+4ic-wire v0.13.3 (*)
+4serde v1.0.229 (*)
+4thiserror v2.0.18 (*)
+3ic-platform v0.16.0 (*)
+3ic-storage v0.60.6 (*)
+3ic-timers v0.35.3
+4ic-metrics v0.24.4 (*)
+4ic-platform v0.16.0 (*)
+4thiserror v2.0.18 (*)
+3ic-wire v0.13.3 (*)
+3num-bigint v0.4.8 (*)
+3remain v0.2.16 (proc-macro) (*)
+3serde v1.0.229 (*)
+3serde_bytes v0.11.19 (*)
+3serde_cbor v0.11.2
+4half v1.8.3
+4serde v1.0.229 (*)
+3sha2 v0.10.9 (*)
+3thiserror v2.0.18 (*)
+2ic-platform v0.16.0 (*)
+2ic-timers v0.35.3 (*)
+2ic-wire v0.13.3 (*)
+2serde v1.0.229 (*)
+2serde_json v1.0.154
+3itoa v1.0.18
+3memchr v2.8.3
+3serde_core v1.0.229
+3zmij v1.0.23
+2sha2 v0.10.9 (*)
+2thiserror v2.0.18 (*)
+1canic-core v0.114.0 (/home/adam/projects/canic/crates/canic-core) (*)
+1canic-macros v0.114.0 (proc-macro) (/home/adam/projects/canic/crates/canic-macros)
+2proc-macro2 v1.0.107 (*)
+2quote v1.0.47 (*)
+2syn v3.0.9 (*)
+1ic-platform v0.16.0 (*)
+1ic-wire v0.13.3 (*)
+1serde v1.0.229 (*)

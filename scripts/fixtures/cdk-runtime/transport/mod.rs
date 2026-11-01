@@ -1,9 +1,9 @@
 //! One fixture selects either the existing raw transport or the owned request.
-use ic_platform::Principal;
+use ic_platform_runtime::Principal;
 #[cfg(feature = "prepared-call")]
-use ic_platform::call::{Call, WaitPolicy};
+use ic_platform_runtime::call::{Call, WaitPolicy};
 #[cfg(not(feature = "prepared-call"))]
-use ic_platform::cdk::call::Call;
+use ic_platform_runtime::cdk::call::Call;
 
 #[cfg(feature = "prepared-call")]
 pub fn bounded_wait(target: Principal, method: &str) -> Call<'static, 'static> {

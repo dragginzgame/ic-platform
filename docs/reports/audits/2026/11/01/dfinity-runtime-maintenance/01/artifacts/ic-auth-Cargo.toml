@@ -1,0 +1,73 @@
+[workspace]
+members = [
+    # Tests and tooling packages
+    "apps/qualification/backend-conformance",
+    "apps/qualification/canister",
+    "apps/qualification/contracts",
+    "apps/qualification/feature-unification",
+    "apps/qualification/fixtures",
+    "apps/qualification/runner",
+    "apps/tooling",
+    # Production packages
+    "crates/ic-auth",
+    "crates/ic-auth-protocol-types",
+    "crates/ic-auth-wire",
+]
+resolver = "3"
+
+[workspace.package]
+version = "0.29.0"
+edition = "2024"
+rust-version = "1.91.0"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/dragginzgame/ic-auth"
+
+[workspace.dependencies]
+# Auth (coordinated)
+# Changelog : CHANGELOG.md
+ic-auth = { version = "0.29.0", path = "crates/ic-auth" }
+ic-auth-backend-conformance = { version = "0.29.0", path = "apps/qualification/backend-conformance" }
+ic-auth-feature-unification = { version = "0.29.0", path = "apps/qualification/feature-unification" }
+ic-auth-protocol-types = { version = "0.29.0", path = "crates/ic-auth-protocol-types" }
+ic-auth-qualification = { version = "0.29.0", path = "apps/qualification/runner" }
+ic-auth-qualification-canister = { version = "0.29.0", path = "apps/qualification/canister" }
+ic-auth-qualification-contracts = { version = "0.29.0", path = "apps/qualification/contracts" }
+ic-auth-qualification-fixtures = { version = "0.29.0", path = "apps/qualification/fixtures" }
+ic-auth-tooling = { version = "0.29.0", path = "apps/tooling" }
+ic-auth-wire = { version = "0.29.0", path = "crates/ic-auth-wire" }
+
+# Production dependencies
+# Platform owns Principal and imported signature code; other crypto identities stay upstream.
+# Principal is explicit; protocol, portable and session consumers need no IC runtime.
+ic-platform = { version = "0.16.0", default-features = false }
+# Host generation uses the lock-selected runtime and diagnostic callback.
+ic-wire = "0.13.3"
+leb128 = "0.2"
+serde = { version = "1", features = ["derive"] }
+serde_bytes = "0.11"
+serde_cbor = "0.11"
+sha2 = "0.10"
+thiserror = "2"
+
+# Tests and tooling only
+clap = { version = "4", default-features = false, features = ["derive", "error-context", "help", "std", "usage"] }
+dhat = "0.3.3"
+# Adversarial feature trigger only; production and test crypto APIs use Platform.
+ed25519-dalek = { version = "3.0", default-features = false }
+ic-build = { version = "0.73.4", default-features = false }
+ic-host-fs = { version = "0.73.4", default-features = false }
+ic-host-process = { version = "0.73.4", default-features = false }
+ic-memory = "0.60.6"
+ic-metrics = { version = "0.24.4", default-features = false }
+ic-storage = "0.60.6"
+ic-testkit = { version = "0.76.0", default-features = false }
+serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "time"] }
+
+[workspace.metadata.ic-auth]
+# Executable features are source-owned recovery inputs, not library features.
+release-editor-features = ["cli"]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

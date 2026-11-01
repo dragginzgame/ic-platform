@@ -30,13 +30,13 @@ jobs:
           make install-host-tools
           rustup toolchain install --profile minimal --no-self-update
           cargo install cargo-audit --version '=0.22.2' --locked
-      - name: Audit both maintained lockfiles
+      - name: Audit producer and composition lockfiles
         run: bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git "$RUNNER_TEMP/advisory-evidence"
       - name: Retain evidence in job log
         if: always()
         run: |
           evidence="$RUNNER_TEMP/advisory-evidence"
-          for file in revision tool-version prepare.log workspace.registry-prepare.status runtime.registry-prepare.status workspace.registry-prepare.log runtime.registry-prepare.log workspace.status runtime.status workspace.index-status runtime.index-status workspace.log runtime.log; do
+          for file in revision tool-version prepare.log workspace.registry-prepare.status runtime.registry-prepare.status workspace.registry-prepare.log runtime.registry-prepare.log workspace.status runtime.status workspace.index-status runtime.index-status workspace.log runtime.log composition.registry-prepare.status composition.registry-prepare.log composition.status composition.index-status composition.log; do
             if [[ -f "$evidence/$file" ]]; then
               printf '\nEvidence: %s\n' "$file"
               cat "$evidence/$file"

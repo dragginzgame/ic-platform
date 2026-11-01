@@ -1,0 +1,47 @@
+[package]
+name = "ic-blob-storage"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+description = "Independent blob-storage service library for Internet Computer canisters"
+readme = "../../README.md"
+
+[features]
+# Non-default heap reference owners and isolated probe/fault-injection access.
+test-support = ["ic-memory/test-support"]
+
+[dependencies]
+ic-blob-storage-contracts.workspace = true
+ic-memory.workspace = true
+ic-platform = { workspace = true, features = ["candid", "runtime", "management-canister-types"] }
+ic-storage.workspace = true
+ic-wire.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+hex.workspace = true
+ic-memory = { workspace = true, features = ["test-support"] }
+ic-platform = { workspace = true, features = ["principal-self-authenticating"] }
+
+[lints]
+workspace = true
+
+[[test]]
+name = "catalog_journey"
+required-features = ["test-support"]
+
+[[test]]
+name = "lifecycle_binding"
+required-features = ["test-support"]
+
+[[test]]
+name = "tenant_obligations"
+required-features = ["test-support"]
+
+[[test]]
+name = "upload_reads"
+required-features = ["test-support"]

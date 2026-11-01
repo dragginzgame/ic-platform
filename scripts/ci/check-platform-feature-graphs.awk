@@ -119,6 +119,7 @@ function reject(reason) {
         if (host_capability == "candid-parser" && !parser) reject("unselected host parser")
         if (host_capability == "agent" && !agent) reject("unselected host Agent")
         if (platform_forbidden("retired-cdk", name)) reject("external CDK/executor/IC0 supplier is retired")
+        if (name == "ic-platform-runtime" && !raw_system) reject("unselected runtime owner")
         if (name == "ic-platform-runtime-guard") {
             if (!executor || (line != guard && line != guard " (*)")) reject("unqualified runtime singleton guard")
             found_guard = 1

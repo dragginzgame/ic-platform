@@ -43,6 +43,7 @@ pub enum Method {
     BufferCopy = 0x2003,
     SelfWakeQuery = 0x2004,
     ManagementProof = 0x2005,
+    CancelTask = 0x2006,
     Absent = 0xffff,
 }
 pub fn method_id(name: &str) -> u64 {
@@ -81,6 +82,7 @@ pub fn method_id(name: &str) -> u64 {
         "buffer_copy" => Method::BufferCopy as u64,
         "self_wake_query" => Method::SelfWakeQuery as u64,
         "management_proof" => Method::ManagementProof as u64,
+        "cancel_task" => Method::CancelTask as u64,
         "no_such_method" => Method::Absent as u64,
         _ => panic!("unknown fixture endpoint: {name}"),
     }

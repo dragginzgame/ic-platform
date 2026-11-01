@@ -120,7 +120,7 @@ if [[ "$graph_family" != - ]]; then
                     grep -Eq '^(sha2|digest|candid) ' "$graph"; then
                     echo 'Principal byte/text capability acquired hashing or Candid' >&2; exit 1
                 fi
-                if [[ "$graph_family" == principal ]] && grep -q '^ic_principal ' "$graph"; then
+                if [[ "$graph_family" == principal || "$graph_family" == principal-self-authenticating ]] && grep -q '^ic_principal ' "$graph"; then
                     echo 'Owned Principal acquired the external identity' >&2; exit 1
                 fi ;;
             cdk|runtime|external-candid)

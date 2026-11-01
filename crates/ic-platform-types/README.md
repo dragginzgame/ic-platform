@@ -8,7 +8,9 @@ implementations. The independent series continues from published Types 0.15.0.
 
 The default feature set is empty. Bytes, bounded text and Serde are always
 available; `principal-external` adds registry Principal identities/conversions,
-and `principal-self-authenticating` selects unchanged upstream public-key hashing.
+and `principal-self-authenticating` selects the unchanged imported derivation with
+upstream SHA-224, independently of registry Principal. Enable both when external
+conversions are also required.
 There is no runtime, executor, Wire or Candid dependency.
 
 Existing Platform consumers keep their import paths. External bytes and account

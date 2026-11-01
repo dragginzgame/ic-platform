@@ -1,0 +1,566 @@
+0ic-platform v0.16.0 (/home/adam/projects/ic-platform/crates/ic-platform)
+1ic-agent v0.49.3
+2arc-swap v1.9.3
+3rustversion v1.0.23 (proc-macro)
+2async-channel v2.5.0
+3concurrent-queue v2.5.0
+4crossbeam-utils v0.8.23
+3event-listener-strategy v0.5.4
+4event-listener v5.4.2
+5parking v2.2.1
+5pin-project-lite v0.2.17
+4pin-project-lite v0.2.17
+3futures-core v0.3.34
+3pin-project-lite v0.2.17
+2async-lock v3.4.2
+3event-listener v5.4.2 (*)
+3event-listener-strategy v0.5.4 (*)
+3pin-project-lite v0.2.17
+2async-trait v0.1.92 (proc-macro)
+3proc-macro2 v1.0.107
+4unicode-ident v1.0.27
+3quote v1.0.47
+4proc-macro2 v1.0.107 (*)
+3syn v3.0.9
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4unicode-ident v1.0.27
+2backon v1.6.0
+3fastrand v2.5.0
+2bytes v1.12.1
+2cached v0.56.0
+3ahash v0.8.12
+4cfg-if v1.0.5
+4once_cell v1.21.4
+4zerocopy v0.8.63
+4version_check v0.9.5
+3hashbrown v0.15.5
+4allocator-api2 v0.2.21
+4equivalent v1.0.3
+4foldhash v0.1.5
+3once_cell v1.21.4
+3thiserror v2.0.18
+4thiserror-impl v2.0.18 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6unicode-ident v1.0.27
+3web-time v1.1.0
+2candid v0.10.39
+3anyhow v1.0.104
+3binrw v0.15.2
+4array-init v2.1.0
+4binrw_derive v0.15.2 (proc-macro)
+5either v1.19.0
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119 (*)
+4bytemuck v1.25.2
+3byteorder v1.5.0
+3candid_derive v0.10.39 (proc-macro)
+4lazy_static v1.5.1
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v2.0.119 (*)
+3hex v0.4.3
+3ic_principal v0.1.5
+4crc32fast v1.5.3
+5cfg-if v1.0.5
+4data-encoding v2.11.1
+4rangemap v1.8.0
+4serde v1.0.229
+5serde_core v1.0.229
+5serde_derive v1.0.229 (proc-macro)
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6syn v3.0.9 (*)
+4sha2 v0.10.9
+5cfg-if v1.0.5
+5cpufeatures v0.2.17
+5digest v0.10.7
+6block-buffer v0.10.4
+7generic-array v0.14.9
+8typenum v1.20.1
+8zeroize v1.9.1
+9zeroize_derive v1.5.0 (proc-macro)
+10proc-macro2 v1.0.107 (*)
+10quote v1.0.47 (*)
+10syn v2.0.119 (*)
+8version_check v0.9.5
+6const-oid v0.9.6
+6crypto-common v0.1.6
+7generic-array v0.14.9 (*)
+7typenum v1.20.1
+6subtle v2.6.1
+4thiserror v1.0.69
+5thiserror-impl v1.0.69 (proc-macro)
+6proc-macro2 v1.0.107 (*)
+6quote v1.0.47 (*)
+6syn v2.0.119 (*)
+3leb128 v0.2.7
+3num-bigint v0.4.8
+4num-integer v0.1.47
+5num-traits v0.2.19
+6autocfg v1.5.1
+4num-traits v0.2.19 (*)
+4serde v1.0.229 (*)
+3num-traits v0.2.19 (*)
+3paste v1.0.15 (proc-macro)
+3pretty v0.12.5
+4arrayvec v0.5.2
+4typed-arena v2.0.2
+4unicode-width v0.2.3
+3serde v1.0.229 (*)
+3serde_bytes v0.11.19
+4serde_core v1.0.229
+3stacker v0.1.25
+4cfg-if v1.0.5
+4libc v0.2.191
+4psm v0.1.32
+5ar_archive_writer v0.5.3
+6object v0.39.1
+7memchr v2.8.3
+5cc v1.10.0
+6find-msvc-tools v0.1.15
+6jobserver v0.1.35
+7libc v0.2.191
+6libc v0.2.191
+6shlex v2.0.1
+4cc v1.10.0 (*)
+3thiserror v1.0.69 (*)
+2ecdsa v0.16.9
+3der v0.7.10
+4const-oid v0.9.6
+4pem-rfc7468 v0.7.0
+5base64ct v1.8.3
+4zeroize v1.9.1 (*)
+3digest v0.10.7 (*)
+3elliptic-curve v0.13.8
+4base16ct v0.2.0
+4crypto-bigint v0.5.5
+5generic-array v0.14.9 (*)
+5rand_core v0.6.4
+6getrandom v0.2.17
+7cfg-if v1.0.5
+7libc v0.2.191
+5subtle v2.6.1
+5zeroize v1.9.1 (*)
+4digest v0.10.7 (*)
+4ff v0.13.1
+5rand_core v0.6.4 (*)
+5subtle v2.6.1
+4generic-array v0.14.9 (*)
+4group v0.13.0
+5ff v0.13.1 (*)
+5rand_core v0.6.4 (*)
+5subtle v2.6.1
+4pem-rfc7468 v0.7.0 (*)
+4pkcs8 v0.10.2
+5der v0.7.10 (*)
+5spki v0.7.3
+6der v0.7.10 (*)
+4rand_core v0.6.4 (*)
+4sec1 v0.7.3
+5base16ct v0.2.0
+5der v0.7.10 (*)
+5generic-array v0.14.9 (*)
+5pkcs8 v0.10.2 (*)
+5subtle v2.6.1
+5zeroize v1.9.1 (*)
+4subtle v2.6.1
+4zeroize v1.9.1 (*)
+3rfc6979 v0.4.0
+4hmac v0.12.1
+5digest v0.10.7 (*)
+4subtle v2.6.1
+3signature v2.2.0
+4digest v0.10.7 (*)
+4rand_core v0.6.4 (*)
+3spki v0.7.3 (*)
+2ed25519-consensus v2.1.0
+3curve25519-dalek-ng v4.1.1
+4byteorder v1.5.0
+4digest v0.9.0
+5generic-array v0.14.9 (*)
+4rand_core v0.6.4 (*)
+4subtle-ng v2.5.0
+4zeroize v1.9.1 (*)
+3hex v0.4.3
+3rand_core v0.6.4 (*)
+3serde v1.0.229 (*)
+3sha2 v0.9.9
+4block-buffer v0.9.0
+5generic-array v0.14.9 (*)
+4cfg-if v1.0.5
+4cpufeatures v0.2.17
+4digest v0.9.0 (*)
+4opaque-debug v0.3.1
+3thiserror v1.0.69 (*)
+3zeroize v1.9.1 (*)
+2elliptic-curve v0.13.8 (*)
+2futures-util v0.3.34
+3futures-core v0.3.34
+3futures-io v0.3.34
+3futures-macro v0.3.34 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+3futures-sink v0.3.34
+3futures-task v0.3.34
+3memchr v2.8.3
+3pin-project-lite v0.2.17
+3slab v0.4.12
+2hex v0.4.3
+2http v1.5.0
+3bytes v1.12.1
+3itoa v1.0.18
+2http-body v1.1.0
+3bytes v1.12.1
+3http v1.5.0 (*)
+2http-body-util v0.1.5
+3bytes v1.12.1
+3futures-core v0.3.34
+3http v1.5.0 (*)
+3http-body v1.1.0 (*)
+3pin-project-lite v0.2.17
+2ic-certification v3.2.0
+3hex v0.4.3
+3serde v1.0.229 (*)
+3serde_bytes v0.11.19 (*)
+3sha2 v0.10.9 (*)
+2ic-ed25519 v0.6.0
+3curve25519-dalek v4.1.3
+4cfg-if v1.0.5
+4cpufeatures v0.2.17
+4curve25519-dalek-derive v0.1.1 (proc-macro)
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5syn v2.0.119 (*)
+4digest v0.10.7 (*)
+4group v0.13.0 (*)
+4rand_core v0.6.4 (*)
+4subtle v2.6.1
+4zeroize v1.9.1 (*)
+4rustc_version v0.4.1
+5semver v1.0.28
+3ed25519-dalek v2.2.0
+4curve25519-dalek v4.1.3 (*)
+4ed25519 v2.2.3
+5pkcs8 v0.10.2 (*)
+5signature v2.2.0 (*)
+4merlin v3.0.0
+5byteorder v1.5.0
+5keccak v0.1.6
+5rand_core v0.6.4 (*)
+5zeroize v1.9.1 (*)
+4rand_core v0.6.4 (*)
+4sha2 v0.10.9 (*)
+4signature v2.2.0 (*)
+4subtle v2.6.1
+4zeroize v1.9.1 (*)
+3hex-literal v0.4.1
+3hkdf v0.12.4
+4hmac v0.12.1 (*)
+3ic_principal v0.1.5 (*)
+3pem v3.0.6
+4base64 v0.22.1
+3rand v0.8.8
+4libc v0.2.191
+4rand_chacha v0.3.1
+5ppv-lite86 v0.2.21
+6zerocopy v0.8.63
+5rand_core v0.6.4 (*)
+4rand_core v0.6.4 (*)
+3thiserror v2.0.18 (*)
+3zeroize v1.9.1 (*)
+2ic-transport-types v0.49.3
+3candid v0.10.39 (*)
+3hex v0.4.3
+3ic-certification v3.2.0 (*)
+3leb128 v0.2.7
+3serde v1.0.229 (*)
+3serde_bytes v0.11.19 (*)
+3serde_cbor v0.11.2
+4half v1.8.3
+4serde v1.0.229 (*)
+3serde_repr v0.1.21 (proc-macro)
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4syn v3.0.9 (*)
+3sha2 v0.10.9 (*)
+3thiserror v2.0.18 (*)
+2ic-verify-bls-signature v0.6.0
+3hex v0.4.3
+3ic_bls12_381 v0.10.1
+4digest v0.10.7 (*)
+4ff v0.13.1 (*)
+4group v0.13.0 (*)
+4pairing v0.23.0
+5group v0.13.0 (*)
+4rand_core v0.6.4 (*)
+4subtle v2.6.1
+3lazy_static v1.5.1
+3pairing v0.23.0 (*)
+3rand v0.8.8 (*)
+3sha2 v0.10.9 (*)
+2ic_principal v0.1.5 (*)
+2k256 v0.13.4
+3cfg-if v1.0.5
+3ecdsa v0.16.9 (*)
+3elliptic-curve v0.13.8 (*)
+3once_cell v1.21.4
+3sha2 v0.10.9 (*)
+3signature v2.2.0 (*)
+2leb128 v0.2.7
+2p256 v0.13.2
+3ecdsa v0.16.9 (*)
+3elliptic-curve v0.13.8 (*)
+3primeorder v0.13.6
+4elliptic-curve v0.13.8 (*)
+3sha2 v0.10.9 (*)
+2pem v3.0.6 (*)
+2pkcs8 v0.10.2 (*)
+2rand v0.10.3
+3chacha20 v0.10.2
+4cfg-if v1.0.5
+4cpufeatures v0.3.1
+4rand_core v0.10.1
+3getrandom v0.4.3
+4cfg-if v1.0.5
+4libc v0.2.191
+4rand_core v0.10.1
+3rand_core v0.10.1
+2rangemap v1.8.0
+2reqwest v0.13.5
+3base64 v0.23.1
+3bytes v1.12.1
+3futures-channel v0.3.34
+4futures-core v0.3.34
+4futures-sink v0.3.34
+3futures-core v0.3.34
+3futures-util v0.3.34 (*)
+3http v1.5.0 (*)
+3http-body v1.1.0 (*)
+3http-body-util v0.1.5 (*)
+3hyper v1.12.0
+4atomic-waker v1.1.2
+4bytes v1.12.1
+4futures-core v0.3.34
+4http v1.5.0 (*)
+4http-body v1.1.0 (*)
+4httparse v1.10.1
+4itoa v1.0.18
+4pin-project-lite v0.2.17
+4smallvec v1.16.4
+4tokio v1.54.1
+5bytes v1.12.1
+5libc v0.2.191
+5mio v1.2.4
+6libc v0.2.191
+5pin-project-lite v0.2.17
+5socket2 v0.6.5
+6libc v0.2.191
+4want v0.3.2
+5try-lock v0.2.5
+3hyper-rustls v0.27.10
+4http v1.5.0 (*)
+4hyper v1.12.0 (*)
+4hyper-util v0.1.21
+5base64 v0.23.1
+5bytes v1.12.1
+5futures-channel v0.3.34 (*)
+5futures-util v0.3.34 (*)
+5http v1.5.0 (*)
+5http-body v1.1.0 (*)
+5httparse v1.10.1
+5hyper v1.12.0 (*)
+5ipnet v2.12.2
+5libc v0.2.191
+5percent-encoding v2.3.2
+5pin-project-lite v0.2.17
+5socket2 v0.6.5 (*)
+5tokio v1.54.1 (*)
+5tower-service v0.3.3
+5tracing v0.1.44
+6pin-project-lite v0.2.17
+6tracing-core v0.1.36
+7once_cell v1.21.4
+4rustls v0.23.46
+5aws-lc-rs v1.19.0
+6aws-lc-sys v0.47.0
+7cc v1.10.0 (*)
+7cmake v0.1.58
+8cc v1.10.0 (*)
+7dunce v1.0.5
+7fs_extra v1.3.0
+7pkg-config v0.3.34
+6zeroize v1.9.1 (*)
+5once_cell v1.21.4
+5rustls-pki-types v1.15.1
+6zeroize v1.9.1 (*)
+5rustls-webpki v0.103.16
+6aws-lc-rs v1.19.0 (*)
+6rustls-pki-types v1.15.1 (*)
+6untrusted v0.9.0
+5subtle v2.6.1
+5zeroize v1.9.1 (*)
+4tokio v1.54.1 (*)
+4tokio-rustls v0.26.6
+5rustls v0.23.46 (*)
+5tokio v1.54.1 (*)
+4tower-service v0.3.3
+3hyper-util v0.1.21 (*)
+3log v0.4.35
+3percent-encoding v2.3.2
+3pin-project-lite v0.2.17
+3rustls v0.23.46 (*)
+3rustls-pki-types v1.15.1 (*)
+3rustls-platform-verifier v0.7.1
+4log v0.4.35
+4rustls v0.23.46 (*)
+4rustls-native-certs v0.8.5
+5openssl-probe v0.2.2
+5rustls-pki-types v1.15.1 (*)
+4rustls-webpki v0.103.16 (*)
+3serde v1.0.229 (*)
+3serde_json v1.0.154
+4itoa v1.0.18
+4memchr v2.8.3
+4serde_core v1.0.229
+4zmij v1.0.23
+3sync_wrapper v1.0.2
+4futures-core v0.3.34
+3tokio v1.54.1 (*)
+3tokio-rustls v0.26.6 (*)
+3tokio-util v0.7.20
+4bytes v1.12.1
+4futures-core v0.3.34
+4futures-sink v0.3.34
+4pin-project-lite v0.2.17
+4tokio v1.54.1 (*)
+3tower v0.5.3
+4futures-core v0.3.34
+4futures-util v0.3.34 (*)
+4pin-project-lite v0.2.17
+4sync_wrapper v1.0.2 (*)
+4tokio v1.54.1 (*)
+4tower-layer v0.3.3
+4tower-service v0.3.3
+3tower-http v0.6.11
+4bitflags v2.13.2
+4bytes v1.12.1
+4futures-util v0.3.34 (*)
+4http v1.5.0 (*)
+4http-body v1.1.0 (*)
+4pin-project-lite v0.2.17
+4tower v0.5.3 (*)
+4tower-layer v0.3.3
+4tower-service v0.3.3
+4url v2.5.8
+5form_urlencoded v1.2.2
+6percent-encoding v2.3.2
+5idna v1.1.0
+6idna_adapter v1.2.2
+7icu_normalizer v2.4.0
+8icu_collections v2.4.0
+9displaydoc v0.2.7 (proc-macro)
+10proc-macro2 v1.0.107 (*)
+10quote v1.0.47 (*)
+10syn v3.0.9 (*)
+9potential_utf v0.1.6
+10zerovec v0.11.9
+11yoke v0.8.4
+12stable_deref_trait v1.2.1
+12yoke-derive v0.8.4 (proc-macro)
+13proc-macro2 v1.0.107 (*)
+13quote v1.0.47 (*)
+13syn v3.0.9 (*)
+13synstructure v0.14.0
+14proc-macro2 v1.0.107 (*)
+14quote v1.0.47 (*)
+14syn v3.0.9 (*)
+12zerofrom v0.1.8
+13zerofrom-derive v0.1.8 (proc-macro)
+14proc-macro2 v1.0.107 (*)
+14quote v1.0.47 (*)
+14syn v3.0.9 (*)
+14synstructure v0.14.0 (*)
+11zerofrom v0.1.8 (*)
+11zerovec-derive v0.11.7 (proc-macro)
+12proc-macro2 v1.0.107 (*)
+12quote v1.0.47 (*)
+12syn v3.0.9 (*)
+9utf8_iter v1.1.0
+10utf_types v1.0.0
+9yoke v0.8.4 (*)
+9zerofrom v0.1.8 (*)
+9zerovec v0.11.9 (*)
+8icu_normalizer_data v2.4.0
+8icu_provider v2.4.0
+9displaydoc v0.2.7 (proc-macro) (*)
+9icu_locale_core v2.4.0
+10displaydoc v0.2.7 (proc-macro) (*)
+10litemap v0.8.3
+10tinystr v0.8.5
+11displaydoc v0.2.7 (proc-macro) (*)
+11zerovec v0.11.9 (*)
+10writeable v0.6.4
+10zerovec v0.11.9 (*)
+9writeable v0.6.4
+9yoke v0.8.4 (*)
+9zerofrom v0.1.8 (*)
+9zerotrie v0.2.5
+10displaydoc v0.2.7 (proc-macro) (*)
+10yoke v0.8.4 (*)
+10zerofrom v0.1.8 (*)
+9zerovec v0.11.9 (*)
+8smallvec v1.16.4
+8zerovec v0.11.9 (*)
+7icu_properties v2.4.0
+8displaydoc v0.2.7 (proc-macro) (*)
+8icu_collections v2.4.0 (*)
+8icu_locale_core v2.4.0 (*)
+8icu_properties_data v2.4.0
+8icu_provider v2.4.0 (*)
+8zerotrie v0.2.5 (*)
+8zerovec v0.11.9 (*)
+6smallvec v1.16.4
+6utf8_iter v1.1.0 (*)
+5percent-encoding v2.3.2
+3tower-service v0.3.3
+3url v2.5.8 (*)
+2sec1 v0.7.3 (*)
+2serde v1.0.229 (*)
+2serde_bytes v0.11.19 (*)
+2serde_cbor v0.11.2 (*)
+2serde_repr v0.1.21 (proc-macro) (*)
+2sha2 v0.10.9 (*)
+2stop-token v0.7.0
+3async-channel v1.9.0
+4concurrent-queue v2.5.0 (*)
+4event-listener v2.5.3
+4futures-core v0.3.34
+3cfg-if v1.0.5
+3futures-core v0.3.34
+3pin-project-lite v0.2.17
+2thiserror v2.0.18 (*)
+2time v0.3.55
+3deranged v0.5.9
+3num-conv v0.2.2
+3powerfmt v0.2.1
+3time-core v0.1.9
+2tokio v1.54.1 (*)
+2tower-service v0.3.3
+2url v2.5.8 (*)
+1ic-certification v3.2.0 (*)
+1ic-platform-types v0.15.1 (/home/adam/projects/ic-platform/crates/ic-platform-types)
+2crc32fast v1.5.3 (*)
+2data-encoding v2.11.1
+2ic_principal v0.1.5 (*)
+2serde v1.0.229 (*)
+2thiserror v2.0.18 (*)
+1ic_principal v0.1.5 (*)
+1serde v1.0.229 (*)
+1thiserror v2.0.18 (*)

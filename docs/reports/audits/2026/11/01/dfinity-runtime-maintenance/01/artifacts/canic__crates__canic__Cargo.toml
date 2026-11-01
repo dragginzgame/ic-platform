@@ -1,0 +1,76 @@
+[package]
+name = "canic"
+edition = { workspace = true }
+rust-version = { workspace = true }
+version = { workspace = true }
+license = { workspace = true }
+description = { workspace = true }
+readme = "README.md"
+documentation = "https://docs.rs/canic"
+homepage = { workspace = true }
+repository = { workspace = true }
+keywords = { workspace = true }
+categories = { workspace = true }
+publish = true
+
+[features]
+default = []
+icrc = ["ic-platform/icrc-ledger-types"]
+control-plane = ["dep:canic-control-plane", "canic-control-plane/root-control-plane"]
+fleet-coordinator-canister = ["dep:canic-control-plane", "canic-control-plane/fleet-coordinator-canister"]
+wasm-store-canister = ["dep:canic-control-plane", "canic-control-plane/wasm-store-canister"]
+sharding = ["canic-core/sharding"]
+auth-chain-key-ecdsa = ["canic-core/auth-chain-key-ecdsa"]
+auth-chain-key-root-sign = ["canic-core/auth-chain-key-root-sign"]
+auth-local-application-authorization = ["canic-core/auth-local-application-authorization"]
+auth-root-canister-sig-create = ["canic-core/auth-root-canister-sig-create"]
+auth-root-canister-sig-verify = ["canic-core/auth-root-canister-sig-verify"]
+auth-issuer-canister-sig-create = ["canic-core/auth-issuer-canister-sig-create"]
+auth-issuer-canister-sig-verify = ["canic-core/auth-issuer-canister-sig-verify"]
+auth-delegated-token-verify = ["canic-core/auth-delegated-token-verify"]
+internal-test-fixtures = ["canic-core/internal-test-fixtures"]
+wire-schema = [
+    "canic-contracts/wire-schema",
+    "dep:serde_json",
+    "dep:ic-host-artifacts",
+    "dep:clap",
+]
+testing = ["dep:ic-testkit", "ic-platform/pocket-ic"]
+
+[dependencies]
+canic-contracts.workspace = true
+canic-control-plane = { workspace = true, default-features = false, optional = true }
+canic-core = { workspace = true }
+canic-macros = { workspace = true }
+ic-platform = { workspace = true, features = ["cdk", "candid-service", "executor", "ic0"] }
+ic-wire.workspace = true
+serde = { workspace = true }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+clap = { workspace = true, optional = true }
+ic-host-artifacts = { workspace = true, features = ["wasm"], optional = true }
+ic-testkit = { workspace = true, features = ["wire"], optional = true }
+serde_json = { workspace = true, optional = true }
+toml = { workspace = true }
+
+[dev-dependencies]
+ic-platform = { workspace = true, features = ["cdk", "candid-parser"] }
+syn = { workspace = true, features = ["full", "visit"] }
+
+[lints]
+workspace = true
+
+[[test]]
+name = "wire_schema"
+path = "tests/wire_schema/mod.rs"
+required-features = ["wire-schema"]
+
+[[test]]
+name = "icrc_adapter"
+path = "tests/icrc_adapter/mod.rs"
+required-features = ["icrc"]
+
+[[test]]
+name = "icrc_discovery"
+path = "tests/icrc_discovery/mod.rs"
+required-features = ["icrc"]

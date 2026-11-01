@@ -39,6 +39,7 @@ runtime|ic-platform-runtime-guard v0.1.13 (/other)|reject
 none|ic-wire v0.6.4|reject
 principal|ic-wire v0.6.4|reject
 principal|ic-wire-derive v0.9.0|reject
+principal|ic-platform-runtime v0.17.0 (/fixture)|reject
 executor|ic_principal v0.1.5|reject
 ic0|serde v1.0.229|reject
 executor,ic0|sha2 v0.10.9|reject
@@ -50,6 +51,8 @@ signature-verification,principal-external|ic_principal v0.1.5|pass
 principal-external|ic_principal v0.1.5|pass
 principal-external|sha2 v0.10.9|reject
 principal-self-authenticating|sha2 v0.10.9|pass
+principal-self-authenticating|ic_principal v0.1.5|reject
+principal-self-authenticating,principal-external|ic_principal v0.1.5|pass
 runtime|ic_principal v0.1.5|reject
 runtime|sha2 v0.10.9|reject
 cdk|digest v0.10.7|reject

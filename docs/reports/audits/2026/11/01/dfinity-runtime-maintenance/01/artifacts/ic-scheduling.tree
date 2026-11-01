@@ -1,0 +1,25 @@
+0ic-timers v0.35.2 (/home/adam/projects/ic-scheduling/crates/ic-timers)
+1ic-metrics v0.24.4
+2serde v1.0.229
+3serde_core v1.0.229
+3serde_derive v1.0.229 (proc-macro)
+4proc-macro2 v1.0.107
+5unicode-ident v1.0.27
+4quote v1.0.47
+5proc-macro2 v1.0.107 (*)
+4syn v3.0.9
+5proc-macro2 v1.0.107 (*)
+5quote v1.0.47 (*)
+5unicode-ident v1.0.27
+1ic-platform v0.16.0
+2ic-platform-runtime-guard v0.16.0
+2slotmap v1.1.1
+3version_check v0.9.5
+1thiserror v2.0.18
+2thiserror-impl v2.0.18 (proc-macro)
+3proc-macro2 v1.0.107 (*)
+3quote v1.0.47 (*)
+3syn v2.0.119
+4proc-macro2 v1.0.107 (*)
+4quote v1.0.47 (*)
+4unicode-ident v1.0.27

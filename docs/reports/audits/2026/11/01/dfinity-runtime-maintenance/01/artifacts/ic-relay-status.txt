@@ -1,0 +1,23 @@
+ M .shared-tooling.snapshot
+ M AGENTS.md
+ M CHANGELOG.md
+ M Cargo.lock
+ M README.md
+ M crates/ic-relay-persistence-probe/examples/admission/automatic.rs
+ M crates/ic-relay-persistence-probe/examples/admission/installed/automatic.rs
+ M crates/ic-relay-persistence-probe/examples/admission/installed/schedule.rs
+ M crates/ic-relay-persistence-probe/examples/admission/protocol/automatic.rs
+ M crates/ic-relay-persistence-probe/examples/admission/runner.rs
+ M crates/ic-relay/src/runtime/mod.rs
+ M crates/ic-relay/src/runtime/tests.rs
+ M docs/aggregate-admission-probe.md
+ M docs/canic-adoption.md
+ M docs/design.md
+ M docs/development.md
+ M docs/dispatch-selection.md
+ M docs/runtime.md
+ M scripts/ci/run-release.sh
+ M scripts/ci/test-release-runner.sh
+ M scripts/release/test-release.sh
+?? crates/ic-relay/src/runtime/selected.rs
+?? docs/evidence/selected-runtime-20261101/

@@ -2,7 +2,7 @@
 # Read-only migration guard; Shared's runner retains all recovery authorization.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-case "${RELEASE_GROUP:-}" in platform|types) ;; *) echo 'Select RELEASE_GROUP=platform or RELEASE_GROUP=types' >&2; exit 2 ;; esac
+case "${RELEASE_GROUP:-}" in platform|runtime|types) ;; *) echo 'Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types' >&2; exit 2 ;; esac
 [[ $# == 1 ]] || exit 2
 perl scripts/ci/validate-release-inputs.pl version "$1" > /dev/null
 plan="$(git rev-parse --git-path release-state)/$RELEASE_GROUP-$1.plan"

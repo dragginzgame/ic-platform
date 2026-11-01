@@ -1,12 +1,12 @@
 # Prepared calls
 
-`ic_platform::call` owns prepared, one-shot calls inside the originating canister. It delegates to
+`ic_platform_runtime::call` owns prepared, one-shot calls inside the originating canister. It delegates to
 IC Platform's raw runtime and preserves that implementation's executor,
 callback cleanup, response and error identities. It adds method/argument custody;
 it does not install another runtime or proxy canister.
 
 ```rust
-use ic_platform::call::{Call, Principal, WaitPolicy};
+use ic_platform_runtime::call::{Call, Principal, WaitPolicy};
 
 fn prepare(target: Principal) -> Call<'static, 'static> {
     let method = String::from("runtime-selected-method");

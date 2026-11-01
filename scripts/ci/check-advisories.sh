@@ -10,39 +10,50 @@ cargo audit --version
 bash "$root/scripts/ci/prepare-rustsec-db.sh" "$1" "$2" "$3"
 evidence="$(cd "$3" && pwd -P)"
 cargo audit --version > "$evidence/tool-version"
-# Capture both inputs before registry preparation; audit only these snapshots.
-for name in workspace runtime; do
+# Capture each input before registry preparation; audit only these snapshots.
+for name in workspace runtime composition; do
     lock="$root/Cargo.lock"
     if [[ "$name" == runtime ]]; then lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"; fi
+    if [[ "$name" == composition ]]; then lock="$root/scripts/fixtures/timers-runtime/Cargo.lock"; fi
     cp "$lock" "$evidence/$name.lock"
 done
+status=0
 if [[ "$1" == online ]]; then
-    # --no-fetch also disables cargo-audit's index update. Prepare both locked
+    # --no-fetch also disables cargo-audit's index update. Prepare each locked
     # workspaces explicitly, in a fresh Cargo home so records are current and
     # neither preparation nor auditing contends with the user's package cache.
     export CARGO_HOME="$evidence/cargo-home"
     mkdir "$CARGO_HOME"
-    for name in workspace runtime; do
+    for name in workspace runtime composition; do
         result=0
         lock="$root/Cargo.lock"
-        if [[ "$name" == runtime ]]; then
+        if [[ "$name" != workspace ]]; then
             lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
+            selection=()
+            if [[ "$name" == composition ]]; then
+                lock="$root/scripts/fixtures/timers-runtime/Cargo.lock"
+                selection=(--timers)
+            fi
             # The qualification workspace is generated from maintained templates.
             # Reuse its existing prepare mode instead of inventing another renderer.
-            bash "$root/scripts/ci/check-platform-runtime.sh" --prepare > "$evidence/$name.registry-prepare.log" 2>&1 || result=$?
+            bash "$root/scripts/ci/check-platform-runtime.sh" ${selection[@]+"${selection[@]}"} --prepare > "$evidence/$name.registry-prepare.log" 2>&1 || result=$?
         else
             cargo fetch --locked --manifest-path "$root/Cargo.toml" > "$evidence/$name.registry-prepare.log" 2>&1 || result=$?
         fi
         cat "$evidence/$name.registry-prepare.log"
-        printf '%s\n' "$result" > "$evidence/$name.registry-prepare.status"
-        [[ "$result" == 0 ]] || exit "$result"
         cmp "$lock" "$evidence/$name.lock" || {
-            echo "The $name lockfile changed during registry preparation" >&2; exit 1;
+            echo "The $name lockfile changed during registry preparation" >&2; result=1;
         }
+        printf '%s\n' "$result" > "$evidence/$name.registry-prepare.status"
+        if [[ "$result" != 0 ]]; then status=1; fi
     done
 fi
-status=0
-for name in workspace runtime; do
+for name in workspace runtime composition; do
+    if [[ "$1" == online && "$(cat "$evidence/$name.registry-prepare.status")" != 0 ]]; then
+        printf 'not-run\n' > "$evidence/$name.status"
+        printf 'unavailable\n' > "$evidence/$name.index-status"
+        continue
+    fi
     result=0
     cargo audit --no-fetch --db "$evidence/db" --file "$evidence/$name.lock" --color never \
         > "$evidence/$name.log" 2>&1 || result=$?

@@ -18,10 +18,10 @@
   {"dependency": "ic-error-types", "allowed_packages": ["ic-platform"]},
   {"dependency": "ic-cdk-executor", "allowed_packages": []},
   {"dependency": "ic-cdk-macros", "allowed_packages": []},
-  {"dependency": "ic-platform-macros", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic-platform-macros", "allowed_packages": ["ic-platform", "ic-platform-runtime"]},
   {"dependency": "ic-cdk-timers", "allowed_packages": []},
   {"dependency": "ic-stable-structures", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-platform-runtime-guard", "allowed_packages": ["ic-platform"]},
+  {"dependency": "ic-platform-runtime-guard", "allowed_packages": ["ic-platform-runtime"]},
   {"dependency": "ic-transport-types", "allowed_packages": ["ic-platform-pocket-ic"]},
   {"dependency": "ic-platform-pocket-ic", "allowed_packages": ["ic-platform"]}
 ]

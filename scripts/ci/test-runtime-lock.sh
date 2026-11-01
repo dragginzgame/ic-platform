@@ -2,94 +2,64 @@
 set -euo pipefail
 unset RELEASE_GROUP RELEASE_COMMIT
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-# shellcheck source=scripts/ci/fixture-lifecycle.sh
 source "$root/scripts/ci/fixture-lifecycle.sh"
 fixture="$(fixture_create "${TMPDIR:-/tmp}/platform-runtime-lock.XXXXXX")"
 fixture_complete=false
 trap 'fixture_finish "$?" "$fixture" "Runtime lock fixture retained"' EXIT
-mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/fixtures/cdk-runtime" "$fixture/.tools" "$fixture/ci" "$fixture/crates/ic-platform-types" "$fixture/crates/ic-platform"
+mkdir -p "$fixture/scripts/release" "$fixture/scripts/fixtures" "$fixture/.tools" "$fixture/ci" "$fixture/crates"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 cp "$root/scripts/release/"{runtime-lock.sh,runtime-pin.sh} "$fixture/scripts/release/"
-cp "$root/ci/"{release-editor.env,dependency-pinning-exceptions.json} "$fixture/ci/"
+cp "$root/ci/"{cargo-release-groups.json,release-editor.env,dependency-pinning-exceptions.json} "$fixture/ci/"
+cp -R "$root/scripts/fixtures/"{cdk-runtime,timers-runtime} "$fixture/scripts/fixtures/"
 editor="$(bash "$root/scripts/release/editor.sh" check)"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" %q\n' "$editor" > "$fixture/scripts/release/editor.sh"
-lock="$fixture/scripts/fixtures/cdk-runtime/Cargo.lock"
-cp "$root/scripts/fixtures/cdk-runtime/Cargo.lock" "$lock"
-export YQ="$root/.tools/host/bin/yq"
 export PATH="$root/.tools/host/bin:$PATH"
-version="$("$YQ" -p toml -o json -r '.package.version' "$root/crates/ic-platform/Cargo.toml")"
-types="$("$YQ" -p toml -o json -r '.package.version' "$root/crates/ic-platform-types/Cargo.toml")"
+for package in ic-platform ic-platform-runtime ic-platform-types; do
+    mkdir "$fixture/crates/$package"
+    cp "$root/crates/$package/Cargo.toml" "$fixture/crates/$package/"
+done
 printf '[workspace]\n' > "$fixture/Cargo.toml"
-printf '[package]\nversion = "%s"\n' "$version" > "$fixture/crates/ic-platform/Cargo.toml"
-printf '[package]\nversion = "%s"\n' "$types" > "$fixture/crates/ic-platform-types/Cargo.toml"
 bash "$fixture/scripts/release/runtime-lock.sh" check
-# The historical actual lock contains no local Types record. Types preparation
-# must preserve that graph rather than inventing a newly qualified owner.
-if ! "$YQ" -p toml -o json '.' "$lock" | jq -e 'any(.package[]; .source == null and .name == "ic-platform-types")' > /dev/null; then
-    cp "$lock" "$fixture/historical.lock"
-    printf '[package]\nversion = "99.1.0"\n' > "$fixture/crates/ic-platform-types/Cargo.toml"
-    RELEASE_GROUP=types bash "$fixture/scripts/release/runtime-lock.sh" prepare "$types"
-    cmp "$lock" "$fixture/historical.lock"
-    printf '[package]\nversion = "%s"\n' "$types" > "$fixture/crates/ic-platform-types/Cargo.toml"
-    printf '\n[[package]]\nname = "ic-platform-types"\nversion = "%s"\n' "$types" >> "$lock"
-fi
-# Exercise a recorded implementation owner as well as the historical lock above.
-if ! "$YQ" -p toml -o json '.' "$lock" | jq -e 'any(.package[]; .source == null and .name == "ic-platform-pocket-ic")' > /dev/null; then
-    printf '\n[[package]]\nname = "ic-platform-pocket-ic"\nversion = "%s"\n' "$version" >> "$lock"
-fi
-cp "$lock" "$fixture/before.lock"
-printf '[package]\nversion = "99.0.0"\n' > "$fixture/crates/ic-platform/Cargo.toml"
-if bash "$fixture/scripts/release/runtime-lock.sh" check > "$fixture/stale.log" 2>&1; then exit 1; fi
-if RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" prepare 98.0.0 > "$fixture/wrong-base.log" 2>&1; then exit 1; fi
-cmp "$lock" "$fixture/before.lock"
-RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
-bash "$fixture/scripts/release/runtime-lock.sh" check
-# Runtime-only changes preserve the independent owner and registry identities.
-# Registry dependents (notably Timers) must retarget their local runtime edge too.
-for side in before after; do
-    selected="$lock"; [[ "$side" != before ]] || selected="$fixture/before.lock"
-    "$YQ" -p toml -o json '.' "$selected" | jq -S --arg before "$version" '
-      [.package[] | select(.source != null or (.name != "ic-platform" and .name != "ic-platform-macros" and .name != "ic-platform-runtime-guard" and .name != "ic-platform-pocket-ic")) |
-       if .dependencies != null then .dependencies |= map(
-         if . == "ic-platform 99.0.0" then "ic-platform " + $before
-         elif . == "ic-platform-macros 99.0.0" then "ic-platform-macros " + $before
-         elif . == "ic-platform-pocket-ic 99.0.0" then "ic-platform-pocket-ic " + $before
-         elif . == "ic-platform-runtime-guard 99.0.0" then "ic-platform-runtime-guard " + $before else . end)
-       else . end]' > "$fixture/$side.json"
+for group in platform runtime types; do
+    primary="$(jq -r --arg group "$group" '.groups[] | select(.name == $group) | .primary' "$fixture/ci/cargo-release-groups.json")"
+    members="$(jq -r --arg group "$group" '.groups[] | select(.name == $group) | .members | join(" ")' "$fixture/ci/cargo-release-groups.json")"
+    previous="$(yq -p toml -r '.package.version' "$fixture/crates/$primary/Cargo.toml")"
+    for profile in cdk-runtime timers-runtime; do
+        cp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.before"
+    done
+    printf '[package]\nversion = "99.1.0"\n' > "$fixture/crates/$primary/Cargo.toml"
+    if bash "$fixture/scripts/release/runtime-lock.sh" check > "$fixture/$group-stale.log" 2>&1; then exit 1; fi
+    if RELEASE_GROUP="$group" bash "$fixture/scripts/release/runtime-lock.sh" prepare 98.0.0 > "$fixture/$group-wrong.log" 2>&1; then exit 1; fi
+    for profile in cdk-runtime timers-runtime; do cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.before"; done
+    RELEASE_GROUP="$group" bash "$fixture/scripts/release/runtime-lock.sh" prepare "$previous"
+    bash "$fixture/scripts/release/runtime-lock.sh" check
+    for profile in cdk-runtime timers-runtime; do
+        lock="$fixture/scripts/fixtures/$profile/Cargo.lock"
+        # shellcheck disable=SC2086 # Validated group roster contains package names.
+        "$editor" --max-input-bytes 1048576 lock "$lock" 99.1.0 "$previous" $members > "$fixture/restored"
+        cmp "$fixture/restored" "$fixture/$profile.before"
+        cp "$lock" "$fixture/$profile.after"
+    done
+    RELEASE_GROUP="$group" bash "$fixture/scripts/release/runtime-lock.sh" prepare "$previous"
+    for profile in cdk-runtime timers-runtime; do cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.after"; done
+    if [[ "$group" == runtime ]]; then
+        if bash "$fixture/scripts/release/runtime-pin.sh" check > "$fixture/pin-stale.log" 2>&1; then exit 1; fi
+        cp "$fixture/ci/dependency-pinning-exceptions.json" "$fixture/pins-before"
+        if RELEASE_GROUP=runtime bash "$fixture/scripts/release/runtime-pin.sh" prepare 98.0.0 > "$fixture/pin-wrong.log" 2>&1; then exit 1; fi
+        cmp "$fixture/pins-before" "$fixture/ci/dependency-pinning-exceptions.json"
+        RELEASE_GROUP=runtime bash "$fixture/scripts/release/runtime-pin.sh" prepare "$previous"
+    fi
+    bash "$fixture/scripts/release/runtime-pin.sh" check
 done
-cmp "$fixture/before.json" "$fixture/after.json"
-cp "$lock" "$fixture/runtime.lock"
-RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" prepare "$version"
-cmp "$lock" "$fixture/runtime.lock"
-# The reverse direction updates only the recorded Types owner.
-printf '[package]\nversion = "99.1.0"\n' > "$fixture/crates/ic-platform-types/Cargo.toml"
-if RELEASE_GROUP=types bash "$fixture/scripts/release/runtime-lock.sh" prepare 98.0.0 > "$fixture/type-wrong.log" 2>&1; then exit 1; fi
-cmp "$lock" "$fixture/runtime.lock"
-RELEASE_GROUP=types bash "$fixture/scripts/release/runtime-lock.sh" prepare "$types"
-RELEASE_GROUP=types bash "$fixture/scripts/release/runtime-lock.sh" check
-for side in before after; do
-    selected="$lock"; [[ "$side" != before ]] || selected="$fixture/runtime.lock"
-    "$YQ" -p toml -o json '.' "$selected" | jq -S --arg before "$types" '
-      [.package[] | select(.source != null or .name != "ic-platform-types") |
-       if .dependencies != null then .dependencies |= map(
-         if . == "ic-platform-types 99.1.0" then "ic-platform-types " + $before else . end)
-       else . end]' > "$fixture/$side-types.json"
-done
-cmp "$fixture/before-types.json" "$fixture/after-types.json"
-cp "$lock" "$fixture/types.lock"
-RELEASE_GROUP=types bash "$fixture/scripts/release/runtime-lock.sh" prepare "$types"
-cmp "$lock" "$fixture/types.lock"
-# Exact guard-pin custody remains with the platform group.
-if bash "$fixture/scripts/release/runtime-pin.sh" check > "$fixture/pin-stale.log" 2>&1; then exit 1; fi
-cp "$fixture/ci/dependency-pinning-exceptions.json" "$fixture/before-pins.json"
-if RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-pin.sh" prepare 98.0.0 > "$fixture/pin-wrong.log" 2>&1; then exit 1; fi
-cmp "$fixture/before-pins.json" "$fixture/ci/dependency-pinning-exceptions.json"
-RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-pin.sh" prepare "$version"
-bash "$fixture/scripts/release/runtime-pin.sh" check
-for side in before after; do
-    selected="$fixture/ci/dependency-pinning-exceptions.json"; [[ "$side" != before ]] || selected="$fixture/before-pins.json"
-    jq 'map(select(.subject != "ic-platform-runtime-guard"))' "$selected" > "$fixture/$side-other-pins.json"
-done
-cmp "$fixture/before-other-pins.json" "$fixture/after-other-pins.json"
+# Missing or duplicated singleton evidence never silently passes custody.
+lock="$fixture/scripts/fixtures/cdk-runtime/Cargo.lock"
+cp "$lock" "$fixture/complete.lock"
+perl -0pi -e 's/\[\[package\]\]\nname = "ic-platform-runtime-guard"\n.*?(?=\[\[package\]\]|\z)//s' "$lock"
+if bash "$fixture/scripts/release/runtime-lock.sh" check > "$fixture/missing.log" 2>&1; then exit 1; fi
+grep -q 'missing local ic-platform-runtime-guard' "$fixture/missing.log"
+cp "$fixture/complete.lock" "$lock"
+printf '\n[[package]]\nname = "ic-platform-runtime-guard"\nversion = "99.1.0"\n' >> "$lock"
+if bash "$fixture/scripts/release/runtime-lock.sh" check > "$fixture/duplicate.log" 2>&1; then exit 1; fi
+for temporary in "$fixture"/scripts/fixtures/*/Cargo.lock.*; do [[ ! -e "$temporary" ]] || exit 1; done
 fixture_complete=true
-echo 'Independent runtime/Types lock updates, historical graph preservation, wrong-base refusal and retry passed'
+echo 'All three groups preserve unrelated lock identities; wrong-base/missing/duplicate refusals and retry pass.'

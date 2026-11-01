@@ -1,0 +1,2 @@
+25aeaad27f937d375c01b79cf30118cc0058271ffb2e0eda00be2167f2681300  /home/adam/projects/canic/Cargo.toml
+13041b264b1eb4827388ff2c55682868f10819f88249020f33272621ec140457  /home/adam/projects/canic/Cargo.lock

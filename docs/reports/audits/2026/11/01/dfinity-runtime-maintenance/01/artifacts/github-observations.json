@@ -1,0 +1,11 @@
+{
+  "observedDate": "2026-11-01",
+  "canicPrinter": {
+    "url": "https://github.com/dragginzgame/canic/pull/717",
+    "state": "open",
+    "merged": false,
+    "mergeable": false,
+    "head": "f982f454090f18ba4d55fdc01c06a83b6c35e999",
+    "basis": "GitHub get_pr_info read during audit; status can change"
+  }
+}

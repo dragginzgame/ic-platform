@@ -3,6 +3,7 @@ members = [
     "crates/ic-platform",
     "crates/ic-platform-macros",
     "crates/ic-platform-pocket-ic",
+    "crates/ic-platform-runtime",
     "crates/ic-platform-runtime-guard",
     "crates/ic-platform-types",
 ]
@@ -20,9 +21,13 @@ repository = "https://github.com/dragginzgame/ic-platform"
 # Platform
 # Changelog : releases/platform/CHANGELOG.md
 ic-platform = { version = "0.16.0", path = "crates/ic-platform", default-features = false }
-ic-platform-macros = { version = "0.16.0", path = "crates/ic-platform-macros" }
 ic-platform-pocket-ic = { version = "0.16.0", path = "crates/ic-platform-pocket-ic", default-features = false }
-ic-platform-runtime-guard = { version = "=0.16.0", path = "crates/ic-platform-runtime-guard", default-features = false }
+
+# Runtime
+# Changelog : releases/runtime/CHANGELOG.md
+ic-platform-macros = { version = "0.17.0", path = "crates/ic-platform-macros" }
+ic-platform-runtime = { version = "0.17.0", path = "crates/ic-platform-runtime", default-features = false }
+ic-platform-runtime-guard = { version = "=0.17.0", path = "crates/ic-platform-runtime-guard", default-features = false }
 
 # Types
 # Changelog : releases/types/CHANGELOG.md
@@ -92,7 +97,9 @@ serde_json = "1.0"
 assert_matches = "1.5"
 ic-representation-independent-hash = "4.0.1"
 ic-testkit = "0.72.0"
-ic-timers = "0.35.0"
+# Qualification-only committed adoption source; return to a registry selection
+# after the independent Runtime and matching Timers releases are published.
+ic-timers = { version = "0.35.4", git = "https://github.com/dragginzgame/ic-scheduling", rev = "036fd50c08c2c1d05ab1cb2381abc7b8f1a36103" }
 ic-wire = "0.10.0"
 libfuzzer-sys = "0.4.13"
 rand = "0.8"

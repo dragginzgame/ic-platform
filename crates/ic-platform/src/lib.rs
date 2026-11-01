@@ -44,7 +44,7 @@ pub mod blake3;
 #[cfg(feature = "bls")]
 pub mod bls;
 #[cfg(feature = "runtime")]
-pub mod call;
+pub use ic_platform_runtime::call;
 #[cfg(feature = "candid")]
 pub mod candid;
 #[cfg(all(feature = "candid-parser", not(target_family = "wasm")))]
@@ -66,9 +66,9 @@ pub mod ecdsa;
 #[cfg(feature = "ed25519")]
 pub mod ed25519;
 #[cfg(feature = "executor")]
-pub mod executor;
+pub use ic_platform_runtime::executor;
 #[cfg(feature = "ic0")]
-pub mod ic0;
+pub use ic_platform_runtime::ic0;
 #[cfg(feature = "icp-ledger-types")]
 pub mod icp_ledger_types;
 #[cfg(feature = "nns-registry-types")]
@@ -87,3 +87,7 @@ pub mod stable_structures;
 
 #[cfg(all(feature = "pocket-ic", not(target_family = "wasm")))]
 pub mod pocket_ic;
+
+#[cfg(feature = "runtime")]
+#[doc(hidden)]
+pub use ic_platform_runtime::__platform_println;

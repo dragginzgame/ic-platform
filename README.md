@@ -1,8 +1,9 @@
 # IC Platform
 
 Platform re-exports canonical Principal/Account identities from ic-platform-types.
-The facade/macros/native PocketIC implementation/runtime guard and Types remain in one workspace with independent
-release groups, explicit package versions and releases/ ledgers. Unrelated runtime
+Platform (facade and native PocketIC client), Runtime (runtime, macros and exact
+guard), and Types have independent release groups in one workspace. Each group
+owns explicit versions and its canonical releases/ ledger. Unrelated runtime
 releases retain the same compatible type supplier; see
 [the migration contract](docs/migration.md#stable-owned-identity-package-118).
 
@@ -34,7 +35,8 @@ executor/IC0-only builds omit application types. Select `principal-external` for
 `principal::ExternalPrincipal` and `.into()` conversions at external boundaries.
 This adds byte conversions without self-authentication. Required Candid/client
 features select it automatically. Select `principal-self-authenticating` explicitly
-for the unchanged upstream public-key hashing implementation. Default features
+for the unchanged imported derivation using upstream SHA-224, without registry
+Principal. Select both features when external conversions are also needed. Default features
 remain empty. See the [packaging migration](docs/migration.md#minimal-principal-and-selected-icrc-packaging).
 
 | Feature | Implemented contract |
@@ -42,7 +44,7 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `blake3` | Upstream `hash`, `Hasher` and `Hash`; native/Wasm with `std`, no IC codecs, threading or memory mapping |
 | `principal` | Owned Principal/Account bytes, text and Serde; no external Principal, hashing or Candid |
 | `principal-external` | Registry Principal identity and byte conversions; implies principal, no hashing or Candid |
-| `principal-self-authenticating` | Explicit unchanged upstream self-authentication; implies principal-external |
+| `principal-self-authenticating` | Unchanged imported self-authentication using upstream SHA-224; implies principal |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `bls` | Maintained BLS wrapper and private curve arithmetic, typed errors and optimized verification; no production RNG, Candid or DFINITY registry dependency |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
@@ -51,7 +53,7 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `runtime` | Raw calls, system and task adapters at `cdk::*`, without entrypoint macros |
 | `candid-parser` | Native external Candid parsing/type checking, service equality and dynamic refusal fixtures; owned bindings use Wire |
 | `canister-sig-creation` | Imported signature public-key formats, root-key constants and hashing; no Candid/ic0 or store API |
-| `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one embedded executor |
+| `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one canonical Runtime executor |
 | `certification` | Maintained certificate/hash-tree and mutable tree types, constructors, lookup and hashing; no registry certification, Candid or executor |
 | `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |
 | `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
@@ -137,17 +139,20 @@ TypeScript, adapters and packed consumers. Node/npm setup identities live in
 selects its development compiler independently.
 
 `bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git /tmp/platform-advisory-attempt`
-audits both maintained lockfiles without compiling feature matrices. Prepare
+audits the workspace, owner-runtime and Timers-composition locks independently without compiling feature matrices. Prepare
 `cargo-audit` explicitly first (CI selects 0.22.2) and prepare common host tools;
-the destination must be new. Online mode performs two locked dependency fetches
+the destination must be new. Online mode performs three locked dependency fetches
 in a fresh `CARGO_HOME` under the evidence directory, including the runtime's
 existing `--prepare` operation. This downloads registry data and crate sources
 without compiling or sharing the user's package-cache lock.
+Failed preparation marks that graph's audit unavailable and fails the aggregate;
+successful producer audits still run and retain their results.
 For offline inspection, replace `online URL` with `local DATABASE_REPOSITORY`
 and select an already prepared Cargo cache through `CARGO_HOME` when needed.
 The isolated database revision, tool version, copied locks, registry preparation,
 logs and raw audit statuses are retained. Separate `*.index-status` files report
-complete/incomplete coverage; index failures reject even if cargo-audit exits zero.
+complete/incomplete coverage, or unavailable after preparation failure; index
+failures reject even if cargo-audit exits zero.
 Offline results do not establish advisory or registry freshness. Known vulnerabilities
 fail the check; informational maintenance warnings remain visible and are not
 exemptions. Yanked versions retain cargo-audit's existing warning policy; missing
@@ -236,24 +241,24 @@ checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.
 Every release, resume and publication command requires an explicit group:
 
-`make release-patch RELEASE_GROUP=platform` releases the facade, macros and
-exact runtime guard. `make release-patch RELEASE_GROUP=types` releases the
+`make release-patch RELEASE_GROUP=platform` releases the facade and native client.
+`make release-patch RELEASE_GROUP=runtime` releases Runtime, macros and exact guard. `make release-patch RELEASE_GROUP=types` releases the
 canonical type supplier. No group is inferred from changed files or PACKAGE.
 All members use literal package versions; root Cargo stores common metadata and
-dependencies. The [root changelog](CHANGELOG.md) indexes the two group ledgers
+dependencies. The [root changelog](CHANGELOG.md) indexes the three group ledgers
 and preserved coordinated history.
 Root dependency blocks name each group once, with a separate changelog comment.
 Their path entries catalog every member's full version and retain requirement
 operators. The unused facade entry adds no dependency edge. Dependency and release
 checks enforce complete catalog/alias coverage,
-owned paths and current full versions across both groups.
+owned paths and current full versions across all three groups.
 
 `make publish-check RELEASE_GROUP=platform` packages/verifies that group without
 uploading; `make publish RELEASE_GROUP=platform` uploads clean committed packages
 in Cargo dependency order. Select types explicitly for its separate publication.
 `PACKAGE='name ...'` may narrow the selected group after partial-publication
-reconciliation; cross-group batches refuse. When both groups change, publish the
-supplier group first, then its compatible consumer group. Both retain full gates,
+reconciliation; cross-group batches refuse. When several groups change, publish the
+supplier group first, then its compatible consumer group. All retain full gates,
 transactional runtime metadata and exact source/group-bound resume. Publication
 does not bump versions, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
@@ -262,6 +267,11 @@ is not the full release gate or native macOS qualification. No upload retries ar
 automatic: after an interrupted dispatch, reconcile every dispatched exact registry
 package version before invoking publication again. Partial publication is not rolled back. A successful upload command alone does not
 prove registry visibility or consumer adoption.
+
+For focused release-recovery changes, run
+`bash scripts/ci/test-platform-group-preparation.sh runtime` (or `platform`/`types`).
+Omitting the group exercises all three. These fixtures use disposable local Git
+remotes and substitute the full release gate; they do not release this checkout.
 
 Plain `cargo clean` removes the whole workspace `target/`, including nested build
 caches and evidence. Keep evidence that must survive explicit cleanup elsewhere.
@@ -277,7 +287,7 @@ The reviewed Shared Tooling revision is recorded in [the snapshot](.shared-tooli
 `ic-platform` owns the low-level boundary; its `call` module adds prepared one-shot
 requests with owned or borrowed methods and bytes through its existing runtime.
 The module uses the existing `runtime` feature and adds no dependencies or codecs.
-See [the call contract](crates/ic-platform/src/call/README.md). `ic-platform-macros` is the production
+See [the call contract](crates/ic-platform-runtime/src/call/README.md). `ic-platform-macros` is the production
 proc-macro support package. Its Syn/Quote dependencies generate consumer
 entrypoints. Principal, Candid, the host parser, Agent, certification, raw IC calls,
 management/ledger DTOs, signature/BLS APIs, the executor and Serde are production
@@ -403,21 +413,33 @@ All RPCs and installation/upgrade arguments use Wire in both selections.
 The fixture checks raw awaits, composite queries, guard/malformed-frame refusal,
 all four explicit request allowances, response-encoding traps, callback cleanup,
 weak/protected/migratory spawning, submission-pressure and insufficient-cycle
-errors, timer cancellation/rearm, upgrade, cycle/refund counters, stable-byte
+errors, direct executor cancellation, upgrade, cycle/refund counters, stable-byte
 rollback and certificate lookup. It installs no alternative executor.
 
 Run `make check-runtime-lock` for coordinated lock, graph and imported-source
 checks, or `bash scripts/ci/check-platform-runtime.sh --check-graph` without
 compiling/starting a server. Source fingerprints protect the imported call,
 callback/trap cleanup and protected-spawn regions; mutation cases test refusal.
-The sole executor and IC0 implementation now live inside Platform; the fixture
-selects Timers 0.35.1 against that same local owner.
+The sole executor and IC0 implementation live inside Platform. The owner fixture
+has no Timers dependency. `make check-runtime-composition` reuses the fixture with
+Timers 0.35.3, adding dispatch, callback trap/cleanup, cancellation, rearm and
+post-upgrade dispatch. `make check-runtime-all` runs both paths even if one fails.
+PR CI reports independent jobs; release verification requires both paths to pass.
+The prepared release version must also pass composition graph admission, preventing
+a version bump from silently invalidating the tested scheduler selection.
+No scheduler version mismatch waives that release requirement. This split does
+not change runtime package identity or executor singleton admission.
+After preparing both profiles' caches, `make check-runtime-independence` exercises
+the real resolver with incompatible Timers 0.35.1 in a disposable copy: owner
+graphs must pass and composition must fail the singleton constraint.
 
 Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
 `IC_TESTKIT_POCKET_IC_URL`. The harness retains Testkit's bounded startup and
 teardown. It never installs a server implicitly. Artifacts, sources and metadata
 remain in `target/cdk-runtime.*`. Normal runs use the maintained frozen selection
-in `scripts/fixtures/cdk-runtime/Cargo.lock`; explicit `--refresh-lock` is a
+in `scripts/fixtures/cdk-runtime/Cargo.lock` (owner) or
+`scripts/fixtures/timers-runtime/Cargo.lock` (composition). Prefix the runtime
+script's mode with `--timers` to select composition; explicit `--refresh-lock` is a
 reviewed dependency refresh, not normal validation. `--build-only` compiles both
 protocol selections without starting a server. Runtime qualification remains an
 explicit target outside local full CI. Native macOS and live IC are separate

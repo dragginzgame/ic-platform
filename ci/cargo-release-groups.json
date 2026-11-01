@@ -7,19 +7,12 @@
       "version": "package",
       "members": [
         "ic-platform",
-        "ic-platform-macros",
-        "ic-platform-pocket-ic",
-        "ic-platform-runtime-guard"
+        "ic-platform-pocket-ic"
       ],
       "changelog": "releases/platform/CHANGELOG.md",
       "dependencies": [
         "ic-platform",
-        "ic-platform-macros",
-        "ic-platform-pocket-ic",
-        "ic-platform-runtime-guard"
-      ],
-      "metadata_files": [
-        "ci/dependency-pinning-exceptions.json"
+        "ic-platform-pocket-ic"
       ]
     },
     {
@@ -33,9 +26,29 @@
       "dependencies": [
         "ic-platform-types"
       ]
+    },
+    {
+      "name": "runtime",
+      "primary": "ic-platform-runtime",
+      "version": "package",
+      "members": [
+        "ic-platform-runtime",
+        "ic-platform-macros",
+        "ic-platform-runtime-guard"
+      ],
+      "changelog": "releases/runtime/CHANGELOG.md",
+      "dependencies": [
+        "ic-platform-runtime",
+        "ic-platform-macros",
+        "ic-platform-runtime-guard"
+      ],
+      "metadata_files": [
+        "ci/dependency-pinning-exceptions.json"
+      ]
     }
   ],
   "shared_metadata_files": [
-    "scripts/fixtures/cdk-runtime/Cargo.lock"
+    "scripts/fixtures/cdk-runtime/Cargo.lock",
+    "scripts/fixtures/timers-runtime/Cargo.lock"
   ]
 }

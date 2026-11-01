@@ -6,7 +6,7 @@ cd "$root"
 [[ $# == 1 ]] || exit 2
 group="${RELEASE_GROUP:-}"
 helper="$root/scripts/ci/cargo-release-group.sh"
-case "$group" in platform|types) ;; *) echo "Select RELEASE_GROUP=platform or RELEASE_GROUP=types (received: $group)" >&2; exit 2 ;; esac
+case "$group" in platform|runtime|types) ;; *) echo "Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types (received: $group)" >&2; exit 2 ;; esac
 case "$1" in
     version) exec bash "$helper" version "$group" ;;
     primary|changelog|members)
@@ -19,16 +19,18 @@ case "$1" in
         declared="$(mktemp "${TMPDIR:-/tmp}/platform-group-files.XXXXXX")"
         trap 'rm -f "$declared"' EXIT
         bash "$helper" files "$group" > "$declared"
-        has_lock=false has_pin=false
+        has_lock=false has_composition=false has_pin=false
         while IFS= read -r -d '' path; do
             printf '%s\0' "$path"
             case "$path" in
                 scripts/fixtures/cdk-runtime/Cargo.lock) has_lock=true ;;
+                scripts/fixtures/timers-runtime/Cargo.lock) has_composition=true ;;
                 ci/dependency-pinning-exceptions.json) has_pin=true ;;
             esac
         done < "$declared"
         [[ "$has_lock" == true ]] || printf 'scripts/fixtures/cdk-runtime/Cargo.lock\0'
-        if [[ "$group" == platform && "$has_pin" != true ]]; then printf 'ci/dependency-pinning-exceptions.json\0'; fi
+        [[ "$has_composition" == true ]] || printf 'scripts/fixtures/timers-runtime/Cargo.lock\0'
+        if [[ "$group" == runtime && "$has_pin" != true ]]; then printf 'ci/dependency-pinning-exceptions.json\0'; fi
         ;;
     ready)
         scratch="$(mktemp -d "${TMPDIR:-/tmp}/platform-group-readiness.XXXXXX")"
@@ -37,7 +39,7 @@ case "$1" in
         bash "$helper" files "$group" > "$scratch/declared"
         bash "$0" files > "$scratch/required"
         if ! cmp -s "$scratch/declared" "$scratch/required"; then
-            echo 'release refused: Shared group custody must also admit the required runtime fixture lock and exact guard-pin exception; their checks cannot be omitted' >&2
+            echo 'release refused: Shared group custody must also admit the required runtime fixture locks and exact guard-pin exception; their checks cannot be omitted' >&2
             ready=false
         fi
         # shellcheck source=ci/release-editor.env
