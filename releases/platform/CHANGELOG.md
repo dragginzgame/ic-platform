@@ -6,7 +6,7 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ## [0.15.4] - Unreleased
 
-### 🛠️ Fixed
+### 🩹 Fixed
 
 - Scope native entrypoint symbols to the consuming Cargo crate so multiple
   canister libraries can link in one host process. Retain portable method-name
