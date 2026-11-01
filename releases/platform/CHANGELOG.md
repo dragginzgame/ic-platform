@@ -13,6 +13,9 @@ See also the [Types ledger](../types/CHANGELOG.md).
   encoding and exact Wasm exports, codecs, guards and executor contexts.
   [#129](https://github.com/dragginzgame/ic-platform/issues/129).
 
+- Align the installed runtime fixture with Timers 0.35 and its shared embedded
+  executor. Refresh its maintained qualification lock through the fixture owner.
+
 ## [0.15.3] - 2026-10-31
 
 ### ⬆️ Dependencies
