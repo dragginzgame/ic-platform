@@ -39,7 +39,8 @@ query exceeded the normal instruction limit; splitting the independent suites
 into three queries passed without raising limits. Failed and successful artifacts
 are retained. This is Linux simulator evidence, not live IC or sibling adoption.
 Evidence: /tmp/platform-updates-20261101; graphs: target/feature-graphs/attempt.k2VHLO.
-Full CI remains release-owned.
+Full CI is selected by the current deployment request and runs through the
+standard release gate.
 
 The [remaining external repository inventory](../ic-inventory.md#remaining-external-dfinity-repositories-pending-016)
 records seven Rust DFINITY repositories. Only candid/stable-structures appear in
@@ -89,12 +90,15 @@ Fixed old bytes and isolated Auth qualification passed. See
 [measurements/evidence](../benchmarks/upstream-2026-10-31/README.md),
 /tmp/platform-ecdsa-footprint-20261031 and /tmp/platform-bls-adoption-20261031.
 
-Merged main #130 selects published Timers 0.35.1 and scopes native entrypoint
-symbols by consuming crate, retaining exact Wasm exports and a linkage regression.
-Its earlier Platform 0.15 runtime qualification covers:
-Wire/external-Candid callbacks, traps, cancellation, upgrades and rollback passed
-on both compilers with Testkit 0.72.1/PocketIC 16.0.0. Platform 0.16 still requires
-coordinated Timers adoption/qualification. No later sibling adoption is claimed.
+Merged main #130 scopes native entrypoint symbols by consuming crate, retaining
+exact Wasm exports and a linkage regression. Integrated source 8d39150 passes
+full Clippy and all eight installed raw/prepared-call, Wire/external-Candid
+journeys on Rust 1.99.1 and 1.91.0 with Timers 0.35.1, Testkit 0.72.1 and
+PocketIC 16.0.0. Evidence: /tmp/platform-016-clippy.log,
+/tmp/platform-016-installed-runtime.log and target/cdk-runtime.g6Ksnu.
+This qualification precedes the minor-version transaction: Timers still requires
+Platform 0.15. Publish Platform first; production runtime consumers must wait for
+Timers' coordinated 0.16 dependency adoption and composition qualification.
 
 ## Release custody and native profile
 
