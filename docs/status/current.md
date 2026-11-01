@@ -41,6 +41,10 @@ are retained. This is Linux simulator evidence, not live IC or sibling adoption.
 Evidence: /tmp/platform-updates-20261101; graphs: target/feature-graphs/attempt.k2VHLO.
 Full CI is selected by the current deployment request and runs through the
 standard release gate.
+The first gate stopped before version mutation on a stale grouped-preparation
+test: a Types release now legitimately retargets its local runtime-lock record.
+The assertion now reverses only that owner/version and requires byte-identical
+remaining lock content. Initial evidence: /tmp/platform-016-release.log.
 
 The [remaining external repository inventory](../ic-inventory.md#remaining-external-dfinity-repositories-pending-016)
 records seven Rust DFINITY repositories. Only candid/stable-structures appear in
