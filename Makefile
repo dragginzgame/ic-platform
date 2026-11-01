@@ -71,27 +71,28 @@ publish-check: host-tools-check
 	bash scripts/release/publish.sh check
 
 check:
-	cargo check -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked
+	cargo check -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-targets --all-features --locked
 test:
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
-	cargo test -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
+	cargo test -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --locked
 clippy:
-	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked -- -D warnings
+	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-targets --all-features --locked -- -D warnings
 docs-check:
-	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --no-deps --locked
 wasm-check:
 	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 msrv: host-tools-check
 	@set -eu; \
 	platform_msrv="$$(bash scripts/ci/read-platform-msrv.sh)"; \
-	cargo +"$$platform_msrv" test -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked; \
+	cargo +"$$platform_msrv" test -p ic-platform -p ic-platform-types -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --locked; \
 	cargo +"$$platform_msrv" check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 .PHONY: check-primitives
 check-primitives:
+	bash scripts/ci/check-pocket-ic-source.sh
 	@for target in "$$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do \
 		for features in - executor runtime blake3 runtime,blake3; do \
 			bash scripts/ci/check-blake3-graph.sh "$(CURDIR)" ic-platform "$$target" "$$features" || exit $$?; \
@@ -128,7 +129,7 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform/src/call/README.md crates/ic-platform-macros/README.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform/src/call/README.md crates/ic-platform-macros/README.md crates/ic-platform-pocket-ic/README.md crates/ic-platform-pocket-ic/upstream/NOTICE.md
 .PHONY: check-inventory
 .PHONY: check-native-provider
 check-native-provider:

@@ -33,6 +33,10 @@ if ! "$YQ" -p toml -o json '.' "$lock" | jq -e 'any(.package[]; .source == null 
     printf '[package]\nversion = "%s"\n' "$types" > "$fixture/crates/ic-platform-types/Cargo.toml"
     printf '\n[[package]]\nname = "ic-platform-types"\nversion = "%s"\n' "$types" >> "$lock"
 fi
+# Exercise a recorded implementation owner as well as the historical lock above.
+if ! "$YQ" -p toml -o json '.' "$lock" | jq -e 'any(.package[]; .source == null and .name == "ic-platform-pocket-ic")' > /dev/null; then
+    printf '\n[[package]]\nname = "ic-platform-pocket-ic"\nversion = "%s"\n' "$version" >> "$lock"
+fi
 cp "$lock" "$fixture/before.lock"
 printf '[package]\nversion = "99.0.0"\n' > "$fixture/crates/ic-platform/Cargo.toml"
 if bash "$fixture/scripts/release/runtime-lock.sh" check > "$fixture/stale.log" 2>&1; then exit 1; fi
@@ -45,10 +49,11 @@ bash "$fixture/scripts/release/runtime-lock.sh" check
 for side in before after; do
     selected="$lock"; [[ "$side" != before ]] || selected="$fixture/before.lock"
     "$YQ" -p toml -o json '.' "$selected" | jq -S --arg before "$version" '
-      [.package[] | select(.source != null or (.name != "ic-platform" and .name != "ic-platform-macros" and .name != "ic-platform-runtime-guard")) |
+      [.package[] | select(.source != null or (.name != "ic-platform" and .name != "ic-platform-macros" and .name != "ic-platform-runtime-guard" and .name != "ic-platform-pocket-ic")) |
        if .dependencies != null then .dependencies |= map(
          if . == "ic-platform 99.0.0" then "ic-platform " + $before
          elif . == "ic-platform-macros 99.0.0" then "ic-platform-macros " + $before
+         elif . == "ic-platform-pocket-ic 99.0.0" then "ic-platform-pocket-ic " + $before
          elif . == "ic-platform-runtime-guard 99.0.0" then "ic-platform-runtime-guard " + $before else . end)
        else . end]' > "$fixture/$side.json"
 done

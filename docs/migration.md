@@ -1295,8 +1295,10 @@ ic-memory changes are out of scope; no persisted representation is changed here.
 ## PocketIC maintenance boundary
 
 The optional native-only `pocket-ic` feature exposes `ic_platform::pocket_ic`.
-Platform owns the reviewed PocketIC 16.1.0 dependency and explicit client, error,
-settings/snapshot and fixture REST identities. No replacement structs, runtime,
+Pending Platform 0.17 owns the reviewed PocketIC 16.1.0 client source in
+`ic-platform-pocket-ic`, including client, error, settings/snapshot and fixture
+REST identities. Registry-client Rust identities change; HTTP/JSON and Candid
+bytes remain unchanged. No replacement protocol structs, runtime,
 server launcher or automatic client/server acceptance policy are introduced.
 Testkit retains provisioning, checksums, supported server versions, lifecycle,
 transport, retry behavior and product qualification.
@@ -1313,8 +1315,8 @@ only in Platform, while deployment graphs must exclude PocketIC and Testkit.
 The feature does not enable Platform Candid, executor or parser features, but
 PocketIC brings Candid, certification and native HTTP dependencies transitively.
 Its management DTOs are upstream 0.8.0 and must not be substituted with Platform
-management-canister-types 0.11.0. PocketIC 16.1.0 also requires thiserror 2.0.18;
-the lock selects that compatible version for existing 2.x consumers. These are
+management-canister-types 0.11.0. The maintained client uses the workspace
+thiserror requirement; the existing lock still selects 2.0.18. These are
 dependency-control changes, not transitive removal or Wasm-size claims.
 
 Standalone checks cover building without a server; Testkit adoption, actual
@@ -3055,3 +3057,10 @@ owner. Published Wire 0.12.1 itself selected Types 0.1, so this is source-aligne
 qualification, not published compatibility/adoption. Current/MSRV native/Wasm
 profiles cover identities, schemas, conversions and one runtime; identity-only
 graphs remain runtime/Candid-free. Wire #36 owns actual product adoption.
+
+## Maintained PocketIC Rust client
+
+The approved signature-preserving client takeover uses a native implementation
+package behind the existing facade. See the [ownership and migration contract](pocket-ic-client.md).
+The server, IC execution engine and native Profiler provider remain external or
+separately pinned; this is not an executor, Candid or server fork.

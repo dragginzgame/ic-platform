@@ -815,11 +815,11 @@ dependencies = [
  "hex",
  "ic-management-canister-types 0.11.0",
  "ic-platform-macros",
+ "ic-platform-pocket-ic",
  "ic-platform-runtime-guard",
  "ic-platform-types",
  "ic_principal",
  "pin-project-lite",
- "pocket-ic",
  "serde",
  "serde_bytes",
  "sha2",
@@ -834,6 +834,36 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.9",
+]
+
+[[package]]
+name = "ic-platform-pocket-ic"
+version = "0.16.0"
+dependencies = [
+ "backon",
+ "base64 0.22.1",
+ "candid",
+ "flate2",
+ "hex",
+ "ic-certification",
+ "ic-management-canister-types 0.8.0",
+ "ic-transport-types",
+ "reqwest",
+ "schemars",
+ "semver",
+ "serde",
+ "serde_cbor",
+ "serde_json",
+ "sha2",
+ "slog",
+ "strum",
+ "strum_macros",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -1374,38 +1404,6 @@ dependencies = [
  "ic-wire",
  "serde",
  "serde_cbor",
-]
-
-[[package]]
-name = "pocket-ic"
-version = "16.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85135917c845e8fc132f5eca3a0a8cbab696477a5fee3c2dda168a0797f81e1c"
-dependencies = [
- "backon",
- "base64 0.22.1",
- "candid",
- "flate2",
- "hex",
- "ic-certification",
- "ic-management-canister-types 0.8.0",
- "ic-transport-types",
- "reqwest",
- "schemars",
- "semver",
- "serde",
- "serde_cbor",
- "serde_json",
- "sha2",
- "slog",
- "strum",
- "strum_macros",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
 ]
 
 [[package]]

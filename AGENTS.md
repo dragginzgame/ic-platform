@@ -2,7 +2,7 @@
 
 Read [the current handoff](docs/status/current.md), then
 [DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`143a9abb9ae81feae9400ff3844b03b1ddfdd75a` is recorded in
+`5caa130a8705c43aceaa18993a30c87b959ef823` is recorded in
 [the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
@@ -175,12 +175,14 @@ upstream creation/verifier bodies and vectors inside `signature_upstream`, chang
 only the documented imports and omitting the unexposed store module. Enforce exact
 source/license fingerprints; do not refresh hashes to permit algorithm changes.
 The owned runtime RejectCode similarly replaces only its external catalogue
-dependency; Agent/PocketIC codes keep their external identities.
+dependency; Agent codes retain their external identity. PocketIC catalog
+declarations now belong to the approved native implementation, preserving their
+numeric and protocol names.
 
 ## Stable identity supplier (#118)
 
 The maintainer approved independent Platform and Types groups in one workspace.
-All four packages own explicit versions; root workspace.package has no version.
+All five packages own explicit versions; root workspace.package has no version.
 Keep crate paths, numeric versions, dependency selections and one lockfile intact
 when migrating ownership. Root dependencies group members once under short titles
 and separate Changelog comments. Root CHANGELOG.md is an index;
@@ -270,8 +272,14 @@ during this transfer; this is no general permission to introduce Python tooling.
 Keep Motoko/lifeline outside the admitted native server graph. Follow the source
 profile contract in `native/ic-profiler/README.md` and preserve IC copyrights.
 
-The optional native-only `pocket-ic` feature owns explicit upstream client and DTO
-identities. Testkit retains server provisioning, compatibility admission,
+The maintainer authorized maintaining the signature-preserving PocketIC 16.1 Rust
+client in the published implementation package `ic-platform-pocket-ic`, released
+with Platform. This extra package preserves native-only dependency isolation;
+consumers retain the sole `ic_platform::pocket_ic` facade. Preserve its Apache
+license, source fingerprints, protocol bytes and existing operation behavior.
+Typed fallible operations and provisioning-policy changes are outside this first
+ownership transfer. Client-owned types now have implementation-package identity;
+external management DTOs keep their existing identities. Testkit retains server provisioning, compatibility admission,
 lifecycle, transport and retry policy. Keep PocketIC out of defaults, executor-only
 and canister deployment graphs; do not replace its management DTOs with the
 independently selected external management DTO surface.

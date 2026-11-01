@@ -1,7 +1,7 @@
 # IC Platform
 
 Platform re-exports canonical Principal/Account identities from ic-platform-types.
-The facade/macros/runtime guard and Types remain in one workspace with independent
+The facade/macros/native PocketIC implementation/runtime guard and Types remain in one workspace with independent
 release groups, explicit package versions and releases/ ledgers. Unrelated runtime
 releases retain the same compatible type supplier; see
 [the migration contract](docs/migration.md#stable-owned-identity-package-118).
@@ -63,7 +63,7 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `nns-registry-types` | Exact optional-principal Registry subnet lookup DTOs; implies Candid, no topology policy |
 | `certified-assets-types` | Native-only asset get/get_chunk DTOs; implies Candid, no verification or host transport |
 | `signature-verification` | Imported canister-signature verification with optional authenticated time result; certification/BLS, no Candid/ic0, executor or host transport |
-| `pocket-ic` | Native PocketIC client identities; Testkit retains server lifecycle and policy |
+| `pocket-ic` | Maintained native PocketIC client and DTOs; existing imports/signatures, Testkit server lifecycle and policy |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
 | `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |

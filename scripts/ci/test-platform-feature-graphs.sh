@@ -13,7 +13,7 @@ admit() {
         "$jq" -r --arg projection activation --arg target "$graph_target" \
             --slurpfile metadata "$fixture/metadata.json" --slurpfile policy "$root/scripts/ci/platform-feature-policy.json" \
             -f "$root/scripts/ci/platform-feature-closures.jq" > "$fixture/activation.tsv"
-    awk -v activation="$fixture/activation.tsv" -f "$root/scripts/ci/platform-graph-policy.awk" "$@"
+    awk -v pocket_client="ic-platform-pocket-ic v0.1.13 (/fixture)" -v activation="$fixture/activation.tsv" -f "$root/scripts/ci/platform-graph-policy.awk" "$@"
 }
 count=0
 while IFS='|' read -r selection package expected; do
@@ -185,7 +185,7 @@ printf 'Batch graph admission: %s cases plus shared-key and missing-graph refusa
 # PocketIC is admitted only as a selected native dependency with its own DTOs.
 for target in native wasm32-unknown-unknown; do
     for selection in pocket-ic none executor; do
-        printf 'pocket-ic v16.1.0\nic-management-canister-types v0.8.0\ncandid v0.10.38\nic-certification v3.2.0\n' > "$fixture/$target-pocket.txt"
+        printf 'ic-platform-pocket-ic v0.1.13 (/fixture)\nic-management-canister-types v0.8.0\ncandid v0.10.38\nic-certification v3.2.0\n' > "$fixture/$target-pocket.txt"
         printf '%s\tpocket\n' "$selection" > "$fixture/mapping"
         actual=reject
         if admit -v target="$target" -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
@@ -207,7 +207,7 @@ for target in native wasm32-unknown-unknown; do
         [[ "$actual" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
     done
 done
-for package in 'pocket-ic v16.0.0' 'pocket-ic v16.1.0 (/local)' 'ic-management-canister-types v0.8.0'; do
+for package in 'pocket-ic v16.1.0' 'ic-platform-pocket-ic v0.1.12 (/fixture)' 'ic-platform-pocket-ic v0.1.13 (/other)' 'ic-platform-pocket-ic v0.1.13' 'ic-management-canister-types v0.8.0'; do
     printf '%s\n' "$package" > "$fixture/native-pocket.txt"
     printf 'pocket-ic\tpocket\n' > "$fixture/mapping"
     if admit -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi

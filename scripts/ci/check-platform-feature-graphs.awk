@@ -110,9 +110,10 @@ function reject(reason) {
             found_secp = 1
         }
         if (host_capability == "pocket-ic") {
-            if (!pocket || version != "v16.1.0" || !registry) reject("unqualified PocketIC")
+            if (!pocket || (line != pocket_client && line != pocket_client " (*)")) reject("unqualified owned PocketIC")
             found_pocket = 1
         }
+        if (name == "pocket-ic") reject("retired registry PocketIC client")
         if (host_capability == "testkit") reject("Testkit in production")
         if (name ~ /^(ic-wire|ic-wire-derive)$/) reject("Wire in production")
         if (host_capability == "candid-parser" && !parser) reject("unselected host parser")
