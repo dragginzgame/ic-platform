@@ -101,7 +101,7 @@ for group in platform types; do
         if git diff --quiet -- scripts/fixtures/cdk-runtime/Cargo.lock; then exit 1; fi
         if git diff --quiet -- ci/dependency-pinning-exceptions.json; then exit 1; fi
     else
-        git diff --exit-code -- CHANGELOG.md releases/platform/CHANGELOG.md releases/history.md crates/ic-platform/Cargo.toml crates/ic-platform-macros/Cargo.toml crates/ic-platform-runtime-guard/Cargo.toml ci/dependency-pinning-exceptions.json scripts/fixtures/cdk-runtime/Cargo.lock
+        git diff --exit-code -- CHANGELOG.md releases/platform/CHANGELOG.md releases/history.md crates/ic-platform/Cargo.toml crates/ic-platform-macros/Cargo.toml crates/ic-platform-pocket-ic/Cargo.toml crates/ic-platform-runtime-guard/Cargo.toml ci/dependency-pinning-exceptions.json scripts/fixtures/cdk-runtime/Cargo.lock
         [[ "$(yq -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)" == "$platform_before" ]]
         [[ "$(yq -p toml -o json -r '.workspace.dependencies.ic-platform-types.version' Cargo.toml)" == "$next" ]]
     fi
@@ -110,14 +110,14 @@ for group in platform types; do
     cargo metadata --no-deps --offline --locked --format-version 1 > "$fixture/$group-publication-metadata.json"
     members="$(bash scripts/release/group.sh members)"
     perl scripts/ci/cargo-publication-selection.pl "$fixture/$group-publication-metadata.json" \
-        'ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform' \
+        'ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform-pocket-ic ic-platform' \
         "$members" crates-io > "$fixture/$group-publication-selectors"
     tr '\0' '\n' < "$fixture/$group-publication-selectors" > "$fixture/$group-publication-lines"
     if [[ "$group" == types ]]; then
         [[ "$(cat "$fixture/$group-publication-lines")" == "ic-platform-types@$next" ]]
     else
-        [[ "$(wc -l < "$fixture/$group-publication-lines" | tr -d ' ')" == 3 ]]
-        for package in ic-platform ic-platform-macros ic-platform-runtime-guard; do
+        [[ "$(wc -l < "$fixture/$group-publication-lines" | tr -d ' ')" == 4 ]]
+        for package in ic-platform ic-platform-macros ic-platform-pocket-ic ic-platform-runtime-guard; do
             grep -Fx "$package@$next" "$fixture/$group-publication-lines"
         done
     fi

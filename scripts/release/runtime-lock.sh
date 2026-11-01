@@ -15,9 +15,10 @@ lock=scripts/fixtures/cdk-runtime/Cargo.lock
 platform="$("$YQ" -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)"
 types="$("$YQ" -p toml -o json -r '.package.version' crates/ic-platform-types/Cargo.toml)"
 records="$("$YQ" -p toml -o json '.' "$lock" | jq -ce '
-    [.package[] | select(.source == null and (.name == "ic-platform" or .name == "ic-platform-macros" or .name == "ic-platform-runtime-guard" or .name == "ic-platform-types"))] as $p |
-    if (($p | map(.name) | sort) == ["ic-platform", "ic-platform-macros", "ic-platform-runtime-guard"] or
-        ($p | map(.name) | sort) == ["ic-platform", "ic-platform-macros", "ic-platform-runtime-guard", "ic-platform-types"]) and
+    [.package[] | select(.source == null and (.name == "ic-platform" or .name == "ic-platform-macros" or .name == "ic-platform-runtime-guard" or .name == "ic-platform-types" or .name == "ic-platform-pocket-ic"))] as $p |
+    ($p | map(.name)) as $names |
+    if (($names | unique | length) == ($names | length)) and
+       (($names - ["ic-platform-types", "ic-platform-pocket-ic"] | sort) == ["ic-platform", "ic-platform-macros", "ic-platform-runtime-guard"]) and
        ([$p[] | select(.name != "ic-platform-types") | .version] | unique | length) == 1
     then $p else error("invalid qualification package identities") end')"
 observed_platform="$(jq -r '.[] | select(.name == "ic-platform") | .version' <<< "$records")"
@@ -34,6 +35,9 @@ packages=()
 if [[ "$group" == platform ]]; then
     observed="$observed_platform" version="$platform"
     packages=(ic-platform ic-platform-macros ic-platform-runtime-guard)
+    if jq -e 'any(.[]; .name == "ic-platform-pocket-ic")' <<< "$records" > /dev/null; then
+        packages+=(ic-platform-pocket-ic)
+    fi
 else
     observed="$observed_types" version="$types"
     # Historical qualification locks predate the type extraction. Preserve them;

@@ -1,10 +1,10 @@
 #[test]
-fn original_client_and_dto_identities() {
+fn owned_client_and_dto_identities() {
     macro_rules! identity {
         ($($path:ident)::+) => {
-            let original: Option<pocket_ic::$($path)::+> = None;
+            let original: Option<ic_platform_pocket_ic::$($path)::+> = None;
             let boundary: Option<crate::pocket_ic::$($path)::+> = original;
-            let _: Option<pocket_ic::$($path)::+> = boundary;
+            let _: Option<ic_platform_pocket_ic::$($path)::+> = boundary;
         };
     }
     identity!(PocketIc);

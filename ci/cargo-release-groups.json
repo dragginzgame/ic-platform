@@ -8,12 +8,14 @@
       "members": [
         "ic-platform",
         "ic-platform-macros",
+        "ic-platform-pocket-ic",
         "ic-platform-runtime-guard"
       ],
       "changelog": "releases/platform/CHANGELOG.md",
       "dependencies": [
         "ic-platform",
         "ic-platform-macros",
+        "ic-platform-pocket-ic",
         "ic-platform-runtime-guard"
       ],
       "metadata_files": [

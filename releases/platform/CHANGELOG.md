@@ -1,8 +1,26 @@
 # Platform changelog
 
-This group covers ic-platform, ic-platform-macros and ic-platform-runtime-guard.
+This group covers ic-platform, ic-platform-macros, ic-platform-pocket-ic and
+ic-platform-runtime-guard.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
+
+## [0.16.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Maintain the PocketIC 16.1 Rust client in Platform's native implementation
+  package. Keep the existing `ic_platform::pocket_ic` imports, method signatures,
+  HTTP/JSON protocol and operation behavior; client, builder and client-owned DTOs
+  now have Platform implementation identity. Consumers exchanging concrete
+  registry `pocket-ic` types must align on the facade after adoption.
+  The simulator server, execution engine and Testkit server pin are unchanged.
+
+### 🧹 Cleanup
+
+- Keep client dependencies behind the existing native-only feature, with no
+  Candid/crypto expansion in default, executor-only or Wasm PocketIC selections.
+  Preserve Apache source provenance and qualify the existing Testkit contract.
 
 ## [0.15.3] - 2026-10-31
 

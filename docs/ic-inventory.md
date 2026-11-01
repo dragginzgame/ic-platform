@@ -166,8 +166,8 @@ owns the instrumented IC pin, adapters, patches and patched PocketIC client.
 The recorder/viewer remain consumer-owned. Native workspace/Bazel inputs supply
 published IC Metrics 0.17 counters with defaults disabled, distinct from internal
 replica metrics 0.9. These inputs add no Platform Cargo feature or default/Wasm
-dependency. The registry `pocket-ic` feature is
-unchanged; no instrumented Rust export is added to that feature. The
+dependency. The separate stock `pocket-ic` facade feature now selects the
+maintained native client; no instrumented Rust export is added to that feature. The
 [migration contract](migration.md#instrumented-pocketic-source-provider) records
 the source-provider interface and the remaining native acceptance under
 [#65 — Instrumented PocketIC boundary for IC Profiler](https://github.com/dragginzgame/ic-platform/issues/65).
@@ -186,7 +186,7 @@ API changes or automatically establish whether sibling source still uses an API.
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
 | `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
-| `pocket-ic` | native `pocket_ic` client/DTO identities | Tooling Testkit `src/{lib.rs,pic/transport.rs}` | Upstream simulator client; Testkit owns server provisioning, compatibility, lifecycle and transport policy. |
+| `pocket-ic` | owned native `pocket_ic` client/DTO identities | Tooling Testkit `src/{lib.rs,pic/transport.rs}` | Platform-maintained implementation; Testkit retains server provisioning, compatibility, lifecycle and transport policy. |
 | `ic-management-canister-types` | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
 | Selected imported ICRC 0.2.0 declarations/value helpers | `icrc_ledger_types` account/metadata/transfer/consent/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Platform maintains selected types and callbacks; external wire/Serde representations and unchanged upstream hashes remain. Registry ledger/CBOR/storage and consent-formatting dependencies are removed. No ledger/storage policy. |
 | `ic-certification` | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Upstream tree/hash implementations. Host owns bounded CBOR decoding; consumers own trust roots and verification policy. |
@@ -288,7 +288,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:crc32fast, dep:data-encoding, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
 | ic-platform | management-canister-types | candid/bignum, candid/serde_bytes, dep:candid, dep:ic-management-canister-types, dep:serde_bytes, principal-external |
 | ic-platform | nns-registry-types | candid |
-| ic-platform | pocket-ic | dep:pocket-ic, principal-external |
+| ic-platform | pocket-ic | dep:ic-platform-pocket-ic, principal-external |
 | ic-platform | principal | dep:ic-platform-types, dep:serde, dep:thiserror |
 | ic-platform | principal-external | dep:ic_principal, ic-platform-types/principal-external, principal |
 | ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal-external |
@@ -296,6 +296,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
 | ic-platform | signature-verification | canister-sig-creation, dep:ic-verify-bls-signature, dep:serde_bytes, dep:serde_cbor, ic_principal/serde |
 | ic-platform | stable-structures | dep:ic-stable-structures |
+| ic-platform-pocket-ic | default |  |
 | ic-platform-runtime-guard | default |  |
 | ic-platform-types | default |  |
 | ic-platform-types | principal-external | dep:ic_principal |
@@ -316,6 +317,7 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
 | ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
+| ic-platform | ic-platform-pocket-ic | workspace-owned | normal | cfg(not(target_family = "wasm")) | true | false |  |
 | ic-platform | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-representation-independent-hash | ^3.0 | dev | all | false | true |  |
@@ -327,7 +329,6 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
 | ic-platform | num-traits | ^0.2.19 | normal | all | true | true |  |
 | ic-platform | pin-project-lite | ^0.2.17 | normal | all | true | true |  |
-| ic-platform | pocket-ic | ^16.1.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | serde | ^1.0 | normal | all | true | false | alloc, derive |
 | ic-platform | serde_bytes | ^0.11 | normal | all | true | true |  |
 | ic-platform | serde_bytes | ^0.11 | dev | all | false | true |  |
@@ -340,6 +341,30 @@ report; retain the existing graph, pin and imported-source gates.
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^2 | normal | all | false | true | full |
+| ic-platform-pocket-ic | backon | ^1.6.0 | normal | cfg(not(target_family = "wasm")) | false | false | std |
+| ic-platform-pocket-ic | base64 | ^0.22 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | candid | ^0.10.38 | normal | cfg(not(target_family = "wasm")) | false | false | bignum, printer, serde_bytes |
+| ic-platform-pocket-ic | flate2 | ^1.0.31 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | hex | ^0.4.3 | normal | cfg(not(target_family = "wasm")) | false | true | serde |
+| ic-platform-pocket-ic | ic-certification | ^3.2.0 | normal | cfg(not(target_family = "wasm")) | false | false | serde |
+| ic-platform-pocket-ic | ic-management-canister-types | ^0.8.0 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | ic-transport-types | ^0.49.1 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | reqwest | ^0.13 | normal | cfg(not(target_family = "wasm")) | false | false | blocking, http2, json, multipart, rustls, socks, stream |
+| ic-platform-pocket-ic | schemars | ^0.8.21 | normal | cfg(not(target_family = "wasm")) | false | true | derive |
+| ic-platform-pocket-ic | semver | ^1.0.9 | normal | cfg(not(target_family = "wasm")) | false | true | serde |
+| ic-platform-pocket-ic | serde | ^1.0 | normal | cfg(not(target_family = "wasm")) | false | false | derive, derive |
+| ic-platform-pocket-ic | serde_cbor | ^0.11.2 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | serde_json | ^1.0 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | sha2 | ^0.10 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | slog | ^2.7.0 | normal | cfg(not(target_family = "wasm")) | false | true | max_level_trace, nested-values, release_max_level_trace |
+| ic-platform-pocket-ic | strum | ^0.26.3 | normal | cfg(not(target_family = "wasm")) | false | true | derive |
+| ic-platform-pocket-ic | strum_macros | ^0.26.4 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | tempfile | ^3.20 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | thiserror | ^2.0.18 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | tokio | ^1.42.0 | normal | cfg(not(target_family = "wasm")) | false | false | full |
+| ic-platform-pocket-ic | tracing | ^0.1.41 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | tracing-appender | ^0.2.3 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | tracing-subscriber | ^0.3.19 | normal | cfg(not(target_family = "wasm")) | false | true | env-filter, fmt, json, time |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | true |  |
 | ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | convert |

@@ -2896,3 +2896,10 @@ owner. Published Wire 0.12.1 itself selected Types 0.1, so this is source-aligne
 qualification, not published compatibility/adoption. Current/MSRV native/Wasm
 profiles cover identities, schemas, conversions and one runtime; identity-only
 graphs remain runtime/Candid-free. Wire #36 owns actual product adoption.
+
+## Maintained PocketIC Rust client
+
+The approved signature-preserving client takeover uses a native implementation
+package behind the existing facade. See the [ownership and migration contract](pocket-ic-client.md).
+The server, IC execution engine and native Profiler provider remain external or
+separately pinned; this is not an executor, Candid or server fork.
