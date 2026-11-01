@@ -4,16 +4,16 @@
 
 The current source separates three release groups in this workspace:
 
-| Group | Packages | Source version |
+| Group | Packages | Published version |
 | --- | --- | --- |
-| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.17.0 |
-| Platform | ic-platform, ic-platform-pocket-ic | 0.16.0 |
-| Types | ic-platform-types | 0.15.1 |
+| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.17.1 |
+| Platform | ic-platform, ic-platform-pocket-ic | 0.17.0 |
+| Types | ic-platform-types | 0.16.0 |
 
-Runtime 0.17.0 is an explicit, unpublished initial selection. The existing macros
-and guard advance from their published 0.16 generation; no published identity is
-reset. Platform's pending breaking changes and Types' separate pending change
-retain their own ledgers. No release, tag or upload is implied by this extraction.
+These groups were published on 2026-11-01. Runtime began at an explicit,
+unpublished 0.17.0 selection and shipped at 0.17.1 through the ordinary patch
+workflow. The existing macros and guard advanced from their published 0.16
+generation; no published identity was reset. Each group retains its own ledger.
 
 `ic-platform-runtime` owns the actual IC0 implementation, sole executor, CDK
 system/callback/stable passthrough adapters and prepared raw calls. Its complete
@@ -44,13 +44,13 @@ executor, ic0}`. Select Platform separately for required external Candid and
 cryptographic capabilities. Select Types directly when only identities are needed.
 Timers and Wire Endpoint adopt Runtime directly in
 [Scheduling #86](https://github.com/dragginzgame/ic-scheduling/pull/86) and
-[Wire #41](https://github.com/dragginzgame/ic-wire/pull/41). If shipping the pending Principal cut, release/publish its Types group first so
-all new packages select that canonical version. Then publish Runtime’s guard,
-macros and runtime, compatible adapters and the delegating facade, followed by
-application adoption. The adapters' registry lock refreshes wait for
-supplier publication; source/archive proofs are not registry adoption evidence.
+[Wire #41](https://github.com/dragginzgame/ic-wire/pull/41). Types 0.16, Runtime's
+guard/macros/runtime 0.17.1 and the delegating Platform 0.17 facade are published.
+Align adapter Types and native-client requirements, refresh their registry locks,
+then publish compatible adapters before application adoption. Source/archive
+proofs alone are not completed adapter registry adoption.
 
-Until that publication, the test-only Timers catalog selects immutable adoption
+Until adapter publication, the test-only Timers catalog selects immutable adoption
 commit `036fd50c08c2c1d05ab1cb2381abc7b8f1a36103`. Explicit preparation fetches it;
 normal owner/composition validation uses maintained locks and prepared caches.
 The qualification root patches unpublished Platform owners, never dependency-local
