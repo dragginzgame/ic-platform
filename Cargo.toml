@@ -20,8 +20,8 @@ repository = "https://github.com/dragginzgame/ic-platform"
 
 # Platform
 # Changelog : releases/platform/CHANGELOG.md
-ic-platform = { version = "0.16.0", path = "crates/ic-platform", default-features = false }
-ic-platform-pocket-ic = { version = "0.16.0", path = "crates/ic-platform-pocket-ic", default-features = false }
+ic-platform = { version = "0.17.0", path = "crates/ic-platform", default-features = false }
+ic-platform-pocket-ic = { version = "0.17.0", path = "crates/ic-platform-pocket-ic", default-features = false }
 
 # Runtime
 # Changelog : releases/runtime/CHANGELOG.md

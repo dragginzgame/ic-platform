@@ -1606,7 +1606,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.16.0"
+version = "0.17.0"
 dependencies = [
  "assert_matches",
  "blake3",
@@ -1660,7 +1660,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-pocket-ic"
-version = "0.16.0"
+version = "0.17.0"
 dependencies = [
  "backon",
  "base64 0.22.1",

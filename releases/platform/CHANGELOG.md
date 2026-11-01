@@ -4,7 +4,7 @@ This group covers ic-platform and ic-platform-pocket-ic.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
-## [0.17.0]
+## [0.17.0] - 2026-11-01
 
 ### ⚠️ Breaking
 
