@@ -4,6 +4,19 @@ This group covers ic-platform, ic-platform-macros and ic-platform-runtime-guard.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.16.1]
+
+### 🩹 Fixed
+
+- Use physical workspace paths during grouped release preparation, including
+  aliased macOS temporary directories; retain rollback and resume checks.
+
+### ⬆️ Dependencies
+
+- Adopt Host Process/FS/Artifacts 0.73.2 and core Wire 0.13.1 in the native
+  Profiler Cargo/Bazel inputs. Keep Metrics 0.24.0 independently locked and
+  preserve process observations, gzip bytes, frame admission and saved reports.
+
 ## [0.16.0] - 2026-11-01
 
 ### ⬆️ Dependencies

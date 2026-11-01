@@ -7,6 +7,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 bash "$root/scripts/ci/check-make-execution.sh"
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES
 fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-group-preparation.XXXXXX")"
+fixture="$(cd "$fixture" && pwd -P)"
 trap 'printf "Grouped preparation evidence: %s\n" "$fixture"' EXIT
 cd "$root"
 source ci/release-editor.env
