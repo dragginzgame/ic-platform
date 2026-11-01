@@ -89,7 +89,9 @@ Fixed old bytes and isolated Auth qualification passed. See
 [measurements/evidence](../benchmarks/upstream-2026-10-31/README.md),
 /tmp/platform-ecdsa-footprint-20261031 and /tmp/platform-bls-adoption-20261031.
 
-Published Timers 0.34.0 qualified the current Platform 0.15 runtime fixture:
+Merged main #130 selects published Timers 0.35.1 and scopes native entrypoint
+symbols by consuming crate, retaining exact Wasm exports and a linkage regression.
+Its earlier Platform 0.15 runtime qualification covers:
 Wire/external-Candid callbacks, traps, cancellation, upgrades and rollback passed
 on both compilers with Testkit 0.72.1/PocketIC 16.0.0. Platform 0.16 still requires
 coordinated Timers adoption/qualification. No later sibling adoption is claimed.

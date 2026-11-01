@@ -142,7 +142,7 @@ this guard package-wide, including native/default-only selections; the pending
 application and all runtime consumers against the same new Platform line. Timers
 must adopt that requirement before production migration; a transitive old
 Platform requirement cannot be bridged with handle conversions. The installed
-fixture selects published Timers 0.34.0 and patches its compatible 0.15 requirement
+fixture selects published Timers 0.35.1 and patches its compatible 0.15 requirement
 to the local source solely for qualification. After a new Platform minor release,
 its dependency requirement must be coordinated; this patch is not consumer supply.
 

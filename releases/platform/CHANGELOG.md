@@ -46,6 +46,11 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ### 🩹 Fixed
 
+- Scope native entrypoint symbols to the consuming Cargo crate so multiple
+  canister libraries can link in one host process. Retain portable method-name
+  encoding and exact Wasm exports, codecs, guards and executor contexts.
+  [#129](https://github.com/dragginzgame/ic-platform/issues/129).
+
 - Apply the exact upstream BLS identity-public-key rejection and regression
   vector for [#127](https://github.com/dragginzgame/ic-platform/issues/127).
   Raw BLS and canister-signature verification reject forged identity-key
@@ -59,7 +64,7 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ### 🧪 Testing
 
-- Qualify published Timers 0.34.0 with the current embedded runtime, restoring
+- Qualify published Timers 0.35.1 with the current embedded runtime, restoring
   combined installed callback, cancellation and upgrade coverage. Preserve
   independent Types release custody when registry consumers reference local
   package identities.

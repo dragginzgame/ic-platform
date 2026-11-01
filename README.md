@@ -411,7 +411,7 @@ checks, or `bash scripts/ci/check-platform-runtime.sh --check-graph` without
 compiling/starting a server. Source fingerprints protect the imported call,
 callback/trap cleanup and protected-spawn regions; mutation cases test refusal.
 The sole executor and IC0 implementation now live inside Platform; the fixture
-selects Timers 0.32.3 against that same local owner.
+selects Timers 0.35.1 against that same local owner.
 
 Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
 `IC_TESTKIT_POCKET_IC_URL`. The harness retains Testkit's bounded startup and
