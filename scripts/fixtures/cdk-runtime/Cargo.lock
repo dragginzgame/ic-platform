@@ -809,7 +809,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.15.3"
+version = "0.16.0"
 dependencies = [
  "candid",
  "hex",
@@ -829,7 +829,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.15.3"
+version = "0.16.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -838,7 +838,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.15.3"
+version = "0.16.0"
 
 [[package]]
 name = "ic-platform-types"
@@ -873,7 +873,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4e2d0ee65121e3b42389d9f85326bf94510f254b01d34ef6c9c080e9ae7b1f0"
 dependencies = [
  "ic-metrics",
- "ic-platform 0.15.3",
+ "ic-platform 0.16.0",
  "thiserror 2.0.18",
 ]
 
@@ -1359,7 +1359,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.15.3",
+ "ic-platform 0.16.0",
  "ic-timers",
  "ic-wire",
  "serde",
@@ -1369,7 +1369,7 @@ dependencies = [
 name = "platform-runtime-driver"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.15.3",
+ "ic-platform 0.16.0",
  "ic-testkit",
  "ic-wire",
  "serde",
