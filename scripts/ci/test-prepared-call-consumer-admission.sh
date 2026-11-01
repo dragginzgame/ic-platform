@@ -24,6 +24,8 @@ mkdir -p "$fixture/crates/ic-platform/tests/fixtures"
 cp "$root/crates/ic-platform/tests/management_consumer.rs" "$fixture/crates/ic-platform/tests/"
 cp "$root/crates/ic-platform/tests/fixtures/management-"*.hex "$fixture/crates/ic-platform/tests/fixtures/"
 cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/"
+mkdir -p "$fixture/.cargo"
+cp "$root/.cargo/config.toml" "$fixture/.cargo/"
 cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 ln -s "$BASH" "$fixture/bin/bash"
@@ -41,8 +43,8 @@ case "$1" in
     locate-project) exit 0 ;;
     metadata) printf '{}\n' ;;
     tree)
-        printf 'ic-platform v0.8.5 (/local/platform)\n'
-        case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'candid v0.10.39\n' ;; esac
+        printf 'ic-platform-runtime v0.17.0 (/local/runtime)\n'
+        case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'ic-platform v0.17.0 (/local/platform)\ncandid v0.10.39\n' ;; esac
         ;;
     +*)
         if [[ "$2" == build ]]; then
@@ -62,6 +64,9 @@ case "$1" in
 esac
 CARGO
 chmod +x "$fixture/bin/cargo" "$fixture/bin/rustc"
+git -C "$fixture" init -q
+git -C "$fixture" add .
+git -C "$fixture" -c user.name='Platform admission fixture' -c user.email='platform-fixture@example.invalid' commit -qm 'Runtime admission source'
 export PATH="$fixture/bin:$PATH" ADMISSION_CALLS="$fixture/calls" ADMISSION_TARGETS="$fixture/targets"
 "$BASH" "$fixture/scripts/ci/check-prepared-call-consumer.sh" --prepare > "$fixture/prepare.log" 2>&1 || { cat "$fixture/prepare.log"; exit 1; }
 [[ "$(grep -c '^fetch ' "$ADMISSION_CALLS")" == 1 ]]

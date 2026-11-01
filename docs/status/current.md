@@ -9,6 +9,13 @@ unpublished 0.17.0 source selection and uses the normal patch workflow. Preserve
 failed attempts and reconcile registry state before retrying any upload. The [runtime contract](../migration.md#independent-runtime-owner-131)
 is the current ownership decision; historical facade-owned descriptions are superseded.
 
+The first publication gate stopped before version preparation/upload on stale
+consumer-admission mocks. Both fixtures now model the independent Runtime; the
+prepared-call fixture supplies the source revision/configuration receipts required
+by #116. Full Clippy and all 32 standalone consumer profiles pass. Preserve
+/tmp/platform-131/release-types.log and consumer-release-fixtures-final.log;
+the next release attempt starts fresh from the corrected committed source.
+
 `ic-platform-runtime` now owns the actual IC0, sole executor, CDK adapters and
 prepared calls. Facade paths delegate to it. Runtime, macros and exact guard form
 an independent Runtime group at explicit unpublished source version 0.17.0;

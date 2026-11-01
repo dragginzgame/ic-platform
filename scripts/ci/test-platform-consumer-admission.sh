@@ -40,7 +40,11 @@ case "$1" in
             if [[ "${TEST_BLAKE3_DUPLICATE:-no}" == yes ]]; then printf 'blake3 v1.8.6\tstd\n'; fi
             exit 0
         fi
-        printf 'ic-platform v0.8.5 (/local/platform)\n'
+        printf 'ic-platform v0.17.0 (/local/platform)\n'
+        case "${TEST_CAPABILITY:-cdk}" in
+            cdk|runtime|external-candid|executor|ic0)
+                printf 'ic-platform-runtime v0.17.0 (/local/runtime)\n' ;;
+        esac
         if [[ "$TEST_CANDID" == yes ]]; then printf 'candid v0.10.38\n'; fi
         if [[ "$TEST_REJECT" == yes ]]; then printf 'ic-agent v0.49.2\n'; fi
         ;;
