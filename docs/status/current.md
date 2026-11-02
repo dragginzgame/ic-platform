@@ -1,46 +1,56 @@
 # Current handoff
 
-## Authorized Platform delivery — 2026-11-02
+## Platform delivery — 2026-11-02
 
-The maintainer requested latest committed Shared adoption, then deployment here.
-Shared 0.27.27 at 651f5f7acb2e3055abd51ba5f835a2112801666a is exported and
-checksum-verified. Its optional group-plan mapping is not enabled; this combined
-Shared/compiler/ownership batch retains the complete release gate.
-Release/publish Types 0.17.0, Runtime 0.18.0, PocketIC 0.18.0, then Platform 0.18.0.
-Use normal explicit group commands, preserve all plans and verify each upload.
-Preparation and new delivery logs belong in `.git/release-state/platform-018-deployment/`.
-This authorizes the scoped pending Rust batch, including #123, #125, #132, #133,
-Principal provider scaffolding and PocketIC independence. No npm, simulator or
-sibling delivery is included; the mistaken Tooling release request was withdrawn.
+Shared 0.27.27 at 651f5f7acb2e3055abd51ba5f835a2112801666a is adopted and
+pushed. Optional group-plan mapping remains off; complete existing gates apply.
+Source commits are 3920d12 (snapshot) and 543c22c (reviewed Rust batch).
 
-Blob Client and Testkit direct Types/Runtime migrations are integrated in their
-actual sibling trees and passed focused native/Wasm/installed checks. Tooling's
-concurrent Metrics adoption was preserved. Their delivery stays with their owners.
+| Delivered group | Version | Release commit |
+| --- | --- | --- |
+| Types | 0.17.0 | 42beb561942f33e5859afef95b8b35a2131cb530 |
+| PocketIC | 0.18.0 | 42a6b5c7d987ee4c7e9c38a437df0950f9f210c2 |
 
-## Pending PocketIC independence and management 0.11 — 2026-11-02
+Both passed full CI, independent owner and Timers installed suites, standard
+release/tag/atomic push and Cargo publication. Official registry readback,
+archive checksums and clean VCS identities match. Durable plans/logs/archives
+are in `.git/release-state/platform-018-deployment/` and the normal group plans.
+PocketIC now independently ships management DTOs 0.11 and Rust 1.99.1. Its new
+implementation is available directly; published facade 0.17 keeps the old client.
+Browser, simulator, other sibling releases and live IC acceptance are outside scope.
 
-The maintainer requested the client management upgrade first, then its own group.
-`ic-platform-pocket-ic` now selects the existing workspace =0.11.0 DTOs; 0.8 leaves
-the root lock. Only import names/order change in protected client source. The
-guard reconstructs those adaptations against unchanged hashes and rejects drift.
-Installed status, settings and snapshot lifecycle pass against prepared 16.1.0.
-Older Testkit still brings management 0.8 into tooling-only fixture graphs.
+## Runtime and facade delivery blocker
 
-`RELEASE_GROUP=pocket-ic` owns the client, catalog entry and new ledger. The facade
-keeps its optional re-export; direct native consumers need no facade or Runtime.
-Current versions remain unchanged; pending client notes are 0.18 (DTO identity
-and Rust floor). Publish the client before a facade release adopting it. Sibling
-adoption and publication remain separate; no commit, push or upload was requested.
-See [the client contract](../pocket-ic-client.md) and
-[its ledger](../../releases/pocket-ic/CHANGELOG.md).
+Runtime 0.18 passed complete CI and both installed suites, then its prepared-graph
+check correctly refused Timers' old Runtime-0.17-only source. No Runtime tag,
+push or upload happened. Its nine generated metadata files were preserved under
+`target/shared-02727-release/runtime-prepared-blocked/`, then restored to the
+committed source to permit independent PocketIC delivery. The failed plan and
+logs remain. Do not weaken the singleton or relabel this as a completed release.
 
-Evidence: `target/pocket-ic-independent-20261102/` contains client/facade Clippy
-and tests, installed server runs, source guard, direct archive consumer, native/
-Wasm feature graphs, cross-facade client identity and four-group routing/lock
-checks. Platform/PocketIC disposable preparation, rollback, delivery and repeated
-resume pass (`/tmp/platform-group-preparation.AHzPXR` and `Jl34rl`).
-The two maintained qualification locks change only the client's management edge.
-Full release CI and macOS remain separate; previous unrelated dirty work is intact.
+The user authorized an isolated Scheduling source change. Commit
+`1c57a6d9abfd432fc683c5016d4625763682483a` on
+`adopt/runtime-018-platform-qualification` in
+`target/shared-02727-release/scheduling` admits `>=0.17.1, <0.19`. Only the root
+catalog and pending Timers notes change; timer bodies and its lock are identical.
+All 175 tests pass on both lines, strict native/Wasm Clippy passes, and all four
+installed Runtime-0.18/Timers profiles pass in the disposable candidate clone.
+The exact guard and one resolved owner are retained.
+
+**Awaiting explicit permission to push that Scheduling topic branch** so fresh
+Platform qualification can fetch its immutable commit. Local commit permission
+was granted; no Scheduling merge, release or crate publication is authorized.
+After the branch push, adopt that Git pin and version in Platform's test-only
+Timers catalog, refresh the affected actual composition lock, and qualify it.
+Then commit the source fix and start a fresh Runtime minor release, followed by
+publication/archive readback and the facade minor release/publication. Do not
+resume the old attempt against changed source or repeat Types/PocketIC uploads.
+The remaining controller must select only Runtime and Platform.
+
+Blob Client and Testkit direct Types/Runtime changes are integrated in their
+normal sibling trees; their own delivery remains owner-scoped. The mistaken
+Tooling deployment prompt was withdrawn. Its small local guide/lint fixes remain.
+Earlier focused evidence is in the old handoff; it never replaces complete gates.
 
 ## Pending issue batch
 

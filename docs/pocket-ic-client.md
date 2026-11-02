@@ -9,11 +9,11 @@ The `pocket-ic` release group has its own
 [ledger](../releases/pocket-ic/CHANGELOG.md). Client-only releases leave the facade,
 Runtime and Types versions unchanged. Use explicit `RELEASE_GROUP=pocket-ic` for
 release, resume and publication. When both client and facade requirements change,
-publish the client first. Package versions remain unchanged during local work;
-0.17.0 is published, and the management upgrade below belongs to pending 0.18.0.
+publish the client first. Client 0.18.0 is published. The published facade 0.17
+still selects the older client; the pending facade 0.18 adopts this new owner.
 Sibling adoption follows publication and is not performed by this change.
 
-The pending client selects management-canister DTOs =0.11.0, sharing the native
+The 0.18 client selects management-canister DTOs =0.11.0, sharing the native
 Platform management surface's external identity. Consumers exchanging 0.8 DTOs
 must align their dependency. Settings/status expose status visibility and minimum
 incoming-call cycles; decoded status requires the new fields. Their Candid schema

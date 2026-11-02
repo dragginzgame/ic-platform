@@ -2,10 +2,10 @@
 
 ## Supported compiler (#133)
 
-Pending source requires Rust 1.99.1 for every member of the independent Platform,
+Current source requires Rust 1.99.1 for every member of the independent Platform,
 PocketIC, Runtime and Types groups. The minimum and pinned development/release toolchain
 must agree; compiler admission checks and records actual Cargo/rustc identities.
-Package versions remain unchanged until normal delivery. Historical 1.91 results
+Types 0.17 and PocketIC 0.18 are published; Runtime and facade 0.18 remain pending. Historical 1.91 results
 below remain dated evidence, not a support promise for this source.
 
 | Existing obligation | Current qualification |
@@ -30,11 +30,12 @@ The current source separates four release groups in this workspace:
 | --- | --- | --- |
 | Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.17.1 |
 | Platform | ic-platform | 0.17.0 |
-| PocketIC | ic-platform-pocket-ic | 0.17.0 |
-| Types | ic-platform-types | 0.16.0 |
+| PocketIC | ic-platform-pocket-ic | 0.18.0 |
+| Types | ic-platform-types | 0.17.0 |
 
-These package versions were published on 2026-11-01; PocketIC initially shipped
-with Platform and now has its own group, without changing its current version. Runtime began at an explicit,
+Runtime and facade retain their 2026-11-01 publications. Types 0.17 and the
+independent PocketIC 0.18 were published on 2026-11-02. PocketIC initially shipped
+with Platform; its new group now owns its own releases. Runtime began at an explicit,
 unpublished 0.17.0 selection and shipped at 0.17.1 through the ordinary patch
 workflow. The existing macros and guard advanced from their published 0.16
 generation; no published identity was reset. Each group retains its own ledger.
@@ -1401,8 +1402,7 @@ ic-memory changes are out of scope; no persisted representation is changed here.
 `ic-platform-pocket-ic` owns the maintained native PocketIC 16.1 client and its
 independent `pocket-ic` release group. Native consumers may select it directly;
 the facade's optional `pocket-ic` feature re-exports the same implementation.
-The current package version remains 0.17.0; the pending 0.18 change selects
-workspace management DTOs =0.11.0 in place of 0.8.0. Settings, status and install
+Published client 0.18.0 selects workspace management DTOs =0.11.0 in place of 0.8.0. Settings, status and install
 mode types now share the native management surface's external identity.
 
 The source guard reconstructs only the import rename and rustfmt ordering before
