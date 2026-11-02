@@ -1,5 +1,25 @@
 # Current handoff
 
+## Local stable-structures removal — 2026-11-02
+
+The maintainer requested retirement of the unused stable-structures surface.
+The facade feature/module, upstream catalog/member dependency, identity fixtures,
+consumer profile and obsolete pin exception are removed. Cargo pruned the package
+from the workspace lock. The dependency boundary and graph admission now reject
+it; raw stable-memory Runtime passthroughs are unchanged. The pending Platform
+0.18 ledger, migration contract and checked inventory describe the cut.
+
+Native and Wasm all-feature facade library Clippy passed with warnings denied.
+Both normal/build graphs and the workspace lock exclude ic-stable-structures.
+Feature-selection/admission and inventory regressions, dependency boundaries,
+pin checks and documentation links passed. Graph evidence is in
+`target/stable-structures-removal/`. Full CI/release/publication were not run
+for this implementation task; the Runtime delivery blocker below remains.
+
+Tooling's native Testkit memory instrumentation and Canic's native delegation
+fixture still select the old surface through Platform 0.17. The maintainer
+explicitly owns those sibling changes; both trees remain untouched by this cut.
+
 ## Platform delivery — 2026-11-02
 
 Shared 0.27.27 at 651f5f7acb2e3055abd51ba5f835a2112801666a is adopted and

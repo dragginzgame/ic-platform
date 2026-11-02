@@ -50,7 +50,6 @@ done <<'MUTATIONS'
 .features["signature-verification"] -= ["bls"]
 (.dependencies[] | select(.name == "crypto-bigint")).req = "^0.7.5"
 (.dependencies[] | select(.name == "ed25519-dalek")).uses_default_features = true
-(.dependencies[] | select(.name == "ic-stable-structures")).req = "^0.7"
 (.dependencies[] | select(.name == "k256")).uses_default_features = true
 .links = "unconditional-executor"
 .dependencies += [{"name":"ic0"}]

@@ -18,14 +18,6 @@
   {
     "rule": "cargo-exact",
     "file": "Cargo.toml",
-    "subject": "ic-stable-structures",
-    "value": "=0.7.2",
-    "reason": "Preserve the Memory/Storable and persisted collection identities shared with IC Memory, IC Storage and Testkit instrumentation.",
-    "evidence": "docs/migration.md#stable-structures-substrate"
-  },
-  {
-    "rule": "cargo-exact",
-    "file": "Cargo.toml",
     "subject": "ic-platform-runtime-guard",
     "value": "=0.17.1",
     "reason": "Each canonical runtime owner selects its exact guard; facade versions may share the same runtime owner.",

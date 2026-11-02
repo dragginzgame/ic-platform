@@ -42,11 +42,10 @@ transfer/memo and `icrc21` consent DTOs. They keep the existing pins and feature
 selections; they add no calls, signing implementation or policy. Require at least
 0.6.21 and qualify the consumer before replacing those remaining mirrors.
 
-Enable `stable-structures` for explicit upstream 0.7.2 collection, Memory,
-Storable/codec, iterator, restricted, vector-backed and memory-manager identities. Storage owns
-governed constructors; Memory owns allocation; Testkit owns instrumentation.
-This optional capability adds no Candid or executor and implements no storage.
-See the [substrate contract](../../docs/migration.md#stable-structures-substrate).
+The pending 0.18 cut removes the unused `stable-structures` feature and module,
+including their upstream dependency. Storage and allocation remain consumer-owned;
+Runtime's raw stable-memory system calls remain available. See the
+[retirement contract](../../docs/migration.md#stable-structures-substrate).
 
 Select `principal` for owned Principal/Account bytes, text and Serde without
 external Principal or hashing. `principal-external` adds registry identity and

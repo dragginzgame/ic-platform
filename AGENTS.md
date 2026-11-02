@@ -26,8 +26,8 @@ records the installed revision; do not edit its payloads.
   stable passthroughs preserve upstream bytes and semantics; they do
   not transfer storage ownership. Wire, Testkit, Host, Canic and Query
   retain their product responsibilities; existing siblings remain read-only.
-  The authorized #45 manager exports retain upstream 0.7.2 identities solely for
-  Memory infrastructure; allocation, checked reopening and leases remain there.
+  The maintainer retired the unused stable-structures facade and dependency;
+  allocation, checked reopening and leases remain consumer-owned.
 - Preserve dirty work and check for Cargo/rustc processes sharing target/ before
   editing or compiling. Use focused checks from README; full CI is release-owned.
 - Run affected-package Clippy before longer relevant tests; fix warnings in that

@@ -33,7 +33,7 @@ for mutation in \
     fi
 done
 cp "$fixture/original.json" "$fixture/metadata.json"
-sed '/^| `stable-structures` |/d' "$root/README.md" > "$fixture/README.md"
+sed '/^| `principal` |/d' "$root/README.md" > "$fixture/README.md"
 if bash "$fixture/scripts/ci/check-platform-inventory.sh" > "$fixture/log" 2>&1; then
     echo 'inventory accepted missing README feature' >&2; exit 1
 fi

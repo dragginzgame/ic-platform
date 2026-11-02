@@ -49,7 +49,6 @@ ed25519-dalek = { version = "3.0.0", default-features = false }
 ff = { version = "0.13", default-features = false }
 group = { version = "0.13", default-features = false, features = ["alloc"] }
 hex = "0.4.3"
-ic-stable-structures = { version = "=0.7.2", default-features = false }
 ic_principal = { version = "0.1.5", default-features = false, features = ["convert"] }
 k256 = { version = "0.14.0", default-features = false, features = ["ecdsa"] }
 num-bigint = "0.4.6"

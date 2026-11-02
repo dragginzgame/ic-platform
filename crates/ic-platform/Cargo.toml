@@ -68,7 +68,6 @@ management-canister-types = [
 signature-verification = ["bls", "canister-sig-creation", "dep:serde_bytes", "dep:serde_cbor"]
 pocket-ic = ["principal-external", "dep:ic-platform-pocket-ic"]
 secp256k1 = ["principal-external", "dep:ic-secp256k1"]
-stable-structures = ["dep:ic-stable-structures"]
 
 [dependencies]
 blake3 = { workspace = true, optional = true }
@@ -85,7 +84,6 @@ hex = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-platform-runtime = { workspace = true, optional = true }
 ic-platform-types = { workspace = true, optional = true }
-ic-stable-structures = { workspace = true, optional = true }
 ic_principal = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
 num-bigint = { workspace = true, optional = true }
@@ -255,11 +253,6 @@ required-features = ["principal-external"]
 name = "principal_self_authenticating_consumer"
 path = "tests/principal_self_authenticating_consumer.rs"
 required-features = ["principal-self-authenticating"]
-
-[[test]]
-name = "stable_structures_consumer"
-path = "tests/stable_structures_consumer.rs"
-required-features = ["stable-structures"]
 
 [[test]]
 name = "external_contract_consumer"

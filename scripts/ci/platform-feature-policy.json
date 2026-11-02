@@ -5,7 +5,7 @@
     "cmc-types", "cycles-ledger-types", "default", "ecdsa", "ed25519", "executor",
     "ic0", "icp-ledger-types", "icrc-ledger-types", "management-canister-types",
     "nns-registry-types", "pocket-ic", "principal", "principal-external", "principal-self-authenticating", "runtime",
-    "secp256k1", "signature-verification", "stable-structures"
+    "secp256k1", "signature-verification"
   ],
   "native_leaves": {
     "agent": {"dependencies": ["ic-agent", "ic-certification"], "prerequisites": ["principal-external"]},

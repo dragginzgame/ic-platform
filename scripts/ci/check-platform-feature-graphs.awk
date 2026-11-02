@@ -60,8 +60,7 @@ function reject(reason) {
     external_principal = enabled("principal-external")
     principal = enabled("principal")
     hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp
-    minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification") && !enabled("stable-structures")
-    found_storage = 0
+    minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification")
     found_ed = 0
     found_curve = 0
     found_secp = 0
@@ -76,7 +75,7 @@ function reject(reason) {
         host_capability = platform_host_capability(name)
         if (minimal && platform_forbidden("minimal", name))
             reject("application types in minimal executor/IC0 graph")
-        if (name == "ic_principal" && !(external_principal || enabled("stable-structures")))
+        if (name == "ic_principal" && !external_principal)
             reject("external Principal in owned-only graph")
         if (name ~ /^(sha2|digest)$/ && !hashing)
             reject("unselected hashing")
@@ -132,14 +131,10 @@ function reject(reason) {
         if (name == "ic-management-canister-types" && !(registry && native && (management || pocket) && version == "v0.11.0")) reject("unselected or Wasm registry management types")
         if (name == "icrc-ledger-types" || name == "icrc-cbor") reject("retired upstream ledger package")
         if (name == "ic-error-types" && !(agent || pocket)) reject("runtime error catalogue")
-        if (name == "ic-stable-structures") {
-            if (!enabled("stable-structures") || version != "v0.7.2" || !registry) reject("unqualified storage substrate")
-            found_storage = 1
-        }
+        if (name == "ic-stable-structures") reject("retired storage substrate")
         if ((name == "candid" || name == "candid_derive") && !candid) reject("unexpected Candid")
     }
     if (executor && !found_guard) reject("missing runtime singleton guard")
-    if (enabled("stable-structures") && !found_storage) reject("missing selected storage substrate")
     if (enabled("ed25519") && (!found_ed || !found_curve)) reject("missing selected Dalek")
     if (pocket && !found_pocket) reject("missing selected PocketIC")
     if (secp && !found_secp) reject("missing selected secp256k1")

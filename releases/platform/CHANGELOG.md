@@ -8,6 +8,10 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ### ⚠️ Breaking
 
+- Remove the unused `stable-structures` feature, `stable_structures` module and
+  `ic-stable-structures` dependency. Runtime's raw stable-memory system calls
+  remain available; storage and allocation stay with their product owners.
+
 - Require Rust 1.99.1 for the facade (#133). Keep
   isolated native/Wasm capability and archive proofs; qualify each compiler
   selection once instead of repeating the old 1.91/development matrix.

@@ -1173,42 +1173,20 @@ compiler exports does not remove the upstream parser's compiler dependencies.
 
 ## Stable-structures substrate
 
-Pending 0.6.5 adds `memory_manager::{MemoryId, MemoryManager, VirtualMemory}`
-under the same optional feature, retaining exact upstream 0.7.2 identities for
-IC Persistence's Memory infrastructure. After the supplying release is qualified
-and published, require Platform 0.6.5 or later and replace direct manager imports
-with `ic_platform::stable_structures::memory_manager::{MemoryId, MemoryManager,
-VirtualMemory}`. Existing `Vec`/`Log` exports cover local StableVec/StableLog
-aliases; no additional alias exports are needed. Memory retains checked layout
-reopening, growth preflight, allocation authority and exclusive leases. The
-standalone vector-backed manager test qualifies upstream bytes and identity,
-not production governance or installed upgrades. No manager implementation or
-allocation policy moves into Platform.
+The maintainer retired this unused boundary for the pending Platform 0.18 cut.
+The `stable-structures` feature, `stable_structures` module (including manager,
+collection, Memory and Storable re-exports), identity fixtures and direct
+`ic-stable-structures` dependency are removed. Remove the old feature from
+consumer manifests; there is no replacement Platform storage facade. Earlier
+0.6.x adoption instructions and the #45 manager-export contract are superseded.
+Storage implementation, persisted formats, allocation, checked reopening and
+leases stay with their product owners. Runtime's raw stable-memory System API
+passthroughs remain available and retain their bytes and semantics.
 
-Platform 0.6.2 adds optional `stable-structures` exports from upstream `=0.7.2`.
-This completes [PR #32](https://github.com/dragginzgame/ic-platform/pull/32),
-including Storage's review feedback: `storable::{Blob, BoundedVecN,
-UnboundedVecN, TryFromSliceError}` accompany `Bound` and `Storable`.
-Collection, Memory, iterator, log-error and backing types retain upstream
-identities. No replacement types, formats, memory manager or storage
-implementation is introduced. Defaults/executor-only graphs exclude the
-dependency; substrate-only selection adds no Candid, parser, CDK, executor or
-owned Principal. Upstream `ic_principal` remains a substrate dependency; this is
-dependency control, not transitive removal or measured Wasm reduction.
-
-The exact version preserves the trait identity requested by Memory/Storage and
-Testkit. Changing it requires renewed interoperability and retained-byte checks.
-Require Platform 0.6.2 or later with this feature and replace
-the direct declaration/private alias with
-`use ic_platform::stable_structures as substrate`. Keep governed constructors,
-record/region/recovery policy in Storage and allocation/runtime handles in
-Memory. Applications continue using governed Storage rather than raw backing.
-
-Testkit's instrumentation selects `VectorMemory` explicitly for target-neutral
-shared backing. `DefaultMemoryImpl` is target-dependent and is not a substitute.
-Testkit retains counters, reset, overflow and fixture policy. No sibling changes
-are made here. Actual adoption, native macOS and installed-upgrade qualification
-remain separate from Platform export/identity and standalone reopening tests.
+Read-only sibling review found native-only callers in Tooling's Testkit memory
+instrumentation and Canic's delegation fixture, both selecting Platform 0.17.
+The maintainer is handling their feature/import removal before 0.18 adoption.
+No sibling source or persisted data is changed by this Platform cut.
 
 ## Explicit external Candid entrypoints (0.6.2 qualification)
 

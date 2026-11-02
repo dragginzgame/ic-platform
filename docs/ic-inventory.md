@@ -215,7 +215,6 @@ API changes or automatically establish whether sibling source still uses an API.
 | `k256`, `curve25519-dalek`, `ed25519-dalek` | `ecdsa`, `ed25519` | Auth `src/{chain_key_signature,portable_signature}.rs`; Canic tests | General-purpose upstream crypto, not DFINITY-only code. Platform controls selected identities/features, not algorithms. Repository Wasm builds select RustCrypto's existing 32-bit backend; application build owners must carry the cfg because dependency Cargo configuration is not inherited. |
 | `ic-secp256k1` | native `secp256k1` public derivation/types | Canic Core native chain-key configuration and public-key fixtures | Upstream key derivation and encoding remain unchanged. Native-only explicit boundary. |
 | Imported `ic-canister-sig-creation` / `ic-signature-verification` | `canister_sig_creation`, `signature_verification`; private `signature_upstream` | Auth `src/{signature_store,canister_signature}.rs` | Platform owns packaging, DER framing admission, evidence extraction and import scaffolding. The additive verifier returns authenticated signing time; consumers own freshness. Original fingerprints reconstruct after removing the single admitted framing call; crypto bodies, vectors and licenses remain protected. |
-| `ic-stable-structures` | `stable_structures` collections, Memory/Storable and `memory_manager::{MemoryId,MemoryManager,VirtualMemory}` | Persistence Storage `src/lib.rs`; Memory runtime and stable-cell modules | Upstream substrate implementation. Memory owns layout validation, growth preflight, allocation and exclusive leases; Storage owns adapters. |
 | `ic-representation-independent-hash` | development dependency, signature reference tests only | Platform's own tests | Upstream comparison oracle; not a normal dependency. |
 
 Generic support dependencies (Serde, SHA-2, encoding/checksum helpers, error and
@@ -240,25 +239,25 @@ Imported-source ownership is recorded beside the code in
 Existing signature/runtime fingerprint checks enforce their respective admitted
 source changes. Do not refresh fingerprints to approve cryptographic changes.
 
-## Remaining external DFINITY repositories (pending 0.16)
+## Remaining external DFINITY repositories
 
-The 2026-11-01 root Rust normal/build graph with all features selected still
-uses seven DFINITY repositories. This counts externally supplied packages, not
-the ancestry of code already maintained here. Individual consumer selections
+After retiring the unused stable-structures boundary in pending 0.18, the root
+Rust normal/build graph with all features selected uses six DFINITY repositories.
+This counts externally supplied packages, not the ancestry of code already
+maintained here. Individual consumer selections
 can be much smaller; standalone BLS/signature profiles remain DFINITY-package-free.
 
 | Repository | Remaining packages / scope |
 | --- | --- |
 | [candid](https://github.com/dfinity/candid) | Candid and external Principal on selected native/Wasm paths; candid_derive runs on the compiler host; candid_parser is native-only. |
-| [stable-structures](https://github.com/dfinity/stable-structures) | Optional native/Wasm stable-memory substrate, retaining Memory's qualified 0.7.2 identity. |
 | [agent-rs](https://github.com/dfinity/agent-rs) | Native ic-agent and ic-transport-types. |
 | [ic](https://github.com/dfinity/ic) | Native management DTOs, ic-ed25519 and ic-secp256k1; also the opt-in native Profiler source provider. PocketIC client source is maintained locally. |
 | [response-verification](https://github.com/dfinity/response-verification) | Native Agent/PocketIC registry certification; representation-independent-hash 4.0.1 is development-only. |
 | [verify-bls-signatures](https://github.com/dfinity/verify-bls-signatures) | Native Agent's registry 0.6.0 wrapper; the owned wrapper's #127 fix does not change it. |
 | [bls12_381](https://github.com/dfinity/bls12_381) | Native Agent's transitive curve package; standalone Platform BLS uses its private maintained source. |
 
-Only candid and stable-structures appear as external DFINITY sources in the root
-all-feature Wasm normal/build graph. The browser package separately retains
+Only candid appears as an external DFINITY source in the root all-feature Wasm
+normal/build graph. The browser package separately retains
 [icp-js-core](https://github.com/dfinity/icp-js-core) through SDK Core 6.1.1;
 [icp-js-auth](https://github.com/dfinity/icp-js-auth) is a development compatibility
 fixture. This Rust update does not change browser or native-provider selections.
@@ -345,7 +344,6 @@ profiles retain their explicitly external identities.
 | ic-platform | runtime | executor, ic-platform-runtime/runtime, ic0, principal |
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
 | ic-platform | signature-verification | bls, canister-sig-creation, dep:serde_bytes, dep:serde_cbor |
-| ic-platform | stable-structures | dep:ic-stable-structures |
 | ic-platform-pocket-ic | default |  |
 | ic-platform-runtime | cdk | dep:ic-platform-macros, runtime |
 | ic-platform-runtime | default |  |
@@ -380,7 +378,6 @@ profiles retain their explicitly external identities.
 | ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-representation-independent-hash | ^4.0.1 | dev | all | false | true |  |
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
-| ic-platform | ic-stable-structures | =0.7.2 | normal | all | true | false |  |
 | ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert |
 | ic-platform | k256 | ^0.14.0 | normal | all | true | false | ecdsa |
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |

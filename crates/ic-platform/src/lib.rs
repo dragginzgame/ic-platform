@@ -82,8 +82,6 @@ pub mod management_canister_types;
 pub mod secp256k1;
 #[cfg(feature = "signature-verification")]
 pub mod signature_verification;
-#[cfg(feature = "stable-structures")]
-pub mod stable_structures;
 
 #[cfg(all(feature = "pocket-ic", not(target_family = "wasm")))]
 pub mod pocket_ic;

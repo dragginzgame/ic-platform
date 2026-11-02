@@ -165,11 +165,9 @@ icrc-ledger-types|icrc-ledger-types v0.2.0|reject
 icrc-ledger-types|icrc-cbor v0.1.0|reject
 icrc-ledger-types|pretty v0.12.5|reject
 icrc-ledger-types|ic-stable-structures v0.7.2|reject
-stable-structures|ic-stable-structures v0.7.2|pass
-stable-structures|ic-stable-structures v0.7.3|reject
-stable-structures|ic-stable-structures v0.7.2 (/tmp/override)|reject
-stable-structures|ic-platform v0.1.18|reject
-stable-structures|candid v0.10.38|reject
+agent|ic-stable-structures v0.7.2|reject
+principal|ic-stable-structures v0.7.3|reject
+principal|ic-stable-structures v0.7.2 (/tmp/override)|reject
 CASES
 # A runtime selection must actually contain its guard, not merely avoid outsiders.
 printf 'ic-platform v0.1.13\n' > "$fixture/native-case.txt"
