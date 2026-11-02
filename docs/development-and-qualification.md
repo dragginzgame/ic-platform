@@ -358,7 +358,7 @@ callback/trap cleanup and protected-spawn regions; mutation cases test refusal.
 The sole executor and IC0 implementation live in `ic-platform-runtime`; the facade
 delegates to that owner. The owner fixture
 has no Timers dependency. `make check-runtime-composition` reuses the fixture with
-Timers 0.35.3, adding dispatch, callback trap/cleanup, cancellation, rearm and
+Timers 0.37.0, adding dispatch, callback trap/cleanup, cancellation, rearm and
 post-upgrade dispatch. `make check-runtime-all` runs both paths even if one fails.
 PR CI reports independent jobs; release verification requires both paths to pass.
 The prepared release version must also pass composition graph admission, preventing

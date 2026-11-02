@@ -199,9 +199,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.10.0"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86e055fa6e3e40ad6187ba25b6855eeb635d5271f8e0f0e1e9a5826b8d75bea0"
+checksum = "375989decec1a0fa424442bed520fa12ede43a48475ce8c7417d2c69b32b5f6b"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -306,9 +306,9 @@ dependencies = [
 
 [[package]]
 name = "crc32fast"
-version = "1.5.3"
+version = "1.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ba106e844045ddc02c20768ac4b0b7cb45f2cc2ecbd833ac9f5dacb183c2055"
+checksum = "5f97d3416d5337d15c4b0d78c8c91df922ca143f57ec20e2d1c188333047ef04"
 dependencies = [
  "cfg-if",
 ]
@@ -783,9 +783,9 @@ dependencies = [
 
 [[package]]
 name = "ic-metrics"
-version = "0.24.4"
+version = "0.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a6018917ffc653f1ef13e4a09c1aaf10e273b00ec3fe341aef93442d2106f11"
+checksum = "081b1f0ada80283b9fe61c3f5355f98d8bff2a11f03a8fa3411c7dbd40100c57"
 dependencies = [
  "serde",
 ]
@@ -909,8 +909,8 @@ dependencies = [
 
 [[package]]
 name = "ic-timers"
-version = "0.35.4"
-source = "git+https://github.com/dragginzgame/ic-scheduling?rev=036fd50c08c2c1d05ab1cb2381abc7b8f1a36103#036fd50c08c2c1d05ab1cb2381abc7b8f1a36103"
+version = "0.37.0"
+source = "git+https://github.com/dragginzgame/ic-scheduling?rev=1c57a6d9abfd432fc683c5016d4625763682483a#1c57a6d9abfd432fc683c5016d4625763682483a"
 dependencies = [
  "ic-metrics",
  "ic-platform-runtime",

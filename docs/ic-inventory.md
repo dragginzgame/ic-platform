@@ -222,7 +222,7 @@ proc-macro libraries) are also included in the manifest inventory so additions
 cannot escape review by having a non-IC name. SHA-2 and upstream cryptographic
 primitives remain outside our implementation authority. Tooling-only fixture
 workspaces additionally use owned Wire and Testkit; only the composition profile
-selects Timers (0.35.3). Owner and composition locks and runtime graph admission
+selects Timers (0.37.0). Owner and composition locks and runtime graph admission
 remain separate from the workspace inventory. Both remain release requirements.
 
 Canonical owned Principal/Account identities live in `ic-platform-types`, which

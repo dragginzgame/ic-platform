@@ -76,7 +76,8 @@ then publish compatible adapters before application adoption. Source/archive
 proofs alone are not completed adapter registry adoption.
 
 Until adapter publication, the test-only Timers catalog selects immutable adoption
-commit `036fd50c08c2c1d05ab1cb2381abc7b8f1a36103`. Explicit preparation fetches it;
+commit `1c57a6d9abfd432fc683c5016d4625763682483a` (Timers 0.37.0), admitting
+Runtime `>=0.17.1, <0.19` while preserving the exact singleton guard. Explicit preparation fetches it;
 normal owner/composition validation uses maintained locks and prepared caches.
 The qualification root patches unpublished Platform owners, never dependency-local
 patches or production Git dependencies. Return this test selection to the published

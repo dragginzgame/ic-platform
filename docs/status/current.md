@@ -57,12 +57,13 @@ All 175 tests pass on both lines, strict native/Wasm Clippy passes, and all four
 installed Runtime-0.18/Timers profiles pass in the disposable candidate clone.
 The exact guard and one resolved owner are retained.
 
-**Awaiting explicit permission to push that Scheduling topic branch** so fresh
-Platform qualification can fetch its immutable commit. Local commit permission
-was granted; no Scheduling merge, release or crate publication is authorized.
-After the branch push, adopt that Git pin and version in Platform's test-only
-Timers catalog, refresh the affected actual composition lock, and qualify it.
-Then commit the source fix and start a fresh Runtime minor release, followed by
+The renewed all-crate deployment request includes this prerequisite branch push.
+The exact topic branch is now on Scheduling's remote; no Scheduling merge,
+release or crate publication was performed. Platform's test-only Timers catalog
+now selects that immutable commit. The actual composition lock is refreshed;
+all raw/prepared and Wire/external-Candid native/Wasm graphs pass admission,
+along with both qualification-lock identity checks, pin and documentation checks.
+Commit this source fix and start a fresh Runtime minor release, followed by
 publication/archive readback and the facade minor release/publication. Do not
 resume the old attempt against changed source or repeat Types/PocketIC uploads.
 The remaining controller must select only Runtime and Platform.
@@ -131,7 +132,7 @@ IC0/executor/CDK/prepared-call owner, empty defaults and exact singleton refusal
 Types 0.16 separates self-authentication from registry conversions. Crypto/source
 guards and fixed 16-level external Candid admission remain unchanged.
 #116 keeps separate owner and Timers installed suites/locks. The test-only Timers
-catalog still pins 036fd50c08c2c1d05ab1cb2381abc7b8f1a36103; return it to a
+catalog pins 1c57a6d9abfd432fc683c5016d4625763682483a; return it to a
 qualified registry selection after adapter publication.
 
 
