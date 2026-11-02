@@ -34,6 +34,10 @@ perl -MJSON::PP -0777 -e '
     }
     my @hosts=sort map { $_->{runner} } @{$jobs->{platform}{strategy}{matrix}{include}};
     join(",",@hosts) eq "macos-15,macos-15-intel,ubuntu-24.04" or die "lost native host";
+    my $native_steps=$jobs->{"native-provider-source"}{steps};
+    my ($tools)=grep { ($native_steps->[$_]{run}//"") eq "make install-host-tools" } 0..$#$native_steps;
+    my ($prepare)=grep { ($native_steps->[$_]{run}//"") eq "bash scripts/ci/check-native-profiler-http.sh --prepare" } 0..$#$native_steps;
+    defined($tools) && defined($prepare) && $tools < $prepare or die "native preparation lacks required manifest tools";
     print $classify->{run};
 ' "$fixture/workflow.json" > "$fixture/classify.sh"
 mkdir -p "$fixture/repo/ci" "$fixture/repo/scripts/ci" "$fixture/repo/docs/status" "$fixture/repo/crates/example"

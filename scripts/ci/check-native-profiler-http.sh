@@ -11,7 +11,8 @@ fixture="$(mktemp -d "$root/target/native-profiler-http.XXXXXX")"
 trap 'printf "Native HTTP evidence retained at %s\n" "$fixture"' EXIT
 mkdir -p "$fixture/src"
 cp "$root/scripts/fixtures/native-profiler-http/Cargo.toml.in" "$fixture/Cargo.toml"
-PLATFORM_MSRV="$(bash "$root/scripts/ci/read-platform-msrv.sh")" \
+msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
+PLATFORM_MSRV="$msrv" \
     perl -pi -e 's/\@MSRV\@/$ENV{PLATFORM_MSRV}/g' "$fixture/Cargo.toml"
 source="$root/native/ic-profiler/profiler/server/system_profile_api/admission.rs"
 cp "$source" "$fixture/src/lib.rs"

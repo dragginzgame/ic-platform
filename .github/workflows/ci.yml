@@ -52,6 +52,9 @@ jobs:
       - name: Prepare native HTTP fixture toolchain
         if: needs.selection.outputs.scope != 'docs'
         run: rustup toolchain install --profile minimal --no-self-update --component clippy --component rustfmt
+      - name: Prepare native HTTP manifest tools
+        if: needs.selection.outputs.scope != 'docs'
+        run: make install-host-tools
       - name: Prepare native HTTP fixture dependencies
         if: needs.selection.outputs.scope != 'docs'
         run: bash scripts/ci/check-native-profiler-http.sh --prepare

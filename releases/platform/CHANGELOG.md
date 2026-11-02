@@ -4,6 +4,14 @@ This group covers ic-platform. PocketIC now has its own [ledger](../pocket-ic/CH
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.18.1] - Unreleased
+
+### 🩹 Fixed
+
+- Prepare native-provider CI's manifest tools before reading the compiler floor
+  ([#133](https://github.com/dragginzgame/ic-platform/issues/133)). Fail immediately
+  if that lookup fails, before rendering an empty Cargo `rust-version`.
+
 ## [0.18.0] - 2026-11-02
 
 ### ⚠️ Breaking

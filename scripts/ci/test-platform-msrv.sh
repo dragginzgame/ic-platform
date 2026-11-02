@@ -45,4 +45,25 @@ make --no-print-directory -C "$fixture" msrv
 [[ "$(wc -l < "$fixture/calls" | tr -d ' ')" == 2 ]]
 grep -qx test "$fixture/calls"
 grep -qx wasm-check "$fixture/calls"
+# A failed manifest-tool lookup must stop preparation before Cargo sees a
+# template with an empty rust-version (the native-provider CI regression).
+native="$fixture/native-http"
+mkdir -p "$native/scripts/ci" "$native/scripts/fixtures/native-profiler-http" "$native/bin"
+cp "$root/scripts/ci/check-native-profiler-http.sh" "$native/scripts/ci/"
+cp "$root/scripts/fixtures/native-profiler-http/Cargo.toml.in" "$native/scripts/fixtures/native-profiler-http/"
+cat > "$native/scripts/ci/read-platform-msrv.sh" <<'READER'
+#!/usr/bin/env bash
+echo 'fixture: required manifest tool unavailable' >&2
+exit 23
+READER
+cat > "$native/bin/cargo" <<'CARGO'
+#!/usr/bin/env bash
+touch "$NATIVE_HTTP_CARGO_MARKER"
+CARGO
+chmod +x "$native/bin/cargo"
+result=0
+PATH="$native/bin:$PATH" NATIVE_HTTP_CARGO_MARKER="$native/cargo-called" \
+    bash "$native/scripts/ci/check-native-profiler-http.sh" --prepare > "$native/refusal.log" 2>&1 || result=$?
+[[ "$result" == 23 && ! -e "$native/cargo-called" ]]
+grep -q 'required manifest tool unavailable' "$native/refusal.log"
 printf 'Compiler admission follows manifest/toolchain policy, rejects wrong Cargo/rustc, and reuses distinct native/Wasm proofs once\n'
