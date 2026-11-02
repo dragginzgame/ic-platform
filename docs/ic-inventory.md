@@ -241,7 +241,7 @@ source changes. Do not refresh fingerprints to approve cryptographic changes.
 
 ## Remaining external DFINITY repositories
 
-After retiring the unused stable-structures boundary in pending 0.18, the root
+After retiring the unused stable-structures boundary in 0.18, the root
 Rust normal/build graph with all features selected uses six DFINITY repositories.
 This counts externally supplied packages, not the ancestry of code already
 maintained here. Individual consumer selections

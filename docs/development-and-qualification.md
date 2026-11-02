@@ -75,7 +75,7 @@ index coverage is a failing observation. No maintained lockfile or shared adviso
 cache is updated. A separate PR/main CI job
 runs the online check and retains its revision and findings in job logs.
 
-The pending 0.18 cut retires the unused stable-structures feature, module and
+Platform 0.18 retires the unused stable-structures feature, module and
 upstream dependency; see the
 [contract](../docs/migration.md#stable-structures-substrate).
 

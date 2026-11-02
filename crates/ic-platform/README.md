@@ -42,7 +42,7 @@ transfer/memo and `icrc21` consent DTOs. They keep the existing pins and feature
 selections; they add no calls, signing implementation or policy. Require at least
 0.6.21 and qualify the consumer before replacing those remaining mirrors.
 
-The pending 0.18 cut removes the unused `stable-structures` feature and module,
+Platform 0.18 removes the unused `stable-structures` feature and module,
 including their upstream dependency. Storage and allocation remain consumer-owned;
 Runtime's raw stable-memory system calls remain available. See the
 [retirement contract](../../docs/migration.md#stable-structures-substrate).

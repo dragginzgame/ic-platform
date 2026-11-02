@@ -5,7 +5,7 @@
 Current source requires Rust 1.99.1 for every member of the independent Platform,
 PocketIC, Runtime and Types groups. The minimum and pinned development/release toolchain
 must agree; compiler admission checks and records actual Cargo/rustc identities.
-Types 0.17 and PocketIC 0.18 are published; Runtime and facade 0.18 remain pending. Historical 1.91 results
+Types 0.17, PocketIC 0.18, Runtime 0.18 and facade 0.18 are published. Historical 1.91 results
 below remain dated evidence, not a support promise for this source.
 
 | Existing obligation | Current qualification |
@@ -28,13 +28,13 @@ The current source separates four release groups in this workspace:
 
 | Group | Packages | Published version |
 | --- | --- | --- |
-| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.17.1 |
-| Platform | ic-platform | 0.17.0 |
+| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.18.0 |
+| Platform | ic-platform | 0.18.0 |
 | PocketIC | ic-platform-pocket-ic | 0.18.0 |
 | Types | ic-platform-types | 0.17.0 |
 
-Runtime and facade retain their 2026-11-01 publications. Types 0.17 and the
-independent PocketIC 0.18 were published on 2026-11-02. PocketIC initially shipped
+Runtime 0.18, facade 0.18, Types 0.17 and the independent PocketIC 0.18 were
+published on 2026-11-02. PocketIC initially shipped
 with Platform; its new group now owns its own releases. Runtime began at an explicit,
 unpublished 0.17.0 selection and shipped at 0.17.1 through the ordinary patch
 workflow. The existing macros and guard advanced from their published 0.16
@@ -69,8 +69,8 @@ executor, ic0}`. Select Platform separately for required external Candid and
 cryptographic capabilities. Select Types directly when only identities are needed.
 Timers and Wire Endpoint adopt Runtime directly in
 [Scheduling #86](https://github.com/dragginzgame/ic-scheduling/pull/86) and
-[Wire #41](https://github.com/dragginzgame/ic-wire/pull/41). Types 0.16, Runtime's
-guard/macros/runtime 0.17.1 and the delegating Platform 0.17 facade are published.
+[Wire #41](https://github.com/dragginzgame/ic-wire/pull/41). Types 0.17, Runtime's
+guard/macros/runtime 0.18 and the delegating Platform 0.18 facade are published.
 Align adapter Types and native-client requirements, refresh their registry locks,
 then publish compatible adapters before application adoption. Source/archive
 proofs alone are not completed adapter registry adoption.
@@ -104,8 +104,8 @@ not the executor algorithm, IC ABI, external bytes or application policy.
 
 ## Selected canister management DTOs
 
-The maintainer authorized the canister-used subset of management 0.11.0 for the
-pending breaking 0.9.0 line. The existing module/feature name stays. On Wasm,
+Platform 0.18 ships the maintainer-authorized canister-used subset of management
+0.11.0. The existing module/feature name stays. On Wasm,
 43 explicit public names now refer to Platform-owned types, backed by 51 complete
 upstream declarations. The selection follows non-test Canic Core/control-plane
 and Blob source references, plus the maintained Canic runtime-probe canister's
@@ -1174,7 +1174,7 @@ compiler exports does not remove the upstream parser's compiler dependencies.
 
 ## Stable-structures substrate
 
-The maintainer retired this unused boundary for the pending Platform 0.18 cut.
+The maintainer retired this unused boundary in Platform 0.18.
 The `stable-structures` feature, `stable_structures` module (including manager,
 collection, Memory and Storable re-exports), identity fixtures and direct
 `ic-stable-structures` dependency are removed. Remove the old feature from

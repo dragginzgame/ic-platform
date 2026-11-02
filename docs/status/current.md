@@ -1,157 +1,68 @@
 # Current handoff
 
-## Local stable-structures removal — 2026-11-02
+## Verified Rust publication — 2026-11-02
 
-The maintainer requested retirement of the unused stable-structures surface.
-The facade feature/module, upstream catalog/member dependency, identity fixtures,
-consumer profile and obsolete pin exception are removed. Cargo pruned the package
-from the workspace lock. The dependency boundary and graph admission now reject
-it; raw stable-memory Runtime passthroughs are unchanged. The pending Platform
-0.18 ledger, migration contract and checked inventory describe the cut.
+All six workspace crates are published and independently verified on crates.io.
+The four groups keep their independent versions; no previously delivered package
+was uploaded again.
 
-Native and Wasm all-feature facade library Clippy passed with warnings denied.
-Both normal/build graphs and the workspace lock exclude ic-stable-structures.
-Feature-selection/admission and inventory regressions, dependency boundaries,
-pin checks and documentation links passed. Graph evidence is in
-`target/stable-structures-removal/`. Full CI/release/publication were not run
-for this implementation task; the Runtime delivery blocker below remains.
+| Group | Packages | Version | Release commit / tag |
+| --- | --- | --- | --- |
+| Types | ic-platform-types | 0.17.0 | 42beb561942f33e5859afef95b8b35a2131cb530 / types-v0.17.0 |
+| PocketIC | ic-platform-pocket-ic | 0.18.0 | 42a6b5c7d987ee4c7e9c38a437df0950f9f210c2 / pocket-ic-v0.18.0 |
+| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.18.0 | d3343171c942a20590513fb1752d5fecf7b5d670 / runtime-v0.18.0 |
+| Platform | ic-platform | 0.18.0 | 81490a94fbe35c28f05c6f74d2dc4e50a643822a / platform-v0.18.0 |
+
+Shared 0.27.27 at 651f5f7acb2e3055abd51ba5f835a2112801666a remains the
+installed executable snapshot. All six packages require Rust 1.99.1. Each group
+passed the complete existing CI and installed owner/Timers suites before its
+standard release, tag, atomic push and Cargo publication. No optional stage reuse
+or group-validation mapping was enabled. Official registry metadata, archive
+checksums and clean VCS identities match every exact release commit above.
+A fresh registry-only consumer additionally passed native/Wasm Clippy and proved
+canonical Principal/Account, prepared-call and native PocketIC identities without
+local patches. Native execution here was Linux; no fresh macOS or live IC
+acceptance is implied. Browser/npm and sibling publications were unchanged.
+
+Platform 0.18 removes the stable-structures feature/module, direct dependency,
+identity fixtures and obsolete pin exception. The workspace lock and native/Wasm
+normal/build graphs exclude that package. Runtime's raw stable-memory System API
+passthroughs remain unchanged. This completes source commit ee58738; the pending
+compiler/ownership batch and Principal provider update are also delivered.
+
+Durable release/publication/readback logs are under
+`.git/release-state/platform-018-final-delivery.9UcrQT/` and
+`.git/release-state/platform-018-deployment/`, with the four normal group plans.
+The earlier failed Runtime intent is preserved as `prior-runtime-0.18.0.plan`
+in the final-delivery directory. Archive readback receipts are in unique registry
+subdirectories under the earlier deployment directory. Focused removal evidence
+is in `target/stable-structures-removal/`; the published registry consumer is in
+`target/shared-02727-release/published-018-consumer/`.
+
+## Sibling adoption and qualification source
+
+The earlier Runtime preparation refusal is resolved. The renewed deployment
+request authorized the already-tested Scheduling topic branch push. Exact commit
+`1c57a6d9abfd432fc683c5016d4625763682483a` is available on
+`adopt/runtime-018-platform-qualification`. Only its Runtime requirement and
+pending notes change; timer bodies and Scheduling's lock remain unchanged.
+Platform source commit 6c50bf3 selects that immutable Timers 0.37.0 source and
+refreshes the actual composition lock. Runtime 0.18 preparation and both installed
+suites passed with the exact singleton guard retained. No Scheduling merge,
+release or crate publication was performed. Return the test-only Git selection
+to a qualified registry release after the Scheduling owner publishes it.
 
 Tooling's native Testkit memory instrumentation and Canic's native delegation
-fixture still select the old surface through Platform 0.17. The maintainer
-explicitly owns those sibling changes; both trees remain untouched by this cut.
+fixture still select stable-structures through Platform 0.17. The maintainer
+explicitly owns those feature/import removals before facade 0.18 adoption; both
+sibling trees remain untouched by this cut. Blob Client/Testkit direct Types and
+Runtime source migrations were integrated earlier; their version adoption and
+delivery remain owner-scoped. The mistaken Tooling deployment prompt remains
+withdrawn. Do not restart its release workflow.
 
-## Platform delivery — 2026-11-02
-
-Shared 0.27.27 at 651f5f7acb2e3055abd51ba5f835a2112801666a is adopted and
-pushed. Optional group-plan mapping remains off; complete existing gates apply.
-Source commits are 3920d12 (snapshot) and 543c22c (reviewed Rust batch).
-
-| Delivered group | Version | Release commit |
-| --- | --- | --- |
-| Types | 0.17.0 | 42beb561942f33e5859afef95b8b35a2131cb530 |
-| PocketIC | 0.18.0 | 42a6b5c7d987ee4c7e9c38a437df0950f9f210c2 |
-
-Both passed full CI, independent owner and Timers installed suites, standard
-release/tag/atomic push and Cargo publication. Official registry readback,
-archive checksums and clean VCS identities match. Durable plans/logs/archives
-are in `.git/release-state/platform-018-deployment/` and the normal group plans.
-PocketIC now independently ships management DTOs 0.11 and Rust 1.99.1. Its new
-implementation is available directly; published facade 0.17 keeps the old client.
-Browser, simulator, other sibling releases and live IC acceptance are outside scope.
-
-## Runtime and facade delivery blocker
-
-Runtime 0.18 passed complete CI and both installed suites, then its prepared-graph
-check correctly refused Timers' old Runtime-0.17-only source. No Runtime tag,
-push or upload happened. Its nine generated metadata files were preserved under
-`target/shared-02727-release/runtime-prepared-blocked/`, then restored to the
-committed source to permit independent PocketIC delivery. The failed plan and
-logs remain. Do not weaken the singleton or relabel this as a completed release.
-
-The user authorized an isolated Scheduling source change. Commit
-`1c57a6d9abfd432fc683c5016d4625763682483a` on
-`adopt/runtime-018-platform-qualification` in
-`target/shared-02727-release/scheduling` admits `>=0.17.1, <0.19`. Only the root
-catalog and pending Timers notes change; timer bodies and its lock are identical.
-All 175 tests pass on both lines, strict native/Wasm Clippy passes, and all four
-installed Runtime-0.18/Timers profiles pass in the disposable candidate clone.
-The exact guard and one resolved owner are retained.
-
-The renewed all-crate deployment request includes this prerequisite branch push.
-The exact topic branch is now on Scheduling's remote; no Scheduling merge,
-release or crate publication was performed. Platform's test-only Timers catalog
-now selects that immutable commit. The actual composition lock is refreshed;
-all raw/prepared and Wire/external-Candid native/Wasm graphs pass admission,
-along with both qualification-lock identity checks, pin and documentation checks.
-Commit this source fix and start a fresh Runtime minor release, followed by
-publication/archive readback and the facade minor release/publication. Do not
-resume the old attempt against changed source or repeat Types/PocketIC uploads.
-The remaining controller must select only Runtime and Platform.
-
-Blob Client and Testkit direct Types/Runtime changes are integrated in their
-normal sibling trees; their own delivery remains owner-scoped. The mistaken
-Tooling deployment prompt was withdrawn. Its small local guide/lint fixes remain.
-Earlier focused evidence is in the old handoff; it never replaces complete gates.
-
-## Pending issue batch
-
-#125 limits docs-only CI while preserving native jobs. #132 bounds new Profiler
-compiler scratch under assembly custody; existing artifacts and legacy caches
-stay untouched. #133 selects Rust 1.99.1 across all six members and retains each
-distinct native/Wasm/consumer/installed proof. #123 removes test-only assertions
-with original-source reconstruction. Earlier focused results are retained in
-`target/issue-125-132-133/` and `target/issue-repairs-20261102/`; they do not
-replace this delivery's complete gates. No crypto advisory suppression was made.
-
-## Pending owned Principal provider update — 2026-11-01
-
-The maintainer requested dependency modernization for owned Principal, keeping
-Candid's Principal external. Local Types changes select upstream SHA-2 0.11.1
-without defaults; the original derivation, vectors and source fingerprint remain.
-Certification/creation were tested but retained at SHA-2 0.10 because splitting
-them from BLS added roughly 9 KB to verifier Wasm. Principal's own probe changes
-by -386 bytes with size optimization and +784 bytes at opt-level 3.
-See [the measured tradeoff](../benchmarks/upstream-2026-10-31/README.md#owned-principal-sha-2-provider-qualification-2026-11-01).
-Evidence and the broader experimental patch are in `target/sha2-011/`.
-No new release, publication or sibling edits are authorized by this batch.
-
-The authorized BLS dependency trial is isolated in `target/bls-dependency-trial/`.
-Manifest resolution passed; full Clippy failed on Digest, curve-trait and RNG API
-changes. No BLS source/dependency changes were adopted and no size claim is made.
-Newer ff/group alone cannot remove Digest 0.10: zkcrypto's newer release retains
-it too. The benchmark notes above record the failed trial and upstream findings.
-The maintainer chose to retain DFINITY's qualified BLS dependency versions;
-do not pursue that migration merely to remove outdated-version notices.
-
-## Published independent Runtime batch — 2026-11-01
-
-The maintainer authorized and completed publication of the #131 and retained
-Principal/#116 batch through all three Rust release groups. Do not repeat uploads.
-
-| Group | Published packages | Release commit and tag |
-| --- | --- | --- |
-| Types | ic-platform-types 0.16.0 | e20aa7b94e708ad8319426d854f019709fed3353 / types-v0.16.0 |
-| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard 0.17.1 | f41cb50360542e4dc1bd504c802ffd30cd30b260 / runtime-v0.17.1 |
-| Platform | ic-platform, ic-platform-pocket-ic 0.17.0 | 35cffb6f0ab768e00b0f11d6429eff4d7d7e252c / platform-v0.17.0 |
-
-All six archives passed full release gates and published checksum/VCS checks.
-Browser 0.1.1 and sibling publications were unchanged. Keep the three original
-release plans and `.git/release-state/platform-017-publication/` recovery receipts.
-The first Platform attempt hit ENOSPC before preparation/upload. No approved
-incremental deletion was needed; external cleanup later removed `target/` and
-`/tmp/platform-131` during validation. The live log was recovered and full gates
-completed. Earlier temporary consumer/archive evidence was lost; registry receipts
-were downloaded and verified again. Do not claim deleted receipts remain available.
-See the [published handoff](https://github.com/dragginzgame/ic-platform/blob/35cffb6f0ab768e00b0f11d6429eff4d7d7e252c/docs/status/current.md)
-for detailed history. Linux qualification does not establish macOS acceptance.
-
-## Ownership and downstream adoption
-
-The [runtime contract](../migration.md#independent-runtime-owner-131) retains one
-IC0/executor/CDK/prepared-call owner, empty defaults and exact singleton refusal.
-Types 0.16 separates self-authentication from registry conversions. Crypto/source
-guards and fixed 16-level external Candid admission remain unchanged.
-#116 keeps separate owner and Timers installed suites/locks. The test-only Timers
-catalog pins 1c57a6d9abfd432fc683c5016d4625763682483a; return it to a
-qualified registry selection after adapter publication.
-
-
-User-authorized drafts are published as
-[Scheduling #86](https://github.com/dragginzgame/ic-scheduling/pull/86) and
-[Wire #41](https://github.com/dragginzgame/ic-wire/pull/41). Their isolated clones
-were removed by the external cleanup; their branches are safe on GitHub.
-Scheduling head is 690db36208daf68d03b3063700ed6c6bfcd3bdc1; Wire head is
-ca0b10fc6e7e5fe94fa6cb6e2503a51407576080. Both incorporate then-current main.
-Sibling working checkouts were untouched. Do not merge with stale supplier locks.
-
-Timers/Endpoint archive and installed proofs passed against published Runtime
-0.17.1/Types 0.16/Core 0.13.5 before cleanup. Their temporary receipts were lost;
-requalify changed inputs rather than claiming retained evidence.
-
-Wire needs canonical Types 0.16 adoption in Core/identity fixtures and native-client
-qualification, then its registry lock and affected gates. Scheduling's Jobs fixture
-still selects Endpoint 0.3; refresh its complete registry lock after matching
-Endpoint publication. The drafts record these obligations. No sibling release,
-full adoption completion or macOS evidence is implied by Platform publication.
-
+Preserve the existing [Runtime ownership contract](../migration.md#independent-runtime-owner-131),
+canonical Types, guarded imported bodies and consumer-owned policy. The BLS
+modernization trial remains unadopted; the maintainer chose the qualified DFINITY
+provider versions. Historical qualification and earlier delivery details remain
+in the [pre-finalization handoff](https://github.com/dragginzgame/ic-platform/blob/81490a94fbe35c28f05c6f74d2dc4e50a643822a/docs/status/current.md).
 Shared snapshot payloads stay immutable; refresh only through the exporter.
