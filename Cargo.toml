@@ -102,7 +102,7 @@ ic-representation-independent-hash = "4.0.1"
 ic-testkit = "0.72.0"
 # Qualification-only committed adoption source; return to a registry selection
 # after the independent Runtime and matching Timers releases are published.
-ic-timers = { version = "0.37.0", git = "https://github.com/dragginzgame/ic-scheduling", rev = "1c57a6d9abfd432fc683c5016d4625763682483a" }
+ic-timers = { version = "0.37.0", git = "https://github.com/dragginzgame/ic-scheduling", rev = "a61f35174f512b17d1c7974f4d0be79ef1e2777b" }
 ic-wire = "0.10.0"
 libfuzzer-sys = "0.4.13"
 rand = "0.8"

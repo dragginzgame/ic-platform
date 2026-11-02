@@ -6,9 +6,12 @@ The maintainer requested all pending changes. Planned releases are Types 0.18.0,
 PocketIC 0.19.0, Runtime/macros/guard 0.19.0 and Platform 0.19.0, in dependency
 order. Runtime changes because its public Principal must retain the canonical
 Types identity. Keep upstream Agent. Use standard full release/publication gates.
-Timers' selected qualification source accepts Runtime below 0.19; permission for
-an isolated compatible Scheduling branch is pending. No Scheduling release or
-sibling checkout edit is part of this delivery. Do not bypass singleton admission.
+Types 0.18.0 is released and published at 0ea35e7, with matching registry archive
+checksum and VCS identity. Remaining groups retain their pending releases.
+The maintainer authorized the isolated Scheduling branch; commit a61f351 admits
+Runtime 0.19 without timer-body changes. Its native/Wasm Clippy and 175 tests pass
+against isolated candidate metadata. No Scheduling release, merge or sibling
+checkout edit was performed. Retain singleton admission and installed composition.
 
 ## Agent decision — 2026-11-02
 
@@ -101,8 +104,8 @@ green. Logs: target/issue-work-20261102/. No fresh macOS/live IC claim is made.
 ## Sibling scope
 
 Composition qualification selects immutable Timers 0.37.0 source
-1c57a6d9abfd432fc683c5016d4625763682483a on
-adopt/runtime-018-platform-qualification. No Scheduling merge/release was done;
+a61f35174f512b17d1c7974f4d0be79ef1e2777b on
+adopt/runtime-019-platform-qualification. No Scheduling merge/release was done;
 return to a qualified registry source after its owner publishes. Tooling/Canic
 stable-structures removals are explicitly maintainer-owned. Sibling checkouts
 remain untouched, and the mistaken Tooling deployment request stays withdrawn.
