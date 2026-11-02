@@ -1708,7 +1708,7 @@ version = "0.18.1"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "crc32fast",
  "data-encoding",
