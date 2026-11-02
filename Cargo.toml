@@ -28,9 +28,9 @@ ic-platform-pocket-ic = { version = "0.18.0", path = "crates/ic-platform-pocket-
 
 # Runtime
 # Changelog : releases/runtime/CHANGELOG.md
-ic-platform-macros = { version = "0.17.1", path = "crates/ic-platform-macros" }
-ic-platform-runtime = { version = "0.17.1", path = "crates/ic-platform-runtime", default-features = false }
-ic-platform-runtime-guard = { version = "=0.17.1", path = "crates/ic-platform-runtime-guard", default-features = false }
+ic-platform-macros = { version = "0.18.0", path = "crates/ic-platform-macros" }
+ic-platform-runtime = { version = "0.18.0", path = "crates/ic-platform-runtime", default-features = false }
+ic-platform-runtime-guard = { version = "=0.18.0", path = "crates/ic-platform-runtime-guard", default-features = false }
 
 # Types
 # Changelog : releases/types/CHANGELOG.md
