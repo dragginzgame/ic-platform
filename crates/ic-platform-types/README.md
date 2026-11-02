@@ -13,7 +13,11 @@ upstream SHA-224, independently of registry Principal. Enable both when external
 conversions are also required.
 There is no runtime, executor, Wire or Candid dependency.
 
-Existing Platform consumers keep their import paths. External bytes and account
-semantics remain unchanged. Its [group ledger](https://github.com/dragginzgame/ic-platform/blob/main/releases/types/CHANGELOG.md)
+Existing Platform consumers keep their Rust import paths and account identity
+semantics. Present subaccounts serialize through `serde_bytes` with exactly 32
+bytes. This changes binary Serde contracts: Postcard adds the `0x20` length prefix
+after Some's `0x01` marker; None stays `0x00`. Coordinate Wire schemas/clients,
+qualify budgets and preserve original retry/hash bytes. External Candid DTOs are
+unchanged. Its [group ledger](https://github.com/dragginzgame/ic-platform/blob/main/releases/types/CHANGELOG.md)
 owns release notes and links the earlier coordinated history. Initial 0.1 notes
 remain historical. Release and publication require explicit RELEASE_GROUP=types.

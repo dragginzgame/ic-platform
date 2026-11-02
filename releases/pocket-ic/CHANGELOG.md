@@ -3,6 +3,25 @@
 This independent group covers `ic-platform-pocket-ic`.
 Its initial publication is recorded in the [Platform ledger](../platform/CHANGELOG.md).
 
+## [0.19.0] - Unreleased
+
+### 🧹 Maintenance
+
+- Consolidate base64 on 0.23.1, shared with Reqwest. Preserve standard padded
+  JSON bytes and malformed-input rejection; imported client bodies stay exact.
+
+### ⚠️ Breaking
+
+- Return structured ClientError failures from sync/async network operations and
+  builder execution. Preserve sources, server status and accepted operation IDs;
+  never replay uncertain submissions. Use monotonic deadlines and async polling.
+  Remove I/O-performing Default; explicit deletion now retains state on failure
+  and prevents automatic Drop replay. Management/protocol bytes remain unchanged.
+
+- Update Strum and its macros to 0.28. Exposed enum iteration now uses that
+  trait identity; consumers importing IntoEnumIterator must select 0.28.
+  Preserve imported client bodies, enum catalog values and protocol bytes.
+
 ## [0.18.0] - 2026-11-02
 
 ### ⚠️ Breaking

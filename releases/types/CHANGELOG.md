@@ -5,6 +5,18 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.18.0] - Unreleased
+
+### ⚠️ Breaking
+
+- #138: encode present owned Account subaccounts as Serde bytes, retaining the
+  fixed 32-byte length and omitted-field admission. Postcard Some gains a 0x20
+  length prefix; CBOR uses bytes; None and explicit zero remain distinguishable.
+  Require the next Types minor and coordinated Wire schemas, browser clients,
+  fresh endpoint contract IDs and budget qualification. Preserve retained data
+  bytes; there is no automatic persisted-data migration or legacy decoder.
+  Logical identity and external ledger Candid contracts remain unchanged.
+
 ## [0.17.0] - 2026-11-02
 
 ### ⚠️ Breaking

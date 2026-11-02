@@ -14,3 +14,8 @@ primitive, account-identifier derivation or hash domain is implemented or change
 Parse errors are owned, bounded diagnostics; oversized inputs are rejected first.
 Absent and explicit zero subaccounts remain distinguishable serialized fields,
 while equality, ordering, hashing and displayed text treat them identically.
+
+The approved optional-subaccount Serde cut uses the standard serde_bytes adapter
+with exactly 32 payload bytes. Present values become byte strings rather than
+tuples; the absent/zero distinction and logical/text identity remain unchanged.
+Wire owns the matching schema and coordinated consumer adoption.

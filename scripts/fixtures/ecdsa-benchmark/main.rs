@@ -39,18 +39,27 @@ fn main() {
     extended.push(0);
     cases.push(("long-signature", extended, 0));
 
-    let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))
-        .unwrap()
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
+    let config = PocketIcStartupConfig::from_env(Duration::from_secs(60)).unwrap();
+    let (_server, url) = match config {
+        PocketIcStartupConfig::Connect { server_url, .. } => (None, server_url),
+        spawn => {
+            let server = spawn.start_managed_server().unwrap();
+            let url = server.url().to_owned();
+            (Some(server), url)
+        }
+    };
+    let pic = PocketIcBuilder::new()
+        .with_server_url(url.parse().unwrap())
+        .with_application_subnet()
+        .build()
         .unwrap();
-    let pic = owned.instance();
     println!("backend\tcase\tsample\tinstructions");
     let mut args = std::env::args().skip(1);
     while let Some(backend) = args.next() {
         let wasm = std::fs::read(args.next().expect("Wasm path")).unwrap();
-        let id = pic.create_canister();
-        pic.add_cycles(id, 10_000_000_000_000);
-        pic.install_canister(id, wasm, vec![], None);
+        let id = pic.create_canister().unwrap();
+        pic.add_cycles(id, 10_000_000_000_000).unwrap();
+        pic.install_canister(id, wasm, vec![], None).unwrap();
         for (name, request, expected) in &cases {
             for sample in 0..3 {
                 let result = pic

@@ -63,6 +63,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
     }
     let denied = pic
         .update_call(id, Principal::anonymous(), "external_denied", vec![0; 1025])
+        .map_err(super::rejection)
         .unwrap_err();
     assert!(denied.reject_message.contains("fixture access refused"));
     assert_eq!(observed(pic, id), 7);

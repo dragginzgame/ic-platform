@@ -8,7 +8,7 @@ fn hex(path: &Path) -> Vec<u8> {
     let text = std::fs::read_to_string(path).unwrap();
     text.trim()
         .as_bytes()
-        .chunks_exact(2)
+        .as_chunks::<2>().0.iter()
         .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
         .collect()
 }
@@ -22,17 +22,26 @@ fn main() {
     assert_eq!(public.len(), 96);
     let mut request = [signature, public].concat();
     request.extend_from_slice(b"platform-signature");
-    let owned = PocketIcStartupConfig::from_env(Duration::from_secs(60))
-        .unwrap()
-        .build_instance(PocketIcBuilder::new().with_application_subnet())
+    let config = PocketIcStartupConfig::from_env(Duration::from_secs(60)).unwrap();
+    let (_server, url) = match config {
+        PocketIcStartupConfig::Connect { server_url, .. } => (None, server_url),
+        spawn => {
+            let server = spawn.start_managed_server().unwrap();
+            let url = server.url().to_owned();
+            (Some(server), url)
+        }
+    };
+    let pic = PocketIcBuilder::new()
+        .with_server_url(url.parse().unwrap())
+        .with_application_subnet()
+        .build()
         .unwrap();
-    let pic = owned.instance();
     println!("variant\tcase\tsample\tinstructions");
     while let Some(variant) = args.next() {
         let wasm = std::fs::read(args.next().expect("Wasm path")).unwrap();
-        let id = pic.create_canister();
-        pic.add_cycles(id, 10_000_000_000_000);
-        pic.install_canister(id, wasm, vec![], None);
+        let id = pic.create_canister().unwrap();
+        pic.add_cycles(id, 10_000_000_000_000).unwrap();
+        pic.install_canister(id, wasm, vec![], None).unwrap();
         // Updates retain the prepared-generator cache; queries do not commit it.
         for sample in 0..6 {
             let result = pic

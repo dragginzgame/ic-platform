@@ -4,6 +4,15 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.19.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Adopt Types 0.18 as the canonical Principal owner shared with Platform.
+  Rebuild consumers against this Runtime generation; its coordinated macros and
+  exact singleton guard advance together. Execution, IC0 and call bodies remain
+  unchanged. Raw IC0/executor builds still avoid application Types.
+
 ## [0.18.1] - 2026-11-02
 
 ### ➕ Added

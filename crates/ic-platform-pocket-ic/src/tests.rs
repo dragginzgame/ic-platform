@@ -2,6 +2,36 @@ use super::{ErrorCode, RejectCode, RejectResponse, check_pocketic_server_version
 use strum::IntoEnumIterator as _;
 
 #[test]
+fn base64_json_preserves_padding_binary_bytes_and_rejections() {
+    #[derive(Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+    struct Payload {
+        #[serde(with = "super::common::rest::base64")]
+        bytes: Vec<u8>,
+    }
+    for (raw, encoded) in [
+        (b"".as_slice(), ""),
+        (b"f".as_slice(), "Zg=="),
+        (b"fo".as_slice(), "Zm8="),
+        (b"foo".as_slice(), "Zm9v"),
+        ([255, 0, 1, 254].as_slice(), "/wAB/g=="),
+    ] {
+        let payload = Payload {
+            bytes: raw.to_vec(),
+        };
+        let json = format!(r#"{{"bytes":"{encoded}"}}"#);
+        assert_eq!(serde_json::to_string(&payload).unwrap(), json);
+        assert_eq!(serde_json::from_str::<Payload>(&json).unwrap(), payload);
+    }
+    for invalid in ["Zg", "Zg=", "Zh==", "Zm9v=", "_w==", "Zg==\n"] {
+        let json = serde_json::json!({"bytes": invalid});
+        assert!(
+            serde_json::from_value::<Payload>(json).is_err(),
+            "{invalid:?}"
+        );
+    }
+}
+
+#[test]
 fn rejection_catalog_preserves_protocol_values_and_json() {
     for code in RejectCode::iter() {
         assert_eq!(RejectCode::try_from(code as u64).unwrap(), code);
@@ -67,3 +97,5 @@ mod windows_to_wsl_tests {
         assert!(windows_to_wsl(r"C:Users\x").is_err());
     }
 }
+
+mod client_failures;

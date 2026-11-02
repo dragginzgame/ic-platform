@@ -23,6 +23,12 @@ pub struct Account {
     /// Account owner.
     pub owner: Principal,
     /// Explicit subaccount, or the effective all-zero default.
+    // Hard cut: present subaccounts use Serde bytes instead of 32 tuple elements.
+    // Postcard Some([0;32]) changes from 01 + 32 zero bytes to 01 20 + 32 zeros;
+    // None stays 00. Logical identity and absent/explicit-zero representation stay
+    // distinct. Align Wire's bounded-byte schema and all binary consumers; qualify
+    // budgets and retain original retry/hash bytes. External Candid DTOs are separate.
+    #[serde(default, with = "serde_bytes")]
     pub subaccount: Option<Subaccount>,
 }
 

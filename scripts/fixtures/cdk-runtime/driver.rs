@@ -46,11 +46,18 @@ fn update<R: DeserializeOwned>(
 }
 #[cfg(feature = "timers-composition")]
 fn advance(pic: &PocketIc) {
-    pic.advance_time(Duration::from_secs(2));
+    pic.advance_time(Duration::from_secs(2)).unwrap();
     for _ in 0..20 {
-        pic.tick();
+        pic.tick().unwrap();
     }
 }
+fn rejection(error: ic_platform::pocket_ic::ClientError) -> RejectResponse {
+    match error {
+        ic_platform::pocket_ic::ClientError::Canister(rejection) => rejection,
+        other => panic!("expected canister rejection, got {other}"),
+    }
+}
+
 fn assert_guard_rejection(error: &RejectResponse) {
     assert_eq!(error.reject_code, RejectCode::CanisterReject);
     assert_eq!(error.reject_message, "fixture guard refused");
@@ -109,11 +116,13 @@ fn main() {
         .with_server_url(url.parse().unwrap())
         .with_max_request_time_ms(Some(60_000))
         .with_application_subnet()
-        .build();
+        .build()
+        .unwrap();
     let pic = &instance;
-    let id = pic.create_canister();
-    pic.add_cycles(id, 10_000_000_000_000);
-    pic.install_canister(id, wasm.clone(), request("initialize", 10u64), None);
+    let id = pic.create_canister().unwrap();
+    pic.add_cycles(id, 10_000_000_000_000).unwrap();
+    pic.install_canister(id, wasm.clone(), request("initialize", 10u64), None)
+        .unwrap();
     for size in BUFFER_COPY_SIZES {
         let payload: Vec<u8> = (0..size).map(|i| (i % 256) as u8).collect();
         let mut baseline = Vec::new();
@@ -162,11 +171,13 @@ fn main() {
             "guarded",
             request("guarded", ()),
         )
+        .map_err(rejection)
         .unwrap_err(),
     );
     for bytes in [vec![], vec![0, 1]] {
         let error = pic
             .query_call(id, Principal::anonymous(), "scalar", bytes)
+            .map_err(rejection)
             .unwrap_err();
         // Empty input must reach the decoder, not fail in buffer initialization.
         assert!(error.reject_message.contains("fixture request:"));
@@ -211,6 +222,7 @@ fn main() {
             "protected_pending",
             request("protected_pending", ())
         )
+        .map_err(rejection)
         .unwrap_err()
         .reject_message
         .contains("protected task outlived its canister method")
@@ -253,9 +265,10 @@ fn main() {
         advance(pic);
         assert_eq!(query::<u64>(pic, id, "value", ()), 31);
     }
-    let receiver = pic.create_canister();
-    pic.add_cycles(receiver, 10_000_000_000_000);
-    pic.install_canister(receiver, wasm, request("initialize", 0u64), None);
+    let receiver = pic.create_canister().unwrap();
+    pic.add_cycles(receiver, 10_000_000_000_000).unwrap();
+    pic.install_canister(receiver, wasm, request("initialize", 0u64), None)
+        .unwrap();
     assert_eq!(update::<u64>(pic, id, "cancel_task", ()), 2);
     let offered = 1_000_000_000u128;
     for (limit, mode, refund) in [
@@ -293,6 +306,7 @@ fn main() {
                 (receiver, offered, 300_000_000u128, 0u8, true),
             ),
         )
+        .map_err(rejection)
         .unwrap_err();
     assert_eq!(error.reject_code, RejectCode::CanisterError);
     assert!(
@@ -320,6 +334,7 @@ fn main() {
             "stable_value",
             request("stable_value", ())
         )
+        .map_err(rejection)
         .unwrap_err()
         .reject_code,
         RejectCode::CanisterError
@@ -335,6 +350,7 @@ fn main() {
             "stable_edit",
             request("stable_edit", (999u64, true, true))
         )
+        .map_err(rejection)
         .unwrap_err()
         .reject_message
         .contains("fixture stable rollback")
@@ -363,6 +379,7 @@ fn main() {
                 "stable_bounds_trap",
                 request("stable_bounds_trap", write),
             )
+            .map_err(rejection)
             .unwrap_err();
         assert_eq!(rejection.reject_code, RejectCode::CanisterError);
         assert!(

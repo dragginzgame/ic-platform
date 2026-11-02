@@ -17,8 +17,9 @@ fn main() {
         .with_server_url(url.parse().unwrap())
         .with_max_request_time_ms(Some(60_000))
         .with_application_subnet()
-        .build();
-    let id = pic.create_canister();
+        .build()
+        .unwrap();
+    let id = pic.create_canister().unwrap();
     let before = pic.canister_status(id, None).unwrap();
     let minimum = before.settings.minimum_incoming_canister_call_cycles;
     let visibility = before.settings.status_visibility;
@@ -41,7 +42,8 @@ fn main() {
     );
     assert_eq!(after.settings.status_visibility, visibility);
     // A complete empty Wasm module is enough to qualify snapshot management.
-    pic.install_canister(id, b"\0asm\x01\0\0\0".to_vec(), vec![], None);
+    pic.install_canister(id, b"\0asm\x01\0\0\0".to_vec(), vec![], None)
+        .unwrap();
     pic.stop_canister(id, None).unwrap();
     let snapshot = pic.take_canister_snapshot(id, None, None).unwrap();
     let listed = pic.list_canister_snapshots(id, None).unwrap();

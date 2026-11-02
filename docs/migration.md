@@ -1,5 +1,39 @@
 # Candid and runtime ownership
 
+## Account byte-adapter cut (#138)
+
+The next Types minor changes Account’s optional subaccount to the standard
+`serde_bytes` adapter. Rust fields remain owner: Principal followed by
+subaccount: Option<[u8; 32]>. Principal remains bounded to 29 bytes. Postcard
+None stays 00; Some changes from 01 plus 32 payload bytes to 01 20 plus those
+bytes. JSON retains an array or null; CBOR now emits a byte string for Some.
+Omitted optional map fields still decode to None; 31/33-byte subaccounts refuse.
+Logical equality/ordering/hash/text and raw None versus explicit zero remain
+distinct concepts. External ledger Candid DTOs and their bytes do not change.
+
+This is an incompatible binary Serde contract, without a legacy lane or
+automatic migration. Matching Wire schema must use optional bytes, min=max=32,
+and generated browser fields must use Uint8Array. Requalify frame, allocation,
+node and depth limits. Affected endpoints and clients require fresh unique
+contract IDs through the existing endpoint id setting: default method-name IDs
+and a package minor alone do not distinguish these payloads. An old Account
+whose subaccount starts with 20, followed by a blob, can decode successfully as
+a different Account and blob under the new layout. A regression retains this
+collision; do not rely on malformed-input rejection to fence old messages.
+
+Consumers resolve retained/in-flight operations under their existing recovery
+policy and preserve original retry, signature and encoder-hash bytes. Endpoint
+IDs do not fence unframed persisted Account data: inventory and handle those
+stored formats separately. Platform does not own storage migration or Wire IDs.
+
+This working tree is source preparation, not a published Types supplier. Release
+the next Types minor and align the facade/Runtime dependency selections where
+the canonical Types identity changes, retaining one Types identity and one exact
+Runtime guard. Do not advance unrelated release groups mechanically. Producer
+completion does not require every consumer rollout; Wire owns its subsequent
+schema/client adoption and registry-only installed qualification. Current local
+Linux/Wasm proofs do not establish that future release family or macOS coverage.
+
 ## Supported compiler (#133)
 
 Current source requires Rust 1.99.1 for every member of the independent Platform,
@@ -1402,11 +1436,23 @@ the facade's optional `pocket-ic` feature re-exports the same implementation.
 Published client 0.18.0 selects workspace management DTOs =0.11.0 in place of 0.8.0. Settings, status and install
 mode types now share the native management surface's external identity.
 
-The source guard reconstructs only the import rename and rustfmt ordering before
-checking the original maintained hashes. Method bodies, REST fields, polling and
-operation behavior remain unchanged. New management fields alter the Candid
+The published 0.18 source guard reconstructs the import rename and rustfmt ordering
+before checking the original maintained hashes. New management fields alter the Candid
 schema; installed status, settings and snapshot lifecycle are qualified against
 the explicitly prepared 16.1.0 server. This is no blanket server-version promise.
+
+The pending #134 cut makes sync/async network operations and builder execution
+fallible with one ClientError contract. Consumers must handle transport, body,
+JSON, server-status, deadline and canister-rejection cases explicitly. Errors
+retain accepted HTTP computation and ingress identities for consumer-owned
+recovery; a lost response never authorizes automatic resubmission. A monotonic
+budget covers dispatch, body reads and polling. The unused stringifying
+ApiResponse::from_response helper and I/O-performing Default are removed.
+Explicit deletion retains state on failure and is not repeated by Drop.
+The source guard reverses the exact fallible patch before the import adaptation;
+original hashes and licenses remain unchanged. This requires a new minor client
+release and affected facade adoption, not a republish of 0.18.0. Siblings retain
+their current published API until they explicitly adopt the new owner.
 
 All client dependencies remain native-target scoped. Direct consumers avoid the
 facade and Runtime, while retaining Candid, certification and native HTTP below
@@ -1815,13 +1861,20 @@ and [verification/BLS isolation](https://github.com/dragginzgame/ic-platform/iss
 ## Native Agent extension
 
 The optional `agent` feature exposes `ic_platform::agent` on native hosts only.
-It currently locks `ic-agent` 0.49.2, matching Query's requirement and Canic's
-exact selection, with upstream defaults disabled and PEM enabled for Canic's
+It currently locks `ic-agent` 0.49.3 through the existing compatible 0.49.2
+requirement, with upstream defaults disabled and PEM enabled for Canic's
 exported identities. Agent and its module are absent on Wasm even with all
 features; neither runtime nor parser features enable it. Agent does not enable
 Platform's Candid, certification or parser features, though upstream Agent itself
 depends on Candid and certification. Select `certification` for shared certificate
 types and `candid` for DTOs/decoding when needed. No browser Agent is qualified.
+
+The maintainer withdrew the unreleased owned Agent and its RustCrypto provider
+migration. Upstream retains implementation and cryptographic dependency ownership;
+Platform maintains this explicit native adapter. Native tools can sign real
+requests, so this is not a test-only safety exemption: advisory #50 remains open
+for upstream Agent and the separate offline derivation provider. The rollback
+does not change production canister Wasm or the existing standalone crypto owners.
 
 The read-only Agent audit used working trees at Query `8982c2a4`, Canic
 `5583496bf` and Host `8b458763`; these bases do not imply clean source. Copied

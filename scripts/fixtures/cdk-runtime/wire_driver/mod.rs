@@ -111,6 +111,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
                 method,
                 vec![0; REQUEST.bytes + 1],
             )
+            .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterReject);
         assert_eq!(
@@ -128,6 +129,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
     ] {
         let error = pic
             .update_call(id, Principal::anonymous(), "wire_set", bytes)
+            .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterError);
         assert!(error.reject_message.contains("Wire fixture request:"));
@@ -145,6 +147,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
         );
         let error = pic
             .update_call(id, Principal::anonymous(), method, frame)
+            .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterError);
         assert!(
@@ -166,6 +169,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
             "wire_encode_trap",
             ic_wire::native::encode_request(ENCODE_TRAP, &(), REQUEST).unwrap(),
         )
+        .map_err(super::rejection)
         .unwrap_err();
     assert_eq!(error.reject_code, RejectCode::CanisterError);
     assert!(

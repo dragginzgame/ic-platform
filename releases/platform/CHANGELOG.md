@@ -4,7 +4,23 @@ This group covers ic-platform. PocketIC now has its own [ledger](../pocket-ic/CH
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
-## [0.18.1] - Unreleased
+## [0.19.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Adopt the new canonical Types family and its Account subaccount byte encoding.
+  Affected RPCs need matching schemas and fresh contract IDs; persisted data
+  requires consumer-owned migration. Runtime retains the same canonical Principal.
+- Forward PocketIC's fallible client API. Handle ClientError explicitly for
+  construction and operations; uncertain submissions must not be replayed.
+
+### 🧹 Maintenance
+
+- Retain upstream ic-agent behind the explicit native facade; withdraw the
+  unreleased owned Agent and its cryptographic-provider migration. Keep upstream
+  type identities and consumer-owned trust, retry and admission policy.
+- Remove unused direct ic_principal and thiserror dependencies from the facade;
+  Types retains Principal implementation ownership and feature forwarding.
 
 ### 🩹 Fixed
 

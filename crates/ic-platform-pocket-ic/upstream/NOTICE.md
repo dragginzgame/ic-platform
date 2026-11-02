@@ -52,3 +52,27 @@ type tables change, including the new status visibility and minimum incoming-cal
 cycles fields; original payload-byte identity is not claimed for this upgrade.
 Installed status, settings and snapshot lifecycle pass against prepared PocketIC
 16.1.0. Testkit's admission and server lifecycle ownership remain unchanged.
+
+## Fallible client adaptation (#134, unreleased)
+
+The maintained client now changes the imported signatures and error plumbing:
+network operations return ClientError; the sync client delegates to the async
+owner. src/error.rs and src/http.rs are owned integration code. HTTP dispatch,
+body reads, JSON decoding and polling retain typed sources and operation evidence.
+One monotonic deadline covers an exchange. Busy permits a new submission;
+Started permanently selects polling of that receipt. Transport failures never
+resubmit. Successful decoded results retain best-effort graph pruning; failures
+retain the receipt for consumer-owned recovery. Async waits yield instead of
+blocking. Direct creation/blob/gateway/metrics/delete paths share the exchange.
+Candid and CBOR failures propagate; their upstream codecs remain selected.
+
+Builder execution is fallible and the I/O-performing Default implementation is
+removed. Explicit deletion preserves state on failure and Drop does not repeat
+an attempted deletion. Server convenience startup propagates failures and bounds
+waiting for the port; Testkit remains the provisioning owner. Protocol request
+payloads, management DTO identities, rejection catalog and hash operations remain.
+
+fallible-client.patch records the exact delta from the preceding management-0.11
+source. The guard verifies its checksum, reverses it without fuzz, then reverses
+the management import adaptation and checks the original maintained-source.sha256.
+Those original fingerprints and licenses are not refreshed for this change.

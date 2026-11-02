@@ -1,9 +1,9 @@
 //! Standalone host consumer with only Platform declared; no server is started.
 #![cfg(not(target_family = "wasm"))]
 use ic_platform::pocket_ic::{
-    CanisterInstallMode, CanisterSettings, CreateCanisterParams, CreateCanisterPlacement,
-    ErrorCode, LATEST_SERVER_VERSION, PocketIc, PocketIcBuilder, RejectCode, RejectResponse,
-    Snapshot,
+    CanisterInstallMode, CanisterSettings, ClientError, CreateCanisterParams,
+    CreateCanisterPlacement, ErrorCode, LATEST_SERVER_VERSION, PocketIc, PocketIcBuilder,
+    RejectCode, RejectResponse, Snapshot,
     common::rest::{
         BlobCompression, CanisterHttpReply, CanisterHttpResponse, CreateInstanceResponse,
         IcpFeatures, IcpFeaturesConfig, InstanceHttpGatewayConfig, MockCanisterHttpResponse,
@@ -73,9 +73,10 @@ pub fn client_contract() {
     };
     assert_eq!(response.request_id, 7);
 
-    let _: fn(&PocketIc, RawMessageId) -> Result<Vec<u8>, RejectResponse> = PocketIc::await_call;
-    let _: fn(&PocketIc, MockCanisterHttpResponse) = PocketIc::mock_canister_http_response;
-    let _update = |client: &PocketIc| -> Result<Vec<u8>, RejectResponse> {
+    let _: fn(&PocketIc, RawMessageId) -> Result<Vec<u8>, ClientError> = PocketIc::await_call;
+    let _: fn(&PocketIc, MockCanisterHttpResponse) -> Result<(), ClientError> =
+        PocketIc::mock_canister_http_response;
+    let _update = |client: &PocketIc| -> Result<Vec<u8>, ClientError> {
         client.update_call_with_effective_principal(
             canister,
             message.effective_principal,
@@ -105,7 +106,7 @@ fn chunked_upgrade_preserves_pocketic_management_identity() {
     assert_eq!(flags.skip_pre_upgrade, Some(true));
 
     // Compile the real client parameter without starting a server or installing.
-    let _install = |client: &PocketIc, mode: CanisterInstallMode| -> Result<(), RejectResponse> {
+    let _install = |client: &PocketIc, mode: CanisterInstallMode| -> Result<(), ClientError> {
         let canister = ic_platform::principal::ExternalPrincipal::management_canister();
         client.install_chunked_canister(canister, None, mode, canister, vec![], vec![], vec![])
     };
@@ -113,11 +114,12 @@ fn chunked_upgrade_preserves_pocketic_management_identity() {
 
 #[test]
 fn pending_ingress_preserves_the_submitted_message_identity() {
-    let _status =
-        |client: &PocketIc, message: RawMessageId| -> Option<Result<Vec<u8>, RejectResponse>> {
-            client.ingress_status(message)
-        };
-    let _submit = |client: &PocketIc| -> Result<RawMessageId, RejectResponse> {
+    let _status = |client: &PocketIc,
+                   message: RawMessageId|
+     -> Result<Option<Result<Vec<u8>, RejectResponse>>, ClientError> {
+        client.ingress_status(message)
+    };
+    let _submit = |client: &PocketIc| -> Result<RawMessageId, ClientError> {
         let canister = ic_platform::principal::ExternalPrincipal::management_canister();
         client.submit_call(canister, canister, "fixture", vec![])
     };

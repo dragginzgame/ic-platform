@@ -13,8 +13,8 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 [features]
 default = []
 blake3 = ["dep:blake3"]
-principal = ["dep:ic-platform-types", "dep:serde", "dep:thiserror"]
-principal-external = ["principal", "ic-platform-types/principal-external", "dep:ic_principal"]
+principal = ["dep:ic-platform-types", "dep:serde"]
+principal-external = ["principal", "ic-platform-types/principal-external"]
 principal-self-authenticating = ["principal", "ic-platform-types/principal-self-authenticating"]
 agent = ["principal-external", "dep:ic-agent", "dep:ic-certification"]
 bls = [
@@ -84,7 +84,6 @@ hex = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-platform-runtime = { workspace = true, optional = true }
 ic-platform-types = { workspace = true, optional = true }
-ic_principal = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
 num-bigint = { workspace = true, optional = true }
 num-traits = { workspace = true, optional = true }
@@ -95,7 +94,6 @@ serde_bytes = { workspace = true, optional = true }
 serde_cbor = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }
 subtle = { workspace = true, optional = true }
-thiserror = { workspace = true, optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }

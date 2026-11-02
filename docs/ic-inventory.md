@@ -225,6 +225,12 @@ workspaces additionally use owned Wire and Testkit; only the composition profile
 selects Timers (0.37.0). Owner and composition locks and runtime graph admission
 remain separate from the workspace inventory. Both remain release requirements.
 
+Types now uses serde_bytes for the optional fixed-length Account subaccount
+(#138). Postcard, JSON and CBOR are test-only proof dependencies; no Wire,
+Candid, Runtime or host dependency enters the Types normal graph. The new
+binary contract requires coordinated consumer adoption as described in the
+migration guide.
+
 Canonical owned Principal/Account identities live in `ic-platform-types`, which
 has its own version within the same workspace and is explicitly re-exported by
 Platform. The selected
@@ -338,8 +344,8 @@ profiles retain their explicitly external identities.
 | ic-platform | management-canister-types | candid/bignum, candid/serde_bytes, dep:candid, dep:ic-management-canister-types, dep:serde_bytes, principal-external |
 | ic-platform | nns-registry-types | candid |
 | ic-platform | pocket-ic | dep:ic-platform-pocket-ic, principal-external |
-| ic-platform | principal | dep:ic-platform-types, dep:serde, dep:thiserror |
-| ic-platform | principal-external | dep:ic_principal, ic-platform-types/principal-external, principal |
+| ic-platform | principal | dep:ic-platform-types, dep:serde |
+| ic-platform | principal-external | ic-platform-types/principal-external, principal |
 | ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal |
 | ic-platform | runtime | executor, ic-platform-runtime/runtime, ic0, principal |
 | ic-platform | secp256k1 | dep:ic-secp256k1, principal-external |
@@ -378,7 +384,6 @@ profiles retain their explicitly external identities.
 | ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-representation-independent-hash | ^4.0.1 | dev | all | false | true |  |
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
-| ic-platform | ic_principal | ^0.1.5 | normal | all | true | false | convert |
 | ic-platform | k256 | ^0.14.0 | normal | all | true | false | ecdsa |
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
 | ic-platform | num-traits | ^0.2.19 | normal | all | true | true |  |
@@ -395,12 +400,11 @@ profiles retain their explicitly external identities.
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
 | ic-platform | sha3 | ^0.10 | dev | all | false | true |  |
 | ic-platform | subtle | ^2.6 | normal | all | true | false |  |
-| ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^3 | normal | all | false | true | full |
 | ic-platform-pocket-ic | backon | ^1.6.0 | normal | cfg(not(target_family = "wasm")) | false | false | std |
-| ic-platform-pocket-ic | base64 | ^0.22 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | base64 | ^0.23.1 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | candid | ^0.10.38 | normal | cfg(not(target_family = "wasm")) | false | false | bignum, printer, serde_bytes |
 | ic-platform-pocket-ic | flate2 | ^1.0.31 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | hex | ^0.4.3 | normal | cfg(not(target_family = "wasm")) | false | true | serde |
@@ -415,8 +419,8 @@ profiles retain their explicitly external identities.
 | ic-platform-pocket-ic | serde_json | ^1.0 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | sha2 | ^0.10 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | slog | ^2.7.0 | normal | cfg(not(target_family = "wasm")) | false | true | max_level_trace, nested-values, release_max_level_trace |
-| ic-platform-pocket-ic | strum | ^0.26.3 | normal | cfg(not(target_family = "wasm")) | false | true | derive |
-| ic-platform-pocket-ic | strum_macros | ^0.26.4 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | strum | ^0.28.0 | normal | cfg(not(target_family = "wasm")) | false | true | derive |
+| ic-platform-pocket-ic | strum_macros | ^0.28.0 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | tempfile | ^3.20 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | thiserror | ^2.0.18 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | tokio | ^1.42.0 | normal | cfg(not(target_family = "wasm")) | false | false | full |
@@ -435,8 +439,11 @@ profiles retain their explicitly external identities.
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | true |  |
 | ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | convert |
 | ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert, self_authenticating |
+| ic-platform-types | postcard | ^1.1.3 | dev | all | false | false | alloc |
 | ic-platform-types | serde | ^1.0 | normal | all | false | false | alloc, derive |
-| ic-platform-types | serde_bytes | ^0.11 | dev | all | false | true |  |
+| ic-platform-types | serde_bytes | ^0.11 | normal | all | false | true |  |
+| ic-platform-types | serde_cbor | ^0.11.2 | dev | all | false | true |  |
+| ic-platform-types | serde_json | ^1.0 | dev | all | false | true |  |
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-types | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |

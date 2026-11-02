@@ -39,7 +39,7 @@ done <<'MUTATIONS'
 (.dependencies[] | select(.name == "ic-management-canister-types")).target = null
 .features["icrc-ledger-types"] += ["dep:icrc-ledger-types"]
 .features.principal += ["dep:ic_principal"]
-(.dependencies[] | select(.name == "ic_principal")).features += ["self_authenticating"]
+.dependencies += [{"name":"ic_principal", "features":["self_authenticating"]}]
 (.dependencies[] | select(.name == "group")).uses_default_features = true
 .features.certification = ["dep:ic-certification"]
 .features["canister-sig-creation"] -= ["certification"]

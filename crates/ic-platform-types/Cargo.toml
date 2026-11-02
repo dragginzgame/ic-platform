@@ -20,12 +20,15 @@ crc32fast.workspace = true
 data-encoding.workspace = true
 ic_principal = { workspace = true, optional = true }
 serde = { workspace = true, features = ["alloc"] }
+serde_bytes.workspace = true
 sha2_11 = { workspace = true, optional = true }
 thiserror.workspace = true
 
 [dev-dependencies]
 ic_principal = { workspace = true, features = ["self_authenticating"] }
-serde_bytes.workspace = true
+postcard.workspace = true
+serde_cbor.workspace = true
+serde_json.workspace = true
 serde_test.workspace = true
 
 [lints]

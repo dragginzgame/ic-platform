@@ -2,6 +2,22 @@ use super::*;
 use serde_test::{Token, assert_de_tokens};
 use std::{collections::hash_map::DefaultHasher, hash::Hasher};
 
+mod serde_formats;
+
+// Account equality normalizes absent and zero; compare the raw field too.
+#[derive(Debug)]
+struct Exact(Account);
+impl PartialEq for Exact {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.owner == other.0.owner && self.0.subaccount == other.0.subaccount
+    }
+}
+impl<'de> serde::Deserialize<'de> for Exact {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Account::deserialize(deserializer).map(Self)
+    }
+}
+
 #[test]
 fn error_messages_and_sources_remain_stable() {
     use std::error::Error;
@@ -99,7 +115,7 @@ fn serde_preserves_explicit_zero_and_rejects_wrong_lengths() {
         owner: Principal::from_slice(&[2, 1]),
         subaccount: Some([0; 32]),
     };
-    let mut tokens = vec![
+    let tokens = [
         Token::Struct {
             name: "Account",
             len: 2,
@@ -108,16 +124,46 @@ fn serde_preserves_explicit_zero_and_rejects_wrong_lengths() {
         Token::Bytes(&[2, 1]),
         Token::Str("subaccount"),
         Token::Some,
-        Token::Tuple { len: 32 },
+        Token::Bytes(&[0; 32]),
+        Token::StructEnd,
     ];
-    tokens.extend([Token::U8(0); 32]);
-    tokens.extend([Token::TupleEnd, Token::StructEnd]);
     assert_ser_tokens(&account.compact(), &tokens);
-    assert_de_tokens(&account.compact(), &tokens);
-    tokens.remove(6);
-    tokens.pop(); // Deserialization stops at the invalid array, before StructEnd.
-    assert_de_tokens_error::<serde_test::Compact<Account>>(
-        &tokens,
-        "invalid length 31, expected an array of length 32",
+    assert_de_tokens(&Exact(account).compact(), &tokens);
+    for bytes in [&[0; 31][..], &[0; 33][..]] {
+        assert_de_tokens_error::<serde_test::Compact<Account>>(
+            &[
+                Token::Struct {
+                    name: "Account",
+                    len: 2,
+                },
+                Token::Str("owner"),
+                Token::Bytes(&[2, 1]),
+                Token::Str("subaccount"),
+                Token::Some,
+                Token::Bytes(bytes),
+            ],
+            &format!(
+                "invalid length {}, expected a byte array of length 32",
+                bytes.len()
+            ),
+        );
+    }
+}
+
+#[test]
+fn omitted_subaccount_still_deserializes_as_none() {
+    use serde_test::Configure;
+    let account = Account::from(Principal::from_slice(&[2, 1]));
+    assert_de_tokens(
+        &Exact(account).compact(),
+        &[
+            Token::Struct {
+                name: "Account",
+                len: 1,
+            },
+            Token::Str("owner"),
+            Token::Bytes(&[2, 1]),
+            Token::StructEnd,
+        ],
     );
 }

@@ -6,9 +6,7 @@
 use crate::RejectResponse;
 use candid::Principal;
 use hex;
-use reqwest::Response;
 use schemars::JsonSchema;
-use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::net::SocketAddr;
@@ -214,7 +212,7 @@ pub struct RawStableMemory {
 
 #[derive(Clone, Serialize, Deserialize, Debug, JsonSchema)]
 pub struct ApiError {
-    message: String,
+    pub(crate) message: String,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, JsonSchema)]
@@ -230,53 +228,6 @@ pub enum ApiResponse<T> {
     Busy { state_label: String, op_id: String },
     Started { state_label: String, op_id: String },
     Error { message: String },
-}
-
-impl<T: DeserializeOwned> ApiResponse<T> {
-    pub async fn from_response(resp: Response) -> Self {
-        match resp.status() {
-            reqwest::StatusCode::OK => {
-                let result = resp.json::<T>().await;
-                match result {
-                    Ok(t) => ApiResponse::Success(t),
-                    Err(e) => ApiResponse::Error {
-                        message: format!("Could not parse response: {e}"),
-                    },
-                }
-            }
-            reqwest::StatusCode::ACCEPTED => {
-                let result = resp.json::<StartedOrBusyResponse>().await;
-                match result {
-                    Ok(StartedOrBusyResponse { state_label, op_id }) => {
-                        ApiResponse::Started { state_label, op_id }
-                    }
-                    Err(e) => ApiResponse::Error {
-                        message: format!("Could not parse response: {e}"),
-                    },
-                }
-            }
-            reqwest::StatusCode::CONFLICT => {
-                let result = resp.json::<StartedOrBusyResponse>().await;
-                match result {
-                    Ok(StartedOrBusyResponse { state_label, op_id }) => {
-                        ApiResponse::Busy { state_label, op_id }
-                    }
-                    Err(e) => ApiResponse::Error {
-                        message: format!("Could not parse response: {e}"),
-                    },
-                }
-            }
-            _ => {
-                let result = resp.json::<ApiError>().await;
-                match result {
-                    Ok(e) => ApiResponse::Error { message: e.message },
-                    Err(e) => ApiResponse::Error {
-                        message: format!("Could not parse error: {e}"),
-                    },
-                }
-            }
-        }
-    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, JsonSchema)]
