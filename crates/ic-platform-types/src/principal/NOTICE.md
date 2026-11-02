@@ -15,9 +15,11 @@ Overlong input now returns `TextTooLong` before examining its content.
 
 The optional `self_authenticating` module retains the exact `self_authenticating`
 method body and tag from that same ic_principal 0.1.5 revision. Only the surrounding
-module/imports, documentation and a scoped deprecation expectation are added.
-SHA-224 remains the unchanged RustCrypto `sha2` 0.10 implementation. The source
-guard freezes the admitted module, original Apache license, 29-byte capacity and
+module/imports and documentation are added. SHA-224 uses RustCrypto `sha2` 0.11.1
+with default features disabled. An import alias selects that provider; the obsolete
+0.10 deprecation expectation is removed. The source guard reverses only these
+scaffolding changes before checking the original admitted module fingerprint.
+It also freezes the original Apache license, 29-byte capacity and
 existing fixed/differential tests; registry ic_principal is a test oracle only
 unless external conversions are selected. No upstream self-authentication test
 module existed in that package; Platform's existing vectors remain unchanged.

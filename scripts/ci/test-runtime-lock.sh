@@ -14,13 +14,13 @@ cp -R "$root/scripts/fixtures/"{cdk-runtime,timers-runtime} "$fixture/scripts/fi
 editor="$(bash "$root/scripts/release/editor.sh" check)"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" %q\n' "$editor" > "$fixture/scripts/release/editor.sh"
 export PATH="$root/.tools/host/bin:$PATH"
-for package in ic-platform ic-platform-runtime ic-platform-types; do
+for package in ic-platform ic-platform-pocket-ic ic-platform-runtime ic-platform-types; do
     mkdir "$fixture/crates/$package"
     cp "$root/crates/$package/Cargo.toml" "$fixture/crates/$package/"
 done
 printf '[workspace]\n' > "$fixture/Cargo.toml"
 bash "$fixture/scripts/release/runtime-lock.sh" check
-for group in platform runtime types; do
+for group in platform pocket-ic runtime types; do
     primary="$(jq -r --arg group "$group" '.groups[] | select(.name == $group) | .primary' "$fixture/ci/cargo-release-groups.json")"
     members="$(jq -r --arg group "$group" '.groups[] | select(.name == $group) | .members | join(" ")' "$fixture/ci/cargo-release-groups.json")"
     previous="$(yq -p toml -r '.package.version' "$fixture/crates/$primary/Cargo.toml")"
@@ -62,4 +62,4 @@ printf '\n[[package]]\nname = "ic-platform-runtime-guard"\nversion = "99.1.0"\n'
 if bash "$fixture/scripts/release/runtime-lock.sh" check > "$fixture/duplicate.log" 2>&1; then exit 1; fi
 for temporary in "$fixture"/scripts/fixtures/*/Cargo.lock.*; do [[ ! -e "$temporary" ]] || exit 1; done
 fixture_complete=true
-echo 'All three groups preserve unrelated lock identities; wrong-base/missing/duplicate refusals and retry pass.'
+echo 'All four groups preserve unrelated lock identities; wrong-base/missing/duplicate refusals and retry pass.'

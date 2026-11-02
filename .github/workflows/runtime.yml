@@ -36,17 +36,21 @@ jobs:
         run: |
           rustup toolchain install --profile minimal --no-self-update
           rustup target add wasm32-unknown-unknown
-          rustup toolchain install 1.91.0 --profile minimal --target wasm32-unknown-unknown
           make install-host-tools
           make install-rust-tools
+          bash scripts/ci/check-platform-compiler.sh
           cargo fetch --locked
           selection=()
           if [[ '${{ matrix.qualification }}' == timers ]]; then selection=(--timers); fi
           bash scripts/ci/check-platform-runtime.sh "${selection[@]}" --prepare
+          if [[ '${{ matrix.qualification }}' == timers ]]; then
+            bash scripts/ci/test-runtime-independence.sh --prepare
+          fi
       - name: Prepare Testkit-owned server
         run: |
           version="$(.tools/host/bin/yq -p toml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
-          cargo +1.91.0 install --locked --version "=$version" --features cli --root target/testkit-cli ic-testkit --bin ic-testkit-server
+          compiler="$(bash scripts/ci/read-platform-msrv.sh)"
+          cargo +"$compiler" install --locked --version "=$version" --features cli --root target/testkit-cli ic-testkit --bin ic-testkit-server
           target/testkit-cli/bin/ic-testkit-server setup
           binary="$(target/testkit-cli/bin/ic-testkit-server check)"
           printf 'POCKET_IC_BIN=%s\n' "$binary" >> "$GITHUB_ENV"

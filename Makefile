@@ -3,14 +3,15 @@ SHARED_TOOLING_RUST := 1
 FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/prepared-call-consumer/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
-FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs scripts/fixtures/stable-identities/*.rs)
+FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs scripts/fixtures/stable-identities/*.rs scripts/fixtures/pocket-ic-client/*.rs)
 # Independent groups require a visible selection before any recipe or setup.
 ifneq ($(filter-out release-editor-check,$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
 ifeq ($(RELEASE_GROUP),platform)
 else ifeq ($(RELEASE_GROUP),types)
 else ifeq ($(RELEASE_GROUP),runtime)
+else ifeq ($(RELEASE_GROUP),pocket-ic)
 else
-$(error Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types)
+$(error Select RELEASE_GROUP=platform, RELEASE_GROUP=pocket-ic, RELEASE_GROUP=runtime or RELEASE_GROUP=types)
 endif
 endif
 export RELEASE_GROUP
@@ -42,7 +43,7 @@ help:
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Exact saved recovery: release-resume VERSION=X.Y.Z'
 	@echo 'Feature graphs: check-features; check-features-exhaustive FEATURES=a,b (1–12 features)'
-	@echo 'Release/publish requires RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types'
+	@echo 'Release/publish requires RELEASE_GROUP=platform, RELEASE_GROUP=pocket-ic, RELEASE_GROUP=runtime or RELEASE_GROUP=types'
 	@echo 'Registry: publish-check (dry run), publish (selected group); PACKAGE= selects an explicit batch'
 	@echo 'Release editor: install-release-editor; release-editor-check (offline)'
 	@echo 'Browser SDK: install-browser-tools, check-browser; check-browser-runtime needs prepared Chromium'
@@ -71,29 +72,29 @@ publish: host-tools-check
 publish-check: host-tools-check
 	bash scripts/release/publish.sh check
 
-check:
+.PHONY: check-compiler
+check-compiler: host-tools-check
+	bash scripts/ci/check-platform-compiler.sh
+check: check-compiler
 	cargo check -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-targets --all-features --locked
-test:
+test: check-compiler
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
 	cargo test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --locked
-clippy:
+clippy: check-compiler
 	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-targets --all-features --locked -- -D warnings
-docs-check:
+docs-check: check-compiler
 	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --no-deps --locked
-wasm-check:
+wasm-check: check-compiler
 	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
-msrv: host-tools-check
-	@set -eu; \
-	platform_msrv="$$(bash scripts/ci/read-platform-msrv.sh)"; \
-	cargo +"$$platform_msrv" test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p ic-platform-pocket-ic --all-features --locked; \
-	cargo +"$$platform_msrv" check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
+# Compatibility command: these are the same supported-compiler proofs, once.
+msrv: test wasm-check
 check-boundary:
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 .PHONY: check-primitives
 check-primitives:
-	bash scripts/ci/check-pocket-ic-source.sh
+	bash scripts/ci/test-pocket-ic-source.sh
 	@for target in "$$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do \
 		for features in - executor runtime blake3 runtime,blake3; do \
 			bash scripts/ci/check-blake3-graph.sh "$(CURDIR)" ic-platform "$$target" "$$features" || exit $$?; \
@@ -130,7 +131,7 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md AGENTS.md CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md crates/ic-platform-pocket-ic/README.md crates/ic-platform-pocket-ic/upstream/NOTICE.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md crates/ic-platform-pocket-ic/README.md crates/ic-platform-pocket-ic/upstream/NOTICE.md
 .PHONY: check-inventory
 .PHONY: check-native-provider
 check-native-provider:
@@ -143,12 +144,13 @@ check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/browser-compiler-floor --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
+	bash scripts/ci/test-platform-ci-selection.sh
 	bash scripts/ci/test-platform-release-groups.sh
 	bash scripts/ci/test-platform-group-preparation.sh
 	bash scripts/release/test-editor-bootstrap.sh
 	bash scripts/ci/test-release-changelog.sh
 ci:
-	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check msrv
+	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check
 
 release-resume: check-release-resume-policy
 .PHONY: check-release-resume-policy

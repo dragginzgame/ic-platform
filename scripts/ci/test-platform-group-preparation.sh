@@ -4,9 +4,9 @@
 set -euo pipefail
 unset RELEASE_GROUP RELEASE_COMMIT RELEASE_SOURCE IC_PLATFORM_RELEASE_PREPARE
 case "$#:${1:-all}" in
-    0:all) groups=(platform runtime types) ;;
-    1:platform|1:runtime|1:types) groups=("$1") ;;
-    *) echo "usage: $0 [platform|runtime|types]" >&2; exit 2 ;;
+    0:all) groups=(platform pocket-ic runtime types) ;;
+    1:platform|1:pocket-ic|1:runtime|1:types) groups=("$1") ;;
+    *) echo "usage: $0 [platform|pocket-ic|runtime|types]" >&2; exit 2 ;;
 esac
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 bash "$root/scripts/ci/check-make-execution.sh"
@@ -83,8 +83,6 @@ for group in "${groups[@]}"; do
     printf '/.tools\n' >> .git/info/exclude
     export RELEASE_GROUP="$group"
     previous="$(bash scripts/release/group.sh version)"
-    platform_before="$(yq -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)"
-    types_before="$(yq -p toml -o json -r '.package.version' crates/ic-platform-types/Cargo.toml)"
     kind=minor
     [[ "$group" != types ]] || kind='patch'
     next="$(perl scripts/ci/validate-release-inputs.pl next-version "$previous" "$kind")"
@@ -111,7 +109,7 @@ for group in "${groups[@]}"; do
     bash scripts/release/adapter.sh check
     # Only the selected group's member literals, catalog requirements and ledger
     # change. Crypto/certification preparation preserves Runtime and Types.
-    for other_group in platform runtime types; do
+    for other_group in platform pocket-ic runtime types; do
         [[ "$other_group" != "$group" ]] || continue
         other_members="$(RELEASE_GROUP="$other_group" bash scripts/release/group.sh members)"
         git diff --exit-code -- "releases/$other_group/CHANGELOG.md"

@@ -1,0 +1,6 @@
+# Exact consumer-owned prose only. Packaged READMEs, generated inventory,
+# release ledgers and snapshot companions deliberately retain full validation.
+docs/status/current.md
+docs/migration.md
+docs/external-contracts.md
+docs/pocket-ic-client.md

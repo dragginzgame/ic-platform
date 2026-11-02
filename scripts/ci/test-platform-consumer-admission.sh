@@ -14,19 +14,22 @@ touch "$fixture/Cargo.lock"
 cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
-cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"
+cp "$root/rust-toolchain.toml" "$fixture/"
 cp "$root/Cargo.toml" "$fixture/Cargo.toml"
 cp "$root/crates/ic-platform/Cargo.toml" "$fixture/crates/ic-platform/Cargo.toml"
 mkdir -p "$fixture/.tools"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 cat > "$fixture/bin/rustc" <<'STUB'
 #!/usr/bin/env bash
-printf 'host: x86_64-unknown-linux-gnu\n'
+if [[ "$1" == --version ]]; then printf 'rustc %s (fixture)\n' "$TEST_MSRV"
+else printf 'host: x86_64-unknown-linux-gnu\n'; fi
 STUB
 cat > "$fixture/bin/cargo" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
 case "$1" in
+    --version) printf 'cargo %s (fixture)\n' "$TEST_MSRV" ;;
     locate-project) exit 0 ;;
     metadata) printf '{}\n' ;;
     tree)
@@ -73,8 +76,8 @@ while IFS=$'\t' read -r capability _ _ wasm _; do
     TEST_CAPABILITY="$capability" "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" "$capability" > "$fixture/log" 2>&1 || {
         cat "$fixture/log" >&2; exit 1;
     }
-    expected=4
-    if [[ "$wasm" == skip ]]; then expected=2; fi
+    expected=2
+    if [[ "$wasm" == skip ]]; then expected=1; fi
     [[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
 done < "$root/scripts/ci/platform-consumer-profiles.tsv"
 : > "$TEST_CALLS"
@@ -129,7 +132,7 @@ for capability in cdk runtime external-candid; do
         : > "$TEST_CALLS"
         if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" "$capability" > "$fixture/log" 2>&1; then
             [[ "$rejection" == no ]] || { echo "Admitted rejected $capability graph" >&2; exit 1; }
-            [[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == 4 ]] || { cat "$fixture/log"; exit 1; }
+            [[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == 2 ]] || { cat "$fixture/log"; exit 1; }
         else
             [[ "$rejection" == yes ]] || { cat "$fixture/log"; exit 1; }
             grep -q 'Canister graph contains host parsing' "$fixture/log"
@@ -169,5 +172,5 @@ if ! wait "$runner_pid"; then
     echo 'Consumer runner read a shifted script tail after its final Cargo call' >&2
     exit 1
 fi
-[[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == 4 ]] || { cat "$fixture/edit.log" >&2; exit 1; }
+[[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == 2 ]] || { cat "$fixture/edit.log" >&2; exit 1; }
 echo 'Consumer runner completes its parsed command list after a concurrent edit'

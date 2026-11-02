@@ -1,16 +1,40 @@
 # Candid and runtime ownership
 
+## Supported compiler (#133)
+
+Pending source requires Rust 1.99.1 for every member of the independent Platform,
+PocketIC, Runtime and Types groups. The minimum and pinned development/release toolchain
+must agree; compiler admission checks and records actual Cargo/rustc identities.
+Package versions remain unchanged until normal delivery. Historical 1.91 results
+below remain dated evidence, not a support promise for this source.
+
+| Existing obligation | Current qualification |
+| --- | --- |
+| All six packages, tests, proc macros and doc tests | All-feature native tests on 1.99.1 |
+| All-feature facade Wasm | `wasm-check` on 1.99.1 |
+| Isolated capability, Principal/ledger/schema and raw/executor consumers | Same feature/target selections, once on 1.99.1 |
+| Prepared calls | Raw, Wire and external Candid; native tests and Wasm checks |
+| Installed owner and Timers composition | Separate jobs; each retains raw/prepared × Wire/external Candid, driver tests and lifecycle assertions |
+| Archive/publication and release groups | Existing package, source, singleton and release gates retained |
+| Native hosts | Linux, macOS Intel and macOS ARM retained |
+
+`make msrv` delegates to the same native/Wasm targets rather than compiling them
+again in CI. New qualification reads the workspace policy; it does not change
+old benchmark receipts or the external IC source profile's pinned compiler.
+
 ## Independent Runtime owner (#131)
 
-The current source separates three release groups in this workspace:
+The current source separates four release groups in this workspace:
 
 | Group | Packages | Published version |
 | --- | --- | --- |
 | Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.17.1 |
-| Platform | ic-platform, ic-platform-pocket-ic | 0.17.0 |
+| Platform | ic-platform | 0.17.0 |
+| PocketIC | ic-platform-pocket-ic | 0.17.0 |
 | Types | ic-platform-types | 0.16.0 |
 
-These groups were published on 2026-11-01. Runtime began at an explicit,
+These package versions were published on 2026-11-01; PocketIC initially shipped
+with Platform and now has its own group, without changing its current version. Runtime began at an explicit,
 unpublished 0.17.0 selection and shipped at 0.17.1 through the ordinary patch
 workflow. The existing macros and guard advanced from their published 0.16
 generation; no published identity was reset. Each group retains its own ledger.
@@ -58,7 +82,7 @@ patches or production Git dependencies. Return this test selection to the publis
 compatible Timers release after qualification. Owner proof remains Timers-free.
 
 The Runtime group owns its ledger and pin exception. Both qualification locks are
-shared metadata in all three groups' transactional preparation and recovery.
+shared metadata in all four groups' transactional preparation and recovery.
 Every recorded local package is required and checked against its owning group's
 version. Preparation changes only selected identities and references; missing or
 duplicated guard records refuse. Existing release journals retain their policy
@@ -1374,42 +1398,26 @@ ic-memory changes are out of scope; no persisted representation is changed here.
 
 ## PocketIC maintenance boundary
 
-The optional native-only `pocket-ic` feature exposes `ic_platform::pocket_ic`.
-Pending Platform 0.17 owns the reviewed PocketIC 16.1.0 client source in
-`ic-platform-pocket-ic`, including client, error, settings/snapshot and fixture
-REST identities. Registry-client Rust identities change; HTTP/JSON and Candid
-bytes remain unchanged. No replacement protocol structs, runtime,
-server launcher or automatic client/server acceptance policy are introduced.
-Testkit retains provisioning, checksums, supported server versions, lifecycle,
-transport, retry behavior and product qualification.
+`ic-platform-pocket-ic` owns the maintained native PocketIC 16.1 client and its
+independent `pocket-ic` release group. Native consumers may select it directly;
+the facade's optional `pocket-ic` feature re-exports the same implementation.
+The current package version remains 0.17.0; the pending 0.18 change selects
+workspace management DTOs =0.11.0 in place of 0.8.0. Settings, status and install
+mode types now share the native management surface's external identity.
 
-Published Testkit 0.55.2 uses Platform with `features = ["candid", "pocket-ic"]`
-on native targets and forwards `ic_platform::pocket_ic` at its public module path.
-After these fixture exports are published, raise Testkit's minimum Platform
-requirement to the supplying release; an older compatible lock selection can
-otherwise retain the incomplete surface. Do not restore a second direct upstream
-declaration or DTO owner. Audit downstream use of the formerly blanket export
-against this explicit surface. Consumers continue using Testkit workflows. Direct-dependency policies should allow upstream PocketIC
-only in Platform, while deployment graphs must exclude PocketIC and Testkit.
+The source guard reconstructs only the import rename and rustfmt ordering before
+checking the original maintained hashes. Method bodies, REST fields, polling and
+operation behavior remain unchanged. New management fields alter the Candid
+schema; installed status, settings and snapshot lifecycle are qualified against
+the explicitly prepared 16.1.0 server. This is no blanket server-version promise.
 
-The feature does not enable Platform Candid, executor or parser features, but
-PocketIC brings Candid, certification and native HTTP dependencies transitively.
-Its management DTOs are upstream 0.8.0 and must not be substituted with Platform
-management-canister-types 0.11.0. The maintained client uses the workspace
-thiserror requirement; the existing lock still selects 2.0.18. These are
-dependency-control changes, not transitive removal or Wasm-size claims.
-
-Standalone checks cover building without a server; Testkit adoption, actual
-client/server execution and native macOS qualification remain separate gates.
-
-Backup, Canic and Blob's existing Testkit workflows additionally use placement,
-effective-principal routing, pending messages, HTTP gateway configuration,
-mock HTTP responses and chunked installation. The root `CanisterInstallMode`
-retains PocketIC's own management 0.8 identity and `skip_pre_upgrade` flags;
-Platform's independent management 0.11 type cannot replace that method parameter.
-Their explicit root and REST exports retain the original
-PocketIC identities, including method parameter/result compatibility. These
-exports add no gateway startup, pending-call polling, retries or outcall policy.
+All client dependencies remain native-target scoped. Direct consumers avoid the
+facade and Runtime, while retaining Candid, certification and native HTTP below
+the client. No Wasm-size reduction is claimed. Testkit retains provisioning,
+server checksums, compatibility admission, lifecycle, transport and retry policy.
+Existing Backup, Canic and Blob consumers adopt the independent owner after its
+publication; no sibling source is changed here. See the
+[client contract](pocket-ic-client.md) for qualification and release details.
 
 ## Owned Principal migration (0.3)
 
@@ -2530,21 +2538,18 @@ adoption qualification. No transitive Candid removal or Wasm-size reduction is c
 
 ## Evidence and isolation
 
-`make test` and `make msrv` exercise the retained six decoder cases and expanded
+`make test` (also selected by the `make msrv` alias) exercises the retained six decoder cases and expanded
 DTO fixture. `make check-consumer` builds separate workspaces with only Platform
-as a direct dependency: native tests on current Rust and the declared 1.91 MSRV,
-plus Wasm compilation
-on both compilers for Candid, certification, management, raw-system and ledger
+as a direct dependency: native tests on the declared Rust 1.99.1 compiler,
+plus Wasm compilation for Candid, certification, management, raw-system and ledger
 consumers, plus canister-signature creation, signature verification, BLS and the CDK
-canister/service fixture (linked as a Wasm cdylib on both compilers).
-The maintained `make check-runtime` harness separately installs the combined
-CDK/Timers fixture, exercising callbacks, trap cleanup, cancellation and upgrade.
-It uses published Timers/Testkit at their Rust 1.91 floor; Platform now also
-declares that floor. See [runtime setup](../README.md#maintained-cdk-runtime-regression).
+canister/service fixture (linked as a Wasm cdylib).
+The maintained runtime harness separately installs owner and Timers-composition
+fixtures, exercising callbacks, trap cleanup, cancellation and upgrade on that
+same compiler. See [runtime setup](../README.md#maintained-cdk-runtime-regression).
 Parser/dynamic and Agent consumers are native-only. `make msrv` also
 checks the all-feature library for Wasm at the declared MSRV. CI prepares the
-Wasm target
-for both toolchains; local validation never installs it. See
+Wasm target for the pinned compiler; local validation never installs it. See
 [Wasm MSRV enforcement](https://github.com/dragginzgame/ic-platform/issues/15).
 It exercises recursive/renamed DTOs, generic argument helpers, `Reserved`, typed
 error downcasting, and independent Candid wire vectors for nat 2^128 and int -65.
@@ -3054,7 +3059,7 @@ of later consumer adoption.
 
 `make check-consumer` includes a standalone crate exercising raw calls with only
 Platform `runtime`, then explicit Wire and external-Candid selections on the development
-compiler and Rust 1.91, native and Wasm. `bash scripts/ci/check-platform-runtime.sh
+compiler (currently 1.99.1), native and Wasm. `bash scripts/ci/check-platform-runtime.sh
 --prepared-call` qualifies owned dynamic methods alongside the raw control in the existing installed lifecycle
 fixture. Both modes use the same maintained lock; the prepared-call selection
 adds no package or dependency edge. The original raw/published
@@ -3094,7 +3099,8 @@ Types' compatible requirement, supplying identity and ledger unchanged. A Types
 release updates its admitted requirement and requires separate consumer
 compatibility/publication assessment; it does not silently publish the facade.
 
-releases/platform/CHANGELOG.md now owns facade/native-client notes;
+releases/platform/CHANGELOG.md now owns facade notes;
+releases/pocket-ic/CHANGELOG.md owns native-client notes;
 releases/runtime/CHANGELOG.md owns Runtime/macros/guard notes, and
 releases/types/CHANGELOG.md owns Types notes. Root CHANGELOG.md is an index. The
 intact coordinated history through 0.15.0 lives once in releases/history.md;
@@ -3106,17 +3112,17 @@ canonical type owner and bytes.
 ### Release command routing
 
 Every release, resume and publication command must explicitly select
-RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types. Missing, empty and unknown groups
+RELEASE_GROUP=platform, RELEASE_GROUP=pocket-ic, RELEASE_GROUP=runtime or RELEASE_GROUP=types. Missing, empty and unknown groups
 refuse before setup or validation. An explicit environment selection is valid.
 Publication follows the same selection, so runtime-only changes do not re-upload
 unchanged Types. Explicit PACKAGE subsets stay within the selected group and
-support reconciled partial-publication recovery. When both groups change, publish
-Types first and then the separately released compatible Platform group; PACKAGE
+support reconciled partial-publication recovery. When multiple groups change, publish
+suppliers (Types, Runtime or PocketIC) before their compatible consumer groups; PACKAGE
 never infers a group or admits a mixed batch. All workspace release gates and
 full publication Clippy remain required; npm publication stays separate.
 
 The owner-runtime and Timers-composition qualification locks are explicitly common
-consumer metadata, included once in all three groups' exact plans. The exact runtime-guard pin
+consumer metadata, included once in all four groups' exact plans. The exact runtime-guard pin
 belongs to the Runtime group. Semantic checks compare each recorded local owner
 to its group primary version.
 Preparation changes only the selected group's recorded identities. All current locks require the six qualified local owners. Adding or changing

@@ -2,6 +2,7 @@
 set -euo pipefail
 # Historical registry feature experiment; production now uses the maintained wrapper.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
+compiler="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 [[ $# == 1 && ! -e "$1" ]] || { echo 'usage: bls.sh NEW_EVIDENCE_DIRECTORY' >&2; exit 2; }
 [[ -n "${POCKET_IC_BIN:-}${IC_TESTKIT_POCKET_IC_URL:-}" ]] || {
     echo 'Select an explicitly prepared PocketIC server through Testkit first' >&2; exit 1;
@@ -49,17 +50,17 @@ cat > "$output/driver/Cargo.toml" <<MANIFEST
 name = "platform-bls-benchmark"
 version = "0.0.0"
 edition = "2024"
-rust-version = "1.91.0"
+rust-version = "$compiler"
 [workspace]
 resolver = "3"
 [dependencies]
 ic-platform = { path = $platform, default-features = false, features = ["pocket-ic"] }
 ic-testkit = "$testkit"
 MANIFEST
-cargo +1.91.0 metadata --manifest-path "$output/driver/Cargo.toml" --offline \
+cargo +"$compiler" metadata --manifest-path "$output/driver/Cargo.toml" --offline \
     --format-version 1 > "$output/driver/metadata.json"
 CARGO_TARGET_DIR="${BLS_BENCH_HOST_TARGET_DIR:-$output/target-driver}" \
-    cargo +1.91.0 build --manifest-path "$output/driver/Cargo.toml" --frozen \
+    cargo +"$compiler" build --manifest-path "$output/driver/Cargo.toml" --frozen \
     > "$output/driver/build.log" 2>&1
 driver="${BLS_BENCH_HOST_TARGET_DIR:-$output/target-driver}/debug/platform-bls-benchmark"
 shasum -a 256 "$driver" "$output/driver/src/main.rs" "$output/driver/Cargo.lock" > "$output/driver/sha256.txt"

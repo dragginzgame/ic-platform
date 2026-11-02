@@ -38,6 +38,19 @@ for part in creation verification; do
     done
 done
 printf 'Signature source, vector and license mutation refusals passed.\n'
+for mutation in predicate diagnostic success; do
+    destination="$fixture/signature-assertion-$mutation"
+    cp -R "$root/crates/ic-platform/src/signature_upstream" "$destination"
+    case "$mutation" in
+        predicate) perl -0777 -i -pe 's/e\.contains\("invalid OID"\)/e.contains("changed OID")/ == 1 or die "missing predicate\n"' "$destination/creation/mod.rs" ;;
+        diagnostic) perl -0777 -i -pe 's/"\{result:\?\}"/"missing result"/ == 1 or die "missing diagnostic\n"' "$destination/creation/mod.rs" ;;
+        success) perl -0777 -i -pe 's/result\.is_ok\(\)/result.is_err()/ == 1 or die "missing success assertion\n"' "$destination/creation/mod.rs" ;;
+    esac
+    if bash "$root/scripts/ci/check-signature-source.sh" "$destination" > "$fixture/log" 2>&1; then
+        echo "Unexpectedly admitted signature assertion mutation: $mutation" >&2; exit 1
+    fi
+done
+printf 'Changed signature predicates, diagnostics and success assertions are refused.\n'
 for file in mod.rs tests/mod.rs LICENSE-APACHE; do
     destination="$fixture/bls-${file//\//-}"
     cp -R "$root/crates/ic-platform/src/bls/upstream" "$destination"

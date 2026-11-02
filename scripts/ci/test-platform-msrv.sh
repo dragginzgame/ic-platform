@@ -1,34 +1,48 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-msrv.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-msrv.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
-for version in 1.91.0 1.92.0; do
+for version in 1.99.1 1.100.0; do
     printf '[workspace]\n[workspace.package]\nrust-version = "%s"\n' "$version" > "$fixture/Cargo.toml"
     actual="$(bash "$root/scripts/ci/read-platform-msrv.sh" "$fixture/Cargo.toml")"
     [[ "$actual" == "$version" ]] || exit 1
 done
-for version in '' 1.91 1.91.0-beta invalid; do
+for version in '' 1.99 1.99.1-beta invalid; do
     printf '[workspace]\n[workspace.package]\nrust-version = "%s"\n' "$version" > "$fixture/Cargo.toml"
     if bash "$root/scripts/ci/read-platform-msrv.sh" "$fixture/Cargo.toml" > "$fixture/output" 2> "$fixture/error"; then
         echo 'MSRV reader admitted an unpinned or invalid compiler' >&2; exit 1
     fi
     [[ ! -s "$fixture/output" ]] || exit 1
 done
-# Exercise the actual Make recipe with a later floor and a non-compiling Cargo
-# adapter. This catches accidental Make expansion of shell variables.
+# Exercise actual compiler admission with a later floor, not another literal.
 mkdir -p "$fixture/scripts/ci" "$fixture/.tools" "$fixture/bin"
-cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
-printf '[workspace]\n[workspace.package]\nrust-version = "1.92.0"\n' > "$fixture/Cargo.toml"
-awk '/^msrv:/ { printing=1 } printing && /^[A-Za-z0-9_.-]+:/ && !/^msrv:/ { exit } printing { print }' "$root/Makefile" > "$fixture/Makefile"
-printf '\nhost-tools-check:\n\t@:\n' >> "$fixture/Makefile"
+printf '[workspace]\n[workspace.package]\nrust-version = "1.100.0"\n' > "$fixture/Cargo.toml"
+printf '[toolchain]\nchannel = "1.100.0"\n' > "$fixture/rust-toolchain.toml"
 cat > "$fixture/bin/cargo" <<'CARGO'
 #!/usr/bin/env bash
-if [[ "$1" != locate-project ]]; then printf '%s\n' "$*" >> "$MSRV_TEST_CALLS"; fi
+if [[ "$1" == --version ]]; then printf 'cargo %s (fixture)\n' "${FIXTURE_CARGO_VERSION:-1.100.0}"; fi
 CARGO
-chmod +x "$fixture/bin/cargo"
-PATH="$fixture/bin:$PATH" MSRV_TEST_CALLS="$fixture/calls" make --no-print-directory -C "$fixture" msrv
+cat > "$fixture/bin/rustc" <<'RUSTC'
+#!/usr/bin/env bash
+printf 'rustc %s (fixture)\n' "${FIXTURE_RUSTC_VERSION:-1.100.0}"
+RUSTC
+chmod +x "$fixture/bin/cargo" "$fixture/bin/rustc"
+export PATH="$fixture/bin:$PATH"
+unset RUSTC
+bash "$fixture/scripts/ci/check-platform-compiler.sh"
+if FIXTURE_CARGO_VERSION=1.99.1 bash "$fixture/scripts/ci/check-platform-compiler.sh" > "$fixture/log" 2>&1; then exit 1; fi
+if FIXTURE_RUSTC_VERSION=1.99.1 bash "$fixture/scripts/ci/check-platform-compiler.sh" > "$fixture/log" 2>&1; then exit 1; fi
+printf '[toolchain]\nchannel = "1.99.1"\n' > "$fixture/rust-toolchain.toml"
+if bash "$fixture/scripts/ci/check-platform-compiler.sh" > "$fixture/log" 2>&1; then exit 1; fi
+# The compatibility command reuses the same native/Wasm targets exactly once.
+awk '/^msrv:/ { print }' "$root/Makefile" > "$fixture/Makefile"
+printf '\ntest wasm-check:\n\t@echo $@ >> calls\n' >> "$fixture/Makefile"
+make --no-print-directory -C "$fixture" msrv
 [[ "$(wc -l < "$fixture/calls" | tr -d ' ')" == 2 ]]
-[[ "$(grep -c '^+1.92.0 ' "$fixture/calls")" == 2 ]]
-printf 'Current-source MSRV follows the manifest and refuses invalid/unpinned values\n'
+grep -qx test "$fixture/calls"
+grep -qx wasm-check "$fixture/calls"
+printf 'Compiler admission follows manifest/toolchain policy, rejects wrong Cargo/rustc, and reuses distinct native/Wasm proofs once\n'

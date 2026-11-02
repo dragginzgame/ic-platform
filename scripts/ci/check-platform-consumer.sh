@@ -15,9 +15,8 @@ if [[ "${1:-}" == --published ]]; then
     published="$2"
     shift 2
 fi
-# Published qualification retains its historical compiler; source checks use the manifest.
-msrv=1.91.0
-if [[ -z "$published" ]]; then msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"; fi
+# Both source and selected archive qualification use the current owner policy.
+msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 profiles="$root/scripts/ci/platform-consumer-profiles.tsv"
 awk -f "$root/scripts/ci/platform-graph-policy.awk" /dev/null
 tests="$("$root/.tools/host/bin/yq" -p toml -o json '.test' crates/ic-platform/Cargo.toml)"
@@ -146,11 +145,10 @@ if [[ "$graph_family" != - ]]; then
         esac
     done
 fi
-CARGO_TARGET_DIR="$root/target/consumer-build" cargo test --manifest-path "$fixture/Cargo.toml" --frozen
-CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --frozen
+bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler.txt"
+CARGO_TARGET_DIR="$root/target/consumer-build" cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --frozen
 if [[ "$wasm" != skip ]]; then
-    CARGO_TARGET_DIR="$root/target/consumer-build" cargo "$wasm" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
-    CARGO_TARGET_DIR="$root/target/consumer-msrv" cargo +"$msrv" "$wasm" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
+    CARGO_TARGET_DIR="$root/target/consumer-build" cargo +"$msrv" "$wasm" --manifest-path "$fixture/Cargo.toml" --lib --target wasm32-unknown-unknown --frozen
 fi
 printf 'Consumer evidence retained at %s\n' "$fixture"
 # Parse the exit with the loop before Cargo runs. A concurrent source edit must

@@ -17,20 +17,51 @@ defaults:
     shell: bash
 
 jobs:
+  selection:
+    runs-on: ubuntu-24.04
+    outputs:
+      scope: ${{ steps.classify.outputs.scope }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - id: classify
+        name: Select qualification for the tested commit
+        env:
+          CHANGE_EVENT: ${{ github.event_name }}
+          CHANGE_REF: ${{ github.event_name == 'pull_request' && format('refs/heads/{0}', github.base_ref) || github.ref }}
+          CHANGE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CHANGE_HEAD: ${{ github.sha }}
+        run: |
+          scope="$(perl scripts/ci/classify-ci-change.pl --event "$CHANGE_EVENT" --ref "$CHANGE_REF" --base "$CHANGE_BASE" --head "$CHANGE_HEAD" --policy ci/docs-only-paths.txt)"
+          case "$scope" in docs|full) ;; *) exit 1 ;; esac
+          printf 'scope=%s\n' "$scope" >> "$GITHUB_OUTPUT"
+
   native-provider-source:
+    needs: selection
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
+      - name: Validate documentation only (no native qualification)
+        if: needs.selection.outputs.scope == 'docs'
+        run: make shared-tooling-check check-doc-links
       - name: Prepare native HTTP fixture toolchain
+        if: needs.selection.outputs.scope != 'docs'
         run: rustup toolchain install --profile minimal --no-self-update --component clippy --component rustfmt
       - name: Prepare native HTTP fixture dependencies
+        if: needs.selection.outputs.scope != 'docs'
         run: bash scripts/ci/check-native-profiler-http.sh --prepare
       - name: Qualify native source-provider assembly boundaries
+        if: needs.selection.outputs.scope != 'docs'
         run: make check-native-provider
 
   platform:
+    needs: selection
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix:
@@ -57,25 +88,33 @@ jobs:
           args=("$EXPECTED_OS" "$EXPECTED_ARCH")
           if [[ "$EXPECTED_OS" == Darwin ]]; then args+=(15); fi
           bash scripts/ci/check-native-host.sh "${args[@]}"
+      - name: Validate documentation only (no native qualification)
+        if: needs.selection.outputs.scope == 'docs'
+        run: make shared-tooling-check check-doc-links
       - name: Prepare toolchains
+        if: needs.selection.outputs.scope != 'docs'
         run: |
           rustup toolchain install --profile minimal --no-self-update --component rustfmt --component clippy
           rustup target add wasm32-unknown-unknown
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        if: needs.selection.outputs.scope != 'docs'
         with:
           node-version: '24.21.0'
           package-manager-cache: false
       - name: Prepare pinned npm
+        if: needs.selection.outputs.scope != 'docs'
         run: npm install --global --ignore-scripts "$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").packageManager')"
       - name: Prepare shared tools
+        if: needs.selection.outputs.scope != 'docs'
         run: make install-tools
       - name: Verify tools
+        if: needs.selection.outputs.scope != 'docs'
         run: make tools-check
-      - name: Prepare declared MSRV
-        run: rustup toolchain install "$(bash scripts/ci/read-platform-msrv.sh)" --profile minimal --target wasm32-unknown-unknown
       - name: Prepare locked and standalone consumer dependencies
+        if: needs.selection.outputs.scope != 'docs'
         run: |
           cargo fetch --locked
           make prepare-consumer-dependencies
       - name: Validate
+        if: needs.selection.outputs.scope != 'docs'
         run: make ci

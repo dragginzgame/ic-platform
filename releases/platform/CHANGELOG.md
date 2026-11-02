@@ -1,8 +1,41 @@
 # Platform changelog
 
-This group covers ic-platform and ic-platform-pocket-ic.
+This group covers ic-platform. PocketIC now has its own [ledger](../pocket-ic/CHANGELOG.md).
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
+
+## [0.18.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Require Rust 1.99.1 for the facade (#133). Keep
+  isolated native/Wasm capability and archive proofs; qualify each compiler
+  selection once instead of repeating the old 1.91/development matrix.
+- The optional PocketIC facade now uses management DTO identity 0.11. Native
+  clients can depend directly on the independently released `ic-platform-pocket-ic`;
+  migration details are in the [client contract](../../docs/pocket-ic-client.md).
+
+### 🧹 Maintenance
+
+- Adopt Shared Tooling 0.27.27 at committed revision 651f5f7. Keep the full
+  release gate for this combined compiler/ownership batch; the optional
+  group-validation plan requires separate consumer mapping qualification.
+
+- Keep the README's checked feature catalog, setup and release-group choices
+  concise; move contributor and runtime qualification detail into a linked guide.
+
+- Remove the direct test-only `assert_matches` dependency ([#123](https://github.com/dragginzgame/ic-platform/issues/123)).
+  Standard assertions preserve match guards and failure values;
+  source reconstruction retains the original upstream test fingerprints.
+- Prepare historical registry owners used by singleton/composition rejection
+  fixtures on fresh CI runners, and print fixture logs on failure. Principal
+  mutation checks verify that the source changed and use the shared checksum
+  verifier for vector diagnostics.
+- Select documentation-only native CI only for an exact reviewed prose allowlist;
+  retain all native hosts and full qualification for code or uncertain changes (#125).
+- Bound new native profiler compiler scratch to 256 GiB/seven idle days under
+  assembly custody. Retain executable copies and immutable receipts separately;
+  preserve historical and operator-selected external caches (#132).
 
 ## [0.17.0] - 2026-11-01
 

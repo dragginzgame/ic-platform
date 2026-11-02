@@ -5,7 +5,7 @@ edition.workspace = true
 rust-version.workspace = true
 license = "Apache-2.0"
 repository.workspace = true
-description = "Native PocketIC client implementation for the IC Platform facade"
+description = "Independently maintained native PocketIC client"
 publish = ["crates-io"]
 include = ["src/**", "upstream/**", "Cargo.toml", "README.md", "LICENSE"]
 
@@ -19,8 +19,8 @@ candid = { workspace = true, features = ["bignum", "serde_bytes", "printer"] }
 flate2 = { workspace = true }
 hex = { workspace = true, features = ["serde"] }
 ic-certification = { workspace = true }
+ic-management-canister-types = { workspace = true }
 ic-transport-types = { workspace = true }
-pocket-ic-management-canister-types = { workspace = true }
 reqwest = { workspace = true, features = ["blocking", "http2", "json", "multipart", "rustls", "socks", "stream"] }
 schemars = { workspace = true }
 semver = { workspace = true }

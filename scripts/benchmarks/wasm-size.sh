@@ -8,7 +8,7 @@ output="${2:-$(mktemp -d "${TMPDIR:-/tmp}/platform-wasm-size.XXXXXX")}"
 mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
 [[ ! -e "$output/Cargo.toml" ]] || { echo 'Size evidence already exists; select a new output directory' >&2; exit 2; }
-toolchain="${WASM_BENCH_TOOLCHAIN:-1.91.0}"
+toolchain="${WASM_BENCH_TOOLCHAIN:-$(bash "$root/scripts/ci/read-platform-msrv.sh" "$source_root/Cargo.toml")}"
 build_target="${WASM_BENCH_TARGET_DIR:-$output/target}"
 profiles="${WASM_BENCH_PROFILES:-principal principal-binary principal-self-auth runtime external-candid verification}"
 recipes="${WASM_BENCH_RECIPES:-3-none-16 3-thin-1 3-fat-1 s-fat-1 z-fat-1}"

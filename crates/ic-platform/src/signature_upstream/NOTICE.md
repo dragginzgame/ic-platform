@@ -45,6 +45,11 @@ hashes above. No fingerprint was refreshed. The added `admission` module rejects
 truncated/noncanonical short-form DER; it does not implement key encoding.
 The original SHA-256, domain separation, DER/raw encoding, CBOR parsing, BLS and
 certificate verification bodies, constants and vectors remain unchanged.
+For #123, eleven creation-test assertions use standard `assert!` with borrowed
+`matches!` predicates or `is_ok()` and debug failure values instead of the test-only
+`assert_matches` crate. The guard restores those exact assertions and their
+import before checking the unchanged source fingerprints. Match guards and
+vectors are preserved; no production body changes.
 Long-form DER remains unsupported by the fixed-offset imported key parser.
 Callers retain byte/depth bounds, issuer/seed, trust and application policy.
 

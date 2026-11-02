@@ -74,11 +74,11 @@ use candid::{
     utils::{ArgumentDecoder, ArgumentEncoder},
 };
 use flate2::read::GzDecoder;
-pub use ic_transport_types::SubnetMetrics;
-pub use pocket_ic_management_canister_types::{
+pub use ic_management_canister_types::{
     CanisterId, CanisterInstallMode, CanisterLogRecord, CanisterSettings, CanisterStatusResult,
     EnvironmentVariable, Snapshot,
 };
+pub use ic_transport_types::SubnetMetrics;
 use reqwest::Url;
 use schemars::JsonSchema;
 use semver::{Version, VersionReq};

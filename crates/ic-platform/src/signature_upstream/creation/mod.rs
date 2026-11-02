@@ -195,7 +195,6 @@ pub fn parse_canister_sig_cbor(signature_cbor: &[u8]) -> Result<CanisterSig, Str
 #[cfg(test)]
 mod tests {
     use super::*;
-    use assert_matches::assert_matches;
 
     const TEST_SIGNING_CANISTER_ID: &str = "rwlgt-iiaaa-aaaaa-aaaaa-cai";
     const TEST_SEED: [u8; 3] = [42, 72, 44];
@@ -238,13 +237,13 @@ mod tests {
         let mut bad_oid_der = *CANISTER_SIG_PK_DER;
         bad_oid_der[2] += 42;
         let result = CanisterSigPublicKey::try_from(bad_oid_der.as_slice());
-        assert_matches!(result, Err(e) if e.contains("invalid OID"));
+        assert!(matches!(&result, Err(e) if e.contains("invalid OID")), "{result:?}");
     }
 
     #[test]
     fn should_fail_parsing_canister_sig_pk_from_short_der() {
         let result = CanisterSigPublicKey::try_from(CANISTER_SIG_PK_DER[..25].to_vec().as_slice());
-        assert_matches!(result, Err(e) if e.contains("pk too short"));
+        assert!(matches!(&result, Err(e) if e.contains("pk too short")), "{result:?}");
     }
 
     #[test]
@@ -266,7 +265,7 @@ mod tests {
             &CANISTER_SIG_PK_DER.as_slice()
                 [CANISTER_SIG_PK_DER_PREFIX_LENGTH..(CANISTER_SIG_PK_DER_PREFIX_LENGTH + 10)],
         );
-        assert_matches!(result, Err(e) if e.contains("pk too short"));
+        assert!(matches!(&result, Err(e) if e.contains("pk too short")), "{result:?}");
     }
 
     #[test]
@@ -284,13 +283,13 @@ mod tests {
         let mut bad_oid_der = *CANISTER_SIG_PK_DER;
         bad_oid_der[2] += 42;
         let result = extract_raw_canister_sig_pk_from_der(&bad_oid_der);
-        assert_matches!(result, Err(e) if e.contains("invalid OID"));
+        assert!(matches!(&result, Err(e) if e.contains("invalid OID")), "{result:?}");
     }
 
     #[test]
     fn should_fail_extract_raw_canister_sig_pk_from_short_der() {
         let result = extract_raw_canister_sig_pk_from_der(&CANISTER_SIG_PK_DER[..25]);
-        assert_matches!(result, Err(e) if e.contains("pk too short"));
+        assert!(matches!(&result, Err(e) if e.contains("pk too short")), "{result:?}");
     }
 
     #[test]
@@ -309,19 +308,19 @@ mod tests {
         let mut bad_oid_der = *IC_ROOT_PK_DER;
         bad_oid_der[2] += 42;
         let result = extract_raw_root_pk_from_der(&bad_oid_der);
-        assert_matches!(result, Err(e) if e.contains("invalid OID"));
+        assert!(matches!(&result, Err(e) if e.contains("invalid OID")), "{result:?}");
     }
 
     #[test]
     fn should_fail_extract_raw_root_pk_from_short_der() {
         let result = extract_raw_root_pk_from_der(&IC_ROOT_PK_DER[..42]);
-        assert_matches!(result, Err(e) if e.contains("invalid root pk length"));
+        assert!(matches!(&result, Err(e) if e.contains("invalid root pk length")), "{result:?}");
     }
 
     #[test]
     fn should_parse_canister_sig_cbor() {
         let result = parse_canister_sig_cbor(CANISTER_SIG_CBOR);
-        assert_matches!(result, Ok(_));
+        assert!(result.is_ok(), "{result:?}");
     }
 
     #[test]
@@ -329,13 +328,13 @@ mod tests {
         let mut bad_prefix_cbor = *CANISTER_SIG_CBOR;
         bad_prefix_cbor[0] = 42;
         let result = parse_canister_sig_cbor(&bad_prefix_cbor);
-        assert_matches!(result, Err(e) if e.contains("doesn't have a self-describing tag"));
+        assert!(matches!(&result, Err(e) if e.contains("doesn't have a self-describing tag")), "{result:?}");
     }
 
     #[test]
     fn should_fail_parse_canister_sig_cbor_if_incomplete_cbor() {
         let result = parse_canister_sig_cbor(&CANISTER_SIG_CBOR[..100]);
-        assert_matches!(result, Err(e) if e.contains("failed to parse canister signature"));
+        assert!(matches!(&result, Err(e) if e.contains("failed to parse canister signature")), "{result:?}");
     }
 
     #[test]
@@ -344,6 +343,6 @@ mod tests {
         // `HashTree` starts around this byte.
         corrupted_cbor[180] = 42;
         let result = parse_canister_sig_cbor(&corrupted_cbor);
-        assert_matches!(result, Err(e) if e.contains("failed to parse canister signature"));
+        assert!(matches!(&result, Err(e) if e.contains("failed to parse canister signature")), "{result:?}");
     }
 }

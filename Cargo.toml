@@ -11,7 +11,7 @@ resolver = "3"
 
 [workspace.package]
 edition = "2024"
-rust-version = "1.91.0"
+rust-version = "1.99.1"
 license = "MIT"
 repository = "https://github.com/dragginzgame/ic-platform"
 
@@ -21,6 +21,9 @@ repository = "https://github.com/dragginzgame/ic-platform"
 # Platform
 # Changelog : releases/platform/CHANGELOG.md
 ic-platform = { version = "0.17.0", path = "crates/ic-platform", default-features = false }
+
+# PocketIC
+# Changelog : releases/pocket-ic/CHANGELOG.md
 ic-platform-pocket-ic = { version = "0.17.0", path = "crates/ic-platform-pocket-ic", default-features = false }
 
 # Runtime
@@ -56,6 +59,8 @@ pin-project-lite = "0.2.17"
 rand_core = { version = "0.6", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 sha2 = "0.10"
+# Owned Principal can use the current provider; BLS still requires Digest 0.10.
+sha2_11 = { package = "sha2", version = "0.11.1", default-features = false }
 slotmap = "1.1.1"
 subtle = { version = "2.6", default-features = false }
 thiserror = "2.0.18"
@@ -70,7 +75,6 @@ ic-certification = { version = "3.2.0", default-features = false, features = ["s
 ic-management-canister-types = "=0.11.0"
 ic-secp256k1 = "=0.3.0"
 ic-transport-types = "0.49.1"
-pocket-ic-management-canister-types = { package = "ic-management-canister-types", version = "0.8.0" }
 reqwest = { version = "0.13", default-features = false }
 schemars = { version = "0.8.21", features = ["derive"] }
 semver = { version = "1.0.9", features = ["serde"] }
@@ -94,7 +98,6 @@ serde_cbor = "0.11.2"
 serde_json = "1.0"
 
 # Tests and tooling only
-assert_matches = "1.5"
 ic-representation-independent-hash = "4.0.1"
 ic-testkit = "0.72.0"
 # Qualification-only committed adoption source; return to a registry selection

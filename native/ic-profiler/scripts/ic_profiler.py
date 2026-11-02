@@ -21,8 +21,11 @@ SCHEMA = 1
 MANIFEST = "integration/manifest.json"
 OWNER = "ic-profiler-owner.json"
 RECEIPT = "ic-profiler-receipt.json"
+CACHE_MAX_BYTES = 256 * 1024**3
+CACHE_MAX_AGE_SECONDS = 7 * 86400
 BUILD_ENVIRONMENT = (
-    "RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS", "RUSTC", "RUSTDOC", "CARGO_BUILD_JOBS",
+    "RUSTFLAGS", "CARGO_ENCODED_RUSTFLAGS", "RUSTC", "RUSTDOC", "CARGO_BUILD_JOBS", "CARGO_INCREMENTAL",
+    "CARGO_BUILD_TARGET_DIR", "CARGO_BUILD_BUILD_DIR",
     "CARGO_PROFILE_DEV_DEBUG", "CARGO_PROFILE_DEV_INCREMENTAL", "CARGO_PROFILE_DEV_OPT_LEVEL",
     "CARGO_PROFILE_RELEASE_DEBUG", "CARGO_PROFILE_RELEASE_INCREMENTAL", "CARGO_PROFILE_RELEASE_OPT_LEVEL",
     "CARGO_PROFILE_RELEASE_LTO",
@@ -106,7 +109,12 @@ def file_snapshot(path, name):
         raise Error(f"Cannot read {name}: {exc}") from exc
     if not stat.S_ISREG(info.st_mode):
         raise Error(f"Expected a regular file: {name}")
-    return {"path": name, "sha256": digest_bytes(path.read_bytes()),
+    with path.open("rb") as stream:
+        hasher = hashlib.sha256()
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            hasher.update(chunk)
+        digest = hasher.hexdigest()
+    return {"path": name, "sha256": digest,
             "executable": bool(info.st_mode & 0o111)}
 
 
@@ -396,7 +404,8 @@ def copy_file(source, destination):
 def publish_prepare_receipt(root, destination, receipt):
     build = build_directory(root)
     if destination == build / "ic":
-        write_json(build / "receipts" / "latest-prepare.json", {**receipt, "destination": str(destination)})
+        receipts = inside(build, "receipts", "preparation receipts")
+        write_json(receipts / "latest-prepare.json", {**receipt, "destination": str(destination)})
 
 
 def prepare(root, manifest, *, force=False, revision=None, destination=None):
@@ -514,6 +523,51 @@ def executable_paths(checkout, env):
     return result
 
 
+def cache_helper(root):
+    repository = Path(git(root, "rev-parse", "--show-toplevel").decode().strip())
+    return repository / "scripts/dev/compiler-cache-maintenance.pl"
+
+
+def compiler_cache(root, operation):
+    """Only new provider-owned scratch is managed; legacy/external targets stay put."""
+    consumer = consumer_directory(root)
+    target = inside(consumer, "target", "compiler scratch parent")
+    target.mkdir(exist_ok=True)
+    cache = target / "ic-profiler-cache"
+    helper = cache_helper(root)
+    result = run(["perl", helper, operation, cache, consumer,
+                  build_directory(root) / ".assembly.lock", str(os.getpid()),
+                  str(CACHE_MAX_BYTES), str(CACHE_MAX_AGE_SECONDS)])
+    print(result.decode().strip(), flush=True)
+    return cache / "build"
+
+
+def retain_executable(root, path):
+    """Copy executable bytes out of compiler scratch before any cache retirement."""
+    source = file_snapshot(path, str(path))
+    directory = inside(build_directory(root), f"artifacts/{source['sha256']}", "retained artifacts")
+    directory.mkdir(parents=True, exist_ok=True)
+    destination = directory / path.name
+    if destination.exists() or destination.is_symlink():
+        existing = file_snapshot(destination, str(destination))
+        if (existing["sha256"], existing["executable"]) != (source["sha256"], source["executable"]):
+            raise Error(f"Retained artifact changed: {destination}")
+    else:
+        descriptor, temporary = tempfile.mkstemp(prefix=".artifact-", dir=directory)
+        try:
+            with os.fdopen(descriptor, "wb") as stream, path.open("rb") as incoming:
+                shutil.copyfileobj(incoming, stream)
+            os.chmod(temporary, 0o755 if source["executable"] else 0o644)
+            copied = file_snapshot(Path(temporary), temporary)
+            if copied["sha256"] != source["sha256"] or file_snapshot(path, str(path)) != source:
+                raise Error(f"Compiler artifact changed during retention: {path}")
+            os.replace(temporary, destination)
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+    return {**file_snapshot(destination, str(destination)), "compiler_path": str(path)}
+
+
 def cargo_command(root, manifest, command, arguments, force):
     checkout, assembly = prepare(root, manifest, force=force)
     env = os.environ.copy()
@@ -526,14 +580,21 @@ def cargo_command(root, manifest, command, arguments, force):
         read_json(routing)
         env["MAINNET_ROUTING_TABLE"] = str(routing)
         embedded_inputs.append(file_snapshot(routing, str(routing)))
-    target = Path(env.get("CARGO_TARGET_DIR", str(build_directory(root) / "target"))).expanduser()
+    external_target = env.get("CARGO_TARGET_DIR") or env.get("CARGO_BUILD_TARGET_DIR")
+    managed = not external_target
+    if managed and env.get("CARGO_BUILD_BUILD_DIR"):
+        raise Error("Select CARGO_TARGET_DIR explicitly when overriding Cargo's compiler build directory")
+    target = compiler_cache(root, "prepare") if managed else Path(external_target).expanduser()
     if not target.is_absolute():
         target = Path.cwd() / target
     env["CARGO_TARGET_DIR"] = str(target.resolve())
+    env.setdefault("CARGO_INCREMENTAL", "0")
     if arguments and arguments[0] == "--":
         arguments = arguments[1:]
     if any(arg == "--message-format" or arg.startswith("--message-format=") for arg in arguments):
         raise Error("The scripts manage Cargo's message format to record artifact hashes")
+    if any(arg == "--target-dir" or arg.startswith("--target-dir=") or arg == "--config" or arg.startswith("--config=") for arg in arguments):
+        raise Error("Select external compiler output with CARGO_TARGET_DIR; Cargo target/config overrides bypass cache custody")
     package = "pocket-ic-server" if command in ("build", "clippy") else "ic-system-profiler"
     # An explicit package selection replaces the default, allowing native
     # integration tests whose test target does not exist in the core package.
@@ -558,6 +619,11 @@ def cargo_command(root, manifest, command, arguments, force):
                   "cargo_version": tool_version(checkout, ["cargo", "--version"]),
                   "rustc_version": tool_version(checkout, [env.get("RUSTC", "rustc"), "--version", "--verbose"]),
                   "cargo_target_dir": env["CARGO_TARGET_DIR"],
+                  "compiler_cache": {"managed": managed, "max_bytes": CACHE_MAX_BYTES,
+                                     "max_age_seconds": CACHE_MAX_AGE_SECONDS,
+                                     "maintenance": [file_snapshot(path, str(path)) for path in
+                                                     (cache_helper(root), cache_helper(root).with_name("OwnedTree.pm"))]}
+                  if managed else {"managed": False},
                   "build_environment": {name: env[name] for name in BUILD_ENVIRONMENT if name in env},
                   "embedded_inputs": embedded_inputs,
                   "native_server": file_snapshot(Path(env["POCKET_IC_BIN"]).resolve(), env["POCKET_IC_BIN"])
@@ -570,7 +636,7 @@ def cargo_command(root, manifest, command, arguments, force):
     provenance["toolchain_file"] = {"path": toolchain.name, "sha256": digest_bytes(toolchain.read_bytes()), "contents": toolchain.read_text()}
     print(f"Running {' '.join(args)} in {checkout}", flush=True)
     process = subprocess.Popen(args, cwd=checkout, env=env, stdout=subprocess.PIPE, text=True)
-    artifacts = set()
+    artifacts = {}
     assert process.stdout is not None
     for line in process.stdout:
         try:
@@ -579,18 +645,18 @@ def cargo_command(root, manifest, command, arguments, force):
             print(line, end="", flush=True)
             continue
         if message.get("reason") == "compiler-artifact" and message.get("executable"):
-            artifacts.add(message["executable"])
+            artifacts[message["executable"]] = message.get("target", {}).get("name")
         elif message.get("reason") == "compiler-message":
             rendered = message.get("message", {}).get("rendered")
             if rendered:
                 print(rendered, end="", file=sys.stderr, flush=True)
     code = process.wait()
     for path in sorted(artifacts):
-        provenance["artifacts"].append(file_snapshot(Path(path), path))
+        provenance["artifacts"].append({**retain_executable(root, Path(path)), "target_name": artifacts[path]})
     provenance["exit_code"] = code
     provenance["finished_at"] = datetime.now(timezone.utc).isoformat()
     provenance["checkout_sha256_after"] = checkout_digest(checkout)
-    receipts = build_directory(root) / "receipts"
+    receipts = inside(build_directory(root), "receipts", "command receipts")
     identity = provenance["started_at"].replace(":", "").replace(".", "")
     receipt_path = receipts / f"{command}-{identity}-{os.getpid()}.json"
     if receipt_path.exists():
@@ -598,10 +664,15 @@ def cargo_command(root, manifest, command, arguments, force):
     write_json(receipt_path, provenance)
     write_json(receipts / f"latest-{command}.json", provenance)
     print(f"Recorded {command} provenance: {receipt_path}")
+    # Receipts and executable copies are durable before deleting compiler output,
+    # including failed attempts. A retention failure leaves scratch untouched.
+    if managed:
+        compiler_cache(root, "finish")
     if code:
         raise Error(f"cargo {command} failed with exit code {code}")
     if provenance["checkout_sha256_after"] != assembly["checkout_sha256"]:
         raise Error("Cargo changed the generated source checkout; inspect the checkout and receipt before regenerating")
+    return provenance
 
 
 def check_native_graph(root, manifest):
@@ -621,14 +692,19 @@ def native_verify(root, manifest):
     previous = {name: os.environ.get(name) for name in
                 ("CARGO_TARGET_DIR", "POCKET_IC_BIN", "SYSTEM_PROFILE_TEST_SERVER_URL")}
     try:
-        target = build_directory(root) / "target"
-        os.environ["CARGO_TARGET_DIR"] = str(target)
         os.environ.pop("SYSTEM_PROFILE_TEST_SERVER_URL", None)
         cargo_command(root, manifest, "clippy", ["--", "--no-deps", "--lib", "--", "-D", "warnings"], False)
-        cargo_command(root, manifest, "build", [], False)
+        built = cargo_command(root, manifest, "build", [], False)
+        servers = [item for item in built["artifacts"] if item["target_name"] == "pocket-ic-server"]
+        if len(servers) != 1:
+            raise Error("Expected exactly one retained pocket-ic-server executable")
+        server = servers[0]
         cargo_command(root, manifest, "test", ["--", "--lib"], False)
         cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic-server", "--lib", "profiling::"], False)
-        os.environ["POCKET_IC_BIN"] = str(target / "debug/pocket-ic-server")
+        observed = file_snapshot(Path(server["path"]), server["path"])
+        if observed["sha256"] != server["sha256"] or not observed["executable"]:
+            raise Error("Retained native server changed before installed qualification")
+        os.environ["POCKET_IC_BIN"] = server["path"]
         cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic", "--test", "system_profiling"], False)
     finally:
         for name, value in previous.items():

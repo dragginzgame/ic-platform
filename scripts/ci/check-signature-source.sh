@@ -20,6 +20,14 @@ perl -0777 -e '
         or die "Missing owned creation certification import\n";
     ($source =~ s/^use crate::principal::Principal;$/use ic_principal::Principal;/m) == 1
         or die "Missing owned Principal import\n";
+    # #123 replaces only the eleven test assertions with MSRV-compatible std
+    # macros. Restore the original assertions/import before fingerprinting.
+    ($source =~ s/assert!\(\s*matches!\(&result, (Err\(e\) if e\.contains\("[^"\n]+"\))\),\s*"\{result:\?\}"\s*,?\s*\);/assert_matches!(result, $1);/g) == 10
+        or die "Changed signature test assertions or diagnostics\n";
+    ($source =~ s/\Qassert!(result.is_ok(), "{result:?}");\E/assert_matches!(result, Ok(_));/) == 1
+        or die "Changed signature success assertion\n";
+    ($source =~ s/(mod tests \{\n    use super::\*;\n)/$1    use assert_matches::assert_matches;\n/) == 1
+        or die "Missing signature test module\n";
     print $source;
 ' "$source_root/creation/mod.rs" > "$admitted_creation"
 # The BLS packaging move changes this import only, never verifier bodies.

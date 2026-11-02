@@ -1,41 +1,47 @@
 # Maintained PocketIC Rust client
 
-IC Platform maintains the released PocketIC 16.1.0 Rust client in the native-only
-implementation package `ic-platform-pocket-ic`. Consumers select the existing
-`pocket-ic` feature and import `ic_platform::pocket_ic`. This is one client owner
-and one facade contract; the registry `pocket-ic` package leaves that graph.
+`ic-platform-pocket-ic` maintains the PocketIC 16.1 Rust client as an independent,
+native-only package. Native consumers can depend on it directly and import
+`ic_platform_pocket_ic::{PocketIc, PocketIcBuilder}`. The optional
+`ic_platform::pocket_ic` facade re-exports the same owner and types.
 
-The maintainer selected a signature-preserving first transfer. HTTP/JSON fields,
-Candid management payloads, polling, rejections and existing operation behavior
-are retained. The client still has its inherited panic and convenience behavior;
-this does not claim typed transport failures or new retry/provisioning semantics.
-Testkit continues using explicit server setup and compatibility/lifecycle policy.
-No simulator server or IC execution code is imported. The native Profiler
-provider retains its independently qualified patched client/server protocol.
+The `pocket-ic` release group has its own
+[ledger](../releases/pocket-ic/CHANGELOG.md). Client-only releases leave the facade,
+Runtime and Types versions unchanged. Use explicit `RELEASE_GROUP=pocket-ic` for
+release, resume and publication. When both client and facade requirements change,
+publish the client first. Package versions remain unchanged during local work;
+0.17.0 is published, and the management upgrade below belongs to pending 0.18.0.
+Sibling adoption follows publication and is not performed by this change.
 
-Client, builder, Time, rejection and locally defined REST DTO Rust identities
-move from the registry client to this implementation package. Their names and
-method signatures through the facade stay the same. Consumers exchanging registry
-client types must align on the new facade release. Required external management
-DTOs retain their 0.8 identities, independently of Platform's 0.11 management
-surface. Types, macros and runtime ownership otherwise stay unchanged.
+The pending client selects management-canister DTOs =0.11.0, sharing the native
+Platform management surface's external identity. Consumers exchanging 0.8 DTOs
+must align their dependency. Settings/status expose status visibility and minimum
+incoming-call cycles; decoded status requires the new fields. Their Candid schema
+changes, so compatibility is qualified against a prepared server rather than
+inferred from compilation. Status, settings and snapshot lifecycle pass against
+PocketIC 16.1.0. Older server acceptance is not implied.
 
-A separate implementation package is needed because directly enabling the
-facade's shared Candid/crypto dependencies would also select them on Wasm.
-Every implementation dependency is native-target scoped; defaults and
-executor-only graphs remain free of the client. Its version follows the Platform
-group; publish it before the facade through the existing group publisher.
-Existing versions stay at 0.16.0 (Types 0.15.1); the new implementation matches
-its Platform group. The breaking client identity cut is pending 0.17.0.
+Method bodies, REST fields, polling, rejections and existing operation behavior
+are retained. This includes inherited panic/convenience behavior. Testkit owns
+explicit server preparation, pinning, compatibility admission, process lifecycle
+and caller retry policy. No simulator or IC execution engine is imported. The
+native Profiler retains its independently qualified patched client/server protocol.
 
-[Source provenance, retained license and upstream review](../crates/ic-platform-pocket-ic/upstream/NOTICE.md)
-record the source transfer. The source guard checks the reviewed implementation
-and license hashes; intentional changes retain original identity, document the
-deviation and add behavioral evidence before updating those fingerprints.
+All dependencies remain native-target scoped, excluding the client from canister
+execution graphs. Direct client consumers need neither the facade nor Runtime;
+Candid, certification and HTTP remain native client dependencies. This packaging
+change makes no production Wasm-size claim. Rust 1.99.1 is the supported compiler.
 
-Qualification selects the owned client/facade tests, full required Clippy gate,
-native/Wasm dependency policies, Rust 1.91 consumers and Testkit against the
-existing prepared 16.1.0 server. A local source override is qualification only,
-never the published distribution mechanism. Native macOS and hosted results
-remain separate from local Linux evidence. Source transfer alone does not prove
-independent simulator recovery or offline rebuilding of the complete stack.
+[Provenance and retained license](../crates/ic-platform-pocket-ic/upstream/NOTICE.md)
+record the transfer. The source guard reconstructs only the admitted management
+import rename/ordering before checking unchanged maintained fingerprints. This
+permits no method-body or cryptographic algorithm changes.
+
+Focused qualification covers client Clippy/tests, source guard rejection,
+management type identity, direct/facade identity across facade versions, native
+and Wasm graphs, archive consumption and group preparation/recovery. The installed
+fixture is [pocket-ic-client/main.rs](../scripts/fixtures/pocket-ic-client/main.rs);
+run `bash scripts/ci/check-pocket-ic-client.sh` with `POCKET_IC_BIN` or
+`IC_TESTKIT_POCKET_IC_URL` selecting an explicitly prepared server under Testkit custody. Native macOS and
+hosted results remain separate from local Linux evidence. Source inclusion alone
+does not prove offline simulator rebuilding or complete-stack recovery.

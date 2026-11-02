@@ -69,6 +69,11 @@ and uses upstream SHA-224 directly; self-authentication alone no longer selects
 registry Principal. Runtime selects only the owned capability. Required external integrations
 select conversions automatically.
 
+Owned Principal self-authentication selects RustCrypto SHA-2 0.11 without default
+features. Certification, BLS and ledger hashing retain SHA-2 0.10; splitting
+certification from BLS increased the combined verifier Wasm by roughly 9 KB in
+the qualification probes. Candid's registry Principal keeps its own dependencies.
+
 The `icrc-ledger-types` feature now supplies selected Platform-maintained DTOs
 and unchanged imported value hashing, without the registry ledger package,
 CBOR/storage adapters or consent-formatting machinery. External Candid/Serde
@@ -168,11 +173,12 @@ remains consumer-owned.
 
 Wire 0.10.0 remains a tooling catalog entry for independent call fixtures. The
 production graph checker rejects Wire on both native and Wasm, for every feature
-selection. The runtime fixture selects published Timers 0.34.0 against one local
-Platform 0.15 runtime, replacing the incompatible Platform 0.8 requirement. Its
-lock remains separate from the production lock. A future Platform minor still
-requires coordinated Timers adoption. All features retain
-Rust 1.91. See the [migration contract](migration.md#owned-principal-and-account-wire-metadata).
+selection. The independent owner fixture excludes Timers; the composition fixture
+pins the reviewed Timers adoption to the sole Runtime owner. Their locks remain
+separate from the production lock. Facade-only version changes do not advance
+Runtime identity. All current features require Rust 1.99.1; historical 1.91
+qualification is retained as evidence. See the
+[migration contract](migration.md#owned-principal-and-account-wire-metadata).
 
 IC Profiler selects the opt-in Git source profile at `native/ic-profiler`, which
 owns the instrumented IC pin, adapters, patches and patched PocketIC client.
@@ -180,7 +186,9 @@ The recorder/viewer remain consumer-owned. Native workspace/Bazel inputs supply
 published IC Metrics 0.17 counters with defaults disabled, distinct from internal
 replica metrics 0.9. These inputs add no Platform Cargo feature or default/Wasm
 dependency. The separate stock `pocket-ic` facade feature now selects the
-maintained native client; no instrumented Rust export is added to that feature. The
+maintained native client. Its independent `pocket-ic` release group also permits
+direct native consumer dependencies on `ic-platform-pocket-ic`, sharing management
+DTOs =0.11.0 with the native facade. No instrumented Rust export is added to that feature. The
 [migration contract](migration.md#instrumented-pocketic-source-provider) records
 the source-provider interface and the remaining native acceptance under
 [#65 — Instrumented PocketIC boundary for IC Profiler](https://github.com/dragginzgame/ic-platform/issues/65).
@@ -347,11 +355,10 @@ profiles retain their explicitly external identities.
 | ic-platform-runtime-guard | default |  |
 | ic-platform-types | default |  |
 | ic-platform-types | principal-external | dep:ic_principal |
-| ic-platform-types | principal-self-authenticating | dep:sha2 |
+| ic-platform-types | principal-self-authenticating | dep:sha2_11 |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ic-platform | assert_matches | ^1.5 | dev | all | false | true |  |
 | ic-platform | blake3 | ^1.8.7 | normal | all | true | false | std |
 | ic-platform | candid | ^0.10.38 | normal | all | true | false |  |
 | ic-platform | candid_parser | ^0.4.1 | normal | cfg(not(target_family = "wasm")) | true | false |  |
@@ -401,7 +408,7 @@ profiles retain their explicitly external identities.
 | ic-platform-pocket-ic | flate2 | ^1.0.31 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | hex | ^0.4.3 | normal | cfg(not(target_family = "wasm")) | false | true | serde |
 | ic-platform-pocket-ic | ic-certification | ^3.2.0 | normal | cfg(not(target_family = "wasm")) | false | false | serde |
-| ic-platform-pocket-ic | ic-management-canister-types | ^0.8.0 | normal | cfg(not(target_family = "wasm")) | false | true |  |
+| ic-platform-pocket-ic | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | ic-transport-types | ^0.49.1 | normal | cfg(not(target_family = "wasm")) | false | true |  |
 | ic-platform-pocket-ic | reqwest | ^0.13 | normal | cfg(not(target_family = "wasm")) | false | false | blocking, http2, json, multipart, rustls, socks, stream |
 | ic-platform-pocket-ic | schemars | ^0.8.21 | normal | cfg(not(target_family = "wasm")) | false | true | derive |
@@ -434,6 +441,6 @@ profiles retain their explicitly external identities.
 | ic-platform-types | serde | ^1.0 | normal | all | false | false | alloc, derive |
 | ic-platform-types | serde_bytes | ^0.11 | dev | all | false | true |  |
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
-| ic-platform-types | sha2 | ^0.10 | normal | all | true | true |  |
+| ic-platform-types | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->

@@ -6,14 +6,20 @@
       "primary": "ic-platform",
       "version": "package",
       "members": [
-        "ic-platform",
-        "ic-platform-pocket-ic"
+        "ic-platform"
       ],
       "changelog": "releases/platform/CHANGELOG.md",
       "dependencies": [
-        "ic-platform",
-        "ic-platform-pocket-ic"
+        "ic-platform"
       ]
+    },
+    {
+      "name": "pocket-ic",
+      "primary": "ic-platform-pocket-ic",
+      "version": "package",
+      "members": ["ic-platform-pocket-ic"],
+      "changelog": "releases/pocket-ic/CHANGELOG.md",
+      "dependencies": ["ic-platform-pocket-ic"]
     },
     {
       "name": "types",

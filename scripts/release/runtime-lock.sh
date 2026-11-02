@@ -8,7 +8,7 @@ mode="${1:-check}"
 case "$mode" in check) [[ $# == 1 ]] ;; prepare) [[ $# == 2 ]] ;; *) exit 2 ;; esac
 group="${RELEASE_GROUP:-}"
 if [[ "$mode" == prepare ]]; then
-    case "$group" in platform|runtime|types) ;; *) echo 'Select a release group' >&2; exit 2 ;; esac
+    case "$group" in platform|pocket-ic|runtime|types) ;; *) echo 'Select a release group' >&2; exit 2 ;; esac
 fi
 previous="${2:-}"
 for lock in scripts/fixtures/{cdk-runtime,timers-runtime}/Cargo.lock; do

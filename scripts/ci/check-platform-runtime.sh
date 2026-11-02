@@ -30,14 +30,11 @@ if [[ "$mode" == run && -z "${POCKET_IC_BIN:-}" && -z "${IC_TESTKIT_POCKET_IC_UR
     echo 'Set POCKET_IC_BIN (Testkit-admitted binary) or IC_TESTKIT_POCKET_IC_URL first' >&2
     exit 1
 fi
-msrv=1.91.0
-if [[ -z "$published" ]]; then msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"; fi
+msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 mkdir -p target
 fixture="$(mktemp -d "$root/target/cdk-runtime.XXXXXX")"
 mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 # Inherit the reviewed test dependency selections from the root catalog.
-development_toolchain="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.toolchain.channel' rust-toolchain.toml)"
-[[ "$development_toolchain" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Expected a pinned development compiler in rust-toolchain.toml' >&2; exit 1; }
 testkit="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-testkit' Cargo.toml)"
 wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
 serde="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde.version' Cargo.toml)"
@@ -93,7 +90,7 @@ printf '%s\n' "$mode" > "$fixture/operation"
 # compiler identities. Retain failed preparation as well as installed results.
 {
     "$root/.tools/host/bin/rg" --files crates scripts/fixtures/cdk-runtime | sed "\|^scripts/fixtures/cdk-runtime/Cargo.lock$|d"
-    printf '%s\n' Cargo.toml rust-toolchain.toml .cargo/config.toml scripts/ci/check-platform-runtime.sh "$lock"
+    printf '%s\n' Cargo.toml rust-toolchain.toml .cargo/config.toml scripts/ci/check-platform-runtime.sh scripts/ci/check-platform-compiler.sh scripts/ci/read-platform-msrv.sh "$lock"
     if [[ "$mode" == --refresh-lock ]]; then printf '%s\n' Cargo.lock; fi
 } | LC_ALL=C sort -u > "$fixture/input-files"
 source_fingerprints() {
@@ -200,6 +197,7 @@ if [[ "$mode" == --check-graph ]]; then
     exit 0
 fi
 build="${CARGO_TARGET_DIR:-$root/target/runtime-build}"
+bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler-admission.txt"
 mkdir -p "$fixture/artifacts"
 # Cargo releases its target lock before returning. Keep our own inherited lock
 # through the copy, so another proof cannot replace the selected artifact first.
@@ -222,8 +220,8 @@ build_runtime_driver() {
 }
 retain_runtime_artifact "$build/host-$msrv-$qualification" debug/platform-runtime-driver \
     "$fixture/artifacts/platform-runtime-driver" build_runtime_driver
+toolchain="$msrv"
 for transport in "${transports[@]}"; do
-for toolchain in "$development_toolchain" "$msrv"; do
     rustc +"$toolchain" -vV > "$fixture/compiler-$toolchain.txt"
     for protocol in wire external-candid; do
         select_runtime_profile "$transport" "$protocol"
@@ -251,6 +249,5 @@ for toolchain in "$development_toolchain" "$msrv"; do
             printf 'PASS %s %s %s\n' "$toolchain" "$transport" "$protocol" >> "$fixture/profiles.log"
         fi
     done
-done
 done
 printf 'Runtime sources, lock and metadata retained at %s\n' "$fixture"

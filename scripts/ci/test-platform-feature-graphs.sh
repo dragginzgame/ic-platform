@@ -188,7 +188,7 @@ printf 'Batch graph admission: %s cases plus shared-key and missing-graph refusa
 # PocketIC is admitted only as a selected native dependency with its own DTOs.
 for target in native wasm32-unknown-unknown; do
     for selection in pocket-ic none executor; do
-        printf 'ic-platform-pocket-ic v0.1.13 (/fixture)\nic-management-canister-types v0.8.0\ncandid v0.10.38\nic-certification v3.2.0\n' > "$fixture/$target-pocket.txt"
+        printf 'ic-platform-pocket-ic v0.1.13 (/fixture)\nic-management-canister-types v0.11.0\ncandid v0.10.38\nic-certification v3.2.0\n' > "$fixture/$target-pocket.txt"
         printf '%s\tpocket\n' "$selection" > "$fixture/mapping"
         actual=reject
         if admit -v target="$target" -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi

@@ -24,10 +24,7 @@ use candid::{
     utils::{ArgumentDecoder, ArgumentEncoder},
 };
 use ic_certification::{Certificate, Label, LookupResult};
-use ic_transport_types::Envelope;
-use ic_transport_types::EnvelopeContent::ReadState;
-use ic_transport_types::{ReadStateResponse, SubnetMetrics};
-use pocket_ic_management_canister_types::{
+use ic_management_canister_types::{
     CanisterId, CanisterIdRecord, CanisterInstallMode, CanisterLogRecord, CanisterSettings,
     CanisterStatusResult, ChunkHash, DeleteCanisterSnapshotArgs, FetchCanisterLogsResult,
     InstallChunkedCodeArgs, InstallCodeArgs, LoadCanisterSnapshotArgs,
@@ -35,6 +32,9 @@ use pocket_ic_management_canister_types::{
     TakeCanisterSnapshotArgs, UpdateSettingsArgs, UpgradeFlags, UploadChunkArgs, UploadChunkResult,
     WasmMemoryPersistence,
 };
+use ic_transport_types::Envelope;
+use ic_transport_types::EnvelopeContent::ReadState;
+use ic_transport_types::{ReadStateResponse, SubnetMetrics};
 use reqwest::{StatusCode, Url};
 use serde::{Serialize, de::DeserializeOwned};
 use sha2::{Digest, Sha256};

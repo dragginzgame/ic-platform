@@ -844,7 +844,7 @@ dependencies = [
  "flate2",
  "hex",
  "ic-certification",
- "ic-management-canister-types 0.8.0",
+ "ic-management-canister-types 0.11.0",
  "ic-transport-types",
  "reqwest",
  "schemars",

@@ -11,7 +11,19 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 mkdir -p target
 fixture="$(mktemp -d "$root/target/runtime-singleton.XXXXXX")"
-trap 'printf "Runtime singleton evidence: %s\n" "$fixture"' EXIT
+finish() {
+    result=$?
+    if [[ "$result" != 0 ]]; then
+        for log in "$fixture"/*.log; do
+            [[ -f "$log" ]] || continue
+            printf '\nEvidence: %s\n' "$log" >&2
+            cat "$log" >&2
+        done
+    fi
+    printf 'Runtime singleton evidence: %s\n' "$fixture"
+    exit "$result"
+}
+trap finish EXIT
 mkdir -p "$fixture/src"
 printf '// Cargo packaging proof; execution stays in the qualified runtime fixtures.\n' > "$fixture/src/lib.rs"
 manifest() {
@@ -31,6 +43,18 @@ if [[ "$prepare" == true ]]; then
     # The embedded runtime removed this registry supplier from the root lock.
     # Resolve and fetch it only during explicitly requested fixture setup.
     manifest '"ic0"'
+    cargo fetch --manifest-path "$fixture/Cargo.toml"
+    # The negative legacy-owner case also needs its registry manifest on fresh
+    # runners; a missing offline package is not singleton-refusal evidence.
+    cat > "$fixture/Cargo.toml" <<'MANIFEST'
+[package]
+name = "runtime-singleton-proof"
+version = "0.0.0"
+edition = "2024"
+[workspace]
+[dependencies]
+ic-platform = { version = "=0.16.0", default-features = false, features = ["executor"] }
+MANIFEST
     cargo fetch --manifest-path "$fixture/Cargo.toml"
     echo 'Registry singleton dependencies prepared; normal checks remain offline.'
     exit 0
@@ -73,14 +97,12 @@ copy="$fixture-next-platform"
 mkdir "$copy"
 cp Cargo.toml "$copy/"
 cp -R crates "$copy/"
-# Edit only the two Platform group literals and their catalog requirements.
-perl -0pi -e 's/^(ic-platform(?:-pocket-ic)? = \{ version = ")[^"]+/${1}99.0.0/gm' "$copy/Cargo.toml"
-for package in ic-platform ic-platform-pocket-ic; do
-    perl -pi -e 's/^version = "[^"]+"$/version = "99.0.0"/' "$copy/crates/$package/Cargo.toml"
-done
+# Edit only the Platform facade literal and its catalog requirement.
+perl -0pi -e 's/^(ic-platform = \{ version = ")[^"]+/${1}99.0.0/gm' "$copy/Cargo.toml"
+perl -pi -e 's/^version = "[^"]+"$/version = "99.0.0"/' "$copy/crates/ic-platform/Cargo.toml"
 # A second facade must depend on the original canonical owners, not copied
 # packages with coincident versions. Their version requirements remain untouched.
-for package in ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard; do
+for package in ic-platform-pocket-ic ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard; do
     cmp "$root/crates/$package/Cargo.toml" "$copy/crates/$package/Cargo.toml"
     PLATFORM_SINGLETON_PACKAGE="$package" PLATFORM_SINGLETON_ROOT="$root" perl -0pi -e '
         my ($p,$r)=@ENV{qw(PLATFORM_SINGLETON_PACKAGE PLATFORM_SINGLETON_ROOT)};
@@ -88,9 +110,7 @@ for package in ic-platform-types ic-platform-runtime ic-platform-macros ic-platf
         s/path = "crates\/\Q$p\E"/path = "$r\/crates\/$p"/ == 1 or die "missing catalog $p";
     ' "$copy/Cargo.toml"
 done
-for manifest_path in "$copy"/crates/{ic-platform,ic-platform-pocket-ic}/Cargo.toml; do
-    perl -pi -e 's/^\[package\]$/[package]\nworkspace = "..\/.."/' "$manifest_path"
-done
+perl -pi -e 's/^\[package\]$/[package]\nworkspace = "..\/.."/' "$copy/crates/ic-platform/Cargo.toml"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [package]
 name = "runtime-singleton-proof"
@@ -139,7 +159,7 @@ if cargo tree --manifest-path "$fixture/Cargo.toml" --offline > "$fixture/incomp
 fi
 grep -q 'links to the native library' "$fixture/incompatible.log"
 grep -q 'ic-platform-runtime-guard' "$fixture/incompatible.log"
-sed -i.bak '/^next = /c\next = { package = "ic-platform", version = "=0.16.0", features = ["executor"] }' "$fixture/Cargo.toml"
+perl -0777 -i -pe 's/^next = .*$/next = { package = "ic-platform", version = "=0.16.0", features = ["executor"] }/m == 1 or die "missing next owner\n"' "$fixture/Cargo.toml"
 if cargo tree --manifest-path "$fixture/Cargo.toml" --offline > "$fixture/legacy.tree" 2> "$fixture/legacy.log"; then
     echo 'Legacy embedded executor unexpectedly resolved' >&2; exit 1
 fi

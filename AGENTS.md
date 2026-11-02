@@ -1,20 +1,17 @@
 # IC Platform contributor instructions
 
-Read [the current handoff](docs/status/current.md), then
-[DRAGGINZGAME.md](DRAGGINZGAME.md). Shared revision
-`4c84efa9dd5f4b3ff7bdea89972e747fd394d406` is recorded in
-[the snapshot](.shared-tooling.snapshot). Do not edit snapshot payloads.
+Read [the current handoff](docs/status/current.md) and the installed
+[baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
+records the installed revision; do not edit its payloads.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
   Keep [the IC inventory](docs/ic-inventory.md) aligned with dependency, feature,
   export and ownership changes; `make check-inventory` checks manifest facts.
-- The maintainer moved #75’s prepared one-shot calls into `ic_platform::call`,
-  selected by the existing `runtime` feature. There is no separate `ic-call`
-  package. It reuses the sole call implementation and executor and owns
-  method/argument custody, not codecs,
-  retries, Relay delivery, timers, domain endpoints or application policy.
-- Keep the low-level consumer boundary under `crates/ic-platform`. Add no blanket upstream
+- Runtime owns prepared one-shot calls and method/argument custody; the facade
+  delegates to that implementation. There is no separate `ic-call` package.
+  Codecs, retries, Relay delivery, timers and application policy stay consumer-owned.
+- Keep Types, Runtime and facade ownership explicit. Add no blanket upstream
   re-exports, automatic resource limits beyond the authorized Candid ceiling below,
   or alternative executor implementation.
   Explicit upstream-coupled exports belong to the documented contract.
@@ -33,17 +30,16 @@ Read [the current handoff](docs/status/current.md), then
   Memory infrastructure; allocation, checked reopening and leases remain there.
 - Preserve dirty work and check for Cargo/rustc processes sharing target/ before
   editing or compiling. Use focused checks from README; full CI is release-owned.
-- Run full `make clippy` (all targets/features, warnings denied) before longer
-  tests, as requested by the maintainer. Fix failures before proceeding.
-- The maintainer has deferred further hard cuts
-  until Canic is live, except the explicitly authorized coordinated owned-endpoint
-  Wire migration and minimal Principal/selected ICRC packaging cut in docs/migration.md. Retire its consumed compiler/service
-  exports only after consumer adoption; preserve required external Candid paths.
-- The authorized #38 compiler-only retirement shipped in 0.7.0 after the Canic
-  Wire caller/qualification audit. Do not restore the JS/TS compiler facade
-  exports or exhausted merged-program helper; retain external parsing/service
-  operations. That narrow cut does not authorize other hard cuts or a parser fork.
-- Rust 2024 and MSRV 1.91.0. Inherit workspace metadata and dependencies; ordinary
+- Run affected-package Clippy before longer relevant tests; fix warnings in that
+  selection. Full-workspace Clippy follows the shared broad-validation boundary.
+- The accepted Rust SDK ownership and Runtime/Types splits are current. Earlier
+  Canic-dependent hard-cut deferrals are superseded for those approved changes.
+  Keep retired compiler/JS/TS facade exports removed; new product changes retain
+  their own scope and qualification under [the migration contract](docs/migration.md).
+- Rust 2024 and minimum/development/release compiler 1.99.1 (#133). Read the
+  workspace floor and pinned toolchain; qualify each distinct graph once on
+  this compiler, preserving native hosts and installed-runtime obligations.
+  Inherit workspace metadata and dependencies; ordinary
   directory modules only. Do not add Python tooling.
 - GitHub issues are the follow-up tracker once a remote exists. Migration and
   provenance documents specify contracts and evidence, not a second issue queue.
@@ -51,10 +47,10 @@ Read [the current handoff](docs/status/current.md), then
 ## Browser SDK boundary
 
 The maintainer authorized the separate ESM npm package under `packages/browser`
-alongside the sole Rust consumer library. It owns SDK Core dependency selection
+alongside the Rust release groups. It owns SDK Core dependency selection
 and shared non-cryptographic integration for Blob and Canic; it is not a second
 Wire generator, storage owner, authentication flow or application policy owner.
-Target Blob's approved local 0.48 graph with SDK Core 6.1.1. Preserve upstream classes/type identity,
+Use the selected browser manifest and qualification inputs. Preserve upstream classes/type identity,
 cryptographic implementations and external bytes; expose explicit subpaths only.
 Principal text admission, checked identity restoration and Agent construction
 plumbing may be owned here. Consumers retain trust roots, budgets, retries,
@@ -67,13 +63,11 @@ Keep real browser/worker evidence separate from installed IC/provider acceptance
 SDK Core is an exact ordinary npm dependency; consumer adoption waits for a
 published package. Existing SDK peers stay until then. Rust `make publish` remains
 crates.io-only; npm release/publication is a separate maintainer action.
-Caffeine 1.1.2 still declares SDK 5; its SDK-6 override belongs to the consuming
-application. Auth 10.0.2 is a compatible SDK-6 type fixture, not Canic adoption.
 
 ## Owned entrypoint generator
 
-`ic-platform-macros` is the implementation proc-macro crate behind the sole
-consumer library's optional `cdk` surface. The maintainer authorized maintaining
+`ic-platform-macros` belongs to Runtime's coordinated release group and supplies
+its optional `cdk` surface, also forwarded by the facade. The maintainer authorized maintaining
 the generator independently of upstream acceptance. Preserve its imported
 Apache-2.0 license (the necessary exception to the workspace's MIT metadata),
 coordinated package version, original generator semantics and explicit paths.
@@ -187,27 +181,19 @@ certification and native clients stay outside its release group. Types remains
 independent. Keep empty defaults, raw executor/IC0 isolation, explicit-codec
 macros, protected source bodies and singleton refusal. Timers and Endpoint must
 select Runtime directly; qualify source/archive consumers before publication.
-Use the current contract in docs/migration.md; older facade-owned descriptions
-below describe provenance, not a second implementation or current version owner.
+Use the current contract in docs/migration.md; imported-source history never
+creates a second implementation or changes the current release-group owner.
 
-## Stable identity supplier (#118)
+## Release groups and canonical identities
 
-The maintainer approved independent Platform, Runtime and Types groups in one workspace.
-All six packages own explicit versions; root workspace.package has no version.
-Keep crate paths, numeric versions, dependency selections and one lockfile intact
-when migrating ownership. Root dependencies group members once under short titles
-and separate Changelog comments. Root CHANGELOG.md is an index;
-releases/history.md preserves coordinated history through 0.15.0 once.
-Release, resume and publication require explicit RELEASE_GROUP=platform, runtime or types,
-including environment selection; no default or PACKAGE inference is allowed.
-Publication subsets must stay within the selected group. Preserve shared runtime
-lock and Runtime-only pin custody, full validation and recorded recovery.
-Catalog every member in root dependencies with its path and full version, and
-register every alias in its group's dependencies roster. Keep group/ledger labels
-nearby, retain requirement operators and classify external dependency use. Unused
-catalog entries add no dependency edges; keep numeric comments out.
-Platform re-exports the sole canonical types; conversions, source bodies, bytes,
-Serde, zero fields and provenance stay with their current owners.
+`ci/cargo-release-groups.json` owns Platform, PocketIC, Runtime and Types membership,
+version authorities and ledgers. Root `Cargo.toml` is the dependency catalog;
+root `CHANGELOG.md` is an index and `releases/history.md` retains coordinated history.
+Release, resume and publication require explicit `RELEASE_GROUP=platform`,
+`pocket-ic`, `runtime` or `types`. Keep the shared qualification-lock and recovery custody;
+publication subsets stay within the selected group. A facade-only change does
+not advance PocketIC, Runtime or Types. Platform re-exports the sole canonical Types;
+conversions, bytes, Serde and provenance remain with their current owners.
 
 ## Owned Principal
 
@@ -220,9 +206,8 @@ this packaging permission authorizes no cryptographic algorithm changes. No defa
 and canister-signature creation/verification select only the owned capability;
 Candid and external DTO/client profiles select external conversions explicitly;
 raw executor/IC0-only profiles exclude application types and their dependencies.
-This supersedes the earlier unconditional availability decision. The pending
-0.16 signature cut uses owned Principal in CanisterSigPublicKey and certified
-range decoding. Preserve original DER/hash/verifier bodies via import-only
+CanisterSigPublicKey and certified range decoding use owned Principal.
+Preserve original DER/hash/verifier bodies via import-only
 reconstruction and qualify CBOR bytes and length-first range ordering.
 
 The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
@@ -235,15 +220,14 @@ Candid contract types stay external. Do not add Candid to the owned type.
 
 ## Executor identity
 
-Platform now owns the embedded executor and IC0 implementations. This supersedes
-the registry =2.0.0 / =1.2.0 constraints and no-executor-fork restriction. Keep
+Runtime owns the embedded executor and IC0 implementations. Keep
 exactly one executor across Platform, Timers and application callbacks. Preserve
 the inherited Cargo links guard in the optional, dependency-free internal
 `ic-platform-runtime-guard` package, selected only by `executor`. Its requirement
-must exactly match the facade version so different runtime owners cannot share a
+must exactly match the Runtime version so different runtime owners cannot share a
 guard. Non-runtime consumers may coexist with an unrelated external executor;
 never admit an external ic-cdk-executor beside the enabled embedded owner. Existing public module paths remain; task/method handles
-now have Platform identity and require coordinated consumer adoption.
+have Runtime identity and require compatible consumer adoption.
 
 Retain SlotMap generation checks. The maintainer selected standard Vec task lists
 after the 2026-10-30 benchmark, prioritizing reduced production Wasm size over
@@ -275,8 +259,9 @@ The maintainer explicitly authorized transferring IC Profiler's native provider,
 including its existing assembler/fixtures, into `native/ic-profiler`. Profiler
 #4 / Platform #90 return the product CLI/query renderer and shared PNG/range
 mechanics to the consumer; keep only their native integration/state adapters here.
-The qualified paired native profile selects Host Artifacts 0.73.1 gzip directly
-and drops registry Platform. Consumers retain the matching product imports and
+The paired native profile selects Host Artifacts gzip directly and excludes
+registry Platform; its exact cohort belongs in the provider manifest and handoff.
+Consumers retain the matching product imports and
 immutable provider pin; older consumers keep their qualified source. The current
 consumer library has no gzip surface. That opt-in
 source profile owns replica adapters and the patched client below this facade;
@@ -285,17 +270,16 @@ during this transfer; this is no general permission to introduce Python tooling.
 Keep Motoko/lifeline outside the admitted native server graph. Follow the source
 profile contract in `native/ic-profiler/README.md` and preserve IC copyrights.
 
-The maintainer authorized maintaining the signature-preserving PocketIC 16.1 Rust
-client in the published implementation package `ic-platform-pocket-ic`, released
-with Platform. This extra package preserves native-only dependency isolation;
-consumers retain the sole `ic_platform::pocket_ic` facade. Preserve its Apache
-license, source fingerprints, protocol bytes and existing operation behavior.
-Typed fallible operations and provisioning-policy changes are outside this first
-ownership transfer. Client-owned types now have implementation-package identity;
-external management DTOs keep their existing identities. Testkit retains server provisioning, compatibility admission,
-lifecycle, transport and retry policy. Keep PocketIC out of defaults, executor-only
-and canister deployment graphs; do not replace its management DTOs with the
-independently selected external management DTO surface.
+The maintained PocketIC 16.1 Rust client lives in `ic-platform-pocket-ic`. The
+maintainer authorized its independent `pocket-ic` release group and direct native
+consumer selection; the optional `ic_platform::pocket_ic` facade exposes the same
+owner. The client now selects workspace management DTOs =0.11.0. Preserve original
+source/license fingerprints by reconstructing only the reviewed import rename
+and ordering; retain method bodies and protocol behavior. Qualify status, settings
+and snapshots against the prepared server when changing management DTOs. Testkit
+retains provisioning, compatibility admission, lifecycle, transport and retry
+policy. Keep the client out of defaults, executor-only and canister deployment
+graphs. Typed fallible operations remain separate work.
 
 ## Owned account
 

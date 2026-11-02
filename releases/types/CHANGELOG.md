@@ -5,6 +5,21 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.17.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Require Rust 1.99.1, matching the pinned development/release compiler (#133).
+  Preserve independent Types identity, Principal interoperability and native/Wasm proofs.
+
+### 🔧 Changed
+
+- Use RustCrypto SHA-2 0.11 for optional owned Principal self-authentication,
+  without default provider features. Preserve the original derivation, vectors
+  and external Principal identity. Wasm probe size improves by 386 bytes with
+  size optimization but grows by 784 bytes at opt-level 3; no universal size
+  reduction is claimed.
+
 ## [0.16.0] - 2026-11-01
 
 ### 🔧 Changed

@@ -16,7 +16,7 @@ cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/met
 "$root/.tools/host/bin/jq" -e --slurpfile policy scripts/ci/platform-feature-policy.json \
     -f scripts/ci/platform-feature-contract.jq target/feature-graphs/metadata.json >/dev/null || exit 1
 
-facade_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform") | .version' target/feature-graphs/metadata.json)"
+pocket_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform-pocket-ic") | .version' target/feature-graphs/metadata.json)"
 generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform-runtime") | .version' target/feature-graphs/metadata.json)"
 # Cargo tree prints canonical package names even for renamed deps.
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
@@ -63,7 +63,7 @@ for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         fi
     done < "$mapping"
     awk -v target="$target" -v cache="$cache" -v activation="$cache/$target-activation.tsv" \
-        -v pocket_client="ic-platform-pocket-ic v$facade_version ($root/crates/ic-platform-pocket-ic)" \
+        -v pocket_client="ic-platform-pocket-ic v$pocket_version ($root/crates/ic-platform-pocket-ic)" \
         -v guard="ic-platform-runtime-guard v$generator_version ($root/crates/ic-platform-runtime-guard)" \
         -v generator="ic-platform-macros v$generator_version (proc-macro) ($root/crates/ic-platform-macros)" \
         -f scripts/ci/platform-graph-policy.awk -f scripts/ci/check-platform-feature-graphs.awk "$mapping"

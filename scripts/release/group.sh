@@ -6,7 +6,7 @@ cd "$root"
 [[ $# == 1 ]] || exit 2
 group="${RELEASE_GROUP:-}"
 helper="$root/scripts/ci/cargo-release-group.sh"
-case "$group" in platform|runtime|types) ;; *) echo "Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types (received: $group)" >&2; exit 2 ;; esac
+case "$group" in platform|pocket-ic|runtime|types) ;; *) echo "Select RELEASE_GROUP=platform, RELEASE_GROUP=pocket-ic, RELEASE_GROUP=runtime or RELEASE_GROUP=types (received: $group)" >&2; exit 2 ;; esac
 case "$1" in
     version) exec bash "$helper" version "$group" ;;
     primary|changelog|members)

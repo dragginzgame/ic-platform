@@ -12,8 +12,31 @@ Set `IC_PROFILER_CONSUMER_ROOT` to the physical consumer checkout, then invoke
 `scripts/ic_profiler.py prepare|build|test|refresh-manifest|check-native-graph`. Explicit setup calls
 `scripts/dev/native-tools.sh install`; `check` is read-only. No fetch occurs in
 assembly, checks or builds. The consumer's `.build` holds generated integration,
-targets and immutable receipts. Useful previous assemblies must be retained when
+retained executables and immutable receipts. Useful previous assemblies must be retained when
 migrating from a consumer-owned backend.
+
+New compiler scratch defaults to `target/ic-profiler-cache/build` in the consumer.
+Under the existing `.build/.assembly.lock`, Shared's compiler-cache helper
+enforces a **256 GiB / seven idle days** policy before builds and after the child
+compiler exits. Oversized compiler output is retired as a whole after executable
+copies and command receipts are durable; limits apply between commands, not to
+peak build usage. Cargo fingerprints permit reuse across provider pin refreshes
+in this one bounded cache. Incremental compilation defaults to off.
+
+Executables are copied to `.build/artifacts/<sha256>/<name>`; receipts record both
+that retained path and the original compiler path. `native-verify` uses the exact
+retained server from its successful build receipt, with a hash check before the
+installed tests. Content-addressed artifacts and immutable receipts remain
+evidence outside the compiler-cache budget and survive `cargo clean`.
+
+Explicit `CARGO_TARGET_DIR`/`CARGO_BUILD_TARGET_DIR` selects operator-managed
+output: its bytes are never reclaimed by this policy. `CARGO_INCREMENTAL` remains
+an explicit override. Use those environment selections instead of Cargo CLI
+target/config overrides, which bypass receipt and cache custody. Existing
+`.build/target`, retained assemblies and external caches are neither claimed,
+moved nor deleted. Migrating that historical output requires a separate explicit
+owner action after preserving its selected artifacts and recovery evidence.
+Unknown cache ownership and symlinked cache roots refuse before compilation.
 
 Fresh and verified cached preparation publish the normal assembly's summary to
 the consumer's `.build/receipts/latest-prepare.json`. Candidate probes keep that

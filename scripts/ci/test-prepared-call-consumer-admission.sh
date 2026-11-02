@@ -29,10 +29,11 @@ cp "$root/.cargo/config.toml" "$fixture/.cargo/"
 cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 ln -s "$BASH" "$fixture/bin/bash"
-cp "$root/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"
 cat > "$fixture/bin/rustc" <<'RUSTC'
 #!/usr/bin/env bash
-printf 'host: x86_64-unknown-linux-gnu\n'
+if [[ "$1" == --version ]]; then printf 'rustc %s (fixture)\n' "$ADMISSION_COMPILER"
+else printf 'host: x86_64-unknown-linux-gnu\n'; fi
 RUSTC
 cat > "$fixture/bin/cargo" <<'CARGO'
 #!/usr/bin/env bash
@@ -40,6 +41,7 @@ set -euo pipefail
 for arg in "$@"; do [[ -n "$arg" ]] || { echo 'empty argument reached Cargo' >&2; exit 31; }; done
 printf '%s\n' "$*" >> "$ADMISSION_CALLS"
 case "$1" in
+    --version) printf 'cargo %s (fixture)\n' "$ADMISSION_COMPILER" ;;
     locate-project) exit 0 ;;
     metadata) printf '{}\n' ;;
     tree)
@@ -68,6 +70,8 @@ git -C "$fixture" init -q
 git -C "$fixture" add .
 git -C "$fixture" -c user.name='Platform admission fixture' -c user.email='platform-fixture@example.invalid' commit -qm 'Runtime admission source'
 export PATH="$fixture/bin:$PATH" ADMISSION_CALLS="$fixture/calls" ADMISSION_TARGETS="$fixture/targets"
+ADMISSION_COMPILER="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
+export ADMISSION_COMPILER
 "$BASH" "$fixture/scripts/ci/check-prepared-call-consumer.sh" --prepare > "$fixture/prepare.log" 2>&1 || { cat "$fixture/prepare.log"; exit 1; }
 [[ "$(grep -c '^fetch ' "$ADMISSION_CALLS")" == 1 ]]
 [[ "$(grep -vc '^locate-project ' "$ADMISSION_CALLS")" == 1 ]]
@@ -76,8 +80,8 @@ export PATH="$fixture/bin:$PATH" ADMISSION_CALLS="$fixture/calls" ADMISSION_TARG
 if grep -q '^fetch ' "$ADMISSION_CALLS"; then echo 'Offline validation fetched dependencies' >&2; exit 1; fi
 # All three selections reach strict Clippy, tests and both target checks.
 [[ "$(grep -c '^clippy ' "$ADMISSION_CALLS")" == 3 ]]
-[[ "$(grep -c '^+.* test ' "$ADMISSION_CALLS")" == 6 ]]
-[[ "$(grep -c '^+.* check ' "$ADMISSION_CALLS")" == 6 ]]
+[[ "$(grep -c '^+.* test ' "$ADMISSION_CALLS")" == 3 ]]
+[[ "$(grep -c '^+.* check ' "$ADMISSION_CALLS")" == 3 ]]
 [[ "$(grep -c '^tree ' "$ADMISSION_CALLS")" == 6 ]]
 [[ "$(grep '^tree ' "$ADMISSION_CALLS" | grep -c -- ' --features wire ')" == 2 ]]
 [[ "$(grep '^tree ' "$ADMISSION_CALLS" | grep -c -- ' --features external-candid ')" == 2 ]]
@@ -97,10 +101,10 @@ for attempt in first second; do
     LC_ALL=C sort -u "$ADMISSION_TARGETS" > "$fixture/$attempt-targets"
 done
 cmp "$fixture/first-targets" "$fixture/second-targets"
-[[ "$(wc -l < "$fixture/first-targets" | tr -d ' ')" == 3 ]]
+[[ "$(wc -l < "$fixture/first-targets" | tr -d ' ')" == 2 ]]
 while IFS= read -r retained; do
     [[ -f "$retained/artifacts/platform-runtime-driver" ]]
-    [[ "$(find "$retained/artifacts" -name '*.wasm' | wc -l | tr -d ' ')" == 8 ]]
+    [[ "$(find "$retained/artifacts" -name '*.wasm' | wc -l | tr -d ' ')" == 4 ]]
 done < <(sed -n 's/^Runtime sources, lock and metadata retained at //p' "$fixture/first-build.log" "$fixture/second-build.log")
 if ADMISSION_FAIL_BUILD=yes "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --build-only > "$fixture/build-failure.log" 2>&1; then
     echo 'Runtime proof hid a failed locked build' >&2; exit 1
@@ -110,7 +114,8 @@ fi
 
 # Pause A after Cargo returns and before copying its first Wasm. B must wait
 # for that entire interval, then retain its own output from the shared cache.
-export ADMISSION_REAL_CP="$(command -v cp)" ADMISSION_REAL_PERL="$(command -v perl)"
+ADMISSION_REAL_CP="$(command -v cp)" ADMISSION_REAL_PERL="$(command -v perl)"
+export ADMISSION_REAL_CP ADMISSION_REAL_PERL
 export ADMISSION_FIRST_READY="$fixture/first-ready" ADMISSION_SECOND_READY="$fixture/second-ready" ADMISSION_RESUME="$fixture/resume"
 development_toolchain="$("$root/.tools/host/bin/yq" -p toml -r '.toolchain.channel' "$root/rust-toolchain.toml")"
 export ADMISSION_WASM_LOCK="$fixture/target/runtime-build/$development_toolchain/.platform-artifact.lock"

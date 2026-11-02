@@ -1,7 +1,7 @@
 # ic-platform
 
 Platform re-exports canonical Principal/Account identities from ic-platform-types.
-Platform (facade and native PocketIC client), Runtime (runtime, macros and exact
+Platform (facade), PocketIC (native client), Runtime (runtime, macros and exact
 guard), and Types have independent release groups in one workspace. Each group
 owns explicit versions and its canonical releases/ ledger. Unrelated runtime releases retain the
 same compatible type supplier; see [the migration contract](../../docs/migration.md#stable-owned-identity-package-118).
@@ -288,17 +288,17 @@ partial projections. The `candid` feature includes upstream big-number support.
 Use `Result<T, contract::Error>` for encoding errors and `DecodeError` for bounded
 decoding failures. Existing wire labels and caller-owned limits remain unchanged.
 
-`executor` exports Platform-owned task/context types and operations from its
+`executor` re-exports Runtime-owned task/context types and operations from the
 single maintained task registry. Callers must preserve context placement, callbacks
 and trap cleanup; native compilation does not qualify installed IC behavior.
 The implementation is maintained from ic-cdk-executor 2.0.0, with protected-query
 wake routing, wake coalescing, cached wakers and task-bookkeeping reclamation.
-The Cargo singleton guard rejects old registry executors and multiple new Platform
-runtime versions; coordinate Timers/application adoption of the same Platform minor
-line. The internal, dependency-free `ic-platform-runtime-guard` package is selected
-only by `executor` and exactly matches the facade version. Native default and
+The Cargo singleton guard rejects old registry executors and incompatible Runtime
+owners; coordinate Timers/application adoption of the same Runtime identity.
+The internal, dependency-free `ic-platform-runtime-guard` package is selected
+only by `executor` and exactly matches the Runtime version. Native default and
 IC0-only consumers select no guard and can coexist with unrelated executors.
-The executor implementation stays here; the helper exports no API.
+The executor implementation lives in `ic-platform-runtime`; the guard exports no API.
 
 Enable `ic0` for `ic_platform::ic0`: the explicit IC 1.2.0 calls used by Timers
 for time/version/counters/stable page count, one timer, self/caller/argument

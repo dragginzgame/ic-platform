@@ -33,7 +33,8 @@ class IntegrationScriptsTest(unittest.TestCase):
         self.remote.mkdir()
         self.env = os.environ.copy()
         for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_OBJECT_DIRECTORY",
-                     "GIT_ALTERNATE_OBJECT_DIRECTORIES", "IC_PROFILER_CONSUMER_ROOT"):
+                     "GIT_ALTERNATE_OBJECT_DIRECTORIES", "IC_PROFILER_CONSUMER_ROOT",
+                     "CARGO_TARGET_DIR", "CARGO_BUILD_TARGET_DIR", "CARGO_BUILD_BUILD_DIR", "CARGO_INCREMENTAL"):
             self.env.pop(name, None)
         self.env.update({
             "GIT_CONFIG_GLOBAL": os.devnull,
@@ -71,12 +72,14 @@ class IntegrationScriptsTest(unittest.TestCase):
         self.conflicting_candidate = self.git(self.remote, "rev-parse", "HEAD").strip()
 
         shutil.copytree(REPOSITORY / "scripts", self.root / "scripts")
+        for name in ("compiler-cache-maintenance.pl", "OwnedTree.pm"):
+            shutil.copyfile(REPOSITORY.parents[1] / "scripts/dev" / name, self.root / "scripts/dev" / name)
         self.git(self.root, "init", "--quiet", "--initial-branch=main")
         self.git(self.root, "-c", "protocol.file.allow=always", "submodule", "add",
                  "--quiet", str(self.remote), "upstream/ic")
         self.upstream = self.root / "upstream/ic"
         self.git(self.upstream, "checkout", "--quiet", "--detach", self.pin)
-        self.write(self.root, ".gitignore", "/.build/\n__pycache__/\n*.py[cod]\n")
+        self.write(self.root, ".gitignore", "/.build/\n/target/\n__pycache__/\n*.py[cod]\n")
         self.write(self.root, "profiler/server.rs", "// profiler server\n")
         self.write(self.root, "profiler/viewer/fixture_client.py", "VALUE = 'fixture'\n")
         self.write(self.root, "profiler/system/.metadata", "hidden owned source\n")
@@ -344,7 +347,9 @@ class IntegrationScriptsTest(unittest.TestCase):
         self.write(tools, "cargo", '''#!/bin/sh
 if [ "$1" = --version ]; then printf 'cargo fixture\n'; exit 0; fi
 printf '%s\n' "$@" > "$IC_PROFILER_FIXTURE_ARGS"
-printf '{"reason":"compiler-artifact","executable":"%s"}\n' "$IC_PROFILER_FIXTURE_EXECUTABLE"
+mkdir -p "$CARGO_TARGET_DIR"
+cp "$IC_PROFILER_FIXTURE_EXECUTABLE" "$CARGO_TARGET_DIR/pocket-ic-server"
+printf '{"reason":"compiler-artifact","executable":"%s/pocket-ic-server","target":{"name":"pocket-ic-server"}}\n' "$CARGO_TARGET_DIR"
 exit "${IC_PROFILER_FIXTURE_EXIT:-0}"
 ''')
         self.write(tools, "rustc", "#!/bin/sh\nprintf 'rustc fixture\\n'\n")
@@ -379,6 +384,78 @@ exit "${IC_PROFILER_FIXTURE_EXIT:-0}"
         self.assertEqual(len(immutable), 2)
         self.assertIn(first, [json.loads(path.read_text()) for path in immutable])
         self.assertEqual(len(list((self.root / ".build/receipts").glob("build-*.json"))), 1)
+
+    def test_managed_cache_budget_preserves_artifacts_receipts_and_legacy_output(self):
+        self.fake_cargo()
+        script = self.root / "scripts/ic_profiler.py"
+        script.write_text(script.read_text().replace("CACHE_MAX_BYTES = 256 * 1024**3", "CACHE_MAX_BYTES = 1"))
+        legacy = self.write(self.root, ".build/target/keep", "legacy compiler state\n")
+        self.script("build")
+        first = json.loads((self.root / ".build/receipts/latest-build.json").read_text())
+        cache = self.root / "target/ic-profiler-cache"
+        self.assertEqual(first["cargo_target_dir"], str(cache / "build"))
+        self.assertEqual(first["build_environment"]["CARGO_INCREMENTAL"], "0")
+        self.assertFalse((cache / "build").exists())
+        artifact = Path(first["artifacts"][0]["path"])
+        self.assertTrue(artifact.is_file())
+        self.assertTrue(str(artifact).startswith(str(self.root / ".build/artifacts")))
+        self.assertEqual(legacy.read_text(), "legacy compiler state\n")
+        self.script("build")
+        second = json.loads((self.root / ".build/receipts/latest-build.json").read_text())
+        self.assertEqual(first["artifacts"], second["artifacts"])
+        self.assertFalse((cache / "build").exists())
+        self.assertEqual(len(list((self.root / ".build/receipts").glob("build-*.json"))), 2)
+        self.write(self.root, "profiler/server.rs", "// refreshed integration\n")
+        self.script("build", "--force")
+        refreshed = json.loads((self.root / ".build/receipts/latest-build.json").read_text())
+        self.assertNotEqual(first["assembly_recipe_sha256"], refreshed["assembly_recipe_sha256"])
+        self.assertEqual(refreshed["cargo_target_dir"], first["cargo_target_dir"])
+        self.assertFalse((cache / "build").exists())
+
+    def test_external_target_is_recorded_and_never_managed(self):
+        self.fake_cargo()
+        external = self.home / "external-target"
+        self.env["CARGO_TARGET_DIR"] = str(external)
+        self.env["CARGO_INCREMENTAL"] = "1"
+        self.script("build")
+        receipt = json.loads((self.root / ".build/receipts/latest-build.json").read_text())
+        self.assertEqual(receipt["cargo_target_dir"], str(external))
+        self.assertEqual(receipt["build_environment"]["CARGO_INCREMENTAL"], "1")
+        self.assertTrue((external / "pocket-ic-server").is_file())
+        self.assertFalse((self.root / "target/ic-profiler-cache").exists())
+
+    def test_unowned_and_redirected_cache_refuse_before_cargo(self):
+        self.fake_cargo()
+        cache = self.root / "target/ic-profiler-cache"
+        cache.mkdir(parents=True)
+        sentinel = self.write(cache, "unowned", "keep\n")
+        self.script("build", success=False)
+        self.assertEqual(sentinel.read_text(), "keep\n")
+        self.assertFalse((self.home / "cargo-arguments").exists())
+        sentinel.unlink()
+        cache.rmdir()
+        cache.symlink_to(self.home, target_is_directory=True)
+        self.script("build", success=False)
+        self.assertFalse((self.home / "cargo-arguments").exists())
+
+    def test_active_assembly_and_target_override_refuse(self):
+        self.fake_cargo()
+        lock = self.write(self.root, ".build/.assembly.lock", "another owner\n")
+        self.script("build", success=False)
+        self.assertFalse((self.home / "cargo-arguments").exists())
+        lock.unlink()
+        self.script("build", "--", "--target-dir", str(self.home / "bypass"), success=False)
+        self.assertFalse((self.home / "cargo-arguments").exists())
+
+    def test_redirected_receipts_refuse_before_build_or_retirement(self):
+        self.fake_cargo()
+        outside = self.home / "outside-receipts"
+        outside.mkdir()
+        (self.root / ".build").mkdir()
+        (self.root / ".build/receipts").symlink_to(outside, target_is_directory=True)
+        self.script("build", success=False)
+        self.assertEqual(list(outside.iterdir()), [])
+        self.assertFalse((self.home / "cargo-arguments").exists())
 
     def test_clippy_entrypoint_selects_native_server_and_retains_failure(self):
         self.fake_cargo()
@@ -668,7 +745,11 @@ class NativeVerifyGateTest(unittest.TestCase):
                 calls.append((command, args))
                 if "profiling::" in args and refused:
                     raise provider.Error("product regression failed")
-            with mock.patch.dict(os.environ, {"CARGO_TARGET_DIR": "prior-target", "POCKET_IC_BIN": "prior-server", "SYSTEM_PROFILE_TEST_SERVER_URL": "prior-url"}), mock.patch.object(provider, "run"), mock.patch.object(provider, "check_native_graph"), mock.patch.object(provider, "build_directory", return_value=Path("/fixture/consumer/.build")), mock.patch.object(provider, "cargo_command", side_effect=cargo):
+                self.assertEqual(os.environ["CARGO_TARGET_DIR"], "prior-target")
+                if "system_profiling" in args:
+                    self.assertEqual(os.environ["POCKET_IC_BIN"], "/fixture/retained/server")
+                return {"artifacts": [{"target_name": "pocket-ic-server", "path": "/fixture/retained/server", "sha256": "fixture"}]}
+            with mock.patch.dict(os.environ, {"CARGO_TARGET_DIR": "prior-target", "POCKET_IC_BIN": "prior-server", "SYSTEM_PROFILE_TEST_SERVER_URL": "prior-url"}), mock.patch.object(provider, "run"), mock.patch.object(provider, "check_native_graph"), mock.patch.object(provider, "file_snapshot", return_value={"sha256": "fixture", "executable": True}), mock.patch.object(provider, "build_directory", return_value=Path("/fixture/consumer/.build")), mock.patch.object(provider, "cargo_command", side_effect=cargo):
                 if refused:
                     with self.assertRaises(provider.Error):
                         provider.native_verify(root, manifest)
