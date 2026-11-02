@@ -4,6 +4,15 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.18.1] - Unreleased
+
+### ➕ Added
+
+- Expose the existing safe stable-memory grow/read/write primitives through
+  `ic0`, alongside size, without enabling the executor, guard or Types
+  ([#135](https://github.com/dragginzgame/ic-platform/issues/135)). Preserve
+  upstream argument order, traps and growth refusal; Storage retains governance.
+
 ## [0.18.0] - 2026-11-02
 
 ### ⚠️ Breaking

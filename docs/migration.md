@@ -102,6 +102,24 @@ This contract supersedes the facade-owned runtime/group descriptions in the
 historical migration sections below. It changes packaging and release ownership,
 not the executor algorithm, IC ABI, external bytes or application policy.
 
+## IC0 stable memory infrastructure
+
+Pending Runtime 0.18.1 completes the existing `ic0` feature with the safe
+`stable64_grow(u64) -> u64`, `stable64_read(&mut [u8], u64)` and
+`stable64_write(&[u8], u64)` exports beside `stable64_size`. Read/write take
+the byte slice before the offset. The imported implementations, System API ABI,
+bounds traps and `u64::MAX` growth-refusal result remain unchanged. The facade
+delegates the same exports. No storage allocator, executor, application types,
+new feature or second implementation is selected by this infrastructure boundary.
+Production application storage remains governed by Storage.
+
+The external IC0-only consumer compiles all four operations on native/Wasm and
+requires exactly itself plus Runtime in its normal/build graph. Installed owner
+qualification uses these public wrappers for growth, round trips, refused growth,
+read/write bounds traps and rollback, while retaining CDK checkpoint paths.
+Run `bash scripts/ci/check-runtime-ic0.sh`; after publication its
+`--published X.Y.Z` mode additionally requires the exact registry owner.
+
 ## Selected canister management DTOs
 
 Platform 0.18 ships the maintainer-authorized canister-used subset of management

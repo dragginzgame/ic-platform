@@ -56,7 +56,7 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one canonical Runtime executor |
 | `certification` | Maintained certificate/hash-tree and mutable tree types, constructors, lookup and hashing; no registry certification, Candid or executor |
 | `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |
-| `ic0` | Qualified raw IC 1.2.0 calls, including replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
+| `ic0` | Raw IC 1.2.0 calls, including safe stable-memory size/grow/read/write, replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Selected maintained ICRC DTOs and unchanged upstream value hashing, plus ICRC-10; no registry ledger package, storage, CBOR or consent formatting |
 | `management-canister-types` | Owned canister-used 0.11.0 DTOs on Wasm; native upstream DTOs for host tooling; Candid without implicit Wasm printer, no executor or transport |
 | `cmc-types` | External CMC top-up, mint notification and certified rate DTOs; implies Candid, no payment policy |

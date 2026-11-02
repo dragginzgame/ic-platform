@@ -347,6 +347,36 @@ fn main() {
         update::<(u64, u64)>(pic, receiver, "stable_edit", (456u64, true, false)),
         (1, 2)
     );
+    assert_eq!(
+        update::<(u64, u64)>(pic, receiver, "stable_refused_growth", ()),
+        (u64::MAX, 2)
+    );
+    assert_eq!(
+        query::<(u64, u64)>(pic, receiver, "stable_value", ()),
+        (2, 456)
+    );
+    for write in [false, true] {
+        let rejection = pic
+            .update_call(
+                receiver,
+                Principal::anonymous(),
+                "stable_bounds_trap",
+                request("stable_bounds_trap", write),
+            )
+            .unwrap_err();
+        assert_eq!(rejection.reject_code, RejectCode::CanisterError);
+        assert!(
+            rejection
+                .reject_message
+                .to_ascii_lowercase()
+                .contains("stable memory"),
+            "expected a stable-memory bounds trap: {rejection:?}"
+        );
+        assert_eq!(
+            query::<(u64, u64)>(pic, receiver, "stable_value", ()),
+            (2, 456)
+        );
+    }
     let root = vec![42u8; 32];
     assert!(update::<bool>(pic, receiver, "publish_root", root.clone()));
     let certificate: Option<Vec<u8>> = query(pic, receiver, "certificate", ());

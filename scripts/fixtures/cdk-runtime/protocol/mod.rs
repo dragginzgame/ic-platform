@@ -44,6 +44,8 @@ pub enum Method {
     SelfWakeQuery = 0x2004,
     ManagementProof = 0x2005,
     CancelTask = 0x2006,
+    StableRefusedGrowth = 0x2007,
+    StableBoundsTrap = 0x2008,
     Absent = 0xffff,
 }
 pub fn method_id(name: &str) -> u64 {
@@ -83,6 +85,8 @@ pub fn method_id(name: &str) -> u64 {
         "self_wake_query" => Method::SelfWakeQuery as u64,
         "management_proof" => Method::ManagementProof as u64,
         "cancel_task" => Method::CancelTask as u64,
+        "stable_refused_growth" => Method::StableRefusedGrowth as u64,
+        "stable_bounds_trap" => Method::StableBoundsTrap as u64,
         "no_such_method" => Method::Absent as u64,
         _ => panic!("unknown fixture endpoint: {name}"),
     }

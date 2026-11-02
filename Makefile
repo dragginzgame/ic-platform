@@ -4,6 +4,7 @@ FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/ver
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs scripts/fixtures/stable-identities/*.rs scripts/fixtures/pocket-ic-client/*.rs)
+FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/ic0-consumer/*.rs)
 # Independent groups require a visible selection before any recipe or setup.
 ifneq ($(filter-out release-editor-check,$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
 ifeq ($(RELEASE_GROUP),platform)
@@ -111,6 +112,7 @@ prepare-consumer-dependencies:
 	bash scripts/ci/check-prepared-call-consumer.sh --prepare
 check-consumer:
 	bash scripts/ci/test-runtime-singleton.sh
+	bash scripts/ci/check-runtime-ic0.sh
 	bash scripts/ci/test-platform-msrv.sh
 	bash scripts/ci/test-platform-consumer-admission.sh
 	bash scripts/ci/test-prepared-call-consumer-admission.sh

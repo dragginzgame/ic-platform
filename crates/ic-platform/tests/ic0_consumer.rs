@@ -28,3 +28,12 @@ pub fn reply_in_parts(first: &[u8], second: &[u8]) {
 pub fn reject(message: &[u8]) {
     ic_platform::ic0::msg_reject(message);
 }
+
+/// Use the complete safe stable-memory boundary without enabling the runtime.
+pub fn stable_io(pages: u64, offset: u64, written: &[u8], read: &mut [u8]) -> (u64, u64) {
+    let before = ic_platform::ic0::stable64_size();
+    let growth = ic_platform::ic0::stable64_grow(pages);
+    ic_platform::ic0::stable64_write(written, offset);
+    ic_platform::ic0::stable64_read(read, offset);
+    (before, growth)
+}
