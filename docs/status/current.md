@@ -66,9 +66,28 @@ fixtures/license under scripts/fixtures/agent-installed.
 Agent and ic-secp256k1 derivation's crypto-bigint 0.5.5 paths. Native tools can sign
 real requests; using upstream is not a test-only advisory exemption. No crypto
 rewrite, waiver or incompatible patch was adopted. Standalone ECDSA keeps its
-existing patched provider. [#136](https://github.com/dragginzgame/ic-platform/issues/136)
-snapshot transfer and [#137](https://github.com/dragginzgame/ic-platform/issues/137)
-scoped release qualification remain unimplemented; retain the full release gate.
+existing patched provider. [#134](https://github.com/dragginzgame/ic-platform/issues/134)
+is closed against published 0.19.0; its stale unreleased documentation is corrected.
+
+[#136](https://github.com/dragginzgame/ic-platform/issues/136) is implemented in
+the reviewed delivery batch, authorized for release and publication. Snapshot
+metadata/data methods and caller-owned incremental transfer preserve partial IDs,
+accepted ingress, timer/hook state and upstream DTO identities. HTTP/Candid/chunk
+and total byte bounds are explicit; interrupted steps refuse implicit replay.
+Pending client 0.20 notes cover the new exhaustive ClientError variant; no package
+version or publication changed. Client and facade Clippy, 20 client unit tests,
+management identity, source mutation guards and installed 16.1 restoration pass.
+Evidence: /tmp/platform-136-*.log and target/pocket-ic-client.DDyVwL.
+No fresh macOS result or sibling adoption is claimed.
+[#137](https://github.com/dragginzgame/ic-platform/issues/137) now has a local
+[validation pilot](../platform-release-validation.md): exhaustive roster, source
+classification, Shared runner receipts and failure/recovery fixtures pass. Actual
+same-source Linux full (20 stages), PocketIC/Runtime selected (18 each) and Types
+selected (19) mappings all passed on isolated source 21e9180 with Rust 1.99.1,
+including installed Runtime/Timers proofs. Timings and exact evidence are in the
+pilot document. Release-recovery integration and new native-host acceptance remain;
+the active full release gate is unchanged. No controlled speedup is claimed.
+The unrelated working-tree Cargo.lock Pest update is preserved, not adopted by this task.
 
 ## Scheduling and recovery custody
 
@@ -85,8 +104,19 @@ Preserve prior recovery evidence at .git/release-state/runtime-0181-delivery.LgU
 .git/release-state/platform-018-final-delivery.9UcrQT/ and
 .git/release-state/platform-018-deployment/. A prior custom CARGO_TARGET_DIR failed
 an admission fixture; standard release gates passed without that override.
-Native-provider setup fix #133 is shipped; its previously pending hosted run
-41498018089 was not rechecked, so no overall hosted-green claim is made.
+#133 and #138 are closed against delivered compiler/Account supplier evidence.
+Hosted CI run 41498018089 passed actual native-provider source checks and full
+Linux/macOS Intel/macOS ARM64 jobs. #132 is closed after fresh isolated native
+qualification on Linux with Rust 1.99.1: server Clippy/build, 83 recorder tests,
+114 server tests and all six installed profiling tests passed. Provider 21e9180
+has identical native/cache inputs to delivered d9af0f6; the isolated consumer is
+50d9548. The retained server's SHA-256 is
+d572e50a3f06ff6e0404a0ce6857f920e87cf8cf3d5c17370f67c0dd5c1f6348.
+Receipts and artifacts remain under target/issues-132-137.sYRgR0/profiler/.build;
+the nonincremental managed compiler cache is separate under target/, measured
+at 17 GiB after qualification against its 256 GiB / seven idle days policy.
+This is current-provider qualification, not consumer pin adoption or a new
+macOS installed-server result. Sibling checkouts and existing caches are untouched.
 Sibling stable-structures removals remain maintainer-owned; the mistaken Tooling
 deployment request remains withdrawn. Preserve canonical Types, Runtime singleton
 and guarded crypto bodies. Earlier evidence is retained in the

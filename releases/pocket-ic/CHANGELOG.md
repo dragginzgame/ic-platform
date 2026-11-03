@@ -3,6 +3,20 @@
 This independent group covers `ic-platform-pocket-ic`.
 Its initial publication is recorded in the [Platform ledger](../platform/CHANGELOG.md).
 
+## [0.20.0] - Unreleased
+
+### ✨ Added
+
+- [#136](https://github.com/dragginzgame/ic-platform/issues/136): add bounded
+  in-memory snapshot transfer with explicit sender, chunk and decoding budgets.
+  Preserve timer/hook state and retain partial-upload identity for caller-owned
+  cancellation and reconciliation; no shared files or automatic cleanup.
+
+### ⚠️ Breaking
+
+- Add `ClientError::ResponseTooLarge` for explicitly bounded snapshot exchanges;
+  update exhaustive error matches. Existing operations retain their selected limits.
+
 ## [0.19.0] - 2026-11-02
 
 ### 🧹 Maintenance

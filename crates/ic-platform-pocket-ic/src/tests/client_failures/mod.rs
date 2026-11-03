@@ -352,3 +352,5 @@ async fn ingress_id_survives_loss_after_successful_submission() {
     assert_eq!(requests.len(), 2);
     assert!(requests[1].contains(r#""message_id":"AQI=""#));
 }
+
+mod snapshot;

@@ -133,7 +133,7 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md crates/ic-platform-pocket-ic/README.md crates/ic-platform-pocket-ic/upstream/NOTICE.md
+	perl scripts/ci/check-documentation-links.pl --root . README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md docs/platform-release-validation.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md crates/ic-platform-pocket-ic/README.md crates/ic-platform-pocket-ic/upstream/NOTICE.md
 .PHONY: check-inventory
 .PHONY: check-native-provider
 check-native-provider:
@@ -147,6 +147,7 @@ check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
 	bash scripts/ci/test-platform-ci-selection.sh
+	bash scripts/ci/test-platform-validation-plan.sh
 	bash scripts/ci/test-platform-release-groups.sh
 	bash scripts/ci/test-platform-group-preparation.sh
 	bash scripts/release/test-editor-bootstrap.sh

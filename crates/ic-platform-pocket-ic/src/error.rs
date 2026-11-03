@@ -50,6 +50,11 @@ pub enum ClientError {
     },
     #[error("PocketIC request deadline expired")]
     Timeout { context: Box<RequestContext> },
+    #[error("PocketIC response exceeds {limit} bytes")]
+    ResponseTooLarge {
+        context: Box<RequestContext>,
+        limit: usize,
+    },
     #[error("canister rejected the call: {0:?}")]
     Canister(crate::RejectResponse),
     #[error("Candid failed: {0}")]
@@ -69,6 +74,7 @@ impl ClientError {
             | Self::Body { context, .. }
             | Self::Json { context, .. }
             | Self::Server { context, .. }
+            | Self::ResponseTooLarge { context, .. }
             | Self::Timeout { context } => context.ingress = Some(ingress),
             _ => {}
         }
@@ -81,6 +87,7 @@ impl ClientError {
             | Self::Body { context, .. }
             | Self::Json { context, .. }
             | Self::Server { context, .. }
+            | Self::ResponseTooLarge { context, .. }
             | Self::Timeout { context } => Some(context),
             _ => None,
         }

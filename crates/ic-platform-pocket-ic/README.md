@@ -10,7 +10,7 @@ The simulator server and IC execution engine remain external.
 Testkit retains server setup, compatibility admission and lifecycle policy.
 See [provenance](upstream/NOTICE.md).
 
-The pending breaking cut returns `Result<_, ClientError>` from network operations
+The published 0.19 cut returns `Result<_, ClientError>` from network operations
 and builder execution. Both clients preserve transport/body/decode sources,
 server diagnostics and accepted operation IDs. Match `ClientError::Canister`
 for canister rejections. Do not infer retry permission from an uncertain result.

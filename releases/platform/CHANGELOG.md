@@ -4,6 +4,21 @@ This group covers ic-platform. PocketIC now has its own [ledger](../pocket-ic/CH
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.20.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Forward PocketIC 0.20's bounded snapshot transfer API and the new exhaustive
+  `ClientError::ResponseTooLarge` variant. Consumers matching every error variant
+  must handle the additional case. Types and Runtime identities are unchanged.
+
+### 🧪 Testing
+
+- [#137](https://github.com/dragginzgame/ic-platform/issues/137): add a guarded
+  four-group validation pilot with complete stage rosters, source-bound receipts
+  and failure/recovery tests. Linux full/selected mappings pass; keep the full
+  release gate pending recovery integration and remaining native qualification.
+
 ## [0.19.0] - 2026-11-02
 
 ### ⚠️ Breaking

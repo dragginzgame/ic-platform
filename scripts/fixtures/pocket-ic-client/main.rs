@@ -1,4 +1,6 @@
 //! Installed management compatibility through the independent native client.
+mod snapshot;
+
 use ic_platform_pocket_ic::{CanisterSettings, PocketIcBuilder};
 use ic_testkit::pic::PocketIcStartupConfig;
 use std::time::Duration;
@@ -54,6 +56,7 @@ fn main() {
     assert!(pic.list_canister_snapshots(id, None).unwrap().is_empty());
     pic.start_canister(id, None).unwrap();
     pic.canister_status(id, None).unwrap();
+    snapshot::qualify(&pic);
     drop(pic);
     drop(server);
     println!(

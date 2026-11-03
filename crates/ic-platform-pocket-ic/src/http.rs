@@ -7,6 +7,7 @@ use tokio::time::Instant;
 pub(crate) struct Exchange {
     pub(crate) context: RequestContext,
     deadline: Option<Instant>,
+    pub(crate) response_limit: Option<usize>,
 }
 
 impl Exchange {
@@ -20,6 +21,7 @@ impl Exchange {
                 status: None,
             },
             deadline: budget_ms.map(|ms| Instant::now() + Duration::from_millis(ms)),
+            response_limit: None,
         }
     }
 
@@ -59,7 +61,7 @@ impl Exchange {
         // Conservative once dispatched: never infer non-execution from a lost reply.
         self.context.may_have_executed = true;
         self.context.status = None;
-        let response = self
+        let mut response = self
             .bounded(client.execute(request))
             .await?
             .map_err(|source| ClientError::Transport {
@@ -68,14 +70,27 @@ impl Exchange {
             })?;
         let status = response.status();
         self.context.status = Some(status);
-        let bytes = self
-            .bounded(response.bytes())
-            .await?
-            .map_err(|source| ClientError::Body {
-                context: Box::new(self.context.clone()),
-                source,
-            })?;
-        Ok((status, bytes.to_vec()))
+        let mut bytes = Vec::new();
+        while let Some(chunk) =
+            self.bounded(response.chunk())
+                .await?
+                .map_err(|source| ClientError::Body {
+                    context: Box::new(self.context.clone()),
+                    source,
+                })?
+        {
+            if self
+                .response_limit
+                .is_some_and(|limit| chunk.len() > limit.saturating_sub(bytes.len()))
+            {
+                return Err(ClientError::ResponseTooLarge {
+                    context: Box::new(self.context.clone()),
+                    limit: self.response_limit.unwrap(),
+                });
+            }
+            bytes.extend_from_slice(&chunk);
+        }
+        Ok((status, bytes))
     }
 
     pub(crate) fn decode<T: DeserializeOwned>(&self, bytes: &[u8]) -> Result<T, ClientError> {

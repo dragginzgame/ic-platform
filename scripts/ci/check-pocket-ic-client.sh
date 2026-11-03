@@ -21,8 +21,11 @@ edition = "2024"
 [dependencies]
 ic-platform-pocket-ic = { path = "../../crates/ic-platform-pocket-ic" }
 ic-testkit = "$testkit"
+candid = "0.10.38"
+ic-management-canister-types = "=0.11.0"
+ic-host-artifacts = { version = "=0.72.1", default-features = false, features = ["wasm-text"] }
 MANIFEST
-cp "$root/scripts/fixtures/pocket-ic-client/main.rs" "$fixture/src/main.rs"
+cp "$root/scripts/fixtures/pocket-ic-client/"{main.rs,snapshot.rs,snapshot_timer.wat} "$fixture/src/"
 # Reuse prepared qualification selections, pruning only this disposable lock.
 cp "$root/scripts/fixtures/cdk-runtime/Cargo.lock" "$fixture/Cargo.lock"
 cargo metadata --offline --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"

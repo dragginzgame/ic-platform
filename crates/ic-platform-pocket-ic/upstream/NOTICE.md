@@ -41,7 +41,7 @@ protocol and is not automatically changed by this stock-client transfer.
 Source inclusion alone does not establish offline build or simulator recovery.
 Retain required server binaries, dependencies, compilers and tools independently.
 
-## Management 0.11 adaptation (pending 0.18)
+## Management 0.11 adaptation (released 0.18)
 
 The maintainer authorized replacing the original management 0.8 dependency with
 the workspace's =0.11.0 selection. Only the dependency/import names and rustfmt
@@ -53,7 +53,7 @@ cycles fields; original payload-byte identity is not claimed for this upgrade.
 Installed status, settings and snapshot lifecycle pass against prepared PocketIC
 16.1.0. Testkit's admission and server lifecycle ownership remain unchanged.
 
-## Fallible client adaptation (#134, unreleased)
+## Fallible client adaptation (#134, released 0.19)
 
 The maintained client now changes the imported signatures and error plumbing:
 network operations return ClientError; the sync client delegates to the async
@@ -76,3 +76,16 @@ fallible-client.patch records the exact delta from the preceding management-0.11
 source. The guard verifies its checksum, reverses it without fuzz, then reverses
 the management import adaptation and checks the original maintained-source.sha256.
 Those original fingerprints and licenses are not refreshed for this change.
+
+## Bounded snapshot transfer (#136, pending 0.20)
+
+src/snapshot.rs and src/nonblocking/snapshot.rs own bounded integration around the
+unchanged external management 0.11 DTOs and Candid codec. The exact
+snapshot-client.patch adds module declarations and delegates existing HTTP requests
+to a helper with an optional response byte ceiling. Existing calls select no new
+ceiling. The guard verifies and reverses this patch before fallible-client.patch;
+original imported-source/license hashes are unchanged. Owned HTTP/error scaffolding
+adds streaming admission with retained context. SHA-256 remains the existing
+upstream sha2 implementation, with no changed hash encoding or domain.
+The installed snapshot_timer.wat fixture was adapted from IC Tooling's
+crates/ic-testkit/tests/fixtures/snapshot_timer.wat; no sibling source was edited.

@@ -108,6 +108,7 @@ mod http;
 pub use error::{ClientError, Operation, RequestContext};
 pub mod common;
 pub mod nonblocking;
+pub mod snapshot;
 
 const POCKET_IC_SERVER_NAME: &str = "pocket-ic-server";
 

@@ -6,7 +6,7 @@ source_root="${1:-$root/crates/ic-platform-pocket-ic}"
 scratch="$(mktemp -d "${TMPDIR:-/tmp}/pocket-ic-source.XXXXXX")"
 trap 'rm -rf "$scratch"' EXIT
 while read -r checksum file; do
-    [[ "$file" == upstream/fallible-client.patch ]] || exit 1
+    [[ "$file" == upstream/fallible-client.patch || "$file" == upstream/snapshot-client.patch ]] || exit 1
     bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$checksum" "$source_root/$file"
 done < "$source_root/upstream/adaptations.sha256"
 mkdir -p "$scratch/source/src/common"
@@ -14,6 +14,8 @@ cp "$source_root/src/"{lib.rs,nonblocking.rs} "$scratch/source/src/"
 cp "$source_root/src/common/rest.rs" "$scratch/source/src/common/"
 # Reverse only the exact reviewed client adaptation. Never refresh the original
 # source/license fingerprints to admit an unrelated imported-body change.
+patch --directory="$scratch/source" --strip=1 --reverse --fuzz=0 --batch \
+    < "$source_root/upstream/snapshot-client.patch" > "$scratch/snapshot-patch.log"
 patch --directory="$scratch/source" --strip=1 --reverse --fuzz=0 --batch \
     < "$source_root/upstream/fallible-client.patch" > "$scratch/patch.log"
 while read -r checksum file; do
