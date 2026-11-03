@@ -148,6 +148,7 @@ check-pins:
 check-release-commands:
 	bash scripts/ci/test-platform-ci-selection.sh
 	bash scripts/ci/test-platform-validation-plan.sh
+	bash scripts/ci/test-platform-validation-recovery.sh
 	bash scripts/ci/test-platform-release-groups.sh
 	bash scripts/ci/test-platform-group-preparation.sh
 	bash scripts/release/test-editor-bootstrap.sh
@@ -165,8 +166,7 @@ version release-version:
 release-preflight:
 	@bash scripts/release/adapter.sh preflight
 release-verify:
-	+VALIDATION_FAILURE_LOG_DIR="$$(git rev-parse --git-path release-state)/validation-failures" bash scripts/ci/run-validation-targets.sh ci
-	+$(MAKE) check-runtime-all
+	+bash scripts/release/validation-gate.sh verify
 release-prepare-version:
 	@bash scripts/release/adapter.sh prepare
 release-prepared-check:

@@ -69,6 +69,7 @@ case "$operation" in
             --prepare prepare-consumer-dependencies --prepare tools-check
         ;;
     prepare)
+        bash scripts/release/validation-gate.sh check
         bash scripts/release/group.sh ready
         bash scripts/ci/check-release-source.sh "${source_args[@]}"
         current="$(bash scripts/release/group.sh version)"
@@ -88,6 +89,7 @@ case "$operation" in
         fi
         ;;
     check|commit-check)
+        bash scripts/release/validation-gate.sh check
         bash scripts/release/runtime-lock.sh check
         bash scripts/release/runtime-pin.sh check
         bash scripts/ci/check-release-source.sh "${source_args[@]}"

@@ -5,8 +5,8 @@ use warnings;
 use JSON::PP;
 my $json = JSON::PP->new->canonical->utf8;
 my ($group, $source, $baseline, $output, $scope) = @ARGV;
-@ARGV == 5 && $scope =~ /\A(?:auto|workspace)\z/
-    or die "usage: validation-plan.pl GROUP SOURCE GROUP-TAG OUTPUT auto|workspace\n";
+@ARGV == 5 && $scope =~ /\A(?:auto|workspace|release)\z/
+    or die "usage: validation-plan.pl GROUP SOURCE GROUP-TAG|none OUTPUT auto|workspace|release\n";
 sub capture {
     open my $fh, '-|', @_ or die "start @_: $!\n";
     local $/; my $value = <$fh> // '';
@@ -38,7 +38,7 @@ my $make = read_file('Makefile');
 my ($ci) = $make =~ /^ci:\n\t\+bash scripts\/ci\/run-validation-targets\.sh --fail-fast ([^\n]+)\n/m;
 my ($runtime) = $make =~ /^check-runtime-all:\n\t\+bash scripts\/ci\/run-validation-targets\.sh ([^\n]+)\n/m;
 defined($ci) && defined($runtime) or die "full gate recipe changed; requalify roster\n";
-$make =~ /^release-verify:\n\t\+VALIDATION_FAILURE_LOG_DIR=[^\n]+run-validation-targets\.sh ci\n\t\+\$\(MAKE\) check-runtime-all\n/m
+$make =~ /^release-verify:\n\t\+bash scripts\/release\/validation-gate\.sh verify\n/m
     or die "release gate changed; requalify roster\n";
 my @full = (split(/ /,$ci), split(/ /,$runtime));
 same_names($policy->{stages}, \@full);
@@ -46,8 +46,8 @@ $source =~ /\A[0-9a-f]{40,64}\z/ && capture('git','rev-parse','HEAD') eq "$sourc
     or die "stale release source\n";
 capture('git','status','--porcelain','--untracked-files=all') eq ''
     or die "release plan requires clean committed source\n";
-$baseline =~ /\A\Q$group\E-v\d+\.\d+\.\d+\z/ or die "wrong baseline group/tag\n";
-my $base = capture('git','rev-parse','--verify',"refs/tags/$baseline^{commit}"); chomp $base;
+$baseline eq 'none' || $baseline =~ /\A\Q$group\E-v\d+\.\d+\.\d+\z/ or die "wrong baseline group/tag\n";
+my $base = $baseline eq 'none' ? $source : capture('git','rev-parse','--verify',"refs/tags/$baseline^{commit}"); chomp $base;
 system('git','merge-base','--is-ancestor',$base,$source) == 0 or die "baseline is not ancestor\n";
 my @changed = grep { length } split /\0/, capture('git','diff','--name-only','--no-renames','-z',$base,$source,'--');
 # Narrow only source/test changes within one existing owner. Manifest, lock,
@@ -55,7 +55,25 @@ my @changed = grep { length } split /\0/, capture('git','diff','--name-only','--
 my %owners = (platform=>['ic-platform'], 'pocket-ic'=>['ic-platform-pocket-ic'],
     runtime=>['ic-platform-runtime','ic-platform-macros','ic-platform-runtime-guard'], types=>['ic-platform-types']);
 my $owned = join '|', map { quotemeta } @{$owners{$group}};
-my $narrow = @changed && $scope eq 'auto';
+my $narrow = @changed && $scope ne 'workspace' && $baseline ne 'none';
+my $execution = $json->decode(capture('perl','scripts/release/validation-context.pl'));
+my $hosts = $json->decode(read_file('ci/release-validation-hosts.json'));
+$hosts->{schema} == 1 && ref($hosts->{qualified}) eq 'ARRAY' or die "invalid native qualification policy\n";
+my %seen_hosts;
+for (@{$hosts->{qualified}}) {
+    /\A(?:Linux x86_64|Darwin (?:x86_64|arm64) 15)\z/ && !$seen_hosts{$_}++
+        or die "unknown or duplicate qualified native host\n";
+}
+my $release;
+if ($scope eq 'release') {
+    $release = {map {$_ => $ENV{"RELEASE_".uc($_)}} qw(previous version remote branch)};
+    for (qw(previous version)) {
+        defined($release->{$_}) && $release->{$_} =~ /\A\d+\.\d+\.\d+\z/ or die "missing release version identity\n";
+    }
+    for (qw(remote branch)) { defined($release->{$_}) && length($release->{$_}) or die "missing release destination\n"; }
+    $baseline eq 'none' || $baseline eq "$group-v$release->{previous}" or die "wrong release baseline\n";
+    $narrow = 0 unless grep { $_ eq $execution->{host_key} } @{$hosts->{qualified}};
+}
 for my $path (@changed) {
     if ($path =~ m{\Acrates/ic-platform-(?:macros|runtime-guard)/}) { $narrow = 0; next; }
     next if $path =~ m{\Acrates/(?:$owned)/(?:src|tests)/[^\x00-\x1f]+\.rs\z};
@@ -91,9 +109,8 @@ for my $entry (grep { length } split /\0/, $index_inventory) {
 my $context = {
     schema=>1, source=>$source, group=>$group, baseline=>$base, baseline_tag=>$baseline,
     changed=>\@changed, input_inventory=>\@inputs, gitlinks=>\@gitlinks, index_inventory=>$index_inventory,
-    qualification=>'pilot; not admitted for release omission',
-    host=>capture('uname','-sm'), rustc=>capture('rustc','-vV'), cargo=>capture('cargo','-V'),
-    environment=>{map {$_=>(exists($ENV{$_})?$ENV{$_}:undef)} qw(PATH RUSTFLAGS CARGO_ENCODED_RUSTFLAGS RUSTDOCFLAGS CARGO_TARGET_DIR RUSTUP_TOOLCHAIN CC CXX AR POCKET_IC_BIN IC_TESTKIT_POCKET_IC_URL)},
+    qualification=>defined($release)?'release':'qualification only', release=>$release,
+    %$execution,
 };
 my $context_path = "$output.context.json";
 for my $path ($output,$context_path) {

@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # Real selector + Shared plan runner, disposable stage bodies. No product gate claim.
 set -euo pipefail
+[[ $# == 0 || ( $# == 1 && "$1" == --prepare ) ]] || exit 2
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/release-plan-test.XXXXXX")"
 trap 'printf "Platform validation-plan fixture evidence: %s\n" "$fixture"' EXIT
 mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/scripts/release" "$fixture/repo/ci"
-cp "$root/ci/"{release-validation.json,cargo-release-groups.json} "$fixture/repo/ci/"
-cp "$root/scripts/release/"{validation-plan.pl,validation-receipt.pl,qualify-validation-plan.sh} "$fixture/repo/scripts/release/"
+cp "$root/ci/"{release-validation.json,release-validation-hosts.json,cargo-release-groups.json} "$fixture/repo/ci/"
+# Exercise the unqualified-host fallback regardless of the production allowlist.
+printf '{"qualified":[],"schema":1}\n' > "$fixture/repo/ci/release-validation-hosts.json"
+cp "$root/scripts/release/"{validation-plan.pl,validation-context.pl,validation-receipt.pl,qualify-validation-plan.sh} "$fixture/repo/scripts/release/"
 cp "$root/scripts/ci/"{run-validation-targets.sh,check-make-execution.sh,verify-file-checksum.sh,validation-input-checkpoint.pl,release-validation-plan.pl} "$fixture/repo/scripts/ci/"
 # Retain the actual full-gate recipe text so roster drift is checked against it.
 perl -0777 -ne 'for my $name (qw(ci check-runtime-all release-verify)) { /(^\Q$name\E:\n(?:\t[^\n]*\n)+)/m or die "missing recipe"; print $1,"\n"; }' "$root/Makefile" > "$fixture/repo/Makefile"
@@ -38,6 +41,7 @@ git add .
 git commit -qm baseline
 base="$(git rev-parse HEAD)"
 for group in platform pocket-ic runtime types; do git tag "$group-v1.0.0"; done
+if [[ ${1:-} == --prepare ]]; then exit 0; fi
 refuse() {
     if "$@" > "$fixture/refusal.log" 2>&1; then echo 'unexpected admission' >&2; exit 1; fi
 }
@@ -48,6 +52,11 @@ for group in platform pocket-ic runtime types; do
     git commit -qam 'owner source change'
     head="$(git rev-parse HEAD)"
     mkdir -p "target/$group"
+    RELEASE_PREVIOUS=1.0.0 RELEASE_VERSION=1.0.1 RELEASE_REMOTE=origin RELEASE_BRANCH=main \
+        perl scripts/release/validation-plan.pl "$group" "$head" "$group-v1.0.0" "target/$group/unqualified-host.json" release
+    jq -e '.scope=="workspace" and ([.stages[].required] | all)' "target/$group/unqualified-host.json"
+    perl scripts/release/validation-plan.pl "$group" "$head" none "target/$group/no-baseline.json" auto
+    jq -e '.scope=="workspace"' "target/$group/no-baseline.json"
     perl scripts/release/validation-plan.pl "$group" "$head" "$group-v1.0.0" "target/$group/auto.json" auto
     required="$(jq -r '.stages[] | select(.target=="check-release-commands") | .required' "target/$group/auto.json")"
     if [[ "$group" == platform ]]; then [[ "$required" == true ]]; else [[ "$required" == false ]]; fi
@@ -89,6 +98,7 @@ refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]
 cp "$fixture/events.original" "${run[0]}/plan-events.tsv"
 # Same-source evidence can be rechecked, but cannot qualify a moved source.
 perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/readmitted.json
+refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" "$receipt" check
 RUSTFLAGS='--cfg changed_receipt_environment' refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/config-drift.json
 printf '// drift\n' >> crates/ic-platform-pocket-ic/src/lib.rs
 git commit -qam 'moved source'

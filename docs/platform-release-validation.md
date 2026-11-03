@@ -1,11 +1,11 @@
-# Platform release validation pilot (#137)
+# Platform release validation (#137)
 
-The full `release-verify` gate remains authoritative. This pilot does not omit
-checks from a release, reuse a prior release receipt, change versions or publish.
-It prepares the consumer mapping for Shared's
-[plan interface](release-group-validation.md). Linux same-source full/selected
-qualification passed below. Release-recovery integration and native-host
-acceptance remain required before activation.
+`release-verify` now dispatches a fresh source-bound plan through Shared's
+[plan interface](release-group-validation.md). The qualified-host allowlist in
+`ci/release-validation-hosts.json` is empty, so actual releases still run every
+stage. Recovery integration is implemented; new native-host acceptance remains
+required before enabling omissions. This does not change package versions or
+publish anything.
 
 ## Complete roster and inputs
 
@@ -60,8 +60,43 @@ Receipts require every required stage's PASS event, timing and retained log; an
 excluded stage must remain not-applicable. They bind plan/policy/input hashes,
 source/group/baseline, host/compiler and relevant build/server environment.
 Failed or interrupted attempts produce no success receipt. Retry uses a fresh
-attempt. Re-admission checks unchanged input evidence but is not permission to
-skip any release work. Exact-input stage reuse is not enabled.
+attempt. Recovery admission checks unchanged input evidence for the same saved
+release intent. Stage reuse between fresh releases is not enabled.
+
+## Release and recovery admission
+
+The Shared release runner still owns the lock, saved intent, metadata editor,
+commit, tag and delivery. The consumer hook records a receipt pointer beside
+that intent at `.git/release-state/GROUP-VERSION.validation`. Its baseline is the
+selected group's previous-version tag; a missing tag selects the full roster.
+Release mode permits omissions only on an explicitly qualified OS/architecture
+(and macOS major). Unknown hosts always select the full roster.
+
+Preparation and subsequent adapter checks re-admit that receipt. Source, group,
+previous/candidate versions, remote and branch must match. Only the existing
+metadata editor's declared files may differ in the index or working tree; its
+semantic checks remain mandatory. The original source is reconstructed with
+`git archive` for Shared's input checkpoint, without reversing Cargo versions or
+inventing a second metadata projector. Receipt, stage logs and input hashes must
+match, as must compiler executables, versions, host and build/server settings.
+A local PocketIC executable is also fingerprinted. Missing or changed evidence
+refuses recovery; retain the complete attempt directory and journal pointer.
+
+Historical saved intents with the recognized former full-gate recipe retain
+their original Shared recovery checks. Their logs are never reinterpreted as new
+plan receipts. An unknown historical recipe refuses this fallback.
+
+The `Release validation qualification` workflow runs full and selected plans on
+Linux x86_64, macOS 15 Intel and macOS 15 ARM64. It prepares the pinned compiler,
+dependencies and Testkit-owned server, then runs
+`scripts/release/qualify-native-validation.sh` in a disposable clone. All four
+receipts must name the same source, baseline and host, with the expected stage
+counts. The workflow retains receipts, logs, timing, installed evidence and a
+Git bundle of the synthetic qualification commit over its recorded input source.
+Synthetic tags exercise the mappings without changing actual release history.
+Host allowlist activation requires successful retained results; changing only
+that allowlist does not trigger another broad PR run. Manual dispatch remains
+available. Normal CI and installed-runtime workflows remain unchanged.
 
 ## Current qualification
 
@@ -70,6 +105,13 @@ Shared plan runner and receipt admission against disposable stage bodies. It
 covers all group rosters, full expansion for shared locks, required-stage failure,
 excluded-stage failure, stale source, new stages, dirty input, failed attempts and
 fresh retry. These are dispatch/custody proofs, not product builds or timings.
+
+`bash scripts/ci/test-platform-validation-recovery.sh` exercises the real Shared
+release runner and receipt hooks for all four groups, with substitute product
+stages and metadata. It covers preparation interruption, commit/tag/pre-push
+recovery, local bare-repository delivery and refusal of source, environment,
+server, baseline, receipt, journal and stage-log drift. The existing grouped
+preparation fixture separately exercises the real metadata editor.
 
 ### Actual Linux qualification, 2026-11-03
 
@@ -106,8 +148,6 @@ and do not authorize narrowing any actual release. Owner/shared-change selection
 and required/excluded failure cases are separately covered by the substitute
 fixtures described above.
 
-Before changing `release-verify`, qualify recovery admission through the release
-adapter and the required native hosts for the new pilot. Earlier hosted full CI
-does not qualify these new selector/receipt scripts on macOS. Do not reinterpret
-historical full-workspace release logs as pilot receipts. The active full gate
-stays intact and receipts explicitly deny release omission; #137 remains open.
+Earlier hosted full CI does not qualify the new selector/receipt scripts on
+macOS. The native qualification workflow has not yet supplied that evidence;
+the host allowlist remains empty and #137 remains open.

@@ -53,6 +53,12 @@ done
 MAKE
 chmod +x "$fixture/make"
 export RELEASE_MAKE="$fixture/make"
+# This metadata fixture substitutes validation; actual gate/receipt recovery is
+# exercised with the real Shared runner by test-platform-validation-recovery.sh.
+cat > "$fixture/source/scripts/release/validation-gate.sh" <<'GATE'
+#!/usr/bin/env bash
+[[ $# == 1 && "$1" == check ]]
+GATE
 # Preserve the real Make/adapter environment and test its prepared-graph routing.
 # Runtime resolution and installed behavior have their own qualification paths.
 cat > "$fixture/source/scripts/ci/check-platform-runtime.sh" <<'RUNTIME'

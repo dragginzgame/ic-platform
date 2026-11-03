@@ -111,8 +111,20 @@ classification, Shared runner receipts and failure/recovery fixtures pass. Actua
 same-source Linux full (20 stages), PocketIC/Runtime selected (18 each) and Types
 selected (19) mappings all passed on isolated source 21e9180 with Rust 1.99.1,
 including installed Runtime/Timers proofs. Timings and exact evidence are in the
-pilot document. Release-recovery integration and new native-host acceptance remain;
-the active full release gate is unchanged. No controlled speedup is claimed.
+pilot document. Release-recovery integration is now prepared locally: fresh plans
+and saved receipts run through Shared's existing release hooks, with original-source
+checkpointing after metadata preparation. All four groups have focused failure
+and recovery fixtures. A new Linux/macOS Intel/macOS ARM64 workflow prepares the
+remaining full/selected host acceptance. Its host allowlist is empty until that
+evidence passes, so actual releases still execute the complete roster. #137 is
+not yet complete. No controlled speedup is claimed.
+Focused selector, four-group recovery, CI selection and group-routing suites pass;
+the Platform metadata preparation/resume fixture also passes. ShellCheck,
+actionlint, Perl syntax and documentation links pass. Local evidence is retained
+at `/tmp/platform-137-*-final.log`, `target/release-plan-test.KrXSya` and
+`/tmp/platform-group-preparation.F8t0UW`. These fixtures substitute product stages;
+they do not qualify native product behavior. The reviewed local file list is
+`/tmp/platform-137-reviewed-files.txt`; it excludes the unrelated lock update.
 The unrelated working-tree Cargo.lock Pest update is preserved, not adopted by this task.
 
 ## Scheduling and recovery custody

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Pilot only. Does not alter release-verify, release metadata, refs or publication.
+# Execute a fresh plan through Shared; never mutate release metadata or refs.
 set -euo pipefail
-[[ $# == 3 ]] || { echo 'usage: qualify-validation-plan.sh GROUP GROUP-TAG auto|workspace' >&2; exit 2; }
+[[ $# == 3 ]] || { echo 'usage: qualify-validation-plan.sh GROUP GROUP-TAG|none auto|workspace|release' >&2; exit 2; }
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 export RELEASE_GROUP="$1" RELEASE_SOURCE

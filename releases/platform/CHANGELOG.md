@@ -4,6 +4,15 @@ This group covers ic-platform. PocketIC now has its own [ledger](../pocket-ic/CH
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.20.1] - Unreleased
+
+### 🧪 Testing
+
+- Integrate #137's validation receipts with release preparation and recovery;
+  reject changed source, execution settings or retained evidence. Add full and
+  selected qualification on Linux and both macOS architectures. Keep release
+  omissions disabled until native-host qualification is recorded.
+
 ## [0.20.0] - 2026-11-03
 
 ### ⚠️ Breaking
