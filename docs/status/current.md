@@ -1,114 +1,93 @@
 # Current handoff
 
-## Full-batch delivery authorized
+## Delivered batch — 2026-11-03
 
-The maintainer requested all pending changes. Planned releases are Types 0.18.0,
-PocketIC 0.19.0, Runtime/macros/guard 0.19.0 and Platform 0.19.0, in dependency
-order. Runtime changes because its public Principal must retain the canonical
-Types identity. Keep upstream Agent. Use standard full release/publication gates.
-Types 0.18.0 is released and published at 0ea35e7, with matching registry archive
-checksum and VCS identity. Remaining groups retain their pending releases.
-The maintainer authorized the isolated Scheduling branch; commit a61f351 admits
-Runtime 0.19 without timer-body changes. Its native/Wasm Clippy and 175 tests pass
-against isolated candidate metadata. No Scheduling release, merge or sibling
-checkout edit was performed. Retain singleton admission and installed composition.
+The maintainer authorized all pending changes and their publication. All six Rust
+crates are released, pushed and published on crates.io:
 
-## Agent decision — 2026-11-02
+| Group | Version | Release commit | Tag |
+| --- | --- | --- | --- |
+| Types | 0.18.0 | 0ea35e7 | types-v0.18.0 |
+| PocketIC | 0.19.0 | c999f1d | pocket-ic-v0.19.0 |
+| Runtime, macros, guard | 0.19.0 | 4c011da | runtime-v0.19.0 |
+| Platform | 0.19.0 | c93fef4 | platform-v0.19.0 |
 
-The maintainer withdrew the unreleased owned Agent and its cryptographic-provider
-migration. The explicit native facade again selects upstream ic-agent (compatible
-0.49.2 requirement, locked 0.49.3), with PEM and without upstream default features.
-External certificate identities and explicit owned/external conversions return.
-Agent remains absent from Wasm; no production canister size saving is claimed.
-Replacement source, experiments, source guards, crypto pins and Types' unpublished
-principal-external-rangemap feature are removed. The unrelated Principal facade
-cleanup, Account byte adapter and PocketIC work remain. Nothing was committed,
-released, published or changed in siblings by this rollback.
+Every group passed its standard full release gate and installed Runtime/Timers
+composition checks. Every registry archive matches its index checksum and exact
+release commit, with clean VCS metadata. The registry-only consumer at
+target/full-batch-registry-consumer.pYSBIa passed native and Wasm Clippy, proving
+canonical Principal/Account/call/client identities without path patches. Its six
+Platform-family packages have the released versions; the selected Wasm graph
+excludes PocketIC, Agent, Candid and an external executor. This is Linux/PocketIC
+and Wasm evidence, not fresh macOS or live IC acceptance.
 
-The pre-revert dirty tree and withdrawn source are recoverable under
-/tmp/platform-agent-revert/. This is local undo evidence, not a second supported
-implementation. The maintained five Agent consumer tests and the installed
-four-identity gateway fixture remain; the latter now owns its PEM fixtures and
-license under scripts/fixtures/agent-installed. Focused validation logs are in
-/tmp/platform-agent-revert/: Clippy, five consumer tests and all four installed
-identity profiles pass, including wrong-root refusal. Feature admission/closure
-tests, native/Wasm graph isolation, inventory, pins, formatting and links pass.
-Native macOS and release qualification remain separate.
+Release/publication logs, registry readbacks and final consumer evidence are in
+.git/release-state/full-batch-20261102.NPXE3e/. Completed per-group plans remain in
+.git/release-state/. Do not repeat successful uploads or increments.
+All six crates require Rust 1.99.1. Shared 0.27.27 at
+651f5f7acb2e3055abd51ba5f835a2112801666a remains the installed executable snapshot;
+revision-bound policy does not refresh it. Browser/npm publication is unchanged.
 
-[#50](https://github.com/dragginzgame/ic-platform/issues/50) remains open for
-native Agent and ic-secp256k1 derivation's crypto-bigint 0.5.5 paths. Native tools
-can sign real requests; using upstream is not a test-only advisory exemption.
-No cryptographic rewrite, waiver or incompatible Cargo patch is authorized by
-this rollback. Standalone ECDSA retains its existing patched provider.
+## Released contract changes
 
-## Pending product changes
+[#138](https://github.com/dragginzgame/ic-platform/issues/138): Account present
+subaccounts now use Serde bytes. Postcard Some gains a length prefix; CBOR Some
+uses bytes. JSON, raw None/zero fields and logical equality remain qualified.
+Old frames can decode to different valid values: consumers require matching
+Wire/browser schemas, fresh RPC contract IDs and separate persisted-data handling.
+See [the migration contract](../migration.md#account-byte-adapter-cut-138).
+Runtime 0.19 retains the canonical Types identity; its implementation is unchanged.
 
-[#134](https://github.com/dragginzgame/ic-platform/issues/134): breaking fallible
-PocketIC sync/async client, bounded HTTP exchange and monotonic polling are local.
+[#134](https://github.com/dragginzgame/ic-platform/issues/134): PocketIC's sync and
+async operations are fallible, with bounded HTTP exchange and monotonic polling.
 Accepted computation/ingress IDs survive failures; only explicit Busy permits
 initial resubmission. Failed explicit deletion retains state and Drop does not
-replay it. I/O-performing Default and unused stringifying response helper are
-removed. Facade, installed/runtime and benchmark consumers are aligned. Exact
-reverse patch and mutation checks preserve original source/license fingerprints.
-See [the client contract](../pocket-ic-client.md) and its release ledger.
+replay it. I/O-performing Default and the unused stringifying response helper
+are removed. Exact reverse-patch and mutation checks preserve source fingerprints.
+See [the client contract](../pocket-ic-client.md). Strum/macros 0.28 and Base64
+0.23.1 are selected. Installed 16.1 status/settings/snapshot lifecycle passed.
 
-Evidence /tmp/pocket-134-*.log covers client Clippy, 12 unit/one identity tests,
-three facade tests, runtime/benchmark callers, source guards and installed
-PocketIC 16.1 status/settings/snapshot lifecycle. These were Linux checks.
-A concurrent target/ removal interrupted an earlier compile; the affected build
-was repeated in /tmp/platform-134-build. Original source for reconstruction is
-retained in /tmp/pocket-134-before. No publication is implied.
+## Agent decision and remaining work
 
-[#136](https://github.com/dragginzgame/ic-platform/issues/136) bounded snapshot
-transfer and [#137](https://github.com/dragginzgame/ic-platform/issues/137) scoped
-release qualification remain unimplemented; retain the existing broad release gate.
+The maintainer withdrew the unreleased owned Agent and cryptographic-provider
+migration. The native facade selects upstream ic-agent (compatible 0.49.2
+requirement, locked 0.49.3), with PEM and without upstream default features.
+External certificate identities and explicit conversions remain. Agent is absent
+from Wasm; no production canister size saving is claimed. The facade's unused
+direct ic_principal/thiserror dependencies are removed; Types owns Principal.
 
-[#138](https://github.com/dragginzgame/ic-platform/issues/138): Types' Account
-subaccount uses serde_bytes with default/with; Postcard Some gains a length byte
-and CBOR Some uses bytes. JSON, raw None/zero fields and logical equality remain
-qualified. See [the migration contract](../migration.md#account-byte-adapter-cut-138).
-Old frames can decode to different valid values: affected consumers require fresh
-contract IDs, matching Wire/browser schemas and separate persisted-data handling.
-The next Types minor and genuinely affected canonical facade/Runtime selections
-must be released together appropriately; no mechanical unrelated group bump.
-Focused native/Wasm, archive and codec evidence is under target/account-138-*.
+The pre-revert dirty tree and withdrawn source remain recoverable under
+/tmp/platform-agent-revert/. This is undo evidence, not a supported implementation.
+Five maintained Agent consumer tests and all four installed identity profiles
+passed, including wrong-root refusal. The installed gateway fixture owns its PEM
+fixtures/license under scripts/fixtures/agent-installed.
 
-PocketIC's pending Strum/macros 0.28 adoption preserves imported source and JSON
-but changes exposed trait identity, requiring a minor. Base64 0.23.1 remains.
-Keep resolver-selected crypto-common 0.1.6/generic-array 0.14.9 rather than pinning
-solely to increase a version label. Pest/Schemars experiments were not adopted.
+[#50](https://github.com/dragginzgame/ic-platform/issues/50) remains open for native
+Agent and ic-secp256k1 derivation's crypto-bigint 0.5.5 paths. Native tools can sign
+real requests; using upstream is not a test-only advisory exemption. No crypto
+rewrite, waiver or incompatible patch was adopted. Standalone ECDSA keeps its
+existing patched provider. [#136](https://github.com/dragginzgame/ic-platform/issues/136)
+snapshot transfer and [#137](https://github.com/dragginzgame/ic-platform/issues/137)
+scoped release qualification remain unimplemented; retain the full release gate.
 
-## Delivered state and recovery custody
+## Scheduling and recovery custody
 
-Published independent groups remain Types 0.17.0, PocketIC 0.18.0, Platform
-0.18.0, and Runtime/macros/guard 0.18.1. All six crates require Rust 1.99.1.
-Shared 0.27.27 at 651f5f7acb2e3055abd51ba5f835a2112801666a remains the installed
-executable snapshot; do not modify its payloads. Revision-bound policy does not
-refresh that snapshot. Browser/npm and sibling publications are unchanged.
+The explicitly authorized isolated branch adopt/runtime-019-platform-qualification
+is pushed at a61f35174f512b17d1c7974f4d0be79ef1e2777b. It admits Runtime 0.19
+without timer-body changes. Native/Wasm Clippy and 175 Timers tests passed against
+the isolated candidate; Platform's installed composition gates subsequently passed.
+Composition selects this immutable Timers 0.37.0 source. No Scheduling merge,
+release or sibling checkout edit was performed. Return to a qualified registry
+source after Scheduling's owner publishes. Evidence and isolated checkout remain
+under /tmp/platform-runtime019-scheduling.EBatnW/.
 
-Runtime #135's IC0 stable64 wrappers shipped at
-868c3c788a3b4ee93df3994a06bb44e6746331c8 (runtime-v0.18.1), with full release and
-installed owner/Timers gates and registry-only native/Wasm consumer proof.
-Receipts and completed plan: .git/release-state/runtime-0181-delivery.LgU8r6/.
-A first admission fixture failed with a custom CARGO_TARGET_DIR; the standard
-release gate passed after removing that override, without weakening checks.
-Other publication/readback receipts and prior failed Runtime intent remain in
+Preserve prior recovery evidence at .git/release-state/runtime-0181-delivery.LgU8r6/,
 .git/release-state/platform-018-final-delivery.9UcrQT/ and
-.git/release-state/platform-018-deployment/. Preserve them.
-
-Native-provider setup fix #133 is integrated at 7740fc4. Focused setup/refusal,
-52 provider and four HTTP tests passed; fresh hosted acceptance in run
-41498018089 was pending when last inspected. Do not claim the overall workflow
-green. Logs: target/issue-work-20261102/. No fresh macOS/live IC claim is made.
-
-## Sibling scope
-
-Composition qualification selects immutable Timers 0.37.0 source
-a61f35174f512b17d1c7974f4d0be79ef1e2777b on
-adopt/runtime-019-platform-qualification. No Scheduling merge/release was done;
-return to a qualified registry source after its owner publishes. Tooling/Canic
-stable-structures removals are explicitly maintainer-owned. Sibling checkouts
-remain untouched, and the mistaken Tooling deployment request stays withdrawn.
-Preserve canonical Types, the Runtime singleton and guarded crypto bodies.
-Historical publication details remain in the
-[delivered handoff](https://github.com/dragginzgame/ic-platform/blob/81490a94fbe35c28f05c6f74d2dc4e50a643822a/docs/status/current.md).
+.git/release-state/platform-018-deployment/. A prior custom CARGO_TARGET_DIR failed
+an admission fixture; standard release gates passed without that override.
+Native-provider setup fix #133 is shipped; its previously pending hosted run
+41498018089 was not rechecked, so no overall hosted-green claim is made.
+Sibling stable-structures removals remain maintainer-owned; the mistaken Tooling
+deployment request remains withdrawn. Preserve canonical Types, Runtime singleton
+and guarded crypto bodies. Earlier evidence is retained in the
+[pre-delivery handoff](https://github.com/dragginzgame/ic-platform/blob/b03dbcb/docs/status/current.md).
