@@ -14,3 +14,13 @@ The browser npm package retains its [separate package](packages/browser/README.m
 
 The retired [PocketIC ledger](releases/pocket-ic/CHANGELOG.md) preserves published
 history; the client now belongs to Testkit’s release group.
+
+## Platform 0.21.0
+
+### ⚠️ Breaking
+
+- Move the maintained PocketIC client into Testkit and retire Platform's client
+  package, facade feature and release group
+  ([#139](https://github.com/dragginzgame/ic-platform/issues/139),
+  [Tooling #324](https://github.com/dragginzgame/ic-tooling/issues/324)).
+  See the [Platform release notes](releases/platform/CHANGELOG.md).

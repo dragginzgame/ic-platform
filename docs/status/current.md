@@ -16,8 +16,12 @@ that registry supplier, with no dependency on the retired client package.
 
 Shared PRs #351/#352 merged the native owner exception and Bash 3.2 group-order
 fix. Shared 0.29.0 is released and pushed at
-`5767ac6788fab3a9b2350015ab0e74093ddc2f1d`; this checkout adopts that exact
-release through the exporter. Its full gate passed (894 seconds), and remote
+`5767ac6788fab3a9b2350015ab0e74093ddc2f1d`; that release was initially adopted through the exporter. The maintainer subsequently requested the latest
+Shared snapshot: 0.29.1 at `55960755351c127b8ef2a03a1f08fdeba068f5e4` is now
+adopted from committed main. This governance-only refresh preserves executable
+payloads; local groups lead the dependency catalog and root notes link #139
+and Tooling #324. Snapshot, manifest order, inventory and documentation checks
+pass. Shared 0.29.0's full gate passed (894 seconds), and remote
 main plus annotated tag were verified. The earlier 0.28.3 attempt passed its
 gate but was stopped before metadata, tag or push after main advanced. Both
 logs and the earlier source branch remain in the durable Shared checkout under

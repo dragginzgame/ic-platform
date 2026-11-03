@@ -13,7 +13,7 @@ See also the [Types ledger](../types/CHANGELOG.md).
   Testkit now owns one version for client and lifecycle helpers. Keep historical
   releases; migrate native test fixtures to Testkit 0.84.0. No Runtime,
   Types, Agent or crypto implementation changes.
-- Adopt committed Shared ownership rules. Release selection now admits Platform,
+- Adopt Shared 0.29.1 ownership and contribution rules. Release selection now admits Platform,
   Runtime and Types only; retain full release validation pending fresh native
   qualification of this three-group mapping.
 
