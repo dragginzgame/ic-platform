@@ -4,7 +4,7 @@ This group covers ic-platform. PocketIC now has its own [ledger](../pocket-ic/CH
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
-## [0.20.0] - Unreleased
+## [0.20.0] - 2026-11-03
 
 ### ⚠️ Breaking
 
