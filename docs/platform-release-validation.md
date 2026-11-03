@@ -2,10 +2,12 @@
 
 `release-verify` now dispatches a fresh source-bound plan through Shared's
 [plan interface](release-group-validation.md). The qualified-host allowlist in
-`ci/release-validation-hosts.json` is empty, so actual releases still run every
-stage. Recovery integration is implemented; new native-host acceptance remains
-required before enabling omissions. This does not change package versions or
-publish anything.
+`ci/release-validation-hosts.json` admits Linux x86_64 and macOS 15 Intel/ARM64
+after the full/selected native qualification recorded below. Eligible PocketIC,
+Runtime and Types owner-source changes may use the selected roster. Facade,
+shared, ambiguous and unclassified changes, missing baselines and unknown hosts
+still use the full roster. Recovery rechecks the saved receipt through Shared's
+existing release hooks. This does not change package versions or publish anything.
 
 ## Complete roster and inputs
 
@@ -37,7 +39,7 @@ full until its crypto/external-adapter scopes are separately qualified.
 
 Every omitted stage carries its reason in the plan. These are deliberately
 conservative candidates: there is no package-only Clippy shortcut or version
-projection. The normal Linux and both macOS CI jobs remain unchanged; a pilot
+projection. The normal Linux and both macOS CI jobs remain unchanged; a qualification
 receipt proves only its recorded host, never a substitute native-host result.
 
 ## Run and inspect
@@ -148,6 +150,39 @@ and do not authorize narrowing any actual release. Owner/shared-change selection
 and required/excluded failure cases are separately covered by the substitute
 fixtures described above.
 
-Earlier hosted full CI does not qualify the new selector/receipt scripts on
-macOS. The native qualification workflow has not yet supplied that evidence;
-the host allowlist remains empty and #137 remains open.
+### Native activation qualification, 2026-11-03
+
+[Run 41625352854](https://github.com/dragginzgame/ic-platform/actions/runs/41625352854)
+passed all three hosts against committed input
+`082be2ff19f52ced0653f2a589c092bc0ffc3e90`, using Rust/Cargo 1.99.1 and the
+Testkit-owned PocketIC server. Each host ran the complete facade roster, followed
+by the three selected rosters, on one synthetic commit with identical product
+source. Recovered Git bundles differ from the input only by the qualification
+sentence in the handoff. No package version or actual release ref was changed.
+
+| Native host | Full / facade (20 stages) | PocketIC (18) | Runtime (18) | Types (19) |
+| --- | --- | --- | --- | --- |
+| Linux x86_64 | 1,709 s | 302 s | 296 s | 307 s |
+| macOS 15 ARM64 | 3,045 s | 654 s | 658 s | 687 s |
+| macOS 15 Intel | 5,962 s | 939 s | 1,091 s | 1,308 s |
+
+These are sums of recorded stage durations. Selected runs had warm compiler
+artifacts after the full run; the table is not a controlled speedup benchmark.
+All 12 receipts and 24 installed Runtime/Timers profile statuses passed.
+Archive digests, retained plan/context/input/log hashes and source identities
+were verified after download. Ordinary same-source CI also passed Linux and
+both macOS hosts; browser and installed-runtime workflows passed separately.
+The dependency advisory tracked by #50 is unchanged.
+
+The run retains `release-validation-Linux-x86_64` (artifact 13229210141),
+`release-validation-Darwin-arm64` (13231567401), and
+`release-validation-Darwin-x86_64` (13237276477). Local copies and verification
+reports are under `target/issue-137-native-41625352854/`. Each artifact includes
+its exact synthetic source identity/bundle, four receipts, stage logs, timing
+and installed-profile evidence.
+
+The allowlist now enables those three qualified host identities. The qualified
+selector, receipt, recovery and runner code is unchanged by activation. Fresh
+releases still execute every required stage; these qualification receipts cannot
+be reused as release receipts. The first release containing this shared-script
+batch still selects the full roster because its baseline inputs changed.

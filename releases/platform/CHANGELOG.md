@@ -10,8 +10,10 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 - Integrate #137's validation receipts with release preparation and recovery;
   reject changed source, execution settings or retained evidence. Add full and
-  selected qualification on Linux and both macOS architectures. Keep release
-  omissions disabled until native-host qualification is recorded.
+  selected qualification on Linux and both macOS architectures. Enable qualified
+  owner-source plans on Linux x86_64 and macOS 15 Intel/ARM64 after all three
+  native qualifications pass. Facade, shared/unclassified changes and unknown
+  hosts retain the full roster; fresh releases do not reuse qualification receipts.
 
 ## [0.20.0] - 2026-11-03
 

@@ -105,26 +105,23 @@ Client 0.20 adds an exhaustive ClientError variant. Client and facade Clippy, 20
 management identity, source mutation guards and installed 16.1 restoration pass.
 Evidence: /tmp/platform-136-*.log and target/pocket-ic-client.DDyVwL.
 No fresh macOS result or sibling adoption is claimed.
-[#137](https://github.com/dragginzgame/ic-platform/issues/137) now has a delivered
-[validation pilot](../platform-release-validation.md): exhaustive roster, source
-classification, Shared runner receipts and failure/recovery fixtures pass. Actual
-same-source Linux full (20 stages), PocketIC/Runtime selected (18 each) and Types
-selected (19) mappings all passed on isolated source 21e9180 with Rust 1.99.1,
-including installed Runtime/Timers proofs. Timings and exact evidence are in the
-pilot document. Release-recovery integration is now prepared locally: fresh plans
-and saved receipts run through Shared's existing release hooks, with original-source
-checkpointing after metadata preparation. All four groups have focused failure
-and recovery fixtures. A new Linux/macOS Intel/macOS ARM64 workflow prepares the
-remaining full/selected host acceptance. Its host allowlist is empty until that
-evidence passes, so actual releases still execute the complete roster. #137 is
-not yet complete. No controlled speedup is claimed.
-Focused selector, four-group recovery, CI selection and group-routing suites pass;
-the Platform metadata preparation/resume fixture also passes. ShellCheck,
-actionlint, Perl syntax and documentation links pass. Local evidence is retained
-at `/tmp/platform-137-*-final.log`, `target/release-plan-test.KrXSya` and
-`/tmp/platform-group-preparation.F8t0UW`. These fixtures substitute product stages;
-they do not qualify native product behavior. The reviewed local file list is
-`/tmp/platform-137-reviewed-files.txt`; it excludes the unrelated lock update.
+[#137](https://github.com/dragginzgame/ic-platform/issues/137) now has qualified
+[release validation and recovery](../platform-release-validation.md).
+[Run 41625352854](https://github.com/dragginzgame/ic-platform/actions/runs/41625352854)
+passed full and selected mappings on Linux x86_64 and macOS 15 Intel/ARM64 against
+input 082be2f with Rust/Cargo 1.99.1. All 12 receipts and 24 installed Runtime/Timers
+profiles passed; downloaded archives, source bundles and retained evidence hashes
+were verified. Exact timings and artifact IDs are in the validation document;
+local copies are under `target/issue-137-native-41625352854/`.
+The three qualified host identities are enabled. Facade, shared/unclassified
+changes, unknown hosts and missing baselines retain the full roster. This shared
+script batch itself still requires the full roster on its next release.
+Fresh validation and saved-release recovery use Shared's existing hooks, metadata
+editor and lock. All four groups' failure/recovery fixtures and real metadata
+preparation checks pass. Ordinary same-source native CI, browser and installed
+runtime workflows also pass; #50 remains unchanged. Activation changes only the
+host allowlist and evidence notes, with no new package versions or publication.
+No controlled speedup is claimed because selected runs used warm compiler artifacts.
 The unrelated working-tree Cargo.lock Pest update is preserved, not adopted by this task.
 
 ## Scheduling and recovery custody
