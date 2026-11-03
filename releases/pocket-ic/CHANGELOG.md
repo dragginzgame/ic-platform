@@ -3,7 +3,7 @@
 This independent group covers `ic-platform-pocket-ic`.
 Its initial publication is recorded in the [Platform ledger](../platform/CHANGELOG.md).
 
-## [0.20.0] - Unreleased
+## [0.20.0] - 2026-11-03
 
 ### ✨ Added
 
