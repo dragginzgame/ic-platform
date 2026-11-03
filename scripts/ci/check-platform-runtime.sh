@@ -52,13 +52,14 @@ PLATFORM_FIXTURE_SERDE="$serde" PLATFORM_FIXTURE_CBOR="$cbor" \
     perl -pe 's/\@(RUNTIME|PLATFORM|TESTKIT|WIRE|SERDE|CBOR|MSRV)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
         scripts/fixtures/cdk-runtime/Cargo.toml.in > "$fixture/Cargo.toml"
 # Timers and the canister share the canonical Runtime owner.
+# Testkit retains its published facade requirement; do not globally patch that
+# native DTO adapter to the local facade, whose minor release is independent.
 # This qualification-only patch tests existing compatible consumer requirements;
 # published consumers must adopt the supplying release themselves.
 if [[ -z "$published" ]]; then
     cat >> "$fixture/Cargo.toml" <<'PATCH'
 
 [patch.crates-io]
-ic-platform = { path = "../../crates/ic-platform" }
 ic-platform-runtime = { path = "../../crates/ic-platform-runtime" }
 ic-platform-macros = { path = "../../crates/ic-platform-macros" }
 ic-platform-runtime-guard = { path = "../../crates/ic-platform-runtime-guard" }

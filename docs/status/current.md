@@ -25,7 +25,13 @@ logs and the earlier source branch remain in the durable Shared checkout under
 
 Platform 0.21.0 release preparation is active: the final published supplier is
 selected, and the complete release gate precedes version preparation and upload.
-No Platform version bump, release tag or upload has occurred yet.
+The initial full gate passed, but prepared-version admission caught a fixture
+lock that conflated Testkit's registry facade with the local facade. The global
+facade patch is removed; Runtime singleton patches remain. The exact 0.21
+candidate lock projection and Timers graph now pass. Failed preparation is
+preserved in `.git/release-state/platform021-prepared-before-fixture-fix.patch`;
+metadata was restored before the corrected source's fresh release. No tag or
+upload occurred in that failed attempt.
 
 Platform's client package, facade feature/module and active release group are
 removed. Only Platform, Runtime and Types remain active. The historical client

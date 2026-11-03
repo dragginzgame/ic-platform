@@ -76,16 +76,16 @@ publish-check: host-tools-check
 check-compiler: host-tools-check
 	bash scripts/ci/check-platform-compiler.sh
 check: check-compiler
-	cargo check -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p --all-targets --all-features --locked
+	cargo check -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked
 test: check-compiler
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
-	cargo test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p --all-features --locked
+	cargo test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
 clippy: check-compiler
-	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p --all-targets --all-features --locked -- -D warnings
+	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked -- -D warnings
 docs-check: check-compiler
-	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard -p --all-features --no-deps --locked
+	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
 wasm-check: check-compiler
 	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 # Compatibility command: these are the same supported-compiler proofs, once.
