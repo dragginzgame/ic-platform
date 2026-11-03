@@ -90,12 +90,6 @@ dependencies = [
 
 [[package]]
 name = "base64"
-version = "0.22.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
-
-[[package]]
-name = "base64"
 version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac07cdecf99051d9a5238b80f35af32cdeba5b336e55d957b318b50137e18da5"
@@ -247,7 +241,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fa961b519f0b462e3a3b4a34b64d119eeaca1d59af726fe450bbba07a9fc0a1"
 dependencies = [
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -267,7 +261,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b60b5124979fccd9addd89d8b97a1d6eebb4950694520c75ddd722535ea443f"
 dependencies = [
  "nix",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -446,7 +440,6 @@ checksum = "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb"
 dependencies = [
  "crc32fast",
  "miniz_oxide",
- "zlib-rs",
 ]
 
 [[package]]
@@ -695,7 +688,7 @@ version = "0.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ddc03d96684f9226b8a787cdb71488417b53ab5ea8fdb1dac946cb9431cc8bff"
 dependencies = [
- "base64 0.23.1",
+ "base64",
  "bytes",
  "futures-channel",
  "futures-util",
@@ -727,9 +720,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-artifacts"
-version = "0.72.1"
+version = "0.74.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d51ea50922db8c88b6f515d53fb3d008c20abdddb651be9576c3c02a5a72e29"
+checksum = "9fa80b009d37daf5af3af6283be85af59ea9b6aad1ff07a8c79a106aa65673dd"
 dependencies = [
  "flate2",
  "sha2",
@@ -737,37 +730,26 @@ dependencies = [
 
 [[package]]
 name = "ic-host-fs"
-version = "0.72.1"
+version = "0.74.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0845729e5015d8e3dd3a665aa386ee49c1b2d15c6d96bce04e242bf37a1e11db"
+checksum = "55e793d0359c9f242f8939c0b6cfd0ab8bb27c90e75b0370545f682b1ae8a32e"
 dependencies = [
  "ic-host-artifacts",
  "rustix",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ic-host-process"
-version = "0.72.1"
+version = "0.74.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "624ca62b19ca01d154b20d7d96378126f8b4945a62eb87ac6a46f172053c8eff"
+checksum = "deaea87e171ae873d54d848ca9d11d93a2a912334a6634d9f02084a65ddf22a8"
 dependencies = [
  "command-fds",
  "ic-host-artifacts",
  "ic-host-fs",
  "libc",
  "rustix",
-]
-
-[[package]]
-name = "ic-management-canister-types"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3187ba94198a8df0e38a478f289812fcead6a86c658b9552b00f1f8081f06bb3"
-dependencies = [
- "candid",
- "serde",
- "serde_bytes",
 ]
 
 [[package]]
@@ -783,32 +765,14 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2eb75052018c3645d0d5f483b50bb4eff1a037c0b6a0c00d71614a5f42137bf"
-dependencies = [
- "candid",
- "crc32fast",
- "data-encoding",
- "ic-management-canister-types 0.11.0",
- "ic_principal",
- "pocket-ic",
- "serde",
- "serde_bytes",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform"
 version = "0.20.0"
 dependencies = [
  "candid",
  "hex",
- "ic-management-canister-types 0.11.0",
+ "ic-management-canister-types",
  "ic-platform-macros",
- "ic-platform-pocket-ic",
  "ic-platform-runtime",
- "ic-platform-types",
+ "ic-platform-types 0.18.0",
  "serde",
  "serde_bytes",
  "sha2",
@@ -824,46 +788,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-platform-pocket-ic"
-version = "0.20.0"
-dependencies = [
- "backon",
- "base64 0.23.1",
- "candid",
- "flate2",
- "hex",
- "ic-certification",
- "ic-management-canister-types 0.11.0",
- "ic-transport-types",
- "reqwest",
- "schemars",
- "semver",
- "serde",
- "serde_cbor",
- "serde_json",
- "sha2",
- "slog",
- "strum 0.28.0",
- "strum_macros 0.28.0",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "ic-platform-runtime"
 version = "0.19.0"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
- "ic-platform-types",
+ "ic-platform-types 0.18.0",
  "pin-project-lite",
  "serde",
  "slotmap",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -879,22 +813,60 @@ dependencies = [
  "ic_principal",
  "serde",
  "serde_bytes",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
+]
+
+[[package]]
+name = "ic-platform-types"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f95791d7eff0804a23182f131b976293f0f0184b237a63cfb741c1f63a60fb91"
+dependencies = [
+ "crc32fast",
+ "data-encoding",
+ "ic_principal",
+ "serde",
+ "serde_bytes",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
 name = "ic-testkit"
-version = "0.72.1"
+version = "0.84.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a2fa68787bea21643f8f1060193a0155e2b5f44e99509ce0533bd409a8405f8"
+checksum = "be5b12efa43c51293328a0c2802864e40b05af3e4c23fb51fc593deac26ab0d8"
 dependencies = [
+ "backon",
+ "base64",
+ "candid",
+ "flate2",
+ "hex",
+ "ic-certification",
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
- "ic-platform 0.11.1",
+ "ic-management-canister-types",
+ "ic-platform",
+ "ic-platform-runtime",
+ "ic-platform-types 0.18.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-transport-types",
  "libc",
- "thiserror 2.0.18",
+ "reqwest",
+ "schemars",
+ "semver",
+ "serde",
+ "serde_cbor",
+ "serde_json",
+ "sha2",
+ "slog",
+ "strum",
+ "strum_macros",
+ "tempfile",
+ "thiserror 2.0.21",
  "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -912,7 +884,7 @@ dependencies = [
  "serde_cbor",
  "serde_repr",
  "sha2",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -1090,7 +1062,7 @@ dependencies = [
  "jni-sys",
  "log",
  "simd_cesu8",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
  "walkdir",
  "windows-link",
 ]
@@ -1379,7 +1351,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.20.0",
+ "ic-platform",
  "ic-platform-runtime",
  "ic-wire",
  "serde",
@@ -1389,43 +1361,11 @@ dependencies = [
 name = "platform-runtime-driver"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.20.0",
+ "ic-platform",
  "ic-testkit",
  "ic-wire",
  "serde",
  "serde_cbor",
-]
-
-[[package]]
-name = "pocket-ic"
-version = "16.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "85135917c845e8fc132f5eca3a0a8cbab696477a5fee3c2dda168a0797f81e1c"
-dependencies = [
- "backon",
- "base64 0.22.1",
- "candid",
- "flate2",
- "hex",
- "ic-certification",
- "ic-management-canister-types 0.8.0",
- "ic-transport-types",
- "reqwest",
- "schemars",
- "semver",
- "serde",
- "serde_cbor",
- "serde_json",
- "sha2",
- "slog",
- "strum 0.26.3",
- "strum_macros 0.26.4",
- "tempfile",
- "thiserror 2.0.18",
- "tokio",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
 ]
 
 [[package]]
@@ -1499,7 +1439,7 @@ dependencies = [
  "rustc-hash",
  "rustls",
  "socket2",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "web-time",
@@ -1522,7 +1462,7 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "slab",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
  "tinyvec",
  "tracing",
  "web-time",
@@ -1615,7 +1555,7 @@ version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16a1cfa75cc186dd73d5818e510e042e40927bccc9c236b061cea97e1eb08029"
 dependencies = [
- "base64 0.23.1",
+ "base64",
  "bytes",
  "futures-channel",
  "futures-core",
@@ -2063,33 +2003,11 @@ dependencies = [
 
 [[package]]
 name = "strum"
-version = "0.26.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
-dependencies = [
- "strum_macros 0.26.4",
-]
-
-[[package]]
-name = "strum"
 version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9628de9b8791db39ceda2b119bbe13134770b56c138ec1d3af810d045c04f9bd"
 dependencies = [
- "strum_macros 0.28.0",
-]
-
-[[package]]
-name = "strum_macros"
-version = "0.26.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
-dependencies = [
- "heck",
- "proc-macro2",
- "quote",
- "rustversion",
- "syn 2.0.119",
+ "strum_macros",
 ]
 
 [[package]]
@@ -2182,11 +2100,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.18"
+version = "2.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4288b5bcbc7920c07a1149a35cf9590a2aa808e0bc1eafaade0b80947865fbc4"
+checksum = "09e52cb86a36cede5cb101bf8908837b3e4c6e5e59fe7fd85c23fb56200d189e"
 dependencies = [
- "thiserror-impl 2.0.18",
+ "thiserror-impl 2.0.21",
 ]
 
 [[package]]
@@ -2202,13 +2120,13 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.18"
+version = "2.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebc4ee7f67670e9b64d05fa4253e753e016c6c95ff35b89b7941d6b856dec1d5"
+checksum = "fe5197923287db20a58125f0bc85c062f7f2c892de97b18c356f9efb14b28524"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.119",
+ "syn 3.0.9",
 ]
 
 [[package]]
@@ -2382,7 +2300,7 @@ checksum = "050686193eb999b4bb3bc2acfa891a13da00f79734704c4b8b4ef1a10b368a3c"
 dependencies = [
  "crossbeam-channel",
  "symlink",
- "thiserror 2.0.18",
+ "thiserror 2.0.21",
  "time",
  "tracing-subscriber",
 ]
@@ -2839,12 +2757,6 @@ dependencies = [
  "quote",
  "syn 3.0.9",
 ]
-
-[[package]]
-name = "zlib-rs"
-version = "0.6.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b268e58e7c693d7c271f93ffc4ba3b380412554231c85bf61ca7af91042a4112"
 
 [[package]]
 name = "zmij"

@@ -371,18 +371,9 @@ consumer's timer ownership, and `api::msg_method_name` in `inspect_message`.
 The base runtime removes full CDK and Candid from its normal/build graph.
 There is no replacement checkpoint implementation or automatic data migration.
 
-Enable `pocket-ic` for explicit native client, typed error and fixture DTO exports
-through `ic_platform::pocket_ic`, including `nonblocking::PocketIc`. Testkit retains
-server installation, compatibility admission and lifecycle policy. This feature
-is absent on Wasm; default and executor-only builds do not select PocketIC.
-PocketIC's management DTOs retain their own upstream 0.8.0 identity.
-
-PocketIC fixture exports include root `CreateCanisterPlacement` and
-`CanisterInstallMode`, plus REST `RawEffectivePrincipal`, `RawMessageId`,
-`InstanceHttpGatewayConfig`, `CanisterHttpReply`, `CanisterHttpResponse` and
-`MockCanisterHttpResponse`. The install mode retains PocketIC's management 0.8
-identity, including upgrade flags, independently of Platform's management 0.11
-surface. Testkit forwards these identities without owning another client or DTO.
+The maintained PocketIC client moved to `ic_testkit::pocket_ic`. Select Testkit
+directly for its client, DTOs, errors and lifecycle helpers; Platform provides no
+client feature or forwarding module. See the [migration](../../docs/pocket-ic-client.md).
 
 Enable `ed25519` for native/Wasm `ic_platform::ed25519::{Signature,
 SignatureError, Signer, SigningKey, VerifyingKey, Scalar}`. These are original

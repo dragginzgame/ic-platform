@@ -42,7 +42,6 @@ function reject(reason) {
     native = target !~ /^wasm/
     parser = native && enabled("candid-parser")
     agent = native && enabled("agent")
-    pocket = native && enabled("pocket-ic")
     secp = native && enabled("secp256k1")
     external_endpoint = enabled("candid-endpoint")
     cdk = enabled("cdk")
@@ -52,11 +51,11 @@ function reject(reason) {
     creation = enabled("canister-sig-creation")
     bls = verification || agent || enabled("bls")
     raw_system = executor || enabled("ic0")
-    certification = pocket || creation || agent || enabled("certification")
+    certification = creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
     external_dto = enabled("cmc-types") || enabled("icp-ledger-types") || enabled("cycles-ledger-types") || enabled("nns-registry-types") || enabled("certified-assets-types")
-    candid = external_endpoint || pocket || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
+    candid = external_endpoint || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
     external_principal = enabled("principal-external")
     principal = enabled("principal")
     hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp
@@ -65,7 +64,6 @@ function reject(reason) {
     found_curve = 0
     found_secp = 0
     found_k256 = 0
-    found_pocket = 0
     found_blake3 = 0
     found_guard = 0
     for (i = 1; i <= count[key]; i++) {
@@ -79,11 +77,11 @@ function reject(reason) {
             reject("external Principal in owned-only graph")
         if (name ~ /^(sha2|digest)$/ && !hashing)
             reject("unselected hashing")
-        if (name == "ic-representation-independent-hash" && !(agent || pocket))
+        if (name == "ic-representation-independent-hash" && !(agent))
             reject("reference-only signature hashing in production")
-        if ((name == "serde_cbor" || name == "half") && !(verification || agent || pocket || parser))
+        if ((name == "serde_cbor" || name == "half") && !(verification || agent || parser))
             reject("unselected CBOR parser")
-        if (name == "pretty" && !(enabled("candid-service") || parser || agent || pocket || (native && management)))
+        if (name == "pretty" && !(enabled("candid-service") || parser || agent || (native && management)))
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") reject("host artifact codecs belong to Tooling consumers")
@@ -93,7 +91,7 @@ function reject(reason) {
         }
         # rand_core supplies traits and is permitted. Entropy/RNG implementations
         # belong only to the selected native host capabilities that require them.
-        if (name ~ /^(rand|rand_chacha|getrandom)$/ && !(agent || pocket || secp || parser))
+        if (name ~ /^(rand|rand_chacha|getrandom)$/ && !(agent || secp || parser))
             reject("unselected RNG/entropy scaffolding")
         if (name == "k256") {
             if (!(enabled("ecdsa") || agent || secp) || !registry) reject("unselected K256")
@@ -108,10 +106,7 @@ function reject(reason) {
             if (!secp || version != "v0.3.0" || !registry) reject("unqualified secp256k1")
             found_secp = 1
         }
-        if (host_capability == "pocket-ic") {
-            if (!pocket || (line != pocket_client && line != pocket_client " (*)")) reject("unqualified owned PocketIC")
-            found_pocket = 1
-        }
+        if (host_capability == "pocket-ic") reject("PocketIC belongs to Testkit, outside Platform")
         if (name == "pocket-ic") reject("retired registry PocketIC client")
         if (host_capability == "testkit") reject("Testkit in production")
         if (name ~ /^(ic-wire|ic-wire-derive)$/) reject("Wire in production")
@@ -127,16 +122,15 @@ function reject(reason) {
         if (name == "ic-canister-sig-creation" || name == "ic-signature-verification") reject("retired signature package")
         if (name == "ic-verify-bls-signature" && (!agent || version != "v0.6.0" || !registry)) reject("registry BLS wrapper is reserved for native Agent")
         if (name == "ic_bls12_381" && (!agent || version != "v0.10.1" || !registry)) reject("registry BLS curve is reserved for native Agent")
-        if (name == "ic-certification" && (!(agent || pocket) || version != "v3.2.0" || !registry)) reject("unqualified certification")
-        if (name == "ic-management-canister-types" && !(registry && native && (management || pocket) && version == "v0.11.0")) reject("unselected or Wasm registry management types")
+        if (name == "ic-certification" && (!(agent) || version != "v3.2.0" || !registry)) reject("unqualified certification")
+        if (name == "ic-management-canister-types" && !(registry && native && (management) && version == "v0.11.0")) reject("unselected or Wasm registry management types")
         if (name == "icrc-ledger-types" || name == "icrc-cbor") reject("retired upstream ledger package")
-        if (name == "ic-error-types" && !(agent || pocket)) reject("runtime error catalogue")
+        if (name == "ic-error-types" && !(agent)) reject("runtime error catalogue")
         if (name == "ic-stable-structures") reject("retired storage substrate")
         if ((name == "candid" || name == "candid_derive") && !candid) reject("unexpected Candid")
     }
     if (executor && !found_guard) reject("missing runtime singleton guard")
     if (enabled("ed25519") && (!found_ed || !found_curve)) reject("missing selected Dalek")
-    if (pocket && !found_pocket) reject("missing selected PocketIC")
     if (secp && !found_secp) reject("missing selected secp256k1")
     if (enabled("ecdsa") && !found_k256) reject("missing selected K256")
     if (enabled("blake3") && !found_blake3) reject("missing selected BLAKE3")

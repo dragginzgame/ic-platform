@@ -9,6 +9,7 @@ trap 'printf "Agent installed evidence: %s\n" "$fixture"' EXIT
 mkdir "$fixture/src"
 cp "$root/scripts/fixtures/agent-installed/main.rs" "$fixture/src/"
 cp "$root/scripts/fixtures/agent-installed/"{prime256v1,secp256k1}.pem "$fixture/src/"
+testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 [package]
@@ -19,8 +20,7 @@ rust-version = "1.99.1"
 publish = false
 [dependencies]
 ic-platform = { path = "$root/crates/ic-platform", default-features = false, features = ["agent"] }
-ic-platform-pocket-ic = { path = "$root/crates/ic-platform-pocket-ic" }
-ic-testkit = "0.72.0"
+ic-testkit = { $testkit }
 tokio = { version = "1", features = ["rt", "time"] }
 wat = "=1.263.0"
 MANIFEST

@@ -1,16 +1,59 @@
 {
   "features": [
-    "agent", "blake3", "bls", "candid", "candid-endpoint", "candid-parser", "candid-service",
-    "canister-sig-creation", "cdk", "certification", "certified-assets-types",
-    "cmc-types", "cycles-ledger-types", "default", "ecdsa", "ed25519", "executor",
-    "ic0", "icp-ledger-types", "icrc-ledger-types", "management-canister-types",
-    "nns-registry-types", "pocket-ic", "principal", "principal-external", "principal-self-authenticating", "runtime",
-    "secp256k1", "signature-verification"
+    "agent",
+    "blake3",
+    "bls",
+    "candid",
+    "candid-endpoint",
+    "candid-parser",
+    "candid-service",
+    "canister-sig-creation",
+    "cdk",
+    "certification",
+    "certified-assets-types",
+    "cmc-types",
+    "cycles-ledger-types",
+    "default",
+    "ecdsa",
+    "ed25519",
+    "executor",
+    "ic0",
+    "icp-ledger-types",
+    "icrc-ledger-types",
+    "management-canister-types",
+    "nns-registry-types",
+    "principal",
+    "principal-external",
+    "principal-self-authenticating",
+    "runtime",
+    "secp256k1",
+    "signature-verification"
   ],
   "native_leaves": {
-    "agent": {"dependencies": ["ic-agent", "ic-certification"], "prerequisites": ["principal-external"]},
-    "candid-parser": {"dependencies": ["candid_parser"], "prerequisites": ["principal-external"]},
-    "pocket-ic": {"dependencies": ["ic-platform-pocket-ic"], "prerequisites": ["principal-external"]},
-    "secp256k1": {"dependencies": ["ic-secp256k1"], "prerequisites": ["principal-external"]}
+    "agent": {
+      "dependencies": [
+        "ic-agent",
+        "ic-certification"
+      ],
+      "prerequisites": [
+        "principal-external"
+      ]
+    },
+    "candid-parser": {
+      "dependencies": [
+        "candid_parser"
+      ],
+      "prerequisites": [
+        "principal-external"
+      ]
+    },
+    "secp256k1": {
+      "dependencies": [
+        "ic-secp256k1"
+      ],
+      "prerequisites": [
+        "principal-external"
+      ]
+    }
   }
 }

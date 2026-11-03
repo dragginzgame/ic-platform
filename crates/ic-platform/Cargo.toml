@@ -66,7 +66,6 @@ management-canister-types = [
     "dep:ic-management-canister-types",
 ]
 signature-verification = ["bls", "canister-sig-creation", "dep:serde_bytes", "dep:serde_cbor"]
-pocket-ic = ["principal-external", "dep:ic-platform-pocket-ic"]
 secp256k1 = ["principal-external", "dep:ic-secp256k1"]
 
 [dependencies]
@@ -100,7 +99,6 @@ candid_parser = { workspace = true, optional = true }
 ic-agent = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
-ic-platform-pocket-ic = { workspace = true, optional = true }
 ic-secp256k1 = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -226,11 +224,6 @@ required-features = ["candid-parser"]
 name = "certification_consumer"
 path = "tests/certification_consumer.rs"
 required-features = ["certification"]
-
-[[test]]
-name = "pocket_ic_consumer"
-path = "tests/pocket_ic_consumer.rs"
-required-features = ["pocket-ic"]
 
 [[test]]
 name = "principal"

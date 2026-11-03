@@ -1,8 +1,8 @@
 //! Installed checks for explicit Wire frames, rejection and callback cleanup.
 
 use crate::wire_protocol::*;
-use ic_platform::pocket_ic::{PocketIc, RejectCode};
 use ic_platform::principal::ExternalPrincipal as Principal;
+use ic_testkit::pocket_ic::{PocketIc, RejectCode};
 
 const ROUNDTRIP_SIZES: [usize; 4] = [0, 1, 7, 15];
 

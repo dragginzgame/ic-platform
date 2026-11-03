@@ -13,7 +13,7 @@ admit() {
         "$jq" -r --arg projection activation --arg target "$graph_target" \
             --slurpfile metadata "$fixture/metadata.json" --slurpfile policy "$root/scripts/ci/platform-feature-policy.json" \
             -f "$root/scripts/ci/platform-feature-closures.jq" > "$fixture/activation.tsv"
-    awk -v pocket_client="ic-platform-pocket-ic v0.1.13 (/fixture)" -v activation="$fixture/activation.tsv" -f "$root/scripts/ci/platform-graph-policy.awk" "$@"
+    awk -v activation="$fixture/activation.tsv" -f "$root/scripts/ci/platform-graph-policy.awk" "$@"
 }
 count=0
 while IFS='|' read -r selection package expected; do
@@ -183,15 +183,14 @@ if admit -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platfor
 rm "$fixture/native-case.txt"
 if admit -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 printf 'Batch graph admission: %s cases plus shared-key and missing-graph refusals passed\n' "$count"
-# PocketIC is admitted only as a selected native dependency with its own DTOs.
+# The retired PocketIC owner is rejected on every target.
 for target in native wasm32-unknown-unknown; do
-    for selection in pocket-ic none executor; do
+    for selection in none executor; do
         printf 'ic-platform-pocket-ic v0.1.13 (/fixture)\nic-management-canister-types v0.11.0\ncandid v0.10.38\nic-certification v3.2.0\n' > "$fixture/$target-pocket.txt"
         printf '%s\tpocket\n' "$selection" > "$fixture/mapping"
         actual=reject
         if admit -v target="$target" -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
         expected=reject
-        if [[ "$target" == native && "$selection" == pocket-ic ]]; then expected=pass; fi
         [[ "$actual" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
     done
 done
@@ -210,12 +209,12 @@ for target in native wasm32-unknown-unknown; do
 done
 for package in 'pocket-ic v16.1.0' 'ic-platform-pocket-ic v0.1.12 (/fixture)' 'ic-platform-pocket-ic v0.1.13 (/other)' 'ic-platform-pocket-ic v0.1.13' 'ic-management-canister-types v0.8.0'; do
     printf '%s\n' "$package" > "$fixture/native-pocket.txt"
-    printf 'pocket-ic\tpocket\n' > "$fixture/mapping"
+    printf 'none\tpocket\n' > "$fixture/mapping"
     if admit -v target=native -v cache="$fixture" -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 done
-echo 'PocketIC native selection, Wasm exclusion and identity refusals passed'
+echo 'Retired PocketIC client refuses in native and Wasm graphs'
 # Native host selections cannot authorize entropy dependencies in a Wasm graph.
-for selection in agent candid-parser pocket-ic secp256k1; do
+for selection in agent candid-parser secp256k1; do
     printf 'getrandom v0.2.17\n' > "$fixture/wasm32-unknown-unknown-entropy.txt"
     printf '%s\tentropy\n' "$selection" > "$fixture/mapping"
     if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \

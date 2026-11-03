@@ -2,11 +2,11 @@
 
 `release-verify` now dispatches a fresh source-bound plan through Shared's
 [plan interface](release-group-validation.md). The qualified-host allowlist in
-`ci/release-validation-hosts.json` admits Linux x86_64 and macOS 15 Intel/ARM64
-after the full/selected native qualification recorded below. Eligible PocketIC,
-Runtime and Types owner-source changes may use the selected roster. Facade,
-shared, ambiguous and unclassified changes, missing baselines and unknown hosts
-still use the full roster. Recovery rechecks the saved receipt through Shared's
+`ci/release-validation-hosts.json` is empty following #139’s client retirement.
+All releases use the full roster until the new three-group mapping has fresh
+Linux/macOS qualification. Runtime and Types retain selected-plan candidates for
+explicit qualification; facade/shared/unclassified changes remain full. The
+previous four-group native evidence below remains historical. Recovery rechecks the saved receipt through Shared's
 existing release hooks. This does not change package versions or publish anything.
 
 ## Complete roster and inputs
@@ -34,7 +34,7 @@ full until its crypto/external-adapter scopes are separately qualified.
 | Snapshot, docs, pins, boundary, inventory, formatting, primitive guards | All groups retain them. |
 | Clippy, check, test, docs, consumers, feature graphs, Wasm | All groups retain the complete existing package/feature selections, including reverse consumers and canonical identities. |
 | Runtime owner and Timers composition | All groups retain both installed profiles; PocketIC is used by their drivers, and Types/Runtime affect public identities and singleton behavior. |
-| Browser | Types/facade retain it. Pure client/runtime source candidates may omit it only when all browser/schema/Types inputs are unchanged. |
+| Browser | Types/facade retain it. Pure runtime source candidates may omit it only when all browser/schema/Types inputs are unchanged. |
 | Release-command regressions | Pure owner-source candidates may omit them only when recipes, release metadata, locks, scripts and fixtures are unchanged from their baseline. |
 
 Every omitted stage carries its reason in the plan. These are deliberately
@@ -48,8 +48,8 @@ From clean committed source, with tools/dependencies and the PocketIC server
 already prepared:
 
 ```sh
-bash scripts/release/qualify-validation-plan.sh pocket-ic pocket-ic-v0.19.0 workspace
-bash scripts/release/qualify-validation-plan.sh pocket-ic pocket-ic-v0.19.0 auto
+bash scripts/release/qualify-validation-plan.sh runtime runtime-v0.19.0 workspace
+bash scripts/release/qualify-validation-plan.sh runtime runtime-v0.19.0 auto
 ```
 
 These are explicit broad qualification commands, not ordinary development checks.
@@ -91,7 +91,7 @@ plan receipts. An unknown historical recipe refuses this fallback.
 The `Release validation qualification` workflow runs full and selected plans on
 Linux x86_64, macOS 15 Intel and macOS 15 ARM64. It prepares the pinned compiler,
 dependencies and Testkit-owned server, then runs
-`scripts/release/qualify-native-validation.sh` in a disposable clone. All four
+`scripts/release/qualify-native-validation.sh` in a disposable clone. All three
 receipts must name the same source, baseline and host, with the expected stage
 counts. The workflow retains receipts, logs, timing, installed evidence and a
 Git bundle of the synthetic qualification commit over its recorded input source.
@@ -109,7 +109,7 @@ excluded-stage failure, stale source, new stages, dirty input, failed attempts a
 fresh retry. These are dispatch/custody proofs, not product builds or timings.
 
 `bash scripts/ci/test-platform-validation-recovery.sh` exercises the real Shared
-release runner and receipt hooks for all four groups, with substitute product
+release runner and receipt hooks for all three groups, with substitute product
 stages and metadata. It covers preparation interruption, commit/tag/pre-push
 recovery, local bare-repository delivery and refusal of source, environment,
 server, baseline, receipt, journal and stage-log drift. The existing grouped

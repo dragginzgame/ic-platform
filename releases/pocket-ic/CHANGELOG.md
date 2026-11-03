@@ -1,6 +1,8 @@
 # PocketIC client changelog
 
-This independent group covers `ic-platform-pocket-ic`.
+This retired group covered `ic-platform-pocket-ic`; it is no longer a release
+selection. The implementation and pending socket fix below moved to Testkit
+under Platform #139 / Tooling #324. Published versions and this ledger remain.
 Its initial publication is recorded in the [Platform ledger](../platform/CHANGELOG.md).
 
 ## [0.20.1] - Unreleased

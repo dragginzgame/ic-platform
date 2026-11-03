@@ -4,9 +4,9 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 prepare=false
-profiles=('' external-ledger current-runtime native-client)
+profiles=('' external-ledger current-runtime)
 compiler="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
-case "${1:-}" in '') [[ $# == 0 ]] ;; --prepare) [[ $# == 1 ]]; prepare=true ;; --pocket-ic) [[ $# == 1 ]]; profiles=(native-client) ;; *) exit 2 ;; esac
+case "${1:-}" in '') [[ $# == 0 ]] ;; --prepare) [[ $# == 1 ]]; prepare=true ;; *) exit 2 ;; esac
 mkdir -p target
 fixture="$(mktemp -d "$root/target/stable-identities.XXXXXX")"
 printf 'Stable identity evidence: %s\n' "$fixture"
@@ -39,7 +39,7 @@ next="$major.$((minor + 1)).0"
 PLATFORM_IDENTITY_CURRENT="$version" PLATFORM_IDENTITY_NEXT="$next" PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '
     my ($old,$new,$source)=@ENV{qw(PLATFORM_IDENTITY_CURRENT PLATFORM_IDENTITY_NEXT PLATFORM_IDENTITY_SOURCE)};
     s/^(ic-platform = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm == 1 or die "facade catalog identity changed\n";
-    for my $owner (qw(ic-platform-pocket-ic ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard)) {
+    for my $owner (qw(ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard)) {
         my $path=$source =~ s{ic-platform-types$}{$owner}r;
         s/^    "crates\/\Q$owner\E",\n//m == 1 or die "owner member changed\n";
         s/path = "crates\/\Q$owner\E"/path = "$path"/ == 1 or die "owner selection changed\n";
@@ -56,14 +56,11 @@ rust-version = "$compiler"
 [features]
 external-ledger = ["current/icrc-ledger-types"]
 current-runtime = ["current/runtime"]
-native-client = ["current/pocket-ic", "next/pocket-ic", "dep:ic-platform-pocket-ic"]
 [dependencies]
 current = { package = "ic-platform", path = "$root/crates/ic-platform", default-features = false, features = ["principal-external"] }
 next = { package = "ic-platform", path = "$fixture/next/crates/ic-platform", default-features = false, features = ["principal-external"] }
 ic-platform-types = { path = "$root/crates/ic-platform-types", features = ["principal-external"] }
 ic-wire = { path = "$fixture/wire", features = ["platform-types"] }
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
-ic-platform-pocket-ic = { path = "$root/crates/ic-platform-pocket-ic", optional = true }
 MANIFEST
 cp scripts/fixtures/stable-identities/lib.rs "$fixture/consumer/src/lib.rs"
 cargo metadata --manifest-path "$fixture/consumer/Cargo.toml" --offline --all-features --format-version 1 > "$fixture/metadata.json"
@@ -81,8 +78,5 @@ if grep -Eq '^(candid |ic-cdk|ic-platform-runtime-guard |ic-platform-macros )' "
 fi
 jq -e --arg path "$root/crates/ic-platform-types/Cargo.toml" '
  [.packages[] | select(.name=="ic-platform-types")] | length==1 and .[0].manifest_path==$path
-' "$fixture/metadata.json" >/dev/null
-jq -e --arg path "$root/crates/ic-platform-pocket-ic/Cargo.toml" '
- [.packages[] | select(.name=="ic-platform-pocket-ic")] | length==1 and .[0].manifest_path==$path
 ' "$fixture/metadata.json" >/dev/null
 printf 'Selected stable-identity profiles passed: %s\n' "${profiles[*]}"

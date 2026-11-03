@@ -14,27 +14,6 @@ pub fn canonical(value: current::Principal) -> ic_platform_types::Principal {
     value
 }
 
-#[cfg(all(feature = "native-client", not(target_family = "wasm")))]
-pub fn client(value: current::pocket_ic::PocketIc) -> next::pocket_ic::PocketIc {
-    value
-}
-
-#[cfg(all(feature = "native-client", not(target_family = "wasm")))]
-pub fn direct_client(value: next::pocket_ic::PocketIc) -> ic_platform_pocket_ic::PocketIc {
-    value
-}
-
-#[cfg(all(feature = "native-client", not(target_family = "wasm")))]
-#[test]
-fn independent_client_settings_share_the_facade_management_identity() {
-    let owned = ic_platform_pocket_ic::CanisterSettings {
-        minimum_incoming_canister_call_cycles: Some(123_u64.into()),
-        ..Default::default()
-    };
-    let current: current::pocket_ic::CanisterSettings = owned;
-    let next: next::pocket_ic::CanisterSettings = current;
-    assert_eq!(next.minimum_incoming_canister_call_cycles.unwrap(), 123_u64);
-}
 #[cfg(feature = "external-ledger")]
 #[test]
 fn conversions_preserve_one_identity_and_explicit_zero_fields() {

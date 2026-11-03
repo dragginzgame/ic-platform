@@ -11,7 +11,7 @@ publish = false
 [workspace.dependencies]
 ic-platform = { @PLATFORM@, default-features = false }
 ic-platform-runtime = { @RUNTIME@, default-features = false, features = ["cdk"] }
-ic-testkit = "@TESTKIT@"
+ic-testkit = { @TESTKIT@ }
 ic-wire = "@WIRE@"
 serde = { version = "@SERDE@", default-features = false }
 serde_cbor = "@CBOR@"

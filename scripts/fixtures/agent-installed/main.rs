@@ -3,8 +3,8 @@ use ic_platform::agent::{
     Agent, BasicIdentity, DelegatedIdentity, Delegation, Identity, Prime256v1Identity,
     Secp256k1Identity, SignedDelegation,
 };
-use ic_platform_pocket_ic::PocketIcBuilder;
 use ic_testkit::pic::PocketIcStartupConfig;
+use ic_testkit::pocket_ic::PocketIcBuilder;
 use std::{sync::Arc, time::Duration};
 
 fn main() {

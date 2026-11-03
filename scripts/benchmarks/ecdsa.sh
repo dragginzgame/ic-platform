@@ -22,7 +22,7 @@ mkdir -p "$output/driver/src"
 cp "$root/scripts/fixtures/ecdsa-benchmark/main.rs" "$output/driver/src/main.rs"
 cp "$root/Cargo.lock" "$output/driver/Cargo.lock"
 platform="$(perl -MJSON::PP -e 'print encode_json($ARGV[0])' "$root/crates/ic-platform")"
-testkit="$("$root/.tools/host/bin/yq" -p toml -r '.workspace.dependencies.ic-testkit' "$root/Cargo.toml")"
+testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
 cat > "$output/driver/Cargo.toml" <<MANIFEST
 [package]
 name = "platform-ecdsa-benchmark"
@@ -32,8 +32,8 @@ rust-version = "$compiler"
 [workspace]
 resolver = "3"
 [dependencies]
-ic-platform = { path = $platform, default-features = false, features = ["ecdsa", "pocket-ic"] }
-ic-testkit = "$testkit"
+ic-platform = { path = $platform, default-features = false, features = ["ecdsa", "principal-external"] }
+ic-testkit = { $testkit }
 MANIFEST
 cargo +"$compiler" metadata --manifest-path "$output/driver/Cargo.toml" --offline \
     --format-version 1 > "$output/driver/metadata.json"

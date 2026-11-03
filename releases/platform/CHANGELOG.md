@@ -1,10 +1,21 @@
 # Platform changelog
 
-This group covers ic-platform. PocketIC now has its own [ledger](../pocket-ic/CHANGELOG.md).
+This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGELOG.md) preserves its history.
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
-## [0.20.1] - Unreleased
+## [0.21.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Transfer the maintained PocketIC client to `ic_testkit::pocket_ic`. Remove the
+  client package, facade `pocket-ic` feature and module, and its release group.
+  Testkit now owns one version for client and lifecycle helpers. Keep historical
+  releases; migrate native test fixtures to Testkit 0.84.0. No Runtime,
+  Types, Agent or crypto implementation changes.
+- Adopt committed Shared ownership rules. Release selection now admits Platform,
+  Runtime and Types only; retain full release validation pending fresh native
+  qualification of this three-group mapping.
 
 ### 🧪 Testing
 

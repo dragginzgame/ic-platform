@@ -39,7 +39,7 @@ done
 cd "$attempt/repo"
 git config user.name 'Platform native qualification'
 git config user.email qualification@example.invalid
-for group in platform pocket-ic runtime types; do git tag "$group-v99.0.0"; done
+for group in platform runtime types; do git tag "$group-v99.0.0"; done
 printf '\nIsolated native full/selected mapping qualification.\n' >> docs/status/current.md
 git add docs/status/current.md
 git commit -qm 'Controlled same-product-source validation baseline'
@@ -49,14 +49,14 @@ git rev-parse HEAD > "$attempt/evidence/qualified-source"
 git bundle create "$attempt/evidence/source.bundle" HEAD "^$(cat "$attempt/evidence/input-source")"
 perl scripts/release/validation-context.pl > "$attempt/evidence/execution.json"
 bash scripts/release/qualify-validation-plan.sh platform platform-v99.0.0 workspace > "$attempt/evidence/full.log" 2>&1
-for group in pocket-ic runtime types; do
+for group in runtime types; do
     bash scripts/release/qualify-validation-plan.sh "$group" "$group-v99.0.0" auto > "$attempt/evidence/$group.log" 2>&1
 done
 perl scripts/release/validation-plan.pl platform "$(git rev-parse HEAD)" platform-v99.0.0 target/release-validation/facade-auto.json auto
 jq -e '.scope=="workspace" and ([.stages[].required] | all)' target/release-validation/facade-auto.json
 perl -MJSON::PP -e '
     my %groups;
-    my %expected=(platform=>20,"pocket-ic"=>18,runtime=>18,types=>19);
+    my %expected=(platform=>20,runtime=>18,types=>19);
     my ($source,$host,$baseline);
     for my $file (@ARGV) {
         open my $fh,"<",$file or die $!; local $/; my $r=decode_json(<$fh>);
@@ -69,6 +69,6 @@ perl -MJSON::PP -e '
         die "unexpected stage count" unless exists($expected{$r->{group}}) && $stages==$expected{$r->{group}};
         printf "%s\t%s\t%s\t%d\t%d\n",$r->{source},$r->{host_key},$r->{group},$stages,$seconds;
     }
-    die "missing group" unless keys(%groups)==4;
+    die "missing group" unless keys(%groups)==3;
 ' target/release-validation/qualification.*/receipt.json > "$attempt/evidence/results.tsv"
 cat "$attempt/evidence/results.tsv"

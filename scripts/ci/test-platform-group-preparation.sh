@@ -4,9 +4,9 @@
 set -euo pipefail
 unset RELEASE_GROUP RELEASE_COMMIT RELEASE_SOURCE IC_PLATFORM_RELEASE_PREPARE
 case "$#:${1:-all}" in
-    0:all) groups=(platform pocket-ic runtime types) ;;
-    1:platform|1:pocket-ic|1:runtime|1:types) groups=("$1") ;;
-    *) echo "usage: $0 [platform|pocket-ic|runtime|types]" >&2; exit 2 ;;
+    0:all) groups=(platform runtime types) ;;
+    1:platform|1:runtime|1:types) groups=("$1") ;;
+    *) echo "usage: $0 [platform|runtime|types]" >&2; exit 2 ;;
 esac
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 bash "$root/scripts/ci/check-make-execution.sh"
@@ -115,7 +115,7 @@ for group in "${groups[@]}"; do
     bash scripts/release/adapter.sh check
     # Only the selected group's member literals, catalog requirements and ledger
     # change. Crypto/certification preparation preserves Runtime and Types.
-    for other_group in platform pocket-ic runtime types; do
+    for other_group in platform runtime types; do
         [[ "$other_group" != "$group" ]] || continue
         other_members="$(RELEASE_GROUP="$other_group" bash scripts/release/group.sh members)"
         git diff --exit-code -- "releases/$other_group/CHANGELOG.md"
@@ -145,7 +145,7 @@ for group in "${groups[@]}"; do
     cargo metadata --no-deps --offline --locked --format-version 1 > "$fixture/$group-publication-metadata.json"
     members="$(bash scripts/release/group.sh members)"
     perl scripts/ci/cargo-publication-selection.pl "$fixture/$group-publication-metadata.json" \
-        'ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform-runtime ic-platform-pocket-ic ic-platform' \
+        'ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform-runtime ic-platform' \
         "$members" crates-io > "$fixture/$group-publication-selectors"
     tr '\0' '\n' < "$fixture/$group-publication-selectors" > "$fixture/$group-publication-lines"
     [[ "$(wc -l < "$fixture/$group-publication-lines" | tr -d ' ')" == "$(wc -w <<< "$members" | tr -d ' ')" ]]

@@ -176,17 +176,17 @@ checks Rust and manifest formatting. Authorized releases use the shared
 Every release, resume and publication command requires an explicit group:
 
 `make release-patch RELEASE_GROUP=platform` releases the facade.
-`make release-patch RELEASE_GROUP=pocket-ic` releases the native client.
+The native client now releases in Tooling’s Testkit group.
 `make release-patch RELEASE_GROUP=runtime` releases Runtime, macros and exact guard. `make release-patch RELEASE_GROUP=types` releases the
 canonical type supplier. No group is inferred from changed files or PACKAGE.
 All members use literal package versions; root Cargo stores common metadata and
-dependencies. The [root changelog](../CHANGELOG.md) indexes the four group ledgers
+dependencies. The [root changelog](../CHANGELOG.md) indexes the three active group ledgers
 and preserved coordinated history.
 Root dependency blocks name each group once, with a separate changelog comment.
 Their path entries catalog every member's full version and retain requirement
 operators. The unused facade entry adds no dependency edge. Dependency and release
 checks enforce complete catalog/alias coverage,
-owned paths and current full versions across all four groups.
+owned paths and current full versions across all three groups.
 
 `make publish-check RELEASE_GROUP=platform` packages/verifies that group without
 uploading; `make publish RELEASE_GROUP=platform` uploads clean committed packages
@@ -204,8 +204,8 @@ package version before invoking publication again. Partial publication is not ro
 prove registry visibility or consumer adoption.
 
 For focused release-recovery changes, run
-`bash scripts/ci/test-platform-group-preparation.sh runtime` (or `platform`/`pocket-ic`/`types`).
-Omitting the group exercises all four. These fixtures use disposable local Git
+`bash scripts/ci/test-platform-group-preparation.sh runtime` (or `platform`/`types`).
+Omitting the group exercises all three. These fixtures use disposable local Git
 remotes and substitute the full release gate; they do not release this checkout.
 
 Plain `cargo clean` removes the whole workspace `target/`, including nested build

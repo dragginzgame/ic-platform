@@ -52,7 +52,7 @@ system('git','merge-base','--is-ancestor',$base,$source) == 0 or die "baseline i
 my @changed = grep { length } split /\0/, capture('git','diff','--name-only','--no-renames','-z',$base,$source,'--');
 # Narrow only source/test changes within one existing owner. Manifest, lock,
 # generator, imported-source/provenance, cross-group and unknown paths expand.
-my %owners = (platform=>['ic-platform'], 'pocket-ic'=>['ic-platform-pocket-ic'],
+my %owners = (platform=>['ic-platform'],
     runtime=>['ic-platform-runtime','ic-platform-macros','ic-platform-runtime-guard'], types=>['ic-platform-types']);
 my $owned = join '|', map { quotemeta } @{$owners{$group}};
 my $narrow = @changed && $scope ne 'workspace' && $baseline ne 'none';
@@ -80,13 +80,13 @@ for my $path (@changed) {
     next if $path eq "releases/$group/CHANGELOG.md" || $path eq 'docs/status/current.md';
     $narrow = 0;
 }
-# Only the independently authored client has no Rust-to-browser schema surface.
+# The runtime implementation has no Rust-to-browser schema surface.
 # Full compile/lint/test/consumer/feature checks deliberately stay applicable.
 my %excluded = (
     'check-release-commands' => 'Only owner Rust sources/tests and its notes changed; all release scripts, recipes, group metadata and qualification inputs are byte-identical to the baseline.',
 );
-if ($group eq 'pocket-ic' || $group eq 'runtime') {
-    $excluded{'check-browser'} = 'Browser package, JS dependencies, browser fixtures and Types/schema inputs are unchanged; native client/runtime implementation has no browser-package code path.';
+if ($group eq 'runtime') {
+    $excluded{'check-browser'} = 'Browser package, JS dependencies, browser fixtures and Types/schema inputs are unchanged; runtime implementation has no browser-package code path.';
 }
 # Keep both installed suites even for client-only changes: their drivers use the
 # client. Types/Runtime public identity and singleton boundaries also require them.

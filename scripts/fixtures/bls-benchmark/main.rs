@@ -1,14 +1,16 @@
 //! Compare unchanged upstream BLS feature variants in installed Wasm.
-use ic_platform::pocket_ic::PocketIcBuilder;
 use ic_platform::principal::ExternalPrincipal as Principal;
 use ic_testkit::pic::PocketIcStartupConfig;
+use ic_testkit::pocket_ic::PocketIcBuilder;
 use std::{path::Path, time::Duration};
 
 fn hex(path: &Path) -> Vec<u8> {
     let text = std::fs::read_to_string(path).unwrap();
     text.trim()
         .as_bytes()
-        .as_chunks::<2>().0.iter()
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
         .collect()
 }

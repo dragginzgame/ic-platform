@@ -11,7 +11,7 @@ cp "$root/ci/"{release-validation.json,release-validation-hosts.json,cargo-relea
 # Exercise the unqualified-host fallback regardless of the production allowlist.
 printf '{"qualified":[],"schema":1}\n' > "$fixture/repo/ci/release-validation-hosts.json"
 cp "$root/scripts/release/"{validation-plan.pl,validation-context.pl,validation-receipt.pl,qualify-validation-plan.sh} "$fixture/repo/scripts/release/"
-cp "$root/scripts/ci/"{run-validation-targets.sh,check-make-execution.sh,verify-file-checksum.sh,validation-input-checkpoint.pl,release-validation-plan.pl} "$fixture/repo/scripts/ci/"
+cp "$root/scripts/ci/"{run-validation-targets.sh,check-make-execution.sh,verify-file-checksum.sh,validation-input-checkpoint.pl,release-validation-plan.pl,ValidationPlan.pm} "$fixture/repo/scripts/ci/"
 # Retain the actual full-gate recipe text so roster drift is checked against it.
 perl -0777 -ne 'for my $name (qw(ci check-runtime-all release-verify)) { /(^\Q$name\E:\n(?:\t[^\n]*\n)+)/m or die "missing recipe"; print $1,"\n"; }' "$root/Makefile" > "$fixture/repo/Makefile"
 jq -r '.stages[]' "$root/ci/release-validation.json" | while read -r target; do
@@ -23,15 +23,15 @@ set -eu
 printf '%s\n' "$1"
 [[ "$1" != "${FAIL_STAGE:-}" ]] || exit 27
 if [[ "$1" == "${INTERRUPT_STAGE:-}" ]]; then kill -TERM "$PPID"; exit 143; fi
-if [[ "$1" == "${DRIFT_STAGE:-}" ]]; then printf '\nchanged\n' >> crates/ic-platform-pocket-ic/src/lib.rs; fi
+if [[ "$1" == "${DRIFT_STAGE:-}" ]]; then printf '\nchanged\n' >> crates/ic-platform-runtime/src/lib.rs; fi
 STAGE
 cd "$fixture/repo"
 printf '/target/\n' > .gitignore
-for package in ic-platform ic-platform-pocket-ic ic-platform-runtime ic-platform-types; do
+for package in ic-platform ic-platform-runtime ic-platform-types; do
     mkdir -p "crates/$package/src"
     printf '// unchanged source\n' > "crates/$package/src/lib.rs"
 done
-mkdir -p docs/status releases/{platform,pocket-ic,runtime,types}
+mkdir -p docs/status releases/{platform,runtime,types}
 printf 'fixture\n' > docs/status/current.md
 printf 'fixture lock\n' > Cargo.lock
 git init -q
@@ -40,14 +40,14 @@ git config user.email fixture@example.invalid
 git add .
 git commit -qm baseline
 base="$(git rev-parse HEAD)"
-for group in platform pocket-ic runtime types; do git tag "$group-v1.0.0"; done
+for group in platform runtime types; do git tag "$group-v1.0.0"; done
 if [[ ${1:-} == --prepare ]]; then exit 0; fi
 refuse() {
     if "$@" > "$fixture/refusal.log" 2>&1; then echo 'unexpected admission' >&2; exit 1; fi
 }
-for group in platform pocket-ic runtime types; do
+for group in platform runtime types; do
     git checkout -q -B "test-$group" "$base"
-    case "$group" in platform) package=ic-platform ;; pocket-ic) package=ic-platform-pocket-ic ;; runtime) package=ic-platform-runtime ;; types) package=ic-platform-types ;; esac
+    case "$group" in platform) package=ic-platform ;; runtime) package=ic-platform-runtime ;; types) package=ic-platform-types ;; esac
     printf '// owner change\n' >> "crates/$package/src/lib.rs"
     git commit -qam 'owner source change'
     head="$(git rev-parse HEAD)"
@@ -60,7 +60,7 @@ for group in platform pocket-ic runtime types; do
     perl scripts/release/validation-plan.pl "$group" "$head" "$group-v1.0.0" "target/$group/auto.json" auto
     required="$(jq -r '.stages[] | select(.target=="check-release-commands") | .required' "target/$group/auto.json")"
     if [[ "$group" == platform ]]; then [[ "$required" == true ]]; else [[ "$required" == false ]]; fi
-    # All four groups preserve compilation, native/Wasm consumers and both installed profiles.
+    # All three groups preserve compilation, native/Wasm consumers and both installed profiles.
     jq -e '[.stages[] | select(.target=="clippy" or .target=="check-consumer" or .target=="check-runtime" or .target=="check-runtime-composition") | .required] | all' "target/$group/auto.json"
     bash scripts/release/qualify-validation-plan.sh "$group" "$group-v1.0.0" workspace > "$fixture/$group-full.log"
     if [[ "$group" != platform ]]; then
@@ -82,13 +82,13 @@ cp target/changed.json ci/release-validation.json
 git commit -qam 'unmapped stage'
 refuse perl scripts/release/validation-plan.pl types "$(git rev-parse HEAD)" types-v1.0.0 target/unknown-stage.json auto
 git checkout -q -B drift "$base"
-printf '// changed\n' >> crates/ic-platform-pocket-ic/src/lib.rs
+printf '// changed\n' >> crates/ic-platform-runtime/src/lib.rs
 git commit -qam 'client change'
-DRIFT_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh pocket-ic pocket-ic-v1.0.0 auto
-git restore crates/ic-platform-pocket-ic/src/lib.rs
-INTERRUPT_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh pocket-ic pocket-ic-v1.0.0 auto
+DRIFT_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 auto
+git restore crates/ic-platform-runtime/src/lib.rs
+INTERRUPT_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 auto
 # A fresh attempt succeeds after an interrupted/failed one; no receipt is reused.
-bash scripts/release/qualify-validation-plan.sh pocket-ic pocket-ic-v1.0.0 auto > "$fixture/retry.log"
+bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 auto > "$fixture/retry.log"
 receipt="$(sed -n '/\/receipt.json$/p' "$fixture/retry.log")"
 attempt="${receipt%/receipt.json}"
 run=("$attempt"/logs/validation.*)
@@ -100,7 +100,7 @@ cp "$fixture/events.original" "${run[0]}/plan-events.tsv"
 perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/readmitted.json
 refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" "$receipt" check
 RUSTFLAGS='--cfg changed_receipt_environment' refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/config-drift.json
-printf '// drift\n' >> crates/ic-platform-pocket-ic/src/lib.rs
+printf '// drift\n' >> crates/ic-platform-runtime/src/lib.rs
 git commit -qam 'moved source'
 refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/stale-receipt.json
-printf 'Four-group selection, full fallback, required/excluded failures, drift and recovery passed. Stage bodies were substitutes.\n'
+printf 'Three-group selection, full fallback, required/excluded failures, drift and recovery passed. Stage bodies were substitutes.\n'

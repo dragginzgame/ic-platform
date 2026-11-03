@@ -49,7 +49,7 @@ cat >> "$seed/fixture-stage.sh" <<'COUNT'
 printf '%s\n' "$1" >> target/executed-stages
 COUNT
 mkdir "$seed/versions"
-for group in platform pocket-ic runtime types; do printf '1.0.0\n' > "$seed/versions/$group"; done
+for group in platform runtime types; do printf '1.0.0\n' > "$seed/versions/$group"; done
 printf '#!/usr/bin/env bash\nexit 0\n' > "$fixture/server"
 chmod +x "$fixture/server"
 export POCKET_IC_BIN="$fixture/server"
@@ -58,11 +58,11 @@ jq -cnS --arg host "$(perl scripts/release/validation-context.pl | jq -r .host_k
 git add .
 git commit -qm 'Recovery fixture hooks and qualified-host substitute'
 base="$(git rev-parse HEAD)"
-for group in platform pocket-ic runtime types; do git tag -f "$group-v1.0.0" "$base" > /dev/null; done
+for group in platform runtime types; do git tag -f "$group-v1.0.0" "$base" > /dev/null; done
 refuse() {
     if "$@" > "$fixture/refusal.log" 2>&1; then echo 'unexpected recovery admission' >&2; exit 1; fi
 }
-for group in platform pocket-ic runtime types; do
+for group in platform runtime types; do
     work="$fixture/$group"
     cp -R "$seed" "$work"
     cd "$work"
@@ -71,7 +71,7 @@ for group in platform pocket-ic runtime types; do
     git remote add origin "$fixture/$group.git"
     git push -qu origin main
     export RELEASE_GROUP="$group"
-    case "$group" in platform) package=ic-platform ;; pocket-ic) package=ic-platform-pocket-ic ;; runtime) package=ic-platform-runtime ;; types) package=ic-platform-types ;; esac
+    case "$group" in platform) package=ic-platform ;; runtime) package=ic-platform-runtime ;; types) package=ic-platform-types ;; esac
     printf '// owner change\n' >> "crates/$package/src/lib.rs"
     git commit -qam 'Scoped owner change'
     source="$(git rev-parse HEAD)"
@@ -135,7 +135,7 @@ for group in platform pocket-ic runtime types; do
     bash scripts/ci/run-release.sh resume 1.0.1 origin main > "$fixture/$group-resume.log" 2>&1
     [[ "$(wc -l < target/executed-stages)" == "$before" ]]
     [[ "$(git --git-dir="$fixture/$group.git" rev-parse main)" == "$(git rev-parse HEAD)" ]]
-    for other in platform pocket-ic runtime types; do
+    for other in platform runtime types; do
         [[ "$other" == "$group" || "$(cat "versions/$other")" == 1.0.0 ]]
     done
     git diff --exit-code HEAD
@@ -161,4 +161,4 @@ printf 'release-verify:\n\t@true\n' > Makefile
 git add Makefile
 git commit -qm 'Unknown historical hook fixture'
 RELEASE_SOURCE="$(git rev-parse HEAD)" refuse bash scripts/release/validation-gate.sh check
-printf 'Four-group release preparation, commit/tag/push recovery and evidence refusals passed; product stages and metadata were substitutes.\n'
+printf 'Three-group release preparation, commit/tag/push recovery and evidence refusals passed; product stages and metadata were substitutes.\n'

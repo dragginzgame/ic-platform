@@ -1,27 +1,130 @@
 [
-  {"dependency": "blake3", "allowed_packages": ["ic-platform"]},
-  {"dependency": "pocket-ic", "allowed_packages": []},
-  {"dependency": "ic0", "allowed_packages": []},
-  {"dependency": "ic-agent", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-secp256k1", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-canister-sig-creation", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-certification", "allowed_packages": ["ic-platform", "ic-platform-pocket-ic"]},
-  {"dependency": "ic-management-canister-types", "allowed_packages": ["ic-platform", "ic-platform-pocket-ic"]},
-  {"dependency": "ic-signature-verification", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-verify-bls-signature", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic_principal", "allowed_packages": ["ic-platform", "ic-platform-types"]},
-  {"dependency": "icrc-ledger-types", "allowed_packages": ["ic-platform"]},
-  {"dependency": "candid", "allowed_packages": ["ic-platform", "ic-platform-pocket-ic"]},
-  {"dependency": "candid_derive", "allowed_packages": []},
-  {"dependency": "candid_parser", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-cdk", "allowed_packages": []},
-  {"dependency": "ic-error-types", "allowed_packages": ["ic-platform"]},
-  {"dependency": "ic-cdk-executor", "allowed_packages": []},
-  {"dependency": "ic-cdk-macros", "allowed_packages": []},
-  {"dependency": "ic-platform-macros", "allowed_packages": ["ic-platform", "ic-platform-runtime"]},
-  {"dependency": "ic-cdk-timers", "allowed_packages": []},
-  {"dependency": "ic-stable-structures", "allowed_packages": []},
-  {"dependency": "ic-platform-runtime-guard", "allowed_packages": ["ic-platform-runtime"]},
-  {"dependency": "ic-transport-types", "allowed_packages": ["ic-platform-pocket-ic"]},
-  {"dependency": "ic-platform-pocket-ic", "allowed_packages": ["ic-platform"]}
+  {
+    "dependency": "blake3",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "pocket-ic",
+    "allowed_packages": []
+  },
+  {
+    "dependency": "ic0",
+    "allowed_packages": []
+  },
+  {
+    "dependency": "ic-agent",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic-secp256k1",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic-canister-sig-creation",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic-certification",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic-management-canister-types",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic-signature-verification",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic-verify-bls-signature",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic_principal",
+    "allowed_packages": [
+      "ic-platform",
+      "ic-platform-types"
+    ]
+  },
+  {
+    "dependency": "icrc-ledger-types",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "candid",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "candid_derive",
+    "allowed_packages": []
+  },
+  {
+    "dependency": "candid_parser",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic-cdk",
+    "allowed_packages": []
+  },
+  {
+    "dependency": "ic-error-types",
+    "allowed_packages": [
+      "ic-platform"
+    ]
+  },
+  {
+    "dependency": "ic-cdk-executor",
+    "allowed_packages": []
+  },
+  {
+    "dependency": "ic-cdk-macros",
+    "allowed_packages": []
+  },
+  {
+    "dependency": "ic-platform-macros",
+    "allowed_packages": [
+      "ic-platform",
+      "ic-platform-runtime"
+    ]
+  },
+  {
+    "dependency": "ic-cdk-timers",
+    "allowed_packages": []
+  },
+  {
+    "dependency": "ic-stable-structures",
+    "allowed_packages": []
+  },
+  {
+    "dependency": "ic-platform-runtime-guard",
+    "allowed_packages": [
+      "ic-platform-runtime"
+    ]
+  },
+  {
+    "dependency": "ic-transport-types",
+    "allowed_packages": []
+  }
 ]

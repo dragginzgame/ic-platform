@@ -4,9 +4,9 @@ mod protocol;
 mod wire_driver;
 mod wire_protocol;
 
-use ic_platform::pocket_ic::{PocketIc, PocketIcBuilder, RejectCode, RejectResponse};
 use ic_platform::principal::ExternalPrincipal as Principal;
 use ic_testkit::pic::PocketIcStartupConfig;
+use ic_testkit::pocket_ic::{PocketIc, PocketIcBuilder, RejectCode, RejectResponse};
 use protocol::{LIMITS, method_id};
 use serde::{Serialize, de::DeserializeOwned};
 use std::time::Duration;
@@ -51,9 +51,9 @@ fn advance(pic: &PocketIc) {
         pic.tick().unwrap();
     }
 }
-fn rejection(error: ic_platform::pocket_ic::ClientError) -> RejectResponse {
+fn rejection(error: ic_testkit::pocket_ic::ClientError) -> RejectResponse {
     match error {
-        ic_platform::pocket_ic::ClientError::Canister(rejection) => rejection,
+        ic_testkit::pocket_ic::ClientError::Canister(rejection) => rejection,
         other => panic!("expected canister rejection, got {other}"),
     }
 }
@@ -69,7 +69,7 @@ fn missing_entrypoint_is_not_guard_rejection() {
     assert_guard_rejection(&RejectResponse {
         reject_code: RejectCode::CanisterError,
         reject_message: "fixture guard refused".into(),
-        error_code: ic_platform::pocket_ic::ErrorCode::CanisterMethodNotFound,
+        error_code: ic_testkit::pocket_ic::ErrorCode::CanisterMethodNotFound,
         certified: false,
     });
 }
@@ -79,7 +79,7 @@ fn unrelated_rejection_is_not_guard_rejection() {
     assert_guard_rejection(&RejectResponse {
         reject_code: RejectCode::CanisterReject,
         reject_message: "unrelated rejection".into(),
-        error_code: ic_platform::pocket_ic::ErrorCode::CanisterRejectedMessage,
+        error_code: ic_testkit::pocket_ic::ErrorCode::CanisterRejectedMessage,
         certified: false,
     });
 }

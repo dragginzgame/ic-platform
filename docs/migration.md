@@ -37,14 +37,14 @@ Linux/Wasm proofs do not establish that future release family or macOS coverage.
 ## Supported compiler (#133)
 
 Current source requires Rust 1.99.1 for every member of the independent Platform,
-PocketIC, Runtime and Types groups. The minimum and pinned development/release toolchain
+Runtime and Types groups. The minimum and pinned development/release toolchain
 must agree; compiler admission checks and records actual Cargo/rustc identities.
 Types 0.17, PocketIC 0.18, Runtime 0.18 and facade 0.18 are published. Historical 1.91 results
 below remain dated evidence, not a support promise for this source.
 
 | Existing obligation | Current qualification |
 | --- | --- |
-| All six packages, tests, proc macros and doc tests | All-feature native tests on 1.99.1 |
+| All five packages, tests, proc macros and doc tests | All-feature native tests on 1.99.1 |
 | All-feature facade Wasm | `wasm-check` on 1.99.1 |
 | Isolated capability, Principal/ledger/schema and raw/executor consumers | Same feature/target selections, once on 1.99.1 |
 | Prepared calls | Raw, Wire and external Candid; native tests and Wasm checks |
@@ -58,13 +58,12 @@ old benchmark receipts or the external IC source profile's pinned compiler.
 
 ## Independent Runtime owner (#131)
 
-The current source separates four release groups in this workspace:
+The current source separates three release groups in this workspace:
 
 | Group | Packages | Published version |
 | --- | --- | --- |
 | Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.18.0 |
 | Platform | ic-platform | 0.18.0 |
-| PocketIC | ic-platform-pocket-ic | 0.18.0 |
 | Types | ic-platform-types | 0.17.0 |
 
 Runtime 0.18, facade 0.18, Types 0.17 and the independent PocketIC 0.18 were
@@ -118,7 +117,7 @@ patches or production Git dependencies. Return this test selection to the publis
 compatible Timers release after qualification. Owner proof remains Timers-free.
 
 The Runtime group owns its ledger and pin exception. Both qualification locks are
-shared metadata in all four groups' transactional preparation and recovery.
+shared metadata in all three groups' transactional preparation and recovery.
 Every recorded local package is required and checked against its owning group's
 version. Preparation changes only selected identities and references; missing or
 duplicated guard records refuse. Existing release journals retain their policy
@@ -1314,7 +1313,7 @@ that version-requirement update and qualification against the published package.
 
 `runtime` (therefore `cdk`), `candid` (therefore `candid-service`),
 `canister-sig-creation` (therefore `signature-verification`), management and ledger
-DTO features, `agent`, `pocket-ic`, `candid-parser` and `secp256k1` include
+DTO features, `agent`, `candid-parser` and `secp256k1` include
 `principal`. Native-only client/parser dependencies remain absent on Wasm;
 the explicitly implied portable principal types remain available there.
 Certification, BLS, ECDSA and Ed25519 alone do not select application types;
@@ -1418,7 +1417,7 @@ is test code, not a general checkpoint implementation offered to consumers.
 Management/ledger DTOs, external Candid adapters and cryptographic dependencies
 remain upstream. This cut reduces maintained source and temporary identity
 allocations. Plain `candid` no longer selects the upstream printer; combined
-graphs may still select it through Agent, PocketIC, parser or external DTO
+graphs may still select it through Agent, parser or external DTO
 packages. Feature separation alone establishes neither fleet-wide dependency
 removal nor measured Wasm-size or execution-speed improvement.
 
@@ -1430,37 +1429,11 @@ ic-memory changes are out of scope; no persisted representation is changed here.
 
 ## PocketIC maintenance boundary
 
-`ic-platform-pocket-ic` owns the maintained native PocketIC 16.1 client and its
-independent `pocket-ic` release group. Native consumers may select it directly;
-the facade's optional `pocket-ic` feature re-exports the same implementation.
-Published client 0.18.0 selects workspace management DTOs =0.11.0 in place of 0.8.0. Settings, status and install
-mode types now share the native management surface's external identity.
-
-The published 0.18 source guard reconstructs the import rename and rustfmt ordering
-before checking the original maintained hashes. New management fields alter the Candid
-schema; installed status, settings and snapshot lifecycle are qualified against
-the explicitly prepared 16.1.0 server. This is no blanket server-version promise.
-
-The pending #134 cut makes sync/async network operations and builder execution
-fallible with one ClientError contract. Consumers must handle transport, body,
-JSON, server-status, deadline and canister-rejection cases explicitly. Errors
-retain accepted HTTP computation and ingress identities for consumer-owned
-recovery; a lost response never authorizes automatic resubmission. A monotonic
-budget covers dispatch, body reads and polling. The unused stringifying
-ApiResponse::from_response helper and I/O-performing Default are removed.
-Explicit deletion retains state on failure and is not repeated by Drop.
-The source guard reverses the exact fallible patch before the import adaptation;
-original hashes and licenses remain unchanged. This requires a new minor client
-release and affected facade adoption, not a republish of 0.18.0. Siblings retain
-their current published API until they explicitly adopt the new owner.
-
-All client dependencies remain native-target scoped. Direct consumers avoid the
-facade and Runtime, while retaining Candid, certification and native HTTP below
-the client. No Wasm-size reduction is claimed. Testkit retains provisioning,
-server checksums, compatibility admission, lifecycle, transport and retry policy.
-Existing Backup, Canic and Blob consumers adopt the independent owner after its
-publication; no sibling source is changed here. See the
-[client contract](pocket-ic-client.md) for qualification and release details.
+The maintained native PocketIC 16.1 client moved to `ic_testkit::pocket_ic`
+under #139 / Tooling #324. Its module, DTO and error identity now belong to Testkit,
+with lifecycle helpers in `ic_testkit::pic`. Platform no longer maintains a client
+package, feature, facade forwarder or release group. See the
+[client migration](pocket-ic-client.md) for exact source and qualification custody.
 
 ## Owned Principal migration (0.3)
 
@@ -2153,7 +2126,7 @@ selection. Use the separate Candid encoders/decoders as described in the
 [transport migration](#transport-and-codec-separation-04).
 The DTO features retain their original registry
 identities and external bytes; they do not implicitly select Platform's codec API.
-Native parser, Agent and PocketIC features stay separate from canister features.
+Native parser and Agent features stay separate from canister features; PocketIC is owned by Testkit.
 
 Raw `Call` constructors now start with **empty transport bytes**, not implicit
 Candid unit arguments. Always supply a Wire request frame, including unit requests,
@@ -2203,7 +2176,7 @@ source availability and demonstrated recovery are separate claims.
 | Owned generator and runtime adapters | Platform reviews upstream CDK fixes for applicability and maintains entrypoints, call ownership and cleanup. Preserve Apache provenance and qualify installed behavior. |
 | Embedded executor and IC0 (originally 2.0.0 / 1.2.0) | Platform maintains their source and Apache licenses, preserving one runtime owner and the System API ABI. Review executor fixes and IC System API changes; changes require combined entrypoint/call/Timers qualification. No second executor. |
 | Candid, parser and required IC DTOs | Platform controls dependency exposure; retain external wire fixtures, bounded decoder behavior and host-only parser separation. Consumers own protocol selection and limits. |
-| Agent and PocketIC | Platform controls explicit client/type exposure. Host/Query retain transport and verification policy; Testkit retains simulator provisioning and admission. Archive required binaries as well as Rust sources for recovery. |
+| Agent and PocketIC | Platform controls Agent client/type exposure; Testkit owns the PocketIC client, provisioning and admission. Host/Query retain transport and verification policy. Archive required binaries as well as Rust sources for recovery. |
 | Certification and cryptographic implementations | Preserve upstream implementations, vectors and licenses. Platform may maintain scaffolding; algorithm or primitive changes require qualified external cryptographic expertise. |
 
 For each runtime change, inspect relevant upstream fixes and IC interface changes
@@ -3150,7 +3123,7 @@ release updates its admitted requirement and requires separate consumer
 compatibility/publication assessment; it does not silently publish the facade.
 
 releases/platform/CHANGELOG.md now owns facade notes;
-releases/pocket-ic/CHANGELOG.md owns native-client notes;
+releases/pocket-ic/CHANGELOG.md retains retired native-client history;
 releases/runtime/CHANGELOG.md owns Runtime/macros/guard notes, and
 releases/types/CHANGELOG.md owns Types notes. Root CHANGELOG.md is an index. The
 intact coordinated history through 0.15.0 lives once in releases/history.md;
@@ -3162,7 +3135,7 @@ canonical type owner and bytes.
 ### Release command routing
 
 Every release, resume and publication command must explicitly select
-RELEASE_GROUP=platform, RELEASE_GROUP=pocket-ic, RELEASE_GROUP=runtime or RELEASE_GROUP=types. Missing, empty and unknown groups
+RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types. Missing, empty and unknown groups
 refuse before setup or validation. An explicit environment selection is valid.
 Publication follows the same selection, so runtime-only changes do not re-upload
 unchanged Types. Explicit PACKAGE subsets stay within the selected group and
@@ -3172,10 +3145,10 @@ never infers a group or admits a mixed batch. All workspace release gates and
 full publication Clippy remain required; npm publication stays separate.
 
 The owner-runtime and Timers-composition qualification locks are explicitly common
-consumer metadata, included once in all four groups' exact plans. The exact runtime-guard pin
+consumer metadata, included once in all three groups' exact plans. The exact runtime-guard pin
 belongs to the Runtime group. Semantic checks compare each recorded local owner
 to its group primary version.
-Preparation changes only the selected group's recorded identities. All current locks require the six qualified local owners. Adding or changing
+Preparation changes only the selected group's recorded identities. All current locks require the five qualified local owners. Adding or changing
 a supplier requires actual graph qualification, not fabricated lock records.
 
 Platform #116 separates installed producer qualification from scheduler composition.
@@ -3207,7 +3180,7 @@ graphs remain runtime/Candid-free. Wire #36 owns actual product adoption.
 
 ## Maintained PocketIC Rust client
 
-The approved signature-preserving client takeover uses a native implementation
-package behind the existing facade. See the [ownership and migration contract](pocket-ic-client.md).
+The native client implementation now belongs to Testkit, with no Platform facade
+forwarder or independently maintained client package. See the [ownership and migration contract](pocket-ic-client.md).
 The server, IC execution engine and native Profiler provider remain external or
 separately pinned; this is not an executor, Candid or server fork.

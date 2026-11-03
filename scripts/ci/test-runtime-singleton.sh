@@ -102,7 +102,7 @@ perl -0pi -e 's/^(ic-platform = \{ version = ")[^"]+/${1}99.0.0/gm' "$copy/Cargo
 perl -pi -e 's/^version = "[^"]+"$/version = "99.0.0"/' "$copy/crates/ic-platform/Cargo.toml"
 # A second facade must depend on the original canonical owners, not copied
 # packages with coincident versions. Their version requirements remain untouched.
-for package in ic-platform-pocket-ic ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard; do
+for package in ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard; do
     cmp "$root/crates/$package/Cargo.toml" "$copy/crates/$package/Cargo.toml"
     PLATFORM_SINGLETON_PACKAGE="$package" PLATFORM_SINGLETON_ROOT="$root" perl -0pi -e '
         my ($p,$r)=@ENV{qw(PLATFORM_SINGLETON_PACKAGE PLATFORM_SINGLETON_ROOT)};

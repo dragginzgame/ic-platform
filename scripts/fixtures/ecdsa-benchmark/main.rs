@@ -1,10 +1,9 @@
 //! Compare RustCrypto's existing backends in installed Wasm.
 use ic_platform::{
     ecdsa::{PrehashSigner, Signature, SigningKey},
-    pocket_ic::PocketIcBuilder,
     principal::ExternalPrincipal as Principal,
 };
-use ic_testkit::pic::PocketIcStartupConfig;
+use ic_testkit::{pic::PocketIcStartupConfig, pocket_ic::PocketIcBuilder};
 use std::time::Duration;
 
 fn main() {

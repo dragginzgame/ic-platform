@@ -65,7 +65,6 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `nns-registry-types` | Exact optional-principal Registry subnet lookup DTOs; implies Candid, no topology policy |
 | `certified-assets-types` | Native-only asset get/get_chunk DTOs; implies Candid, no verification or host transport |
 | `signature-verification` | Imported canister-signature verification with optional authenticated time result; certification/BLS, no Candid/ic0, executor or host transport |
-| `pocket-ic` | Maintained native PocketIC client and DTOs; existing imports/signatures, Testkit server lifecycle and policy |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
 | `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |
@@ -118,7 +117,7 @@ remain broad validation; they are not the default loop for ordinary edits.
 
 ## Releases
 
-Select `RELEASE_GROUP=platform`, `pocket-ic`, `runtime` or `types` explicitly for release,
+Select `RELEASE_GROUP=platform`, `runtime` or `types` explicitly for release,
 resume and publication. No group is inferred from changed files. Root
 [Cargo.toml](Cargo.toml) lists member versions; [CHANGELOG.md](CHANGELOG.md) links
 the separate group ledgers and shared history. A Git release does not establish

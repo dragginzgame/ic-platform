@@ -186,13 +186,13 @@ creates a second implementation or changes the current release-group owner.
 
 ## Release groups and canonical identities
 
-`ci/cargo-release-groups.json` owns Platform, PocketIC, Runtime and Types membership,
+`ci/cargo-release-groups.json` owns Platform, Runtime and Types membership,
 version authorities and ledgers. Root `Cargo.toml` is the dependency catalog;
 root `CHANGELOG.md` is an index and `releases/history.md` retains coordinated history.
 Release, resume and publication require explicit `RELEASE_GROUP=platform`,
-`pocket-ic`, `runtime` or `types`. Keep the shared qualification-lock and recovery custody;
+`runtime` or `types`. Keep the shared qualification-lock and recovery custody;
 publication subsets stay within the selected group. A facade-only change does
-not advance PocketIC, Runtime or Types. Platform re-exports the sole canonical Types;
+not advance Runtime or Types. Platform re-exports the sole canonical Types;
 conversions, bytes, Serde and provenance remain with their current owners.
 
 ## Owned Principal
@@ -270,16 +270,12 @@ during this transfer; this is no general permission to introduce Python tooling.
 Keep Motoko/lifeline outside the admitted native server graph. Follow the source
 profile contract in `native/ic-profiler/README.md` and preserve IC copyrights.
 
-The maintained PocketIC 16.1 Rust client lives in `ic-platform-pocket-ic`. The
-maintainer authorized its independent `pocket-ic` release group and direct native
-consumer selection; the optional `ic_platform::pocket_ic` facade exposes the same
-owner. The client now selects workspace management DTOs =0.11.0. Preserve original
-source/license fingerprints by reconstructing only the reviewed import rename
-and ordering; retain method bodies and protocol behavior. Qualify status, settings
-and snapshots against the prepared server when changing management DTOs. Testkit
-retains provisioning, compatibility admission, lifecycle, transport and retry
-policy. Keep the client out of defaults, executor-only and canister deployment
-graphs. Typed fallible operations remain separate work.
+The maintainer authorized transferring the maintained PocketIC 16.1 client to
+Tooling’s existing `ic-testkit::pocket_ic` module (#139 / Tooling #324). Preserve
+the historical ledger; no client package, release group, facade feature or
+forwarder remains here. Platform’s development fixtures select the exact Testkit
+supplier. Keep normal/build dependencies directed from Testkit to Platform.
+The separately pinned native Profiler provider remains outside this transfer.
 
 ## Owned account
 

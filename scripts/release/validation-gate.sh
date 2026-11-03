@@ -3,7 +3,7 @@
 set -euo pipefail
 [[ $# == 1 && ( "$1" == verify || "$1" == check ) ]] || exit 2
 cd "$(dirname "$0")/../.."
-case "${RELEASE_GROUP:-}" in platform|pocket-ic|runtime|types) ;; *) exit 2 ;; esac
+case "${RELEASE_GROUP:-}" in platform|runtime|types) ;; *) exit 2 ;; esac
 [[ "${RELEASE_SOURCE:-}" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || exit 2
 perl scripts/ci/validate-release-inputs.pl version "${RELEASE_VERSION:?}" > /dev/null
 perl scripts/ci/validate-release-inputs.pl version "${RELEASE_PREVIOUS:?}" > /dev/null

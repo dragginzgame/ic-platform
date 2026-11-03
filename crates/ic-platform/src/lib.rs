@@ -10,7 +10,6 @@
 //! `candid-parser` selects native external Candid parsing and type checking.
 //! `candid-service` separately selects Candid service declaration generation.
 //! `agent` selects native IC transport and identities, with consumer-owned policy.
-//! `pocket-ic` selects native simulator client identities; Testkit owns lifecycle policy.
 //! `secp256k1` selects native offline public-key derivation with upstream identities.
 //! `bls` selects BLS keys, signatures and verification with upstream allocation support.
 //! `blake3` selects the upstream hash function, streaming hasher and digest identity.
@@ -82,9 +81,6 @@ pub mod management_canister_types;
 pub mod secp256k1;
 #[cfg(feature = "signature-verification")]
 pub mod signature_verification;
-
-#[cfg(all(feature = "pocket-ic", not(target_family = "wasm")))]
-pub mod pocket_ic;
 
 #[cfg(feature = "runtime")]
 #[doc(hidden)]
