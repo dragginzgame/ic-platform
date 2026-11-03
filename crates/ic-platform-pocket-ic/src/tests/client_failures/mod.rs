@@ -52,6 +52,9 @@ impl Server {
                         Err(error) => panic!("{error}"),
                     }
                 };
+                // Accepted sockets can inherit the listener's nonblocking mode
+                // on macOS; the fixture reads each request with bounded blocking I/O.
+                socket.set_nonblocking(false).unwrap();
                 socket
                     .set_read_timeout(Some(Duration::from_secs(2)))
                     .unwrap();

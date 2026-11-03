@@ -1,6 +1,33 @@
 # Current handoff
 
-## Delivered batch — 2026-11-03
+## Delivered follow-up — 2026-11-03
+
+PocketIC 0.20.0 (`5c5338d`, tag `pocket-ic-v0.20.0`) and Platform 0.20.0
+(`cc8214b`, tag `platform-v0.20.0`) are pushed and published on crates.io.
+Both groups passed their standard full release gates and installed Runtime/Timers
+composition checks. Types remains 0.18.0; Runtime/macros/guard remain 0.19.0.
+The published archives match their registry checksums and exact clean release
+commits. A registry-only consumer passed Clippy, facade/direct-client identity,
+management status/settings, snapshot lifecycle and bounded snapshot restoration
+of module, heap, stable memory, globals, chunks, timer and hook state on PocketIC
+16.1.0. No sibling adoption or npm publication was performed.
+
+Source batch: `faa02f1`. Delivery evidence is retained under
+target/issues-136-137-deploy.XWWjT3/: release/publication logs, registry archive
+readbacks and release/target/published-client-proof. Completed release plans are
+in that isolated checkout's .git/release-state; do not repeat the releases.
+The unrelated working-tree Pest lock update was excluded and remains user-owned.
+
+Hosted PocketIC-release browser/installed-runtime jobs passed. CI run 41617435058
+exposed a macOS ARM mock-server failure: accepted sockets inherited nonblocking
+mode, so test reads failed with WouldBlock. The source-only follow-up explicitly
+selects blocking I/O for these bounded test sockets; affected Clippy and all 15
+failure/snapshot tests pass locally. No production client code changed; hosted
+qualification of this correction is pending. Do not claim all native CI green.
+Advisory run 41617435017 still reports #50's crypto-bigint vulnerability; no waiver,
+crypto change or closure is included.
+
+## Previous coordinated batch — 2026-11-02
 
 The maintainer authorized all pending changes and their publication. All six Rust
 crates are released, pushed and published on crates.io:
@@ -69,17 +96,16 @@ rewrite, waiver or incompatible patch was adopted. Standalone ECDSA keeps its
 existing patched provider. [#134](https://github.com/dragginzgame/ic-platform/issues/134)
 is closed against published 0.19.0; its stale unreleased documentation is corrected.
 
-[#136](https://github.com/dragginzgame/ic-platform/issues/136) is implemented in
-the reviewed delivery batch, authorized for release and publication. Snapshot
+[#136](https://github.com/dragginzgame/ic-platform/issues/136) is delivered in
+PocketIC/Platform 0.20.0 with the registry-only installed proof above. Snapshot
 metadata/data methods and caller-owned incremental transfer preserve partial IDs,
 accepted ingress, timer/hook state and upstream DTO identities. HTTP/Candid/chunk
 and total byte bounds are explicit; interrupted steps refuse implicit replay.
-Pending client 0.20 notes cover the new exhaustive ClientError variant; no package
-version or publication changed. Client and facade Clippy, 20 client unit tests,
+Client 0.20 adds an exhaustive ClientError variant. Client and facade Clippy, 20 client unit tests,
 management identity, source mutation guards and installed 16.1 restoration pass.
 Evidence: /tmp/platform-136-*.log and target/pocket-ic-client.DDyVwL.
 No fresh macOS result or sibling adoption is claimed.
-[#137](https://github.com/dragginzgame/ic-platform/issues/137) now has a local
+[#137](https://github.com/dragginzgame/ic-platform/issues/137) now has a delivered
 [validation pilot](../platform-release-validation.md): exhaustive roster, source
 classification, Shared runner receipts and failure/recovery fixtures pass. Actual
 same-source Linux full (20 stages), PocketIC/Runtime selected (18 each) and Types

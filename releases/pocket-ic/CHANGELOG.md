@@ -3,6 +3,14 @@
 This independent group covers `ic-platform-pocket-ic`.
 Its initial publication is recorded in the [Platform ledger](../platform/CHANGELOG.md).
 
+## [0.20.1] - Unreleased
+
+### 🧪 Testing
+
+- Explicitly select blocking I/O for accepted mock-server sockets on macOS.
+  Preserve bounded reads and the no-replay assertions; production client code
+  and the published 0.20.0 behavior are unchanged.
+
 ## [0.20.0] - 2026-11-03
 
 ### ✨ Added
