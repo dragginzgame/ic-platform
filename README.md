@@ -1,8 +1,9 @@
 # IC Platform
 
 Platform re-exports canonical Principal/Account identities from ic-platform-types.
-Platform (facade), PocketIC (native client), Runtime (runtime, macros and exact
-guard), and Types have independent release groups in one workspace. Each group
+Platform (facade), Runtime (runtime, macros and exact guard), and Types have
+independent release groups in one workspace. The native PocketIC client now
+releases with Tooling’s Testkit. Each group
 owns explicit versions and its canonical releases/ ledger. Unrelated runtime
 releases retain the same compatible type supplier; see
 [the migration contract](docs/migration.md#stable-owned-identity-package-118).

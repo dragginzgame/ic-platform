@@ -1,78 +1,64 @@
 # Current handoff — 2026-11-04
 
-## Current local Shared adoption and upstream crypto cut
+## Delivered Platform 0.22.0 and Runtime 0.19.1
 
-The maintainer reversed embedded cryptographic ownership. BLS curve/verifier,
-certification certificate/hash/tree and canister-signature creation/verification
-bodies, algorithm suites/vectors and four reconstruction guards are removed.
-Registry suppliers now own those implementations: verifier 0.6.0, curve 0.10.1,
-certification 3.2.0, signature creation 1.3.1 and verification 0.3.0. The unused
-direct development-only representation-independent-hash 4.x selection is gone.
+Platform **0.22.0** is pushed and published from
+`b95c9a2e6f4ecfbd25fc2f8466b3ca5826df550f`, tagged `platform-v0.22.0`.
+Runtime, macros and the exact guard **0.19.1** are pushed and published from
+`74a5071a7b0fdb6470ceb356d1891510ca8d16b1`, tagged `runtime-v0.19.1`.
+Types remains **0.18.0**. The maintainer's “publish” means both GitHub main/tags
+and crates.io. No sibling source/adoption, browser/npm or native-provider release
+is included. Hosted push CI is separate from the local Linux release results.
 
-Platform retains delegating BLS keys, CanisterSigPublicKey with canonical owned
-Principal/seed fields, #72 DER framing, #127 identity-key admission and signing-time
-extraction. Certificate/tree, BLS Signature and BLS errors now have upstream
-identity. Native Agent shares certificate types directly; recursive conversion
-adapters are removed. Runtime and Types identities/versions do not change.
+The crypto reversal removes embedded BLS curve/verifier, certification trees and
+canister-signature creation/verification bodies, algorithm suites/vectors and
+four reconstruction guards. Registry suppliers own these implementations.
+Platform keeps owned issuer fields, delegating key APIs, DER framing, root and
+delegated identity-key admission, and authenticated signing time. Certificate/tree,
+BLS Signature and BLS error types have registry identity; native Agent shares
+certificates directly. Upstream signature packaging restores transitive Candid/
+printer, raw IC0, CBOR, hashing and a lazy root cache. Key admission/time extraction
+repeat CBOR decoding. No Wasm-size or performance gain is claimed.
 
-Registry BLS still lacks #127. Both root and delegated subnet identity keys are
-therefore refused around upstream canister verification. Regressions demonstrate
-that raw upstream verification accepts the forged identity-key envelopes while
-both Platform APIs reject them. No algorithm is implemented in those guards.
-The adapter repeats CBOR decoding after upstream verification for delegated-key
-admission and optional signing-time extraction; upstream exposes no evidence API.
-Time retains unique top-level/u64/nonminimal-encoding behavior and never reads
-delegation time.
+Shared **0.29.3** at `afccb9947d26bbae13d4c4a143d2fd5f0c2c07a4`, owned test-layout
+changes, the incoming Pest update and #139 documentation corrections are committed.
+Source batch: `1264e76`; qualification-lock refresh: `a4683d6`. Runtime's patch
+contains its own test-layout work; the facade's crypto cut does not change Types.
+Owner/Timers locks select compatible Testkit **0.84.1**, retaining its registry
+Platform 0.21 DTO adapter separately from the local facade.
 
-Upstream signature packaging restores transitive Candid/printer, raw IC0, CBOR,
-representation-independent hashing and a lazy root cache. No store/cache API is
-exported. Raw Runtime/executor/IC0, standalone certification and BLS remain codec
-isolated. Signature+Runtime admits only the qualified registry raw IC0 supplier;
-external CDK/executors and alternate/local IC0 suppliers still refuse.
-This is maintenance reduction, without a linked-Wasm-size or performance claim.
+Both full Linux release gates passed all twenty required stages: source/dependency
+checks, formatting, Clippy, browser, recovery, tests/docs, consumers, native/Wasm
+features and installed owner/Timers raw/prepared-call × Wire/Candid profiles.
+Prepared-version composition graphs and publication's separate lint/archive
+verification passed. Runtime's receipt is
+`target/release-validation/qualification.vfRxyF/receipt.json`; Platform's is
+`target/release-validation/qualification.rWavht/receipt.json`.
+Publication selections: `target/publication/publish.selection.1jdY3S` (Runtime)
+and `target/publication/publish.selection.H2GEEB` (Platform). Cargo confirmed
+registry visibility; its refreshed index checksums match all four qualified
+archives. Verification: `target/crypto-reversal-publication/registry-archive-verification.txt`.
+GitHub refs were reconciled against the local tags.
 
-Focused facade Clippy, eight library tests and twelve integration tests pass.
-Four separate native/Wasm consumers (certification, creation, verification, Agent),
-the 17-selection native/Wasm feature matrix, combined signature+Runtime Wasm
-compilation/graph, feature-contract/closure/graph and runtime-refusal fixtures
-pass. Remaining Runtime/Principal/management source guards pass. Evidence:
-`target/shared0293-upstream-signature-*`; prior BLS-only evidence is retained in
-`target/shared0293-upstream-bls-*`. Full CI/release qualification was not run.
+Retained failures: the initial gate `qualification.fKwyRr` reached installed
+Runtime without a configured server. Explicit lock refresh fixed subsequent
+stale fixture selections. All eight installed profiles then passed. GitHub's
+first Platform atomic push returned HTTP 500; remote reconciliation showed no
+partial delivery, and the saved exact-version resume succeeded without retagging.
+Logs: `target/runtime0191-{release-qualified,publish}.log` and
+`target/platform0220-{release,release-resume,publish}.log`.
 
-Shared 0.29.3 at `afccb9947d26bbae13d4c4a143d2fd5f0c2c07a4` remains adopted
-locally through the committed-revision exporter. The earlier owned unit/fixture
-test separations remain in macros, CDK call policy/System API text, prepared-call,
-installed-runtime, stable-identity and packaging fixtures; generator/admission
-copies follow their canonical tests. Certificate conversion tests and the
-conversion implementation are now obsolete and removed by the cut above.
-Malformed-Candid integration/fuzz fixtures use ordinary module discovery; group
-ledgers own pending notes and the root changelog is navigation only. Existing
-focused evidence for those changes is retained under `target/shared0293-*`.
-
-LOC now: 6,876 runtime-classified and 6,093 separate test Rust code lines. Before
-this final cut: 9,314 and 6,892; before BLS removal: 20,614 and 7,188. Counts exclude
-comments/blanks, and a few imported tests remain in runtime-classified files.
-Evidence: `target/shared0293-loc-after-signature-removal.json`.
-
-Publication is authorized for GitHub main/tags and crates.io: Runtime 0.19.1
-(macros/guard included), then Platform 0.22.0. Types stays 0.18.0. Source batch
-1264e76 includes the reviewed Pest update and prior #139 documentation corrections.
-The first full gate passed through Wasm/features/consumers but failed at installed
-Runtime because no server was configured; evidence is retained in
-`target/release-validation/qualification.fKwyRr`. No release metadata or uploads
-were produced. Explicit qualification-lock refresh now selects Testkit 0.84.1
-with its registry Platform 0.21 adapter while retaining the local facade separately.
-
-PocketIC 16.1 is copied locally from the existing prepared bundle and admitted by
-Testkit; `target/pocket-ic1610-admission.log` records the selected path. Use
-`POCKET_IC_BIN=$PWD/.tools/ic-testkit-server/16.1.0-x86_64-linux/pocket-ic`
-for release qualification. The executable SHA-256 is
+For future installed qualification, select
+`POCKET_IC_BIN=$PWD/.tools/ic-testkit-server/16.1.0-x86_64-linux/pocket-ic`.
+Testkit admitted this prepared PocketIC **16.1** bundle; executable SHA-256:
 `b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db`.
-All four owner and four Timers profiles pass with refreshed locks; evidence:
-`target/runtime0191-installed-prequalification-refreshed.log` and
-`target/cdk-runtime.{7zi14T,yXlA0t}`. Fresh full release gates remain required.
-Siblings remain unchanged. Future maintainer “publish” means both GitHub delivery
-and crates.io publication.
+Admission evidence: `target/pocket-ic1610-admission.log`.
+
+LOC: **6,876** runtime-classified and **6,093** separate test Rust code lines,
+down from 20,614/7,188 before the reversal. Counts exclude comments/blanks and
+still classify a few imported tests with runtime files. Evidence:
+`target/shared0293-loc-after-signature-removal.json`. Focused development evidence
+remains under `target/shared0293-*`; no implementation is left only in those files.
 
 ## Delivered Platform 0.21.0 — #139
 

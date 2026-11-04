@@ -29,10 +29,10 @@ the complete closure, version choices and source/archive adoption evidence.
 
 ## APIs, consumers and maintenance ownership
 
-The pending 0.22 cut returns BLS, certification and canister-signature
+Platform 0.22 returns BLS, certification and canister-signature
 cryptography to registry dependencies. Platform retains only delegation, issuer
 conversion, DER/key admission and authenticated-time extraction. See the
-[current dependency contract](migration.md#upstream-cryptographic-dependency-cut-pending-022);
+[current dependency contract](migration.md#upstream-cryptographic-dependency-cut-022);
 earlier release narratives below retain historical packaging evidence.
 
 The pending 0.9.0 management cut owns only sibling-canister-used DTOs on Wasm:

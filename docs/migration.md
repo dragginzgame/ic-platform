@@ -1,6 +1,6 @@
 # Candid and runtime ownership
 
-## Upstream cryptographic dependency cut (pending 0.22)
+## Upstream cryptographic dependency cut (0.22)
 
 The embedded BLS curve/verifier, certification certificate/hash/tree code and
 canister-signature creation/verifier bodies are removed, together with their
