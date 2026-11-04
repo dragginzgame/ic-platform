@@ -5,6 +5,15 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.18.1] - Unreleased
+
+### 🐛 Fixed
+
+- Select upstream Principal Serde with `principal-external`, so passive records
+  using ExternalPrincipal no longer need Candid to supply its serialization
+  traits. Preserve canonical identities, conversion behavior and bytes; keep
+  defaults empty and self-authentication separate. No new production packages.
+
 ## [0.18.0] - 2026-11-02
 
 ### ⚠️ Breaking

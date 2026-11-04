@@ -1,5 +1,17 @@
 # Candid and runtime ownership
 
+## Passive contract consumers (Types 0.18.1, pending)
+
+Types' `principal-external` now explicitly selects upstream Principal Serde.
+This removes a hidden dependence on Candid feature unification for passive DTOs;
+the owned and external identities, conversion behavior and bytes remain unchanged.
+The correction is local and unreleased. Existing facade feature forwarding is
+sufficient; Candid and external-protocol ownership remain in the facade.
+See the [consumer boundary audit](audits/passive-contract-boundaries-2026-11-04.md)
+for completed Platform work, required sibling feature/import migrations, old
+IC Crates identity-cohort constraints and focused evidence. No sibling adoption
+or release is implied.
+
 ## Upstream cryptographic dependency cut (0.22)
 
 The embedded BLS curve/verifier, certification certificate/hash/tree code and

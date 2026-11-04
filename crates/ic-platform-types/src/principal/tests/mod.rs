@@ -140,6 +140,55 @@ fn malformed_text_and_bytes_are_fallible_and_bounded() {
     );
 }
 
+#[cfg(feature = "principal-external")]
+#[test]
+fn passive_external_principal_fields_keep_upstream_serde_without_candid() {
+    #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+    struct PassiveRecord {
+        owner: ExternalPrincipal,
+    }
+
+    for len in 0..=Principal::MAX_LENGTH_IN_BYTES {
+        let bytes = &[2; 29][..len];
+        let owned = Principal::from_slice(bytes);
+        let record = PassiveRecord {
+            owner: owned.into(),
+        };
+        assert_tokens(
+            &record.compact(),
+            &[
+                Token::Struct {
+                    name: "PassiveRecord",
+                    len: 1,
+                },
+                Token::Str("owner"),
+                Token::Bytes(bytes),
+                Token::StructEnd,
+            ],
+        );
+        let json = serde_json::to_string(&record).unwrap();
+        assert_eq!(json, format!("{{\"owner\":\"{}\"}}", owned.to_text()));
+        assert_eq!(
+            serde_json::from_str::<PassiveRecord>(&json).unwrap(),
+            record
+        );
+        let encoded = postcard::to_allocvec(&record).unwrap();
+        let mut expected = vec![len as u8];
+        expected.extend_from_slice(bytes);
+        assert_eq!(encoded, expected);
+        assert_eq!(
+            postcard::from_bytes::<PassiveRecord>(&encoded).unwrap(),
+            record
+        );
+        let encoded = serde_cbor::to_vec(&record).unwrap();
+        assert_eq!(
+            serde_cbor::from_slice::<PassiveRecord>(&encoded).unwrap(),
+            record
+        );
+        assert_eq!(Principal::from(record.owner), owned);
+    }
+}
+
 #[test]
 fn serde_bytes_never_consume_a_candid_marker() {
     for bytes in [&[][..], &[4][..], &[2, 1][..], &[0; 29][..]] {

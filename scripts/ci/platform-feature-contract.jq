@@ -11,6 +11,15 @@ require((.features.candid == ["principal-external", "dep:candid", "candid/bignum
 require(((.features | keys) == $policy[0].features); "Platform feature inventory changed; update the graph matrix and isolation policy") |
 require((.features["candid-endpoint"] == ["cdk", "candid"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
 require((.features.principal == ["dep:ic-platform-types", "dep:serde"] and .features["principal-external"] == ["principal", "ic-platform-types/principal-external"] and .features["principal-self-authenticating"] == ["principal", "ic-platform-types/principal-self-authenticating"] and ([.dependencies[] | select(.name == "ic_principal")] | length == 0)); "Owned Principal, external byte conversion and self-authentication must remain separate") |
+require(([$metadata.packages[] | select(.name == "ic-platform-types")] | length == 1 and
+    .[0].features.default == [] and
+    .[0].features["principal-external"] == ["dep:ic_principal", "ic_principal/serde"] and
+    .[0].features["principal-self-authenticating"] == ["dep:sha2_11"] and
+    ([.[0].dependencies[] | select(.kind == null and
+        (.name | test("^(candid(_parser)?|ic-platform(-runtime)?|ic-agent)$")))] | length == 0) and
+    ([.[0].dependencies[] | select(.name == "ic_principal" and .kind == null)] |
+        length == 1 and .[0].optional and .[0].target == null and (.[0].uses_default_features | not) and .[0].features == ["convert"]));
+    "Types external Principal must supply upstream Serde without default hashing or a codec") |
 require((.features.default == []); "Platform must declare empty default features") |
 require((.links == null and .features.executor == ["ic0", "ic-platform-runtime/executor"] and
     .features.runtime == ["principal", "executor", "ic0", "ic-platform-runtime/runtime"] and

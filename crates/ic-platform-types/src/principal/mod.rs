@@ -343,6 +343,7 @@ impl<'de> serde::Deserialize<'de> for Principal {
 
 /// Original registry identity required by external IC clients and DTOs.
 /// Convert explicitly at the boundary; owned application payloads use [Principal].
+/// This capability includes upstream Serde without selecting Candid or hashing.
 #[cfg(feature = "principal-external")]
 pub use ic_principal::Principal as ExternalPrincipal;
 /// Original parse errors for the explicitly external principal identity.

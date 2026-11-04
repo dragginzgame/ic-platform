@@ -12,7 +12,7 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [features]
 default = []
-principal-external = ["dep:ic_principal"]
+principal-external = ["dep:ic_principal", "ic_principal/serde"]
 principal-self-authenticating = ["dep:sha2_11"]
 
 [dependencies]

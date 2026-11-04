@@ -19,6 +19,21 @@ for selection in 'map(select(.name != "ic-platform"))' '. + map(select(.name == 
     fi
     grep -q 'expected exactly one ic-platform package' "$fixture/error"
 done
+# A passive external Principal must serialize without borrowing Candid's features.
+while IFS= read -r mutation; do
+    "$jq" "(.packages[] | select(.name == \"ic-platform-types\")) |= ($mutation)" \
+        "$fixture/metadata.json" > "$fixture/invalid.json"
+    if contract "$fixture/invalid.json" 2> "$fixture/error"; then
+        echo "Types contract admitted mutation: $mutation" >&2; exit 1
+    fi
+    grep -q 'Types external Principal' "$fixture/error"
+done <<'MUTATIONS'
+.features["principal-external"] = ["dep:ic_principal"]
+.features["principal-external"] += ["principal-self-authenticating"]
+.features.default = ["principal-external"]
+(.dependencies[] | select(.name == "ic_principal" and .kind == null)).uses_default_features = true
+.dependencies += [{name:"candid",kind:null}]
+MUTATIONS
 # Mutate actual Cargo observations, retaining each policy's refusal evidence.
 while IFS= read -r mutation; do
     "$jq" "(.packages[] | select(.name == \"ic-platform\")) |= ($mutation)" \

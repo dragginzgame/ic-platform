@@ -29,6 +29,11 @@ the complete closure, version choices and source/archive adoption evidence.
 
 ## APIs, consumers and maintenance ownership
 
+The [passive consumer audit](audits/passive-contract-boundaries-2026-11-04.md)
+records the Types-only identity path and required consumer-owned Candid gates.
+The pending Types 0.18.1 correction enables registry Principal Serde through
+`principal-external`, without adding Candid, execution, hashing or new packages.
+
 Platform 0.22 returns BLS, certification and canister-signature
 cryptography to registry dependencies. Platform retains only delegation, issuer
 conversion, DER/key admission and authenticated-time extraction. See the
@@ -359,7 +364,7 @@ profiles retain their explicitly external identities.
 | ic-platform-runtime | runtime | dep:ic-platform-types, dep:pin-project-lite, dep:serde, dep:thiserror, executor |
 | ic-platform-runtime-guard | default |  |
 | ic-platform-types | default |  |
-| ic-platform-types | principal-external | dep:ic_principal |
+| ic-platform-types | principal-external | dep:ic_principal, ic_principal/serde |
 | ic-platform-types | principal-self-authenticating | dep:sha2_11 |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |

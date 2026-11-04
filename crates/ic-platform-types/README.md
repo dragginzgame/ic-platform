@@ -7,7 +7,8 @@ and lockfile. Platform re-exports these exact definitions; Wire owns its schema
 implementations. The independent series continues from published Types 0.15.0.
 
 The default feature set is empty. Bytes, bounded text and Serde are always
-available; `principal-external` adds registry Principal identities/conversions,
+available; `principal-external` adds registry Principal identities/conversions
+and their upstream Serde implementation without a Candid dependency,
 and `principal-self-authenticating` selects the unchanged imported derivation with
 upstream SHA-224, independently of registry Principal. Enable both when external
 conversions are also required.

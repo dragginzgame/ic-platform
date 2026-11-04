@@ -1,5 +1,29 @@
 # Current handoff — 2026-11-04
 
+## Local passive-contract audit — pending Types 0.18.1
+
+The [boundary audit](../audits/passive-contract-boundaries-2026-11-04.md) separates
+completed Platform work from required Canic/Blob/IC Crates migrations. Three
+release groups and their ownership remain unchanged. No sibling source or release
+was changed; hashes of their observed Rust/manifests/locks remained identical.
+
+One real gap is corrected locally: Types `principal-external` now selects upstream
+Principal Serde explicitly. Without this, passive ExternalPrincipal DTO fields
+borrowed Serde activation from Candid. The new regression failed with E0277 before
+the fix and passes afterward across all principal lengths, Postcard/CBOR/JSON and
+conversion bytes. No Candid, runtime, hashing or new packages enter Types. The
+facade's existing forwarding is sufficient. Package versions remain unchanged;
+the pending correction must be published before registry-only external-Serde
+consumer adoption. Existing facade consumers already selecting Candid are unchanged.
+
+Focused Types/facade Clippy, 16 Types tests, three identity-consumer and six Candid
+tests pass. Native/Wasm identity package sets remain unchanged and exclude
+codecs/execution/crypto. Feature-contract mutations and Principal source guards
+pass. Read-only consumer checks pass: Canic u128 overflow and bounded-magnitude
+canonicality, Blob's independent Caffeine request vector, and IC Crates' gateway
+Candid records. Evidence: `target/passive-contract-audit/`. No full CI, fleet
+matrix, sibling migration or release was run for this audit.
+
 ## Delivered Platform 0.22.0 and Runtime 0.19.1
 
 Platform **0.22.0** is pushed and published from
