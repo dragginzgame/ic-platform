@@ -62,7 +62,7 @@ next = { package = "ic-platform", path = "$fixture/next/crates/ic-platform", def
 ic-platform-types = { path = "$root/crates/ic-platform-types", features = ["principal-external"] }
 ic-wire = { path = "$fixture/wire", features = ["platform-types"] }
 MANIFEST
-cp scripts/fixtures/stable-identities/lib.rs "$fixture/consumer/src/lib.rs"
+cp scripts/fixtures/stable-identities/{lib,tests}.rs "$fixture/consumer/src/"
 cargo metadata --manifest-path "$fixture/consumer/Cargo.toml" --offline --all-features --format-version 1 > "$fixture/metadata.json"
 bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler.txt"
 build="${CARGO_TARGET_DIR:-$root/target/stable-identities-build}"

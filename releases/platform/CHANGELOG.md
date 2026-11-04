@@ -4,6 +4,35 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.22.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Return BLS cryptography to upstream dependencies and delete the embedded curve,
+  verifier, algorithm tests and source guards. Preserve key/signature bytes and
+  identity-key rejection through small delegating key adapters. Signature and
+  error types now have upstream identity; align consumers that exchange them.
+  Defaults and RNG remain disabled, with allocated verification selected.
+
+- Return certification and canister-signature formats/hashing/verification to
+  registry dependencies. Certificate/tree types now share upstream identities
+  with native Agent; remove recursive conversion adapters. Preserve owned issuer
+  fields, DER framing, root/delegated identity-key refusal and authenticated time.
+  Key admission/time extraction repeat CBOR decoding. Upstream packaging restores transitive
+  Candid/printer, raw IC0, CBOR and a lazy root cache; no store API is exported.
+  Remove embedded algorithm suites/source guards and the unused direct 4.x
+  representation-independent-hash test dependency. No Wasm/performance win claimed.
+
+### 🧪 Testing
+
+- Use ordinary module discovery for the shared malformed-Candid test/fuzz fixture.
+  Adopt Shared 0.29.3's test-layout, changelog and snapshot-export rules; preserve
+  imported source-layout exceptions and keep the root changelog as navigation.
+- Format the shared malformed-Candid corpus directly while keeping the fuzz
+  harness's copied module from breaking standalone formatting checks.
+- Separate stable-identity and Candid packaging experiment tests from fixture
+  implementations, preserving feature selection and generated-package coverage.
+
 ## [0.21.0] - 2026-11-03
 
 ### ⚠️ Breaking
@@ -12,7 +41,9 @@ See also the [Types ledger](../types/CHANGELOG.md).
   client package, facade `pocket-ic` feature and module, and its release group.
   Testkit now owns one version for client and lifecycle helpers. Keep historical
   releases; migrate native test fixtures to Testkit 0.84.0. No Runtime,
-  Types, Agent or crypto implementation changes.
+  Types, Agent or crypto implementation changes
+  ([#139 — Transfer PocketIC client ownership to Testkit](https://github.com/dragginzgame/ic-platform/issues/139),
+  [Tooling #324 — Merge the PocketIC client into ic-testkit](https://github.com/dragginzgame/ic-tooling/issues/324)).
 - Adopt Shared 0.29.1 ownership and contribution rules. Release selection now admits Platform,
   Runtime and Types only; retain full release validation pending fresh native
   qualification of this three-group mapping.

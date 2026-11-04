@@ -55,7 +55,7 @@ function reject(reason) {
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
     external_dto = enabled("cmc-types") || enabled("icp-ledger-types") || enabled("cycles-ledger-types") || enabled("nns-registry-types") || enabled("certified-assets-types")
-    candid = external_endpoint || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto
+    candid = external_endpoint || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto || creation
     external_principal = enabled("principal-external")
     principal = enabled("principal")
     hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp
@@ -77,11 +77,11 @@ function reject(reason) {
             reject("external Principal in owned-only graph")
         if (name ~ /^(sha2|digest)$/ && !hashing)
             reject("unselected hashing")
-        if (name == "ic-representation-independent-hash" && !(agent))
-            reject("reference-only signature hashing in production")
-        if ((name == "serde_cbor" || name == "half") && !(verification || agent || parser))
+        if (name == "ic-representation-independent-hash" && !(agent || creation))
+            reject("unselected signature hashing")
+        if ((name == "serde_cbor" || name == "half") && !(creation || verification || agent || parser))
             reject("unselected CBOR parser")
-        if (name == "pretty" && !(enabled("candid-service") || parser || agent || (native && management)))
+        if (name == "pretty" && !(enabled("candid-service") || parser || agent || creation || (native && management)))
             reject("unselected Candid service printer")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") reject("host artifact codecs belong to Tooling consumers")
@@ -112,17 +112,18 @@ function reject(reason) {
         if (name ~ /^(ic-wire|ic-wire-derive)$/) reject("Wire in production")
         if (host_capability == "candid-parser" && !parser) reject("unselected host parser")
         if (host_capability == "agent" && !agent) reject("unselected host Agent")
-        if (platform_forbidden("retired-cdk", name)) reject("external CDK/executor/IC0 supplier is retired")
+        if (platform_forbidden("retired-cdk", name) && !(name == "ic0" && creation && registry && version == "v1.2.0")) reject("external CDK/executor/IC0 supplier is retired")
         if (name == "ic-platform-runtime" && !raw_system) reject("unselected runtime owner")
         if (name == "ic-platform-runtime-guard") {
             if (!executor || (line != guard && line != guard " (*)")) reject("unqualified runtime singleton guard")
             found_guard = 1
         }
         if (name == "ic-platform-macros" && (!cdk || (line != generator && line != generator " (*)"))) reject("unqualified generator")
-        if (name == "ic-canister-sig-creation" || name == "ic-signature-verification") reject("retired signature package")
-        if (name == "ic-verify-bls-signature" && (!agent || version != "v0.6.0" || !registry)) reject("registry BLS wrapper is reserved for native Agent")
-        if (name == "ic_bls12_381" && (!agent || version != "v0.10.1" || !registry)) reject("registry BLS curve is reserved for native Agent")
-        if (name == "ic-certification" && (!(agent) || version != "v3.2.0" || !registry)) reject("unqualified certification")
+        if (name == "ic-canister-sig-creation" && (!creation || !registry || version != "v1.3.1")) reject("unqualified signature key dependency")
+        if (name == "ic-signature-verification" && (!verification || !registry || version != "v0.3.0")) reject("unqualified signature verifier")
+        if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified upstream BLS verifier")
+        if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified upstream BLS curve")
+        if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
         if (name == "ic-management-canister-types" && !(registry && native && (management) && version == "v0.11.0")) reject("unselected or Wasm registry management types")
         if (name == "icrc-ledger-types" || name == "icrc-cbor") reject("retired upstream ledger package")
         if (name == "ic-error-types" && !(agent)) reject("runtime error catalogue")

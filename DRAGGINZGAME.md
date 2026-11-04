@@ -150,11 +150,11 @@ changing or reviewing commands.
 
 ## Metrics and logging
 
-**All our Rust crates use `ic-metrics` for metrics and `ic-logging` for logging.**
-Do not maintain custom or competing implementations. Raise capability gaps as
-issues in IC Observability and improve the canonical crates there. Ordinary
-benchmark/statistical calculations stay with their owning tool and do not by
-themselves require a Metrics dependency. Read the
+**`ic-metrics` is only for operational instrumentation of the Canic application
+tree, reported through the shared endpoint owned by Canic's metrics adapter.**
+It is not a general math, statistics or validation library; do not depend on it
+or re-export its helpers for those purposes. Use `ic-logging` for logging.
+Read the
 [observability contract](rules/engineering-details.md#metrics-and-logging)
 when adding, changing or reviewing metrics and logging.
 
@@ -204,10 +204,12 @@ the existing full gate. Repository-wide CI remains separate and unchanged.
 
 ## Changelogs and artifact preservation
 
-Use IcyDB-style emoji category sections in root release notes; read the
+Use IcyDB-style emoji category sections in the owning release changelog; read the
 [changelog rules](rules/changelogs.md) when updating them. Every issue fixed must
-have a direct link in root `CHANGELOG.md` before handoff, including when detailed
-or release-group notes hold the full explanation. Preserve selected
+have a direct link in that changelog before handoff: root `CHANGELOG.md` for a
+workspace without independent release groups, or `releases/<group>/CHANGELOG.md`
+for the owning group. A grouped workspace's root remains a navigation index;
+it does not need duplicate issue links. Preserve selected
 deliverables and required provenance/recovery evidence. Regenerable tool-build
 scratch and obsolete cache generations need bounded retention; they are not
 permanent evidence. Consumer release artifacts remain protected from implicit
@@ -225,6 +227,10 @@ Production stable stores use `ic-storage`-issued checked allocation handles. Rea
 storage allocation, admission, backing access or persistence integrations.
 
 ## Rust workspaces and portable tooling
+
+Keep Rust tests and test-only helpers in `tests.rs` or a `tests/` directory
+wherever practical, so file-based LOC tools can distinguish test source.
+Follow the [test layout rule](docs/principles/rust-code-hygiene.md#tests).
 
 Use ordinary Rust module discovery. `#[path]` module attributes, including
 conditional path overrides, are prohibited. Follow the

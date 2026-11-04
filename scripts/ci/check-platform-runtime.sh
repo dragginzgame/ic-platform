@@ -77,11 +77,13 @@ if [[ "$qualification" == timers ]]; then
     printf '\nic-timers = { %s }\n' "$timers" >> "$fixture/crates/canister/Cargo.toml"
 fi
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
+cp scripts/fixtures/cdk-runtime/canister/tests.rs "$fixture/crates/canister/src/tests.rs"
 mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
 cp crates/ic-platform/tests/management_consumer.rs "$fixture/crates/canister/src/management_proof/mod.rs"
 cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/src/management_proof/fixtures/"
 cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister} "$fixture/crates/canister/src/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
+cp scripts/fixtures/cdk-runtime/driver/tests.rs "$fixture/apps/driver/src/tests.rs"
 cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver} "$fixture/apps/driver/src/"
 lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
 if [[ "$qualification" == timers ]]; then lock="$root/scripts/fixtures/timers-runtime/Cargo.lock"; fi

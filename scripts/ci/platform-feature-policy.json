@@ -32,8 +32,7 @@
   "native_leaves": {
     "agent": {
       "dependencies": [
-        "ic-agent",
-        "ic-certification"
+        "ic-agent"
       ],
       "prerequisites": [
         "principal-external"

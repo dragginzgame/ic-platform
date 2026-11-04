@@ -32,8 +32,10 @@ function bodies, cryptographic behavior, protocol constants or budgets changed.
 Tooling’s focused Linux checks passed: native and Wasm Clippy, 111 library tests,
 management identity, source/mutation guards, native/Wasm graph profiles, archived
 client imports and installed PocketIC 16.1 management/snapshot restoration.
-Fresh macOS Intel/ARM transfer qualification remains pending. Platform’s historical
-three-host donor evidence does not substitute for destination qualification.
+Testkit 0.84.0's [destination CI](https://github.com/dragginzgame/ic-tooling/actions/runs/41681210184)
+passed native CI and publication qualification on Linux, macOS Intel and macOS
+ARM against release source `5f91f4c`. The separate focused release-contract stage
+was still running on Intel at the closure check; it is not client-transfer evidence.
 
 Typed failures, accepted-operation custody, explicit Busy-only retry, uncertain
 request no-replay behavior and bounded snapshot transfer remain owned by the

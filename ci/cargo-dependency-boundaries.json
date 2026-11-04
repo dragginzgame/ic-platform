@@ -126,5 +126,11 @@
   {
     "dependency": "ic-transport-types",
     "allowed_packages": []
+  },
+  {
+    "dependency": "ic_bls12_381",
+    "allowed_packages": [
+      "ic-platform"
+    ]
   }
 ]

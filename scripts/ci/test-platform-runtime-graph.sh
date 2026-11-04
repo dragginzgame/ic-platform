@@ -22,12 +22,10 @@ for dependency in 'candid v0.10.38' 'candid_derive v0.10.38' 'ic-cdk v0.20.3' 'i
         echo "Unexpectedly admitted $dependency" >&2; exit 1
     fi
 done
-for missing in ic-platform-runtime; do
-    awk -v missing="$missing" '$1 != missing' "$fixture/control" > "$fixture/rejected"
-    if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/rejected" > "$fixture/log" 2>&1; then
-        echo "Unexpectedly admitted missing $missing" >&2; exit 1
-    fi
-done
+awk '$1 != "ic-platform-runtime"' "$fixture/control" > "$fixture/rejected"
+if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/rejected" > "$fixture/log" 2>&1; then
+    echo 'Unexpectedly admitted missing ic-platform-runtime' >&2; exit 1
+fi
 echo 'Runtime graph control and rejection cases passed'
 cp "$fixture/control" "$fixture/external"
 printf 'candid v0.10.38\ncandid_derive v0.10.38\n' >> "$fixture/external"
@@ -41,3 +39,16 @@ bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" --ex
 printf 'ic-agent v0.49.2\n' >> "$fixture/external"
 if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" --external-candid --native-management > "$fixture/log" 2>&1; then exit 1; fi
 echo 'Management native mirror and Wasm exclusion passed'
+# Selected registry signature creation may bring raw IC0, never an executor.
+cp "$fixture/control" "$fixture/signature"
+printf 'candid v0.10.39\nic-canister-sig-creation v1.3.1\nic0 v1.2.0\n' >> "$fixture/signature"
+bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/signature" --external-candid
+for mutation in 's/ic0 v1.2.0/ic0 v1.1.0/' 's/ic0 v1.2.0/ic0 v1.2.0 (\/local)/' 's/ic-canister-sig-creation v1.3.1/ic-canister-sig-creation v1.3.2/' 's/ic-canister-sig-creation v1.3.1/ic-canister-sig-creation v1.3.1 (\/local)/'; do
+    sed "$mutation" "$fixture/signature" > "$fixture/rejected"
+    if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/rejected" --external-candid > "$fixture/log" 2>&1; then
+        echo "Unexpectedly admitted signature IC0 supplier mutation: $mutation" >&2; exit 1
+    fi
+done
+printf 'ic-cdk-executor v2.0.0\n' >> "$fixture/signature"
+if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/signature" --external-candid > "$fixture/log" 2>&1; then exit 1; fi
+echo 'Signature raw IC0 admission preserves executor/source isolation'

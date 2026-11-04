@@ -57,7 +57,7 @@ fn system_text(bytes: Vec<u8>, failure: &'static str) -> String {
 }
 
 #[cfg(test)]
-mod text_tests;
+mod tests;
 
 /// Replies to the sender with the data.
 pub fn msg_reply<T: AsRef<[u8]>>(data: T) {

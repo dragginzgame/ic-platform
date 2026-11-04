@@ -1,11 +1,9 @@
 #![no_main]
 
-mod candid_malformed {
-    include!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/src/candid_malformed.rs"
-    ));
-}
+// The harness copies this shared module beside main.rs before compilation.
+// Its canonical source is formatted separately by FORMAT_EXTRA_SOURCES.
+#[rustfmt::skip]
+mod candid_malformed;
 
 use ic_platform::{Account, Principal, account::ExternalAccount, principal::ExternalPrincipal};
 

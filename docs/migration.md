@@ -1,5 +1,50 @@
 # Candid and runtime ownership
 
+## Upstream cryptographic dependency cut (pending 0.22)
+
+The embedded BLS curve/verifier, certification certificate/hash/tree code and
+canister-signature creation/verifier bodies are removed, together with their
+algorithm suites, vectors, provenance payloads and four reconstruction guards.
+Use registry ic-verify-bls-signature 0.6, ic_bls12_381 0.10, ic-certification 3.2,
+ic-canister-sig-creation 1.3.1 and ic-signature-verification 0.3. No cryptographic
+primitive, key encoding, domain/hash or signature algorithm is implemented here.
+Certification stays at 3.2 to share the native Agent/signature suppliers' identity.
+
+Certificate/tree, BLS Signature and BLS error types now have registry identity;
+consumers exchanging those Rust types must align with the Platform minor. The
+native Agent accepts the same certificate directly, removing recursive copying
+conversions. Principal/Account and Runtime identities remain unchanged.
+CanisterSigPublicKey retains owned Principal/seed fields through a delegating
+adapter; all DER/raw encoding and hash operations call upstream. PublicKey and
+PrivateKey likewise delegate BLS operations. Public-key construction performs a
+second upstream point parse and caches identity admission for repeated verification.
+
+Keep #72 short-form DER framing admission before the upstream key parser. Registry
+BLS 0.6.0 lacks #127's identity-key fix, so canister verification additionally
+rejects identity roots and identity delegated subnet keys, using upstream point
+operations. Integration regressions cover direct and both delegated levels.
+No successful result or signing time is returned until all checks pass.
+
+The adapter calls the upstream verifier first, then decodes the same envelope
+and certificate bytes for delegated-key admission and optional signing-time
+extraction. This repeats CBOR decoding because upstream exposes no evidence API. It retains
+u64/nonminimal-encoding behavior and refuses duplicate, missing or malformed time;
+delegation time is not signing time. Consumers retain budgets, trust and freshness.
+
+Returning creation/verifier ownership upstream restores their transitive Candid
+printer, raw IC0, CBOR, representation-independent hashing and lazy root-key cache.
+These are packaging costs; Platform does not expose the upstream store or cache.
+The unused direct development-only representation-independent-hash 4.x dependency
+is removed. Raw Runtime/executor/IC0, certification-only and standalone BLS retain
+their codec/host isolation. The extra upstream raw IC0 supplier in signature graphs
+contains no executor; the exact Runtime singleton requirement is unchanged.
+
+This is a maintenance reduction, not a measured Wasm-size or performance win.
+Algorithm tests stay upstream; Platform retains byte/admission/integration tests.
+Earlier embedded-source sections below are historical and superseded by this cut;
+removed provenance links point to the preceding release. Runtime and Types do not
+advance for this facade change.
+
 ## Account byte-adapter cut (#138)
 
 The next Types minor changes Account’s optional subaccount to the standard
@@ -1603,7 +1648,7 @@ Only existing SHA-256, hex, Serde and Serde bytes dependencies are selected.
 The unexposed nested_rb_tree module and its rstest dependency are omitted.
 
 Hash/tree/Serde bodies, original tests and Apache licensing are preserved under
-an exact-reconstruction guard. [Provenance and admissions](../crates/ic-platform/src/certification/upstream/NOTICE.md)
+an exact-reconstruction guard. [Provenance and admissions](https://github.com/dragginzgame/ic-platform/blob/platform-v0.21.0/crates/ic-platform/src/certification/upstream/NOTICE.md)
 record the source, Rust 2024 adaptations and the review through upstream 4.0.1.
 That newer package changes only its docs.rs attribute relative to this import.
 
@@ -1715,7 +1760,7 @@ The `bls` capability now owns the existing ic_bls12_381 0.10.1 implementation
 under a private module. No new crate, feature or public curve API is introduced.
 The wrapper's public paths and byte formats remain unchanged by this step;
 the earlier wrapper ownership change still requires the 0.16 release.
-See [curve provenance](../crates/ic-platform/src/bls/curve/NOTICE.md) for the exact
+See [curve provenance](https://github.com/dragginzgame/ic-platform/blob/platform-v0.21.0/crates/ic-platform/src/bls/curve/NOTICE.md) for the exact
 revision, licenses, upstream review and admitted packaging transformations.
 
 All arithmetic, constants, original source tests and binary vector files remain
@@ -1753,7 +1798,7 @@ The signature implementation was packaged in Platform for 0.4. The pending 0.16
 line also packages the upstream BLS wrapper, with one std LazyLock
 cache replacing lazy_static. BLS key/signature/error types now have Platform
 identity; public paths and serialized bytes remain. See
-[BLS provenance](../crates/ic-platform/src/bls/upstream/NOTICE.md) and
+[BLS provenance](https://github.com/dragginzgame/ic-platform/blob/platform-v0.21.0/crates/ic-platform/src/bls/upstream/NOTICE.md) and
 [the earlier identity migration](#runtime-codes-and-signature-packaging-04).
 The reviewed upstream #127 correction rejects identity public keys at verification
 entry and preserves its exact regression vector. All other cryptographic bodies

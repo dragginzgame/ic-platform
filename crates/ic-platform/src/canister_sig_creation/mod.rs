@@ -1,15 +1,71 @@
-//! Explicit upstream canister-signature public-key formats and hashing.
+//! Upstream canister-signature key formats and hashing with owned issuer bytes.
 //!
-//! These retain upstream-authored DER/raw encodings and domain separators.
-//! `CanisterSigPublicKey` uses Platform's owned Principal for its issuer; no
-//! external Principal conversion or self-authentication capability is selected.
-//! The imported 1.3.1 implementation omits the unexposed store and Candid import;
-//! this module does not expose that store or publish certification roots.
-//! Owned framing admission rejects truncated/noncanonical short-form DER before
-//! the unchanged parser. Preserve consumer byte budgets and seed/issuer checks.
-//! Long-form DER remains unsupported; hashing does not authenticate.
+//! Encoding, decoding, hashing and domain separation delegate upstream. The
+//! adapter preserves Platform Principal fields and checked DER framing. The
+//! upstream signature store is not exported; consumers retain store lifecycle.
 
-pub use crate::signature_upstream::creation::{
-    CanisterSigPublicKey, IC_ROOT_PK_DER, IC_ROOT_PK_DER_PREFIX, extract_raw_root_pk_from_der,
-    hash_bytes, hash_with_domain,
+pub(crate) mod admission;
+
+use crate::principal::{ExternalPrincipal, Principal};
+
+pub use ic_canister_sig_creation::{
+    IC_ROOT_PK_DER, IC_ROOT_PK_DER_PREFIX, extract_raw_root_pk_from_der, hash_bytes,
+    hash_with_domain,
 };
+
+/// An upstream canister-signature key with Platform's canonical issuer identity.
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct CanisterSigPublicKey {
+    /// Canister issuing this signature key.
+    pub canister_id: Principal,
+    /// Consumer-selected seed, preserved without normalization.
+    pub seed: Vec<u8>,
+}
+
+impl CanisterSigPublicKey {
+    /// Construct a key without changing the issuer or seed.
+    pub fn new(canister_id: Principal, seed: Vec<u8>) -> Self {
+        Self { canister_id, seed }
+    }
+
+    fn from_upstream(key: ic_canister_sig_creation::CanisterSigPublicKey) -> Self {
+        Self {
+            canister_id: key.canister_id.into(),
+            seed: key.seed,
+        }
+    }
+
+    fn upstream(&self) -> ic_canister_sig_creation::CanisterSigPublicKey {
+        ic_canister_sig_creation::CanisterSigPublicKey::new(
+            ExternalPrincipal::from(self.canister_id),
+            self.seed.clone(),
+        )
+    }
+
+    /// Decode the upstream raw key format.
+    ///
+    /// # Errors
+    /// Returns the unchanged upstream parsing diagnostic.
+    pub fn try_from_raw(bytes: &[u8]) -> Result<Self, String> {
+        ic_canister_sig_creation::CanisterSigPublicKey::try_from_raw(bytes).map(Self::from_upstream)
+    }
+
+    /// Encode the key using the upstream DER implementation.
+    pub fn to_der(&self) -> Vec<u8> {
+        self.upstream().to_der()
+    }
+
+    /// Encode the key using the upstream raw implementation.
+    pub fn to_raw(&self) -> Vec<u8> {
+        self.upstream().to_raw()
+    }
+}
+
+impl TryFrom<&[u8]> for CanisterSigPublicKey {
+    type Error = String;
+
+    fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+        admission::canister_sig_der(bytes)?;
+        ic_canister_sig_creation::CanisterSigPublicKey::try_from(bytes).map(Self::from_upstream)
+    }
+}

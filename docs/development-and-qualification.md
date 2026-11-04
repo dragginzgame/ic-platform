@@ -294,23 +294,25 @@ enable `candid` separately when using Platform's encoding and bounded decoding.
 Ledger DTOs similarly bring transitive Candid without selecting Platform's codec,
 executor, parser or Agent. Upstream defaults/storage integration are disabled;
 the graph gate rejects `ic-stable-structures` and unselected ledger dependencies.
-Canister-signature creation and verification select maintained certification but
-no registry Principal, Candid or raw ic0; only verification brings BLS and selects
-the creation surface. CanisterSigPublicKey accepts/returns the owned Principal.
-BLS alone excludes creation, Candid, certification, CDK and
-host tooling. Its upstream defaults/RNG are disabled and alloc is explicit.
-Graph admission rejects retired registry signature packages and checks BLS and
-certification identities; other consumer graphs still need their own qualification.
-Only native Agent or PocketIC graphs retain `ic-certification`. Native Agent APIs
-accept `agent::ExternalCertificate`; explicit `From` conversions to/from owned
-`certification::Certificate` are available with both features. They rebuild tree
-boxes and copy labels, preserving bytes without authenticating them.
+Canister-signature creation and verification select upstream certification and
+external Principal conversions. Their registry packages bring Candid/printer,
+CBOR, representation-independent hashing and raw IC0 transitively; only
+verification brings BLS. CanisterSigPublicKey retains the owned Principal field
+through a delegating adapter. DER framing and both root/delegated identity-key
+refusals remain integration guards. Signing-time extraction follows upstream
+verification and requires an additional CBOR decode. The upstream signature store
+is not exported. Standalone BLS still excludes creation, Candid, certification,
+CDK and host tooling; defaults/RNG are disabled and alloc is explicit.
+Graph admission checks the qualified registry signature/BLS/certification suppliers.
+Agent and certification expose the same registry certificate identity, removing
+tree-copying conversions. Consumers own their own qualification.
 `candid_parser` and `ic-agent` are admitted only with explicit native host
 selection; no runtime feature enables them. Host retains strict bounded CBOR decoding;
 trust roots, authentication and application interpretation remain consumer-owned.
 
 Platform embeds the executor and IC0 implementations from upstream 2.0.0/1.2.0.
-Their registry packages are absent. The inherited Cargo singleton guard lives in
+Their registry packages are absent from raw Runtime graphs. The selected upstream
+canister-signature dependency may bring raw IC0, but never another executor. The inherited Cargo singleton guard lives in
 an internal helper selected only by `executor`, requiring one Platform runtime
 owner across Timers and applications. Native consumers without runtime can coexist with
 an unrelated registry executor; task/method handles

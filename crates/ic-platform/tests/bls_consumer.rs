@@ -21,6 +21,15 @@ pub fn roundtrip() {
             Err(())
         );
     }
+    // Derived public keys use the same admission as deserialized public keys.
+    let zero_key = PrivateKey::deserialize(&[0; 32]).unwrap();
+    let zero_signature = zero_key.sign(b"derived identity-key regression");
+    assert_eq!(
+        zero_key
+            .public_key()
+            .verify(b"derived identity-key regression", &zero_signature),
+        Err(())
+    );
     let mut bytes = [0; 32];
     bytes[31] = 1;
     let key = PrivateKey::deserialize(&bytes).unwrap();

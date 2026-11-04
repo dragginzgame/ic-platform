@@ -1,11 +1,16 @@
 use super::*;
 use crate::bls::PrivateKey;
-use crate::certification::upstream::{
-    Certificate, Delegation, HashTree, empty, fork, labeled, leaf, pruned,
-};
+use crate::canister_sig_creation::CanisterSigPublicKey;
+use crate::canister_sig_creation::IC_ROOT_PK_DER_PREFIX;
+use crate::certification::{Certificate, Delegation, HashTree, empty, fork, labeled, leaf, pruned};
 use crate::principal::Principal;
-use crate::signature_upstream::creation::IC_ROOT_PK_DER_PREFIX;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct CanisterSignature {
+    certificate: ByteBuf,
+    tree: HashTree,
+}
 use serde_bytes::ByteBuf;
 
 fn key(value: u8) -> PrivateKey {
@@ -24,7 +29,7 @@ fn signer() -> Principal {
     Principal::from_slice(&[1; 10])
 }
 fn certificate(tree: HashTree, key: &PrivateKey, delegation: Option<Delegation>) -> Certificate {
-    let mut message = super::super::IC_STATE_ROOT_DOMAIN_SEPARATOR.to_vec();
+    let mut message = b"\x0Dic-state-root".to_vec();
     message.extend_from_slice(&tree.digest());
     Certificate {
         tree,
@@ -37,8 +42,11 @@ fn envelope(time_tree: HashTree, delegation: Option<Delegation>) -> (Vec<u8>, Ve
     let tree = labeled(
         b"sig".to_vec(),
         labeled(
-            super::super::hash_sha256(b"seed"),
-            labeled(super::super::hash_sha256(b"message"), leaf(Vec::new())),
+            crate::canister_sig_creation::hash_bytes(b"seed"),
+            labeled(
+                crate::canister_sig_creation::hash_bytes(b"message"),
+                leaf(Vec::new()),
+            ),
         ),
     );
     let certified = labeled(
@@ -51,7 +59,7 @@ fn envelope(time_tree: HashTree, delegation: Option<Delegation>) -> (Vec<u8>, Ve
     let signing_key = if delegation.is_some() { key(2) } else { key(1) };
     let cert = certificate(fork(certified, time_tree), &signing_key, delegation);
     (
-        cbor(&super::super::CanisterSignature {
+        cbor(&CanisterSignature {
             certificate: ByteBuf::from(cbor(&cert)),
             tree,
         }),
@@ -61,27 +69,6 @@ fn envelope(time_tree: HashTree, delegation: Option<Delegation>) -> (Vec<u8>, Ve
 }
 fn time(bytes: Vec<u8>) -> HashTree {
     labeled(b"time".to_vec(), leaf(bytes))
-}
-
-#[test]
-fn certified_ranges_preserve_length_first_order_and_boundary_inclusion() {
-    // Length-first Principal order: [255] precedes [0, 0]. Plain byte-slice
-    // ordering would reverse these bounds and reject the valid endpoints.
-    let bytes = [0x81, 0x82, 0x41, 0xff, 0x42, 0, 0];
-    let ranges: Vec<(Principal, Principal)> = serde_cbor::from_slice(&bytes).unwrap();
-    for (raw, accepted) in [
-        (&[][..], false),
-        (&[254][..], false),
-        (&[255][..], true),
-        (&[0, 0][..], true),
-        (&[0, 1][..], false),
-    ] {
-        assert_eq!(
-            super::super::principal_is_within_ranges(&Principal::from_slice(raw), &ranges),
-            accepted
-        );
-    }
-    assert_eq!(serde_cbor::to_vec(&ranges).unwrap(), bytes);
 }
 
 #[cfg(all(feature = "agent", not(target_family = "wasm")))]
@@ -170,7 +157,7 @@ fn authenticated_times_cover_u64_and_existing_nonminimal_encodings() {
             Ok(expected)
         );
         assert_eq!(
-            super::super::verify_canister_sig(b"message", &signature, &public, &root),
+            verify_canister_sig(b"message", &signature, &public, &root),
             Ok(())
         );
         if expected == 128
@@ -198,7 +185,7 @@ fn malformed_time_is_separate_from_signature_verification() {
     ] {
         let (signature, public, root) = envelope(time(bytes), None);
         assert_eq!(
-            super::super::verify_canister_sig(b"message", &signature, &public, &root),
+            verify_canister_sig(b"message", &signature, &public, &root),
             Ok(())
         );
         assert_eq!(
@@ -249,8 +236,7 @@ fn original_failures_are_preserved_and_never_return_time() {
             &root,
         ),
     ] {
-        let error =
-            super::super::verify_canister_sig(message, signature, public, root).unwrap_err();
+        let error = verify_canister_sig(message, signature, public, root).unwrap_err();
         assert_eq!(
             verify_canister_sig_with_time(message, signature, public, root),
             Err(CanisterSigTimeError::Verification(error))
@@ -265,20 +251,21 @@ fn identity_root_cannot_authenticate_a_certificate() {
         verify_canister_sig_with_time(b"message", &signature, &public, &root),
         Ok(42)
     );
-    let mut envelope: super::super::CanisterSignature = serde_cbor::from_slice(&signature).unwrap();
+    let mut envelope: CanisterSignature = serde_cbor::from_slice(&signature).unwrap();
     let cert: Certificate = serde_cbor::from_slice(&envelope.certificate).unwrap();
     let identity = key(0);
     let cert = certificate(cert.tree, &identity, None);
     envelope.certificate = ByteBuf::from(cbor(&cert));
     let forged = cbor(&envelope);
     let root = identity.public_key().serialize();
-    let error = super::super::verify_canister_sig(b"message", &forged, &public, &root).unwrap_err();
+    let error = verify_canister_sig(b"message", &forged, &public, &root).unwrap_err();
     assert_eq!(
         verify_canister_sig_with_time(b"message", &forged, &public, &root),
         Err(CanisterSigTimeError::Verification(error))
     );
     if let Some(path) = std::env::var_os("PLATFORM_SIGNATURE_IDENTITY_FIXTURE") {
-        std::fs::write(path, hex::encode(&forged) + "\n").unwrap();
+        let text: String = forged.iter().map(|byte| format!("{byte:02x}")).collect();
+        std::fs::write(path, text + "\n").unwrap();
     }
 }
 
@@ -378,5 +365,54 @@ fn delegated_range_formats_preserve_owned_principal_admission() {
                 std::fs::write(std::path::Path::new(&directory).join(name), text + "\n").unwrap();
             }
         }
+    }
+}
+
+#[test]
+fn identity_keys_cannot_authenticate_either_delegation_level() {
+    // Each envelope is accepted by registry 0.3.0/0.6.0. The integration guard
+    // must reject identity keys both at the trust root and in the subnet leaf.
+    for (root_key, signing_key) in [(key(0), key(2)), (key(1), key(0)), (key(0), key(0))] {
+        let subnet = vec![3; 10];
+        let mut subnet_key = IC_ROOT_PK_DER_PREFIX.to_vec();
+        subnet_key.extend_from_slice(&signing_key.public_key().serialize());
+        let delegation_tree = labeled(
+            b"subnet".to_vec(),
+            labeled(
+                subnet.clone(),
+                fork(
+                    labeled(
+                        b"canister_ranges".to_vec(),
+                        leaf(cbor(&vec![(signer(), signer())])),
+                    ),
+                    labeled(b"public_key".to_vec(), leaf(subnet_key)),
+                ),
+            ),
+        );
+        let delegation = Delegation {
+            subnet_id: subnet,
+            certificate: cbor(&certificate(delegation_tree, &root_key, None)),
+        };
+        let (signature, public, _) = envelope(time(vec![42]), Some(delegation));
+        let mut envelope: CanisterSignature = serde_cbor::from_slice(&signature).unwrap();
+        let cert: Certificate = serde_cbor::from_slice(&envelope.certificate).unwrap();
+        envelope.certificate =
+            ByteBuf::from(cbor(&certificate(cert.tree, &signing_key, cert.delegation)));
+        let signature = cbor(&envelope);
+        let root = root_key.public_key().serialize();
+        assert_eq!(
+            ic_signature_verification::verify_canister_sig(b"message", &signature, &public, &root),
+            Ok(())
+        );
+        assert_eq!(
+            verify_canister_sig(b"message", &signature, &public, &root),
+            Err("invalid BLS signature".into())
+        );
+        assert_eq!(
+            verify_canister_sig_with_time(b"message", &signature, &public, &root),
+            Err(CanisterSigTimeError::Verification(
+                "invalid BLS signature".into()
+            ))
+        );
     }
 }

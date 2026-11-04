@@ -413,14 +413,8 @@ async fn cycle_roundtrip(
     )
 }
 
-#[test]
-fn cycle_and_counter_helper_signatures() {
-    let _: fn() -> u128 = api::msg_cycles_available;
-    let _: fn(u128) -> u128 = api::msg_cycles_accept;
-    let _: fn() -> u128 = api::msg_cycles_refunded;
-    let _: fn() -> u64 = api::instruction_counter;
-    let _: fn() -> u64 = api::call_context_instruction_counter;
-}
+#[cfg(test)]
+mod tests;
 
 thread_local! {
     static CHECKPOINT: Cell<(bool, bool, u64, u64)> = const { Cell::new((false, false, 0, 0)) };

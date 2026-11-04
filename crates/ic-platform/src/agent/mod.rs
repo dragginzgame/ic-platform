@@ -5,9 +5,8 @@
 //! verification mode, deadline, retry or reconciliation policy for consumers.
 //! Consumers retain those choices and upstream internal HTTP retry behavior.
 //! Use `crate::certification` for owned certificate/hash-tree operations. Agent
-//! methods and [`lookup_value`] accept [`ExternalCertificate`]; explicit `From`
-//! conversions are available when `certification` is selected. They preserve
-//! bytes, rebuild tree boxes and copy labels; they do not authenticate anything.
+//! methods and [`lookup_value`] accept [`ExternalCertificate`], the same registry
+//! identity exposed by `certification`. No conversion or tree copying is needed.
 //! [`lookup_value`] only reads a certificate tree; it does not authenticate it.
 //! [`signed_update_inspect`] compares envelope content; it does not verify its
 //! signature or authorize replay. This module and Agent are absent on Wasm.
@@ -15,6 +14,7 @@
 //! construction does not authenticate a chain or enforce expiry/target policy.
 //! Call response variants grant no permission to poll, retry or resubmit.
 
+pub use ic_agent::Certificate as ExternalCertificate;
 pub use ic_agent::agent::agent_error::{HttpErrorPayload, TransportError};
 pub use ic_agent::agent::signed::SignedUpdate;
 pub use ic_agent::agent::{
@@ -28,4 +28,5 @@ pub use ic_agent::identity::{
 pub use ic_agent::{
     Agent, AgentError, Identity, RequestId, TransportCallResponse, lookup_value, to_request_id,
 };
-pub use ic_certification::{Certificate as ExternalCertificate, HashTree as ExternalHashTree};
+/// The upstream tree identity used by native Agent certificates.
+pub type ExternalHashTree = ic_agent::hash_tree::HashTree<Vec<u8>>;

@@ -44,6 +44,17 @@ records the installed revision; do not edit its payloads.
 - GitHub issues are the follow-up tracker once a remote exists. Migration and
   provenance documents specify contracts and evidence, not a second issue queue.
 
+## Test source layout
+
+Follow Shared's `tests.rs`/`tests/` layout for owned unit tests. Integration tests
+already live under crate `tests/` directories, and doctests stay beside their APIs.
+Imported ICRC test bodies retain their
+upstream layout where provenance/reconstruction guards bind their exact source.
+Those inline tests are deliberate exceptions; changing
+their protected layout requires a separately reviewed reconstruction adaptation.
+Owned tests beside imported adapters follow the ordinary layout when outside
+protected regions, including CDK call policy and System API text tests.
+
 ## Browser SDK boundary
 
 The maintainer authorized the separate ESM npm package under `packages/browser`
@@ -93,63 +104,39 @@ The maintainer authorized taking responsibility for the Rust IC stack; the IC
 network, replica and simulator remain external infrastructure. This supersedes
 the earlier general hard-cut deferral for this adoption work. Keep product owners
 and cryptographic restrictions intact; imports retain licenses and attribution.
-Platform now owns the selected certification 3.2.0 implementation and its types.
-Preserve original hash/tree/Serde bodies and tests with the reconstruction guard.
-Native Agent alone may directly select the external certificate adapter; PocketIC
-retains its transitive identity. Standalone certification and signature graphs
-must exclude the registry certification package. Agent conversions are explicit,
-byte-preserving integration, with no authentication or admission policy.
+Certification and canister-signature cryptography now belong to registry
+suppliers. Platform exposes explicit certificate/tree names with upstream identity;
+Agent uses that same certificate identity without copying conversions. Keep their
+external bytes and consumer-owned decoding/trust/freshness policies unchanged.
 
 ## Cryptographic boundary
 
-The maintainer authorized #72's narrow DER admission exception: one owned envelope
-check precedes the unchanged imported canister-key parser. The source guard admits
-only that exact call at parser entry, then reconstructs the original fingerprints.
-Encoding, cryptographic bodies, constants and upstream vectors remain unchanged;
-this authorizes no other key-format changes or fingerprint refreshes.
+The maintainer reversed embedded BLS, certification and canister-signature
+ownership. Consume upstream cryptographic implementations; keep no embedded
+algorithm bodies or upstream algorithm-test suites for these capabilities.
+Platform retains delegating key adapters, owned Principal fields and integration
+checks. Preserve #72 DER framing admission before the upstream parser and #127
+identity-key refusal at both root and delegated keys. Signing-time extraction
+must follow successful upstream verification and read only the signing certificate;
+consumers retain freshness and authority policy. Registry signature packages
+currently bring Candid/printer, CBOR, representation-independent hashing, a lazy
+root-key cache and raw IC0 transitively. Admit those only with the selected
+signature capability; raw Runtime/executor/IC0 and standalone BLS stay isolated.
+Registry raw IC0 is not an additional executor. Do not export the upstream store.
 
 The maintainer authorized the optional BLAKE3 maintenance surface with explicit
 upstream `hash`, `Hasher` and `Hash` identities. Keep the implementation upstream,
 select only `std`, and qualify singleton/source and effective-feature graphs.
 Consumers retain hash-format/domain policy; no existing SHA-256 contract changes.
 
-The maintainer authorized importing ic-verify-bls-signature 0.6.0 into
-`bls::upstream`. Retain its cryptographic bodies, constants, original tests/vectors
-and Apache provenance. Keep the optimized allocated verification path and upstream
-curve/pairing/SHA-256 implementations. The admitted cache scaffolding uses
-std LazyLock with the identical initializer; the RNG helper and Rand remain
-test-only. `check-bls-source.sh` reconstructs the original source and test hashes;
-do not refresh them for algorithm changes. BLS types now have Platform identity.
-Native Agent may retain its registry wrapper transitively; standalone BLS and
-signature verification must exclude that package and production RNG scaffolding.
-
-For #127 the maintainer authorized adopting upstream commit
-`1f423f7b9d2e9c2a4c41e7a252ff999beb5489a5` exactly: reject identity public keys
-at `PublicKey::verify` entry and retain its original regression vector. This is
-the sole additional verification-body exception. The guard validates that exact
-check/vector before reconstructing the unchanged original source fingerprints.
-Do not generalize it into permission for other cryptographic edits.
-
-The authorized Rust stack ownership continues with ic_bls12_381 0.10.1 as the
-private `bls::curve` module for 0.16. Preserve all original arithmetic, constants,
-Rust tests and binary vectors under `check-bls-curve-source.sh`; retain both
-licenses and COPYRIGHT. Only documented path, edition, feature and lint scaffolding
-changes are admitted. Alloc/groups/pairings/hash-to-curve remain selected; bits,
-zeroize and upstream std stay unselected. Keep generic ff/group/pairing/digest,
-rand_core traits and subtle upstream; rand_xorshift and SHA-3 are test-only.
-Standalone BLS and signature verification must exclude the registry curve;
-native Agent keeps its transitive copy. Do not add a public curve API or crate.
-
-For the authorized 0.6 packaging cut, unused creation delegation/CBOR helpers
-compile only in tests. Preserve their complete bodies and vectors. The source
-guard checks both exact annotated source and reconstruction of the 0.5.1 source
-after removing only eight admitted attributes. No algorithm changes are allowed.
-
-The maintainer authorized the 0.5.1 deletion of the unused, unexported
-`IC_ROOT_PUBLIC_KEY` lazy cache and its import/dependency. This narrow scaffolding
-exception does not authorize changes to root-key bytes, DER extraction,
-cryptographic function bodies or test vectors. The creation-source fingerprint
-records only that deletion; the remaining source/license guards stay exact.
+BLS cryptography belongs to registry ic-verify-bls-signature 0.6.x and
+ic_bls12_381 0.10.x. Select only alloc/groups, with defaults and RNG disabled.
+Keep no embedded curve/verifier source or algorithm-test/vector suite. Platform
+retains delegating key adapters and #127 identity-key admission: point parsing,
+identity testing, derivation, signing, serialization and verification all call
+upstream APIs. Signature/error types have upstream identity; key adapters retain
+Platform identity. Preserve existing bytes, typed errors and identity-key refusal
+through integration tests, including keys derived from a zero private key.
 
 Our team does not include cryptographers. Do not implement, replace or alter
 cryptographic primitives or algorithms, including public-key derivation,
@@ -164,10 +151,6 @@ and unchanged cryptographic function bodies. Qualify their actual consumer graph
 type/source identities and wire bytes; a dependency-local Cargo patch is not a
 supported distribution mechanism for downstream consumers.
 
-The maintainer authorized the 0.4 signature packaging migration: retain the
-upstream creation/verifier bodies and vectors inside `signature_upstream`, changing
-only the documented imports and omitting the unexposed store module. Enforce exact
-source/license fingerprints; do not refresh hashes to permit algorithm changes.
 The owned runtime RejectCode similarly replaces only its external catalogue
 dependency; Agent codes retain their external identity. PocketIC catalog
 declarations now belong to the approved native implementation, preserving their

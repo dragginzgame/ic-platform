@@ -1,10 +1,11 @@
 .DEFAULT_GOAL := help
 SHARED_TOOLING_RUST := 1
-FORMAT_EXTRA_SOURCES := $(wildcard crates/ic-platform/src/signature_upstream/verification/evidence/*.rs scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/prepared-call-consumer/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
+FORMAT_EXTRA_SOURCES := $(wildcard scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/prepared-call-consumer/*.rs scripts/fixtures/secp-scaffolding/main.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/benchmarks/0.4/principal-source/main.rs scripts/fixtures/wasm-size/lib.rs)
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs scripts/fixtures/stable-identities/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/ic0-consumer/*.rs)
+FORMAT_EXTRA_SOURCES += crates/ic-platform/tests/fixtures/candid_malformed.rs
 # Independent groups require a visible selection before any recipe or setup.
 ifneq ($(filter-out release-editor-check,$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
 ifeq ($(RELEASE_GROUP),platform)

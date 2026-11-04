@@ -45,8 +45,8 @@ ic0|serde v1.0.229|reject
 executor,ic0|sha2 v0.10.9|reject
 executor,ic0|serde_derive v1.0.229 (proc-macro)|reject
 principal|ic_principal v0.1.5|reject
-canister-sig-creation|ic_principal v0.1.5|reject
-signature-verification|ic_principal v0.1.5|reject
+canister-sig-creation|ic_principal v0.1.5|pass
+signature-verification|ic_principal v0.1.5|pass
 signature-verification,principal-external|ic_principal v0.1.5|pass
 principal-external|ic_principal v0.1.5|pass
 principal-external|sha2 v0.10.9|reject
@@ -57,10 +57,10 @@ runtime|ic_principal v0.1.5|reject
 runtime|sha2 v0.10.9|reject
 cdk|digest v0.10.7|reject
 principal,executor|serde v1.0.229|pass
-canister-sig-creation|ic-representation-independent-hash v3.2.0|reject
-signature-verification|ic-representation-independent-hash v3.2.0|reject
-canister-sig-creation|serde_cbor v0.11.2|reject
-canister-sig-creation|half v1.8.3|reject
+canister-sig-creation|ic-representation-independent-hash v3.2.0|pass
+signature-verification|ic-representation-independent-hash v3.2.0|pass
+canister-sig-creation|serde_cbor v0.11.2|pass
+canister-sig-creation|half v1.8.3|pass
 signature-verification|serde_cbor v0.11.2|pass
 none|rand v0.8.5|reject
 executor|rand_chacha v0.3.1|reject
@@ -136,26 +136,26 @@ cdk|ic-platform-macros v0.1.12 (proc-macro) (/fixture)|reject
 ic0|ic0 v1.2.0|reject
 ic0|ic0 v1.1.0|reject
 ic0|ic0 v1.2.0 (/local)|reject
-canister-sig-creation|ic-canister-sig-creation v1.3.1|reject
-canister-sig-creation|candid v0.10.38|reject
-signature-verification|candid v0.10.38|reject
-canister-sig-creation|ic0 v1.2.0|reject
-signature-verification|ic0 v1.2.0|reject
+canister-sig-creation|ic-canister-sig-creation v1.3.1|pass
+canister-sig-creation|candid v0.10.38|pass
+signature-verification|candid v0.10.38|pass
+canister-sig-creation|ic0 v1.2.0|pass
+signature-verification|ic0 v1.2.0|pass
 cdk|ic-error-types v0.2.0|reject
 canister-sig-creation|ic-canister-sig-creation v1.3.2|reject
-signature-verification|ic-signature-verification v0.3.0|reject
+signature-verification|ic-signature-verification v0.3.0|pass
 signature-verification|ic-signature-verification v0.2.0|reject
-bls|ic-verify-bls-signature v0.6.0|reject
-signature-verification|ic-verify-bls-signature v0.6.0|reject
+bls|ic-verify-bls-signature v0.6.0|pass
+signature-verification|ic-verify-bls-signature v0.6.0|pass
 agent|ic-verify-bls-signature v0.6.0|pass
-bls|ic_bls12_381 v0.10.1|reject
-signature-verification|ic_bls12_381 v0.10.1|reject
+bls|ic_bls12_381 v0.10.1|pass
+signature-verification|ic_bls12_381 v0.10.1|pass
 agent|ic_bls12_381 v0.10.1|pass
 bls|ic_bls12_381 v0.10.2|reject
 bls|ic-verify-bls-signature v0.6.0 (/local)|reject
-certification|ic-certification v3.2.0|reject
-canister-sig-creation|ic-certification v3.2.0|reject
-signature-verification|ic-certification v3.2.0|reject
+certification|ic-certification v3.2.0|pass
+canister-sig-creation|ic-certification v3.2.0|pass
+signature-verification|ic-certification v3.2.0|pass
 agent|ic-certification v3.2.0|pass
 certification|ic-certification v3.2.1|reject
 none|ic-management-canister-types v0.11.0|reject

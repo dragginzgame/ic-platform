@@ -4,6 +4,17 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.19.1] - Unreleased
+
+### 🧪 Testing
+
+- Move owned signature-analysis, external-Candid adapter, call-policy and System
+  API text tests into adjacent `tests.rs` modules. Preserve test bodies and
+  behavior, with unchanged protected runtime regions and source fingerprints.
+- Separate reusable prepared-call and installed-runtime driver/canister tests from fixture
+  implementations. Generated consumers copy their test modules alongside the
+  source, preserving raw/Wire/external-Candid feature coverage.
+
 ## [0.19.0] - 2026-11-02
 
 ### ⚠️ Breaking

@@ -18,7 +18,7 @@ trap finish EXIT
 mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/prepared-call-consumer" "$fixture/.tools" "$fixture/bin"
 cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
-cp "$root/scripts/fixtures/prepared-call-consumer/lib.rs" "$fixture/scripts/fixtures/prepared-call-consumer/"
+cp "$root/scripts/fixtures/prepared-call-consumer/"{lib,tests}.rs "$fixture/scripts/fixtures/prepared-call-consumer/"
 cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
 mkdir -p "$fixture/crates/ic-platform/tests/fixtures"
 cp "$root/crates/ic-platform/tests/management_consumer.rs" "$fixture/crates/ic-platform/tests/"

@@ -32,18 +32,18 @@ require(([$metadata.packages[] | select(.name == "ic-platform-runtime")] | lengt
 require((.features.secp256k1 == ["principal-external", "dep:ic-secp256k1"] and ([.dependencies[] | select(.name == "ic-secp256k1")] | length == 1 and .[0].optional and .[0].req == "=0.3.0" and .[0].target == "cfg(not(target_family = \"wasm\"))")); "secp256k1 must remain exact, optional and native-only") |
 require((.features["management-canister-types"] == ["principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:serde_bytes", "dep:ic-management-canister-types"] and ([.dependencies[] | select(.name == "ic-management-canister-types")] | length == 1 and .[0].req == "=0.11.0" and .[0].optional and .[0].target == "cfg(not(target_family = \"wasm\"))")); "Platform must own selected Wasm management DTOs and retain native-only upstream 0.11.0") |
 require((.features["icrc-ledger-types"] == ["dep:crc32fast", "dep:data-encoding", "principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:hex", "dep:num-bigint", "dep:num-traits", "dep:serde_bytes", "dep:sha2"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 0)); "Selected ledger DTOs must not acquire the retired upstream package") |
-require((.features.certification == ["dep:hex", "dep:serde", "dep:serde_bytes", "dep:sha2"] and
-    .features["canister-sig-creation"] == ["principal", "certification"] and
-    .features.agent == ["principal-external", "dep:ic-agent", "dep:ic-certification"] and
-    ([.dependencies[] | select(.name == "ic-certification")] | length == 1 and .[0].optional and .[0].target == "cfg(not(target_family = \"wasm\"))" and (.[0].uses_default_features | not) and .[0].features == ["serde"])); "Certification must be owned; registry certificate types belong only to native Agent") |
-require((.features.bls == ["dep:digest", "dep:ff", "dep:group", "dep:hex", "dep:pairing", "dep:rand_core", "dep:sha2", "dep:subtle"] and
-    .features["signature-verification"] == ["bls", "canister-sig-creation", "dep:serde_bytes", "dep:serde_cbor"] and
-    ([.dependencies[] | select(.name == "ic-verify-bls-signature")] | length == 0) and
-    ([.dependencies[] | select(.name == "ic_bls12_381")] | length == 0) and
-    ([.dependencies[] | select(.name == "ff" or .name == "rand_core" or .name == "subtle")] | length == 3 and all(.[]; .optional and (.uses_default_features | not) and .features == [] and .target == null)) and
-    ([.dependencies[] | select(.name == "group")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["alloc"] and .[0].target == null) and
-    ([.dependencies[] | select(.name == "pairing")] | length == 1 and .[0].optional and (.[0].uses_default_features | not) and .[0].target == null) and
-    ([.dependencies[] | select((.name == "rand" or .name == "rand_xorshift" or .name == "sha3") and .kind != "dev")] | length == 0)); "BLS must use the maintained wrapper and curve without production RNG or test hashes") |
+require((.features.certification == ["dep:ic-certification"] and
+    .features["canister-sig-creation"] == ["principal-external", "certification", "dep:ic-canister-sig-creation"] and
+    .features.agent == ["principal-external", "dep:ic-agent"] and
+    ([.dependencies[] | select(.name == "ic-certification")] | length == 1 and .[0].optional and .[0].target == null and (.[0].uses_default_features | not) and .[0].features == ["serde"]) and
+    ([.dependencies[] | select(.name == "ic-canister-sig-creation")] | length == 1 and .[0].optional and .[0].req == "^1.3.1" and .[0].target == null and (.[0].uses_default_features | not)) and
+    ([.dependencies[] | select(.name == "ic-signature-verification")] | length == 1 and .[0].optional and .[0].req == "^0.3.0" and .[0].target == null and (.[0].uses_default_features | not)));
+    "Certification must use registry identities; signature key adapters preserve owned issuers") |
+require((.features.bls == ["dep:ic-verify-bls-signature", "dep:ic_bls12_381"] and
+    .features["signature-verification"] == ["bls", "canister-sig-creation", "dep:serde_bytes", "dep:serde_cbor", "dep:ic-signature-verification"] and
+    ([.dependencies[] | select(.name == "ic-verify-bls-signature")] | length == 1 and .[0].optional and .[0].req == "^0.6.0" and (.[0].uses_default_features | not) and .[0].features == ["alloc"] and .[0].target == null) and
+    ([.dependencies[] | select(.name == "ic_bls12_381")] | length == 1 and .[0].optional and .[0].req == "^0.10.1" and (.[0].uses_default_features | not) and .[0].features == ["groups"] and .[0].target == null) and
+    ([.dependencies[] | select(.name == "digest" or .name == "ff" or .name == "group" or .name == "pairing" or .name == "rand_core" or .name == "subtle" or .name == "rand" or .name == "rand_xorshift" or .name == "sha3")] | length == 0)); "BLS must delegate cryptography upstream with alloc, identity admission and no RNG capability") |
 require((.features.ed25519 == ["dep:curve25519-dalek", "dep:ed25519-dalek"] and ([.dependencies[] | select(.name == "curve25519-dalek" or .name == "ed25519-dalek")] | length == 2 and all(.[]; .optional and (.uses_default_features | not) and .features == [] and .target == null))); "Ed25519 must remain optional on native/Wasm without upstream default/RNG features") |
 require((.features.ecdsa == ["dep:crypto-bigint", "dep:k256"] and ([.dependencies[] | select(.name == "k256")] | length == 1 and .[0].req == "^0.14.0" and .[0].optional and (.[0].uses_default_features | not) and .[0].features == ["ecdsa"] and .[0].target == null) and
     ([.dependencies[] | select(.name == "crypto-bigint")] | length == 1 and .[0].req == "^0.7.10" and .[0].optional and (.[0].uses_default_features | not) and .[0].target == null)); "ECDSA must remain optional without default/RNG features and enforce its published bigint security floor") |

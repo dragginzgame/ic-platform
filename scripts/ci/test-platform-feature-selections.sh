@@ -40,12 +40,14 @@ done <<'MUTATIONS'
 .features["icrc-ledger-types"] += ["dep:icrc-ledger-types"]
 .features.principal += ["dep:ic_principal"]
 .dependencies += [{"name":"ic_principal", "features":["self_authenticating"]}]
-(.dependencies[] | select(.name == "group")).uses_default_features = true
-.features.certification = ["dep:ic-certification"]
+(.dependencies[] | select(.name == "ic-verify-bls-signature")).uses_default_features = true
+(.dependencies[] | select(.name == "ic-verify-bls-signature")).features += ["rand"]
+(.dependencies[] | select(.name == "ic_bls12_381")).features += ["bits"]
+.features.certification = []
 .features["canister-sig-creation"] -= ["certification"]
-.features["canister-sig-creation"] += ["principal-external"]
+.features["canister-sig-creation"] -= ["dep:ic-canister-sig-creation"]
 .features["signature-verification"] += ["ic_principal/serde"]
-(.dependencies[] | select(.name == "ic-certification")).target = null
+(.dependencies[] | select(.name == "ic-certification")).target = "cfg(not(target_family = \"wasm\"))"
 .features.bls = ["dep:ic-verify-bls-signature"]
 .features["signature-verification"] -= ["bls"]
 (.dependencies[] | select(.name == "crypto-bigint")).req = "^0.7.5"

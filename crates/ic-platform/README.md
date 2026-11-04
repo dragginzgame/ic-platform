@@ -223,7 +223,7 @@ native parsing still selects `candid-parser`.
 
 Enable `certification` for `ic_platform::certification`: upstream `Certificate`,
 `Delegation`, `HashTree`, `Label`, `LookupResult`, `empty`, `fork`, `labeled`,
-`leaf`, `pruned`, `fork_hash`, `AsHashTree`, `RbTree` and `Hash`, with upstream Serde support. This feature is
+`leaf`, `pruned`, `fork_hash`, `AsHashTree`, `RbTree` and `Hash`, with upstream Serde support and registry type identities. This feature is
 independent of Candid and the executor. Host retains its strict bounded CBOR
 decoder; consumers own trust roots, authentication, budgets and leaf meanings.
 Neither construction nor deserialization authenticates a certificate. This
@@ -233,24 +233,22 @@ smaller Wasm artifacts.
 Enable `canister-sig-creation` for `ic_platform::canister_sig_creation`:
 `CanisterSigPublicKey`, `hash_bytes`, `hash_with_domain`,
 `extract_raw_root_pk_from_der`, `IC_ROOT_PK_DER` and `IC_ROOT_PK_DER_PREFIX`
-from the unchanged upstream 1.3.1 implementation packaged inside Platform.
-CanisterSigPublicKey now has a Platform identity; its Principal field, DER/raw
-methods, domain separators and `String` errors preserve upstream behavior.
-The unused store and Candid import are omitted. No signature store, root
-publication or clock API is exposed, and no Candid/ic0/executor is selected.
+from registry 1.3.1. The delegating CanisterSigPublicKey adapter keeps Platform's
+Principal field and existing DER/raw bytes and String errors. The upstream
+signature store is not exported. Its dependencies do bring Candid/printer,
+representation-independent hashing, CBOR, a lazy root-key cache and raw IC0;
+these are upstream packaging costs, not additional Platform APIs or an executor.
 
 Enable `signature-verification` for
-`ic_platform::signature_verification::verify_canister_sig`, preserving upstream
-0.3.0's four byte-slice arguments and `Result<(), String>`. This checks supplied
-signature/certificate bytes against the supplied root. It does not select a
-trusted issuer, seed, network root, freshness window, resource ceiling or grant
-application authority. Keep those checks in the consumer. Owned framing admission
-rejects truncated/noncanonical short-form public-key DER before the unchanged
-parser on both public-key and verification paths. Long-form DER is unsupported;
-encoder/hash/domain length conversion behavior remains upstream.
-The verifier selects creation, certification and BLS, exposing the creation
-surface without enabling Candid, ic0, CDK, parser or Agent. Both imported source
-modules and their vectors/licenses are protected by exact fingerprints.
+`ic_platform::signature_verification::verify_canister_sig`, delegating to registry
+0.3.0 with the same four byte-slice arguments and Result<(), String>. Platform
+retains checked short-form DER admission and identity-key rejection for both the
+root and delegated subnet. Long-form DER remains unsupported.
+`verify_canister_sig_with_time` verifies first, then decodes the authenticated
+signing certificate to extract its unique u64 time; upstream exposes no evidence
+API, so this adds a second CBOR decode. The delegation certificate's time is
+never returned. Consumers retain byte/depth limits, roots, freshness and authority.
+There are no embedded signature/encoding/hash implementations or algorithm suites.
 
 Enable `bls` independently for `ic_platform::bls::{PublicKey, Signature,
 PrivateKey, InvalidPublicKey, InvalidSignature, InvalidPrivateKey,

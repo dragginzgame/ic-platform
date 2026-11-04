@@ -1,13 +1,13 @@
 //! Owned framing admission before the unchanged imported key parser.
 //! No key encoding, cryptography, seed limit or issuer policy is implemented here.
 
-pub(super) fn canister_sig_der(bytes: &[u8]) -> Result<(), String> {
+pub(crate) fn canister_sig_der(bytes: &[u8]) -> Result<(), String> {
     if bytes.len() < 20 {
         return Err("canister sig pk shorter than DER prefix".into());
     }
     // The pinned encoder/parser use the short-form SubjectPublicKeyInfo grammar.
     // Long-form lengths are not supported by that parser's fixed raw-key offset.
-    if bytes[2..16] != super::creation::CANISTER_SIG_PK_DER_OID[..] {
+    if bytes[2..16] != ic_canister_sig_creation::CANISTER_SIG_PK_DER_OID[..] {
         return Err("invalid OID of canister sig pk".into());
     }
     if bytes[1] & 0x80 != 0

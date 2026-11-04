@@ -32,7 +32,7 @@ external-candid = ["ic-platform/candid"]
 ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["runtime"] }
 ic-wire = { version = "$wire", optional = true }
 MANIFEST
-cp scripts/fixtures/prepared-call-consumer/lib.rs "$fixture/src/lib.rs"
+cp scripts/fixtures/prepared-call-consumer/{lib,tests}.rs "$fixture/src/"
 if [[ "$prepare" == true ]]; then
     cp "$root/Cargo.lock" "$fixture/Cargo.lock"
     cargo fetch --manifest-path "$fixture/Cargo.toml"

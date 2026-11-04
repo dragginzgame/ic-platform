@@ -22,7 +22,14 @@ esac
 if awk -v family=runtime-host -v allow_native_management="$native_management" -f "$policy" "$graph"; then
     echo "Canister graph contains host parsing, Agent or Testkit: $graph" >&2; exit 1
 fi
-if awk -v family=retired-cdk -f "$policy" "$graph"; then
+allow_signature_ic0=0
+if grep -Eq '^ic-canister-sig-creation v1\.3\.1( \(\*\))?$' "$graph"; then
+    if ! awk '$1 == "ic0" && $0 !~ /^ic0 v1\.2\.0( \(\*\))?$/ { exit 1 }' "$graph"; then
+        echo "Unqualified signature IC0 supplier: $graph" >&2; exit 1
+    fi
+    allow_signature_ic0=1
+fi
+if awk -v family=retired-cdk -v allow_signature_ic0="$allow_signature_ic0" -f "$policy" "$graph"; then
     echo "Retired full CDK runtime/generator: $graph" >&2; exit 1
 fi
 identities="$(awk '$1 == "ic-platform-runtime"' "$graph" | sed 's/ (\*)$//' | LC_ALL=C sort -u)"

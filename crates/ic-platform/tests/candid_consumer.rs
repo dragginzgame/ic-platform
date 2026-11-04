@@ -317,5 +317,6 @@ fn strict_consumer_admission() {
 }
 
 #[cfg(test)]
-#[path = "fixtures/candid_malformed.rs"]
-mod candid_malformed;
+mod fixtures {
+    mod candid_malformed;
+}

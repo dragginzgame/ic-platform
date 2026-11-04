@@ -46,15 +46,15 @@ remain empty. See the [packaging migration](docs/migration.md#minimal-principal-
 | `principal-external` | Registry Principal identity and byte conversions; implies principal, no hashing or Candid |
 | `principal-self-authenticating` | Unchanged imported self-authentication using upstream SHA-224; implies principal |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
-| `bls` | Maintained BLS wrapper and private curve arithmetic, typed errors and optimized verification; no production RNG, Candid or DFINITY registry dependency |
+| `bls` | Upstream BLS cryptography with typed errors and identity-key admission; no embedded algorithms, production RNG or Candid |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
 | `candid-service` | Candid service declaration macros and printer; implies `candid` |
 | `candid-endpoint` | Explicit required-external-Candid query/update adapters with artifact-selected limits, empty-envelope policy and existing runtime; implies CDK and Candid, with separate service-printer selection |
 | `runtime` | Raw calls, system and task adapters at `cdk::*`, without entrypoint macros |
 | `candid-parser` | Native external Candid parsing/type checking, service equality and dynamic refusal fixtures; owned bindings use Wire |
-| `canister-sig-creation` | Imported signature public-key formats, root-key constants and hashing; no Candid/ic0 or store API |
+| `canister-sig-creation` | Upstream signature key formats/constants/hashing, owned issuer adapter and DER admission; transitive Candid/ic0, no store API |
 | `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one canonical Runtime executor |
-| `certification` | Maintained certificate/hash-tree and mutable tree types, constructors, lookup and hashing; no registry certification, Candid or executor |
+| `certification` | Registry certificate/hash-tree and mutable tree identities, lookup and hashing; no Candid or executor |
 | `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |
 | `ic0` | Raw IC 1.2.0 calls, including safe stable-memory size/grow/read/write, replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Selected maintained ICRC DTOs and unchanged upstream value hashing, plus ICRC-10; no registry ledger package, storage, CBOR or consent formatting |
