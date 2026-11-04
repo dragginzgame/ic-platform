@@ -40,7 +40,7 @@ for the unchanged imported derivation using upstream SHA-224, without registry
 Principal. Select both features when external conversions are also needed. Default features
 remain empty. See the [packaging migration](docs/migration.md#minimal-principal-and-selected-icrc-packaging).
 
-The pending Types 0.18.1 correction makes `principal-external` self-contained for
+Types 0.18.1 makes `principal-external` self-contained for
 upstream Serde. Published Types 0.18.0 alone does not provide those external
 serialization traits. See the [passive contract audit](docs/audits/passive-contract-boundaries-2026-11-04.md)
 for supplier availability and consumer-owned feature/import changes.

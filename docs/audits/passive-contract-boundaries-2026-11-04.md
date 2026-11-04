@@ -24,11 +24,13 @@ CBOR, human-readable JSON and owned/external conversions. Manifest admission
 also refuses missing Serde, implicit default features, self-authentication
 coupling and a Candid dependency in Types.
 
-This correction is **local and unreleased**, pending Types 0.18.1. Published
+This correction is **published in Types 0.18.1**, from commit
+`2307ec3e88132913b44c2db201b19c98d8fcca04`, tagged `types-v0.18.1`. Published
 Types 0.18.0 already supports owned Principal/Account-only consumers; it does not
 supply the standalone external-Serde capability. Registry-only Canic adoption
-must wait for the corrected Types supplier. No package versions, release groups,
-published artifacts or sibling sources were changed by this audit.
+must select the corrected Types supplier. The initial audit changed no package
+versions or sibling sources; subsequent delivery advanced only the Types group.
+Platform, Runtime, release-group membership and sibling sources remain unchanged.
 
 ## Observed paths and proposed consumer paths
 
@@ -71,13 +73,13 @@ Do not replace ExternalPrincipal fields with owned Principal, or owned fields
 with external Principal. They have different contracts, including Candid support
 and some deserializer admission behavior.
 
-Use inherited workspace declarations, with defaults disabled. After the Types
-fix is published, Canic's catalog must require at least 0.18.1 rather than leave
+Use inherited workspace declarations, with defaults disabled. Canic's catalog
+must require at least Types 0.18.1 rather than leave
 an older lock eligible. Blob's existing 0.18.0 requirement is sufficient for
 owned-only fields; using the corrected patch as a common minimum is also valid.
 Do not move Nat, Int, CandidType, protocol codecs or Wire traits into Types.
 
-For an existing workspace adopting the corrected supplier after publication:
+For an existing workspace adopting the published correction:
 
 ~~~toml
 [workspace.dependencies]
@@ -259,6 +261,16 @@ These consumer checks cover their current source and published dependency
 selections, not a completed migration to the proposed optional features. Owners
 must additionally qualify passive defaults, the opt-in external profiles and
 host schema generation, including frozen Serde/Wire/Candid vectors and the
-numeric limits above. There was no blanket fleet matrix, full CI, installed
-canister qualification or release in this task.
+numeric limits above. The initial audit ran no blanket fleet matrix, full CI,
+installed canister qualification or release.
+
+The subsequent Types 0.18.1 release passed all twenty local Linux release stages,
+including installed Runtime/Timers composition and final candidate graph checks.
+Receipt: `target/release-validation/qualification.LfiUP1/receipt.json`.
+Publication: `target/publication/publish.selection.2WZvBD`.
+The downloaded registry archive, published index checksum and locally verified
+archive match; evidence is in `target/types0181-publication-verification/`.
+GitHub main and the annotated Types tag resolve to the release commit above.
+This supplies the correction; it does not implement or qualify sibling adoption,
+or establish native macOS or hosted CI results.
 

@@ -31,7 +31,7 @@ the complete closure, version choices and source/archive adoption evidence.
 
 The [passive consumer audit](audits/passive-contract-boundaries-2026-11-04.md)
 records the Types-only identity path and required consumer-owned Candid gates.
-The pending Types 0.18.1 correction enables registry Principal Serde through
+Types 0.18.1 enables registry Principal Serde through
 `principal-external`, without adding Candid, execution, hashing or new packages.
 
 Platform 0.22 returns BLS, certification and canister-signature
