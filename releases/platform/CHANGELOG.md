@@ -25,6 +25,9 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ### 🧪 Testing
 
+- Refresh owner/Timers qualification locks for the registry certificate boundary
+  and compatible Testkit 0.84.1; retain its published native Platform separately.
+
 - Use ordinary module discovery for the shared malformed-Candid test/fuzz fixture.
   Adopt Shared 0.29.3's test-layout, changelog and snapshot-export rules; preserve
   imported source-layout exceptions and keep the root changelog as navigation.

@@ -54,9 +54,25 @@ this final cut: 9,314 and 6,892; before BLS removal: 20,614 and 7,188. Counts ex
 comments/blanks, and a few imported tests remain in runtime-classified files.
 Evidence: `target/shared0293-loc-after-signature-removal.json`.
 
-Pending notes are Platform 0.22.0 and Runtime 0.19.1; package versions are unchanged.
-All changes remain local, uncommitted and unreleased. Preserve the incoming Pest
-update and prior #139 documentation corrections. Siblings remain untouched.
+Publication is authorized for GitHub main/tags and crates.io: Runtime 0.19.1
+(macros/guard included), then Platform 0.22.0. Types stays 0.18.0. Source batch
+1264e76 includes the reviewed Pest update and prior #139 documentation corrections.
+The first full gate passed through Wasm/features/consumers but failed at installed
+Runtime because no server was configured; evidence is retained in
+`target/release-validation/qualification.fKwyRr`. No release metadata or uploads
+were produced. Explicit qualification-lock refresh now selects Testkit 0.84.1
+with its registry Platform 0.21 adapter while retaining the local facade separately.
+
+PocketIC 16.1 is copied locally from the existing prepared bundle and admitted by
+Testkit; `target/pocket-ic1610-admission.log` records the selected path. Use
+`POCKET_IC_BIN=$PWD/.tools/ic-testkit-server/16.1.0-x86_64-linux/pocket-ic`
+for release qualification. The executable SHA-256 is
+`b44e1eccd66e02328146b3e209e3403e3a3428a25d25555aca2f67500e5ae9db`.
+All four owner and four Timers profiles pass with refreshed locks; evidence:
+`target/runtime0191-installed-prequalification-refreshed.log` and
+`target/cdk-runtime.{7zi14T,yXlA0t}`. Fresh full release gates remain required.
+Siblings remain unchanged. Future maintainer “publish” means both GitHub delivery
+and crates.io publication.
 
 ## Delivered Platform 0.21.0 — #139
 
