@@ -270,7 +270,8 @@ Receipt: `target/release-validation/qualification.LfiUP1/receipt.json`.
 Publication: `target/publication/publish.selection.2WZvBD`.
 The downloaded registry archive, published index checksum and locally verified
 archive match; evidence is in `target/types0181-publication-verification/`.
-GitHub main and the annotated Types tag resolve to the release commit above.
+The annotated Types tag and archive provenance name the release commit above;
+GitHub main contains it and the subsequent delivery documentation.
 This supplies the correction; it does not implement or qualify sibling adoption,
 or establish native macOS or hosted CI results.
 

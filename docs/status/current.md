@@ -17,7 +17,8 @@ installed Runtime/Timers profiles. Final candidate graphs passed. Receipt:
 Publication: `target/publication/publish.selection.2WZvBD`.
 The registry index, downloaded crate and locally verified archive share SHA-256
 `aa881498e10a94f06602424148b166e685170cd9afe0b0f377fb849b47c7bc6f`.
-Archive provenance and remote main/tag resolve to the release commit above.
+Archive provenance and the annotated tag name the release commit above.
+GitHub main contains that release and its subsequent delivery documentation.
 Evidence: `target/types0181-publication-verification/`,
 `target/types0181-release.log` and `target/types0181-publish.log`.
 Hosted CI and native macOS results are separate; none is claimed by this gate.
