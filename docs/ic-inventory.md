@@ -161,13 +161,13 @@ explicit trust/Agent options and raw query errors. SDK crypto, hashing, key
 encoding and classes remain upstream; trust, limits, intents and application
 policies remain consumer-owned. Wire retains owned codecs and generators.
 
-Pending Rust 0.22.3 adds native `ic-protocol` packet codecs using the same
+Rust 0.22.3 supplies native `ic-protocol` packet codecs using the same
 registry transport identities without Agent or Runtime. Its separate
 `ic-protocol-fixtures` feature contains typed native development helpers;
 `certification-cbor::strict` retains Host's existing field/tree/nesting admission.
 No generic CBOR codec or Value export is supplied. Consumers retain packet
 budgets, request bindings, cryptographic/freshness verification and effects.
-See the [packet migration contract](migration.md#typed-ic-packet-and-fixture-boundary-pending-0223).
+See the [packet migration contract](migration.md#typed-ic-packet-and-fixture-boundary-0223).
 
 `make check-browser` checks the npm selections, real provider types and packed
 consumer/bundle contract; `make check-browser-runtime` adds Chromium page/worker

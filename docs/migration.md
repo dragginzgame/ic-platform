@@ -1,6 +1,6 @@
 # Candid and runtime ownership
 
-## Bounded certificate and signature CBOR (pending)
+## Bounded certificate and signature CBOR (0.22.3)
 
 Select `certification-cbor` for `certification::cbor::{decode_certificate,
 decode_canister_signature, encode_certificate, encode_canister_signature}`.
@@ -11,10 +11,10 @@ identities. Byte budgets are not total heap limits; upstream recursion admission
 remains unchanged. Decode is not verification, including for delegation bytes.
 Consumers retain trust/freshness, certified-root binding, witness construction
 and signature-store policy. No Runtime, Candid or cryptographic primitive is
-added to the certification-only graph. Auth adoption requires publishing this
-facade addition first; no sibling release is authorized by source implementation.
+added to the certification-only graph. Auth can adopt the published 0.22.3 facade
+addition; consumer qualification and releases remain separately owned.
 
-## Typed IC packet and fixture boundary (pending 0.22.3)
+## Typed IC packet and fixture boundary (0.22.3)
 
 Platform supplies protocol-specific operations rather than a generic CBOR
 serializer, decoder or Value API. The default, identity and raw Runtime profiles

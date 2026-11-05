@@ -1,93 +1,78 @@
 # Current handoff — 2026-11-05
 
-## Platform codec release in preparation
+## Platform codec delivery
 
-The authorized delivery is Platform only: candidate **0.22.3**, from published
-0.22.2. Runtime 0.19.2, Types 0.18.1 and browser/npm stay outside this release.
-Select `certification-cbor` for strict certificate/tree and standard certificate
-codecs, and native `ic-protocol` for Testkit envelope/read-state/metrics codecs.
-Their existing registry identities, strict field/tree admission, self-described
-envelope bytes and full u128 metrics are preserved. All budgets, verification,
-freshness, transport/retry and simulator orchestration stay consumer-owned.
-The [migration table](../migration.md#typed-ic-packet-and-fixture-boundary-pending-0223)
-records consumer steps; Tooling adoption is separately owned. No sibling edits
-or publication belong to this release. Existing unqualified caller work remains
-with its owners. No generic CBOR serializer or Value is exported.
+**ic-platform 0.22.3** is pushed, tagged and published on crates.io. Release
+commit: `f8fab103c5dfa41c6e32c4c6401bfd216173822d`; tag: `platform-v0.22.3`.
+Runtime stays **0.19.2**, Types **0.18.1**; browser/npm and Tooling were not released.
+No sibling checkout was edited during this delivery.
 
-Standalone `ic-protocol` Clippy and 18 unit tests pass on Rust 1.99.1, including
-Testkit read-state framing, complete response consumption and u128 range edges.
-Logs: `target/platform-codec-release/protocol-{clippy,tests}.log`. Earlier focused
-strict/native/Wasm and feature-graph evidence remains valid for unchanged code.
-The standard Platform release gate and registry/archive verification follow.
-Native macOS and hosted integration are separate asynchronous evidence.
+Select `default-features = false` with `features = ["certification-cbor"]` for
+`certification::cbor` and its `strict` certificate/tree decoder. Native Testkit
+packet consumers select `features = ["ic-protocol"]`, which includes the former.
+Use `ic-protocol-fixtures` only for native development helpers. The
+[migration table](../migration.md#typed-ic-packet-and-fixture-boundary-0223)
+records separately owned consumer changes, including Tools 0.83.0 and Testkit
+0.87.0. No generic CBOR encoder/decoder or Value is public.
 
-## Delivered maintenance cohort
+Host's strict field/tree admission and complete-consumption checks are retained;
+SDK envelope framing, upstream certificate/transport identities and full u128
+metrics values are preserved. Consumers retain all budgets, authentication,
+trust roots, delegation/freshness checks, request binding, transport, retries
+and PocketIC orchestration. No cryptographic implementation changed.
 
-Runtime **0.19.2** and Platform **0.22.2** are pushed, tagged and published on
-crates.io. Types stays at **0.18.1**; its source edits only tighten lint scopes.
-No browser npm package, sibling release or Profiler consumer pin changed.
+## Delivery evidence
 
-| Group | Published packages | Release commit / tag |
-| --- | --- | --- |
-| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard 0.19.2 | `5e9437fb5cbd6221b5ec7c9edb4ea33164297fce` / `runtime-v0.19.2` |
-| Platform | ic-platform 0.22.2 | `53eae551b9d73ae01b4275059b78e03bbac0317a` / `platform-v0.22.2` |
+The complete twenty-stage Linux release gate passed on Rust **1.99.1** for source
+`766ba97bfa37222b8cf96fe7ba1a430cf417d099`. Receipt:
+`target/release-validation/qualification.XEPzDn/receipt.json`. This includes
+Clippy, Rust tests, feature closures, Wasm, consumer admission and installed
+Runtime/Timers composition (`target/cdk-runtime.v68quN`). Candidate metadata
+and clean source were admitted by the standard release/publication workflow.
 
-Both complete twenty-stage Linux release gates passed on Rust 1.99.1, including
-installed owner and Timers composition. Candidate graphs passed after metadata
-preparation. Receipts: `target/release-validation/qualification.R0xwqQ/receipt.json`
-(Runtime), `target/release-validation/qualification.BDiYdI/receipt.json` (Platform).
-Publication attempts: `target/publication/publish.selection.OuPX7F` and
-`target/publication/publish.selection.NKcUG5`. Registry index checksums match
-the downloaded archives; their clean Cargo VCS provenance matches the release
-commits above. Remote annotated tags were independently checked. Summary:
-`target/platform0222-delivery/deployment-verification.json`.
+The registry-only consumer passes both certificate-only and native protocol
+profiles without source overrides. Certificate-only excludes Candid, Agent and
+Runtime; protocol selects transport 0.49.3/Candid but excludes Agent and Runtime.
+The published archive's clean VCS provenance matches the release commit; its
+SHA256 matches the crates.io index:
+`d73c010faf8ba71b380b35fed865c5a30e2e9ed56d688fb7817d7df978e396fc`.
+Independent remote main/tag verification also passed. Summary and logs:
+`target/platform-codec-release/deployment-verification.json`; publication:
+`target/publication/publish.selection.wnDxDu`.
 
-Shared **0.30.0**, committed supplier
-`4d0961821a31766e3044c08fbe5954ed81213ec9`, is adopted through the canonical
-exporter. Its payload integrity is intact. The [audit](../audits/shared-030-practices-2026-11-05.md)
-records rule coverage, remaining native limits and detailed evidence.
-The normal documentation gate now covers every exported Shared Markdown payload
-and rejects a missing target in an isolated regression. Source/runtime bodies,
-external bytes, numeric ranges and cryptographic/freshness checks are unchanged.
-No consumer regeneration or new identity owner is introduced.
+Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/42038858650)
+and [installed runtime](https://github.com/dragginzgame/ic-platform/actions/runs/42038858617)
+were running at observation. Native macOS Intel and ARM jobs are asynchronous;
+there is no new local macOS evidence. Linux execution does not claim macOS,
+Chromium or full native-provider acceptance. Failed local attempts are retained
+under `qualification.upw92f` and `qualification.3Fb3um`; neither is a pass.
 
-## Qualification limits and follow-through
+## Retained boundaries and follow-through
 
-- [#140](https://github.com/dragginzgame/ic-platform/issues/140) owns remaining
-  native Profiler path-module wiring and paired native acceptance. Its moved
-  tests/lint edits are source-only; no new provider pin is qualified here.
-- [#50](https://github.com/dragginzgame/ic-platform/issues/50) remains unresolved.
-  Runtime’s [hosted advisory job](https://github.com/dragginzgame/ic-platform/actions/runs/42019538519)
-  fails on crypto-bigint 0.5.5 / RUSTSEC-2026-0387. No exemption or waiver was added.
-- Runtime’s hosted Browser SDK and Installed runtime runs passed. Its general CI
-  was cancelled by the subsequent main push. Platform’s release-commit workflows
-  were still running at observation; see [CI](https://github.com/dragginzgame/ic-platform/actions/runs/42022979876).
-  Local Linux results do not claim native macOS, Chromium or full IC-server acceptance.
+Shared **0.30.0**, supplier `4d0961821a31766e3044c08fbe5954ed81213ec9`, remains
+adopted with intact executable snapshots. The [audit](../audits/shared-030-practices-2026-11-05.md)
+records rule coverage and native limits. [#140](https://github.com/dragginzgame/ic-platform/issues/140)
+owns remaining native Profiler path-module wiring and paired acceptance; no new
+provider pin is qualified here. [#50](https://github.com/dragginzgame/ic-platform/issues/50)
+remains the crypto-bigint 0.5.5 / RUSTSEC-2026-0387 advisory; no waiver was added.
+Prior releases, supplier details and failures remain in the
+[preceding handoff](https://github.com/dragginzgame/ic-platform/blob/f8fab103c5dfa41c6e32c4c6401bfd216173822d/docs/status/current.md).
+The [Canic report](../audits/platform-022-canic-wasm-2026-11-05.md) remains the
+0.22.1 size evidence; this codec release makes no new Wasm-size claim.
 
-Failed gates remain retained: `qualification.B8Ovtd` (management lint scopes),
-`qualification.hLObj9` (fixture companion closure), and `qualification.WG3FSK`
-(Timers dependency appended into LOC metadata). All are under
-`target/release-validation/`; none is counted as a pass. Corrections use scoped
-expectations, Shared’s fixture copier and explicit workspace dependency inheritance.
-Maintained supplier versions/locks were not re-resolved to hide those failures.
+Unrelated browser drafts were preserved under
+`refs/retained/platform-codec-0223-unrelated`, restored without staged Rust
+replay and checked against their original SHA256 inventory. Browser source,
+package version and pending docs remain uncommitted; ignored dist was rebuilt.
+No npm release or publication was performed.
 
-## Evidence custody and retained contracts
+## Evidence custody
 
-The maintainer-approved historical archive and all bundles remain at
-`recovery-evidence/retired-checkouts/20261104-issue139/`, with byte inventories,
-checksums and relocation receipts at the old/new paths. The two reproducible
-Runtime 0.18.1 executables moved to
-`target/recovery-evidence/runtime-0181-delivery.LgU8r6/`; original logs/checksums
-and relocation receipts remain in Git-side release state. No refs or evidence
-were deleted. Platform’s maintainer owns review by **2026-12-04**.
-`make check-retained-evidence` and Shared’s Git-side checker enforce their
-budgets without automatic deletion or retention extension. Cargo clean removes
-target evidence, while the separate historical archive survives.
-
-The [pre-delivery handoff](https://github.com/dragginzgame/ic-platform/blob/53eae551b9d73ae01b4275059b78e03bbac0317a/docs/status/current.md)
-preserves earlier release, failure, supplier and retirement details in Git.
-Supplier artifacts/bundles also remain in `.git/issue-139-suppliers/`.
-#139’s PocketIC transfer, #138’s Types/Account bytes and existing Wire/schema
-regeneration obligations retain their [migration contract](../migration.md).
-The [matched Canic report](../audits/platform-022-canic-wasm-2026-11-05.md) remains
-the 0.22.1 size evidence; this hygiene batch makes no new Wasm-size claim.
+The approved archive and bundles remain in
+`recovery-evidence/retired-checkouts/20261104-issue139/`; checksum inventories
+and relocation receipts preserve custody. Runtime 0.18.1 reproducible binaries
+remain at `target/recovery-evidence/runtime-0181-delivery.LgU8r6/`. The maintainer
+owns review by **2026-12-04**. Retention checks enforce budgets without deletion
+or extension. Cargo clean can remove target evidence; the separate historical
+archive survives. Supplier bundles also remain in `.git/issue-139-suppliers/`.
+#139's transfer and #138's Types/Account bytes retain their [contract](../migration.md).
