@@ -76,27 +76,26 @@ remain in the [preceding handoff](https://github.com/dragginzgame/ic-platform/bl
 The [Canic report](../audits/platform-022-canic-wasm-2026-11-05.md) remains the
 0.22.1 size evidence; this release makes no new Wasm-size claim.
 
-## Prepared browser 0.2.0 npm release
+## Published browser SDK 0.2.0
 
-The maintainer requested completing the browser SDK release for Auth adoption.
-Version 0.2.0 and its package lock are prepared in the existing checkout. The
-minor removes generic Cbor exports in favor of typed ingress inspection and
-explicit development response/corruption fixtures. SDK Core remains exactly
-6.1.1; decoding, hashing and cryptography remain upstream. Consumer budgets,
-request binding, verification and effect policy retain their owners.
+@tokostudios/ic-platform 0.2.0 is published on npm. Source commit d30e01c and
+annotated tag browser-v0.2.0 are pushed to origin/main. The release replaces
+generic Cbor exports with typed ingress inspection and explicit development
+response/corruption fixtures. SDK Core remains exactly 6.1.1; decoding, hashing
+and cryptography stay upstream. Consumer limits, request binding, verification
+and effect policy retain their owners.
 
 All 21 browser tests, packed consumers on TypeScript 6.0.3/7.0.2, export/bundle
 isolation and Caffeine/Auth singleton checks pass. The final archive also passes
-actual Chromium page and module-worker qualification. Evidence and exact archive
-integrity: target/browser020-delivery/{final-runtime.log,pack.json}.
+actual Chromium page and module-worker qualification. Release Clippy and fresh
+prepublishOnly checks pass. Registry integrity/checksum and the sole SDK Core
+dependency match the qualified archive. Exact custody and logs are under
+target/browser020-delivery/, including publication-complete.json. Earlier
+authentication failures are reconciled by that matching registry observation.
 
-Publication is blocked by npm authentication: npm whoami returned 401 Unauthorized.
-The maintainer was asked to sign in with npm login. No upload was attempted; no
-new browser tag or commit was created. Once authenticated, recheck registry
-absence and unchanged package inputs, publish from packages/browser so the
-prepublishOnly gate runs, and compare registry integrity to the prepared archive.
-Preserve unrelated Rust Cargo.lock edits. Auth adopts the registry artifact only
-after this publication; packed supplier qualification is not consumer adoption.
+Auth is adopting the published package in its own checkout; supplier proofs do
+not establish consumer adoption. Unrelated Rust Cargo.lock edits remain preserved
+and uncommitted. Other Rust release groups were not advanced by this npm release.
 
 ## Evidence custody
 

@@ -1195,7 +1195,7 @@ this batch follows Blob's approved 6.1.1 selection.
 
 ### Typed browser call-ingress inspection
 
-The pending npm **0.2.0** cut replaces `/agent`'s generic `Cbor` export with
+The published npm **0.2.0** cut replaces `/agent`'s generic `Cbor` export with
 `inspectCallIngress` and the `CallIngressInspection` type. SDK Core stays exactly
 6.1.1; no Rust group or cryptographic implementation changes. The inspector
 delegates decoding and request hashing to SDK Core. It retains all decoded
@@ -1227,7 +1227,7 @@ Blob's request-binding/refusal and effect-recovery tests must qualify the
 published artifact before claiming consumer adoption. No sibling edits or
 releases are required to qualify the supplying API itself.
 
-The same pending minor also supplies `inspectIngress` for typed call/query/
+The same minor also supplies `inspectIngress` for typed call/query/
 read-state inspection, including signing public-key/signature byte snapshots and
 read-state paths. Auth's browser transport tests retain their signing-metadata,
 path, request-binding and non-success assertions through this API. The separate

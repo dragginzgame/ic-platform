@@ -161,7 +161,7 @@ explicit trust/Agent options and raw query errors. SDK crypto, hashing, key
 encoding and classes remain upstream; trust, limits, intents and application
 policies remain consumer-owned. Wire retains owned codecs and generators.
 
-The pending browser 0.2 cut removes the generic `Cbor` export. Its typed
+The browser 0.2 cut removes the generic `Cbor` export. Its typed
 `inspectCallIngress` adapter delegates decoding and complete-content request-ID
 hashing to the same SDK, exposing only call fields with SDK Principal identities
 and copied bytes. Inspection adds no authentication, freshness or effect policy;

@@ -15,7 +15,7 @@ NNS/SNS, ledgers and other interfaces that require it; caller location does not
 select a codec. Existing Candid checkpoints remain a legacy compatibility exception.
 
 The separate [browser package](packages/browser/README.md) supplies the
-`@tokostudios/ic-platform` 0.1.1 npm boundary over SDK Core 6.1.1 for Blob 0.48,
+`@tokostudios/ic-platform` 0.2.0 npm boundary over SDK Core 6.1.1 for Blob 0.48,
 with checked identity restoration, explicit Agent configuration and raw query
 integration. The package is published; existing browser SDK declarations remain
 until qualified adoption. Use `make check-browser` and the separately prepared Chromium
