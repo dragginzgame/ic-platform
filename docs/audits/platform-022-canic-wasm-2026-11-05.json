@@ -1,6 +1,6 @@
 {
   "date": "2026-11-05",
-  "status": "source-only; not published",
+  "status": "Pre-release measurement candidate; corrected bodies subsequently published as Platform 0.22.1",
   "inputs": {
     "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
     "compiler": "/home/adam/.rustup/toolchains/1.99.1-x86_64-unknown-linux-gnu/bin/rustc",
@@ -206,5 +206,13 @@
       "target/platform022-auth"
     ],
     "authOriginalUnchangedSinceCapture": true
+  },
+  "publication": {
+    "version": "0.22.1",
+    "source": "fcf540b116e9bf9d511f634b7611a3c0da01dd1c",
+    "tag": "platform-v0.22.1",
+    "checksum": "229f2ea285da3b2cfd9b780e50f32c3313be5972c3a5fda70646111dbe794a07",
+    "qualification": "target/release-validation/qualification.0lxZkr/receipt.json",
+    "evidence": "target/publication/publish.selection.45kQ6d"
   }
 }

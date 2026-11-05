@@ -9,6 +9,12 @@ not size parity. Preserve the upstream cryptographic ownership boundary and the
 required admission/time checks rather than introduce another parser or remove
 checks to eliminate this modest residual overhead.
 
+The corrected source is now published as **Platform 0.22.1**, from
+`fcf540b116e9bf9d511f634b7611a3c0da01dd1c`, tagged `platform-v0.22.1`.
+The measurements below describe the pre-release local 0.22.0 candidate. They are
+not measurements of a subsequent Canic deployment. Delivery and full release-gate
+evidence are recorded in the [current handoff](../status/current.md).
+
 ## Matched inputs
 
 - One frozen Canic working-tree capture: HEAD
@@ -82,7 +88,8 @@ Local path identities change code/layout slightly even without a product change.
 The local control prevents attributing that difference to the correction. Local
 patch arms also align the unchanged canonical Runtime/Types/macros/guard sources
 to avoid duplicate executor/type identities. These are diagnostic overrides,
-not a downstream distribution mechanism. The candidate is **not published**.
+not a downstream distribution mechanism. The candidate was unpublished when
+measured; the matching corrected bodies are now published in 0.22.1.
 
 Imports, exports, Candid sidecars, Wire JSON contracts and generated Wire
 TypeScript are identical for all four arms of each role. The machine-readable
@@ -194,6 +201,9 @@ node scripts/benchmarks/0.22/report.cjs target/platform022-canic \
 The source capture requires the prepared Canic tools and published Auth 0.33.2
 source in the local registry. The current corrected checkout is not an unchanged
 control: use the preserved pre-edit input when reproducing the local patch delta.
+These local arms also require the matching 0.22.0 manifest identity from the
+pre-bump source commit `55f5115`; the delivered checkout now declares 0.22.1.
+For a later experiment, pass its actual version rather than relaxing the guard.
 The native builder must be compiled once with the 0.22 supplier and reused for
 0.21, since current Host Tools uses the 0.22 native DTO identity.
 
@@ -203,4 +213,5 @@ artifacts, symbol attribution, source-archive comparisons and `measurements.json
 `target/platform022-auth/` retains its frozen source, diagnostic-only source diff,
 tool admission, generated-client comparison and passing native/live logs.
 Failed/intermediate captures and experiments are retained separately; they are
-not passes. No package version, tag, publication or sibling source was changed.
+not passes. The measurement phase changed no package version, tag, publication
+or sibling source. Subsequent Platform-only delivery is recorded above.

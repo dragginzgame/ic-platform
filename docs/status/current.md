@@ -1,6 +1,27 @@
 # Current handoff — 2026-11-05
 
-## Source-only Platform 0.22.1 candidate
+## Delivered Platform 0.22.1
+
+Platform **0.22.1** is pushed and published from
+`fcf540b116e9bf9d511f634b7611a3c0da01dd1c`, tagged `platform-v0.22.1`.
+Source/benchmark commit: `55f5115`. Only the facade advanced; Runtime remains
+0.19.1 and Types remains 0.18.1.
+
+All twenty local Linux release stages passed on Rust 1.99.1, including both
+installed Runtime/Timers profiles and final candidate graph admission. Receipt:
+`target/release-validation/qualification.0lxZkr/receipt.json`.
+Publication: `target/publication/publish.selection.45kQ6d`.
+The registry index, downloaded archive and both locally prepared archives share
+SHA-256 `229f2ea285da3b2cfd9b780e50f32c3313be5972c3a5fda70646111dbe794a07`.
+Clean archive provenance and the remote annotated tag name the release commit
+above. Evidence: `target/platform0221-publication-verification/`,
+`target/platform0221-release-with-pocketic.log`, `target/platform0221-publish.log`.
+Hosted CI and native macOS results remain separate; none is claimed here.
+
+The first gate stopped at installed Runtime because `POCKET_IC_BIN` was omitted;
+its failed evidence remains under `qualification.4DOW53`. No release intent had
+yet been saved. A fresh complete gate passed with the documented prepared server
+below. The earlier release/resume logs are retained; their failures are not passes.
 
 The [matched Canic Wasm report](../audits/platform-022-canic-wasm-2026-11-05.md)
 compares one frozen issuer/receiver source with registry Platform 0.21.0/0.22.0,
@@ -21,9 +42,9 @@ source capture passes engine Clippy, 197 native tests and 11 live PocketIC cases
 Chromium remains explicitly excluded. Its captured Wire 0.17.1 generated client
 was stale and was regenerated only in the diagnostic copy; the original Auth
 checkout still needs its own generator refresh. Source inventories, exact sizes,
-compatibility limits and evidence paths are in the report. The maintainer has
-authorized Platform-only 0.22.1 delivery. Fresh full release qualification and
-publication are pending; Runtime and Types do not advance.
+compatibility limits and evidence paths are in the report. These are pre-release
+measurements of the local 0.22.0 candidate; the matching corrected bodies are now
+published in 0.22.1. No sibling source or release was changed.
 
 ## Delivered Types 0.18.1
 
@@ -60,9 +81,9 @@ unimplemented here. No sibling checkout was edited or released. Earlier read-onl
 consumer tests retain their actual source/lock identities, not today's independent
 supplier updates. Keep genuine Nat/Caffeine/HTTP Candid and IcyDB's BLAKE3 edge.
 
-## Current Platform and Runtime deliveries
+## Prior Platform ownership cut and current Runtime delivery
 
-Platform **0.22.0** remains published at
+Platform **0.22.0** was published at
 `b95c9a2e6f4ecfbd25fc2f8466b3ca5826df550f`, tag `platform-v0.22.0`.
 Runtime, macros and exact guard **0.19.1** remain published at
 `74a5071a7b0fdb6470ceb356d1891510ca8d16b1`, tag `runtime-v0.19.1`.
