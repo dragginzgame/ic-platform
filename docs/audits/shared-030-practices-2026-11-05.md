@@ -138,6 +138,14 @@ all-target checks and source-mutation refusals cover the corrected configuration
 Failed gate evidence remains at
 `target/release-validation/qualification.B8Ovtd/`; it is not a passing receipt.
 
+The second release gate at `e9a6419` passed Clippy and browser checks but exposed
+two consumer fixture copies missing newly declared Shared companions. Use the
+canonical companion-aware copier for CI selection and release recovery. The
+affected fixtures, three-group preparation/rollback/retry/local delivery/resume,
+publication routing, editor bootstrap and changelog checks pass. The failed gate
+at `qualification.hLObj9` remains retained; individual correction evidence is
+under `target/platform0222-delivery/`. No production stage or refusal was removed.
+
 ## Native provider qualification boundary
 
 [Platform #140](https://github.com/dragginzgame/ic-platform/issues/140) owns the

@@ -11,7 +11,7 @@ fixture="$(printf '%s\n' "$prepared" | sed -n 's/^Platform validation-plan fixtu
 trap 'printf "Release receipt recovery evidence: %s\n" "$fixture"' EXIT
 seed="$fixture/repo"
 cp "$root/scripts/release/validation-gate.sh" "$seed/scripts/release/"
-cp "$root/scripts/ci/"{run-release.sh,check-release-tag.sh,validate-release-inputs.pl,StableVersion.pm} "$seed/scripts/ci/"
+bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$seed" scripts/ci/run-release.sh
 cat > "$seed/scripts/ci/cargo-release-group.sh" <<'GROUP'
 #!/usr/bin/env bash
 set -eu

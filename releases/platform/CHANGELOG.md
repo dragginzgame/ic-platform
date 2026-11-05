@@ -10,6 +10,8 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 - Adopt Shared 0.30’s source-role LOC report, label generated proof/benchmark
   packages and use ordinary source files for the Canic benchmark driver.
+- Keep CI-selection and release-recovery fixtures complete through Shared’s
+  declared companion closure.
 - Repair exported Shared documentation through committed adoption and check every
   exported Markdown payload in the normal documentation gate.
 - Enforce bounded, dated recovery-evidence admission before release/publication;

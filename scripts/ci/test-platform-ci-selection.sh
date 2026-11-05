@@ -42,7 +42,7 @@ perl -MJSON::PP -0777 -e '
 ' "$fixture/workflow.json" > "$fixture/classify.sh"
 mkdir -p "$fixture/repo/ci" "$fixture/repo/scripts/ci" "$fixture/repo/docs/status" "$fixture/repo/crates/example"
 cp "$root/ci/docs-only-paths.txt" "$fixture/repo/ci/"
-cp "$root/scripts/ci/classify-ci-change.pl" "$fixture/repo/scripts/ci/"
+bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" scripts/ci/classify-ci-change.pl
 cd "$fixture/repo"
 git init -q
 git config user.name 'CI selection fixture'

@@ -19,6 +19,14 @@ explicitly native. Focused native/Wasm Clippy, three native unit cases and exact
 source/mutation guards pass. Failed evidence remains at
 `target/release-validation/qualification.B8Ovtd/`.
 
+The second gate at `e9a6419` passed full Clippy and browser checks, then found
+consumer fixtures copying Shared helpers without their new companions. Both CI
+selection and release recovery now use Shared’s companion-aware fixture copier.
+All three groups’ transaction, rollback, custody and delivery/resume cases pass,
+as do editor bootstrap and changelog checks. The failed receipt is retained at
+`target/release-validation/qualification.hLObj9/`; release qualification will
+restart from the committed correction.
+
 Platform’s documentation gate now checks every exported Shared Markdown payload
 alongside its local document roster. The committed Shared LOC permalink fix and
 explicit exporter selection of the missing governance/audit documents close all
