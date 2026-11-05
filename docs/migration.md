@@ -57,6 +57,15 @@ Earlier embedded-source sections below are historical and superseded by this cut
 removed provenance links point to the preceding release. Runtime and Types do not
 advance for this facade change.
 
+The pending 0.22.1 correction removes signature admission's redundant key
+serialization/reparse through the same upstream checked point parser. Its envelope
+projection mirrors both upstream fields, preserving packed-map and sequence forms
+while skipping the already authenticated witness. Verification, identity-key
+refusal and authenticated-time/freshness boundaries are unchanged. The
+[matched Canic measurement](audits/platform-022-canic-wasm-2026-11-05.md) records
+the remaining modest 0.22 overhead and focused Auth requalification; it does not
+claim size parity with 0.21 or a published patch.
+
 ## Account byte-adapter cut (#138)
 
 The next Types minor changes Account’s optional subaccount to the standard

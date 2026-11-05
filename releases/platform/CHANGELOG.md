@@ -4,6 +4,20 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.22.1] - Unreleased
+
+### 🐛 Fixes
+
+- Restore upstream packed-map and sequence canister-signature envelope admission
+  while preserving verification, delegated-key admission and authenticated time.
+
+### ⚡ Performance
+
+- Remove a redundant BLS key serialization/reparse from signature admission using
+  the unchanged upstream checked point parser. Matched Canic release artifacts
+  save about 3.3 KB of code each; retain all cryptographic and freshness checks.
+  See the [matched Wasm report](../../docs/audits/platform-022-canic-wasm-2026-11-05.md).
+
 ## [0.22.0] - 2026-11-04
 
 ### ⚠️ Breaking

@@ -7,17 +7,19 @@
 #[cfg(test)]
 mod tests;
 
-use crate::bls::PublicKey;
 use crate::canister_sig_creation::{admission, extract_raw_root_pk_from_der};
 use ic_certification::{Certificate, HashTreeNode, LookupResult};
 use serde::Deserialize;
 
-// Project only the certificate bytes. The full envelope/tree was already
-// authenticated by upstream; no hash-tree verification is implemented here.
+// Mirror upstream's envelope fields, including their order for packed/sequence
+// CBOR. Ignore the already authenticated tree without allocating another one.
+// Upstream authenticates the complete tree before this projection is decoded.
 #[derive(Deserialize)]
 struct SigningCertificate {
     #[serde(with = "serde_bytes")]
     certificate: Vec<u8>,
+    #[serde(rename = "tree")]
+    _tree: serde::de::IgnoredAny,
 }
 
 fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, String> {
@@ -25,9 +27,17 @@ fn decode<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, String> {
 }
 
 fn admit_key(bytes: &[u8]) -> Result<(), String> {
-    match PublicKey::deserialize(bytes) {
-        Ok(key) if !key.is_identity() => Ok(()),
-        _ => Err("invalid BLS signature".into()),
+    let Ok(encoded) = <&[u8; ic_verify_bls_signature::PublicKey::BYTES]>::try_from(bytes) else {
+        return Err("invalid BLS signature".into());
+    };
+    // Use the same upstream checked point parser as the verifier, without
+    // constructing our public wrapper (parse -> serialize -> parse). This is
+    // admission only; upstream still verifies every certificate signature.
+    let point = ic_bls12_381::G2Affine::from_compressed(encoded);
+    if bool::from(point.is_some()) && !bool::from(point.unwrap().is_identity()) {
+        Ok(())
+    } else {
+        Err("invalid BLS signature".into())
     }
 }
 

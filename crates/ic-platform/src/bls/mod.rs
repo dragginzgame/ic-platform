@@ -32,11 +32,6 @@ impl PublicKey {
         }
     }
 
-    #[cfg(feature = "signature-verification")]
-    pub(crate) fn is_identity(&self) -> bool {
-        self.identity
-    }
-
     /// Serialize using the upstream key encoding.
     pub fn serialize(&self) -> [u8; Self::BYTES] {
         self.key.serialize()

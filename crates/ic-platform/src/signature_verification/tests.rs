@@ -71,6 +71,34 @@ fn time(bytes: Vec<u8>) -> HashTree {
     labeled(b"time".to_vec(), leaf(bytes))
 }
 
+#[test]
+fn upstream_envelope_forms_preserve_authenticated_time() {
+    let (signature, public, root) = envelope(time(vec![42]), None);
+    let decoded: CanisterSignature = serde_cbor::from_slice(&signature).unwrap();
+    let mut packed = Vec::new();
+    let mut serializer = serde_cbor::Serializer::new(&mut packed).packed_format();
+    serializer.self_describe().unwrap();
+    decoded.serialize(&mut serializer).unwrap();
+    // Serde structs also accept sequences. Only the outer representation changes;
+    // the certificate, witness, public key and all signed bytes remain identical.
+    let sequence = cbor(&(&decoded.certificate, &decoded.tree));
+    for signature in [&signature, &packed, &sequence] {
+        assert_eq!(
+            ic_signature_verification::verify_canister_sig(b"message", signature, &public, &root),
+            Ok(())
+        );
+        assert_eq!(
+            verify_canister_sig(b"message", signature, &public, &root),
+            Ok(())
+        );
+        assert_eq!(
+            verify_canister_sig_with_time(b"message", signature, &public, &root),
+            Ok(42)
+        );
+        assert!(verify_canister_sig(b"changed", signature, &public, &root).is_err());
+    }
+}
+
 #[cfg(all(feature = "agent", not(target_family = "wasm")))]
 #[test]
 fn certified_range_decoding_and_order_match_the_registry_reference() {

@@ -1,4 +1,29 @@
-# Current handoff — 2026-11-04
+# Current handoff — 2026-11-05
+
+## Source-only Platform 0.22.1 candidate
+
+The [matched Canic Wasm report](../audits/platform-022-canic-wasm-2026-11-05.md)
+compares one frozen issuer/receiver source with registry Platform 0.21.0/0.22.0,
+Rust 1.99.1 and the identical Canic release/optimizer recipe. Published 0.22 adds
+33,175/32,032 total bytes and 32,199/31,544 code bytes respectively, about 1%.
+CBOR projection/decoder instantiations dominate; the earlier large Auth reference
+increase does not reproduce in these Canic artifacts.
+
+The retained private-adapter correction saves 3,694/3,664 total bytes and 3,337
+code bytes each against an unchanged local-source control. It removes the extra
+BLS key serialization/reparse and restores packed-map/sequence envelope forms,
+with no cryptographic, certificate, delegation, identity or time check removed.
+Residual overhead remains. A larger full-envelope decoder-sharing trial was
+worse and is reverted. No feature/dependency or Runtime/Types change is required.
+
+Affected Platform Clippy and 15 integration/unit tests pass. A read-only Auth
+source capture passes engine Clippy, 197 native tests and 11 live PocketIC cases;
+Chromium remains explicitly excluded. Its captured Wire 0.17.1 generated client
+was stale and was regenerated only in the diagnostic copy; the original Auth
+checkout still needs its own generator refresh. Source inventories, exact sizes,
+compatibility limits and evidence paths are in the report. The maintainer has
+authorized Platform-only 0.22.1 delivery. Fresh full release qualification and
+publication are pending; Runtime and Types do not advance.
 
 ## Delivered Types 0.18.1
 

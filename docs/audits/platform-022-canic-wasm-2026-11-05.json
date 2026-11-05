@@ -1,0 +1,210 @@
+{
+  "date": "2026-11-05",
+  "status": "source-only; not published",
+  "inputs": {
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)\nbinary: rustc\ncommit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67\ncommit-date: 2026-10-13\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.1\nLLVM version: 23.1.1\n",
+    "compiler": "/home/adam/.rustup/toolchains/1.99.1-x86_64-unknown-linux-gnu/bin/rustc",
+    "canic": {
+      "input": "/home/adam/projects/canic",
+      "output": "/home/adam/projects/ic-platform/target/platform022-canic",
+      "head": "e6a061999dfae207bc20917ffefa2082e7ffe2e7",
+      "inventorySha256": "cb5b302225a6deb9f2fa5e01e67ea9aaf51396e08a96b1c8fa7c46ba1cafbe8b"
+    },
+    "profile": "\nopt-level = \"z\"\nlto = true\ncodegen-units = 1\nstrip = \"symbols\"\ndebug = false\npanic = \"abort\"\noverflow-checks = false\nincremental = false\n",
+    "rustflags": "--cfg=cpubits=\"32\"",
+    "toolPaths": [
+      "/home/adam/projects/canic/.tools/ic/bin/ic-wasm",
+      "/home/adam/projects/canic/.tools/ic/bin/wasm-opt"
+    ],
+    "nativeBuilderSha256": "78684ce19dfbcb544110a842e41dcb7d0c23e994699502e4a567bdfbb21326eb",
+    "tools": [
+      {
+        "path": "/home/adam/projects/canic/.tools/ic/bin/ic-wasm",
+        "realPath": "/home/adam/.local/share/shared-tooling/tools/ic-ed69f58af3f97e4ebac6737dd8cbcd25ed21d864d29a786a83019b04b5bd02d1/set.vXvsAo/bin/ic-wasm",
+        "sha256": "204dad3ad59b78a46fad559dfefcdcaee3609433e5e4e6d81bda5e051a2bc0bc",
+        "version": "ic-wasm 0.11.1"
+      },
+      {
+        "path": "/home/adam/projects/canic/.tools/ic/bin/wasm-opt",
+        "realPath": "/home/adam/.local/share/shared-tooling/tools/ic-ed69f58af3f97e4ebac6737dd8cbcd25ed21d864d29a786a83019b04b5bd02d1/set.vXvsAo/bin/wasm-opt",
+        "sha256": "8f25e9fd5db0fc5f210003aaa432922feb2e52d309e430def2f929e34da9466b",
+        "version": "wasm-opt version 133 (version_133)"
+      }
+    ],
+    "optimizerArguments": [
+      "<input>",
+      "-o",
+      "<output>",
+      "-Oz",
+      "--enable-bulk-memory",
+      "--enable-bulk-memory-opt",
+      "--enable-mutable-globals",
+      "--enable-nontrapping-float-to-int",
+      "--enable-sign-ext"
+    ],
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+    "platformBaselineHead": "8837c876a4ff9f79553305930384b98d259f01ff"
+  },
+  "codeMetric": "Wasm section 10 payload including count and body lengths; excludes section ID/size header",
+  "measurements": [
+    {
+      "arm": "registry021",
+      "role": "issuer",
+      "totalBytes": 3381706,
+      "codePayloadBytes": 3145674,
+      "codeFramedBytes": 3145679,
+      "sha256": "3890c469b8168a7e08bf5b0c7757163c5bef2b643b6171a57646e7245ffbeec5",
+      "contractHashes": {
+        "did": "f87a234f8c3b3367f7bf13a8f4637eab3a73379cf870ac86fcfddc1f520ba5cb",
+        "wire.json": "28dd4835451d6e6e8aefcce96c7bbaee61cc730da9da35c91233039aa5391cfb",
+        "wire.ts": "8ae4b37e6172d556e19d97ebf7b7322c51691876e61d93c8051e63a13bedbca4"
+      },
+      "lockSha256": "df6d7c06948f08df9a68b770a2fe1f9707314bb76d3ef46dc7665df5c67269d2"
+    },
+    {
+      "arm": "registry022",
+      "role": "issuer",
+      "totalBytes": 3414881,
+      "codePayloadBytes": 3177873,
+      "codeFramedBytes": 3177878,
+      "sha256": "8d5705e034c8713f8f9aa2c31051d27ed83336bc3aee51d831e80144075b9325",
+      "contractHashes": {
+        "did": "f87a234f8c3b3367f7bf13a8f4637eab3a73379cf870ac86fcfddc1f520ba5cb",
+        "wire.json": "28dd4835451d6e6e8aefcce96c7bbaee61cc730da9da35c91233039aa5391cfb",
+        "wire.ts": "8ae4b37e6172d556e19d97ebf7b7322c51691876e61d93c8051e63a13bedbca4"
+      },
+      "lockSha256": "a9029300accb19d43b9c202df172c6085c5cea227458b7f60e8db03473412c6a"
+    },
+    {
+      "arm": "path022-control",
+      "role": "issuer",
+      "totalBytes": 3414075,
+      "codePayloadBytes": 3177362,
+      "codeFramedBytes": 3177367,
+      "sha256": "e6da65e31c9dc817d43a6f8bb8af9b524bf7642a7c72d238b7afcf40148b069d",
+      "contractHashes": {
+        "did": "f87a234f8c3b3367f7bf13a8f4637eab3a73379cf870ac86fcfddc1f520ba5cb",
+        "wire.json": "28dd4835451d6e6e8aefcce96c7bbaee61cc730da9da35c91233039aa5391cfb",
+        "wire.ts": "8ae4b37e6172d556e19d97ebf7b7322c51691876e61d93c8051e63a13bedbca4"
+      },
+      "lockSha256": "04f9acf8ed9e071ea93308199b8dbe9668a84e2a34e8838192d04a2562ece36f"
+    },
+    {
+      "arm": "path022-fixed",
+      "role": "issuer",
+      "totalBytes": 3410381,
+      "codePayloadBytes": 3174025,
+      "codeFramedBytes": 3174030,
+      "sha256": "2942e3ad6858a7c84ce33677aefbeed6097014310b2bc78158934c88da3c5e3d",
+      "contractHashes": {
+        "did": "f87a234f8c3b3367f7bf13a8f4637eab3a73379cf870ac86fcfddc1f520ba5cb",
+        "wire.json": "28dd4835451d6e6e8aefcce96c7bbaee61cc730da9da35c91233039aa5391cfb",
+        "wire.ts": "8ae4b37e6172d556e19d97ebf7b7322c51691876e61d93c8051e63a13bedbca4"
+      },
+      "lockSha256": "04f9acf8ed9e071ea93308199b8dbe9668a84e2a34e8838192d04a2562ece36f"
+    },
+    {
+      "arm": "registry021",
+      "role": "receiver",
+      "totalBytes": 2987311,
+      "codePayloadBytes": 2770296,
+      "codeFramedBytes": 2770301,
+      "sha256": "7e2e1f838ec4e42a68b69ce5418a8c5d43d8f7114d048fb18a5f361115dd29e7",
+      "contractHashes": {
+        "did": "4099d1e5696c6e2a5605c53ba37f23c54c9585ab534685ca971b9e5a7365adf1",
+        "wire.json": "a0409cfc53b87e0efaa795984744059d2f0da1934b3ceb5dfcb7e2afa08593e1",
+        "wire.ts": "fc099c7d7eff56f8ba19799963c55f35ae2ca7380ddbdf40edf05e859dbe536d"
+      },
+      "lockSha256": "df6d7c06948f08df9a68b770a2fe1f9707314bb76d3ef46dc7665df5c67269d2"
+    },
+    {
+      "arm": "registry022",
+      "role": "receiver",
+      "totalBytes": 3019343,
+      "codePayloadBytes": 2801840,
+      "codeFramedBytes": 2801845,
+      "sha256": "c86724c0cd490e467b14208939ae34f98b8ac6b37ad71a6450ab42dc960c7ad5",
+      "contractHashes": {
+        "did": "4099d1e5696c6e2a5605c53ba37f23c54c9585ab534685ca971b9e5a7365adf1",
+        "wire.json": "a0409cfc53b87e0efaa795984744059d2f0da1934b3ceb5dfcb7e2afa08593e1",
+        "wire.ts": "fc099c7d7eff56f8ba19799963c55f35ae2ca7380ddbdf40edf05e859dbe536d"
+      },
+      "lockSha256": "a9029300accb19d43b9c202df172c6085c5cea227458b7f60e8db03473412c6a"
+    },
+    {
+      "arm": "path022-control",
+      "role": "receiver",
+      "totalBytes": 3018782,
+      "codePayloadBytes": 2801571,
+      "codeFramedBytes": 2801576,
+      "sha256": "38da3585fb0c59dd5d858d2fedcbd99bfe7b4c85b421a0bd8f045a5d5b72a9fd",
+      "contractHashes": {
+        "did": "4099d1e5696c6e2a5605c53ba37f23c54c9585ab534685ca971b9e5a7365adf1",
+        "wire.json": "a0409cfc53b87e0efaa795984744059d2f0da1934b3ceb5dfcb7e2afa08593e1",
+        "wire.ts": "fc099c7d7eff56f8ba19799963c55f35ae2ca7380ddbdf40edf05e859dbe536d"
+      },
+      "lockSha256": "04f9acf8ed9e071ea93308199b8dbe9668a84e2a34e8838192d04a2562ece36f"
+    },
+    {
+      "arm": "path022-fixed",
+      "role": "receiver",
+      "totalBytes": 3015118,
+      "codePayloadBytes": 2798234,
+      "codeFramedBytes": 2798239,
+      "sha256": "bb5da6a349af8025a534cc862921ad9f63c5c22cfbaae8969985f455c7e39582",
+      "contractHashes": {
+        "did": "4099d1e5696c6e2a5605c53ba37f23c54c9585ab534685ca971b9e5a7365adf1",
+        "wire.json": "a0409cfc53b87e0efaa795984744059d2f0da1934b3ceb5dfcb7e2afa08593e1",
+        "wire.ts": "fc099c7d7eff56f8ba19799963c55f35ae2ca7380ddbdf40edf05e859dbe536d"
+      },
+      "lockSha256": "04f9acf8ed9e071ea93308199b8dbe9668a84e2a34e8838192d04a2562ece36f"
+    }
+  ],
+  "upstreamSourceVerification": [
+    {
+      "package": "ic-verify-bls-signature-0.6.0",
+      "archiveSha256": "cd6c4261586eb473fe1219de63186a98e554985d5fd6f3488036c8fb82452e27",
+      "filesVerified": 9
+    },
+    {
+      "package": "ic_bls12_381-0.10.1",
+      "archiveSha256": "a1e828f9e804ccefe4b9b15b2195f474c60fd4f95ccd14fcb554eb6d7dfafde3",
+      "filesVerified": 40
+    },
+    {
+      "package": "ic-certification-3.2.0",
+      "archiveSha256": "754e3037360152de7e5f2bd0ccf51db8864b6a03c5a2b4ffc6a65286c0e2ffa7",
+      "filesVerified": 13
+    },
+    {
+      "package": "ic-signature-verification-0.3.0",
+      "archiveSha256": "f0e8f6b8a33244df75bddeef3ef1255552de517785f462a090ba218cf2abd93c",
+      "filesVerified": 9
+    },
+    {
+      "package": "ic-canister-sig-creation-1.3.1",
+      "archiveSha256": "d8b2a507d1bebb111fc8c76098468e4de9c745e9b9ef160a079568ae1d6f7fef",
+      "filesVerified": 9
+    }
+  ],
+  "qualification": {
+    "platformTestsPassed": 15,
+    "authSource": {
+      "input": "/home/adam/projects/ic-auth",
+      "output": "/home/adam/projects/ic-platform/target/platform022-auth",
+      "head": "6af482c6613e20587a8a25caf09903f6eb9f0e0f",
+      "inventorySha256": "515886e5cd93a3b8efa200047b8523e88c37f4ac0a30c7ea2b2dcd28a17daa65"
+    },
+    "authNativeTestsPassed": 197,
+    "authLivePassed": 11,
+    "authLiveIgnored": 1,
+    "authClientDiagnosticChange": "Regenerated stale Wire 0.17.1 wire-runtime.ts only in the disposable source copy",
+    "platformClippy": "pass; signature-verification library and four integration contracts; warnings denied",
+    "authClippy": "pass; engine all targets/features; warnings denied",
+    "evidenceDirectories": [
+      "target/platform022-canic",
+      "target/platform022-auth"
+    ],
+    "authOriginalUnchangedSinceCapture": true
+  }
+}
