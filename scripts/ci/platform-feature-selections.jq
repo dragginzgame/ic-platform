@@ -22,7 +22,8 @@ def powerset:
      ["canister-sig-creation", "signature-verification", "bls", "certification-cbor", "ed25519"],
      # Host-feature exclusion on Wasm alongside the full runtime.
      (["cdk"] + ($policy[0].native_leaves | keys)),
-     ($features - ($policy[0].native_leaves | keys))
+     # The development profile also implies the native packet leaf.
+     ($features - (($policy[0].native_leaves | keys) + ["ic-protocol-fixtures"]))
    ] | map(if (. - $features | length) == 0 then selection
            else error("critical selection contains an unknown feature") end)
  else error("unknown feature matrix mode") end) |
