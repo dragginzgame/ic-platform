@@ -1,6 +1,6 @@
 # Candid and runtime ownership
 
-## Management create_canister request (pending 0.23.2)
+## Management create_canister request (0.23.2)
 
 Select `management-canister-types` for
 `management_canister_types::CreateCanisterArgs { settings, sender_canister_version }`.
@@ -15,9 +15,9 @@ The reply is the existing `CanisterIdRecord`. The decoder retains caller budgets
 16-level admission and explicit reply arity. No transport or runtime is selected.
 Canic can delete `StubCreateCanisterArgs` and construct this public request
 directly, retaining its deadline, attached cycles, recovery and fixture policy.
-Consumer source changes and publication are not part of this local API fix.
-After publication, select a Platform requirement accepting 0.23.2; published
-0.23.0 and the 0.22 line do not expose this request.
+Published Platform 0.23.2 supplies this API. Select a requirement accepting 0.23.2;
+published 0.23.0 and the 0.22 line do not expose this request. The interrupted
+0.23.1 attempt was never published. Consumer adoption remains separately owned.
 
 ## Optional subnet metrics (0.23.0)
 
@@ -316,7 +316,7 @@ Run `bash scripts/ci/check-runtime-ic0.sh`; after publication its
 ## Selected canister management DTOs
 
 Platform 0.18 introduced the canister-used subset of management 0.11.0.
-With the pending 0.23.2 creation request, the same module/feature supplies
+With the 0.23.2 creation request, the same module/feature supplies
 44 explicit public names now refer to Platform-owned types, backed by 52 complete
 upstream declarations. The selection follows non-test Canic Core/control-plane
 and Blob source references, plus the maintained Canic runtime-probe canister's
