@@ -25,6 +25,9 @@ The standard metadata, exact-tree, annotated-tag and atomic-push checks passed.
 Publication status is zero under `target/publication/publish.selection.520zh8/`.
 Registry/archive verification: `target/platform0232-delivery/registry-verification.json`.
 Hosted CI remains asynchronous; this is Linux evidence, not native macOS evidence.
+The [advisory workflow](https://github.com/dragginzgame/ic-platform/actions/runs/42087238475)
+failed on existing crypto-bigint 0.5.5 / RUSTSEC-2026-0387 (#50); no waiver or
+correction is claimed. This is separate from the twenty passing local stages.
 
 ## Forward recovery and unrelated draft
 
