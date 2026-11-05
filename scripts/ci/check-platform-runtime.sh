@@ -74,7 +74,14 @@ fi
 cp scripts/fixtures/cdk-runtime/driver.Cargo.toml "$fixture/apps/driver/Cargo.toml"
 if [[ "$qualification" == timers ]]; then
     timers="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-timers' Cargo.toml | "$root/.tools/host/bin/jq" -r 'if type == "string" then {version: .} else . end | to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-    printf '\nic-timers = { %s }\n' "$timers" >> "$fixture/crates/canister/Cargo.toml"
+    PLATFORM_FIXTURE_TIMERS="$timers" perl -0pi -e '
+        s/^\[workspace.dependencies\]\n/$& . "ic-timers = { " . $ENV{PLATFORM_FIXTURE_TIMERS} . " }\n"/me == 1
+            or die "missing fixture dependency catalog\n";
+    ' "$fixture/Cargo.toml"
+    perl -0pi -e '
+        s/^\[dependencies\]\n/$& . "ic-timers.workspace = true\n"/me == 1
+            or die "missing canister dependency table\n";
+    ' "$fixture/crates/canister/Cargo.toml"
 fi
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
 cp scripts/fixtures/cdk-runtime/canister/tests.rs "$fixture/crates/canister/src/tests.rs"

@@ -146,6 +146,17 @@ publication routing, editor bootstrap and changelog checks pass. The failed gate
 at `qualification.hLObj9` remains retained; individual correction evidence is
 under `target/platform0222-delivery/`. No production stage or refusal was removed.
 
+The third full gate (`qualification.WG3FSK`, source `0111b94`) passed 19/20
+stages but caught Timers being appended beneath the new package LOC metadata
+table. Declare it in the generated workspace catalog and inherit it explicitly
+in the canister’s dependency table. The original frozen lock now admits without
+refresh, and all installed Timers/Wire/external-Candid/prepared-call proofs pass
+at `target/cdk-runtime.wGVVgn/`. No dependency version or product behavior changed.
+The original failed source/lock evidence remains under `target/cdk-runtime.kSYofo/`;
+its disposable lock was separately resolved for diagnosis, with the original
+saved at `target/platform0222-delivery/timers-lock-before`. Maintained locks were
+never changed by that diagnostic.
+
 ## Native provider qualification boundary
 
 [Platform #140](https://github.com/dragginzgame/ic-platform/issues/140) owns the

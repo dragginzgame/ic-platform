@@ -27,6 +27,14 @@ as do editor bootstrap and changelog checks. The failed receipt is retained at
 `target/release-validation/qualification.hLObj9/`; release qualification will
 restart from the committed correction.
 
+The third gate at `0111b94` passed 19/20 stages, including the installed owner
+profile. Timers composition exposed an appended dependency landing in the new
+LOC metadata table. The renderer now declares Timers in the fixture workspace
+catalog and inherits it in the canister dependency table. The unchanged frozen
+lock and all installed composition proofs pass at `target/cdk-runtime.wGVVgn/`.
+The failed full-gate evidence remains at `qualification.WG3FSK`; a clean-source
+full gate is still required before any version preparation or upload.
+
 Platform’s documentation gate now checks every exported Shared Markdown payload
 alongside its local document roster. The committed Shared LOC permalink fix and
 explicit exporter selection of the missing governance/audit documents close all

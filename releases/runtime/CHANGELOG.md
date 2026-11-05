@@ -13,6 +13,12 @@ ic-platform-runtime-guard. Earlier macro/guard history remains in
 - Derive the stable-memory error’s mechanical display/source implementation using
   the existing dependency, preserving its variant and message.
 
+### 🧪 Testing
+
+- Keep the Timers composition dependency in the generated workspace catalog and
+  canister dependency table when source-role metadata is present. Preserve the
+  frozen supplier selection and all installed runtime checks.
+
 ## [0.19.1] - 2026-11-04
 
 ### 🧪 Testing
