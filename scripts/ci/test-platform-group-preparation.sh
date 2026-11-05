@@ -101,6 +101,9 @@ for group in "${groups[@]}"; do
     git init -q --bare "$fixture/$group.git"
     git remote add origin "$fixture/$group.git"
     git push -qu origin main
+    # Real release commits must survive the normal formatter without changing
+    # the exact candidate tree recorded by Shared's runner.
+    git config core.hooksPath .githooks
     export RELEASE_PREVIOUS="$previous" RELEASE_VERSION="$next"
     RELEASE_DATE="$(date -u +%F)"; export RELEASE_DATE
     bash scripts/release/group.sh files > "$fixture/$group-files"

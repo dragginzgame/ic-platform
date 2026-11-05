@@ -83,6 +83,15 @@ fn create_canister_uses_the_management_request_and_existing_reply_contract() {
 
 /// Preserve the probe's request bytes, transform references and caller admission.
 pub fn roundtrip() {
+    // This function also runs inside the installed Wasm management proof.
+    let create = ic_platform::management_canister_types::CreateCanisterArgs {
+        settings: None,
+        sender_canister_version: Some(u64::MAX),
+    };
+    assert_eq!(
+        prepare_create_canister(&create),
+        contract::encode_one(&create).unwrap()
+    );
     let limits = DecodeLimits {
         reply_bytes: 4096,
         decoding_quota: 1_000_000,

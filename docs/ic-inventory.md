@@ -40,7 +40,7 @@ conversion, DER/key admission and authenticated-time extraction. See the
 [current dependency contract](migration.md#upstream-cryptographic-dependency-cut-022);
 earlier release narratives below retain historical packaging evidence.
 
-The management selection, including pending 0.23.1's creation request, owns only
+The management selection, including pending 0.23.2's creation request, owns only
 sibling-canister-used DTOs on Wasm:
 44 public names, backed by 52 complete 0.11.0 declarations. Canic Core,
 control-plane, Blob recovery and the Canic runtime-probe canister supply the

@@ -7,7 +7,8 @@ Platform adopts published Shared **0.30.5**, supplier
 It includes the explicitly approved inherent-implementation checker correction,
 now committed on remote main. The original focused adoption used `a08f03a`;
 all 138 payloads are reverified against the published supplier for delivery.
-Platform 0.23.1 adds the management creation request and qualified native layout.
+Platform 0.23.2 delivers the management request and qualified native layout;
+the interrupted local 0.23.1 attempt remains recorded in the group ledger.
 The unrelated incoming Candid/derive 0.10.40 lock draft retains separate custody.
 
 The preceding [0.30 audit](https://github.com/dragginzgame/ic-platform/blob/bd4a6a9/docs/audits/shared-030-practices-2026-11-05.md)

@@ -1,11 +1,12 @@
 # Current handoff — 2026-11-05
 
-## Platform 0.23.1 delivery preparation
+## Platform 0.23.2 forward recovery
 
 Shared **0.30.5** is adopted at published supplier
 `be3771031ebfb340583b238dee5446be65929c62`, including the approved checker correction.
-The pending Platform batch covers #140, #146 and the reviewed cleanup below;
-Runtime, Types and browser versions are unchanged. The incoming Candid/derive
+Local 0.23.1 stopped before tag/push/publication after hook formatting; its commit
+and journal remain. Pending 0.23.2 fixes candidate formatting and delivers #140/#146;
+Runtime, Types and browser versions stay unchanged. The incoming Candid/derive
 0.10.40 lock draft retains separate custody and is restored after delivery.
 
 `make check-boundary` now enforces the named external Candid source policy.
@@ -14,9 +15,8 @@ External DTO admission and new/stale declaration refusal pass; type identity and
 source/license guards retain their separate duties. No cryptographic body changed.
 
 #146 adds the pinned management `CreateCanisterArgs` and typed creation codec;
-see the [pending API contract](../migration.md#management-create_canister-request-pending-0231).
-Native/Wasm Clippy, schema/byte/range and reply-admission checks pass. Logs:
-`target/issue146/`. Canic adoption and Platform publication remain separate.
+see the [pending API contract](../migration.md#management-create_canister-request-pending-0232).
+Native/Wasm Clippy and contract checks pass (`target/issue146/`); Canic adoption stays separate.
 
 Twenty-five obsolete experimental files are retired; compact conclusions and
 references remain in the [audit](../audits/shared-030-practices-2026-11-05.md).

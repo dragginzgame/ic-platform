@@ -4,7 +4,7 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
-## [0.23.1] - 2026-11-05
+## [0.23.2] - Unreleased
 
 ### ➕ Added
 
@@ -12,6 +12,11 @@ See also the [Types ledger](../types/CHANGELOG.md).
   narrow `candid::protocols::management::create_canister` codec, reusing existing
   settings/reply identities and preserving caller transport, cycles and recovery
   policy ([#146](https://github.com/dragginzgame/ic-platform/issues/146)).
+
+### 🐛 Fixed
+
+- Format rendered release manifests before staging so the normal commit hook
+  preserves the exact release tree; qualify real hooks in grouped recovery tests.
 
 ### 🔧 Tooling
 
@@ -23,6 +28,12 @@ See also the [Types ledger](../types/CHANGELOG.md).
   preserving the independent recorder, viewer assets and public aliases; include
   extracted patch tests and compiled-owner lint checks in native qualification
   ([#140](https://github.com/dragginzgame/ic-platform/issues/140)).
+
+## [0.23.1] - 2026-11-05
+
+The local release stopped before tag/push/publication when the commit hook
+formatted a rendered feature array after staging. Its commit and journal are
+retained; 0.23.2 delivers the reviewed changes through forward recovery.
 
 ## [0.23.0] - 2026-11-05
 

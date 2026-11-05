@@ -41,6 +41,9 @@ render_platform_metadata() {
         if [[ "$RELEASE_GROUP" == runtime ]]; then
             bash scripts/release/runtime-pin.sh prepare "$RELEASE_PREVIOUS" || exit
         fi
+        # Match the normal commit hook before the transaction binds candidate
+        # bytes. The metadata editor can compact arrays that cargo-sort expands.
+        cargo sort --workspace --grouped || exit
         bash scripts/release/runtime-lock.sh check || exit
         bash scripts/release/runtime-pin.sh check || exit
         bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
