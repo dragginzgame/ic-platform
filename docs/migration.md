@@ -1,6 +1,6 @@
 # Candid and runtime ownership
 
-## Optional subnet metrics (pending 0.23.0)
+## Optional subnet metrics (0.23.0)
 
 The native `ic-protocol` decoder's `decode_subnet_metrics` result is now
 `Result<Option<SubnetMetrics>, CborError>`, matching Testkit's existing IC leaf
@@ -8,8 +8,9 @@ contract. Handle `Some(metrics)` and CBOR null's `None` explicitly. All metrics
 fields retain upstream identity and the complete u128 cycle range. Empty,
 malformed and trailing data still fail, and complete-input byte limits apply
 before decoding even null. Missing tree paths, authentication and freshness
-remain consumer-owned. The correction is local until Platform 0.23.0 is published;
-published 0.22.3 still returns the required metrics object.
+remain consumer-owned. The correction is published in Platform 0.23.0. Consumers
+must update their Platform requirement from `0.22` to `0.23`; `cargo update` alone
+does not cross that minor boundary. Published 0.22.3 returns a required metrics object.
 
 ## Bounded certificate and signature CBOR (0.22.3)
 
