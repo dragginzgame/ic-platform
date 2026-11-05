@@ -58,8 +58,13 @@ source and baseline must match before comparing full and selected outcomes. A
 shared-input change correctly makes both plans full; never force narrow selection
 by changing the baseline just to shorten a release.
 
-Receipts require every required stage's PASS event, timing and retained log; an
-excluded stage must remain not-applicable. They bind plan/policy/input hashes,
+Shared's `validation-evidence.pl verify` interprets events, timings, checkpoints
+and logs for the exact original run. Platform retains its complete proof in
+the consumer receipt, including relative run/log paths, the expanded input
+checkpoint and every evidence-file digest. A PASS records target success; it
+does not independently assert that an underlying check executed afresh. Stage
+reuse remains disabled. Excluded stages must remain not-applicable. Receipts bind
+plan/policy/input hashes,
 source/group/baseline, host/compiler and relevant build/server environment.
 Failed or interrupted attempts produce no success receipt. Retry uses a fresh
 attempt. Recovery admission checks unchanged input evidence for the same saved
@@ -69,7 +74,9 @@ release intent. Stage reuse between fresh releases is not enabled.
 
 The Shared release runner still owns the lock, saved intent, metadata editor,
 commit, tag and delivery. The consumer hook records a receipt pointer beside
-that intent at `.git/release-state/GROUP-VERSION.validation`. Its baseline is the
+that intent at `.git/release-state/GROUP-VERSION.validation`. The journal binds
+the receipt's path and SHA256, protecting the complete original Shared proof
+before candidate projection begins. Its baseline is the
 selected group's previous-version tag; a missing tag selects the full roster.
 Release mode permits omissions only on an explicitly qualified OS/architecture
 (and macOS major). Unknown hosts always select the full roster.
@@ -77,12 +84,21 @@ Release mode permits omissions only on an explicitly qualified OS/architecture
 Preparation and subsequent adapter checks re-admit that receipt. Source, group,
 previous/candidate versions, remote and branch must match. Only the existing
 metadata editor's declared files may differ in the index or working tree; its
-semantic checks remain mandatory. The original source is reconstructed with
-`git archive` for Shared's input checkpoint, without reversing Cargo versions or
-inventing a second metadata projector. Receipt, stage logs and input hashes must
-match, as must compiler executables, versions, host and build/server settings.
+semantic checks remain mandatory. Unchanged-source admission invokes Shared's
+`check` at the original physical source/run location. After metadata preparation,
+the generic checker cannot observe original inputs through prepared live manifests.
+Platform's separate custody contract therefore verifies the journal's receipt
+digest, reconstructs the immutable original source with `git archive` for Shared's
+input checkpoint and checks every file in the retained proof's digest inventory.
+It does not reverse live Cargo versions, rewrite runner paths, regenerate the
+proof or claim that the generic checker admits a projection. Relocation refuses.
+Receipt, stage logs and input hashes must match, as must compiler executables,
+versions, host and build/server settings.
 A local PocketIC executable is also fingerprinted. Missing or changed evidence
 refuses recovery; retain the complete attempt directory and journal pointer.
+Version 3 receipts require the digest-bearing journal. Older saved attempts
+retain their original admission code and evidence; restore that source to resume
+them rather than converting or regenerating their proof under this implementation.
 
 Historical saved intents with the recognized former full-gate recipe retain
 their original Shared recovery checks. Their logs are never reinterpreted as new

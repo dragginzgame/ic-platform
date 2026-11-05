@@ -11,7 +11,7 @@ cp "$root/ci/"{release-validation.json,release-validation-hosts.json,cargo-relea
 # Exercise the unqualified-host fallback regardless of the production allowlist.
 printf '{"qualified":[],"schema":1}\n' > "$fixture/repo/ci/release-validation-hosts.json"
 cp "$root/scripts/release/"{validation-plan.pl,validation-context.pl,validation-receipt.pl,qualify-validation-plan.sh} "$fixture/repo/scripts/release/"
-cp "$root/scripts/ci/"{run-validation-targets.sh,check-make-execution.sh,verify-file-checksum.sh,validation-input-checkpoint.pl,release-validation-plan.pl,ValidationPlan.pm} "$fixture/repo/scripts/ci/"
+bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" scripts/ci/run-validation-targets.sh scripts/ci/validation-evidence.pl scripts/ci/check-make-execution.sh
 # Retain the actual full-gate recipe text so roster drift is checked against it.
 perl -0777 -ne 'for my $name (qw(ci check-runtime-all release-verify)) { /(^\Q$name\E:\n(?:\t[^\n]*\n)+)/m or die "missing recipe"; print $1,"\n"; }' "$root/Makefile" > "$fixture/repo/Makefile"
 jq -r '.stages[]' "$root/ci/release-validation.json" | while read -r target; do
@@ -96,8 +96,15 @@ cp "${run[0]}/plan-events.tsv" "$fixture/events.original"
 sed '/clippy\tPASS/d' "$fixture/events.original" > "${run[0]}/plan-events.tsv"
 refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/incomplete-receipt.json
 cp "$fixture/events.original" "${run[0]}/plan-events.tsv"
+[[ ! -e target/incomplete-receipt.json ]]
 # Same-source evidence can be rechecked, but cannot qualify a moved source.
 perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/readmitted.json
+# Platform retains the entire unmodified Shared proof, including the relative
+# run/log paths, input checkpoints and evidence inventory; not just a stage list.
+jq -cS .validation_evidence "$receipt" > target/retained-proof.json
+perl scripts/ci/validation-evidence.pl check "$PWD" "$attempt/plan.json" "$(git rev-parse HEAD)" runtime \
+    "${run[0]}" "$attempt/plan.json.context.json" target/retained-proof.json > "$fixture/shared-readmission.json"
+cmp target/retained-proof.json "$fixture/shared-readmission.json"
 refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" "$receipt" check
 RUSTFLAGS='--cfg changed_receipt_environment' refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/config-drift.json
 printf '// drift\n' >> crates/ic-platform-runtime/src/lib.rs

@@ -82,9 +82,10 @@ for group in platform runtime types; do
     FAIL_STAGE="$failure" STOP_AFTER_PREPARE=1 refuse bash scripts/ci/run-release.sh patch origin main
     journal=".git/release-state/$group-1.0.1.validation"
     [[ "$(cat "versions/$group")" == 1.0.1 && -f "$journal" ]]
-    receipt="$(cat "$journal")"
+    receipt="$(jq -r .receipt "$journal")"
     cp "$journal" "$fixture/journal"
     cp "$receipt" "$fixture/receipt"
+    jq -e '.schema==3 and .validation_evidence.kind=="group-validation-evidence" and (.validation_evidence.inputs|length>0) and (.validation_evidence.files|length>0)' "$receipt"
     attempt="${receipt%/receipt.json}"
     runs=("$attempt"/logs/validation.*)
     RELEASE_SOURCE="$source" RELEASE_PREVIOUS=1.0.0 RELEASE_VERSION=1.0.2 RELEASE_REMOTE=origin RELEASE_BRANCH=main \
@@ -111,11 +112,22 @@ for group in platform runtime types; do
     printf '\n# changed binary\n' >> "$POCKET_IC_BIN"
     refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
     printf '#!/usr/bin/env bash\nexit 0\n' > "$POCKET_IC_BIN"
-    log="$(jq -r '.stages[] | select(.target=="clippy") | .log' "$receipt")"
+    log="$(jq -r '.validation_evidence | .run as $run | .stages[] | select(.target=="clippy") | $run+"/"+.log' "$receipt")"
     cp "$log" "$fixture/log"
     printf '\nchanged log\n' >> "$log"
     refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
     cp "$fixture/log" "$log"
+    # Re-admit the original proof after candidate metadata preparation without
+    # rewriting absolute runner paths or replaying the product stages.
+    for evidence in "$attempt/plan.json.context.json" "${runs[0]}/plan-inputs.json" "${runs[0]}/timings.tsv"; do
+        cp "$evidence" "$fixture/evidence.original"
+        printf '\n' >> "$evidence"
+        refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+        cp "$fixture/evidence.original" "$evidence"
+    done
+    jq -cS '.validation_evidence.stages=[]' "$fixture/receipt" > "$receipt"
+    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    cp "$fixture/receipt" "$receipt"
     jq -cS '.group="wrong"' "$fixture/receipt" > "$receipt"
     refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
     cp "$fixture/receipt" "$receipt"
@@ -128,6 +140,10 @@ for group in platform runtime types; do
     refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
     rm "$journal"
     cp "$fixture/journal" "$journal"
+    if [[ "$group" == platform ]]; then
+        cp -R "$work" "$fixture/relocated"
+        (cd "$fixture/relocated"; refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main)
+    fi
     STOP_BEFORE_PUSH=1 refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
     [[ "$(git log -1 --format=%s)" == "Release $group 1.0.1" ]]
     [[ "$(git --git-dir="$fixture/$group.git" rev-parse main)" == "$base" ]]

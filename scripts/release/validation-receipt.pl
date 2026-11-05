@@ -28,10 +28,10 @@ sub command {
 }
 my $raw=bytes($plan_path);
 my $plan=$json->decode($raw);
-$raw eq bytes("$run/parsed-inputs.json.plan.json") or die "runner selected a different plan\n";
-bytes($plan->{policy}) eq bytes("$run/parsed-inputs.json.policy.json") or die "policy drift\n";
 my $context=$json->decode(bytes("$plan_path.context.json"));
 my $checkpoint_root=abs_path('.');
+my $physical_root=$checkpoint_root;
+my $projected=0;
 if ($mode eq 'write') {
     command('git','rev-parse','HEAD') eq "$plan->{source}\n" or die "stale source\n";
     command('git','status','--porcelain','--untracked-files=all') eq '' or die "dirty release inputs\n";
@@ -48,6 +48,7 @@ if ($mode eq 'write') {
         push @args,'--cached' if $staged;
         for (grep {length} split /\0/,command(@args,$plan->{source},'--')) {
             $allowed{$_} or die "non-metadata source drift: $_\n";
+            $projected=1;
         }
     }
     command('git','ls-files','--others','--exclude-standard','-z') eq '' or die "untracked release source\n";
@@ -77,58 +78,57 @@ if (defined $context->{release}) {
 }
 my $runner_log=dirname(dirname($run)).'/runner.log';
 my $runner_bytes=bytes($runner_log);
-$runner_bytes =~ /^VALIDATION PASSED: all requested targets succeeded\.$/m
-    && $runner_bytes =~ /\nPlatform runner completed status=0\n\z/
+$runner_bytes =~ /\nPlatform runner completed status=0\n\z/
     or die "runner did not finish successfully\n";
 $context->{source} eq $plan->{source} && $context->{group} eq $plan->{group} or die "wrong context\n";
 if ($context->{baseline_tag} ne 'none') {
     command('git','rev-parse',"refs/tags/$context->{baseline_tag}^{commit}") eq "$context->{baseline}\n"
         or die "baseline moved\n";
 }
-# Reuse Shared's checkpoint validator; do not implement a second source hasher.
-my ($observed_fh,$observed)=tempfile('receipt-inputs.XXXXXX',DIR=>$run); close $observed_fh;
-system('perl','scripts/ci/validation-input-checkpoint.pl',$checkpoint_root,"$run/plan-inputs.json",$observed,
-    'scripts/ci/verify-file-checksum.sh',@{$plan->{inputs}})==0 or die "input checkpoint drift\n";
-my %last;
-for my $line (split /\n/,bytes("$run/plan-events.tsv")) {
-    my ($target,$state,$detail)=split /\t/,$line,3;
-    next if $target eq 'target';
-    $last{$target}=[$state,$detail];
-}
-my %timings;
-for my $line (split /\n/,bytes("$run/timings.tsv")) {
-    my ($target,$state,$seconds,$log)=split /\t/,$line,4;
-    next if $target eq 'target';
-    !exists $timings{$target} && $state eq 'PASS' && $seconds =~ /^\d+$/
-        or die "failed/duplicate/incomplete stage timing\n";
-    $timings{$target}=[$seconds,$log];
-}
-my @stages;
-for my $stage (@{$plan->{stages}}) {
-    my $target=$stage->{target}; my $event=$last{$target} or die "missing stage event\n";
-    if ($stage->{required}) {
-        $event->[0] eq 'PASS' && exists $timings{$target} && $event->[1] eq $timings{$target}[1]
-            or die "blocked, failed or missing required stage $target\n";
-        my $log=$event->[1];
-        index(abs_path($log)//'',abs_path($run).'/')==0 or die "stage log outside attempt\n";
-        push @stages,{target=>$target,state=>'PASS',admission=>'executed',seconds=>0+$timings{$target}[0],
-            log=>$log,log_sha256=>sha256_hex(bytes($log))};
+my @verify=('perl','scripts/ci/validation-evidence.pl',
+    $physical_root,$plan_path,$plan->{source},$plan->{group},$run,"$plan_path.context.json");
+my $proof;
+if ($mode eq 'write') {
+    # Shared alone interprets events, timings, stage checkpoints and log slots.
+    # Its nonzero status must never publish a successful consumer receipt.
+    $proof=$json->decode(command($verify[0],$verify[1],'verify',@verify[2..$#verify]));
+} else {
+    my $saved=$json->decode(bytes($output));
+    $saved->{schema}==3 && $saved->{physical_root} eq $physical_root
+        or die "unsupported or relocated consumer receipt; restore its original source/location\n";
+    $proof=$saved->{validation_evidence};
+    ref($proof) eq 'HASH' or die "missing complete Shared proof\n";
+    if (!$projected) {
+        # Re-admit at the original physical source/run location. Do not rewrite
+        # the runner's absolute paths or claim that this checks a projection.
+        my ($fh,$path)=tempfile('receipt-proof.XXXXXX',DIR=>$run,UNLINK=>1);
+        print {$fh} $json->encode($proof),"\n"; close $fh or die $!;
+        command($verify[0],$verify[1],'check',@verify[2..$#verify],$path);
     } else {
-        $event->[0] eq 'not-applicable' && !exists $timings{$target} or die "excluded stage executed\n";
-        push @stages,{target=>$target,state=>'not-applicable',reason=>$stage->{reason}};
+        # Shared cannot read prepared metadata as the original source. The
+        # consumer gate protects this complete receipt by digest in its journal.
+        # Re-admit immutable source inputs through the existing checkpoint owner,
+        # and bind every retained evidence file without parsing runner protocols.
+        my ($fh,$observed)=tempfile('receipt-inputs.XXXXXX',DIR=>$run,UNLINK=>1); close $fh;
+        system('perl','scripts/ci/validation-input-checkpoint.pl',$checkpoint_root,"$run/plan-inputs.json",$observed,
+            'scripts/ci/verify-file-checksum.sh',@{$plan->{inputs}})==0 or die "input checkpoint drift\n";
+        $json->encode($proof->{inputs}) eq $json->encode($json->decode(bytes("$run/plan-inputs.json")))
+            or die "Shared proof input inventory drift\n";
+        for my $path (keys %{$proof->{files}}) {
+            sha256_hex(bytes("$run/$path")) eq $proof->{files}{$path} or die "retained Shared evidence changed: $path\n";
+        }
     }
-    delete $last{$target}; delete $timings{$target};
 }
-!keys(%last) && !keys(%timings) or die "unknown evidence stage\n";
 my $execution=$json->decode(command('perl','scripts/release/validation-context.pl'));
 for (keys %$execution) {
     $json->encode($execution->{$_}) eq $json->encode($context->{$_}) or die "execution context drift: $_\n";
 }
-my $receipt={schema=>2,contract=>'platform-release-validation/2',source=>$plan->{source},group=>$plan->{group},
+my $receipt={schema=>3,contract=>'platform-release-validation/3',source=>$plan->{source},group=>$plan->{group},
     scope=>$plan->{scope},baseline=>$context->{baseline},plan_sha256=>sha256_hex($raw),
     context_sha256=>sha256_hex(bytes("$plan_path.context.json")), release=>$context->{release},
     policy_sha256=>sha256_hex(bytes($plan->{policy})),inputs_sha256=>sha256_hex(bytes("$run/plan-inputs.json")),
-    %$execution,runner_log_sha256=>sha256_hex(bytes($runner_log)),stages=>\@stages,
+    %$execution,runner_log_sha256=>sha256_hex(bytes($runner_log)),
+    physical_root=>$physical_root,validation_evidence=>$proof,
     release_omission_admitted=>(defined($context->{release}) && $plan->{scope} eq 'group')?JSON::PP::true:JSON::PP::false};
 if ($mode eq 'check') {
     $json->encode($receipt)."\n" eq bytes($output) or die "receipt/evidence changed\n";

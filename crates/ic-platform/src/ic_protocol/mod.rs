@@ -83,8 +83,13 @@ pub fn decode_read_state_response(
     decode(bytes, max_bytes)
 }
 
-/// Decode the IC subnet-metrics leaf, preserving the upstream u128 cycle count.
-pub fn decode_subnet_metrics(bytes: &[u8], max_bytes: usize) -> Result<SubnetMetrics, CborError> {
+/// Decode the optional IC subnet-metrics leaf, preserving the upstream u128
+/// cycle count. A CBOR null leaf is `None`; malformed or trailing bytes refuse.
+/// Missing certificate paths remain the caller's responsibility.
+pub fn decode_subnet_metrics(
+    bytes: &[u8],
+    max_bytes: usize,
+) -> Result<Option<SubnetMetrics>, CborError> {
     decode(bytes, max_bytes)
 }
 

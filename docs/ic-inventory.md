@@ -169,6 +169,10 @@ No generic CBOR codec or Value export is supplied. Consumers retain packet
 budgets, request bindings, cryptographic/freshness verification and effects.
 See the [packet migration contract](migration.md#typed-ic-packet-and-fixture-boundary-0223).
 
+The pending 0.23.0 correction makes subnet-metrics decoding optional to preserve
+Testkit's CBOR-null leaf contract; full u128 values and typed refusal remain.
+See the [return-type migration](migration.md#optional-subnet-metrics-pending-0230).
+
 `make check-browser` checks the npm selections, real provider types and packed
 consumer/bundle contract; `make check-browser-runtime` adds Chromium page/worker
 qualification. The Rust-only manifest block below does not inventory npm packages.

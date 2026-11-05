@@ -4,6 +4,23 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.23.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Preserve Testkit's optional subnet-metrics leaf contract: `decode_subnet_metrics`
+  now returns `Option<SubnetMetrics>`, accepting CBOR null as absence while
+  retaining complete-input limits, malformed/trailing-data refusal and full u128
+  cycle counts ([#145](https://github.com/dragginzgame/ic-platform/issues/145)).
+  Callers must handle the optional result; certificate path lookup stays consumer-owned.
+
+### 🔧 Tooling
+
+- Use Shared's complete validation proofs instead of locally interpreting runner
+  events and timings. Keep source/host/release custody and digest-bound recovery
+  after metadata preparation; a stage PASS does not imply fresh execution
+  ([#141](https://github.com/dragginzgame/ic-platform/issues/141)).
+
 ## [0.22.3] - 2026-11-05
 
 ### ➕ Added
@@ -18,6 +35,9 @@ See also the [Types ledger](../types/CHANGELOG.md).
   [#143](https://github.com/dragginzgame/ic-platform/issues/143)). Include the existing
   strict certificate/tree admission contract and preserve separate tagged/untagged
   packet bytes, upstream identities and caller-owned verification/effect policy.
+- The same native fixture selection supplies Canic's query, controller-list and
+  canister-range packet tests without generic CBOR exports
+  ([#144](https://github.com/dragginzgame/ic-platform/issues/144)).
 
 ## [0.22.2] - 2026-11-05
 

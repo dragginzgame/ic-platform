@@ -30,12 +30,16 @@ if [[ "$1" == verify ]]; then
     receipt="$(printf '%s\n' "$result" | sed -n '\|^target/release-validation/qualification\.[A-Za-z0-9]*/receipt.json$|p')"
     [[ -n "$receipt" && -f "$receipt" && "$receipt" != *$'\n'* ]] || exit 1
     temporary="$(mktemp "$journal.XXXXXX")"
-    printf '%s\n' "$receipt" > "$temporary"
+    digest="$(bash scripts/ci/verify-file-checksum.sh --print sha256 "$receipt")"
+    jq -cnS --arg receipt "$receipt" --arg sha256 "$digest" '{schema:1,receipt:$receipt,sha256:$sha256}' > "$temporary"
     mv "$temporary" "$journal"
 else
     [[ -f "$journal" ]] || { echo 'Missing release validation receipt; restore retained evidence before resuming.' >&2; exit 1; }
-    receipt="$(cat "$journal")"
+    jq -e '.schema==1 and (.receipt|type=="string") and (.sha256|type=="string")' "$journal" > /dev/null
+    receipt="$(jq -r .receipt "$journal")"
     [[ "$receipt" =~ ^target/release-validation/qualification\.[A-Za-z0-9]+/receipt.json$ ]] || exit 1
+    [[ ! -L "$receipt" ]] || exit 1
+    bash scripts/ci/verify-file-checksum.sh sha256 "$(jq -r .sha256 "$journal")" "$receipt"
     attempt="${receipt%/receipt.json}"
     runs=("$attempt"/logs/validation.*)
     [[ ${#runs[@]} == 1 && -d "${runs[0]}" ]] || exit 1

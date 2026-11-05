@@ -65,7 +65,7 @@ perl -MJSON::PP -e '
         die "different source/host/baseline" unless $r->{source} eq $source && $r->{host_key} eq $host && $r->{baseline} eq $baseline;
         die "wrong scope" unless $r->{scope} eq ($r->{group} eq "platform" ? "workspace" : "group");
         my $seconds=0; my $stages=0;
-        for (@{$r->{stages}}) { next if $_->{state} eq "not-applicable"; die "not passed" unless $_->{state} eq "PASS"; $seconds+=$_->{seconds}; $stages++; }
+        for (@{$r->{validation_evidence}{stages}}) { next if $_->{state} eq "not-applicable"; die "not passed" unless $_->{state} eq "PASS"; $seconds+=$_->{seconds}; $stages++; }
         die "unexpected stage count" unless exists($expected{$r->{group}}) && $stages==$expected{$r->{group}};
         printf "%s\t%s\t%s\t%d\t%d\n",$r->{source},$r->{host_key},$r->{group},$stages,$seconds;
     }

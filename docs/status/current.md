@@ -1,5 +1,23 @@
 # Current handoff — 2026-11-05
 
+## Local issue fixes, not released
+
+[#145](https://github.com/dragginzgame/ic-platform/issues/145) restores Testkit's
+optional subnet-metrics leaf: CBOR null is `None`, while every field/u128 value,
+byte bounds and malformed/trailing refusal remain intact. The breaking return
+type is noted for **0.23.0**; package versions remain unchanged. Protocol and
+fixture Clippy pass; all 20 selected unit tests pass. Logs:
+`target/platform-codec-release/issue145-{clippy,standalone-clippy,tests}.log`.
+
+[#141](https://github.com/dragginzgame/ic-platform/issues/141) delegates runner
+evidence interpretation to Shared, retains its complete proof and digest-binds
+the release journal. Original-location checks and prepared-source custody remain
+distinct. Final three-group plan/recovery fixtures pass (substitute product stages):
+`target/release-plan-test.kYWKyr/` and `target/release-plan-test.hb2EKu/`.
+No real release, new native/macOS qualification or narrowed gate is claimed.
+#142–#144 are closed for the published supplying APIs; sibling adoption remains
+separate. #140's paired Profiler/native work and #50's advisory remain open.
+
 ## Platform codec delivery
 
 **ic-platform 0.22.3** is pushed, tagged and published on crates.io. Release

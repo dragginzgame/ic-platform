@@ -74,7 +74,25 @@ fn subnet_metrics_preserve_every_field_across_the_full_u128_range() {
             update_transactions_total: u64::MAX,
         };
         let encoded = serde_cbor::to_vec(&expected).unwrap();
-        let decoded = decode_subnet_metrics(&encoded, encoded.len()).unwrap();
+        let decoded = decode_subnet_metrics(&encoded, encoded.len())
+            .unwrap()
+            .unwrap();
+        let prior: Option<SubnetMetrics> = serde_cbor::from_slice(&encoded).unwrap();
+        let prior = prior.unwrap();
+        assert_eq!(
+            (
+                decoded.num_canisters,
+                decoded.canister_state_bytes,
+                decoded.consumed_cycles_total,
+                decoded.update_transactions_total,
+            ),
+            (
+                prior.num_canisters,
+                prior.canister_state_bytes,
+                prior.consumed_cycles_total,
+                prior.update_transactions_total,
+            )
+        );
         assert_eq!(decoded.num_canisters, expected.num_canisters);
         assert_eq!(decoded.canister_state_bytes, expected.canister_state_bytes);
         assert_eq!(decoded.consumed_cycles_total, cycles);
@@ -97,6 +115,25 @@ fn subnet_metrics_preserve_every_field_across_the_full_u128_range() {
         decode_subnet_metrics(&[0xff], 1),
         Err(CborError::Decode(_))
     ));
+}
+
+#[test]
+fn subnet_metrics_null_preserves_absence_without_hiding_refusals() {
+    let null = [0xf6];
+    let prior: Option<SubnetMetrics> = serde_cbor::from_slice(&null).unwrap();
+    assert!(prior.is_none());
+    assert!(decode_subnet_metrics(&null, null.len()).unwrap().is_none());
+    assert!(matches!(
+        decode_subnet_metrics(&null, 0),
+        Err(CborError::InputTooLarge)
+    ));
+    for bytes in [&[][..], &[0xff], &[0xa1], &[0xf6, 0], &[0xf6, 0xf6]] {
+        assert!(serde_cbor::from_slice::<Option<SubnetMetrics>>(bytes).is_err());
+        assert!(matches!(
+            decode_subnet_metrics(bytes, bytes.len()),
+            Err(CborError::Decode(_))
+        ));
+    }
 }
 
 #[test]
@@ -225,6 +262,7 @@ fn typed_protocol_fixtures_keep_payload_ranges_and_strict_rejections() {
     assert_eq!(bytes, serde_cbor::to_vec(&value).unwrap());
     assert_eq!(
         decode_subnet_metrics(&bytes, bytes.len())
+            .unwrap()
             .unwrap()
             .consumed_cycles_total,
         u128::MAX
