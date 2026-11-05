@@ -97,9 +97,9 @@ thiserror = { workspace = true, optional = true }
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }
 ic-agent = { workspace = true, optional = true }
-ic-transport-types = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-secp256k1 = { workspace = true, optional = true }
+ic-transport-types = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde_bytes.workspace = true
