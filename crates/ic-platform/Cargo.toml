@@ -1,7 +1,7 @@
 [package]
 name = "ic-platform"
 description = "Controlled Candid and IC runtime dependency boundary"
-version = "0.23.0"
+version = "0.23.1"
 edition.workspace = true
 rust-version.workspace = true
 license = "MIT AND Apache-2.0"
@@ -33,7 +33,13 @@ canister-sig-creation = ["principal-external", "certification", "dep:ic-canister
 cdk = ["runtime", "dep:ic-platform-macros"]
 runtime = ["principal", "executor", "ic0", "ic-platform-runtime/runtime"]
 certification = ["dep:ic-certification"]
-certification-cbor = ["certification", "dep:serde", "dep:serde_bytes", "dep:serde_cbor", "dep:thiserror"]
+certification-cbor = [
+    "certification",
+    "dep:serde",
+    "dep:serde_bytes",
+    "dep:serde_cbor",
+    "dep:thiserror",
+]
 ecdsa = ["dep:crypto-bigint", "dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["ic0", "ic-platform-runtime/executor"]
