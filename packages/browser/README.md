@@ -1,7 +1,7 @@
 # IC Platform browser boundary
 
 `@tokostudios/ic-platform` owns the shared SDK Core integration boundary for
-browser and module-worker consumers. Package version 0.1.1 uses exactly
+browser and module-worker consumers. Package version 0.2.0 uses exactly
 `@icp-sdk/core` 6.1.1 for Blob's approved 0.48 graph. Rust package versions and
 release commands remain independent; npm supplies the browser package.
 
@@ -37,9 +37,10 @@ pending or unrun hosts are not local execution evidence.
 | `/principal` | SDK Principal identity; bounded canonical text parsing with redacted errors |
 | `/identity` | SDK Ed25519 identity; checked JSON key-pair restoration with a caller-supplied byte budget |
 | `/identity/secp256k1` | Equivalent secp256k1 integration through the unchanged SDK |
-| `/agent` | SDK HttpAgent, request-ID/CBOR operations and rejection identities; explicit Agent options and raw query dispatch |
+| `/agent` | SDK HttpAgent, request IDs and rejection identities; typed call-ingress inspection, explicit Agent options and raw query dispatch |
 | `/certification` | SDK Certificate verification and lookup identities; lookup alone is not authentication |
 | `/candid` | SDK IDL for required external protocols |
+| `/testing` | Typed IC response and deliberate corruption fixtures for development imports only |
 
 Version 0.1.1 also exposes SDK `Endpoint`, `SubmitRequestType`,
 `ReadRequestType` and `Expiry` through `/agent` for consumers constructing
@@ -47,6 +48,41 @@ requests for `Identity.transformRequest`. These are unchanged upstream identitie
 they introduce no signing authority, expiry policy or network dispatch. Published
 0.1.0 does not supply these four names. Require at least 0.1.1 and qualify the
 consumer before removing its direct SDK dependency for these imports.
+
+### Typed call-ingress inspection (0.2.0)
+
+The next browser minor removes the generic `Cbor` export. Use
+`inspectCallIngress(envelopeBytes)` to inspect an SDK call envelope. It returns
+`sender` and `canisterId` as unchanged SDK Principal instances, `methodName`,
+opaque `arg` bytes, exact `ingressExpiry` as bigint, optional `nonce`, and
+`requestId`. CBOR decoding and request hashing stay upstream. The ID hashes the
+complete original content, including nonce and extension fields; it does not
+hash a reconstructed subset. Inputs and returned byte views are snapshotted.
+Malformed/non-call envelopes raise a redacted TypeError with no ingress-bearing
+cause. There is no generic encoder/decoder replacement.
+
+This is structural inspection of signed or anonymous call envelopes, not
+signature/delegation verification, freshness admission or permission to submit.
+Consumers enforce their byte limit **before** inspection and retain expected
+sender/canister/method/argument bindings, certificate/trust checks, durable
+intents, cancellation and dispatch/recovery authority. It neither verifies nor
+rewrites outer signatures/delegations, and does not return generic CBOR values.
+No wire, stored envelope or request-ID format changes. Require the published
+0.2 minor before migrating; 0.1.1 does not supply this function.
+
+`inspectIngress` additionally returns a discriminated `requestType` for call,
+query and read-state content, copied signing metadata (`senderPublicKey` and
+`senderSignature` when present), and exact read-state `paths`. Its trust and
+budget contract is the same as call-only inspection. It provides the fields
+needed by Auth's signed-transport tests without exposing arbitrary CBOR values.
+Signing metadata alone is not proof of validity or authorization.
+
+Import `/testing` only in development code for `queryReplyFixture`,
+`readStateResponseFixture`, `invalidCertificateFixture`,
+`corruptCertificateSignatureFixture` and `callWithMethodFixture`. They construct
+standard IC fixtures or deliberately corrupt one signature byte/call method,
+preserving the other protocol fields. They do not verify, dispatch or replace
+SDK cryptography. Ordinary production imports do not select this subpath.
 
 There is no root barrel, actor generator or alternative transport/codec. Exported
 SDK classes retain their public methods; these explicit names do not make every

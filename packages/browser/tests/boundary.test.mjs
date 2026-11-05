@@ -4,13 +4,13 @@ import { Principal as SdkPrincipal } from '@icp-sdk/core/principal';
 import { Ed25519KeyIdentity as SdkEd25519 } from '@icp-sdk/core/identity';
 import { Secp256k1KeyIdentity as SdkSecp256k1 } from '@icp-sdk/core/identity/secp256k1';
 import {
-  HttpAgent as SdkAgent, Certificate as SdkCertificate, Endpoint as SdkEndpoint,
+  Cbor, HttpAgent as SdkAgent, Certificate as SdkCertificate, Endpoint as SdkEndpoint,
   SubmitRequestType as SdkSubmitRequestType, ReadRequestType as SdkReadRequestType, Expiry as SdkExpiry,
 } from '@icp-sdk/core/agent';
 import { Principal, parseCanonicalPrincipal, PrincipalTextError } from '../dist/principal.js';
 import { Ed25519KeyIdentity, restoreEd25519Identity, IdentityImportError } from '../dist/identity.js';
 import { Secp256k1KeyIdentity, restoreSecp256k1Identity } from '../dist/secp256k1.js';
-import { HttpAgent, createAgentOptions, queryRaw, Cbor, requestIdOf, RejectError, IC_ROOT_KEY } from '../dist/agent.js';
+import { HttpAgent, createAgentOptions, queryRaw, inspectCallIngress, requestIdOf, RejectError, IC_ROOT_KEY } from '../dist/agent.js';
 import { Endpoint, SubmitRequestType, ReadRequestType, Expiry } from '../dist/agent.js';
 import { Certificate } from '../dist/certification.js';
 import { IDL } from '../dist/candid.js';

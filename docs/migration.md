@@ -1193,6 +1193,50 @@ production authentication, durable intents or provider effects. Run those at the
 owning consumers after adoption. New SDK versions require renewed qualification;
 this batch follows Blob's approved 6.1.1 selection.
 
+### Typed browser call-ingress inspection
+
+The pending npm **0.2.0** cut replaces `/agent`'s generic `Cbor` export with
+`inspectCallIngress` and the `CallIngressInspection` type. SDK Core stays exactly
+6.1.1; no Rust group or cryptographic implementation changes. The inspector
+delegates decoding and request hashing to SDK Core. It retains all decoded
+content fields in the request-ID calculation, including nonce and extensions.
+Principal values retain SDK identity; expiry is a lossless bigint; argument,
+nonce and ID bytes are snapshots. Malformed input raises a redacted TypeError.
+Signed and anonymous calls are accepted structurally. Query/read-state envelopes
+are refused. Signature/delegation validity and freshness are not asserted.
+
+**Required Blob adoption:** after npm
+publication/adoption, replace `Cbor` and the now-unused `requestIdOf` import in
+`clients/browser/certificate.js` with `inspectCallIngress`. Keep `envelopeId`'s
+existing 8192-byte admission and replace its decode/binding/hash sequence with:
+
+```js
+const call = inspectCallIngress(bytes);
+require(call.methodName === METHOD &&
+  call.sender.toText() === saved.uploader &&
+  call.canisterId.toText() === saved.service && same(call.arg, arg), 'envelope');
+return hex(call.requestId);
+```
+
+The inspector enforces `request_type === 'call'`. Keep Blob's existing refusal
+mapping if it exposes a product-specific error for malformed envelopes. Keep
+every intent, route, retained-envelope, response/certificate, trust/freshness,
+cancellation and dispatch-binding check. Preserve and submit the original bytes,
+never re-encode inspected fields. Retained envelopes and IDs need no migration.
+Blob's request-binding/refusal and effect-recovery tests must qualify the
+published artifact before claiming consumer adoption. No sibling edits or
+releases are required to qualify the supplying API itself.
+
+The same pending minor also supplies `inspectIngress` for typed call/query/
+read-state inspection, including signing public-key/signature byte snapshots and
+read-state paths. Auth's browser transport tests retain their signing-metadata,
+path, request-binding and non-success assertions through this API. The separate
+`/testing` subpath supplies typed query/read-state response fixtures, deliberate
+invalid certificates, certificate signature-byte corruption and changed-call-method
+fixtures. Blob's certificate and retained-envelope negative tests can migrate
+without removing the refusal cases. Neither subpath exports generic CBOR, and
+fixture construction or structural inspection never verifies a signature.
+
 ### Blob 0.48 and SDK 6
 
 All current Blob browser SDK imports are covered by the explicit subpaths above;

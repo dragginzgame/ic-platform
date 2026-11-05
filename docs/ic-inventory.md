@@ -161,6 +161,14 @@ explicit trust/Agent options and raw query errors. SDK crypto, hashing, key
 encoding and classes remain upstream; trust, limits, intents and application
 policies remain consumer-owned. Wire retains owned codecs and generators.
 
+The pending browser 0.2 cut removes the generic `Cbor` export. Its typed
+`inspectCallIngress` adapter delegates decoding and complete-content request-ID
+hashing to the same SDK, exposing only call fields with SDK Principal identities
+and copied bytes. Inspection adds no authentication, freshness or effect policy;
+consumers retain admission budgets and request bindings. Rust groups and SDK
+dependency selections are unchanged. See the
+[consumer migration](migration.md#typed-browser-call-ingress-inspection).
+
 Rust 0.22.3 supplies native `ic-protocol` packet codecs using the same
 registry transport identities without Agent or Runtime. Its separate
 `ic-protocol-fixtures` feature contains typed native development helpers;

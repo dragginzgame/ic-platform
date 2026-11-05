@@ -141,7 +141,7 @@ check-doc-links:
 		records="$$(mktemp "$(CURDIR)/target/doc-link-records.XXXXXX")"; \
 		trap 'rm -f "$$records"' EXIT; \
 		bash scripts/ci/verify-shared-tooling-snapshot.sh --read-manifest .shared-tooling.snapshot > "$$records"; \
-		set -- README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md docs/platform-release-validation.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md; \
+		set -- README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md docs/platform-release-validation.md packages/browser/README.md packages/browser/CHANGELOG.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md; \
 		while IFS="$$(printf '\t')" read -r kind checksum mode path; do \
 			case "$$kind:$$path" in file:*.md) set -- "$$@" "$$path" ;; esac; \
 		done < "$$records"; \

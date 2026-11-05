@@ -1,9 +1,10 @@
 import { Principal, parseCanonicalPrincipal } from '@tokostudios/ic-platform/principal';
 import { Ed25519KeyIdentity, restoreEd25519Identity } from '@tokostudios/ic-platform/identity';
 import { Secp256k1KeyIdentity, restoreSecp256k1Identity } from '@tokostudios/ic-platform/identity/secp256k1';
-import { HttpAgent, createAgentOptions, queryRaw, IC_ROOT_KEY, Cbor, type Identity } from '@tokostudios/ic-platform/agent';
+import { HttpAgent, createAgentOptions, queryRaw, inspectCallIngress, inspectIngress, IC_ROOT_KEY, type Identity, type CallIngressInspection } from '@tokostudios/ic-platform/agent';
 import { Endpoint, SubmitRequestType, ReadRequestType, Expiry } from '@tokostudios/ic-platform/agent';
 import { Certificate, lookupResultToBuffer } from '@tokostudios/ic-platform/certification';
+import { queryReplyFixture } from '@tokostudios/ic-platform/testing';
 import { IDL } from '@tokostudios/ic-platform/candid';
 
 export async function smoke() {
@@ -37,19 +38,35 @@ export async function smoke() {
   const arg = Uint8Array.of(0x49, 0x43, 0x57, 7);
   const reply = Uint8Array.of(3, 2, 1);
   let calls = 0;
+  let inspected: CallIngressInspection | undefined;
   const agent = await HttpAgent.create(createAgentOptions({
     host: new URL('https://example.invalid'), rootKey, identity,
     retryTimes: 0, verifyQuerySignatures: false, shouldSyncTime: false,
-    fetch: async (_url, init) => {
+    fetch: async (url, init) => {
+      if (new URL(String(url)).pathname.endsWith('/call')) {
+        inspected = inspectCallIngress(init!.body as Uint8Array);
+        if (inspected.sender.toText() !== identity.getPrincipal().toText() ||
+            inspected.canisterId.toText() !== target.toText() || inspected.methodName !== 'wire_method' ||
+            String(inspected.arg) !== String(arg) || typeof inspected.ingressExpiry !== 'bigint') {
+          throw new Error('Ingress binding changed');
+        }
+        return new Response(null, { status: 202 });
+      }
       calls++;
-      const request = Cbor.decode<{ content: { arg: Uint8Array }; sender_sig: Uint8Array }>(init!.body as Uint8Array);
-      if (String(request.content.arg) !== String(arg) || request.sender_sig.length === 0) throw new Error('Envelope changed');
-      return new Response(Cbor.encode({ status: 'replied', reply: { arg: reply } }).slice().buffer,
+      const query = inspectIngress(init!.body as Uint8Array);
+      if (query.requestType !== 'query' || String(query.arg) !== String(arg) || !query.senderSignature?.length) {
+        throw new Error('Query signing bytes changed');
+      }
+      return new Response(new Uint8Array(queryReplyFixture(reply)).buffer,
         { headers: { 'content-type': 'application/cbor' } });
     },
   }));
   const response = await queryRaw(agent, target, { methodName: 'wire_method', arg });
   if (String(response) !== String(reply) || calls !== 1) throw new Error('Unexpected dispatch');
+  const submitted = await agent.call(target, { methodName: 'wire_method', arg, callSync: false });
+  if (!inspected || String(inspected.requestId) !== String(submitted.requestId)) {
+    throw new Error('Ingress request ID changed');
+  }
   if (IDL.decode([IDL.Text], IDL.encode([IDL.Text], ['root']))[0] !== 'root') throw new Error('External Candid changed');
   let malformedRefused = false;
   try {

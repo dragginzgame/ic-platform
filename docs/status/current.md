@@ -76,6 +76,28 @@ remain in the [preceding handoff](https://github.com/dragginzgame/ic-platform/bl
 The [Canic report](../audits/platform-022-canic-wasm-2026-11-05.md) remains the
 0.22.1 size evidence; this release makes no new Wasm-size claim.
 
+## Prepared browser 0.2.0 npm release
+
+The maintainer requested completing the browser SDK release for Auth adoption.
+Version 0.2.0 and its package lock are prepared in the existing checkout. The
+minor removes generic Cbor exports in favor of typed ingress inspection and
+explicit development response/corruption fixtures. SDK Core remains exactly
+6.1.1; decoding, hashing and cryptography remain upstream. Consumer budgets,
+request binding, verification and effect policy retain their owners.
+
+All 21 browser tests, packed consumers on TypeScript 6.0.3/7.0.2, export/bundle
+isolation and Caffeine/Auth singleton checks pass. The final archive also passes
+actual Chromium page and module-worker qualification. Evidence and exact archive
+integrity: target/browser020-delivery/{final-runtime.log,pack.json}.
+
+Publication is blocked by npm authentication: npm whoami returned 401 Unauthorized.
+The maintainer was asked to sign in with npm login. No upload was attempted; no
+new browser tag or commit was created. Once authenticated, recheck registry
+absence and unchanged package inputs, publish from packages/browser so the
+prepublishOnly gate runs, and compare registry integrity to the prepared archive.
+Preserve unrelated Rust Cargo.lock edits. Auth adopts the registry artifact only
+after this publication; packed supplier qualification is not consumer adoption.
+
 ## Evidence custody
 
 The approved archive/bundles remain in
