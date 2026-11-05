@@ -4,7 +4,8 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 [[ $# -le 2 ]] || { echo 'usage: wasm-size.sh [PLATFORM_SOURCE [NEW_OUTPUT_DIRECTORY]]' >&2; exit 2; }
 source_root="$(cd "${1:-$root}" && pwd -P)"
-output="${2:-$(mktemp -d "${TMPDIR:-/tmp}/platform-wasm-size.XXXXXX")}"
+mkdir -p "$root/target"
+output="${2:-$(mktemp -d "$root/target/platform-wasm-size.XXXXXX")}"
 mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
 [[ ! -e "$output/Cargo.toml" ]] || { echo 'Size evidence already exists; select a new output directory' >&2; exit 2; }
@@ -48,6 +49,9 @@ cat > "$output/Cargo.toml" <<MANIFEST
 name = "platform-wasm-size-probe"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"
 [workspace]
 [lib]
 crate-type = ["cdylib"]

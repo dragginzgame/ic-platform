@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-runtime-graph.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-runtime-graph.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 cat > "$fixture/control" <<'GRAPH'
 platform-runtime-canister v0.0.0

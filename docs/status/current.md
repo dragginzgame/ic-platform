@@ -1,5 +1,33 @@
 # Current handoff — 2026-11-05
 
+## Local Shared 0.30 adoption and hygiene audit
+
+Shared **0.30.0**, exact committed supplier
+`4d0961821a31766e3044c08fbe5954ed81213ec9`, is installed through the canonical
+exporter. The maintainer authorized deployment of this reviewed maintenance
+batch: Runtime 0.19.2 followed by Platform 0.22.2. Types remains 0.18.1; its
+changes only tighten lint scopes. Release qualification and publication are
+pending, with evidence under `target/platform0222-delivery/`. No sibling source
+or provider consumer pin changes are included. See the [audit](../audits/shared-030-practices-2026-11-05.md)
+for rule coverage, focused evidence and the remaining native-provider limitation
+tracked in [#140](https://github.com/dragginzgame/ic-platform/issues/140).
+
+Platform’s documentation gate now checks every exported Shared Markdown payload
+alongside its local document roster. The committed Shared LOC permalink fix and
+explicit exporter selection of the missing governance/audit documents close all
+three observed broken links; the unnecessary local fleet guide is removed through
+the exporter. The actual Make gate passes and rejects a broken exported target
+in a disposable regression. Evidence: `target/shared-doc-links-20261105/`.
+
+The approved custody moves preserve the complete historical archive/bundles at
+`recovery-evidence/retired-checkouts/20261104-issue139/`, with byte inventories
+and relocation receipts at both old/new locations. The old Runtime 0.18.1 driver
+executables now live under `target/recovery-evidence/runtime-0181-delivery.LgU8r6/`;
+logs/checksums remain at their original locations, with relocation receipts.
+Shared’s Git-side admission passes; release/publication also admit the separate
+archive budget. Review belongs to the Platform maintainer by 2026-12-04; the
+checker never deletes or automatically extends retention.
+
 ## Delivered Platform 0.22.1
 
 Platform **0.22.1** is pushed and published from
@@ -102,7 +130,8 @@ Candid/printer, raw IC0, CBOR, hashing and a lazy root cache; repeated CBOR deco
 remains. No Wasm-size or performance improvement is claimed. Native Agent remains
 upstream ic-agent 0.49.3; advisory #50 is unchanged.
 
-Shared **0.29.3** at `afccb9947d26bbae13d4c4a143d2fd5f0c2c07a4` is installed.
+That delivery used Shared **0.29.3** at
+`afccb9947d26bbae13d4c4a143d2fd5f0c2c07a4`; the local adoption above supersedes it.
 Rust remains pinned/minimum 1.99.1. The three-group release host allowlist remains
 empty: all releases retain the full gate until fresh mapping qualification on
 Linux/macOS. Historical four-group #137 receipts do not activate this mapping.
@@ -126,7 +155,8 @@ bundles remain in `.git/issue-139-suppliers/`. Tooling native CI/publication evi
 is run 41681210184; the prior handoff records its exact scope and limitations.
 
 The retired contribution container, all Git refs/bundles and release evidence are
-preserved in `.git/retired-checkouts/20261104-issue139/ic-platform-contributions.tar.zst`.
+preserved in `recovery-evidence/retired-checkouts/20261104-issue139/ic-platform-contributions.tar.zst`
+following the approved relocation recorded above.
 Integrity/full filesystem comparison passed before removal; missing worktree
 metadata was preserved before pruning. Earlier delivery logs remain in
 `.git/release-state/issue-139-delivery/`, with rejected candidate patch

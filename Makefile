@@ -5,6 +5,8 @@ FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCE
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-reader/harness/src/*.rs scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/*.rs scripts/benchmarks/0.9/candid-reader/driver/src/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/benchmarks/0.9/candid-packaging/consumer/*.rs scripts/fixtures/stable-identities/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/ic0-consumer/*.rs)
+FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/canic-wasm-benchmark/*.rs)
+FORMAT_EXTRA_SOURCES += $(wildcard crates/ic-platform-macros/src/export/tests/linking/*.rs)
 FORMAT_EXTRA_SOURCES += crates/ic-platform/tests/fixtures/candid_malformed.rs
 # Independent groups require a visible selection before any recipe or setup.
 ifneq ($(filter-out release-editor-check,$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
@@ -31,6 +33,7 @@ release-patch release-minor release-major release-resume: export IC_PLATFORM_REL
 .PHONY: release-prepared-check release-commit-check release-committed-check release-tagged-check release-push-check
 .PHONY: check-release-commands
 .PHONY: publish publish-check
+.PHONY: check-retained-evidence
 .PHONY: check-formatting
 
 check-formatting:
@@ -68,9 +71,9 @@ check-browser-runtime: browser-tools-check
 	npm test --prefix packages/browser
 	node scripts/ci/check-browser-consumer.mjs --browser
 
-publish: host-tools-check
+publish: host-tools-check check-retained-evidence
 	bash scripts/release/publish.sh publish
-publish-check: host-tools-check
+publish-check: host-tools-check check-retained-evidence
 	bash scripts/release/publish.sh check
 
 .PHONY: check-compiler
@@ -79,6 +82,8 @@ check-compiler: host-tools-check
 check: check-compiler
 	cargo check -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked
 test: check-compiler
+	bash scripts/ci/test-canic-benchmark-capture.sh
+	bash scripts/ci/test-platform-documentation.sh
 	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
@@ -132,7 +137,15 @@ check-features-exhaustive:
 check-upstream-scaffolding:
 	bash scripts/ci/check-upstream-scaffolding.sh
 check-doc-links:
-	perl scripts/ci/check-documentation-links.pl --root . README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md docs/platform-release-validation.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md
+	@set -eu; mkdir -p target; \
+		records="$$(mktemp "$(CURDIR)/target/doc-link-records.XXXXXX")"; \
+		trap 'rm -f "$$records"' EXIT; \
+		bash scripts/ci/verify-shared-tooling-snapshot.sh --read-manifest .shared-tooling.snapshot > "$$records"; \
+		set -- README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md docs/platform-release-validation.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md; \
+		while IFS="$$(printf '\t')" read -r kind checksum mode path; do \
+			case "$$kind:$$path" in file:*.md) set -- "$$@" "$$path" ;; esac; \
+		done < "$$records"; \
+		perl scripts/ci/check-documentation-links.pl --root . "$$@"
 .PHONY: check-inventory
 .PHONY: check-native-provider
 check-native-provider:
@@ -162,7 +175,9 @@ check-release-resume-policy:
 
 version release-version:
 	@bash scripts/release/adapter.sh version
-release-preflight:
+check-retained-evidence:
+	perl scripts/ci/check-retained-state.pl --root recovery-evidence --max-bytes 335544320 --max-file-bytes 268435456 --max-age-days 30
+release-preflight: check-retained-evidence
 	@bash scripts/release/adapter.sh preflight
 release-verify:
 	+bash scripts/release/validation-gate.sh verify

@@ -2,7 +2,8 @@
 set -euo pipefail
 # Qualify Platform's actual Make policy and hook, never the caller's index.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-formatting.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-formatting.XXXXXX")"
 finish() {
     local status=$?
     if [[ "$status" == 0 ]]; then

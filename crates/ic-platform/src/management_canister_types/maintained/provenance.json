@@ -168,6 +168,7 @@
     "Select complete upstream declarations and their dependency closure; keep EcdsaCurve cost-code conversion and TransformFunc wrapper unchanged.",
     "Use the owned subset on Wasm; retain the existing registry facade and identities on native targets.",
     "Select Candid bignum/serde_bytes explicitly without printer for Wasm; preserve all external fields, variants and serialization attributes.",
-    "Retain uppercase HttpMethod variants under a localized Clippy allowance; render three links to private/omitted upstream items as code in documentation."
+    "Retain uppercase HttpMethod variants under a localized Clippy allowance; render three links to private/omitted upstream items as code in documentation.",
+    "Remove obsolete acronym lint suppression and expect the generated callback documentation lint; the source guard reconstructs only these exact attributes before checking the unchanged maintained source hash."
   ]
 }

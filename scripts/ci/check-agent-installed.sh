@@ -18,6 +18,9 @@ version = "0.0.0"
 edition = "2024"
 rust-version = "1.99.1"
 publish = false
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [dependencies]
 ic-platform = { path = "$root/crates/ic-platform", default-features = false, features = ["agent"] }
 ic-testkit = { $testkit }

@@ -32,6 +32,9 @@ cat > "$fixture/Cargo.toml" <<MANIFEST
 name = "runtime-singleton-proof"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [workspace]
 [dependencies]
 ic-platform = { path = "../../crates/ic-platform", default-features = false, features = [$1] }
@@ -51,6 +54,9 @@ if [[ "$prepare" == true ]]; then
 name = "runtime-singleton-proof"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [workspace]
 [dependencies]
 ic-platform = { version = "=0.16.0", default-features = false, features = ["executor"] }
@@ -116,6 +122,9 @@ cat > "$fixture/Cargo.toml" <<MANIFEST
 name = "runtime-singleton-proof"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [workspace]
 [dependencies]
 current = { package = "ic-platform", path = "$root/crates/ic-platform", default-features = false, features = ["runtime"] }
@@ -149,6 +158,9 @@ cat > "$fixture/Cargo.toml" <<MANIFEST
 name = "runtime-singleton-proof"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [workspace]
 [dependencies]
 current = { package = "ic-platform-runtime", path = "$root/crates/ic-platform-runtime", features = ["executor"] }

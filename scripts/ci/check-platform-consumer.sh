@@ -66,6 +66,9 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 publish = false
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [lints.rust]
 warnings = "deny"
 [dependencies]

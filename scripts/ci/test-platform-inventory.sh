@@ -2,7 +2,8 @@
 # Exercise the real checker with isolated metadata and documentation mutations.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-inventory-test.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-inventory-test.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 mkdir -p "$fixture/scripts/ci" "$fixture/docs" "$fixture/bin"
 cp "$root/scripts/ci/check-platform-inventory.sh" "$root/scripts/ci/platform-inventory.jq" "$fixture/scripts/ci/"

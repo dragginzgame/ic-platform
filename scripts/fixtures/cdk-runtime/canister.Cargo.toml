@@ -19,3 +19,6 @@ ic-platform = { workspace = true, optional = true }
 ic-platform-runtime.workspace = true
 ic-wire.workspace = true
 serde.workspace = true
+
+[package.metadata.shared-tooling.loc]
+category = "tests"

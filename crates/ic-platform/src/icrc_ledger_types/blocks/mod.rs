@@ -1,7 +1,7 @@
 //! Selected upstream ICRC implementation; see ../NOTICE.md.
-#![allow(
+#![expect(
     missing_docs,
-    reason = "Retained upstream declarations and documentation"
+    reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
 )]
 
 use super::{ICRC3Value, QueryArchiveFn};

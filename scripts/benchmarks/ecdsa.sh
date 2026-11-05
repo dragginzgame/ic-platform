@@ -29,6 +29,9 @@ name = "platform-ecdsa-benchmark"
 version = "0.0.0"
 edition = "2024"
 rust-version = "$compiler"
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"
 [workspace]
 resolver = "3"
 [dependencies]

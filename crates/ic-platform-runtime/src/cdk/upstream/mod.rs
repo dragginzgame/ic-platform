@@ -7,7 +7,10 @@ compile_error!("This version of the runtime does not support multithreading.");
 
 pub mod api;
 // Imported callback ABI and Arc ownership require these reviewed unsafe blocks.
-#[allow(unsafe_code)]
+#[expect(
+    unsafe_code,
+    reason = "Imported callback ABI and Arc custody require the reviewed unsafe operations."
+)]
 pub mod call;
 pub mod futures;
 pub mod stable;

@@ -8,3 +8,6 @@ publish = false
 pocket-ic = "16.1.0"
 candid = { version = "=0.10.39", default-features = false, features = ["bignum"] }
 ic-management-canister-types = "=0.11.0"
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"

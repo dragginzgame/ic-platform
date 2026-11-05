@@ -43,7 +43,8 @@ for change in '.dependencies[0].target = null' '.dependencies[1].optional = fals
     fi
 done
 echo 'Native-only Wasm equivalence and fail-closed contract cases passed'
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-native-closures.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-native-closures.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 for change in 'del(.native_leaves.agent.prerequisites)' '.native_leaves.agent.prerequisites = "principal"' '.native_leaves.agent.dependencies = []'; do
     "$jq" "$change" scripts/ci/platform-feature-policy.json > "$fixture/policy.json"

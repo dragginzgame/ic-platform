@@ -88,6 +88,14 @@ The transferred sources originate from `dragginzgame/ic-profiler` at
 notices and IC provenance remain intact. The existing Python assembler is
 transferred with its fixtures; this profile adds no second assembly engine.
 
+Shared 0.30 hygiene adoption moves provider/overlay unit tests into ordinary
+`tests.rs`/`*_tests.rs` modules, preserving their bodies, and narrows owned lint
+suppressions. Source pins include the added test files. The standalone HTTP proof
+copies its adjacent tests explicitly. The remaining legacy path-module wiring
+and complete paired native qualification are tracked in
+[#140](https://github.com/dragginzgame/ic-platform/issues/140); these source/assembler
+checks do not qualify a new native server or authorize a consumer pin update.
+
 Focused assembler tests:
 
 ```sh

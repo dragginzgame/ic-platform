@@ -3,7 +3,8 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 jq="$root/.tools/host/bin/jq"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-selections.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-selections.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 cargo metadata --no-deps --format-version 1 --frozen > "$fixture/metadata.json"
 "$jq" '.packages[] | select(.name == "ic-platform") | .features | keys - ["default"]' "$fixture/metadata.json" > "$fixture/features.json"

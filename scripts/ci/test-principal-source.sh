@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-principal-source.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-principal-source.XXXXXX")"
 trap 'printf "Principal source mutation evidence: %s\n" "$fixture"' EXIT
 for mutation in derivation tag capacity vector license provider; do
     selected="$fixture/$mutation"

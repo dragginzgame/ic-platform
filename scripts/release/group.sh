@@ -16,7 +16,8 @@ case "$1" in
             members) printf '%s\n' "$plan" | jq -er '.members | join(" ")' ;;
         esac ;;
     files)
-        declared="$(mktemp "${TMPDIR:-/tmp}/platform-group-files.XXXXXX")"
+        mkdir -p target
+        declared="$(mktemp "$PWD/target/platform-group-files.XXXXXX")"
         trap 'rm -f "$declared"' EXIT
         bash "$helper" files "$group" > "$declared"
         has_lock=false has_composition=false has_pin=false
@@ -33,7 +34,8 @@ case "$1" in
         if [[ "$group" == runtime && "$has_pin" != true ]]; then printf 'ci/dependency-pinning-exceptions.json\0'; fi
         ;;
     ready)
-        scratch="$(mktemp -d "${TMPDIR:-/tmp}/platform-group-readiness.XXXXXX")"
+        mkdir -p target
+        scratch="$(mktemp -d "$PWD/target/platform-group-readiness.XXXXXX")"
         trap 'rm -rf "$scratch"' EXIT
         ready=true
         bash "$helper" files "$group" > "$scratch/declared"

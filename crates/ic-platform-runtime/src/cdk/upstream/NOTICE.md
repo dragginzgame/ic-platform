@@ -8,8 +8,9 @@ code remains MIT; the combined consumer package declares MIT AND Apache-2.0.
 
 Platform is the maintenance owner of these adapters. No upstream acceptance,
 registry replacement, consumer Cargo patch or second runtime package is needed.
-The executor implementation is not copied: every task/context delegates to
-registry `ic-cdk-executor =2.0.0`; raw calls use registry `ic0 =1.2.0`.
+Every task/context delegates to Runtime’s sole embedded executor, originally
+imported from `ic-cdk-executor` 2.0.0. Raw calls use its embedded IC0 1.2.0
+bindings. Their source and license guards remain independent of these adapters.
 
 The reviewed import retains selected System API functions; raw call submission,
 response/error handling and callback/trap cleanup; protected/weak/migratory
@@ -20,6 +21,10 @@ No cryptographic implementation is imported or altered. The root-key system
 adapter retains its upstream bytes and construction unchanged.
 
 Changes from the import:
+
+- Derive the mechanical stable-memory error display/source implementation with
+  the Runtime-selected `thiserror`, preserving its variant, text and empty source.
+  Reviewed unsafe scopes use lint expectations without changing their bodies.
 
 - System API text admission retains UTF-8 validation and the invalid-text panic
   reason, while omitting rejected-byte Debug dumps. The shared text adapter is

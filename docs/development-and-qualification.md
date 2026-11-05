@@ -41,6 +41,30 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
+Use `make cloc` (`CLOC_SUBCRATES=1` for package rows) for Shared 0.30’s
+source classification, or `bash scripts/dev/cloc.sh --json` for schema 2. It
+separates library/application, tests, examples, benchmarks, build/tooling and
+unclassified source, including inline test blocks. The report counts each source
+path once and reports macro expansion limits; it is not a linked-Wasm metric.
+Owned test files use `tests.rs`, `*_tests.rs` or `tests/`; the main workspace
+has no singular `test/` or `test.rs` paths. Generated qualification and benchmark
+packages declare `[package.metadata.shared-tooling.loc]` with the appropriate
+`category`, even when their library target carries a consumer proof. Use
+`--manifest /absolute/path/to/Cargo.toml` to classify an independent generated
+workspace explicitly; the default report covers the five main members only.
+
+New Platform-owned qualification scratch defaults beneath `target/`, while
+Shared snapshot helpers retain their supplier-owned scratch contracts.
+`cargo clean` reclaims the whole default workspace target, including diagnostic
+captures and the relocated old Runtime driver executables. The separately
+approved historical archive under `recovery-evidence/` survives cleanup.
+`make check-retained-evidence` enforces a 320 MiB aggregate, 256 MiB single-file
+and 30-day bulk age limit through Shared’s read-only checker before release
+preflight/publication. Its owner and dated review are in [AGENTS](../AGENTS.md#recovery-evidence-custody).
+The release runner separately enforces Shared’s Git-side defaults. Both refuse
+without automatic cleanup; no archive, Git refs or recovery journals were deleted.
+
+
 Platform 0.11 removed `wire-schema`. Principal and Account retain
 their existing Serde representations; Wire owns the schema integration. See the
 [migration contract](../docs/migration.md#owned-principal-and-account-wire-metadata)
@@ -53,7 +77,7 @@ TypeScript, adapters and packed consumers. Node/npm setup identities live in
 `scripts/fixtures/browser-compiler-floor/package.json`; the browser package
 selects its development compiler independently.
 
-`bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git /tmp/platform-advisory-attempt`
+`bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git target/platform-advisory-attempt`
 audits the workspace, owner-runtime and Timers-composition locks independently without compiling feature matrices. Prepare
 `cargo-audit` explicitly first (CI selects 0.22.2) and prepare common host tools;
 the destination must be new. Online mode performs three locked dependency fetches
@@ -269,7 +293,8 @@ and exact qualified executor/system requirements. It rejects unreviewed feature
 names until the matrix and isolation policy are updated, admits the owned
 generator only with `cdk`, rejects full CDK packages, and rejects additional executor/
 system versions or non-registry sources in the transitive graph. It also
-admits PocketIC only with its explicit native feature, rejects `ic-testkit` and `ic-testkit-candid`, and checks Candid/CDK-free defaults and Candid-free
+rejects the retired PocketIC feature and the `ic-testkit`/`ic-testkit-candid`
+canister dependencies, and checks Candid/CDK-free defaults and Candid-free
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
 direct dependency ownership; role comments themselves are not executable policy.

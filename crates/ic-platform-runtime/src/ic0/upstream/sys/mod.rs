@@ -155,9 +155,14 @@ unsafe extern "C" {
 }
 
 #[cfg(not(target_family = "wasm"))]
-#[allow(unused_variables)]
-#[allow(clippy::missing_safety_doc)]
-#[allow(clippy::too_many_arguments)]
+#[expect(
+    unused_variables,
+    reason = "Native IC0 stubs trap before reading the unchanged ABI arguments."
+)]
+#[expect(
+    clippy::too_many_arguments,
+    reason = "The imported System API argument lists are fixed by the IC ABI."
+)]
 mod non_wasm {
     #[doc = "# Safety\n\nAlways safe to call"]
     pub unsafe fn msg_arg_data_size() -> usize {

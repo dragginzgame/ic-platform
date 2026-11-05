@@ -100,9 +100,9 @@ pub enum QueryArchiveError {
 pub type QueryEncodedBlocksResult = Result<Vec<Vec<u8>>, QueryArchiveError>;
 
 mod callback {
-    #![allow(
+    #![expect(
         missing_docs,
-        reason = "upstream macro generates undocumented function-reference members"
+        reason = "The upstream function-reference macro emits undocumented members."
     )]
     use super::{GetBlocksArgs, QueryEncodedBlocksResult};
     candid::define_function!(pub QueryEncodedBlocksFn : (GetBlocksArgs) -> (QueryEncodedBlocksResult) query);

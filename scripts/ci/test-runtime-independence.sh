@@ -9,7 +9,8 @@ case "$#:${1:-}" in
     1:--prepare) prepare=true ;;
     *) echo "usage: $0 [--prepare]" >&2; exit 2 ;;
 esac
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-runtime-independence.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-runtime-independence.XXXXXX")"
 finish() {
     result=$?
     if [[ "$result" != 0 ]]; then
@@ -31,6 +32,9 @@ if [[ "$prepare" == true ]]; then
 name = "runtime-independence-input"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [workspace]
 [dependencies]
 ic-timers = "=0.35.1"

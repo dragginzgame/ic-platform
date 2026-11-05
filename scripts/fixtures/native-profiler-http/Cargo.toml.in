@@ -17,3 +17,6 @@ axum = "0.8.4"
 aide = { version = "0.14.2", features = ["axum", "axum-json"] }
 tokio = { version = "1.42.0", features = ["macros", "rt-multi-thread"] }
 tower = { version = "0.5.2", features = ["util"] }
+
+[package.metadata.shared-tooling.loc]
+category = "tests"

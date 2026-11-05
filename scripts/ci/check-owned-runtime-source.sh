@@ -9,7 +9,8 @@ if [[ $# == 0 ]]; then
 fi
 source_root="${1:-$root/crates/ic-platform-runtime/src/cdk/upstream}"
 [[ $# -le 1 ]] || exit 2
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-runtime-source.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-runtime-source.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 for part in call spawn; do
     file="$source_root/call/mod.rs"

@@ -31,8 +31,9 @@ export RUSTFLAGS='--cfg=cpubits="32"'
 if [[ "${PLATFORM_BENCH_SYMBOLS:-0}" == 1 ]]; then
     RUSTFLAGS+=' -Cstrip=none'
 fi
-export PATH="/home/adam/projects/canic/.tools/ic/bin:$PATH"
-builder="$base/build/debug/examples/build_artifact"
+tool_root="$(cat "$base/tool-root")"
+export PATH="$tool_root:$PATH"
+builder="$base/build/debug/examples/platform_benchmark"
 sha256sum "$builder" > "$base/$arm/builder.sha256"
 read -r -a roles <<<"${PLATFORM_BENCH_ROLES:-issuer receiver}"
 for role in "${roles[@]}"; do
@@ -47,6 +48,7 @@ const selected=new Set(fs.readFileSync(graph,'utf8').split('\n').filter(s=>s.sta
 if(selected.size!==1 || !selected.has('v'+version))throw Error('Unexpected Wasm facade selection: '+[...selected]);
 NODE
     "$builder" "$export_name" release "$base/source" "$base/source" "$config" --environment local \
+        --ic-wasm "$tool_root/ic-wasm" --wasm-opt "$tool_root/wasm-opt" \
         --release-build-id a4c128728412f11837b79ce8562e3115451db387e17361b79b4f15d02cbb36ae \
         > "$base/$arm/$role.log" 2>&1
     artifact="$base/source/.canic/release-builds/a4c128728412f11837b79ce8562e3115451db387e17361b79b4f15d02cbb36ae/artifacts/$export_name/$export_name"

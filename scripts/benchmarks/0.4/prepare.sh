@@ -11,6 +11,9 @@ for revision in base candidate; do
 name = "platform-benchmark"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"
 [workspace]
 [lib]
 crate-type = ["cdylib"]

@@ -177,7 +177,11 @@ that affect behavior. The unsuccessful full-tree trial is not the delivered code
 The version-specific helpers live in
 [`scripts/benchmarks/0.22`](../../scripts/benchmarks/0.22/prepare.cjs).
 They capture read-only sibling sources into disposable validation inputs without
-creating a Git checkout. Keep an unchanged local control before modifying
+creating a Git checkout. The maintained reproduction helper adds the ordinary
+`platform_benchmark` example from Platform’s fixture source and passes explicit
+tool paths; the original measurement used the captured `build_artifact` driver
+with the equivalent public-API selection. Historical captures are unchanged.
+Keep an unchanged local control before modifying
 Platform. Never edit a running arm's scripts, manifests or source.
 
 ```bash
@@ -186,7 +190,7 @@ cargo metadata --manifest-path target/platform022-canic/source/Cargo.toml \
   --offline --format-version 1 >target/platform022-canic/initial-metadata.json
 CARGO_TARGET_DIR="$PWD/target/platform022-canic/build" cargo build \
   --manifest-path target/platform022-canic/source/Cargo.toml --locked --offline \
-  -p canic-host --example build_artifact
+  -p canic-host --example platform_benchmark
 bash scripts/benchmarks/0.22/run-arm.sh target/platform022-canic registry022 0.22.0
 bash scripts/benchmarks/0.22/run-arm.sh target/platform022-canic registry021 0.21.0
 bash scripts/benchmarks/0.22/run-arm.sh target/platform022-canic path022-control 0.22.0 \

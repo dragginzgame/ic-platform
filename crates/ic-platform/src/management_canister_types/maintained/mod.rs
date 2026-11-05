@@ -822,10 +822,6 @@ pub struct HttpRequestResult {
     Copy,
     Default,
 )]
-#[allow(
-    clippy::upper_case_acronyms,
-    reason = "Retain upstream HTTP method names"
-)]
 pub enum HttpMethod {
     /// GET
     #[default]
@@ -884,7 +880,10 @@ pub struct TransformContext {
 }
 
 mod transform_func {
-    #![allow(missing_docs)]
+    #![expect(
+        missing_docs,
+        reason = "The upstream function-reference macro emits undocumented members."
+    )]
     use super::{HttpRequestResult, TransformArgs};
     candid::define_function!(pub TransformFunc : (TransformArgs) -> (HttpRequestResult) query);
 }

@@ -5,10 +5,11 @@ unset PACKAGE RELEASE_GROUP
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 bash "$root/scripts/ci/check-make-execution.sh"
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-release-routing.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-release-routing.XXXXXX")"
 trap 'printf "Release routing evidence: %s\n" "$fixture"' EXIT
 cd "$root"
-bash scripts/ci/prepare-script-fixture.sh "$root" "$fixture" Makefile make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh ci/release-delivery.txt
+bash scripts/ci/prepare-script-fixture.sh "$root" "$fixture" Makefile make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh scripts/ci/check-retained-state.pl ci/release-delivery.txt
 mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/dev"
 ln -s "$root/.tools" "$fixture/.tools"
 export ROUTING_OUTPUT="$fixture/selection" ROUTING_EFFECTS="$fixture/effects"
@@ -94,6 +95,24 @@ for group in platform runtime types; do
     grep -q 'outside the publication roster' "$fixture/cross-group.log"
     if RELEASE_GROUP="$group" PACKAGE='' bash "$fixture/scripts/release/publish.sh" check > "$fixture/empty-package.log" 2>&1; then exit 1; fi
 done
+# Exercise Platform's actual retention prerequisite, with sparse disposable
+# evidence; this proves routing without replaying Shared's checker suite.
+mkdir -p "$fixture/recovery-evidence"
+perl -e 'open my $f, ">", $ARGV[0] or die $!; truncate $f, 268435457 or die $!' "$fixture/recovery-evidence/oversized"
+for operation in release-preflight publish publish-check; do
+    if make --no-print-directory -s -C "$fixture" "$operation" RELEASE_GROUP=platform > "$fixture/retention-refusal.log" 2>&1; then
+        echo "Retained-evidence admission was bypassed by $operation" >&2; exit 1
+    fi
+    grep -q 'file exceeds 268435456 byte budget' "$fixture/retention-refusal.log"
+done
+rm "$fixture/recovery-evidence/oversized"
+perl -e 'open my $f, ">", $ARGV[0] or die $!; truncate $f, 1048576 or die $!; utime time-31*86400, time-31*86400, $ARGV[0] or die $!' "$fixture/recovery-evidence/expired"
+if make --no-print-directory -s -C "$fixture" release-preflight RELEASE_GROUP=platform > "$fixture/retention-refusal.log" 2>&1; then
+    echo 'Expired retained evidence bypassed release preflight' >&2; exit 1
+fi
+grep -q 'bulk evidence older than 30 days' "$fixture/retention-refusal.log"
+rm "$fixture/recovery-evidence/expired"
+echo 'Release and publication reject oversized/expired retained evidence before their adapters.'
 for operation in version files primary; do
     if bash scripts/release/group.sh "$operation" > "$fixture/cli-refusal.log" 2>&1; then exit 1; fi
     grep -q 'Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types' "$fixture/cli-refusal.log"

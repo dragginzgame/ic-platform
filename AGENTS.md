@@ -2,7 +2,8 @@
 
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
-records the installed revision; do not edit its payloads.
+records the installed revision; do not edit its payloads. Shared 0.30.0 at
+`4d0961821a31766e3044c08fbe5954ed81213ec9` is the adopted baseline.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
@@ -54,6 +55,28 @@ Those inline tests are deliberate exceptions; changing
 their protected layout requires a separately reviewed reconstruction adaptation.
 Owned tests beside imported adapters follow the ordinary layout when outside
 protected regions, including CDK call policy and System API text tests.
+
+The generated internal spawn retains its scoped `disallowed_methods` allowance:
+consumer Clippy configurations may forbid the method or omit that lint entirely,
+so one expectation would fail for supported consumers. Keep its explicit reason.
+
+The opt-in native Profiler provider’s remaining path-module mappings and paired
+qualification are tracked in [#140](https://github.com/dragginzgame/ic-platform/issues/140).
+Its moved tests and lint edits require native acceptance before adopting a new
+provider pin; root crate checks do not qualify the IC workspace.
+
+## Recovery evidence custody
+
+The maintainer approved moving the historical contribution archive and bundles
+to ignored `recovery-evidence/retired-checkouts/20261104-issue139/`. Preserve them;
+checksums and relocation receipts retain their original custody. The Platform
+maintainer owns review by 2026-12-04, before original bulk mtimes reach 30 days.
+`make check-retained-evidence` uses Shared’s checker and the budget in Makefile,
+also required by release preflight and publication. It refuses expired/oversized
+state without deleting anything. Review or further relocation requires the
+maintainer; do not renew mtimes, split files or raise limits to evade refusal.
+Only the separately approved reproducible Runtime 0.18.1 driver binaries moved
+to `target/recovery-evidence/`, where ordinary Cargo cleanup can reclaim them.
 
 ## Browser SDK boundary
 

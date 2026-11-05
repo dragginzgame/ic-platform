@@ -6,7 +6,8 @@ mode="${1:---check}"
 [[ $# -le 1 && ( "$mode" == --check || "$mode" == --print ) ]] || {
     echo 'usage: check-platform-inventory.sh [--check|--print]' >&2; exit 2;
 }
-scratch="$(mktemp -d "${TMPDIR:-/tmp}/platform-inventory.XXXXXX")"
+mkdir -p "$root/target"
+scratch="$(mktemp -d "$root/target/platform-inventory.XXXXXX")"
 trap 'rm -rf "$scratch"' EXIT
 cargo metadata --manifest-path "$root/Cargo.toml" --no-deps --format-version 1 --locked --offline > "$scratch/metadata.json"
 jq -r -f "$root/scripts/ci/platform-inventory.jq" "$scratch/metadata.json" > "$scratch/current"

@@ -437,7 +437,10 @@ impl EntryPlan {
             quote! {
                 #cratename::futures::internals::#async_context_name(|| {
                     #guard
-                    #[allow(clippy::disallowed_methods)]
+                    #[allow(
+                        clippy::disallowed_methods,
+                        reason = "The generated internal spawn must work with consumer-specific disallowed-method lists; the lint is absent for other consumers."
+                    )]
                     #cratename::futures::spawn(async {
                         #arg_decode
                         let #result = #function_call;

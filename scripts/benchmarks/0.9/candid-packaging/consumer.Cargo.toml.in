@@ -16,3 +16,6 @@ ic-platform = { path = "../platform/crates/ic-platform", default-features = fals
 candid = { version = "=0.10.39", default-features = false, features = ["bignum", "serde_bytes"] }
 codec = { package = "candid-codec-packaging-probe", path = "../codec", optional = true }
 binrw = { version = "0.15", default-features = false, features = ["std"], optional = true }
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"

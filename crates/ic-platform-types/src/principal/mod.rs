@@ -89,7 +89,6 @@ impl Principal {
     pub const MAX_LENGTH_IN_BYTES: usize = 29;
     /// Maximum canonical text length, including dashes and checksum.
     pub const MAX_LENGTH_IN_TEXT: usize = 63;
-    #[allow(dead_code)]
     const CRC_LENGTH_IN_BYTES: usize = 4;
 
     const ANONYMOUS_TAG: u8 = 4;
@@ -212,7 +211,10 @@ impl Principal {
     /// This equals the length of the slice returned by
     /// [`as_slice`](Self::as_slice).
     #[inline]
-    #[allow(clippy::len_without_is_empty)]
+    #[expect(
+        clippy::len_without_is_empty,
+        reason = "Zero significant bytes identify the management canister, not an empty identity."
+    )]
     pub const fn len(&self) -> u8 {
         self.len
     }

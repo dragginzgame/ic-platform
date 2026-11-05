@@ -14,3 +14,6 @@ ic-testkit.workspace = true
 serde_cbor.workspace = true
 serde.workspace = true
 ic-wire.workspace = true
+
+[package.metadata.shared-tooling.loc]
+category = "tests"

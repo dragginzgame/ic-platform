@@ -19,3 +19,6 @@ serde = { version = "1", features = ["derive"] }
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 stacker = "0.1"
 [workspace]
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"

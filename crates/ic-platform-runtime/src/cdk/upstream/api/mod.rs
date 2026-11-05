@@ -6,7 +6,10 @@ use crate::ic0::upstream as ic0;
 use crate::Principal;
 
 /// Gets the message argument data.
-#[allow(unsafe_code)] // Reviewed initialization after the IC's all-or-trap copy.
+#[expect(
+    unsafe_code,
+    reason = "Initialize the Vec length only after the reviewed all-or-trap IC0 copy."
+)]
 pub fn msg_arg_data() -> Vec<u8> {
     let len = ic0::msg_arg_data_size();
     let mut buf = Vec::<u8>::with_capacity(len);

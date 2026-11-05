@@ -24,6 +24,9 @@ version = "0.0.0"
 edition = "2024"
 rust-version = "$msrv"
 publish = false
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [dependencies]
 ic-platform-runtime = { $selection, default-features = false, features = ["ic0"] }
 MANIFEST

@@ -16,6 +16,7 @@ PLATFORM_MSRV="$msrv" \
     perl -pi -e 's/\@MSRV\@/$ENV{PLATFORM_MSRV}/g' "$fixture/Cargo.toml"
 source="$root/native/ic-profiler/profiler/server/system_profile_api/admission.rs"
 cp "$source" "$fixture/src/lib.rs"
+cp "$root/native/ic-profiler/profiler/server/system_profile_api/admission/tests.rs" "$fixture/src/tests.rs"
 # A separate target avoids contention with the consumer library's Cargo builds.
 export CARGO_TARGET_DIR="${PLATFORM_HTTP_TARGET_DIR:-$root/target/native-profiler-http-target}"
 if [[ "$mode" == prepare ]]; then
@@ -29,3 +30,4 @@ cargo metadata --manifest-path "$fixture/Cargo.toml" --format-version 1 --offlin
 cargo clippy --manifest-path "$fixture/Cargo.toml" --all-targets --frozen -- -D warnings
 cargo test --manifest-path "$fixture/Cargo.toml" --lib --frozen
 cmp "$source" "$fixture/src/lib.rs"
+cmp "$root/native/ic-profiler/profiler/server/system_profile_api/admission/tests.rs" "$fixture/src/tests.rs"

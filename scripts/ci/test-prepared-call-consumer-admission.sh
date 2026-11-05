@@ -2,7 +2,8 @@
 # Run with Bash 3.2 on macOS as well as the prepared development shell.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/prepared-call-admission.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/prepared-call-admission.XXXXXX")"
 fixture="$(CDPATH='' cd "$fixture" && pwd -P)"
 first_pid="" second_pid=""
 finish() {

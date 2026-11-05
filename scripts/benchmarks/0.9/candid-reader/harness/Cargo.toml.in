@@ -15,3 +15,6 @@ candid = { path = "../candid-reader" }
 baseline-reader = ["dep:binrw"]
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 binrw = { version = "0.15", optional = true, default-features = false, features = ["std"] }
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"

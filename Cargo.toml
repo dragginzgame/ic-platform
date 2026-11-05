@@ -33,8 +33,6 @@ ic-platform-types = { version = "0.18.1", path = "crates/ic-platform-types", def
 # External production dependencies
 blake3 = { version = "1.8.7", default-features = false, features = ["std"] }
 candid = { version = "0.10.38", default-features = false }
-
-# External adapters and shared production dependencies
 candid_parser = { version = "0.4.1", default-features = false }
 crc32fast = "1.5"
 # Published ECDSA security floor; older consumer locks must not retain 0.7.5.
@@ -49,37 +47,39 @@ ic-certification = { version = "3.2.0", default-features = false, features = ["s
 ic-management-canister-types = "=0.11.0"
 ic-secp256k1 = "=0.3.0"
 ic-signature-verification = { version = "0.3.0", default-features = false }
-ic-testkit = { version = "0.84.0", default-features = false }
-# Qualification-only committed adoption source; return to a registry selection
-# after the independent Runtime and matching Timers releases are published.
-ic-timers = { version = "0.37.0", git = "https://github.com/dragginzgame/ic-scheduling", rev = "a61f35174f512b17d1c7974f4d0be79ef1e2777b" }
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
-ic-wire = "0.10.0"
 ic_bls12_381 = { version = "0.10.1", default-features = false, features = ["groups"] }
-ic_principal = { version = "0.1.5", default-features = false, features = ["convert"] }
 k256 = { version = "0.14.0", default-features = false, features = ["ecdsa"] }
-libfuzzer-sys = "0.4.13"
 num-bigint = "0.4.6"
 num-traits = "0.2.19"
 pin-project-lite = "0.2.17"
-
-# External mixed production/test dependencies
-postcard = { version = "1.1.3", default-features = false, features = ["alloc"] }
-
-# External proc-macro dependencies (compiler host)
-proc-macro2 = "1.0.106"
-quote = "1"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
-serde_bytes = "0.11"
-serde_cbor = "0.11.2"
-serde_json = "1.0"
-serde_test = "1.0.177"
 sha2 = "0.10"
 # Owned Principal can use the current provider; BLS still requires Digest 0.10.
 sha2_11 = { package = "sha2", version = "0.11.1", default-features = false }
 slotmap = "1.1.1"
-syn = { version = "3", features = ["full"] }
 thiserror = "2.0.18"
+
+# External mixed production/test dependencies
+ic_principal = { version = "0.1.5", default-features = false, features = ["convert"] }
+serde_bytes = "0.11"
+serde_cbor = "0.11.2"
+
+# External proc-macro dependencies (compiler host)
+proc-macro2 = "1.0.106"
+quote = "1"
+syn = { version = "3", features = ["full"] }
+
+# External tests and tooling only
+ic-testkit = { version = "0.84.0", default-features = false }
+# Qualification-only committed adoption source; return to a registry selection
+# after the independent Runtime and matching Timers releases are published.
+ic-timers = { version = "0.37.0", git = "https://github.com/dragginzgame/ic-scheduling", rev = "a61f35174f512b17d1c7974f4d0be79ef1e2777b" }
+ic-wire = "0.10.0"
+libfuzzer-sys = "0.4.13"
+postcard = { version = "1.1.3", default-features = false, features = ["alloc"] }
+serde_json = "1.0"
+serde_test = "1.0.177"
 
 [workspace.lints.rust]
 missing_docs = "warn"

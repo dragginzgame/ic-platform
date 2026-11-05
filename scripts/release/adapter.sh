@@ -11,7 +11,8 @@ esac
 primary="$(bash scripts/release/group.sh primary)"
 bash scripts/ci/check-release-delivery.sh ci/release-delivery.txt "${RELEASE_DELIVERY:-direct}"
 changelog="$(bash scripts/release/group.sh changelog)"
-metadata_files="$(mktemp "${TMPDIR:-/tmp}/platform-release-files.XXXXXX")"
+mkdir -p target
+metadata_files="$(mktemp "$PWD/target/platform-release-files.XXXXXX")"
 trap 'rm -f "$metadata_files"' EXIT
 bash scripts/release/group.sh files > "$metadata_files"
 source_args=()

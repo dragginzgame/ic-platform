@@ -4,6 +4,15 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.19.2] - Unreleased
+
+### 🔧 Maintenance
+
+- Replace obsolete/broad lint allowances with scoped expectations while retaining
+  the original embedded-source fingerprints and callback/ABI behavior.
+- Derive the stable-memory error’s mechanical display/source implementation using
+  the existing dependency, preserving its variant and message.
+
 ## [0.19.1] - 2026-11-04
 
 ### 🧪 Testing

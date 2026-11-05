@@ -26,6 +26,9 @@ cat > "$fixture/consumer/Cargo.toml" <<'MANIFEST'
 name = "primitive-graph-consumer"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [dependencies]
 ic-platform.workspace = true
 # Deliberate adversarial alias: one identity can acquire extra unified features.

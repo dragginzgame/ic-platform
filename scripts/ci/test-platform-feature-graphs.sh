@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-feature-admission.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-feature-admission.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 cd "$root"
 jq="$root/.tools/host/bin/jq"

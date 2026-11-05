@@ -2,7 +2,8 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 jq="$root/.tools/host/bin/jq"
-fixture="$(mktemp -d "${TMPDIR:-/tmp}/platform-registry-admission.XXXXXX")"
+mkdir -p "$root/target"
+fixture="$(mktemp -d "$root/target/platform-registry-admission.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
 "$jq" -n '{packages: [
     {name: "ic-platform", version: "0.4.0", source: "registry+https://github.com/rust-lang/crates.io-index"},

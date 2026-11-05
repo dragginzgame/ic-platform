@@ -11,6 +11,9 @@ for revision in pre-principal candidate; do
 name = "principal-benchmark"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"
 [workspace]
 [dependencies]
 ic-platform = { path = "$bench/$revision/crates/ic-platform", default-features = false }

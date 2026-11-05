@@ -8077,7 +8077,7 @@ index 387ba539a9..0903b27ea4 100644
 +        let context = unsafe { &*(context as *const libc::ucontext_t) };
 +        return Some(context.uc_mcontext.pc);
 +    }
-+    #[allow(unreachable_code)]
++    #[cfg(not(all(target_os = "linux", any(target_arch = "x86_64", target_arch = "aarch64"))))]
 +    None
 +}
 +
@@ -10245,7 +10245,7 @@ index b3b6e4fd49..3da72606df 100644
      /// Must be called before the operation changes anything the canister's freezing
      /// threshold depends on, since `ConsumedCyclesForInstructions::apply` re-applies
      /// the recorded charge to the canister restored by a rollback.
-+    #[allow(clippy::too_many_arguments)]
++    #[expect(clippy::too_many_arguments, reason = "Preserve the management charge inputs with the diagnostic rule identifier.")]
      fn charge_for_management_canister_instructions(
          &self,
 +        rule_id: &'static str,
@@ -11789,7 +11789,7 @@ index 8c91e77123..3538ffa3c1 100644
 +        )
 +    }
 +
-+    #[allow(clippy::too_many_arguments)]
++    #[expect(clippy::too_many_arguments, reason = "Retain the upstream response execution inputs and explicit profiling retry.")]
 +    fn execute_canister_response_with_retry(
 +        &self,
 +        canister: CanisterState,
@@ -12522,7 +12522,7 @@ index 3eea48fc2f..67cb675601 100644
 +
 +    /// Constructs test services with the same optional diagnostic observer used
 +    /// by production setup, without changing any execution or billing settings.
-+    #[allow(clippy::type_complexity, clippy::too_many_arguments)]
++    #[expect(clippy::too_many_arguments, reason = "Retain upstream test-service inputs and the optional diagnostic observer.")]
 +    pub fn setup_execution_with_tracer(
 +        logger: ReplicaLogger,
 +        metrics_registry: &MetricsRegistry,

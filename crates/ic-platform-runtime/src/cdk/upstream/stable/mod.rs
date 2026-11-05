@@ -5,24 +5,14 @@
 //! for a in-depth explanation of stable memory.
 
 use crate::ic0::upstream as ic0;
-use std::{error, fmt};
 
 /// A possible error value when dealing with stable memory.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum StableMemoryError {
     /// No more stable memory could be allocated.
+    #[error("Out of memory")]
     OutOfMemory,
 }
-
-impl fmt::Display for StableMemoryError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::OutOfMemory => f.write_str("Out of memory"),
-        }
-    }
-}
-
-impl error::Error for StableMemoryError {}
 
 /// Attempts to grow the stable memory by `new_pages` (added pages).
 ///

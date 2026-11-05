@@ -11,7 +11,11 @@
       },
       {
         "path": "packages/pocket-ic/src/common/storage.rs",
-        "sha256": "cb1ad9806e56f21fc07ec1d1d8acf797a4f1ad14ad9ebac31e64fa7bab88a715"
+        "sha256": "b95ad888e26344be884d0e91bcd508164022d241352aa2682c16eade86cd7060"
+      },
+      {
+        "path": "packages/pocket-ic/src/common/storage/tests.rs",
+        "sha256": "646324a34da3a521a9b2cdc66dab9d82e28e8be780c15bf69a09519ff6beab32"
       },
       {
         "path": "packages/pocket-ic/tests/memory_access_tracing.rs",
@@ -36,7 +40,19 @@
       },
       {
         "path": "rs/embedders/src/wasmtime_embedder/profiling.rs",
-        "sha256": "7ecbc6e161ea3d493a33b0ed4f34fee2293dda5b3fe5e71ca3851d5ac88c1352"
+        "sha256": "4e4411eb27b70c7e764bec46ba97bb312f2b66f4984cecae9904b2ba9642b85c"
+      },
+      {
+        "path": "rs/embedders/src/wasmtime_embedder/profiling/read_mask_tests.rs",
+        "sha256": "f188826bcce908e811fe8ae8b65d5d1cc8a6db591fcaa87ce1b4968da64b294a"
+      },
+      {
+        "path": "rs/embedders/src/wasmtime_embedder/profiling/tests.rs",
+        "sha256": "94553f504238a5bf284df37fcc247caae98d41b0e7052ad64892a2179a1c52c6"
+      },
+      {
+        "path": "rs/embedders/src/wasmtime_embedder/profiling/write_mask_tests.rs",
+        "sha256": "99eeb1ad9d8b9c6c0f7fde33f5060121cc623032288bf937a9f56a4d5b7b0b0d"
       },
       {
         "path": "rs/execution_environment/src/execution_environment/tests/runtime_costs.rs",
@@ -44,7 +60,11 @@
       },
       {
         "path": "rs/execution_environment/src/scheduler/round_profile.rs",
-        "sha256": "49557588a9f9550585865f6796a398184e8b09941cd405dca25e7384327fc67d"
+        "sha256": "a0710fe36ff516cdb3f3469065583fb24bc288fe38c33928b16310f9c0a66c84"
+      },
+      {
+        "path": "rs/execution_environment/src/scheduler/round_profile/tests.rs",
+        "sha256": "043c5b9002eb9f9a1f614abbdc6081ca942e35a8d4a25c96b420c0d68b03bee5"
       },
       {
         "path": "rs/messaging/src/system_profile.rs",
@@ -62,7 +82,7 @@
       },
       {
         "path": "0002-replica-runtime-hooks.patch",
-        "sha256": "8f1c2471d094a7f9a77e0c10288d83bcb45b7cd5598147c18be3456f7f3094e0"
+        "sha256": "f5b0d6b0bbb9471f2fdac06b7fc1d306afb544ac95cb6a9daf69bbf4854adb30"
       },
       {
         "path": "0003-pocketic-client-and-server.patch",

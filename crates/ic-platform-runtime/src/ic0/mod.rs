@@ -11,7 +11,18 @@
 
 // Reviewed imported ABI wrappers are the only unsafe implementation in this module.
 // Unexposed upstream entrypoints remain private and can be removed by the linker.
-#[allow(unsafe_code, missing_docs, dead_code)]
+#[expect(
+    unsafe_code,
+    reason = "Imported raw System API bindings preserve the reviewed IC ABI."
+)]
+#[expect(
+    missing_docs,
+    reason = "The selected upstream ABI wrappers retain undocumented exported functions."
+)]
+#[expect(
+    dead_code,
+    reason = "Only the explicitly exported subset of imported IC0 is public."
+)]
 pub(crate) mod upstream;
 
 pub use upstream::{

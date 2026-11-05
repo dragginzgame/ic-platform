@@ -3,8 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const cp = require('child_process');
+for (const value of [__dirname, process.cwd(), ...process.argv.slice(2)]) {
+  if (/[\r\n]/.test(value)) throw Error('Source capture paths must not contain line breaks');
+}
 const root = path.resolve(__dirname, '../../..');
-const input = process.argv[2] || '/home/adam/projects/canic';
+const input = fs.realpathSync(process.argv[2] || '/home/adam/projects/canic');
+if (/[\r\n]/.test(input)) throw Error('Resolved capture path contains line breaks');
 const output = path.resolve(process.argv[3] || path.join(root, 'target/platform022-canic'));
 const source = path.join(output, 'source');
 const run = (args, cwd = input) => cp.execFileSync(args[0], args.slice(1), { cwd, maxBuffer: 32 * 1024 * 1024 });
@@ -16,7 +20,8 @@ function inventory() {
   return Object.fromEntries(files.map(p => {
     const f = path.join(input, p), s = fs.lstatSync(f, { throwIfNoEntry: false });
     if (!s || s.isDirectory()) return [p, null];
-    return [p, s.isSymbolicLink() ? { link: fs.readlinkSync(f) } : hash(fs.readFileSync(f))];
+    if (s.isSymbolicLink()) throw Error('Source capture requires regular files, not symlinks: ' + JSON.stringify(p));
+    return [p, hash(fs.readFileSync(f))];
   }));
 }
 const before = inventory();
@@ -26,8 +31,8 @@ for (const p of files) {
   const from = path.join(input, p), to = path.join(source, p), s = fs.lstatSync(from, { throwIfNoEntry: false });
   if (!s || s.isDirectory()) continue;
   fs.mkdirSync(path.dirname(to), { recursive: true });
-  if (s.isSymbolicLink()) fs.symlinkSync(fs.readlinkSync(from), to);
-  else fs.copyFileSync(from, to);
+  if (!s.isFile()) throw Error('Source changed file kind during capture');
+  fs.copyFileSync(from, to);
 }
 const after = inventory();
 if (JSON.stringify(before) !== JSON.stringify(after)) throw Error('Canic changed during capture');
@@ -52,20 +57,13 @@ const authManifest = path.join(output, 'auth/Cargo.toml');
 const authText = fs.readFileSync(authManifest, 'utf8').replace(
   /(\[dependencies.ic-platform\]\nversion = ")[^"]+("\n)/, '$1=0.22.0$2');
 fs.writeFileSync(authManifest, authText);
-// Only the benchmark host driver selects explicit, already admitted tools.
-const driver = path.join(source, 'crates/canic-host/examples/build_artifact.rs');
-let text = fs.readFileSync(driver, 'utf8');
-const old = 'let output = build_workspace_canister_artifact(&context)?;';
-if (!text.includes(old)) throw Error('Host driver changed; review its public API');
-text = text.replace(old, `let toolchain = canic_host::build_toolchain::BuildToolchain::resolve_with_paths(
-        profile,
-        Some(Path::new("${input}/.tools/ic/bin/ic-wasm")),
-        Some(Path::new("${input}/.tools/ic/bin/wasm-opt")),
-    )?;
-    let output = canic_host::canister_build::CanisterArtifactBuilder::with_toolchain(toolchain)
-        .build_workspace_canister_artifact(&context)?;`);
-text = text.replace('CanisterBuildProfile, WorkspaceBuildContext, build_workspace_canister_artifact,', 'CanisterBuildProfile, WorkspaceBuildContext,');
-fs.writeFileSync(driver, text);
+// Add an ordinary example through Canic Host's existing public API. Never patch
+// executable Rust text or overwrite the captured product driver.
+const driver = path.join(source, 'crates/canic-host/examples/platform_benchmark.rs');
+if (fs.existsSync(driver)) throw Error('Benchmark example already exists');
+fs.copyFileSync(path.join(root, 'scripts/fixtures/canic-wasm-benchmark/main.rs'), driver);
+fs.writeFileSync(path.join(output, 'benchmark-driver.sha256'), hash(fs.readFileSync(driver)) + '\n');
+fs.writeFileSync(path.join(output, 'tool-root'), path.join(input, '.tools/ic/bin') + '\n');
 fs.writeFileSync(path.join(output, 'canic-manifest.original'), fs.readFileSync(path.join(source, 'Cargo.toml')));
 fs.writeFileSync(path.join(output, 'auth-manifest.original'), fs.readFileSync(path.join(output, 'auth/Cargo.toml')));
 console.log(source);

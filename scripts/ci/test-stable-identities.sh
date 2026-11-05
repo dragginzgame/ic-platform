@@ -11,7 +11,7 @@ mkdir -p target
 fixture="$(mktemp -d "$root/target/stable-identities.XXXXXX")"
 printf 'Stable identity evidence: %s\n' "$fixture"
 mkdir -p "$fixture/supplier/src" "$fixture/consumer/src" "$fixture/next"
-printf '[workspace]\n[package]\nname="identity-schema-supplier"\nversion="0.0.0"\nedition="2024"\n[dependencies]\nic-wire="=0.12.1"\n' > "$fixture/supplier/Cargo.toml"
+printf '[workspace]\n[package]\nname="identity-schema-supplier"\nversion="0.0.0"\nedition="2024"\n[package.metadata.shared-tooling.loc]\ncategory="tests"\n[dependencies]\nic-wire="=0.12.1"\n' > "$fixture/supplier/Cargo.toml"
 touch "$fixture/supplier/src/lib.rs"
 if [[ "$prepare" == true ]]; then
     cargo fetch --manifest-path "$fixture/supplier/Cargo.toml"
@@ -53,6 +53,9 @@ name = "stable-identity-consumer"
 version = "0.0.0"
 edition = "2024"
 rust-version = "$compiler"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [features]
 external-ledger = ["current/icrc-ledger-types"]
 current-runtime = ["current/runtime"]

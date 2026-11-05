@@ -10,6 +10,9 @@ cat > "$fixture/Cargo.toml" <<'MANIFEST'
 name = "platform-type-benchmark"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "benchmarks"
 [workspace]
 [dependencies]
 ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["icrc-ledger-types"] }

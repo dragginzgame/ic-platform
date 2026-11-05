@@ -77,6 +77,9 @@ for side in original candidate; do
 name = "vectors-$side"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [dependencies]
 ic-secp256k1 = { $dependency }
 MANIFEST

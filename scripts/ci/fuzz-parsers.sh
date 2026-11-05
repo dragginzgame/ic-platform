@@ -20,6 +20,9 @@ cat > "$fixture/crates/probe/Cargo.toml" <<'MANIFEST'
 name = "platform-parser-fuzz"
 version = "0.0.0"
 edition = "2024"
+
+[package.metadata.shared-tooling.loc]
+category = "tests"
 [dependencies]
 ic-platform.workspace = true
 libfuzzer-sys.workspace = true

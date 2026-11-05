@@ -4,6 +4,23 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.22.2] - Unreleased
+
+### 🔧 Tooling
+
+- Adopt Shared 0.30’s source-role LOC report, label generated proof/benchmark
+  packages and use ordinary source files for the Canic benchmark driver.
+- Repair exported Shared documentation through committed adoption and check every
+  exported Markdown payload in the normal documentation gate.
+- Enforce bounded, dated recovery-evidence admission before release/publication;
+  preserve the approved historical archive outside Git administrative state.
+
+### 🧪 Testing
+
+- Move native Profiler inline tests into ordinary test modules and tighten owned
+  lint scopes. Paired native-server qualification remains required under
+  [#140](https://github.com/dragginzgame/ic-platform/issues/140).
+
 ## [0.22.1] - 2026-11-05
 
 ### 🐛 Fixes
