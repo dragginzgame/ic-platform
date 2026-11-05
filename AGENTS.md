@@ -2,8 +2,8 @@
 
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
-records the installed revision; do not edit its payloads. Shared 0.30.0 at
-`4d0961821a31766e3044c08fbe5954ed81213ec9` is the adopted baseline.
+records the installed revision; do not edit its payloads. Shared 0.30.5 at
+`be3771031ebfb340583b238dee5446be65929c62` is the adopted baseline.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
@@ -60,9 +60,10 @@ The generated internal spawn retains its scoped `disallowed_methods` allowance:
 consumer Clippy configurations may forbid the method or omit that lint entirely,
 so one expectation would fail for supported consumers. Keep its explicit reason.
 
-The opt-in native Profiler provider’s remaining path-module mappings and paired
-qualification are tracked in [#140](https://github.com/dragginzgame/ic-platform/issues/140).
-Its moved tests and lint edits require native acceptance before adopting a new
+The opt-in native Profiler provider uses manifest source-prefix mappings for
+ordinary Rust module discovery while preserving recorder/viewer locations.
+See [the paired native qualification](docs/audits/native-profiler-140-2026-11-05.md).
+Its test/layout/lint edits require native acceptance before adopting a new
 provider pin; root crate checks do not qualify the IC workspace.
 
 ## Recovery evidence custody
@@ -249,9 +250,9 @@ qualification plus relevant native executor regressions. See the
 ## Management contract
 
 The maintainer authorized adopting only the management DTOs used by sibling
-canisters. Wasm uses 43 explicit exports backed by 51 complete declarations from
+canisters. Wasm uses 44 explicit exports backed by 52 complete declarations from
 0.11.0, including nested types and the Canic runtime-probe HTTP contract. Native
-builds retain the existing 57-name registry =0.11.0 surface and identities for
+builds retain the existing 58-name registry =0.11.0 surface and identities for
 Backup/Testkit/host tooling; do not import the host-only transfer DTOs speculatively.
 Keep Candid bytes, fields, variants, Serde attributes and function-reference
 signatures unchanged. Select bignum/serde_bytes without Candid's printer on Wasm.

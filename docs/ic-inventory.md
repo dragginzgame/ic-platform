@@ -40,12 +40,14 @@ conversion, DER/key admission and authenticated-time extraction. See the
 [current dependency contract](migration.md#upstream-cryptographic-dependency-cut-022);
 earlier release narratives below retain historical packaging evidence.
 
-The pending 0.9.0 management cut owns only sibling-canister-used DTOs on Wasm:
-43 existing public names, backed by 51 complete 0.11.0 declarations. Canic Core,
+The management selection, including pending 0.23.1's creation request, owns only
+sibling-canister-used DTOs on Wasm:
+44 public names, backed by 52 complete 0.11.0 declarations. Canic Core,
 control-plane, Blob recovery and the Canic runtime-probe canister supply the
-selection evidence recorded in the maintained provenance. Fourteen host-only
+selection evidence recorded in the maintained provenance. Canic's sharding-root
+fixture additionally requires `CreateCanisterArgs` ([#146](https://github.com/dragginzgame/ic-platform/issues/146)). Fourteen host-only
 snapshot-transfer names are excluded from Wasm; native builds retain the complete
-57-name registry =0.11.0 facade and its original identities for Backup/Testkit.
+58-name registry =0.11.0 facade and its original identities for Backup/Testkit.
 The registry management crate and its implicit Candid printer disappear from the
 management-only Wasm graph. Candid bignum/serde_bytes and all external fields,
 variants, Serde bytes and function signatures remain. See the

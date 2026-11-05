@@ -8,7 +8,7 @@ The executor, callback state machine, wire formats and cryptography are unchange
 
 ## Installed measurements
 
-[Results](input-copy.tsv) record IC instruction-counter deltas on Linux with the
+The selected results below record IC instruction-counter deltas on Linux with the
 prepared Testkit-owned PocketIC 16.0.0 server, Rust 1.99.1 and 1.91.0 release Wasm.
 Both Wire-only and external-Candid feature combinations pass. The measured RPC
 itself uses Wire in all combinations.
@@ -43,8 +43,11 @@ POCKET_IC_BIN=/absolute/path/to/prepared/pocket-ic \
   CARGO_BUILD_JOBS=4 bash scripts/ci/check-platform-runtime.sh
 ```
 
-The runner retains its source, lock, metadata and four Wasm artifacts under the
-printed `target/cdk-runtime.*` directory. This run used `target/cdk-runtime.UsGpFZ`;
-[artifact digests](artifact-sha256.txt) identify the measured binaries.
-Local logs are `/tmp/platform051-input-*.log`. Package versions remain unchanged;
-the evidence describes the pending working tree, not a published release.
+New runner output is retained under its printed `target/cdk-runtime.*` directory.
+The original run used `target/cdk-runtime.UsGpFZ`; that historical directory was
+not reverified. This records the former 0.5.1 experiment, not fresh qualification.
+
+Raw trial tables, source snapshots and artifact-hash listings were retired from the
+current tree during Shared 0.30.4 cleanup. The selected observations below remain
+historical summaries; old local artifacts were not reverified and are not claimed
+as independently available evidence. Git history retains the previous records.

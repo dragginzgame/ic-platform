@@ -232,6 +232,19 @@ pub struct DefiniteCanisterSettings {
     pub environment_variables: Vec<EnvironmentVariable>,
 }
 
+/// # Create Canister Args
+///
+/// Argument type of [`create_canister`](https://docs.internetcomputer.org/references/management-canister/#create_canister).
+#[derive(
+    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
+)]
+pub struct CreateCanisterArgs {
+    /// Canister settings.
+    pub settings: Option<CanisterSettings>,
+    /// Must match the canister's [`canister_version`](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/#system-api-canister-version) value when specified.
+    pub sender_canister_version: Option<u64>,
+}
+
 /// # Update Settings Args
 ///
 /// Argument type of [`update_settings`](https://docs.internetcomputer.org/references/management-canister/#update_settings).

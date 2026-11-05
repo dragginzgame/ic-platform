@@ -154,12 +154,32 @@ def load_manifest(root):
         inside(root, upstream["path"], "upstream.path")
         inside(root, manifest["profiler"]["path"], "profiler.path")
         relative(manifest["profiler"]["destination"], "profiler.destination")
+        mappings = manifest["profiler"].get("mappings", [])
+        if not isinstance(mappings, list):
+            raise Error("profiler.mappings must be an array")
+        sources = set()
+        for mapping in mappings:
+            source = str(relative(mapping["source"], "profiler mapping source"))
+            relative(mapping["destination"], "profiler mapping destination")
+            if source in sources:
+                raise Error(f"Duplicate profiler mapping source: {source}")
+            sources.add(source)
         inside(root, manifest["patches"]["directory"], "patches.directory")
         inside(root, manifest["patches"]["series"], "patches.series")
         inside(root, manifest["overlay"]["path"], "overlay.path")
     except (KeyError, TypeError) as exc:
         raise Error(f"Malformed {MANIFEST}: missing or invalid {exc}") from exc
     return manifest
+
+
+def profiler_destination(manifest, name):
+    """Route each merged source once, using its most specific declared prefix."""
+    matches = [mapping for mapping in manifest["profiler"].get("mappings", [])
+               if name == mapping["source"] or name.startswith(mapping["source"] + "/")]
+    if matches:
+        mapping = max(matches, key=lambda item: len(item["source"]))
+        return mapping["destination"] + name[len(mapping["source"]):]
+    return manifest["profiler"]["destination"] + "/" + name
 
 
 def patch_series(root, manifest):
@@ -452,16 +472,21 @@ def prepare(root, manifest, *, force=False, revision=None, destination=None):
             git(temporary, "apply", "--check", "--binary", "--", str(patch))
             git(temporary, "apply", "--binary", "--", str(patch))
         profiler_root = inside(root, manifest["profiler"]["path"], "profiler.path")
-        profiler_destination = str(relative(manifest["profiler"]["destination"], "profiler.destination"))
-        if (temporary / profiler_destination).exists():
-            raise Error(f"Profiler destination already exists in upstream: {profiler_destination}")
+        profiler_base = str(relative(manifest["profiler"]["destination"], "profiler.destination"))
+        if (temporary / profiler_base).exists():
+            raise Error(f"Profiler destination already exists in upstream: {profiler_base}")
+        profiler_destinations = set()
         for entry in state["profiler"]:
             source_root = consumer_directory(root) / "profiler" if entry.get("origin") == "consumer" else profiler_root
-            copy_file(source_root / entry["path"], inside(temporary, profiler_destination + "/" + entry["path"], "profiler destination"))
+            name = profiler_destination(manifest, entry["path"])
+            if name in upstream_paths or name in profiler_destinations:
+                raise Error(f"Profiler destination overlaps existing ownership: {name}")
+            profiler_destinations.add(name)
+            copy_file(source_root / entry["path"], inside(temporary, name, "profiler destination"))
         overlay_root = inside(root, manifest["overlay"]["path"], "overlay.path")
         for entry in state["overlay"]:
             name = entry["path"]
-            if name in upstream_paths or name == profiler_destination or name.startswith(profiler_destination + "/"):
+            if name in upstream_paths or name in profiler_destinations or name == profiler_base or name.startswith(profiler_base + "/"):
                 raise Error(f"Overlay destination overlaps upstream or profiler ownership: {name}")
             source = inside(root, entry["source"], "overlay source") if "source" in entry else inside(overlay_root, name, "overlay path")
             copy_file(source, inside(temporary, name, "overlay destination"))
@@ -693,7 +718,7 @@ def native_verify(root, manifest):
                 ("CARGO_TARGET_DIR", "POCKET_IC_BIN", "SYSTEM_PROFILE_TEST_SERVER_URL")}
     try:
         os.environ.pop("SYSTEM_PROFILE_TEST_SERVER_URL", None)
-        cargo_command(root, manifest, "clippy", ["--", "--no-deps", "--lib", "--", "-D", "warnings"], False)
+        cargo_command(root, manifest, "clippy", ["--", "--no-deps", "--lib", "--bin", "pocket-ic-server", "--", "-D", "warnings"], False)
         built = cargo_command(root, manifest, "build", [], False)
         servers = [item for item in built["artifacts"] if item["target_name"] == "pocket-ic-server"]
         if len(servers) != 1:
@@ -701,6 +726,18 @@ def native_verify(root, manifest):
         server = servers[0]
         cargo_command(root, manifest, "test", ["--", "--lib"], False)
         cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic-server", "--lib", "profiling::"], False)
+        cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic-server", "--lib", "storage_tests"], False)
+        cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic-server", "--bin", "pocket-ic-server", "cli_tests"], False)
+        cargo_command(root, manifest, "test", ["--", "-p", "pocket-ic", "--lib", "trace_serialization_tests"], False)
+        for package, target, selection in (
+            ("ic-embedders", "--lib", "runtime_cost_tests"),
+            ("ic-embedders", "--lib", "origin_map_tests"),
+            ("ic-embedders", "--lib", "signal_handler::tests"),
+            ("ic-embedders", "--lib", "stable_memory::tests"),
+            ("memory_tracker", "--lib", "deterministic::tests"),
+        ):
+            cargo_command(root, manifest, "test", ["--", "-p", package, target, selection], False)
+        cargo_command(root, manifest, "test", ["--", "-p", "ic-embedders", "--test", "wasmtime_embedder", "instruction_profile_tests"], False)
         observed = file_snapshot(Path(server["path"]), server["path"])
         if observed["sha256"] != server["sha256"] or not observed["executable"]:
             raise Error("Retained native server changed before installed qualification")

@@ -4,8 +4,8 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd -P)"
 root="$(cd "$here/../../../.." && pwd -P)"
 cd "$root"
-mkdir -p target
-out="$(mktemp -d "$root/target/candid-packaging.XXXXXX")"
+mkdir -p target/evidence
+out="$(mktemp -d "$root/target/evidence/candid-packaging.XXXXXX")"
 trap 'printf "Candid packaging evidence: %s\n" "$out"' EXIT
 make clippy > "$out/owner-clippy.log" 2>&1
 cargo metadata --locked --offline --all-features --format-version 1 > "$out/owner-metadata.json"

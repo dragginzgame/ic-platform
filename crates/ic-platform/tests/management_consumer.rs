@@ -17,6 +17,70 @@ use ic_platform::management_canister_types::{
 };
 use ic_platform::principal::ExternalPrincipal as Principal;
 
+/// Prepare the management request without choosing cycles, deadlines or transport.
+pub fn prepare_create_canister(
+    request: &ic_platform::management_canister_types::CreateCanisterArgs,
+) -> Vec<u8> {
+    ic_platform::candid::protocols::management::create_canister::encode(request).unwrap()
+}
+
+#[test]
+fn create_canister_uses_the_management_request_and_existing_reply_contract() {
+    use ic_platform::{
+        candid::protocols::{ReplyArity, management::create_canister},
+        management_canister_types::{CanisterIdRecord, CanisterSettings, CreateCanisterArgs},
+    };
+    let request = CreateCanisterArgs {
+        settings: Some(CanisterSettings {
+            controllers: Some(vec![Principal::anonymous()]),
+            ..Default::default()
+        }),
+        sender_canister_version: Some(u64::MAX),
+    };
+    assert_eq!(create_canister::METHOD, "create_canister");
+    assert_eq!(
+        prepare_create_canister(&request),
+        contract::encode_one(&request).unwrap()
+    );
+    let response = CanisterIdRecord {
+        canister_id: Principal::anonymous(),
+    };
+    let limits = DecodeLimits {
+        reply_bytes: 4096,
+        decoding_quota: 100_000,
+        skipping_quota: 1000,
+        type_entries: 64,
+        header_bytes: 2048,
+    };
+    assert_eq!(
+        create_canister::decode(
+            &contract::encode_one(&response).unwrap(),
+            limits,
+            ReplyArity::Exact
+        )
+        .unwrap(),
+        response
+    );
+    for bytes in [
+        b"".to_vec(),
+        contract::encode_args(()).unwrap(),
+        contract::encode_args((&response, 7u64)).unwrap(),
+    ] {
+        assert!(create_canister::decode(&bytes, limits, ReplyArity::Exact).is_err());
+    }
+    assert!(matches!(
+        create_canister::decode(
+            &contract::encode_one(&response).unwrap(),
+            DecodeLimits {
+                reply_bytes: 0,
+                ..limits
+            },
+            ReplyArity::Exact
+        ),
+        Err(DecodeError::ReplyTooLarge { .. })
+    ));
+}
+
 /// Preserve the probe's request bytes, transform references and caller admission.
 pub fn roundtrip() {
     let limits = DecodeLimits {

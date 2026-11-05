@@ -3,8 +3,8 @@ set -euo pipefail
 # Historical comparison. Requires cached registry sources and Rust 1.99.1.
 root="$(cd "$(dirname "$0")/../../.." && pwd -P)"
 export BENCH_ROOT
-mkdir -p "$root/target"
-BENCH_ROOT="$(mktemp -d "$root/target/platform-benchmark.XXXXXX")"
+mkdir -p "$root/target/evidence"
+BENCH_ROOT="$(mktemp -d "$root/target/evidence/platform-benchmark.XXXXXX")"
 mkdir -p "$BENCH_ROOT/results"
 for pair in base:390644f candidate:9a661f7 pre-principal:f105386; do
     name="${pair%%:*}"

@@ -14,8 +14,7 @@ Counts deduplicate `(package name, version)` and include Platform itself.
 | executor + ic0 | wasm32-unknown-unknown | 26 | 6 | Application identity/text/Serde/crypto dependencies absent |
 | canister-sig-creation | x86_64-unknown-linux-gnu | 30 | 26 | representation-independent-hash, leb128, serde_cbor and half absent |
 
-Retained trees: [raw before](executor-before.txt), [raw after](executor-after.txt),
-[creation before](creation-before.txt), [creation after](creation-after.txt).
+The selected package counts above are historical, not a current graph inventory.
 The raw graph retains executor 2.0.0, ic0 1.2.0, slotmap, smallvec and version_check.
 Creation still receives serde_bytes through certification. Verification still
 requires CBOR. Other selected host capabilities can reintroduce packages.
@@ -46,3 +45,8 @@ Native macOS, installed timer/canister execution and live IC were not rerun.
 Existing runtime submission/callback/trap and executor sources/identities remain
 unchanged; source fingerprints pass. Do not infer deployment qualification from
 these compile and graph checks.
+
+Raw trial tables, source snapshots and artifact-hash listings were retired from the
+current tree during Shared 0.30.4 cleanup. The selected observations below remain
+historical summaries; old local artifacts were not reverified and are not claimed
+as independently available evidence. Git history retains the previous records.

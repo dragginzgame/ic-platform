@@ -187,10 +187,6 @@ fn store() -> &'static Mutex<SnapshotStore> {
 
 /// All state arguments must come from the same immutable labeled state and the
 /// cursor must be sampled while the PocketIC operation owns the instance.
-#[expect(
-    clippy::too_many_arguments,
-    reason = "Capture metadata and state are sampled under the same PocketIC operation."
-)]
 pub(crate) fn capture_snapshot(
     snapshot_id: String,
     instance_id: InstanceId,

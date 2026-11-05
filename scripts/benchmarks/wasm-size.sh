@@ -4,8 +4,8 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 [[ $# -le 2 ]] || { echo 'usage: wasm-size.sh [PLATFORM_SOURCE [NEW_OUTPUT_DIRECTORY]]' >&2; exit 2; }
 source_root="$(cd "${1:-$root}" && pwd -P)"
-mkdir -p "$root/target"
-output="${2:-$(mktemp -d "$root/target/platform-wasm-size.XXXXXX")}"
+mkdir -p "$root/target/evidence"
+output="${2:-$(mktemp -d "$root/target/evidence/platform-wasm-size.XXXXXX")}"
 mkdir -p "$output"
 output="$(cd "$output" && pwd -P)"
 [[ ! -e "$output/Cargo.toml" ]] || { echo 'Size evidence already exists; select a new output directory' >&2; exit 2; }

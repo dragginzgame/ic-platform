@@ -50,14 +50,22 @@ and the installed profiling tests
 against that exact server. Profiling tests serialize their whole-server recording
 windows; independent workloads must not contaminate one another's cycle totals.
 
-`scripts/ic_profiler.py clippy -- --no-deps --lib -- -D warnings` checks the
+`scripts/ic_profiler.py clippy -- --no-deps --lib --bin pocket-ic-server -- -D warnings` checks the
 native server package without linting the full upstream dependency workspace.
 Retain the pinned IC Clippy configuration; no blanket warning allowances apply.
 The paired Profiler product sources also need the narrow CLI/rendering lint
 correction tracked by Platform #98. Old source pins retain their prior gate.
 
-The provider's `profiler/` sources and the consumer's `profiler/` sources merge at
-the declared IC destination. Overlapping files are rejected. Their separate
+The provider's `profiler/` sources and the consumer's `profiler/` sources merge
+through `profiler.mappings` in the manifest. The most specific source prefix wins:
+server modules, arguments and rendering go to `rs/pocket_ic_server/src/profiling`,
+operations become children of `pocket_ic`, and routes become children of
+`state_api::routes`. These ordinary modules retain the existing public aliases
+and private parent access. The independent recorder stays at `profiling/system`
+and viewer assets stay at `profiling/viewer`; data includes and Cargo/Bazel inputs
+follow those locations. No consumer implementation is copied into the provider.
+Overlapping sources or destinations, upstream replacement, traversal and symlink
+parents are rejected. Their separate
 origins and digests enter the assembly identity, together with the IC pin and all
 patch/overlay inputs. Command receipts record both provider and consumer commits.
 The paired consumer additionally supplies `server/system_profile_product/mod.rs`
@@ -91,10 +99,12 @@ transferred with its fixtures; this profile adds no second assembly engine.
 Shared 0.30 hygiene adoption moves provider/overlay unit tests into ordinary
 `tests.rs`/`*_tests.rs` modules, preserving their bodies, and narrows owned lint
 suppressions. Source pins include the added test files. The standalone HTTP proof
-copies its adjacent tests explicitly. The remaining legacy path-module wiring
-and complete paired native qualification are tracked in
-[#140](https://github.com/dragginzgame/ic-platform/issues/140); these source/assembler
-checks do not qualify a new native server or authorize a consumer pin update.
+copies its adjacent tests explicitly. Patch-only DTO, CLI and storage tests also
+use ordinary modules and run before installed acceptance. The IC lint configuration
+permits twelve arguments; no suppression is needed for the snapshot/round adapters.
+See [the native layout qualification](../../docs/audits/native-profiler-140-2026-11-05.md)
+for the exact paired input, Linux evidence and separate macOS/Bazel status. Source
+and assembler checks alone do not qualify a new native server or consumer pin.
 
 Focused assembler tests:
 

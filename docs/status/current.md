@@ -1,80 +1,70 @@
 # Current handoff — 2026-11-05
 
-## Delivered Platform 0.23.0
+## Platform 0.23.1 delivery preparation
 
-**ic-platform 0.23.0** is pushed, tagged and published on crates.io. Release
-commit: `7d2230c585b1a91c11ff12d0fcfce24bda424550`; tag: `platform-v0.23.0`.
-Runtime remains **0.19.2**, Types **0.18.1**. Browser/npm and siblings were not
-released or edited. [#141](https://github.com/dragginzgame/ic-platform/issues/141)
-and [#145](https://github.com/dragginzgame/ic-platform/issues/145) are closed.
+Shared **0.30.5** is adopted at published supplier
+`be3771031ebfb340583b238dee5446be65929c62`, including the approved checker correction.
+The pending Platform batch covers #140, #146 and the reviewed cleanup below;
+Runtime, Types and browser versions are unchanged. The incoming Candid/derive
+0.10.40 lock draft retains separate custody and is restored after delivery.
 
-Native `ic-protocol::decode_subnet_metrics` now returns
-`Result<Option<SubnetMetrics>, CborError>`, preserving Testkit's CBOR-null absence
-and full u128 metrics values, byte limits and malformed/trailing refusal.
-Consumers must advance their Platform requirement from `0.22` to `0.23`;
-`cargo update` alone cannot cross this minor boundary. See the
-[return-type migration](../migration.md#optional-subnet-metrics-0230).
+`make check-boundary` now enforces the named external Candid source policy.
+It admits 153 exact declarations across 226 Rust files, without module exemptions.
+External DTO admission and new/stale declaration refusal pass; type identity and
+source/license guards retain their separate duties. No cryptographic body changed.
 
-Select defaults off with `certification-cbor` for standard/strict certificate and
-tree codecs, native `ic-protocol` for envelope/read-state/metrics operations,
-and `ic-protocol-fixtures` only for native development fixtures. The existing
-[migration table](../migration.md#typed-ic-packet-and-fixture-boundary-0223)
-records separately owned sibling adoption, including Tools 0.83.0 and Testkit
-0.87.0. #142–#144 are closed for the supplying APIs; consumer qualification and
-publication remain separate. All cryptography, trust, delegation/freshness,
-request binding, budgets, transport and replay/retry policies retain their owners.
+#146 adds the pinned management `CreateCanisterArgs` and typed creation codec;
+see the [pending API contract](../migration.md#management-create_canister-request-pending-0231).
+Native/Wasm Clippy, schema/byte/range and reply-admission checks pass. Logs:
+`target/issue146/`. Canic adoption and Platform publication remain separate.
 
-## Validation and publication evidence
+Twenty-five obsolete experimental files are retired; compact conclusions and
+references remain in the [audit](../audits/shared-030-practices-2026-11-05.md).
+New output uses `target/evidence/`; recovery evidence and vectors are untouched.
 
-The complete **20-stage Linux gate passed** on Rust **1.99.1**, source
-`4170f4da8120412dbb49766d842c76ab5b3011e4`. Receipt:
+Focused snapshot, Cargo/Candid boundary, consumer refusal, formatting/hook, LOC,
+documentation and strict Wasm fixture Clippy checks pass. Logs:
+`target/shared0304-adoption/`. No release/fleet matrix, benchmark or macOS run.
+
+## Native Profiler #140, local only
+
+The provider removes its 21 path attributes while preserving public aliases,
+private parents, recorder identity and viewer locations. Nine patch test modules
+and two standalone tests move with their original bodies. The native gate covers
+the moved selections and strict library/binary Clippy. See the
+[paired qualification](../audits/native-profiler-140-2026-11-05.md).
+
+The exact IC pin is unchanged. Validation uses committed Profiler `50d9548` as
+read-only archived fixture input under `target/issue140/consumer`; the sibling's
+concurrent work is untouched. Linux qualification passes on Rust 1.99.1, including
+83 recorder, 114 product and six installed scenarios against hash `e2240c66dc9f`.
+Evidence: `target/issue140/qualification-summary.json`. No macOS/Bazel execution,
+consumer pin adoption, commit, release or publication is claimed.
+
+## Published Rust groups
+
+**ic-platform 0.23.0** is published at release commit
+`7d2230c585b1a91c11ff12d0fcfce24bda424550`, tag `platform-v0.23.0`.
+Runtime remains **0.19.2**, Types **0.18.1**. #141/#145 are closed. The native
+metrics decoder returns `Result<Option<SubnetMetrics>, CborError>`; consumers
+must advance their Platform requirement from `0.22` to `0.23`.
+Features remain `certification-cbor`, native `ic-protocol`, and development-only
+`ic-protocol-fixtures`. See the [migration table](../migration.md#typed-ic-packet-and-fixture-boundary-0223).
+Sibling adoption/qualification and releases remain separately owned.
+
+All twenty Linux release stages passed on Rust 1.99.1, source `4170f4d`.
+The exact-source resume after a retained Candid draft completed without bypassing
+the original proof. Receipt:
 `target/release-validation/qualification.AvTtIC/receipt.json`.
-It contains Shared's complete `validation_evidence`, not a locally interpreted
-stage projection. Native/Wasm graphs, Clippy, tests, consumers and both installed
-Runtime profiles passed. Candidate graph evidence remains under
-`target/cdk-runtime.xGGgrf/`; no Runtime release or new native-provider acceptance
-is implied. Release/source recovery retains the
-[custody contract](../platform-release-validation.md#release-and-recovery-admission).
-
-After validation, a Candid lock draft reappeared and post-validation admission
-stopped before preparation. The identical draft was retained; exact
-`release-resume VERSION=0.23.0 RELEASE_GROUP=platform` re-admitted the original
-proof/source and completed metadata, commit/tag and atomic main/tag delivery.
-Original and recovery logs: `target/platform023-delivery/{release,resume}.log`.
-No gate was bypassed or historical proof relabelled as a fresh run.
-
-The downloaded crates.io archive's checksum matches the index and its clean VCS
-provenance matches the release commit. SHA256:
-`be12bedb3f3a6eaeb38eaa4f834159e181b560e530df59291fa3a486219cfc57`.
-Registry-only certificate and protocol consumers pass, including actual
-`Some(u128::MAX)`, null absence and refusal cases. Certificate-only excludes
-Candid/Agent/Runtime; protocol excludes Agent/Runtime. Publication attempt:
-`target/publication/publish.selection.x6Tvkh`. Complete verification:
+Registry-only certificate/protocol consumers, full-u128/null refusal cases,
+archive checksum and clean VCS provenance match. Summary:
 `target/platform023-delivery/deployment-verification.json`.
+This is the recorded release evidence, not qualification of the new local snapshot.
+Prior details remain in the [delivery handoff](https://github.com/dragginzgame/ic-platform/blob/07b442e/docs/status/current.md).
 
-Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/42050137062)
-was pending and [installed runtime](https://github.com/dragginzgame/ic-platform/actions/runs/42050137222)
-was running at observation. Native macOS results remain asynchronous; there is
-no new local macOS qualification. Linux results do not claim macOS, Chromium
-or complete native-provider acceptance.
-
-## Preserved work and remaining boundaries
-
-Unrelated browser drafts and the Candid 0.10.40/derive lock update are restored,
-with browser checksums and the original lock-patch hunks verified. Browser dist
-was rebuilt. They remain uncommitted; no npm version or publication changed.
-Recovery refs: `refs/retained/platform-023-unrelated` and
-`refs/retained/platform-023-late-candid`. No retained work was dropped.
-
-Shared **0.30.0**, supplier `4d0961821a31766e3044c08fbe5954ed81213ec9`, remains
-installed without payload edits. The [audit](../audits/shared-030-practices-2026-11-05.md)
-retains rule coverage. [#140](https://github.com/dragginzgame/ic-platform/issues/140)
-still owns paired Profiler module layout and native acceptance;
-[#50](https://github.com/dragginzgame/ic-platform/issues/50) remains the
-crypto-bigint advisory, without a waiver. Earlier delivery and supplier details
-remain in the [preceding handoff](https://github.com/dragginzgame/ic-platform/blob/7d2230c585b1a91c11ff12d0fcfce24bda424550/docs/status/current.md).
-The [Canic report](../audits/platform-022-canic-wasm-2026-11-05.md) remains the
-0.22.1 size evidence; this release makes no new Wasm-size claim.
+#50 remains the crypto advisory without a waiver. The
+[Canic report](../audits/platform-022-canic-wasm-2026-11-05.md) remains
+the current matched size evidence; cleanup introduces no new size/performance claim.
 
 ## Published browser SDK 0.2.0
 
@@ -101,8 +91,10 @@ and uncommitted. Other Rust release groups were not advanced by this npm release
 
 The approved archive/bundles remain in
 `recovery-evidence/retired-checkouts/20261104-issue139/`, with checksum and
-relocation receipts. Reproducible Runtime 0.18.1 binaries remain under
-`target/recovery-evidence/runtime-0181-delivery.LgU8r6/`. The maintainer owns
-review by **2026-12-04**. Retention checks enforce budgets without deletion or
-extension. Cargo clean can reclaim target evidence; the historical archive
-survives. Supplier bundles also remain in `.git/issue-139-suppliers/`.
+relocation receipts. Runtime 0.18.1 reproducible binaries remain under
+`target/recovery-evidence/runtime-0181-delivery.LgU8r6/`. Review remains due
+**2026-12-04**, owned by the maintainer. Retention checks refuse excess/expiry
+without deletion or extension. Cargo clean can reclaim target evidence; the
+historical archive and `.git/issue-139-suppliers/` remain separately protected.
+Recovery refs `refs/retained/platform-023-unrelated` and
+`refs/retained/platform-023-late-candid` are retained.

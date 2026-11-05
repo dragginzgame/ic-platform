@@ -96,8 +96,12 @@ wasm-check: check-compiler
 	cargo check -p ic-platform --lib --all-features --target wasm32-unknown-unknown --locked
 # Compatibility command: these are the same supported-compiler proofs, once.
 msrv: test wasm-check
-check-boundary:
+check-boundary: check-candid-boundary
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
+.PHONY: check-candid-boundary
+check-candid-boundary:
+	perl scripts/ci/check-candid-boundary.pl "$(CURDIR)" ci/candid-boundary.json crates scripts native/ic-profiler/profiler native/ic-profiler/overlay
+	bash scripts/ci/test-platform-candid-boundary.sh
 .PHONY: check-primitives
 check-primitives:
 	@for target in "$$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do \

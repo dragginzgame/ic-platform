@@ -274,10 +274,6 @@ pub(super) struct PassCapture {
 }
 
 impl PassCapture {
-    #[expect(
-        clippy::too_many_arguments,
-        reason = "Retain the scheduler slice counters and timing inputs as one observation."
-    )]
     pub(super) fn slice(
         &mut self,
         instructions: u64,

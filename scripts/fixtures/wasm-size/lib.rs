@@ -242,14 +242,14 @@ struct ExternalBoundedBytes<const LIMIT: usize>(Vec<u8>);
 #[cfg(feature = "candid-sequence")]
 impl<const LIMIT: usize> ic_platform::candid::contract::CandidType for ExternalBoundedBytes<LIMIT> {
     fn _ty() -> ic_platform::candid::contract::types::Type {
-        <Vec<u8> as ic_platform::candid::contract::CandidType>::_ty()
+        Vec::<u8>::_ty()
     }
 
     fn idl_serialize<S: ic_platform::candid::contract::types::Serializer>(
         &self,
         serializer: S,
     ) -> Result<(), S::Error> {
-        ic_platform::candid::contract::CandidType::idl_serialize(&self.0, serializer)
+        self.0.idl_serialize(serializer)
     }
 }
 

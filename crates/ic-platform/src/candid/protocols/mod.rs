@@ -141,6 +141,13 @@ pub mod management {
     empty_request!(raw_rand, "raw_rand", Vec<u8>);
     #[cfg(feature = "management-canister-types")]
     single!(
+        create_canister,
+        "create_canister",
+        crate::management_canister_types::CreateCanisterArgs,
+        crate::management_canister_types::CanisterIdRecord
+    );
+    #[cfg(feature = "management-canister-types")]
+    single!(
         canister_status,
         "canister_status",
         crate::management_canister_types::CanisterIdRecord,

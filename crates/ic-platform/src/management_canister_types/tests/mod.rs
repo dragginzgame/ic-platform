@@ -27,6 +27,7 @@ fn selected_schemas_match_the_pinned_external_contract() {
         CodeDeploymentMode,
         CodeDeploymentRecord,
         ControllersChangeRecord,
+        CreateCanisterArgs,
         CreationRecord,
         DefiniteCanisterSettings,
         DeleteCanisterSnapshotArgs,
@@ -64,6 +65,49 @@ fn selected_schemas_match_the_pinned_external_contract() {
         UploadChunkArgs,
         WasmMemoryPersistence
     );
+}
+
+#[cfg(not(target_family = "wasm"))]
+#[test]
+fn create_canister_preserves_pinned_bytes_and_complete_numeric_ranges() {
+    assert_eq!(
+        std::any::TypeId::of::<super::CreateCanisterArgs>(),
+        std::any::TypeId::of::<ic_management_canister_types::CreateCanisterArgs>()
+    );
+    let large: candid::Nat = "340282366920938463463374607431768211456".parse().unwrap();
+    let settings = owned::CanisterSettings {
+        controllers: Some(vec![candid::Principal::anonymous()]),
+        reserved_cycles_limit: Some(large),
+        environment_variables: Some(vec![owned::EnvironmentVariable {
+            name: "fixture".into(),
+            value: "preserve\0bytes".into(),
+        }]),
+        ..Default::default()
+    };
+    for settings in [
+        None,
+        Some(owned::CanisterSettings::default()),
+        Some(settings),
+    ] {
+        let upstream_settings: Option<ic_management_canister_types::CanisterSettings> =
+            candid::decode_one(&candid::encode_one(&settings).unwrap()).unwrap();
+        for version in [None, Some(0), Some(u64::MAX)] {
+            let request = owned::CreateCanisterArgs {
+                settings: settings.clone(),
+                sender_canister_version: version,
+            };
+            let upstream = ic_management_canister_types::CreateCanisterArgs {
+                settings: upstream_settings.clone(),
+                sender_canister_version: version,
+            };
+            let expected = candid::encode_one(&upstream).unwrap();
+            assert_eq!(candid::encode_one(&request).unwrap(), expected);
+            assert_eq!(
+                candid::decode_one::<owned::CreateCanisterArgs>(&expected).unwrap(),
+                request
+            );
+        }
+    }
 }
 
 fn hex(text: &str) -> Vec<u8> {

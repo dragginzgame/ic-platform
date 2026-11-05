@@ -414,3 +414,21 @@ Owner and Timers composition each retain all four raw/prepared-call ×
 Wire/external-Candid profiles on the declared compiler. Driver tests, exact Wasm
 artifacts, graph isolation and lifecycle tests remain separate obligations.
 No measured Wasm-size reduction is claimed.
+
+## Candid source admission and experiment retention
+
+`make check-boundary` includes the lightweight Shared Candid source checker and
+Platform policy refusal cases. `ci/candid-boundary.json` admits exact named
+external protocol declarations and explicit codec qualification fixtures. It
+covers crates, scripts and the native provider/overlay Rust sources. New or
+changed declarations require review; no directory or module is exempted. The
+checker is lexical, not macro expansion/type resolution. Upstream generators
+remain separately covered by their source and external schema contracts.
+
+Keep one compact conclusion per experimental topic, with at most two small data
+files and 100 KiB combined; the repository budget is 5 MiB. New manual benchmark
+output defaults to `target/evidence/`. Historical tables/probes retired during
+cleanup remain in Git history; a summary or hash does not prove missing raw
+artifacts are available. Active release/recovery custody and maintained test
+vectors keep their separate contracts. See the Shared
+[retention rule](../rules/engineering-details.md#changelogs-and-artifact-preservation).

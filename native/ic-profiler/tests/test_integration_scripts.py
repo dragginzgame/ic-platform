@@ -187,6 +187,77 @@ class IntegrationScriptsTest(unittest.TestCase):
         self.assertEqual(self.checkout.stat().st_ino, original_inode)
         self.assertEqual((self.checkout / ".git/ic-profiler-receipt.json").read_bytes(), receipt_bytes)
 
+    def test_profiler_mappings_split_modules_from_recorder_and_viewer(self):
+        manifest = self.manifest()
+        manifest["profiler"]["mappings"] = [
+            {"source": "server", "destination": "src/profiling"},
+            {"source": "server/operations.rs", "destination": "src/pocket_ic/profiling_operations.rs"},
+        ]
+        self.write_manifest(manifest)
+        self.write(self.root, "profiler/server/api.rs", "// API\n")
+        self.write(self.root, "profiler/server/operations.rs", "// private parent access\n")
+        consumer = self.home / "consumer"
+        consumer.mkdir()
+        self.git(consumer, "init", "--quiet")
+        self.write(consumer, "profiler/server/product/mod.rs", "// consumer product\n")
+        self.env["IC_PROFILER_CONSUMER_ROOT"] = str(consumer)
+        self.script("prepare")
+        checkout = consumer / ".build/ic"
+        for name, content in (("src/profiling/api.rs", "// API\n"),
+                              ("src/profiling/product/mod.rs", "// consumer product\n"),
+                              ("src/pocket_ic/profiling_operations.rs", "// private parent access\n"),
+                              ("rs/pocket_ic_server/profiling/system/.metadata", "hidden owned source\n"),
+                              ("rs/pocket_ic_server/profiling/viewer/fixture_client.py", "VALUE = 'fixture'\n")):
+            self.assertEqual((checkout / name).read_text(), content)
+        self.assertFalse((checkout / "rs/pocket_ic_server/profiling/server").exists())
+        self.assertFalse((checkout / "src/profiling/operations.rs").exists())
+        self.assert_pristine_pin()
+
+    def test_profiler_mapping_rejects_unsafe_paths_and_duplicate_sources(self):
+        for mapping in ({"source": "../server", "destination": "src/profiling"},
+                        {"source": "server", "destination": "../outside"},
+                        {"source": "server", "destination": "/outside"}):
+            manifest = self.manifest()
+            manifest["profiler"]["mappings"] = [mapping]
+            self.write_manifest(manifest)
+            self.script("prepare", success=False)
+        manifest["profiler"]["mappings"] = [
+            {"source": "server", "destination": "src/one"},
+            {"source": "server", "destination": "src/two"},
+        ]
+        self.write_manifest(manifest)
+        self.assertIn("Duplicate profiler mapping", self.script("prepare", success=False).stderr)
+
+    def test_profiler_mapping_cannot_overwrite_upstream_or_other_source(self):
+        for destination in ("src/base.txt", "rs/pocket_ic_server/profiling/system/.metadata"):
+            manifest = self.manifest()
+            manifest["profiler"]["mappings"] = [{"source": "server.rs", "destination": destination}]
+            self.write_manifest(manifest)
+            self.script("prepare", success=False)
+            self.assertFalse(self.checkout.exists())
+            self.assert_pristine_pin()
+
+    def test_overlay_cannot_overwrite_mapped_profiler_source(self):
+        manifest = self.manifest()
+        manifest["profiler"]["mappings"] = [
+            {"source": "server.rs", "destination": "rs/embedders/owned_hook.rs"},
+        ]
+        self.write_manifest(manifest)
+        result = self.script("prepare", success=False)
+        self.assertIn("overlaps upstream or profiler ownership", result.stderr)
+        self.assertFalse(self.checkout.exists())
+
+    def test_profiler_mapping_rejects_upstream_symlink_parent(self):
+        (self.upstream / "linked").symlink_to("src", target_is_directory=True)
+        self.pin_fixture_upstream_edit()
+        manifest = self.manifest()
+        manifest["profiler"]["mappings"] = [{"source": "server.rs", "destination": "linked/owned.rs"}]
+        self.write_manifest(manifest)
+        result = self.script("prepare", success=False)
+        self.assertIn("Symlinks are not allowed", result.stderr)
+        self.assertFalse((self.upstream / "src/owned.rs").exists())
+        self.assertFalse(self.checkout.exists())
+
     def test_consumer_recorder_and_provider_adapters_have_separate_origins(self):
         consumer = self.home / "consumer"
         consumer.mkdir()
@@ -739,11 +810,13 @@ class NativeVerifyGateTest(unittest.TestCase):
         spec.loader.exec_module(provider)
         root = Path("/fixture/provider")
         manifest = {"fixture": True}
-        for refused in [False, True]:
+        for refused in [None, "profiling::", "storage_tests", "cli_tests", "trace_serialization_tests",
+                        "runtime_cost_tests", "origin_map_tests", "signal_handler::tests",
+                        "stable_memory::tests", "deterministic::tests", "instruction_profile_tests"]:
             calls = []
             def cargo(_root, _manifest, command, args, force):
                 calls.append((command, args))
-                if "profiling::" in args and refused:
+                if refused in args:
                     raise provider.Error("product regression failed")
                 self.assertEqual(os.environ["CARGO_TARGET_DIR"], "prior-target")
                 if "system_profiling" in args:
@@ -758,7 +831,10 @@ class NativeVerifyGateTest(unittest.TestCase):
                 product = [args for command, args in calls if "profiling::" in args]
                 installed = [args for command, args in calls if "system_profiling" in args]
                 self.assertEqual(product, [["--", "-p", "pocket-ic-server", "--lib", "profiling::"]])
-                self.assertEqual(calls[0], ("clippy", ["--", "--no-deps", "--lib", "--", "-D", "warnings"]))
+                self.assertEqual(calls[0], ("clippy", ["--", "--no-deps", "--lib", "--bin", "pocket-ic-server", "--", "-D", "warnings"]))
+                if not refused:
+                    for selection in ("storage_tests", "cli_tests", "trace_serialization_tests"):
+                        self.assertTrue(any(selection in args for command, args in calls))
                 self.assertEqual(bool(installed), not refused)
                 self.assertEqual(os.environ["CARGO_TARGET_DIR"], "prior-target")
                 self.assertEqual(os.environ["POCKET_IC_BIN"], "prior-server")

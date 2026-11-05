@@ -4,7 +4,7 @@ The pending 0.4.1 formatter uses a fixed 64-byte hexadecimal buffer. Checksum,
 principal spelling, omission of default subaccounts and trimmed hex output remain
 unchanged. No cryptographic implementation or persisted format changes.
 
-[Raw trials](types.tsv) use the maintained `scripts/benchmarks/types.sh` harness:
+Historical trials used the maintained `scripts/benchmarks/types.sh` harness:
 Linux x86-64, Rust 1.99.1 release, opt-level 3, no LTO, 16 codegen units. Each of
 five trials performs 500,000 operations after warmup; owned/external order
 alternates. Values below are median nanoseconds per `to_string()` operation.
@@ -25,3 +25,8 @@ measurements. Rust 1.88 differential tests preserve text/Candid bytes across
 23,040 account cases and all 64 trimmed hex lengths, including parser mutations.
 The source change is confined to Account Display on top of released `26a07c5`;
 the existing incoming lock update remains present.
+
+Raw trial tables, source snapshots and artifact-hash listings were retired from the
+current tree during Shared 0.30.4 cleanup. The selected observations below remain
+historical summaries; old local artifacts were not reverified and are not claimed
+as independently available evidence. Git history retains the previous records.

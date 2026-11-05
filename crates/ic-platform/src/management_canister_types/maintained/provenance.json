@@ -4,7 +4,7 @@
   "upstream_revision": "e74ddee846a8bd664fa0f684ba31dc37e9ebddea",
   "original_source_sha256": "11f1c93fc9034e3dbcc35ff377e2356a07439382bbcfad8ad213327d83c1c554",
   "license_sha256": "6f44e3f228570e343cdb96bd929d1e8c6057ac33b411e47d77427f824e5a96ac",
-  "maintained_source_sha256": "110c5e0ec2a6bff30c4078518346164b6754cbd70377456f0906dca240da0a37",
+  "maintained_source_sha256": "e25366791afdc81906d0f5c8fb0a80bd62c756ca89eadc1283fd46332dc8f5ee",
   "selection": "Sibling canister source references, excluding cfg(test) items; includes the maintained Canic runtime-probe Wasm target. Required nested records and complete enum variants are retained.",
   "direct_names": [
     "CanisterIdRecord",
@@ -18,6 +18,7 @@
     "ChangeOrigin",
     "ChunkHash",
     "CodeDeploymentMode",
+    "CreateCanisterArgs",
     "DefiniteCanisterSettings",
     "DeleteCanisterSnapshotArgs",
     "EcdsaCurve",
@@ -55,6 +56,7 @@
     "CodeDeploymentMode",
     "CodeDeploymentRecord",
     "ControllersChangeRecord",
+    "CreateCanisterArgs",
     "CreationRecord",
     "DefiniteCanisterSettings",
     "DeleteCanisterSnapshotArgs",
@@ -107,6 +109,7 @@
     "CodeDeploymentMode",
     "CodeDeploymentRecord",
     "ControllersChangeRecord",
+    "CreateCanisterArgs",
     "CreationRecord",
     "DefiniteCanisterSettings",
     "DeleteCanisterSnapshotArgs",
@@ -169,6 +172,7 @@
     "Use the owned subset on Wasm; retain the existing registry facade and identities on native targets.",
     "Select Candid bignum/serde_bytes explicitly without printer for Wasm; preserve all external fields, variants and serialization attributes.",
     "Retain uppercase HttpMethod variants under a localized Clippy allowance; render three links to private/omitted upstream items as code in documentation.",
-    "Scope acronym expectations to native private schema tests and callback documentation expectations to public Wasm exports; the source guard reconstructs only these exact attributes before checking the unchanged maintained source hash."
+    "Scope acronym expectations to native private schema tests and callback documentation expectations to public Wasm exports; the source guard reconstructs only these exact attributes before checking the unchanged maintained source hash.",
+    "For #146, select the exact 0.11.0 CreateCanisterArgs declaration with existing CanisterSettings; native builds re-export the registry identity, Wasm uses the maintained declaration."
   ]
 }

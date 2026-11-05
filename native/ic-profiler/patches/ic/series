@@ -7,3 +7,4 @@
 0007-compiled-catalog-facts.patch
 0008-client-validation-inputs.patch
 0009-native-lint.patch
+0010-native-module-discovery.patch

@@ -6,8 +6,8 @@ set -euo pipefail
 here="$(cd "$(dirname "$0")" && pwd -P)"
 root="$(cd "$here/../../../.." && pwd -P)"
 cd "$root"
-mkdir -p target
-out="$(mktemp -d "$root/target/candid-reader.XXXXXX")"
+mkdir -p target/evidence
+out="$(mktemp -d "$root/target/evidence/candid-reader.XXXXXX")"
 trap 'printf "Candid reader evidence retained: %s\n" "$out"' EXIT
 cargo metadata --locked --offline --all-features --format-version 1 > "$out/metadata.json"
 source_manifest="$(node -e 'const m=require(process.argv[1]); const p=m.packages.find(p=>p.name==="candid"&&p.version==="0.10.39"); if(!p)throw Error("Prepared candid 0.10.39 is required");process.stdout.write(p.manifest_path)' "$out/metadata.json")"

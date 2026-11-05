@@ -4,6 +4,26 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.23.1] - Unreleased
+
+### ➕ Added
+
+- Expose the exact management `CreateCanisterArgs` on native and Wasm and add the
+  narrow `candid::protocols::management::create_canister` codec, reusing existing
+  settings/reply identities and preserving caller transport, cycles and recovery
+  policy ([#146](https://github.com/dragginzgame/ic-platform/issues/146)).
+
+### 🔧 Tooling
+
+- Adopt Shared 0.30.5 with the qualified generic inherent-header correction and
+  enforce named external Candid declarations in the existing boundary gate.
+- Keep compact experimental conclusions in Git, retire obsolete trial tables
+  and probes, and default new benchmark output to `target/evidence/`.
+- Assemble native Profiler adapters through ordinary Rust module discovery,
+  preserving the independent recorder, viewer assets and public aliases; include
+  extracted patch tests and compiled-owner lint checks in native qualification
+  ([#140](https://github.com/dragginzgame/ic-platform/issues/140)).
+
 ## [0.23.0] - 2026-11-05
 
 ### ⚠️ Breaking

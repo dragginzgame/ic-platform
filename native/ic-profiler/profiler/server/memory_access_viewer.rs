@@ -36,8 +36,8 @@ use std::str::FromStr;
 use std::sync::atomic::Ordering;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-const VIEWER_HTML: &str = include_str!("../viewer/viewer.html");
-const AGENT_GUIDE: &str = include_str!("../viewer/agent_guide.md");
+const VIEWER_HTML: &str = include_str!("../../profiling/viewer/viewer.html");
+const AGENT_GUIDE: &str = include_str!("../../profiling/viewer/agent_guide.md");
 // The web app reads its data from this element, which is replaced to make it
 // load the traces from the API.
 const DATA_PLACEHOLDER: &str = r#"<script type="application/json" id="trace-data">null</script>"#;

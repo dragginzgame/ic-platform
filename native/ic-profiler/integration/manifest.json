@@ -10,6 +10,10 @@
         "sha256": "a6604fb5c6ca33d5bbe7f39f945ae69f4946af8cff2c2271dcaca950789c1a2d"
       },
       {
+        "path": "packages/pocket-ic/src/common/rest/trace_serialization_tests.rs",
+        "sha256": "b8036e3f5f8e6b1e580ba777f802104ce01d29160e1979d725a3f4204a53502b"
+      },
+      {
         "path": "packages/pocket-ic/src/common/storage.rs",
         "sha256": "b95ad888e26344be884d0e91bcd508164022d241352aa2682c16eade86cd7060"
       },
@@ -31,12 +35,20 @@
       },
       {
         "path": "profilingic.md",
-        "sha256": "5cdfc689d24dce12e18bcc66203f276e64fff9502f7fbc5c9ff47126f8079cfd",
+        "sha256": "ef846ff7a228199b96280fcbfd47466a8f105d713a298cbccdd70ae49381dc0f",
         "source": "docs/profiling-design.md"
       },
       {
         "path": "rs/cycles_account_manager/src/cycles_account_manager/system_profile.rs",
         "sha256": "e282f6792269161eff8c3bd87d4d9649004845b26f1e3fbd43348d8a592b2f58"
+      },
+      {
+        "path": "rs/embedders/src/wasm_executor/runtime_cost_tests.rs",
+        "sha256": "4f1cfdd78bfdfd0f92ca096a43285bb868984308bd85ad18a3e31a09ff439a92"
+      },
+      {
+        "path": "rs/embedders/src/wasm_utils/instrumentation/origin_map_tests.rs",
+        "sha256": "e070652caefb5856c9de5cb1bc9ddd1f67aaf383624eadd6dda48e7e38d2359d"
       },
       {
         "path": "rs/embedders/src/wasmtime_embedder/profiling.rs",
@@ -55,20 +67,44 @@
         "sha256": "99eeb1ad9d8b9c6c0f7fde33f5060121cc623032288bf937a9f56a4d5b7b0b0d"
       },
       {
+        "path": "rs/embedders/src/wasmtime_embedder/signal_handler/tests.rs",
+        "sha256": "3381fa67dbceb25b5b4c4bb3b2a4514084b27ea5ba7139bf43b4f639d2e725d0"
+      },
+      {
+        "path": "rs/embedders/src/wasmtime_embedder/system_api/stable_memory/tests.rs",
+        "sha256": "70f449b21265ca064b808bf4b6ee4af89ecf8f63ac1d265ce6bd85648b64a4fe"
+      },
+      {
+        "path": "rs/embedders/tests/instruction_profile_tests/mod.rs",
+        "sha256": "6343be782037cebd96ff3ea70bb56a0f18c002fc9adadd5b0d7f334373ec57bc"
+      },
+      {
         "path": "rs/execution_environment/src/execution_environment/tests/runtime_costs.rs",
         "sha256": "09fcd0e7611beca3f3013901507719605a37a29c3a073653435c0e6ca4eb8e6f"
       },
       {
         "path": "rs/execution_environment/src/scheduler/round_profile.rs",
-        "sha256": "a0710fe36ff516cdb3f3469065583fb24bc288fe38c33928b16310f9c0a66c84"
+        "sha256": "2576d90d80ad989a5c19016ae31e6a370e8019e3f9f6bd7473755d2554acf876"
       },
       {
         "path": "rs/execution_environment/src/scheduler/round_profile/tests.rs",
         "sha256": "043c5b9002eb9f9a1f614abbdc6081ca942e35a8d4a25c96b420c0d68b03bee5"
       },
       {
+        "path": "rs/memory_tracker/src/deterministic/tests.rs",
+        "sha256": "23e8e310744e42ab6c771e98a6dc06e031c67258f5eb25e5c9a3eb3f40207c33"
+      },
+      {
         "path": "rs/messaging/src/system_profile.rs",
         "sha256": "c2908f894e263926adf7c1b454dac24956b1b5db935cdbacb4f78fff76b8db71"
+      },
+      {
+        "path": "rs/pocket_ic_server/src/cli_tests.rs",
+        "sha256": "d86104f96cd30a92362fa0e88418526e46ec0a450009f316b33cfea7ed02ba06"
+      },
+      {
+        "path": "rs/pocket_ic_server/src/state_api/routes/storage_tests.rs",
+        "sha256": "6f1c8b875ed6b88bfb4d91d4e10c55737babfe56fe100cb74298a574937eb98d"
       }
     ],
     "path": "overlay"
@@ -82,11 +118,11 @@
       },
       {
         "path": "0002-replica-runtime-hooks.patch",
-        "sha256": "f5b0d6b0bbb9471f2fdac06b7fc1d306afb544ac95cb6a9daf69bbf4854adb30"
+        "sha256": "e71f514b8580b1fe7d9ffa26c9728d23803416c95dfc17106563f29ed4292cf5"
       },
       {
         "path": "0003-pocketic-client-and-server.patch",
-        "sha256": "7f410196b9afc49b790092886ec7df292237df049bf4b0adabbff27fd9fa62c5"
+        "sha256": "f458af5e2a402969f83cd1b38ababdfcf3042b15a531dbd30dbcedada0856524"
       },
       {
         "path": "0004-native-library-dependencies.patch",
@@ -111,12 +147,42 @@
       {
         "path": "0009-native-lint.patch",
         "sha256": "1b481eaf2a6b0ca2072edbc0cd712aed9f53b8ed54dfa39d2f7cdb002485238c"
+      },
+      {
+        "path": "0010-native-module-discovery.patch",
+        "sha256": "b35570d86ebaebb5e460bfaed5cf57f6e267ada1a43d90c9e9f30e4c4a88ff58"
       }
     ],
     "series": "patches/ic/series"
   },
   "profiler": {
     "destination": "rs/pocket_ic_server/profiling",
+    "mappings": [
+      {
+        "destination": "rs/pocket_ic_server/src/profiling/mod.rs",
+        "source": "mod.rs"
+      },
+      {
+        "destination": "rs/pocket_ic_server/src/profiling/arguments",
+        "source": "arguments"
+      },
+      {
+        "destination": "rs/pocket_ic_server/src/profiling/rendering",
+        "source": "rendering"
+      },
+      {
+        "destination": "rs/pocket_ic_server/src/pocket_ic/profiling_operations.rs",
+        "source": "server/operations.rs"
+      },
+      {
+        "destination": "rs/pocket_ic_server/src/state_api/routes/profiling_routes.rs",
+        "source": "server/routes.rs"
+      },
+      {
+        "destination": "rs/pocket_ic_server/src/profiling",
+        "source": "server"
+      }
+    ],
     "path": "profiler"
   },
   "provenance": {
