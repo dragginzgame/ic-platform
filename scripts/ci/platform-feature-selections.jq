@@ -19,7 +19,7 @@ def powerset:
      # Auth's portable crypto combination must not acquire host/runtime scaffolding.
      ["bls", "ecdsa", "ed25519"],
      # Certificate/signature dependency paths and portable verification together.
-     ["canister-sig-creation", "signature-verification", "bls", "certification", "ed25519"],
+     ["canister-sig-creation", "signature-verification", "bls", "certification-cbor", "ed25519"],
      # Host-feature exclusion on Wasm alongside the full runtime.
      (["cdk"] + ($policy[0].native_leaves | keys)),
      ($features - ($policy[0].native_leaves | keys))

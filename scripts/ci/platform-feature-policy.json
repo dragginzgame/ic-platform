@@ -10,6 +10,7 @@
     "canister-sig-creation",
     "cdk",
     "certification",
+    "certification-cbor",
     "certified-assets-types",
     "cmc-types",
     "cycles-ledger-types",
@@ -17,6 +18,8 @@
     "ecdsa",
     "ed25519",
     "executor",
+    "ic-protocol",
+    "ic-protocol-fixtures",
     "ic0",
     "icp-ledger-types",
     "icrc-ledger-types",
@@ -52,6 +55,15 @@
       ],
       "prerequisites": [
         "principal-external"
+      ]
+    },
+    "ic-protocol": {
+      "dependencies": [
+        "ic-transport-types"
+      ],
+      "prerequisites": [
+        "principal-external",
+        "certification-cbor"
       ]
     }
   }

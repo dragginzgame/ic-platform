@@ -4,6 +4,21 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.22.3] - Unreleased
+
+### ➕ Added
+
+- Add explicit `certification-cbor` APIs for byte-bounded standard certificate
+  and canister-signature encoding/decoding. Keep caller-selected budgets,
+  witness construction, store policy and verification with consumers; preserve
+  upstream certificate/tree identities and standard CBOR bytes.
+- Supply native typed IC packet codecs and explicit development fixtures so
+  consumers can remove direct CBOR dependencies without dropping protocol or
+  malformed-input checks ([#142](https://github.com/dragginzgame/ic-platform/issues/142),
+  [#143](https://github.com/dragginzgame/ic-platform/issues/143)). Include the existing
+  strict certificate/tree admission contract and preserve separate tagged/untagged
+  packet bytes, upstream identities and caller-owned verification/effect policy.
+
 ## [0.22.2] - 2026-11-05
 
 ### 🔧 Tooling

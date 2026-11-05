@@ -161,6 +161,14 @@ explicit trust/Agent options and raw query errors. SDK crypto, hashing, key
 encoding and classes remain upstream; trust, limits, intents and application
 policies remain consumer-owned. Wire retains owned codecs and generators.
 
+Pending Rust 0.22.3 adds native `ic-protocol` packet codecs using the same
+registry transport identities without Agent or Runtime. Its separate
+`ic-protocol-fixtures` feature contains typed native development helpers;
+`certification-cbor::strict` retains Host's existing field/tree/nesting admission.
+No generic CBOR codec or Value export is supplied. Consumers retain packet
+budgets, request bindings, cryptographic/freshness verification and effects.
+See the [packet migration contract](migration.md#typed-ic-packet-and-fixture-boundary-pending-0223).
+
 `make check-browser` checks the npm selections, real provider types and packed
 consumer/bundle contract; `make check-browser-runtime` adds Chromium page/worker
 qualification. The Rust-only manifest block below does not inventory npm packages.
@@ -215,9 +223,10 @@ API changes or automatically establish whether sibling source still uses an API.
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
 | `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
+| `ic-transport-types` | native `ic_protocol` packet identities and typed fixture operations | Query/Blob native fixtures; Testkit metrics; Canic IC packet admission | Same registry transport identities as Agent, without selecting Agent or Runtime. Optional native-only dependency; production protocol codecs and explicit development fixtures remain separate. No generic CBOR export or authentication policy. |
 | `ic-management-canister-types` | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
 | Selected imported ICRC 0.2.0 declarations/value helpers | `icrc_ledger_types` account/metadata/transfer/consent/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Platform maintains selected types and callbacks; external wire/Serde representations and unchanged upstream hashes remain. Registry ledger/CBOR/storage and consent-formatting dependencies are removed. No ledger/storage policy. |
-| Registry certification 3.2.0 | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Registry owns certificate/tree/hash/Serde implementations and identities, shared directly with native Agent. Host owns bounded CBOR decoding; consumers own trust roots and verification policy. |
+| Registry certification 3.2.0 | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Registry owns certificate/tree/hash/Serde implementations and identities, shared directly with native Agent. Platform’s optional `certification-cbor` owns byte-bounded certificate/signature CBOR; consumers select budgets, construct witnesses and own trust roots and verification policy. |
 | Registry `ic-verify-bls-signature` ^0.6.0 and `ic_bls12_381` ^0.10.1 | `bls`; shared by the canister verifier | Auth and Canic keys; Auth signature verification | Cryptographic implementation and algorithm tests remain upstream. Platform key adapters only delegate and cache upstream identity admission, preserving #127. Signature/errors have registry identity. Defaults/RNG are disabled; alloc verification is selected. |
 | `k256`, `curve25519-dalek`, `ed25519-dalek` | `ecdsa`, `ed25519` | Auth `src/{chain_key_signature,portable_signature}.rs`; Canic tests | General-purpose upstream crypto, not DFINITY-only code. Platform controls selected identities/features, not algorithms. Repository Wasm builds select RustCrypto's existing 32-bit backend; application build owners must carry the cfg because dependency Cargo configuration is not inherited. |
 | `ic-secp256k1` | native `secp256k1` public derivation/types | Canic Core native chain-key configuration and public-key fixtures | Upstream key derivation and encoding remain unchanged. Native-only explicit boundary. |
@@ -339,6 +348,7 @@ profiles retain their explicitly external identities.
 | ic-platform | canister-sig-creation | certification, dep:ic-canister-sig-creation, principal-external |
 | ic-platform | cdk | dep:ic-platform-macros, runtime |
 | ic-platform | certification | dep:ic-certification |
+| ic-platform | certification-cbor | certification, dep:serde, dep:serde_bytes, dep:serde_cbor, dep:thiserror |
 | ic-platform | certified-assets-types | candid |
 | ic-platform | cmc-types | candid |
 | ic-platform | cycles-ledger-types | candid |
@@ -346,6 +356,8 @@ profiles retain their explicitly external identities.
 | ic-platform | ecdsa | dep:crypto-bigint, dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
 | ic-platform | executor | ic-platform-runtime/executor, ic0 |
+| ic-platform | ic-protocol | certification-cbor, dep:ic-transport-types, principal-external |
+| ic-platform | ic-protocol-fixtures | ic-protocol |
 | ic-platform | ic0 | dep:ic-platform-runtime, ic-platform-runtime/ic0 |
 | ic-platform | icp-ledger-types | candid |
 | ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:crc32fast, dep:data-encoding, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
@@ -387,6 +399,7 @@ profiles retain their explicitly external identities.
 | ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-secp256k1 | =0.3.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-signature-verification | ^0.3.0 | normal | all | true | false |  |
+| ic-platform | ic-transport-types | ^0.49.1 | normal | cfg(not(target_family = "wasm")) | true | true |  |
 | ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
 | ic-platform | ic_bls12_381 | ^0.10.1 | normal | all | true | false | groups |
 | ic-platform | k256 | ^0.14.0 | normal | all | true | false | ecdsa |
@@ -399,6 +412,7 @@ profiles retain their explicitly external identities.
 | ic-platform | serde_cbor | ^0.11.2 | dev | all | false | true |  |
 | ic-platform | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
+| ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^3 | normal | all | false | true | full |

@@ -42,6 +42,7 @@ data-encoding = "2.11"
 ed25519-dalek = { version = "3.0.0", default-features = false }
 hex = "0.4.3"
 ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
+ic-transport-types = "0.49.1"
 ic-canister-sig-creation = { version = "1.3.1", default-features = false }
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
 ic-management-canister-types = "=0.11.0"

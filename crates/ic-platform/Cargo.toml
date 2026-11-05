@@ -17,6 +17,8 @@ principal = ["dep:ic-platform-types", "dep:serde"]
 principal-external = ["principal", "ic-platform-types/principal-external"]
 principal-self-authenticating = ["principal", "ic-platform-types/principal-self-authenticating"]
 agent = ["principal-external", "dep:ic-agent"]
+ic-protocol = ["principal-external", "certification-cbor", "dep:ic-transport-types"]
+ic-protocol-fixtures = ["ic-protocol"]
 bls = ["dep:ic-verify-bls-signature", "dep:ic_bls12_381"]
 candid = ["principal-external", "dep:candid", "candid/bignum"]
 candid-endpoint = ["cdk", "candid"]
@@ -31,6 +33,7 @@ canister-sig-creation = ["principal-external", "certification", "dep:ic-canister
 cdk = ["runtime", "dep:ic-platform-macros"]
 runtime = ["principal", "executor", "ic0", "ic-platform-runtime/runtime"]
 certification = ["dep:ic-certification"]
+certification-cbor = ["certification", "dep:serde", "dep:serde_bytes", "dep:serde_cbor", "dep:thiserror"]
 ecdsa = ["dep:crypto-bigint", "dep:k256"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 executor = ["ic0", "ic-platform-runtime/executor"]
@@ -89,10 +92,12 @@ serde = { workspace = true, optional = true, features = ["alloc"] }
 serde_bytes = { workspace = true, optional = true }
 serde_cbor = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }
+thiserror = { workspace = true, optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid_parser = { workspace = true, optional = true }
 ic-agent = { workspace = true, optional = true }
+ic-transport-types = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
 ic-secp256k1 = { workspace = true, optional = true }
 

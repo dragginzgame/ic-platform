@@ -1568,6 +1568,7 @@ dependencies = [
  "ic-platform-types",
  "ic-secp256k1",
  "ic-signature-verification",
+ "ic-transport-types",
  "ic-verify-bls-signature",
  "ic_bls12_381",
  "k256 0.14.0",
@@ -1578,6 +1579,7 @@ dependencies = [
  "serde_cbor",
  "serde_test",
  "sha2 0.10.9",
+ "thiserror 2.0.21",
 ]
 
 [[package]]

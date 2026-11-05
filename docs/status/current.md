@@ -1,5 +1,26 @@
 # Current handoff — 2026-11-05
 
+## Platform codec release in preparation
+
+The authorized delivery is Platform only: candidate **0.22.3**, from published
+0.22.2. Runtime 0.19.2, Types 0.18.1 and browser/npm stay outside this release.
+Select `certification-cbor` for strict certificate/tree and standard certificate
+codecs, and native `ic-protocol` for Testkit envelope/read-state/metrics codecs.
+Their existing registry identities, strict field/tree admission, self-described
+envelope bytes and full u128 metrics are preserved. All budgets, verification,
+freshness, transport/retry and simulator orchestration stay consumer-owned.
+The [migration table](../migration.md#typed-ic-packet-and-fixture-boundary-pending-0223)
+records consumer steps; Tooling adoption is separately owned. No sibling edits
+or publication belong to this release. Existing unqualified caller work remains
+with its owners. No generic CBOR serializer or Value is exported.
+
+Standalone `ic-protocol` Clippy and 18 unit tests pass on Rust 1.99.1, including
+Testkit read-state framing, complete response consumption and u128 range edges.
+Logs: `target/platform-codec-release/protocol-{clippy,tests}.log`. Earlier focused
+strict/native/Wasm and feature-graph evidence remains valid for unchanged code.
+The standard Platform release gate and registry/archive verification follow.
+Native macOS and hosted integration are separate asynchronous evidence.
+
 ## Delivered maintenance cohort
 
 Runtime **0.19.2** and Platform **0.22.2** are pushed, tagged and published on

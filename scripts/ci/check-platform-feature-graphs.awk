@@ -42,6 +42,7 @@ function reject(reason) {
     native = target !~ /^wasm/
     parser = native && enabled("candid-parser")
     agent = native && enabled("agent")
+    protocol = native && enabled("ic-protocol")
     secp = native && enabled("secp256k1")
     external_endpoint = enabled("candid-endpoint")
     cdk = enabled("cdk")
@@ -55,7 +56,7 @@ function reject(reason) {
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
     external_dto = enabled("cmc-types") || enabled("icp-ledger-types") || enabled("cycles-ledger-types") || enabled("nns-registry-types") || enabled("certified-assets-types")
-    candid = external_endpoint || enabled("candid") || enabled("candid-service") || parser || agent || management || ledger || external_dto || creation
+    candid = external_endpoint || enabled("candid") || enabled("candid-service") || parser || agent || protocol || management || ledger || external_dto || creation
     external_principal = enabled("principal-external")
     principal = enabled("principal")
     hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp
@@ -79,10 +80,11 @@ function reject(reason) {
             reject("unselected hashing")
         if (name == "ic-representation-independent-hash" && !(agent || creation))
             reject("unselected signature hashing")
-        if ((name == "serde_cbor" || name == "half") && !(creation || verification || agent || parser))
+        if ((name == "serde_cbor" || name == "half") && !(creation || verification || agent || parser || enabled("certification-cbor")))
             reject("unselected CBOR parser")
-        if (name == "pretty" && !(enabled("candid-service") || parser || agent || creation || (native && management)))
+        if (name == "pretty" && !(enabled("candid-service") || parser || agent || protocol || creation || (native && management)))
             reject("unselected Candid service printer")
+        if (name == "ic-transport-types" && !(agent || protocol)) reject("unselected native IC transport types")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") reject("host artifact codecs belong to Tooling consumers")
         if (name == "blake3") {

@@ -81,6 +81,11 @@ executor|curve25519-dalek v4.1.3|reject
 ed25519||reject
 ed25519|ed25519-dalek v2.2.0|reject
 none|candid v0.10.38|reject
+ic-protocol|candid v0.10.38|pass
+ic-protocol|pretty v0.12.5|pass
+ic-protocol|ic-transport-types v0.49.3|pass
+ic-protocol-fixtures|ic-agent v0.49.3|reject
+certification-cbor|ic-transport-types v0.49.3|reject
 cdk|candid v0.10.38|reject
 runtime|candid v0.10.38|reject
 candid-endpoint|candid v0.10.38|pass
@@ -155,6 +160,11 @@ agent|ic_bls12_381 v0.10.1|pass
 bls|ic_bls12_381 v0.10.2|reject
 bls|ic-verify-bls-signature v0.6.0 (/local)|reject
 certification|ic-certification v3.2.0|pass
+certification-cbor|ic-certification v3.2.0|pass
+certification-cbor|serde_cbor v0.11.2|pass
+certification-cbor|half v1.8.3|pass
+certification-cbor|candid v0.10.38|reject
+certification-cbor|ic-platform-runtime v0.19.2 (/fixture)|reject
 canister-sig-creation|ic-certification v3.2.0|pass
 signature-verification|ic-certification v3.2.0|pass
 agent|ic-certification v3.2.0|pass

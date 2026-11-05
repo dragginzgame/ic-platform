@@ -12,6 +12,14 @@ their schema trait integration through opt-in `platform-types`. Host schema
 consumers select that feature alongside Platform `principal`.
 Generic gzip codecs are selected directly from IC Tooling.
 
+Select `certification-cbor` for typed certificate/signature codecs and the
+existing strict certificate/tree admission contract. Native `ic-protocol`
+supplies bounded IC packet codecs without Agent or Runtime; select
+`ic-protocol-fixtures` separately in native development dependencies. No generic
+CBOR value/Serde encoder is exposed. Consumers retain byte budgets, verification,
+freshness, request bindings and effect authority. See the
+[packet migration contract](../../docs/migration.md#typed-ic-packet-and-fixture-boundary-pending-0223).
+
 Source release 0.7.4 adds `candid-endpoint` and `candid::endpoint::{query, update}` for
 required external Candid interfaces with explicit `limits`, `empty_args` and
 ordered caller guards. It reuses the existing generator/executor; select

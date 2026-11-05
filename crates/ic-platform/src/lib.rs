@@ -10,6 +10,8 @@
 //! `candid-parser` selects native external Candid parsing and type checking.
 //! `candid-service` separately selects Candid service declaration generation.
 //! `agent` selects native IC transport and identities, with consumer-owned policy.
+//! `ic-protocol` selects native typed packet codecs without Agent or runtime.
+//! `ic-protocol-fixtures` additionally selects native development protocol fixtures.
 //! `secp256k1` selects native offline public-key derivation with upstream identities.
 //! `bls` selects BLS keys, signatures and verification with upstream allocation support.
 //! `blake3` selects the upstream hash function, streaming hasher and digest identity.
@@ -34,6 +36,9 @@ pub use principal::{Principal, PrincipalError};
 
 #[cfg(all(feature = "agent", not(target_family = "wasm")))]
 pub mod agent;
+
+#[cfg(all(feature = "ic-protocol", not(target_family = "wasm")))]
+pub mod ic_protocol;
 
 #[cfg(feature = "blake3")]
 pub mod blake3;

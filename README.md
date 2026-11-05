@@ -52,6 +52,8 @@ for supplier availability and consumer-owned feature/import changes.
 | `principal-external` | Registry Principal identity, byte conversions and upstream Serde; implies principal, no hashing or Candid |
 | `principal-self-authenticating` | Unchanged imported self-authentication using upstream SHA-224; implies principal |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
+| `ic-protocol` | Native typed IC packet codecs with caller-selected byte budgets; upstream transport identity without Agent or runtime |
+| `ic-protocol-fixtures` | Explicit native development helpers for IC query, certificate, controller and subnet-metrics fixtures |
 | `bls` | Upstream BLS cryptography with typed errors and identity-key admission; no embedded algorithms, production RNG or Candid |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
 | `candid-service` | Candid service declaration macros and printer; implies `candid` |
@@ -61,6 +63,7 @@ for supplier availability and consumer-owned feature/import changes.
 | `canister-sig-creation` | Upstream signature key formats/constants/hashing, owned issuer adapter and DER admission; transitive Candid/ic0, no store API |
 | `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one canonical Runtime executor |
 | `certification` | Registry certificate/hash-tree and mutable tree identities, lookup and hashing; no Candid or executor |
+| `certification-cbor` | Byte-bounded standard certificate/signature CBOR; caller-selected budgets, no verification or runtime |
 | `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |
 | `ic0` | Raw IC 1.2.0 calls, including safe stable-memory size/grow/read/write, replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
 | `icrc-ledger-types` | Selected maintained ICRC DTOs and unchanged upstream value hashing, plus ICRC-10; no registry ledger package, storage, CBOR or consent formatting |

@@ -23,13 +23,13 @@ fi
 echo 'Long closure names retain distinct short cache IDs'
 # Native-only leaves may be removed from a Wasm key only after exact admission.
 native_metadata="$(printf '%s' "$metadata" | "$jq" '
-  .[0].packages[0] |= (.features += {principal:[],"principal-external":["principal"],agent:["principal-external","dep:ic-agent"],"candid-parser":["principal-external","dep:candid_parser"],secp256k1:["principal-external","dep:ic-secp256k1"]} |
-  .dependencies = ["ic-agent","candid_parser","ic-secp256k1"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
+  .[0].packages[0] |= (.features += {principal:[],"principal-external":["principal"],agent:["principal-external","dep:ic-agent"],"candid-parser":["principal-external","dep:candid_parser"],secp256k1:["principal-external","dep:ic-secp256k1"],certification:[],"certification-cbor":["certification"],"ic-protocol":["principal-external","certification-cbor","dep:ic-transport-types"]} |
+  .dependencies = ["ic-agent","candid_parser","ic-secp256k1","ic-transport-types"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
 selections='["none","default","agent","agent,candid-parser,secp256k1","agent,cdk"]'
 actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
 expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tprincipal,principal-external\nagent,candid-parser,secp256k1\tprincipal,principal-external\nagent,cdk\tcdk,executor,ic0,principal,principal-external')"
 [[ "$actual" == "$expected" ]] || { echo 'Unexpected target-aware closure' >&2; exit 1; }
-for feature in agent candid-parser secp256k1; do
+for feature in agent candid-parser secp256k1 ic-protocol; do
     # shellcheck disable=SC2016 # $feature is a jq variable.
     changed="$(printf '%s' "$native_metadata" | "$jq" --arg feature "$feature" '.[0].packages[0].features[$feature] += ["candid"]')"
     if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$changed" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then

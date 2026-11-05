@@ -1,5 +1,68 @@
 # Candid and runtime ownership
 
+## Bounded certificate and signature CBOR (pending)
+
+Select `certification-cbor` for `certification::cbor::{decode_certificate,
+decode_canister_signature, encode_certificate, encode_canister_signature}`.
+Every call takes a caller-selected byte budget. Input length is admitted before
+upstream Serde decoding; serialization refuses an oversized write before growing
+the output buffer. The APIs preserve standard CBOR and upstream certificate/tree
+identities. Byte budgets are not total heap limits; upstream recursion admission
+remains unchanged. Decode is not verification, including for delegation bytes.
+Consumers retain trust/freshness, certified-root binding, witness construction
+and signature-store policy. No Runtime, Candid or cryptographic primitive is
+added to the certification-only graph. Auth adoption requires publishing this
+facade addition first; no sibling release is authorized by source implementation.
+
+## Typed IC packet and fixture boundary (pending 0.22.3)
+
+Platform supplies protocol-specific operations rather than a generic CBOR
+serializer, decoder or Value API. The default, identity and raw Runtime profiles
+do not enable these capabilities. Cryptography, signature verification,
+delegations, hash/domain behavior, certificate freshness and external bytes are
+unchanged. Decoding or constructing a fixture never authenticates it.
+
+`certification-cbor` additionally supplies `encode_certificate_untagged` and
+`encode_hash_tree`. Use the untagged certificate operation where retained packet
+bytes or hashes were produced by upstream `serde_cbor::to_vec`; existing
+`encode_certificate` retains self-described framing. The `strict` submodule
+contains the Host certificate/tree visitors with their existing `DecodeLimits`,
+`DecodeError` and `ParseError` contract: unknown/duplicate fields, non-byte
+payloads, malformed tree shapes, trailing data and upstream nesting limits still
+refuse. This strict decoder is distinct from upstream certificate deserialization;
+consumers must retain the decoder matching their current admission contract.
+
+The native-only `ic-protocol` module exposes upstream transport identities and
+bounded envelope encoding/decoding, strict call-content inspection, call and
+read-state response decoding, controllers-leaf decoding and subnet-metrics
+decoding. It uses transport types directly without selecting Agent or Runtime.
+The transport supplier does select Candid and its printer on native hosts;
+neither is introduced into the certification-only Wasm graph. Strict call-content
+inspection rejects unknown content fields; its returned sender-info remains a
+consumer admission decision. Never replace original signed bytes with an encoded
+projection or infer submission/retry authority from a decoded response.
+
+Select `ic-protocol-fixtures` only in native development dependencies for typed
+query replies/rejections, read-state responses, controller/range/metrics leaves
+and deliberate unknown/duplicate certificate fields. There is no arbitrary
+Serde or CBOR value encoder. All Rust codec operations take caller-selected byte
+limits; those limits are not total heap quotas or universal stack-safety claims.
+
+Required consumer adoption after supplier publication:
+
+| Consumer | Selection and migration | Consumer responsibilities retained |
+| --- | --- | --- |
+| Auth | `certification-cbor` for certificate/signature preparation and profiling; native fixture selection for protocol tests | Certified-root binding, witness/store policy, limits, signature/delegation/freshness verification |
+| Query | `certification-cbor::strict` in production; `ic-protocol-fixtures` in native tests | Agent authentication, combined evidence budgets, exact callback arguments/replies, rejection metadata and malformed/deep fixture coverage |
+| Blob native tests | `ic-protocol` packet readers and untagged certificate encoding; fixture selection where needed | Saved envelope/request-ID correlation, raw v4 certificate bytes, forged-proof refusal, recovery and revocation checks |
+| Canic | Native protocol readers/fixtures and certificate encoding; use strict call inspection where unknown fields currently refuse | Sender-info refusal, expected call bindings, controller limits/uniqueness, original-envelope custody, paid-effect authority; Fleet/release-build commitments keep their existing bytes |
+| Tooling | Move the strict decoder API's consumers to Platform; Testkit selects the native packet capability for read-state/metrics | Server lifecycle, deadlines, existing authentication behavior and imported-client provenance; remove the duplicate Host implementation without a forwarding owner |
+
+Publish Platform before registry adoption and qualify each consumer's affected
+contracts afterward. Source-only preparation or local overrides do not establish
+published-package or installed consumer acceptance. No consumer release follows
+automatically from this supplier implementation.
+
 ## Passive contract consumers (Types 0.18.1)
 
 Types' `principal-external` now explicitly selects upstream Principal Serde.

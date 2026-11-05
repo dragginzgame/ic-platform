@@ -21,6 +21,10 @@ require(([$metadata.packages[] | select(.name == "ic-platform-types")] | length 
         length == 1 and .[0].optional and .[0].target == null and (.[0].uses_default_features | not) and .[0].features == ["convert"]));
     "Types external Principal must supply upstream Serde without default hashing or a codec") |
 require((.features.default == []); "Platform must declare empty default features") |
+require((.features["ic-protocol"] == ["principal-external", "certification-cbor", "dep:ic-transport-types"] and
+    .features["ic-protocol-fixtures"] == ["ic-protocol"] and
+    ([.dependencies[] | select(.name == "ic-transport-types")] | length == 1 and .[0].optional and .[0].req == "^0.49.1" and .[0].target == "cfg(not(target_family = \"wasm\"))"));
+    "IC protocol codecs and separate fixture helpers must retain native transport identity without Agent or runtime") |
 require((.links == null and .features.executor == ["ic0", "ic-platform-runtime/executor"] and
     .features.runtime == ["principal", "executor", "ic0", "ic-platform-runtime/runtime"] and
     .features.cdk == ["runtime", "dep:ic-platform-macros"] and
@@ -42,6 +46,7 @@ require((.features.secp256k1 == ["principal-external", "dep:ic-secp256k1"] and (
 require((.features["management-canister-types"] == ["principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:serde_bytes", "dep:ic-management-canister-types"] and ([.dependencies[] | select(.name == "ic-management-canister-types")] | length == 1 and .[0].req == "=0.11.0" and .[0].optional and .[0].target == "cfg(not(target_family = \"wasm\"))")); "Platform must own selected Wasm management DTOs and retain native-only upstream 0.11.0") |
 require((.features["icrc-ledger-types"] == ["dep:crc32fast", "dep:data-encoding", "principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:hex", "dep:num-bigint", "dep:num-traits", "dep:serde_bytes", "dep:sha2"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 0)); "Selected ledger DTOs must not acquire the retired upstream package") |
 require((.features.certification == ["dep:ic-certification"] and
+    .features["certification-cbor"] == ["certification", "dep:serde", "dep:serde_bytes", "dep:serde_cbor", "dep:thiserror"] and
     .features["canister-sig-creation"] == ["principal-external", "certification", "dep:ic-canister-sig-creation"] and
     .features.agent == ["principal-external", "dep:ic-agent"] and
     ([.dependencies[] | select(.name == "ic-certification")] | length == 1 and .[0].optional and .[0].target == null and (.[0].uses_default_features | not) and .[0].features == ["serde"]) and
