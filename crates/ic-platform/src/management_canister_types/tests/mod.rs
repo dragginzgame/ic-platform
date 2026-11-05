@@ -1,6 +1,9 @@
 use super::maintained as owned;
+#[cfg(not(target_family = "wasm"))]
 use candid::CandidType;
 
+// The registry schema supplier is selected only in the native graph.
+#[cfg(not(target_family = "wasm"))]
 #[test]
 fn selected_schemas_match_the_pinned_external_contract() {
     macro_rules! compare {

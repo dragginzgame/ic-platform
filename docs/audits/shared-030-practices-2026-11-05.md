@@ -42,7 +42,7 @@ concurrent uncommitted work and all sibling checkouts remain untouched.
 | Adoption and provenance | Exported 135 supplier-bound payloads, including the classifier, retention checker and linked LOC guide. Integrity is checked against the independently selected commit. No snapshot payload was edited locally. |
 | Workspace, release groups and compiler | Keep the virtual root, five members and three groups. Rust minimum/development/release remains 1.99.1. Correct root dependency-role headings from actual member/fixture use without changing requirements, lockfiles or feature selections. |
 | Directory/module/test roles | Main members have no singular `test/` or `test.rs` paths and no path/include module wiring. Add explicit roles to generated/template test and benchmark manifests, including macro consumers. Move 20 native provider/overlay inline test modules into ordinary `tests.rs`/`*_tests.rs` files. Native path-module debt remains tracked in #140 below. |
-| Lint expectations | Main crates go from 22 allowance attributes to one. Remove three obsolete allowances; convert the other 18 applicable attributes to expectations, splitting one grouped scope. The generated internal spawn retains a reasoned allowance because downstream disallowed-method lists differ. Keep unfulfilled expectations enabled and qualify native/Wasm configurations. |
+| Lint expectations | Main crates go from 22 allowance attributes to one. Remove two obsolete allowances; convert the other 19 applicable attributes to expectations, splitting one grouped scope. The generated internal spawn retains a reasoned allowance because downstream disallowed-method lists differ. Keep unfulfilled expectations enabled and qualify native/Wasm configurations. |
 | Imported bodies and licenses | Preserve all existing Principal, IC0/executor, callback and ICRC fingerprints. Guards reconstruct only the exact new lint scaffolding; mutation checks still refuse body/ABI/vector/license and altered-normalization inputs. Native assembly pins include moved tests and exact patch inputs. No cryptographic body, check or test suite is adopted or altered. |
 | Errors and standard library | No `core::` imports in the std-based main crates. Derive the mechanical stable-memory error using Runtime’s existing thiserror, with unchanged variant, display and source. Preserve passive display types, test error adapters, upstream-owned hash/display bodies and facade errors rather than adding an unrelated dependency. |
 | Source capture and fixtures | Replace Rust-text patching in the Canic benchmark with an ordinary fixture calling the public Host build API and explicit admitted tools. Macro linking tests also copy ordinary Rust fixtures. Preserve historical captures. The actual capture now rejects line-break paths and source symlinks, with a focused positive/negative regression in the normal test target. |
@@ -125,6 +125,18 @@ that still need scoped expectations; those probes were corrected and rerun.
 They are not presented as successes. Full CI, installed Runtime/Timers, Auth,
 Chromium, macOS and the full native IC build were not run for this hygiene batch.
 Prior release receipts qualify their original sources only.
+
+## Release qualification correction
+
+The first Runtime release gate from source `95baef5` stopped at full Clippy,
+before version preparation or publication. The earlier library-only probes missed
+the private native management schema-test configuration: acronym warnings apply
+there, while generated missing-doc warnings apply to public Wasm exports. Scope
+those expectations with `cfg_attr`; preserve the complete DTO declarations,
+external bytes and original reconstructed fingerprint. Focused native/Wasm
+all-target checks and source-mutation refusals cover the corrected configurations.
+Failed gate evidence remains at
+`target/release-validation/qualification.B8Ovtd/`; it is not a passing receipt.
 
 ## Native provider qualification boundary
 

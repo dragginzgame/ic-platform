@@ -822,6 +822,13 @@ pub struct HttpRequestResult {
     Copy,
     Default,
 )]
+#[cfg_attr(
+    all(test, not(target_family = "wasm")),
+    expect(
+        clippy::upper_case_acronyms,
+        reason = "Native private schema tests retain the external HTTP method names."
+    )
+)]
 pub enum HttpMethod {
     /// GET
     #[default]
@@ -880,9 +887,12 @@ pub struct TransformContext {
 }
 
 mod transform_func {
-    #![expect(
-        missing_docs,
-        reason = "The upstream function-reference macro emits undocumented members."
+    #![cfg_attr(
+        target_family = "wasm",
+        expect(
+            missing_docs,
+            reason = "The upstream function-reference macro emits undocumented members."
+        )
     )]
     use super::{HttpRequestResult, TransformArgs};
     candid::define_function!(pub TransformFunc : (TransformArgs) -> (HttpRequestResult) query);

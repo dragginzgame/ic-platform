@@ -10,12 +10,13 @@ trap 'rm -rf "$scratch"' EXIT
 perl -0777 -e '
     use strict; use warnings;
     local $/; my $source = <>;
-    my $current = qq{    #![expect(\n        missing_docs,\n        reason = "The upstream function-reference macro emits undocumented members."\n    )]};
+    my $current = qq{    #![cfg_attr(\n        target_family = "wasm",\n        expect(\n            missing_docs,\n            reason = "The upstream function-reference macro emits undocumented members."\n        )\n    )]};
     $source =~ s/\Q$current\E/    #![allow(missing_docs)]/ == 1
         or die "unexpected management callback lint scaffolding\n";
-    my $original = qq{#[allow(\n    clippy::upper_case_acronyms,\n    reason = "Retain upstream HTTP method names"\n)]\npub enum HttpMethod};
-    $source =~ s/pub enum HttpMethod/$original/ == 1
-        or die "missing management HTTP method declaration\n";
+    my $current_http = qq{#[cfg_attr(\n    all(test, not(target_family = "wasm")),\n    expect(\n        clippy::upper_case_acronyms,\n        reason = "Native private schema tests retain the external HTTP method names."\n    )\n)]};
+    my $original = qq{#[allow(\n    clippy::upper_case_acronyms,\n    reason = "Retain upstream HTTP method names"\n)]};
+    $source =~ s/\Q$current_http\E/$original/ == 1
+        or die "unexpected management HTTP method lint scaffolding\n";
     print $source;
 ' "$source_root/mod.rs" > "$scratch/mod.rs"
 for entry in 'maintained_source_sha256 mod.rs' 'license_sha256 LICENSE-APACHE'; do

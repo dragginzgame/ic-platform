@@ -17,6 +17,8 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ### 🧪 Testing
 
+- Scope management schema comparisons to their native registry supplier and lint
+  expectations to the actual native/Wasm visibility, preserving external DTO bytes.
 - Move native Profiler inline tests into ordinary test modules and tighten owned
   lint scopes. Paired native-server qualification remains required under
   [#140](https://github.com/dragginzgame/ic-platform/issues/140).

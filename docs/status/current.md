@@ -12,6 +12,13 @@ or provider consumer pin changes are included. See the [audit](../audits/shared-
 for rule coverage, focused evidence and the remaining native-provider limitation
 tracked in [#140](https://github.com/dragginzgame/ic-platform/issues/140).
 
+The first Runtime gate at `95baef5` stopped at Clippy before any version
+preparation or upload. Management DTO lint scopes now distinguish private native
+schema tests from public Wasm exports; the registry-only schema comparison is
+explicitly native. Focused native/Wasm Clippy, three native unit cases and exact
+source/mutation guards pass. Failed evidence remains at
+`target/release-validation/qualification.B8Ovtd/`.
+
 Platform’s documentation gate now checks every exported Shared Markdown payload
 alongside its local document roster. The committed Shared LOC permalink fix and
 explicit exporter selection of the missing governance/audit documents close all
