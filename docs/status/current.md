@@ -1,89 +1,86 @@
 # Current handoff — 2026-11-06
 
-## Authorized three-group deployment
+## Verified three-group publication
 
-The maintainer authorized deploying the pending Platform changes. Release order:
-Types **0.18.2**, Runtime **0.19.3** (with macros/guard), Platform **0.23.3**.
-Use this checkout/main and origin/main through the standard explicit-group
-workflow. Browser **0.2.0** is unchanged. No sibling release/adoption is included.
-These are pending candidates, not publication claims. Shared **0.30.5** at
-`be3771031ebfb340583b238dee5446be65929c62` remains the adopted baseline.
+The authorized deployment is complete on crates.io and GitHub:
 
-The maintainer explicitly excluded the concurrent stable64_read_uninit export
-from this deployment. Its complete commit is preserved at
-`refs/retained/runtime-stable-read-uninit-20261106`; a forward revert keeps it
-out of release source without deleting its work. Two Types qualification attempts
-refused a reappearing lock draft; evidence remains in qualification.vNb6k8 and
-qualification.MBdND6 under target/release-validation. No release tag/upload
-occurred. Restore stable source inputs and use a fresh gate; never reuse those
-failed receipts. The maintainer confirmed no other writer and requested continuation.
+| Group | Published members | Version | Annotated tag | Release commit |
+| --- | --- | --- | --- | --- |
+| Types | ic-platform-types | 0.18.2 | types-v0.18.2 | 5eeb016469b15de9bdf9f4d2092a8dbff8ea4d21 |
+| Runtime | ic-platform-runtime, ic-platform-macros, ic-platform-runtime-guard | 0.19.3 | runtime-v0.19.3 | 731fc9bc47a38f1c2bd66eaff9ec68b4e422efba |
+| Platform | ic-platform | 0.23.3 | platform-v0.23.3 | e71e8a63eebc1135f06fc5a8507404a88ddf5c94 |
 
-The unrelated Candid/derive 0.10.40 and cc 1.11.1 lock draft is retained exactly
-at `refs/retained/platform-20261106-deploy-lock-draft` (blob), with original lock
-and separate draft patch under `target/deployment-20261106/`. Release source
-retains only the owned facade serde_test-edge removal. Restore the draft patch
-after all publications, preserving new owner versions; never copy the original
-whole lock over released metadata. No unrelated dirty selection is included.
+Every downloaded registry archive is non-yanked, checksum verified and records
+its exact clean release commit. GitHub annotated tags were independently checked.
+Summary: `target/deployment-20261106/complete.json`; individual API/archive/VCS
+proofs and publication logs are alongside it. No sibling release/adoption occurred.
+Browser **0.2.0** remains unchanged. Shared **0.30.5** at
+`be3771031ebfb340583b238dee5446be65929c62` remains adopted.
 
-## Included behavior and focused evidence
+All twenty local Linux release stages passed separately for each group on Rust
+1.99.1, including all-feature lint/tests/docs, consumer/feature graphs and installed
+Runtime/Timers profiles. Receipts under `target/release-validation/`:
+Types `qualification.4YbUdJ`, Runtime `qualification.1MJU9W`,
+Platform `qualification.dZncxE`. Publication ran once per group in dependency
+order, with normal hooks, exact-tree checks and atomic commit/tag pushes.
+Hosted CI for the new release commits remains asynchronous and is separate from
+these local receipts. #50 remains open awaiting upstream, with no fix or waiver.
 
-#147 adds `icp_ledger_types::account_identifier` for owned Principal plus exactly
-32 subaccount bytes. The selected Apache-2.0 ic-ledger-types 0.16.0 constructor
-body is unchanged and source/license guarded. Native vectors/public consumer and
-native/Wasm Clippy pass; an altered upstream body refuses. No Agent, Runtime,
-CDK, parser, ledger-client package or Candid printer enters that selection.
-The pending migration is in `docs/migration.md`; Canic adoption follows publication.
+## Supplied behavior and consumer ownership
 
-Utility defaults narrow data-encoding/serde_bytes to alloc. Standalone Types'
-graph is narrower; probe savings are only 0–6 bytes, not a material Wasm win.
-Types' fourteen tests, forty selected Platform tests and five ICRC consumer tests
-pass. See `docs/benchmarks/utility-features-2026-11-06.md`. The unused facade
-serde_test development edge is removed; Types/Runtime retain real uses.
+#147 is closed: Platform 0.23.3 supplies
+`icp_ledger_types::account_identifier(owner, &subaccount) -> [u8; 32]` under
+`icp-ledger-types`. The selected Apache-2.0 ic-ledger-types 0.16.0 constructor
+body is unchanged and source/license guarded. Canic/boundary/nonzero-subaccount
+native vectors, native/Wasm Clippy and altered-body refusal pass. No Agent,
+Runtime, CDK, parser, ledger-client package or Candid printer enters that selection.
+Its specific Wasm proof is compilation, not installed account-identifier execution.
+Canic retains adoption, CRC dependency removal and mint/receipt requalification;
+see `docs/migration.md`. No sibling checkout was changed.
 
-Audit commits `43f48b0` and `244e085` supply CBOR fuzzing, shared Rust/browser
-ingress vectors, Wasm regression tooling and stable-order executor tail removal.
-The latter improved native reverse cancellation of 8,192 tasks from 7.55 ms to
-0.14 ms, adding 58 bytes each to the optimized Runtime module/code section.
-This is not an application IC timing. Two decoder allocation prototypes were
-reverted after adding about 9 KB each; Candid traversal was measured but unchanged.
-Focused Clippy/tests and installed Runtime/Timers qualification passed. Fuzzing
-passed 420,463 executions. See `docs/audits/platform-improvements-2026-11-06.md`.
+Types 0.18.2 and Platform 0.23.3 select allocation-only data-encoding/serde_bytes.
+Probe savings are only 0–6 bytes; no material Wasm gain is claimed. The unused
+facade serde_test edge is removed; Types/Runtime retain real uses. See the
+[utility comparison](../benchmarks/utility-features-2026-11-06.md).
 
-Hosted source `244e085` passed normal CI, browser, installed-runtime and Wasm-size
-workflows. Three-host release-mapping qualification run **42184881886** passed
-Linux and macOS ARM64 at the latest observation; Intel remains asynchronous.
-The host allowlist remains empty: all actual releases still use the full gate.
-#50 remains open awaiting upstream, without a fix, risk acceptance or waiver.
-Its known advisory workflow failure is separate from release-stage evidence.
+Runtime 0.19.3 supplies stable-order executor tail removal. Native reverse
+cancellation of 8,192 tasks improved 7.55 ms to 0.14 ms, costing 58 optimized
+module/code bytes; this is not application IC timing. Platform also supplies
+CBOR fuzzing, shared Rust/browser ingress vectors and Wasm regression tooling.
+See the [audit evidence](../audits/platform-improvements-2026-11-06.md).
+Two allocation prototypes were reverted for about 9 KB growth each; Candid
+traversal remains unchanged. Final-source fuzzing passed 420,463 executions.
 
-## Last verified publications and recovery
+## Exclusions and restored draft
 
-Platform **0.23.2**, commit `81b3f05f53ed113d02a671d47d13f1a36222e845`,
-tag `platform-v0.23.2`, was verified on crates.io/GitHub. Types is **0.18.1**,
-Runtime/macros/guard **0.19.2**. Previous registry receipt:
-`target/platform0232-delivery/registry-verification.json`; all twenty Linux
-release stages passed at `target/release-validation/qualification.mgXj17/`.
+The maintainer excluded the concurrent stable64_read_uninit export. Its complete
+commit remains at `refs/retained/runtime-stable-read-uninit-20261106`; forward
+revert `3ad71e6` removed it from release source. The published Runtime archive's
+public IC0 module was independently checked to exclude the export.
 
-The interrupted 0.23.1 commit `12cab9c` remains in main ancestry, with its original
-journal/receipt. There was no 0.23.1 tag/upload. Metadata rendering now sorts
-before staging; exact-tree and real-hook regressions cover all three groups.
-No history or failed evidence was rewritten. Earlier unrelated draft refs
-`refs/retained/platform-0231-candid-draft`, `refs/retained/platform-023-unrelated`
-and `refs/retained/platform-023-late-candid` remain preserved.
+The exact unrelated Candid/derive 0.10.40 and cc 1.11.1 draft is restored in
+Cargo.lock, preserving all five published owner versions. Only that draft remains
+dirty. Original custody is `refs/retained/platform-20261106-deploy-lock-draft`,
+plus original/restored patches under `target/deployment-20261106/`. Never copy
+its original whole lock over current release metadata. Earlier Types attempts
+refused lock drift, before tags/uploads; failed proofs `qualification.vNb6k8`
+and `qualification.MBdND6` remain preserved and were not reused.
 
-Native Profiler #140 is delivered in Git. Its IC pin is unchanged; 71 provider
-inputs plus orchestration match the paired Linux proof against server
-`e2240c66dc9f`. See `docs/audits/native-profiler-140-2026-11-05.md`.
-Native Profiler macOS/Bazel remain unqualified; root CI is not that evidence.
-Browser SDK 0.2.0 was published from `d30e01c`, tag `browser-v0.2.0`, over SDK Core
-6.1.1. No npm release is part of this deployment.
+## Host qualification and retained evidence
 
-## Evidence custody
+Three-host mapping [run 42184881886](https://github.com/dragginzgame/ic-platform/actions/runs/42184881886)
+passed Linux and both macOS hosts at source `244e085`. It is separate from the
+new release receipts. The host allowlist remains empty pending evidence admission;
+all actual releases above used the full roster. No stage-receipt reuse was enabled.
+Native Profiler #140's paired Linux evidence remains in its
+[qualification](../audits/native-profiler-140-2026-11-05.md). Native Profiler
+macOS/Bazel remain unqualified; root CI is not that evidence.
 
 Approved archives/bundles remain under
 `recovery-evidence/retired-checkouts/20261104-issue139/`, with receipts/checksums.
-Maintainer review is due **2026-12-04**. Retention refuses excess/expiry without
-cleanup or extension. Reproducible Runtime 0.18.1 binaries remain under
-`target/recovery-evidence/runtime-0181-delivery.LgU8r6/`. Cargo clean can reclaim
-target evidence; retain active release receipts/stage logs while recovery may be
-needed. No evidence cleanup was performed.
+Maintainer review is due **2026-12-04**. Reproducible Runtime 0.18.1 binaries
+remain under `target/recovery-evidence/runtime-0181-delivery.LgU8r6/`.
+Retention refuses excess/expiry without cleanup or extension; no evidence cleanup
+was performed. Cargo clean can reclaim target evidence: retain active release
+receipts and stage logs while recovery may be needed. Earlier retained refs and
+the interrupted, unpublished 0.23.1 commit/journal remain intact.

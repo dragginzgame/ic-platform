@@ -1,6 +1,6 @@
 # Candid and runtime ownership
 
-## ICP account identifier (pending Platform 0.23.3)
+## ICP account identifier (Platform 0.23.3)
 
 Select `icp-ledger-types` and call
 `ic_platform::icp_ledger_types::account_identifier(owner, &subaccount)` with the
@@ -10,7 +10,7 @@ is unchanged from Apache-2.0 ic-ledger-types 0.16.0, with its SHA-224/domain and
 CRC32 bytes intact. The new API does not add a transfer, address validator,
 account-identity abstraction, subaccount policy or runtime dependency.
 
-Canic can replace its mint/receipt helper after a supplying Platform publication,
+Platform 0.23.3 supplies this operation on crates.io. Canic can replace its mint/receipt helper,
 preserving the retained `bdc4ee05...680a938` vector, transfer bytes and receipt
 checks. Remove its direct crc32fast dependency only after confirming no other
 consumer use. Existing SHA-256 contracts are unaffected. No sibling adoption or
@@ -178,7 +178,7 @@ describe the pre-release local candidate; no size parity with 0.21 is claimed.
 
 ## Account byte-adapter cut (#138)
 
-The next Types minor changes Account’s optional subaccount to the standard
+Types 0.18.0 changed Account’s optional subaccount to the standard
 `serde_bytes` adapter. Rust fields remain owner: Principal followed by
 subaccount: Option<[u8; 32]>. Principal remains bounded to 29 bytes. Postcard
 None stays 00; Some changes from 01 plus 32 payload bytes to 01 20 plus those
@@ -202,13 +202,13 @@ policy and preserve original retry, signature and encoder-hash bytes. Endpoint
 IDs do not fence unframed persisted Account data: inventory and handle those
 stored formats separately. Platform does not own storage migration or Wire IDs.
 
-This working tree is source preparation, not a published Types supplier. Release
-the next Types minor and align the facade/Runtime dependency selections where
+The published Types 0.18 line supplies this cut; its current release is 0.18.2.
+Align the facade/Runtime dependency selections where
 the canonical Types identity changes, retaining one Types identity and one exact
 Runtime guard. Do not advance unrelated release groups mechanically. Producer
 completion does not require every consumer rollout; Wire owns its subsequent
 schema/client adoption and registry-only installed qualification. Current local
-Linux/Wasm proofs do not establish that future release family or macOS coverage.
+Linux/Wasm proofs do not establish consumer rollout or macOS coverage.
 
 ## Supported compiler (#133)
 
