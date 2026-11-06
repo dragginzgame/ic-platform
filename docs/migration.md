@@ -1,5 +1,15 @@
 # Candid and runtime ownership
 
+## Uninitialized stable reads (pending Runtime publication)
+
+Runtime's `ic0::stable64_read_uninit(&mut [MaybeUninit<u8>], offset)` exposes
+the existing safe imported IC0 helper. A successful call initializes the whole
+buffer; invalid stable ranges trap. It permits Storage to retain ICSS's direct
+uninitialized-read path without adding another system-call binding. The export
+adds no dependency, executor, Types capability or allocation authority. Existing
+initialized reads are unchanged. Storage adoption requires a supplying Runtime
+publication; local qualification alone does not establish registry availability.
+
 ## ICP account identifier (pending Platform 0.23.3)
 
 Select `icp-ledger-types` and call

@@ -6,6 +6,12 @@ ic-platform-runtime-guard. Earlier macro/guard history remains in
 
 ## [0.19.3] - Unreleased
 
+### ➕ Added
+
+- Expose the existing safe `ic0::stable64_read_uninit` helper for complete
+  initialization of caller-provided buffers, preserving IC trap semantics and
+  the dependency-free IC0 boundary. Storage can avoid zeroing buffers before IO.
+
 ### ⚡ Performance
 
 - Avoid scanning protected-task membership when removing its final entry,
