@@ -1,11 +1,15 @@
 //! Legacy ICP transfer and encoded-block/archive contracts.
 //!
-//! Passive external Candid contracts; see docs/external-contracts.md for pinned
-//! schemas and provenance. Decoding does not authenticate a response or authorize
+//! External Candid contracts and selected upstream account-identifier derivation;
+//! see docs/external-contracts.md for pinned schemas and provenance.
+//! Decoding does not authenticate a response or authorize
 //! a payment, retry, topology decision or resource allocation.
 
 use candid::CandidType;
 use serde::Deserialize;
+
+mod account_identifier;
+pub use account_identifier::account_identifier;
 
 /// Tokens.
 #[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]

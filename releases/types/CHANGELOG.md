@@ -5,6 +5,13 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.18.2] - Unreleased
+
+### 🔧 Maintenance
+
+- Select `alloc` for encoding and byte-Serde helpers without enabling their
+  unnecessary `std` features. Principal/Account identities and bytes are unchanged.
+
 ## [0.18.1] - 2026-11-04
 
 ### 🐛 Fixed

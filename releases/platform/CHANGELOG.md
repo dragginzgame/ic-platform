@@ -6,6 +6,19 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ## [0.23.3] - Unreleased
 
+### ✨ Features
+
+- Expose standard ICP account-identifier derivation under `icp-ledger-types`,
+  preserving upstream SHA-224/CRC32 bytes so consumers can remove local helpers
+  ([#147](https://github.com/dragginzgame/ic-platform/issues/147)).
+
+### 🔧 Maintenance
+
+- Remove the facade's unused `serde_test` development dependency; Types and
+  Runtime retain their own test dependencies.
+- Select allocation-only encoding and byte-Serde utility features, preserving
+  external bytes without forcing their standard-library features on consumers.
+
 ### 🧪 Testing
 
 - Extend malformed-input fuzzing to certificate, hash-tree and typed IC packet

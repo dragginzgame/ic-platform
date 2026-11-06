@@ -212,6 +212,7 @@ check-runtime-independence:
 
 .PHONY: check-runtime-lock
 check-runtime-lock:
+	bash scripts/ci/check-icp-account-source.sh
 	bash scripts/ci/test-published-runtime.sh
 	bash scripts/ci/check-owned-runtime-source.sh
 	bash scripts/ci/test-owned-runtime-source.sh

@@ -25,7 +25,7 @@ The Principal/Nat/function machinery retains registry Candid identities.
 | Feature | Import module | Selected external methods |
 | --- | --- | --- |
 | `cmc-types` | `ic_platform::cmc_types` | `notify_top_up`, `notify_mint_cycles`, `get_icp_xdr_conversion_rate` |
-| `icp-ledger-types` | `ic_platform::icp_ledger_types` | Legacy ICP `transfer`, `query_encoded_blocks` and encoded-block archive callbacks |
+| `icp-ledger-types` | `ic_platform::icp_ledger_types` | Legacy ICP `transfer`, `query_encoded_blocks`, encoded-block archive callbacks and account-identifier derivation |
 | `cycles-ledger-types` | `ic_platform::cycles_ledger_types` | `create_canister`, `withdraw` |
 | `nns-registry-types` | `ic_platform::nns_registry_types` | `get_subnet_for_canister` |
 | `certified-assets-types` | `ic_platform::certified_assets_types` | Native-host asset `get`, `get_chunk` |
@@ -51,6 +51,16 @@ Account and subaccount allocation, digest length checks and decode limits are
 consumer-owned. Decoding never authenticates a rate, asset, archive or payment.
 
 ## Source and licensing
+
+The ICP account-identifier constructor is separately selected from Apache-2.0
+`ic-ledger-types` 0.16.0 at cdk-rs revision
+`80d82348b7de1f10117aead50ad26669da7e2b79`. Its body and SHA-224/CRC32 behavior
+are unchanged; the private carrier structs and owned-to-external Principal adapter
+do not create a new identity type. Source/license fingerprints and attribution
+live beside the implementation. It uses existing SHA-2 and CRC providers without
+the upstream ledger client's CDK dependency. The fixed vectors cover Canic's
+retained destination, management/anonymous and maximum-length Principals, and
+nonzero subaccounts. The public consumer is checked on native and Wasm targets.
 
 The CMC and ICP declarations are schema-derived adaptations of the Apache-2.0
 interfaces at IC revision `f83a7646c20ce18100eb87b7865c12852bef8169`:

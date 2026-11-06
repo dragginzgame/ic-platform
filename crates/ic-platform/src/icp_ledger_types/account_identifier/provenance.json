@@ -1,0 +1,9 @@
+{
+  "upstream_package": "ic-ledger-types",
+  "upstream_version": "0.16.0",
+  "upstream_revision": "80d82348b7de1f10117aead50ad26669da7e2b79",
+  "upstream_path": "library/ic-ledger-types/src/lib.rs",
+  "original_source_sha256": "3e4a0a954105c39282452b9f4b4067256170a6f6597b48e005270421f8ea8c53",
+  "new_body_fingerprint": "68eaaa0132aeff9faa3f1d7ea83a8112b52f350ae08afca9d156ebdf655ccc64",
+  "license_sha256": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9"
+}

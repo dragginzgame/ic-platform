@@ -1,5 +1,21 @@
 # Candid and runtime ownership
 
+## ICP account identifier (pending Platform 0.23.3)
+
+Select `icp-ledger-types` and call
+`ic_platform::icp_ledger_types::account_identifier(owner, &subaccount)` with the
+canonical owned Principal and `[u8; 32]` subaccount. It returns `[u8; 32]` in the
+standard ICP format, distinct from ICRC Account text. The selected constructor
+is unchanged from Apache-2.0 ic-ledger-types 0.16.0, with its SHA-224/domain and
+CRC32 bytes intact. The new API does not add a transfer, address validator,
+account-identity abstraction, subaccount policy or runtime dependency.
+
+Canic can replace its mint/receipt helper after a supplying Platform publication,
+preserving the retained `bdc4ee05...680a938` vector, transfer bytes and receipt
+checks. Remove its direct crc32fast dependency only after confirming no other
+consumer use. Existing SHA-256 contracts are unaffected. No sibling adoption or
+installed-canister acceptance is claimed by the focused native/Wasm compile proofs.
+
 ## Management create_canister request (0.23.2)
 
 Select `management-canister-types` for

@@ -25,7 +25,7 @@ candid-endpoint = ["cdk", "candid"]
 candid-parser = ["principal-external", "dep:candid_parser"]
 candid-service = ["candid", "candid/printer"]
 cmc-types = ["candid"]
-icp-ledger-types = ["candid"]
+icp-ledger-types = ["candid", "dep:crc32fast", "dep:sha2"]
 cycles-ledger-types = ["candid"]
 nns-registry-types = ["candid"]
 certified-assets-types = ["candid"]
@@ -110,7 +110,6 @@ ic-transport-types = { workspace = true, optional = true }
 [dev-dependencies]
 serde_bytes.workspace = true
 serde_cbor.workspace = true
-serde_test.workspace = true
 
 [[test]]
 name = "blake3_consumer"
@@ -297,6 +296,10 @@ required-features = ["candid-endpoint", "candid-service"]
 [[test]]
 name = "cbor_malformed"
 required-features = ["ic-protocol"]
+
+[[test]]
+name = "icp_account_identifier_consumer"
+required-features = ["icp-ledger-types"]
 
 [lints]
 workspace = true

@@ -373,7 +373,7 @@ profiles retain their explicitly external identities.
 | ic-platform | ic-protocol | certification-cbor, dep:ic-transport-types, principal-external |
 | ic-platform | ic-protocol-fixtures | ic-protocol |
 | ic-platform | ic0 | dep:ic-platform-runtime, ic-platform-runtime/ic0 |
-| ic-platform | icp-ledger-types | candid |
+| ic-platform | icp-ledger-types | candid, dep:crc32fast, dep:sha2 |
 | ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:crc32fast, dep:data-encoding, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
 | ic-platform | management-canister-types | candid/bignum, candid/serde_bytes, dep:candid, dep:ic-management-canister-types, dep:serde_bytes, principal-external |
 | ic-platform | nns-registry-types | candid |
@@ -401,7 +401,7 @@ profiles retain their explicitly external identities.
 | ic-platform | crc32fast | ^1.5 | normal | all | true | true |  |
 | ic-platform | crypto-bigint | ^0.7.10 | normal | all | true | false |  |
 | ic-platform | curve25519-dalek | ^5.0.0 | normal | all | true | false |  |
-| ic-platform | data-encoding | ^2.11 | normal | all | true | true |  |
+| ic-platform | data-encoding | ^2.11 | normal | all | true | false | alloc |
 | ic-platform | ed25519-dalek | ^3.0.0 | normal | all | true | false |  |
 | ic-platform | hex | ^0.4.3 | normal | all | true | true |  |
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
@@ -420,11 +420,10 @@ profiles retain their explicitly external identities.
 | ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
 | ic-platform | num-traits | ^0.2.19 | normal | all | true | true |  |
 | ic-platform | serde | ^1.0 | normal | all | true | false | alloc, derive |
-| ic-platform | serde_bytes | ^0.11 | normal | all | true | true |  |
-| ic-platform | serde_bytes | ^0.11 | dev | all | false | true |  |
+| ic-platform | serde_bytes | ^0.11 | normal | all | true | false | alloc |
+| ic-platform | serde_bytes | ^0.11 | dev | all | false | false | alloc |
 | ic-platform | serde_cbor | ^0.11.2 | normal | all | true | true |  |
 | ic-platform | serde_cbor | ^0.11.2 | dev | all | false | true |  |
-| ic-platform | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
@@ -439,12 +438,12 @@ profiles retain their explicitly external identities.
 | ic-platform-runtime | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform-runtime | thiserror | ^2.0.18 | normal | all | true | true |  |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
-| ic-platform-types | data-encoding | ^2.11 | normal | all | false | true |  |
+| ic-platform-types | data-encoding | ^2.11 | normal | all | false | false | alloc |
 | ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | convert |
 | ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert, self_authenticating |
 | ic-platform-types | postcard | ^1.1.3 | dev | all | false | false | alloc |
 | ic-platform-types | serde | ^1.0 | normal | all | false | false | alloc, derive |
-| ic-platform-types | serde_bytes | ^0.11 | normal | all | false | true |  |
+| ic-platform-types | serde_bytes | ^0.11 | normal | all | false | false | alloc |
 | ic-platform-types | serde_cbor | ^0.11.2 | dev | all | false | true |  |
 | ic-platform-types | serde_json | ^1.0 | dev | all | false | true |  |
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |

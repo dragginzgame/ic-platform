@@ -38,7 +38,7 @@ crc32fast = "1.5"
 # Published ECDSA security floor; older consumer locks must not retain 0.7.5.
 crypto-bigint = { version = "0.7.10", default-features = false }
 curve25519-dalek = { version = "5.0.0", default-features = false }
-data-encoding = "2.11"
+data-encoding = { version = "2.11", default-features = false, features = ["alloc"] }
 ed25519-dalek = { version = "3.0.0", default-features = false }
 hex = "0.4.3"
 ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
@@ -63,7 +63,7 @@ thiserror = "2.0.18"
 
 # External mixed production/test dependencies
 ic_principal = { version = "0.1.5", default-features = false, features = ["convert"] }
-serde_bytes = "0.11"
+serde_bytes = { version = "0.11", default-features = false, features = ["alloc"] }
 serde_cbor = "0.11.2"
 
 # External proc-macro dependencies (compiler host)
