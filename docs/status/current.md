@@ -9,13 +9,14 @@ workflow. Browser **0.2.0** is unchanged. No sibling release/adoption is include
 These are pending candidates, not publication claims. Shared **0.30.5** at
 `be3771031ebfb340583b238dee5446be65929c62` remains the adopted baseline.
 
-The first Types gate refused when the retained draft reappeared during feature
-queries; no tag/upload occurred. Its failed receipt/logs remain under
-`target/release-validation/qualification.vNb6k8/`. The maintainer confirmed no
-other writer and instructed continuation. Runtime's additional narrow
-`stable64_read_uninit` export is reviewed; native/Wasm IC0-only Clippy and source
-guards pass without dependencies or an imported ABI/body change. Include it in
-Runtime 0.19.3, then run fresh gates against the updated committed source.
+The maintainer explicitly excluded the concurrent stable64_read_uninit export
+from this deployment. Its complete commit is preserved at
+`refs/retained/runtime-stable-read-uninit-20261106`; a forward revert keeps it
+out of release source without deleting its work. Two Types qualification attempts
+refused a reappearing lock draft; evidence remains in qualification.vNb6k8 and
+qualification.MBdND6 under target/release-validation. No release tag/upload
+occurred. Restore stable source inputs and use a fresh gate; never reuse those
+failed receipts. The maintainer confirmed no other writer and requested continuation.
 
 The unrelated Candid/derive 0.10.40 and cc 1.11.1 lock draft is retained exactly
 at `refs/retained/platform-20261106-deploy-lock-draft` (blob), with original lock
