@@ -2,6 +2,7 @@
 # Public grouped consumer routing; actual recovery semantics are tested separately.
 set -euo pipefail
 unset PACKAGE RELEASE_GROUP
+unset RELEASE_GROUPS RELEASE_PUBLISH_TARGET RELEASE_BATCH_ACTIVE
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 bash "$root/scripts/ci/check-make-execution.sh"
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES
@@ -24,6 +25,29 @@ printf 'release %s %s\n' "$1" "$RELEASE_GROUP" >> "$ROUTING_EFFECTS"
 [[ "${2:-}" == review && "${3:-}" == release-review || "$1" == resume && "${2:-}" == 99.0.0 && "${3:-}" == review && "${4:-}" == release-review ]]
 exit "${ROUTING_RUNNER_RESULT:-0}"
 RUNNER
+cat > "$fixture/scripts/ci/run-release-batch.pl" <<'FROZEN'
+use strict;
+use warnings;
+use Getopt::Long qw(GetOptions);
+my ($root,$groups,$kind,$remote,$branch,$setup,$publish,$delivery,$status,$resume,$reconcile,$retire);
+GetOptions('root=s'=>\$root,'groups=s'=>\$groups,'kind=s'=>\$kind,'remote=s'=>\$remote,
+    'branch=s'=>\$branch,'setup-target=s'=>\$setup,'publish-target=s'=>\$publish,'delivery=s'=>\$delivery,
+    'status=s'=>\$status,'resume=s'=>\$resume,'reconcile=s'=>\$reconcile,'retire=s'=>\$retire) or die;
+my ($operation,$selection);
+if (defined $groups) {
+    $setup eq 'release-candidate-setup' && $remote eq 'review' && $branch eq 'release-review' or die;
+    ($operation,$selection)=($kind,$groups);
+} else {
+    for my $entry ([status=>$status],[resume=>$resume],[reconcile=>$reconcile],[retire=>$retire]) {
+        ($operation,$selection)=@$entry if defined $entry->[1];
+    }
+}
+$operation eq $ENV{EXPECTED_OPERATION} && $selection eq $ENV{EXPECTED_GROUP} or die;
+open my $out,'>',$ENV{ROUTING_OUTPUT} or die $!; print {$out} "$selection\n"; close $out or die $!;
+open my $events,'>>',$ENV{ROUTING_EFFECTS} or die $!;
+print {$events} "frozen $operation $selection publish=",($publish//''),"\n"; close $events or die $!;
+exit($ENV{ROUTING_RUNNER_RESULT}//0);
+FROZEN
 cp scripts/release/publish.sh "$fixture/scripts/release/"
 cat > "$fixture/scripts/release/check-resume-policy.sh" <<'RESUME'
 #!/usr/bin/env bash
@@ -61,6 +85,31 @@ for operation in release-patch release-minor release-major release-resume publis
         grep -q 'Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types' "$fixture/refusal.log"
         [[ ! -e "$ROUTING_EFFECTS" ]]
     done
+done
+# The installed interface rejects retired configuration before any tool/runner
+# effects, including an explicitly empty value. Never alias an old roster.
+for setting in RELEASE_FROZEN_GROUPS RELEASE_FROZEN_PUBLISH_TARGET RELEASE_FROZEN_SETUP_TARGET RELEASE_FROZEN_SETUP_MODE FROZEN_RELEASE_ACTIVE; do
+    for value in '' 1; do
+        if make --no-print-directory -s -C "$fixture" help "$setting=$value" > "$fixture/retired-setting.log" 2>&1; then exit 1; fi
+        grep -q "Retired release settings:.*$setting" "$fixture/retired-setting.log"
+        [[ ! -e "$ROUTING_EFFECTS" ]]
+    done
+done
+if make --no-print-directory -s -C "$fixture" release-patch RELEASE_GROUP=platform RELEASE_GROUPS= > "$fixture/cleared-roster.log" 2>&1; then exit 1; fi
+[[ ! -e "$ROUTING_EFFECTS" ]]
+# The outer Makefile admits a whole canonical cohort without a single group.
+EXPECTED_GROUP=types,runtime,platform EXPECTED_OPERATION=patch make --no-print-directory -s -C "$fixture" release-patch \
+    RELEASE_GROUPS=types,runtime,platform RELEASE_PUBLISH_TARGET=publish RELEASE_REMOTE=review RELEASE_BRANCH=release-review
+[[ "$(cat "$ROUTING_OUTPUT")" == types,runtime,platform ]]
+grep -q 'frozen patch types,runtime,platform publish=publish' "$ROUTING_EFFECTS"
+cp "$ROUTING_EFFECTS" "$fixture/before-batch-refusal"
+for roster in runtime,types types,types types,unknown; do
+    if make --no-print-directory -s -C "$fixture" release-patch RELEASE_GROUPS="$roster" > "$fixture/batch-refusal.log" 2>&1; then exit 1; fi
+    cmp "$ROUTING_EFFECTS" "$fixture/before-batch-refusal"
+done
+for operation in status resume reconcile retire; do
+    EXPECTED_GROUP=batch-reviewed EXPECTED_OPERATION="$operation" make --no-print-directory -s -C "$fixture" "release-batch-$operation" BATCH=batch-reviewed
+    [[ "$(cat "$ROUTING_OUTPUT")" == batch-reviewed ]]
 done
 for group in platform runtime types; do
     for operation in release-patch release-minor release-major release-resume; do

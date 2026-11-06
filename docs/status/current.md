@@ -1,5 +1,44 @@
 # Current handoff — 2026-11-06
 
+## Local Shared 0.31.0 adoption
+
+Shared **0.31.0** at `74313941af2fce4399bec0e6909ca6229673c3f8` is
+installed through the canonical exporter, with all 141 payloads verified against
+that committed remote-main revision. The adoption preserves the existing frozen
+deployment work and the independent Cargo.lock draft. No package versions,
+commits, tags or real publications were created. Storage stays with its session.
+
+Platform setup, recovery admission, routing fixtures, the optional integration
+qualifier and current commands now use `RELEASE_GROUPS`, `RELEASE_PUBLISH_TARGET`,
+`RELEASE_SETUP_TARGET`, `RELEASE_SETUP_MODE` and `RELEASE_BATCH_ACTIVE`. Shared
+owns automatic single-group capture and the renamed `run-release-batch.pl`/
+`docs/release-batches.md` interface. Old settings refuse rather than alias. No
+active pre-0.31 batch was present; such a batch must finish with its original
+tooling because 0.31 requires schema-2 journals and a saved publication commit.
+
+Use `make release-patch RELEASE_GROUP=platform RELEASE_PUBLISH_TARGET=publish`
+for a separately authorized Platform delivery. An affected cohort uses one
+`RELEASE_GROUPS=types,runtime,platform` roster, omitting unaffected groups. Shared
+owns status, resume, clean fast-forward reconciliation and explicit retirement;
+normal-checkout edits stay deferred. Candidate-local setup still uses existing
+tool owners, with offline recovery checks and no normal-tree lock/tool copy.
+Browser caches outside admitted build roots still require review before retirement.
+See [commands and qualification](../platform-release-validation.md#commands-and-effects).
+
+Focused checks passed under `target/shared0310/`: annotated snapshot/source
+integrity, documentation links, both npm lock-schema/pinning selections, setup
+prepare/recovery policy, all three groups' routing and same-group publication
+admission, plus ShellCheck and shell syntax. Retired settings (including empty
+values) and a cleared selected-group roster refuse before runner effects. These
+routing checks use substitutes and do not perform registry delivery.
+The prior 0.30.9
+three-group rehearsal, verified archive bytes/receipts and installed Wire owner
+profile remain at `target/platform-frozen-qualification.lSXxHi/`; they are
+historical evidence for the unchanged product/setup behavior, not proof of a
+0.31 full release gate or registry delivery. Real releases still require every
+applicable standard gate and native/installed obligation. No new macOS/native
+Profiler acceptance is claimed.
+
 ## Runtime 0.19.4 published: safe uninitialized stable reads
 
 The maintainer now explicitly supersedes the earlier deployment exclusion of
@@ -33,7 +72,7 @@ Never restore an old whole lock over the published release identities.
 The maintainer assigned Storage adoption/deployment back to its active session;
 this session changed no Storage source, manifest or lockfile. Both maintained
 Storage workspaces must select published Runtime >=0.19.4 before delivery.
-Frozen release activation remains unqualified; the standard workflow applies.
+That release used the ordinary workflow before the current frozen wiring.
 
 ## Platform 0.23.4 publication and Shared 0.30.7 adoption
 
@@ -89,10 +128,11 @@ Shared's frozen batch runner is supplied but **not activated**: Platform must
 qualify its actual release/publication hooks, recovery and normal-lock edit
 isolation before setting `RELEASE_FROZEN_GROUPS`. The current standard release
 workflow and empty native-host allowlist remain in force.
-The subsequent [frozen readiness check](../platform-release-validation.md#frozen-readiness-check-2026-11-06)
+The subsequent [frozen readiness check](../platform-release-validation.md#before-the-0309-wiring-frozen-readiness-check-2026-11-06)
 passed Shared's 18 focused runner checks, but actual Platform startup refused
 missing candidate-local tools before preflight. Platform's outer Make guard also
-rejects a batch-only roster. These checks used disposable sources/local remotes;
+rejected a batch-only roster. The current 0.30.9 wiring replaces those startup
+limitations. These historical checks used disposable sources/local remotes;
 no release or upload occurred, and the normal lock draft remained unchanged.
 
 ## Previous verified three-group publication

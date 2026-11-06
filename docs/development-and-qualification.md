@@ -231,7 +231,7 @@ Wasm, including with all features enabled.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.
-Every release, resume and publication command requires an explicit group:
+Fresh releases require an explicit group or supplier-ordered cohort:
 
 `make release-patch RELEASE_GROUP=platform` releases the facade.
 The native client now releases in Tooling’s Testkit group.
@@ -240,13 +240,23 @@ canonical type supplier. No group is inferred from changed files or PACKAGE.
 All members use literal package versions; root Cargo stores common metadata and
 dependencies. The [root changelog](../CHANGELOG.md) indexes the three active group ledgers
 and preserved coordinated history.
+
+Fresh group releases execute in Shared's frozen candidate and leave the normal
+checkout's branch/versions unchanged until explicit reconciliation. To publish
+as part of that same batch, select `RELEASE_PUBLISH_TARGET=publish` on the
+initial release command. Multiple affected groups use one
+`RELEASE_GROUPS=types,runtime,platform` roster, omitting unaffected groups;
+do not append a normal-tree `publish` goal. Recover with the printed batch ID,
+using `release-batch-status`/`release-batch-resume`, then reconcile deliberately.
+See [the exact commands and effects](platform-release-validation.md#commands-and-effects).
 Root dependency blocks name each group once, with a separate changelog comment.
 Their path entries catalog every member's full version and retain requirement
 operators. The unused facade entry adds no dependency edge. Dependency and release
 checks enforce complete catalog/alias coverage,
 owned paths and current full versions across all three groups.
 
-`make publish-check RELEASE_GROUP=platform` packages/verifies that group without
+Standalone `make publish-check RELEASE_GROUP=platform` packages/verifies the
+selected normal-checkout group without
 uploading; `make publish RELEASE_GROUP=platform` uploads clean committed packages
 in Cargo dependency order. Select types explicitly for its separate publication.
 `PACKAGE='name ...'` may narrow the selected group after partial-publication
@@ -266,8 +276,10 @@ For focused release-recovery changes, run
 Omitting the group exercises all three. These fixtures use disposable local Git
 remotes and substitute the full release gate; they do not release this checkout.
 
-Plain `cargo clean` removes the whole workspace `target/`, including nested build
-caches and evidence. Keep evidence that must survive explicit cleanup elsewhere.
+Plain `cargo clean` removes the whole workspace `target/`, including frozen
+candidates, nested build caches and evidence. Do not run it while a frozen batch
+needs its candidate; use the explicit shared retirement flow after reconciliation
+and evidence preservation. Keep evidence that must survive cleanup elsewhere.
 The separately managed `.tools/` store is outside Cargo cleanup.
 
 Linux x86-64 and macOS 15 on Intel and Apple Silicon are supported hosts.

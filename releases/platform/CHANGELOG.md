@@ -4,6 +4,21 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.23.5] - Unreleased
+
+### 🩹 Fixed
+
+- Adopt Shared 0.31.0, including stricter snapshot/checksum verification,
+  schema-2 release journals and guarded batch reconciliation and retirement.
+
+### 🔧 Tooling
+
+- Capture fresh grouped releases in a frozen candidate, prepare its own tools
+  before version lookup and admit recovery offline. Explicit supplier-ordered
+  cohorts use the shared batch lifecycle commands and renamed `RELEASE_GROUPS`,
+  setup and publication settings; retired settings refuse. Publication remains
+  opt-in.
+
 ## [0.23.4] - 2026-11-06
 
 ### 🔧 Tooling

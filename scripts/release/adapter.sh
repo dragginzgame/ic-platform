@@ -4,6 +4,9 @@ operation="${1:-}"
 [[ $# -eq 1 ]] || exit 2
 prepare="${IC_PLATFORM_RELEASE_PREPARE:-0}"
 unset IC_PLATFORM_RELEASE_PREPARE
+# Frozen setup already prepared this candidate's selections before version
+# lookup. The ordinary preflight still admits them; it must not install again.
+if [[ "${RELEASE_BATCH_ACTIVE:-}" == 1 ]]; then prepare=0; fi
 export RELEASE_GROUP
 case "$operation" in
     version|files) exec bash scripts/release/group.sh "$operation" ;;

@@ -9,13 +9,51 @@ FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/canic-wasm-benchmark/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard crates/ic-platform-macros/src/export/tests/linking/*.rs)
 FORMAT_EXTRA_SOURCES += crates/ic-platform/tests/fixtures/candid_malformed.rs
 FORMAT_EXTRA_SOURCES += crates/ic-platform/tests/fixtures/cbor_malformed.rs
+# Fresh grouped releases capture their selected roster once. The shared runner
+# invokes the ordinary group runner inside that checkout with this flag set.
+RELEASE_GROUPS ?= $(RELEASE_GROUP)
+RELEASE_SETUP_TARGET := release-candidate-setup
+_platform_batch_targets := release-batch-status release-batch-resume release-batch-reconcile release-batch-retire
+_platform_fresh_release := $(filter release-patch release-minor release-major,$(MAKECMDGOALS))
 # Independent groups require a visible selection before any recipe or setup.
-ifneq ($(filter-out release-editor-check,$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
+_platform_comma := ,
+ifneq ($(_platform_fresh_release),)
+ifneq ($(RELEASE_BATCH_ACTIVE),1)
+_platform_batch_groups := $(strip $(subst $(_platform_comma), ,$(RELEASE_GROUPS)))
+_platform_batch_order := $(strip $(foreach group,types runtime platform,$(if $(filter $(group),$(_platform_batch_groups)),$(group))))
+ifeq ($(_platform_batch_groups),)
+$(error Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types, or RELEASE_GROUPS in supplier order)
+endif
+ifneq ($(_platform_batch_order),$(_platform_batch_groups))
+$(error Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types; batch groups must be unique and in supplier order: types,runtime,platform)
+endif
+ifneq ($(strip $(RELEASE_GROUP)),)
+ifneq ($(strip $(RELEASE_GROUPS)),$(strip $(RELEASE_GROUP)))
+$(error Select RELEASE_GROUP alone or the complete RELEASE_GROUPS roster)
+endif
+endif
+ifneq ($(filter publish publish-check,$(MAKECMDGOALS)),)
+$(error Select RELEASE_PUBLISH_TARGET instead of a second normal-checkout publication target)
+endif
+endif
+endif
+ifneq ($(filter-out release-editor-check $(_platform_batch_targets) $(_platform_fresh_release),$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
 ifeq ($(RELEASE_GROUP),platform)
 else ifeq ($(RELEASE_GROUP),types)
 else ifeq ($(RELEASE_GROUP),runtime)
 else
 $(error Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types)
+endif
+endif
+# Captured release commands still require their one saved group.
+ifeq ($(RELEASE_BATCH_ACTIVE),1)
+ifneq ($(_platform_fresh_release),)
+ifneq ($(words $(RELEASE_GROUP)),1)
+$(error Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types)
+endif
+ifneq ($(filter types runtime platform,$(RELEASE_GROUP)),$(RELEASE_GROUP))
+$(error Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types)
+endif
 endif
 endif
 export RELEASE_GROUP
@@ -28,6 +66,10 @@ LOCAL_TOOL_CHECK_TARGETS += browser-tools-check
 include make/consumer.mk
 export YQ := $(CURDIR)/.tools/host/bin/yq
 release-patch release-minor release-major release-resume: export IC_PLATFORM_RELEASE_PREPARE := 1
+
+.PHONY: release-candidate-setup
+release-candidate-setup:
+	+bash scripts/release/candidate-setup.sh
 
 .PHONY: help check test clippy docs-check wasm-check msrv check-boundary check-doc-links check-pins ci check-consumer check-features
 .PHONY: version release-version release-preflight release-verify release-prepare-version release-files
@@ -47,6 +89,8 @@ help:
 	@echo 'Focused: check, test, clippy, docs-check, wasm-check, msrv, check-boundary'
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Exact saved recovery: release-resume VERSION=X.Y.Z'
+	@echo 'Frozen cohort: release-patch RELEASE_GROUPS=types,runtime,platform RELEASE_PUBLISH_TARGET=publish'
+	@echo 'Frozen recovery/custody: release-batch-status, release-batch-resume, release-batch-reconcile, release-batch-retire BATCH=batch-XXXXXXXX'
 	@echo 'Feature graphs: check-features; check-features-exhaustive FEATURES=a,b (1–12 features)'
 	@echo 'Release/publish requires RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types'
 	@echo 'Registry: publish-check (dry run), publish (selected group); PACKAGE= selects an explicit batch'
@@ -163,6 +207,7 @@ check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/browser-compiler-floor --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
+	bash scripts/ci/test-platform-frozen-setup.sh
 	bash scripts/ci/test-platform-ci-selection.sh
 	bash scripts/ci/test-platform-validation-plan.sh
 	bash scripts/ci/test-platform-validation-recovery.sh

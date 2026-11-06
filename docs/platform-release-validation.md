@@ -1,13 +1,125 @@
 # Platform release validation (#137)
 
-Shared 0.30.7 supplies [frozen release batches](frozen-releases.md), but Platform
-does not set `RELEASE_FROZEN_GROUPS`. Activation requires qualification of the
-actual three-group release/publication hooks, interrupted recovery, supplier
-ordering and preservation of concurrent normal-checkout lock edits. Snapshot
-adoption and synthetic runner tests do not establish that evidence. Releases
-continue through the existing workflow described below.
+Shared 0.31.0 owns [frozen release batches](release-batches.md). Platform's fresh
+`release-patch`, `release-minor` and `release-major` commands capture the explicitly
+selected group by default. An explicit `RELEASE_GROUPS` selects the complete
+affected cohort in `types,runtime,platform` supplier order, without selecting
+unaffected groups. Platform admits the roster and supplies candidate setup;
+Shared owns capture, the queue, saved context and lifecycle commands. Inside the
+candidate, the ordinary release runner and all existing release gates still run.
 
-### Frozen readiness check, 2026-11-06
+### Commands and effects
+
+With clean committed source, the pinned compiler and an explicitly prepared
+Testkit server (`POCKET_IC_BIN` or `IC_TESTKIT_POCKET_IC_URL`), select one batch:
+
+```sh
+make release-patch RELEASE_GROUP=platform RELEASE_PUBLISH_TARGET=publish
+make release-patch RELEASE_GROUPS=types,runtime,platform RELEASE_PUBLISH_TARGET=publish
+```
+
+These are real delivery commands requiring release/publication authority.
+Choose one example and only the affected groups. All selected groups use the
+same increment. Omitting `RELEASE_PUBLISH_TARGET` retains Git-only release
+semantics. For a cohort that needs publication, select it before capture so each
+supplier is published before its consumer. Do not append a second normal-tree
+`publish` Make goal or loop separate group releases.
+
+Shared prints the candidate under `target/release-frozen/BATCH` and its durable
+Git/journals under `.git/release-state/frozen/BATCH`. The normal checkout's branch,
+versions and later lock edits remain untouched. Inspect and recover that exact
+saved batch without supplying a new group or version:
+
+```sh
+make release-batch-status BATCH=batch-XXXXXXXX
+make release-batch-resume BATCH=batch-XXXXXXXX
+make release-batch-reconcile BATCH=batch-XXXXXXXX
+make release-batch-retire BATCH=batch-XXXXXXXX
+```
+
+Shared 0.31 uses `RELEASE_GROUPS`, `RELEASE_PUBLISH_TARGET`,
+`RELEASE_SETUP_TARGET`, `RELEASE_SETUP_MODE` and `RELEASE_BATCH_ACTIVE`.
+Retired frozen-prefixed settings fail explicitly, including empty values.
+Recovery requires a schema-2 journal and a saved publication commit; finish any
+pre-0.31 batch with its original tooling before adoption. No active batch was
+present when Platform adopted 0.31.0. The physical recovery paths are unchanged.
+
+Uncertain publication refuses redispatch: inspect registry/package receipts,
+then select `PUBLICATION_RESULT=published` or `not-published` on batch resume.
+Reconciliation requires completed delivery and a clean normal checkout and only
+fast-forwards. Preserve deferred edits durably before reconciling, then reapply
+them deliberately, keeping the delivered owner versions. Legacy `release-resume
+VERSION=... RELEASE_GROUP=...` remains the existing standard-journal recovery.
+
+Retirement is a separately selected deletion operation, never post-deploy
+cleanup. Shared preserves release refs and refuses pending/unique candidate
+state. Its admitted ignored build roots are `target/` and `.tools/`; Platform's
+browser `node_modules` or `dist` outside those roots require explicit review and
+preservation/cleanup before retirement. Never broaden the snapshot allowlist or
+delete them automatically to satisfy the checker.
+
+### Candidate setup and qualification
+
+`release-candidate-setup` delegates to the existing tool owners. Prepare first
+checks the candidate's complete selected tool roster, installs only a missing
+selection, configures its normal Git hook and prepares locked dependency caches.
+All groups currently retain the complete roster. Check mode admits those same
+tools/hooks offline, without installations or graph resolution from partially
+prepared manifests. The normal preflight repeats admission rather than setup.
+No live normal-tree tool directory or lockfile is copied into the candidate.
+An externally prepared server remains explicitly selected and fingerprinted by
+the existing validation context; freezing isolates lock edits, not arbitrary
+changes to host configuration or the server binary.
+
+`scripts/release/qualify-frozen-release.sh [LOCKFILE]` exercises the actual
+Platform setup, metadata editor, release hooks, publication selection and Clippy,
+then verifies real coordinated package archives against local release commits.
+It uses disposable local Git remotes and substitutes the full product gate and
+terminal upload/check dispatch; these are integration/archive proofs, not new
+full-gate or live-registry receipts. The optional lock selects a reviewed test
+input without changing the normal lock. The maintained fast checks are
+`test-platform-frozen-setup.sh` and `test-platform-release-groups.sh`, included
+in the existing release-command stage. Required full product, installed and
+native-host obligations remain unchanged for real releases.
+
+The 0.30.9 consumer rehearsal is retained at
+`target/platform-frozen-qualification.lSXxHi/`. All three actual group hooks,
+publication admission/Clippy and coordinated archive builds passed. It installed
+tools once, recovered Runtime offline, refused uncertain publication without
+redispatch, left the original checkout unchanged, refused dirty reconciliation
+and then fast-forwarded the disposable development branch. All selected archives
+retain their clean release-commit identities. The first invocation's final
+checksum comparison used relative versus absolute filenames; its identical
+digests were independently checked and the assertion corrected. The final
+assertions passed separately; the entire command was not rerun for that test-only
+correction. Archive retention now copies the selected bytes into each attempt
+before later groups can overwrite Cargo's shared package directory; independently
+retained copies from this run were checked against the original receipt hashes.
+
+From that captured candidate, the installed Wire owner profile passed identity,
+await/trap cleanup, upgrade, stable rollback and certificate checks using an
+explicitly prepared Testkit server. Driver Clippy and six unit tests passed.
+Shared retirement first refused the ignored browser caches; after retaining
+archive/installed evidence and removing only this disposable fixture's generated
+caches, retirement passed with all three release tags preserved. This proves the
+focused captured-path integration, not the full product gate, live registry
+publication or a fresh macOS/native Profiler acceptance.
+
+### Historical Shared 0.30.8 recovery correction
+
+The generator can create underscores in batch IDs. Shared 0.30.7's resume
+admission rejected those same IDs; 0.30.8 accepts them without renaming recovery
+paths. The committed supplier's forced-underscore regression reproduced
+`invalid batch identity` against Platform's old installed runner and passes
+against its refreshed runner. The 19 focused checks include completed resume,
+interrupted second-group recovery, deferred normal-lock edits and uncertain
+publication refusal/reconciliation, using disposable Git remotes and publication
+substitutes. Evidence: `target/shared0308/before.log` and `after.log`.
+
+That adoption corrected recovery ID admission only. The missing setup and outer
+Make admission recorded below are integrated by the 0.30.9 wiring above.
+
+### Before the 0.30.9 wiring: frozen readiness check, 2026-11-06
 
 Shared 0.30.7's focused frozen-runner suite passed **18 checks** against its
 committed supplier source, copied with the declared companions into Platform's
@@ -30,18 +142,17 @@ created its managed checkout and durable journal, but stopped at the first
 | Dirty starting source | A synthetic deferred lock edit correctly refuses a new batch. Frozen execution isolates edits made after capture; it does not admit an already dirty starting selection. |
 | Normal checkout custody | The real Platform Cargo.lock hash is unchanged before/after the probes. No real remote, tag, package version or registry upload was changed. |
 
-Activation therefore requires an admitted candidate-local tool bootstrap before
-the runner's first version lookup, plus Platform Make admission for an explicit
-batch roster. The current supplier interface has no preparation hook at that
-point. Do not work around this by linking normal-checkout tools, falling back to
-unqualified system binaries or editing snapshot payloads.
+Those observations required candidate-local setup before version lookup and
+Platform Make admission for an explicit cohort. Shared 0.30.9 supplies that hook;
+the current wiring uses it without linking normal-tree tools or editing snapshot
+payloads. The old supplier had no preparation interface at that point.
 
-After those interfaces are integrated, the actual three-group hooks still need
-the qualification described above: clean locked builds and archives, publication
-receipt custody, a normal-lock edit during execution, supplier ordering,
-interruption/resume and remote advancement. The ordinary 0.23.4 release receipt
-does not establish frozen-checkout qualification. Frozen delivery remains off;
-these probes ran no full product matrix or real publication.
+The focused 0.30.9 rehearsal above now covers the actual three-group hooks,
+clean locked archives, receipt custody, a normal-lock edit during execution,
+supplier ordering, interruption/resume and local-remote advancement. The ordinary
+0.23.4 release receipt does not establish frozen-checkout qualification. Neither
+these historical probes nor the new rehearsal replace the full product gate or
+prove real publication.
 
 `release-verify` now dispatches a fresh source-bound plan through Shared's
 [plan interface](release-group-validation.md). The qualified-host allowlist in
