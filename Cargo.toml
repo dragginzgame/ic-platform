@@ -22,9 +22,9 @@ ic-platform = { version = "0.23.2", path = "crates/ic-platform", default-feature
 
 # Runtime
 # Changelog : releases/runtime/CHANGELOG.md
-ic-platform-macros = { version = "0.19.2", path = "crates/ic-platform-macros" }
-ic-platform-runtime = { version = "0.19.2", path = "crates/ic-platform-runtime", default-features = false }
-ic-platform-runtime-guard = { version = "=0.19.2", path = "crates/ic-platform-runtime-guard", default-features = false }
+ic-platform-macros = { version = "0.19.3", path = "crates/ic-platform-macros" }
+ic-platform-runtime = { version = "0.19.3", path = "crates/ic-platform-runtime", default-features = false }
+ic-platform-runtime-guard = { version = "=0.19.3", path = "crates/ic-platform-runtime-guard", default-features = false }
 
 # Types
 # Changelog : releases/types/CHANGELOG.md
