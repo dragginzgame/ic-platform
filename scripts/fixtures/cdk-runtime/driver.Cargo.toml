@@ -9,9 +9,8 @@ rust-version.workspace = true
 timers-composition = []
 
 [dependencies]
-ic-platform = { workspace = true, features = ["certification", "candid"] }
+ic-platform = { workspace = true, features = ["certification-cbor", "candid"] }
 ic-testkit.workspace = true
-serde_cbor.workspace = true
 serde.workspace = true
 ic-wire.workspace = true
 

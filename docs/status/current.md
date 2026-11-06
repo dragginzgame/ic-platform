@@ -1,5 +1,40 @@
 # Current handoff — 2026-11-06
 
+## Local Shared 0.30.7 adoption
+
+Shared **0.30.7** at `22a853e26c05ec323f06c57fa316c08b808f252b`
+is installed through the canonical exporter; all 141 payloads match that commit.
+This adoption is local and unpublished, with no package version changes. The
+previously restored Cargo.lock draft below is preserved unchanged.
+
+The boundary gate now includes Shared's lexical Rust CBOR check. Exact
+file/crate allowances cover Platform's typed codec implementations/integration
+tests, Types' serializer tests and the protected imported PocketIC ingress
+fixture. No generic codec export or broad native-directory exemption is added.
+The installed-runtime driver uses `certification::cbor::decode_certificate`;
+the fuzz harness uses typed certificate/tree APIs. Their standalone manifests
+no longer select serde_cbor directly. Independent consumer, runtime, benchmark,
+stable-identity and native HTTP fixture workspaces now run Shared's Cargo
+boundary admission against their own materialized manifests.
+
+Focused evidence is under `target/shared0307/`: snapshot/root boundaries,
+consumer/prepared-call admission (including direct CBOR refusal before builds),
+owner/Timers locked graphs, incompatible-Timers refusal, three-group release
+routing with substitute runners, facade and driver Clippy, 15 codec tests,
+malformed CBOR smoke tests, six driver unit tests and packed browser consumers.
+The coverage-guided fuzz campaign was not rerun for this adoption.
+These are Linux-focused checks,
+not a full release gate or new macOS/native Profiler qualification. See
+[development qualification](../development-and-qualification.md#candid-and-cbor-source-admission-and-experiment-retention).
+The changed certificate decoder also passed one installed Wire owner profile
+(raw awaits, callback cleanup, upgrade, stable rollback and certificate lookup);
+`installed-wire.log` and `runtime-artifacts.sha256` retain that separate evidence.
+
+Shared's frozen batch runner is supplied but **not activated**: Platform must
+qualify its actual release/publication hooks, recovery and normal-lock edit
+isolation before setting `RELEASE_FROZEN_GROUPS`. The current standard release
+workflow and empty native-host allowlist remain in force.
+
 ## Verified three-group publication
 
 The authorized deployment is complete on crates.io and GitHub:
@@ -14,8 +49,8 @@ Every downloaded registry archive is non-yanked, checksum verified and records
 its exact clean release commit. GitHub annotated tags were independently checked.
 Summary: `target/deployment-20261106/complete.json`; individual API/archive/VCS
 proofs and publication logs are alongside it. No sibling release/adoption occurred.
-Browser **0.2.0** remains unchanged. Shared **0.30.5** at
-`be3771031ebfb340583b238dee5446be65929c62` remains adopted.
+Browser **0.2.0** remains unchanged. These releases used Shared **0.30.5** at
+`be3771031ebfb340583b238dee5446be65929c62`.
 
 All twenty local Linux release stages passed separately for each group on Rust
 1.99.1, including all-feature lint/tests/docs, consumer/feature graphs and installed
@@ -59,8 +94,8 @@ revert `3ad71e6` removed it from release source. The published Runtime archive's
 public IC0 module was independently checked to exclude the export.
 
 The exact unrelated Candid/derive 0.10.40 and cc 1.11.1 draft is restored in
-Cargo.lock, preserving all five published owner versions. Only that draft remains
-dirty. Original custody is `refs/retained/platform-20261106-deploy-lock-draft`,
+Cargo.lock, preserving all five published owner versions. At deployment completion
+only that draft remained dirty. Original custody is `refs/retained/platform-20261106-deploy-lock-draft`,
 plus original/restored patches under `target/deployment-20261106/`. Never copy
 its original whole lock over current release metadata. Earlier Types attempts
 refused lock drift, before tags/uploads; failed proofs `qualification.vNb6k8`

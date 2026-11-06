@@ -5,8 +5,17 @@ use ic_platform::ic_protocol;
 pub fn exercise(bytes: &[u8]) {
     let limits = strict::DecodeLimits { bytes: bytes.len() };
     if let Ok(tree) = strict::decode_hash_tree(bytes, limits) {
-        let upstream: ic_platform::certification::HashTree = serde_cbor::from_slice(bytes).unwrap();
-        assert_eq!(tree, upstream);
+        let encoded = cbor::encode_hash_tree(&tree, usize::MAX).unwrap();
+        assert_eq!(
+            tree,
+            strict::decode_hash_tree(
+                &encoded,
+                strict::DecodeLimits {
+                    bytes: encoded.len()
+                }
+            )
+            .unwrap()
+        );
     }
     if let Ok(certificate) = strict::decode_certificate(bytes, limits) {
         assert_eq!(

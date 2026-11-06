@@ -1,5 +1,12 @@
 # Platform release validation (#137)
 
+Shared 0.30.7 supplies [frozen release batches](frozen-releases.md), but Platform
+does not set `RELEASE_FROZEN_GROUPS`. Activation requires qualification of the
+actual three-group release/publication hooks, interrupted recovery, supplier
+ordering and preservation of concurrent normal-checkout lock edits. Snapshot
+adoption and synthetic runner tests do not establish that evidence. Releases
+continue through the existing workflow described below.
+
 `release-verify` now dispatches a fresh source-bound plan through Shared's
 [plan interface](release-group-validation.md). The qualified-host allowlist in
 `ci/release-validation-hosts.json` is empty following #139’s client retirement.

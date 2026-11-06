@@ -29,8 +29,10 @@ Historical measurements and reproduction instructions are in
 `bash scripts/ci/fuzz-parsers.sh` runs a separate 60-second coverage-guided
 Principal/Account differential campaign and caller-budgeted Candid decoding
 through all three public decoder policies, plus strict certificate/hash-tree and
-typed IC packet CBOR decoding. Strict successful decodes are compared with the
-upstream representation; byte-budget refusals are checked independently.
+typed IC packet CBOR decoding. Successful strict certificates are compared with
+the typed upstream-backed decoder; strict trees round-trip through Platform's
+typed encoder. Independent strict/upstream differential tests remain inside the
+codec unit tests; byte-budget refusals are checked independently.
 Deterministic recursive-type, overlong-header, extra-argument, CBOR mutation and
 truncation cases also run in consumer tests. Prepare nightly-2026-11-05, a C++
 compiler and registry sources explicitly first; the command installs nothing.
@@ -282,8 +284,9 @@ See [the call contract](../crates/ic-platform-runtime/src/call/README.md). `ic-p
 proc-macro support package. Its Syn/Quote dependencies generate consumer
 entrypoints. Principal, Candid, the host parser, Agent, certification, raw IC calls,
 management/ledger DTOs, signature/BLS APIs, the executor and Serde are production
-dependencies, including optional and derive use. Testkit, Timers and the runtime
-driver's CBOR decoder are tests/tooling entries used by the independent fixture.
+dependencies, including optional and derive use. Testkit and Timers are
+tests/tooling entries used by the independent fixture. Its host driver selects
+Platform's `certification-cbor` decoder instead of a direct generic CBOR codec.
 Optional parser
 and Agent dependencies are restricted to non-Wasm targets.
 The root catalog has `Production dependencies` and `Tests and tooling only`
@@ -447,15 +450,25 @@ Wire/external-Candid profiles on the declared compiler. Driver tests, exact Wasm
 artifacts, graph isolation and lifecycle tests remain separate obligations.
 No measured Wasm-size reduction is claimed.
 
-## Candid source admission and experiment retention
+## Candid and CBOR source admission and experiment retention
 
-`make check-boundary` includes the lightweight Shared Candid source checker and
-Platform policy refusal cases. `ci/candid-boundary.json` admits exact named
-external protocol declarations and explicit codec qualification fixtures. It
-covers crates, scripts and the native provider/overlay Rust sources. New or
-changed declarations require review; no directory or module is exempted. The
-checker is lexical, not macro expansion/type resolution. Upstream generators
+`make check-boundary` includes the lightweight Shared Candid source checker with
+`--cbor` and Platform policy refusal cases. `ci/candid-boundary.json` admits exact
+named external declarations and file/crate CBOR uses, each with reason and review
+condition. Coverage includes crates, scripts and native provider/overlay Rust
+sources. Platform's typed codecs, Types' existing serializer tests and one
+protected imported native ingress fixture retain explicit allowances. There is
+no directory or module exemption. New direct uses and stale allowances fail.
+The checker is lexical, not macro expansion/type resolution. Upstream generators
 remain separately covered by their source and external schema contracts.
+
+Shared's Cargo inventory additionally rejects direct generic CBOR dependencies
+outside Platform, except Types' development-only serializer tests. Independent
+consumer, runtime, fuzz, benchmark, stable-identity and native HTTP workspaces run
+that check on their materialized manifests as well as the root workspace.
+This is direct-dependency admission, not a claim that their transitive graphs are
+CBOR-free. The separately pinned native IC workspace remains external
+infrastructure with paired native qualification; root checks do not qualify it.
 
 Keep one compact conclusion per experimental topic, with at most two small data
 files and 100 KiB combined; the repository budget is 5 MiB. New manual benchmark

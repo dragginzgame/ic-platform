@@ -101,7 +101,7 @@ check-boundary: check-candid-boundary
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 .PHONY: check-candid-boundary
 check-candid-boundary:
-	perl scripts/ci/check-candid-boundary.pl "$(CURDIR)" ci/candid-boundary.json crates scripts native/ic-profiler/profiler native/ic-profiler/overlay
+	perl scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates scripts native/ic-profiler/profiler native/ic-profiler/overlay
 	bash scripts/ci/test-platform-candid-boundary.sh
 .PHONY: check-primitives
 check-primitives:

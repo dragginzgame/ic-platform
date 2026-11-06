@@ -38,7 +38,6 @@ mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
 wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
 serde="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde.version' Cargo.toml)"
-cbor="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde_cbor' Cargo.toml)"
 selection='path = "../../crates/ic-platform"'
 runtime_selection='path = "../../crates/ic-platform-runtime"'
 if [[ -n "$published" ]]; then
@@ -48,8 +47,8 @@ if [[ -n "$published" ]]; then
 fi
 PLATFORM_FIXTURE_RUNTIME="$runtime_selection" PLATFORM_FIXTURE_MSRV="$msrv" PLATFORM_FIXTURE_PLATFORM="$selection" PLATFORM_FIXTURE_TESTKIT="$testkit" \
 PLATFORM_FIXTURE_WIRE="$wire" \
-PLATFORM_FIXTURE_SERDE="$serde" PLATFORM_FIXTURE_CBOR="$cbor" \
-    perl -pe 's/\@(RUNTIME|PLATFORM|TESTKIT|WIRE|SERDE|CBOR|MSRV)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
+PLATFORM_FIXTURE_SERDE="$serde" \
+    perl -pe 's/\@(RUNTIME|PLATFORM|TESTKIT|WIRE|SERDE|MSRV)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
         scripts/fixtures/cdk-runtime/Cargo.toml.in > "$fixture/Cargo.toml"
 # Timers and the canister share the canonical Runtime owner.
 # Testkit retains its published facade requirement; do not globally patch that
@@ -160,6 +159,7 @@ if [[ -n "$published" ]]; then
     }
 fi
 cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
+bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 # One selection owner for graph admission, compilation, artifacts and execution.
 select_runtime_profile() {
     selected_features=()

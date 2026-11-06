@@ -67,6 +67,7 @@ ic-wire = { path = "$fixture/wire", features = ["platform-types"] }
 MANIFEST
 cp scripts/fixtures/stable-identities/{lib,tests}.rs "$fixture/consumer/src/"
 cargo metadata --manifest-path "$fixture/consumer/Cargo.toml" --offline --all-features --format-version 1 > "$fixture/metadata.json"
+bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture/consumer" --external-ic
 bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler.txt"
 build="${CARGO_TARGET_DIR:-$root/target/stable-identities-build}"
 for features in "${profiles[@]}"; do

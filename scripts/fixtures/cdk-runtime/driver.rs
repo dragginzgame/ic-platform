@@ -364,8 +364,10 @@ fn main() {
     let root = vec![42u8; 32];
     assert!(update::<bool>(pic, receiver, "publish_root", root.clone()));
     let certificate: Option<Vec<u8>> = query(pic, receiver, "certificate", ());
-    let certificate: ic_platform::certification::Certificate =
-        serde_cbor::from_slice(&certificate.unwrap()).unwrap();
+    let certificate = certificate.unwrap();
+    let certificate =
+        ic_platform::certification::cbor::decode_certificate(&certificate, certificate.len())
+            .unwrap();
     assert_eq!(
         certificate.tree.lookup_path([
             b"canister".as_slice(),

@@ -46,6 +46,9 @@ mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/scripts/fixtures" "$fixture/r
 cp -R "$root/crates" "$root/.cargo" "$fixture/repo/"
 cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/repo/"
 cp "$root/scripts/ci/"{check-platform-runtime.sh,check-platform-runtime-graph.sh,check-platform-compiler.sh,read-platform-msrv.sh,platform-graph-policy.awk} "$fixture/repo/scripts/ci/"
+cp "$root/scripts/ci/check-cargo-dependency-boundaries.sh" "$fixture/repo/scripts/ci/"
+mkdir -p "$fixture/repo/ci"
+cp "$root/ci/"{external-ic-dependencies.txt,cbor-dependencies.json} "$fixture/repo/ci/"
 cp -R "$root/scripts/fixtures/"{cdk-runtime,timers-runtime} "$fixture/repo/scripts/fixtures/"
 ln -s "$root/.tools/host" "$fixture/repo/.tools/host"
 # The source provenance is the current repository; no temporary commits needed.

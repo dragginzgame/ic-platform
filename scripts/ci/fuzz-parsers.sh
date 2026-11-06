@@ -7,14 +7,12 @@ host="$(rustup run nightly-2026-11-05 rustc -vV | sed -n 's/^host: //p')"
 fixture="$(mktemp -d "$root/target/parser-fuzz.XXXXXX")"
 mkdir -p "$fixture/crates/probe/src" "$fixture/corpus"
 version="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.libfuzzer-sys' "$root/Cargo.toml")"
-cbor_version="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde_cbor' "$root/Cargo.toml")"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 members = ["crates/probe"]
 resolver = "3"
 [workspace.dependencies]
 ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["icrc-ledger-types", "candid", "ic-protocol"] }
-serde_cbor = "$cbor_version"
 libfuzzer-sys = "$version"
 MANIFEST
 cat > "$fixture/crates/probe/Cargo.toml" <<'MANIFEST'
@@ -28,13 +26,13 @@ category = "tests"
 [dependencies]
 ic-platform.workspace = true
 libfuzzer-sys.workspace = true
-serde_cbor.workspace = true
 MANIFEST
 cp "$root/scripts/fixtures/parser-fuzz/main.rs" "$fixture/crates/probe/src/main.rs"
 cp "$root/crates/ic-platform/tests/fixtures/candid_malformed.rs" "$fixture/crates/probe/src/candid_malformed.rs"
 cp "$root/crates/ic-platform/tests/fixtures/cbor_malformed.rs" "$fixture/crates/probe/src/cbor_malformed.rs"
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
 cargo metadata --offline --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"
+bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 printf 'DIDL\000\001\170\052\000\000\000\000\000\000\000' > "$fixture/corpus/candid-one"
 printf 'DIDL\001\156\000\001\000\001' > "$fixture/corpus/candid-recursive"
 printf 'DIDL\200\200\200\200\200\200\200\200\200\200\000' > "$fixture/corpus/candid-overlong"

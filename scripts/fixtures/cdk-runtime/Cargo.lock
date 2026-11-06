@@ -775,6 +775,8 @@ dependencies = [
  "ic-platform-types 0.18.2",
  "serde",
  "serde_bytes",
+ "serde_cbor",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -1377,7 +1379,6 @@ dependencies = [
  "ic-testkit",
  "ic-wire",
  "serde",
- "serde_cbor",
 ]
 
 [[package]]

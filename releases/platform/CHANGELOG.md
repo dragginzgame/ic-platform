@@ -4,6 +4,16 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.23.4] - Unreleased
+
+### 🔧 Tooling
+
+- Adopt Shared 0.30.7 and enforce reviewed Rust CBOR source allowances and
+  standalone fixture Cargo boundaries. Use Platform's typed codecs in runtime
+  and fuzz callers instead of their direct generic CBOR dependencies.
+- Supply the opt-in frozen release runner without activating it before
+  Platform's actual release and publication hooks are qualified.
+
 ## [0.23.3] - 2026-11-06
 
 ### ✨ Features

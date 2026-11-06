@@ -1072,5 +1072,73 @@
          "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
       }
    ],
+   "cbor_allowances" : [
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform-types/src/account/tests/serde_formats/mod.rs",
+         "reason" : "Existing Types serializer-compatibility tests compare retained Principal/Account bytes.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform-types/src/principal/tests/mod.rs",
+         "reason" : "Existing Types serializer-compatibility tests compare retained Principal/Account bytes.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform/src/certification/cbor/mod.rs",
+         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform/src/certification/cbor/strict/mod.rs",
+         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform/src/certification/cbor/strict/tests.rs",
+         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform/src/certification/cbor/tests.rs",
+         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform/src/ic_protocol/mod.rs",
+         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform/src/ic_protocol/tests.rs",
+         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform/src/signature_verification/mod.rs",
+         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "crates/ic-platform/src/signature_verification/tests.rs",
+         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+      },
+      {
+         "crate" : "serde_cbor",
+         "path" : "native/ic-profiler/overlay/packages/pocket-ic/tests/memory_access_tracing.rs",
+         "reason" : "Existing maintainer-authorized imported PocketIC ingress fixture; the native infrastructure contract and provenance remain intact.",
+         "review" : "Review on native provider/client transfer; require paired native qualification before changing the imported fixture."
+      }
+   ],
    "schema" : 1
 }

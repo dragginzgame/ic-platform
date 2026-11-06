@@ -13,6 +13,9 @@ cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
 cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/check-cargo-dependency-boundaries.sh" "$fixture/scripts/ci/"
+mkdir -p "$fixture/ci"
+cp "$root/ci/"{external-ic-dependencies.txt,cbor-dependencies.json} "$fixture/ci/"
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"
@@ -32,7 +35,12 @@ set -euo pipefail
 case "$1" in
     --version) printf 'cargo %s (fixture)\n' "$TEST_MSRV" ;;
     locate-project) exit 0 ;;
-    metadata) printf '{}\n' ;;
+    metadata)
+        if [[ " $* " == *' --no-deps '* ]]; then
+            dependencies='[]'
+            if [[ "${TEST_DIRECT_CBOR:-no}" == yes ]]; then dependencies='[{"name":"serde_cbor","kind":null}]'; fi
+            printf '{"version":1,"workspace_root":"%s","workspace_members":["probe"],"packages":[{"id":"probe","name":"platform-consumer-proof","dependencies":%s}]}\n' "$PWD" "$dependencies"
+        else printf '{}\n'; fi ;;
     tree)
         if [[ "${TEST_CAPABILITY:-}" == external-codecs ]]; then
             printf 'candid v0.10.39\n'
@@ -70,6 +78,12 @@ export PATH="$fixture/bin:$PATH" TEST_CALLS="$fixture/calls"
 TEST_MSRV="$("$BASH" "$root/scripts/ci/read-platform-msrv.sh")"
 export TEST_MSRV
 export TEST_REJECT=no TEST_CANDID=no
+: > "$TEST_CALLS"
+if TEST_DIRECT_CBOR=yes "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" principal > "$fixture/cbor-refusal.log" 2>&1; then
+    echo 'Standalone consumer admitted direct CBOR' >&2; exit 1
+fi
+grep -q 'platform-consumer-proof -> serde_cbor' "$fixture/cbor-refusal.log"
+[[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled after direct CBOR rejection' >&2; exit 1; }
 while IFS=$'\t' read -r capability _ _ wasm _; do
     TEST_CANDID=no
     if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi

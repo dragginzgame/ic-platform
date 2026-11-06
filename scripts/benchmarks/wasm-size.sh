@@ -74,6 +74,7 @@ ic-platform = { path = $quoted_source, default-features = false, features = ["ic
 serde_json = { version = "1.0", optional = true }
 MANIFEST
 cargo "+$toolchain" metadata --manifest-path "$output/Cargo.toml" --offline --format-version 1 > "$output/metadata.json" 2> "$output/metadata.log"
+bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$output" --external-ic
 shasum -a 256 "$output/src/lib.rs" "$output/Cargo.toml" "$output/Cargo.lock" > "$output/probe-sha256.txt"
 printf 'recipe\tcapability\traw_bytes\tcode_bytes\tcustom_bytes\toptimized_bytes\toptimized_code_bytes\toptimized_custom_bytes\n' > "$output/sizes.tsv"
 for recipe in $recipes; do

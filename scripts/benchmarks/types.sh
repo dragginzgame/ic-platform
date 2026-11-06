@@ -15,7 +15,7 @@ edition = "2024"
 category = "benchmarks"
 [workspace]
 [dependencies]
-ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["icrc-ledger-types"] }
+ic-platform = { path = "../../../crates/ic-platform", default-features = false, features = ["icrc-ledger-types"] }
 [profile.release]
 opt-level = 3
 lto = false
@@ -24,5 +24,6 @@ panic = "abort"
 MANIFEST
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --format-version 1 > "$fixture/metadata.json"
+bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 CARGO_BUILD_JOBS=4 cargo run --manifest-path "$fixture/Cargo.toml" --release --frozen > "$fixture/results.tsv"
 printf 'Type size and Account timing evidence: %s\n' "$fixture"

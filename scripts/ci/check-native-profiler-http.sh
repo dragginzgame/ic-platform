@@ -27,6 +27,7 @@ fi
 bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler.txt"
 rustfmt --check --edition 2024 "$source"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --format-version 1 --offline > "$fixture/metadata.json"
+bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 cargo clippy --manifest-path "$fixture/Cargo.toml" --all-targets --frozen -- -D warnings
 cargo test --manifest-path "$fixture/Cargo.toml" --lib --frozen
 cmp "$source" "$fixture/src/lib.rs"

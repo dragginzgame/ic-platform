@@ -2,8 +2,8 @@
 
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
-records the installed revision; do not edit its payloads. Shared 0.30.5 at
-`be3771031ebfb340583b238dee5446be65929c62` is the adopted baseline.
+records the installed revision; do not edit its payloads. Shared 0.30.7 at
+`22a853e26c05ec323f06c57fa316c08b808f252b` is the adopted baseline.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
