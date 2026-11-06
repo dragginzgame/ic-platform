@@ -1,10 +1,28 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { readFileSync } from 'node:fs';
 import { Cbor, Endpoint, Expiry, requestIdOf } from '@icp-sdk/core/agent';
 import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Principal } from '@icp-sdk/core/principal';
 import { inspectCallIngress, inspectIngress } from '../dist/agent.js';
 import { callWithMethodFixture, corruptCertificateSignatureFixture, readStateResponseFixture, invalidCertificateFixture, queryReplyFixture } from '../dist/testing.js';
+
+test('shared Rust ingress corpus preserves full-content request identity', () => {
+  const corpus = readFileSync(new URL('../../../crates/ic-platform/tests/fixtures/ingress.tsv', import.meta.url), 'utf8');
+  for (const line of corpus.trim().split('\n').filter(line => !line.startsWith('#'))) {
+    const [name, hex, , accepted, expiry, id] = line.split('\t');
+    const bytes = new Uint8Array(Buffer.from(hex, 'hex'));
+    const before = bytes.slice();
+    if (accepted === 'true') {
+      const result = inspectCallIngress(bytes);
+      assert.equal(String(result.ingressExpiry), expiry, name);
+      assert.equal(Buffer.from(result.requestId).toString('hex'), id, name);
+    } else {
+      assert.throws(() => inspectCallIngress(bytes), TypeError, name);
+    }
+    assert.deepEqual(bytes, before, name);
+  }
+});
 
 function content(overrides = {}) {
   return {

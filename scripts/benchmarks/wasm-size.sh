@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Manual, serial size qualification. No installs, sibling edits or root lock writes.
+# Serial size qualification. No installs, sibling edits or root lock writes.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 [[ $# -le 2 ]] || { echo 'usage: wasm-size.sh [PLATFORM_SOURCE [NEW_OUTPUT_DIRECTORY]]' >&2; exit 2; }
 source_root="$(cd "${1:-$root}" && pwd -P)"
@@ -16,7 +16,7 @@ recipes="${WASM_BENCH_RECIPES:-3-none-16 3-thin-1 3-fat-1 s-fat-1 z-fat-1}"
 cpubits="${WASM_BENCH_CPUBITS:-auto}"
 case "$cpubits" in auto|32|64) ;; *) echo 'WASM_BENCH_CPUBITS must be auto, 32 or 64' >&2; exit 2 ;; esac
 for profile in $profiles; do
-    case "$profile" in principal|principal-binary|principal-self-auth|runtime|external-candid|candid-exact|candid-sequence|candid-sequence-one|verification|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
+    case "$profile" in principal|principal-binary|principal-self-auth|runtime|external-candid|candid-exact|candid-sequence|candid-sequence-one|verification|certification-cbor|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
 done
 for recipe in $recipes; do
     case "$recipe" in 3-none-16|3-thin-1|3-fat-1|s-fat-1|z-fat-1) ;; *) echo "Unknown size recipe: $recipe" >&2; exit 2 ;; esac
@@ -65,6 +65,7 @@ candid-exact = ["ic-platform/candid", "ic-platform/management-canister-types"]
 candid-sequence = ["ic-platform/candid"]
 candid-sequence-one = ["candid-sequence"]
 verification = ["ic-platform/signature-verification"]
+certification-cbor = ["ic-platform/certification-cbor"]
 bls = ["ic-platform/bls"]
 ecdsa = ["ic-platform/ecdsa"]
 ecdsa-instructions = ["ecdsa"]

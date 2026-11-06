@@ -1,4 +1,25 @@
-# Current handoff — 2026-11-05
+# Current handoff — 2026-11-06
+
+## Pending audit improvements
+
+The maintainer selected audit items 2–10, explicitly excluding #50. The working
+tree adds CBOR fuzz coverage, a shared Rust/browser ingress corpus, Wasm regression
+comparison/CI, and a stable-order executor tail-removal fast path. Pending notes
+are Platform 0.23.3 and Runtime 0.19.3; package versions are unchanged.
+The unrelated Candid lock draft is preserved. No sibling edits or releases occurred.
+
+Focused Clippy/tests and installed Runtime/Timers qualification pass. Final-source
+fuzzing passed 420,463 executions. Reverse cancellation of 8,192 tasks improved
+from 7.55 ms to 0.14 ms in a native benchmark; the optimised Runtime probe grows
+58 bytes in both module and code section. These are not application IC timings.
+Two decoder allocation prototypes were reverted after adding roughly 9 KB each;
+Candid traversal was measured but remains unchanged. See the
+[audit evidence and limitations](../audits/platform-improvements-2026-11-06.md).
+The maintainer authorized this batch's scoped commit/push and hosted qualification,
+excluding the lock draft and package publication. Release-group activation awaits
+fresh committed-input Linux/macOS qualification;
+native Profiler macOS/Bazel qualification remains incomplete. No host allowance
+was enabled and hosted execution is not claimed.
 
 ## Published Platform 0.23.2
 

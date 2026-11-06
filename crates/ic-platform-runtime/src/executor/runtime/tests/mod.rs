@@ -2,6 +2,63 @@ use super::*;
 use std::{future::poll_fn, rc::Rc};
 
 #[test]
+fn task_removal_preserves_remaining_membership_order() {
+    in_tracking_executor_context(|| {
+        let handles: Vec<_> = (0..5)
+            .map(|_| spawn_protected(std::future::pending()))
+            .collect();
+        let method = CURRENT_METHOD.get().unwrap();
+        cancel_task(&handles[4]); // tail fast path
+        cancel_task(&handles[1]); // stable interior removal
+        METHODS.with_borrow(|methods| {
+            assert_eq!(
+                methods[method].tasks,
+                [handles[0].task_id, handles[2].task_id, handles[3].task_id]
+            )
+        });
+        cancel_task(&handles[4]); // stale handle cannot remove another task
+        cancel_task(&handles[3]);
+        METHODS.with_borrow(|methods| {
+            assert_eq!(
+                methods[method].tasks,
+                [handles[0].task_id, handles[2].task_id]
+            )
+        });
+    });
+    assert!(TASKS.with_borrow(|tasks| tasks.is_empty()));
+}
+
+#[test]
+#[ignore = "manual release-mode task-removal benchmark; no IC execution"]
+fn benchmark_protected_task_removal() {
+    for count in [1, 32, 1024, 8192] {
+        for reverse in [false, true] {
+            let mut elapsed = std::time::Duration::ZERO;
+            for _ in 0..20 {
+                in_tracking_executor_context(|| {
+                    let mut handles: Vec<_> = (0..count)
+                        .map(|_| spawn_protected(std::future::pending()))
+                        .collect();
+                    if reverse {
+                        handles.reverse();
+                    }
+                    let start = std::time::Instant::now();
+                    for handle in &handles {
+                        cancel_task(handle);
+                    }
+                    elapsed += start.elapsed();
+                    assert!(TASKS.with_borrow(|tasks| tasks.is_empty()));
+                });
+            }
+            eprintln!(
+                "protected-removal count={count} reverse={reverse} mean_ns={}",
+                elapsed.as_nanos() / 20
+            );
+        }
+    }
+}
+
+#[test]
 fn protected_query_self_wakeup_completes_and_reuses_waker() {
     let polls = Rc::new(Cell::new(0));
     let observed = polls.clone();

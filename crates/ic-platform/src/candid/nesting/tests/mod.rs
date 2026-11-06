@@ -1,5 +1,35 @@
 use super::*;
 use crate::candid::{self, contract};
+
+#[test]
+#[ignore = "manual release-mode admission benchmark; preserves existing work quotas"]
+fn benchmark_shared_type_paths() {
+    for levels in [4u8, 8, 12, 16] {
+        let mut bytes = b"DIDL".to_vec();
+        bytes.push(levels);
+        for index in 0..levels {
+            let child = if index + 1 == levels { 0x7f } else { index + 1 };
+            bytes.extend([0x6c, 2, 0, child, 1, child]);
+        }
+        bytes.push(0);
+        for quota in [1000, 1_000_000] {
+            let limits = DecodeLimits {
+                decoding_quota: quota,
+                skipping_quota: 0,
+                ..wire()
+            };
+            let start = std::time::Instant::now();
+            let mut accepted = 0;
+            for _ in 0..100 {
+                accepted += usize::from(check(std::hint::black_box(&bytes), limits).is_ok());
+            }
+            eprintln!(
+                "type-paths levels={levels} quota={quota} accepted={accepted} mean_ns={}",
+                start.elapsed().as_nanos() / 100
+            );
+        }
+    }
+}
 fn wire() -> DecodeLimits {
     DecodeLimits {
         reply_bytes: 1_000_000,

@@ -4,11 +4,14 @@
 // Its canonical source is formatted separately by FORMAT_EXTRA_SOURCES.
 #[rustfmt::skip]
 mod candid_malformed;
+#[rustfmt::skip]
+mod cbor_malformed;
 
 use ic_platform::{Account, Principal, account::ExternalAccount, principal::ExternalPrincipal};
 
 libfuzzer_sys::fuzz_target!(|data: &[u8]| {
     candid_malformed::exercise(data);
+    cbor_malformed::exercise(data);
     if let Ok(text) = std::str::from_utf8(data) {
         let owned = Principal::from_text(text);
         if text.len() <= Principal::MAX_LENGTH_IN_TEXT {

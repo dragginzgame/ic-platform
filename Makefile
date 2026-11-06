@@ -8,6 +8,7 @@ FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/ic0-consumer/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/canic-wasm-benchmark/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard crates/ic-platform-macros/src/export/tests/linking/*.rs)
 FORMAT_EXTRA_SOURCES += crates/ic-platform/tests/fixtures/candid_malformed.rs
+FORMAT_EXTRA_SOURCES += crates/ic-platform/tests/fixtures/cbor_malformed.rs
 # Independent groups require a visible selection before any recipe or setup.
 ifneq ($(filter-out release-editor-check,$(filter release-% version publish publish-check,$(MAKECMDGOALS))),)
 ifeq ($(RELEASE_GROUP),platform)

@@ -2,6 +2,23 @@ use super::*;
 use serde_cbor::Value;
 const LIMITS: DecodeLimits = DecodeLimits { bytes: 65_536 };
 
+#[test]
+fn pruned_digest_accepts_exact_bytes_including_chunks_and_refuses_coercions() {
+    let mut chunked = vec![0x82, 4, 0x5f, 0x50];
+    chunked.extend([7; 16]);
+    chunked.push(0x50);
+    chunked.extend([7; 16]);
+    chunked.push(0xff);
+    assert_eq!(decode_hash_tree(&chunked, LIMITS).unwrap(), pruned([7; 32]));
+    for size in [0, 31, 32, 33, 256] {
+        let bytes = encode(&array(vec![tag(4), Value::Bytes(vec![7; size])]));
+        assert_eq!(decode_hash_tree(&bytes, LIMITS).is_ok(), size == 32);
+    }
+    for payload in [Value::Text("a".repeat(32)), array(vec![tag(7); 32])] {
+        assert!(decode_hash_tree(&encode(&array(vec![tag(4), payload])), LIMITS).is_err());
+    }
+}
+
 #[cfg(all(feature = "agent", not(target_family = "wasm")))]
 #[test]
 fn decoded_certificate_has_the_native_agent_identity() {

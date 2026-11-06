@@ -203,7 +203,13 @@ pub(crate) fn delete_task(task_id: TaskId) {
     if let Some(method_id) = _task.as_ref().and_then(|task| task.method_binding) {
         METHODS.with_borrow_mut(|methods| {
             if let Some(method) = methods.get_mut(method_id) {
-                method.tasks.retain(|id| *id != task_id);
+                // The common single-task and reverse-completion cases need no
+                // scan. Other removals retain the original cancellation order.
+                if method.tasks.last() == Some(&task_id) {
+                    method.tasks.pop();
+                } else {
+                    method.tasks.retain(|id| *id != task_id);
+                }
             }
         });
     }

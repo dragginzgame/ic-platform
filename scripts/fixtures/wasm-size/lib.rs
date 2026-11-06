@@ -11,6 +11,17 @@ fn reply(bytes: &[u8]) {
     ic_platform::ic0::msg_reply();
 }
 
+#[cfg(feature = "certification-cbor")]
+#[unsafe(export_name = "canister_query decode_tree")]
+pub extern "C" fn decode_tree() {
+    let bytes = input();
+    let result = ic_platform::certification::cbor::strict::decode_hash_tree(
+        &bytes,
+        ic_platform::certification::cbor::strict::DecodeLimits { bytes: bytes.len() },
+    );
+    reply(&[u8::from(result.is_ok())]);
+}
+
 #[cfg(feature = "ecdsa")]
 #[unsafe(export_name = "canister_query verify_ecdsa")]
 pub extern "C" fn verify_ecdsa() {

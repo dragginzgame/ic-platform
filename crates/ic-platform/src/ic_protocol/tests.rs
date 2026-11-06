@@ -284,3 +284,31 @@ fn typed_protocol_fixtures_keep_payload_ranges_and_strict_rejections() {
     let bytes = encode_certificate_untagged(&certificate, 1024).unwrap();
     assert_eq!(bytes, serde_cbor::to_vec(&certificate).unwrap());
 }
+#[test]
+fn shared_browser_ingress_corpus_preserves_bytes_and_request_identity() {
+    for line in include_str!("../../tests/fixtures/ingress.tsv").lines() {
+        if line.starts_with('#') {
+            continue;
+        }
+        let fields: Vec<_> = line.split('\t').collect();
+        let bytes: Vec<u8> = fields[1]
+            .as_bytes()
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
+            .collect();
+        let result = super::decode_call_content_strict(&bytes, bytes.len());
+        assert_eq!(result.is_ok(), fields[2] == "true", "{}", fields[0]);
+        if let Ok(content) = result {
+            let id = ic_transport_types::to_request_id(&content)
+                .unwrap()
+                .to_string();
+            assert_eq!(id, fields[5], "{}", fields[0]);
+            let super::EnvelopeContent::Call { ingress_expiry, .. } = content else {
+                panic!()
+            };
+            assert_eq!(ingress_expiry.to_string(), fields[4]);
+        }
+    }
+}

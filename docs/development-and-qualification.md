@@ -28,11 +28,43 @@ Historical measurements and reproduction instructions are in
 [the benchmark report](../docs/benchmarks/0.4/README.md).
 `bash scripts/ci/fuzz-parsers.sh` runs a separate 60-second coverage-guided
 Principal/Account differential campaign and caller-budgeted Candid decoding
-through all three public decoder policies. Deterministic recursive-type,
-overlong-header, extra-argument and truncation cases also run in consumer tests. Prepare nightly-2026-07-29, a C++
+through all three public decoder policies, plus strict certificate/hash-tree and
+typed IC packet CBOR decoding. Strict successful decodes are compared with the
+upstream representation; byte-budget refusals are checked independently.
+Deterministic recursive-type, overlong-header, extra-argument, CBOR mutation and
+truncation cases also run in consumer tests. Prepare nightly-2026-11-05, a C++
 compiler and registry sources explicitly first; the command installs nothing.
-It retains its corpus, crash artifacts and disposable lock under `target/`.
+It retains its corpus, full log, crash artifacts and disposable lock under `target/`.
+The sanitizer needs host process inspection; a sandbox refusal is not a passing
+campaign and must not be hidden by disabling the sanitizer.
 This tooling-only libFuzzer selection does not enter consumer dependency graphs.
+
+### Wasm regression comparison
+
+Run `bash scripts/benchmarks/check-wasm-size-regression.sh BASE_REF [MAX_GROWTH_BYTES]`
+with the compiler, registry sources and `ic-wasm` already prepared. The default
+profiles are binary Principal, Runtime, external Candid, signature verification
+and strict certificate CBOR, using one `3-fat-1` recipe. `WASM_BENCH_PROFILES`
+selects a smaller affected subset. Both arms use the same current probe source,
+compiler, recipe and current dependency lock; this isolates implementation changes,
+not dependency-upgrade effects. Incompatible resolved external locks refuse comparison.
+The separate asynchronous Wasm size workflow runs the default selection on relevant
+PRs and retains total uncompressed and code-section measurements before/after
+optimisation. Its default allowance is 128 bytes per measurement; dispatch can
+choose an explicit allowance. This is a regression trigger, not a consumer Wasm
+budget, instruction benchmark or permission to weaken verification.
+
+`node --test scripts/benchmarks/tests/compare-wasm-sizes.test.mjs` checks comparison
+admission. The shared ingress corpus at
+`crates/ic-platform/tests/fixtures/ingress.tsv` is exercised by Rust unit tests
+with `ic-protocol` and browser `ingress.test.mjs`. It deliberately records the
+browser's extension-field acceptance and Rust's upstream text-to-byte coercion;
+neither inspection API authenticates requests or replaces original signed bytes.
+
+Manual release-mode benchmarks are ignored by ordinary tests:
+`cargo test -p ic-platform-runtime --features executor --release --lib benchmark_protected -- --ignored --nocapture`
+and `cargo test -p ic-platform --features candid --release --lib benchmark_shared_type -- --ignored --nocapture`.
+These measure native bookkeeping/admission, not installed Wasm instructions.
 
 Consumers own schemas, authentication, byte/work budgets, deadlines, retries and
 recovery. IC Wire owns controlled application protocols. Candid remains required

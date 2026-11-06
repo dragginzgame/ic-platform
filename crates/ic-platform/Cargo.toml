@@ -294,5 +294,9 @@ name = "candid_endpoint_consumer"
 path = "tests/candid_endpoint_consumer.rs"
 required-features = ["candid-endpoint", "candid-service"]
 
+[[test]]
+name = "cbor_malformed"
+required-features = ["ic-protocol"]
+
 [lints]
 workspace = true

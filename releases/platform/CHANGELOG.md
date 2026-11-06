@@ -4,6 +4,15 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.23.3] - Unreleased
+
+### 🧪 Testing
+
+- Extend malformed-input fuzzing to certificate, hash-tree and typed IC packet
+  CBOR, and share ingress compatibility fixtures between Rust and the browser.
+- Compare representative Wasm capabilities against a committed baseline with
+  identical build inputs, reporting total and code-section growth separately.
+
 ## [0.23.2] - 2026-11-05
 
 ### ➕ Added

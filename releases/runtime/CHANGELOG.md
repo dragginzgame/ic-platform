@@ -4,6 +4,14 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.19.3] - Unreleased
+
+### ⚡ Performance
+
+- Avoid scanning protected-task membership when removing its final entry,
+  preserving cancellation order and callback/trap cleanup. Retain a focused
+  native benchmark for forward and reverse removal patterns.
+
 ## [0.19.2] - 2026-11-05
 
 ### 🔧 Maintenance

@@ -1,0 +1,81 @@
+name: Wasm size regression
+
+on:
+  pull_request:
+    paths:
+      - Cargo.toml
+      - Cargo.lock
+      - rust-toolchain.toml
+      - crates/**
+      - scripts/benchmarks/**
+      - scripts/fixtures/wasm-size/**
+      - .github/workflows/wasm-size.yml
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: Committed baseline ref with the same dependency requirements
+        required: true
+        default: platform-v0.23.2
+      max_growth_bytes:
+        description: Maximum permitted growth per total/code-section measurement
+        required: true
+        default: '128'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - name: Prepare pinned tools and sources
+        run: |
+          rustup toolchain install --profile minimal --no-self-update
+          rustup target add wasm32-unknown-unknown
+          make install-host-tools install-ic-tools IC_TOOLS=ic-wasm
+          cargo fetch --locked
+      - name: Compare identical probe sources and build settings
+        env:
+          BASELINE: ${{ github.event.pull_request.base.sha || inputs.baseline }}
+          ALLOWANCE: ${{ inputs.max_growth_bytes || '128' }}
+        run: |
+          export PATH="$PWD/.tools/ic/bin:$PATH"
+          node --test scripts/benchmarks/tests/compare-wasm-sizes.test.mjs
+          bash scripts/benchmarks/check-wasm-size-regression.sh "$BASELINE" "$ALLOWANCE"
+      - name: Retain measurements and input identities
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: wasm-size-regression
+          path: |
+            target/evidence/wasm-regression.*/baseline-commit
+            target/evidence/wasm-regression.*/deltas.tsv
+            target/evidence/wasm-regression.*/before/*.txt
+            target/evidence/wasm-regression.*/after/*.txt
+            target/evidence/wasm-regression.*/before/*.tsv
+            target/evidence/wasm-regression.*/after/*.tsv
+            target/evidence/wasm-regression.*/before/*.log
+            target/evidence/wasm-regression.*/after/*.log
+            target/evidence/wasm-regression.*/before/Cargo.lock
+            target/evidence/wasm-regression.*/after/Cargo.lock
+            target/evidence/wasm-regression.*/before/Cargo.toml
+            target/evidence/wasm-regression.*/after/Cargo.toml
+            target/evidence/wasm-regression.*/before/src/lib.rs
+            target/evidence/wasm-regression.*/after/src/lib.rs
+            target/evidence/wasm-regression.*/after/source.patch
+            target/evidence/wasm-regression.*/before/*.wasm
+            target/evidence/wasm-regression.*/after/*.wasm
+          if-no-files-found: warn

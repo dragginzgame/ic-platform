@@ -197,7 +197,9 @@ reports are under `target/issue-137-native-41625352854/`. Each artifact includes
 its exact synthetic source identity/bundle, four receipts, stage logs, timing
 and installed-profile evidence.
 
-The allowlist now enables those three qualified host identities. The qualified
+That activation enabled those three qualified host identities. Following #139's
+client retirement, the allowlist was emptied; this four-group evidence does not
+activate the current three-group mapping. The qualified
 selector, receipt, recovery and runner code is unchanged by activation. Fresh
 releases still execute every required stage; these qualification receipts cannot
 be reused as release receipts. The first release containing this shared-script
