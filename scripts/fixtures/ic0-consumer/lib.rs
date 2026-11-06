@@ -8,3 +8,8 @@ pub fn stable_io(pages: u64, offset: u64, written: &[u8], read: &mut [u8]) -> (u
     ic_platform_runtime::ic0::stable64_read(read, offset);
     (before, growth)
 }
+
+/// Fill an uninitialized destination through the same safe IC0-only boundary.
+pub fn stable_read_uninit(offset: u64, read: &mut [std::mem::MaybeUninit<u8>]) {
+    ic_platform_runtime::ic0::stable64_read_uninit(read, offset);
+}

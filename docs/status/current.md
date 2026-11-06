@@ -1,5 +1,17 @@
 # Current handoff — 2026-11-06
 
+## Authorized Runtime export restoration
+
+The maintainer now explicitly supersedes the earlier deployment exclusion of
+`stable64_read_uninit` and requests Runtime publication before Storage adoption
+and deployment. The restored export and IC0-only compile fixture come from
+retained commit `998764c3a4d2a80db2b64a8521f3a0580b91a64d`; the imported
+implementation body remains unchanged. Runtime **0.19.4** is the pending release
+for Runtime, macros and its exact singleton guard. Platform, Types and browser
+versions remain unchanged. The existing lock draft is excluded from qualification
+and will be restored afterward. Frozen release activation remains unqualified;
+the standard workflow applies.
+
 ## Platform 0.23.4 publication and Shared 0.30.7 adoption
 
 Shared **0.30.7** at `22a853e26c05ec323f06c57fa316c08b808f252b`
@@ -54,6 +66,11 @@ Shared's frozen batch runner is supplied but **not activated**: Platform must
 qualify its actual release/publication hooks, recovery and normal-lock edit
 isolation before setting `RELEASE_FROZEN_GROUPS`. The current standard release
 workflow and empty native-host allowlist remain in force.
+The subsequent [frozen readiness check](../platform-release-validation.md#frozen-readiness-check-2026-11-06)
+passed Shared's 18 focused runner checks, but actual Platform startup refused
+missing candidate-local tools before preflight. Platform's outer Make guard also
+rejects a batch-only roster. These checks used disposable sources/local remotes;
+no release or upload occurred, and the normal lock draft remained unchanged.
 
 ## Previous verified three-group publication
 
@@ -108,7 +125,9 @@ traversal remains unchanged. Final-source fuzzing passed 420,463 executions.
 
 ## Exclusions and restored draft
 
-The maintainer excluded the concurrent stable64_read_uninit export. Its complete
+For the earlier 0.19.3 deployment, the maintainer excluded the concurrent
+stable64_read_uninit export. That exclusion is superseded by the restoration
+authority above. Its complete
 commit remains at `refs/retained/runtime-stable-read-uninit-20261106`; forward
 revert `3ad71e6` removed it from release source. The published Runtime archive's
 public IC0 module was independently checked to exclude the export.

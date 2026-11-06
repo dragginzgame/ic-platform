@@ -7,6 +7,42 @@ ordering and preservation of concurrent normal-checkout lock edits. Snapshot
 adoption and synthetic runner tests do not establish that evidence. Releases
 continue through the existing workflow described below.
 
+### Frozen readiness check, 2026-11-06
+
+Shared 0.30.7's focused frozen-runner suite passed **18 checks** against its
+committed supplier source, copied with the declared companions into Platform's
+disposable validation area. It exercised sequential groups, deferred normal-lock
+edits, durable delivery commits, completed resume, interrupted second-group
+recovery and uncertain-publication refusal/reconciliation. Evidence:
+`target/platform-frozen-runner.XZAu3D/test.log`. Its synthetic consumers and
+publication trace do not qualify Platform's actual hooks or registry delivery.
+
+A second probe used Platform source `d4ef6dbe0344473925f3eb592982522a9ea8e5ec`,
+the actual Make/release hooks and a local bare Git remote. The frozen runner
+created its managed checkout and durable journal, but stopped at the first
+`release-version` lookup. Evidence: `target/platform-frozen-probe.aegDdE/`.
+
+| Admission boundary | Observed result |
+| --- | --- |
+| Cold candidate tools | `cargo-release-group.sh` cannot find the candidate-local `.tools/host/bin/yq`; version lookup precedes release preflight/tool preparation. |
+| Cold metadata editor | `release-editor-check` independently refuses the missing candidate-local `ic-build 0.73.0` selection. Preparing only yq would not establish readiness. |
+| Outer batch selection | `make release-patch RELEASE_FROZEN_GROUPS=types,runtime,platform` is refused by Platform's single-group Make guard before dispatch. |
+| Dirty starting source | A synthetic deferred lock edit correctly refuses a new batch. Frozen execution isolates edits made after capture; it does not admit an already dirty starting selection. |
+| Normal checkout custody | The real Platform Cargo.lock hash is unchanged before/after the probes. No real remote, tag, package version or registry upload was changed. |
+
+Activation therefore requires an admitted candidate-local tool bootstrap before
+the runner's first version lookup, plus Platform Make admission for an explicit
+batch roster. The current supplier interface has no preparation hook at that
+point. Do not work around this by linking normal-checkout tools, falling back to
+unqualified system binaries or editing snapshot payloads.
+
+After those interfaces are integrated, the actual three-group hooks still need
+the qualification described above: clean locked builds and archives, publication
+receipt custody, a normal-lock edit during execution, supplier ordering,
+interruption/resume and remote advancement. The ordinary 0.23.4 release receipt
+does not establish frozen-checkout qualification. Frozen delivery remains off;
+these probes ran no full product matrix or real publication.
+
 `release-verify` now dispatches a fresh source-bound plan through Shared's
 [plan interface](release-group-validation.md). The qualified-host allowlist in
 `ci/release-validation-hosts.json` is empty following #139’s client retirement.
