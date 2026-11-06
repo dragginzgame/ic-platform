@@ -1,11 +1,31 @@
 # Current handoff — 2026-11-06
 
-## Local Shared 0.30.7 adoption
+## Platform 0.23.4 publication and Shared 0.30.7 adoption
 
 Shared **0.30.7** at `22a853e26c05ec323f06c57fa316c08b808f252b`
 is installed through the canonical exporter; all 141 payloads match that commit.
-This adoption is local and unpublished, with no package version changes. The
-previously restored Cargo.lock draft below is preserved unchanged.
+Platform **0.23.4** is published on crates.io and GitHub at release commit
+`31649c18cea503aba279b7f15996d80575075216`, annotated tag `platform-v0.23.4`.
+The downloaded non-yanked crate's checksum and clean embedded VCS commit match;
+the remote annotated tag object and peeled commit match the local release.
+Verification, archive and publication evidence is under
+`target/deployment-platform-0234/` (`verified.json`, `publish.log`). Runtime
+**0.19.3**, Types **0.18.2** and browser **0.2.0** remain unchanged.
+
+All **20** local release stages passed on Rust 1.99.1, including the complete
+native/Wasm feature matrix, standalone consumers and all installed owner/Timers
+profiles. The full, fresh qualification is
+`target/release-validation/qualification.KkXPfO/`, bound to implementation source
+`3ac90c4cd1a0a81230f381d07c074d2df32e450c`; metadata preparation and recovery
+re-admitted its receipt before release delivery. Hosted integration/native CI
+remains asynchronous; no new macOS or native Profiler qualification is claimed.
+
+The separate Candid/derive 0.10.40 and cc 1.11.1 Cargo.lock draft is restored,
+preserving all published owner versions, including Platform 0.23.4. Its complete
+original is retained at `refs/retained/platform-0307-deploy-lock-draft`; the
+original/restored patches under `target/deployment-platform-0234/` match after
+excluding their base-blob index lines. Only that draft remains dirty after the
+handoff commit. Never restore an old whole lock over current release identities.
 
 The boundary gate now includes Shared's lexical Rust CBOR check. Exact
 file/crate allowances cover Platform's typed codec implementations/integration
@@ -23,8 +43,8 @@ owner/Timers locked graphs, incompatible-Timers refusal, three-group release
 routing with substitute runners, facade and driver Clippy, 15 codec tests,
 malformed CBOR smoke tests, six driver unit tests and packed browser consumers.
 The coverage-guided fuzz campaign was not rerun for this adoption.
-These are Linux-focused checks,
-not a full release gate or new macOS/native Profiler qualification. See
+These earlier focused checks are separate from the full gate above and do not
+qualify macOS/native Profiler. See
 [development qualification](../development-and-qualification.md#candid-and-cbor-source-admission-and-experiment-retention).
 The changed certificate decoder also passed one installed Wire owner profile
 (raw awaits, callback cleanup, upgrade, stable rollback and certificate lookup);
@@ -35,9 +55,9 @@ qualify its actual release/publication hooks, recovery and normal-lock edit
 isolation before setting `RELEASE_FROZEN_GROUPS`. The current standard release
 workflow and empty native-host allowlist remain in force.
 
-## Verified three-group publication
+## Previous verified three-group publication
 
-The authorized deployment is complete on crates.io and GitHub:
+The preceding three-group deployment completed on crates.io and GitHub:
 
 | Group | Published members | Version | Annotated tag | Release commit |
 | --- | --- | --- | --- | --- |
