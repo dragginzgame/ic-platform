@@ -781,7 +781,7 @@ dependencies = [
  "ic-management-canister-types",
  "ic-platform-macros",
  "ic-platform-runtime",
- "ic-platform-types 0.18.1",
+ "ic-platform-types 0.18.2",
  "serde",
  "serde_bytes",
 ]
@@ -814,7 +814,7 @@ version = "0.19.2"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
- "ic-platform-types 0.18.1",
+ "ic-platform-types 0.18.2",
  "pin-project-lite",
  "serde",
  "slotmap",
@@ -827,7 +827,7 @@ version = "0.19.2"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.18.1"
+version = "0.18.2"
 dependencies = [
  "crc32fast",
  "data-encoding",
