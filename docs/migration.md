@@ -1,14 +1,16 @@
 # Candid and runtime ownership
 
-## Uninitialized stable reads (pending Runtime 0.19.4)
+## Uninitialized stable reads (Runtime 0.19.4)
 
 Runtime's `ic0::stable64_read_uninit(&mut [MaybeUninit<u8>], offset)` exposes
 the existing safe imported IC0 helper. A successful call initializes the whole
 buffer; invalid stable ranges trap. It permits Storage to retain ICSS's direct
 uninitialized-read path without adding another system-call binding. The export
 adds no dependency, executor, Types capability or allocation authority. Existing
-initialized reads are unchanged. Storage adoption requires a supplying Runtime
-publication; local qualification alone does not establish registry availability.
+initialized reads are unchanged. Registry consumers require Runtime >=0.19.4
+with `default-features = false` and `features = ["ic0"]`. Native/Wasm registry
+consumer proofs retain the exact supplying package and dependency-free graph;
+Storage retains its own installed IO, initialization and upgrade qualification.
 
 ## ICP account identifier (Platform 0.23.3)
 

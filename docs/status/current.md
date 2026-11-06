@@ -1,16 +1,39 @@
 # Current handoff — 2026-11-06
 
-## Authorized Runtime export restoration
+## Runtime 0.19.4 published: safe uninitialized stable reads
 
 The maintainer now explicitly supersedes the earlier deployment exclusion of
 `stable64_read_uninit` and requests Runtime publication before Storage adoption
-and deployment. The restored export and IC0-only compile fixture come from
+and deployment. Runtime, macros and the exact singleton guard **0.19.4** are
+published on crates.io and GitHub at `8ec8a395a54998bca3e995ea1a78c07e9977eff0`,
+annotated tag `runtime-v0.19.4`. All three downloaded, non-yanked archives match
+registry checksums and that clean embedded source commit; the remote annotated
+tag object and peeled commit match. The restored export and IC0-only fixture come from
 retained commit `998764c3a4d2a80db2b64a8521f3a0580b91a64d`; the imported
-implementation body remains unchanged. Runtime **0.19.4** is the pending release
-for Runtime, macros and its exact singleton guard. Platform, Types and browser
-versions remain unchanged. The existing lock draft is excluded from qualification
-and will be restored afterward. Frozen release activation remains unqualified;
-the standard workflow applies.
+implementation body remains unchanged.
+
+All **20** local release stages passed on Rust 1.99.1, including the full
+native/Wasm feature matrix, source guards, consumers and installed owner/Timers
+profiles. Receipt: `target/release-validation/qualification.KC2SnU/receipt.json`.
+The exact registry Runtime additionally passes native/Wasm Clippy and compilation
+of the restored API with only `ic0`; its normal/build graph contains just Runtime
+and the proof consumer. This is published-API compilation evidence; Storage's
+installed uninitialized-read behavior remains its consumer qualification.
+Verification, publication and registry-consumer logs are retained under
+`target/deployment-runtime-0194/`. Hosted native CI remains asynchronous; no new
+macOS or native Profiler qualification is claimed.
+
+Platform **0.23.4**, Types **0.18.2** and browser **0.2.0** remain unchanged.
+The separate Candid/derive 0.10.40 and cc 1.11.1 lock draft is restored, retaining
+all current owner versions. Its original is protected at
+`refs/retained/runtime-0194-deploy-lock-draft`; original/restored patches under
+the evidence directory match after excluding their base-blob index lines.
+Never restore an old whole lock over the published release identities.
+
+The maintainer assigned Storage adoption/deployment back to its active session;
+this session changed no Storage source, manifest or lockfile. Both maintained
+Storage workspaces must select published Runtime >=0.19.4 before delivery.
+Frozen release activation remains unqualified; the standard workflow applies.
 
 ## Platform 0.23.4 publication and Shared 0.30.7 adoption
 
@@ -21,8 +44,8 @@ Platform **0.23.4** is published on crates.io and GitHub at release commit
 The downloaded non-yanked crate's checksum and clean embedded VCS commit match;
 the remote annotated tag object and peeled commit match the local release.
 Verification, archive and publication evidence is under
-`target/deployment-platform-0234/` (`verified.json`, `publish.log`). Runtime
-**0.19.3**, Types **0.18.2** and browser **0.2.0** remain unchanged.
+`target/deployment-platform-0234/` (`verified.json`, `publish.log`). At that
+publication Runtime **0.19.3**, Types **0.18.2** and browser **0.2.0** were unchanged.
 
 All **20** local release stages passed on Rust 1.99.1, including the complete
 native/Wasm feature matrix, standalone consumers and all installed owner/Timers
@@ -129,7 +152,7 @@ For the earlier 0.19.3 deployment, the maintainer excluded the concurrent
 stable64_read_uninit export. That exclusion is superseded by the restoration
 authority above. Its complete
 commit remains at `refs/retained/runtime-stable-read-uninit-20261106`; forward
-revert `3ad71e6` removed it from release source. The published Runtime archive's
+revert `3ad71e6` removed it from release source. The published 0.19.3 Runtime archive's
 public IC0 module was independently checked to exclude the export.
 
 The exact unrelated Candid/derive 0.10.40 and cc 1.11.1 draft is restored in
