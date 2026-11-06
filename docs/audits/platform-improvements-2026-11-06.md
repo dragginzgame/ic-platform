@@ -22,7 +22,9 @@ focused evidence, not a release receipt or whole-stack security assessment.
   uncompressed modules and code sections are compared before and after shrinking.
   Mismatched tool identities, probe sources, external locks and profile selections
   refuse. Default growth allowance is 128 bytes per measurement, not an application
-  budget. Hosted execution awaits source delivery; only local evidence is claimed.
+  budget. Hosted runs are started after source delivery; their acceptance remains
+  separate from the local evidence recorded here. Invalid growth allowances are
+  rejected before baseline extraction/building, with focused CLI refusal tests.
 - Use `Vec::pop` for final protected-task membership removal. Non-tail removal
   remains stable; no task index, extra field, dependency or executor is introduced.
   Generation checks, cancellation order and destruction outside borrows remain.
@@ -86,8 +88,11 @@ Release-group activation remains incomplete: the existing qualification runner
 requires clean committed source, followed by full/selected and recovery evidence
 on Linux and both supported macOS hosts. Authorized integration excludes the user's
 lock draft and does not enable unqualified omissions.
-`ci/release-validation-hosts.json` remains empty. Use the existing Release validation
-qualification workflow after integration; no new release system is needed.
+`ci/release-validation-hosts.json` remains empty. The existing Release validation
+qualification workflow is used after integration and cancels superseded runs;
+no new release system is introduced. The CBOR integration target is explicitly
+native-only, matching its protocol dependency; both native and Wasm test-target
+Clippy selections pass.
 
 Native Profiler source is unchanged. Existing #140 Linux proof remains historical
 evidence; macOS and Bazel execution are still unavailable here (Linux host, no

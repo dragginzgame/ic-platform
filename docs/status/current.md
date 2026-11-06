@@ -19,7 +19,8 @@ The maintainer authorized this batch's scoped commit/push and hosted qualificati
 excluding the lock draft and package publication. Release-group activation awaits
 fresh committed-input Linux/macOS qualification;
 native Profiler macOS/Bazel qualification remains incomplete. No host allowance
-was enabled and hosted execution is not claimed.
+was enabled. Hosted qualification is authorized and tracked separately from the
+passing local evidence; starting a run does not establish acceptance.
 
 ## Published Platform 0.23.2
 

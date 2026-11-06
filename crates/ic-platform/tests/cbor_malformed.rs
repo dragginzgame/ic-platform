@@ -1,4 +1,6 @@
 //! Deterministic malformed-input coverage shared with the CBOR fuzzer.
+#![cfg(not(target_family = "wasm"))]
+
 mod fixtures {
     pub mod cbor_malformed;
 }
