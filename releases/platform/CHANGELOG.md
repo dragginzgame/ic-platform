@@ -4,6 +4,37 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.23.6] - Unreleased
+
+### 🩹 Fixed
+
+- Adopt Shared 0.31.1's Bash 3.2 checksum-parser correction for macOS tool setup.
+- Use Shared's portable checksum helper throughout the optional frozen-batch
+  qualifier, preserving archive checksum records without requiring GNU tools.
+- Refuse runtime-lock checks and preparation when the release-group roster
+  reader fails, including partial output, before changing either fixture lock.
+- Refuse embedded IC0/executor source verification when its checksum-roster
+  reader fails or emits no entries, including failure after partial output.
+
+### ⚡ Performance
+
+- Store Candid admission's type-child references in one shared buffer, preserving
+  traversal order, wire admission, work quotas and the 16-level nesting ceiling.
+  The matched external-Candid probe shrinks 372 total uncompressed bytes and
+  402 code-section bytes. A 1,024-type header uses 44% fewer IC instructions;
+  simple recursive refusals cost 161 additional instructions in the same probe.
+
+### 🔧 Tooling
+
+- Project adjacent release fields from one admitted group plan per command;
+  retain fresh admission at subsequent phases and all rollback/recovery cases.
+- Carry publication's admitted package selection into Clippy without changing
+  compiler or lint flags; ordinary release qualification retains its full gate.
+- Compare Wasm sizes on relevant main-branch pushes as well as pull requests
+  and manual dispatches.
+- Add opt-in matched System API and Candid admission instruction probes alongside
+  the existing Wasm size profiles; ordinary installed regressions stay separate.
+
 ## [0.23.5] - 2026-11-06
 
 ### 🩹 Fixed

@@ -18,7 +18,7 @@ spawning; and raw stable-byte passthroughs. The unused Candid checkpoint adapter
 and private stable IO machinery are retired in the 0.5 hard cut. No allocator,
 storage layout, manager or replacement checkpoint owner is introduced.
 No cryptographic implementation is imported or altered. The root-key system
-adapter retains its upstream bytes and construction unchanged.
+adapter retains its upstream bytes and IC execution-context restrictions.
 
 Changes from the import:
 
@@ -35,6 +35,10 @@ Changes from the import:
   1.2.0's all-or-trap initialization contract, then set the initialized length.
   This avoids requesting zero initialization before overwriting the same bytes.
   Caller admission, returned bytes and callback/trap machinery are unchanged.
+- Apply the same reviewed all-or-trap copy to reject/method text, root keys and
+  data certificates through the private `system_bytes` helper. Initialize the
+  vector length only after the complete IC0 copy, retaining UTF-8 admission,
+  certificate absence and IC execution-context restrictions. No crypto changes.
 - In 0.5 replace panic-prone timeout mutation with explicit WaitPolicy selection.
   The stored timeout and submission path retain their original representation
   and semantics; bounded constructors still select 300 seconds.

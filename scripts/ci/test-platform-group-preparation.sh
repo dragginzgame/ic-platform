@@ -119,14 +119,16 @@ for group in "${groups[@]}"; do
     bash scripts/release/adapter.sh check
     # Only the selected group's member literals, catalog requirements and ledger
     # change. Crypto/certification preparation preserves Runtime and Types.
+    git show HEAD:Cargo.toml | yq -p toml -o json '.' > "$fixture/catalog-before.json"
+    yq -p toml -o json '.' Cargo.toml > "$fixture/catalog-after.json"
     for other_group in platform runtime types; do
         [[ "$other_group" != "$group" ]] || continue
-        other_members="$(RELEASE_GROUP="$other_group" bash scripts/release/group.sh members)"
+        other_members="$(jq -r --arg group "$other_group" '.groups[] | select(.name == $group) | .members | join(" ")' ci/cargo-release-groups.json)"
         git diff --exit-code -- "releases/$other_group/CHANGELOG.md"
         for package in $other_members; do
             git diff --exit-code -- "crates/$package/Cargo.toml"
-            git show HEAD:Cargo.toml | yq -p toml -o json '.' | jq --arg package "$package" '.workspace.dependencies[$package]' > "$fixture/catalog-before"
-            yq -p toml -o json '.' Cargo.toml | jq --arg package "$package" '.workspace.dependencies[$package]' > "$fixture/catalog-after"
+            jq --arg package "$package" '.workspace.dependencies[$package]' "$fixture/catalog-before.json" > "$fixture/catalog-before"
+            jq --arg package "$package" '.workspace.dependencies[$package]' "$fixture/catalog-after.json" > "$fixture/catalog-after"
             cmp "$fixture/catalog-before" "$fixture/catalog-after"
         done
     done

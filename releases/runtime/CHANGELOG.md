@@ -4,6 +4,26 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.19.5] - Unreleased
+
+### ⚡ Performance
+
+- Locate interior protected-task entries once and bulk-shift their Vec tail,
+  preserving stable cancellation/destructor order and existing wake routing.
+  The matched 8,192-task FIFO fixture uses 69% fewer installed Wasm instructions;
+  the Runtime probe shrinks by 347 bytes in total uncompressed and code-section
+  size. Reverse cancellation retains the existing tail fast path.
+- Avoid redundant zero initialization before complete IC0 copies of reject/method
+  text, root keys and certificates. Share the existing message-copy initialization
+  proof in one private helper; preserve UTF-8 errors, absence and trap semantics.
+  A matched 1,111-byte certificate read saves 1,227 IC instructions. The Runtime
+  probe shrinks a further 28 total uncompressed/code bytes.
+
+### 🔧 Maintenance
+
+- Remove the unused private null-context entry helper and its dead-code
+  expectation, retaining null method IDs and migratory wake routing.
+
 ## [0.19.4] - 2026-11-06
 
 ### ➕ Added

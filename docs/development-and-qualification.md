@@ -51,10 +51,12 @@ selects a smaller affected subset. Both arms use the same current probe source,
 compiler, recipe and current dependency lock; this isolates implementation changes,
 not dependency-upgrade effects. Incompatible resolved external locks refuse comparison.
 The separate asynchronous Wasm size workflow runs the default selection on relevant
-PRs and retains total uncompressed and code-section measurements before/after
-optimisation. Its default allowance is 128 bytes per measurement; dispatch can
-choose an explicit allowance. This is a regression trigger, not a consumer Wasm
+PRs and main-branch pushes and retains total uncompressed and code-section
+measurements before/after optimisation. Its default allowance is 128 bytes per
+measurement; dispatch can choose an explicit allowance. This is a regression trigger, not a consumer Wasm
 budget, instruction benchmark or permission to weaken verification.
+Pushes compare against the event's preceding main commit; PRs use their base
+commit, and manual dispatch retains its explicitly selected baseline.
 
 `node --test scripts/benchmarks/tests/compare-wasm-sizes.test.mjs` checks comparison
 admission. The shared ingress corpus at
@@ -67,6 +69,25 @@ Manual release-mode benchmarks are ignored by ordinary tests:
 `cargo test -p ic-platform-runtime --features executor --release --lib benchmark_protected -- --ignored --nocapture`
 and `cargo test -p ic-platform --features candid --release --lib benchmark_shared_type -- --ignored --nocapture`.
 These measure native bookkeeping/admission, not installed Wasm instructions.
+
+The installed Runtime fixture also has an opt-in cancellation measurement:
+`PLATFORM_EXECUTOR_BENCHMARK=1 POCKET_IC_BIN=/prepared/pocket-ic RETAINED_DRIVER RETAINED_WASM`.
+Use the driver and Wasm from a matching Wire owner profile; this mode replaces
+the ordinary installed corpus for that invocation. It measures only cancellation
+of 0, 1, 32, 1,024 and 8,192 protected tasks in forward/reverse order, with task
+creation outside the counter and destructor-order/count assertions. Compare
+identical fixture sources, compiler, lock and build settings between arms.
+
+`WASM_BENCH_PROFILES='runtime-system candid-admission'` additionally builds
+opt-in System API and Candid admission probes with the same size runner/recipe.
+Use `PLATFORM_CODEC_BENCHMARK=system` or `candid` with a matching retained Runtime
+driver and the corresponding raw probe Wasm. The driver replaces its ordinary
+installed corpus for that invocation. System measurements create an explicit NNS
+subnet for Testkit's root-key byte comparison and decode the returned certificate;
+ordinary runtime qualification keeps its original topology. Candid measurements
+compare typed refusal text with the native reader, including work exhaustion and
+recursive-value refusal. Request admission and reply framing stay outside the
+counters. Neither probe changes production exports or consumer resource policy.
 
 Consumers own schemas, authentication, byte/work budgets, deadlines, retries and
 recovery. IC Wire owns controlled application protocols. Candid remains required
@@ -187,6 +208,9 @@ are aggregate checks, not focused selections. Use them for explicitly requested
 broad validation or release qualification. `make ci` is the full release gate;
 its fail-fast ordering runs Clippy before tests. Documentation-only work uses
 `make check-doc-links` and diff/consistency review.
+For a selected package with all its features/targets, the existing lint leaf
+accepts `make clippy PLATFORM_CLIPPY_PACKAGES=ic-platform-runtime`; use direct
+Cargo arguments above when only a narrower feature selection is affected.
 `make check-upstream-scaffolding` applies the experimental packaging patches to
 disposable registry-source copies and checks source preservation and licenses.
 It performs no dependency adoption, publication or runtime qualification.
@@ -265,6 +289,9 @@ supplier group first, then its compatible consumer group. All retain full gates,
 transactional runtime metadata and exact source/group-bound resume. Publication
 does not bump versions, commit, tag or push.
 Both commands use the lockfile and retain evidence under `target/publication/`.
+Publication Clippy uses exactly the admitted package selection, retaining the
+pinned compiler, all-target/all-feature checks and denied warnings. It does not
+replace or narrow the separate full release-qualification gate.
 They require the pinned host tools (`make install-host-tools`). Cargo verification
 is not the full release gate or native macOS qualification. No upload retries are
 automatic: after an interrupted dispatch, reconcile every dispatched exact registry

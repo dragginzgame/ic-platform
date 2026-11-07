@@ -87,6 +87,61 @@ fn wire_observe() -> (u64, u64) {
     (EFFECTS.get(), CLEANED.get())
 }
 
+// Explicit fixture-only fanout, measuring cancellation rather than task creation.
+// Each destructor checks stable order; all callbacks/wake routing stay unchanged.
+#[ic_platform_runtime::cdk::update(
+    guard = "admit",
+    decode_with = "decode::<_, FANOUT_CANCEL>",
+    encode_with = "encode::<_, FANOUT_CANCEL>"
+)]
+fn wire_cancel_fanout(count: u32, reverse: bool) -> (u64, u32) {
+    use std::rc::Rc;
+    assert!(count <= 8192, "fixture fanout allowance");
+    struct Dropped {
+        index: u32,
+        next: Rc<Cell<u32>>,
+        drops: Rc<Cell<u32>>,
+        reverse: bool,
+    }
+    impl Drop for Dropped {
+        fn drop(&mut self) {
+            assert_eq!(self.index, self.next.get());
+            self.next.set(if self.reverse {
+                self.index.wrapping_sub(1)
+            } else {
+                self.index + 1
+            });
+            self.drops.set(self.drops.get() + 1);
+        }
+    }
+    let next = Rc::new(Cell::new(if reverse { count.saturating_sub(1) } else { 0 }));
+    let drops = Rc::new(Cell::new(0));
+    let mut handles: Vec<_> = (0..count)
+        .map(|index| {
+            let dropped = Dropped {
+                index,
+                next: next.clone(),
+                drops: drops.clone(),
+                reverse,
+            };
+            ic_platform_runtime::executor::spawn_protected(async move {
+                std::future::pending::<()>().await;
+                drop(dropped);
+            })
+        })
+        .collect();
+    if reverse {
+        handles.reverse();
+    }
+    let start = api::instruction_counter();
+    for handle in &handles {
+        ic_platform_runtime::executor::cancel_task(handle);
+    }
+    let instructions = api::instruction_counter() - start;
+    assert_eq!(drops.get(), count);
+    (instructions, drops.get())
+}
+
 struct Cleanup;
 
 impl Drop for Cleanup {

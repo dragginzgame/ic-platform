@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Preserve full workspace qualification; Shared owns publication attempts/custody.
+# Release owns full qualification; publication lints only its admitted packages.
 set -euo pipefail
 [[ $# == 1 && ( "$1" == check || "$1" == publish ) ]] || exit 2
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"

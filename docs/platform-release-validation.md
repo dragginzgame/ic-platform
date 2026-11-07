@@ -8,6 +8,12 @@ unaffected groups. Platform admits the roster and supplies candidate setup;
 Shared owns capture, the queue, saved context and lifecycle commands. Inside the
 candidate, the ordinary release runner and all existing release gates still run.
 
+Platform projects primary, changelog and custody files from one admitted Shared
+group plan per command. Subsequent phases observe the source again; there is no
+cross-command metadata cache. The preparation fixture also reads each unchanged
+dependency catalog once per phase while retaining real-editor rollback, retry,
+other-group custody and Git recovery checks.
+
 ### Commands and effects
 
 With clean committed source, the pinned compiler and an explicitly prepared
@@ -81,6 +87,9 @@ input without changing the normal lock. The maintained fast checks are
 `test-platform-frozen-setup.sh` and `test-platform-release-groups.sh`, included
 in the existing release-command stage. Required full product, installed and
 native-host obligations remain unchanged for real releases.
+Publication's verifier carries Shared's admitted package selection to the Clippy
+leaf, preserving the pinned compiler, all targets/features and denied warnings.
+The ordinary lint default and full release gate still include every owner.
 
 The 0.30.9 consumer rehearsal is retained at
 `target/platform-frozen-qualification.lSXxHi/`. All three actual group hooks,

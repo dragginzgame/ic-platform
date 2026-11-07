@@ -10,6 +10,9 @@ scratch="$(mktemp -d "$root/target/embedded-source.XXXXXX")"
 trap 'rm -rf "$scratch"' EXIT
 for module in ic0/upstream executor/runtime; do
     manifest="$root/crates/ic-platform-runtime/src/$module/provenance.json"
+    # Capture the complete observation first: process substitution hides reader
+    # failures, including a valid prefix followed by failure. Empty rosters refuse.
+    sources="$("$jq" -er '.maintained_sources | to_entries[] | [.key, .value] | @tsv' "$manifest")"
     while IFS=$'\t' read -r file checksum; do
         selected="$source_root/$module/$file"
         if [[ "$module/$file" == ic0/upstream/sys/mod.rs ]]; then
@@ -27,7 +30,7 @@ for module in ic0/upstream executor/runtime; do
             selected="$scratch/sys.rs"
         fi
         bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$checksum" "$selected"
-    done < <("$jq" -r '.maintained_sources | to_entries[] | [.key, .value] | @tsv' "$manifest")
+    done <<< "$sources"
     license="$("$jq" -er '.license_sha256' "$manifest")"
     bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$license" "$source_root/$module/LICENSE-APACHE"
 done

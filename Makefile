@@ -133,8 +133,9 @@ test: check-compiler
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
 	cargo test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
+PLATFORM_CLIPPY_PACKAGES ?= ic-platform ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard
 clippy: check-compiler
-	cargo clippy -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-targets --all-features --locked -- -D warnings
+	cargo clippy $(foreach package,$(PLATFORM_CLIPPY_PACKAGES),--package $(package)) --all-targets --all-features --locked -- -D warnings
 docs-check: check-compiler
 	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
 wasm-check: check-compiler
@@ -208,6 +209,7 @@ check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
 	bash scripts/ci/test-platform-frozen-setup.sh
+	bash scripts/ci/test-platform-group-projection.sh
 	bash scripts/ci/test-platform-ci-selection.sh
 	bash scripts/ci/test-platform-validation-plan.sh
 	bash scripts/ci/test-platform-validation-recovery.sh

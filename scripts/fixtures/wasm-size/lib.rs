@@ -11,6 +11,66 @@ fn reply(bytes: &[u8]) {
     ic_platform::ic0::msg_reply();
 }
 
+// Opt-in IC instruction probes. Both arms use these exact same fixture bodies;
+// counters exclude request admission and reply framing.
+#[cfg(feature = "runtime-system")]
+fn measure_system_read(read: fn() -> Vec<u8>) {
+    let request = input();
+    let repetitions = u32::from_le_bytes(request.as_slice().try_into().unwrap());
+    assert!((1..=64).contains(&repetitions));
+    let start = ic_platform::cdk::api::instruction_counter();
+    let first = read();
+    for _ in 1..repetitions {
+        assert_eq!(read(), first);
+    }
+    let instructions = ic_platform::cdk::api::instruction_counter() - start;
+    let mut response = instructions.to_le_bytes().to_vec();
+    response.extend_from_slice(&first);
+    reply(&response);
+}
+
+#[cfg(feature = "runtime-system")]
+#[unsafe(export_name = "canister_query system_certificate")]
+pub extern "C" fn system_certificate() {
+    measure_system_read(|| ic_platform::cdk::api::data_certificate().unwrap());
+}
+
+#[cfg(feature = "runtime-system")]
+#[unsafe(export_name = "canister_inspect_message")]
+pub extern "C" fn system_inspect() {
+    assert_eq!(ic_platform::cdk::api::msg_method_name(), "system_root_key");
+    ic_platform::cdk::api::accept_message();
+}
+
+#[cfg(feature = "runtime-system")]
+#[unsafe(export_name = "canister_update system_root_key")]
+pub extern "C" fn system_root_key() {
+    measure_system_read(ic_platform::cdk::api::root_key);
+}
+
+#[cfg(feature = "candid-admission")]
+#[unsafe(export_name = "canister_query candid_admission")]
+pub extern "C" fn candid_admission() {
+    let request = input();
+    let (quota, wire) = request.split_at(8);
+    let quota = usize::try_from(u64::from_le_bytes(quota.try_into().unwrap())).unwrap();
+    let limits = ic_platform::candid::DecodeLimits {
+        reply_bytes: 1_000_000,
+        header_bytes: 100_000,
+        type_entries: 10_000,
+        decoding_quota: quota,
+        skipping_quota: 0,
+    };
+    let start = ic_platform::ic0::performance_counter(0);
+    let result = ic_platform::candid::nesting::check(wire, limits);
+    let instructions = ic_platform::ic0::performance_counter(0) - start;
+    let mut response = instructions.to_le_bytes().to_vec();
+    if let Err(error) = result {
+        response.extend_from_slice(error.to_string().as_bytes());
+    }
+    reply(&response);
+}
+
 #[cfg(feature = "certification-cbor")]
 #[unsafe(export_name = "canister_query decode_tree")]
 pub extern "C" fn decode_tree() {

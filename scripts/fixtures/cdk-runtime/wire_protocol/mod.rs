@@ -8,6 +8,7 @@ pub const ENCODE_TRAP: u64 = 5;
 pub const TIGHT: u64 = 6;
 pub const ALLOCATION: u64 = 7;
 pub const DEPTH: u64 = 8;
+pub const FANOUT_CANCEL: u64 = 9;
 pub const REQUEST: ic_wire::Limits = ic_wire::Limits {
     bytes: 1024,
     allocation: 16 * 1024,

@@ -16,7 +16,7 @@ trap 'printf "Platform frozen integration evidence: %s\n" "$fixture"' EXIT
 development="$fixture/development"
 mkdir "$development"
 cd "$root"
-sha256sum Cargo.lock > "$fixture/normal-lock.before"
+bash "$root/scripts/ci/verify-file-checksum.sh" --print sha256 Cargo.lock > "$fixture/normal-lock.before"
 git rev-parse HEAD > "$fixture/normal-head.before"
 git ls-files --cached --others --exclude-standard -z > "$fixture/source-files"
 while IFS= read -r -d '' path; do
@@ -25,7 +25,7 @@ while IFS= read -r -d '' path; do
     cp -p "$path" "$development/$path"
 done < "$fixture/source-files"
 cp "$lock_input" "$development/Cargo.lock"
-sha256sum "$lock_input" > "$fixture/selected-lock.sha256"
+bash "$root/scripts/ci/verify-file-checksum.sh" --print sha256 "$lock_input" > "$fixture/selected-lock.sha256"
 # Supply explicit fixture notes without changing the real ledgers.
 for entry in types:ic-platform-types runtime:ic-platform-runtime platform:ic-platform; do
     group="${entry%:*}" package="${entry#*:}"
@@ -119,7 +119,8 @@ for selector in "${selectors[@]}"; do
     retained="$attempt/archives/$package-$version.crate"
     cp "$archive" "$retained"
     cmp "$archive" "$retained"
-    sha256sum "$retained" >> "$attempt/archives.sha256"
+    digest="$(bash scripts/ci/verify-file-checksum.sh --print sha256 "$retained")"
+    printf '%s  %s\n' "$digest" "$retained" >> "$attempt/archives.sha256"
     tar -xOf "$retained" "$package-$version/.cargo_vcs_info.json" > "$attempt/$package.vcs.json"
     jq -e --arg source "$source" '.git.sha1==$source and (.git.dirty!=true)' "$attempt/$package.vcs.json" > /dev/null
     printf '%s\n' "$selector" >> "$attempt/selectors"
@@ -170,7 +171,7 @@ grep -q 'deferred edits remain' "$fixture/dirty-reconcile.log"
 git -C "$development" restore -- Cargo.lock
 make --no-print-directory -C "$development" release-batch-reconcile BATCH="$batch" > "$fixture/reconcile.log" 2>&1
 [[ "$(git -C "$development" rev-parse HEAD)" == "$(jq -r .commit "$intent")" ]]
-sha256sum Cargo.lock > "$fixture/normal-lock.after"
+bash "$root/scripts/ci/verify-file-checksum.sh" --print sha256 Cargo.lock > "$fixture/normal-lock.after"
 cmp "$fixture/normal-lock.before" "$fixture/normal-lock.after"
 [[ "$(git -C "$root" rev-parse HEAD)" == "$(cat "$fixture/normal-head.before")" ]]
 printf '%s\n' "$candidate" > "$fixture/candidate"

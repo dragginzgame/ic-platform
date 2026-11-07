@@ -16,7 +16,7 @@ recipes="${WASM_BENCH_RECIPES:-3-none-16 3-thin-1 3-fat-1 s-fat-1 z-fat-1}"
 cpubits="${WASM_BENCH_CPUBITS:-auto}"
 case "$cpubits" in auto|32|64) ;; *) echo 'WASM_BENCH_CPUBITS must be auto, 32 or 64' >&2; exit 2 ;; esac
 for profile in $profiles; do
-    case "$profile" in principal|principal-binary|principal-self-auth|runtime|external-candid|candid-exact|candid-sequence|candid-sequence-one|verification|certification-cbor|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
+    case "$profile" in principal|principal-binary|principal-self-auth|runtime|runtime-system|external-candid|candid-admission|candid-exact|candid-sequence|candid-sequence-one|verification|certification-cbor|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
 done
 for recipe in $recipes; do
     case "$recipe" in 3-none-16|3-thin-1|3-fat-1|s-fat-1|z-fat-1) ;; *) echo "Unknown size recipe: $recipe" >&2; exit 2 ;; esac
@@ -60,7 +60,9 @@ principal = ["ic-platform/principal", "dep:serde_json"]
 principal-binary = ["ic-platform/principal"]
 principal-self-auth = ["ic-platform/principal-self-authenticating"]
 runtime = ["ic-platform/runtime"]
+runtime-system = ["ic-platform/runtime"]
 external-candid = ["ic-platform/candid", "ic-platform/management-canister-types"]
+candid-admission = ["ic-platform/candid"]
 candid-exact = ["ic-platform/candid", "ic-platform/management-canister-types"]
 candid-sequence = ["ic-platform/candid"]
 candid-sequence-one = ["candid-sequence"]

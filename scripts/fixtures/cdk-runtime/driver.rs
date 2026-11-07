@@ -1,4 +1,5 @@
 //! Installed Wire runtime checks. Testkit owns server lifecycle and transport.
+mod benchmarks;
 mod external_driver;
 mod protocol;
 mod wire_driver;
@@ -79,17 +80,31 @@ fn main() {
             (Some(server), url)
         }
     };
-    let instance = PocketIcBuilder::new()
+    let builder = PocketIcBuilder::new()
         .with_server_url(url.parse().unwrap())
         .with_max_request_time_ms(Some(60_000))
-        .with_application_subnet()
-        .build()
-        .unwrap();
+        .with_application_subnet();
+    // The optional root-key measurement compares against Testkit's NNS key.
+    // Keep the ordinary owner/Timers qualification topology unchanged.
+    let builder = if std::env::var("PLATFORM_CODEC_BENCHMARK").as_deref() == Ok("system") {
+        builder.with_nns_subnet()
+    } else {
+        builder
+    };
+    let instance = builder.build().unwrap();
     let pic = &instance;
     let id = pic.create_canister().unwrap();
     pic.add_cycles(id, 10_000_000_000_000).unwrap();
+    if let Ok(mode) = std::env::var("PLATFORM_CODEC_BENCHMARK") {
+        benchmarks::run(pic, id, wasm, &mode);
+        return;
+    }
     pic.install_canister(id, wasm.clone(), request("initialize", 10u64), None)
         .unwrap();
+    if std::env::var_os("PLATFORM_EXECUTOR_BENCHMARK").is_some() {
+        wire_driver::benchmark_fanout(pic, id);
+        return;
+    }
     for size in BUFFER_COPY_SIZES {
         let payload: Vec<u8> = (0..size).map(|i| (i % 256) as u8).collect();
         let mut baseline = Vec::new();

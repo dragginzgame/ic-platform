@@ -1,6 +1,16 @@
 name: Wasm size regression
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - Cargo.toml
+      - Cargo.lock
+      - rust-toolchain.toml
+      - crates/**
+      - scripts/benchmarks/**
+      - scripts/fixtures/wasm-size/**
+      - .github/workflows/wasm-size.yml
   pull_request:
     paths:
       - Cargo.toml
@@ -49,7 +59,7 @@ jobs:
           cargo fetch --locked
       - name: Compare identical probe sources and build settings
         env:
-          BASELINE: ${{ github.event.pull_request.base.sha || inputs.baseline }}
+          BASELINE: ${{ github.event.pull_request.base.sha || github.event.before || inputs.baseline }}
           ALLOWANCE: ${{ inputs.max_growth_bytes || '128' }}
         run: |
           export PATH="$PWD/.tools/ic/bin:$PATH"

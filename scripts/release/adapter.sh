@@ -11,13 +11,14 @@ export RELEASE_GROUP
 case "$operation" in
     version|files) exec bash scripts/release/group.sh "$operation" ;;
 esac
-primary="$(bash scripts/release/group.sh primary)"
+plan="$(bash scripts/release/group.sh plan)"
+primary="$(jq -er .primary <<< "$plan")"
 bash scripts/ci/check-release-delivery.sh ci/release-delivery.txt "${RELEASE_DELIVERY:-direct}"
-changelog="$(bash scripts/release/group.sh changelog)"
+changelog="$(jq -er .changelog <<< "$plan")"
 mkdir -p target
 metadata_files="$(mktemp "$PWD/target/platform-release-files.XXXXXX")"
 trap 'rm -f "$metadata_files"' EXIT
-bash scripts/release/group.sh files > "$metadata_files"
+jq -jr '.files[] | . + "\u0000"' <<< "$plan" > "$metadata_files"
 source_args=()
 while IFS= read -r -d '' path; do source_args+=(--allow "$path"); done < "$metadata_files"
 # The shared transaction installs all selected metadata together, including the

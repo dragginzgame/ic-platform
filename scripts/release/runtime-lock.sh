@@ -11,6 +11,9 @@ if [[ "$mode" == prepare ]]; then
     case "$group" in platform|runtime|types) ;; *) echo 'Select a release group' >&2; exit 2 ;; esac
 fi
 previous="${2:-}"
+# Finish the roster observation before checking or preparing either lock. A
+# process substitution hides a failed (or partially emitted) producer from set -e.
+roster="$(jq -er '.groups[] | [.name,.primary,(.members|join(" "))] | @tsv' ci/cargo-release-groups.json)"
 for lock in scripts/fixtures/{cdk-runtime,timers-runtime}/Cargo.lock; do
     records="$(yq -p toml -o json '.' "$lock" | jq -c '[.package[] | select(.source == null)]')"
     while IFS=$'\t' read -r owner primary members; do
@@ -36,5 +39,5 @@ for lock in scripts/fixtures/{cdk-runtime,timers-runtime}/Cargo.lock; do
             cat "$temporary" > "$lock"
             rm -f "$temporary"
         fi
-    done < <(jq -r '.groups[] | [.name,.primary,(.members|join(" "))] | @tsv' ci/cargo-release-groups.json)
+    done <<< "$roster"
 done

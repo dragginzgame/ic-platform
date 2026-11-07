@@ -5,20 +5,25 @@ use crate::ic0::upstream as ic0;
 
 use crate::Principal;
 
-/// Gets the message argument data.
+// Every caller below selects a reviewed IC0 copy that initializes the complete
+// supplied slice or traps. Keep this helper private to those System API readers.
 #[expect(
     unsafe_code,
-    reason = "Initialize the Vec length only after the reviewed all-or-trap IC0 copy."
+    reason = "Reviewed IC0 readers initialize the entire spare-capacity slice or trap before its length is published."
 )]
-pub fn msg_arg_data() -> Vec<u8> {
-    let len = ic0::msg_arg_data_size();
+fn system_bytes(len: usize, copy: fn(&mut [std::mem::MaybeUninit<u8>], usize)) -> Vec<u8> {
     let mut buf = Vec::<u8>::with_capacity(len);
-    ic0::msg_arg_data_copy_uninit(&mut buf.spare_capacity_mut()[..len], 0);
-    // SAFETY: capacity is at least len. The pinned ic0 API initializes the entire
-    // supplied prefix or traps without returning; no uninitialized byte becomes
-    // observable. This also holds for an empty message.
+    copy(&mut buf.spare_capacity_mut()[..len], 0);
+    // SAFETY: capacity is at least len. The five private callers select pinned
+    // IC0 all-or-trap copies. They initialize every byte of this prefix, even
+    // when it is empty; failure cannot expose any uninitialized byte.
     unsafe { buf.set_len(len) };
     buf
+}
+
+/// Gets the message argument data.
+pub fn msg_arg_data() -> Vec<u8> {
+    system_bytes(ic0::msg_arg_data_size(), ic0::msg_arg_data_copy_uninit)
 }
 
 /// Gets the identity of the caller, which may be a canister id or a user id.
@@ -47,9 +52,7 @@ pub fn msg_reject_code() -> u32 {
 /// - There is no reject message (i.e. if `reject_code` is 0).
 /// - The message is not valid UTF-8.
 pub fn msg_reject_msg() -> String {
-    let len = ic0::msg_reject_msg_size();
-    let mut buf = vec![0u8; len];
-    ic0::msg_reject_msg_copy(&mut buf, 0);
+    let buf = system_bytes(ic0::msg_reject_msg_size(), ic0::msg_reject_msg_copy_uninit);
     system_text(buf, "reject message is not valid UTF-8")
 }
 
@@ -147,9 +150,10 @@ pub fn subnet_self() -> Principal {
 ///
 /// Traps if the method name is not valid UTF-8.
 pub fn msg_method_name() -> String {
-    let len = ic0::msg_method_name_size();
-    let mut buf = vec![0u8; len];
-    ic0::msg_method_name_copy(&mut buf, 0);
+    let buf = system_bytes(
+        ic0::msg_method_name_size(),
+        ic0::msg_method_name_copy_uninit,
+    );
     system_text(buf, "msg_method_name is not valid UTF-8")
 }
 
@@ -174,10 +178,7 @@ pub fn stable_size() -> u64 {
 ///
 /// This traps in non-replicated mode.
 pub fn root_key() -> Vec<u8> {
-    let len = ic0::root_key_size();
-    let mut buf = vec![0u8; len];
-    ic0::root_key_copy(&mut buf, 0);
-    buf
+    system_bytes(ic0::root_key_size(), ic0::root_key_copy_uninit)
 }
 
 /// Sets the certified data of this canister.
@@ -211,10 +212,10 @@ pub fn data_certificate() -> Option<Vec<u8>> {
     if ic0::data_certificate_present() == 0 {
         return None;
     }
-    let n = ic0::data_certificate_size();
-    let mut buf = vec![0u8; n];
-    ic0::data_certificate_copy(&mut buf, 0);
-    Some(buf)
+    Some(system_bytes(
+        ic0::data_certificate_size(),
+        ic0::data_certificate_copy_uninit,
+    ))
 }
 
 /// Gets current timestamp, in nanoseconds since the epoch (1970-01-01)

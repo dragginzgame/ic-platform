@@ -90,7 +90,7 @@ cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/
 cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister} "$fixture/crates/canister/src/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
 cp scripts/fixtures/cdk-runtime/driver/tests.rs "$fixture/apps/driver/src/tests.rs"
-cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver} "$fixture/apps/driver/src/"
+cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver,benchmarks} "$fixture/apps/driver/src/"
 lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
 if [[ "$qualification" == timers ]]; then lock="$root/scripts/fixtures/timers-runtime/Cargo.lock"; fi
 printf '%s\n' "$qualification" > "$fixture/qualification"

@@ -198,10 +198,17 @@ enum Kind {
 }
 struct Node {
     kind: Kind,
+    children: std::ops::Range<usize>,
+}
+
+// One child buffer for the complete header avoids a separate allocation per
+// constructed type. Ranges retain the original order and work/depth decisions.
+struct TypeTable {
+    nodes: Vec<Node>,
     children: Vec<i64>,
 }
 
-fn header(cursor: &mut Cursor<'_>, limits: DecodeLimits) -> Result<(Vec<Node>, Vec<i64>)> {
+fn header(cursor: &mut Cursor<'_>, limits: DecodeLimits) -> Result<(TypeTable, Vec<i64>)> {
     if cursor.take(4)? != b"DIDL" {
         return Err(cursor.malformed());
     }
@@ -213,6 +220,7 @@ fn header(cursor: &mut Cursor<'_>, limits: DecodeLimits) -> Result<(Vec<Node>, V
         });
     }
     let mut types = Vec::new();
+    let mut children = Vec::new();
     for _ in 0..count {
         let opcode = cursor.leb(true)? as i64;
         let kind = match opcode {
@@ -225,7 +233,7 @@ fn header(cursor: &mut Cursor<'_>, limits: DecodeLimits) -> Result<(Vec<Node>, V
             value if value < -24 => return Err(NestingError::Unsupported { opcode: value }),
             _ => return Err(cursor.malformed()),
         };
-        let mut children = Vec::new();
+        let start = children.len();
         match kind {
             Kind::Opt | Kind::Vec => children.push(cursor.index()?),
             Kind::Record | Kind::Variant => {
@@ -265,39 +273,45 @@ fn header(cursor: &mut Cursor<'_>, limits: DecodeLimits) -> Result<(Vec<Node>, V
                 }
             }
         }
-        types.push(Node { kind, children });
+        types.push(Node {
+            kind,
+            children: start..children.len(),
+        });
     }
     let count = cursor.count()?;
     let mut args = Vec::new();
     for _ in 0..count {
         args.push(cursor.index()?);
     }
-    for index in args
-        .iter()
-        .chain(types.iter().flat_map(|node| &node.children))
-    {
+    for index in args.iter().chain(&children) {
         if *index >= 0 && usize::try_from(*index).map_or(true, |i| i >= types.len()) {
             return Err(cursor.malformed());
         }
     }
-    Ok((types, args))
+    Ok((
+        TypeTable {
+            nodes: types,
+            children,
+        },
+        args,
+    ))
 }
 
-fn type_depth(cursor: &mut Cursor<'_>, types: &[Node]) -> Result<()> {
-    let mut active = vec![false; types.len()];
+fn type_depth(cursor: &mut Cursor<'_>, types: &TypeTable) -> Result<()> {
+    let mut active = vec![false; types.nodes.len()];
     let mut stack = Vec::new();
-    for root in 0..types.len() {
+    for root in 0..types.nodes.len() {
         cursor.charge(1)?;
         active[root] = true;
         stack.push((root, 0usize));
         while let Some((index, next)) = stack.last_mut() {
-            let node = &types[*index];
-            if *next == node.children.len() {
+            let children = &types.children[types.nodes[*index].children.clone()];
+            if *next == children.len() {
                 active[*index] = false;
                 stack.pop();
                 continue;
             }
-            let child = node.children[*next];
+            let child = children[*next];
             *next += 1;
             cursor.charge(1)?;
             if child < 0 {
@@ -333,7 +347,7 @@ enum Task<'a> {
     Value(i64, usize),
     Repeat(i64, usize, usize),
 }
-fn values(cursor: &mut Cursor<'_>, types: &[Node], args: &[i64]) -> Result<()> {
+fn values(cursor: &mut Cursor<'_>, types: &TypeTable, args: &[i64]) -> Result<()> {
     let mut stack = vec![Task::Values(args, 0, 0)];
     while let Some(task) = stack.pop() {
         let (ty, depth) = match task {
@@ -376,16 +390,17 @@ fn values(cursor: &mut Cursor<'_>, types: &[Node], args: &[i64]) -> Result<()> {
             return Err(NestingError::ValueDepth { maximum: MAX_DEPTH });
         }
         let depth = depth + 1;
-        let node = &types[usize::try_from(ty).map_err(|_| cursor.malformed())?];
+        let node = &types.nodes[usize::try_from(ty).map_err(|_| cursor.malformed())?];
+        let children = &types.children[node.children.clone()];
         match node.kind {
             Kind::Opt => match cursor.byte()? {
                 0 => (),
-                1 => stack.push(Task::Value(node.children[0], depth)),
+                1 => stack.push(Task::Value(children[0], depth)),
                 _ => return Err(cursor.malformed()),
             },
             Kind::Vec => {
                 let count = cursor.count()?;
-                let ty = node.children[0];
+                let ty = children[0];
                 if let Some(width) = width(ty) {
                     cursor.charge(count)?;
                     let size = count.checked_mul(width).ok_or_else(|| cursor.malformed())?;
@@ -394,10 +409,10 @@ fn values(cursor: &mut Cursor<'_>, types: &[Node], args: &[i64]) -> Result<()> {
                     stack.push(Task::Repeat(ty, count, depth));
                 }
             }
-            Kind::Record => stack.push(Task::Values(&node.children, 0, depth)),
+            Kind::Record => stack.push(Task::Values(children, 0, depth)),
             Kind::Variant => {
                 let index = cursor.count()?;
-                let child = *node.children.get(index).ok_or_else(|| cursor.malformed())?;
+                let child = *children.get(index).ok_or_else(|| cursor.malformed())?;
                 stack.push(Task::Value(child, depth));
             }
             Kind::Func => {

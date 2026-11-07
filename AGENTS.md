@@ -2,8 +2,8 @@
 
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
-records the installed revision; do not edit its payloads. Shared 0.31.0 at
-`74313941af2fce4399bec0e6909ca6229673c3f8` is the adopted baseline.
+records the installed revision; do not edit its payloads. Shared 0.31.1 at
+`5efbda2ab81ad84e30f490f3137d8ef083c303d2` is the adopted baseline.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
@@ -110,8 +110,10 @@ The maintainer authorized adopting the reviewed non-cryptographic CDK 0.20.3
 adapters inside Platform and removing the `ic-cdk` package. Keep their Apache-2.0
 license/provenance. The facade's mixed-source license is MIT AND Apache-2.0.
 The imported callback module permits reviewed unsafe code. The maintainer also
-authorized the function-local `msg_arg_data` exception: set the vector length
-only after the maintained IC0 all-or-trap uninitialized-buffer copy returns.
+authorized spare-capacity copies for `msg_arg_data`, `msg_reject_msg`,
+`msg_method_name`, `root_key` and `data_certificate`: their private `system_bytes`
+helper sets vector length only after the selected maintained IC0 all-or-trap
+uninitialized-buffer copy returns. Keep the unsafe expectation local to that helper.
 The maintainer authorized embedding IC0 1.2.0 and executor 2.0.0 inside Platform,
 including the reviewed IC0 unsafe bindings. Preserve Apache-2.0 provenance and
 the unchanged System API ABI. Other functions retain the workspace deny lint. Endpoint macros require

@@ -144,6 +144,40 @@ for group in platform runtime types; do
     grep -q 'outside the publication roster' "$fixture/cross-group.log"
     if RELEASE_GROUP="$group" PACKAGE='' bash "$fixture/scripts/release/publish.sh" check > "$fixture/empty-package.log" 2>&1; then exit 1; fi
 done
+# Exercise the actual publication verifier and Make Clippy leaf. Only Cargo and
+# compiler/tool admission are substitutes; no archive or upload is dispatched.
+mkdir -p "$fixture/lint-bin"
+cp scripts/release/verify-publication.sh "$fixture/scripts/release/"
+printf '#!/bin/sh\nexit 0\n' > "$fixture/scripts/ci/check-platform-compiler.sh"
+export PUBLICATION_LINT_TRACE="$fixture/lint-arguments"
+cat > "$fixture/lint-bin/cargo" <<'CARGO'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$1" == clippy && -z "${CARGO_PUBLISH_PACKAGES+x}" ]]
+printf '%s\n' "$@" > "$PUBLICATION_LINT_TRACE"
+CARGO
+chmod +x "$fixture/lint-bin/cargo"
+for group in platform runtime types; do
+    roster="$(RELEASE_GROUP="$group" bash scripts/release/group.sh members)"
+    subset="${roster%% *}"
+    for selection in "$roster" "$subset"; do
+        (cd "$fixture" && PATH="$fixture/lint-bin:$PATH" CARGO_PUBLISH_PACKAGES="$roster" CARGO_PUBLISH_SELECTION="$selection" \
+            bash scripts/release/verify-publication.sh --no-print-directory clippy) > "$fixture/lint.log" 2>&1
+        {
+            printf '%s\n' clippy
+            for package in $selection; do printf '%s\n' --package "$package"; done
+            printf '%s\n' --all-targets --all-features --locked -- -D warnings
+        } > "$fixture/lint-expected"
+        cmp "$fixture/lint-expected" "$PUBLICATION_LINT_TRACE"
+    done
+    cp "$PUBLICATION_LINT_TRACE" "$fixture/lint-before-refusal"
+    for selection in '' outside-group '--all'; do
+        if (cd "$fixture" && PATH="$fixture/lint-bin:$PATH" CARGO_PUBLISH_PACKAGES="$roster" CARGO_PUBLISH_SELECTION="$selection" \
+            bash scripts/release/verify-publication.sh --no-print-directory clippy) > "$fixture/lint-refusal.log" 2>&1; then exit 1; fi
+        cmp "$fixture/lint-before-refusal" "$PUBLICATION_LINT_TRACE"
+    done
+done
+echo 'Publication lint reaches only admitted packages/subsets, retaining compiler and Clippy flags.'
 # Exercise Platform's actual retention prerequisite, with sparse disposable
 # evidence; this proves routing without replaying Shared's checker suite.
 mkdir -p "$fixture/recovery-evidence"

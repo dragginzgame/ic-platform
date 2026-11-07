@@ -21,6 +21,27 @@ fn observe(pic: &PocketIc, id: Principal) -> (u64, u64) {
     ic_wire::native::decode_response(OBSERVE, &response, RESPONSE).unwrap()
 }
 
+/// Opt-in measurement; the ordinary installed corpus does not add a benchmark.
+pub fn benchmark_fanout(pic: &PocketIc, id: Principal) {
+    for count in [0_u32, 1, 32, 1024, 8192] {
+        for reverse in [false, true] {
+            let response = pic
+                .update_call(
+                    id,
+                    Principal::anonymous(),
+                    "wire_cancel_fanout",
+                    ic_wire::native::encode_request(FANOUT_CANCEL, &(count, reverse), REQUEST)
+                        .unwrap(),
+                )
+                .unwrap();
+            let (instructions, drops): (u64, u32) =
+                ic_wire::native::decode_response(FANOUT_CANCEL, &response, RESPONSE).unwrap();
+            assert_eq!(drops, count);
+            println!("executor-fanout count={count} reverse={reverse} instructions={instructions}");
+        }
+    }
+}
+
 pub fn run(pic: &PocketIc, id: Principal) {
     assert_eq!(observe(pic, id), (0, 0));
     // Exact binary round trips through generated ingress and awaited reply reads.

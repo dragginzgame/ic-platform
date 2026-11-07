@@ -1,8 +1,8 @@
 # Shared Tooling snapshot v1
-# version	0.31.0
+# version	0.31.1
 format	1
 source	https://github.com/dragginzgame/shared-tooling
-revision	74313941af2fce4399bec0e6909ca6229673c3f8
+revision	5efbda2ab81ad84e30f490f3137d8ef083c303d2
 # entrypoint	DRAGGINZGAME.md
 # entrypoint	make/consumer.mk
 # entrypoint	scripts/ci/check-cargo-dependency-boundaries.sh
@@ -141,7 +141,7 @@ file	e4c348ca67764c57a46b6de27be2d534ad855e32be1143490261c4db599510d7	-	docs/too
 file	f74b4d59bdeb66381cbd80acd5b8f8a716062542f6c2934528d73715ca29de14	-	audits/ci-release-integrity.md
 file	b58c28709ad3d8a8fa950d7a27020fc87f5f10150b5dcb1e9351ca35790e2619	-	scripts/distribution/governance-files.txt
 file	d0ee87bebd55af6c3dfc2a062b5abdf951b07afc419e7cf52c085ce65bddba15	-	scripts/ci/check-candid-boundary.pl
-file	163ee69a2de9d371432462e47bdf09d9d1655e590567a2ed386ef7ba56d896c0	x	scripts/ci/verify-file-checksum.sh
+file	578a5f7217e378280fe378328d39e4b7dcea653bd868159b57362461bd4e8555	x	scripts/ci/verify-file-checksum.sh
 file	23c23beef41fda5f0acc1a404e40b04e5c362399a415524f16dbc4899120a5dd	x	scripts/ci/verify-shared-tooling-snapshot.sh
 file	c19319d552bab2fc3bde4efa10a313e47f01dbef1494137c6a8820142d93e34b	-	rules/engineering-details.md
 file	e3aed908dd9b08bf93255328bb056bed57298dab39944e3726aad2726548e653	-	rules/rpc-budgets.md

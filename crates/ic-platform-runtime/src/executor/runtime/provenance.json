@@ -9,10 +9,11 @@
     "Platform-owned runtime wiring; polling retains task metadata, caches wakers and coalesces wakeups; completed task membership and method wake queues are reclaimed; native execution does not install the IC panic hook.",
     "Method records own their wake queues, eliminating the secondary table and duplicate task context field; bulk cancellation clears stale wakeups before dropping futures, preserving destructor-spawned tasks.",
     "Use standard Vec task lists and retire the direct SmallVec dependency after installed benchmarking; the maintainer prioritizes production Wasm size over small-method allocation savings.",
-    "Tail task removal uses Vec::pop without scanning; non-tail removals preserve stable membership/cancellation order. Slot generations, wake routing and destructor placement are unchanged."
+    "Tail task removal uses Vec::pop without scanning; non-tail removals locate their unique task ID once and bulk-shift Vec entries, preserving stable membership/cancellation order. Slot generations, wake routing and destructor placement are unchanged.",
+    "Remove the unused private null-context entry helper; tracked contexts, null MethodId wake routing and public task APIs remain unchanged."
   ],
   "maintained_sources": {
-    "mod.rs": "d217cc0d86e316f9af55701cd6475c6ae52734f61cb58bd5e4fb58c53f4dcd37"
+    "mod.rs": "3904e0fc77d60b0192b3185e62d61277d89793124c3f40350248b8d633c5832d"
   },
   "reviewed_upstream_history": "2.0.0 tracking/protected/migratory contexts and 1.x stale-waker/trap-recovery changes retained; local wake-routing and membership defects reproduced and covered by native/installed regressions."
 }

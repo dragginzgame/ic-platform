@@ -20,6 +20,46 @@ for package in ic-platform ic-platform-runtime ic-platform-types; do
 done
 printf '[workspace]\n' > "$fixture/Cargo.toml"
 bash "$fixture/scripts/release/runtime-lock.sh" check
+# Roster failures must refuse before any selected lock can be prepared, even
+# when the reader emitted a valid first group before failing on a later one.
+cp "$fixture/ci/cargo-release-groups.json" "$fixture/valid-groups.json"
+for profile in cdk-runtime timers-runtime; do
+    cp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
+done
+for invalid in malformed empty partial; do
+    case "$invalid" in
+        malformed) printf '{' > "$fixture/ci/cargo-release-groups.json" ;;
+        empty) printf '{"groups":[]}\n' > "$fixture/ci/cargo-release-groups.json" ;;
+        partial) jq '.groups += [{"name":"broken", "primary":"broken", "members":null}]' "$fixture/valid-groups.json" > "$fixture/ci/cargo-release-groups.json" ;;
+    esac
+    for operation in check prepare; do
+        arguments=("$operation")
+        [[ "$operation" != prepare ]] || arguments+=(0.0.0)
+        if RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" "${arguments[@]}" > "$fixture/$invalid-$operation.log" 2>&1; then exit 1; fi
+        for profile in cdk-runtime timers-runtime; do
+            cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
+        done
+    done
+done
+cp "$fixture/valid-groups.json" "$fixture/ci/cargo-release-groups.json"
+(
+    # shellcheck disable=SC2329 # Exported into the checker subprocess for failure injection.
+    jq() {
+        if [[ "${2:-}" == .groups* ]]; then return 23; fi
+        command jq "$@"
+    }
+    export -f jq
+    for operation in check prepare; do
+        arguments=("$operation")
+        [[ "$operation" != prepare ]] || arguments+=(0.0.0)
+        result=0
+        RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" "${arguments[@]}" > "$fixture/reader-$operation.log" 2>&1 || result=$?
+        [[ "$result" == 23 ]]
+        for profile in cdk-runtime timers-runtime; do
+            cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
+        done
+    done
+)
 for group in platform runtime types; do
     primary="$(jq -r --arg group "$group" '.groups[] | select(.name == $group) | .primary' "$fixture/ci/cargo-release-groups.json")"
     members="$(jq -r --arg group "$group" '.groups[] | select(.name == $group) | .members | join(" ")' "$fixture/ci/cargo-release-groups.json")"

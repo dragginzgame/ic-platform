@@ -113,19 +113,6 @@ pub fn in_tracking_executor_context<R>(f: impl FnOnce() -> R) -> R {
     })
 }
 
-/// Execute a function in a context that is not tracked across callbacks, able to call [`spawn_migratory`]
-/// but not [`spawn_protected`].
-#[expect(dead_code)] // not used in current null context code but may be used for other things in the future
-pub(crate) fn in_null_context<R>(f: impl FnOnce() -> R) -> R {
-    setup_panic_hook();
-    let guard = MethodHandle::for_method(MethodId::null());
-    enter_current_method(guard, || {
-        let res = f();
-        poll_all();
-        res
-    })
-}
-
 /// Execute a query function in a context that allows calling [`spawn_protected`] but not [`spawn_migratory`].
 pub fn in_tracking_query_executor_context<R>(f: impl FnOnce() -> R) -> R {
     setup_panic_hook();
@@ -204,11 +191,12 @@ pub(crate) fn delete_task(task_id: TaskId) {
         METHODS.with_borrow_mut(|methods| {
             if let Some(method) = methods.get_mut(method_id) {
                 // The common single-task and reverse-completion cases need no
-                // scan. Other removals retain the original cancellation order.
+                // scan. Locate interior entries once, then bulk-shift the tail,
+                // retaining the original membership and cancellation order.
                 if method.tasks.last() == Some(&task_id) {
                     method.tasks.pop();
-                } else {
-                    method.tasks.retain(|id| *id != task_id);
+                } else if let Some(index) = method.tasks.iter().position(|id| *id == task_id) {
+                    method.tasks.remove(index);
                 }
             }
         });
