@@ -28,9 +28,7 @@ cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/"
 mkdir -p "$fixture/.cargo"
 cp "$root/.cargo/config.toml" "$fixture/.cargo/"
 cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
-cp "$root/scripts/ci/check-cargo-dependency-boundaries.sh" "$fixture/scripts/ci/"
-mkdir -p "$fixture/ci"
-cp "$root/ci/"{external-ic-dependencies.txt,cbor-dependencies.json} "$fixture/ci/"
+bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" scripts/ci/check-cargo-dependency-boundaries.sh
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"
@@ -164,6 +162,7 @@ read -r -t 15 _ <&6
 ADMISSION_RUN=B "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --prepared-call --build-only > "$fixture/concurrent-b.log" 2>&1 &
 second_pid=$!
 read -r -t 15 _ <&7
+# shellcheck disable=SC2016 # Perl variables must reach the Perl interpreter literally.
 "$ADMISSION_REAL_PERL" -MFcntl=:flock -e 'open my $lock, ">>", $ARGV[0] or die $!; exit(flock($lock, LOCK_EX | LOCK_NB) ? 1 : 0)' "$ADMISSION_WASM_LOCK"
 printf 'resume\n' >&8
 wait "$first_pid"; first_pid=""

@@ -5,7 +5,13 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/platform-consumer-admission.XXXXXX")"
-trap 'rm -rf "$fixture"' EXIT
+finish() {
+    local status=$?
+    if [[ "$status" == 0 ]]; then rm -rf "$fixture"
+    else printf 'Consumer admission evidence retained: %s\n' "$fixture" >&2; fi
+    exit "$status"
+}
+trap finish EXIT
 mkdir -p "$fixture/scripts/ci" "$fixture/crates/ic-platform/tests" "$fixture/bin"
 cp "$root/scripts/ci/check-platform-consumer.sh" "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/check-blake3-graph.sh" "$root/scripts/ci/check-cargo-graph.pl" "$fixture/scripts/ci/"
@@ -13,9 +19,7 @@ cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
 cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
-cp "$root/scripts/ci/check-cargo-dependency-boundaries.sh" "$fixture/scripts/ci/"
-mkdir -p "$fixture/ci"
-cp "$root/ci/"{external-ic-dependencies.txt,cbor-dependencies.json} "$fixture/ci/"
+bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" scripts/ci/check-cargo-dependency-boundaries.sh
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"

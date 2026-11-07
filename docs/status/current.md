@@ -82,6 +82,16 @@ environment sealing. Qualification is being rerun before a new frozen capture.
 See `target/deployment-platform0251-20261107/` for capture, correction and draft
 custody evidence. No schema or old proof is rebound to the correction.
 
+The Make-context regression passed all five successful group receipts and its
+negative/recovery cases at `target/release-plan-test.rI7xjI`. Correction source is
+`68f624f98d022886925de6c26e65685b4f9c73a6`. Batch `batch-2ylQaRca` then passed
+through workspace tests/docs but failed consumer-admission fixture setup: the
+new Shared dependency checker was copied without its declared hash-policy file.
+No metadata, tag or upload was produced. Three owned fixture constructors now
+use Shared's declared companion copier; consumer/prepared-call admission and real
+Runtime independence pass. Failed consumer fixtures also retain their evidence.
+The next source receives a fresh complete gate; no old receipt is reused.
+
 ## Runtime 0.20.0 and Platform 0.25.0 deployed
 
 Both groups are published on crates.io and GitHub, delivered through Shared's
