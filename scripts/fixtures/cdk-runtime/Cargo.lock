@@ -765,13 +765,26 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e87f01cbae3cc6cbd5b0ffc705c9086618817e4f0045ce67821e3fcbbc338670"
+dependencies = [
+ "candid",
+ "ic-management-canister-types",
+ "ic-platform-types 0.18.0",
+ "serde",
+ "serde_bytes",
+]
+
+[[package]]
+name = "ic-platform"
 version = "0.24.0"
 dependencies = [
  "candid",
  "ic-certification",
  "ic-management-canister-types",
  "ic-platform-macros",
- "ic-platform-runtime",
+ "ic-platform-runtime 0.20.0",
  "ic-platform-types 0.18.2",
  "serde",
  "serde_bytes",
@@ -780,21 +793,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-platform"
-version = "0.21.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e87f01cbae3cc6cbd5b0ffc705c9086618817e4f0045ce67821e3fcbbc338670"
-dependencies = [
- "candid",
- "ic-management-canister-types",
- "ic-platform-types 0.18.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde",
- "serde_bytes",
-]
-
-[[package]]
 name = "ic-platform-macros"
-version = "0.19.5"
+version = "0.20.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -804,6 +804,12 @@ dependencies = [
 [[package]]
 name = "ic-platform-runtime"
 version = "0.19.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "50c3993129a37d30563cc7cda9e38e922c7f5986c9c9424dae804d9e5f2545ae"
+
+[[package]]
+name = "ic-platform-runtime"
+version = "0.20.0"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -816,11 +822,13 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.19.5"
+version = "0.20.0"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.18.2"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f95791d7eff0804a23182f131b976293f0f0184b237a63cfb741c1f63a60fb91"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -832,9 +840,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-types"
-version = "0.18.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f95791d7eff0804a23182f131b976293f0f0184b237a63cfb741c1f63a60fb91"
+version = "0.18.2"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -860,9 +866,9 @@ dependencies = [
  "ic-host-fs",
  "ic-host-process",
  "ic-management-canister-types",
- "ic-platform 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "ic-platform-runtime",
- "ic-platform-types 0.18.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.21.0",
+ "ic-platform-runtime 0.19.5",
+ "ic-platform-types 0.18.0",
  "ic-transport-types",
  "libc",
  "reqwest",
@@ -1366,7 +1372,7 @@ name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
  "ic-platform 0.24.0",
- "ic-platform-runtime",
+ "ic-platform-runtime 0.20.0",
  "ic-wire",
  "serde",
 ]

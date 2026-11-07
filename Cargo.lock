@@ -1576,7 +1576,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.19.5"
+version = "0.20.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1585,7 +1585,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.19.5"
+version = "0.20.0"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -1599,7 +1599,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.19.5"
+version = "0.20.0"
 
 [[package]]
 name = "ic-platform-types"

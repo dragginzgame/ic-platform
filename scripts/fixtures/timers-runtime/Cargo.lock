@@ -793,7 +793,7 @@ dependencies = [
  "ic-certification",
  "ic-management-canister-types",
  "ic-platform-macros",
- "ic-platform-runtime",
+ "ic-platform-runtime 0.20.0",
  "ic-platform-types 0.18.2",
  "serde",
  "serde_bytes",
@@ -803,7 +803,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.19.5"
+version = "0.20.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -813,6 +813,12 @@ dependencies = [
 [[package]]
 name = "ic-platform-runtime"
 version = "0.19.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "50c3993129a37d30563cc7cda9e38e922c7f5986c9c9424dae804d9e5f2545ae"
+
+[[package]]
+name = "ic-platform-runtime"
+version = "0.20.0"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -825,7 +831,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.19.5"
+version = "0.20.0"
 
 [[package]]
 name = "ic-platform-types"
@@ -870,7 +876,7 @@ dependencies = [
  "ic-host-process",
  "ic-management-canister-types",
  "ic-platform 0.21.0",
- "ic-platform-runtime",
+ "ic-platform-runtime 0.19.5",
  "ic-platform-types 0.18.0",
  "ic-transport-types",
  "libc",
@@ -898,7 +904,7 @@ version = "0.37.0"
 source = "git+https://github.com/dragginzgame/ic-scheduling?rev=e50ca4f91e7cc213e089d7ef79f9c224d36d61ad#e50ca4f91e7cc213e089d7ef79f9c224d36d61ad"
 dependencies = [
  "ic-metrics",
- "ic-platform-runtime",
+ "ic-platform-runtime 0.20.0",
  "thiserror 2.0.21",
 ]
 
@@ -1385,7 +1391,7 @@ name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
  "ic-platform 0.24.0",
- "ic-platform-runtime",
+ "ic-platform-runtime 0.20.0",
  "ic-timers",
  "ic-wire",
  "serde",
