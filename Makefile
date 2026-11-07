@@ -212,6 +212,9 @@ check-release-commands:
 	bash scripts/ci/test-platform-release-groups.sh
 	bash scripts/ci/test-platform-group-preparation.sh
 	bash scripts/release/test-editor-bootstrap.sh
+.PHONY: check-policy-fixture-evidence
+check-policy-fixture-evidence:
+	@perl scripts/release/policy-fixture-evidence.pl seal "$$PLATFORM_POLICY_ADMISSION" "$$PLATFORM_POLICY_SOURCE" "$$PLATFORM_POLICY_GROUP"
 ci:
 	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check
 

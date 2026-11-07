@@ -95,7 +95,9 @@ retain Shared's complete parent-gate proof plus its sealed leaf admission,
 original execution and log digests. Recovery re-observes the leaf's current
 closure/tools/environment and checks those immutable bytes; missing or damaged
 evidence cannot satisfy a saved receipt. Old schema-3 receipts keep their original
-semantics. Normal qualification output distinguishes execution/reuse and reports
+semantics. Observation uses the same child Make dispatch as execution, preserving
+its tool-path prefix instead of substituting the parent process's environment.
+Normal qualification output distinguishes execution/reuse and reports
 admission time. Exact-input mismatch or absent proof executes ordinarily; changed
 inputs during execution, primary failure or unsafe custody refuses admission.
 

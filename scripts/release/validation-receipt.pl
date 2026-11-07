@@ -131,7 +131,13 @@ for my $stage (@{$context->{stage_admissions}//[]}) {
     $stage eq 'release-policy-fixtures' or die "unqualified reusable stage\n";
     my $path=dirname(dirname($run))."/stage-admissions/$stage.json";
     bytes($path); # Check routes before the Shared sealer reads the admission.
-    $stage_admissions{$stage}=$json->decode(command('perl','scripts/release/policy-fixture-evidence.pl','seal',$path,$plan->{source},$plan->{group}));
+    # The leaf was dispatched by a child Make, whose exported tool PATH is a
+    # genuine input. Re-enter the same Make owner for observation; the parent's
+    # environment is not interchangeable and must not be normalized for reuse.
+    local $ENV{PLATFORM_POLICY_ADMISSION}=$path;
+    local $ENV{PLATFORM_POLICY_SOURCE}=$plan->{source};
+    local $ENV{PLATFORM_POLICY_GROUP}=$plan->{group};
+    $stage_admissions{$stage}=$json->decode(command('make','--no-print-directory','check-policy-fixture-evidence'));
 }
 my $receipt={schema=>$schema,contract=>"platform-release-validation/$schema",source=>$plan->{source},group=>$plan->{group},
     scope=>$plan->{scope},baseline=>$context->{baseline},plan_sha256=>sha256_hex($raw),

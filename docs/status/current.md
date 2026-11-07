@@ -65,6 +65,23 @@ release. Deployment-start SHA-256:
 patch; the earlier task-start lock remains under `target/issues148-150/`.
 No new full release gate, publication, native macOS or Profiler evidence is claimed.
 
+## Platform 0.25.1 delivery state
+
+The initial capture refused the independent dirty lock without release effects.
+Its exact draft is retained durably at `retained/platform0251-lock-draft`, based
+on preparation commit `1b5909acd90f58620e7f5e653ca1a57bf27dd79d`. After clean
+capture, that same draft was restored to the normal tree and remains deferred.
+
+Batch `batch-ZNfZ3p9z` pinned that preparation source. Its validator was stopped
+before metadata preparation/publication after identifying that real child Make
+adds a tool-path prefix absent from the earlier substituted dispatch. Preserve
+its failed/interrupted evidence; no package or tag was delivered by it. Receipt
+observation now uses the same child Make owner as leaf execution. The regression
+fixture retains the actual PATH export/sealing recipe and refuses direct parent-
+environment sealing. Qualification is being rerun before a new frozen capture.
+See `target/deployment-platform0251-20261107/` for capture, correction and draft
+custody evidence. No schema or old proof is rebound to the correction.
+
 ## Runtime 0.20.0 and Platform 0.25.0 deployed
 
 Both groups are published on crates.io and GitHub, delivered through Shared's

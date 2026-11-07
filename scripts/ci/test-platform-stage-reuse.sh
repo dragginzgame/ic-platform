@@ -16,6 +16,11 @@ for directory in docs rules make .cargo; do mkdir -p "$repo/$directory"; cp -R "
 cp "$root/"{.shared-tooling.snapshot,DRAGGINZGAME.md,AGENTS.md,README.md,rust-toolchain.toml} "$repo/"
 # Keep the fake product stage except for the actual bounded leaf under review.
 perl -0pi -e 's/\t\@bash fixture-stage.sh check-release-commands\n/\tbash scripts\/release\/check-policy-fixtures.sh\n/ or die "missing parent stage"' "$repo/Makefile"
+# Preserve the real Make export and sealing dispatch. A stage's child Make
+# prefixes PATH once more than the parent receipt process; direct sealing from
+# that parent must refuse rather than silently rebinding its environment.
+sed -n '/^export PATH :=/p' "$root/make/tools.mk" >> "$repo/Makefile"
+perl -0777 -ne '/(^check-policy-fixture-evidence:\n(?:\t[^\n]*\n)+)/m or die "missing sealing dispatch"; print $1' "$root/Makefile" >> "$repo/Makefile"
 mkdir "$repo/versions"
 for group in platform runtime types; do printf '1.0.0\n' > "$repo/versions/$group"; done
 cat > "$repo/scripts/release/group.sh" <<'GROUP'
@@ -52,6 +57,7 @@ admit() {
 }
 admit > "$fixture/readmitted.log"
 admission="${second%/receipt.json}/stage-admissions/release-policy-fixtures.json"
+refuse perl scripts/release/policy-fixture-evidence.pl seal "$admission" "$(jq -r .source "$second")" platform
 mv "$admission" "$admission.saved"
 refuse admit
 mv "$admission.saved" "$admission"
