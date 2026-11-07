@@ -1,5 +1,49 @@
 # Current handoff — 2026-11-07
 
+## Local complexity cleanup and Shared adoption (unpublished)
+
+Pending **Runtime 0.20.0 / Platform 0.25.0** removes the paired ordinary macro
+families: Runtime's conventional `cdk::{query, update, init, ...}` exports are
+canonical. The facade's `cdk` feature and ordinary macro exports are removed;
+its raw `runtime` adapters and explicit external-Candid bridge remain. Consumers
+must select Runtime `cdk` directly, including generated/scaffold dependencies.
+Explicit crate overrides, codecs, ABI, guard ordering and executor identity are
+preserved. See [the migration](../migration.md#canonical-ordinary-entrypoints-runtime-020--platform-025).
+No sibling source or release was changed.
+
+The inactive selected-stage pilot, host allowlist and qualification workflow are
+removed. All **20** local release stages remain mandatory for every group;
+source/metadata/evidence receipts and recovery refusals remain. Real preparation,
+rollback and custody tests still cover all groups; Runtime supplies one full
+local delivery/resume cycle instead of repeating it for every group.
+
+Focused Linux/Rust 1.99.1 checks pass: affected-package all-target/all-feature
+Clippy; Runtime/macros and moved CDK consumer tests; dedicated external-Candid
+consumer tests and standalone native/Wasm contracts; feature-policy regressions
+and actual Linux/Wasm closures; singleton/type-identity refusals; full-only planner,
+three-group receipt recovery and real group preparation. Installed owner and
+Timers raw/prepared Wire/external-Candid checks pass, including awaits, callback
+traps, cancellation, upgrade, stable rollback, certificates and admission.
+Evidence: `target/complexity-cleanup/`; installed fixtures
+`target/cdk-runtime.y9J8xH/` and `target/cdk-runtime.6ReMRn/`.
+Planner/recovery fixtures substitute product stage bodies; installed checks use
+the prepared real Testkit server. No full release gate, fresh macOS/Profiler
+acceptance, publication or matched size/performance improvement is claimed.
+Runtime 0.20 release qualification will need a compatible immutable Timers supplier;
+current tests qualify the local 0.19.5 owner with the macro changes, not a published
+0.20 cohort. Types/browser and the independent lock draft remain untouched.
+
+Adopted committed Shared `b2026a118e38de4af1555c527af327cb604eacdf` through the
+canonical exporter after impact review; all 141 payloads match. Local overlay
+and pending Platform 0.25.0 notes follow that baseline. No package version changed.
+Fresh override-scratch LOC reporting and selected shell/Perl syntax/lint pass;
+Platform group routing/publication-subset checks pass. Evidence:
+`target/shared0315-adoption/`.
+[Advisory run 42365731394](https://github.com/dragginzgame/ic-platform/actions/runs/42365731394)
+failed on crypto-bigint 0.5.5 / RUSTSEC-2026-0387 only. Runtime and Timers
+composition audit statuses are zero with complete index observations. #50 stays
+open and deferred at the maintainer’s instruction; no waiver or retry was added.
+
 ## Platform 0.24.0 deployed
 
 Platform **0.24.0** is published on crates.io and GitHub under annotated tag
@@ -68,23 +112,26 @@ commit's hosted browser and Wasm comparisons passed. Recorded observations are i
 ## Deferred dependency draft
 
 The independent Candid/derive **0.10.40**, cc **1.11.1** and SmallVec **1.16.5**
-updates remain uncommitted in normal Cargo.lock and were excluded from publication.
+updates are deferred from publication; the committed graph is selected for deployment.
 The draft reappeared during frozen qualification with its exact retained checksum;
 frozen inputs stayed unchanged. After reconciliation its normalized external patch
 was restored exactly over the delivered owner versions. Current lock SHA-256:
 `4ce766eee04d278fe4885ece92342bf4fa27f21f572259e5021b0422f435fe3f`.
 
-Custody: `refs/retained/platform0240-20261107-reviewed-draft`, plus
+Current custody: `refs/retained/platform0250-runtime0200-20261107-lock-draft`
+and `target/deployment-platform0250-runtime0200-20261107/`. Restore its external
+dependency patch over delivered owner versions after reconciliation. Earlier
+custody: `refs/retained/platform0240-20261107-reviewed-draft`, plus
 `deferred.Cargo.lock`, `deferred-version.patch` and `restored-version.patch` in
 deployment evidence. Earlier `refs/retained/audit-deploy-20261107-lock-draft` is
 untouched. Never restore an old whole lock over delivered owner versions.
 
 ## Baseline and retained custody
 
-Shared **0.31.1** at `5efbda2ab81ad84e30f490f3137d8ef083c303d2` remains adopted;
-all 141 snapshot payloads passed admission. VERSION/changelog say 0.31.1 despite
-the supplier commit title 0.31.2. The pinned metadata editor remains ic-build 0.73.0.
-Native-host reuse stays disabled, so releases retain full gates. Historical Shared
+The published 0.24.0 release used Shared **0.31.1** at
+`5efbda2ab81ad84e30f490f3137d8ef083c303d2`. Local Shared **0.31.5** adoption is
+recorded above and is not yet delivered. The metadata editor remains ic-build 0.73.0.
+The selected-stage pilot is now retired, so releases retain full gates. Historical Shared
 macOS setup/native reuse is separate from Platform acceptance; the supplier's broader
 portable suite had failed at `test-release-editor-setup.sh`. No new result is claimed.
 

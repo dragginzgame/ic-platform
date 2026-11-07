@@ -13,15 +13,15 @@ def powerset:
     range($i + 1; $features | length) as $j | [$features[$i], $features[$j]]] +
    [
      # Runtime identity with redundant explicit entrypoint prerequisites.
-     ["cdk", "candid", "executor", "ic0"],
+     ["runtime", "candid", "executor", "ic0"],
      # Combined canister DTO and certificate integrations without host features.
-     ["cdk", "management-canister-types", "icrc-ledger-types", "certification"],
+     ["runtime", "management-canister-types", "icrc-ledger-types", "certification"],
      # Auth's portable crypto combination must not acquire host/runtime scaffolding.
      ["bls", "ecdsa", "ed25519"],
      # Certificate/signature dependency paths and portable verification together.
      ["canister-sig-creation", "signature-verification", "bls", "certification-cbor", "ed25519"],
      # Host-feature exclusion on Wasm alongside the full runtime.
-     (["cdk"] + ($policy[0].native_leaves | keys)),
+     (["runtime"] + ($policy[0].native_leaves | keys)),
      # The development profile also implies the native packet leaf.
      ($features - (($policy[0].native_leaves | keys) + ["ic-protocol-fixtures"]))
    ] | map(if (. - $features | length) == 0 then selection

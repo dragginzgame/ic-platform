@@ -7,7 +7,9 @@ in `ic-platform-types`. There are no default features.
 
 Select `ic0` for raw system calls, `executor` for method/task contexts, `runtime`
 for raw calls and prepared `call::Call`, or `cdk` for explicit-codec entrypoints.
-Use `ic_platform_runtime::{ic0, executor, cdk, call}`. Endpoint codecs and policy
+Use `ic_platform_runtime::{ic0, executor, cdk, call}`. The conventional
+`cdk::{query, update, init, pre_upgrade, post_upgrade, heartbeat, inspect_message,
+on_low_wasm_memory}` macros form the sole ordinary entrypoint family. Endpoint codecs and policy
 remain caller-owned. For a renamed dependency, pass the existing macro `crate`
 option with the selected runtime's CDK path.
 

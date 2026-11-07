@@ -1,40 +1,41 @@
 //! Explicit codecs for a required external Candid interface, not owned Wire RPCs.
-use ic_platform::{
-    candid::{DecodeError, DecodeLimits, contract, decode_args},
-    cdk,
+use ic_platform::candid::{
+    contract,
+    endpoint::{self, ArgumentLimits},
 };
 
-const LIMITS: DecodeLimits = DecodeLimits {
-    reply_bytes: 1024,
+#[cfg(test)]
+use ic_platform::candid::endpoint::{ArgumentDecodeError, EmptyArgs};
+
+const LIMITS: ArgumentLimits = ArgumentLimits {
+    max_bytes: 1024,
     decoding_quota: 10_000,
     skipping_quota: 0,
-    type_entries: 8,
-    header_bytes: 256,
+    max_type_len: 8,
+    max_header_len: 256,
 };
 
-fn admit_empty(bytes: &[u8]) -> Result<(), DecodeError> {
-    decode_args::<()>(bytes, LIMITS)
+#[cfg(test)]
+fn admit_empty(bytes: &[u8]) -> Result<(), ArgumentDecodeError> {
+    LIMITS.decode::<()>(bytes, EmptyArgs::Reject)
 }
 
-fn decode_empty(bytes: Vec<u8>) {
-    admit_empty(&bytes).unwrap_or_else(|error| cdk::api::trap(error.to_string()));
-}
-
+#[cfg(test)]
 fn encode_reply(value: u64) -> Vec<u8> {
-    contract::encode_args((value,)).unwrap_or_else(|error| cdk::api::trap(error.to_string()))
+    contract::encode_args((value,))
+        .unwrap_or_else(|error| ic_platform::cdk::api::trap(error.to_string()))
 }
 
 fn admit_caller() -> Result<(), String> {
     Ok(())
 }
 
-#[cdk::query(
+#[endpoint::query(
     name = "external_status",
     guard = "admit_caller",
-    decode_with = "decode_empty",
-    encode_with = "encode_reply"
+    limits = "LIMITS",
+    empty_args = "reject"
 )]
-#[contract::candid_method(query, rename = "external_status")]
 fn external_status() -> u64 {
     7
 }
@@ -63,10 +64,13 @@ fn empty_external_requests_still_require_valid_bounded_candid() {
         b"DIDL\0\0\x01".to_vec(),
         contract::encode_args((7_u64,)).unwrap(),
     ] {
-        assert!(matches!(admit_empty(&bytes), Err(DecodeError::Candid(_))));
+        assert!(matches!(
+            admit_empty(&bytes),
+            Err(ArgumentDecodeError::Candid(_))
+        ));
     }
     assert!(matches!(
-        admit_empty(&vec![0; LIMITS.reply_bytes + 1]),
-        Err(DecodeError::ReplyTooLarge { .. })
+        admit_empty(&vec![0; LIMITS.max_bytes + 1]),
+        Err(ArgumentDecodeError::TooLarge { .. })
     ));
 }

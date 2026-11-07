@@ -86,7 +86,7 @@ manifest '"ic0"'
 cargo check --manifest-path "$fixture/Cargo.toml" --frozen \
     --target-dir "$fixture/target" > "$fixture/ic0-check.log" 2>&1
 # Reuse the successful native lock: enabling runtime later must still refuse.
-for features in executor runtime cdk; do
+for features in executor runtime candid-endpoint; do
     manifest "$(printf '"%s"' "$features" | sed 's/,/", "/g')"
     if cargo tree --manifest-path "$fixture/Cargo.toml" --offline \
         > "$fixture/$features.tree" 2> "$fixture/$features.log"; then

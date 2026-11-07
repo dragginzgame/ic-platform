@@ -1,12 +1,12 @@
 //! Standalone Candid-free runtime ABI proof; installed RPC fixtures use Wire.
-use ic_platform::cdk::{api, call};
+use ic_platform_runtime::cdk::{api, call};
 
-#[ic_platform::cdk::query(decode_with = "decode_unit", manual_reply)]
+#[ic_platform_runtime::cdk::query(decode_with = "decode_unit", manual_reply)]
 fn fixed_reply() {
     api::msg_reply(42_u64.to_le_bytes());
 }
 
-#[ic_platform::cdk::query(decode_with = "decode_unit", manual_reply)]
+#[ic_platform_runtime::cdk::query(decode_with = "decode_unit", manual_reply)]
 fn static_reply() {
     api::msg_reply(b"explicit-static-codec");
 }
@@ -17,7 +17,7 @@ fn encode_default<T: Default>() -> T {
 
 // Keep the existing Vec expectation: widening encode_with would make this
 // previously supported generic encoder ambiguous.
-#[ic_platform::cdk::query(decode_with = "decode_unit", encode_with = "encode_default")]
+#[ic_platform_runtime::cdk::query(decode_with = "decode_unit", encode_with = "encode_default")]
 fn generic_reply() {}
 
 mod binding_collisions {
@@ -36,22 +36,26 @@ mod binding_collisions {
         Ok(())
     }
 
-    #[ic_platform::cdk::query(decode_with = "decode", encode_with = "result")]
+    #[ic_platform_runtime::cdk::query(decode_with = "decode", encode_with = "result")]
     fn entry(entry: u64, __arg_entry: u64) -> u64 {
         entry + __arg_entry
     }
 
-    #[ic_platform::cdk::query(decode_with = "decode", encode_with = "result")]
+    #[ic_platform_runtime::cdk::query(decode_with = "decode", encode_with = "result")]
     fn arg_bytes((left, right): (u64, u64)) -> u64 {
         left + right
     }
 
-    #[ic_platform::cdk::update(guard = "admit", decode_with = "decode", encode_with = "result")]
+    #[ic_platform_runtime::cdk::update(
+        guard = "admit",
+        decode_with = "decode",
+        encode_with = "result"
+    )]
     async fn r((left, right): (u64, u64)) -> u64 {
         left + right
     }
 
-    #[ic_platform::cdk::query(decode_with = "decode", encode_with = "result")]
+    #[ic_platform_runtime::cdk::query(decode_with = "decode", encode_with = "result")]
     fn __platform_arg_0((left, right): (u64, u64)) -> u64 {
         left + right
     }
@@ -68,12 +72,12 @@ fn decode_unit(bytes: Vec<u8>) {
     assert!(bytes.is_empty());
 }
 
-#[ic_platform::cdk::query(decode_with = "decode_opaque", encode_with = "encode_opaque")]
+#[ic_platform_runtime::cdk::query(decode_with = "decode_opaque", encode_with = "encode_opaque")]
 fn echo(value: Opaque) -> Opaque {
     value
 }
 
-#[ic_platform::cdk::query(
+#[ic_platform_runtime::cdk::query(
     name = "native-name",
     decode_with = "decode_opaque",
     encode_with = "encode_opaque"
@@ -82,7 +86,7 @@ fn native_hyphen(value: Opaque) -> Opaque {
     value
 }
 
-#[ic_platform::cdk::query(
+#[ic_platform_runtime::cdk::query(
     name = "native_name",
     decode_with = "decode_opaque",
     encode_with = "encode_opaque"
@@ -91,18 +95,18 @@ fn native_underscore(value: Opaque) -> Opaque {
     value
 }
 
-#[ic_platform::cdk::query(decode_with = "decode_opaque", encode_with = "encode_opaque")]
+#[ic_platform_runtime::cdk::query(decode_with = "decode_opaque", encode_with = "encode_opaque")]
 fn r#match(value: Opaque) -> Opaque {
     value
 }
 
-#[ic_platform::cdk::query(decode_with = "missing_decoder", encode_with = "missing_encoder")]
+#[ic_platform_runtime::cdk::query(decode_with = "missing_decoder", encode_with = "missing_encoder")]
 #[cfg(any())]
 fn disabled_after_macro(value: MissingType) -> MissingType {
     value
 }
 
-#[ic_platform::cdk::update(decode_with = "decode_opaque", encode_with = "encode_opaque")]
+#[ic_platform_runtime::cdk::update(decode_with = "decode_opaque", encode_with = "encode_opaque")]
 async fn awaited(value: Opaque) -> Opaque {
     let response = call::Call::bounded_wait(api::canister_self(), "echo")
         .take_raw_args(value.0)
@@ -111,15 +115,15 @@ async fn awaited(value: Opaque) -> Opaque {
     Opaque(response.into_bytes())
 }
 
-#[ic_platform::cdk::init(decode_with = "decode_unit")]
+#[ic_platform_runtime::cdk::init(decode_with = "decode_unit")]
 fn init() {}
 
-#[ic_platform::cdk::pre_upgrade]
+#[ic_platform_runtime::cdk::pre_upgrade]
 fn before_upgrade() {}
 
 #[test]
 fn error_and_system_contracts() {
-    use ic_platform::cdk::{futures, stable};
+    use ic_platform_runtime::cdk::{futures, stable};
     let rejected = call::CallRejected::with_rejection(3, "missing destination".into());
     assert_eq!(rejected.raw_reject_code(), 3);
     assert_eq!(rejected.reject_message(), "missing destination");
@@ -142,12 +146,12 @@ fn error_and_system_contracts() {
     assert_eq!(u32::from(api::PerformanceCounterType::from(17)), 17);
     assert_eq!(api::PerformanceCounterType::InstructionCounter, 0);
     let _: fn() -> bool = futures::is_recovering_from_trap;
-    ic_platform::cdk::println!("native debug adapter");
+    ic_platform_runtime::cdk::println!("native debug adapter");
 }
 
 #[test]
 fn owned_reject_codes_preserve_numbers_and_diagnostics() {
-    use ic_platform::cdk::call::RejectCode;
+    use ic_platform_runtime::cdk::call::RejectCode;
     for (raw, name) in [
         (1, "SYS_FATAL"),
         (2, "SYS_TRANSIENT"),
@@ -167,7 +171,7 @@ fn owned_reject_codes_preserve_numbers_and_diagnostics() {
 
 #[test]
 fn transport_failures_are_named_without_a_codec_error_union() {
-    use ic_platform::cdk::call::{
+    use ic_platform_runtime::cdk::call::{
         CallFailed, CallPerformFailed, CallRejected, OnewayError, RejectCode,
         UnrecognizedRejectCode,
     };

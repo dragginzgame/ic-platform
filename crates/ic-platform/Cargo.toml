@@ -21,7 +21,7 @@ ic-protocol = ["principal-external", "certification-cbor", "dep:ic-transport-typ
 ic-protocol-fixtures = ["ic-protocol"]
 bls = ["dep:ic-verify-bls-signature", "dep:ic_bls12_381"]
 candid = ["principal-external", "dep:candid", "candid/bignum"]
-candid-endpoint = ["cdk", "candid"]
+candid-endpoint = ["runtime", "candid", "dep:ic-platform-macros"]
 candid-parser = ["principal-external", "dep:candid_parser"]
 candid-service = ["candid", "candid/printer"]
 cmc-types = ["candid"]
@@ -30,7 +30,6 @@ cycles-ledger-types = ["candid"]
 nns-registry-types = ["candid"]
 certified-assets-types = ["candid"]
 canister-sig-creation = ["principal-external", "certification", "dep:ic-canister-sig-creation"]
-cdk = ["runtime", "dep:ic-platform-macros"]
 runtime = ["principal", "executor", "ic0", "ic-platform-runtime/runtime"]
 certification = ["dep:ic-certification"]
 certification-cbor = [
@@ -130,11 +129,6 @@ path = "tests/ed25519_consumer.rs"
 required-features = ["ed25519"]
 
 [[test]]
-name = "cdk_consumer"
-path = "tests/cdk_consumer.rs"
-required-features = ["cdk"]
-
-[[test]]
 name = "runtime_consumer"
 path = "tests/runtime_consumer.rs"
 required-features = ["runtime"]
@@ -197,7 +191,7 @@ required-features = ["icrc-ledger-types"]
 [[test]]
 name = "external_candid_consumer"
 path = "tests/external_candid_consumer.rs"
-required-features = ["cdk", "candid-service"]
+required-features = ["candid-endpoint", "candid-service"]
 
 [[test]]
 name = "management_consumer"

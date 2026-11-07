@@ -18,10 +18,7 @@ mod upstream;
 pub use crate::__platform_println as println;
 #[cfg(feature = "cdk")]
 pub use ic_platform_macros::{
-    runtime_heartbeat as heartbeat, runtime_init as init,
-    runtime_inspect_message as inspect_message, runtime_on_low_wasm_memory as on_low_wasm_memory,
-    runtime_post_upgrade as post_upgrade, runtime_pre_upgrade as pre_upgrade,
-    runtime_query as query, runtime_update as update,
+    heartbeat, init, inspect_message, on_low_wasm_memory, post_upgrade, pre_upgrade, query, update,
 };
 
 /// Explicit reviewed system adapters used by reviewed canisters and the generator.

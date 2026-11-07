@@ -21,7 +21,7 @@ while IFS='|' read -r selection package expected; do
     printf 'ic-platform v0.1.13\n%s\n' "$package" > "$fixture/native-case.txt"
     # Supply the required guard for ordinary runtime cases; explicit guard cases
     # below exercise identity and feature-selection refusals.
-    if [[ "$package" != ic-platform-runtime-guard* && ",$selection," =~ ,(executor|runtime|cdk|candid-endpoint), ]]; then
+    if [[ "$package" != ic-platform-runtime-guard* && ",$selection," =~ ,(executor|runtime|candid-endpoint), ]]; then
         printf 'ic-platform-runtime-guard v0.1.13 (/fixture)\n' >> "$fixture/native-case.txt"
     fi
     printf '%s\tcase\n' "$selection" > "$fixture/mapping"
@@ -56,7 +56,7 @@ principal-self-authenticating|ic_principal v0.1.5|reject
 principal-self-authenticating,principal-external|ic_principal v0.1.5|pass
 runtime|ic_principal v0.1.5|reject
 runtime|sha2 v0.10.9|reject
-cdk|digest v0.10.7|reject
+runtime|digest v0.10.7|reject
 principal,executor|serde v1.0.229|pass
 canister-sig-creation|ic-representation-independent-hash v3.2.0|pass
 signature-verification|ic-representation-independent-hash v3.2.0|pass
@@ -65,7 +65,7 @@ canister-sig-creation|half v1.8.3|pass
 signature-verification|serde_cbor v0.11.2|pass
 none|rand v0.8.5|reject
 executor|rand_chacha v0.3.1|reject
-cdk|getrandom v0.2.17|reject
+runtime|getrandom v0.2.17|reject
 bls|rand v0.8.5|reject
 signature-verification|rand v0.8.5|reject
 none|rand_core v0.6.4|pass
@@ -86,7 +86,6 @@ ic-protocol|pretty v0.12.5|pass
 ic-protocol|ic-transport-types v0.49.3|pass
 ic-protocol-fixtures|ic-agent v0.49.3|reject
 certification-cbor|ic-transport-types v0.49.3|reject
-cdk|candid v0.10.38|reject
 runtime|candid v0.10.38|reject
 candid-endpoint|candid v0.10.38|pass
 candid-endpoint|pretty v0.12.5|reject
@@ -95,8 +94,8 @@ candid-endpoint|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
 runtime|ic-cdk-executor v2.0.0|reject
 runtime|ic0 v1.2.0|reject
 runtime|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
-cdk|candid_derive v0.10.38|reject
-cdk,candid|candid v0.10.38|pass
+runtime|candid_derive v0.10.38|reject
+runtime,candid|candid v0.10.38|pass
 none|candid_derive v0.10.38|reject
 candid|candid v0.10.38|pass
 cmc-types|candid v0.10.38|pass
@@ -111,7 +110,7 @@ certified-assets-types|ic-agent v0.49.3|reject
 nns-registry-types|pocket-ic v16.1.0|reject
 candid-service|candid v0.10.38|pass
 candid|pretty v0.12.5|reject
-cdk,candid|pretty v0.12.5|reject
+runtime,candid|pretty v0.12.5|reject
 candid-service|pretty v0.12.5|pass
 candid-parser|pretty v0.12.5|pass
 management-canister-types|pretty v0.12.5|pass
@@ -129,14 +128,13 @@ none|ic-cdk-executor v2.0.0|reject
 executor|ic-cdk-executor v2.0.0|reject
 executor|ic-cdk-executor v1.0.2|reject
 executor|ic-cdk-executor v2.0.0 (/local)|reject
-cdk|ic-cdk v0.20.3|reject
-cdk|ic-cdk v0.19.0|reject
-cdk|ic-cdk-timers v1.0.0|reject
-cdk|ic-cdk-macros v0.20.3 (proc-macro)|reject
-cdk|ic-cdk-macros v0.20.3 (proc-macro) (/local)|reject
-cdk|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
+runtime|ic-cdk v0.20.3|reject
+runtime|ic-cdk v0.19.0|reject
+runtime|ic-cdk-timers v1.0.0|reject
+runtime|ic-cdk-macros v0.20.3 (proc-macro)|reject
+runtime|ic-cdk-macros v0.20.3 (proc-macro) (/local)|reject
 none|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
-cdk|ic-platform-macros v0.1.12 (proc-macro) (/fixture)|reject
+candid-endpoint|ic-platform-macros v0.1.12 (proc-macro) (/fixture)|reject
 ic0|ic0 v1.2.0|reject
 ic0|ic0 v1.1.0|reject
 ic0|ic0 v1.2.0 (/local)|reject
@@ -145,7 +143,7 @@ canister-sig-creation|candid v0.10.38|pass
 signature-verification|candid v0.10.38|pass
 canister-sig-creation|ic0 v1.2.0|pass
 signature-verification|ic0 v1.2.0|pass
-cdk|ic-error-types v0.2.0|reject
+runtime|ic-error-types v0.2.0|reject
 canister-sig-creation|ic-canister-sig-creation v1.3.2|reject
 signature-verification|ic-signature-verification v0.3.0|pass
 signature-verification|ic-signature-verification v0.2.0|reject

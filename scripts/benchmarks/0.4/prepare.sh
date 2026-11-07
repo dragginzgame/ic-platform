@@ -5,7 +5,7 @@ for revision in base candidate; do
  for selection in runtime creation verification; do
   fixture="$bench/fixtures/$revision-$selection"
   mkdir -p "$fixture/src"
-  case "$selection" in runtime) features='"cdk"';; creation) features='"canister-sig-creation"';; verification) features='"signature-verification"';; esac
+  case "$selection" in runtime) features='"runtime"';; creation) features='"canister-sig-creation"';; verification) features='"signature-verification"';; esac
   cat > "$fixture/Cargo.toml" <<MANIFEST
 [package]
 name = "platform-benchmark"
@@ -29,6 +29,12 @@ panic = "abort"
 strip = "debuginfo"
 MANIFEST
   if [[ "$selection" == runtime ]]; then
+   cat >> "$fixture/Cargo.toml" <<MANIFEST
+[dependencies.ic-platform-runtime]
+path = "$bench/$revision/crates/ic-platform-runtime"
+default-features = false
+features = ["cdk"]
+MANIFEST
    cat >> "$fixture/Cargo.toml" <<'MANIFEST'
 [dependencies.ic-timers]
 version = "=0.29.2"

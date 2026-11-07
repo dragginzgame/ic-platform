@@ -2,8 +2,8 @@
 
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
-records the installed revision; do not edit its payloads. Shared 0.31.1 at
-`5efbda2ab81ad84e30f490f3137d8ef083c303d2` is the adopted baseline.
+records the installed revision; do not edit its payloads. Shared 0.31.5 at
+`b2026a118e38de4af1555c527af327cb604eacdf` is the adopted baseline.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
@@ -102,7 +102,8 @@ crates.io-only; npm release/publication is a separate maintainer action.
 ## Owned entrypoint generator
 
 `ic-platform-macros` belongs to Runtime's coordinated release group and supplies
-its optional `cdk` surface, also forwarded by the facade. The maintainer authorized maintaining
+its optional `cdk` surface. Ordinary entrypoint macros and the `cdk` feature
+belong only to Runtime; the facade retains its explicit external-Candid bridge. The maintainer authorized maintaining
 the generator independently of upstream acceptance. Preserve its imported
 Apache-2.0 license (the necessary exception to the workspace's MIT metadata),
 coordinated package version, original generator semantics and explicit paths.

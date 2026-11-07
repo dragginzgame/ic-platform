@@ -4,6 +4,28 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.25.0] - Unreleased
+
+### 💥 Breaking
+
+- Remove ordinary facade entrypoint macros and its `cdk` feature. Select
+  `ic-platform-runtime/cdk` and import entrypoints from its canonical owner;
+  explicit external-Candid adapters remain in Platform.
+
+### 🔧 Maintenance
+
+- Require the complete release gate for every group; retire the inactive
+  selected-stage pilot and its native qualification workflow. Receipt, source,
+  metadata and recovery admission remain mandatory.
+- Preserve real preparation/rollback/custody checks for all three groups while
+  running the complete metadata-fixture delivery/recovery cycle once, for Runtime.
+
+### 🔧 Tooling
+
+- Adopt Shared Tooling 0.31.5, including release-checker isolation and grouped
+  dispatch, clearer refusal after active LOC scratch is removed, and the rule
+  that output owners create their required directories on every fresh run.
+
 ## [0.24.0] - 2026-11-07
 
 ### 💥 Breaking

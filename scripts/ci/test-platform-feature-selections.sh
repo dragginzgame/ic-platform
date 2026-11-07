@@ -48,7 +48,6 @@ done <<'MUTATIONS'
 .features.extra = []
 .features.default = ["runtime"]
 .features.executor = []
-.features.cdk = []
 .features.ic0 = ["dep:ic0"]
 (.dependencies[] | select(.name == "ic-management-canister-types")).req = "^0.11"
 (.dependencies[] | select(.name == "ic-management-canister-types")).target = null
@@ -136,10 +135,10 @@ fi
   (["none", "default", ($f | join(","))] - $r | length) == 0 and
   all($f[]; . as $a | ($r | index($a)) != null and
     all($f[] | select(. != $a); . as $b | ($r | index([$a,$b] | sort | join(","))) != null)) and
-  (["candid,cdk,executor,ic0",
+  (["candid,executor,ic0,runtime",
     "bls,ecdsa,ed25519",
-    "cdk,certification,icrc-ledger-types,management-canister-types",
-    "agent,candid-parser,cdk,ic-protocol",
+    "certification,icrc-ledger-types,management-canister-types,runtime",
+    "agent,candid-parser,ic-protocol,runtime",
     "bls,canister-sig-creation,certification-cbor,ed25519,signature-verification",
     ($f - ["agent","candid-parser","ic-protocol","ic-protocol-fixtures"] | join(","))] - $r | length) == 0
 ' >/dev/null

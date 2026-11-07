@@ -16,8 +16,7 @@
 //! `blake3` selects the upstream hash function, streaming hasher and digest identity.
 //! `canister-sig-creation` selects canister public-key formats and hashing.
 //! `signature-verification` selects upstream canister-signature verification.
-//! `cdk` selects owned explicit-codec entrypoints and a Candid-free runtime.
-//! `runtime` selects those adapters and prepared `call` requests without the entrypoint generator.
+//! `runtime` selects raw adapters and prepared `call` requests; ordinary entrypoints select Runtime directly.
 //! `ic0` selects qualified raw system calls without Candid or an executor.
 //! `management-canister-types` selects external management HTTP/history/snapshot/status DTOs.
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.

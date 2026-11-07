@@ -1,6 +1,6 @@
 # ic-platform-macros
 
-Implementation support for the Runtime and Platform `cdk` surfaces. This maintained
+Implementation support for Runtime entrypoints and Platform’s external-Candid bridge. This maintained
 Apache-2.0 generator derives from IC CDK 0.20.3 release revision
 `624606f7fd1ecd6668e9608594946486aec29167`; its complete original license remains.
 Its entrypoint core implements no executor or implicit codec and requires no
@@ -16,8 +16,10 @@ preserves existing query/update macros' explicit-codec contract and keeps owned
 Wire endpoints on their selected codec.
 See the [migration](../../docs/migration.md#external-endpoint-and-protocol-codecs-78-79).
 
-Facade exports default to `::ic_platform::cdk`; the `runtime_*` exports re-exported
-by Runtime default to `::ic_platform_runtime::cdk`. Both use one generator and
+The single ordinary attribute family defaults to `::ic_platform_runtime::cdk`
+and is re-exported by Runtime. The former `runtime_*` family and ordinary facade
+exports are removed. The external-Candid bridge supplies its explicit adapter
+path. All use one generator and
 support the parsed `crate = "module::path"` override for renamed dependencies. Every query/update explicitly supplies
 `decode_with` and `encode_with` (or `manual_reply`); even unit RPCs run their
 explicit decoder. Lifecycle argument decoding is explicit. Wire owns controlled
@@ -47,7 +49,7 @@ Async entries use the preserved protected-spawn wrapper and the sole
 `ic-platform-runtime` executor. `IC_CDK_DEBUG` retains opt-in expansion diagnostics.
 Automatic `encode_with` retains its `Vec<u8>` expectation, including inference for
 generic encoders. For a constant or fixed-size encoded response, `manual_reply`
-can pass a borrowed slice or array directly to `ic_platform::cdk::api::msg_reply`.
+can pass a borrowed slice or array directly to `ic_platform_runtime::cdk::api::msg_reply`.
 It does not select a codec: the bytes must still satisfy the consumer's explicit
 Wire or required external protocol. Consumers own the exactly-once reply and
 encoding-failure behavior on this path.

@@ -70,14 +70,13 @@ See the [prepared-call contract](../ic-platform-runtime/src/call/README.md). Thi
 `ic-call` package in 0.10.0.
 
 For raw calls and system/task adapters, select `runtime` and keep the existing
-`ic_platform::cdk::{api, call, futures, stable}` imports. Select `cdk` when the
-package also owns generated entrypoints; it includes `runtime`. Both use the
-same executor and remain Candid-free. This avoids the Platform entrypoint
-generator in runtime-only graphs, not every transitive proc-macro dependency.
+`ic_platform::cdk::{api, call, futures, stable}` imports. When the
+package owns entrypoints, depend directly on `ic-platform-runtime` and select
+its `cdk` feature. Both use the same executor and remain Candid-free.
 
 All owned application endpoints use IC Wire, including public endpoints called by
-third parties. Enable `cdk` for explicit-codec entrypoints and the Candid-free
-runtime, or `executor` for the shared executor alone. Enable `candid` only for
+third parties. Select Runtime’s `cdk` feature for explicit-codec entrypoints,
+or the facade’s `executor` feature for the shared executor alone. Enable `candid` only for
 required management/system, NNS/SNS, ledger and other Candid interfaces, or legacy
 persisted checkpoints. Caller location does not select Candid.
 Select `principal` for Principal, Account and Subaccount. Runtime, Candid,
@@ -212,7 +211,7 @@ It also exports `DecoderConfig` and `decode_args_with_config` with their origina
 upstream identities for generated-code contracts. These preserve upstream defaults
 and selected configuration, independently of the finite-limit parent helpers.
 Published upstream CDK macros 0.20.3 still hardcode `::candid`. Platform's optional
-`cdk` surface uses its own maintained generator to resolve these paths.
+Runtime `cdk` surface uses its maintained generator to resolve these paths.
 `contract::types::subtype::subtype` preserves upstream structural subtyping for
 narrowed reply projections; equality is a different relation.
 For service generation, write `contract::export_service!(ic_platform::candid::contract)`;
@@ -318,9 +317,10 @@ slice order and still requires `msg_reply()` to finalize. Keep rejection bytes,
 early size refusal and authentication ordering unchanged. These exports do not
 replace CDK's Principal/Vec convenience helpers, macros or call/task lifecycle.
 
-Enable `cdk` for the Candid-free `ic_platform::cdk` runtime: explicit-codec
-entrypoints, raw calls, system helpers, protected spawning and raw stable-byte
-operations. Full `ic-cdk` and upstream macros are not dependencies. The embedded
+Select `ic-platform-runtime/cdk` for explicit-codec entrypoints, raw calls,
+system helpers, protected spawning and raw stable-byte operations. Use
+`ic_platform_runtime::cdk` for these imports; the facade has no ordinary
+entrypoint macros or `cdk` feature. Its `runtime` feature retains raw adapters. Full `ic-cdk` and upstream macros are not dependencies. The embedded
 executor and IC0 remain shared with Timers; neither registry package is required.
 
 All controlled endpoints use Wire. Query/update macros require `decode_with`
@@ -329,14 +329,14 @@ pre-copy byte admission. Caller code retains endpoint IDs, decoder budgets,
 authentication and retry policy. No Candid endpoint fallback, service-registration
 macro or Candid path option is supplied. Lifecycle hooks with arguments require
 explicit decoding; no-argument hooks may omit it. A renamed dependency can use
-`crate = "platform::cdk"`. Remove the retired no-op `hidden` option.
+`crate = "runtime::cdk"`. Remove the retired no-op `hidden` option.
 `Call::change_timeout(seconds)` is retired; use
 `Call::with_wait_policy(call::WaitPolicy::Bounded { timeout_seconds: seconds })`.
 `WaitPolicy::Unbounded` explicitly selects unbounded waiting. Neither choice
 configures retries; bounded constructors still default to 300 seconds.
 
-Select `cdk,candid` explicitly for required external management/system-canister
-calls. Encode with `candid::contract::{encode_one,encode_args,encode_args_ref}`,
+Select Runtime’s `runtime` or `cdk` feature and the facade’s `candid` feature
+for required external management/system-canister calls. Encode with `candid::contract::{encode_one,encode_args,encode_args_ref}`,
 then supply `with_raw_args` or `take_raw_args`. Decode `Response::as_ref()` through
 the separate Candid decoder, choosing existing admission/arity policy explicitly.
 Raw constructors start with empty transport bytes; Wire callers always supply
@@ -362,7 +362,7 @@ their published Testkit upgrade is qualified
 Do not add conversion/re-export packages or replacement simulator transport.
 Selected upstream dependencies remain transitive dependencies.
 
-The same `cdk` feature includes explicit typed call failures, signing/HTTP/creation
+Runtime’s `runtime` feature includes explicit typed call failures, signing/HTTP/creation
 costs, balances, certificate publication, counters and `println!`, plus the
 reviewed `stable::{stable_grow, stable_read, stable_write, StableMemoryError}`
 passthroughs. The 0.5 hard cut retires unused `cdk::storage` checkpoint helpers.

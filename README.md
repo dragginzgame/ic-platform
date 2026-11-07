@@ -57,11 +57,10 @@ for supplier availability and consumer-owned feature/import changes.
 | `bls` | Upstream BLS cryptography with typed errors and identity-key admission; no embedded algorithms, production RNG or Candid |
 | `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
 | `candid-service` | Candid service declaration macros and printer; implies `candid` |
-| `candid-endpoint` | Explicit required-external-Candid query/update adapters with artifact-selected limits, empty-envelope policy and existing runtime; implies CDK and Candid, with separate service-printer selection |
+| `candid-endpoint` | Explicit required-external-Candid query/update adapters with artifact-selected limits, empty-envelope policy and existing runtime; implies runtime and Candid, with separate service-printer selection |
 | `runtime` | Raw calls, system and task adapters at `cdk::*`, without entrypoint macros |
 | `candid-parser` | Native external Candid parsing/type checking, service equality and dynamic refusal fixtures; owned bindings use Wire |
 | `canister-sig-creation` | Upstream signature key formats/constants/hashing, owned issuer adapter and DER admission; transitive Candid/ic0, no store API |
-| `cdk` | Owned explicit-codec entrypoints, raw calls, system helpers and protected spawning; Candid-free runtime with one canonical Runtime executor |
 | `certification` | Registry certificate/hash-tree and mutable tree identities, lookup and hashing; no Candid or executor |
 | `certification-cbor` | Byte-bounded standard certificate/signature CBOR; caller-selected budgets, no verification or runtime |
 | `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |

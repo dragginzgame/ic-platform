@@ -9,7 +9,7 @@ if length == 1 then .[0] else error("expected exactly one ic-platform package") 
 require((.features.candid == ["principal-external", "dep:candid", "candid/bignum"] and
     .features["candid-service"] == ["candid", "candid/printer"]); "Candid service generation must remain explicitly selected") |
 require(((.features | keys) == $policy[0].features); "Platform feature inventory changed; update the graph matrix and isolation policy") |
-require((.features["candid-endpoint"] == ["cdk", "candid"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
+require((.features["candid-endpoint"] == ["runtime", "candid", "dep:ic-platform-macros"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
 require((.features.principal == ["dep:ic-platform-types", "dep:serde"] and .features["principal-external"] == ["principal", "ic-platform-types/principal-external"] and .features["principal-self-authenticating"] == ["principal", "ic-platform-types/principal-self-authenticating"] and ([.dependencies[] | select(.name == "ic_principal")] | length == 0)); "Owned Principal, external byte conversion and self-authentication must remain separate") |
 require(([$metadata.packages[] | select(.name == "ic-platform-types")] | length == 1 and
     .[0].features.default == [] and
@@ -27,7 +27,6 @@ require((.features["ic-protocol"] == ["principal-external", "certification-cbor"
     "IC protocol codecs and separate fixture helpers must retain native transport identity without Agent or runtime") |
 require((.links == null and .features.executor == ["ic0", "ic-platform-runtime/executor"] and
     .features.runtime == ["principal", "executor", "ic0", "ic-platform-runtime/runtime"] and
-    .features.cdk == ["runtime", "dep:ic-platform-macros"] and
     .features.ic0 == ["dep:ic-platform-runtime", "ic-platform-runtime/ic0"] and
     ([.dependencies[] | select(.name == "slotmap" or .name == "pin-project-lite" or .name == "ic-platform-runtime-guard" or .name == "ic-cdk" or .name == "ic-cdk-executor" or .name == "ic0")] | length == 0)); "Facade must delegate runtime ownership without a second implementation") |
 require(([$metadata.packages[] | select(.name == "ic-platform-runtime")] | length == 1 and

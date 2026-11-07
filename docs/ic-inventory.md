@@ -233,7 +233,7 @@ API changes or automatically establish whether sibling source still uses an API.
 | --- | --- | --- | --- |
 | `blake3` | optional `blake3::{hash,Hasher,Hash}` | IcyDB currently uses upstream directly for predicate fingerprints; adoption remains consumer-owned | Platform selects unchanged upstream hashing with `std` only. Consumers own domain/format policy; no SHA-256 protocol replacement or size saving is implied. |
 | `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting and account semantics. External Principal conversions and upstream self-authentication are separate explicit features; owned-only graphs exclude both. |
-| Embedded IC0/executor; imported CDK adapters and owned generator | `ic0`, including safe `stable64_{size,grow,read,read_uninit,write}`; `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters; Storage's requested IC0-only backing | Platform maintains non-crypto adapters/generator. Platform maintains the sole executor and unchanged IC0 1.2.0 ABI; callback/trap semantics require installed qualification. Storage retains governance; raw stable IO selects no executor or Types. No full `ic-cdk` dependency. |
+| Embedded IC0/executor; imported CDK adapters and owned generator | `ic0`, including safe `stable64_{size,grow,read,read_uninit,write}`; `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters; Storage's requested IC0-only backing | Runtime owns ordinary entrypoint macros; Platform retains the external-Candid bridge. Platform maintains non-crypto adapters/generator. Platform maintains the sole executor and unchanged IC0 1.2.0 ABI; callback/trap semantics require installed qualification. Storage retains governance; raw stable IO selects no executor or Types. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Decoding uses finite-limit helpers or explicit configuration/staging; unconfigured decoder shortcuts are retired. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
 | `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
@@ -355,11 +355,10 @@ profiles retain their explicitly external identities.
 | ic-platform | blake3 | dep:blake3 |
 | ic-platform | bls | dep:ic-verify-bls-signature, dep:ic_bls12_381 |
 | ic-platform | candid | candid/bignum, dep:candid, principal-external |
-| ic-platform | candid-endpoint | candid, cdk |
+| ic-platform | candid-endpoint | candid, dep:ic-platform-macros, runtime |
 | ic-platform | candid-parser | dep:candid_parser, principal-external |
 | ic-platform | candid-service | candid, candid/printer |
 | ic-platform | canister-sig-creation | certification, dep:ic-canister-sig-creation, principal-external |
-| ic-platform | cdk | dep:ic-platform-macros, runtime |
 | ic-platform | certification | dep:ic-certification |
 | ic-platform | certification-cbor | certification, dep:serde, dep:serde_bytes, dep:serde_cbor, dep:thiserror |
 | ic-platform | certified-assets-types | candid |

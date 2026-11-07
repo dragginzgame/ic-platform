@@ -11,11 +11,11 @@ pub mod sdk {
     }
 }
 
-#[ic_platform_macros::runtime_inspect_message(crate = "crate::sdk")]
+#[ic_platform_macros::inspect_message(crate = "crate::sdk")]
 fn inspect() {}
-#[ic_platform_macros::runtime_init(crate = "crate::sdk")]
+#[ic_platform_macros::init(crate = "crate::sdk")]
 fn init() {}
-#[ic_platform_macros::runtime_post_upgrade(crate = "crate::sdk")]
+#[ic_platform_macros::post_upgrade(crate = "crate::sdk")]
 fn upgrade() {}
 
 pub fn value() -> u8 {

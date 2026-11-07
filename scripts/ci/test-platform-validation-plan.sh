@@ -7,9 +7,7 @@ mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/release-plan-test.XXXXXX")"
 trap 'printf "Platform validation-plan fixture evidence: %s\n" "$fixture"' EXIT
 mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/scripts/release" "$fixture/repo/ci"
-cp "$root/ci/"{release-validation.json,release-validation-hosts.json,cargo-release-groups.json} "$fixture/repo/ci/"
-# Exercise the unqualified-host fallback regardless of the production allowlist.
-printf '{"qualified":[],"schema":1}\n' > "$fixture/repo/ci/release-validation-hosts.json"
+cp "$root/ci/"{release-validation.json,cargo-release-groups.json} "$fixture/repo/ci/"
 cp "$root/scripts/release/"{validation-plan.pl,validation-context.pl,validation-receipt.pl,qualify-validation-plan.sh} "$fixture/repo/scripts/release/"
 bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" scripts/ci/run-validation-targets.sh scripts/ci/validation-evidence.pl scripts/ci/check-make-execution.sh
 # Retain the actual full-gate recipe text so roster drift is checked against it.
@@ -53,26 +51,23 @@ for group in platform runtime types; do
     head="$(git rev-parse HEAD)"
     mkdir -p "target/$group"
     RELEASE_PREVIOUS=1.0.0 RELEASE_VERSION=1.0.1 RELEASE_REMOTE=origin RELEASE_BRANCH=main \
-        perl scripts/release/validation-plan.pl "$group" "$head" "$group-v1.0.0" "target/$group/unqualified-host.json" release
-    jq -e '.scope=="workspace" and ([.stages[].required] | all)' "target/$group/unqualified-host.json"
-    perl scripts/release/validation-plan.pl "$group" "$head" none "target/$group/no-baseline.json" auto
+        perl scripts/release/validation-plan.pl "$group" "$head" "$group-v1.0.0" "target/$group/release.json" release
+    jq -e '.scope=="workspace" and ([.stages[].required] | all)' "target/$group/release.json"
+    perl scripts/release/validation-plan.pl "$group" "$head" none "target/$group/no-baseline.json" qualification
     jq -e '.scope=="workspace"' "target/$group/no-baseline.json"
-    perl scripts/release/validation-plan.pl "$group" "$head" "$group-v1.0.0" "target/$group/auto.json" auto
-    required="$(jq -r '.stages[] | select(.target=="check-release-commands") | .required' "target/$group/auto.json")"
-    if [[ "$group" == platform ]]; then [[ "$required" == true ]]; else [[ "$required" == false ]]; fi
-    # All three groups preserve compilation, native/Wasm consumers and both installed profiles.
-    jq -e '[.stages[] | select(.target=="clippy" or .target=="check-consumer" or .target=="check-runtime" or .target=="check-runtime-composition") | .required] | all' "target/$group/auto.json"
-    bash scripts/release/qualify-validation-plan.sh "$group" "$group-v1.0.0" workspace > "$fixture/$group-full.log"
-    if [[ "$group" != platform ]]; then
-        FAIL_STAGE=check-release-commands bash scripts/release/qualify-validation-plan.sh "$group" "$group-v1.0.0" auto > "$fixture/$group-narrow.log"
-    fi
-    FAIL_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh "$group" "$group-v1.0.0" auto
-    refuse perl scripts/release/validation-plan.pl unknown "$head" "$group-v1.0.0" "target/$group/unknown.json" auto
-    refuse perl scripts/release/validation-plan.pl "$group" "$base" "$group-v1.0.0" "target/$group/stale.json" auto
-    # Shared lock changes always expand, even for the same group.
+    perl scripts/release/validation-plan.pl "$group" "$head" "$group-v1.0.0" "target/fresh/$group/nested/full.json" qualification
+    test -f "target/fresh/$group/nested/full.json.context.json"
+    perl scripts/release/validation-plan.pl "$group" "$head" "$group-v1.0.0" "target/$group/full.json" qualification
+    jq -e '.scope=="workspace" and ([.stages[].required] | all)' "target/$group/full.json"
+    bash scripts/release/qualify-validation-plan.sh "$group" "$group-v1.0.0" qualification > "$fixture/$group-full.log"
+    FAIL_STAGE=check-release-commands refuse bash scripts/release/qualify-validation-plan.sh "$group" "$group-v1.0.0" qualification
+    FAIL_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh "$group" "$group-v1.0.0" qualification
+    refuse perl scripts/release/validation-plan.pl unknown "$head" "$group-v1.0.0" "target/$group/unknown.json" qualification
+    refuse perl scripts/release/validation-plan.pl "$group" "$base" "$group-v1.0.0" "target/$group/stale.json" qualification
+    # Shared lock changes also retain every full-gate obligation.
     printf 'changed lock\n' >> Cargo.lock
     git commit -qam 'shared lock change'
-    perl scripts/release/validation-plan.pl "$group" "$(git rev-parse HEAD)" "$group-v1.0.0" "target/$group/shared.json" auto
+    perl scripts/release/validation-plan.pl "$group" "$(git rev-parse HEAD)" "$group-v1.0.0" "target/$group/shared.json" qualification
     jq -e '.scope=="workspace" and ([.stages[].required] | all)' "target/$group/shared.json"
 done
 # Group roster and full-gate roster cannot silently lose or gain an obligation.
@@ -80,15 +75,15 @@ git checkout -q -B refusal "$base"
 jq -cS '.stages += ["new-stage"]' ci/release-validation.json > target/changed.json
 cp target/changed.json ci/release-validation.json
 git commit -qam 'unmapped stage'
-refuse perl scripts/release/validation-plan.pl types "$(git rev-parse HEAD)" types-v1.0.0 target/unknown-stage.json auto
+refuse perl scripts/release/validation-plan.pl types "$(git rev-parse HEAD)" types-v1.0.0 target/unknown-stage.json qualification
 git checkout -q -B drift "$base"
 printf '// changed\n' >> crates/ic-platform-runtime/src/lib.rs
 git commit -qam 'client change'
-DRIFT_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 auto
+DRIFT_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 qualification
 git restore crates/ic-platform-runtime/src/lib.rs
-INTERRUPT_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 auto
+INTERRUPT_STAGE=clippy refuse bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 qualification
 # A fresh attempt succeeds after an interrupted/failed one; no receipt is reused.
-bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 auto > "$fixture/retry.log"
+bash scripts/release/qualify-validation-plan.sh runtime runtime-v1.0.0 qualification > "$fixture/retry.log"
 receipt="$(sed -n '/\/receipt.json$/p' "$fixture/retry.log")"
 attempt="${receipt%/receipt.json}"
 run=("$attempt"/logs/validation.*)
@@ -97,6 +92,12 @@ sed '/clippy\tPASS/d' "$fixture/events.original" > "${run[0]}/plan-events.tsv"
 refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/incomplete-receipt.json
 cp "$fixture/events.original" "${run[0]}/plan-events.tsv"
 [[ ! -e target/incomplete-receipt.json ]]
+cp "$attempt/plan.json" "$fixture/plan.original"
+jq -cS '.stages[0].required=false' "$fixture/plan.original" > "$attempt/plan.json"
+refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/omitted-receipt.json
+cp "$fixture/plan.original" "$attempt/plan.json"
+[[ ! -e target/omitted-receipt.json ]]
+
 # Same-source evidence can be rechecked, but cannot qualify a moved source.
 perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/readmitted.json
 # Platform retains the entire unmodified Shared proof, including the relative
@@ -110,4 +111,4 @@ RUSTFLAGS='--cfg changed_receipt_environment' refuse perl scripts/release/valida
 printf '// drift\n' >> crates/ic-platform-runtime/src/lib.rs
 git commit -qam 'moved source'
 refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" target/stale-receipt.json
-printf 'Three-group selection, full fallback, required/excluded failures, drift and recovery passed. Stage bodies were substitutes.\n'
+printf 'Three-group full gates, required-stage failures, drift and recovery passed. Stage bodies were substitutes.\n'

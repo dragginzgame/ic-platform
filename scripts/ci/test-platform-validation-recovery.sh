@@ -54,9 +54,8 @@ printf '#!/usr/bin/env bash\nexit 0\n' > "$fixture/server"
 chmod +x "$fixture/server"
 export POCKET_IC_BIN="$fixture/server"
 cd "$seed"
-jq -cnS --arg host "$(perl scripts/release/validation-context.pl | jq -r .host_key)" '{schema:1,qualified:[$host]}' > ci/release-validation-hosts.json
 git add .
-git commit -qm 'Recovery fixture hooks and qualified-host substitute'
+git commit -qm 'Recovery fixture hooks for full qualification'
 base="$(git rev-parse HEAD)"
 for group in platform runtime types; do git tag -f "$group-v1.0.0" "$base" > /dev/null; done
 refuse() {
@@ -78,8 +77,7 @@ for group in platform runtime types; do
     FAIL_STAGE=clippy refuse bash scripts/ci/run-release.sh patch origin main
     [[ ! -f ".git/release-state/$group-1.0.1.plan" ]]
     [[ "$(cat "versions/$group")" == 1.0.0 ]]
-    failure=check-release-commands; [[ "$group" != platform ]] || failure=''
-    FAIL_STAGE="$failure" STOP_AFTER_PREPARE=1 refuse bash scripts/ci/run-release.sh patch origin main
+    STOP_AFTER_PREPARE=1 refuse bash scripts/ci/run-release.sh patch origin main
     journal=".git/release-state/$group-1.0.1.validation"
     [[ "$(cat "versions/$group")" == 1.0.1 && -f "$journal" ]]
     receipt="$(jq -r .receipt "$journal")"
@@ -94,11 +92,7 @@ for group in platform runtime types; do
     cp "$journal" ".git/release-state/$other-1.0.1.validation"
     RELEASE_GROUP="$other" RELEASE_SOURCE="$source" RELEASE_PREVIOUS=1.0.0 RELEASE_VERSION=1.0.1 RELEASE_REMOTE=origin RELEASE_BRANCH=main \
         refuse bash scripts/release/validation-gate.sh check
-    if [[ "$group" == platform ]]; then
-        jq -e '.scope=="workspace" and .release_omission_admitted==false' "$receipt"
-    else
-        jq -e '.scope=="group" and .release_omission_admitted==true' "$receipt"
-    fi
+    jq -e '.scope=="workspace" and .release_omission_admitted==false' "$receipt"
     mv "$journal" "$journal.missing"
     refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
     mv "$journal.missing" "$journal"

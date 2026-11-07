@@ -1,5 +1,40 @@
 # Candid and runtime ownership
 
+## Canonical ordinary entrypoints (Runtime 0.20 / Platform 0.25)
+
+Ordinary entrypoint macros belong only to `ic-platform-runtime`, selected with
+`default-features = false, features = ["cdk"]`. Import
+`ic_platform_runtime::cdk::{query, update, init, pre_upgrade, post_upgrade,
+heartbeat, inspect_message, on_low_wasm_memory}`. These names remain conventional;
+the implementation macro package now has the same single family, defaulting to
+`::ic_platform_runtime::cdk`. The prefixed `runtime_*` exports are removed.
+
+Remove the facade's `cdk` feature selection and ordinary macro imports before
+adopting Platform 0.25. Raw facade adapters remain under its `runtime` feature;
+execution-only consumers should depend on Runtime directly. Native/scaffold and
+benchmark generators must emit the direct Runtime dependency/imports too. Renamed
+Runtime dependencies retain the explicit `crate = "renamed::cdk"` override.
+One generator, executor, IC0 ABI, guard ordering, codec hooks, method names,
+reply/async/lifecycle behaviour and canonical Types identities remain unchanged.
+No compatibility feature or second executor is introduced.
+
+Required external Candid adapters stay in the facade under `candid-endpoint`.
+That feature explicitly selects `runtime`, `candid` and the coordinated macro
+supplier. Its typed bridge retains an explicit facade adapter path, so it does
+not force ordinary macro consumers through Platform or require consumers to name
+private dependencies. Candid/Serde bytes and all verification policy are unchanged.
+The CDK consumer integration proof moves to Runtime; external-Candid proof stays
+with the facade. Types and browser groups do not advance for this cut.
+
+## Full release qualification only
+
+The selected-stage release pilot is retired. All three groups require all local
+stages; there is no host allowlist or source-path exclusion classifier. Immutable
+source/evidence receipts, release identity, metadata-only projection and recovery
+refusals remain. See [release validation](platform-release-validation.md).
+Historical pilot text below is superseded by this contract; retained attempts
+must use their own supplying source and tooling.
+
 ## Explicit Candid decoder configuration (Platform 0.24.0)
 
 The unconfigured `candid::decoder::{decode_one, decode_args}` exports are

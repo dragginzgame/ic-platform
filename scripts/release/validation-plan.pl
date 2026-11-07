@@ -1,12 +1,14 @@
 #!/usr/bin/env perl
-# Consumer-owned selection only; execution/checkpointing belongs to Shared.
+# Consumer-owned full-gate roster; execution/checkpointing belongs to Shared.
 use strict;
 use warnings;
 use JSON::PP;
+use File::Path qw(make_path);
+use File::Basename qw(dirname);
 my $json = JSON::PP->new->canonical->utf8;
 my ($group, $source, $baseline, $output, $scope) = @ARGV;
-@ARGV == 5 && $scope =~ /\A(?:auto|workspace|release)\z/
-    or die "usage: validation-plan.pl GROUP SOURCE GROUP-TAG|none OUTPUT auto|workspace|release\n";
+@ARGV == 5 && $scope =~ /\A(?:qualification|release)\z/
+    or die "usage: validation-plan.pl GROUP SOURCE GROUP-TAG|none OUTPUT qualification|release\n";
 sub capture {
     open my $fh, '-|', @_ or die "start @_: $!\n";
     local $/; my $value = <$fh> // '';
@@ -50,20 +52,7 @@ $baseline eq 'none' || $baseline =~ /\A\Q$group\E-v\d+\.\d+\.\d+\z/ or die "wron
 my $base = $baseline eq 'none' ? $source : capture('git','rev-parse','--verify',"refs/tags/$baseline^{commit}"); chomp $base;
 system('git','merge-base','--is-ancestor',$base,$source) == 0 or die "baseline is not ancestor\n";
 my @changed = grep { length } split /\0/, capture('git','diff','--name-only','--no-renames','-z',$base,$source,'--');
-# Narrow only source/test changes within one existing owner. Manifest, lock,
-# generator, imported-source/provenance, cross-group and unknown paths expand.
-my %owners = (platform=>['ic-platform'],
-    runtime=>['ic-platform-runtime','ic-platform-macros','ic-platform-runtime-guard'], types=>['ic-platform-types']);
-my $owned = join '|', map { quotemeta } @{$owners{$group}};
-my $narrow = @changed && $scope ne 'workspace' && $baseline ne 'none';
 my $execution = $json->decode(capture('perl','scripts/release/validation-context.pl'));
-my $hosts = $json->decode(read_file('ci/release-validation-hosts.json'));
-$hosts->{schema} == 1 && ref($hosts->{qualified}) eq 'ARRAY' or die "invalid native qualification policy\n";
-my %seen_hosts;
-for (@{$hosts->{qualified}}) {
-    /\A(?:Linux x86_64|Darwin (?:x86_64|arm64) 15)\z/ && !$seen_hosts{$_}++
-        or die "unknown or duplicate qualified native host\n";
-}
 my $release;
 if ($scope eq 'release') {
     $release = {map {$_ => $ENV{"RELEASE_".uc($_)}} qw(previous version remote branch)};
@@ -72,26 +61,7 @@ if ($scope eq 'release') {
     }
     for (qw(remote branch)) { defined($release->{$_}) && length($release->{$_}) or die "missing release destination\n"; }
     $baseline eq 'none' || $baseline eq "$group-v$release->{previous}" or die "wrong release baseline\n";
-    $narrow = 0 unless grep { $_ eq $execution->{host_key} } @{$hosts->{qualified}};
 }
-for my $path (@changed) {
-    if ($path =~ m{\Acrates/ic-platform-(?:macros|runtime-guard)/}) { $narrow = 0; next; }
-    next if $path =~ m{\Acrates/(?:$owned)/(?:src|tests)/[^\x00-\x1f]+\.rs\z};
-    next if $path eq "releases/$group/CHANGELOG.md" || $path eq 'docs/status/current.md';
-    $narrow = 0;
-}
-# The runtime implementation has no Rust-to-browser schema surface.
-# Full compile/lint/test/consumer/feature checks deliberately stay applicable.
-my %excluded = (
-    'check-release-commands' => 'Only owner Rust sources/tests and its notes changed; all release scripts, recipes, group metadata and qualification inputs are byte-identical to the baseline.',
-);
-if ($group eq 'runtime') {
-    $excluded{'check-browser'} = 'Browser package, JS dependencies, browser fixtures and Types/schema inputs are unchanged; runtime implementation has no browser-package code path.';
-}
-# Keep both installed suites even for client-only changes: their drivers use the
-# client. Types/Runtime public identity and singleton boundaries also require them.
-# Facade changes remain full until crypto/external-adapter scopes are qualified.
-$narrow = 0 if $group eq 'platform';
 my $index_inventory = capture('git','ls-files','--stage','-z');
 my (@inputs, @gitlinks);
 for my $entry (grep { length } split /\0/, $index_inventory) {
@@ -119,13 +89,14 @@ for my $path ($output,$context_path) {
     my $route = '.';
     for (split m{/}, $path) { $route .= "/$_"; !-l $route or die "redirected output\n"; }
 }
+make_path(dirname($output));
 open my $ctx, '>:raw', $context_path or die "write context: $!\n";
 print {$ctx} $json->encode($context),"\n"; close $ctx or die "close context\n";
 my $plan = {
-    schema=>1, source=>$source, group=>$group, scope=>$narrow?'group':'workspace', policy=>$policy_path,
+    schema=>1, source=>$source, group=>$group, scope=>'workspace', policy=>$policy_path,
     inputs=>[sort(@inputs,$context_path)],
-    stages=>[map { {target=>$_, required=>($narrow && exists $excluded{$_})?JSON::PP::false:JSON::PP::true,
-        reason=>($narrow && exists $excluded{$_})?$excluded{$_}:'Required full-gate obligation: source/lint/native/Wasm/consumer or installed behavior remains affected or unclassified.'} } @full],
+    stages=>[map { {target=>$_, required=>JSON::PP::true,
+        reason=>'Every Platform release requires the complete local gate.'} } @full],
 };
 open my $out,'>:raw',$output or die "write plan: $!\n";
 print {$out} $json->encode($plan),"\n"; close $out or die "close plan\n";

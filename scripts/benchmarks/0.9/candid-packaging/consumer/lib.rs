@@ -66,7 +66,7 @@ fn output(result: Result<CanisterStatusResult, String>) -> Vec<u8> {
         Err(error) => error.into_bytes(),
     }
 }
-#[ic_platform::cdk::query(decode_with = "input", encode_with = "output")]
+#[ic_platform_runtime::cdk::query(decode_with = "input", encode_with = "output")]
 fn status(value: Result<CanisterStatusResult, String>) -> Result<CanisterStatusResult, String> {
     value
 }
@@ -86,7 +86,7 @@ fn registry_output(result: Result<CanisterStatusResult, String>) -> Vec<u8> {
     }
 }
 #[cfg(feature = "mixed-codec")]
-#[ic_platform::cdk::query(decode_with = "registry_input", encode_with = "registry_output")]
+#[ic_platform_runtime::cdk::query(decode_with = "registry_input", encode_with = "registry_output")]
 fn registry_status(
     value: Result<CanisterStatusResult, String>,
 ) -> Result<CanisterStatusResult, String> {

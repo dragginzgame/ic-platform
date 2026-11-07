@@ -20,7 +20,6 @@ icrc10-types	icrc10_types_consumer	-	check	ledger
 bls	bls_consumer	bls-*.hex	check	-
 canister-sig-creation	canister_sig_consumer	-	check	-
 signature-verification	signature_consumer	bls-*.hex,signature-*.hex	check	-
-cdk	cdk_consumer	-	build	cdk
 runtime	runtime_consumer	-	check	runtime
 external-contracts	external_contract_consumer	-	check	-
 asset-contracts	asset_contract_consumer	-	check	-

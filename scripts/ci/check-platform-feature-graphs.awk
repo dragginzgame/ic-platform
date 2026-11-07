@@ -44,7 +44,7 @@ function reject(reason) {
     agent = native && enabled("agent")
     protocol = native && enabled("ic-protocol")
     external_endpoint = enabled("candid-endpoint")
-    cdk = enabled("cdk")
+    generator_enabled = enabled("candid-endpoint")
     runtime = enabled("runtime")
     executor = enabled("executor")
     verification = enabled("signature-verification")
@@ -115,7 +115,7 @@ function reject(reason) {
             if (!executor || (line != guard && line != guard " (*)")) reject("unqualified runtime singleton guard")
             found_guard = 1
         }
-        if (name == "ic-platform-macros" && (!cdk || (line != generator && line != generator " (*)"))) reject("unqualified generator")
+        if (name == "ic-platform-macros" && (!generator_enabled || (line != generator && line != generator " (*)"))) reject("unqualified generator")
         if (name == "ic-canister-sig-creation" && (!creation || !registry || version != "v1.3.1")) reject("unqualified signature key dependency")
         if (name == "ic-signature-verification" && (!verification || !registry || version != "v0.3.0")) reject("unqualified signature verifier")
         if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified upstream BLS verifier")

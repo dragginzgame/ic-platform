@@ -19,7 +19,7 @@ fn output(result: Result<CanisterStatusResult, String>) -> Vec<u8> {
         Err(e) => e.into_bytes(),
     }
 }
-#[ic_platform::cdk::query(decode_with = "input", encode_with = "output")]
+#[ic_platform_runtime::cdk::query(decode_with = "input", encode_with = "output")]
 fn status(value: Result<CanisterStatusResult, String>) -> Result<CanisterStatusResult, String> {
     value
 }

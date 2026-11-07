@@ -164,6 +164,9 @@ for group in "${groups[@]}"; do
     bash scripts/release/adapter.sh commit-check
     git restore --staged --worktree -- "${files[@]}"
     unset RELEASE_PREVIOUS RELEASE_VERSION RELEASE_DATE
+    # Runtime is the representative delivery cycle: it covers coordinated macros
+    # and the exact guard. Every group above still proves real metadata custody.
+    [[ "$group" == runtime ]] || continue
     if PLATFORM_GROUP_FAIL_PUSH=1 bash scripts/ci/run-release.sh "$kind" origin main > "$fixture/$group-runner.log" 2>&1; then
         echo 'controlled pre-push failure was not observed' >&2; exit 1
     fi
@@ -193,4 +196,4 @@ for group in "${groups[@]}"; do
     make --no-print-directory release-resume VERSION="$next" RELEASE_GROUP="$group" > "$fixture/$group-resume-again.log" 2>&1
     [[ "$(git rev-parse HEAD)" == "$commit" ]]
 done
-echo 'Independent group preparation, failure/rollback, retry, exact custody and local delivery/resume passed.'
+echo 'Independent group preparation/rollback/custody passed; Runtime delivery/resume exercised when selected.'

@@ -37,7 +37,7 @@ for capability in "${capabilities[@]}"; do
 profile="$(awk -F '\t' -v capability="$capability" '$1 == capability { print }' "$profiles")"
 IFS=$'\t' read -r _ source assets wasm graph_family <<< "$profile"
 case "$graph_family" in
-    -|minimal|principal|principal-external|principal-self-authenticating|ledger|cdk|runtime|external-candid|blake3|external-codecs) ;;
+    -|minimal|principal|principal-external|principal-self-authenticating|ledger|runtime|external-candid|blake3|external-codecs) ;;
     *) echo "Unknown consumer graph family: $graph_family" >&2; exit 2 ;;
 esac
 features="$(printf '%s\n' "$tests" | "$root/.tools/host/bin/jq" -er --arg source "tests/$source.rs" '
@@ -125,7 +125,7 @@ if [[ "$graph_family" != - ]]; then
                 if [[ "$graph_family" == principal || "$graph_family" == principal-self-authenticating ]] && grep -q '^ic_principal ' "$graph"; then
                     echo 'Owned Principal acquired the external identity' >&2; exit 1
                 fi ;;
-            cdk|runtime|external-candid)
+            runtime|external-candid)
                 if [[ "$graph_family" == external-candid ]]; then
                     bash scripts/ci/check-platform-runtime-graph.sh "$graph" --external-candid
                 else

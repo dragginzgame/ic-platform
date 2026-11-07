@@ -35,5 +35,10 @@ thiserror = { workspace = true, optional = true }
 [dev-dependencies]
 serde_test.workspace = true
 
+[[test]]
+name = "cdk_consumer"
+path = "tests/cdk_consumer.rs"
+required-features = ["cdk"]
+
 [lints]
 workspace = true

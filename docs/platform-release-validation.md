@@ -1,369 +1,100 @@
-# Platform release validation (#137)
+# Platform release validation
 
-Shared 0.31.0 owns [frozen release batches](release-batches.md). Platform's fresh
-`release-patch`, `release-minor` and `release-major` commands capture the explicitly
-selected group by default. An explicit `RELEASE_GROUPS` selects the complete
-affected cohort in `types,runtime,platform` supplier order, without selecting
-unaffected groups. Platform admits the roster and supplies candidate setup;
-Shared owns capture, the queue, saved context and lifecycle commands. Inside the
-candidate, the ordinary release runner and all existing release gates still run.
+Every Platform, Runtime and Types release requires the complete local gate:
+all stages in `ci/release-validation.json`, checked against the actual `ci` and
+`check-runtime-all` recipes in Makefile. Group selection controls package versions
+and custody, never which validation stages run. No native-host allowlist or
+selected-stage release mode remains.
 
-Platform projects primary, changelog and custody files from one admitted Shared
-group plan per command. Subsequent phases observe the source again; there is no
-cross-command metadata cache. The preparation fixture also reads each unchanged
-dependency catalog once per phase while retaining real-editor rollback, retry,
-other-group custody and Git recovery checks.
+## Commands and effects
 
-### Commands and effects
-
-With clean committed source, the pinned compiler and an explicitly prepared
-Testkit server (`POCKET_IC_BIN` or `IC_TESTKIT_POCKET_IC_URL`), select one batch:
+Shared owns [frozen release batches](release-batches.md). With clean committed
+source, the pinned compiler and an explicitly prepared Testkit server
+(`POCKET_IC_BIN` or `IC_TESTKIT_POCKET_IC_URL`), select only affected groups:
 
 ```sh
 make release-patch RELEASE_GROUP=platform RELEASE_PUBLISH_TARGET=publish
-make release-patch RELEASE_GROUPS=types,runtime,platform RELEASE_PUBLISH_TARGET=publish
+make release-minor RELEASE_GROUPS=runtime,platform RELEASE_PUBLISH_TARGET=publish
 ```
 
-These are real delivery commands requiring release/publication authority.
-Choose one example and only the affected groups. All selected groups use the
-same increment. Omitting `RELEASE_PUBLISH_TARGET` retains Git-only release
-semantics. For a cohort that needs publication, select it before capture so each
-supplier is published before its consumer. Do not append a second normal-tree
-`publish` Make goal or loop separate group releases.
+These are delivery commands requiring release/publication authority. Use the
+increment appropriate to the complete batch. A cohort uses one increment and
+supplier order `types,runtime,platform`; unchanged groups are excluded. Omitting
+`RELEASE_PUBLISH_TARGET` retains Git-only semantics. Do not append a second
+normal-checkout publication command.
 
-Shared prints the candidate under `target/release-frozen/BATCH` and its durable
-Git/journals under `.git/release-state/frozen/BATCH`. The normal checkout's branch,
-versions and later lock edits remain untouched. Inspect and recover that exact
-saved batch without supplying a new group or version:
+The candidate runs under `target/release-frozen/BATCH`; durable Git and journals
+remain under `.git/release-state/frozen/BATCH`. Later normal-tree edits are not
+release inputs. The candidate prepares and admits its own complete tool roster,
+hooks and locked dependency caches, without copying the normal checkout's tool
+store. Its ordinary release adapter repeats admission, not installation.
+
+Inspect or recover that exact batch without selecting a different group/version:
 
 ```sh
 make release-batch-status BATCH=batch-XXXXXXXX
 make release-batch-resume BATCH=batch-XXXXXXXX
 make release-batch-reconcile BATCH=batch-XXXXXXXX
-make release-batch-retire BATCH=batch-XXXXXXXX
 ```
 
-Shared 0.31 uses `RELEASE_GROUPS`, `RELEASE_PUBLISH_TARGET`,
-`RELEASE_SETUP_TARGET`, `RELEASE_SETUP_MODE` and `RELEASE_BATCH_ACTIVE`.
-Retired frozen-prefixed settings fail explicitly, including empty values.
-Recovery requires a schema-2 journal and a saved publication commit; finish any
-pre-0.31 batch with its original tooling before adoption. No active batch was
-present when Platform adopted 0.31.0. The physical recovery paths are unchanged.
+Reconciliation requires completed delivery and clean normal source, and only
+fast-forwards. Preserve deferred edits durably, then reapply their exact patch
+over delivered package versions. Uncertain publication refuses redispatch;
+inspect registry/archive evidence before supplying `PUBLICATION_RESULT=published`
+or `not-published` on resume. Never infer publication from current HEAD.
 
-Uncertain publication refuses redispatch: inspect registry/package receipts,
-then select `PUBLICATION_RESULT=published` or `not-published` on batch resume.
-Reconciliation requires completed delivery and a clean normal checkout and only
-fast-forwards. Preserve deferred edits durably before reconciling, then reapply
-them deliberately, keeping the delivered owner versions. Legacy `release-resume
-VERSION=... RELEASE_GROUP=...` remains the existing standard-journal recovery.
+Retirement is a separately authorized deletion, not post-deployment cleanup.
+`release-batch-retire` retains the Shared custody and ignored-output restrictions.
+Do not broaden its allowlist or remove browser caches to make retirement pass.
 
-Retirement is a separately selected deletion operation, never post-deploy
-cleanup. Shared preserves release refs and refuses pending/unique candidate
-state. Its admitted ignored build roots are `target/` and `.tools/`; Platform's
-browser `node_modules` or `dist` outside those roots require explicit review and
-preservation/cleanup before retirement. Never broaden the snapshot allowlist or
-delete them automatically to satisfy the checker.
+## Full-gate evidence and recovery
 
-### Candidate setup and qualification
-
-`release-candidate-setup` delegates to the existing tool owners. Prepare first
-checks the candidate's complete selected tool roster, installs only a missing
-selection, configures its normal Git hook and prepares locked dependency caches.
-All groups currently retain the complete roster. Check mode admits those same
-tools/hooks offline, without installations or graph resolution from partially
-prepared manifests. The normal preflight repeats admission rather than setup.
-No live normal-tree tool directory or lockfile is copied into the candidate.
-An externally prepared server remains explicitly selected and fingerprinted by
-the existing validation context; freezing isolates lock edits, not arbitrary
-changes to host configuration or the server binary.
-
-`scripts/release/qualify-frozen-release.sh [LOCKFILE]` exercises the actual
-Platform setup, metadata editor, release hooks, publication selection and Clippy,
-then verifies real coordinated package archives against local release commits.
-It uses disposable local Git remotes and substitutes the full product gate and
-terminal upload/check dispatch; these are integration/archive proofs, not new
-full-gate or live-registry receipts. The optional lock selects a reviewed test
-input without changing the normal lock. The maintained fast checks are
-`test-platform-frozen-setup.sh` and `test-platform-release-groups.sh`, included
-in the existing release-command stage. Required full product, installed and
-native-host obligations remain unchanged for real releases.
-Publication's verifier carries Shared's admitted package selection to the Clippy
-leaf, preserving the pinned compiler, all targets/features and denied warnings.
-The ordinary lint default and full release gate still include every owner.
-
-The 0.30.9 consumer rehearsal is retained at
-`target/platform-frozen-qualification.lSXxHi/`. All three actual group hooks,
-publication admission/Clippy and coordinated archive builds passed. It installed
-tools once, recovered Runtime offline, refused uncertain publication without
-redispatch, left the original checkout unchanged, refused dirty reconciliation
-and then fast-forwarded the disposable development branch. All selected archives
-retain their clean release-commit identities. The first invocation's final
-checksum comparison used relative versus absolute filenames; its identical
-digests were independently checked and the assertion corrected. The final
-assertions passed separately; the entire command was not rerun for that test-only
-correction. Archive retention now copies the selected bytes into each attempt
-before later groups can overwrite Cargo's shared package directory; independently
-retained copies from this run were checked against the original receipt hashes.
-
-From that captured candidate, the installed Wire owner profile passed identity,
-await/trap cleanup, upgrade, stable rollback and certificate checks using an
-explicitly prepared Testkit server. Driver Clippy and six unit tests passed.
-Shared retirement first refused the ignored browser caches; after retaining
-archive/installed evidence and removing only this disposable fixture's generated
-caches, retirement passed with all three release tags preserved. This proves the
-focused captured-path integration, not the full product gate, live registry
-publication or a fresh macOS/native Profiler acceptance.
-
-### Historical Shared 0.30.8 recovery correction
-
-The generator can create underscores in batch IDs. Shared 0.30.7's resume
-admission rejected those same IDs; 0.30.8 accepts them without renaming recovery
-paths. The committed supplier's forced-underscore regression reproduced
-`invalid batch identity` against Platform's old installed runner and passes
-against its refreshed runner. The 19 focused checks include completed resume,
-interrupted second-group recovery, deferred normal-lock edits and uncertain
-publication refusal/reconciliation, using disposable Git remotes and publication
-substitutes. Evidence: `target/shared0308/before.log` and `after.log`.
-
-That adoption corrected recovery ID admission only. The missing setup and outer
-Make admission recorded below are integrated by the 0.30.9 wiring above.
-
-### Before the 0.30.9 wiring: frozen readiness check, 2026-11-06
-
-Shared 0.30.7's focused frozen-runner suite passed **18 checks** against its
-committed supplier source, copied with the declared companions into Platform's
-disposable validation area. It exercised sequential groups, deferred normal-lock
-edits, durable delivery commits, completed resume, interrupted second-group
-recovery and uncertain-publication refusal/reconciliation. Evidence:
-`target/platform-frozen-runner.XZAu3D/test.log`. Its synthetic consumers and
-publication trace do not qualify Platform's actual hooks or registry delivery.
-
-A second probe used Platform source `d4ef6dbe0344473925f3eb592982522a9ea8e5ec`,
-the actual Make/release hooks and a local bare Git remote. The frozen runner
-created its managed checkout and durable journal, but stopped at the first
-`release-version` lookup. Evidence: `target/platform-frozen-probe.aegDdE/`.
-
-| Admission boundary | Observed result |
-| --- | --- |
-| Cold candidate tools | `cargo-release-group.sh` cannot find the candidate-local `.tools/host/bin/yq`; version lookup precedes release preflight/tool preparation. |
-| Cold metadata editor | `release-editor-check` independently refuses the missing candidate-local `ic-build 0.73.0` selection. Preparing only yq would not establish readiness. |
-| Outer batch selection | `make release-patch RELEASE_FROZEN_GROUPS=types,runtime,platform` is refused by Platform's single-group Make guard before dispatch. |
-| Dirty starting source | A synthetic deferred lock edit correctly refuses a new batch. Frozen execution isolates edits made after capture; it does not admit an already dirty starting selection. |
-| Normal checkout custody | The real Platform Cargo.lock hash is unchanged before/after the probes. No real remote, tag, package version or registry upload was changed. |
-
-Those observations required candidate-local setup before version lookup and
-Platform Make admission for an explicit cohort. Shared 0.30.9 supplies that hook;
-the current wiring uses it without linking normal-tree tools or editing snapshot
-payloads. The old supplier had no preparation interface at that point.
-
-The focused 0.30.9 rehearsal above now covers the actual three-group hooks,
-clean locked archives, receipt custody, a normal-lock edit during execution,
-supplier ordering, interruption/resume and local-remote advancement. The ordinary
-0.23.4 release receipt does not establish frozen-checkout qualification. Neither
-these historical probes nor the new rehearsal replace the full product gate or
-prove real publication.
-
-`release-verify` now dispatches a fresh source-bound plan through Shared's
-[plan interface](release-group-validation.md). The qualified-host allowlist in
-`ci/release-validation-hosts.json` is empty following #139’s client retirement.
-All releases use the full roster until the new three-group mapping has fresh
-Linux/macOS qualification. Runtime and Types retain selected-plan candidates for
-explicit qualification; facade/shared/unclassified changes remain full. The
-previous four-group native evidence below remains historical. Recovery rechecks the saved receipt through Shared's
-existing release hooks. This does not change package versions or publish anything.
-
-## Complete roster and inputs
-
-`ci/release-validation.json` lists every stage of `ci` followed by both stages of
-`check-runtime-all`, in their actual order. Selection refuses if those Make recipes
-or Cargo release-group names change without matching the roster. Each plan binds
-an exact clean Git HEAD, the selected group's ancestor release tag, the complete
-diff since that tag, the index inventory and every tracked regular source file.
-Native IC gitlinks are bound by their object identity, not traversed or claimed as
-compiled. The full gate's existing source-only native-provider limitations remain.
-Tracked symlinks, unmerged indexes, dirty/untracked source and redirected outputs
-refuse. Shared checkpoints the plan, policy and expanded inventory before and after
-each executed target. Final receipt admission also checks the source inventory,
-including added files, and the baseline tag identity.
-
-Only Rust source/tests in one owner, that owner's release ledger and the current
-handoff can enter a narrow candidate. Manifests, locks, feature declarations,
-macro/guard generators, shared snapshots, CI/release scripts, fixtures, provenance,
-other groups and unknown paths select the full roster. Facade candidates remain
-full until its crypto/external-adapter scopes are separately qualified.
-
-| Stages | Candidate obligations |
-| --- | --- |
-| Snapshot, docs, pins, boundary, inventory, formatting, primitive guards | All groups retain them. |
-| Clippy, check, test, docs, consumers, feature graphs, Wasm | All groups retain the complete existing package/feature selections, including reverse consumers and canonical identities. |
-| Runtime owner and Timers composition | All groups retain both installed profiles; PocketIC is used by their drivers, and Types/Runtime affect public identities and singleton behavior. |
-| Browser | Types/facade retain it. Pure runtime source candidates may omit it only when all browser/schema/Types inputs are unchanged. |
-| Release-command regressions | Pure owner-source candidates may omit them only when recipes, release metadata, locks, scripts and fixtures are unchanged from their baseline. |
-
-Every omitted stage carries its reason in the plan. These are deliberately
-conservative candidates: there is no package-only Clippy shortcut or version
-projection. The normal Linux and both macOS CI jobs remain unchanged; a qualification
-receipt proves only its recorded host, never a substitute native-host result.
-
-## Run and inspect
-
-From clean committed source, with tools/dependencies and the PocketIC server
-already prepared:
+For standalone full qualification of committed source, without delivery:
 
 ```sh
-bash scripts/release/qualify-validation-plan.sh runtime runtime-v0.19.0 workspace
-bash scripts/release/qualify-validation-plan.sh runtime runtime-v0.19.0 auto
+bash scripts/release/qualify-validation-plan.sh runtime runtime-v0.19.5 qualification
 ```
 
-These are explicit broad qualification commands, not ordinary development checks.
-Plans/logs/receipts are retained under `target/release-validation/`. Their exact
-source and baseline must match before comparing full and selected outcomes. A
-shared-input change correctly makes both plans full; never force narrow selection
-by changing the baseline just to shorten a release.
+The final `release` purpose is reserved for the actual release hook, which binds
+previous/new versions, group, destination and source. Both purposes require every
+stage. The former `auto`/`workspace` selector arguments and native pilot qualifier
+are retired. The ordinary Linux/macOS CI and installed-runtime workflows remain.
 
-Shared's `validation-evidence.pl verify` interprets events, timings, checkpoints
-and logs for the exact original run. Platform retains its complete proof in
-the consumer receipt, including relative run/log paths, the expanded input
-checkpoint and every evidence-file digest. A PASS records target success; it
-does not independently assert that an underlying check executed afresh. Stage
-reuse remains disabled. Excluded stages must remain not-applicable. Receipts bind
-plan/policy/input hashes,
-source/group/baseline, host/compiler and relevant build/server environment.
-Failed or interrupted attempts produce no success receipt. Retry uses a fresh
-attempt. Recovery admission checks unchanged input evidence for the same saved
-release intent. Stage reuse between fresh releases is not enabled.
+The planner refuses dirty/stale source, wrong baseline identity, unsafe tracked
+inputs and Make/policy roster drift. Shared executes the plan, records complete
+input checkpoints, stage events/logs and interruption status, and verifies its
+own evidence protocol. Platform retains the full Shared proof and adds source,
+group, baseline, compiler/tool/server/environment and release-destination binding.
+Receipts cannot admit an omitted stage or a failed/incomplete run.
 
-## Release and recovery admission
+Prepared metadata is the only admitted source projection. The adapter checks its
+exact semantics, while receipt recovery reconstructs immutable original source
+from Git and verifies all retained evidence. Source edits, staged/untracked files,
+changed policy, environment/server drift, relocated receipts and altered logs or
+checkpoints refuse. Recovery does not rerun product stages or rewrite old runner
+paths to manufacture evidence. Historical saved attempts retain their recorded
+source/tooling and must not be reinterpreted under this implementation.
 
-The Shared release runner still owns the lock, saved intent, metadata editor,
-commit, tag and delivery. The consumer hook records a receipt pointer beside
-that intent at `.git/release-state/GROUP-VERSION.validation`. The journal binds
-the receipt's path and SHA256, protecting the complete original Shared proof
-before candidate projection begins. Its baseline is the
-selected group's previous-version tag; a missing tag selects the full roster.
-Release mode permits omissions only on an explicitly qualified OS/architecture
-(and macOS major). Unknown hosts always select the full roster.
+## Focused qualification owners
 
-Preparation and subsequent adapter checks re-admit that receipt. Source, group,
-previous/candidate versions, remote and branch must match. Only the existing
-metadata editor's declared files may differ in the index or working tree; its
-semantic checks remain mandatory. Unchanged-source admission invokes Shared's
-`check` at the original physical source/run location. After metadata preparation,
-the generic checker cannot observe original inputs through prepared live manifests.
-Platform's separate custody contract therefore verifies the journal's receipt
-digest, reconstructs the immutable original source with `git archive` for Shared's
-input checkpoint and checks every file in the retained proof's digest inventory.
-It does not reverse live Cargo versions, rewrite runner paths, regenerate the
-proof or claim that the generic checker admits a projection. Relocation refuses.
-Receipt, stage logs and input hashes must match, as must compiler executables,
-versions, host and build/server settings.
-A local PocketIC executable is also fingerprinted. Missing or changed evidence
-refuses recovery; retain the complete attempt directory and journal pointer.
-Version 3 receipts require the digest-bearing journal. Older saved attempts
-retain their original admission code and evidence; restore that source to resume
-them rather than converting or regenerating their proof under this implementation.
+- `test-platform-group-preparation.sh` checks real preparation failure/rollback,
+  retry, guard pins, other-group custody, qualification locks and publication
+  selectors for all three groups. Runtime, with coordinated macros and exact
+  guard, supplies the one complete local commit/tag/push/resume integration cycle.
+- `test-platform-validation-plan.sh` checks full rosters, failures, interruption,
+  input drift, omitted-stage refusal and exact retained Shared proof.
+- `test-platform-validation-recovery.sh` checks actual Shared journals and receipt
+  recovery for every group, using substituted stage bodies and metadata.
+- `qualify-frozen-release.sh` checks actual setup/editor/publication wiring and
+  archive identity against disposable remotes; product stages and upload effects
+  are substitutes. It is not a fresh full gate or live publication receipt.
 
-Historical saved intents with the recognized former full-gate recipe retain
-their original Shared recovery checks. Their logs are never reinterpreted as new
-plan receipts. An unknown historical recipe refuses this fallback.
+These focused checks do not qualify native product execution. Real releases still
+run the entire required gate, including installed Runtime owner and Timers
+composition profiles. Keep native macOS/Profiler evidence separate from Linux
+root-workspace results.
 
-The `Release validation qualification` workflow runs full and selected plans on
-Linux x86_64, macOS 15 Intel and macOS 15 ARM64. It prepares the pinned compiler,
-dependencies and Testkit-owned server, then runs
-`scripts/release/qualify-native-validation.sh` in a disposable clone. All three
-receipts must name the same source, baseline and host, with the expected stage
-counts. The workflow retains receipts, logs, timing, installed evidence and a
-Git bundle of the synthetic qualification commit over its recorded input source.
-Synthetic tags exercise the mappings without changing actual release history.
-Host allowlist activation requires successful retained results; changing only
-that allowlist does not trigger another broad PR run. Manual dispatch remains
-available. Normal CI and installed-runtime workflows remain unchanged.
-
-## Current qualification
-
-`bash scripts/ci/test-platform-validation-plan.sh` runs the real selector,
-Shared plan runner and receipt admission against disposable stage bodies. It
-covers all group rosters, full expansion for shared locks, required-stage failure,
-excluded-stage failure, stale source, new stages, dirty input, failed attempts and
-fresh retry. These are dispatch/custody proofs, not product builds or timings.
-
-`bash scripts/ci/test-platform-validation-recovery.sh` exercises the real Shared
-release runner and receipt hooks for all three groups, with substitute product
-stages and metadata. It covers preparation interruption, commit/tag/pre-push
-recovery, local bare-repository delivery and refusal of source, environment,
-server, baseline, receipt, journal and stage-log drift. The existing grouped
-preparation fixture separately exercises the real metadata editor.
-
-### Actual Linux qualification, 2026-11-03
-
-All runs used clean isolated source
-`21e9180f611457303aac83065b09f8fc78085f4c`, Linux x86_64 and Rust/Cargo 1.99.1.
-The source includes the pending snapshot-client/pilot batch and the preserved
-working-tree Pest lock update. The facade's `auto` stage roster was also compared
-with `workspace` and is identical; no second identical full run was needed.
-
-| Plan | Required stages | Sum of stage durations | Receipt attempt |
-| --- | --- | --- | --- |
-| Full / facade | 20, all passed | 1,879 seconds | qualification.H0qDSk |
-| PocketIC selected | 18, all passed | 316 seconds | qualification.OZjEyg |
-| Runtime selected | 18, all passed | 342 seconds | qualification.hVomEd |
-| Types selected | 19, all passed | 327 seconds | qualification.9qlriJ |
-
-Evidence root: `target/issues-132-137.sYRgR0/platform/target/release-validation/`.
-Each attempt retains its plan, context, Shared events/checkpoints/timings, stage
-logs and successful `receipt.json`. Each selected run actually executed all its
-required stages, including both installed Runtime/Timers profiles. Types also
-executed browser checks. There was no stage-receipt reuse. Compiler artifacts
-were warm after the full run, and concurrent Cargo activity caused cache-lock
-waits; these observations are not a controlled speedup benchmark. The full run's
-release-command stage accounted for 1,301 seconds.
-
-Commands were `qualify-validation-plan.sh platform platform-v99.0.0 workspace`,
-followed sequentially by `qualify-validation-plan.sh GROUP GROUP-v99.0.0 auto`
-for `pocket-ic`, `runtime` and `types`, all under `scripts/release/` with
-`POCKET_IC_BIN=/tmp/ic-storage-ic0-release-0652/.tools/ic-testkit-server/16.1.0-x86_64-linux/pocket-ic`.
-The isolated `GROUP-v99.0.0` tags all bind baseline `de10702`; source differs only
-by a handoff sentence. These synthetic baselines exercise real full/selected
-commands on identical product sources. They are not published release baselines
-and do not authorize narrowing any actual release. Owner/shared-change selection
-and required/excluded failure cases are separately covered by the substitute
-fixtures described above.
-
-### Native activation qualification, 2026-11-03
-
-[Run 41625352854](https://github.com/dragginzgame/ic-platform/actions/runs/41625352854)
-passed all three hosts against committed input
-`082be2ff19f52ced0653f2a589c092bc0ffc3e90`, using Rust/Cargo 1.99.1 and the
-Testkit-owned PocketIC server. Each host ran the complete facade roster, followed
-by the three selected rosters, on one synthetic commit with identical product
-source. Recovered Git bundles differ from the input only by the qualification
-sentence in the handoff. No package version or actual release ref was changed.
-
-| Native host | Full / facade (20 stages) | PocketIC (18) | Runtime (18) | Types (19) |
-| --- | --- | --- | --- | --- |
-| Linux x86_64 | 1,709 s | 302 s | 296 s | 307 s |
-| macOS 15 ARM64 | 3,045 s | 654 s | 658 s | 687 s |
-| macOS 15 Intel | 5,962 s | 939 s | 1,091 s | 1,308 s |
-
-These are sums of recorded stage durations. Selected runs had warm compiler
-artifacts after the full run; the table is not a controlled speedup benchmark.
-All 12 receipts and 24 installed Runtime/Timers profile statuses passed.
-Archive digests, retained plan/context/input/log hashes and source identities
-were verified after download. Ordinary same-source CI also passed Linux and
-both macOS hosts; browser and installed-runtime workflows passed separately.
-The dependency advisory tracked by #50 is unchanged.
-
-The run retains `release-validation-Linux-x86_64` (artifact 13229210141),
-`release-validation-Darwin-arm64` (13231567401), and
-`release-validation-Darwin-x86_64` (13237276477). Local copies and verification
-reports are under `target/issue-137-native-41625352854/`. Each artifact includes
-its exact synthetic source identity/bundle, four receipts, stage logs, timing
-and installed-profile evidence.
-
-That activation enabled those three qualified host identities. Following #139's
-client retirement, the allowlist was emptied; this four-group evidence does not
-activate the current three-group mapping. The qualified
-selector, receipt, recovery and runner code is unchanged by activation. Fresh
-releases still execute every required stage; these qualification receipts cannot
-be reused as release receipts. The first release containing this shared-script
-batch still selects the full roster because its baseline inputs changed.
+The retired #137 pilot, earlier qualification observations and recovery history
+remain in the [0.24.0 validation record](https://github.com/dragginzgame/ic-platform/blob/platform-v0.24.0/docs/platform-release-validation.md).
+No retained batch, receipt, ref, package archive or historical recovery evidence
+is deleted by retiring the pilot's code and workflow.

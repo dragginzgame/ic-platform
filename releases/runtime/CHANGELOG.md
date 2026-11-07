@@ -4,6 +4,15 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.20.0] - Unreleased
+
+### 💥 Breaking
+
+- Keep one ordinary entrypoint macro family, exported through Runtime’s `cdk`
+  module and defaulting to that owner. Remove the prefixed `runtime_*` macro
+  exports and the facade’s ordinary front door; explicit crate-path overrides,
+  export names, codecs, guard ordering and executor behaviour are preserved.
+
 ## [0.19.5] - 2026-11-07
 
 ### ⚡ Performance

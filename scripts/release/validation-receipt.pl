@@ -29,6 +29,8 @@ sub command {
 my $raw=bytes($plan_path);
 my $plan=$json->decode($raw);
 my $context=$json->decode(bytes("$plan_path.context.json"));
+$plan->{scope} eq "workspace" && !grep { !$_->{required} } @{$plan->{stages}}
+    or die "Platform requires the full validation gate\n";
 my $checkpoint_root=abs_path('.');
 my $physical_root=$checkpoint_root;
 my $projected=0;
@@ -129,7 +131,7 @@ my $receipt={schema=>3,contract=>'platform-release-validation/3',source=>$plan->
     policy_sha256=>sha256_hex(bytes($plan->{policy})),inputs_sha256=>sha256_hex(bytes("$run/plan-inputs.json")),
     %$execution,runner_log_sha256=>sha256_hex(bytes($runner_log)),
     physical_root=>$physical_root,validation_evidence=>$proof,
-    release_omission_admitted=>(defined($context->{release}) && $plan->{scope} eq 'group')?JSON::PP::true:JSON::PP::false};
+    release_omission_admitted=>JSON::PP::false};
 if ($mode eq 'check') {
     $json->encode($receipt)."\n" eq bytes($output) or die "receipt/evidence changed\n";
     print "Release validation receipt admitted: $output\n";

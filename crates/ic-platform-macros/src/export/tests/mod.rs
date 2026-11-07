@@ -313,23 +313,12 @@ fn typed_bridge_preserves_the_public_generators_decisions() {
 fn runtime_entrypoints_select_the_owner_and_preserve_explicit_paths() {
     let item = quote! { fn read(value: u64) -> u64 { value } };
     let codecs = quote! { decode_with = "decode", encode_with = "encode" };
-    let runtime = runtime_entry(MethodType::Query, codecs.clone(), item.clone())
-        .unwrap()
-        .to_string();
+    let runtime = ic_query(codecs.clone(), item.clone()).unwrap().to_string();
     assert!(runtime.contains(":: ic_platform_runtime :: cdk"));
     assert!(runtime.contains("\"canister_query read\""));
-    let facade = ic_query(codecs.clone(), item.clone()).unwrap().to_string();
-    assert_eq!(
-        runtime.replace("ic_platform_runtime", "ic_platform"),
-        facade
-    );
-    let explicit = runtime_entry(
-        MethodType::Query,
-        quote! { #codecs, crate = "::selected::cdk" },
-        item,
-    )
-    .unwrap()
-    .to_string();
+    let explicit = ic_query(quote! { #codecs, crate = "::selected::cdk" }, item)
+        .unwrap()
+        .to_string();
     assert!(explicit.contains(":: selected :: cdk"));
     assert!(!explicit.contains("ic_platform_runtime"));
 }
