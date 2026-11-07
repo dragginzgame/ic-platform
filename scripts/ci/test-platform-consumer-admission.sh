@@ -53,8 +53,8 @@ case "$1" in
             exit 0
         fi
         printf 'ic-platform v0.17.0 (/local/platform)\n'
-        case "${TEST_CAPABILITY:-cdk}" in
-            cdk|runtime|external-candid|executor|ic0)
+        case "${TEST_CAPABILITY:-runtime}" in
+            runtime|external-candid|executor|ic0)
                 printf 'ic-platform-runtime v0.17.0 (/local/runtime)\n' ;;
         esac
         if [[ "$TEST_CANDID" == yes ]]; then printf 'candid v0.10.38\n'; fi
@@ -139,7 +139,7 @@ for rejection in duplicate features; do
     [[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled after BLAKE3 graph rejection' >&2; exit 1; }
 done
 echo 'BLAKE3 consumer rejects duplicate identities and extra features before compilation'
-for capability in cdk runtime external-candid; do
+for capability in runtime external-candid; do
     export TEST_CANDID=no
     if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi
     for rejection in no yes; do
@@ -155,10 +155,10 @@ for capability in cdk runtime external-candid; do
         fi
     done
 done
-echo 'Consumer admission: CDK/runtime/external Candid selection and failure propagation passed'
+echo 'Consumer admission: runtime/external Candid selection and failure propagation passed'
 
-export TEST_FAIL_LAST=yes TEST_REJECT=no TEST_CANDID=no
-if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" cdk > "$fixture/failure.log" 2>&1; then
+export TEST_FAIL_LAST=yes TEST_REJECT=no TEST_CANDID=yes
+if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-candid > "$fixture/failure.log" 2>&1; then
     echo 'Final Cargo failure was masked by consumer completion' >&2; exit 1
 else
     [[ $? == 42 ]] || { cat "$fixture/failure.log" >&2; exit 1; }
@@ -169,10 +169,10 @@ echo 'Final Cargo failure still propagates before successful completion'
 # Cargo may run for minutes while a maintainer edits this checkout. Rewrite the
 # same inode while the last call is paused, shifting the already-read file tail.
 mkfifo "$fixture/ready" "$fixture/resume"
-export TEST_EDIT=yes TEST_REJECT=no TEST_CANDID=no
+export TEST_EDIT=yes TEST_REJECT=no TEST_CANDID=yes
 export TEST_READY="$fixture/ready" TEST_RESUME="$fixture/resume"
 : > "$TEST_CALLS"
-"$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" cdk > "$fixture/edit.log" 2>&1 &
+"$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-candid > "$fixture/edit.log" 2>&1 &
 runner_pid=$!
 read -r _ < "$TEST_READY"
 {
