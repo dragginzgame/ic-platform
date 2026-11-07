@@ -75,13 +75,6 @@ package also owns generated entrypoints; it includes `runtime`. Both use the
 same executor and remain Candid-free. This avoids the Platform entrypoint
 generator in runtime-only graphs, not every transitive proc-macro dependency.
 
-Enable `secp256k1` for native offline public-key derivation through
-`ic_platform::secp256k1::{PublicKey, MasterPublicKeyId, PocketIcMasterPublicKeyId,
-KeyDecodingError}`. The dependency is exactly `ic-secp256k1 =0.3.0`; types and
-derivation bytes remain upstream. This feature is independent of Candid/CDK and
-excluded from Wasm because upstream unconditionally selects native RNG support.
-Consumers retain network/key choice, path validation and authorization policy.
-
 All owned application endpoints use IC Wire, including public endpoints called by
 third parties. Enable `cdk` for explicit-codec entrypoints and the Candid-free
 runtime, or `executor` for the shared executor alone. Enable `candid` only for
@@ -202,14 +195,16 @@ implementation or Candid trait/marker handling is provided. Explicitly select
 the base owned type and runtime do not acquire hashing.
 
 Use `candid::decoder::{DecoderConfig, IDLDeserialize, decode_one_with_config,
-decode_args_with_config, decode_one, decode_args}` for existing low-level configuration and staged
+decode_args_with_config}` for explicit low-level configuration and staged
 decoding. These are direct upstream identities: optional/default ceilings,
 diagnostics, construction/value/finalization/drop boundaries and typed errors
 are unchanged. Callers retain pre-decoder byte admission and canonical re-encoding;
 the finite `DecodeLimits` helpers continue selecting compact diagnostics.
-The decoder module's `decode_one` and `decode_args` use upstream defaults,
-including diagnostics, and take no Platform `DecodeLimits` argument. Preserve
-existing caller byte admission; do not confuse them with the parent helpers.
+Platform 0.24 removes the decoder module's unconfigured `decode_one` and
+`decode_args` shortcuts. Use the parent helpers with `DecodeLimits`, or explicitly
+select a `DecoderConfig` for the configured/staged APIs. Preserve caller byte
+admission, optional quotas, diagnostics and skipping versus exact-arity policy;
+this API cut introduces no automatic ceilings or decoding-behaviour changes.
 
 The contract explicitly exports `candid_method`, `export_service`, `Encode`,
 `Decode`, `TypeEnv`, `idl_hash`, reflection/type equality/subtyping and printer machinery.
@@ -391,5 +386,4 @@ Enable `ecdsa` for native/Wasm secp256k1 ECDSA through
 `ic_platform::ecdsa::{Signature, SigningKey, VerifyingKey, SignatureError,
 PrehashSigner, PrehashVerifier}`. K256 retains type identities and cryptography;
 consumers retain prehash construction, high-S policy, normalization and custody.
-No RNG backend is selected. This is independent of native IC key derivation
-under `secp256k1`.
+No RNG backend is selected. Offline IC public-key derivation is not provided.

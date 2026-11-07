@@ -582,7 +582,9 @@ async fn external_management() -> bool {
         .await
         .unwrap();
     // Preserve this fixture's original upstream decode/arity policy explicitly.
-    let bytes: Vec<u8> = ic_platform::candid::decoder::decode_one(response.as_ref()).unwrap();
+    let config = contract::DecoderConfig::new();
+    let bytes: Vec<u8> =
+        ic_platform::candid::decoder::decode_one_with_config(response.as_ref(), &config).unwrap();
     bytes.len() == 32
 }
 

@@ -42,14 +42,6 @@ pub fn roundtrip() {
     use contract::{Decode, Encode};
     let bytes = Encode!(&42_u64).unwrap();
     assert_eq!(Decode!(&bytes, u64).unwrap(), 42);
-    assert_eq!(
-        ic_platform::candid::decoder::decode_one::<u64>(&bytes).unwrap(),
-        42
-    );
-    assert_eq!(
-        ic_platform::candid::decoder::decode_args::<(u64,)>(&bytes).unwrap(),
-        (42,)
-    );
     let config = DecoderConfig::new();
     let generated_config: contract::DecoderConfig = config.clone();
     assert_eq!(
@@ -196,21 +188,22 @@ fn staged_decoding_preserves_caller_failures_and_optional_configuration() {
     assert_eq!(staged_value(&trailing), Err(Stage::Trailing));
     let extra = contract::encode_args((42_u64, true)).unwrap();
     assert_eq!(staged_value(&extra), Err(Stage::Noncanonical));
+    let default_config = DecoderConfig::new();
     assert_eq!(
-        ic_platform::candid::decoder::decode_one::<u64>(&extra).unwrap(),
+        decode_one_with_config::<u64>(&extra, &default_config).unwrap(),
         42
     );
     assert_eq!(
-        ic_platform::candid::decoder::decode_args::<(u64,)>(&extra).unwrap(),
+        decode_args_with_config::<(u64,)>(&extra, &default_config).unwrap(),
         (42,)
     );
     let missing = contract::encode_args(()).unwrap();
     assert_eq!(
-        ic_platform::candid::decoder::decode_one::<Option<u64>>(&missing).unwrap(),
+        decode_one_with_config::<Option<u64>>(&missing, &default_config).unwrap(),
         None
     );
     let _: contract::Error =
-        ic_platform::candid::decoder::decode_one::<u64>(b"bad header").unwrap_err();
+        decode_one_with_config::<u64>(b"bad header", &default_config).unwrap_err();
     assert_eq!(staged_value(&vec![0; 5121]), Err(Stage::Limit));
     let mut config = DecoderConfig::new();
     config.set_full_error_message(false).set_skipping_quota(0);
@@ -229,7 +222,8 @@ fn owned_principal_converts_at_the_external_candid_boundary() {
     // DIDL, zero type-table entries, one principal argument, reference marker,
     // two significant bytes. This is external Candid, never a Wire payload.
     assert_eq!(bytes, [68, 73, 68, 76, 0, 1, 104, 1, 2, 2, 1]);
-    let decoded: contract::Principal = ic_platform::candid::decoder::decode_one(&bytes).unwrap();
+    let decoded: contract::Principal =
+        decode_one_with_config(&bytes, &DecoderConfig::new()).unwrap();
     assert_eq!(ic_platform::Principal::from(decoded), owned);
 }
 #[test]

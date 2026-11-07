@@ -4,6 +4,28 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.24.0] - Unreleased
+
+### 💥 Breaking
+
+- Remove native offline IC public-key derivation, its `secp256k1` feature and
+  the `ic-secp256k1` dependency. Consumers must remove the feature/imports;
+  [Canic’s fetch-and-cache migration](https://github.com/dragginzgame/canic/issues/739)
+  remains consumer-owned. The separate `ecdsa` capability and Agent are unchanged.
+- Remove unconfigured `candid::decoder::{decode_one, decode_args}` shortcuts.
+  Select the bounded helpers or an explicit decoder configuration. Caller
+  migrations remain in [Canic #740](https://github.com/dragginzgame/canic/issues/740),
+  [Blob #119](https://github.com/dragginzgame/ic-blob-storage/issues/119) and
+  [IC Crates #25](https://github.com/dragginzgame/ic-crates/issues/25).
+
+### 🔧 Tooling
+
+- Stop replaying Shared's generic changelog-parser regression matrix in
+  `check-release-commands`; retain Platform's group preparation, adapter and
+  recovery coverage and normal release changelog admission.
+- Retire the remaining unadopted crypto packaging patches; registry suppliers
+  and their cryptographic implementations remain unchanged.
+
 ## [0.23.6] - 2026-11-07
 
 ### 🩹 Fixed

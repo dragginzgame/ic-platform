@@ -76,7 +76,6 @@ for supplier availability and consumer-owned feature/import changes.
 | `signature-verification` | Imported canister-signature verification with optional authenticated time result; certification/BLS, no Candid/ic0, executor or host transport |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
-| `secp256k1` | Native offline public-key derivation from exactly 0.3.0; no Candid/CDK, excluded from Wasm |
 
 The [IC inventory](docs/ic-inventory.md) maps upstream code to exposed APIs,
 observed consumers and maintenance ownership. `make check-inventory` rejects

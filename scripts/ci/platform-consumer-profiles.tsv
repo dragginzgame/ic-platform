@@ -22,7 +22,6 @@ canister-sig-creation	canister_sig_consumer	-	check	-
 signature-verification	signature_consumer	bls-*.hex,signature-*.hex	check	-
 cdk	cdk_consumer	-	build	cdk
 runtime	runtime_consumer	-	check	runtime
-secp256k1	secp256k1_consumer	-	check	-
 external-contracts	external_contract_consumer	-	check	-
 asset-contracts	asset_contract_consumer	-	check	-
 external-contract-schema	external_contract_schema	external-*.did,icrc-reference.did	skip	-

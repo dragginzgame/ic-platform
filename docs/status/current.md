@@ -1,5 +1,40 @@
 # Current handoff — 2026-11-07
 
+## Local Platform 0.24.0 hard cut (unpublished)
+
+Removed the native `secp256k1` feature/module and `ic-secp256k1` supplier,
+its consumer tests and the obsolete derivation/scaffolding experiments. The
+separate `ecdsa` and Agent capabilities remain. [Canic #739](https://github.com/dragginzgame/canic/issues/739)
+owns authenticated key lookup/session caching and bootstrap before adoption;
+no sibling source was edited. Platform-only deployment is now authorized.
+Runtime, Types and browser release selections are unchanged. Agent still brings
+the older bigint family, so #50 remains unresolved.
+
+Focused Rust 1.99.1 validation passed: facade all-feature/all-target Clippy,
+five Agent and one ECDSA consumer tests, Wasm ECDSA compilation, native/Wasm
+feature graphs for host/crypto and identity/executor subsets, feature-policy
+regressions, dependency boundaries, inventory/pins and formatting integration.
+Logs and before/after metadata/lockfiles: `target/secp256k1-removal/`.
+The lock drops five packages (ic-secp256k1, base64 0.13, pem 1, simple_asn1,
+time-macros), adds none and retains all other selected versions, including the
+independent draft below. Focused checks used that draft; release gates will
+qualify the committed release lock. Sibling acceptance remains consumer-owned.
+
+The same draft removes unconfigured `candid::decoder::{decode_one, decode_args}`
+exports and the four remaining unadopted crypto patches. Explicit configuration,
+staged decoding and all cryptographic checks remain; no extra dependency leaves
+with this slice. Caller migrations are filed as [Canic #740](https://github.com/dragginzgame/canic/issues/740),
+[Blob #119](https://github.com/dragginzgame/ic-blob-storage/issues/119) and
+[IC Crates #25](https://github.com/dragginzgame/ic-crates/issues/25). No sibling edits.
+Facade Clippy, 15 Candid/schema tests, standalone native/Wasm Candid consumer,
+owner graphs and external-adapter fixture Wasm compilation pass. Evidence:
+`target/candid-shortcut-retirement/`.
+No fresh installed-runtime or macOS execution is claimed for this export cut.
+
+`check-release-commands` also no longer replays Shared's generic changelog-parser
+matrix. Platform's group-preparation, adapter/recovery coverage and production
+changelog admission remain; this earlier local work is preserved in the draft.
+
 ## Audit improvements deployed
 
 The reviewed audit batch and Shared 0.31.1 repair are published on crates.io and
@@ -55,18 +90,20 @@ recursive refusals cost 161 extra. Exercised acceptance/error outcomes matched.
 These are probe measurements, not application fleet gains. Earlier FIFO cancellation
 measurements and their 347-byte Runtime saving remain in the owning release ledger.
 
-## Independent dependency draft
+## Deferred dependency draft and release inputs
 
-The normal lockfile again contains only the original external dependency patch:
-Candid/derive **0.10.40**, cc **1.11.1**, SmallVec **1.16.5**. It was updated during
-the frozen batch without changing release inputs. The exact patch was restored
-over Platform 0.23.6 and Runtime/macros/guard 0.19.5 after reconciliation; normalized
-before/after diffs match. Current restored lock SHA-256:
-`a683f1fe9cc23a1cd03f5f7c65297ab431338a6b30cfd00c8c50922fc057138f`.
-Original custody is `refs/retained/audit-deploy-20261107-lock-draft`; its original
-lock hash is `8fa03623313c4866557072e88365b73c6ee05488b1a06417898ddd55881af070`.
-Original/restored patches are alongside publication evidence. Never restore an
-old whole lock over delivered owner versions. Do not treat this draft as released.
+The independent Candid/derive **0.10.40**, cc **1.11.1** and SmallVec **1.16.5**
+updates are excluded from this deployment. The release lock preserves committed
+external versions and only prunes the five retired derivation packages.
+The complete reviewed tree and draft are retained in
+`refs/retained/platform0240-20261107-reviewed-draft`, with the exact deferred
+lock at `target/deployment-platform0240-20261107/deferred.Cargo.lock` (SHA-256
+`13a61b072de01514d5923b59453af4ad1eb133ab98b97d79d557491d82103e48`).
+Restore that external patch over the delivered Platform version after batch
+reconciliation; never restore the old whole lock over released owner versions.
+Earlier custody `refs/retained/audit-deploy-20261107-lock-draft` and original
+publication evidence remain preserved. Normal source preparation, frozen release
+and deferred edits are separate; no draft version is claimed as published.
 
 ## Baseline and retained custody
 

@@ -43,7 +43,6 @@ function reject(reason) {
     parser = native && enabled("candid-parser")
     agent = native && enabled("agent")
     protocol = native && enabled("ic-protocol")
-    secp = native && enabled("secp256k1")
     external_endpoint = enabled("candid-endpoint")
     cdk = enabled("cdk")
     runtime = enabled("runtime")
@@ -59,11 +58,10 @@ function reject(reason) {
     candid = external_endpoint || enabled("candid") || enabled("candid-service") || parser || agent || protocol || management || ledger || external_dto || creation
     external_principal = enabled("principal-external")
     principal = enabled("principal")
-    hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || secp
+    hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519")
     minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification")
     found_ed = 0
     found_curve = 0
-    found_secp = 0
     found_k256 = 0
     found_blake3 = 0
     found_guard = 0
@@ -93,10 +91,10 @@ function reject(reason) {
         }
         # rand_core supplies traits and is permitted. Entropy/RNG implementations
         # belong only to the selected native host capabilities that require them.
-        if (name ~ /^(rand|rand_chacha|getrandom)$/ && !(agent || secp || parser))
+        if (name ~ /^(rand|rand_chacha|getrandom)$/ && !(agent || parser))
             reject("unselected RNG/entropy scaffolding")
         if (name == "k256") {
-            if (!(enabled("ecdsa") || agent || secp) || !registry) reject("unselected K256")
+            if (!(enabled("ecdsa") || agent) || !registry) reject("unselected K256")
             found_k256 = 1
         }
         if (name == "ed25519-dalek" || name == "curve25519-dalek") {
@@ -104,10 +102,7 @@ function reject(reason) {
             if (name == "ed25519-dalek") found_ed = 1
             else found_curve = 1
         }
-        if (host_capability == "secp256k1") {
-            if (!secp || version != "v0.3.0" || !registry) reject("unqualified secp256k1")
-            found_secp = 1
-        }
+        if (host_capability == "secp256k1") reject("offline public derivation is retired")
         if (host_capability == "pocket-ic") reject("PocketIC belongs to Testkit, outside Platform")
         if (name == "pocket-ic") reject("retired registry PocketIC client")
         if (host_capability == "testkit") reject("Testkit in production")
@@ -134,7 +129,6 @@ function reject(reason) {
     }
     if (executor && !found_guard) reject("missing runtime singleton guard")
     if (enabled("ed25519") && (!found_ed || !found_curve)) reject("missing selected Dalek")
-    if (secp && !found_secp) reject("missing selected secp256k1")
     if (enabled("ecdsa") && !found_k256) reject("missing selected K256")
     if (enabled("blake3") && !found_blake3) reject("missing selected BLAKE3")
 }

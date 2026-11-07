@@ -45,7 +45,7 @@ run_make fmt-check
 grep -q 'Standalone Rust formatting.*ok' "$fixture/last.log"
 grep -q 'running without shortcut' "$fixture/last.log"
 
-source_file=scripts/fixtures/secp-scaffolding/main.rs
+source_file=scripts/fixtures/type-benchmark/main.rs
 cp "$fixture/work/$source_file" "$fixture/original.rs"
 printf '\nfn platform_formatting_fixture( ){ }\n' >> "$fixture/work/$source_file"
 if run_make fmt-check; then

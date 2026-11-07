@@ -21,9 +21,7 @@
   },
   {
     "dependency": "ic-secp256k1",
-    "allowed_packages": [
-      "ic-platform"
-    ]
+    "allowed_packages": []
   },
   {
     "dependency": "ic-canister-sig-creation",

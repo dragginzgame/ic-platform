@@ -1,5 +1,31 @@
 # Candid and runtime ownership
 
+## Explicit Candid decoder configuration (Platform 0.24.0)
+
+The unconfigured `candid::decoder::{decode_one, decode_args}` exports are
+removed. Use `candid::{decode_one, decode_args}` with caller-selected
+`DecodeLimits`, or the existing `decoder::{decode_one_with_config,
+decode_args_with_config}` with an explicitly selected `DecoderConfig`.
+Staged `IDLDeserialize` and its upstream identity remain available.
+
+This is an API cut, not a codec or resource-policy replacement. The bounded
+helpers retain their existing admission rules and closed errors; the configured
+and staged APIs retain upstream behaviour, optional quotas and diagnostics.
+Preserve external bytes, integer ranges, optional/subtyped values, extra-value
+skipping versus exact arity, and consumer-owned error/transport/retry policy.
+An explicit `DecoderConfig::new()` retains the former default behaviour when
+that is the consumer's deliberate selection; production budgets remain theirs
+to choose. Do not replace an ordinary decoder with `decode_exactly_one` without
+reviewing that operation's reply contract.
+
+Read-only caller migration issues: [Canic #740](https://github.com/dragginzgame/canic/issues/740)
+(production host/history paths and tests), [Blob #119](https://github.com/dragginzgame/ic-blob-storage/issues/119)
+(gateway test canister), and [IC Crates #25](https://github.com/dragginzgame/ic-crates/issues/25)
+(managed HTTP tests). No sibling code or release is changed here. Platform's
+own consumer and installed-runtime fixture sources use explicit configuration
+while preserving their prior decoding choices. Runtime, Types and browser groups
+are unchanged.
+
 ## Uninitialized stable reads (Runtime 0.19.4)
 
 Runtime's `ic0::stable64_read_uninit(&mut [MaybeUninit<u8>], offset)` exposes
@@ -1419,7 +1445,7 @@ that version-requirement update and qualification against the published package.
 
 `runtime` (therefore `cdk`), `candid` (therefore `candid-service`),
 `canister-sig-creation` (therefore `signature-verification`), management and ledger
-DTO features, `agent`, `candid-parser` and `secp256k1` include
+DTO features, `agent` and `candid-parser` include
 `principal`. Native-only client/parser dependencies remain absent on Wasm;
 the explicitly implied portable principal types remain available there.
 Certification, BLS, ECDSA and Ed25519 alone do not select application types;
@@ -1923,19 +1949,12 @@ compiling for Wasm. This does not qualify its runtime canister, real upgrade or
 signed ingress. Published adoption must run those consumer workflows; native
 macOS producer CI and installed-canister acceptance remain separate.
 
-Upstream creation 1.3.1 uses `candid::Principal` for its only Candid API use.
-`patches/canister-sig-principal.patch` proposes replacing that dependency/import
-with `ic_principal`, against reviewed upstream
-`3e5786bb06f94e898d3f8371ec088be23abec987`. It is not submitted or selected by
-production. Upstream acceptance/release and subsequent Platform qualification
-are required before changing the published dependency path. The candidate passes
-all 24 upstream library tests on Rust 1.99/1.88 and Wasm compilation at 1.88.
-Standalone creation/verifier probes preserve the same vectors at 1.88; both native
-and Wasm graphs lose Candid only when the proposed source is explicitly selected
-in those disposable probes. Raw ic0 remains 1.2.0. The current production features
-centralize direct ownership without eliminating that Candid edge or proving a
-Wasm-size reduction. See [key/hash ownership](https://github.com/dragginzgame/ic-platform/issues/16)
-and [verification/BLS isolation](https://github.com/dragginzgame/ic-platform/issues/18).
+Registry creation 1.3.1 brings Candid for its Principal API. The former
+Principal/store packaging proposals were never selected and are retired in
+Platform 0.24. Registry cryptographic implementations and identities remain the
+suppliers; no replacement source or downstream Cargo patch is introduced.
+The dependency path and all DER/hash/signature checks are unchanged. Historical
+experiments did not establish production removal of Candid or a Wasm-size win.
 
 ## Native Agent extension
 
@@ -2693,7 +2712,7 @@ scopes fail before graph queries. Routine
 coverage deliberately omits other higher-order combinations; this is not an
 equivalent exhaustive proof. Combined CDK/Timers qualification remains separate.
 It derives local feature closures from Cargo metadata and reuses graph queries
-only within the same invocation. On Wasm, Agent/parser/secp256k1 leaves may share
+only within the same invocation. On Wasm, Agent/parser leaves may share
 a key only while each feature activates exactly its single optional native-only
 dependency; a changed contract fails closed. Defaults keep a separate key.
 All selection-specific admission checks still run in one validator process
@@ -2745,118 +2764,45 @@ The decoder and tests match the Testkit working tree at HEAD `55ac397`, reviewed
 Working-tree provenance does not claim publication. Shared Tooling owns release
 execution; the local adapter remains a thin consumer of its reviewed snapshot.
 
-## Native secp256k1 public derivation
+## Retired native secp256k1 public derivation (Platform 0.24.0)
 
-The optional `secp256k1` feature pins `ic-secp256k1 =0.3.0` at the maintainer's
-request and explicitly exports `PublicKey`, `MasterPublicKeyId`,
-`PocketIcMasterPublicKeyId` and `KeyDecodingError`. These are upstream identities,
-including SEC1 encoding, chain codes, parsing errors and derivation methods.
-Canic's `ops/config/chain_key` host operation uses mainnet `EcdsaKey1` and
-PocketIC `EcdsaKey1`, `EcdsaTestKey1` and `EcdsaDfxTestKey` with Platform's existing
-Principal identity. No private-key API or cryptographic implementation is copied.
+Platform removes the native `secp256k1` feature, module and `ic-secp256k1`
+dependency. No compatibility feature or replacement derivation implementation
+is supplied. The separate native/Wasm `ecdsa` signing/verification capability,
+Agent identities, management ECDSA DTOs and browser exports remain unchanged.
+This is a breaking minor change; existing consumers must remove the feature
+selection and imports before adopting the 0.24 line.
 
-Select `ic-platform` with `features = ["secp256k1"]` in the native consumer's
-inherited dependency, replace `ic_secp256k1` imports with
-`ic_platform::secp256k1`, then remove the exhausted upstream declaration from
-member/root catalogs and update ownership guards. Preserve network selection,
-allowed key IDs, path limits, root validation and existing-value mismatch checks.
-Test the consumer's existing derivation and role-rendering behavior after the
-paired release; source compilation here does not qualify the whole Canic workspace.
+Canic owns the replacement in [Canic #739](https://github.com/dragginzgame/canic/issues/739):
+fetch the key over authenticated transport, cache successful results for the
+session under the exact network/Root/key/path binding, and feed the result into
+its existing explicit public-key configuration before artifact generation.
+Bootstrap must be resolved without relaxing Root activation, authority or trust
+checks. Keep verification material in deployed configuration and preserve all
+signature, certificate, delegation, freshness and policy checks. No Canic source
+or deployment is changed here, and filing the issue does not qualify its migration.
 
-This surface is deliberately native-only, like Agent and the host parser.
-Upstream 0.3.0 unconditionally selects Rand/getrandom and exposes no feature to
-remove that dependency. Platform does not install a Wasm entropy backend or
-substitute an RNG. Enabling this feature on Wasm exposes no module and adds no
-secp256k1 dependency. Native selection stays Candid/CDK/executor-free; default
-builds do not select it. It centralizes direct dependency ownership, without
-claiming transitive dependency removal or measured Wasm savings.
+The removal affects native tooling only; the dependency was already excluded
+from production Wasm. Agent still selects the older K256/bigint family, so this
+cut alone does not resolve the crypto-bigint advisory in Platform #50.
 
 ## Qualified dependency-reduction experiments
 
-The following patches are review experiments against exact registry sources,
-not dependencies selected by Platform. They retain their upstream Apache-2.0
-provenance and do not change the supported type-identity/runtime contracts above.
-No new production fork, compatibility package or alternate executor is selected.
-
-The maintainer subsequently excluded replacement of DFINITY-authored cryptographic
-code. Retain upstream implementations and identities for derivation, signature
-verification, key encoding/hashing and BLS. The public-derivation prototype below
-is historical evidence, not an adoption candidate. Dependency/module trimming
-may be assessed where it preserves that code; these experiments do not authorize
-owned cryptographic replacements.
-
-- `patches/canister-sig-no-store.patch` targets creation 1.3.1: use canonical
-  `ic_principal` and omit the unused signature-map module and its `ic0` dependency.
-  With verifier 0.3.0 selecting this candidate, all 17 retained creation and 12
-  verifier library tests pass on Rust 1.88, as does Wasm checking. Its normal/build
-  graph loses Candid and ic0. This does not qualify a production owner migration,
-  altered malformed-DER behavior or Auth's installed application policies.
-- `patches/secp256k1-public-only.patch` is a standalone public-derivation experiment
-  from secp256k1 0.3.0, including its manifest and differential fixture. Rust 1.88
-  native tests compare mainnet ECDSA key_1 and three PocketIC ECDSA keys across
-  four Principals and four paths (64 pairs), including empty and 255-component
-  paths; compressed/uncompressed outputs and chain codes match the original.
-  Native and Wasm library checks pass. Its normal graph excludes upstream
-  secp256k1, rand, rand_chacha, getrandom, PEM and simple_asn1; rand_core remains
-  through curve arithmetic. The prototype omits broader methods/traits and has
-  an inherited deprecated generic-array call: it is not public API parity or
-  strict-lint qualification, and its owned types cannot silently replace current
-  upstream identities. No new curve arithmetic or signing implementation exists.
-- The CDK macro-gating proposal is retired by the maintained runtime adoption
-  above. Its historical source-copy evidence did not establish a Candid-free
-  published runtime; the new owner is qualified separately.
-
-Each patch applies to its exact registry source. Disposable evidence is retained
-under `/tmp/platform-signature-split`, `/tmp/platform-public-secp` and
-`/tmp/platform-cdk-split`. These package-graph observations do not measure Wasm
-size or wall-clock performance. Existing management/ledger DTOs remain selected:
-owning their definitions would change Rust identity without removing external
-Candid requirements. Public ownership changes require an explicit migration and
-renewed consumer qualification; no supplying release is implied by these proofs.
+The unadopted canister-signature Principal/store packaging patches, public-only
+derivation prototype and related scaffolding experiments are retired in Platform
+0.24. Their earlier source-bound observations remain historical in Git; no
+experimental source is selected or maintained as a dependency. Current suppliers
+and cryptographic behaviour remain unchanged. The CDK macro-gating proposal was
+already superseded by the maintained Runtime owner above.
 
 ## Scaffolding-only packaging qualification
 
-The earlier CDK macro-gating proposal is superseded by the maintained runtime
-above. Its patch and qualification branch are retired; the remaining proposals
-below concern cryptographic dependency scaffolding only.
-
-The maintained packaging proposals preserve upstream cryptographic function
-bodies, constants and test vectors. They change feature selection, dependency
-imports and module exposure only:
-
-- `patches/canister-sig-optional-store.patch` retains the upstream signature map
-  under a default-enabled `signature-map` feature. Disabling it removes ic0;
-  canonical `ic_principal` replaces the Candid Principal import without changing
-  that type. `patches/verifier-optional-store.patch` disables that unused store
-  on the verifier's dependency edge; verifier source is unchanged.
-- `patches/secp256k1-optional-scaffolding.patch` retains all original source lines
-  and adds `full` feature gates. Defaults preserve the upstream API. Disabling
-  `full` retains public derivation and SEC1/BIP340 serialization without private
-  keys, signature verification, PEM/DER or RNG scaffolding. K256 remains 0.13.4,
-  using its supported `arithmetic` and `sha2` features; full mode restores the
-  original optimization/format/signature features. This changes inherited method
-  availability and needs an explicit compatibility/source migration before adoption.
-
-`make check-upstream-scaffolding` applies these patches to exact cached registry
-sources in disposable directories. It compares every source file after removing
-only the declared feature attributes and Principal import adjustment, verifies
-license bytes, records source hashes and prepares an independent secp vector
-workspace. It does not change the production dependency selections or publish
-packages. Using the printed evidence directory as `proof_root`, rerun the
-separate MSRV builds without unifying the upstream and trimmed crypto features:
-
-```sh
-cargo +1.88.0 run --manifest-path "$proof_root/vectors/Cargo.toml" -p vectors-original --frozen --offline > "$proof_root/original.out"
-cargo +1.88.0 run --manifest-path "$proof_root/vectors/Cargo.toml" -p vectors-candidate --frozen --offline > "$proof_root/candidate.out"
-cmp "$proof_root/original.out" "$proof_root/candidate.out"
-```
-
-Production source choice is separate: Cargo ignores dependency-local `[patch]`
-tables. The disposable Platform consumer qualification uses an explicit root
-patch for the verifier/creation edge; this proves behavior, not transparent
-downstream distribution. Registry-source admission remains strict until an
-explicitly supported source arrangement and any type-identity migration are
-selected and qualified. No supplying release or installed runtime proof is implied.
+The old experimental patch runner, fixtures and remaining patch files are
+removed. There is no current experiment qualification command or alternative
+cryptographic owner. Dependency-local Cargo patches are not a supported
+consumer distribution mechanism. Any future packaging change needs its own
+explicit scope, unchanged upstream cryptographic bodies and actual consumer
+qualification; these retired experiments supply no such authorization.
 
 ## Standard Ed25519 maintenance boundary
 
@@ -2892,8 +2838,8 @@ The optional native/Wasm `ecdsa` feature exposes original K256 0.14.0 identities
 as `ic_platform::ecdsa::{Signature, SigningKey, VerifyingKey, SignatureError,
 PrehashSigner, PrehashVerifier}`. The compatible registry requirement disables
 upstream defaults and selects only `ecdsa`; no RNG backend, Candid or executor
-is enabled. This is independent of the existing native-only `secp256k1` IC public
-key derivation surface. Agent/public derivation may unify additional K256 features.
+is enabled. Offline IC public-key derivation is retired; Agent may independently
+select its older K256 family and additional features.
 
 This is a breaking Platform minor change: K256 now exposes signature 3 identities.
 Replace `to_encoded_point` with `to_sec1_point`. `normalize_s()` now returns the
@@ -2909,7 +2855,7 @@ permits an older transitive selection, so a corrected workspace lock would not
 protect existing downstream locks. This constraint unifies the existing bigint
 dependency; it adds no replacement arithmetic or public bigint API. The qualified
 graph resolves elliptic-curve 0.14.3 and crypto-bigint 0.7.10 at Rust 1.91.
-Agent and native IC public derivation retain the older K256/bigint family; this
+Agent retains the older K256/bigint family; this
 does not establish complete remediation of the repository's advisory graph.
 
 Auth's `chain-key-verification` should select `dep:ic-platform` and
@@ -3036,8 +2982,8 @@ For required external Candid calls, migrate deliberately:
 | --- | --- |
 | `call.with_arg(arg)` | `contract::encode_one(&arg)`, then `call.take_raw_args(bytes)` |
 | `call.with_args(&args)` | `contract::encode_args_ref(&args)`, then `call.take_raw_args(bytes)` |
-| `response.candid::<T>()` | `decoder::decode_one::<T>(response.as_ref())` to preserve upstream defaults |
-| `response.candid_tuple::<T>()` | `decoder::decode_args::<T>(response.as_ref())` to preserve upstream defaults |
+| `response.candid::<T>()` | `decoder::decode_one_with_config::<T>(response.as_ref(), &config)` with explicit caller configuration |
+| `response.candid_tuple::<T>()` | `decoder::decode_args_with_config::<T>(response.as_ref(), &config)` with explicit caller configuration |
 
 Here `contract` and `decoder` are under `ic_platform::candid`. Existing callers
 using finite limits continue using the parent module's bounded helpers, including

@@ -211,9 +211,11 @@ its fail-fast ordering runs Clippy before tests. Documentation-only work uses
 For a selected package with all its features/targets, the existing lint leaf
 accepts `make clippy PLATFORM_CLIPPY_PACKAGES=ic-platform-runtime`; use direct
 Cargo arguments above when only a narrower feature selection is affected.
-`make check-upstream-scaffolding` applies the experimental packaging patches to
-disposable registry-source copies and checks source preservation and licenses.
-It performs no dependency adoption, publication or runtime qualification.
+The former upstream-scaffolding experiment runner is retired with native offline
+public-key derivation. Historical packaging proposals remain documented in the
+[migration contract](migration.md#scaffolding-only-packaging-qualification);
+they are not selected dependencies or current qualification commands.
+
 Consumer profiles are declared in
 [`platform-consumer-profiles.tsv`](../scripts/ci/platform-consumer-profiles.tsv):
 capability, test source basename,

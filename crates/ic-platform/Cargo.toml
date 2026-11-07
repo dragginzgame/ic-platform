@@ -72,7 +72,6 @@ signature-verification = [
     "dep:serde_cbor",
     "dep:ic-signature-verification",
 ]
-secp256k1 = ["principal-external", "dep:ic-secp256k1"]
 
 [dependencies]
 blake3 = { workspace = true, optional = true }
@@ -104,7 +103,6 @@ thiserror = { workspace = true, optional = true }
 candid_parser = { workspace = true, optional = true }
 ic-agent = { workspace = true, optional = true }
 ic-management-canister-types = { workspace = true, optional = true }
-ic-secp256k1 = { workspace = true, optional = true }
 ic-transport-types = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -140,16 +138,6 @@ required-features = ["cdk"]
 name = "runtime_consumer"
 path = "tests/runtime_consumer.rs"
 required-features = ["runtime"]
-
-[[test]]
-name = "secp256k1_consumer"
-path = "tests/secp256k1_consumer.rs"
-required-features = ["secp256k1"]
-
-[[test]]
-name = "secp256k1_identity"
-path = "tests/secp256k1_identity.rs"
-required-features = ["secp256k1"]
 
 [[test]]
 name = "bls_consumer"

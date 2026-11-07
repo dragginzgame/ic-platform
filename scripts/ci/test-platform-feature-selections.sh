@@ -49,7 +49,6 @@ done <<'MUTATIONS'
 .features.default = ["runtime"]
 .features.executor = []
 .features.cdk = []
-.features.secp256k1 = []
 .features.ic0 = ["dep:ic0"]
 (.dependencies[] | select(.name == "ic-management-canister-types")).req = "^0.11"
 (.dependencies[] | select(.name == "ic-management-canister-types")).target = null
@@ -140,9 +139,9 @@ fi
   (["candid,cdk,executor,ic0",
     "bls,ecdsa,ed25519",
     "cdk,certification,icrc-ledger-types,management-canister-types",
-    "agent,candid-parser,cdk,ic-protocol,secp256k1",
+    "agent,candid-parser,cdk,ic-protocol",
     "bls,canister-sig-creation,certification-cbor,ed25519,signature-verification",
-    ($f - ["agent","candid-parser","ic-protocol","ic-protocol-fixtures","secp256k1"] | join(","))] - $r | length) == 0
+    ($f - ["agent","candid-parser","ic-protocol","ic-protocol-fixtures"] | join(","))] - $r | length) == 0
 ' >/dev/null
 if "$jq" --arg mode typo --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-selections.jq "$fixture/features.json" >/dev/null 2>&1; then
     echo 'Unknown matrix mode was admitted' >&2; exit 1

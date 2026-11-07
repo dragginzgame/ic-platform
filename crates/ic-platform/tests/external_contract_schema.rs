@@ -175,9 +175,9 @@ mod tests {
         assert_ne!(canonical_bytes, old_bytes);
         // Upstream subtyping admits the old required field; that is not equal wire identity.
         assert_eq!(
-            ic_platform::candid::decoder::decode_one::<registry::GetSubnetForCanisterRequest>(
-                &old_bytes
-            )
+            ic_platform::candid::decoder::decode_one_with_config::<
+                registry::GetSubnetForCanisterRequest,
+            >(&old_bytes, &contract::DecoderConfig::new(),)
             .unwrap(),
             canonical
         );

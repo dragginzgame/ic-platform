@@ -120,10 +120,8 @@ candid-parser|candid_parser v0.4.1|pass
 none|ic-agent v0.49.2|reject
 agent|ic-agent v0.49.2|pass
 none|ic-secp256k1 v0.3.0|reject
-secp256k1|ic-secp256k1 v0.3.0|pass
-secp256k1||reject
-secp256k1|ic-secp256k1 v0.3.1|reject
-secp256k1|ic-secp256k1 v0.3.0 (/local)|reject
+agent|ic-secp256k1 v0.3.0|reject
+ecdsa|ic-secp256k1 v0.3.0|reject
 none|pocket-ic v16.1.0|reject
 none|ic-testkit v0.54.0|reject
 none|ic-testkit-candid v0.53.0|reject
@@ -225,7 +223,7 @@ for package in 'pocket-ic v16.1.0' 'ic-platform-pocket-ic v0.1.12 (/fixture)' 'i
 done
 echo 'Retired PocketIC client refuses in native and Wasm graphs'
 # Native host selections cannot authorize entropy dependencies in a Wasm graph.
-for selection in agent candid-parser secp256k1; do
+for selection in agent candid-parser; do
     printf 'getrandom v0.2.17\n' > "$fixture/wasm32-unknown-unknown-entropy.txt"
     printf '%s\tentropy\n' "$selection" > "$fixture/mapping"
     if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \

@@ -45,7 +45,6 @@ ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
 ic-canister-sig-creation = { version = "1.3.1", default-features = false }
 ic-certification = { version = "3.2.0", default-features = false, features = ["serde"] }
 ic-management-canister-types = "=0.11.0"
-ic-secp256k1 = "=0.3.0"
 ic-signature-verification = { version = "0.3.0", default-features = false }
 ic-transport-types = "0.49.1"
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
