@@ -29,9 +29,10 @@ Evidence: `target/complexity-cleanup/`; installed fixtures
 Planner/recovery fixtures substitute product stage bodies; installed checks use
 the prepared real Testkit server. No full release gate, fresh macOS/Profiler
 acceptance, publication or matched size/performance improvement is claimed.
-Runtime 0.20 release qualification will need a compatible immutable Timers supplier;
-current tests qualify the local 0.19.5 owner with the macro changes, not a published
-0.20 cohort. Types/browser and the independent lock draft remain untouched.
+Source is pushed as `5688667`; no release batch or upload has started. Runtime
+0.20 needs an immutable Timers supplier accepting it (current pin: <0.20).
+Approval to prepare/push that Scheduling qualification branch is pending;
+its dirty working files stay untouched. Current tests use the 0.19.5 local owner.
 
 Adopted committed Shared `b2026a118e38de4af1555c527af327cb604eacdf` through the
 canonical exporter after impact review; all 141 payloads match. Local overlay
@@ -102,12 +103,9 @@ logs `validation.Oc5mXN`, copied under the deployment evidence's `qualification/
 
 Release gates used committed Candid/derive 0.10.39, cc 1.11.0 and SmallVec 1.16.4;
 focused pre-release checks separately passed with the deferred newer versions.
-The release commit's [CI](https://github.com/dragginzgame/ic-platform/actions/runs/42365548736),
-[installed Runtime](https://github.com/dragginzgame/ic-platform/actions/runs/42365548756),
-browser, Wasm and advisory jobs were in progress at observation. They remain
-asynchronous; no fresh macOS or native Profiler acceptance is claimed. The source
-commit's hosted browser and Wasm comparisons passed. Recorded observations are in
-`{source,release}-hosted-observation.json` beside deployment evidence.
+Hosted observations for that release are in `{source,release}-hosted-observation.json`
+beside deployment evidence. Its source browser/Wasm comparisons passed; other jobs
+were pending at observation. No fresh macOS/native Profiler acceptance is claimed.
 
 ## Deferred dependency draft
 
