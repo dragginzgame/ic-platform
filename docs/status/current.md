@@ -1,110 +1,95 @@
 # Current handoff — 2026-11-07
 
-## Local audit improvements awaiting delivery
+## Audit improvements deployed
 
-The maintainer requested deployment of the reviewed audit improvements and Shared
-0.31.1 repair. Deliver Runtime/macros/guard **0.19.5**, then Platform **0.23.6**,
-through one Shared patch/publication batch to `origin/main` and crates.io. Types
-**0.18.2** and browser **0.2.0** are unaffected. Current package metadata is still
-Platform 0.23.5 / Runtime 0.19.4 until the standard runner prepares each group.
-Retain the independent lock draft durably, exclude it from captured source and
-restore it over delivered owner versions only after batch reconciliation. Full
-local release gates are required; development checks below are not their receipt.
+The reviewed audit batch and Shared 0.31.1 repair are published on crates.io and
+GitHub. Shared schema-2 batch `batch-U1NhGrpl` completed both groups in order from
+source `2e3a54f2d6531be8800ce031e2fd71a3fdad6cb8`; normal main is reconciled.
 
-Release lock/source-roster readers now fail closed on failed, partial or empty
-observations. Adjacent release fields share one admitted plan per command, with
-fresh later admission; preparation fixtures parse unchanged catalogs once.
-Publication carries its admitted package selection to Clippy, preserving the full
-release gate. Relevant main pushes trigger the existing matched Wasm comparison.
-The earlier three-group real-editor rollback/retry/Git-resume fixture passed in
-435 seconds with product gates substituted; its logs were subsequently cleaned.
+| Group | Published version / annotated tag | Release commit |
+| --- | --- | --- |
+| Runtime/macros/guard | 0.19.5 / runtime-v0.19.5 | `c07b714fad92d7c19206427a2bc81c99d61f2dba` |
+| Platform | 0.23.6 / platform-v0.23.6 | `51f5fbb7c53000fbb6f7bc3219ee3c2978c08521` |
 
-Executor interior removal retains stable Vec order while locating each task once
-and bulk-shifting its tail. The unused private null-context entry is removed;
-null method IDs, migratory wake routing and generation checks remain. Five System
-API readers now share one private all-or-trap spare-capacity copy; length becomes
-visible only after full initialization. UTF-8 admission, absence and traps remain.
-Candid admission stores child references in one buffer, preserving traversal,
-unused/skipped-value inspection, quotas and the fixed 16-level ceiling. Crypto,
-public signatures, dependencies and canonical identities are unchanged.
+All four downloaded registry archives are non-yanked, match registry checksums
+and record their exact clean release commit. Remote annotated tag objects and
+peeled commits match. Evidence: `target/deployment-audit-20261107/`, including
+`registry/verified.tsv`, `batch-complete.json`, `release.log` and `reconcile.log`.
+Types **0.18.2** and browser **0.2.0** remain unchanged. No sibling source or
+release was taken over; Storage and Tooling remain with their other sessions.
 
-## Current focused evidence
+Each group passed all **20** local release stages on Rust 1.99.1, including full
+lint/tests/docs, native/Wasm consumers and feature graphs, source/ABI/license
+checks and installed owner/Timers raw/prepared Wire/external-Candid profiles.
+Canonical candidate receipts are under `target/release-frozen/batch-U1NhGrpl/target/release-validation/`:
+Runtime `qualification.1XHqxr`, Platform `qualification.D0ws9t`. Copies remain in
+`target/deployment-audit-20261107/{runtime,platform}-qualification/`.
 
-Fresh evidence is under `target/evidence/platform-audit-followup/`. Its baseline
-reconstructs the starting source while retaining the earlier executor removal
-improvement (verified source SHA-256 `53e3f13240ddad4a250da9f704e80e460b6e04ca18ab347a437384d66fbdc615`).
-Both arms use identical probes, compiler 1.99.1, external locks and `3-fat-1`.
-The zero-growth comparison passes for total uncompressed and code sections:
+Hosted checks continue asynchronously. At the recorded observation, the delivered
+source's [Wasm comparison](https://github.com/dragginzgame/ic-platform/actions/runs/42358426521)
+passed; [CI](https://github.com/dragginzgame/ic-platform/actions/runs/42358426580),
+installed Runtime, browser and advisory jobs were in progress. No fresh macOS
+acceptance is claimed; hosted/native results are separate from the Linux receipts.
+The native-host reuse allowlist remains empty, so actual releases retain full gates.
+#50 remains upstream-dependent and excluded from this work; no waiver was added.
 
-| Optimized probe | Total bytes before → after | Code bytes before → after |
-| --- | ---: | ---: |
-| Runtime | 38,741 → 38,713 | 32,776 → 32,748 |
-| System readers | 29,005 → 28,920 | 22,605 → 22,520 |
-| External Candid | 609,093 → 608,721 | 556,109 → 555,707 |
-| Candid admission | 29,636 → 29,436 | 26,723 → 26,493 |
+## Supplied changes and measurements
 
-Installed measurement saves 1,227 instructions per 1,111-byte certificate read
-and 249 per 133-byte root-key read. Wide 1,024-type admission falls from 1,241,774
-to 695,195 instructions; simple recursive refusals cost 161 extra instructions.
-Exercised acceptance/error outcomes match; the driver compares root-key bytes
-against Testkit's explicitly selected NNS key. These are probes, not fleet gains.
+Lock/source-roster readers fail closed on failed, partial or empty observations.
+Release fields share one admitted plan per command, with fresh later admission;
+publication carries its package selection to Clippy. Relevant main pushes run
+matched Wasm comparisons. Runtime retains stable Vec cancellation order with bulk
+tail shifting and removes the unused private null-context entry. Five System API
+readers share one reviewed all-or-trap spare-capacity copy. Candid admission uses
+one child-reference buffer, preserving traversal, quotas and the 16-level ceiling.
+Cryptographic implementations, public signatures and canonical identities remain.
 
-Runtime and Candid focused Clippy pass; each selected native library passes 21
-tests with one benchmark ignored. Source/license/ABI/callback guards and failed,
-partial, empty and malformed roster refusal checks pass. Installed owner profiles
-pass raw/prepared calls with Wire/external Candid, including awaits, callback traps,
-cancellation, upgrades, stable rollback, certificates and nesting admission.
-Matching Timers composition profiles pass the same four installed selections.
-Full CI, macOS and native Profiler qualification are outside this task.
-Documentation/format checks pass.
+Matched experimental evidence is at `target/evidence/platform-audit-followup/`:
+identical probes/compiler/external locks and `3-fat-1`. Those comparisons used the
+independent dependency draft below; release gates used the committed release lock.
+Optimized total uncompressed/code bytes decreased respectively: Runtime **28/28**,
+System readers **85/85**, external Candid **372/402**, Candid admission **200/230**.
+A 1,111-byte certificate read saved 1,227 instructions; a 133-byte root-key read
+saved 249. Wide 1,024-type admission fell 1,241,774 → 695,195 instructions; simple
+recursive refusals cost 161 extra. Exercised acceptance/error outcomes matched.
+These are probe measurements, not application fleet gains. Earlier FIFO cancellation
+measurements and their 347-byte Runtime saving remain in the owning release ledger.
 
-The independent Cargo.lock draft (Candid/derive 0.10.40, cc 1.11.1 and SmallVec
-1.16.5) is unchanged, SHA-256
-`8fa03623313c4866557072e88365b73c6ee05488b1a06417898ddd55881af070`.
-Keep it separate from delivered qualification; never restore an old whole lock
-onto newer owner versions. The pinned metadata editor remains ic-build 0.73.0.
+## Independent dependency draft
 
-## Cleanup and evidence custody
+The normal lockfile again contains only the original external dependency patch:
+Candid/derive **0.10.40**, cc **1.11.1**, SmallVec **1.16.5**. It was updated during
+the frozen batch without changing release inputs. The exact patch was restored
+over Platform 0.23.6 and Runtime/macros/guard 0.19.5 after reconciliation; normalized
+before/after diffs match. Current restored lock SHA-256:
+`a683f1fe9cc23a1cd03f5f7c65297ab431338a6b30cfd00c8c50922fc057138f`.
+Original custody is `refs/retained/audit-deploy-20261107-lock-draft`; its original
+lock hash is `8fa03623313c4866557072e88365b73c6ee05488b1a06417898ddd55881af070`.
+Original/restored patches are alongside publication evidence. Never restore an
+old whole lock over delivered owner versions. Do not treat this draft as released.
 
-External cleanup removed the complete `target/` during this task, including old
-release receipts, first comparison artifacts and reproducible Runtime 0.18.1
-binaries. The maintainer confirmed cleanup stopped; the affected current evidence
-above was regenerated afterward. Earlier dated successes remain observations,
-not available raw receipts. No evidence was deleted by this session. Cargo cleanup
-can reclaim target state; preserve active receipts/logs while recovery needs them.
-
-The completed Platform batch's durable state still exists at
-`.git/release-state/frozen/batch-hEX13lnF`; it has not been retired. Earlier retained
-refs and the interrupted unpublished 0.23.1 journal remain untouched. Approved
-historical archives/bundles and custody receipts remain outside target at
-`recovery-evidence/retired-checkouts/20261104-issue139/`; maintainer review remains
-due **2026-12-04**. Retention refuses expiry/excess without automatic cleanup.
-
-## Baseline, deliveries and host limits
+## Baseline and retained custody
 
 Shared **0.31.1** at `5efbda2ab81ad84e30f490f3137d8ef083c303d2` is adopted through
-the canonical exporter. VERSION/changelog say 0.31.1; the commit title says 0.31.2.
-All 141 payloads were verified. Its Bash 3.2 checksum-parser repair and Platform's
-portable batch-qualifier digest calls remain local and unpublished. Supplier
-macOS ARM/Intel setup/native reuse passed, but its broader portable suite failed
-at `test-release-editor-setup.sh`; see [the supplier run](https://github.com/dragginzgame/shared-tooling/actions/runs/42274707843).
-No fresh Platform macOS acceptance is claimed. #50 awaits upstream and is excluded.
+the canonical exporter; both release gates verified all 141 payloads. VERSION and
+changelog say 0.31.1; the commit title says 0.31.2. Its Bash 3.2 checksum-parser
+repair and the portable Platform qualifier are delivered. The earlier supplier
+macOS setup/native reuse passed, but its broader portable suite failed at
+`test-release-editor-setup.sh`; [that historical supplier run](https://github.com/dragginzgame/shared-tooling/actions/runs/42274707843)
+is not fresh Platform macOS acceptance. The pinned metadata editor is ic-build 0.73.0.
 
-| Group | Published version / tag | Release commit |
-| --- | --- | --- |
-| Platform | 0.23.5 / platform-v0.23.5 | `64a52fcf79749f30bcc7715a0f6b0c95bcae49ec` |
-| Runtime/macros/guard | 0.19.4 / runtime-v0.19.4 | `8ec8a395a54998bca3e995ea1a78c07e9977eff0` |
-| Types | 0.18.2 / types-v0.18.2 | `5eeb016469b15de9bdf9f4d2092a8dbff8ea4d21` |
+External cleanup removed all target state during implementation. The maintainer
+confirmed cleanup stopped, and current focused/release evidence was regenerated.
+Earlier target receipts, first comparison artifacts and reproducible Runtime
+0.18.1 binaries are gone; older successes remain dated observations. No evidence
+was deleted by this session. Preserve active receipts/logs while recovery needs them.
 
-These were verified on crates.io and GitHub with archive/checksum/VCS/tag proofs.
-Each latest Platform/Runtime delivery passed all 20 local release stages before
-cleanup. Hosted Linux/runtime/browser passed for Platform 0.23.5; both macOS jobs
-failed at the old checksum parser before validation; see [the delivered CI run](https://github.com/dragginzgame/ic-platform/actions/runs/42266799710).
-Runtime 0.19.4 explicitly supersedes the earlier stable64_read_uninit exclusion.
-Storage and Tooling work belong to their other sessions; no sibling is edited here.
-
-Future authorized delivery uses the [batch lifecycle](../platform-release-validation.md#commands-and-effects)
-and affected groups. The native-host reuse allowlist remains empty: real releases
-retain full gates. Root evidence does not qualify the independent native Profiler
-provider; its [paired Linux evidence](../audits/native-profiler-140-2026-11-05.md)
-remains historical, with macOS/Bazel unqualified.
+Completed batches `batch-U1NhGrpl` and `batch-hEX13lnF` retain durable Git/journals
+under `.git/release-state/frozen/`; neither was retired. Earlier retained refs and
+the interrupted unpublished 0.23.1 journal remain untouched. Historical archives,
+bundles and receipts remain at `recovery-evidence/retired-checkouts/20261104-issue139/`;
+maintainer review is due **2026-12-04**. Retention refuses expiry/excess without
+automatic cleanup. Future authorized delivery uses the [batch lifecycle](../platform-release-validation.md#commands-and-effects).
+Root evidence does not qualify the separate native Profiler provider; its
+[paired Linux evidence](../audits/native-profiler-140-2026-11-05.md) remains historical,
+with macOS/Bazel unqualified.
