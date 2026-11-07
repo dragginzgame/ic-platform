@@ -68,7 +68,10 @@ group, baseline, compiler/tool/server/environment and release-destination bindin
 Receipts cannot admit an omitted stage or a failed/incomplete run.
 
 Prepared metadata is the only admitted source projection. The adapter checks its
-exact semantics, while receipt recovery reconstructs immutable original source
+exact semantics and resolves qualification locks offline from their maintained
+selections before installing metadata. A native supplier may retain a preceding
+inactive registry owner after a minor bump; prepared canister graphs still require
+the sole current executor. Receipt recovery reconstructs immutable original source
 from Git and verifies all retained evidence. Source edits, staged/untracked files,
 changed policy, environment/server drift, relocated receipts and altered logs or
 checkpoints refuse. Recovery does not rerun product stages or rewrite old runner
@@ -78,7 +81,8 @@ source/tooling and must not be reinterpreted under this implementation.
 ## Focused qualification owners
 
 - `test-platform-group-preparation.sh` checks real preparation failure/rollback,
-  retry, guard pins, other-group custody, qualification locks and publication
+  retry, guard pins, other-group custody, real offline qualification-lock resolution,
+  post-version graph admission and publication
   selectors for all three groups. Runtime, with coordinated macros and exact
   guard, supplies the one complete local commit/tag/push/resume integration cycle.
 - `test-platform-validation-plan.sh` checks full rosters, failures, interruption,

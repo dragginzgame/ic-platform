@@ -45,6 +45,11 @@ render_platform_metadata() {
         if [[ "$RELEASE_GROUP" == runtime ]]; then
             bash scripts/release/runtime-pin.sh prepare "$RELEASE_PREVIOUS" || exit
         fi
+        # A minor owner bump may leave a native supplier needing the preceding
+        # registry owner. Preserve foreign pins; resolve that distinction offline
+        # inside the transaction before installing either qualification lock.
+        CARGO_NET_OFFLINE=true bash scripts/ci/check-platform-runtime.sh --refresh-lock || exit
+        CARGO_NET_OFFLINE=true bash scripts/ci/check-platform-runtime.sh --timers --refresh-lock || exit
         # Match the normal commit hook before the transaction binds candidate
         # bytes. The metadata editor can compact arrays that cargo-sort expands.
         cargo sort --workspace --grouped || exit

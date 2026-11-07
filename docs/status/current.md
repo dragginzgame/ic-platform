@@ -6,21 +6,29 @@ Requested publication selects Runtime **0.20.0** (Runtime/macros/exact guard), t
 Platform **0.25.0**, to crates.io and `origin/main` with annotated group tags.
 Types **0.18.2** and browser **0.2.0** remain unchanged. No new package upload,
 release commit or tag has happened yet. Source preparation is pushed through
-`5a8cf86b5f08e4c706fdaa2d16091537a741196d`.
+`a13f2974e1944127ce327fe32cf76ccb771c832f`; metadata-workflow corrections follow.
 
 First frozen batch `batch-d_fzxuMA` stopped during `check-consumer`, before version
 preparation: its admission fixture still selected the removed facade `cdk` profile.
-The normal-tree fix uses the retained runtime/external-Candid profiles and keeps
-final Cargo failure and concurrent-edit propagation tests. Its focused admission
-and shell lint pass. Start a fresh batch from the corrected committed source;
-never edit or relabel the failed immutable candidate. Evidence and the failed
-batch remain at `target/deployment-platform0250-runtime0200-20261107/`,
-`target/release-frozen/batch-d_fzxuMA/` and its durable Git/recovery store.
+The committed fix uses current runtime/external-Candid profiles and retains final
+Cargo failure/concurrent-edit tests. Focused admission and shell lint pass.
 
-That attempt passed its first 15 local stages, including Clippy, browser, provenance,
-release commands, package tests and docs. Those passes do not constitute a release
-receipt. All **20** stages remain mandatory in the next batch. Hosted integration
-and native CI remain asynchronous; no fresh macOS/Profiler acceptance is claimed.
+Second batch `batch-TC9AK4RR` passed all **20** stages, but post-version graph
+admission refused the mechanically rewritten fixture lock. Native Testkit's old
+facade still needs an inactive registry Runtime 0.19.5 record after the local
+owner moves to 0.20. No second executor is enabled. The saved plan remains at
+`prepare`; prepared metadata, source and receipt are retained without reinterpretation.
+Both attempts remain under `target/release-frozen/` and durable frozen Git stores.
+
+The correction resolves locks offline from their maintained selections inside
+the metadata transaction. Real Runtime 0.20 preparation, rollback, post-version
+graphs and delivery/resume pass at `target/platform-group-preparation.zzxUOi/`.
+Foreign versions/checksums stay pinned. The fixture now uses real graph admission
+and the shared changelog validator to select a pending increment or default patch,
+avoiding an unqualified future Runtime minor after publication. Evidence:
+`target/deployment-platform0250-runtime0200-20261107/`. Start a fresh batch from
+the corrected committed source; all 20 stages remain mandatory. Hosted/native CI
+remains asynchronous; no fresh macOS/Profiler acceptance is claimed.
 
 ## Current source contract and qualification supplier
 

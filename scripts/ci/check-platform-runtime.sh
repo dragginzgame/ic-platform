@@ -100,7 +100,6 @@ printf '%s\n' "$mode" > "$fixture/operation"
 {
     "$root/.tools/host/bin/rg" --files crates scripts/fixtures/cdk-runtime | sed "\|^scripts/fixtures/cdk-runtime/Cargo.lock$|d"
     printf '%s\n' Cargo.toml rust-toolchain.toml .cargo/config.toml scripts/ci/check-platform-runtime.sh scripts/ci/check-platform-compiler.sh scripts/ci/read-platform-msrv.sh "$lock"
-    if [[ "$mode" == --refresh-lock ]]; then printf '%s\n' Cargo.lock; fi
 } | LC_ALL=C sort -u > "$fixture/input-files"
 source_fingerprints() {
     perl -MDigest::SHA -ne '
@@ -109,7 +108,13 @@ source_fingerprints() {
     ' "$fixture/input-files"
 }
 source_fingerprints > "$fixture/source.sha256"
-git rev-parse HEAD > "$fixture/source-revision"
+if [[ "$mode" == --refresh-lock ]]; then
+    # Metadata rendering also runs from an uncommitted source archive. A lock
+    # refresh is preparation, never installed/release qualification evidence.
+    printf 'not-qualified: lock refresh\n' > "$fixture/source-revision"
+else
+    git rev-parse HEAD > "$fixture/source-revision"
+fi
 rustc -vV > "$fixture/compiler.txt"
 finish_runtime() {
     local result=$?
@@ -134,9 +139,9 @@ trap finish_runtime EXIT
 # Preparation modes may resolve/fetch only as explicitly requested. Qualification
 # below this phase uses the maintained lock and admits graphs before compiling.
 if [[ "$mode" == --refresh-lock ]]; then
-    # Explicitly rebase on the production lock, resolving the test-only additions.
-    # Ordinary validation never resolves or rewrites the maintained selection.
-    cp Cargo.lock "$fixture/Cargo.lock"
+    # Preserve the maintained foreign selections while resolving necessary
+    # manifest/owner changes. Ordinary validation never rewrites this lock.
+    cp "$lock" "$fixture/Cargo.lock"
     cargo metadata --manifest-path "$fixture/Cargo.toml" --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
     cp "$fixture/Cargo.lock" "$lock"
     printf 'Review the refreshed qualification lock: %s\n' "$lock"

@@ -481,7 +481,12 @@ remain in `target/cdk-runtime.*`. Normal runs use the maintained frozen selectio
 in `scripts/fixtures/cdk-runtime/Cargo.lock` (owner) or
 `scripts/fixtures/timers-runtime/Cargo.lock` (composition). Prefix the runtime
 script's mode with `--timers` to select composition; explicit `--refresh-lock` is a
-reviewed dependency refresh, not normal validation. `--build-only` compiles both
+reviewed dependency refresh that preserves existing foreign pins and resolves
+necessary manifest changes, not normal validation. Release metadata rendering
+runs that same operation offline inside its transaction; the native Testkit
+supplier may retain an inactive registry Runtime after a minor owner bump.
+Prepared graph checks still require the sole enabled canister executor.
+`--build-only` compiles both
 protocol selections without starting a server. Runtime qualification remains an
 explicit target outside local full CI. Native macOS and live IC are separate
 qualification from Linux PocketIC or Wasm compilation.

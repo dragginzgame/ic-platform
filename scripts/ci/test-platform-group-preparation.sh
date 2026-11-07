@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Real metadata/editor and Git delivery in disposable repositories. The fixture
-# substitutes tool installation and CI/runtime qualification; it is not a release gate.
+# substitutes tool installation and CI/installed qualification; lock resolution and
+# prepared-graph admission remain real. It is not a release gate.
 set -euo pipefail
 unset RELEASE_GROUP RELEASE_COMMIT RELEASE_SOURCE IC_PLATFORM_RELEASE_PREPARE
 case "$#:${1:-all}" in
@@ -60,13 +61,8 @@ cat > "$fixture/source/scripts/release/validation-gate.sh" <<'GATE'
 #!/usr/bin/env bash
 [[ $# == 1 && "$1" == check ]]
 GATE
-# Preserve the real Make/adapter environment and test its prepared-graph routing.
-# Runtime resolution and installed behavior have their own qualification paths.
-cat > "$fixture/source/scripts/ci/check-platform-runtime.sh" <<'RUNTIME'
-#!/usr/bin/env bash
-set -euo pipefail
-[[ $# == 3 && "$1" == --timers && "$2" == --prepared-call && "$3" == --check-graph ]]
-RUNTIME
+# Preserve real offline lock resolution and post-version graph admission. The
+# former success stub missed native suppliers retaining an older registry owner.
 # Inject failure after Shared renders core metadata, inside the consumer's outer
 # transaction. The real checkout must retain every original byte.
 mv "$fixture/source/scripts/release/runtime-lock.sh" "$fixture/source/scripts/release/runtime-lock-implementation.sh"
@@ -90,10 +86,18 @@ for group in "${groups[@]}"; do
     printf '/.tools\n' >> .git/info/exclude
     export RELEASE_GROUP="$group"
     previous="$(bash scripts/release/group.sh version)"
-    kind=minor
-    [[ "$group" != types ]] || kind='patch'
-    next="$(perl scripts/ci/validate-release-inputs.pl next-version "$previous" "$kind")"
     ledger="$(bash scripts/release/group.sh changelog)"
+    # Exercise the current pending batch, or a patch when no draft exists. Do
+    # not invent the next breaking Runtime/Timers cohort after one is released.
+    admitted_kind=false
+    for kind in patch minor major; do
+        next="$(perl scripts/ci/validate-release-inputs.pl next-version "$previous" "$kind")"
+        if bash scripts/ci/check-release-changelog.sh "$next" "$previous" "$(date -u +%F)" "$ledger" > "$fixture/$group-kind.log" 2>&1; then
+            admitted_kind=true
+            break
+        fi
+    done
+    [[ "$admitted_kind" == true ]] || { cat "$fixture/$group-kind.log" >&2; exit 1; }
     awk -v version="$next" '!done && /^## \[/ {print "## [" version "]"; done=1; next} {print}' "$ledger" > "$fixture/ledger"
     cp "$fixture/ledger" "$ledger"
     git add .
@@ -137,14 +141,21 @@ for group in "${groups[@]}"; do
     else
         git diff --exit-code -- ci/dependency-pinning-exceptions.json
     fi
-    # Reversing only selected identities must reproduce both lockfiles exactly,
-    # including supplier records and dependency references.
+    # Preserve every foreign version/checksum. A minor bump may additionally
+    # require the preceding selected owner as an inactive registry dependency.
+    members="$(bash scripts/release/group.sh members)"
+    selected_members="$(printf '%s\n' "$members" | jq -R 'split(" ")')"
     for lock in scripts/fixtures/{cdk-runtime,timers-runtime}/Cargo.lock; do
-        git show "HEAD:$lock" > "$fixture/lock-before"
-        members="$(bash scripts/release/group.sh members)"
-        # shellcheck disable=SC2086 # Group roster is space-delimited package names.
-        "$editor" --max-input-bytes "$PLATFORM_RELEASE_EDITOR_MAX_BYTES" lock "$lock" "$next" "$previous" $members > "$fixture/lock-restored"
-        cmp "$fixture/lock-before" "$fixture/lock-restored"
+        git show "HEAD:$lock" | yq -p toml -o json '.' |
+            jq '[.package[] | select(.source != null) | del(.dependencies)]' > "$fixture/foreign-before.json"
+        yq -p toml -o json '.' "$lock" |
+            jq '[.package[] | select(.source != null) | del(.dependencies)]' > "$fixture/foreign-after.json"
+        jq -e --slurpfile before "$fixture/foreign-before.json" \
+            --arg previous "$previous" --argjson members "$selected_members" '
+            (($before[0] - .) | length) == 0 and
+            all((. - $before[0])[];
+                .version == $previous and (.name as $name | $members | index($name)) != null)
+        ' "$fixture/foreign-after.json" > /dev/null
     done
     # Use real prepared metadata when group versions differ; the selected batch
     # must use each package's own identity, never the facade's workspace version.

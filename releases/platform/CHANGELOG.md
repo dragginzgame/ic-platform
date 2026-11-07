@@ -21,6 +21,10 @@ See also the [Types ledger](../types/CHANGELOG.md).
   running the complete metadata-fixture delivery/recovery cycle once, for Runtime.
 - Pin the immutable Timers qualification source that also accepts Runtime 0.20,
   retaining the existing implementation and all installed composition checks.
+- Resolve qualification locks offline inside metadata preparation, preserving
+  foreign selections and necessary inactive registry owners across minor bumps.
+  Exercise actual post-version graphs in the preparation fixture, and retain
+  consumer failure/concurrent-edit checks with the current admission profiles.
 
 ### 🔧 Tooling
 
