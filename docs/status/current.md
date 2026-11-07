@@ -1,5 +1,70 @@
 # Current handoff — 2026-11-07
 
+## Platform 0.25.1 release preparation (#148–#150)
+
+Shared **0.31.6** at `84b52d14a9082eca0c43db807f649ddf8a74f02c` is now
+adopted through the canonical exporter: **145** verified payloads, including the
+new pure-hashing policy and exact-input stage runner/sealer entrypoints.
+The maintainer authorized Platform **0.25.1** delivery to GitHub and crates.io.
+Release preparation is in progress; the published identities below remain the
+last verified versions until batch/registry reconciliation. Runtime, Types and
+browser have no pending increment.
+
+[#148](https://github.com/dragginzgame/ic-platform/issues/148): native Runtime,
+Agent, BLS and ECDSA fixtures select published **Testkit 0.92.0**. Each owns one
+Tokio runtime, awaits network/lifecycle operations, uses an explicit finite
+60-second client request budget and awaits instance teardown. Startup remains
+separately bounded. Catalog/template generators and both maintained qualification
+locks agree and each loses 47 package entries; source and protocol assertions remain unchanged. Native fixture-only
+dependencies do not enter production Wasm graphs.
+
+Focused Linux/Rust 1.99.1 evidence under `target/issues148-150/`:
+
+- Owner raw: `target/cdk-runtime.T4GaI3`; Timers raw:
+  `target/cdk-runtime.DEbia1`.
+- Owner raw/prepared: `target/cdk-runtime.HcepQ3`; Timers raw/prepared:
+  `target/cdk-runtime.MiWx4c`. Each covers Wire and external Candid, graph
+  admission, driver Clippy/six tests and installed behaviour; all status files are 0.
+- Agent Clippy and installed signed query/update/read-state/wrong-root refusals
+  passed for Ed25519, delegated, P-256 and secp256k1 identities
+  (`target/agent-installed.tDElpF`). Both benchmark native drivers pass Clippy;
+  their historical performance experiments were not rerun.
+- Snapshot, links, pins, inventory, boundary, lock identity, standalone formatting
+  and changed-script ShellCheck passed. No blanket fleet gate was run.
+
+[#149](https://github.com/dragginzgame/ic-platform/issues/149): only the bounded
+release-plan/recovery policy fixtures can reuse Shared exact-input proofs on
+Linux x86_64. All 20 required parent stages, real package-version/native/archive
+checks and per-group source/index/metadata custody remain. Schema-4 receipts seal
+fresh leaf admissions and original proof/log identities; schema-3 recovery retains
+its original semantics. The actual-leaf activation harness passed at
+`target/release-plan-test.WBLEAT` (`target/issues148-150/stage-reuse-qualified.log`).
+Five successful group receipts retain 20/20 parent stages each: three executed
+leaves and two reuses. Exact-match execution/admission took 133.19s versus 16.43s
+(116.76s saved for this leaf); changed source/tools forced execution. Missing or
+altered evidence refused, failures retained primary status 27/143 with no receipt,
+and recovery reused the original intact proof. The other product stages and
+metadata are substitutes, not current product/native macOS acceptance. Structured
+results are in `target/issues148-150/reuse-qualified-summary.json`. Prior real
+Runtime/Platform gates took 1,049s/833s, including 481s/500s for the whole
+release-command stage; those totals are repeated cost, not reusable savings.
+
+[#150](https://github.com/dragginzgame/ic-platform/issues/150): the new policy is
+installed. Wire removed its unused activation at `72ab905`. IcyDB Core, SQL
+helpers and the independent integration workspace still import the facade at the
+last read-only observation; IcyDB #631 belongs to another session. Preserve the
+forwarder until those callers migrate, following policy → consumers → removal.
+`target/issues148-150/blake3-callers.txt` records the observed paths. No sibling
+source or release was changed here.
+
+The separate root Cargo.lock draft now also includes arc-swap **1.9.4**, alongside
+Candid/derive 0.10.40, cc 1.11.1 and SmallVec 1.16.5. It remains excluded from this
+release. Deployment-start SHA-256:
+`ca4c45c0e5e60b15f07d12b3f7b331a0fe237cf590f7bd16d1d1ce252fec0c50`.
+`target/deployment-platform0251-20261107/` retains its bytes and external-only
+patch; the earlier task-start lock remains under `target/issues148-150/`.
+No new full release gate, publication, native macOS or Profiler evidence is claimed.
+
 ## Runtime 0.20.0 and Platform 0.25.0 deployed
 
 Both groups are published on crates.io and GitHub, delivered through Shared's
@@ -74,9 +139,9 @@ browser, Wasm and advisory jobs were in progress at the single final observation
 see `hosted-observation.json` in deployment evidence. Do not wait solely for that
 matrix. No fresh macOS or native Profiler/Bazel acceptance is claimed.
 
-Shared **0.31.5** at `b2026a118e38de4af1555c527af327cb604eacdf` is the adopted
-baseline and latest remote main observed during this task. The canonical exporter
-verified all 141 payloads. The metadata editor remains ic-build 0.73.0.
+The two publications used Shared **0.31.5** at
+`b2026a118e38de4af1555c527af327cb604eacdf`, with all 141 payloads verified.
+The current local adoption is recorded above. The metadata editor remains ic-build 0.73.0.
 
 ## Deferred draft and recovery custody
 

@@ -208,8 +208,7 @@ check-release-commands:
 	bash scripts/ci/test-platform-frozen-setup.sh
 	bash scripts/ci/test-platform-group-projection.sh
 	bash scripts/ci/test-platform-ci-selection.sh
-	bash scripts/ci/test-platform-validation-plan.sh
-	bash scripts/ci/test-platform-validation-recovery.sh
+	bash scripts/release/check-policy-fixtures.sh
 	bash scripts/ci/test-platform-release-groups.sh
 	bash scripts/ci/test-platform-group-preparation.sh
 	bash scripts/release/test-editor-bootstrap.sh

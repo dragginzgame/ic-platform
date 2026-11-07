@@ -11,7 +11,7 @@ const LIMITS: candid::DecodeLimits = candid::DecodeLimits {
     type_entries: 128,
     header_bytes: 8192,
 };
-fn observed(pic: &PocketIc, id: Principal) -> u64 {
+async fn observed(pic: &PocketIc, id: Principal) -> u64 {
     let bytes = pic
         .query_call(
             id,
@@ -19,13 +19,15 @@ fn observed(pic: &PocketIc, id: Principal) -> u64 {
             "external_observed",
             b"DIDL\0\0".to_vec(),
         )
+        .await
         .unwrap();
     candid::decode_exactly_one(&bytes, LIMITS).unwrap()
 }
-pub fn qualify(pic: &PocketIc, id: Principal) {
+pub async fn qualify(pic: &PocketIc, id: Principal) {
     let args = contract::encode_one(7u64).unwrap();
     let reply = pic
         .update_call(id, Principal::anonymous(), "external_effect", args)
+        .await
         .unwrap();
     assert_eq!(
         candid::decode_exactly_one::<u64>(&reply, LIMITS).unwrap(),
@@ -39,9 +41,10 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
     ] {
         assert!(
             pic.update_call(id, Principal::anonymous(), "external_effect", bytes)
+                .await
                 .is_err()
         );
-        assert_eq!(observed(pic, id), 7);
+        assert_eq!(observed(pic, id).await, 7);
     }
     for (method, bytes) in [
         ("external_no_work", contract::encode_one(8u64).unwrap()),
@@ -57,16 +60,18 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
     ] {
         assert!(
             pic.update_call(id, Principal::anonymous(), method, bytes)
+                .await
                 .is_err()
         );
-        assert_eq!(observed(pic, id), 7);
+        assert_eq!(observed(pic, id).await, 7);
     }
     let denied = pic
         .update_call(id, Principal::anonymous(), "external_denied", vec![0; 1025])
+        .await
         .map_err(super::rejection)
         .unwrap_err();
     assert!(denied.reject_message.contains("fixture access refused"));
-    assert_eq!(observed(pic, id), 7);
+    assert_eq!(observed(pic, id).await, 7);
     assert!(
         pic.update_call(
             id,
@@ -74,9 +79,10 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             "external_encoding_trap",
             b"DIDL\0\0".to_vec()
         )
+        .await
         .is_err()
     );
-    assert_eq!(observed(pic, id), 7);
+    assert_eq!(observed(pic, id).await, 7);
     let tuple = pic
         .update_call(
             id,
@@ -84,6 +90,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             "external_tuple",
             contract::encode_args((8u64, true)).unwrap(),
         )
+        .await
         .unwrap();
     assert_eq!(
         candid::decode_args::<(u64, bool)>(&tuple, LIMITS).unwrap(),
@@ -96,6 +103,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             "external_zero",
             b"DIDL\0\0".to_vec(),
         )
+        .await
         .unwrap();
     assert_eq!(unit, b"DIDL\0\0");
     let null = pic
@@ -105,10 +113,12 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             "external_one_null",
             b"DIDL\0\0".to_vec(),
         )
+        .await
         .unwrap();
     assert_eq!(null, b"DIDL\0\x01\x7f");
     assert_eq!(
         pic.update_call(id, Principal::anonymous(), "external_legacy_empty", vec![])
+            .await
             .unwrap(),
         b"DIDL\0\0"
     );
@@ -119,6 +129,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             "external_composite",
             contract::encode_one(8u64).unwrap(),
         )
+        .await
         .unwrap();
     assert_eq!(
         candid::decode_exactly_one::<u64>(&composite, LIMITS).unwrap(),
@@ -131,6 +142,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             "external_random",
             b"DIDL\0\0".to_vec(),
         )
+        .await
         .unwrap();
     assert_eq!(
         candid::decode_exactly_one::<Vec<u8>>(&random, LIMITS)
@@ -152,6 +164,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
                 "external_nesting_probe",
                 contract::encode_one(nested(depth)).unwrap(),
             )
+            .await
             .unwrap();
         assert_eq!(
             candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
@@ -168,6 +181,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
                 "external_nesting_probe",
                 contract::encode_one(malformed).unwrap(),
             )
+            .await
             .unwrap();
         assert_eq!(
             candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
@@ -213,6 +227,7 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             "external_nesting_probe",
             contract::encode_one(header).unwrap(),
         )
+        .await
         .unwrap();
     assert_eq!(
         candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
@@ -225,9 +240,10 @@ pub fn qualify(pic: &PocketIc, id: Principal) {
             "external_nesting_effect",
             nested(8192)
         )
+        .await
         .is_err()
     );
-    assert_eq!(observed(pic, id), 7);
+    assert_eq!(observed(pic, id).await, 7);
     println!(
         "Typed iterative nesting refusal passed for the 8,202-byte trap input; handler effects remain unchanged"
     );

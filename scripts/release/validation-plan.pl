@@ -53,6 +53,15 @@ my $base = $baseline eq 'none' ? $source : capture('git','rev-parse','--verify',
 system('git','merge-base','--is-ancestor',$base,$source) == 0 or die "baseline is not ancestor\n";
 my @changed = grep { length } split /\0/, capture('git','diff','--name-only','--no-renames','-z',$base,$source,'--');
 my $execution = $json->decode(capture('perl','scripts/release/validation-context.pl'));
+my @stage_admissions;
+my ($release_commands)=$make =~ /^check-release-commands:\n((?:\t[^\n]*\n)+)/m;
+if (defined($release_commands) && $release_commands =~ /check-policy-fixtures/) {
+    $release_commands =~ /^\tbash scripts\/release\/check-policy-fixtures\.sh$/m
+        or die "policy-fixture dispatch changed; requalify stage contract\n";
+    # Only this bounded leaf has a qualified exact-input contract. The parent
+    # check-release-commands stage and all other obligations remain required.
+    push @stage_admissions,'release-policy-fixtures' if $execution->{host_key} eq 'Linux x86_64';
+}
 my $release;
 if ($scope eq 'release') {
     $release = {map {$_ => $ENV{"RELEASE_".uc($_)}} qw(previous version remote branch)};
@@ -80,6 +89,7 @@ my $context = {
     schema=>1, source=>$source, group=>$group, baseline=>$base, baseline_tag=>$baseline,
     changed=>\@changed, input_inventory=>\@inputs, gitlinks=>\@gitlinks, index_inventory=>$index_inventory,
     qualification=>defined($release)?'release':'qualification only', release=>$release,
+    stage_admissions=>\@stage_admissions,
     %$execution,
 };
 my $context_path = "$output.context.json";

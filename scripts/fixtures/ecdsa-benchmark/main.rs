@@ -7,6 +7,14 @@ use ic_testkit::{pic::PocketIcStartupConfig, pocket_ic::PocketIcBuilder};
 use std::time::Duration;
 
 fn main() {
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(run_fixture());
+}
+
+async fn run_fixture() {
     let key = SigningKey::from_slice(&[7; 32]).unwrap();
     let prehash = [42; 32];
     let signature: Signature = key.sign_prehash(&prehash).unwrap();
@@ -47,22 +55,24 @@ fn main() {
             (Some(server), url)
         }
     };
-    let pic = PocketIcBuilder::new()
+    let pic = PocketIcBuilder::new(Duration::from_secs(60))
         .with_server_url(url.parse().unwrap())
         .with_application_subnet()
         .build()
+        .await
         .unwrap();
     println!("backend\tcase\tsample\tinstructions");
     let mut args = std::env::args().skip(1);
     while let Some(backend) = args.next() {
         let wasm = std::fs::read(args.next().expect("Wasm path")).unwrap();
-        let id = pic.create_canister().unwrap();
-        pic.add_cycles(id, 10_000_000_000_000).unwrap();
-        pic.install_canister(id, wasm, vec![], None).unwrap();
+        let id = pic.create_canister().await.unwrap();
+        pic.add_cycles(id, 10_000_000_000_000).await.unwrap();
+        pic.install_canister(id, wasm, vec![], None).await.unwrap();
         for (name, request, expected) in &cases {
             for sample in 0..3 {
                 let result = pic
                     .query_call(id, Principal::anonymous(), "verify_ecdsa", request.clone())
+                    .await
                     .unwrap();
                 assert_eq!(result.len(), 9);
                 assert_eq!(result[0], *expected, "{backend}/{name}");
@@ -73,4 +83,5 @@ fn main() {
             }
         }
     }
+    pic.drop().await.unwrap();
 }

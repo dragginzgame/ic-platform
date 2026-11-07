@@ -29,6 +29,7 @@ sub command {
 my $raw=bytes($plan_path);
 my $plan=$json->decode($raw);
 my $context=$json->decode(bytes("$plan_path.context.json"));
+my $schema=exists($context->{stage_admissions})?4:3;
 $plan->{scope} eq "workspace" && !grep { !$_->{required} } @{$plan->{stages}}
     or die "Platform requires the full validation gate\n";
 my $checkpoint_root=abs_path('.');
@@ -96,7 +97,7 @@ if ($mode eq 'write') {
     $proof=$json->decode(command($verify[0],$verify[1],'verify',@verify[2..$#verify]));
 } else {
     my $saved=$json->decode(bytes($output));
-    $saved->{schema}==3 && $saved->{physical_root} eq $physical_root
+    $saved->{schema}==$schema && $saved->{physical_root} eq $physical_root
         or die "unsupported or relocated consumer receipt; restore its original source/location\n";
     $proof=$saved->{validation_evidence};
     ref($proof) eq 'HASH' or die "missing complete Shared proof\n";
@@ -125,13 +126,21 @@ my $execution=$json->decode(command('perl','scripts/release/validation-context.p
 for (keys %$execution) {
     $json->encode($execution->{$_}) eq $json->encode($context->{$_}) or die "execution context drift: $_\n";
 }
-my $receipt={schema=>3,contract=>'platform-release-validation/3',source=>$plan->{source},group=>$plan->{group},
+my %stage_admissions;
+for my $stage (@{$context->{stage_admissions}//[]}) {
+    $stage eq 'release-policy-fixtures' or die "unqualified reusable stage\n";
+    my $path=dirname(dirname($run))."/stage-admissions/$stage.json";
+    bytes($path); # Check routes before the Shared sealer reads the admission.
+    $stage_admissions{$stage}=$json->decode(command('perl','scripts/release/policy-fixture-evidence.pl','seal',$path,$plan->{source},$plan->{group}));
+}
+my $receipt={schema=>$schema,contract=>"platform-release-validation/$schema",source=>$plan->{source},group=>$plan->{group},
     scope=>$plan->{scope},baseline=>$context->{baseline},plan_sha256=>sha256_hex($raw),
     context_sha256=>sha256_hex(bytes("$plan_path.context.json")), release=>$context->{release},
     policy_sha256=>sha256_hex(bytes($plan->{policy})),inputs_sha256=>sha256_hex(bytes("$run/plan-inputs.json")),
     %$execution,runner_log_sha256=>sha256_hex(bytes($runner_log)),
     physical_root=>$physical_root,validation_evidence=>$proof,
     release_omission_admitted=>JSON::PP::false};
+$receipt->{stage_admissions}=\%stage_admissions if $schema==4;
 if ($mode eq 'check') {
     $json->encode($receipt)."\n" eq bytes($output) or die "receipt/evidence changed\n";
     print "Release validation receipt admitted: $output\n";

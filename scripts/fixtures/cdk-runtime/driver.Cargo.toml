@@ -13,6 +13,7 @@ ic-platform = { workspace = true, features = ["certification-cbor", "candid"] }
 ic-testkit.workspace = true
 serde.workspace = true
 ic-wire.workspace = true
+tokio.workspace = true
 
 [package.metadata.shared-tooling.loc]
 category = "tests"

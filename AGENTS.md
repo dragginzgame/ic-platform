@@ -2,8 +2,8 @@
 
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
-records the installed revision; do not edit its payloads. Shared 0.31.5 at
-`b2026a118e38de4af1555c527af327cb604eacdf` is the adopted baseline.
+records the installed revision; do not edit its payloads. Shared 0.31.6 at
+`84b52d14a9082eca0c43db807f649ddf8a74f02c` is the adopted baseline.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
@@ -151,10 +151,11 @@ root-key cache and raw IC0 transitively. Admit those only with the selected
 signature capability; raw Runtime/executor/IC0 and standalone BLS stay isolated.
 Registry raw IC0 is not an additional executor. Do not export the upstream store.
 
-The maintainer authorized the optional BLAKE3 maintenance surface with explicit
-upstream `hash`, `Hasher` and `Hash` identities. Keep the implementation upstream,
-select only `std`, and qualify singleton/source and effective-feature graphs.
-Consumers retain hash-format/domain policy; no existing SHA-256 contract changes.
+Shared's [hashing policy](rules/hashing.md) permits approved pure hashing directly
+at its consumers. Retire the optional BLAKE3 forwarding surface only after IcyDB
+and Wire migrations (#150 / IcyDB #631). Until then, preserve upstream identities,
+`std`-only selection, bytes and singleton/effective-feature checks. Algorithm,
+input/domain and persisted-format changes remain separate explicit decisions.
 
 BLS cryptography belongs to registry ic-verify-bls-signature 0.6.x and
 ic_bls12_381 0.10.x. Select only alloc/groups, with defaults and RNG disabled.

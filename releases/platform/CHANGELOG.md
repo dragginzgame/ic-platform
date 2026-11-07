@@ -4,6 +4,25 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.25.1]
+
+### 🧪 Testing
+
+- Adopt the published async Testkit client in native fixtures, with explicit
+  finite request budgets, one caller-owned runtime and awaited teardown. Preserve
+  installed protocol, executor and cryptographic integration coverage
+  ([#148](https://github.com/dragginzgame/ic-platform/issues/148)).
+- Reuse unchanged Linux release-policy fixtures through Shared's exact-input
+  proofs and fresh per-group admissions. Keep every required release stage,
+  version-dependent check and recovery obligation
+  ([#149](https://github.com/dragginzgame/ic-platform/issues/149)).
+
+### 🔧 Changed
+
+- Adopt Shared Tooling 0.31.6 and its approved direct pure-hashing policy.
+  BLAKE3 facade retirement remains gated on caller migration
+  ([#150](https://github.com/dragginzgame/ic-platform/issues/150)).
+
 ## [0.25.0] - 2026-11-07
 
 ### 💥 Breaking

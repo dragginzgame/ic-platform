@@ -38,6 +38,7 @@ mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
 wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
 serde="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde.version' Cargo.toml)"
+tokio="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.tokio' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
 selection='path = "../../crates/ic-platform"'
 runtime_selection='path = "../../crates/ic-platform-runtime"'
 if [[ -n "$published" ]]; then
@@ -48,7 +49,8 @@ fi
 PLATFORM_FIXTURE_RUNTIME="$runtime_selection" PLATFORM_FIXTURE_MSRV="$msrv" PLATFORM_FIXTURE_PLATFORM="$selection" PLATFORM_FIXTURE_TESTKIT="$testkit" \
 PLATFORM_FIXTURE_WIRE="$wire" \
 PLATFORM_FIXTURE_SERDE="$serde" \
-    perl -pe 's/\@(RUNTIME|PLATFORM|TESTKIT|WIRE|SERDE|MSRV)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
+PLATFORM_FIXTURE_TOKIO="$tokio" \
+    perl -pe 's/\@(RUNTIME|PLATFORM|TESTKIT|WIRE|SERDE|TOKIO|MSRV)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
         scripts/fixtures/cdk-runtime/Cargo.toml.in > "$fixture/Cargo.toml"
 # Timers and the canister share the canonical Runtime owner.
 # Testkit retains its published facade requirement; do not globally patch that
@@ -230,6 +232,7 @@ retain_runtime_artifact() (
 driver_features=()
 if [[ "$qualification" == timers ]]; then driver_features=(--features timers-composition); fi
 build_runtime_driver() {
+    cargo +"$msrv" clippy --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver --all-targets ${driver_features[@]+"${driver_features[@]}"} -- -D warnings
     cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver ${driver_features[@]+"${driver_features[@]}"}
     cargo +"$msrv" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver ${driver_features[@]+"${driver_features[@]}"}
 }

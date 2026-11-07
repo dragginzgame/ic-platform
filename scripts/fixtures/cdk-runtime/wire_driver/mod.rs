@@ -9,7 +9,7 @@ const ROUNDTRIP_SIZES: [usize; 4] = [0, 1, 7, 15];
 #[cfg(test)]
 mod tests;
 
-fn observe(pic: &PocketIc, id: Principal) -> (u64, u64) {
+async fn observe(pic: &PocketIc, id: Principal) -> (u64, u64) {
     let response = pic
         .query_call(
             id,
@@ -17,12 +17,13 @@ fn observe(pic: &PocketIc, id: Principal) -> (u64, u64) {
             "wire_observe",
             ic_wire::native::encode_request(OBSERVE, &(), REQUEST).unwrap(),
         )
+        .await
         .unwrap();
     ic_wire::native::decode_response(OBSERVE, &response, RESPONSE).unwrap()
 }
 
 /// Opt-in measurement; the ordinary installed corpus does not add a benchmark.
-pub fn benchmark_fanout(pic: &PocketIc, id: Principal) {
+pub async fn benchmark_fanout(pic: &PocketIc, id: Principal) {
     for count in [0_u32, 1, 32, 1024, 8192] {
         for reverse in [false, true] {
             let response = pic
@@ -33,6 +34,7 @@ pub fn benchmark_fanout(pic: &PocketIc, id: Principal) {
                     ic_wire::native::encode_request(FANOUT_CANCEL, &(count, reverse), REQUEST)
                         .unwrap(),
                 )
+                .await
                 .unwrap();
             let (instructions, drops): (u64, u32) =
                 ic_wire::native::decode_response(FANOUT_CANCEL, &response, RESPONSE).unwrap();
@@ -42,8 +44,8 @@ pub fn benchmark_fanout(pic: &PocketIc, id: Principal) {
     }
 }
 
-pub fn run(pic: &PocketIc, id: Principal) {
-    assert_eq!(observe(pic, id), (0, 0));
+pub async fn run(pic: &PocketIc, id: Principal) {
+    assert_eq!(observe(pic, id).await, (0, 0));
     // Exact binary round trips through generated ingress and awaited reply reads.
     for size in ROUNDTRIP_SIZES {
         let input: Vec<u8> = (0..size).map(|i| (i * 73) as u8).collect();
@@ -54,6 +56,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
                 "wire_await",
                 ic_wire::native::encode_request(AWAIT, &input, REQUEST).unwrap(),
             )
+            .await
             .unwrap();
         assert_eq!(
             response,
@@ -69,13 +72,14 @@ pub fn run(pic: &PocketIc, id: Principal) {
                 method,
                 ic_wire::native::encode_request(frame_id, &input, REQUEST).unwrap(),
             )
+            .await
             .unwrap();
         assert_eq!(
             response,
             ic_wire::native::encode_response(frame_id, &input, RESPONSE).unwrap()
         );
     }
-    assert_eq!(observe(pic, id), (1, 0));
+    assert_eq!(observe(pic, id).await, (1, 0));
     // Oversized malformed bytes must be refused by the guard, before decode.
     for method in ["wire_set", "wire_await"] {
         let error = pic
@@ -85,6 +89,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
                 method,
                 vec![0; REQUEST.bytes + 1],
             )
+            .await
             .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterReject);
@@ -92,7 +97,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
             error.reject_message,
             "Wire fixture request exceeds byte allowance"
         );
-        assert_eq!(observe(pic, id), (1, 0));
+        assert_eq!(observe(pic, id).await, (1, 0));
     }
     // Wrong endpoint, wrong direction, Candid and truncated frames never reach effects.
     for bytes in [
@@ -103,11 +108,12 @@ pub fn run(pic: &PocketIc, id: Principal) {
     ] {
         let error = pic
             .update_call(id, Principal::anonymous(), "wire_set", bytes)
+            .await
             .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterError);
         assert!(error.reject_message.contains("Wire fixture request:"));
-        assert_eq!(observe(pic, id), (1, 0));
+        assert_eq!(observe(pic, id).await, (1, 0));
     }
     for (method, frame_id) in [
         ("wire_tight", TIGHT),
@@ -121,6 +127,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
         );
         let error = pic
             .update_call(id, Principal::anonymous(), method, frame)
+            .await
             .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterError);
@@ -129,11 +136,12 @@ pub fn run(pic: &PocketIc, id: Principal) {
                 .reject_message
                 .contains("Wire fixture request: wire Limit")
         );
-        assert_eq!(observe(pic, id), (1, 0));
+        assert_eq!(observe(pic, id).await, (1, 0));
     }
     // Zero Rust arguments must still run the explicit unit decoder.
     assert!(
         pic.query_call(id, Principal::anonymous(), "wire_observe", vec![])
+            .await
             .is_err()
     );
     let error = pic
@@ -143,6 +151,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
             "wire_encode_trap",
             ic_wire::native::encode_request(ENCODE_TRAP, &(), REQUEST).unwrap(),
         )
+        .await
         .map_err(super::rejection)
         .unwrap_err();
     assert_eq!(error.reject_code, RejectCode::CanisterError);
@@ -152,7 +161,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
             .contains("Wire fixture response: wire Limit")
     );
     // The post-await effect rolls back, then the original CDK cleanup drops the task.
-    assert_eq!(observe(pic, id), (1, 1));
+    assert_eq!(observe(pic, id).await, (1, 1));
     let response = pic
         .update_call(
             id,
@@ -160,6 +169,7 @@ pub fn run(pic: &PocketIc, id: Principal) {
             "wire_await",
             ic_wire::native::encode_request(AWAIT, &input, REQUEST).unwrap(),
         )
+        .await
         .unwrap();
     assert_eq!(
         response,

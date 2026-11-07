@@ -10,6 +10,7 @@ mkdir "$fixture/src"
 cp "$root/scripts/fixtures/agent-installed/main.rs" "$fixture/src/"
 cp "$root/scripts/fixtures/agent-installed/"{prime256v1,secp256k1}.pem "$fixture/src/"
 testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
+tokio="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.tokio' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 [package]
@@ -24,7 +25,7 @@ category = "tests"
 [dependencies]
 ic-platform = { path = "$root/crates/ic-platform", default-features = false, features = ["agent"] }
 ic-testkit = { $testkit }
-tokio = { version = "1", features = ["rt", "time"] }
+tokio = { $tokio }
 wat = "=1.263.0"
 MANIFEST
 export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$root/target/agent-installed-build}"

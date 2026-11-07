@@ -67,6 +67,45 @@ own evidence protocol. Platform retains the full Shared proof and adds source,
 group, baseline, compiler/tool/server/environment and release-destination binding.
 Receipts cannot admit an omitted stage or a failed/incomplete run.
 
+### Exact-input policy-fixture reuse (#149)
+
+On Linux x86_64, the two release-plan/recovery policy fixtures inside
+`check-release-commands` use Shared's `run-validation-stage.pl`. Every group still
+dispatches all 20 required parent stages, admits its committed source/index and
+destination, and freshly runs real group metadata/preparation, Cargo, native,
+archive and publication checks. Only this bounded non-Cargo leaf can reuse an
+immutable successful execution. It does not reuse a historical whole-gate receipt
+or project package versions. Other hosts and checks outside committed group
+qualification execute the policy fixtures freshly.
+
+The observer enumerates policy scripts/companions, docs/rules, Make inputs, group
+policy, the snapshot and compiler configuration, including newly added files.
+It binds selected executable/library/compiler identities, native host and an
+explicit isolated environment. The fixtures create their own package manifests,
+locks, versions and local Git remotes; real package identities and installed
+qualification locks are outside this leaf's input closure. The isolated Git
+configuration/template selection prevents ambient signing/hooks from changing
+these disposable tests. A closed PATH contains only the enumerated tools selected
+from the caller's original PATH; both selections are bound. An unlisted external
+command fails, and a changed tool selection changes the proof key. There is no
+reusable Rust compilation stage.
+
+Each invocation gets a fresh source/group admission. Schema-4 Platform receipts
+retain Shared's complete parent-gate proof plus its sealed leaf admission,
+original execution and log digests. Recovery re-observes the leaf's current
+closure/tools/environment and checks those immutable bytes; missing or damaged
+evidence cannot satisfy a saved receipt. Old schema-3 receipts keep their original
+semantics. Normal qualification output distinguishes execution/reuse and reports
+admission time. Exact-input mismatch or absent proof executes ordinarily; changed
+inputs during execution, primary failure or unsafe custody refuses admission.
+
+`bash scripts/ci/test-platform-stage-reuse.sh` qualifies the actual leaf through
+the parent Make/plan/receipt dispatch using disposable product-stage bodies. It
+checks different groups and metadata commits, closure/tool drift, missing/log-
+tampered evidence and failure recovery. These substituted parent stages do not
+establish product or macOS acceptance. Keep this focused activation proof separate
+from ordinary release fixtures to avoid recursively testing their own cache.
+
 Prepared metadata is the only admitted source projection. The adapter checks its
 exact semantics and resolves qualification locks offline from their maintained
 selections before installing metadata. A native supplier may retain a preceding

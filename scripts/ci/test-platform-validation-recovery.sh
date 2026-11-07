@@ -83,7 +83,7 @@ for group in platform runtime types; do
     receipt="$(jq -r .receipt "$journal")"
     cp "$journal" "$fixture/journal"
     cp "$receipt" "$fixture/receipt"
-    jq -e '.schema==3 and .validation_evidence.kind=="group-validation-evidence" and (.validation_evidence.inputs|length>0) and (.validation_evidence.files|length>0)' "$receipt"
+    jq -e '.schema==4 and .stage_admissions=={} and .validation_evidence.kind=="group-validation-evidence" and (.validation_evidence.inputs|length>0) and (.validation_evidence.files|length>0)' "$receipt"
     attempt="${receipt%/receipt.json}"
     runs=("$attempt"/logs/validation.*)
     RELEASE_SOURCE="$source" RELEASE_PREVIOUS=1.0.0 RELEASE_VERSION=1.0.2 RELEASE_REMOTE=origin RELEASE_BRANCH=main \

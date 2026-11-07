@@ -2,8 +2,8 @@
 use ic_platform::principal::ExternalPrincipal as Principal;
 use ic_testkit::pocket_ic::PocketIc;
 
-pub fn run(pic: &PocketIc, id: Principal, wasm: Vec<u8>, mode: &str) {
-    pic.install_canister(id, wasm, vec![], None).unwrap();
+pub async fn run(pic: &PocketIc, id: Principal, wasm: Vec<u8>, mode: &str) {
+    pic.install_canister(id, wasm, vec![], None).await.unwrap();
     match mode {
         "system" => {
             for count in [1_u32, 32] {
@@ -11,14 +11,18 @@ pub fn run(pic: &PocketIc, id: Principal, wasm: Vec<u8>, mode: &str) {
                     let input = count.to_le_bytes().to_vec();
                     let result = if method == "system_root_key" {
                         pic.update_call(id, Principal::anonymous(), method, input)
+                            .await
                     } else {
                         pic.query_call(id, Principal::anonymous(), method, input)
+                            .await
                     }
                     .unwrap();
                     let (instructions, bytes) = result.split_at(8);
                     let instructions = u64::from_le_bytes(instructions.try_into().unwrap());
                     match method {
-                        "system_root_key" => assert_eq!(bytes, pic.root_key().unwrap().unwrap()),
+                        "system_root_key" => {
+                            assert_eq!(bytes, pic.root_key().await.unwrap().unwrap())
+                        }
                         _ => {
                             ic_platform::certification::cbor::decode_certificate(
                                 bytes,
@@ -42,20 +46,20 @@ pub fn run(pic: &PocketIc, id: Principal, wasm: Vec<u8>, mode: &str) {
                     bytes.extend([0x6e, 0x7f]); // independent opt null types
                 }
                 bytes.push(0); // no arguments; unused types must still be checked
-                measure_admission(pic, id, "wide", count, bytes);
+                measure_admission(pic, id, "wide", count, bytes).await;
             }
             for depth in [16_u64, 17, 8192] {
                 let mut bytes = b"DIDL\x01\x6e\0\x01\0".to_vec();
                 bytes.resize(bytes.len() + depth as usize, 1);
                 bytes.push(0);
-                measure_admission(pic, id, "recursive", depth, bytes);
+                measure_admission(pic, id, "recursive", depth, bytes).await;
             }
         }
         _ => panic!("unknown explicit codec benchmark mode"),
     }
 }
 
-fn measure_admission(pic: &PocketIc, id: Principal, case: &str, count: u64, bytes: Vec<u8>) {
+async fn measure_admission(pic: &PocketIc, id: Principal, case: &str, count: u64, bytes: Vec<u8>) {
     for quota in [64_u64, 1_000_000] {
         let limits = ic_platform::candid::DecodeLimits {
             reply_bytes: 1_000_000,
@@ -72,6 +76,7 @@ fn measure_admission(pic: &PocketIc, id: Principal, case: &str, count: u64, byte
         input.extend_from_slice(&bytes);
         let result = pic
             .query_call(id, Principal::anonymous(), "candid_admission", input)
+            .await
             .unwrap();
         let (instructions, error) = result.split_at(8);
         assert_eq!(error, expected.as_bytes());

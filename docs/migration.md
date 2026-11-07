@@ -1024,6 +1024,26 @@ from consuming this source profile.
 
 ## Optional BLAKE3 maintenance boundary
 
+Shared 0.31.6's [hashing policy](../rules/hashing.md) supersedes the earlier
+recommendation to centralize pure hashing through Platform. Existing approved
+hashing belongs directly with its consumer. For IcyDB's established BLAKE3
+purposes, declare `blake3 = { version = "1.8.7", default-features = false,
+features = ["std"] }` in its root catalog, inherit it in every affected member
+and independent workspace, and replace `ic_platform::blake3` imports with
+`blake3`. Remove the facade dependency only where it supplies no other capability.
+Preserve the current lock selection, upstream identities, exact hash input/domain
+and output bytes; this is an import/dependency migration, not an algorithm change.
+Do not add a replacement wrapper crate.
+
+[Platform #150](https://github.com/dragginzgame/ic-platform/issues/150) retires the
+feature/export/dependency and facade-only fixtures after callers migrate.
+[IcyDB #631](https://github.com/dragginzgame/icydb/issues/631) owns Core, SQL helper
+and independent integration adoption; another session owns those edits. Wire's
+unused benchmark activation is removed. Platform's forwarding surface remains
+until the IcyDB migration is complete; no sibling release is performed here.
+
+### Retained forwarding contract
+
 This surface is supplied by published Platform 0.6.18. Earlier releases do not
 provide it; consumers must raise their minimum requirement when adopting it.
 
@@ -1033,11 +1053,9 @@ workspace requirement is BLAKE3 1.8.7 with defaults disabled and `std` selected.
 There are no default Platform features. Native and Wasm consumers can select
 hashing independently of Principal, Candid, CDK, executor and host features.
 
-Consumers may remove an exhausted direct/renamed BLAKE3 dependency after adopting
-the supplying Platform release. Add their own declaration guard so first-party
-usage has one owner, while retaining provider transitives. IcyDB's current
-`blake3 = "1.8.5"` range can unify with this supplier; publication and actual
-consumer graph checks still precede adoption. No sibling has been edited here.
+The older facade-adoption instructions are superseded by the direct dependency
+migration above. These implementation and graph qualifications describe the
+retained surface while callers migrate.
 
 `make check-primitives` admits default, executor, runtime and BLAKE3 combinations
 on native and `wasm32-unknown-unknown`. It uses the shared Cargo graph checker

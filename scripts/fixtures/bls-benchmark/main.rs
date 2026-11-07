@@ -16,6 +16,14 @@ fn hex(path: &Path) -> Vec<u8> {
 }
 
 fn main() {
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(run_fixture());
+}
+
+async fn run_fixture() {
     let mut args = std::env::args().skip(1);
     let fixtures = args.next().expect("fixture directory");
     let signature = hex(&Path::new(&fixtures).join("bls-signature.hex"));
@@ -33,17 +41,18 @@ fn main() {
             (Some(server), url)
         }
     };
-    let pic = PocketIcBuilder::new()
+    let pic = PocketIcBuilder::new(Duration::from_secs(60))
         .with_server_url(url.parse().unwrap())
         .with_application_subnet()
         .build()
+        .await
         .unwrap();
     println!("variant\tcase\tsample\tinstructions");
     while let Some(variant) = args.next() {
         let wasm = std::fs::read(args.next().expect("Wasm path")).unwrap();
-        let id = pic.create_canister().unwrap();
-        pic.add_cycles(id, 10_000_000_000_000).unwrap();
-        pic.install_canister(id, wasm, vec![], None).unwrap();
+        let id = pic.create_canister().await.unwrap();
+        pic.add_cycles(id, 10_000_000_000_000).await.unwrap();
+        pic.install_canister(id, wasm, vec![], None).await.unwrap();
         // Updates retain the prepared-generator cache; queries do not commit it.
         for sample in 0..6 {
             let result = pic
@@ -53,6 +62,7 @@ fn main() {
                     "verify_bls_update",
                     request.clone(),
                 )
+                .await
                 .unwrap();
             assert_eq!(result.len(), 9);
             assert_eq!(result[0], 1);
@@ -62,6 +72,7 @@ fn main() {
         }
         let result = pic
             .query_call(id, Principal::anonymous(), "verify_bls", request.clone())
+            .await
             .unwrap();
         assert_eq!(result.len(), 9);
         assert_eq!(result[0], 1);
@@ -78,6 +89,7 @@ fn main() {
             }
             let result = pic
                 .update_call(id, Principal::anonymous(), "verify_bls_update", invalid)
+                .await
                 .unwrap();
             assert_eq!(result.len(), 9);
             assert_eq!(result[0], 0);
@@ -87,4 +99,5 @@ fn main() {
             );
         }
     }
+    pic.drop().await.unwrap();
 }

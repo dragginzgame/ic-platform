@@ -231,7 +231,7 @@ API changes or automatically establish whether sibling source still uses an API.
 
 | Upstream / owned code | Public surface and source | Observed consumers | Maintenance responsibility |
 | --- | --- | --- | --- |
-| `blake3` | optional `blake3::{hash,Hasher,Hash}` | IcyDB currently uses upstream directly for predicate fingerprints; adoption remains consumer-owned | Platform selects unchanged upstream hashing with `std` only. Consumers own domain/format policy; no SHA-256 protocol replacement or size saving is implied. |
+| `blake3` | optional `blake3::{hash,Hasher,Hash}` | IcyDB Core, SQL helpers and integration fixtures still select the facade at the last audit; IcyDB #631 moves them to the approved direct dependency | Retained pending #150. Preserve upstream `std` selection and hash bytes; Shared's pure-hashing policy supersedes facade centralization. No algorithm or size claim. |
 | `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting and account semantics. External Principal conversions and upstream self-authentication are separate explicit features; owned-only graphs exclude both. |
 | Embedded IC0/executor; imported CDK adapters and owned generator | `ic0`, including safe `stable64_{size,grow,read,read_uninit,write}`; `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters; Storage's requested IC0-only backing | Runtime owns ordinary entrypoint macros; Platform retains the external-Candid bridge. Platform maintains non-crypto adapters/generator. Platform maintains the sole executor and unchanged IC0 1.2.0 ABI; callback/trap semantics require installed qualification. Storage retains governance; raw stable IO selects no executor or Types. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Decoding uses finite-limit helpers or explicit configuration/staging; unconfigured decoder shortcuts are retired. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
@@ -253,6 +253,10 @@ primitives remain outside our implementation authority. Tooling-only fixture
 workspaces additionally use owned Wire and Testkit; only the composition profile
 selects Timers (0.37.0). Owner and composition locks and runtime graph admission
 remain separate from the workspace inventory. Both remain release requirements.
+Their native drivers now select Testkit 0.92's async contract, with explicit
+60-second request budgets and caller-owned Tokio lifetimes/teardown. This changes
+development-only native graphs; canister graphs retain the same selected owners,
+protocols and external bytes.
 
 Types now uses serde_bytes for the optional fixed-length Account subaccount
 (#138). Postcard, JSON and CBOR are test-only proof dependencies; no Wire,

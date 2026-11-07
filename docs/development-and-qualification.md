@@ -475,7 +475,14 @@ the real resolver with incompatible Timers 0.35.1 in a disposable copy: owner
 graphs must pass and composition must fail the singleton constraint.
 
 Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
-`IC_TESTKIT_POCKET_IC_URL`. The harness retains Testkit's bounded startup and
+`IC_TESTKIT_POCKET_IC_URL`. Owned native fixtures select published Testkit 0.92
+and its async-only client. Each executable owns one current-thread Tokio runtime
+for the complete scenario, awaits network/lifecycle operations and explicitly
+awaits instance teardown before releasing its managed server. Client requests
+have an explicit 60-second finite budget, separate from the 60-second startup
+budget. The benchmark and Agent fixtures use the same catalog selections; Tokio
+is a native fixture dependency and never enters the canister graph.
+The harness retains Testkit's bounded startup and
 teardown. It never installs a server implicitly. Artifacts, sources and metadata
 remain in `target/cdk-runtime.*`. Normal runs use the maintained frozen selection
 in `scripts/fixtures/cdk-runtime/Cargo.lock` (owner) or

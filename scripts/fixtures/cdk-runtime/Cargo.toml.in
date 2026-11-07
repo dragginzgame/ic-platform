@@ -14,3 +14,4 @@ ic-platform-runtime = { @RUNTIME@, default-features = false, features = ["cdk"] 
 ic-testkit = { @TESTKIT@ }
 ic-wire = "@WIRE@"
 serde = { version = "@SERDE@", default-features = false }
+tokio = { @TOKIO@ }
