@@ -19,6 +19,8 @@ See also the [Types ledger](../types/CHANGELOG.md).
   metadata and recovery admission remain mandatory.
 - Preserve real preparation/rollback/custody checks for all three groups while
   running the complete metadata-fixture delivery/recovery cycle once, for Runtime.
+- Pin the immutable Timers qualification source that also accepts Runtime 0.20,
+  retaining the existing implementation and all installed composition checks.
 
 ### 🔧 Tooling
 

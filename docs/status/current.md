@@ -29,10 +29,12 @@ Evidence: `target/complexity-cleanup/`; installed fixtures
 Planner/recovery fixtures substitute product stage bodies; installed checks use
 the prepared real Testkit server. No full release gate, fresh macOS/Profiler
 acceptance, publication or matched size/performance improvement is claimed.
-Source is pushed as `5688667`; no release batch or upload has started. Runtime
-0.20 needs an immutable Timers supplier accepting it (current pin: <0.20).
-Approval to prepare/push that Scheduling qualification branch is pending;
-its dirty working files stay untouched. Current tests use the 0.19.5 local owner.
+Source cleanup is pushed as `5688667`. The Runtime-0.20 qualification supplier is
+Scheduling commit `e50ca4f91e7cc213e089d7ef79f9c224d36d61ad`, branch
+`adopt/runtime-020-platform-qualification`; only the Runtime upper bound changed.
+No Scheduling working files, implementation or release were changed. Platform's
+pin/fixture lock select it without unrelated dependency upgrades. Deployment is
+Runtime 0.20.0 followed by Platform 0.25.0; no upload has started yet.
 
 Adopted committed Shared `b2026a118e38de4af1555c527af327cb604eacdf` through the
 canonical exporter after impact review; all 141 payloads match. Local overlay
@@ -116,8 +118,8 @@ frozen inputs stayed unchanged. After reconciliation its normalized external pat
 was restored exactly over the delivered owner versions. Current lock SHA-256:
 `4ce766eee04d278fe4885ece92342bf4fa27f21f572259e5021b0422f435fe3f`.
 
-Current custody: `refs/retained/platform0250-runtime0200-20261107-lock-draft`
-and `target/deployment-platform0250-runtime0200-20261107/`. Restore its external
+Custody: `refs/retained/platform0250-runtime0200-20261107-lock-draft` and
+`target/deployment-platform0250-runtime0200-20261107/`. Restore its external
 dependency patch over delivered owner versions after reconciliation. Earlier
 custody: `refs/retained/platform0240-20261107-reviewed-draft`, plus
 `deferred.Cargo.lock`, `deferred-version.patch` and `restored-version.patch` in
