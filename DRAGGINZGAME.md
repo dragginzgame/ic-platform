@@ -112,6 +112,9 @@ when changing interfaces, persistence or installation/recovery behavior.
   the leaf commands, and aggregate gates must not repeat full lint/setup through
   nested targets. Reuse unchanged release-stage evidence only through the
   qualified contract; see [validation mechanics](rules/engineering-details.md#validation-and-evidence).
+- Run Gitleaks once per repository CI run, outside host/package/release-group
+  matrices. Do not repeat it during deployment or publication; follow the
+  [repository secret-scanning contract](rules/engineering-details.md#repository-secret-scanning).
 - Reserve local full repository/workspace suites and broad gates for an explicitly
   authorized release or explicit request for those checks. Implementation,
   continuation, PR delivery and readiness wording do not authorize them. Focused

@@ -253,3 +253,38 @@ for package in 'ic-management-canister-types v0.11.0' 'pretty v0.12.5'; do
     fi
 done
 echo 'Wasm management supplier and implicit-printer refusals passed'
+# Runtime's single-pass admission retains each independent refusal and exception.
+while IFS='|' read -r mode packages expected diagnostic; do
+    printf 'ic-platform-runtime v0.20.1 (/fixture)\n%b\n' "$packages" > "$fixture/runtime.graph"
+    arguments=()
+    case "$mode" in
+        wire) ;;
+        external) arguments=(--external-candid) ;;
+        native) arguments=(--external-candid --native-management) ;;
+    esac
+    actual=reject
+    if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/runtime.graph" ${arguments[@]+"${arguments[@]}"} > "$fixture/runtime.log" 2>&1; then actual=pass; fi
+    [[ "$actual" == "$expected" ]] || { cat "$fixture/runtime.log" >&2; echo "Unexpected runtime admission: $mode / $packages" >&2; exit 1; }
+    [[ "$expected" == pass ]] || grep -Fq "$diagnostic" "$fixture/runtime.log"
+done <<'CASES'
+wire||pass|
+wire|candid v0.10.40|reject|Wire runtime acquired Candid
+wire|candid_derive v0.10.40|reject|Wire runtime acquired Candid
+external||reject|Missing selected external Candid adapter
+external|candid v0.10.40|pass|
+wire|ic-agent v0.49.3|reject|Canister graph contains host parsing
+external|candid v0.10.40\nic-management-canister-types v0.11.0|reject|Canister graph contains host parsing
+native|candid v0.10.40\nic-management-canister-types v0.11.0|pass|
+wire|ic0 v1.2.0|reject|Retired full CDK runtime/generator
+wire|ic-cdk-executor v2.0.0|reject|Retired full CDK runtime/generator
+wire|ic-canister-sig-creation v1.3.1\nic0 v1.2.0|pass|
+wire|ic-canister-sig-creation v1.3.1 (*)\nic0 v1.2.0 (*)|pass|
+wire|ic-canister-sig-creation v1.3.1\nic0 v9.0.0|reject|Unqualified signature IC0 supplier
+wire|ic-canister-sig-creation v1.3.1\nic-cdk v0.20.3|reject|Retired full CDK runtime/generator
+wire|ic-platform-runtime v0.20.1 (/fixture) (*)|pass|
+wire|ic-platform-runtime v0.20.1 (/other)|reject|one canonical Runtime executor owner
+CASES
+printf 'slotmap v1.1.1\n' > "$fixture/runtime.graph"
+if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/runtime.graph" > "$fixture/runtime.log" 2>&1; then exit 1; fi
+grep -q 'one canonical Runtime executor owner' "$fixture/runtime.log"
+echo 'Single-pass runtime graph admission: Candid, host, IC0 and owner-identity cases passed'

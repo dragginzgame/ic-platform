@@ -1,195 +1,131 @@
 # Current handoff — 2026-11-08
 
-## Deployment preparation — 2026-11-08
+## Maintenance batch and Git delivery
 
-The maintainer authorized Runtime 0.20.1 and Platform 0.26.0 delivery to
-`dragginzgame/ic-platform:main` and crates.io. Shared 0.31.6 supports one
-increment kind per batch, so the two standard batches run Runtime patch first,
-then Platform minor; Types/browser are unchanged. No release has run yet.
+The maintainer authorized delivery to `origin/main` in this checkout. The reviewed
+batch contains the ten simplifications, Shared 0.31.10 adoption and cargo-machete
+annotations. Public Rust sources and dependency/feature/build declarations are
+unchanged. Only private cargo-machete metadata differs in two package manifests;
+package inventories confirm the tooling paths are outside their published code.
+Under Shared's publication-impact rule this is Git-only maintenance: no version
+bump, tag or registry upload. Platform stays 0.26.0, Runtime/macros/guard 0.20.1,
+Types 0.18.2 and browser 0.2.0. The 0.26.1 tooling note remains pending.
 
-The deferred lock draft is preserved durably on
-`retained/platform026-runtime0201-lock-draft`, commit
-`24c865191d14c628b86e2cc7307988827c3f1e58`. The release lock uses the preceding
-committed suppliers plus BLAKE3 removal (SHA-256
-`3443891a2358040d74a92f1040b8d1150509b2a3662ab917e9db6a5e660f0fc4`).
-Exact external draft/reconciliation inputs are retained under
-`target/deployment-platform026-runtime0201-20261108/`. Restore only that external
-patch after reconciliation, never its older package-version metadata.
+The deferred Cargo.lock draft is excluded from the Git payload and retains its
+exact bytes, as do both qualification locks. Browser and native Profiler source
+are unchanged; siblings remain read-only. Comparison inputs and the reviewed
+86-path delivery roster are under `target/deployment-maintenance-20261108/`.
 
-Release formatting preparation places the four native driver sources and their
-shared support module together in `scripts/fixtures/cdk-runtime/`, preserving
-ordinary module discovery in both the source tree and rendered fixtures. The
-standard `make fmt-check` passes with all four drivers selected.
+- Retired 27 unadopted Candid experiment files, including two private locks.
+  [Historical reproduction](../../scripts/benchmarks/0.9/README.md) retains the
+  immutable source/license/evidence reference; stale policy/format inputs are gone.
+- Shared benchmark-driver preparation, admission-tool stubs and working-tree
+  fixture copying. Formatting retains opaque gitlink and staged-index isolation.
+- Declared 38 fixture method identities once and moved 31 unchanged handler
+  bodies into scenario modules. Driver assertion order/lifecycle remains intact.
+- Selected explicit runtime profiles once for graph/build/execution; runtime
+  graph admission is one pass. Release-lock primaries are observed once per run,
+  with duplicate/missing-owner and rollback/retry refusals retained.
+- Separated the [current migration contract](../migration.md) from
+  [historical investigations](../history/migrations-through-0.26.md), preserving
+  previous heading anchors and correcting stale Runtime ownership/version claims.
 
-## Ten simplifications implemented locally — 2026-11-08
+Focused Linux / Rust 1.99.1 evidence is in `target/complexity-20261108/`:
+strict Clippy/build for both benchmark drivers and all eight owner/Timers Wasm
+profiles; six native driver tests per topology; all eight installed profiles
+pass cancellation, await, callback-trap, upgrade, cycles, stable rollback and
+certificate checks. Also passed: both admission runners (including concurrent
+artifact custody), graph refusals, all three groups' preparation/rollback and
+Runtime resume in disposable Git repositories, lock recovery, formatting/hook
+isolation, documentation mutation/links, boundary/inventory and ShellCheck.
+No full CI, release gate, macOS or native Profiler acceptance is claimed.
 
-All ten maintainer-selected cleanups are implemented in this checkout. Nothing
-was staged, committed, pushed or published. Pending Platform **0.26.0** removes
-its public BLAKE3 feature/export; pending Runtime **0.20.1** contains compatible
-macro-parser maintenance. Package versions and Types/browser groups are unchanged.
-The preceding 0.25.1 deployment evidence below remains historical release evidence.
+Owner fixture: `target/cdk-runtime.w1LFSz/`; Timers fixture:
+`target/cdk-runtime.cNTf9d/`. Their retained artifacts/graphs/logs bind the actual
+observed source; they are focused fixture evidence, not release receipts.
 
-- Retired the BLAKE3 facade, catalog selection and dedicated fixtures after the
-  maintainer confirmed IcyDB migration. A read-only projects-wide source/manifest
-  scan found no remaining facade callers. Platform
-  [#150](https://github.com/dragginzgame/ic-platform/issues/150) is closed with
-  explicit local/unpublished status; IcyDB deployment remains its owner's work.
-  Existing minimal native/Wasm graph checks now forbid the removed dependency.
-- Ordinary copy qualification retains both implementations and every size in
-  ten queries rather than sixty. The former six-round medians are explicit via
-  `PLATFORM_BUFFER_COPY_BENCHMARK=1`, with the same byte assertions.
-- Four native drivers share ordinary test-only server/runtime setup. Each keeps
-  its explicit timeout, topology, client close and managed-server custody.
-- Runtime's three qualification manifests render once from explicit source/
-  published, owner/Timers and external-adapter selections, with no later edits.
-- Five integration consumers share retained-hex decoding; standalone and installed
-  fixture copying includes its ordinary support module. Test-only use stays gated.
-- Runtime/ICRC provenance guards share their exact existing normalization recipe,
-  retaining separate fingerprints, reconstruction, licenses and mutation refusals.
-- Two admission runners use Shared's existing fixture lifecycle operations,
-  retaining child cleanup, failure status and incomplete-run refusal.
-- Exact Candid arity checks have one private implementation; the protocol macros
-  share decoder emission. Existing diagnostics, optional/zero/single/multiple
-  result behavior, budgets and upstream bytes remain unchanged.
-- Both macro adapters share duplicate-option and boolean parsing, retaining their
-  distinct accepted options, repeated guard order and explicit codec selection.
+## Existing local adoption and dependency audit
 
-Focused Linux x86-64 / Rust 1.99.1 validation passed: affected-package Clippy;
-21 Candid tests (one manual benchmark ignored), 18 selected integration cases,
-16 macro tests and six generated native-driver tests. Provenance reconstruction
-and mutation refusals, both admission runners, 144 synthetic feature-graph cases
-plus target/source controls, inventory, dependency boundaries and six real minimal
-native/Wasm graphs passed. The retired feature is rejected before traversal.
+Shared **0.31.10**, `c5285791991c731d266fb5c85dc3ee876d29f6b9`, is adopted
+through the canonical exporter (147 verified payloads), including the pinned
+download-cache action and CI installer. Six hosted setup owners restore before
+installation and save afterward; browser's npm-only setup is unchanged. One
+independent Linux CI job installs pinned Gitleaks and scans full history with
+redaction, including documentation changes. Release/publication paths add no scan.
 
-Actual Runtime owner graphs: `target/cdk-runtime.Mt7hd6/`. Installed Timers
-raw/prepared Wire/external-Candid profiles: `target/cdk-runtime.9nyeDC/`, with
-callback traps, upgrades, stable rollback, certificate/management byte proofs,
-auth-before-decode and 16/17 nesting admission preserved. Actual Agent acceptance:
-`target/agent-installed.DySTDY/`, including signed query, update/read-state and
-wrong-root refusal for Ed25519, delegated, P-256 and secp256k1 identities. Both
-benchmark drivers passed Clippy in `target/cleanup-benchmark-drivers.dJ1qt3/`.
-The opt-in buffer-copy measurement also completed all sizes; log:
-`target/platform-cleanup-buffer-copy-benchmark.log`. Standalone codec consumer
-native tests and Wasm compilation passed in `target/boundary-consumer.uMINbk/`.
-Each retained fixture binds its actual captured inputs; these focused results
-are not a new release receipt. No macOS/Profiler acceptance or hosted CI was run.
+Actionlint, actual CI selection/cache-order checks, formatting/hook isolation,
+documentation links, crate/module CLOC counts and unknown-selector refusal pass.
+The dirty root/qualification locks are unchanged. Evidence is in
+`target/adoption-shared03110-20261108/`; earlier adoption evidence remains in
+`target/adoption-shared0319-20261108/`. Hosted cache/scan execution is asynchronous
+after delivery; no live Gitleaks, hosted/native CI or new release is claimed.
 
-The pre-existing dependency draft remains. Compared with its retained supplier
-records, Cargo.lock only prunes BLAKE3 1.8.7, arrayvec 0.7.8 and constant_time_eq
-0.4.2; pretty's remaining arrayvec reference loses unnecessary version
-qualification. No retained registry version/checksum changed. Current lock SHA-256:
-`94f86637af25de54bf34f3fbfe4741bf379565e60f77ab880444122463abc37c`.
-Shared 0.31.6 snapshot payloads, prior handoff/recovery custody, native Profiler,
-browser and sibling sources are preserved. Platform #50 remains deferred.
+Cargo-machete passes all five workspace crates with documented manifest-only
+exclusions for the ECDSA bigint security floor and executor links guard.
+Their TOML metadata records only those developer-tool exclusions. Evidence:
+`target/dependency-audit-20261108/`.
 
-## Platform 0.25.1 published and reconciled
+## Published baseline and evidence
 
-The maintainer authorized delivery of #148/#149 and Shared's new hashing policy.
-Platform **0.25.1** is published on crates.io and GitHub through completed frozen
-batch `batch-pB_048Ja` (schema 2, index 1). Normal `main` and `origin/main` are
-reconciled to release **`daf454df49d8de3edbb11cd260e8dacf6524c266`**.
-Annotated tag: **`platform-v0.25.1`**, object
-`36833ca0a2fcd5582b85a245e5498e172f88fb4e`.
-Preparation source: `924828e32c7a5d5e71d656ea373a6825c90314ff`.
+Platform **0.26.0** and Runtime/macros/guard **0.20.1** completed standard frozen
+release and crates.io publication. The last published Platform source is
+`41a128751528f8ccd3c926cff550dd8b2ea62926`, tag `platform-v0.26.0`.
+Runtime release commit is `206cc5990c330cafbe15f18fc7fa5b1b6a31093b`, tag
+`runtime-v0.20.1`. Types stays **0.18.2**, browser **0.2.0**.
+Official index/archive checks established non-yanked entries, exact checksums
+and clean VCS source/path identity for all four published crates.
 
-The official registry record is non-yanked. Downloaded archive SHA-256:
-`76bc9d6ea3bf2d8c274541aa482c0b47f43177b7d3a6bfe2555531080bfb0100`.
-Its clean VCS provenance names that exact release commit and `crates/ic-platform`.
-Remote main/tag/peeled commit match local delivery. Runtime/macros/guard remain
-**0.20.0**, Types **0.18.2**, browser **0.2.0**; none was republished.
+Implementation commit `6bfa1ebad43fc5859b389224fcf1b3264b0e5667` removed the BLAKE3
+facade after caller migration and consolidated codecs, macro parsing and test
+plumbing. Cryptographic algorithms/checks and external bytes were preserved.
+See the [Platform ledger](../../releases/platform/CHANGELOG.md) and
+[Runtime ledger](../../releases/runtime/CHANGELOG.md).
 
-Canonical evidence: `target/deployment-platform0251-20261107/`, including registry
-archive/index/VCS, `remote-delivery.txt`, `reconcile.log`, draft custody, source
-commits and all release-attempt logs. The final handoff update is local: pushing
-only status docs now would cancel the running main-branch code qualification.
-No implementation change remains unpublished.
+Both Linux x86-64 / Rust 1.99.1 release gates passed **20/20** stages with no
+omissions, including installed owner/Timers fixtures and final archive checks.
+Runtime batch `batch-_leIreCI` qualified implementation commit `6bfa1eb`;
+Platform batch `batch-C5BoFKA5` qualified Runtime release commit `206cc59`.
+Receipts remain respectively at:
 
-## Delivered scope and qualification
+- `target/release-frozen/batch-_leIreCI/target/release-validation/qualification.xynaOV/receipt.json`
+- `target/release-frozen/batch-C5BoFKA5/target/release-validation/qualification.aaSiWQ/receipt.json`
 
-[#148](https://github.com/dragginzgame/ic-platform/issues/148): owned native Runtime,
-Agent, BLS and ECDSA fixtures use published **Testkit 0.92.0**, one caller-owned
-Tokio runtime, explicit positive 60-second request budgets and awaited teardown.
-Startup remains separately bounded. Catalog/generators and both maintained locks
-agree; each lock loses 47 package entries. Production Wasm gains no Tokio edge.
-Crypto/protocol assertions remain. Historical benchmark/provider source stays
-outside adoption; native benchmark drivers pass Clippy, without new perf claims.
+Both schema-2 intents are complete at index 1. Journals/Git objects remain in
+`.git/release-state/frozen/BATCH/`; neither batch was retired. Deployment logs,
+registry/archive/VCS verification, reconciliation and the complete preceding
+handoff are in `target/deployment-platform026-runtime0201-20261108/`.
 
-[#149](https://github.com/dragginzgame/ic-platform/issues/149): only Linux x86_64
-release-plan/recovery policy fixtures reuse Shared exact-input stage proofs.
-Every group retains all 20 parent stages and fresh real Cargo/native/version,
-metadata, archive/publication and source/index custody. Schema-4 receipts seal
-fresh admissions and immutable original proof/logs; schema-3 recovery is preserved.
-Sealing re-enters the execution's Make owner, preserving its actual PATH prefix.
-
-The corrected activation fixture `target/release-plan-test.rI7xjI` passed five
-complete substitute-parent gates: three executed leaves and two reuses. Matching
-execution/admission took **135.86s / 18.50s**. Source/tool drift forced execution;
-missing/tampered evidence and direct parent-environment sealing refused. Primary
-27/143 failures produced no receipt; retry admitted the intact original proof.
-Its product stages/metadata are substitutes. Structured details:
-`make-context-qualified-summary.json` in deployment evidence. Earlier 133s/16s
-observations predate this Make-dispatch correction and are not its qualification.
-
-The actual release passed **20/20** local stages on **Linux x86_64 / Rust 1.99.1**,
-including package Clippy/tests/docs, native/Wasm consumers, feature closures,
-provenance, real metadata/recovery and installed Runtime owner/Timers raw/prepared
-Wire/external-Candid profiles. Receipt:
-`target/release-frozen/batch-pB_048Ja/target/release-validation/qualification.hd1kU0/receipt.json`.
-It retains workspace scope, no omissions and one executed policy leaf (no reuse
-in this single-group release). Metadata recovery admitted that same receipt;
-publication separately verified/linted the final 0.25.1 archive.
-
-Focused Agent installed acceptance also passed signed queries, update/read-state
-and wrong-root refusal for Ed25519, delegated, P-256 and secp256k1 identities.
-The new Shared dependency checker now reaches three owned fixture constructors
-through its declared companion closure; consumer/prepared-call admission and real
-Runtime independence pass, and failed consumer fixtures retain evidence.
-
-Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/42399099889),
-[installed Runtime](https://github.com/dragginzgame/ic-platform/actions/runs/42399099726),
-browser and advisory jobs were in progress at the single final observation.
-[Wasm size](https://github.com/dragginzgame/ic-platform/actions/runs/42399099687)
-passed. `hosted-observation.json` binds these observations to the release SHA.
-Leave hosted work asynchronous. No fresh macOS or native Profiler/Bazel acceptance
-is claimed; unqualified reuse hosts execute the same policy fixtures freshly.
-
-## Boundaries and remaining owner
-
-Shared **0.31.6**, `84b52d14a9082eca0c43db807f649ddf8a74f02c`, is adopted through
-the canonical exporter with **145 verified payloads**. IC Build editor stays
-0.73.0. No snapshot payload was hand-edited. Production crypto, certificate,
-delegation, freshness policy and external bytes are unchanged.
-
-[#150](https://github.com/dragginzgame/ic-platform/issues/150) remains pending:
-Wire removed its unused BLAKE3 activation at `72ab905`; IcyDB Core/SQL/integration
-still use the facade at the final read-only observation. Another session owns
-IcyDB #631. Keep Platform's export until callers migrate under Shared's approved
-direct hashing policy. No sibling checkout or release was changed here.
-#50 remains explicitly deferred for native Agent's crypto-bigint 0.5.5 advisory;
-no waiver or cryptographic rewrite was added.
+Hosted evidence is separate: the last observation of final commit `41a1287`
+found CI 42468591030, Browser 42468591250 and Wasm size 42468591029 in progress.
+Installed runtime 42468591067 and advisories 42468591066 failed host-tool setup
+with HTTP 504 before tests/auditing; each was retried once, with outcomes left
+asynchronous. Earlier run 42467034589 likewise failed setup before product tests.
+No new advisory result/waiver, macOS pass or Profiler/Bazel acceptance is claimed.
+Do not repeatedly rerun or wait solely to hold deployment open.
 
 ## Deferred draft and recovery custody
 
-The independent lock draft retains arc-swap **1.9.4**, Candid/derive **0.10.40**,
-cc **1.11.1** and SmallVec **1.16.5**. It was excluded from delivery and reapplied
-as the exact external-only patch over released 0.25.1 metadata. Current lock SHA:
-`d5e76b0a72c3be0e4afd789b936c45c040244dd2251b9152b1cfd60cf6bb88be`.
-Durable branch: `retained/platform0251-lock-draft`, commit
-`25a397b1055bf2d20cec22ee03d3185da6cb866f`.
-Its original whole lock has older owner metadata; never restore it over 0.25.1.
-The before/after patches differ only in Git's base/result blob header.
+Cargo.lock remains deliberately dirty. Its independent dependency draft was
+excluded from deployment, then restored as external-only changes over released
+owner versions. All **391 external supplier records** match the retained draft.
+Current lock SHA-256:
+`d47ee5c95cd219e49a36e45a890596fdc810a39ad5f87f204080d2ee28f87e00`.
+Preservation ref `retained/platform026-runtime0201-lock-draft` points at
+`24c865191d14c628b86e2cc7307988827c3f1e58`. Never restore that whole older lock
+over the published owner metadata. Earlier draft refs remain preserved.
 
-Preserve `batch-ZNfZ3p9z` (stopped before preparation after finding the Make-prefix
-mismatch) and `batch-2ylQaRca` (consumer fixture missing the new hash-policy file).
-Neither tagged, pushed or uploaded. The initial dirty capture refused before a
-batch existed. Corrective source commits are `68f624f` and `924828e`; no old proof
-was rebound. All previous failed/completed batches, refs and interrupted 0.23.1
-state remain as recorded in the
-[previous handoff](https://github.com/dragginzgame/ic-platform/blob/924828e32c7a5d5e71d656ea373a6825c90314ff/docs/status/current.md).
+Preserve historical failed/completed batches, including `batch-ZNfZ3p9z`,
+`batch-2ylQaRca` and interrupted 0.23.1 state. Their details remain in the
+[historical handoff](https://github.com/dragginzgame/ic-platform/blob/924828e32c7a5d5e71d656ea373a6825c90314ff/docs/status/current.md)
+and retained journals; never reinterpret old receipts under new tooling.
 
 Historical archives/bundles/receipts stay at
-`recovery-evidence/retired-checkouts/20261104-issue139/`, with maintainer review due
-**2026-12-04**. Retention refuses excess/expiry without deletion; no cleanup or
-mtime renewal is authorized. Previously removed target evidence/0.18.1 binaries
-must not be claimed present. Use the existing batch lifecycle and supplying
-source for recovery, never reinterpret historical receipts under new tooling.
+`recovery-evidence/retired-checkouts/20261104-issue139/`, with maintainer review
+by **2026-12-04**. Retention refuses excess/expiry without deletion. No cleanup,
+mtime renewal or retirement is authorized. Previously removed target evidence
+and Runtime 0.18.1 binaries must not be claimed present.
+
+[Issue #50](https://github.com/dragginzgame/ic-platform/issues/50) remains explicitly
+deferred for native Agent's upstream crypto-bigint advisory; no waiver or crypto
+rewrite was added. Other ownership/provenance constraints remain in
+[AGENTS.md](../../AGENTS.md) and the [migration contract](../migration.md).

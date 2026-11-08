@@ -13,14 +13,20 @@ fi
 previous="${2:-}"
 # Finish the roster observation before checking or preparing either lock. A
 # process substitution hides a failed (or partially emitted) producer from set -e.
-roster="$(jq -er '.groups[] | [.name,.primary,(.members|join(" "))] | @tsv' ci/cargo-release-groups.json)"
+groups="$(jq -er '.groups[] | [.name,.primary,(.members|join(" "))] | @tsv' ci/cargo-release-groups.json)"
+# Observe each primary once, before either lock is prepared.
+roster="$(while IFS=$'\t' read -r owner primary members; do
+    version="$(yq -p toml -o json -r '.package.version' "crates/$primary/Cargo.toml")" || exit
+    printf '%s\t%s\t%s\n' "$owner" "$version" "$members"
+done <<< "$groups")"
 for lock in scripts/fixtures/{cdk-runtime,timers-runtime}/Cargo.lock; do
     records="$(yq -p toml -o json '.' "$lock" | jq -c '[.package[] | select(.source == null)]')"
-    while IFS=$'\t' read -r owner primary members; do
-        version="$(yq -p toml -o json -r '.package.version' "crates/$primary/Cargo.toml")"
+    # Admit and index every local identity once; duplicates never select a winner.
+    records="$(jq -ce 'reduce .[] as $p ({}; if has($p.name) then error("duplicate owner: " + $p.name) else .[$p.name] = $p.version end)' <<< "$records")"
+    while IFS=$'\t' read -r owner version members; do
         packages=()
         for package in $members; do
-            observed="$(jq -r --arg name "$package" '[.[] | select(.name == $name)] | if length > 1 then error("duplicate owner") else .[0].version // empty end' <<< "$records")"
+            observed="$(jq -r --arg name "$package" '.[$name] // empty' <<< "$records")"
             [[ -n "$observed" ]] || { echo "$lock: missing local $package qualification identity" >&2; exit 1; }
             if [[ "$observed" != "$version" ]]; then
                 if [[ "$mode" != prepare || "$group" != "$owner" || "$observed" != "$previous" ]]; then

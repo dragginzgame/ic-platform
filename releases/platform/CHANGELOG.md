@@ -4,6 +4,25 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.26.1] - Unreleased
+
+### 🛠️ Tooling
+
+- Adopt Shared 0.31.10: format only Cargo workspace members and use
+  `make cloc CLOC_DEPTH=0` for crate rows or `CLOC_DEPTH=1` for module rows.
+  Crate/module selectors narrow the report. Private tooling maintenance does
+  not require a crate release.
+- Cache authenticated pinned downloads before hosted tool setup and save after
+  setup. Run one complete-history, redacted secret scan in repository CI,
+  including documentation changes, independently of host and release matrices.
+- Retire the unadopted Candid prototypes while preserving immutable reproduction
+  sources, licenses and historical results. Separate current migration contracts
+  from their earlier investigations.
+- Share benchmark preparation, admission-test tools and fixture copying; batch
+  release-lock observations and retain dependency-graph refusals in one pass.
+- Organize installed qualification by scenario and declare fixture method names
+  and IDs once, preserving their bytes, assertion order and lifecycle checks.
+
 ## [0.26.0] - 2026-11-08
 
 ### 💥 Breaking

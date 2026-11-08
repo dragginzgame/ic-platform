@@ -40,36 +40,9 @@ RUST
     WASM_BENCH_PROFILES='bls verification' WASM_BENCH_RECIPES="$recipes" \
         bash "$root/scripts/benchmarks/wasm-size.sh" "$source" "$output/$variant"
 done
-mkdir -p "$output/driver/src"
-cp "$root/scripts/fixtures/cdk-runtime/bls_driver.rs" "$output/driver/src/main.rs"
-cp -R "$root/scripts/fixtures/cdk-runtime/pocketic_support" "$output/driver/src/"
-cp "$root/Cargo.lock" "$output/driver/Cargo.lock"
-platform="$(perl -MJSON::PP -e 'print encode_json($ARGV[0])' "$root/crates/ic-platform")"
-testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-tokio="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.tokio' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-cat > "$output/driver/Cargo.toml" <<MANIFEST
-[package]
-name = "platform-bls-benchmark"
-version = "0.0.0"
-edition = "2024"
-rust-version = "$compiler"
-
-[package.metadata.shared-tooling.loc]
-category = "benchmarks"
-[workspace]
-resolver = "3"
-[dependencies]
-ic-platform = { path = $platform, default-features = false, features = ["principal-external"] }
-ic-testkit = { $testkit }
-tokio = { $tokio }
-MANIFEST
-cargo +"$compiler" metadata --manifest-path "$output/driver/Cargo.toml" --offline \
-    --format-version 1 > "$output/driver/metadata.json"
-CARGO_TARGET_DIR="${BLS_BENCH_HOST_TARGET_DIR:-$output/target-driver}" \
-    cargo +"$compiler" build --manifest-path "$output/driver/Cargo.toml" --frozen \
-    > "$output/driver/build.log" 2>&1
-driver="${BLS_BENCH_HOST_TARGET_DIR:-$output/target-driver}/debug/platform-bls-benchmark"
-shasum -a 256 "$driver" "$output/driver/src/main.rs" "$output/driver/Cargo.lock" > "$output/driver/sha256.txt"
+# shellcheck source=scripts/benchmarks/driver.sh
+source "$root/scripts/benchmarks/driver.sh"
+build_benchmark_driver "$root" "$output" "$compiler" bls "${BLS_BENCH_HOST_TARGET_DIR:-$output/target-driver}"
 for recipe in $recipes; do
     "$driver" "$root/crates/ic-platform/tests/fixtures" \
         alloc "$output/alloc/$recipe-bls.optimized.wasm" \

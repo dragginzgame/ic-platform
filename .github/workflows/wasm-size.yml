@@ -51,12 +51,19 @@ jobs:
         with:
           node-version: '24.21.0'
           package-manager-cache: false
-      - name: Prepare pinned tools and sources
+      - name: Restore pinned tool downloads
+        uses: ./.github/actions/cache-tool-downloads
+      - name: Prepare pinned tools
         run: |
           rustup toolchain install --profile minimal --no-self-update
           rustup target add wasm32-unknown-unknown
           make install-host-tools install-ic-tools IC_TOOLS=ic-wasm
-          cargo fetch --locked
+      - name: Save pinned tool downloads
+        uses: ./.github/actions/cache-tool-downloads
+        with:
+          mode: save
+      - name: Prepare locked sources
+        run: cargo fetch --locked
       - name: Compare identical probe sources and build settings
         env:
           BASELINE: ${{ github.event.pull_request.base.sha || github.event.before || inputs.baseline }}

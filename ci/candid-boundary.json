@@ -1030,27 +1030,6 @@
          "reason" : "Native profiling example encodes the real external ledger account/transfer contract."
       },
       {
-         "declaration" : "fn encode<T: CandidType>(value: T) -> candid::Result<Vec<u8>>",
-         "kind" : "codec-comparison",
-         "path" : "scripts/benchmarks/0.9/candid-packaging/consumer/lib.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn typed<T: for<'de> Deserialize<'de> + CandidType>(\n    b: &[u8],\n    c: &DecoderConfig,\n) -> Result<String, candid::Error>",
-         "kind" : "codec-comparison",
-         "path" : "scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/main.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn emit<T: CandidType>(kind: &str, v: T)",
-         "kind" : "codec-comparison",
-         "path" : "scripts/benchmarks/0.9/candid-reader/harness/src/bin/differential/main.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
          "declaration" : "impl contract::CandidType for Broken",
          "kind" : "codec-comparison",
          "path" : "scripts/fixtures/cdk-runtime/external_canister/mod.rs",

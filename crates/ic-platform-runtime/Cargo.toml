@@ -10,6 +10,10 @@ readme = "README.md"
 publish = ["crates-io"]
 include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
+[package.metadata.cargo-machete]
+# Cargo's links constraint enforces executor uniqueness without a Rust import.
+ignored = ["ic-platform-runtime-guard"]
+
 [features]
 default = []
 ic0 = []

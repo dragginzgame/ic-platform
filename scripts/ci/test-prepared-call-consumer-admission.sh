@@ -34,25 +34,17 @@ bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" scripts/ci/
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"
-cat > "$fixture/bin/rustc" <<'RUSTC'
-#!/usr/bin/env bash
-if [[ "$1" == --version ]]; then printf 'rustc %s (fixture)\n' "$ADMISSION_COMPILER"
-else printf 'host: x86_64-unknown-linux-gnu\n'; fi
-RUSTC
+export PLATFORM_ADMISSION_TOOLS="$root/scripts/fixtures/admission-tools"
+export PLATFORM_ADMISSION_PACKAGE=platform-runtime-driver
+cp "$PLATFORM_ADMISSION_TOOLS/rustc.sh" "$fixture/bin/rustc"
 cat > "$fixture/bin/cargo" <<'CARGO'
 #!/usr/bin/env bash
 set -euo pipefail
 for arg in "$@"; do [[ -n "$arg" ]] || { echo 'empty argument reached Cargo' >&2; exit 31; }; done
 printf '%s\n' "$*" >> "$ADMISSION_CALLS"
+# shellcheck source=scripts/fixtures/admission-tools/cargo.sh
+source "$PLATFORM_ADMISSION_TOOLS/cargo.sh"
 case "$1" in
-    --version) printf 'cargo %s (fixture)\n' "$ADMISSION_COMPILER" ;;
-    locate-project) exit 0 ;;
-    metadata)
-        if [[ " $* " == *' --no-deps '* ]]; then
-            dependencies='[]'
-            if [[ "${ADMISSION_DIRECT_CBOR:-no}" == yes ]]; then dependencies='[{"name":"serde_cbor","kind":null}]'; fi
-            printf '{"version":1,"workspace_root":"%s","workspace_members":["probe"],"packages":[{"id":"probe","name":"platform-runtime-driver","dependencies":%s}]}\n' "$PWD" "$dependencies"
-        else printf '{}\n'; fi ;;
     tree)
         printf 'ic-platform-runtime v0.17.0 (/local/runtime)\n'
         case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'ic-platform v0.17.0 (/local/platform)\ncandid v0.10.39\n' ;; esac

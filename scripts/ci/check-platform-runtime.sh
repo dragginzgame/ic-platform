@@ -5,27 +5,29 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 qualification=owner
 if [[ "${1:-}" == --timers ]]; then qualification=timers; shift; fi
-adapters=""
-if [[ "${1:-}" == --external-adapters ]]; then adapters=1; shift; fi
-prepared_call=""
-if [[ "${1:-}" == --prepared-call ]]; then prepared_call=1; shift; fi
+adapter_mode=external
+explicit_adapters=false
+if [[ "${1:-}" == --external-adapters ]]; then explicit_adapters=true; shift; fi
+transport_mode=raw
+if [[ "${1:-}" == --prepared-call ]]; then transport_mode=prepared; shift; fi
 published=""
+selection_mode=source
 if [[ "${1:-}" == --published ]]; then
     stable_version='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
     [[ $# -ge 2 && "$2" =~ $stable_version ]] || exit 2
-    published="$2"
+    [[ "$transport_mode" == raw ]] || { echo 'The prepared-call fixture selects local sources; omit --published' >&2; exit 2; }
+    published="$2"; selection_mode=published
+    if [[ "$explicit_adapters" == false ]]; then adapter_mode=raw; fi
     shift 2
 fi
-[[ -z "$prepared_call" || -z "$published" ]] || { echo 'The prepared-call fixture selects local sources; omit --published' >&2; exit 2; }
-if [[ -z "$published" ]]; then adapters=1; fi
-external_feature=external-candid
-if [[ -n "$adapters" ]]; then external_feature=external-adapters; fi
 mode="${1:-run}"
-[[ $# -le 1 ]] || { echo "Expected [--timers] [--external-adapters] [--prepared-call | --published X.Y.Z] [mode]" >&2; exit 2; }
-case "$mode" in run|--prepare|--check-graph|--build-only|--refresh-lock) ;; *) echo "Usage: $0 [--timers] [--external-adapters] [--prepared-call | --published X.Y.Z] [run|--prepare|--check-graph|--build-only|--refresh-lock]" >&2; exit 2 ;; esac
-[[ ( -z "$published" && -z "$prepared_call" ) || "$mode" != --refresh-lock ]] || {
-    echo 'Published or prepared-call qualification cannot rewrite the maintained local lock' >&2; exit 2;
-}
+[[ $# -le 1 ]] || { echo 'Expected [--timers] [--external-adapters] [--prepared-call | --published X.Y.Z] [mode]' >&2; exit 2; }
+case "$mode" in
+    run|--check-graph|--build-only) ;;
+    --prepare) [[ "$selection_mode" == source ]] || { echo 'Prepare published caches explicitly before qualification' >&2; exit 2; } ;;
+    --refresh-lock) [[ "$selection_mode/$transport_mode" == source/raw ]] || { echo 'Published or prepared-call qualification cannot rewrite the maintained local lock' >&2; exit 2; } ;;
+    *) echo "Unknown runtime qualification mode: $mode" >&2; exit 2 ;;
+esac
 if [[ "$mode" == run && -z "${POCKET_IC_BIN:-}" && -z "${IC_TESTKIT_POCKET_IC_URL:-}" ]]; then
     echo 'Set POCKET_IC_BIN (Testkit-admitted binary) or IC_TESTKIT_POCKET_IC_URL first' >&2
     exit 1
@@ -50,10 +52,6 @@ timers=""
 if [[ "$qualification" == timers ]]; then
     timers="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-timers' Cargo.toml | "$root/.tools/host/bin/jq" -r 'if type == "string" then {version: .} else . end | to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
 fi
-selection_mode=source
-if [[ -n "$published" ]]; then selection_mode=published; fi
-adapter_mode=raw
-if [[ -n "$adapters" ]]; then adapter_mode=external; fi
 PLATFORM_FIXTURE_RUNTIME="$runtime_selection" PLATFORM_FIXTURE_MSRV="$msrv" PLATFORM_FIXTURE_PLATFORM="$selection" \
 PLATFORM_FIXTURE_TESTKIT="$testkit" PLATFORM_FIXTURE_WIRE="$wire" PLATFORM_FIXTURE_SERDE="$serde" \
 PLATFORM_FIXTURE_TOKIO="$tokio" PLATFORM_FIXTURE_TIMERS="$timers" \
@@ -65,11 +63,11 @@ mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
 cp crates/ic-platform/tests/management_consumer.rs "$fixture/crates/canister/src/management_proof/mod.rs"
 cp -R crates/ic-platform/tests/support "$fixture/crates/canister/src/management_proof/"
 cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/src/management_proof/fixtures/"
-cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister} "$fixture/crates/canister/src/"
+cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister,execution,cycles,stable_checks,system_checks,timer_checks} "$fixture/crates/canister/src/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
 cp -R "$root/scripts/fixtures/cdk-runtime/pocketic_support" "$fixture/apps/driver/src/"
 cp scripts/fixtures/cdk-runtime/driver/tests.rs "$fixture/apps/driver/src/tests.rs"
-cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver,benchmarks} "$fixture/apps/driver/src/"
+cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver,benchmarks,driver_scenarios} "$fixture/apps/driver/src/"
 lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
 if [[ "$qualification" == timers ]]; then lock="$root/scripts/fixtures/timers-runtime/Cargo.lock"; fi
 printf '%s\n' "$qualification" > "$fixture/qualification"
@@ -129,7 +127,6 @@ fi
 cp "$lock" "$fixture/Cargo.lock"
 
 if [[ "$mode" == --prepare ]]; then
-    [[ -z "$published" ]] || { echo "Prepare published caches explicitly before qualification" >&2; exit 2; }
     cargo fetch --manifest-path "$fixture/Cargo.toml" --locked
     printf 'Runtime dependency preparation retained at %s\n' "$fixture"
     exit 0
@@ -145,26 +142,28 @@ fi
 cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 # One selection owner for graph admission, compilation, artifacts and execution.
+profiles=(raw-wire raw-external-candid)
+if [[ "$transport_mode" == prepared ]]; then profiles+=(owned-wire owned-external-candid); fi
 select_runtime_profile() {
-    selected_features=()
+    transport="${1%%-*}" protocol="${1#*-}"
+    selected_features=() selected_admission=() selected_external=""
+    case "$1" in
+        raw-wire|owned-wire) ;;
+        raw-external-candid|owned-external-candid)
+            selected_features=(--features external-candid)
+            if [[ "$adapter_mode" == external ]]; then selected_features=(--features external-adapters); fi
+            selected_admission=(--external-candid)
+            selected_external=1 ;;
+        *) echo "Unknown runtime profile: $1" >&2; exit 2 ;;
+    esac
     if [[ "$qualification" == timers ]]; then selected_features+=(--features timers-composition); fi
-    selected_admission=()
-    selected_external=""
-    selected_artifact="$2"
-    if [[ -n "$prepared_call" ]]; then selected_artifact="$1-$2"; fi
-    if [[ "$1" == owned ]]; then selected_features+=(--features prepared-call); fi
-    if [[ "$2" == external-candid ]]; then
-        selected_features+=(--features "$external_feature")
-        selected_admission=(--external-candid)
-        selected_external=1
-    fi
+    if [[ "$transport" == owned ]]; then selected_features+=(--features prepared-call); fi
+    selected_artifact="$protocol"
+    if [[ "$transport_mode" == prepared ]]; then selected_artifact="$1"; fi
 }
-transports=(raw)
-if [[ -n "$prepared_call" ]]; then transports+=(owned); fi
-for transport in "${transports[@]}"; do
-for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
-    for protocol in wire external-candid; do
-        select_runtime_profile "$transport" "$protocol"
+for profile in "${profiles[@]}"; do
+    for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
+        select_runtime_profile "$profile"
         if [[ "$graph_target" != wasm* && -n "$selected_external" ]]; then
             selected_admission+=(--native-management)
         fi
@@ -184,7 +183,6 @@ for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknow
             echo 'Canister runtime acquired an unselected Candid service printer' >&2; exit 1
         fi
     done
-done
 done
 if [[ "$mode" == --check-graph ]]; then
     printf 'Runtime graph evidence retained at %s\n' "$fixture"
@@ -216,10 +214,9 @@ build_runtime_driver() {
 retain_runtime_artifact "$build/host-$msrv-$qualification" debug/platform-runtime-driver \
     "$fixture/artifacts/platform-runtime-driver" build_runtime_driver
 toolchain="$msrv"
-for transport in "${transports[@]}"; do
-    rustc +"$toolchain" -vV > "$fixture/compiler-$toolchain.txt"
-    for protocol in wire external-candid; do
-        select_runtime_profile "$transport" "$protocol"
+rustc +"$toolchain" -vV > "$fixture/compiler-$toolchain.txt"
+for profile in "${profiles[@]}"; do
+        select_runtime_profile "$profile"
         mkdir -p "$fixture/artifacts/$toolchain"
         retain_runtime_artifact "$build/$toolchain" \
             wasm32-unknown-unknown/release/platform_runtime_canister.wasm \
@@ -232,7 +229,7 @@ for transport in "${transports[@]}"; do
             if [[ -n "$selected_external" ]]; then
                 (
                     export PLATFORM_EXTERNAL_CANDID=1
-                    if [[ -n "$adapters" ]]; then export PLATFORM_EXTERNAL_ADAPTERS=1; else unset PLATFORM_EXTERNAL_ADAPTERS; fi
+                    if [[ "$adapter_mode" == external ]]; then export PLATFORM_EXTERNAL_ADAPTERS=1; else unset PLATFORM_EXTERNAL_ADAPTERS; fi
                     "$fixture/artifacts/platform-runtime-driver" "$fixture/artifacts/$toolchain/$selected_artifact.wasm"
                 )
             else
@@ -243,6 +240,5 @@ for transport in "${transports[@]}"; do
             fi
             printf 'PASS %s %s %s\n' "$toolchain" "$transport" "$protocol" >> "$fixture/profiles.log"
         fi
-    done
 done
 printf 'Runtime sources, lock and metadata retained at %s\n' "$fixture"

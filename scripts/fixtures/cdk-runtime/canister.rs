@@ -7,11 +7,17 @@ use ic_platform_runtime::{
 };
 use std::cell::Cell;
 #[cfg(not(feature = "prepared-call"))]
-use transport::Execute as _;
+use transport::Execute;
 #[cfg(feature = "external-candid")]
 // Copied from the workspace-formatted management_consumer.rs by the runtime script.
 #[rustfmt::skip]
 mod management_proof;
+mod cycles;
+mod execution;
+mod stable_checks;
+mod system_checks;
+#[cfg(feature = "timers-composition")]
+mod timer_checks;
 mod transport;
 
 #[cfg(feature = "external-candid")]
@@ -30,37 +36,6 @@ fn management_proof() -> u8 {
 thread_local! {
     static VALUE: Cell<u64> = const { Cell::new(0) };
     static CLEANED: Cell<u64> = const { Cell::new(0) };
-}
-
-// Owner-local cancellation: dropping a queued future exactly once, and refusing
-// to cancel a new task through a stale handle. No scheduler is involved.
-#[ic_platform_runtime::cdk::update(
-    decode_with = "codec::decode::<_, { protocol::Method::CancelTask as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::CancelTask as u64 }>"
-)]
-fn cancel_task() -> u64 {
-    struct Dropped(std::rc::Rc<Cell<u64>>);
-    impl Drop for Dropped {
-        fn drop(&mut self) {
-            self.0.set(self.0.get() + 1);
-        }
-    }
-    let count = std::rc::Rc::new(Cell::new(0));
-    let spawn = || {
-        let dropped = Dropped(count.clone());
-        ic_platform_runtime::executor::spawn_migratory(async move {
-            std::future::pending::<()>().await;
-            drop(dropped);
-        })
-    };
-    let first = spawn();
-    ic_platform_runtime::executor::cancel_task(&first);
-    assert_eq!(count.get(), 1);
-    let second = spawn();
-    ic_platform_runtime::executor::cancel_task(&first);
-    assert_eq!(count.get(), 1);
-    ic_platform_runtime::executor::cancel_task(&second);
-    count.get()
 }
 
 // Compare just the message-buffer read, excluding Wire decoding/encoding.
@@ -111,126 +86,6 @@ fn after_upgrade(value: u64) {
     ic_timers::initialize_runtime().unwrap();
 }
 
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Value as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Value as u64 }>"
-)]
-fn value() -> u64 {
-    VALUE.get()
-}
-
-// A query must drain protected wakes produced while its own future is polling.
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::SelfWakeQuery as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::SelfWakeQuery as u64 }>"
-)]
-async fn self_wake_query() -> u64 {
-    let mut polls = 0;
-    let mut saved: Option<std::task::Waker> = None;
-    std::future::poll_fn(|cx| {
-        polls += 1;
-        if let Some(first) = &saved {
-            assert!(first.will_wake(cx.waker()));
-            std::task::Poll::Ready(polls)
-        } else {
-            saved = Some(cx.waker().clone());
-            for _ in 0..32 {
-                cx.waker().wake_by_ref();
-            }
-            std::task::Poll::Pending
-        }
-    })
-    .await
-}
-
-#[ic_platform_runtime::cdk::query(
-    name = "scalar",
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Scalar as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Scalar as u64 }>"
-)]
-fn r#match(input: u64) -> u64 {
-    input + 1
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Tuple as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Tuple as u64 }>"
-)]
-fn tuple() -> (u64, bool) {
-    (7, true)
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Unit as u64 }>",
-    encode_with = "codec::encode_unit::<{ protocol::Method::Unit as u64 }>"
-)]
-fn unit() {}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Awaited as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Awaited as u64 }>"
-)]
-async fn awaited(input: u64) -> u64 {
-    let bytes = transport::unbounded_wait(api::canister_self(), "scalar")
-        .with_wait_policy(ic_platform_runtime::cdk::call::WaitPolicy::Bounded {
-            timeout_seconds: 300,
-        })
-        .take_raw_args(codec::request("scalar", &input))
-        .execute()
-        .await
-        .unwrap()
-        .into_bytes();
-    codec::response("scalar", &bytes)
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    composite = true,
-    decode_with = "codec::decode::<_, { protocol::Method::Composite as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Composite as u64 }>"
-)]
-async fn composite(input: u64) -> u64 {
-    let bytes = transport::bounded_wait(api::canister_self(), "scalar")
-        .with_wait_policy(ic_platform_runtime::cdk::call::WaitPolicy::Unbounded)
-        .take_raw_args(codec::request("scalar", &input))
-        .execute()
-        .await
-        .unwrap()
-        .into_bytes();
-    codec::response("scalar", &bytes)
-}
-
-fn refuse() -> Result<(), String> {
-    Err("fixture guard refused".into())
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    guard = "refuse",
-    decode_with = "codec::decode::<_, { protocol::Method::Guarded as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Guarded as u64 }>"
-)]
-fn guarded() -> u64 {
-    999
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    manual_reply = true,
-    decode_with = "codec::decode::<_, { protocol::Method::Manual as u64 }>"
-)]
-fn manual() {
-    api::msg_reply(codec::encode::<_, { protocol::Method::Manual as u64 }>(
-        vec![0u8, 255],
-    ));
-}
-
 struct Cleanup;
 
 impl Drop for Cleanup {
@@ -241,176 +96,8 @@ impl Drop for Cleanup {
     }
 }
 
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::CallbackTrap as u64 }>",
-    encode_with = "codec::encode_unit::<{ protocol::Method::CallbackTrap as u64 }>"
-)]
-async fn callback_trap() {
-    let _cleanup = Cleanup;
-    transport::unbounded_wait(api::canister_self(), "scalar")
-        .take_raw_args(codec::request("scalar", &1u64))
-        .execute()
-        .await
-        .unwrap();
-    api::trap("fixture callback trap");
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Cleaned as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Cleaned as u64 }>"
-)]
-fn cleaned() -> u64 {
-    CLEANED.get()
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::ProtectedPending as u64 }>",
-    encode_with = "codec::encode_unit::<{ protocol::Method::ProtectedPending as u64 }>"
-)]
-fn protected_pending() {
-    futures::spawn(std::future::pending());
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Migratory as u64 }>",
-    encode_with = "codec::encode_unit::<{ protocol::Method::Migratory as u64 }>"
-)]
-fn migratory() {
-    futures::spawn_migratory(async { VALUE.set(VALUE.get() + 1) });
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Controller as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Controller as u64 }>"
-)]
-fn controller() -> bool {
-    api::is_controller(&api::msg_caller())
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Missing as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Missing as u64 }>"
-)]
-async fn missing() -> bool {
-    // A successful transport can return bytes invalid for the chosen codec.
-    // Do not reclassify that reply as a submission failure or retry permission.
-    let reply = transport::bounded_wait(api::canister_self(), "manual")
-        .take_raw_args(codec::request("manual", &()))
-        .execute()
-        .await
-        .unwrap();
-    assert!(
-        ic_wire::native::decode_response::<()>(
-            protocol::Method::Manual as u64,
-            reply.as_ref(),
-            protocol::LIMITS,
-        )
-        .is_err()
-    );
-    matches!(
-        transport::bounded_wait(api::canister_self(), "no_such_method")
-            .take_raw_args(codec::request("no_such_method", &()))
-            .execute()
-            .await,
-        Err(ic_platform_runtime::cdk::call::CallFailed::CallRejected(_))
-    )
-}
-
 thread_local! {
     static RECEIVED: Cell<u128> = const { Cell::new(0) };
-}
-
-// Hidden qualification endpoints do not change the fixed public service fixture.
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    manual_reply = true,
-    decode_with = "codec::decode::<_, { protocol::Method::CycleReceiver as u64 }>"
-)]
-fn cycle_receiver(limit: u128, mode: u8) {
-    let available = api::msg_cycles_available();
-    let accepted = api::msg_cycles_accept(limit);
-    let remaining = api::msg_cycles_available();
-    RECEIVED.set(RECEIVED.get() + accepted);
-    match mode {
-        1 => api::msg_reject("fixture cycle rejection"),
-        2 => api::trap("fixture cycle receiver trap"),
-        _ => api::msg_reply(
-            codec::encode::<_, { protocol::Method::CycleReceiver as u64 }>((
-                available, accepted, remaining,
-            )),
-        ),
-    }
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::CycleTotal as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::CycleTotal as u64 }>"
-)]
-fn cycle_total() -> u128 {
-    RECEIVED.get()
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::CycleRoundtrip as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::CycleRoundtrip as u64 }>"
-)]
-async fn cycle_roundtrip(
-    receiver: Principal,
-    offered: u128,
-    limit: u128,
-    mode: u8,
-    trap_callback: bool,
-) -> (bool, u128, Vec<u128>, Vec<u64>) {
-    let _cleanup = Cleanup;
-    let before_message = api::instruction_counter();
-    let before_context = api::call_context_instruction_counter();
-    let bytes = codec::request("cycle_receiver", &(limit, mode));
-    let call = transport::unbounded_wait(receiver, "cycle_receiver")
-        .with_raw_args(&bytes)
-        .with_cycles(offered);
-    assert_eq!(
-        call.get_cost(),
-        offered.saturating_add(api::cost_call(
-            "cycle_receiver".len() as u64,
-            bytes.len() as u64
-        ))
-    );
-    let result = call.execute().await;
-    // Match Blob's policy: only an actual reply/reject callback owns a refund.
-    let refunded = match &result {
-        Ok(_) | Err(ic_platform_runtime::cdk::call::CallFailed::CallRejected(_)) => {
-            api::msg_cycles_refunded()
-        }
-        Err(error) => panic!("fixture did not reach a callback: {error}"),
-    };
-    let after_message = api::instruction_counter();
-    let after_context = api::call_context_instruction_counter();
-    if trap_callback {
-        VALUE.set(999);
-        api::trap("fixture cycle callback write trap");
-    }
-    let reply = match &result {
-        Ok(response) => {
-            let (available, accepted, remaining): (u128, u128, u128) =
-                codec::response("cycle_receiver", response.as_ref());
-            vec![available, accepted, remaining]
-        }
-        Err(_) => Vec::new(),
-    };
-    (
-        result.is_ok(),
-        refunded,
-        reply,
-        vec![before_message, before_context, after_message, after_context],
-    )
 }
 
 #[cfg(test)]
@@ -444,63 +131,6 @@ fn checkpoint() -> (bool, bool, u64, u64) {
     CHECKPOINT.get()
 }
 
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::StableEdit as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::StableEdit as u64 }>"
-)]
-fn stable_edit(value: u64, grow: bool, fail: bool) -> (u64, u64) {
-    let before = ic_platform_runtime::ic0::stable64_size();
-    if before == 0 || grow {
-        assert_eq!(ic_platform_runtime::ic0::stable64_grow(1), before);
-    }
-    ic_platform_runtime::ic0::stable64_write(&value.to_le_bytes(), 0);
-    if fail {
-        api::trap("fixture stable rollback");
-    }
-    (before, ic_platform_runtime::ic0::stable64_size())
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::StableValue as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::StableValue as u64 }>"
-)]
-fn stable_value() -> (u64, u64) {
-    let mut bytes = [0; 8];
-    ic_platform_runtime::ic0::stable64_read(&mut bytes, 0);
-    (
-        ic_platform_runtime::ic0::stable64_size(),
-        u64::from_le_bytes(bytes),
-    )
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::StableRefusedGrowth as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::StableRefusedGrowth as u64 }>"
-)]
-fn stable_refused_growth() -> (u64, u64) {
-    let result = ic_platform_runtime::ic0::stable64_grow(u64::MAX);
-    (result, ic_platform_runtime::ic0::stable64_size())
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::StableBoundsTrap as u64 }>",
-    encode_with = "codec::encode_unit::<{ protocol::Method::StableBoundsTrap as u64 }>"
-)]
-fn stable_bounds_trap(write: bool) {
-    // A subsequent out-of-bounds call must roll back this valid write too.
-    ic_platform_runtime::ic0::stable64_write(&[255], 0);
-    let end = ic_platform_runtime::ic0::stable64_size() * 65_536;
-    if write {
-        ic_platform_runtime::ic0::stable64_write(&[1], end);
-    } else {
-        ic_platform_runtime::ic0::stable64_read(&mut [0], end);
-    }
-}
-
 #[ic_platform_runtime::cdk::query(
     guard = "codec::admit",
     decode_with = "codec::decode::<_, { protocol::Method::CheckpointBytes as u64 }>",
@@ -517,49 +147,6 @@ fn checkpoint_bytes() -> Vec<u8> {
     }
     #[cfg(not(feature = "external-candid"))]
     Vec::new()
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::PublishRoot as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::PublishRoot as u64 }>"
-)]
-fn publish_root(root: Vec<u8>) -> bool {
-    api::certified_data_set(root);
-    api::data_certificate().is_none()
-}
-
-#[ic_platform_runtime::cdk::query(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::Certificate as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::Certificate as u64 }>"
-)]
-fn certificate() -> Option<Vec<u8>> {
-    api::data_certificate()
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::SystemHelpers as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::SystemHelpers as u64 }>"
-)]
-fn system_helpers() -> (u64, u128, bool) {
-    assert!(!api::root_key().is_empty());
-    assert_ne!(api::subnet_self(), Principal::anonymous());
-    assert!(api::canister_cycle_balance() >= api::canister_liquid_cycle_balance());
-    assert!(api::cost_create_canister() > 0);
-    assert!(api::cost_http_request(100, 100) > 0);
-    assert!(api::cost_sign_with_ecdsa("missing-fixture-key", 0).is_err());
-    assert!(api::performance_counter(api::PerformanceCounterType::InstructionCounter) > 0);
-    let previous = api::global_timer_set(0);
-    api::global_timer_set(previous);
-    api::debug_print("platform system fixture");
-    ic_platform_runtime::cdk::println!("platform {}", "macro");
-    (
-        api::canister_version(),
-        api::cycles_burn(123),
-        api::data_certificate().is_none(),
-    )
 }
 
 #[ic_platform_runtime::cdk::inspect_message]
@@ -588,112 +175,9 @@ async fn external_management() -> bool {
     bytes.len() == 32
 }
 
-#[cfg(feature = "timers-composition")]
-use ic_timers::{
-    OnceDecision, OnceRunResult, TimerCompletion, TimerIdentity, TimerSchedule, TimerStart,
-};
-#[cfg(feature = "timers-composition")]
-use std::time::Duration;
-
-#[cfg(feature = "timers-composition")]
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::TimerStart as u64 }>",
-    encode_with = "codec::encode_unit::<{ protocol::Method::TimerStart as u64 }>"
-)]
-fn timer_start(trap: bool, cancel: bool) {
-    let registration = ic_timers::register_once(
-        TimerIdentity::try_new("platform", "qualification", "once").unwrap(),
-        TimerStart::RemoveWhenStopped {
-            initial: TimerSchedule::After(Duration::from_secs(1)),
-        },
-        move |_| async move {
-            let _cleanup = Cleanup;
-            transport::unbounded_wait(api::canister_self(), "scalar")
-                .take_raw_args(codec::request("scalar", &1u64))
-                .execute()
-                .await
-                .unwrap();
-            if trap {
-                api::trap("fixture timer callback trap");
-            }
-            VALUE.set(VALUE.get() + 1);
-            OnceRunResult::new(TimerCompletion::no_work(), OnceDecision::Stop)
-        },
-    )
-    .unwrap();
-    if cancel {
-        registration.cancel().unwrap();
-    }
-}
-
 mod codec;
 #[cfg(feature = "external-adapters")]
 mod external_canister;
 mod protocol;
 mod wire_canister;
 mod wire_protocol;
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::SubmissionPressure as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::SubmissionPressure as u64 }>"
-)]
-async fn submission_pressure() -> (u64, u64) {
-    let mut calls: Vec<_> = (0..600)
-        .map(|_| {
-            Some(Box::pin(
-                transport::unbounded_wait(api::canister_self(), "scalar")
-                    .take_raw_args(codec::request("scalar", &1u64))
-                    .execute(),
-            ))
-        })
-        .collect();
-    let (mut replies, mut refused) = (0u64, 0u64);
-    std::future::poll_fn(move |cx| {
-        for slot in &mut calls {
-            let Some(call) = slot else { continue };
-            match call.as_mut().poll(cx) {
-                std::task::Poll::Ready(result) => {
-                    match result {
-                        Ok(_) => replies += 1,
-                        Err(ic_platform_runtime::cdk::call::CallFailed::CallPerformFailed(_)) => {
-                            refused += 1
-                        }
-                        Err(error) => panic!("unexpected submission error: {error}"),
-                    }
-                    *slot = None;
-                }
-                std::task::Poll::Pending => {}
-            }
-        }
-        if calls.iter().all(Option::is_none) {
-            std::task::Poll::Ready((replies, refused))
-        } else {
-            std::task::Poll::Pending
-        }
-    })
-    .await
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::InsufficientCycles as u64 }>",
-    encode_with = "codec::encode::<_, { protocol::Method::InsufficientCycles as u64 }>"
-)]
-async fn insufficient_cycles() -> bool {
-    matches!(transport::bounded_wait(api::canister_self(), "scalar")
-        .take_raw_args(codec::request("scalar", &1u64))
-        .with_cycles(api::canister_liquid_cycle_balance()).execute().await,
-        Err(ic_platform_runtime::cdk::call::CallFailed::InsufficientLiquidCycleBalance(error))
-            if error.available < error.required)
-}
-
-#[ic_platform_runtime::cdk::update(
-    guard = "codec::admit",
-    decode_with = "codec::decode::<_, { protocol::Method::WeakPending as u64 }>",
-    encode_with = "codec::encode_unit::<{ protocol::Method::WeakPending as u64 }>"
-)]
-fn weak_pending() {
-    futures::spawn_weak(std::future::pending());
-}

@@ -17,26 +17,7 @@ finish() {
 trap finish EXIT
 mkdir -p "$fixture/work" "$fixture/logs" "$fixture/bin"
 # Include the current reviewed snapshot and unstaged inputs, without artifacts.
-git -C "$root" ls-files --stage -z > "$fixture/index"
-: > "$fixture/files"
-: > "$fixture/gitlinks"
-while IFS= read -r -d '' entry; do
-    mode="${entry%% *}"
-    path="${entry#*$'\t'}"
-    case "$mode" in
-        100644|100755) [[ ! -e "$root/$path" ]] || printf '%s\0' "$path" >> "$fixture/files" ;;
-        160000) printf '%s\0' "$entry" >> "$fixture/gitlinks" ;;
-        *) echo 'Formatting fixture requires regular files or opaque gitlinks' >&2; exit 1 ;;
-    esac
-done < "$fixture/index"
-git -C "$root" ls-files --others --exclude-standard -z >> "$fixture/files"
-while IFS= read -r -d '' path; do
-    [[ -f "$root/$path" && ! -L "$root/$path" ]] || {
-        echo 'Formatting fixture input is not a regular file' >&2; exit 1;
-    }
-done < "$fixture/files"
-(cd "$root" && tar --null -T "$fixture/files" -cf -) |
-    (cd "$fixture/work" && tar -xf -)
+bash "$root/scripts/ci/copy-platform-fixture.sh" "$root" "$fixture/work" "$fixture"
 export RUNNER_TEMP="$fixture/logs"
 run_make() {
     make --no-print-directory -C "$fixture/work" "$@" > "$fixture/last.log" 2>&1
@@ -80,7 +61,8 @@ if run_make fmt-check "FORMAT_CARGO=$fixture/bin/cargo"; then
     echo 'Failed manifest sorting was admitted' >&2; exit 1
 fi
 grep -q 'FAILED (exit 47,' "$fixture/last.log"
-if grep -q '^fmt --all' "$fixture/calls"; then
+# Tool-version probes are allowed; formatting either selection must stop.
+if grep -Eq '^fmt( --(all|package)( |$)|$)' "$fixture/calls"; then
     echo 'Workspace Rustfmt ran after manifest sorting failed' >&2; exit 1
 fi
 if grep -q 'Standalone Rust formatting' "$fixture/last.log"; then

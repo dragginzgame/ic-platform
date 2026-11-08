@@ -23,4 +23,32 @@ function platform_forbidden(family, name) {
 }
 # Standalone use reports whether the graph contains a forbidden package.
 family != "" { if (platform_forbidden(family, $1)) forbidden_package = 1 }
-END { if (family != "") exit !forbidden_package }
+runtime_mode != "" {
+    if ($1 == "candid") runtime_candid = 1
+    if ($1 == "candid" || $1 == "candid_derive") runtime_codec = 1
+    if (platform_forbidden("runtime-host", $1)) runtime_host = 1
+    if ($0 ~ /^ic-canister-sig-creation v1\.3\.1( \(\*\))?$/) runtime_signature = 1
+    if ($1 == "ic0" && $0 !~ /^ic0 v1\.2\.0( \(\*\))?$/) runtime_bad_ic0 = 1
+    if ($1 ~ /^ic-cdk/ || $1 == "ic0") runtime_retired = 1
+    if ($1 ~ /^ic-cdk/) runtime_cdk = 1
+    if ($1 == "ic-platform-runtime") {
+        identity = $0
+        sub(/ \(\*\)$/, "", identity)
+        if (!(identity in runtime_identities)) { runtime_identities[identity] = 1; runtime_count++ }
+    }
+}
+function runtime_reject(message) {
+    print message ": " FILENAME > "/dev/stderr"
+    exit 1
+}
+END {
+    if (family != "") exit !forbidden_package
+    if (runtime_mode != "") {
+        if (runtime_mode == "wire" && runtime_codec) runtime_reject("Wire runtime acquired Candid")
+        if (runtime_mode == "external" && !runtime_candid) runtime_reject("Missing selected external Candid adapter")
+        if (runtime_host) runtime_reject("Canister graph contains host parsing, Agent or Testkit")
+        if (runtime_signature && runtime_bad_ic0) runtime_reject("Unqualified signature IC0 supplier")
+        if (runtime_retired && (!runtime_signature || runtime_cdk)) runtime_reject("Retired full CDK runtime/generator")
+        if (runtime_count != 1) runtime_reject("Runtime must have one canonical Runtime executor owner")
+    }
+}

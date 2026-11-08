@@ -28,23 +28,15 @@ cp "$root/Cargo.toml" "$fixture/Cargo.toml"
 cp "$root/crates/ic-platform/Cargo.toml" "$fixture/crates/ic-platform/Cargo.toml"
 mkdir -p "$fixture/.tools"
 ln -s "$root/.tools/host" "$fixture/.tools/host"
-cat > "$fixture/bin/rustc" <<'STUB'
-#!/usr/bin/env bash
-if [[ "$1" == --version ]]; then printf 'rustc %s (fixture)\n' "$TEST_MSRV"
-else printf 'host: x86_64-unknown-linux-gnu\n'; fi
-STUB
+export PLATFORM_ADMISSION_TOOLS="$root/scripts/fixtures/admission-tools"
+export PLATFORM_ADMISSION_PACKAGE=platform-consumer-proof
+cp "$PLATFORM_ADMISSION_TOOLS/rustc.sh" "$fixture/bin/rustc"
 cat > "$fixture/bin/cargo" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
+# shellcheck source=scripts/fixtures/admission-tools/cargo.sh
+source "$PLATFORM_ADMISSION_TOOLS/cargo.sh"
 case "$1" in
-    --version) printf 'cargo %s (fixture)\n' "$TEST_MSRV" ;;
-    locate-project) exit 0 ;;
-    metadata)
-        if [[ " $* " == *' --no-deps '* ]]; then
-            dependencies='[]'
-            if [[ "${TEST_DIRECT_CBOR:-no}" == yes ]]; then dependencies='[{"name":"serde_cbor","kind":null}]'; fi
-            printf '{"version":1,"workspace_root":"%s","workspace_members":["probe"],"packages":[{"id":"probe","name":"platform-consumer-proof","dependencies":%s}]}\n' "$PWD" "$dependencies"
-        else printf '{}\n'; fi ;;
     tree)
         if [[ "${TEST_CAPABILITY:-}" == external-codecs ]]; then
             printf 'candid v0.10.39\n'

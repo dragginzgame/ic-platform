@@ -103,8 +103,9 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-Use `make cloc` (`CLOC_SUBCRATES=1` for package rows) for Shared 0.30’s
-source classification, or `bash scripts/dev/cloc.sh --json` for schema 2. It
+Use `make cloc` for classified workspace totals, `make cloc CLOC_DEPTH=0` for
+crate rows, or `make cloc CLOC_DEPTH=1` to include top-level modules. The script
+equivalents use `-d 0` or `-d 1`; `bash scripts/dev/cloc.sh --json` retains schema 2. It
 separates library/application, tests, examples, benchmarks, build/tooling and
 unclassified source, including inline test blocks. The report counts each source
 path once and reports macro expansion limits; it is not a linked-Wasm metric.
@@ -113,7 +114,10 @@ has no singular `test/` or `test.rs` paths. Generated qualification and benchmar
 packages declare `[package.metadata.shared-tooling.loc]` with the appropriate
 `category`, even when their library target carries a consumer proof. Use
 `--manifest /absolute/path/to/Cargo.toml` to classify an independent generated
-workspace explicitly; the default report covers the five main members only.
+workspace explicitly; the default report covers the five main members only. Select one member with
+`bash scripts/dev/cloc.sh -d 1 ic-platform-runtime`, or one branch with
+`bash scripts/dev/cloc.sh -d 1 ic-platform-runtime::executor`. Depth is relative
+to that selection; unknown crate/module names refuse.
 
 New Platform-owned qualification scratch defaults beneath `target/`, while
 Shared snapshot helpers retain their supplier-owned scratch contracts.

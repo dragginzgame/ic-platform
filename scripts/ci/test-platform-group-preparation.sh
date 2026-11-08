@@ -24,12 +24,7 @@ export PATH="$root/.tools/host/bin:$PATH"
 export YQ="$root/.tools/host/bin/yq"
 mkdir "$fixture/source"
 # Exercise the current working source, including prepared untracked scripts.
-git ls-files --cached --others --exclude-standard -z > "$fixture/source-files"
-while IFS= read -r -d '' path; do
-    [[ -f "$path" ]] || continue
-    mkdir -p "$fixture/source/$(dirname "$path")"
-    cp -p "$path" "$fixture/source/$path"
-done < "$fixture/source-files"
+bash "$root/scripts/ci/copy-platform-fixture.sh" "$root" "$fixture/source" "$fixture/inputs"
 cat > "$fixture/source/scripts/release/editor.sh" <<'EDITOR'
 #!/usr/bin/env bash
 set -euo pipefail

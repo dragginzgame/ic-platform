@@ -10,6 +10,10 @@ readme = "README.md"
 publish = ["crates-io"]
 include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
+[package.metadata.cargo-machete]
+# Constrains K256's transitive bigint to the published ECDSA security floor.
+ignored = ["crypto-bigint"]
+
 [features]
 default = []
 principal = ["dep:ic-platform-types", "dep:serde"]

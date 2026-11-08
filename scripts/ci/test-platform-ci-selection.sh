@@ -85,3 +85,49 @@ if CHANGE_EVENT=push CHANGE_REF=refs/heads/main CHANGE_BASE="$base" CHANGE_HEAD=
 fi
 [[ ! -s "$fixture/output" ]]
 echo 'Actual CI wiring preserves native hosts and fails closed for code, mixed, policy, missing-history and failed observations.'
+
+# The repository owns one asynchronous scan and restores/saves authenticated
+# downloads around each actual host/CI/IC tool setup.
+workflows=()
+for workflow in "$root"/.github/workflows/*.yml; do
+    rendered="$fixture/$(basename "$workflow").json"
+    "$yq" -o json . "$workflow" > "$rendered"
+    workflows+=("$rendered")
+done
+perl -MJSON::PP -e '
+    my ($scans,$installs)=(0,0);
+    for my $file (@ARGV) {
+        open my $input,"<",$file or die "$file: $!";
+        local $/; my $workflow=decode_json(<$input>);
+        for my $name (keys %{$workflow->{jobs}}) {
+            my $job=$workflow->{jobs}{$name}; my $steps=$job->{steps}//[];
+            my (@restore,@save,@setup,@scan);
+            for my $i (0..$#$steps) {
+                my $step=$steps->[$i]; my $run=$step->{run}//"";
+                if (($step->{uses}//"") eq "./.github/actions/cache-tool-downloads") {
+                    push @{(($step->{with}{mode}//"restore") eq "save") ? \@save : \@restore}, $i;
+                }
+                if ($run =~ /make install-(?:host-tools|tools)\b|install-ci-tool\.sh gitleaks/) { push @setup,$i; }
+                $installs++ if $run =~ /install-ci-tool\.sh gitleaks/;
+                push @scan,$i if $run =~ /GITLEAKS_BIN.* git /;
+            }
+            if (@setup) {
+                @restore==1 && @save==1 && $restore[0]<$setup[0] && $save[0]>$setup[-1]
+                    or die "$file / $name: missing ordered download cache setup";
+            }
+            for my $i (@scan) {
+                $scans++;
+                !exists($job->{strategy}) && !exists($job->{needs}) && !exists($job->{if})
+                    or die "secret scan must be independent of selection/matrices";
+                my ($checkout)=grep { ($_->{uses}//"") =~ m{^actions/checkout\@} } @$steps;
+                ($checkout->{with}{"fetch-depth"}//-1)==0 or die "secret scan needs full history";
+                ($steps->[$i]{run}//"") eq q{"$GITLEAKS_BIN" git --redact=100 --no-banner --no-color --log-level error}
+                    or die "secret scan command drift";
+                !exists($steps->[$i]{if}) && !exists($steps->[$i]{"continue-on-error"})
+                    or die "secret scan must run/fail for documentation changes too";
+            }
+        }
+    }
+    $scans==1 && $installs==1 or die "expected exactly one scan/installer across workflows";
+    print "Repository scan ownership and hosted download-cache ordering passed\n";
+' "${workflows[@]}"

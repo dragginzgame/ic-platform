@@ -25,9 +25,16 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           persist-credentials: false
-      - name: Prepare audit and manifest tools
+      - name: Restore pinned tool downloads
+        uses: ./.github/actions/cache-tool-downloads
+      - name: Prepare manifest tools
+        run: make install-host-tools
+      - name: Save pinned tool downloads
+        uses: ./.github/actions/cache-tool-downloads
+        with:
+          mode: save
+      - name: Prepare audit toolchain
         run: |
-          make install-host-tools
           rustup toolchain install --profile minimal --no-self-update
           cargo install cargo-audit --version '=0.22.2' --locked
       - name: Audit producer and composition lockfiles
