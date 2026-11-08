@@ -4,7 +4,6 @@ use ic_platform::candid::{
     arguments::{ArgumentLimits, EmptyArgs},
     contract, decode_args, decode_exactly_one, decode_one,
     nesting::NestingError,
-    protocols::{ReplyArity, management::raw_rand},
 };
 
 const LIMITS: DecodeLimits = DecodeLimits {
@@ -38,9 +37,7 @@ pub fn qualify() {
     assert!(decode_exactly_one::<u64>(&extra, LIMITS).is_err());
     let blob = contract::encode_one(vec![1u8; 8192]).unwrap();
     assert_eq!(
-        raw_rand::decode(&blob, LIMITS, ReplyArity::Exact)
-            .unwrap()
-            .len(),
+        decode_exactly_one::<Vec<u8>>(&blob, LIMITS).unwrap().len(),
         8192
     );
 
@@ -50,11 +47,6 @@ pub fn qualify() {
     let error = decode_exactly_one::<contract::Reserved>(&nested, LIMITS).unwrap_err();
     assert_eq!(
         error.nesting_error(),
-        Some(&NestingError::ValueDepth { maximum: 16 })
-    );
-    let protocol_error = raw_rand::decode(&nested, LIMITS, ReplyArity::Exact).unwrap_err();
-    assert_eq!(
-        protocol_error.nesting_error(),
         Some(&NestingError::ValueDepth { maximum: 16 })
     );
     // Existing exhaustive matches remain source-compatible.

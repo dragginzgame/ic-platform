@@ -74,6 +74,23 @@ For raw calls and system/task adapters, select `runtime` and keep the existing
 package owns entrypoints, depend directly on `ic-platform-runtime` and select
 its `cdk` feature. Both use the same executor and remain Candid-free.
 
+Select `raw-rand` for `ic_platform::raw_rand::{METHOD, encode, decode}` when a
+consumer needs only management entropy. The codec adds no dependency or runtime:
+`encode()` returns the static empty Candid tuple and `decode(bytes)` returns
+`Result<[u8; 32], DecodeError>` under its documented bounded producer profile.
+Select raw execution separately. Callers retain seed admission, including any
+all-zero refusal, and wait/retry/cancellation policy. See the
+[entropy contract](../../docs/migration.md#candid-free-management-entropy-platform-027-unreleased).
+The former `candid::protocols::management::raw_rand` helper is removed in 0.27;
+this module is the sole typed entropy codec. Generic raw transports remain
+method-agnostic.
+
+Select `candid-args` for the small dependency-free argument encoders:
+`candid_args::empty()`, `candid_args::units(count)` and `candid_args::text(value)`.
+These create empty arguments, unit/null arguments and one UTF-8 text argument.
+The `raw-rand` and `candid` features select this shared framing automatically.
+Other schemas retain the explicit upstream Candid adapter.
+
 All owned application endpoints use IC Wire, including public endpoints called by
 third parties. Select Runtime’s `cdk` feature for explicit-codec entrypoints,
 or the facade’s `executor` feature for the shared executor alone. Enable `candid` only for

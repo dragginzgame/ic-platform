@@ -235,6 +235,8 @@ API changes or automatically establish whether sibling source still uses an API.
 | Embedded IC0/executor; imported CDK adapters and owned generator | `ic0`, including safe `stable64_{size,grow,read,read_uninit,write}`; `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters; Storage's requested IC0-only backing | Runtime owns ordinary entrypoint macros; Platform retains the external-Candid bridge. Platform maintains non-crypto adapters/generator. Platform maintains the sole executor and unchanged IC0 1.2.0 ABI; callback/trap semantics require installed qualification. Storage retains governance; raw stable IO selects no executor or Types. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Decoding uses finite-limit helpers or explicit configuration/staging; unconfigured decoder shortcuts are retired. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
 | `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
+| Owned small argument framing | `candid_args::{empty, units, text}`, selected by `candid-args` | Shared empty requests and narrow external argument consumers | Empty/unit/single-text argument lists only, with upstream byte parity; no general Candid, parser, execution or identity dependency. |
+| Owned `raw_rand` framing | sole typed entropy codec, selected by `raw-rand` | [#151 — Candid-free raw_rand codec](https://github.com/dragginzgame/ic-platform/issues/151); [Canic #749 — Adopt the codec](https://github.com/dragginzgame/canic/issues/749) | The former Candid raw_rand helper is removed. Only the documented management producer profile is supported: one 32-byte blob and bounded LEB128 framing, without general Candid or execution dependencies. Generic raw transports remain method-agnostic; no randomness generation or seed policy. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
 | `ic-transport-types` | native `ic_protocol` packet identities and typed fixture operations | Query/Blob native fixtures; Testkit metrics; Canic IC packet admission | Same registry transport identities as Agent, without selecting Agent or Runtime. Optional native-only dependency; production protocol codecs and explicit development fixtures remain separate. No generic CBOR export or authentication policy. |
 | `ic-management-canister-types` | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
@@ -356,7 +358,8 @@ profiles retain their explicitly external identities.
 | --- | --- | --- |
 | ic-platform | agent | dep:ic-agent, principal-external |
 | ic-platform | bls | dep:ic-verify-bls-signature, dep:ic_bls12_381 |
-| ic-platform | candid | candid/bignum, dep:candid, dep:thiserror, principal-external |
+| ic-platform | candid | candid-args, candid/bignum, dep:candid, dep:thiserror, principal-external |
+| ic-platform | candid-args |  |
 | ic-platform | candid-endpoint | candid, dep:ic-platform-macros, runtime |
 | ic-platform | candid-parser | dep:candid_parser, principal-external |
 | ic-platform | candid-service | candid, candid/printer |
@@ -380,6 +383,7 @@ profiles retain their explicitly external identities.
 | ic-platform | principal | dep:ic-platform-types, dep:serde |
 | ic-platform | principal-external | ic-platform-types/principal-external, principal |
 | ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal |
+| ic-platform | raw-rand | candid-args |
 | ic-platform | runtime | executor, ic-platform-runtime/runtime, ic0, principal |
 | ic-platform | signature-verification | bls, canister-sig-creation, dep:ic-signature-verification, dep:serde_bytes, dep:serde_cbor, dep:thiserror |
 | ic-platform-runtime | cdk | dep:ic-platform-macros, runtime |

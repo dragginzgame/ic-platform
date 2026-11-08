@@ -1,0 +1,45 @@
+//! Small external Candid argument encoders without the general Candid library.
+//!
+//! Only empty tuples, lists of unit/null arguments and a single text argument are
+//! supported. Callers retain method selection, budgets and transport. Owned
+//! application protocols continue to use Wire.
+
+/// Exact zero-argument envelope, without allocation or failure.
+pub const fn empty() -> &'static [u8; 6] {
+    b"DIDL\0\0"
+}
+
+/// Encode `count` unit/null arguments: zero gives `()`, two gives `((), ())`.
+///
+/// The count is caller-selected; no resource limit is inferred.
+pub fn units(count: usize) -> Vec<u8> {
+    let mut bytes = header(count);
+    bytes.extend(core::iter::repeat_n(0x7f, count));
+    bytes
+}
+
+/// Encode one text argument with its exact UTF-8 bytes and byte length.
+pub fn text(value: &str) -> Vec<u8> {
+    let mut bytes = header(1);
+    bytes.push(0x71);
+    unsigned(value.len(), &mut bytes);
+    bytes.extend_from_slice(value.as_bytes());
+    bytes
+}
+
+fn header(count: usize) -> Vec<u8> {
+    let mut bytes = b"DIDL\0".to_vec();
+    unsigned(count, &mut bytes);
+    bytes
+}
+
+fn unsigned(mut value: usize, bytes: &mut Vec<u8>) {
+    loop {
+        let byte = (value & 0x7f) as u8;
+        value >>= 7;
+        bytes.push(byte | if value == 0 { 0 } else { 0x80 });
+        if value == 0 {
+            return;
+        }
+    }
+}

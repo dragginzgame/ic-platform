@@ -79,7 +79,7 @@ impl ArgumentLimits {
     ) -> Result<T, ArgumentDecodeError> {
         self.admit_len(bytes.len())?;
         let bytes = if bytes.is_empty() && empty == EmptyArgs::Unit {
-            &b"DIDL\0\0"[..]
+            crate::candid_args::empty().as_slice()
         } else {
             bytes
         };

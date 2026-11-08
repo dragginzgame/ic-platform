@@ -162,17 +162,15 @@ fn inspect() {
     encode_with = "codec::encode::<_, { protocol::Method::ExternalManagement as u64 }>"
 )]
 async fn external_management() -> bool {
-    let args = ic_platform::candid::contract::encode_args(()).unwrap();
-    let response = transport::unbounded_wait(Principal::management_canister(), "raw_rand")
-        .with_raw_args(&args)
-        .execute()
-        .await
-        .unwrap();
-    // Preserve this fixture's original upstream decode/arity policy explicitly.
-    let config = contract::DecoderConfig::new();
-    let bytes: Vec<u8> =
-        ic_platform::candid::decoder::decode_one_with_config(response.as_ref(), &config).unwrap();
-    bytes.len() == 32
+    let response = transport::unbounded_wait(
+        Principal::management_canister(),
+        ic_platform::raw_rand::METHOD,
+    )
+    .with_raw_args(ic_platform::raw_rand::encode().as_slice())
+    .execute()
+    .await
+    .unwrap();
+    ic_platform::raw_rand::decode(response.as_ref()).is_ok()
 }
 
 mod codec;

@@ -3,6 +3,7 @@
     "agent",
     "bls",
     "candid",
+    "candid-args",
     "candid-endpoint",
     "candid-parser",
     "candid-service",
@@ -26,6 +27,7 @@
     "principal",
     "principal-external",
     "principal-self-authenticating",
+    "raw-rand",
     "runtime",
     "signature-verification"
   ],

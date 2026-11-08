@@ -6,7 +6,6 @@ use ic_platform::{
     candid::{
         self, contract,
         endpoint::{self, ArgumentLimits},
-        protocols::{self, ReplyArity},
     },
 };
 use std::cell::Cell;
@@ -60,24 +59,17 @@ fn encoding_trap() -> Broken {
 }
 #[endpoint::update(name = "external_random", limits = "LIMITS", empty_args = "reject")]
 async fn random() -> Vec<u8> {
-    let bytes = protocols::management::raw_rand::encode().unwrap();
     let response = crate::transport::unbounded_wait(
         Principal::management_canister(),
-        protocols::management::raw_rand::METHOD,
+        ic_platform::raw_rand::METHOD,
     )
-    .take_raw_args(bytes)
+    .with_raw_args(ic_platform::raw_rand::encode().as_slice())
     .execute()
     .await
     .unwrap();
-    let reply_limits = candid::DecodeLimits {
-        reply_bytes: 512,
-        decoding_quota: 10000,
-        skipping_quota: 0,
-        type_entries: 8,
-        header_bytes: 128,
-    };
-    protocols::management::raw_rand::decode(response.as_ref(), reply_limits, ReplyArity::Exact)
+    ic_platform::raw_rand::decode(response.as_ref())
         .unwrap()
+        .to_vec()
 }
 #[endpoint::update(name = "external_legacy_empty", limits = "LIMITS", empty_args = "unit")]
 fn legacy_empty() {}

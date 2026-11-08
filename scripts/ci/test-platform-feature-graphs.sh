@@ -32,6 +32,15 @@ while IFS='|' read -r selection package expected; do
     count=$((count + 1))
 done <<'CASES'
 none||pass
+candid-args||pass
+candid-args|candid v0.10.40|reject
+candid-args|ic-platform-runtime v0.20.2|reject
+raw-rand||pass
+raw-rand|candid v0.10.40|reject
+raw-rand|candid_derive v0.10.40|reject
+raw-rand|ic-platform-runtime v0.20.2|reject
+raw-rand|ic-management-canister-types v0.11.0|reject
+raw-rand|ic_principal v0.1.5|reject
 executor|ic-platform-runtime-guard v0.1.13 (/fixture)|pass
 none|ic-platform-runtime-guard v0.1.13 (/fixture)|reject
 ic0|ic-platform-runtime-guard v0.1.13 (/fixture)|reject

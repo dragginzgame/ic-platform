@@ -7,6 +7,17 @@ contract; aggregate and installed-runtime gates retain their explicit scope.
 
 ## Runtime qualification and historical evidence
 
+`make check-raw-rand` is the focused installed management-entropy proof; it needs
+an explicitly prepared `POCKET_IC_BIN` or `IC_TESTKIT_POCKET_IC_URL`. It checks
+native/Wasm normal/build graphs without general Candid, compares matched general
+and narrow codec consumers with opt-level 3 / fat LTO / one codegen unit and
+`ic-wasm shrink`, and calls management `raw_rand` through the existing Runtime.
+It checks producer bytes against native reference Candid, structured rejection,
+callback-trap cleanup, pending-call cancellation and a subsequent successful call.
+Use `bash scripts/ci/check-platform-raw-rand.sh --check-graph` for graph admission
+alone, or `--build-only` for graphs and size measurements without a server. The
+owner runtime gate includes this leaf; no Timers or sibling fleet suite is added.
+
 The optional `cdk` surface uses maintained, non-cryptographic runtime adapters
 and the owned generator. It does not depend on the full `ic-cdk` package.
 All controlled endpoints use explicit Wire hooks; select `candid` separately

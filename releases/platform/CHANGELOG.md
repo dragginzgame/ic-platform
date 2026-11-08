@@ -4,6 +4,36 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.27.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Remove `candid::protocols::management::raw_rand` without an alias. Select
+  `raw-rand` and use the sole typed `raw_rand::{METHOD, encode, decode}` boundary;
+  encoding is infallible and decoding returns exactly `[u8; 32]`. General raw
+  transport remains method-agnostic; other external Candid protocols are unchanged.
+
+### ➕ Added
+
+- Add dependency-free `candid_args::{empty, units, text}` for the deliberately
+  small subset of empty, unit/null and single-text external arguments. Share
+  empty framing with entropy and existing protocol helpers, preserving Candid
+  bytes without selecting the general encoder or parser.
+- Add the dependency-free `raw-rand` feature and `raw_rand::{METHOD, encode,
+  decode}` for management entropy. The bounded decoder accepts the documented
+  single-blob producer profile, including padded LEB128 framing and all-zero
+  results; callers retain transport, wait/retry and seed policy
+  ([#151 — Candid-free raw_rand codec](https://github.com/dragginzgame/ic-platform/issues/151)).
+
+### 🧪 Testing
+
+- Qualify the narrow entropy codec against reference Candid, malformed input,
+  native/Wasm feature graphs and installed management calls. A matched entropy
+  consumer shrinks from 376,466 to 44,796 total uncompressed Wasm bytes and
+  343,496 to 38,114 code-section bytes with Rust 1.99.1, Candid 0.10.40 and the
+  existing opt-level 3 / fat-LTO / `ic-wasm shrink` recipe. These are focused
+  consumer results, not a saving claim for canisters that retain other Candid use.
+
 ## [0.26.1] - 2026-11-08
 
 ### 🧹 Changed

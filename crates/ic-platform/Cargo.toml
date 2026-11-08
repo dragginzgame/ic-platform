@@ -19,11 +19,19 @@ default = []
 principal = ["dep:ic-platform-types", "dep:serde"]
 principal-external = ["principal", "ic-platform-types/principal-external"]
 principal-self-authenticating = ["principal", "ic-platform-types/principal-self-authenticating"]
+candid-args = []
+raw-rand = ["candid-args"]
 agent = ["principal-external", "dep:ic-agent"]
 ic-protocol = ["principal-external", "certification-cbor", "dep:ic-transport-types"]
 ic-protocol-fixtures = ["ic-protocol"]
 bls = ["dep:ic-verify-bls-signature", "dep:ic_bls12_381"]
-candid = ["principal-external", "dep:candid", "candid/bignum", "dep:thiserror"]
+candid = [
+    "principal-external",
+    "dep:candid",
+    "candid/bignum",
+    "dep:thiserror",
+    "candid-args",
+]
 candid-endpoint = ["runtime", "candid", "dep:ic-platform-macros"]
 candid-parser = ["principal-external", "dep:candid_parser"]
 candid-service = ["candid", "candid/printer"]
@@ -110,6 +118,16 @@ ic-transport-types = { workspace = true, optional = true }
 [dev-dependencies]
 serde_bytes.workspace = true
 serde_cbor.workspace = true
+
+[[test]]
+name = "candid_args_consumer"
+path = "tests/candid_args_consumer.rs"
+required-features = ["candid-args", "candid"]
+
+[[test]]
+name = "raw_rand_consumer"
+path = "tests/raw_rand_consumer.rs"
+required-features = ["raw-rand", "candid"]
 
 [[test]]
 name = "executor_consumer"

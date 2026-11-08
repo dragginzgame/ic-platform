@@ -8,7 +8,7 @@ rust-version.workspace = true
 [features]
 timers-composition = []
 prepared-call = []
-external-candid = ["dep:ic-platform", "ic-platform/candid", "ic-platform/management-canister-types"]
+external-candid = ["dep:ic-platform", "ic-platform/candid", "ic-platform/management-canister-types", "ic-platform/raw-rand"]
 external-adapters = ["external-candid"@EXTERNAL_BRIDGE@]
 
 [lib]

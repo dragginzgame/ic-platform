@@ -5,6 +5,7 @@ FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCE
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/stable-identities/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/ic0-consumer/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/canic-wasm-benchmark/*.rs)
+FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/raw-rand/canister/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard crates/ic-platform-macros/src/export/tests/linking/*.rs)
 FORMAT_EXTRA_SOURCES += crates/ic-platform/tests/fixtures/candid_malformed.rs
 FORMAT_EXTRA_SOURCES += crates/ic-platform/tests/fixtures/cbor_malformed.rs
@@ -245,6 +246,11 @@ release-files:
 .PHONY: check-runtime
 check-runtime:
 	bash scripts/ci/check-platform-runtime.sh --prepared-call
+	bash scripts/ci/check-platform-raw-rand.sh
+
+.PHONY: check-raw-rand
+check-raw-rand:
+	bash scripts/ci/check-platform-raw-rand.sh
 
 .PHONY: check-runtime-composition check-runtime-all check-runtime-independence
 check-runtime-composition:

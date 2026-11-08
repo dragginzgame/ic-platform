@@ -1,43 +1,47 @@
 # Current handoff — 2026-11-08
 
+## Local raw_rand codec
+
+The local `raw-rand` feature exposes dependency-free
+`raw_rand::{METHOD, encode, decode, DecodeError}`. It admits only the documented
+management-producer blob profile, capped at 74 bytes with bounded padded LEB128;
+all-zero bytes remain valid. No runtime or cryptographic body changed. Pending
+Platform 0.27.0 removes the duplicate Candid helper without an alias. Generic
+transports remain method-agnostic. No sibling edits, manifest bump or publication.
+[#151 — Candid-free raw_rand codec](https://github.com/dragginzgame/ic-platform/issues/151)
+owns this fix; [Canic #749 — Adopt the codec](https://github.com/dragginzgame/canic/issues/749) owns adoption.
+
+Focused Clippy, four unit and four reference/mutation tests, graph policy and
+native/Wasm consumer admissions pass. The prepared PocketIC 16.1.0 server accepts
+both matched consumers: producer bytes, structured rejection, callback-trap cleanup,
+pending-call cancellation and subsequent successful calls. No macOS/hosted proof.
+The owner gate includes this leaf; migrated external-adapter fixture Clippy passes.
+
+Rust 1.99.1, Candid 0.10.40, opt-level 3 / fat LTO / one codegen unit and
+ic-wasm 0.11.1 shrink give total/code bytes 376466/343496 for general Candid and
+44796/38114 for the narrow codec: -331670 total / -305382 code. Savings require
+removing the last reachable general codec; larger Canic artifacts are unmeasured.
+Retained inputs/artifacts/logs/status: target/evidence/raw-rand.5fgoQi; export
+refusal and migrated fixture checks: target/evidence/raw-rand-sole-boundary.
+
+Small external encoders live in dependency-free `candid_args::{empty, units,
+text}` under `candid-args`. Raw_rand and existing empty protocol helpers reuse
+the empty envelope; general/native text parsing stays upstream. No sibling edits.
+Focused Clippy, 13 byte/protocol tests and native/Wasm isolation checks pass.
+
 ## Shared 0.31.12 adoption
 
-The canonical exporter adopted eb3c8e0d2274d2c7babb2c15b3355bb80a796f0f,
-Shared **0.31.12**, with 149 verified payloads. Only the LOC shell reporter and
-Perl table renderer changed: terminal workspace/crate/module colours and a single
-updating sibling progress line. AGENTS names the new baseline; no product/API,
-dependency or release-workflow change is required.
-
-Workspace JSON and redirected selected-module output match the prior version
-byte-for-byte. Committed supplier LOC/classification and sibling-report tests
-pass in disposable Platform scratch, along with ShellCheck, Perl syntax and
-terminal colour checks. Snapshot/docs/diff checks accompany the evidence at
-target/adoption-shared03112-20261108. The maintainer authorized Git-only delivery;
-no full gate, Rust/native requalification or publication is required for these
-private reporting changes. No crate version or release tag changes are included.
-The deferred Cargo.lock remains unchanged at the restored hash recorded below.
+Shared **0.31.12** at eb3c8e0d2274d2c7babb2c15b3355bb80a796f0f supplies 149
+verified payloads; LOC counts are unchanged. Git-only adoption ced3903 needed no
+package release. Passing evidence: target/adoption-shared03112-20261108.
 
 ## Hosted review and measured dependency cost
 
-Review at d6fc70a found the corrected Wasm workflow and Browser SDK successful.
-The hosted comparison against 3fa6ccb is unchanged in four profiles and two bytes
-smaller for external Candid; that comparison mostly covers private CI maintenance.
-A local comparison against platform-v0.26.0, with identical compiler, probe,
-dependency resolution and 3-fat-1 settings, instead covers the public cleanup:
-four profiles are unchanged and external Candid is one byte larger. No material
-production-probe regression is established for the delivered cleanup.
-
-A separate controlled dependency experiment keeps current public source, Rust
-1.99.1, ic-wasm 0.11.1 and 3-fat-1 settings fixed, changing only candid and
-candid_derive from 0.10.39 to 0.10.40. Optimized external-Candid total/code bytes
-increase from 534627/481743 to 589215/536162: +54588 total and +54419 code.
-The upstream diff adds sequence-completion correctness checks; their semantics
-must be preserved when evaluating the newly linked code. Exact generated-function
-attribution has not been profiled. This is a dependency experiment, not a passing
-same-lock implementation regression check. The real lock draft was not edited.
-Evidence: target/next-wasm-20261108/candid-patch-comparison.json and
-target/evidence/wasm-regression.ByeLgJ. These are probe sizes, not sibling-canister
-measurements or a claim that the full facade is embedded in every canister.
+Controlled Candid/derive 0.10.39→0.10.40, fixed source/compiler/optimization:
+total/code 534627/481743→589215/536162 (+54588/+54419). Preserve sequence-completion
+checks; symbol attribution is unprofiled. This is a dependency comparison. Evidence:
+target/next-wasm-20261108/candid-patch-comparison.json and
+target/evidence/wasm-regression.ByeLgJ. No sibling size claim or lock edit.
 
 The same hosted review found CI validation failing inside grouped preparation on
 Linux and both macOS hosts (exit 101); its inner logs were not retained as CI

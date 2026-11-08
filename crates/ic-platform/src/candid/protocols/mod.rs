@@ -6,8 +6,16 @@
 //! Decoding authenticates nothing and never permits resubmission. The parent
 //! module admits at most 16 constructed wire levels before upstream decoding.
 
-use super::{DecodeError, DecodeLimits, with_decoder};
-use candid::utils::ArgumentDecoder;
+#[cfg(any(
+    feature = "management-canister-types",
+    feature = "cmc-types",
+    feature = "icp-ledger-types",
+    feature = "icrc-ledger-types",
+    feature = "nns-registry-types",
+    feature = "cycles-ledger-types",
+    all(feature = "certified-assets-types", not(target_family = "wasm"))
+))]
+use super::{DecodeError, DecodeLimits};
 
 /// Caller-selected handling of the declared top-level reply arity.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -19,13 +27,23 @@ pub enum ReplyArity {
     Exact,
 }
 
-fn reply<'a, T: ArgumentDecoder<'a>>(
+#[cfg(any(
+    feature = "management-canister-types",
+    feature = "cmc-types",
+    feature = "icp-ledger-types",
+    feature = "icrc-ledger-types",
+    feature = "nns-registry-types",
+    feature = "cycles-ledger-types",
+    all(feature = "certified-assets-types", not(target_family = "wasm"))
+))]
+fn reply<'a, T: candid::utils::ArgumentDecoder<'a>>(
     bytes: &'a [u8],
-    limits: DecodeLimits,
+    limits: super::DecodeLimits,
     arity: ReplyArity,
     requires_value: bool,
-) -> Result<T, DecodeError> {
-    with_decoder(bytes, limits, |decoder| {
+) -> Result<T, super::DecodeError> {
+    use super::DecodeError;
+    super::with_decoder(bytes, limits, |decoder| {
         let decode = |decoder: &mut candid::de::IDLDeserialize<'a>| {
             T::decode(decoder).map_err(DecodeError::Candid)
         };
@@ -46,6 +64,15 @@ fn reply<'a, T: ArgumentDecoder<'a>>(
 }
 
 // Share generated decoder documentation/signatures; request shapes stay explicit.
+#[cfg(any(
+    feature = "management-canister-types",
+    feature = "cmc-types",
+    feature = "icp-ledger-types",
+    feature = "icrc-ledger-types",
+    feature = "nns-registry-types",
+    feature = "cycles-ledger-types",
+    all(feature = "certified-assets-types", not(target_family = "wasm"))
+))]
 macro_rules! decoder {
     ($response:ty, |$bytes:ident, $limits:ident, $arity:ident| $body:expr) => {
         /// Decode with caller-selected resource limits and reply arity.
@@ -91,6 +118,7 @@ macro_rules! single {
         }
     };
 }
+#[cfg(any(feature = "cmc-types", feature = "icrc-ledger-types"))]
 macro_rules! empty_request {
     ($module:ident, $method:literal, $response:ty) => {
         #[doc = concat!("External `", $method, "`: zero request values and one result value.")]
@@ -99,10 +127,9 @@ macro_rules! empty_request {
             pub const METHOD: &str = $method;
             /// Encode the explicit zero-argument envelope, without submitting it.
             ///
-            /// # Errors
-            /// Returns the existing Candid encoding error.
+            /// Zero-argument framing is infallible; retains the protocol result type.
             pub fn encode() -> Result<Vec<u8>, candid::Error> {
-                candid::encode_args(())
+                Ok(crate::candid_args::empty().to_vec())
             }
             decoder!($response, |bytes, limits, arity| {
                 super::super::reply::<($response,)>(bytes, limits, arity, true)
@@ -135,7 +162,6 @@ macro_rules! empty_reply {
 
 /// Management protocol operations; no controller, settings or allocation policy.
 pub mod management {
-    empty_request!(raw_rand, "raw_rand", Vec<u8>);
     #[cfg(feature = "management-canister-types")]
     single!(
         create_canister,

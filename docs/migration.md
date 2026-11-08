@@ -1,5 +1,67 @@
 # Candid and runtime ownership
 
+## Small external argument encoders (Platform 0.27, unreleased)
+
+Select `candid-args` for dependency-free external Candid encoding on native and
+Wasm targets. The deliberately small `candid_args` module supplies:
+
+```rust,ignore
+candid_args::empty();        // zero arguments: ()
+candid_args::units(2);       // two unit/null arguments: ((), ())
+candid_args::text("hello");  // one text argument: ("hello",)
+```
+
+The empty envelope is a static six-byte slice; unit/text encoders return owned
+bytes. Text lengths count UTF-8 bytes and counts/lengths use minimal unsigned
+LEB128. Empty text, no arguments and one null remain distinct. There is no text
+parser, schema machinery, runtime or new dependency here. Callers retain input/
+output budgets and method selection. Owned application protocols still use Wire;
+other external argument shapes retain the explicit general Candid capability.
+
+Both `raw-rand` and `candid` select this module. The entropy request, zero-argument
+external protocol encoders and legacy-empty admission reuse `empty()`. Additional
+supported shapes can be added here only when a concrete external caller needs
+them, with independent upstream byte checks. No sibling is edited here.
+
+## Candid-free management entropy (Platform 0.27, unreleased)
+
+Select `ic-platform` with `default-features = false, features = ["raw-rand"]`
+for `ic_platform::raw_rand::{METHOD, encode, decode, DecodeError}`. Encoding
+returns the static six-byte empty Candid argument tuple; decoding returns
+`[u8; 32]` without allocation or any general Candid dependency. Select execution
+separately through `ic-platform-runtime/runtime` (or its `cdk` entrypoints).
+The facade's existing `runtime` feature can also be composed with `raw-rand`.
+
+This is a deliberately restricted management-producer profile, not a general
+Candid decoder: one `vec nat8` type at index zero, exactly one result and 32
+payload bytes, with no trailing bytes. The vector/nat8 opcodes use their one-byte
+encodings. The four count/index/length fields may use minimal or zero-padded
+LEB128, capped at nine bytes each; the entire reply is capped at 74 bytes. Other
+valid Candid forms, including unused type definitions or a different result type
+index, are refused. The
+replica's `raw_rand` producer creates a 32-byte vector and replies using Candid
+`Encode!(&buffer)`; the reference-byte and installed checks qualify that shape.
+This bounded external-protocol admission does not impose application seed policy.
+
+[Canic #749 — Adopt Platform's Candid-free raw_rand codec](https://github.com/dragginzgame/canic/issues/749)
+can replace its general `candid::protocols::management::raw_rand`
+callers with this module and remove the adapter's `candid` feature selection.
+Use `encode().as_slice()` with the existing raw call, then pass response bytes to
+`decode`. Retain the current wait, callback/cancellation, retries and all-zero
+seed refusal in the consumer. The old
+`candid::protocols::management::raw_rand` module is removed without an alias:
+`ic_platform::raw_rand` is Platform's sole typed entropy codec, independently
+selected even when Candid is already enabled. `encode()` is now infallible;
+`decode()` returns `[u8; 32]` and takes no general Candid budgets or arity option.
+Other Candid protocols keep their signatures and caller-selected budgets.
+
+Generic Runtime/CDK/Agent transports and general Candid encoders are still
+method-agnostic; callers can construct arbitrary external requests manually.
+The single-owner rule does not install method-name filters or an alternative
+runtime. All maintained Platform entropy callers use the typed codec; the
+size/reference fixtures alone construct general Candid as a test baseline.
+No Canic or IcyDB source is changed here; this API is local and not published.
+
 ## Canonical ordinary entrypoints (Runtime 0.20 / Platform 0.25)
 
 Ordinary entrypoint macros belong only to `ic-platform-runtime`, selected with

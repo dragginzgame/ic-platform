@@ -60,21 +60,7 @@ mod tests {
         assert_eq!(value.recent_changes.len(), 9);
     }
     #[test]
-    fn zero_argument_and_single_blob_forms_are_not_implicit_transport_bytes() {
-        assert_eq!(
-            protocols::management::raw_rand::encode().unwrap(),
-            b"DIDL\0\0"
-        );
-        assert_eq!(
-            protocols::management::raw_rand::decode(
-                &hex("4449444c016d7b010003010203"),
-                limits(),
-                ReplyArity::Exact
-            )
-            .unwrap(),
-            [1, 2, 3]
-        );
-        assert!(protocols::management::raw_rand::decode(b"", limits(), ReplyArity::Exact).is_err());
+    fn zero_argument_forms_are_not_implicit_transport_bytes() {
         assert_eq!(
             protocols::icrc::fee::decode(&hex("4449444c00017d07"), limits(), ReplyArity::Exact)
                 .unwrap(),
@@ -88,6 +74,18 @@ mod tests {
         assert_eq!(
             protocols::icrc::get_tip_certificate::encode().unwrap(),
             b"DIDL\0\0"
+        );
+    }
+
+    #[test]
+    fn protocol_decoder_refuses_excess_nesting_before_decoding_the_result() {
+        let mut nested = b"DIDL\x01\x6e\0\x01\0".to_vec();
+        nested.resize(nested.len() + 8192, 1);
+        nested.push(0);
+        let error = protocols::icrc::fee::decode(&nested, limits(), ReplyArity::Exact).unwrap_err();
+        assert_eq!(
+            error.nesting_error(),
+            Some(&ic_platform::candid::nesting::NestingError::ValueDepth { maximum: 16 })
         );
     }
     #[test]

@@ -59,6 +59,8 @@ for supplier availability and consumer-owned feature/import changes.
 | `candid-endpoint` | Explicit required-external-Candid query/update adapters with artifact-selected limits, empty-envelope policy and existing runtime; implies runtime and Candid, with separate service-printer selection |
 | `runtime` | Raw calls, system and task adapters at `cdk::*`, without entrypoint macros |
 | `candid-parser` | Native external Candid parsing/type checking, service equality and dynamic refusal fixtures; owned bindings use Wire |
+| `candid-args` | Dependency-free encoding of empty, unit/null and single-text external argument lists |
+| `raw-rand` | Sole typed management `raw_rand` codec, dependency-free; transport and seed policy remain caller-owned |
 | `canister-sig-creation` | Upstream signature key formats/constants/hashing, owned issuer adapter and DER admission; transitive Candid/ic0, no store API |
 | `certification` | Registry certificate/hash-tree and mutable tree identities, lookup and hashing; no Candid or executor |
 | `certification-cbor` | Byte-bounded standard certificate/signature CBOR; caller-selected budgets, no verification or runtime |

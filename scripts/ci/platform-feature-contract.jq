@@ -6,7 +6,7 @@ def require(condition; $message):
 . as $metadata |
 [.packages[] | select(.name == "ic-platform")] |
 if length == 1 then .[0] else error("expected exactly one ic-platform package") end |
-require((.features.candid == ["principal-external", "dep:candid", "candid/bignum", "dep:thiserror"] and
+require((.features.candid == ["principal-external", "dep:candid", "candid/bignum", "dep:thiserror", "candid-args"] and
     .features["candid-service"] == ["candid", "candid/printer"]); "Candid service generation must remain explicitly selected") |
 require(((.features | keys) == $policy[0].features); "Platform feature inventory changed; update the graph matrix and isolation policy") |
 require((.features["candid-endpoint"] == ["runtime", "candid", "dep:ic-platform-macros"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
@@ -21,6 +21,7 @@ require(([$metadata.packages[] | select(.name == "ic-platform-types")] | length 
         length == 1 and .[0].optional and .[0].target == null and (.[0].uses_default_features | not) and .[0].features == ["convert"]));
     "Types external Principal must supply upstream Serde without default hashing or a codec") |
 require((.features.default == []); "Platform must declare empty default features") |
+require((.features["candid-args"] == [] and .features["raw-rand"] == ["candid-args"]); "Small argument encoding and raw_rand must select no dependency or runtime") |
 require((.features["ic-protocol"] == ["principal-external", "certification-cbor", "dep:ic-transport-types"] and
     .features["ic-protocol-fixtures"] == ["ic-protocol"] and
     ([.dependencies[] | select(.name == "ic-transport-types")] | length == 1 and .[0].optional and .[0].req == "^0.49.1" and .[0].target == "cfg(not(target_family = \"wasm\"))"));

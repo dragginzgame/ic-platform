@@ -17,6 +17,8 @@
 //! `signature-verification` selects upstream canister-signature verification.
 //! `runtime` selects raw adapters and prepared `call` requests; ordinary entrypoints select Runtime directly.
 //! `ic0` selects qualified raw system calls without Candid or an executor.
+//! `raw-rand` selects the dependency-free management entropy codec, without transport.
+//! `candid-args` selects small, dependency-free external argument encoders.
 //! `management-canister-types` selects external management HTTP/history/snapshot/status DTOs.
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
 //! Consumers retain protocol schemas, resource limits and lifecycle policy.
@@ -28,6 +30,8 @@ pub use account::{Account, AccountError, Subaccount};
 
 #[cfg(feature = "principal")]
 pub mod principal;
+#[cfg(feature = "raw-rand")]
+pub mod raw_rand;
 #[cfg(feature = "principal")]
 pub use principal::{Principal, PrincipalError};
 
@@ -43,6 +47,8 @@ pub mod bls;
 pub use ic_platform_runtime::call;
 #[cfg(feature = "candid")]
 pub mod candid;
+#[cfg(feature = "candid-args")]
+pub mod candid_args;
 #[cfg(all(feature = "candid-parser", not(target_family = "wasm")))]
 pub mod candid_parser;
 #[cfg(feature = "canister-sig-creation")]
