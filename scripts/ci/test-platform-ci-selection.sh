@@ -32,6 +32,9 @@ perl -MJSON::PP -0777 -e '
         }
         $docs == 1 && @full or die "missing qualification";
     }
+    my @common=grep { ($_->{uses}//"") eq "./.github/actions/prepare-common-tools" } @{$jobs->{platform}{steps}};
+    @common==1 && $common[0]{with}{cache} eq "true" && $common[0]{with}{"cache-save"} eq "true"
+        or die "full Platform setup must use the shared cached tool owner";
     my @hosts=sort map { $_->{runner} } @{$jobs->{platform}{strategy}{matrix}{include}};
     join(",",@hosts) eq "macos-15,macos-15-intel,ubuntu-24.04" or die "lost native host";
     my $native_steps=$jobs->{"native-provider-source"}{steps};

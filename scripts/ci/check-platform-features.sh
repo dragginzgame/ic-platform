@@ -12,16 +12,17 @@ case "${1:-}" in
     *) echo 'usage: check-platform-features.sh [--exhaustive FEATURE,...]' >&2; exit 2 ;;
 esac
 mkdir -p target/feature-graphs
-cargo metadata --no-deps --format-version 1 --frozen > target/feature-graphs/metadata.json
+# All observations are private to this invocation, including metadata.
+cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"
+cargo metadata --no-deps --format-version 1 --frozen > "$cache/metadata.json"
 "$root/.tools/host/bin/jq" -e --slurpfile policy scripts/ci/platform-feature-policy.json \
-    -f scripts/ci/platform-feature-contract.jq target/feature-graphs/metadata.json >/dev/null || exit 1
+    -f scripts/ci/platform-feature-contract.jq "$cache/metadata.json" >/dev/null || exit 1
 
-generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform-runtime") | .version' target/feature-graphs/metadata.json)"
+generator_version="$("$root/.tools/host/bin/jq" -r '.packages[] | select(.name == "ic-platform-runtime") | .version' "$cache/metadata.json")"
 # Cargo tree prints canonical package names even for renamed deps.
 # Cache only within this invocation; never reuse graphs from a previous lockfile.
-cache="$(mktemp -d "$root/target/feature-graphs/attempt.XXXXXX")"
 # shellcheck disable=SC2016 # $scope and $known are jq variables.
-"$root/.tools/host/bin/jq" '.packages[] | select(.name == "ic-platform") | .features | keys - ["default"]' target/feature-graphs/metadata.json |
+"$root/.tools/host/bin/jq" '.packages[] | select(.name == "ic-platform") | .features | keys - ["default"]' "$cache/metadata.json" |
     "$root/.tools/host/bin/jq" --arg scope "$scope" '
         . as $known | if $scope == "" then . else
         ($scope | split(",")) as $selected |
@@ -33,10 +34,10 @@ selection_count="$("$root/.tools/host/bin/jq" length "$cache/selections.json")"
 printf 'Feature matrix mode: %s\n' "$mode"
 for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     mapping="$cache/$target.tsv"
-    "$root/.tools/host/bin/jq" -r --arg target "$target" --slurpfile metadata target/feature-graphs/metadata.json \
+    "$root/.tools/host/bin/jq" -r --arg target "$target" --slurpfile metadata "$cache/metadata.json" \
         --slurpfile policy scripts/ci/platform-feature-policy.json \
         -f scripts/ci/platform-feature-closures.jq "$cache/selections.json" > "$cache/$target-closures.tsv"
-    "$root/.tools/host/bin/jq" -r --arg target "$target" --arg projection activation --slurpfile metadata target/feature-graphs/metadata.json \
+    "$root/.tools/host/bin/jq" -r --arg target "$target" --arg projection activation --slurpfile metadata "$cache/metadata.json" \
         --slurpfile policy scripts/ci/platform-feature-policy.json \
         -f scripts/ci/platform-feature-closures.jq "$cache/selections.json" > "$cache/$target-activation.tsv"
     awk -f scripts/ci/platform-feature-cache-keys.awk "$cache/$target-closures.tsv" > "$mapping"

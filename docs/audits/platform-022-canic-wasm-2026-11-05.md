@@ -174,15 +174,12 @@ that affect behavior. The unsuccessful full-tree trial is not the delivered code
 
 ## Reproduction and evidence
 
-The version-specific helpers live in
-[`scripts/benchmarks/0.22`](../../scripts/benchmarks/0.22/prepare.cjs).
-They capture read-only sibling sources into disposable validation inputs without
-creating a Git checkout. The maintained reproduction helper adds the ordinary
-`platform_benchmark` example from Platform’s fixture source and passes explicit
-tool paths; the original measurement used the captured `build_artifact` driver
-with the equivalent public-API selection. Historical captures are unchanged.
-Keep an unchanged local control before modifying
-Platform. Never edit a running arm's scripts, manifests or source.
+The commands below are historical and require the [immutable 0.22 source
+checkout](../../scripts/benchmarks/0.22/README.md), its recorded compiler and
+caches. The dated dependency-rewriting/build orchestration is retired. Current
+read-only capture and reporting are [maintained separately](../../scripts/benchmarks/canic-wasm/README.md).
+Historical captures and observations are unchanged; do not treat them as current
+qualification. Keep an unchanged local control and never edit a running arm.
 
 ```bash
 node scripts/benchmarks/0.22/prepare.cjs /home/adam/projects/canic target/platform022-canic

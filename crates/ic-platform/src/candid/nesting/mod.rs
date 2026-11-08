@@ -8,16 +8,16 @@
 //! without inspection. Upstream Candid still owns semantic/type validation.
 
 use super::DecodeLimits;
-use std::{error::Error, fmt};
 
 /// Maximum constructed wire-type path and value depth admitted by bounded decoders.
 /// Scalars use depth zero; an empty container still uses one level.
 pub const MAX_DEPTH: usize = 16;
 
 /// A compact, typed refusal from admission, without disclosing input bytes.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, thiserror::Error)]
 pub enum NestingError {
     /// Original message exceeds its existing byte allowance.
+    #[error("Candid admission bytes {actual} exceed {maximum}")]
     Bytes {
         /// Observed message length.
         actual: usize,
@@ -25,11 +25,13 @@ pub enum NestingError {
         maximum: usize,
     },
     /// Header exceeds its existing byte allowance.
+    #[error("Candid admission header exceeds {maximum} bytes")]
     Header {
         /// Caller-selected header byte allowance.
         maximum: usize,
     },
     /// Type table exceeds its existing entry allowance.
+    #[error("Candid admission type entries {actual} exceed {maximum}")]
     Types {
         /// Declared table entries.
         actual: usize,
@@ -37,58 +39,36 @@ pub enum NestingError {
         maximum: usize,
     },
     /// A path through the type table exceeds the caller's nesting allowance.
+    #[error("Candid type nesting exceeds {maximum}")]
     TypeDepth {
         /// Caller-selected nesting allowance.
         maximum: usize,
     },
     /// An encoded value exceeds the caller's nesting allowance.
+    #[error("Candid value nesting exceeds {maximum}")]
     ValueDepth {
         /// Caller-selected nesting allowance.
         maximum: usize,
     },
     /// Admission work is exhausted, including zero-byte value expansion.
+    #[error("Candid nesting admission work quota exceeds {maximum}")]
     Work {
         /// Caller-selected admission work allowance.
         maximum: usize,
     },
     /// Framing is malformed or truncated at this byte offset.
+    #[error("invalid Candid admission framing at byte {offset}")]
     Malformed {
         /// Offset observed before refusing framing.
         offset: usize,
     },
     /// A future constructor cannot be inspected by this admission implementation.
+    #[error("unsupported Candid admission constructor {opcode}")]
     Unsupported {
         /// Uninspected constructor opcode.
         opcode: i64,
     },
 }
-impl fmt::Display for NestingError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Bytes { actual, maximum } => {
-                write!(f, "Candid admission bytes {actual} exceed {maximum}")
-            }
-            Self::Header { maximum } => {
-                write!(f, "Candid admission header exceeds {maximum} bytes")
-            }
-            Self::Types { actual, maximum } => {
-                write!(f, "Candid admission type entries {actual} exceed {maximum}")
-            }
-            Self::TypeDepth { maximum } => write!(f, "Candid type nesting exceeds {maximum}"),
-            Self::ValueDepth { maximum } => write!(f, "Candid value nesting exceeds {maximum}"),
-            Self::Work { maximum } => {
-                write!(f, "Candid nesting admission work quota exceeds {maximum}")
-            }
-            Self::Malformed { offset } => {
-                write!(f, "invalid Candid admission framing at byte {offset}")
-            }
-            Self::Unsupported { opcode } => {
-                write!(f, "unsupported Candid admission constructor {opcode}")
-            }
-        }
-    }
-}
-impl Error for NestingError {}
 
 type Result<T> = std::result::Result<T, NestingError>;
 

@@ -1,7 +1,6 @@
 //! External Candid argument admission without a runtime or implicit empty request.
 use super::{DecodeError, DecodeLimits, nesting::NestingError};
 use candid::utils::ArgumentDecoder;
-use std::{error::Error, fmt};
 
 /// Caller-selected treatment of an absent argument envelope.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -29,9 +28,10 @@ pub struct ArgumentLimits {
 }
 
 /// Argument admission or decoding failure, retaining the underlying typed cause.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum ArgumentDecodeError {
     /// Original argument envelope is too large.
+    #[error("argument envelope is {actual} bytes; maximum is {maximum}")]
     TooLarge {
         /// Observed bytes.
         actual: usize,
@@ -39,26 +39,8 @@ pub enum ArgumentDecodeError {
         maximum: usize,
     },
     /// Malformed, incompatible or over-budget Candid arguments.
-    Candid(candid::Error),
-}
-impl fmt::Display for ArgumentDecodeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::TooLarge { actual, maximum } => write!(
-                f,
-                "argument envelope is {actual} bytes; maximum is {maximum}"
-            ),
-            Self::Candid(_) => f.write_str("invalid or over-budget Candid arguments"),
-        }
-    }
-}
-impl Error for ArgumentDecodeError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            Self::TooLarge { .. } => None,
-            Self::Candid(error) => Some(error),
-        }
-    }
+    #[error("invalid or over-budget Candid arguments")]
+    Candid(#[source] candid::Error),
 }
 impl ArgumentDecodeError {
     /// Recover the typed wire-admission refusal through the existing error variant.

@@ -42,8 +42,9 @@ sub environment {
         symlink($selected,$path) or die $! unless -l $path;
     }
     my $rustup=command('rustup','show','home'); chomp $rustup;
+    my $compiler=command('bash','scripts/ci/read-platform-msrv.sh'); chomp $compiler;
     return {PATH=>"$scratch/bin",PLATFORM_POLICY_TOOL_PATH=>$ENV{PATH},HOME=>$scratch,CARGO_HOME=>"$scratch/cargo",RUSTUP_HOME=>$rustup,
-        RUSTUP_TOOLCHAIN=>'1.99.1',RUSTUP_AUTO_INSTALL=>'0',CARGO_NET_OFFLINE=>'true',LC_ALL=>'C',TZ=>'UTC',
+        RUSTUP_TOOLCHAIN=>$compiler,RUSTUP_AUTO_INSTALL=>'0',CARGO_NET_OFFLINE=>'true',LC_ALL=>'C',TZ=>'UTC',
         GIT_CONFIG_NOSYSTEM=>'1',GIT_CONFIG_GLOBAL=>'/dev/null',GIT_ATTR_NOSYSTEM=>'1',
         GIT_TEMPLATE_DIR=>"$scratch/templates"};
 }

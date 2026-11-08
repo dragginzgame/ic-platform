@@ -117,10 +117,10 @@ if [[ "$graph_family" != - ]]; then
                     echo 'Identity/ledger consumer acquired retired or unrelated integration machinery' >&2; exit 1
                 fi
                 if [[ "$graph_family" == principal || "$graph_family" == principal-external ]] &&
-                    grep -Eq '^(sha2|digest|candid) ' "$graph"; then
+                    graph_has_forbidden identity-codecs; then
                     echo 'Principal byte/text capability acquired hashing or Candid' >&2; exit 1
                 fi
-                if [[ "$graph_family" == principal || "$graph_family" == principal-self-authenticating ]] && grep -q '^ic_principal ' "$graph"; then
+                if [[ "$graph_family" == principal || "$graph_family" == principal-self-authenticating ]] && graph_has_forbidden external-principal; then
                     echo 'Owned Principal acquired the external identity' >&2; exit 1
                 fi ;;
             runtime|external-candid)
@@ -129,10 +129,10 @@ if [[ "$graph_family" != - ]]; then
                 else
                     bash scripts/ci/check-platform-runtime-graph.sh "$graph"
                 fi
-                if grep -Eq '^(darling|darling_core|darling_macro) ' "$graph"; then
+                if graph_has_forbidden retired-darling; then
                     echo 'Runtime/entrypoint consumer acquired retired Darling scaffolding' >&2; exit 1
                 fi
-                if [[ "$graph_family" == runtime ]] && grep -q '^ic-platform-macros ' "$graph"; then
+                if [[ "$graph_family" == runtime ]] && graph_has_forbidden generator; then
                     echo 'Runtime-only consumer acquired the entrypoint generator' >&2; exit 1
                 fi ;;
             external-codecs)

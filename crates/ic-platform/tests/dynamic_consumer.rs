@@ -2,6 +2,8 @@
 #![cfg(not(target_family = "wasm"))]
 
 #[cfg(test)]
+mod support;
+#[cfg(test)]
 use ic_platform::{
     candid::{
         contract::{
@@ -23,14 +25,7 @@ struct PreparationInput {
 }
 
 #[cfg(test)]
-fn fixture(hex: &str) -> Vec<u8> {
-    let (pairs, remainder) = hex.trim().as_bytes().as_chunks::<2>();
-    assert!(remainder.is_empty());
-    pairs
-        .iter()
-        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-        .collect()
-}
+use support::decode_hex as fixture;
 
 #[test]
 fn old_field_fixture_retains_original_owner_bytes() {

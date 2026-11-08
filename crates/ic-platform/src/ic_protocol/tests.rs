@@ -248,6 +248,34 @@ fn strict_call_inspection_keeps_unknown_field_and_request_shape_refusal() {
 fn typed_protocol_fixtures_keep_payload_ranges_and_strict_rejections() {
     let reply = vec![255, 0, 128];
     let bytes = fixtures::query_reply(&reply, 1024).unwrap();
+    let rejection = ic_transport_types::RejectResponse {
+        reject_code: ic_transport_types::RejectCode::CanisterReject,
+        reject_message: "fixture".into(),
+        error_code: Some("code".into()),
+    };
+    assert!(matches!(
+        fixtures::query_rejection(&rejection, 10),
+        Err(CborError::OutputTooLarge)
+    ));
+    let rejected = fixtures::query_rejection(&rejection, 1024).unwrap();
+    assert_eq!(
+        rejected,
+        serde_cbor::to_vec(&ic_transport_types::QueryResponse::Rejected {
+            reject: rejection,
+            signatures: Vec::new(),
+        })
+        .unwrap()
+    );
+    for maximum in [0, reply.len() - 1] {
+        assert!(matches!(
+            fixtures::query_reply(&reply, maximum),
+            Err(CborError::OutputTooLarge)
+        ));
+        assert!(matches!(
+            fixtures::read_state_response(&reply, maximum),
+            Err(CborError::OutputTooLarge)
+        ));
+    }
     let decoded: ic_transport_types::QueryResponse = decode(&bytes, bytes.len()).unwrap();
     assert!(
         matches!(decoded, ic_transport_types::QueryResponse::Replied { reply: ic_transport_types::ReplyResponse { arg }, .. } if arg == reply)
@@ -291,13 +319,7 @@ fn shared_browser_ingress_corpus_preserves_bytes_and_request_identity() {
             continue;
         }
         let fields: Vec<_> = line.split('\t').collect();
-        let bytes: Vec<u8> = fields[1]
-            .as_bytes()
-            .as_chunks::<2>()
-            .0
-            .iter()
-            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-            .collect();
+        let bytes = fixture_hex(fields[1]);
         let result = super::decode_call_content_strict(&bytes, bytes.len());
         assert_eq!(result.is_ok(), fields[2] == "true", "{}", fields[0]);
         if let Ok(content) = result {
@@ -311,4 +333,69 @@ fn shared_browser_ingress_corpus_preserves_bytes_and_request_identity() {
             assert_eq!(ingress_expiry.to_string(), fields[4]);
         }
     }
+}
+
+fn fixture_hex(text: &str) -> Vec<u8> {
+    let (pairs, rest) = text.as_bytes().as_chunks::<2>();
+    assert!(rest.is_empty());
+    pairs
+        .iter()
+        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
+        .collect()
+}
+
+#[cfg(feature = "ic-protocol-fixtures")]
+#[test]
+fn shared_browser_response_corpus_preserves_framing_and_payloads() {
+    let mut seen = std::collections::BTreeSet::new();
+    for row in include_str!("../../tests/fixtures/protocol.tsv")
+        .lines()
+        .filter(|row| !row.starts_with('#'))
+    {
+        let fields: Vec<_> = row.split('\t').collect();
+        assert_eq!(fields.len(), 4, "{row}");
+        assert!(
+            seen.insert((fields[0], fields[1])),
+            "duplicate corpus case: {row}"
+        );
+        let bytes = fixture_hex(fields[2]);
+        let payload = fixture_hex(fields[3]);
+        let encoded = match fields[0] {
+            "read-state" => {
+                assert_eq!(
+                    decode_read_state_response(&bytes, bytes.len())
+                        .unwrap()
+                        .certificate,
+                    payload
+                );
+                fixtures::read_state_response(&payload, bytes.len()).unwrap()
+            }
+            "query-reply" => {
+                let reply: ic_transport_types::QueryResponse = decode(&bytes, bytes.len()).unwrap();
+                let ic_transport_types::QueryResponse::Replied { reply, .. } = reply else {
+                    panic!("expected replied fixture")
+                };
+                assert_eq!(reply.arg, payload);
+                fixtures::query_reply(&payload, bytes.len()).unwrap()
+            }
+            other => panic!("unknown corpus operation: {other}"),
+        };
+        if fields[1] == "rust" {
+            assert_eq!(encoded, bytes, "{row}");
+        } else {
+            assert_eq!(fields[1], "sdk");
+            assert_eq!([&[0xd9, 0xd9, 0xf7][..], &encoded].concat(), bytes, "{row}");
+        }
+    }
+    assert_eq!(
+        seen,
+        [
+            ("read-state", "sdk"),
+            ("read-state", "rust"),
+            ("query-reply", "sdk"),
+            ("query-reply", "rust"),
+        ]
+        .into_iter()
+        .collect()
+    );
 }

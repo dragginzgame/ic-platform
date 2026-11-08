@@ -206,3 +206,51 @@ fn native_failures_use_compact_candid_diagnostics_and_preserve_input() {
         }
     }
 }
+
+#[test]
+fn error_formatting_and_source_identity_stay_explicit() {
+    let too_large = DecodeError::ReplyTooLarge {
+        actual: 9,
+        maximum: 8,
+    };
+    assert_eq!(
+        too_large.to_string(),
+        "Candid reply is 9 bytes, maximum is 8"
+    );
+    assert!(too_large.source().is_none());
+    let error = DecodeError::Candid(candid::Error::msg("detail"));
+    assert_eq!(error.to_string(), "Candid reply decoding failed: detail");
+    let DecodeError::Candid(ref inner) = error else {
+        unreachable!()
+    };
+    assert!(std::ptr::eq(
+        error
+            .source()
+            .unwrap()
+            .downcast_ref::<candid::Error>()
+            .unwrap(),
+        inner
+    ));
+    let error = super::arguments::ArgumentDecodeError::Candid(candid::Error::msg("private detail"));
+    assert_eq!(error.to_string(), "invalid or over-budget Candid arguments");
+    let super::arguments::ArgumentDecodeError::Candid(ref inner) = error else {
+        unreachable!()
+    };
+    assert!(std::ptr::eq(
+        error
+            .source()
+            .unwrap()
+            .downcast_ref::<candid::Error>()
+            .unwrap(),
+        inner
+    ));
+    let error = super::arguments::ArgumentDecodeError::TooLarge {
+        actual: 9,
+        maximum: 8,
+    };
+    assert_eq!(
+        error.to_string(),
+        "argument envelope is 9 bytes; maximum is 8"
+    );
+    assert!(error.source().is_none());
+}

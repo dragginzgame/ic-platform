@@ -12,11 +12,10 @@ Principal text parsing/formatting was approximately 1.9–2.0 times faster.
 These are fixture results, not application latency or IC instruction measurements.
 Historical peak RSS observations did not measure aggregate process-tree memory.
 
-Run `bash scripts/benchmarks/0.4/reproduce.sh` from this repository after explicitly
-preparing Rust 1.99.1, its Wasm target, registry sources and GNU `/usr/bin/time`.
-The historical Git revisions must be available. The runner creates a fresh
-temporary directory and does not modify repository locks or sibling checkouts.
-It is a Linux benchmark harness, not macOS performance qualification.
+The active historical runner is retired. [Reproduction sources and pinned
+inputs](../../../scripts/benchmarks/0.4/README.md) remain at their immutable Git
+revision. Use that checkout and its recorded compiler/caches; this is historical
+Linux evidence, not current-source or macOS qualification.
 
 The comparison is `390644f` to `9a661f7`; Principal uses `f105386` as its baseline.
 Runtime fixtures contain historical Timers/Wire and registry Platform 0.1.18.

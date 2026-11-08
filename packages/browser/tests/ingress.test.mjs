@@ -141,7 +141,35 @@ test('typed negative fixtures retain the fields that consumer refusal tests prot
   const cert = { tree: [0], signature: Uint8Array.of(7, 8), delegation: { certificate: Uint8Array.of(3) } };
   const corrupted = Cbor.decode(corruptCertificateSignatureFixture(Cbor.encode(cert)));
   assert.deepEqual(corrupted, { ...cert, signature: Uint8Array.of(6, 8) });
-  assert.deepEqual(Cbor.decode(readStateResponseFixture(Uint8Array.of(0))), { certificate: Uint8Array.of(0) });
   assert.deepEqual(Cbor.decode(invalidCertificateFixture()), {});
-  assert.deepEqual(Cbor.decode(queryReplyFixture(Uint8Array.of(0, 255))), { status: 'replied', reply: { arg: Uint8Array.of(0, 255) } });
+});
+
+test('shared Rust response corpus preserves both framing choices and opaque bytes', () => {
+  const corpus = readFileSync(new URL('../../../crates/ic-platform/tests/fixtures/protocol.tsv', import.meta.url), 'utf8');
+  const seen = new Set();
+  for (const row of corpus.trim().split('\n').filter(row => !row.startsWith('#'))) {
+    assert.equal(row.split('\t').length, 4);
+    const [kind, producer, hex, payloadHex] = row.split('\t');
+    const key = `${kind}/${producer}`;
+    assert(!seen.has(key), `duplicate corpus case: ${key}`);
+    seen.add(key);
+    for (const text of [hex, payloadHex]) assert.match(text, /^(?:[0-9a-f]{2})*$/);
+    const bytes = Uint8Array.from(Buffer.from(hex, 'hex'));
+    const payload = Uint8Array.from(Buffer.from(payloadHex, 'hex'));
+    const before = bytes.slice();
+    const decoded = Cbor.decode(bytes);
+    let encoded;
+    if (kind === 'read-state') {
+      assert.deepEqual(decoded, { certificate: payload });
+      encoded = readStateResponseFixture(payload);
+    } else {
+      assert.equal(kind, 'query-reply');
+      assert.deepEqual(decoded, { status: 'replied', reply: { arg: payload } });
+      encoded = queryReplyFixture(payload);
+    }
+    if (producer === 'sdk') assert.deepEqual(encoded, bytes, row);
+    else { assert.equal(producer, 'rust'); assert.deepEqual(encoded.subarray(3), bytes, row); }
+    assert.deepEqual(bytes, before);
+  }
+  assert.deepEqual([...seen].sort(), ['query-reply/rust', 'query-reply/sdk', 'read-state/rust', 'read-state/sdk']);
 });

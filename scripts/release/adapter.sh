@@ -11,7 +11,9 @@ export RELEASE_GROUP
 case "$operation" in
     version|files) exec bash scripts/release/group.sh "$operation" ;;
 esac
-plan="$(bash scripts/release/group.sh plan)"
+projection=plan
+case "$operation" in preflight|prepare) projection=ready-plan ;; esac
+plan="$(bash scripts/release/group.sh "$projection")"
 primary="$(jq -er .primary <<< "$plan")"
 bash scripts/ci/check-release-delivery.sh ci/release-delivery.txt "${RELEASE_DELIVERY:-direct}"
 changelog="$(jq -er .changelog <<< "$plan")"
@@ -69,11 +71,10 @@ check_platform_metadata() {
 }
 case "$operation" in
     preflight)
-        bash scripts/release/group.sh ready
         bash scripts/release/runtime-lock.sh check
         bash scripts/release/runtime-pin.sh check
         bash scripts/ci/check-release-source.sh "${source_args[@]}"
-        current="$(bash scripts/release/group.sh version)"
+        current="$(jq -er .previous <<< "$plan")"
         [[ "$current" == "${RELEASE_PREVIOUS:?}" ]] || exit 1
         bash scripts/ci/check-release-changelog.sh "${RELEASE_VERSION:?}" "$current" "${RELEASE_DATE:?}" "$changelog"
         bash scripts/ci/cargo-release-preflight.sh "$PWD" "$prepare" \
@@ -83,9 +84,8 @@ case "$operation" in
         ;;
     prepare)
         bash scripts/release/validation-gate.sh check
-        bash scripts/release/group.sh ready
         bash scripts/ci/check-release-source.sh "${source_args[@]}"
-        current="$(bash scripts/release/group.sh version)"
+        current="$(jq -er .previous <<< "$plan")"
         [[ -z "${RELEASE_COMMIT:-}" ]] || exit 2
         if [[ "$current" == "${RELEASE_VERSION:?}" ]]; then
             check_platform_metadata

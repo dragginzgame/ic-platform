@@ -90,23 +90,15 @@ pub fn verify_canister_sig(
 }
 
 /// Failure to authenticate a canister signature or extract its signing time.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 pub enum CanisterSigTimeError {
     /// An unchanged upstream verifier rejected the signature; diagnostics are opaque.
+    #[error("{0}")]
     Verification(String),
     /// Time is absent, ambiguous, or not a complete unsigned 64-bit LEB128 value.
+    #[error("invalid signing certificate time")]
     InvalidCertificateTime,
 }
-
-impl std::fmt::Display for CanisterSigTimeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Verification(message) => f.write_str(message),
-            Self::InvalidCertificateTime => f.write_str("invalid signing certificate time"),
-        }
-    }
-}
-impl std::error::Error for CanisterSigTimeError {}
 
 /// Verify a canister signature and return its authenticated signing time in ns.
 ///

@@ -233,3 +233,51 @@ fn existing_function_pointer_and_error_matches_remain_source_compatible() {
         7
     );
 }
+
+#[test]
+fn refusal_diagnostics_keep_values_and_no_source() {
+    use std::error::Error as _;
+    for (error, message) in [
+        (
+            NestingError::Bytes {
+                actual: 9,
+                maximum: 8,
+            },
+            "Candid admission bytes 9 exceed 8",
+        ),
+        (
+            NestingError::Header { maximum: 8 },
+            "Candid admission header exceeds 8 bytes",
+        ),
+        (
+            NestingError::Types {
+                actual: 9,
+                maximum: 8,
+            },
+            "Candid admission type entries 9 exceed 8",
+        ),
+        (
+            NestingError::TypeDepth { maximum: 16 },
+            "Candid type nesting exceeds 16",
+        ),
+        (
+            NestingError::ValueDepth { maximum: 16 },
+            "Candid value nesting exceeds 16",
+        ),
+        (
+            NestingError::Work { maximum: 8 },
+            "Candid nesting admission work quota exceeds 8",
+        ),
+        (
+            NestingError::Malformed { offset: 3 },
+            "invalid Candid admission framing at byte 3",
+        ),
+        (
+            NestingError::Unsupported { opcode: -25 },
+            "unsupported Candid admission constructor -25",
+        ),
+    ] {
+        assert_eq!(error.to_string(), message);
+        assert!(error.source().is_none());
+    }
+}

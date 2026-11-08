@@ -26,18 +26,19 @@ for group in platform runtime types; do
         files:(["Cargo.toml","scripts/fixtures/cdk-runtime/Cargo.lock","scripts/fixtures/timers-runtime/Cargo.lock"] +
             if $group=="runtime" then ["ci/dependency-pinning-exceptions.json"] else [] end)}' > "$PROJECTION_PLAN"
     cp "$PROJECTION_PLAN" "$fixture/valid.json"
-    for operation in plan primary changelog members files ready; do
+    for operation in plan primary changelog members files ready ready-plan; do
         : > "$PROJECTION_CALLS"
         bash "$fixture/scripts/release/group.sh" "$operation" > "$fixture/$operation.out"
         [[ "$(wc -l < "$PROJECTION_CALLS")" -eq 1 ]]
     done
     cmp "$PROJECTION_PLAN" "$fixture/plan.out"
+    cmp "$PROJECTION_PLAN" "$fixture/ready-plan.out"
     [[ "$(cat "$fixture/primary.out")" == "ic-platform-$group" ]]
     [[ "$(cat "$fixture/members.out")" == member ]]
     jq -jr '.files[] | .+"\u0000"' "$PROJECTION_PLAN" > "$fixture/expected-files"
     cmp "$fixture/expected-files" "$fixture/files.out"
     jq '.files |= map(select(. != "scripts/fixtures/cdk-runtime/Cargo.lock"))' "$fixture/valid.json" > "$PROJECTION_PLAN"
-    for operation in plan ready; do
+    for operation in plan ready ready-plan; do
         if bash "$fixture/scripts/release/group.sh" "$operation" > "$fixture/refused" 2>&1; then exit 1; fi
         grep -q 'release refused: Shared group custody' "$fixture/refused"
     done

@@ -11,18 +11,28 @@ The optional `cdk` surface uses maintained, non-cryptographic runtime adapters
 and the owned generator. It does not depend on the full `ic-cdk` package.
 All controlled endpoints use explicit Wire hooks; select `candid` separately
 for required external management/system interfaces and existing checkpoint bytes.
-These breaking runtime and transport changes are released in the 0.4 line.
+The 0.4 transport cut is historical; current execution ownership belongs to the
+independently released Runtime group.
 See [the migration contract](../docs/migration.md) for ownership and adoption conditions.
 The public GitHub repository exists; registry availability requires separate verification.
 
 Installed-runtime qualification runs separately in `.github/workflows/runtime.yml`,
 using Testkit's explicit server setup/admission and both compiler/protocol modes.
 For a prepared registry cache and admitted server, run
-`bash scripts/ci/check-platform-runtime.sh --published 0.4.0` to exercise the exact
-published facade and generator without a local override. Append `--check-graph`
+`bash scripts/ci/check-platform-runtime.sh --published X.Y.Z`, selecting an actual
+published Runtime version, to exercise its registry cohort without a local
+Runtime override. Append `--check-graph`
 for graph-only admission. Local CI cache preparation uses `--prepare`; ordinary
 qualification never installs a server. Native macOS and live IC acceptance remain
 separate from this Linux workflow.
+
+Runtime qualification captures its input roster and bytes beneath the retained
+fixture's `inputs/` directory before reading selections or rendering/copying
+fixtures. The snapshot and current source roster/bytes are checked at completion;
+only the selected maintained lock may change during explicit `--refresh-lock`.
+Dependencies keep their canonical owner paths, so stop source writers during
+qualification. Shared-cache builds retain executables/Wasms under an inherited
+artifact lock before releasing the cache to another cooperative build.
 
 Historical measurements and reproduction instructions are in
 [the benchmark report](../docs/benchmarks/0.4/README.md).
@@ -58,12 +68,15 @@ budget, instruction benchmark or permission to weaken verification.
 Pushes compare against the event's preceding main commit; PRs use their base
 commit, and manual dispatch retains its explicitly selected baseline.
 
-`node --test scripts/benchmarks/tests/compare-wasm-sizes.test.mjs` checks comparison
-admission. The shared ingress corpus at
+`node --test scripts/benchmarks/tests/*.test.mjs` checks comparison
+admission and the common Wasm section reader. The shared ingress corpus at
 `crates/ic-platform/tests/fixtures/ingress.tsv` is exercised by Rust unit tests
 with `ic-protocol` and browser `ingress.test.mjs`. It deliberately records the
 browser's extension-field acceptance and Rust's upstream text-to-byte coercion;
 neither inspection API authenticates requests or replaces original signed bytes.
+The adjacent `protocol.tsv` response corpus is checked with `ic-protocol-fixtures`
+and the same browser tests. It preserves SDK self-described CBOR and Rust's
+untagged framing separately, with identical opaque reply/certificate payloads.
 
 Manual release-mode benchmarks are ignored by ordinary tests:
 `cargo test -p ic-platform-runtime --features executor --release --lib benchmark_protected -- --ignored --nocapture`

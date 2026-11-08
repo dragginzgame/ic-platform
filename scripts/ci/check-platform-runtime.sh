@@ -32,99 +32,83 @@ if [[ "$mode" == run && -z "${POCKET_IC_BIN:-}" && -z "${IC_TESTKIT_POCKET_IC_UR
     echo 'Set POCKET_IC_BIN (Testkit-admitted binary) or IC_TESTKIT_POCKET_IC_URL first' >&2
     exit 1
 fi
-msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 mkdir -p target
 fixture="$(mktemp -d "$root/target/cdk-runtime.XXXXXX")"
 mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
-# Inherit the reviewed test dependency selections from the root catalog.
-testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
-serde="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.serde.version' Cargo.toml)"
-tokio="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.tokio' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-selection='path = "../../crates/ic-platform"'
-runtime_selection='path = "../../crates/ic-platform-runtime"'
-if [[ -n "$published" ]]; then
-    runtime_selection="version = \"=$published\""
-    facade_version="$("$root/.tools/host/bin/yq" -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)"
-    selection="version = \"=$facade_version\""
-fi
-timers=""
-if [[ "$qualification" == timers ]]; then
-    timers="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-timers' Cargo.toml | "$root/.tools/host/bin/jq" -r 'if type == "string" then {version: .} else . end | to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-fi
-PLATFORM_FIXTURE_RUNTIME="$runtime_selection" PLATFORM_FIXTURE_MSRV="$msrv" PLATFORM_FIXTURE_PLATFORM="$selection" \
-PLATFORM_FIXTURE_TESTKIT="$testkit" PLATFORM_FIXTURE_WIRE="$wire" PLATFORM_FIXTURE_SERDE="$serde" \
-PLATFORM_FIXTURE_TOKIO="$tokio" PLATFORM_FIXTURE_TIMERS="$timers" \
-    perl scripts/ci/render-runtime-fixture.pl scripts/fixtures/cdk-runtime "$fixture" \
-        "$qualification" "$selection_mode" "$adapter_mode"
-cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
-cp scripts/fixtures/cdk-runtime/canister/tests.rs "$fixture/crates/canister/src/tests.rs"
-mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
-cp crates/ic-platform/tests/management_consumer.rs "$fixture/crates/canister/src/management_proof/mod.rs"
-cp -R crates/ic-platform/tests/support "$fixture/crates/canister/src/management_proof/"
-cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/src/management_proof/fixtures/"
-cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister,execution,cycles,stable_checks,system_checks,timer_checks} "$fixture/crates/canister/src/"
-cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
-cp -R "$root/scripts/fixtures/cdk-runtime/pocketic_support" "$fixture/apps/driver/src/"
-cp scripts/fixtures/cdk-runtime/driver/tests.rs "$fixture/apps/driver/src/tests.rs"
-cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver,benchmarks,driver_scenarios} "$fixture/apps/driver/src/"
-lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
-if [[ "$qualification" == timers ]]; then lock="$root/scripts/fixtures/timers-runtime/Cargo.lock"; fi
+lock="scripts/fixtures/cdk-runtime/Cargo.lock"
+if [[ "$qualification" == timers ]]; then lock="scripts/fixtures/timers-runtime/Cargo.lock"; fi
 printf '%s\n' "$qualification" > "$fixture/qualification"
 printf '%s\n' "$mode" > "$fixture/operation"
-# Bind each result to the actual source, selected lock, generated manifests and
-# compiler identities. Retain failed preparation as well as installed results.
-{
-    "$root/.tools/host/bin/rg" --files crates scripts/fixtures/cdk-runtime | sed "\|^scripts/fixtures/cdk-runtime/Cargo.lock$|d"
-    printf '%s\n' Cargo.toml rust-toolchain.toml .cargo/config.toml scripts/ci/check-platform-runtime.sh scripts/ci/render-runtime-fixture.pl scripts/ci/check-platform-compiler.sh scripts/ci/read-platform-msrv.sh "$lock"
-} | LC_ALL=C sort -u > "$fixture/input-files"
-source_fingerprints() {
-    perl -MDigest::SHA -ne '
-        chomp; open my $f, "<", $_ or die "$_: $!"; binmode $f;
-        print Digest::SHA->new(256)->addfile($f)->hexdigest, "  $_\n";
-    ' "$fixture/input-files"
-}
-source_fingerprints > "$fixture/source.sha256"
-if [[ "$mode" == --refresh-lock ]]; then
-    # Metadata rendering also runs from an uncommitted source archive. A lock
-    # refresh is preparation, never installed/release qualification evidence.
-    printf 'not-qualified: lock refresh\n' > "$fixture/source-revision"
-else
-    git rev-parse HEAD > "$fixture/source-revision"
-fi
-rustc -vV > "$fixture/compiler.txt"
 finish_runtime() {
     local result=$?
     trap - EXIT
-    source_fingerprints > "$fixture/source-after.sha256" || result=1
-    for side in source source-after; do
-        if [[ "$mode" == --refresh-lock ]]; then
-            grep -Fv "  $lock" "$fixture/$side.sha256" > "$fixture/$side.comparable"
-        else
-            cp "$fixture/$side.sha256" "$fixture/$side.comparable"
-        fi
-    done
-    if ! cmp -s "$fixture/source.comparable" "$fixture/source-after.comparable"; then
-        echo 'Runtime qualification inputs changed during observation' >&2
-        result=1
-    fi
+    refresh=()
+    if [[ "$mode" == --refresh-lock ]]; then refresh=(--refresh-lock); fi
+    perl "$root/scripts/ci/runtime-inputs.pl" verify "$root" "$fixture" "$lock" \
+        ${refresh[@]+"${refresh[@]}"} || result=1
     printf '%s\n' "$result" > "$fixture/status"
     printf 'Runtime %s evidence: %s\n' "$qualification" "$fixture"
     exit "$result"
 }
 trap finish_runtime EXIT
+# Capture before reading catalog/compiler selections or copying any fixture file.
+perl "$root/scripts/ci/runtime-inputs.pl" capture "$root" "$fixture" "$lock"
+input_root="$fixture/inputs"
+mkdir -p "$input_root/.tools"
+ln -s "$root/.tools/host" "$input_root/.tools/host"
+if [[ "$mode" == --refresh-lock ]]; then
+    printf 'not-qualified: lock refresh\n' > "$fixture/source-revision"
+else
+    git rev-parse HEAD > "$fixture/source-revision"
+fi
+msrv="$(bash "$input_root/scripts/ci/read-platform-msrv.sh")"
+rustc -vV > "$fixture/compiler.txt"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_dependencies_read "$input_root"
+testkit="$(platform_dependency ic-testkit)"
+wire="$(platform_dependency_version ic-wire)"
+serde="$(platform_dependency_version serde)"
+tokio="$(platform_dependency tokio)"
+selection='path = "../../crates/ic-platform"'
+runtime_selection='path = "../../crates/ic-platform-runtime"'
+if [[ -n "$published" ]]; then
+    runtime_selection="version = \"=$published\""
+    facade_version="$("$root/.tools/host/bin/yq" -p toml -o json -r '.package.version' "$input_root/crates/ic-platform/Cargo.toml")"
+    selection="version = \"=$facade_version\""
+fi
+timers=""
+if [[ "$qualification" == timers ]]; then
+    timers="$(platform_dependency ic-timers)"
+fi
+PLATFORM_FIXTURE_RUNTIME="$runtime_selection" PLATFORM_FIXTURE_MSRV="$msrv" PLATFORM_FIXTURE_PLATFORM="$selection" \
+PLATFORM_FIXTURE_TESTKIT="$testkit" PLATFORM_FIXTURE_WIRE="$wire" PLATFORM_FIXTURE_SERDE="$serde" \
+PLATFORM_FIXTURE_TOKIO="$tokio" PLATFORM_FIXTURE_TIMERS="$timers" \
+    perl "$input_root/scripts/ci/render-runtime-fixture.pl" "$input_root/scripts/fixtures/cdk-runtime" "$fixture" \
+        "$qualification" "$selection_mode" "$adapter_mode"
+cp "$input_root"/scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
+cp "$input_root"/scripts/fixtures/cdk-runtime/canister/tests.rs "$fixture/crates/canister/src/tests.rs"
+mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
+cp "$input_root"/crates/ic-platform/tests/management_consumer.rs "$fixture/crates/canister/src/management_proof/mod.rs"
+cp -R "$input_root"/crates/ic-platform/tests/support "$fixture/crates/canister/src/management_proof/"
+cp "$input_root"/crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/src/management_proof/fixtures/"
+cp -R "$input_root"/scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister,execution,cycles,stable_checks,system_checks,timer_checks} "$fixture/crates/canister/src/"
+cp "$input_root"/scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
+cp -R "$input_root/scripts/fixtures/cdk-runtime/pocketic_support" "$fixture/apps/driver/src/"
+cp "$input_root"/scripts/fixtures/cdk-runtime/driver/tests.rs "$fixture/apps/driver/src/tests.rs"
+cp -R "$input_root"/scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver,benchmarks,driver_scenarios} "$fixture/apps/driver/src/"
 # Preparation modes may resolve/fetch only as explicitly requested. Qualification
 # below this phase uses the maintained lock and admits graphs before compiling.
 if [[ "$mode" == --refresh-lock ]]; then
     # Preserve the maintained foreign selections while resolving necessary
     # manifest/owner changes. Ordinary validation never rewrites this lock.
-    cp "$lock" "$fixture/Cargo.lock"
+    cp "$input_root/$lock" "$fixture/Cargo.lock"
     cargo metadata --manifest-path "$fixture/Cargo.toml" --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
     cp "$fixture/Cargo.lock" "$lock"
     printf 'Review the refreshed qualification lock: %s\n' "$lock"
     exit 0
 fi
-cp "$lock" "$fixture/Cargo.lock"
+cp "$input_root/$lock" "$fixture/Cargo.lock"
 
 if [[ "$mode" == --prepare ]]; then
     cargo fetch --manifest-path "$fixture/Cargo.toml" --locked
@@ -191,34 +175,23 @@ fi
 build="${CARGO_TARGET_DIR:-$root/target/runtime-build}"
 bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler-admission.txt"
 mkdir -p "$fixture/artifacts"
-# Cargo releases its target lock before returning. Keep our own inherited lock
-# through the copy, so another proof cannot replace the selected artifact first.
-# Perl flock is available on both supported Unix hosts; the subshell owns fd 9.
-retain_runtime_artifact() (
-    cache="$1" artifact="$2" destination="$3"
-    shift 3
-    mkdir -p "$cache"
-    exec 9>>"$cache/.platform-artifact.lock"
-    perl -MFcntl=:flock -e 'open my $lock, "<&=9" or die "$ARGV[0]: $!"; flock($lock, LOCK_EX) or die "$ARGV[0]: $!"' "$cache/.platform-artifact.lock"
-    export CARGO_TARGET_DIR="$cache"
-    "$@"
-    cp "$cache/$artifact" "$destination"
-)
+# shellcheck source=scripts/ci/retain-build-artifact.sh
+source "$root/scripts/ci/retain-build-artifact.sh"
 driver_features=()
 if [[ "$qualification" == timers ]]; then driver_features=(--features timers-composition); fi
 build_runtime_driver() {
-    cargo +"$msrv" clippy --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver --all-targets ${driver_features[@]+"${driver_features[@]}"} -- -D warnings
-    cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver ${driver_features[@]+"${driver_features[@]}"}
+    cargo +"$msrv" clippy --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver --all-targets ${driver_features[@]+"${driver_features[@]}"} -- -D warnings || return
+    cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver ${driver_features[@]+"${driver_features[@]}"} || return
     cargo +"$msrv" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver ${driver_features[@]+"${driver_features[@]}"}
 }
-retain_runtime_artifact "$build/host-$msrv-$qualification" debug/platform-runtime-driver \
+retain_build_artifact "$build/host-$msrv-$qualification" debug/platform-runtime-driver \
     "$fixture/artifacts/platform-runtime-driver" build_runtime_driver
 toolchain="$msrv"
 rustc +"$toolchain" -vV > "$fixture/compiler-$toolchain.txt"
 for profile in "${profiles[@]}"; do
         select_runtime_profile "$profile"
         mkdir -p "$fixture/artifacts/$toolchain"
-        retain_runtime_artifact "$build/$toolchain" \
+        retain_build_artifact "$build/$toolchain" \
             wasm32-unknown-unknown/release/platform_runtime_canister.wasm \
             "$fixture/artifacts/$toolchain/$selected_artifact.wasm" \
             cargo +"$toolchain" build --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${selected_features[@]+"${selected_features[@]}"} --release --target wasm32-unknown-unknown

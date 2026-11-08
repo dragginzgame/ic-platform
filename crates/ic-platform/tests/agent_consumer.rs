@@ -2,6 +2,11 @@
 #![cfg(not(target_family = "wasm"))]
 
 #[cfg(test)]
+mod support;
+#[cfg(test)]
+use support::decode_hex as from_hex;
+
+#[cfg(test)]
 use ic_platform::{
     agent::{
         Agent, AgentBuilder, AgentError, AnonymousIdentity, BasicIdentity, CallResponse,
@@ -94,14 +99,6 @@ fn anonymous_and_delegated_identities_preserve_sender_and_signed_chain() {
         permissions: None,
     };
     let signature = root.sign_delegation(&delegation).unwrap();
-    let from_hex = |hex: &str| -> Vec<u8> {
-        let (pairs, remainder) = hex.trim().as_bytes().as_chunks::<2>();
-        assert!(remainder.is_empty());
-        pairs
-            .iter()
-            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-            .collect()
-    };
     assert_eq!(
         delegation.signable(),
         from_hex(include_str!("fixtures/agent-delegation-signable.hex"))

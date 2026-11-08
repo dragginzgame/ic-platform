@@ -8,6 +8,9 @@ use serde::Serialize;
 
 /// Encode an unsigned replied query with exact opaque reply bytes.
 pub fn query_reply(arg: &[u8], max_bytes: usize) -> Result<Vec<u8>, CborError> {
+    if arg.len() > max_bytes {
+        return Err(CborError::OutputTooLarge);
+    }
     encode_framed(
         &QueryResponse::Replied {
             reply: ReplyResponse { arg: arg.to_vec() },
@@ -20,6 +23,13 @@ pub fn query_reply(arg: &[u8], max_bytes: usize) -> Result<Vec<u8>, CborError> {
 
 /// Encode an unsigned query rejection with its original structured error fields.
 pub fn query_rejection(reject: &RejectResponse, max_bytes: usize) -> Result<Vec<u8>, CborError> {
+    let text_bytes = reject
+        .reject_message
+        .len()
+        .saturating_add(reject.error_code.as_ref().map_or(0, String::len));
+    if text_bytes > max_bytes {
+        return Err(CborError::OutputTooLarge);
+    }
     encode_framed(
         &QueryResponse::Rejected {
             reject: reject.clone(),
@@ -32,6 +42,9 @@ pub fn query_rejection(reject: &RejectResponse, max_bytes: usize) -> Result<Vec<
 
 /// Encode a read-state response containing caller-selected certificate bytes.
 pub fn read_state_response(certificate: &[u8], max_bytes: usize) -> Result<Vec<u8>, CborError> {
+    if certificate.len() > max_bytes {
+        return Err(CborError::OutputTooLarge);
+    }
     encode_framed(
         &ReadStateResponse {
             certificate: certificate.to_vec(),

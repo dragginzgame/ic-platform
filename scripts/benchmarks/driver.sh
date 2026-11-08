@@ -13,8 +13,11 @@ build_benchmark_driver() {
     cp -R "$root/scripts/fixtures/cdk-runtime/pocketic_support" "$output/driver/src/"
     cp "$root/Cargo.lock" "$output/driver/Cargo.lock"
     platform="$(perl -MJSON::PP -e 'print encode_json($ARGV[0])' "$root/crates/ic-platform")"
-    testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-    tokio="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.tokio' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
+    # shellcheck source=scripts/ci/workspace-dependencies.sh
+    source "$root/scripts/ci/workspace-dependencies.sh"
+    platform_dependencies_read "$root"
+    testkit="$(platform_dependency ic-testkit)"
+    tokio="$(platform_dependency tokio)"
     cat > "$output/driver/Cargo.toml" <<MANIFEST
 [package]
 name = "platform-$kind-benchmark"
@@ -35,8 +38,11 @@ MANIFEST
         --format-version 1 > "$output/driver/metadata.json"
     CARGO_TARGET_DIR="$cache" cargo +"$compiler" clippy --manifest-path "$output/driver/Cargo.toml" \
         --frozen --all-targets -- -D warnings > "$output/driver/clippy.log" 2>&1
-    CARGO_TARGET_DIR="$cache" cargo +"$compiler" build --manifest-path "$output/driver/Cargo.toml" \
+    # shellcheck source=scripts/ci/retain-build-artifact.sh
+    source "$root/scripts/ci/retain-build-artifact.sh"
+    driver="$output/driver/platform-$kind-benchmark"
+    retain_build_artifact "$cache" "debug/platform-$kind-benchmark" "$driver" \
+        cargo +"$compiler" build --manifest-path "$output/driver/Cargo.toml" \
         --frozen > "$output/driver/build.log" 2>&1
-    driver="$cache/debug/platform-$kind-benchmark"
     shasum -a 256 "$driver" "$output/driver/src/main.rs" "$output/driver/Cargo.lock" > "$output/driver/sha256.txt"
 }

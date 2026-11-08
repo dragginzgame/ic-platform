@@ -17,8 +17,29 @@ finish() {
     fixture_finish "$status" "$fixture" 'Admission evidence retained'
 }
 trap finish EXIT
+# Catalog projection keeps complete tables and explicit version selections. It
+# takes one snapshot: later manifest edits cannot mix suppliers within one fixture.
+mkdir -p "$fixture/catalog/.tools"
+ln -s "$root/.tools/host" "$fixture/catalog/.tools/host"
+cat > "$fixture/catalog/Cargo.toml" <<'CATALOG'
+[workspace.dependencies]
+scalar = "1.2.3"
+table = { version = "=4.5.6", default-features = false, features = ["one"] }
+source = { git = "https://example.invalid/source", rev = "immutable" }
+CATALOG
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_dependencies_read "$fixture/catalog"
+[[ "$(platform_dependency scalar)" == 'version = "1.2.3"' ]]
+[[ "$(platform_dependency_version table)" == '=4.5.6' ]]
+[[ "$(platform_dependency table)" == 'version = "=4.5.6", default-features = false, features = ["one"]' ]]
+[[ "$(platform_dependency source)" == 'git = "https://example.invalid/source", rev = "immutable"' ]]
+: > "$fixture/catalog/Cargo.toml"
+[[ "$(platform_dependency_version scalar)" == '1.2.3' ]]
+if platform_dependency missing > "$fixture/catalog/missing" 2>&1; then exit 1; fi
+if platform_dependency_version source > "$fixture/catalog/version" 2>&1; then exit 1; fi
 mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/prepared-call-consumer" "$fixture/.tools" "$fixture/bin"
-cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,runtime-inputs.pl,retain-build-artifact.sh,workspace-dependencies.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 cp "$root/scripts/fixtures/prepared-call-consumer/"{lib,tests}.rs "$fixture/scripts/fixtures/prepared-call-consumer/"
 cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
@@ -50,6 +71,7 @@ case "$1" in
         case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'ic-platform v0.17.0 (/local/platform)\ncandid v0.10.39\n' ;; esac
         ;;
     +*)
+        if [[ "$2" == clippy && "${ADMISSION_FAIL_CLIPPY:-no}" == yes ]]; then exit 43; fi
         if [[ "$2" == build ]]; then
             if [[ "${ADMISSION_FAIL_BUILD:-no}" == yes ]]; then exit 42; fi
             printf '%s\n' "$CARGO_TARGET_DIR" >> "$ADMISSION_TARGETS"
@@ -120,6 +142,13 @@ if ADMISSION_FAIL_BUILD=yes "$BASH" "$fixture/scripts/ci/check-platform-runtime.
 else
     [[ $? == 42 ]] || { cat "$fixture/build-failure.log"; exit 1; }
 fi
+: > "$ADMISSION_CALLS"
+if ADMISSION_FAIL_CLIPPY=yes "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --build-only > "$fixture/clippy-failure.log" 2>&1; then
+    echo 'Runtime copied an artifact after failed Clippy' >&2; exit 1
+else
+    [[ $? == 43 ]] || { cat "$fixture/clippy-failure.log"; exit 1; }
+fi
+if grep -q ' build ' "$ADMISSION_CALLS"; then echo 'Runtime built after failed Clippy' >&2; exit 1; fi
 
 # Pause A after Cargo returns and before copying its first Wasm. B must wait
 # for that entire interval, then retain its own output from the shared cache.
@@ -170,6 +199,29 @@ for run in a b; do
     done < <(find "$retained/artifacts" -name '*.wasm')
 done
 exec 6>&- 7>&- 8>&-
+# Snapshot copies have their own identity; additions, source edits and snapshot
+# edits refuse, while explicit refresh tolerates only the selected lock changing.
+proof="$fixture/input-proof"
+mkdir "$proof"
+input_lock=scripts/fixtures/cdk-runtime/Cargo.lock
+input_file=scripts/fixtures/cdk-runtime/canister.rs
+perl "$fixture/scripts/ci/runtime-inputs.pl" capture "$fixture" "$proof" "$input_lock"
+cmp "$fixture/$input_file" "$proof/inputs/$input_file"
+printf '// added input\n' > "$fixture/crates/new-input.rs"
+if perl "$fixture/scripts/ci/runtime-inputs.pl" verify "$fixture" "$proof" "$input_lock" > "$proof/roster.log" 2>&1; then exit 1; fi
+grep -q 'input roster changed' "$proof/roster.log"
+rm "$fixture/crates/new-input.rs"
+printf '\n// source edit\n' >> "$fixture/$input_file"
+if perl "$fixture/scripts/ci/runtime-inputs.pl" verify "$fixture" "$proof" "$input_lock" > "$proof/source.log" 2>&1; then exit 1; fi
+grep -q 'inputs changed during observation' "$proof/source.log"
+cp "$proof/inputs/$input_file" "$fixture/$input_file"
+printf '\n# refreshed lock\n' >> "$fixture/$input_lock"
+if perl "$fixture/scripts/ci/runtime-inputs.pl" verify "$fixture" "$proof" "$input_lock" > "$proof/lock.log" 2>&1; then exit 1; fi
+perl "$fixture/scripts/ci/runtime-inputs.pl" verify "$fixture" "$proof" "$input_lock" --refresh-lock
+cp "$proof/inputs/$input_lock" "$fixture/$input_lock"
+printf '\n// snapshot edit\n' >> "$proof/inputs/$input_file"
+if perl "$fixture/scripts/ci/runtime-inputs.pl" verify "$fixture" "$proof" "$input_lock" > "$proof/snapshot.log" 2>&1; then exit 1; fi
+grep -q 'input snapshot changed' "$proof/snapshot.log"
 if "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --published invalid --check-graph > "$fixture/version.log" 2>&1; then
     echo 'Runtime admitted an invalid published version' >&2; exit 1
 else

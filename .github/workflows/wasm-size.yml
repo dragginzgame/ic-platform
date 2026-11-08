@@ -70,7 +70,7 @@ jobs:
           ALLOWANCE: ${{ inputs.max_growth_bytes || '128' }}
         run: |
           export PATH="$PWD/.tools/ic/bin:$PATH"
-          node --test scripts/benchmarks/tests/compare-wasm-sizes.test.mjs
+          node --test scripts/benchmarks/tests/*.test.mjs
           bash scripts/benchmarks/check-wasm-size-regression.sh "$BASELINE" "$ALLOWANCE"
       - name: Retain measurements and input identities
         if: always()

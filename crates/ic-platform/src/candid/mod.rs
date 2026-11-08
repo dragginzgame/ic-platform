@@ -17,7 +17,6 @@ use candid::{
     de::{DecoderConfig, IDLDeserialize},
 };
 use serde::Deserialize;
-use std::{error::Error, fmt};
 
 pub mod arguments;
 pub mod decoder;
@@ -85,9 +84,10 @@ pub struct DecodeLimits {
 }
 
 /// Wire admission or Candid decoding failure, retaining the original decoder cause.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum DecodeError {
     /// Original wire reply exceeds the selected byte ceiling.
+    #[error("Candid reply is {actual} bytes, maximum is {maximum}")]
     ReplyTooLarge {
         /// Observed original reply length.
         actual: usize,
@@ -95,27 +95,8 @@ pub enum DecodeError {
         maximum: usize,
     },
     /// Candid shape, work quota, truncation or exact-result admission failed.
-    Candid(candid::Error),
-}
-
-impl fmt::Display for DecodeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::ReplyTooLarge { actual, maximum } => {
-                write!(f, "Candid reply is {actual} bytes, maximum is {maximum}")
-            }
-            Self::Candid(error) => write!(f, "Candid reply decoding failed: {error}"),
-        }
-    }
-}
-
-impl Error for DecodeError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self {
-            Self::ReplyTooLarge { .. } => None,
-            Self::Candid(error) => Some(error),
-        }
-    }
+    #[error("Candid reply decoding failed: {0}")]
+    Candid(#[source] candid::Error),
 }
 
 impl DecodeError {

@@ -3,16 +3,15 @@ set -euo pipefail
 # Qualify Platform's actual Make policy and hook, never the caller's index.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
-fixture="$(mktemp -d "$root/target/platform-formatting.XXXXXX")"
+# shellcheck source=scripts/ci/fixture-lifecycle.sh
+source "$root/scripts/ci/fixture-lifecycle.sh"
+fixture_complete=false
+fixture="$(fixture_create "$root/target/platform-formatting.XXXXXX")"
 finish() {
     local status=$?
-    if [[ "$status" == 0 ]]; then
-        rm -rf "$fixture"
-    else
-        printf 'Platform formatting evidence retained at: %s\n' "$fixture" >&2
-        [[ ! -f "$fixture/last.log" ]] || cat "$fixture/last.log" >&2
-    fi
-    exit "$status"
+    fixture_completion_status "$status" "$fixture_complete" || status=$?
+    if [[ "$status" != 0 ]]; then fixture_replay_logs "$fixture/last.log"; fi
+    fixture_finish "$status" "$fixture" 'Platform formatting evidence retained'
 }
 trap finish EXIT
 mkdir -p "$fixture/work" "$fixture/logs" "$fixture/bin"
@@ -104,3 +103,4 @@ done < "$fixture/final-index"
 cmp "$fixture/gitlinks" "$fixture/final-gitlinks"
 run_make fmt-check
 printf 'Platform formatting: standalone check/write, configuration, failure stop and staged-hook isolation passed.\n'
+fixture_complete=true

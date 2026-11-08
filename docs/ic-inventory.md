@@ -356,7 +356,7 @@ profiles retain their explicitly external identities.
 | --- | --- | --- |
 | ic-platform | agent | dep:ic-agent, principal-external |
 | ic-platform | bls | dep:ic-verify-bls-signature, dep:ic_bls12_381 |
-| ic-platform | candid | candid/bignum, dep:candid, principal-external |
+| ic-platform | candid | candid/bignum, dep:candid, dep:thiserror, principal-external |
 | ic-platform | candid-endpoint | candid, dep:ic-platform-macros, runtime |
 | ic-platform | candid-parser | dep:candid_parser, principal-external |
 | ic-platform | candid-service | candid, candid/printer |
@@ -381,7 +381,7 @@ profiles retain their explicitly external identities.
 | ic-platform | principal-external | ic-platform-types/principal-external, principal |
 | ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal |
 | ic-platform | runtime | executor, ic-platform-runtime/runtime, ic0, principal |
-| ic-platform | signature-verification | bls, canister-sig-creation, dep:ic-signature-verification, dep:serde_bytes, dep:serde_cbor |
+| ic-platform | signature-verification | bls, canister-sig-creation, dep:ic-signature-verification, dep:serde_bytes, dep:serde_cbor, dep:thiserror |
 | ic-platform-runtime | cdk | dep:ic-platform-macros, runtime |
 | ic-platform-runtime | default |  |
 | ic-platform-runtime | executor | dep:ic-platform-runtime-guard, dep:slotmap, ic0 |

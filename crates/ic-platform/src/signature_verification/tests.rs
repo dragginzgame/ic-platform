@@ -444,3 +444,21 @@ fn identity_keys_cannot_authenticate_either_delegation_level() {
         );
     }
 }
+
+#[test]
+fn signing_time_errors_preserve_display_and_absent_source() {
+    use std::error::Error as _;
+    for (error, message) in [
+        (
+            CanisterSigTimeError::Verification("upstream refusal".into()),
+            "upstream refusal",
+        ),
+        (
+            CanisterSigTimeError::InvalidCertificateTime,
+            "invalid signing certificate time",
+        ),
+    ] {
+        assert_eq!(error.to_string(), message);
+        assert!(error.source().is_none());
+    }
+}

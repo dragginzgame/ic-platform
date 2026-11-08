@@ -6,9 +6,17 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ## [0.26.1] - Unreleased
 
+### 🧹 Changed
+
+- Derive owned Candid admission and signing-time errors through the existing
+  `thiserror` supplier, preserving variants, diagnostics and original sources.
+  Cryptographic verification and wire admission behavior are unchanged.
+- Refuse oversized native protocol-fixture payloads before cloning them,
+  preserving encoded bytes, caller-selected output budgets and error variants.
+
 ### 🛠️ Tooling
 
-- Adopt Shared 0.31.10: format only Cargo workspace members and use
+- Adopt Shared 0.31.11: format only Cargo workspace members and use
   `make cloc CLOC_DEPTH=0` for crate rows or `CLOC_DEPTH=1` for module rows.
   Crate/module selectors narrow the report. Private tooling maintenance does
   not require a crate release.
@@ -22,6 +30,19 @@ See also the [Types ledger](../types/CHANGELOG.md).
   release-lock observations and retain dependency-graph refusals in one pass.
 - Organize installed qualification by scenario and declare fixture method names
   and IDs once, preserving their bytes, assertion order and lifecycle checks.
+- Reuse one admitted release plan per adapter operation and one root dependency
+  catalog per generated fixture; select the policy-fixture compiler from the
+  admitted workspace floor. Keep later phases and graph observations fresh.
+- Share Wasm framing measurements, graph classifications, generator-test
+  assertions and Rust/browser response fixtures. Retire dated 0.4/0.22 runners
+  with immutable reproduction references, retaining read-only Canic capture and
+  reporting. Use Shared's cached common-tools action for full Platform CI only.
+- Bind captured fixture bytes and file rosters to qualification evidence, inspect
+  one Wasm snapshot per report and retain benchmark executables under the shared
+  artifact lock. Isolate feature metadata per invocation; reuse completion-aware
+  cleanup and admitted compiler/catalog selections in the remaining fixtures.
+- Require every Rust/browser response-corpus case and share the remaining Agent
+  and dynamic fixture hex decoding without changing retained protocol vectors.
 
 ## [0.26.0] - 2026-11-08
 

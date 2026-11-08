@@ -2,22 +2,32 @@ mod linking;
 
 use super::*;
 
+fn rendered(result: syn::Result<TokenStream>) -> String {
+    result.unwrap().to_string()
+}
+
+fn assert_in_order(generated: &str, fragments: &[&str]) {
+    let mut end = 0;
+    for fragment in fragments {
+        end += generated[end..]
+            .find(fragment)
+            .expect("missing generated statement")
+            + fragment.len();
+    }
+}
+
 #[test]
 fn raw_rust_identifiers_do_not_leak_into_default_wire_names() {
-    let generated = ic_query(
+    let generated = rendered(ic_query(
         quote! { decode_with = "decode", encode_with = "encode" },
         quote! { fn r#match(value: u64) -> u64 { value } },
-    )
-    .unwrap()
-    .to_string();
+    ));
     assert!(generated.contains("\"canister_query match\""));
     assert!(!generated.contains("canister_query r#match"));
-    let renamed = ic_query(
+    let renamed = rendered(ic_query(
         quote! { name = "r#explicit", decode_with = "decode", encode_with = "encode" },
         quote! { fn r#match(value: u64) -> u64 { value } },
-    )
-    .unwrap()
-    .to_string();
+    ));
     assert!(renamed.contains("\"canister_query r#explicit\""));
 }
 
@@ -43,12 +53,10 @@ fn native_symbols_preserve_distinct_export_names() {
                 .bytes()
                 .all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
     }));
-    let generated = ic_query(
+    let generated = rendered(ic_query(
         quote! { name = "a-b", decode_with = "decode", encode_with = "encode" },
         quote! { fn entry(value: u64) -> u64 { value } },
-    )
-    .unwrap()
-    .to_string();
+    ));
     assert!(generated.contains("canister_query a-b"));
     assert!(generated.contains(&host_export_name("canister_query a-b")));
 }
@@ -86,12 +94,10 @@ fn options_preserve_flags_and_reject_ambiguous_or_retired_syntax() {
 
 #[test]
 fn argument_patterns_need_only_binding_names() {
-    let generated = ic_update(
+    let generated = rendered(ic_update(
         quote! { decode_with = "decode", encode_with = "encode" },
         quote! { fn entry(entry: Vec<Option<u64>>, (left, right): (u64, u64)) {} },
-    )
-    .unwrap()
-    .to_string();
+    ));
     assert!(generated.contains("__platform_arg_0"));
     assert!(generated.contains("__platform_arg_1"));
 }
@@ -131,7 +137,7 @@ fn custom_codec_preserves_admission_and_runtime_contexts() {
             quote! { async fn entry() -> Opaque { awaited().await } },
             quote! { async fn entry(a: Opaque, b: Opaque) -> (Opaque, Opaque) { (a, b) } },
         ] {
-            let generated = dfn_macro(
+            let generated = rendered(dfn_macro(
                 method,
                 quote! {
                     guard = "codec::admit",
@@ -139,19 +145,20 @@ fn custom_codec_preserves_admission_and_runtime_contexts() {
                     encode_with = "codec::encode"
                 },
                 function,
-            )
-            .unwrap()
-            .to_string();
+            ));
             // These statements cross the allocation/effect boundary. In particular,
             // zero Rust arguments must not elide explicit request-frame validation.
-            let guard = generated.find("codec :: admit").unwrap();
-            let copy = generated.find("api :: msg_arg_data").unwrap();
-            let decode = generated.find("codec :: decode").unwrap();
-            let handler = generated.find("let result = entry").unwrap();
-            let encode = generated.find("codec :: encode").unwrap();
-            let reply = generated.find("api :: msg_reply").unwrap();
-            assert!(guard < copy && copy < decode && decode < handler);
-            assert!(handler < encode && encode < reply);
+            assert_in_order(
+                &generated,
+                &[
+                    "codec :: admit",
+                    "api :: msg_arg_data",
+                    "codec :: decode",
+                    "let result = entry",
+                    "codec :: encode",
+                    "api :: msg_reply",
+                ],
+            );
             assert!(!generated.contains("candid"));
             assert!(!generated.contains(":: ic_cdk ::"));
             assert!(!generated.contains("spawn_protected"));
@@ -179,13 +186,11 @@ fn endpoints_require_explicit_codecs() {
         )
         .unwrap_err();
         assert!(error.to_string().contains("encode_with"));
-        let generated = dfn_macro(
+        let generated = rendered(dfn_macro(
             method,
             quote! { decode_with = "decode", manual_reply = true },
             quote! { fn endpoint() {} },
-        )
-        .unwrap()
-        .to_string();
+        ));
         assert!(!generated.contains("candid"));
         assert!(!generated.contains("api :: msg_reply"));
     }
@@ -206,9 +211,11 @@ fn lifecycle_contexts_and_restrictions() {
         } else {
             quote! {}
         };
-        let generated = dfn_macro(method, attr.clone(), quote! { async fn entry() {} })
-            .unwrap()
-            .to_string();
+        let generated = rendered(dfn_macro(
+            method,
+            attr.clone(),
+            quote! { async fn entry() {} },
+        ));
         assert!(!generated.contains("candid"));
         assert!(generated.contains("futures :: spawn"));
         assert!(!generated.contains("spawn_protected"));
@@ -236,13 +243,16 @@ fn lifecycle_contexts_and_restrictions() {
 
 #[test]
 fn names_paths_and_composite_contexts() {
-    let generated = ic_query(quote! { crate = "::renamed::cdk", composite = true, name = "named", guard = "first", guard = "second", decode_with = "decode", encode_with = "encode" }, quote! { async fn entry() -> bool { true } }).unwrap().to_string();
+    let generated = rendered(ic_query(
+        quote! { crate = "::renamed::cdk", composite = true, name = "named", guard = "first", guard = "second", decode_with = "decode", encode_with = "encode" },
+        quote! { async fn entry() -> bool { true } },
+    ));
     assert!(generated.contains("canister_composite_query named"));
     assert!(
         generated
             .contains(":: renamed :: cdk :: futures :: internals :: in_query_executor_context")
     );
-    assert!(generated.find("first ()").unwrap() < generated.find("second ()").unwrap());
+    assert_in_order(&generated, &["first ()", "second ()"]);
     assert!(ic_update(quote! { name = "<ic-cdk internal> reserved", decode_with = "decode", encode_with = "encode" }, quote! { fn entry() {} }).is_err());
     for attr in [
         quote! { crate = "bad path" },
@@ -262,9 +272,7 @@ fn lifecycle_arguments_are_explicit_and_empty_hooks_stay_raw() {
                 .to_string()
                 .contains("decode_with")
         );
-        let generated = dfn_macro(method, quote! {}, quote! { fn entry() {} })
-            .unwrap()
-            .to_string();
+        let generated = rendered(dfn_macro(method, quote! {}, quote! { fn entry() {} }));
         assert!(!generated.contains("candid"));
         assert!(!generated.contains("msg_arg_data"));
     }
@@ -313,12 +321,13 @@ fn typed_bridge_preserves_the_public_generators_decisions() {
 fn runtime_entrypoints_select_the_owner_and_preserve_explicit_paths() {
     let item = quote! { fn read(value: u64) -> u64 { value } };
     let codecs = quote! { decode_with = "decode", encode_with = "encode" };
-    let runtime = ic_query(codecs.clone(), item.clone()).unwrap().to_string();
+    let runtime = rendered(ic_query(codecs.clone(), item.clone()));
     assert!(runtime.contains(":: ic_platform_runtime :: cdk"));
     assert!(runtime.contains("\"canister_query read\""));
-    let explicit = ic_query(quote! { #codecs, crate = "::selected::cdk" }, item)
-        .unwrap()
-        .to_string();
+    let explicit = rendered(ic_query(
+        quote! { #codecs, crate = "::selected::cdk" },
+        item,
+    ));
     assert!(explicit.contains(":: selected :: cdk"));
     assert!(!explicit.contains("ic_platform_runtime"));
 }

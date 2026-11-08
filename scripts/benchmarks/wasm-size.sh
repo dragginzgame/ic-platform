@@ -96,9 +96,9 @@ for recipe in $recipes; do
         ic-wasm "$stem.raw.wasm" -o "$stem.optimized.wasm" shrink > "$stem.optimizer.log" 2>&1
         {
             printf '%s\t%s\t' "$recipe" "$profile"
-            perl "$root/scripts/benchmarks/0.4/sections.pl" "$stem.raw.wasm"
+            perl "$root/scripts/benchmarks/wasm-sections.pl" "$stem.raw.wasm"
             printf '\t'
-            perl "$root/scripts/benchmarks/0.4/sections.pl" "$stem.optimized.wasm"
+            perl "$root/scripts/benchmarks/wasm-sections.pl" "$stem.optimized.wasm"
             printf '\n'
         } >> "$output/sizes.tsv"
         shasum -a 256 "$stem.raw.wasm" "$stem.optimized.wasm" >> "$output/artifact-sha256.txt"

@@ -10,15 +10,15 @@ case "$#:${1:-}" in
     *) echo "usage: $0 [--prepare]" >&2; exit 2 ;;
 esac
 mkdir -p "$root/target"
-fixture="$(mktemp -d "$root/target/platform-runtime-independence.XXXXXX")"
+# shellcheck source=scripts/ci/fixture-lifecycle.sh
+source "$root/scripts/ci/fixture-lifecycle.sh"
+fixture_complete=false
+fixture="$(fixture_create "$root/target/platform-runtime-independence.XXXXXX")"
 finish() {
     result=$?
+    fixture_completion_status "$result" "$fixture_complete" || result=$?
     if [[ "$result" != 0 ]]; then
-        for log in "$fixture"/*.log; do
-            [[ -f "$log" ]] || continue
-            printf '\nEvidence: %s\n' "$log" >&2
-            cat "$log" >&2
-        done
+        fixture_replay_logs "$fixture"/*.log
     fi
     printf 'Runtime independence evidence: %s\n' "$fixture"
     exit "$result"
@@ -40,12 +40,13 @@ category = "tests"
 ic-timers = "=0.35.1"
 MANIFEST
     cargo fetch --manifest-path "$fixture/Cargo.toml"
+    fixture_complete=true
     exit 0
 fi
 mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/scripts/fixtures" "$fixture/repo/.tools"
 cp -R "$root/crates" "$root/.cargo" "$fixture/repo/"
 cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/repo/"
-cp "$root/scripts/ci/"{check-platform-runtime.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh,check-platform-compiler.sh,read-platform-msrv.sh,platform-graph-policy.awk} "$fixture/repo/scripts/ci/"
+cp "$root/scripts/ci/"{check-platform-runtime.sh,runtime-inputs.pl,retain-build-artifact.sh,workspace-dependencies.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh,check-platform-compiler.sh,read-platform-msrv.sh,platform-graph-policy.awk} "$fixture/repo/scripts/ci/"
 bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" scripts/ci/check-cargo-dependency-boundaries.sh
 cp -R "$root/scripts/fixtures/"{cdk-runtime,timers-runtime} "$fixture/repo/scripts/fixtures/"
 ln -s "$root/.tools/host" "$fixture/repo/.tools/host"
@@ -61,3 +62,4 @@ if bash "$fixture/repo/scripts/ci/check-platform-runtime.sh" --timers --prepared
 fi
 grep -q 'only one package in the dependency graph may specify the same links value' "$fixture/composition.log"
 printf 'Owner graphs pass independently; incompatible Timers fails singleton admission\n'
+fixture_complete=true

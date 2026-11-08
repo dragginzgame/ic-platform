@@ -124,9 +124,6 @@ jobs:
       - name: Validate documentation only (no native qualification)
         if: needs.selection.outputs.scope == 'docs'
         run: make shared-tooling-check check-doc-links
-      - name: Restore pinned tool downloads
-        if: needs.selection.outputs.scope != 'docs'
-        uses: ./.github/actions/cache-tool-downloads
       - name: Prepare toolchains
         if: needs.selection.outputs.scope != 'docs'
         run: |
@@ -140,17 +137,13 @@ jobs:
       - name: Prepare pinned npm
         if: needs.selection.outputs.scope != 'docs'
         run: npm install --global --ignore-scripts "$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").packageManager')"
-      - name: Prepare shared tools
+      - name: Prepare and verify shared tools
         if: needs.selection.outputs.scope != 'docs'
-        run: make install-tools
-      - name: Verify tools
-        if: needs.selection.outputs.scope != 'docs'
-        run: make tools-check
-      - name: Save pinned tool downloads
-        if: needs.selection.outputs.scope != 'docs'
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./.github/actions/prepare-common-tools
         with:
-          mode: save
+          cache: 'true'
+          cache-save: 'true'
+          cache-extra-key: ${{ hashFiles('ci/release-editor.env') }}
       - name: Prepare locked and standalone consumer dependencies
         if: needs.selection.outputs.scope != 'docs'
         run: |

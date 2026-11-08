@@ -66,4 +66,27 @@ PATH="$native/bin:$PATH" NATIVE_HTTP_CARGO_MARKER="$native/cargo-called" \
     bash "$native/scripts/ci/check-native-profiler-http.sh" --prepare > "$native/refusal.log" 2>&1 || result=$?
 [[ "$result" == 23 && ! -e "$native/cargo-called" ]]
 grep -q 'required manifest tool unavailable' "$native/refusal.log"
+# Installed Agent preparation must also stop before a failed floor can reach
+# its generated manifest, dependency selection or compiler invocation.
+cp "$root/scripts/ci/check-agent-installed.sh" "$native/scripts/ci/"
+result=0
+PATH="$native/bin:$PATH" NATIVE_HTTP_CARGO_MARKER="$native/agent-cargo-called" POCKET_IC_BIN=fixture \
+    bash "$native/scripts/ci/check-agent-installed.sh" > "$native/agent-refusal.log" 2>&1 || result=$?
+[[ "$result" == 23 && ! -e "$native/agent-cargo-called" ]]
+for agent_fixture in "$native/target"/agent-installed.*; do [[ ! -e "$agent_fixture" ]]; done
+grep -q 'required manifest tool unavailable' "$native/agent-refusal.log"
+# Release-policy fixtures must select the same admitted floor, including a future
+# floor, before entering their closed environment. A failed reader has no fallback.
+mkdir -p "$fixture/scripts/release" "$fixture/target"
+cp "$root/scripts/release/policy-fixture-evidence.pl" "$fixture/scripts/release/"
+printf '[toolchain]\nchannel = "1.100.0"\n' > "$fixture/rust-toolchain.toml"
+(
+    cd "$fixture"
+    perl scripts/release/policy-fixture-evidence.pl environment target/environment.json
+)
+"$root/.tools/host/bin/jq" -e '.RUSTUP_TOOLCHAIN == "1.100.0" and .RUSTUP_AUTO_INSTALL == "0"' "$fixture/target/environment.json" > /dev/null
+cp "$native/scripts/ci/read-platform-msrv.sh" "$fixture/scripts/ci/"
+if (cd "$fixture" && perl scripts/release/policy-fixture-evidence.pl environment target/refused.json) > "$fixture/policy-refusal.log" 2>&1; then exit 1; fi
+[[ ! -s "$fixture/target/refused.json" ]]
+grep -q 'required manifest tool unavailable' "$fixture/policy-refusal.log"
 printf 'Compiler admission follows manifest/toolchain policy, rejects wrong Cargo/rustc, and reuses distinct native/Wasm proofs once\n'

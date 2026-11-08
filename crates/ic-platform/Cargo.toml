@@ -23,7 +23,7 @@ agent = ["principal-external", "dep:ic-agent"]
 ic-protocol = ["principal-external", "certification-cbor", "dep:ic-transport-types"]
 ic-protocol-fixtures = ["ic-protocol"]
 bls = ["dep:ic-verify-bls-signature", "dep:ic_bls12_381"]
-candid = ["principal-external", "dep:candid", "candid/bignum"]
+candid = ["principal-external", "dep:candid", "candid/bignum", "dep:thiserror"]
 candid-endpoint = ["runtime", "candid", "dep:ic-platform-macros"]
 candid-parser = ["principal-external", "dep:candid_parser"]
 candid-service = ["candid", "candid/printer"]
@@ -73,6 +73,7 @@ signature-verification = [
     "dep:serde_bytes",
     "dep:serde_cbor",
     "dep:ic-signature-verification",
+    "dep:thiserror",
 ]
 
 [dependencies]

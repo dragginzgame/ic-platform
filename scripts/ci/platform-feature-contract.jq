@@ -6,7 +6,7 @@ def require(condition; $message):
 . as $metadata |
 [.packages[] | select(.name == "ic-platform")] |
 if length == 1 then .[0] else error("expected exactly one ic-platform package") end |
-require((.features.candid == ["principal-external", "dep:candid", "candid/bignum"] and
+require((.features.candid == ["principal-external", "dep:candid", "candid/bignum", "dep:thiserror"] and
     .features["candid-service"] == ["candid", "candid/printer"]); "Candid service generation must remain explicitly selected") |
 require(((.features | keys) == $policy[0].features); "Platform feature inventory changed; update the graph matrix and isolation policy") |
 require((.features["candid-endpoint"] == ["runtime", "candid", "dep:ic-platform-macros"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
@@ -52,7 +52,7 @@ require((.features.certification == ["dep:ic-certification"] and
     ([.dependencies[] | select(.name == "ic-signature-verification")] | length == 1 and .[0].optional and .[0].req == "^0.3.0" and .[0].target == null and (.[0].uses_default_features | not)));
     "Certification must use registry identities; signature key adapters preserve owned issuers") |
 require((.features.bls == ["dep:ic-verify-bls-signature", "dep:ic_bls12_381"] and
-    .features["signature-verification"] == ["bls", "canister-sig-creation", "dep:serde_bytes", "dep:serde_cbor", "dep:ic-signature-verification"] and
+    .features["signature-verification"] == ["bls", "canister-sig-creation", "dep:serde_bytes", "dep:serde_cbor", "dep:ic-signature-verification", "dep:thiserror"] and
     ([.dependencies[] | select(.name == "ic-verify-bls-signature")] | length == 1 and .[0].optional and .[0].req == "^0.6.0" and (.[0].uses_default_features | not) and .[0].features == ["alloc"] and .[0].target == null) and
     ([.dependencies[] | select(.name == "ic_bls12_381")] | length == 1 and .[0].optional and .[0].req == "^0.10.1" and (.[0].uses_default_features | not) and .[0].features == ["groups"] and .[0].target == null) and
     ([.dependencies[] | select(.name == "digest" or .name == "ff" or .name == "group" or .name == "pairing" or .name == "rand_core" or .name == "subtle" or .name == "rand" or .name == "rand_xorshift" or .name == "sha3")] | length == 0)); "BLS must delegate cryptography upstream with alloc, identity admission and no RNG capability") |

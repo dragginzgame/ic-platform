@@ -4,21 +4,26 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 [[ -v POCKET_IC_BIN || -v IC_TESTKIT_POCKET_IC_URL ]] || {
     echo 'Set a Testkit-admitted POCKET_IC_BIN or IC_TESTKIT_POCKET_IC_URL' >&2; exit 1;
 }
+msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
+mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/agent-installed.XXXXXX")"
 trap 'printf "Agent installed evidence: %s\n" "$fixture"' EXIT
 mkdir "$fixture/src"
 cp "$root/scripts/fixtures/cdk-runtime/agent_driver.rs" "$fixture/src/main.rs"
 cp -R "$root/scripts/fixtures/cdk-runtime/pocketic_support" "$fixture/src/"
 cp "$root/scripts/fixtures/agent-installed/"{prime256v1,secp256k1}.pem "$fixture/src/"
-testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-tokio="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.tokio' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_dependencies_read "$root"
+testkit="$(platform_dependency ic-testkit)"
+tokio="$(platform_dependency tokio)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 [package]
 name = "agent-installed-proof"
 version = "0.0.0"
 edition = "2024"
-rust-version = "1.99.1"
+rust-version = "$msrv"
 publish = false
 
 [package.metadata.shared-tooling.loc]
@@ -30,5 +35,6 @@ tokio = { $tokio }
 wat = "=1.263.0"
 MANIFEST
 export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$root/target/agent-installed-build}"
-cargo clippy --offline --manifest-path "$fixture/Cargo.toml" --all-targets -- -D warnings
-cargo run --offline --locked --manifest-path "$fixture/Cargo.toml"
+bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler.txt"
+cargo +"$msrv" clippy --offline --manifest-path "$fixture/Cargo.toml" --all-targets -- -D warnings
+cargo +"$msrv" run --offline --locked --manifest-path "$fixture/Cargo.toml"

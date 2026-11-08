@@ -2,33 +2,20 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const cp = require('child_process');
 const base = path.resolve(process.argv[2]);
 const arms = process.argv.slice(3);
 if (!arms.length) throw Error('usage: report.cjs BASE ARM...');
 const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 function inspect(file) {
   const bytes = fs.readFileSync(file);
-  if (!bytes.subarray(0, 8).equals(Buffer.from([0, 97, 115, 109, 1, 0, 0, 0]))) throw Error('Not Wasm v1');
-  let offset = 8;
-  const leb = () => {
-    let value = 0, shift = 0, byte;
-    do { byte = bytes[offset++]; value += (byte & 127) * 2 ** shift; shift += 7; } while (byte & 128);
-    return value;
-  };
-  const sections = [];
-  while (offset < bytes.length) {
-    const start = offset, id = bytes[offset++], size = leb();
-    const payload = bytes.subarray(offset, offset + size);
-    sections.push({ id, payloadBytes: size, framedBytes: offset - start + size, sha256: sha256(payload) });
-    offset += size;
-  }
-  if (offset !== bytes.length) throw Error('Bad section length');
-  const code = sections.filter(s => s.id === 10);
-  if (code.length !== 1) throw Error('Expected one code section');
+  const measured = JSON.parse(cp.execFileSync('perl', [path.join(__dirname, '../wasm-sections.pl'), '--json', '-'],
+    { input: bytes, encoding: 'utf8', timeout: 30000, maxBuffer: 32 * 1024 * 1024 }));
+  if (measured.sections.filter(s => s.id === 10).length !== 1) throw Error('Expected one code section');
   const module = new WebAssembly.Module(bytes);
   return {
-    totalBytes: bytes.length, codePayloadBytes: code[0].payloadBytes,
-    codeFramedBytes: code[0].framedBytes, sha256: sha256(bytes), sections,
+    totalBytes: measured.totalBytes, codePayloadBytes: measured.codePayloadBytes,
+    codeFramedBytes: measured.codeFramedBytes, sha256: measured.sha256, sections: measured.sections,
     imports: WebAssembly.Module.imports(module), exports: WebAssembly.Module.exports(module),
   };
 }

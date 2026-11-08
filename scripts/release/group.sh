@@ -9,7 +9,7 @@ helper="$root/scripts/ci/cargo-release-group.sh"
 case "$group" in platform|runtime|types) ;; *) echo "Select RELEASE_GROUP=platform, RELEASE_GROUP=runtime or RELEASE_GROUP=types (received: $group)" >&2; exit 2 ;; esac
 case "$1" in
     version) exec bash "$helper" version "$group" ;;
-    plan|primary|changelog|members|files|ready) ;;
+    plan|primary|changelog|members|files|ready|ready-plan) ;;
     *) exit 2 ;;
 esac
 # One admitted observation per command; do not resolve the same graph again to
@@ -26,7 +26,7 @@ case "$1" in
     files)
         jq -jr --argjson required "$required" '(.files + ($required - .files))[] | . + "\u0000"' <<< "$plan"
         ;;
-    plan|ready)
+    plan|ready|ready-plan)
         if ! jq -e --argjson required "$required" '($required - .files) | length == 0' <<< "$plan" > /dev/null; then
             echo 'release refused: Shared group custody must also admit the required runtime fixture locks and exact guard-pin exception; their checks cannot be omitted' >&2
             exit 1
@@ -42,5 +42,6 @@ case "$1" in
             echo 'release refused: the selected IC Build editor lacks group-manifest; a published group-capable editor must be adopted before grouped release preparation' >&2
             exit 1
         fi
+        if [[ "$1" == ready-plan ]]; then printf '%s\n' "$plan"; fi
         ;;
 esac

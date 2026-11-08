@@ -9,8 +9,13 @@ function platform_host_capability(name) {
     return ""
 }
 function platform_forbidden(family, name) {
+    if (family == "hashing") return name ~ /^(sha2|digest)$/
+    if (family == "identity-codecs") return platform_forbidden("hashing", name) || name == "candid"
+    if (family == "external-principal") return name == "ic_principal"
+    if (family == "retired-darling") return name ~ /^(darling|darling_core|darling_macro)$/
+    if (family == "generator") return name == "ic-platform-macros"
     if (family == "minimal")
-        return name ~ /^(ic_principal|serde|serde_core|serde_derive|sha2|digest|crc32fast|data-encoding|candid|ic-agent)$/
+        return platform_forbidden("identity-codecs", name) || platform_forbidden("external-principal", name) || name ~ /^(serde|serde_core|serde_derive|crc32fast|data-encoding|ic-agent)$/
     if (family == "identity")
         return name ~ /^(ic-platform-runtime|icrc-ledger-types|icrc-cbor|minicbor|base32|candid_parser|ic-agent|pocket-ic|ic-platform-pocket-ic)$/
     if (family == "runtime-host")

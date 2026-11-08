@@ -4,6 +4,15 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.20.2] - Unreleased
+
+### 🧹 Cleanup
+
+- Share macro-test expansion rendering and ordered-statement assertions,
+  retaining all generator and native-linking checks. Generator output and
+  Runtime behavior are unchanged; the test source is included in the macros
+  package archive.
+
 ## [0.20.1] - 2026-11-08
 
 ### 🧹 Cleanup
