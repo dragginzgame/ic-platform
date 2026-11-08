@@ -355,7 +355,19 @@ checks establish target compatibility, not installed executor/trap behavior.
 
 ## Dependency roles and deployment admission
 
-The reviewed Shared Tooling revision is recorded in [the snapshot](../.shared-tooling.snapshot).
+Root `[workspace.metadata.toko-tooling]` selects one exact crates.io release.
+The separate `toko-tooling.lock` records its archive checksum, while
+[the snapshot](../.shared-tooling.snapshot) records installed payload hashes.
+Keep all three under version control. Tooling is not a Cargo dependency and
+ordinary Cargo updates do not change it. After intentionally changing the root
+version, run `make shared-tooling-update` to resolve and install it; use
+`make shared-tooling-install` to reinstall the existing tooling lock.
+Installation also prepares and checks the required tools. `make shared-tooling-status`
+and `make shared-tooling-check` compare the root selection, lock and installation
+offline. Custom publication, release metadata and frozen setup adapters admit
+tooling before effects. All product release gates and native-host qualification
+requirements remain in force.
+
 `ic-platform` owns the low-level boundary; its `call` module adds prepared one-shot
 requests with owned or borrowed methods and bytes through its existing runtime.
 The module uses the existing `runtime` feature and adds no dependencies or codecs.

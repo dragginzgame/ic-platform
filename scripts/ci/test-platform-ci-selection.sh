@@ -22,8 +22,15 @@ perl -MJSON::PP -0777 -e '
         my ($docs,@full);
         for my $s (@{$j->{steps}}) {
             next if ($s->{uses}//"") =~ m{^actions/checkout@} || ($s->{name}//"") eq "Check native identity";
+            if (($s->{uses}//"") eq "./.github/actions/cache-tool-downloads") {
+                my $condition=$s->{if}//"";
+                $condition eq "" || $condition eq q{needs.selection.outputs.scope == '\''docs'\''} ||
+                    $condition eq q{needs.selection.outputs.scope != '\''docs'\''} or die "unsafe cache selection";
+                next;
+            }
             if (($s->{if}//"") eq q{needs.selection.outputs.scope == '\''docs'\''}) {
-                $s->{run} eq "make shared-tooling-check check-doc-links" or die "missing real docs/snapshot checks";
+                $s->{run} eq "make install-host-tools\nmake shared-tooling-check check-doc-links\n"
+                    or die "missing manifest-tool bootstrap or real docs/snapshot checks";
                 $docs++;
             } else {
                 ($s->{if}//"") eq q{needs.selection.outputs.scope != '\''docs'\''} or die "unsafe full selection";

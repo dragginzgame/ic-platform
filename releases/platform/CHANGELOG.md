@@ -4,6 +4,17 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.27.1] - Unreleased
+
+### 🛠️ Tooling
+
+- Select `toko-tooling` 0.34.0 through root workspace metadata and the dedicated
+  `toko-tooling.lock`, independently of Cargo dependencies. Remove the superseded
+  dependency-only member and preserve snapshot entrypoints and application locks.
+- Admit the tooling declaration, lock and installed snapshot before custom
+  publication, release metadata and frozen setup effects. Public dependency
+  graphs, package versions and product release requirements are unchanged.
+
 ## [0.27.0] - 2026-11-08
 
 ### ⚠️ Breaking

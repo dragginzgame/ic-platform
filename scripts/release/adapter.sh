@@ -11,6 +11,7 @@ export RELEASE_GROUP
 case "$operation" in
     version|files) exec bash scripts/release/group.sh "$operation" ;;
 esac
+make --no-print-directory shared-tooling-check
 projection=plan
 case "$operation" in preflight|prepare) projection=ready-plan ;; esac
 plan="$(bash scripts/release/group.sh "$projection")"

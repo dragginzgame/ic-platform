@@ -7,6 +7,7 @@ cd "$(dirname "$0")/../.."
 case "${RELEASE_GROUP:-}" in types|runtime|platform) ;; *) echo 'Select a saved Platform release group' >&2; exit 2 ;; esac
 case "${RELEASE_SETUP_MODE:-}" in prepare|check) ;; *) echo 'Expected frozen setup mode prepare or check' >&2; exit 2 ;; esac
 make_bin="${RELEASE_MAKE:-make}"
+"$make_bin" --no-print-directory shared-tooling-check
 if [[ "$RELEASE_SETUP_MODE" == check ]]; then
     # No installation or graph resolution from partially prepared metadata.
     "$make_bin" --no-print-directory tools-check

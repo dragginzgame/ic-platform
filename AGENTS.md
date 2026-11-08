@@ -2,8 +2,13 @@
 
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
-records the installed revision; do not edit its payloads. Shared 0.31.12 at
-`eb3c8e0d2274d2c7babb2c15b3355bb80a796f0f` is the adopted baseline.
+records the installed registry checksum; do not edit its payloads. The baseline
+is crates.io `toko-tooling` 0.34.0, selected by root
+`[workspace.metadata.toko-tooling]` and the separate `toko-tooling.lock`.
+Use `make shared-tooling-update` after changing that exact version, or
+`make shared-tooling-install` to reinstall the existing tooling lock. Application
+Cargo updates do not select tooling. Custom deployment adapters must run
+`shared-tooling-check` before effects.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.

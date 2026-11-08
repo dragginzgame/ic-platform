@@ -64,6 +64,9 @@ LOCAL_TOOL_CHECK_TARGETS += release-editor-check
 LOCAL_TOOL_INSTALL_TARGETS += install-browser-tools
 LOCAL_TOOL_CHECK_TARGETS += browser-tools-check
 include make/consumer.mk
+# Keep the shared pre-capture cleanup behind tooling admission, including -j.
+clean-empty-source-dirs: shared-tooling-check
+release-batch-resume: shared-tooling-check
 export YQ := $(CURDIR)/.tools/host/bin/yq
 release-patch release-minor release-major release-resume: export IC_PLATFORM_RELEASE_PREPARE := 1
 
@@ -116,9 +119,11 @@ check-browser-runtime: browser-tools-check
 	npm test --prefix packages/browser
 	node scripts/ci/check-browser-consumer.mjs --browser
 
-publish: host-tools-check check-retained-evidence
+publish: shared-tooling-check
+	+$(MAKE) --no-print-directory host-tools-check check-retained-evidence
 	bash scripts/release/publish.sh publish
-publish-check: host-tools-check check-retained-evidence
+publish-check: shared-tooling-check
+	+$(MAKE) --no-print-directory host-tools-check check-retained-evidence
 	bash scripts/release/publish.sh check
 
 .PHONY: check-compiler

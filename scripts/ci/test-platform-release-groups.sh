@@ -11,6 +11,7 @@ fixture="$(mktemp -d "$root/target/platform-release-routing.XXXXXX")"
 trap 'printf "Release routing evidence: %s\n" "$fixture"' EXIT
 cd "$root"
 bash scripts/ci/prepare-script-fixture.sh "$root" "$fixture" Makefile make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh scripts/ci/check-retained-state.pl ci/release-delivery.txt
+git -C "$fixture" init -q
 mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/dev"
 ln -s "$root/.tools" "$fixture/.tools"
 export ROUTING_OUTPUT="$fixture/selection" ROUTING_EFFECTS="$fixture/effects"
@@ -61,6 +62,13 @@ cat > "$fixture/scripts/dev/install-host-tools.sh" <<'HOST'
 #!/usr/bin/env bash
 printf 'host admission\n' >> "$ROUTING_EFFECTS"
 HOST
+cat > "$fixture/scripts/dev/shared-tooling.sh" <<'TOOLING'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$1" == check ]]
+printf 'tooling admission\n' >> "$ROUTING_EFFECTS"
+[[ "${ROUTING_TOOLING_REFUSE:-0}" == 0 ]]
+TOOLING
 cat > "$fixture/scripts/ci/cargo-publication-adapter.sh" <<'PUBLISH'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -143,6 +151,32 @@ for group in platform runtime types; do
     if RELEASE_GROUP="$group" PACKAGE="$outside" bash "$fixture/scripts/release/publish.sh" check > "$fixture/cross-group.log" 2>&1; then exit 1; fi
     grep -q 'outside the publication roster' "$fixture/cross-group.log"
     if RELEASE_GROUP="$group" PACKAGE='' bash "$fixture/scripts/release/publish.sh" check > "$fixture/empty-package.log" 2>&1; then exit 1; fi
+done
+# Stale tooling stops both Make and direct custom publication before host or
+# publication effects. The metadata adapter must also stop before preparation.
+cp scripts/release/adapter.sh "$fixture/scripts/release/"
+mkdir -p "$fixture/scripts/guarded-empty"
+printf '/scripts/guarded-empty/\n' >> "$fixture/.gitignore"
+for operation in publish publish-check direct-publication metadata-prepare capture batch-resume; do
+    cp "$ROUTING_EFFECTS" "$fixture/before-tooling-refusal"
+    refused=false
+    case "$operation" in
+        publish|publish-check)
+            if ! ROUTING_TOOLING_REFUSE=1 make --no-print-directory -s -j2 -C "$fixture" "$operation" RELEASE_GROUP=platform > "$fixture/tooling-refusal.log" 2>&1; then refused=true; fi ;;
+        direct-publication)
+            if ! ROUTING_TOOLING_REFUSE=1 RELEASE_GROUP=platform bash "$fixture/scripts/release/publish.sh" check > "$fixture/tooling-refusal.log" 2>&1; then refused=true; fi ;;
+        metadata-prepare)
+            if ! (cd "$fixture" && ROUTING_TOOLING_REFUSE=1 RELEASE_GROUP=platform bash scripts/release/adapter.sh prepare) > "$fixture/tooling-refusal.log" 2>&1; then refused=true; fi ;;
+        capture)
+            if ! ROUTING_TOOLING_REFUSE=1 make --no-print-directory -s -j2 -C "$fixture" release-patch RELEASE_GROUP=platform > "$fixture/tooling-refusal.log" 2>&1; then refused=true; fi ;;
+        batch-resume)
+            if ! ROUTING_TOOLING_REFUSE=1 make --no-print-directory -s -j2 -C "$fixture" release-batch-resume BATCH=batch-reviewed > "$fixture/tooling-refusal.log" 2>&1; then refused=true; fi ;;
+    esac
+    [[ "$refused" == true ]]
+    cat "$fixture/before-tooling-refusal" > "$fixture/expected-tooling-refusal"
+    printf 'tooling admission\n' >> "$fixture/expected-tooling-refusal"
+    cmp "$fixture/expected-tooling-refusal" "$ROUTING_EFFECTS"
+    [[ -d "$fixture/scripts/guarded-empty" ]]
 done
 # Exercise the actual publication verifier and Make Clippy leaf. Only Cargo and
 # compiler/tool admission are substitutes; no archive or upload is dispatched.

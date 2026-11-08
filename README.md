@@ -111,6 +111,12 @@ make tools-check
 cargo fetch --locked
 ```
 
+Shared tooling is selected by `[workspace.metadata.toko-tooling]` in root
+Cargo.toml, independently of application dependencies. Change that exact version
+and run `make shared-tooling-update`; retain `toko-tooling.lock` and the snapshot.
+Use `make shared-tooling-install` to reinstall the existing tooling lock, and
+`make shared-tooling-status` to compare selected and installed identities offline.
+
 For a change to Types, for example, select its focused checks:
 
 ```sh

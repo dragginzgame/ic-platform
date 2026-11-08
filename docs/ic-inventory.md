@@ -6,7 +6,9 @@ ranges/pins, not resolved versions; Cargo.lock and the existing feature-graph
 checks own resolution and isolation. No default features are enabled.
 
 The root catalog includes all five workspace members with their current versions
-and paths, including an unused facade declaration. Release policy owns every
+and paths, including an unused facade declaration. Tooling selection lives in
+root workspace metadata and `toko-tooling.lock`, outside Cargo's dependency graph.
+Release policy owns every
 catalog alias. The unused entry adds no edge; the checked direct dependency and
 feature facts below remain determined by member declarations. Catalog comments
 distinguish local groups, external production/native/proc-macro dependencies,

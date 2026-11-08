@@ -1,5 +1,41 @@
 # Current handoff — 2026-11-08
 
+## Root-owned tooling migration — Git delivery
+
+The working tree selects crates.io **toko-tooling 0.34.0** through root
+`[workspace.metadata.toko-tooling]`. The separate `toko-tooling.lock` records
+archive checksum 5ca8ad09ad9359bc4945a4afdaafce301dd5a4b4955cd5c9f5058d7a54ffcf10.
+The new installer in `/home/adam/projects/toko-tooling` authenticated and installed
+the registry archive, retaining all **74 entrypoints** and **156 payloads**.
+Tool setup/checks completed; no snapshot-owned file was edited manually.
+
+The superseded dependency-only member, dependency/Machete declarations and all
+membership/policy references are removed. Cargo.lock was refreshed offline:
+only the two obsolete tooling records were removed; all **396 retained records**,
+including the independent supplier draft below, are unchanged. There are five
+real members and the same three groups; all public versions are unchanged.
+Use `make shared-tooling-update` after intentionally changing the exact root
+version; `make shared-tooling-install` reinstalls the dedicated tooling lock.
+Application Cargo updates no longer select or install tooling.
+
+Custom publication, metadata preparation and frozen setup now admit tooling
+before effects. Shared pre-capture cleanup is also ordered behind admission,
+including parallel Make. Docs-only CI explicitly prepares and caches host parsers
+before offline admission, retaining the native/full qualification selections.
+The pending Platform **0.27.1** note records internal tooling changes only.
+The authorized delivery is Git-only to origin/main: public crate sources,
+manifests and dependency selections are unchanged from their published owners.
+Package inventories and publication-impact evidence are under
+target/deliver-toko034-20261108. No package bump, tag or upload is selected.
+The independent Cargo.lock draft remains excluded from this delivery.
+
+Focused Linux evidence is under target/adoption-toko034-20261108: snapshot/status,
+tool admission, pins/inventory/documentation, formatting/hook and CI-selection
+callers, custom-effect refusal, release routing and Platform-only preparation/
+rollback/retry. The existing full **20-stage** product gate and native-host
+obligations remain. No full gate or new macOS acceptance is claimed. Historical
+adoption evidence remains under target/adoption-toko033-20261108.
+
 ## Delivered Platform 0.27.0
 
 Platform **0.27.0** is on crates.io and origin/main, with annotated tag
@@ -61,9 +97,10 @@ unmeasured. These experiments have different dependency inputs.
 
 ## Baseline and asynchronous hosted evidence
 
-Shared **0.31.12** at eb3c8e0d2274d2c7babb2c15b3355bb80a796f0f supplies 149
-verified payloads. Adoption ced3903 and LOC reporting evidence remain at
-target/adoption-shared03112-20261108; the snapshot is unchanged by this release.
+The published release used Shared **0.31.12** at
+eb3c8e0d2274d2c7babb2c15b3355bb80a796f0f, with 149 verified payloads.
+Adoption ced3903 and LOC evidence remain at target/adoption-shared03112-20261108.
+The later, uncommitted registry migration is described above.
 
 One observation at release commit a8165b9 found Browser SDK and Wasm size workflows
 successful; CI, installed runtime and dependency advisories were still running.
@@ -93,10 +130,11 @@ refs/retained/platform0270-lock-draft-20261108, commit
 It reappeared in the normal checkout during frozen qualification and matched
 that saved draft exactly. Only its supplier patch was reapplied after the standard
 reconciliation: all **391 external records** match, while the five local owners
-match the released versions. The restored working Cargo.lock SHA-256 is
+match the released versions. Before the registry migration its restored SHA-256 was
 98b7f888a38c062420ef54c310c6a1e8b7df2b66ed5d9c9b0bb9b2a421e5438a.
-It remains deliberately uncommitted. Never replace released owner metadata with
-an entire older lock. Earlier retained refs, batches and receipts remain intact.
+The supplier draft remains uncommitted alongside the new tooling selection.
+Never replace released owner metadata with an entire older lock. Earlier retained
+refs, batches and receipts remain intact.
 
 Preserve all historical failed/completed batches, including batch-_leIreCI,
 batch-C5BoFKA5 and batch-AaHi2pgO; use each attempt's supplying journals/tooling.
