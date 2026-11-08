@@ -10,8 +10,14 @@ publish = ["crates-io"]
 links = "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md"
 include = ["src/**", "LICENSE", "Cargo.toml", "build.rs"]
 
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
 [features]
 default = []
+
+[dev-dependencies]
+toko-tooling.workspace = true
 
 [lints]
 workspace = true

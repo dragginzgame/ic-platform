@@ -12,7 +12,7 @@ include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
 [package.metadata.cargo-machete]
 # Constrains K256's transitive bigint to the published ECDSA security floor.
-ignored = ["crypto-bigint"]
+ignored = ["crypto-bigint", "toko-tooling"]
 
 [features]
 default = []
@@ -118,6 +118,7 @@ ic-transport-types = { workspace = true, optional = true }
 [dev-dependencies]
 serde_bytes.workspace = true
 serde_cbor.workspace = true
+toko-tooling.workspace = true
 
 [[test]]
 name = "candid_args_consumer"

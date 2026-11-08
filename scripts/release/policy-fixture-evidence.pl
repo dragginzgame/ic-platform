@@ -5,11 +5,10 @@ use warnings;
 use JSON::PP;
 use Cwd qw(abs_path);
 use File::Path qw(make_path);
+use FindBin;
+use lib $FindBin::Bin;
+use PlatformEvidence qw(command);
 my $json=JSON::PP->new->canonical->utf8;
-sub command {
-    open my $in,'-|',@_ or die "execute @_: $!\n";
-    local $/; my $raw=<$in>//''; close $in or die "failed @_; no policy-fixture admission\n"; return $raw;
-}
 sub environment {
     # Private fixture Git configuration prevents ambient hooks, signing or
     # templates. These tests invoke compiler version queries, not package builds.

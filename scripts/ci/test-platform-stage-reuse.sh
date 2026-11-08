@@ -3,6 +3,8 @@
 # All other product stages and package metadata are disposable substitutes.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
+[[ $# == 0 || ( $# == 1 && "$1" == --admission ) ]] || { echo 'Expected [--admission]' >&2; exit 2; }
+selection="${1:-all}"
 [[ "$(uname -sm)" == 'Linux x86_64' ]] || { echo 'Policy-fixture reuse requires separate native qualification'; exit 0; }
 prepared="$(bash "$root/scripts/ci/test-platform-validation-plan.sh" --prepare)"
 fixture="$(printf '%s\n' "$prepared" | sed -n 's/^Platform validation-plan fixture evidence: //p')"
@@ -14,6 +16,12 @@ cp -R "$root/scripts/ci/." "$repo/scripts/ci/"
 cp -R "$root/scripts/release/." "$repo/scripts/release/"
 for directory in docs rules make .cargo; do mkdir -p "$repo/$directory"; cp -R "$root/$directory/." "$repo/$directory/"; done
 cp "$root/"{.shared-tooling.snapshot,DRAGGINZGAME.md,AGENTS.md,README.md,rust-toolchain.toml} "$repo/"
+# The closed policy environment reads the compiler floor, not the product graph.
+compiler="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
+printf '[workspace]\nmembers = []\n[workspace.package]\nrust-version = "%s"\n' "$compiler" > "$repo/Cargo.toml"
+mkdir -p "$repo/.tools"
+ln -s "$root/.tools/host" "$repo/.tools/host"
+printf '/.tools/\n' >> "$repo/.git/info/exclude"
 # Keep the fake product stage except for the actual bounded leaf under review.
 perl -0pi -e 's/\t\@bash fixture-stage.sh check-release-commands\n/\tbash scripts\/release\/check-policy-fixtures.sh\n/ or die "missing parent stage"' "$repo/Makefile"
 # Preserve the real Make export and sealing dispatch. A stage's child Make
@@ -29,7 +37,7 @@ cat > "$repo/scripts/release/group.sh" <<'GROUP'
 printf 'versions/%s\0' "$RELEASE_GROUP"
 GROUP
 cd "$repo"
-git add scripts docs rules make .cargo .shared-tooling.snapshot DRAGGINZGAME.md AGENTS.md README.md rust-toolchain.toml Makefile versions
+git add scripts docs rules make .cargo .shared-tooling.snapshot DRAGGINZGAME.md AGENTS.md README.md rust-toolchain.toml Cargo.toml Makefile versions
 git commit -qm 'Stage reuse contract fixture'
 export RELEASE_PREVIOUS=1.0.0 RELEASE_VERSION=1.0.1 RELEASE_REMOTE=origin RELEASE_BRANCH=main
 qualify() {
@@ -67,6 +75,10 @@ printf 'tamper\n' >> "$original_log"
 refuse admit
 cp "$fixture/stdout.saved" "$original_log"
 admit > "$fixture/restored.log"
+if [[ "$selection" == --admission ]]; then
+    echo 'Real policy leaf execution/reuse and missing/tampered receipt admission passed; broader drift matrix not selected.'
+    exit 0
+fi
 # Expanded source closure invalidates reuse and a saved receipt. Run the real
 # policy leaf again; this is not a version-normalization or manifest exception.
 printf 'New policy input\n' > docs/new-policy-input.md

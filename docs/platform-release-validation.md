@@ -101,6 +101,10 @@ Normal qualification output distinguishes execution/reuse and reports
 admission time. Exact-input mismatch or absent proof executes ordinarily; changed
 inputs during execution, primary failure or unsafe custody refuses admission.
 
+`bash scripts/ci/test-platform-stage-reuse.sh --admission` checks real leaf
+execution/reuse and missing/tampered receipt admission through substituted product
+stages. Omit the selector for the broader source/tool-drift and failure matrix.
+
 `bash scripts/ci/test-platform-stage-reuse.sh` qualifies the actual leaf through
 the parent Make/plan/receipt dispatch using disposable product-stage bodies. It
 checks different groups and metadata commits, closure/tool drift, missing/log-

@@ -3,12 +3,14 @@
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
 records the installed registry checksum; do not edit its payloads. The baseline
-is crates.io `toko-tooling` 0.34.0, selected by root
-`[workspace.metadata.toko-tooling]` and the separate `toko-tooling.lock`.
-Use `make shared-tooling-update` after changing that exact version, or
-`make shared-tooling-install` to reinstall the existing tooling lock. Application
-Cargo updates do not select tooling. Custom deployment adapters must run
-`shared-tooling-check` before effects.
+is crates.io `toko-tooling` 0.36.0, pinned once in root workspace dependencies
+and inherited as an unconditional dev-dependency by every real member, with
+the source-bundle cargo-machete exemption. Cargo.lock selects the archive.
+After changing the root pin, update that Cargo selection and run
+`make shared-tooling-update` (or `make shared-tooling-install`). Keep the normal
+Cargo.lock and snapshot; add no metadata version, separate tooling lock,
+selection-only package or artificial Rust import. Custom deployment adapters
+must run `shared-tooling-check` before effects.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
@@ -237,7 +239,7 @@ Candid contract types stay external. Do not add Candid to the owned type.
 
 Runtime owns the embedded executor and IC0 implementations. Keep
 exactly one executor across Platform, Timers and application callbacks. Preserve
-the inherited Cargo links guard in the optional, dependency-free internal
+the inherited Cargo links guard in the optional, production-dependency-free internal
 `ic-platform-runtime-guard` package, selected only by `executor`. Its requirement
 must exactly match the Runtime version so different runtime owners cannot share a
 guard. Non-runtime consumers may coexist with an unrelated external executor;

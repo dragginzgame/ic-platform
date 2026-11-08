@@ -6,8 +6,9 @@ ranges/pins, not resolved versions; Cargo.lock and the existing feature-graph
 checks own resolution and isolation. No default features are enabled.
 
 The root catalog includes all five workspace members with their current versions
-and paths, including an unused facade declaration. Tooling selection lives in
-root workspace metadata and `toko-tooling.lock`, outside Cargo's dependency graph.
+and paths, including an unused facade declaration. Every member inherits the
+root-pinned `toko-tooling` dev-dependency; Cargo.lock owns its registry selection.
+This source bundle is excluded from normal/build production graphs.
 Release policy owns every
 catalog alias. The unused entry adds no edge; the checked direct dependency and
 feature facts below remain determined by member declarations. Catalog comments
@@ -429,9 +430,11 @@ profiles retain their explicitly external identities.
 | ic-platform | serde_cbor | ^0.11.2 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
+| ic-platform | toko-tooling | =0.36.0 | dev | all | false | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^3 | normal | all | false | true | full |
+| ic-platform-macros | toko-tooling | =0.36.0 | dev | all | false | true |  |
 | ic-platform-runtime | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform-runtime | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform-runtime | ic-platform-types | workspace-owned | normal | all | true | false |  |
@@ -440,6 +443,8 @@ profiles retain their explicitly external identities.
 | ic-platform-runtime | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-runtime | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform-runtime | thiserror | ^2.0.18 | normal | all | true | true |  |
+| ic-platform-runtime | toko-tooling | =0.36.0 | dev | all | false | true |  |
+| ic-platform-runtime-guard | toko-tooling | =0.36.0 | dev | all | false | true |  |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | false | alloc |
 | ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | convert |
@@ -452,4 +457,5 @@ profiles retain their explicitly external identities.
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-types | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
+| ic-platform-types | toko-tooling | =0.36.0 | dev | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->

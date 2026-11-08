@@ -5,10 +5,12 @@ use warnings;
 use Digest::SHA qw(sha256_hex);
 use File::Path qw(make_path);
 use File::Basename qw(dirname);
-my ($mode, $root, $fixture, $lock, $refresh) = @ARGV;
+my ($mode, $root, $fixture, $lock, $option) = @ARGV;
 @ARGV >= 4 && @ARGV <= 5 && $mode =~ /\A(?:capture|verify)\z/
-    && (!defined($refresh) || $refresh eq '--refresh-lock')
-    or die "usage: runtime-inputs.pl capture|verify ROOT FIXTURE LOCK [--refresh-lock]\n";
+    && (!defined($option) || $option =~ /\A--(?:refresh-lock|raw-rand)\z/)
+    or die "usage: runtime-inputs.pl capture|verify ROOT FIXTURE LOCK [--refresh-lock|--raw-rand]\n";
+my $raw_rand = ($option // '') eq '--raw-rand';
+!$raw_rand || $lock eq 'Cargo.lock' or die "raw_rand uses the workspace lock\n";
 chdir $root or die "$root: $!\n";
 sub read_file {
     my ($base, $path) = @_;
@@ -27,14 +29,22 @@ sub write_file {
     print {$out} $bytes; close $out or die $!;
 }
 sub names {
-    open my $rg, '-|', "$root/.tools/host/bin/rg", '--files', '-0', 'crates', 'scripts/fixtures/cdk-runtime' or die $!;
+    my @roots = $raw_rand ? qw(crates scripts/fixtures/raw-rand scripts/fixtures/cdk-runtime/pocketic_support)
+        : qw(crates scripts/fixtures/cdk-runtime);
+    open my $rg, '-|', "$root/.tools/host/bin/rg", '--files', '-0', @roots or die $!;
     local $/; my $raw = <$rg> // ''; close $rg or die "cannot inventory runtime inputs\n";
     my %names = map { $_ => 1 } grep { $_ ne 'scripts/fixtures/cdk-runtime/Cargo.lock' } split /\0/, $raw;
     $names{$_} = 1 for ('Cargo.toml', 'rust-toolchain.toml', '.cargo/config.toml',
         'scripts/ci/check-platform-runtime.sh', 'scripts/ci/runtime-inputs.pl',
+        'scripts/ci/runtime-selection.sh',
         'scripts/ci/retain-build-artifact.sh', 'scripts/ci/render-runtime-fixture.pl',
         'scripts/ci/workspace-dependencies.sh', 'scripts/ci/check-platform-compiler.sh',
         'scripts/ci/read-platform-msrv.sh', $lock);
+    if ($raw_rand) {
+        $names{$_} = 1 for qw(scripts/ci/check-platform-raw-rand.sh scripts/ci/check-platform-runtime-graph.sh
+            scripts/ci/platform-graph-policy.awk scripts/benchmarks/wasm-sections.pl
+            scripts/fixtures/cdk-runtime/raw_rand_driver.rs);
+    }
     return sort keys %names;
 }
 sub hashes {
@@ -60,7 +70,7 @@ $roster eq read_file($fixture, 'input-files') or die "Runtime qualification inpu
 hashes("$fixture/inputs", @names) eq $before or die "Runtime input snapshot changed\n";
 my $after = hashes($root, @names);
 write_file("$fixture/source-after.sha256", $after);
-if (defined($refresh) && $mode eq 'verify') {
+if (($option // '') eq '--refresh-lock' && $mode eq 'verify') {
     # Only the selected maintained lock may change during explicit preparation.
     s/^[0-9a-f]{64}  \Q$lock\E\n//m for ($before, $after);
 }

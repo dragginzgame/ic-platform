@@ -210,6 +210,8 @@ check-pins:
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/browser-compiler-floor --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
+	bash scripts/ci/test-resume-policy.sh
+	perl scripts/ci/test-platform-evidence.pl
 	bash scripts/ci/test-platform-frozen-setup.sh
 	bash scripts/ci/test-platform-group-projection.sh
 	bash scripts/ci/test-platform-ci-selection.sh
@@ -267,6 +269,7 @@ check-runtime-independence:
 
 .PHONY: check-runtime-lock
 check-runtime-lock:
+	bash scripts/ci/test-runtime-selection.sh
 	bash scripts/ci/check-icp-account-source.sh
 	bash scripts/ci/test-published-runtime.sh
 	bash scripts/ci/check-owned-runtime-source.sh

@@ -8,7 +8,7 @@ fixture="$(mktemp -d "$root/target/release-plan-test.XXXXXX")"
 trap 'printf "Platform validation-plan fixture evidence: %s\n" "$fixture"' EXIT
 mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/scripts/release" "$fixture/repo/ci"
 cp "$root/ci/"{release-validation.json,cargo-release-groups.json} "$fixture/repo/ci/"
-cp "$root/scripts/release/"{validation-plan.pl,validation-context.pl,validation-receipt.pl,qualify-validation-plan.sh} "$fixture/repo/scripts/release/"
+cp "$root/scripts/release/"{validation-plan.pl,validation-context.pl,validation-receipt.pl,qualify-validation-plan.sh,PlatformEvidence.pm} "$fixture/repo/scripts/release/"
 bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" scripts/ci/run-validation-targets.sh scripts/ci/validation-evidence.pl scripts/ci/check-make-execution.sh
 # Retain the actual full-gate recipe text so roster drift is checked against it.
 perl -0777 -ne 'for my $name (qw(ci check-runtime-all release-verify)) { /(^\Q$name\E:\n(?:\t[^\n]*\n)+)/m or die "missing recipe"; print $1,"\n"; }' "$root/Makefile" > "$fixture/repo/Makefile"

@@ -184,7 +184,7 @@ for group in "${groups[@]}"; do
     other=types; [[ "$group" != types ]] || other=platform
     cp ".git/release-state/$group-$next.plan" ".git/release-state/$other-$next.plan"
     if RELEASE_GROUP="$other" bash scripts/ci/run-release.sh resume "$next" origin main > "$fixture/$group-wrong-resume.log" 2>&1; then exit 1; fi
-    grep -q 'release group changed' "$fixture/$group-wrong-resume.log"
+    grep -q 'group identity mismatch' "$fixture/$group-wrong-resume.log"
     [[ "$(git rev-parse HEAD)" == "$commit" ]]
     # A saved unfinished attempt cannot be reinterpreted under a changed policy.
     cp ci/cargo-release-groups.json "$fixture/$group-policy"

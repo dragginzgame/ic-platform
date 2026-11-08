@@ -5,38 +5,26 @@ use warnings;
 use JSON::PP;
 use File::Path qw(make_path);
 use File::Basename qw(dirname);
+use FindBin;
+use lib $FindBin::Bin;
+use PlatformEvidence qw(bytes command);
 my $json = JSON::PP->new->canonical->utf8;
 my ($group, $source, $baseline, $output, $scope) = @ARGV;
 @ARGV == 5 && $scope =~ /\A(?:qualification|release)\z/
     or die "usage: validation-plan.pl GROUP SOURCE GROUP-TAG|none OUTPUT qualification|release\n";
-sub capture {
-    open my $fh, '-|', @_ or die "start @_: $!\n";
-    local $/; my $value = <$fh> // '';
-    close $fh or die "command failed: @_\n";
-    return $value;
-}
-sub read_file {
-    my ($file) = @_;
-    $file !~ m{^/|(?:^|/)\.{1,2}(?:/|$)|[\x00-\x1f]|//} or die "unsafe input path\n";
-    my $route = '.';
-    for (split m{/}, $file) { $route .= "/$_"; !-l $route or die "redirected input $file\n"; }
-    -f $file or die "non-file input $file\n";
-    open my $fh, '<:raw', $file or die "read $file: $!\n";
-    local $/; return <$fh>;
-}
 sub same_names {
     my ($a,$b) = @_;
     join("\0",@$a) eq join("\0",@$b) or die "stage/group roster drift\n";
 }
 my $policy_path = 'ci/release-validation.json';
-my $policy_raw = read_file($policy_path);
+my $policy_raw = bytes($policy_path);
 my $policy = $json->decode($policy_raw);
 $policy_raw eq $json->encode($policy)."\n" or die "noncanonical policy\n";
-my $groups = $json->decode(read_file('ci/cargo-release-groups.json'));
+my $groups = $json->decode(bytes('ci/cargo-release-groups.json'));
 my @groups = sort map { $_->{name} } @{$groups->{groups}};
 same_names($policy->{groups}, \@groups);
 grep($_ eq $group, @groups) or die "unknown group\n";
-my $make = read_file('Makefile');
+my $make = bytes('Makefile');
 my ($ci) = $make =~ /^ci:\n\t\+bash scripts\/ci\/run-validation-targets\.sh --fail-fast ([^\n]+)\n/m;
 my ($runtime) = $make =~ /^check-runtime-all:\n\t\+bash scripts\/ci\/run-validation-targets\.sh ([^\n]+)\n/m;
 defined($ci) && defined($runtime) or die "full gate recipe changed; requalify roster\n";
@@ -44,15 +32,15 @@ $make =~ /^release-verify:\n\t\+bash scripts\/release\/validation-gate\.sh verif
     or die "release gate changed; requalify roster\n";
 my @full = (split(/ /,$ci), split(/ /,$runtime));
 same_names($policy->{stages}, \@full);
-$source =~ /\A[0-9a-f]{40,64}\z/ && capture('git','rev-parse','HEAD') eq "$source\n"
+$source =~ /\A[0-9a-f]{40,64}\z/ && command('git','rev-parse','HEAD') eq "$source\n"
     or die "stale release source\n";
-capture('git','status','--porcelain','--untracked-files=all') eq ''
+command('git','status','--porcelain','--untracked-files=all') eq ''
     or die "release plan requires clean committed source\n";
 $baseline eq 'none' || $baseline =~ /\A\Q$group\E-v\d+\.\d+\.\d+\z/ or die "wrong baseline group/tag\n";
-my $base = $baseline eq 'none' ? $source : capture('git','rev-parse','--verify',"refs/tags/$baseline^{commit}"); chomp $base;
+my $base = $baseline eq 'none' ? $source : command('git','rev-parse','--verify',"refs/tags/$baseline^{commit}"); chomp $base;
 system('git','merge-base','--is-ancestor',$base,$source) == 0 or die "baseline is not ancestor\n";
-my @changed = grep { length } split /\0/, capture('git','diff','--name-only','--no-renames','-z',$base,$source,'--');
-my $execution = $json->decode(capture('perl','scripts/release/validation-context.pl'));
+my @changed = grep { length } split /\0/, command('git','diff','--name-only','--no-renames','-z',$base,$source,'--');
+my $execution = $json->decode(command('perl','scripts/release/validation-context.pl'));
 my @stage_admissions;
 my ($release_commands)=$make =~ /^check-release-commands:\n((?:\t[^\n]*\n)+)/m;
 if (defined($release_commands) && $release_commands =~ /check-policy-fixtures/) {
@@ -71,7 +59,7 @@ if ($scope eq 'release') {
     for (qw(remote branch)) { defined($release->{$_}) && length($release->{$_}) or die "missing release destination\n"; }
     $baseline eq 'none' || $baseline eq "$group-v$release->{previous}" or die "wrong release baseline\n";
 }
-my $index_inventory = capture('git','ls-files','--stage','-z');
+my $index_inventory = command('git','ls-files','--stage','-z');
 my (@inputs, @gitlinks);
 for my $entry (grep { length } split /\0/, $index_inventory) {
     my ($mode,$object,$stage,$path) = $entry =~ /\A(\d+) ([0-9a-f]+) (\d+)\t(.+)\z/s;
@@ -82,7 +70,7 @@ for my $entry (grep { length } split /\0/, $index_inventory) {
         push @gitlinks, {path=>$path,object=>$object};
     } else {
         $mode eq '100644' || $mode eq '100755' or die "redirected tracked input\n";
-        read_file($path); push @inputs,$path;
+        bytes($path); push @inputs,$path;
     }
 }
 my $context = {

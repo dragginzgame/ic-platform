@@ -11,6 +11,21 @@ fn reply(bytes: &[u8]) {
     ic_platform::ic0::msg_reply();
 }
 
+#[cfg(feature = "candid-args")]
+#[unsafe(export_name = "canister_query encode_units")]
+pub extern "C" fn encode_units() {
+    reply(&ic_platform::candid_args::units(input().len()));
+}
+
+#[cfg(feature = "candid-args")]
+#[unsafe(export_name = "canister_query encode_text")]
+pub extern "C" fn encode_text() {
+    let bytes = input();
+    reply(&ic_platform::candid_args::text(
+        std::str::from_utf8(&bytes).unwrap(),
+    ));
+}
+
 // Opt-in IC instruction probes. Both arms use these exact same fixture bodies;
 // counters exclude request admission and reply framing.
 #[cfg(feature = "runtime-system")]

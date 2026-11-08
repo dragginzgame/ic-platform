@@ -3,31 +3,9 @@ set -euo pipefail
 # Requires an explicitly prepared Testkit server or server URL; never installs it.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
-qualification=owner
-if [[ "${1:-}" == --timers ]]; then qualification=timers; shift; fi
-adapter_mode=external
-explicit_adapters=false
-if [[ "${1:-}" == --external-adapters ]]; then explicit_adapters=true; shift; fi
-transport_mode=raw
-if [[ "${1:-}" == --prepared-call ]]; then transport_mode=prepared; shift; fi
-published=""
-selection_mode=source
-if [[ "${1:-}" == --published ]]; then
-    stable_version='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
-    [[ $# -ge 2 && "$2" =~ $stable_version ]] || exit 2
-    [[ "$transport_mode" == raw ]] || { echo 'The prepared-call fixture selects local sources; omit --published' >&2; exit 2; }
-    published="$2"; selection_mode=published
-    if [[ "$explicit_adapters" == false ]]; then adapter_mode=raw; fi
-    shift 2
-fi
-mode="${1:-run}"
-[[ $# -le 1 ]] || { echo 'Expected [--timers] [--external-adapters] [--prepared-call | --published X.Y.Z] [mode]' >&2; exit 2; }
-case "$mode" in
-    run|--check-graph|--build-only) ;;
-    --prepare) [[ "$selection_mode" == source ]] || { echo 'Prepare published caches explicitly before qualification' >&2; exit 2; } ;;
-    --refresh-lock) [[ "$selection_mode/$transport_mode" == source/raw ]] || { echo 'Published or prepared-call qualification cannot rewrite the maintained local lock' >&2; exit 2; } ;;
-    *) echo "Unknown runtime qualification mode: $mode" >&2; exit 2 ;;
-esac
+# shellcheck source=scripts/ci/runtime-selection.sh
+source "$root/scripts/ci/runtime-selection.sh"
+runtime_selection "$@"
 if [[ "$mode" == run && -z "${POCKET_IC_BIN:-}" && -z "${IC_TESTKIT_POCKET_IC_URL:-}" ]]; then
     echo 'Set POCKET_IC_BIN (Testkit-admitted binary) or IC_TESTKIT_POCKET_IC_URL first' >&2
     exit 1

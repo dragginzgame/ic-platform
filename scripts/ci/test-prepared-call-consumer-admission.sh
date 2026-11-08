@@ -39,7 +39,7 @@ platform_dependencies_read "$fixture/catalog"
 if platform_dependency missing > "$fixture/catalog/missing" 2>&1; then exit 1; fi
 if platform_dependency_version source > "$fixture/catalog/version" 2>&1; then exit 1; fi
 mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/prepared-call-consumer" "$fixture/.tools" "$fixture/bin"
-cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,runtime-inputs.pl,retain-build-artifact.sh,workspace-dependencies.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,runtime-selection.sh,runtime-inputs.pl,retain-build-artifact.sh,workspace-dependencies.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 cp "$root/scripts/fixtures/prepared-call-consumer/"{lib,tests}.rs "$fixture/scripts/fixtures/prepared-call-consumer/"
 cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
@@ -222,6 +222,18 @@ cp "$proof/inputs/$input_lock" "$fixture/$input_lock"
 printf '\n// snapshot edit\n' >> "$proof/inputs/$input_file"
 if perl "$fixture/scripts/ci/runtime-inputs.pl" verify "$fixture" "$proof" "$input_lock" > "$proof/snapshot.log" 2>&1; then exit 1; fi
 grep -q 'input snapshot changed' "$proof/snapshot.log"
+raw_proof="$fixture/raw-rand-input-proof"
+mkdir -p "$raw_proof" "$fixture/scripts/benchmarks"
+cp -R "$root/scripts/fixtures/raw-rand" "$fixture/scripts/fixtures/"
+cp "$root/scripts/ci/check-platform-raw-rand.sh" "$fixture/scripts/ci/"
+cp "$root/scripts/benchmarks/wasm-sections.pl" "$fixture/scripts/benchmarks/"
+perl "$fixture/scripts/ci/runtime-inputs.pl" capture "$fixture" "$raw_proof" Cargo.lock --raw-rand
+cmp "$fixture/scripts/fixtures/raw-rand/canister/mod.rs" "$raw_proof/inputs/scripts/fixtures/raw-rand/canister/mod.rs"
+printf '// added raw_rand input\n' > "$fixture/scripts/fixtures/raw-rand/new.rs"
+if perl "$fixture/scripts/ci/runtime-inputs.pl" verify "$fixture" "$raw_proof" Cargo.lock --raw-rand > "$raw_proof/roster.log" 2>&1; then exit 1; fi
+grep -q 'input roster changed' "$raw_proof/roster.log"
+rm "$fixture/scripts/fixtures/raw-rand/new.rs"
+perl "$fixture/scripts/ci/runtime-inputs.pl" verify "$fixture" "$raw_proof" Cargo.lock --raw-rand
 if "$BASH" "$fixture/scripts/ci/check-platform-runtime.sh" --published invalid --check-graph > "$fixture/version.log" 2>&1; then
     echo 'Runtime admitted an invalid published version' >&2; exit 1
 else

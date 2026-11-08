@@ -14,6 +14,15 @@ and narrow codec consumers with opt-level 3 / fat LTO / one codegen unit and
 `ic-wasm shrink`, and calls management `raw_rand` through the existing Runtime.
 It checks producer bytes against native reference Candid, structured rejection,
 callback-trap cleanup, pending-call cancellation and a subsequent successful call.
+Both runtime and raw_rand qualification capture source bytes and the complete
+input roster before composing fixtures, then refuse source or snapshot drift.
+Raw_rand's consumer workspace stays beside the captured workspace; its two
+matched Wasms remain separate from the broader runtime qualification profiles.
+Runtime qualification flags may appear in any order; duplicate flags,
+conflicting operations and published/prepared-call combinations refuse before
+fixture effects. `bash scripts/ci/test-runtime-selection.sh` checks this selection
+contract without resolving Cargo or starting a server.
+
 Use `bash scripts/ci/check-platform-raw-rand.sh --check-graph` for graph admission
 alone, or `--build-only` for graphs and size measurements without a server. The
 owner runtime gate includes this leaf; no Timers or sibling fleet suite is added.
@@ -68,8 +77,9 @@ Run `bash scripts/benchmarks/check-wasm-size-regression.sh BASE_REF [MAX_GROWTH_
 with the compiler, registry sources and `ic-wasm` already prepared. The default
 profiles are binary Principal, Runtime, external Candid, signature verification
 and strict certificate CBOR, using one `3-fat-1` recipe. `WASM_BENCH_PROFILES`
-selects a smaller affected subset. Both arms use the same current probe source,
-compiler, recipe and current dependency lock; this isolates implementation changes,
+selects a smaller affected subset; opt-in `candid-args` covers the small unit/text
+encoders. Both arms use the same current probe source, compiler, recipe and
+current dependency lock; this isolates implementation changes,
 not dependency-upgrade effects. Incompatible resolved external locks refuse comparison.
 The separate asynchronous Wasm size workflow runs the default selection on relevant
 PRs and main-branch pushes and retains total uncompressed and code-section
@@ -355,18 +365,20 @@ checks establish target compatibility, not installed executor/trap behavior.
 
 ## Dependency roles and deployment admission
 
-Root `[workspace.metadata.toko-tooling]` selects one exact crates.io release.
-The separate `toko-tooling.lock` records its archive checksum, while
+Root `[workspace.dependencies]` pins `toko-tooling` once at an exact registry
+version. Every real member inherits an unconditional dev-dependency and exempts
+the source bundle in its cargo-machete metadata; no Rust import or helper package
+is needed. Vendored sources and intentionally isolated fixture manifests retain
+their own scope. Tooling stays outside normal/build production graphs.
+Cargo.lock records the selected archive checksum and
 [the snapshot](../.shared-tooling.snapshot) records installed payload hashes.
-Keep all three under version control. Tooling is not a Cargo dependency and
-ordinary Cargo updates do not change it. After intentionally changing the root
-version, run `make shared-tooling-update` to resolve and install it; use
-`make shared-tooling-install` to reinstall the existing tooling lock.
-Installation also prepares and checks the required tools. `make shared-tooling-status`
-and `make shared-tooling-check` compare the root selection, lock and installation
-offline. Custom publication, release metadata and frozen setup adapters admit
-tooling before effects. All product release gates and native-host qualification
-requirements remain in force.
+After changing the root pin, run `cargo update -p toko-tooling`, then
+`make shared-tooling-update` (or `make shared-tooling-install`) to install that
+selection and prepare/check its tools. These Make commands do not edit Cargo.lock.
+Status and check commands compare all member declarations, Cargo.lock and the
+installation offline. Custom publication, release metadata and frozen setup
+adapters admit tooling before effects. All product release gates and native-host
+qualification requirements remain in force.
 
 `ic-platform` owns the low-level boundary; its `call` module adds prepared one-shot
 requests with owned or borrowed methods and bytes through its existing runtime.

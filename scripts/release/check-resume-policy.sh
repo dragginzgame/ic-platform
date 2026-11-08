@@ -7,12 +7,12 @@ case "${RELEASE_GROUP:-}" in platform|runtime|types) ;; *) echo 'Select RELEASE_
 perl scripts/ci/validate-release-inputs.pl version "$1" > /dev/null
 plan="$(git rev-parse --git-path release-state)/$RELEASE_GROUP-$1.plan"
 [[ -f "$plan" && ! -L "$plan" ]] || { echo "Saved group release plan not found: $plan" >&2; exit 1; }
-phase="$(sed -n '11p' "$plan")"
+projection="$(perl scripts/ci/release-plan.pl --plan "$plan" --group "$RELEASE_GROUP" --version "$1")"
+phase="$(jq -er .phase <<< "$projection")"
 # Completed observations have no remaining release dispatch. Shared still checks
 # their full record, source/tree, tag and destination before reconciliation.
 [[ "$phase" != complete ]] || exit 0
-source_commit="$(sed -n '6p' "$plan")"
-[[ "$source_commit" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || exit 1
+source_commit="$(jq -er .source <<< "$projection")"
 recorded="$(git rev-parse "$source_commit:ci/cargo-release-groups.json")"
 current="$(git hash-object ci/cargo-release-groups.json)"
 [[ "$recorded" == "$current" ]] || {

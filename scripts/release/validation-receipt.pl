@@ -8,24 +8,14 @@ use Cwd qw(abs_path);
 use File::Basename qw(dirname);
 use File::Temp qw(tempdir tempfile);
 use File::Path qw(make_path);
+use FindBin;
+use lib $FindBin::Bin;
+use PlatformEvidence qw(bytes digest command);
 my $json=JSON::PP->new->canonical->utf8;
 my ($plan_path,$run,$output,$mode)=@ARGV;
 $mode //= 'write';
 (@ARGV==3 || @ARGV==4) && $mode =~ /\A(?:write|check)\z/
     or die "usage: validation-receipt.pl PLAN RUN-DIRECTORY RECEIPT [write|check]\n";
-sub bytes {
-    my ($path)=@_;
-    $path !~ m{[\x00-\x1f]|(?:^|/)\.\.(?:/|$)} or die "unsafe evidence path\n";
-    my $route=$path =~ m{^/}?'/':'.';
-    for (grep {length} split m{/},$path) { $route.="/$_"; !-l $route or die "redirected evidence\n"; }
-    -f $path or die "missing evidence $path\n";
-    open my $fh,'<:raw',$path or die "read $path: $!\n";
-    local $/; return <$fh>;
-}
-sub command {
-    open my $fh,'-|',@_ or die "execute @_: $!\n";
-    local $/; my $value=<$fh>//''; close $fh or die "failed @_; no receipt\n"; return $value;
-}
 my $raw=bytes($plan_path);
 my $plan=$json->decode($raw);
 my $context=$json->decode(bytes("$plan_path.context.json"));
@@ -118,7 +108,7 @@ if ($mode eq 'write') {
         $json->encode($proof->{inputs}) eq $json->encode($json->decode(bytes("$run/plan-inputs.json")))
             or die "Shared proof input inventory drift\n";
         for my $path (keys %{$proof->{files}}) {
-            sha256_hex(bytes("$run/$path")) eq $proof->{files}{$path} or die "retained Shared evidence changed: $path\n";
+            digest("$run/$path") eq $proof->{files}{$path} or die "retained Shared evidence changed: $path\n";
         }
     }
 }
@@ -141,9 +131,9 @@ for my $stage (@{$context->{stage_admissions}//[]}) {
 }
 my $receipt={schema=>$schema,contract=>"platform-release-validation/$schema",source=>$plan->{source},group=>$plan->{group},
     scope=>$plan->{scope},baseline=>$context->{baseline},plan_sha256=>sha256_hex($raw),
-    context_sha256=>sha256_hex(bytes("$plan_path.context.json")), release=>$context->{release},
-    policy_sha256=>sha256_hex(bytes($plan->{policy})),inputs_sha256=>sha256_hex(bytes("$run/plan-inputs.json")),
-    %$execution,runner_log_sha256=>sha256_hex(bytes($runner_log)),
+    context_sha256=>digest("$plan_path.context.json"), release=>$context->{release},
+    policy_sha256=>digest($plan->{policy}),inputs_sha256=>digest("$run/plan-inputs.json"),
+    %$execution,runner_log_sha256=>digest($runner_log),
     physical_root=>$physical_root,validation_evidence=>$proof,
     release_omission_admitted=>JSON::PP::false};
 $receipt->{stage_admissions}=\%stage_admissions if $schema==4;

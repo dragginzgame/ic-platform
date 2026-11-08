@@ -10,6 +10,9 @@ readme = "README.md"
 publish = ["crates-io"]
 include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
 
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
 [features]
 default = []
 principal-external = ["dep:ic_principal", "ic_principal/serde"]
@@ -30,6 +33,7 @@ postcard.workspace = true
 serde_cbor.workspace = true
 serde_json.workspace = true
 serde_test.workspace = true
+toko-tooling.workspace = true
 
 [lints]
 workspace = true

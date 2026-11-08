@@ -5,11 +5,9 @@ use warnings;
 use JSON::PP;
 use Digest::SHA;
 use Cwd qw(abs_path);
-sub command {
-    open my $fh,'-|',@_ or die "execute @_: $!\n";
-    local $/; my $value=<$fh>//''; close $fh or die "failed @_; no execution identity\n";
-    return $value;
-}
+use FindBin;
+use lib $FindBin::Bin;
+use PlatformEvidence qw(command);
 sub fingerprint {
     my ($path)=@_; chomp $path;
     my $resolved=abs_path($path);

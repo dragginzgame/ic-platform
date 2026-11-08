@@ -4,6 +4,14 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.20.3] - Unreleased
+
+### 🛠️ Tooling
+
+- Inherit the exact published `toko-tooling` 0.36.0 development selection in
+  Runtime, macros and the singleton guard, with source-bundle Machete exemptions.
+  Normal/build dependencies, generated code and executor behavior are unchanged.
+
 ## [0.20.2] - 2026-11-08
 
 ### 🧹 Cleanup

@@ -5,6 +5,14 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.18.3] - Unreleased
+
+### 🛠️ Tooling
+
+- Inherit the exact published `toko-tooling` 0.36.0 development selection with
+  its source-bundle Machete exemption. Production dependencies, canonical type
+  identities and serialization bytes are unchanged.
+
 ## [0.18.2] - 2026-11-06
 
 ### 🔧 Maintenance

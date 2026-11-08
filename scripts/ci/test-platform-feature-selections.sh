@@ -109,6 +109,7 @@ done <<'MUTATIONS'
 (.packages[] | select(.name == "ic-platform-runtime-guard")).version = "99.0.0"
 (.packages[] | select(.name == "ic-platform-runtime-guard")).links = null
 (.packages[] | select(.name == "ic-platform-runtime-guard")).dependencies = [{name: "ic0"}]
+(.packages[] | select(.name == "ic-platform-runtime-guard")).dependencies = [{name: "ic0", kind: "build"}]
 MUTATIONS
 "$jq" --arg mode routine --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-selections.jq "$fixture/features.json" > "$fixture/routine.json"
 # Prove powerset completeness on a bounded universe. Ordinary qualification must

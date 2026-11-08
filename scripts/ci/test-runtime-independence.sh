@@ -46,7 +46,7 @@ fi
 mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/scripts/fixtures" "$fixture/repo/.tools"
 cp -R "$root/crates" "$root/.cargo" "$fixture/repo/"
 cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/repo/"
-cp "$root/scripts/ci/"{check-platform-runtime.sh,runtime-inputs.pl,retain-build-artifact.sh,workspace-dependencies.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh,check-platform-compiler.sh,read-platform-msrv.sh,platform-graph-policy.awk} "$fixture/repo/scripts/ci/"
+cp "$root/scripts/ci/"{check-platform-runtime.sh,runtime-selection.sh,runtime-inputs.pl,retain-build-artifact.sh,workspace-dependencies.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh,check-platform-compiler.sh,read-platform-msrv.sh,platform-graph-policy.awk} "$fixture/repo/scripts/ci/"
 bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" scripts/ci/check-cargo-dependency-boundaries.sh
 cp -R "$root/scripts/fixtures/"{cdk-runtime,timers-runtime} "$fixture/repo/scripts/fixtures/"
 ln -s "$root/.tools/host" "$fixture/repo/.tools/host"

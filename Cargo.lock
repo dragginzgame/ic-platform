@@ -1546,6 +1546,7 @@ dependencies = [
  "serde_cbor",
  "sha2 0.10.9",
  "thiserror 2.0.21",
+ "toko-tooling",
 ]
 
 [[package]]
@@ -1555,6 +1556,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.9",
+ "toko-tooling",
 ]
 
 [[package]]
@@ -1569,11 +1571,15 @@ dependencies = [
  "serde_test",
  "slotmap",
  "thiserror 2.0.21",
+ "toko-tooling",
 ]
 
 [[package]]
 name = "ic-platform-runtime-guard"
 version = "0.20.2"
+dependencies = [
+ "toko-tooling",
+]
 
 [[package]]
 name = "ic-platform-types"
@@ -1590,6 +1596,7 @@ dependencies = [
  "serde_test",
  "sha2 0.11.1",
  "thiserror 2.0.21",
+ "toko-tooling",
 ]
 
 [[package]]
@@ -3344,6 +3351,12 @@ dependencies = [
  "pin-project-lite",
  "tokio",
 ]
+
+[[package]]
+name = "toko-tooling"
+version = "0.36.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de0dd05b6437061622a76942baa25d40d2181497e7ba66d9fd809132a3082936"
 
 [[package]]
 name = "toml"
