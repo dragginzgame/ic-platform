@@ -131,6 +131,9 @@ workspace explicitly; the default report covers the five main members only. Sele
 `bash scripts/dev/cloc.sh -d 1 ic-platform-runtime`, or one branch with
 `bash scripts/dev/cloc.sh -d 1 ic-platform-runtime::executor`. Depth is relative
 to that selection; unknown crate/module names refuse.
+Terminal workspace names are green, crates blue and modules white. Redirected
+output, `TERM=dumb` or a nonempty `NO_COLOR` stays plain. Sibling scan progress
+updates one stderr line and clears it before the table; diagnostics are retained.
 
 New Platform-owned qualification scratch defaults beneath `target/`, while
 Shared snapshot helpers retain their supplier-owned scratch contracts.

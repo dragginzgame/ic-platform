@@ -1,5 +1,54 @@
 # Current handoff — 2026-11-08
 
+## Shared 0.31.12 adoption
+
+The canonical exporter adopted eb3c8e0d2274d2c7babb2c15b3355bb80a796f0f,
+Shared **0.31.12**, with 149 verified payloads. Only the LOC shell reporter and
+Perl table renderer changed: terminal workspace/crate/module colours and a single
+updating sibling progress line. AGENTS names the new baseline; no product/API,
+dependency or release-workflow change is required.
+
+Workspace JSON and redirected selected-module output match the prior version
+byte-for-byte. Committed supplier LOC/classification and sibling-report tests
+pass in disposable Platform scratch, along with ShellCheck, Perl syntax and
+terminal colour checks. Snapshot/docs/diff checks accompany the evidence at
+target/adoption-shared03112-20261108. The maintainer authorized Git-only delivery;
+no full gate, Rust/native requalification or publication is required for these
+private reporting changes. No crate version or release tag changes are included.
+The deferred Cargo.lock remains unchanged at the restored hash recorded below.
+
+## Hosted review and measured dependency cost
+
+Review at d6fc70a found the corrected Wasm workflow and Browser SDK successful.
+The hosted comparison against 3fa6ccb is unchanged in four profiles and two bytes
+smaller for external Candid; that comparison mostly covers private CI maintenance.
+A local comparison against platform-v0.26.0, with identical compiler, probe,
+dependency resolution and 3-fat-1 settings, instead covers the public cleanup:
+four profiles are unchanged and external Candid is one byte larger. No material
+production-probe regression is established for the delivered cleanup.
+
+A separate controlled dependency experiment keeps current public source, Rust
+1.99.1, ic-wasm 0.11.1 and 3-fat-1 settings fixed, changing only candid and
+candid_derive from 0.10.39 to 0.10.40. Optimized external-Candid total/code bytes
+increase from 534627/481743 to 589215/536162: +54588 total and +54419 code.
+The upstream diff adds sequence-completion correctness checks; their semantics
+must be preserved when evaluating the newly linked code. Exact generated-function
+attribution has not been profiled. This is a dependency experiment, not a passing
+same-lock implementation regression check. The real lock draft was not edited.
+Evidence: target/next-wasm-20261108/candid-patch-comparison.json and
+target/evidence/wasm-regression.ByeLgJ. These are probe sizes, not sibling-canister
+measurements or a claim that the full facade is embedded in every canister.
+
+The same hosted review found CI validation failing inside grouped preparation on
+Linux and both macOS hosts (exit 101); its inner logs were not retained as CI
+artifacts. The grouped preparation/rollback proof passes locally with the warm
+cache. Installed owner-runtime setup failed in Testkit-owned PocketIC preparation;
+its tool exit encoded status 56, without retained setup diagnostics. No supplier
+orchestration or sibling source was changed here. The full-history secret scan
+flags three documented public test-key occurrences and a prose false positive;
+no exclusion or security waiver was added. The dependency advisory remains #50's
+explicit deferral. These hosted failures are not claimed fixed or green.
+
 ## Delivered Runtime 0.20.2 and Platform 0.26.1
 
 The reviewed simplification/audit batch was committed as
