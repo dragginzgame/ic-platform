@@ -8,6 +8,7 @@ const header = [0, 97, 115, 109, 1, 0, 0, 0];
 const moduleBytes = Uint8Array.from([...header, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 4, 1, 2, 0, 11, 0, 3, 1, 120, 102]);
 
 function fixture(run) {
+  mkdirSync('target', { recursive: true });
   const root = mkdtempSync('target/wasm-sections-test.');
   try { run(root); } finally { rmSync(root, { recursive: true, force: true }); }
 }

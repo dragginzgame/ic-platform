@@ -10,6 +10,7 @@ const capture = resolve('scripts/benchmarks/canic-wasm/capture.cjs');
 
 // Control the copy boundary deterministically; no sleeps or real concurrent Git.
 function runCapture(change) {
+  fs.mkdirSync('target', { recursive: true });
   const root = fs.mkdtempSync('target/capture-consistency.');
   const input = resolve(root, 'input'), output = resolve(root, 'output');
   fs.mkdirSync(input);
