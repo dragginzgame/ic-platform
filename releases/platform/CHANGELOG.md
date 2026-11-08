@@ -25,6 +25,7 @@ See also the [Types ledger](../types/CHANGELOG.md).
   options once, accepting either order and refusing conflicting selections.
 - Reuse Shared's regular-file and streaming digest helpers for release evidence,
   with one owned subprocess wrapper and unchanged receipt/recovery contracts.
+  Keep their full helper closure in compiler-floor qualification fixtures.
 - Use Shared's validated journal projection for resume policy checks, retaining
   policy-drift refusal and completed-plan behavior without positional parsing.
 

@@ -5,10 +5,18 @@
 The maintainer requested deployment of this repository. Select one frozen batch
 in supplier order: Types **0.18.3**, Runtime/macros/guard **0.20.3**, Platform
 **0.27.1**, with GitHub and crates.io delivery. Browser and sibling repositories
-are excluded. These versions are planned, not yet released. Source is on main at
-f27b73b4e95d6c579a8ff4267eaa63cf741cf5e7 with the reviewed local batch below.
-Remote main agrees; Cargo's registry index still reports Types 0.18.2,
+are excluded. These versions are planned, not yet released. The reviewed source
+is committed on main at 8b47f38a22dcd5c2a955e0d8468590be55d82116, with the
+compiler-fixture correction below pending. Cargo's registry index still reports Types 0.18.2,
 Runtime/macros/guard 0.20.2 and Platform 0.27.0.
+
+Batch **batch-PIIqwepD** is retained at that source. Its first gate passed through
+package tests and documentation, then stopped at check-consumer: the compiler-floor
+fixture omitted PlatformEvidence.pm and its Shared ValidationPlan.pm dependency.
+No release metadata, tag, push or registry upload occurred. The normal-checkout
+fix copies the complete helper closure; focused compiler-floor and admission tests
+pass. Capture a fresh committed batch for the corrected source, preserving this
+failed attempt and its qualification.TN7IEz logs.
 
 Package-impact inspection confirms the mandatory tooling dev-dependency appears
 in all five normalized public manifests. All three groups therefore have changed
@@ -35,7 +43,8 @@ make shared-tooling-update or shared-tooling-install. These Make commands instal
 the existing Cargo selection; they do not edit manifests or resolve the lock.
 Focused migration evidence is under target/adoption-toko036-20261108, including
 cold-cache admission, pins, Machete, feature graphs, guard Clippy, entrypoint
-routing and retained Runtime preparation/resume/policy-drift proofs.
+routing and retained Runtime preparation/resume/policy-drift proofs. Deployment
+and fixture-fix evidence is under target/deploy-toko036-20261108.
 
 Small Candid unit/text encoders reserve their complete output once, retaining
 bytes, arity and public signatures. Static empty/raw_rand arguments stay

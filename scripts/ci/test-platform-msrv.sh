@@ -78,7 +78,8 @@ grep -q 'required manifest tool unavailable' "$native/agent-refusal.log"
 # Release-policy fixtures must select the same admitted floor, including a future
 # floor, before entering their closed environment. A failed reader has no fallback.
 mkdir -p "$fixture/scripts/release" "$fixture/target"
-cp "$root/scripts/release/policy-fixture-evidence.pl" "$fixture/scripts/release/"
+cp "$root/scripts/release/"{policy-fixture-evidence.pl,PlatformEvidence.pm} "$fixture/scripts/release/"
+cp "$root/scripts/ci/ValidationPlan.pm" "$fixture/scripts/ci/"
 printf '[toolchain]\nchannel = "1.100.0"\n' > "$fixture/rust-toolchain.toml"
 (
     cd "$fixture"
