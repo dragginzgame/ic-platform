@@ -231,7 +231,6 @@ API changes or automatically establish whether sibling source still uses an API.
 
 | Upstream / owned code | Public surface and source | Observed consumers | Maintenance responsibility |
 | --- | --- | --- | --- |
-| `blake3` | optional `blake3::{hash,Hasher,Hash}` | IcyDB Core, SQL helpers and integration fixtures still select the facade at the last audit; IcyDB #631 moves them to the approved direct dependency | Retained pending #150. Preserve upstream `std` selection and hash bytes; Shared's pure-hashing policy supersedes facade centralization. No algorithm or size claim. |
 | `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting and account semantics. External Principal conversions and upstream self-authentication are separate explicit features; owned-only graphs exclude both. |
 | Embedded IC0/executor; imported CDK adapters and owned generator | `ic0`, including safe `stable64_{size,grow,read,read_uninit,write}`; `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters; Storage's requested IC0-only backing | Runtime owns ordinary entrypoint macros; Platform retains the external-Candid bridge. Platform maintains non-crypto adapters/generator. Platform maintains the sole executor and unchanged IC0 1.2.0 ABI; callback/trap semantics require installed qualification. Storage retains governance; raw stable IO selects no executor or Types. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Decoding uses finite-limit helpers or explicit configuration/staging; unconfigured decoder shortcuts are retired. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
@@ -356,7 +355,6 @@ profiles retain their explicitly external identities.
 | Package | Feature | Enables |
 | --- | --- | --- |
 | ic-platform | agent | dep:ic-agent, principal-external |
-| ic-platform | blake3 | dep:blake3 |
 | ic-platform | bls | dep:ic-verify-bls-signature, dep:ic_bls12_381 |
 | ic-platform | candid | candid/bignum, dep:candid, principal-external |
 | ic-platform | candid-endpoint | candid, dep:ic-platform-macros, runtime |
@@ -396,7 +394,6 @@ profiles retain their explicitly external identities.
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ic-platform | blake3 | ^1.8.7 | normal | all | true | false | std |
 | ic-platform | candid | ^0.10.38 | normal | all | true | false |  |
 | ic-platform | candid_parser | ^0.4.1 | normal | cfg(not(target_family = "wasm")) | true | false |  |
 | ic-platform | crc32fast | ^1.5 | normal | all | true | true |  |

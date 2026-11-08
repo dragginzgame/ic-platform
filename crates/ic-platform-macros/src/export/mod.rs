@@ -51,9 +51,7 @@ impl ExportAttributes {
             if name == "hidden" {
                 return Err(meta.error("hidden is retired; remove it (it had no effect)"));
             }
-            if name != "guard" && !seen.insert(name.clone()) {
-                return Err(meta.error(format!("duplicate entrypoint option `{name}`")));
-            }
+            crate::options::unique(&meta, &name, &mut seen, "entrypoint")?;
             match name.as_str() {
                 "name" | "guard" | "decode_with" | "encode_with" | "crate" => {
                     let value = meta.value()?.parse::<syn::LitStr>()?.value();
@@ -67,11 +65,7 @@ impl ExportAttributes {
                     }
                 }
                 "manual_reply" | "composite" => {
-                    let value = if meta.input.peek(syn::Token![=]) {
-                        meta.value()?.parse::<syn::LitBool>()?.value
-                    } else {
-                        true
-                    };
+                    let value = crate::options::flag(&meta)?;
                     if name == "manual_reply" {
                         attrs.manual_reply = value;
                     } else {

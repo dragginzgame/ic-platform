@@ -13,7 +13,6 @@
 //! `ic-protocol` selects native typed packet codecs without Agent or runtime.
 //! `ic-protocol-fixtures` additionally selects native development protocol fixtures.
 //! `bls` selects BLS keys, signatures and verification with upstream allocation support.
-//! `blake3` selects the upstream hash function, streaming hasher and digest identity.
 //! `canister-sig-creation` selects canister public-key formats and hashing.
 //! `signature-verification` selects upstream canister-signature verification.
 //! `runtime` selects raw adapters and prepared `call` requests; ordinary entrypoints select Runtime directly.
@@ -38,8 +37,6 @@ pub mod agent;
 #[cfg(all(feature = "ic-protocol", not(target_family = "wasm")))]
 pub mod ic_protocol;
 
-#[cfg(feature = "blake3")]
-pub mod blake3;
 #[cfg(feature = "bls")]
 pub mod bls;
 #[cfg(feature = "runtime")]

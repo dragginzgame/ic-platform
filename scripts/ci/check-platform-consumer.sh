@@ -37,9 +37,10 @@ for capability in "${capabilities[@]}"; do
 profile="$(awk -F '\t' -v capability="$capability" '$1 == capability { print }' "$profiles")"
 IFS=$'\t' read -r _ source assets wasm graph_family <<< "$profile"
 case "$graph_family" in
-    -|minimal|principal|principal-external|principal-self-authenticating|ledger|runtime|external-candid|blake3|external-codecs) ;;
+    -|minimal|principal|principal-external|principal-self-authenticating|ledger|runtime|external-candid|external-codecs) ;;
     *) echo "Unknown consumer graph family: $graph_family" >&2; exit 2 ;;
 esac
+# shellcheck disable=SC2016 # $source is a jq binding selecting the test declaration.
 features="$(printf '%s\n' "$tests" | "$root/.tools/host/bin/jq" -er --arg source "tests/$source.rs" '
     [.[] | select(.path == $source)] |
     if length == 1 and (.[0]["required-features"] | type == "array" and length > 0)
@@ -78,6 +79,7 @@ if [[ "$capability" == principal ]]; then
     printf '\n[features]\ncandid = ["ic-platform/candid"]\n' >> "$fixture/crates/consumer/Cargo.toml"
 fi
 cp "crates/ic-platform/tests/${source}.rs" "$fixture/crates/consumer/src/lib.rs"
+cp -R crates/ic-platform/tests/support "$fixture/crates/consumer/src/"
 if [[ "$assets" != - ]]; then
     mkdir -p "$fixture/crates/consumer/src/fixtures"
     IFS=, read -r -a patterns <<< "$assets"
@@ -104,11 +106,7 @@ graph_has_forbidden() {
 if [[ "$graph_family" != - ]]; then
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         graph="$fixture/$graph_target.graph"
-        if [[ "$graph_family" == blake3 ]]; then
-            BLAKE3_PACKAGES_OUTPUT="$graph" bash scripts/ci/check-blake3-graph.sh "$fixture" platform-consumer-proof "$graph_target" -
-        else
-            cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$graph"
-        fi
+        cargo tree --manifest-path "$fixture/Cargo.toml" --frozen --target "$graph_target" --edges normal,build --prefix none > "$graph"
         case "$graph_family" in
             minimal)
                 if graph_has_forbidden minimal; then
@@ -136,10 +134,6 @@ if [[ "$graph_family" != - ]]; then
                 fi
                 if [[ "$graph_family" == runtime ]] && grep -q '^ic-platform-macros ' "$graph"; then
                     echo 'Runtime-only consumer acquired the entrypoint generator' >&2; exit 1
-                fi ;;
-            blake3)
-                if grep -Eq '^(candid|ic-cdk|ic-platform-macros|ic-agent|pocket-ic|ic_principal|serde) ' "$graph"; then
-                    echo 'BLAKE3 consumer acquired unrelated IC/application dependencies' >&2; exit 1
                 fi ;;
             external-codecs)
                 if graph_has_forbidden external-codecs; then

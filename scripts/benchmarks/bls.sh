@@ -41,7 +41,8 @@ RUST
         bash "$root/scripts/benchmarks/wasm-size.sh" "$source" "$output/$variant"
 done
 mkdir -p "$output/driver/src"
-cp "$root/scripts/fixtures/bls-benchmark/main.rs" "$output/driver/src/main.rs"
+cp "$root/scripts/fixtures/cdk-runtime/bls_driver.rs" "$output/driver/src/main.rs"
+cp -R "$root/scripts/fixtures/cdk-runtime/pocketic_support" "$output/driver/src/"
 cp "$root/Cargo.lock" "$output/driver/Cargo.lock"
 platform="$(perl -MJSON::PP -e 'print encode_json($ARGV[0])' "$root/crates/ic-platform")"
 testkit="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-testkit' "$root/Cargo.toml" | "$root/.tools/host/bin/jq" -r 'to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"

@@ -201,18 +201,12 @@ for target in native wasm32-unknown-unknown; do
         [[ "$actual" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
     done
 done
-# BLAKE3 is independent of application/runtime features and registry-selected.
+# Pure hashing no longer belongs to the facade, on either target.
 for target in native wasm32-unknown-unknown; do
-    for selection in none blake3; do
-        printf 'blake3 v1.8.7\n' > "$fixture/$target-blake3.txt"
-        printf '%s\tblake3\n' "$selection" > "$fixture/mapping"
-        actual=reject
-        if admit -v target="$target" -v cache="$fixture" \
-            -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then actual=pass; fi
-        expected=reject
-        [[ "$selection" != blake3 ]] || expected=pass
-        [[ "$actual" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
-    done
+    printf 'blake3 v1.8.7\n' > "$fixture/$target-blake3.txt"
+    printf 'none\tblake3\n' > "$fixture/mapping"
+    if admit -v target="$target" -v cache="$fixture" \
+        -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then exit 1; fi
 done
 for package in 'pocket-ic v16.1.0' 'ic-platform-pocket-ic v0.1.12 (/fixture)' 'ic-platform-pocket-ic v0.1.13 (/other)' 'ic-platform-pocket-ic v0.1.13' 'ic-management-canister-types v0.8.0'; do
     printf '%s\n' "$package" > "$fixture/native-pocket.txt"

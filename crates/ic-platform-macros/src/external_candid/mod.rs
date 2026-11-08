@@ -19,15 +19,9 @@ pub(crate) fn expand(
         let Some(key) = meta.path.get_ident().map(ToString::to_string) else {
             return Err(meta.error("expected an external Candid option name"));
         };
-        if key != "guard" && !seen.insert(key.clone()) {
-            return Err(meta.error(format!("duplicate external Candid option `{key}`")));
-        }
+        crate::options::unique(&meta, &key, &mut seen, "external Candid")?;
         if key == "composite" {
-            composite = if meta.input.peek(syn::Token![=]) {
-                meta.value()?.parse::<syn::LitBool>()?.value
-            } else {
-                true
-            };
+            composite = crate::options::flag(&meta)?;
             return Ok(());
         }
         match key.as_str() {

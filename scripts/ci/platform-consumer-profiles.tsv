@@ -3,7 +3,6 @@ principal	principal	-	check	principal
 principal-external	principal_external_consumer	-	check	principal-external
 principal-self-authenticating	principal_self_authenticating_consumer	-	check	principal-self-authenticating
 ecdsa	ecdsa_consumer	-	check	-
-blake3	blake3_consumer	-	check	blake3
 ed25519	ed25519_consumer	-	check	-
 candid	candid_consumer	candid_malformed.rs	check	-
 nesting	nesting_consumer	-	check	-

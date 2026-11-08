@@ -1,4 +1,5 @@
 //! Platform-only BLS verification and deterministic fixture-key qualification.
+mod support;
 use ic_platform::bls::{
     InvalidPrivateKey, InvalidPublicKey, InvalidSignature, PrivateKey, PublicKey, Signature,
     verify_bls_signature,
@@ -92,14 +93,7 @@ pub fn roundtrip() {
     );
 }
 
-fn hex(input: &str) -> Vec<u8> {
-    let (pairs, remainder) = input.trim().as_bytes().as_chunks::<2>();
-    assert!(remainder.is_empty());
-    pairs
-        .iter()
-        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-        .collect()
-}
+use support::decode_hex as hex;
 
 #[test]
 fn bls_keys_signatures_and_errors_keep_upstream_identity() {

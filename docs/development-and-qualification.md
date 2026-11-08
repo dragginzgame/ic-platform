@@ -78,6 +78,13 @@ of 0, 1, 32, 1,024 and 8,192 protected tasks in forward/reverse order, with task
 creation outside the counter and destructor-order/count assertions. Compare
 identical fixture sources, compiler, lock and build settings between arms.
 
+Routine installed checks exercise both buffer-copy implementations once at each
+of five payload sizes (ten queries). Collect the former six-round instruction
+medians explicitly with `PLATFORM_BUFFER_COPY_BENCHMARK=1` and a matching retained
+Wire driver/Wasm, using the same invocation pattern above. This mode replaces
+the remaining installed corpus for that invocation; correctness checks still
+compare both implementations' complete returned bytes at every size.
+
 `WASM_BENCH_PROFILES='runtime-system candid-admission'` additionally builds
 opt-in System API and Candid admission probes with the same size runner/recipe.
 Use `PLATFORM_CODEC_BENCHMARK=system` or `candid` with a matching retained Runtime

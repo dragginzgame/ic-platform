@@ -63,7 +63,6 @@ function reject(reason) {
     found_ed = 0
     found_curve = 0
     found_k256 = 0
-    found_blake3 = 0
     found_guard = 0
     for (i = 1; i <= count[key]; i++) {
         line = lines[key, i]
@@ -85,10 +84,7 @@ function reject(reason) {
         if (name == "ic-transport-types" && !(agent || protocol)) reject("unselected native IC transport types")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
         if (name == "ic-host-artifacts") reject("host artifact codecs belong to Tooling consumers")
-        if (name == "blake3") {
-            if (!enabled("blake3") || !registry) reject("unselected or non-registry BLAKE3")
-            found_blake3 = 1
-        }
+        if (name == "blake3") reject("pure hashing belongs directly to consumers")
         # rand_core supplies traits and is permitted. Entropy/RNG implementations
         # belong only to the selected native host capabilities that require them.
         if (name ~ /^(rand|rand_chacha|getrandom)$/ && !(agent || parser))
@@ -130,5 +126,4 @@ function reject(reason) {
     if (executor && !found_guard) reject("missing runtime singleton guard")
     if (enabled("ed25519") && (!found_ed || !found_curve)) reject("missing selected Dalek")
     if (enabled("ecdsa") && !found_k256) reject("missing selected K256")
-    if (enabled("blake3") && !found_blake3) reject("missing selected BLAKE3")
 }

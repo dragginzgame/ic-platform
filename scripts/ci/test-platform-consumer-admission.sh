@@ -4,17 +4,17 @@ set -euo pipefail
 # Run with the current shell, including Bash 3.2 on supported macOS hosts.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
-fixture="$(mktemp -d "$root/target/platform-consumer-admission.XXXXXX")"
+# shellcheck source=scripts/ci/fixture-lifecycle.sh
+source "$root/scripts/ci/fixture-lifecycle.sh"
+fixture_complete=false
+fixture="$(fixture_create "$root/target/platform-consumer-admission.XXXXXX")"
 finish() {
     local status=$?
-    if [[ "$status" == 0 ]]; then rm -rf "$fixture"
-    else printf 'Consumer admission evidence retained: %s\n' "$fixture" >&2; fi
-    exit "$status"
+    fixture_finish "$status" "$fixture" 'Consumer admission evidence retained'
 }
 trap finish EXIT
 mkdir -p "$fixture/scripts/ci" "$fixture/crates/ic-platform/tests" "$fixture/bin"
 cp "$root/scripts/ci/check-platform-consumer.sh" "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/scripts/ci/"
-cp "$root/scripts/ci/check-blake3-graph.sh" "$root/scripts/ci/check-cargo-graph.pl" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
@@ -49,11 +49,6 @@ case "$1" in
         if [[ "${TEST_CAPABILITY:-}" == external-codecs ]]; then
             printf 'candid v0.10.39\n'
             if [[ "$TEST_REJECT" == yes ]]; then printf 'ic-agent v0.49.3\n'; fi
-            exit 0
-        fi
-        if [[ "${TEST_CAPABILITY:-}" == blake3 ]]; then
-            printf 'platform-consumer-proof v0.1.0\t\nblake3 v1.8.7\t%s\n' "${TEST_BLAKE3_FEATURES:-std}"
-            if [[ "${TEST_BLAKE3_DUPLICATE:-no}" == yes ]]; then printf 'blake3 v1.8.6\tstd\n'; fi
             exit 0
         fi
         printf 'ic-platform v0.17.0 (/local/platform)\n'
@@ -115,34 +110,16 @@ cp "$fixture/profiles.before" "$fixture/scripts/ci/platform-consumer-profiles.ts
 echo 'Every consumer profile prepares its source/assets and selects native/Wasm commands'
 # The test declaration is the feature owner, even after a later edit.
 cp "$fixture/crates/ic-platform/Cargo.toml" "$fixture/test-manifest.before"
-perl -0777 -i -pe 's/(name = "ecdsa_consumer".*?required-features = )\["ecdsa"\]/${1}["ecdsa", "blake3"]/s' "$fixture/crates/ic-platform/Cargo.toml"
+perl -0777 -i -pe 's/(name = "ecdsa_consumer".*?required-features = )\["ecdsa"\]/${1}["ecdsa", "ed25519"]/s' "$fixture/crates/ic-platform/Cargo.toml"
 "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" ecdsa > "$fixture/derived-features.log" 2>&1
 derived="$(sed -n 's/^Consumer evidence retained at //p' "$fixture/derived-features.log")"
-grep -Fq 'features = ["ecdsa", "blake3"]' "$derived/Cargo.toml"
+grep -Fq 'features = ["ecdsa", "ed25519"]' "$derived/Cargo.toml"
 cp "$fixture/test-manifest.before" "$fixture/crates/ic-platform/Cargo.toml"
 echo 'Standalone feature selection follows the Cargo test declaration'
 if TEST_CAPABILITY=external-codecs TEST_REJECT=yes "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-codecs > "$fixture/codec-rejection.log" 2>&1; then
     echo 'External codecs admitted host transport' >&2; exit 1
 fi
 grep -q 'External codecs acquired transport' "$fixture/codec-rejection.log"
-for rejection in duplicate features; do
-    duplicate=no feature_union=std
-    if [[ "$rejection" == duplicate ]]; then
-        duplicate=yes
-        diagnostic='maximum 1 rendered package identities, observed 2'
-    else
-        feature_union=pure,std
-        diagnostic='BLAKE3 must select only std'
-    fi
-    : > "$TEST_CALLS"
-    if TEST_CAPABILITY=blake3 TEST_BLAKE3_DUPLICATE="$duplicate" TEST_BLAKE3_FEATURES="$feature_union" \
-        "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" blake3 > "$fixture/log" 2>&1; then
-        echo "Admitted rejected BLAKE3 $rejection graph" >&2; exit 1
-    fi
-    grep -Fq "$diagnostic" "$fixture/log"
-    [[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled after BLAKE3 graph rejection' >&2; exit 1; }
-done
-echo 'BLAKE3 consumer rejects duplicate identities and extra features before compilation'
 for capability in runtime external-candid; do
     export TEST_CANDID=no
     if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi
@@ -193,3 +170,4 @@ if ! wait "$runner_pid"; then
 fi
 [[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == 2 ]] || { cat "$fixture/edit.log" >&2; exit 1; }
 echo 'Consumer runner completes its parsed command list after a concurrent edit'
+fixture_complete=true

@@ -9,9 +9,12 @@ rust-version = "@MSRV@"
 publish = false
 
 [workspace.dependencies]
+@TIMERS_ROOT@
 ic-platform = { @PLATFORM@, default-features = false }
 ic-platform-runtime = { @RUNTIME@, default-features = false, features = ["cdk"] }
 ic-testkit = { @TESTKIT@ }
 ic-wire = "@WIRE@"
 serde = { version = "@SERDE@", default-features = false }
 tokio = { @TOKIO@ }
+
+@RUNTIME_PATCH@

@@ -26,19 +26,40 @@ fn reply<'a, T: ArgumentDecoder<'a>>(
     requires_value: bool,
 ) -> Result<T, DecodeError> {
     with_decoder(bytes, limits, |decoder| {
-        if arity == ReplyArity::Exact && requires_value && decoder.is_done() {
-            return Err(DecodeError::Candid(candid::Error::msg(
-                "missing external protocol reply value",
-            )));
+        let decode = |decoder: &mut candid::de::IDLDeserialize<'a>| {
+            T::decode(decoder).map_err(DecodeError::Candid)
+        };
+        if arity == ReplyArity::Exact {
+            super::exact_arity(
+                decoder,
+                requires_value,
+                (
+                    "missing external protocol reply value",
+                    "unexpected additional external protocol reply values",
+                ),
+                decode,
+            )
+        } else {
+            decode(decoder)
         }
-        let value = T::decode(decoder).map_err(DecodeError::Candid)?;
-        if arity == ReplyArity::Exact && !decoder.is_done() {
-            return Err(DecodeError::Candid(candid::Error::msg(
-                "unexpected additional external protocol reply values",
-            )));
-        }
-        Ok(value)
     })
+}
+
+// Share generated decoder documentation/signatures; request shapes stay explicit.
+macro_rules! decoder {
+    ($response:ty, |$bytes:ident, $limits:ident, $arity:ident| $body:expr) => {
+        /// Decode with caller-selected resource limits and reply arity.
+        ///
+        /// # Errors
+        /// Refuses malformed, over-budget or arity-incompatible replies.
+        pub fn decode(
+            $bytes: &[u8],
+            $limits: super::super::DecodeLimits,
+            $arity: super::super::ReplyArity,
+        ) -> Result<$response, super::super::DecodeError> {
+            $body
+        }
+    };
 }
 
 #[cfg(any(
@@ -63,18 +84,10 @@ macro_rules! single {
             pub fn encode(request: &$request) -> Result<Vec<u8>, candid::Error> {
                 candid::encode_one(request)
             }
-            /// Decode one result, preserving the typed external success/error value.
-            ///
-            /// # Errors
-            /// Refuses malformed, over-budget or arity-incompatible replies.
-            pub fn decode(
-                bytes: &[u8],
-                limits: super::super::DecodeLimits,
-                arity: super::super::ReplyArity,
-            ) -> Result<$response, super::super::DecodeError> {
+            decoder!($response, |bytes, limits, arity| {
                 super::super::reply::<($response,)>(bytes, limits, arity, true)
                     .map(|(value,)| value)
-            }
+            });
         }
     };
 }
@@ -91,18 +104,10 @@ macro_rules! empty_request {
             pub fn encode() -> Result<Vec<u8>, candid::Error> {
                 candid::encode_args(())
             }
-            /// Decode one result with caller-selected limits and arity.
-            ///
-            /// # Errors
-            /// Refuses malformed, over-budget or arity-incompatible replies.
-            pub fn decode(
-                bytes: &[u8],
-                limits: super::super::DecodeLimits,
-                arity: super::super::ReplyArity,
-            ) -> Result<$response, super::super::DecodeError> {
+            decoder!($response, |bytes, limits, arity| {
                 super::super::reply::<($response,)>(bytes, limits, arity, true)
                     .map(|(value,)| value)
-            }
+            });
         }
     };
 }
@@ -121,17 +126,9 @@ macro_rules! empty_reply {
             pub fn encode(request: &$request) -> Result<Vec<u8>, candid::Error> {
                 candid::encode_one(request)
             }
-            /// Decode zero results with explicit caller arity and resource policy.
-            ///
-            /// # Errors
-            /// Refuses malformed, over-budget or arity-incompatible replies.
-            pub fn decode(
-                bytes: &[u8],
-                limits: super::super::DecodeLimits,
-                arity: super::super::ReplyArity,
-            ) -> Result<(), super::super::DecodeError> {
-                super::super::reply(bytes, limits, arity, false)
-            }
+            decoder!((), |bytes, limits, arity| super::super::reply(
+                bytes, limits, arity, false
+            ));
         }
     };
 }

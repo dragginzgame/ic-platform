@@ -1,4 +1,5 @@
 //! Platform-only consumer of external management DTOs and Candid formats.
+mod support;
 use ic_platform::candid::{DecodeError, DecodeLimits, contract, decode_exactly_one};
 #[cfg(not(target_family = "wasm"))]
 use ic_platform::management_canister_types::{
@@ -120,13 +121,7 @@ pub fn roundtrip() {
         "2f2f706572662d636f6e746578742e696e76616c69642f30000100010000000000000000",
         "00000101000000",
     );
-    let original: Vec<u8> = original_hex
-        .as_bytes()
-        .as_chunks::<2>()
-        .0
-        .iter()
-        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-        .collect();
+    let original = wire_hex(original_hex);
     assert_eq!(contract::encode_one(&request).unwrap(), original);
     assert_eq!(
         decode_exactly_one::<HttpRequestArgs>(&original, limits).unwrap(),
@@ -193,14 +188,7 @@ fn management_http_wire_and_transform_roundtrips() {
     roundtrip();
 }
 
-fn wire_hex(text: &str) -> Vec<u8> {
-    let (pairs, remainder) = text.trim().as_bytes().as_chunks::<2>();
-    assert!(remainder.is_empty());
-    pairs
-        .iter()
-        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-        .collect()
-}
+use support::decode_hex as wire_hex;
 
 /// Preserve Blob's bounded history request and the original owner's change records.
 pub fn history_roundtrip() {

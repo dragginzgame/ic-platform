@@ -4,6 +4,25 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.26.0] - Unreleased
+
+### 💥 Breaking
+
+- Retire the pure BLAKE3 feature and forwarding module after IcyDB and Wire
+  removed their source callers. Existing hashing consumers select the same
+  upstream implementation directly; their algorithm, features and bytes stay
+  unchanged ([#150](https://github.com/dragginzgame/ic-platform/issues/150)).
+
+### 🧹 Cleanup
+
+- Share exact Candid reply-arity admission and protocol decoder generation while
+  preserving diagnostics, budgets, optional-result behavior and external bytes.
+- Consolidate test data decoding, native fixture setup and source-fingerprint
+  normalization. Keep separate source guards, refusal tests and explicit cleanup.
+- Render runtime qualification manifests in one pass and make repeated copy
+  measurements opt-in. Ordinary qualification retains both copy paths at every
+  payload size, with ten queries instead of sixty.
+
 ## [0.25.1] - 2026-11-07
 
 ### 🧪 Testing

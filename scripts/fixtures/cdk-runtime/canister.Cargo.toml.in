@@ -9,12 +9,13 @@ rust-version.workspace = true
 timers-composition = []
 prepared-call = []
 external-candid = ["dep:ic-platform", "ic-platform/candid", "ic-platform/management-canister-types"]
-external-adapters = ["external-candid"]
+external-adapters = ["external-candid"@EXTERNAL_BRIDGE@]
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
+@TIMERS_CANISTER@
 ic-platform = { workspace = true, optional = true }
 ic-platform-runtime.workspace = true
 ic-wire.workspace = true

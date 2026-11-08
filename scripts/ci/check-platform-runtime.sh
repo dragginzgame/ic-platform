@@ -46,51 +46,28 @@ if [[ -n "$published" ]]; then
     facade_version="$("$root/.tools/host/bin/yq" -p toml -o json -r '.package.version' crates/ic-platform/Cargo.toml)"
     selection="version = \"=$facade_version\""
 fi
-PLATFORM_FIXTURE_RUNTIME="$runtime_selection" PLATFORM_FIXTURE_MSRV="$msrv" PLATFORM_FIXTURE_PLATFORM="$selection" PLATFORM_FIXTURE_TESTKIT="$testkit" \
-PLATFORM_FIXTURE_WIRE="$wire" \
-PLATFORM_FIXTURE_SERDE="$serde" \
-PLATFORM_FIXTURE_TOKIO="$tokio" \
-    perl -pe 's/\@(RUNTIME|PLATFORM|TESTKIT|WIRE|SERDE|TOKIO|MSRV)\@/$ENV{"PLATFORM_FIXTURE_$1"}/ge' \
-        scripts/fixtures/cdk-runtime/Cargo.toml.in > "$fixture/Cargo.toml"
-# Timers and the canister share the canonical Runtime owner.
-# Testkit retains its published facade requirement; do not globally patch that
-# native DTO adapter to the local facade, whose minor release is independent.
-# This qualification-only patch tests existing compatible consumer requirements;
-# published consumers must adopt the supplying release themselves.
-if [[ -z "$published" ]]; then
-    cat >> "$fixture/Cargo.toml" <<'PATCH'
-
-[patch.crates-io]
-ic-platform-runtime = { path = "../../crates/ic-platform-runtime" }
-ic-platform-macros = { path = "../../crates/ic-platform-macros" }
-ic-platform-runtime-guard = { path = "../../crates/ic-platform-runtime-guard" }
-PATCH
-fi
-cp scripts/fixtures/cdk-runtime/canister.Cargo.toml "$fixture/crates/canister/Cargo.toml"
-if [[ -n "$adapters" ]]; then
-    sed -i.bak 's/external-adapters = \["external-candid"\]/external-adapters = ["external-candid", "ic-platform\/candid-endpoint"]/' "$fixture/crates/canister/Cargo.toml"
-    rm "$fixture/crates/canister/Cargo.toml.bak"
-fi
-
-cp scripts/fixtures/cdk-runtime/driver.Cargo.toml "$fixture/apps/driver/Cargo.toml"
+timers=""
 if [[ "$qualification" == timers ]]; then
     timers="$("$root/.tools/host/bin/yq" -p toml -o json '.workspace.dependencies.ic-timers' Cargo.toml | "$root/.tools/host/bin/jq" -r 'if type == "string" then {version: .} else . end | to_entries | map("\(.key) = \(.value | tojson)") | join(", ")')"
-    PLATFORM_FIXTURE_TIMERS="$timers" perl -0pi -e '
-        s/^\[workspace.dependencies\]\n/$& . "ic-timers = { " . $ENV{PLATFORM_FIXTURE_TIMERS} . " }\n"/me == 1
-            or die "missing fixture dependency catalog\n";
-    ' "$fixture/Cargo.toml"
-    perl -0pi -e '
-        s/^\[dependencies\]\n/$& . "ic-timers.workspace = true\n"/me == 1
-            or die "missing canister dependency table\n";
-    ' "$fixture/crates/canister/Cargo.toml"
 fi
+selection_mode=source
+if [[ -n "$published" ]]; then selection_mode=published; fi
+adapter_mode=raw
+if [[ -n "$adapters" ]]; then adapter_mode=external; fi
+PLATFORM_FIXTURE_RUNTIME="$runtime_selection" PLATFORM_FIXTURE_MSRV="$msrv" PLATFORM_FIXTURE_PLATFORM="$selection" \
+PLATFORM_FIXTURE_TESTKIT="$testkit" PLATFORM_FIXTURE_WIRE="$wire" PLATFORM_FIXTURE_SERDE="$serde" \
+PLATFORM_FIXTURE_TOKIO="$tokio" PLATFORM_FIXTURE_TIMERS="$timers" \
+    perl scripts/ci/render-runtime-fixture.pl scripts/fixtures/cdk-runtime "$fixture" \
+        "$qualification" "$selection_mode" "$adapter_mode"
 cp scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
 cp scripts/fixtures/cdk-runtime/canister/tests.rs "$fixture/crates/canister/src/tests.rs"
 mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
 cp crates/ic-platform/tests/management_consumer.rs "$fixture/crates/canister/src/management_proof/mod.rs"
+cp -R crates/ic-platform/tests/support "$fixture/crates/canister/src/management_proof/"
 cp crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/src/management_proof/fixtures/"
 cp -R scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister} "$fixture/crates/canister/src/"
 cp scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
+cp -R "$root/scripts/fixtures/cdk-runtime/pocketic_support" "$fixture/apps/driver/src/"
 cp scripts/fixtures/cdk-runtime/driver/tests.rs "$fixture/apps/driver/src/tests.rs"
 cp -R scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver,benchmarks} "$fixture/apps/driver/src/"
 lock="$root/scripts/fixtures/cdk-runtime/Cargo.lock"
@@ -101,7 +78,7 @@ printf '%s\n' "$mode" > "$fixture/operation"
 # compiler identities. Retain failed preparation as well as installed results.
 {
     "$root/.tools/host/bin/rg" --files crates scripts/fixtures/cdk-runtime | sed "\|^scripts/fixtures/cdk-runtime/Cargo.lock$|d"
-    printf '%s\n' Cargo.toml rust-toolchain.toml .cargo/config.toml scripts/ci/check-platform-runtime.sh scripts/ci/check-platform-compiler.sh scripts/ci/read-platform-msrv.sh "$lock"
+    printf '%s\n' Cargo.toml rust-toolchain.toml .cargo/config.toml scripts/ci/check-platform-runtime.sh scripts/ci/render-runtime-fixture.pl scripts/ci/check-platform-compiler.sh scripts/ci/read-platform-msrv.sh "$lock"
 } | LC_ALL=C sort -u > "$fixture/input-files"
 source_fingerprints() {
     perl -MDigest::SHA -ne '

@@ -1022,84 +1022,18 @@ Source/fixture checks and historical receipts do not establish native or Bazel
 qualification. Publishing a new Rust facade for instrumented clients is separate
 from consuming this source profile.
 
-## Optional BLAKE3 maintenance boundary
+## Retired BLAKE3 facade (Platform 0.26)
 
-Shared 0.31.6's [hashing policy](../rules/hashing.md) supersedes the earlier
-recommendation to centralize pure hashing through Platform. Existing approved
-hashing belongs directly with its consumer. For IcyDB's established BLAKE3
-purposes, declare `blake3 = { version = "1.8.7", default-features = false,
-features = ["std"] }` in its root catalog, inherit it in every affected member
-and independent workspace, and replace `ic_platform::blake3` imports with
-`blake3`. Remove the facade dependency only where it supplies no other capability.
-Preserve the current lock selection, upstream identities, exact hash input/domain
-and output bytes; this is an import/dependency migration, not an algorithm change.
-Do not add a replacement wrapper crate.
+Pure hashing belongs directly with its consumers under Shared's
+[hashing policy](../rules/hashing.md). The `blake3` feature and forwarding module
+are removed. IcyDB and Wire have removed their source callers; IcyDB's own
+qualification and deployment remain consumer-owned.
 
-[Platform #150](https://github.com/dragginzgame/ic-platform/issues/150) retires the
-feature/export/dependency and facade-only fixtures after callers migrate.
-[IcyDB #631](https://github.com/dragginzgame/icydb/issues/631) owns Core, SQL helper
-and independent integration adoption; another session owns those edits. Wire's
-unused benchmark activation is removed. Platform's forwarding surface remains
-until the IcyDB migration is complete; no sibling release is performed here.
-
-### Retained forwarding contract
-
-This surface is supplied by published Platform 0.6.18. Earlier releases do not
-provide it; consumers must raise their minimum requirement when adopting it.
-
-Select `ic-platform/blake3` and import `ic_platform::blake3::{hash, Hasher, Hash}`.
-These are upstream identities, not wrapper types or a generic hashing API. The
-workspace requirement is BLAKE3 1.8.7 with defaults disabled and `std` selected.
-There are no default Platform features. Native and Wasm consumers can select
-hashing independently of Principal, Candid, CDK, executor and host features.
-
-The older facade-adoption instructions are superseded by the direct dependency
-migration above. These implementation and graph qualifications describe the
-retained surface while callers migrate.
-
-`make check-primitives` admits default, executor, runtime and BLAKE3 combinations
-on native and `wasm32-unknown-unknown`. It uses the shared Cargo graph checker
-for at most one full rendered BLAKE3 identity (version plus source qualifier),
-then reads Cargo's actual feature union and requires exactly `std` when present.
-Repeated `(*)` nodes are not duplicates. The source qualifier is Cargo's graph
-rendering, not artifact/source authentication. A real adversarial consumer shows
-that an aliased direct dependency can enable `pure` on the same identity; feature
-admission rejects it even though a duplicate-version check would pass.
-
-For another explicit selection, use
-`bash scripts/ci/check-blake3-graph.sh CONSUMER PACKAGE TARGET FEATURES_OR_DASH`.
-It disables root defaults, uses normal/build edges and locked/offline inputs,
-retains evidence under Platform's target directory and never compiles or fetches.
-Consumers needing root defaults or a broader reviewed feature policy must use
-their own actual build selection/policy rather than silently reusing this one.
-The standard graph checker supplies count/feature/path mechanics; product roots,
-reviewed exceptions and release features remain at the product owner.
-
-Canic must apply governance to each actual deployable package/manifest, including
-generated and independent workspaces, using its build's exact Cargo selection.
-Its existing canonical-role crypto gate is not an inventory of arbitrary Apps.
-Check version/source identities and effective features before expensive builds;
-retain reviewed exceptions explicitly. Its active Wire batch defers builds/tests,
-so no current Canic build, measurement or gate integration is claimed here.
-
-Keep required IC hashes, Caffeine object hashes and existing signed/persisted
-formats unchanged. This feature is not a migration of those contracts. Any new
-owned format/domain policy belongs to its consumer. Compare optimized artifacts
-under the same build recipe before claiming Wasm savings; host/test duplicates
-and graph identity counts alone do not establish linked code size.
-
-### Bounded Wasm size evidence
-
-The retained Rust 1.91 freestanding streaming-hash probe uses one exported ABI,
-`opt-level=z`, fat LTO, one codegen unit, aborting panics and symbol stripping,
-followed by `ic-wasm 0.11.1 shrink`. Optimized sizes are: control 109 bytes,
-BLAKE3 through Platform 23,340 bytes, direct BLAKE3 23,340 bytes and SHA-256
-10,215 bytes. Direct/facade BLAKE3 outputs are byte-identical in this probe.
-This demonstrates no facade overhead for the retained code path, not smaller
-production canisters. BLAKE3 is 13,125 bytes larger than SHA-256 here. It does
-not establish relative execution time or IC instruction/cycle cost.
-Sources, selected lock, metadata and artifact hashes are retained at
-`target/blake3-boundary.QmcewQ/wasm-probe`; `sizes.json` records the comparison.
+For existing approved purposes, inherit `blake3 = { version = "1.8.7",
+default-features = false, features = ["std"] }` and import that supplier
+directly. Preserve its selected version/features, input/domain and output bytes.
+Remove Platform only where it supplies no other capability. No new wrapper,
+algorithm change or production Wasm saving is implied.
 
 ## Browser SDK Core boundary
 

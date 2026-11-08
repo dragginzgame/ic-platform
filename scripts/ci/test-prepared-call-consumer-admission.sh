@@ -3,7 +3,10 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
-fixture="$(mktemp -d "$root/target/prepared-call-admission.XXXXXX")"
+# shellcheck source=scripts/ci/fixture-lifecycle.sh
+source "$root/scripts/ci/fixture-lifecycle.sh"
+fixture_complete=false
+fixture="$(fixture_create "$root/target/prepared-call-admission.XXXXXX")"
 fixture="$(CDPATH='' cd "$fixture" && pwd -P)"
 first_pid="" second_pid=""
 finish() {
@@ -11,18 +14,17 @@ finish() {
     for pid in "$first_pid" "$second_pid"; do
         [[ -z "$pid" ]] || { kill "$pid" 2>/dev/null || :; wait "$pid" 2>/dev/null || :; }
     done
-    if [[ "$status" == 0 ]]; then rm -rf "$fixture"
-    else printf 'Admission evidence retained: %s\n' "$fixture" >&2; fi
-    exit "$status"
+    fixture_finish "$status" "$fixture" 'Admission evidence retained'
 }
 trap finish EXIT
 mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/prepared-call-consumer" "$fixture/.tools" "$fixture/bin"
-cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 cp "$root/scripts/fixtures/prepared-call-consumer/"{lib,tests}.rs "$fixture/scripts/fixtures/prepared-call-consumer/"
 cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
 mkdir -p "$fixture/crates/ic-platform/tests/fixtures"
 cp "$root/crates/ic-platform/tests/management_consumer.rs" "$fixture/crates/ic-platform/tests/"
+cp -R "$root/crates/ic-platform/tests/support" "$fixture/crates/ic-platform/tests/"
 cp "$root/crates/ic-platform/tests/fixtures/management-"*.hex "$fixture/crates/ic-platform/tests/fixtures/"
 cp "$root/"{Cargo.toml,Cargo.lock,rust-toolchain.toml} "$fixture/"
 mkdir -p "$fixture/.cargo"
@@ -182,3 +184,4 @@ else
     [[ $? == 2 ]] || { cat "$fixture/version.log"; exit 1; }
 fi
 echo "prepared-call admission: raw/Wire/external-Candid arguments and failure propagation passed on Bash $BASH_VERSION"
+fixture_complete=true

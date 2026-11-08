@@ -47,7 +47,6 @@ for supplier availability and consumer-owned feature/import changes.
 
 | Feature | Implemented contract |
 | --- | --- |
-| `blake3` | Upstream `hash`, `Hasher` and `Hash`; native/Wasm with `std`, no IC codecs, threading or memory mapping |
 | `principal` | Owned Principal/Account bytes, text and Serde; no external Principal, hashing or Candid |
 | `principal-external` | Registry Principal identity, byte conversions and upstream Serde; implies principal, no hashing or Candid |
 | `principal-self-authenticating` | Unchanged imported self-authentication using upstream SHA-224; implies principal |

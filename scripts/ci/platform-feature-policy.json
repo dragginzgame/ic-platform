@@ -1,7 +1,6 @@
 {
   "features": [
     "agent",
-    "blake3",
     "bls",
     "candid",
     "candid-endpoint",

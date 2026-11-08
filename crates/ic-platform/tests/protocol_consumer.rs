@@ -1,4 +1,6 @@
 //! Real consumer of transport-independent external protocol operations.
+#[cfg(test)]
+mod support;
 use ic_platform::{
     candid::{
         DecodeError, DecodeLimits,
@@ -38,16 +40,7 @@ mod tests {
             header_bytes: 8192,
         }
     }
-    fn hex(s: &str) -> Vec<u8> {
-        s.split_whitespace()
-            .collect::<String>()
-            .as_bytes()
-            .as_chunks::<2>()
-            .0
-            .iter()
-            .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-            .collect()
-    }
+    use support::decode_hex as hex;
 
     #[test]
     fn management_history_uses_independent_upstream_wire_fixtures() {

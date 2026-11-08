@@ -1,4 +1,5 @@
 //! Platform-only IC signature verification against original-owner certificate bytes.
+mod support;
 use ic_platform::signature_verification::{
     CanisterSigTimeError, verify_canister_sig, verify_canister_sig_with_time,
 };
@@ -101,14 +102,7 @@ pub fn roundtrip() {
     assert!(verify_canister_sig(b"platform-signature", &bad_signature, &public, &root).is_err());
 }
 
-fn hex(input: &str) -> Vec<u8> {
-    let (pairs, remainder) = input.trim().as_bytes().as_chunks::<2>();
-    assert!(remainder.is_empty());
-    pairs
-        .iter()
-        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-        .collect()
-}
+use support::decode_hex as hex;
 
 #[test]
 fn signatures_keep_original_acceptance_and_refusal_contracts() {

@@ -4,6 +4,14 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.20.1] - Unreleased
+
+### 🧹 Cleanup
+
+- Share mechanical option parsing between ordinary entrypoints and the external
+  Candid adapter. Preserve emitted entrypoints, repeated guard ordering, explicit
+  codecs and duplicate/type/retired-option diagnostics.
+
 ## [0.20.0] - 2026-11-07
 
 ### 💥 Breaking

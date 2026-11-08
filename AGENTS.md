@@ -152,10 +152,9 @@ signature capability; raw Runtime/executor/IC0 and standalone BLS stay isolated.
 Registry raw IC0 is not an additional executor. Do not export the upstream store.
 
 Shared's [hashing policy](rules/hashing.md) permits approved pure hashing directly
-at its consumers. Retire the optional BLAKE3 forwarding surface only after IcyDB
-and Wire migrations (#150 / IcyDB #631). Until then, preserve upstream identities,
-`std`-only selection, bytes and singleton/effective-feature checks. Algorithm,
-input/domain and persisted-format changes remain separate explicit decisions.
+at its consumers. The BLAKE3 forwarding surface is retired (#150); do not restore
+a facade dependency for pure hashing. Algorithm, input/domain and persisted-format
+changes remain separate explicit decisions.
 
 BLS cryptography belongs to registry ic-verify-bls-signature 0.6.x and
 ic_bls12_381 0.10.x. Select only alloc/groups, with defaults and RNG disabled.

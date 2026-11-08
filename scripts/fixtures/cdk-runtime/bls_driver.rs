@@ -1,7 +1,6 @@
 //! Compare unchanged upstream BLS feature variants in installed Wasm.
+mod pocketic_support;
 use ic_platform::principal::ExternalPrincipal as Principal;
-use ic_testkit::pic::PocketIcStartupConfig;
-use ic_testkit::pocket_ic::PocketIcBuilder;
 use std::{path::Path, time::Duration};
 
 fn hex(path: &Path) -> Vec<u8> {
@@ -16,11 +15,7 @@ fn hex(path: &Path) -> Vec<u8> {
 }
 
 fn main() {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-    runtime.block_on(run_fixture());
+    pocketic_support::runtime().block_on(run_fixture());
 }
 
 async fn run_fixture() {
@@ -32,21 +27,8 @@ async fn run_fixture() {
     assert_eq!(public.len(), 96);
     let mut request = [signature, public].concat();
     request.extend_from_slice(b"platform-signature");
-    let config = PocketIcStartupConfig::from_env(Duration::from_secs(60)).unwrap();
-    let (_server, url) = match config {
-        PocketIcStartupConfig::Connect { server_url, .. } => (None, server_url),
-        spawn => {
-            let server = spawn.start_managed_server().unwrap();
-            let url = server.url().to_owned();
-            (Some(server), url)
-        }
-    };
-    let pic = PocketIcBuilder::new(Duration::from_secs(60))
-        .with_server_url(url.parse().unwrap())
-        .with_application_subnet()
-        .build()
-        .await
-        .unwrap();
+    let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
+    let pic = builder.with_application_subnet().build().await.unwrap();
     println!("variant\tcase\tsample\tinstructions");
     while let Some(variant) = args.next() {
         let wasm = std::fs::read(args.next().expect("Wasm path")).unwrap();
@@ -100,4 +82,5 @@ async fn run_fixture() {
         }
     }
     pic.drop().await.unwrap();
+    drop(server);
 }

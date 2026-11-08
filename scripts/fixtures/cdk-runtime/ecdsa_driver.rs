@@ -1,17 +1,13 @@
 //! Compare RustCrypto's existing backends in installed Wasm.
+mod pocketic_support;
 use ic_platform::{
     ecdsa::{PrehashSigner, Signature, SigningKey},
     principal::ExternalPrincipal as Principal,
 };
-use ic_testkit::{pic::PocketIcStartupConfig, pocket_ic::PocketIcBuilder};
 use std::time::Duration;
 
 fn main() {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-    runtime.block_on(run_fixture());
+    pocketic_support::runtime().block_on(run_fixture());
 }
 
 async fn run_fixture() {
@@ -46,21 +42,8 @@ async fn run_fixture() {
     extended.push(0);
     cases.push(("long-signature", extended, 0));
 
-    let config = PocketIcStartupConfig::from_env(Duration::from_secs(60)).unwrap();
-    let (_server, url) = match config {
-        PocketIcStartupConfig::Connect { server_url, .. } => (None, server_url),
-        spawn => {
-            let server = spawn.start_managed_server().unwrap();
-            let url = server.url().to_owned();
-            (Some(server), url)
-        }
-    };
-    let pic = PocketIcBuilder::new(Duration::from_secs(60))
-        .with_server_url(url.parse().unwrap())
-        .with_application_subnet()
-        .build()
-        .await
-        .unwrap();
+    let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
+    let pic = builder.with_application_subnet().build().await.unwrap();
     println!("backend\tcase\tsample\tinstructions");
     let mut args = std::env::args().skip(1);
     while let Some(backend) = args.next() {
@@ -84,4 +67,5 @@ async fn run_fixture() {
         }
     }
     pic.drop().await.unwrap();
+    drop(server);
 }

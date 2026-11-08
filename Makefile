@@ -129,7 +129,6 @@ check: check-compiler
 test: check-compiler
 	bash scripts/ci/test-canic-benchmark-capture.sh
 	bash scripts/ci/test-platform-documentation.sh
-	bash scripts/ci/test-blake3-graph.sh
 	bash scripts/ci/test-advisories.sh
 	bash scripts/ci/test-platform-inventory.sh
 	cargo test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
@@ -151,8 +150,9 @@ check-candid-boundary:
 .PHONY: check-primitives
 check-primitives:
 	@for target in "$$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do \
-		for features in - executor runtime blake3 runtime,blake3; do \
-			bash scripts/ci/check-blake3-graph.sh "$(CURDIR)" ic-platform "$$target" "$$features" || exit $$?; \
+		for features in - executor runtime; do \
+			set --; if [ "$$features" != - ]; then set -- --features "$$features"; fi; \
+			perl scripts/ci/check-cargo-graph.pl --consumer "$(CURDIR)" --package ic-platform --target "$$target" --no-default-features --forbid blake3 "$$@" || exit $$?; \
 		done; \
 	done
 .PHONY: check-stable-identities

@@ -1,32 +1,18 @@
 //! Local installed ingress acceptance; Testkit owns server startup/admission.
+mod pocketic_support;
 use ic_platform::agent::{
     Agent, BasicIdentity, DelegatedIdentity, Delegation, Identity, Prime256v1Identity,
     Secp256k1Identity, SignedDelegation,
 };
-use ic_testkit::pic::PocketIcStartupConfig;
-use ic_testkit::pocket_ic::PocketIcBuilder;
 use std::{sync::Arc, time::Duration};
 
 fn main() {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-    runtime.block_on(run_fixture());
+    pocketic_support::runtime().block_on(run_fixture());
 }
 
 async fn run_fixture() {
-    let startup = PocketIcStartupConfig::from_env(Duration::from_secs(60)).unwrap();
-    let (server, url) = match startup {
-        PocketIcStartupConfig::Connect { server_url, .. } => (None, server_url),
-        spawn => {
-            let server = spawn.start_managed_server().unwrap();
-            let url = server.url().to_owned();
-            (Some(server), url)
-        }
-    };
-    let mut pic = PocketIcBuilder::new(Duration::from_secs(60))
-        .with_server_url(url.parse().unwrap())
+    let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
+    let mut pic = builder
         .with_nns_subnet()
         .with_application_subnet()
         .build()

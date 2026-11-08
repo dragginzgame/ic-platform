@@ -97,3 +97,40 @@ fn leb(mut value: u64, bytes: &mut Vec<u8>) {
         }
     }
 }
+
+/// Check both copy paths once per size, or explicitly collect instruction medians.
+pub async fn buffer_copy(pic: &PocketIc, id: Principal, measure: bool) {
+    for size in super::BUFFER_COPY_SIZES {
+        let payload: Vec<u8> = (0..size).map(|i| (i % 256) as u8).collect();
+        let mut baseline = Vec::new();
+        let mut candidate = Vec::new();
+        for round in 0..if measure { 6 } else { 1 } {
+            for old in if round % 2 == 0 {
+                [true, false]
+            } else {
+                [false, true]
+            } {
+                let args = (old, payload.clone());
+                let expected = super::request("buffer_copy", &args);
+                let (instructions, bytes): (u64, Vec<u8>) =
+                    super::query(pic, id, "buffer_copy", args).await;
+                assert_eq!(bytes, expected);
+                if round != 0 {
+                    if old {
+                        baseline.push(instructions);
+                    } else {
+                        candidate.push(instructions);
+                    }
+                }
+            }
+        }
+        if measure {
+            baseline.sort_unstable();
+            candidate.sort_unstable();
+            println!(
+                "buffer-copy payload={size} baseline={} candidate={} instructions",
+                baseline[2], candidate[2]
+            );
+        }
+    }
+}

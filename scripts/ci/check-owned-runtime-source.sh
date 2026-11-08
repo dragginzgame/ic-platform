@@ -15,7 +15,7 @@ trap 'rm -rf "$fixture"' EXIT
 for part in call spawn; do
     file="$source_root/call/mod.rs"
     [[ "$part" == call ]] || file="$source_root/futures/mod.rs"
-    perl -0777 -e '
+    perl -I "$root/scripts/ci" -MSourceFingerprint=normalize -0777 -e '
         use strict; use warnings;
         my ($part, $file) = @ARGV;
         open my $input, "<", $file or die $!; local $/; my $source = <$input>;
@@ -27,15 +27,9 @@ for part in call spawn; do
             ($body) = $source =~ m{(pub fn spawn<F:.*?)(?=/// Spawn a weak)}s;
         }
         die "missing qualified source region\n" unless defined $body;
-        # Preserve string contents; ignore comments and formatting only.
-        my @strings;
-        $body =~ s{"(?:\\.|[^"\\])*"}{push(@strings, $&); "\x01" . $#strings . "\x02"}gse;
-        $body =~ s{//[^\n]*}{}g;
-        $body =~ s{/\*.*?\*/}{}gs;
-        $body =~ s/\s+//g;
-        $body =~ s/\x01(\d+)\x02/$strings[$1]/ge;
-        print $body;
+        print normalize($body);
     ' "$part" "$file" > "$fixture/$part"
+    # shellcheck disable=SC2016 # $part is a jq binding, not a shell expansion.
     expected="$("$root/.tools/host/bin/jq" -er --arg part "$part" '.qualified_regions[$part]' "$root/crates/ic-platform-runtime/src/cdk/upstream/provenance.json")"
     bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$expected" "$fixture/$part"
 done

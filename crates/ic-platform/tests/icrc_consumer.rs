@@ -1,4 +1,5 @@
 //! Standalone Platform-only consumer of the explicit external ledger surface.
+mod support;
 use ic_platform::candid::{DecodeLimits, contract, decode_exactly_one};
 use ic_platform::icrc_ledger_types::{
     Account, Allowance, AllowanceArgs, ArchivedBlocks, BlockWithId, GetArchivesArgs,
@@ -7,14 +8,7 @@ use ic_platform::icrc_ledger_types::{
 };
 use ic_platform::principal::ExternalPrincipal as Principal;
 
-fn wire_hex(text: &str) -> Vec<u8> {
-    let (pairs, remainder) = text.trim().as_bytes().as_chunks::<2>();
-    assert!(remainder.is_empty());
-    pairs
-        .iter()
-        .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
-        .collect()
-}
+use support::decode_hex as wire_hex;
 
 fn roundtrip_value<T>(value: &T) -> Vec<u8>
 where

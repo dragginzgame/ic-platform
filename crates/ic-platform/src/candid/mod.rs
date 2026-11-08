@@ -181,19 +181,32 @@ pub fn decode_exactly_one<'a, T: Deserialize<'a> + CandidType>(
     limits: DecodeLimits,
 ) -> Result<T, DecodeError> {
     with_decoder(bytes, limits, |decoder| {
-        if decoder.is_done() {
-            return Err(DecodeError::Candid(candid::Error::msg(
+        exact_arity(
+            decoder,
+            true,
+            (
                 "expected exactly one Candid result",
-            )));
-        }
-        let value = decoder.get_value::<T>().map_err(DecodeError::Candid)?;
-        if !decoder.is_done() {
-            return Err(DecodeError::Candid(candid::Error::msg(
                 "expected exactly one Candid result",
-            )));
-        }
-        Ok(value)
+            ),
+            |decoder| decoder.get_value::<T>().map_err(DecodeError::Candid),
+        )
     })
+}
+
+fn exact_arity<'a, T>(
+    decoder: &mut IDLDeserialize<'a>,
+    requires_value: bool,
+    messages: (&str, &str),
+    decode: impl FnOnce(&mut IDLDeserialize<'a>) -> Result<T, DecodeError>,
+) -> Result<T, DecodeError> {
+    if requires_value && decoder.is_done() {
+        return Err(DecodeError::Candid(candid::Error::msg(messages.0)));
+    }
+    let value = decode(decoder)?;
+    if !decoder.is_done() {
+        return Err(DecodeError::Candid(candid::Error::msg(messages.1)));
+    }
+    Ok(value)
 }
 
 fn with_decoder<'a, T>(

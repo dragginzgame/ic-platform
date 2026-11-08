@@ -1,13 +1,13 @@
 //! Installed Wire runtime checks. Testkit owns server lifecycle and transport.
 mod benchmarks;
 mod external_driver;
+mod pocketic_support;
 mod protocol;
 mod wire_driver;
 mod wire_protocol;
 
 use ic_platform::principal::ExternalPrincipal as Principal;
-use ic_testkit::pic::PocketIcStartupConfig;
-use ic_testkit::pocket_ic::{PocketIc, PocketIcBuilder, RejectCode, RejectResponse};
+use ic_testkit::pocket_ic::{PocketIc, RejectCode, RejectResponse};
 use protocol::{LIMITS, method_id};
 use serde::{Serialize, de::DeserializeOwned};
 use std::time::Duration;
@@ -70,29 +70,15 @@ fn assert_guard_rejection(error: &RejectResponse) {
 mod tests;
 
 fn main() {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-    runtime.block_on(run_fixture());
+    pocketic_support::runtime().block_on(run_fixture());
 }
 
 async fn run_fixture() {
     let wasm = std::fs::read(std::env::args().nth(1).expect("canister Wasm path")).unwrap();
     let legacy = std::env::var_os("PLATFORM_EXTERNAL_CANDID").is_some();
     // Testkit owns server startup/teardown; cross the client-owner boundary by URL.
-    let config = PocketIcStartupConfig::from_env(Duration::from_secs(60)).unwrap();
-    let (server, url) = match config {
-        PocketIcStartupConfig::Connect { server_url, .. } => (None, server_url),
-        spawn => {
-            let server = spawn.start_managed_server().unwrap();
-            let url = server.url().to_owned();
-            (Some(server), url)
-        }
-    };
-    let builder = PocketIcBuilder::new(Duration::from_secs(60))
-        .with_server_url(url.parse().unwrap())
-        .with_application_subnet();
+    let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
+    let builder = builder.with_application_subnet();
     // The optional root-key measurement compares against Testkit's NNS key.
     // Keep the ordinary owner/Timers qualification topology unchanged.
     let builder = if std::env::var("PLATFORM_CODEC_BENCHMARK").as_deref() == Ok("system") {
@@ -119,36 +105,12 @@ async fn run_fixture() {
         drop(server);
         return;
     }
-    for size in BUFFER_COPY_SIZES {
-        let payload: Vec<u8> = (0..size).map(|i| (i % 256) as u8).collect();
-        let mut baseline = Vec::new();
-        let mut candidate = Vec::new();
-        for round in 0..6 {
-            for old in if round % 2 == 0 {
-                [true, false]
-            } else {
-                [false, true]
-            } {
-                let args = (old, payload.clone());
-                let expected = request("buffer_copy", &args);
-                let (instructions, bytes): (u64, Vec<u8>) =
-                    query(pic, id, "buffer_copy", args).await;
-                assert_eq!(bytes, expected);
-                if round != 0 {
-                    if old {
-                        baseline.push(instructions);
-                    } else {
-                        candidate.push(instructions);
-                    }
-                }
-            }
-        }
-        baseline.sort_unstable();
-        candidate.sort_unstable();
-        println!(
-            "buffer-copy payload={size} baseline={} candidate={} instructions",
-            baseline[2], candidate[2]
-        );
+    let measure_copies = std::env::var_os("PLATFORM_BUFFER_COPY_BENCHMARK").is_some();
+    benchmarks::buffer_copy(pic, id, measure_copies).await;
+    if measure_copies {
+        instance.drop().await.unwrap();
+        drop(server);
+        return;
     }
     assert_eq!(query::<u64>(pic, id, "value", ()).await, 10);
     assert_eq!(query::<u64>(pic, id, "scalar", 5u64).await, 6);
