@@ -1,150 +1,108 @@
 # Current handoff — 2026-11-08
 
-## Local raw_rand codec
+## Delivered Platform 0.27.0
 
-The local `raw-rand` feature exposes dependency-free
-`raw_rand::{METHOD, encode, decode, DecodeError}`. It admits only the documented
-management-producer blob profile, capped at 74 bytes with bounded padded LEB128;
-all-zero bytes remain valid. No runtime or cryptographic body changed. Pending
-Platform 0.27.0 removes the duplicate Candid helper without an alias. Generic
-transports remain method-agnostic. No sibling edits, manifest bump or publication.
+Platform **0.27.0** is on crates.io and origin/main, with annotated tag
+`platform-v0.27.0` at a8165b91e0e04f65962bad5324f5db31e312c580. Reviewed source
+689cf1495120c685d51af70ea7f4c77b8fb317e6 was delivered through the standard frozen
+batch **batch-O3V4GL4T**. Its schema-2 journal is complete at index 1; the normal
+branch was fast-forwarded using `release-batch-reconcile`. No batch was retired.
+
+Only Platform was released. Runtime/macros/guard remain **0.20.2**, Types
+**0.18.2**, browser **0.2.0**. No sibling source, release or npm package changed.
+The prior Runtime release/tag remains bb76a069da4d442e1e830636bace9760fbebd880,
+`runtime-v0.20.2`; its earlier qualification and custody remain preserved.
+
+All **20/20** required local stages passed on Linux / Rust 1.99.1, including
+full Clippy/tests, consumer/feature/Wasm graphs and installed owner/Timers raw and
+prepared Wire/external-Candid profiles. The new raw_rand leaf additionally checks
+real management replies, structured rejection, callback-trap cleanup, pending-call
+cancellation and subsequent successful calls against prepared PocketIC 16.1.0.
+The immutable complete-gate receipt is:
+
+- target/release-frozen/batch-O3V4GL4T/target/release-validation/qualification.onAEri/receipt.json
+
+Official index checksum, downloaded archive, retained publication archives and
+exact VCS commit agree; GitHub branch and peeled tag matched. Archive SHA-256:
+33e040a299213e54bc4a37142a9d164a7daaf74181fd5520bba57fd7acb3a2cd.
+Evidence: target/deploy-platform0270-20261108/registry-verification.json,
+github-refs.txt, release.log, reconcile.log and draft-restoration.json.
+
+## Published consumer boundary
+
+Select `raw-rand` for `raw_rand::{METHOD, encode, decode, DecodeError}`.
+The allocation-free decoder admits the documented management-producer profile,
+with at most 74 bytes, bounded padded LEB128 and exactly one 32-byte blob.
+All-zero data remains valid; seed admission, transport, waits and retries stay
+consumer-owned. No runtime or cryptographic implementation body changed.
+
+The duplicate `candid::protocols::management::raw_rand` helper is removed without
+an alias. This is the 0.27 breaking change. Generic Runtime/CDK/Agent transports
+remain method-agnostic; there is one typed entropy codec, not a method-name ban.
 [#151 — Candid-free raw_rand codec](https://github.com/dragginzgame/ic-platform/issues/151)
-owns this fix; [Canic #749 — Adopt the codec](https://github.com/dragginzgame/canic/issues/749) owns adoption.
+is implemented/closed; [Canic #749 — Adopt the codec](https://github.com/dragginzgame/canic/issues/749)
+owns separate consumer adoption. Current APIs and migration are in the
+[migration contract](../migration.md).
 
-Focused Clippy, four unit and four reference/mutation tests, graph policy and
-native/Wasm consumer admissions pass. The prepared PocketIC 16.1.0 server accepts
-both matched consumers: producer bytes, structured rejection, callback-trap cleanup,
-pending-call cancellation and subsequent successful calls. No macOS/hosted proof.
-The owner gate includes this leaf; migrated external-adapter fixture Clippy passes.
+Small external argument encoders are `candid_args::{empty, units, text}`, under
+`candid-args`. Raw_rand and existing empty protocol helpers share `empty()`.
+These deliberately cover only empty, unit/null and single-text arguments, with
+independent Candid byte checks including Unicode and LEB length boundaries.
+The standalone native/Wasm feature graphs contain only Platform. General and
+native textual parsing remain upstream; owned application protocols use Wire.
 
-Rust 1.99.1, Candid 0.10.40, opt-level 3 / fat LTO / one codegen unit and
-ic-wasm 0.11.1 shrink give total/code bytes 376466/343496 for general Candid and
-44796/38114 for the narrow codec: -331670 total / -305382 code. Savings require
-removing the last reachable general codec; larger Canic artifacts are unmeasured.
-Retained inputs/artifacts/logs/status: target/evidence/raw-rand.5fgoQi; export
-refusal and migrated fixture checks: target/evidence/raw-rand-sole-boundary.
+The frozen Candid 0.10.39 entropy comparison reports total/code bytes
+282719/255413 for the general codec and 45056/38114 for the narrow codec, with
+opt-level 3 / fat LTO / one codegen unit and ic-wasm 0.11.1 shrink. Retained
+inputs/artifacts/status: target/release-frozen/batch-O3V4GL4T/target/evidence/raw-rand.n286hl.
+The earlier Candid 0.10.40 comparison remains at target/evidence/raw-rand.5fgoQi.
+Savings require removing the last reachable general codec; sibling Wasms remain
+unmeasured. These experiments have different dependency inputs.
 
-Small external encoders live in dependency-free `candid_args::{empty, units,
-text}` under `candid-args`. Raw_rand and existing empty protocol helpers reuse
-the empty envelope; general/native text parsing stays upstream. No sibling edits.
-Focused Clippy, 13 byte/protocol tests and native/Wasm isolation checks pass.
-
-## Shared 0.31.12 adoption
+## Baseline and asynchronous hosted evidence
 
 Shared **0.31.12** at eb3c8e0d2274d2c7babb2c15b3355bb80a796f0f supplies 149
-verified payloads; LOC counts are unchanged. Git-only adoption ced3903 needed no
-package release. Passing evidence: target/adoption-shared03112-20261108.
+verified payloads. Adoption ced3903 and LOC reporting evidence remain at
+target/adoption-shared03112-20261108; the snapshot is unchanged by this release.
 
-## Hosted review and measured dependency cost
+One observation at release commit a8165b9 found Browser SDK and Wasm size workflows
+successful; CI, installed runtime and dependency advisories were still running.
+See target/deploy-platform0270-20261108/hosted-runs.json. Leave expensive hosted
+integration/native checks asynchronous. No new macOS, browser/worker or native
+Profiler acceptance is claimed by Linux qualification.
 
-Controlled Candid/derive 0.10.39→0.10.40, fixed source/compiler/optimization:
-total/code 534627/481743→589215/536162 (+54588/+54419). Preserve sequence-completion
-checks; symbol attribution is unprofiled. This is a dependency comparison. Evidence:
-target/next-wasm-20261108/candid-patch-comparison.json and
-target/evidence/wasm-regression.ByeLgJ. No sibling size claim or lock edit.
+Earlier hosted validation failed in grouped preparation and Testkit server setup;
+the current complete local gate passed both, but does not establish remote fixes.
+Historical secret scanning flags documented public test keys and a prose false
+positive; no exclusion or waiver was added. The crypto advisory remains explicitly
+deferred under [#50 — Resolve RUSTSEC-2026-0387](https://github.com/dragginzgame/ic-platform/issues/50),
+unimplemented; do not take ownership of cryptographic bodies.
 
-The same hosted review found CI validation failing inside grouped preparation on
-Linux and both macOS hosts (exit 101); its inner logs were not retained as CI
-artifacts. The grouped preparation/rollback proof passes locally with the warm
-cache. Installed owner-runtime setup failed in Testkit-owned PocketIC preparation;
-its tool exit encoded status 56, without retained setup diagnostics. No supplier
-orchestration or sibling source was changed here. The full-history secret scan
-flags three documented public test-key occurrences and a prose false positive;
-no exclusion or security waiver was added. The dependency advisory remains #50's
-explicit deferral. These hosted failures are not claimed fixed or green.
-
-## Delivered Runtime 0.20.2 and Platform 0.26.1
-
-The reviewed simplification/audit batch was committed as
-b8997bbad037f5934b41791b3667739a18da7ae2 and delivered through frozen batch
-batch-AaHi2pgO, supplier order runtime,platform. Both groups are on crates.io and
-origin/main with their annotated tags:
-
-- Runtime/macros/guard **0.20.2**: bb76a069da4d442e1e830636bace9760fbebd880,
-  runtime-v0.20.2.
-- Platform **0.26.1**: 3fa6ccbf934bc1f0b5215ad2f116ffe832f9f988,
-  platform-v0.26.1.
-
-Types remains **0.18.2** and browser **0.2.0**; neither was released. The normal
-main branch was reconciled by the standard fast-forward command. The batch's
-schema-2 journal has completed index 2 under .git/release-state/frozen/batch-AaHi2pgO.
-No batch, build output, retained archive or receipt was retired or cleaned.
-
-Both groups passed all **20/20** required local stages on Linux / Rust 1.99.1,
-including Clippy, consumer/feature/Wasm checks and installed owner/Timers raw and
-prepared Wire/external-Candid profiles. The unchanged policy-fixture leaf was
-executed for Runtime and reused with fresh Platform admission. Complete receipts:
-
-- target/release-frozen/batch-AaHi2pgO/target/release-validation/qualification.Y7ujMF/receipt.json
-- target/release-frozen/batch-AaHi2pgO/target/release-validation/qualification.hLqe8Q/receipt.json
-
-All four registry archives match their official index checksums, retained local
-archive bytes and exact release VCS commits; GitHub main and peeled tags matched.
-Evidence: target/deploy-runtime0202-platform0261-20261108, including registry/
-archives and runtime-registry-verification.json / platform-registry-verification.json.
-
-## Hosted CI and post-release fixture correction
-
-One observation at the published Platform commit found Browser SDK success;
-CI, installed runtime and dependency advisories were still running. Wasm size
-workflow [42482741311](https://github.com/dragginzgame/ic-platform/actions/runs/42482741311)
-failed before measurement: new Node fixture helpers assumed another test had
-already created target/. This was a fresh-checkout test race, not observed Wasm
-growth. Both helpers now create their parent independently. Isolated fresh-copy
-runs pass 4 capture tests, 3 section/report tests and the concurrent 9-test suite.
-The correction and this handoff are Git-only maintenance; public package code,
-requirements and release tags are unchanged. No additional crate release is needed.
-
-The follow-up push restarts the hosted workflows with a code-classified test
-change. Leave their native/integration outcomes asynchronous; no new macOS, real
-browser/worker or native Profiler acceptance is claimed. The completed Wasm
-failure log and fresh-copy evidence are retained with the deployment evidence.
-
-## Delivered scope and baseline
-
-Shared **0.31.11** at 6c529e6940a97226cca826726491e03173b08cd2 supplies 149 verified
-payloads, including the common-tools action. The batch consolidates owned error
-boilerplate, group-plan/catalog reads, graph classifications and macro tests;
-retires dated 0.4/0.22 runners with immutable reproduction references; and shares
-Rust/browser response fixtures while retaining their distinct CBOR framing.
-
-Captures verify copied bytes, fresh rosters and Git identity. Runtime snapshots
-inputs before deriving fixture selections and checks both snapshot and originals
-at completion; canonical dependency paths remain, so stop source writers during
-qualification. Explicit lock refresh exempts only its selected original lock.
-Wasm reporting inspects one byte snapshot. Runtime/benchmarks share artifact
-retention, including failed-Clippy propagation. Feature metadata is per-attempt;
-remaining fixtures reuse compiler/catalog and completion helpers. Native protocol
-fixtures reject oversized payloads before cloning, preserving bytes and errors.
-Cryptographic implementations, canonical identities and verification policy are
-unchanged. Earlier focused evidence remains in target/complexity-second-20261108
-and target/complexity-third-20261108; delivery qualification is the receipts above.
-
-Current ownership remains in the [migration contract](../migration.md). The
-[prior handoff](https://github.com/dragginzgame/ic-platform/blob/9880ba816461f777266a0aedd54763f412af1522/docs/status/current.md)
-retains earlier release and qualification history. No sibling checkout or release
-was changed by this delivery. The deferred [#50](https://github.com/dragginzgame/ic-platform/issues/50)
-remains unimplemented/open; no advisory waiver or cryptographic rewrite was made.
+The controlled Candid/derive 0.10.39→0.10.40 experiment remains a measured next
+investigation: total/code 534627/481743→589215/536162 (+54588/+54419), fixed source,
+compiler and optimization. Preserve sequence-completion checks; exact symbol
+attribution is unprofiled. Evidence: target/next-wasm-20261108/candid-patch-comparison.json.
+It is a dependency experiment, not a same-lock implementation comparison.
 
 ## Deferred draft and recovery custody
 
-The incoming Cargo.lock draft is durably retained at
-refs/retained/platform0261-runtime0202-lock-draft-20261108, commit
-b91e65b11dae893e510e1d459718903594840768. Its exact original SHA-256 is
-d47ee5c95cd219e49a36e45a890596fdc810a39ad5f87f204080d2ee28f87e00.
-Only its supplier-update patch was reapplied after reconciliation: all 391
-external records match that draft, and all five local owner records match the
-released lock. The restored working Cargo.lock SHA-256 is
+The independent dependency draft is retained at
+refs/retained/platform0270-lock-draft-20261108, commit
+588b11a38c60b15ab5af19f30aef1c310a8b0975, original lock SHA-256
 99591563adb27ffadd705cf60456098506788cdcbb8eebb07a92a5db7f5c0ce9.
-It remains deliberately uncommitted; never restore the whole older lock over
-released owner metadata. Restoration proof: draft-restoration.json in the
-deployment evidence directory. Earlier retained draft refs remain untouched.
+It reappeared in the normal checkout during frozen qualification and matched
+that saved draft exactly. Only its supplier patch was reapplied after the standard
+reconciliation: all **391 external records** match, while the five local owners
+match the released versions. The restored working Cargo.lock SHA-256 is
+98b7f888a38c062420ef54c310c6a1e8b7df2b66ed5d9c9b0bb9b2a421e5438a.
+It remains deliberately uncommitted. Never replace released owner metadata with
+an entire older lock. Earlier retained refs, batches and receipts remain intact.
 
-Preserve all historical failed/completed batches and interrupted release state,
-including completed batch-_leIreCI and batch-C5BoFKA5. Use each attempt's supplying
-source/journals; never reinterpret old receipts under new tooling. Historical
-archives, bundles and receipts remain in
+Preserve all historical failed/completed batches, including batch-_leIreCI,
+batch-C5BoFKA5 and batch-AaHi2pgO; use each attempt's supplying journals/tooling.
+Historical archives/bundles/receipts remain in
 recovery-evidence/retired-checkouts/20261104-issue139/, with maintainer review by
-**2026-12-04**. Retention refuses excess/expiry without deletion. No cleanup,
-mtime renewal or retirement is authorized. Previously removed target evidence
-and Runtime 0.18.1 binaries must not be claimed present.
+**2026-12-04**. No cleanup, mtime renewal or retirement was authorized. Previously
+removed target evidence and Runtime 0.18.1 binaries must not be claimed present.
+The [preceding handoff](https://github.com/dragginzgame/ic-platform/blob/a8165b91e0e04f65962bad5324f5db31e312c580/docs/status/current.md)
+retains older release identities, receipts and focused evidence.

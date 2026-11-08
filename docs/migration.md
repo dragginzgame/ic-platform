@@ -1,9 +1,10 @@
 # Candid and runtime ownership
 
-## Small external argument encoders (Platform 0.27, unreleased)
+## Small external argument encoders (Platform 0.27.0)
 
-Select `candid-args` for dependency-free external Candid encoding on native and
-Wasm targets. The deliberately small `candid_args` module supplies:
+Select `candid-args` on published Platform 0.27.0 for dependency-free external
+Candid encoding on native and Wasm targets. The deliberately small `candid_args`
+module supplies:
 
 ```rust,ignore
 candid_args::empty();        // zero arguments: ()
@@ -23,7 +24,10 @@ external protocol encoders and legacy-empty admission reuse `empty()`. Additiona
 supported shapes can be added here only when a concrete external caller needs
 them, with independent upstream byte checks. No sibling is edited here.
 
-## Candid-free management entropy (Platform 0.27, unreleased)
+<!-- Published Platform 0.27.0's crate README uses this anchor. -->
+<a id="candid-free-management-entropy-platform-027-unreleased"></a>
+
+## Candid-free management entropy (Platform 0.27.0)
 
 Select `ic-platform` with `default-features = false, features = ["raw-rand"]`
 for `ic_platform::raw_rand::{METHOD, encode, decode, DecodeError}`. Encoding
@@ -60,7 +64,8 @@ method-agnostic; callers can construct arbitrary external requests manually.
 The single-owner rule does not install method-name filters or an alternative
 runtime. All maintained Platform entropy callers use the typed codec; the
 size/reference fixtures alone construct general Candid as a test baseline.
-No Canic or IcyDB source is changed here; this API is local and not published.
+Published Platform 0.27.0 supplies this API. Select a requirement accepting 0.27.0;
+the 0.26 line does not supply it. No Canic or IcyDB source is changed here.
 
 ## Canonical ordinary entrypoints (Runtime 0.20 / Platform 0.25)
 
