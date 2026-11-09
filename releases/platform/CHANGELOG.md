@@ -4,6 +4,22 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.29.0] - Unreleased
+
+### ➕ Added
+
+- Add caller-selected vector bounds checked before allocation, strict option
+  decoding, and independent skipped-work budgets to the owned Candid reader.
+  Existing entrypoints and encoded bytes remain unchanged; consumers can reject
+  all skipped values while selecting separate limits for nested fields.
+
+### 🛠️ Tooling
+
+- Adopt Toko Tooling 0.38.2 and audit product/qualification package placement.
+  All five maintained crates already use the product layout; disposable fixture
+  templates and vendored upstream sources retain their documented locations.
+  Production boundaries and the three release groups remain unchanged.
+
 ## [0.28.0] - 2026-11-09
 
 ### ⚠️ Breaking

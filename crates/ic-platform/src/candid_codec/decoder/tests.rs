@@ -299,3 +299,118 @@ fn result_variants_and_optional_fallback() {
     conversion::<_, Option<std::result::Result<u64, String>>>(Err::<u64, bool>(true));
     conversion::<_, Option<std::result::Result<Vec<u64>, String>>>(Ok::<Vec<bool>, String>(vec![]));
 }
+
+#[test]
+fn bounded_vectors_refuse_before_storage_or_element_reads() {
+    for count in [0, 31, 32, 255, 256, 257, 1024, 1025, 4096, 4097] {
+        let bytes = upstream::encode_one(vec![7u8; count]).unwrap();
+        for cap in [0, 32, 256, 1024, 4096] {
+            let (mut reader, args) = message(&bytes, limits()).unwrap();
+            let allocation = reader.allocation;
+            let result = reader.bounded_vec::<u8>(args[0], cap);
+            if count > cap {
+                assert_eq!(result, Err(Error::Limit));
+                assert_eq!(reader.allocation, allocation);
+                assert_eq!(reader.input.len() - reader.pos, count);
+            } else {
+                assert_eq!(result.unwrap(), vec![7; count]);
+                assert_eq!(reader.pos, bytes.len());
+            }
+        }
+    }
+    // A huge announced zero-sized vector is rejected without entering its loop.
+    let bytes = b"DIDL\x01\x6d\x7f\x01\x00\xff\xff\xff\xff\x0f";
+    let (mut reader, args) = message(bytes, limits()).unwrap();
+    let allocation = reader.allocation;
+    assert_eq!(reader.bounded_vec::<()>(args[0], 1024), Err(Error::Limit));
+    assert_eq!(reader.allocation, allocation);
+}
+
+#[test]
+fn skipped_work_is_separate_cumulative_and_charged_once() {
+    let bytes = upstream::encode_one(vec![true, false]).unwrap();
+    // skip vector: value + enter + length byte + element count + 2*(value + byte).
+    for budget in 0..9 {
+        let (mut reader, args) = message(&bytes, limits()).unwrap();
+        reader.skipping = budget;
+        assert_eq!(reader.skip(args[0]), Err(Error::Limit));
+        assert!(!reader.in_skip);
+    }
+    let (mut reader, args) = message(&bytes, limits()).unwrap();
+    reader.skipping = 9;
+    let work = reader.work;
+    reader.skip(args[0]).unwrap();
+    assert_eq!(reader.skipping, 0);
+    assert_eq!(work - reader.work, 9);
+
+    let bytes = upstream::encode_args(((), ())).unwrap();
+    assert_eq!(
+        decode_args_with_skip_limit::<()>(&bytes, limits(), Arity::Compatible, 1),
+        Err(Error::Limit)
+    );
+    assert_eq!(
+        decode_args_with_skip_limit::<()>(&bytes, limits(), Arity::Compatible, 2),
+        Ok(())
+    );
+    let mut tight = limits();
+    tight.work = 1;
+    assert_eq!(
+        decode_args_with_skip_limit::<()>(&bytes, tight, Arity::Compatible, usize::MAX),
+        Err(Error::Limit)
+    );
+}
+
+#[test]
+fn zero_skip_refuses_unknown_fields_reserved_and_optional_fallback() {
+    let bytes = upstream::encode_one((42u64, true, false)).unwrap();
+    assert_eq!(
+        decode_one_with_skip_limit::<(u64, bool)>(&bytes, limits(), 0),
+        Err(Error::Limit)
+    );
+    assert_eq!(
+        decode_one_with_skip_limit::<(u64, bool)>(
+            &upstream::encode_one((42u64, true)).unwrap(),
+            limits(),
+            0
+        ),
+        Ok((42, true))
+    );
+    let bytes = upstream::encode_one(true).unwrap();
+    assert_eq!(
+        decode_one_with_skip_limit::<Option<u64>>(&bytes, limits(), 0),
+        Err(Error::Limit)
+    );
+    assert_eq!(
+        decode_one_with_skip_limit::<Option<u64>>(&bytes, limits(), 2),
+        Ok(None)
+    );
+    assert_eq!(
+        decode_one_with_skip_limit::<codec::Reserved>(&bytes, limits(), 0),
+        Err(Error::Limit)
+    );
+    // A sufficient skip budget still validates malformed discarded bytes.
+    let bytes = b"DIDL\0\x01\x7e\x02";
+    assert_eq!(
+        decode_one_with_skip_limit::<Option<u64>>(bytes, limits(), 2),
+        Err(Error::Malformed)
+    );
+}
+
+#[test]
+fn strict_options_do_not_promote_or_discard_incompatible_values() {
+    for value in [None, Some(u64::MAX)] {
+        let bytes = upstream::encode_one(value).unwrap();
+        let (mut reader, args) = message(&bytes, limits()).unwrap();
+        reader.skipping = 0;
+        assert_eq!(reader.strict_option::<u64>(args[0]), Ok(value));
+        assert_eq!(reader.pos, bytes.len());
+    }
+    for bytes in [
+        upstream::encode_one(42u64).unwrap(),
+        upstream::encode_one(Some(true)).unwrap(),
+        upstream::encode_one(()).unwrap(),
+    ] {
+        let (mut reader, args) = message(&bytes, limits()).unwrap();
+        assert_eq!(reader.strict_option::<u64>(args[0]), Err(Error::Type));
+    }
+}

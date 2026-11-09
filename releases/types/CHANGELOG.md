@@ -5,6 +5,15 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.19.1] - Unreleased
+
+### 🛠️ Tooling
+
+- Adopt Toko Tooling 0.38.2 and audit product/qualification package placement.
+  All five maintained crates already use the product layout; disposable fixture
+  templates and vendored upstream sources retain their documented locations.
+  Production boundaries and the three release groups remain unchanged.
+
 ## [0.19.0] - 2026-11-09
 
 ### ⚠️ Breaking

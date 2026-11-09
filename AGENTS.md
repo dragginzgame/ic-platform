@@ -3,7 +3,7 @@
 Read [the current handoff](docs/status/current.md) and the installed
 [baseline](TOKO-TOOLING.md). [.toko-tooling.snapshot](.toko-tooling.snapshot)
 records the installed registry checksum; do not edit its payloads. The baseline
-is crates.io `toko-tooling` 0.37.4, pinned once in root workspace dependencies
+is crates.io `toko-tooling` 0.38.2, pinned once in root workspace dependencies
 and inherited as an unconditional dev-dependency by every real member, with
 the source-bundle cargo-machete exemption. Cargo.lock selects the archive.
 After changing the root pin, update that Cargo selection and run
@@ -11,6 +11,12 @@ After changing the root pin, update that Cargo selection and run
 Cargo.lock and snapshot; add no metadata version, separate tooling lock,
 selection-only package or artificial Rust import. Custom deployment adapters
 must run `toko-tooling-check` before effects.
+
+The five product packages remain in the root workspace under `crates/`.
+The [package placement audit](docs/development-and-qualification.md#package-placement)
+records generated fixture and vendored-source exclusions. Separate maintained
+qualification packages, if introduced, use an independent `qualification/`
+workspace and do not join product release groups.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.

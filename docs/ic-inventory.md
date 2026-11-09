@@ -236,7 +236,7 @@ API changes or automatically establish whether sibling source still uses an API.
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Decoding uses finite-limit helpers or explicit configuration/staging; unconfigured decoder shortcuts are retired. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
 | `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
 | Owned small argument framing | `candid_args::{empty, units, text}`, selected by `candid-args` | Shared empty requests and narrow external argument consumers | Empty/unit/single-text argument lists only, with upstream byte parity; no general Candid, parser, execution or identity dependency. |
-| Owned typed binary codec | `candid_codec`, selected by `candid-codec`; `candid_record!`, `candid_variant!` | Registry, CMC, ICP, ICRC, Cycles and native asset DTOs | Canonical Principal and num-bigint; owned Nat preserves unbounded Candid and Serde bytes. Function payloads use canonical owned Principal and signature subtyping. No upstream Candid/parser/runtime unless another capability selects it. Explicit budgets, validated skipping and 16-level admission. ICRC callbacks and other unmigrated adapters retain their qualified codec. |
+| Owned typed binary codec | `candid_codec`, selected by `candid-codec`; `candid_record!`, `candid_variant!` | Registry, CMC, ICP, ICRC, Cycles and native asset DTOs | Canonical Principal and num-bigint; owned Nat preserves unbounded Candid and Serde bytes. Function payloads use canonical owned Principal and signature subtyping. No upstream Candid/parser/runtime unless another capability selects it. Explicit budgets, preallocation vector caps, strict options, independently budgeted validated skipping and 16-level admission. ICRC callbacks and other unmigrated adapters retain their qualified codec. |
 | Owned `raw_rand` framing | sole typed entropy codec, selected by `raw-rand` | [#151 — Candid-free raw_rand codec](https://github.com/dragginzgame/ic-platform/issues/151); [Canic #749 — Adopt the codec](https://github.com/dragginzgame/canic/issues/749) | The former Candid raw_rand helper is removed. Only the documented management producer profile is supported: one 32-byte blob and bounded LEB128 framing, without general Candid or execution dependencies. Generic raw transports remain method-agnostic; no randomness generation or seed policy. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
 | `ic-transport-types` | native `ic_protocol` packet identities and typed fixture operations | Query/Blob native fixtures; Testkit metrics; Canic IC packet admission | Same registry transport identities as Agent, without selecting Agent or Runtime. Optional native-only dependency; production protocol codecs and explicit development fixtures remain separate. No generic CBOR export or authentication policy. |
@@ -426,11 +426,11 @@ profiles retain their explicitly external identities.
 | ic-platform | serde_json | ^1.0 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform | toko-tooling | =0.37.4 | dev | all | false | true |  |
+| ic-platform | toko-tooling | =0.38.2 | dev | all | false | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^3 | normal | all | false | true | full |
-| ic-platform-macros | toko-tooling | =0.37.4 | dev | all | false | true |  |
+| ic-platform-macros | toko-tooling | =0.38.2 | dev | all | false | true |  |
 | ic-platform-runtime | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform-runtime | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform-runtime | ic-platform-types | workspace-owned | normal | all | true | false |  |
@@ -439,8 +439,8 @@ profiles retain their explicitly external identities.
 | ic-platform-runtime | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-runtime | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform-runtime | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform-runtime | toko-tooling | =0.37.4 | dev | all | false | true |  |
-| ic-platform-runtime-guard | toko-tooling | =0.37.4 | dev | all | false | true |  |
+| ic-platform-runtime | toko-tooling | =0.38.2 | dev | all | false | true |  |
+| ic-platform-runtime-guard | toko-tooling | =0.38.2 | dev | all | false | true |  |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | false | alloc |
 | ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert, self_authenticating, serde |
@@ -452,7 +452,7 @@ profiles retain their explicitly external identities.
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-types | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
-| ic-platform-types | toko-tooling | =0.37.4 | dev | all | false | true |  |
+| ic-platform-types | toko-tooling | =0.38.2 | dev | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->
 
 The pending `candid-codec-endpoint` feature provides an explicit external-interface

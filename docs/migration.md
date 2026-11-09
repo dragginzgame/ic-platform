@@ -1,5 +1,32 @@
 # Candid and runtime ownership
 
+## Per-field decoder admission (0.29)
+
+The `candid-codec` feature adds `decoder::Reader::bounded_vec<T>(wire, maximum)`:
+the element count is checked before reserving vector storage or reading any
+element. A consumer's `Decode` wrapper selects its own cap for each field;
+nested wrappers can independently cap inventory length, ID bytes and other blobs.
+Global work/allocation charges and the fixed 16-level ceiling still apply.
+`Reader::strict_option<T>(wire)` admits only an actual wire option and propagates
+inner errors, without bare-value promotion or incompatible-value fallback.
+Missing fields remain the consumer mapping's `Decode::missing` decision.
+
+`decoder::decode_one_with_skip_limit(bytes, limits, skipping)` and
+`decode_args_with_skip_limit(bytes, limits, arity, skipping)` add a separate
+cumulative skipped-work budget. Reads/traversal during validated skipping debit
+both this budget and total work once, including nested skips, unknown fields,
+surplus compatible arguments, Reserved and optional fallback. Zero refuses all
+skipped values, even zero-byte ones. These are owned codec units, not upstream
+quota units. Existing decoder entrypoints keep their current behavior.
+
+Backup can select its existing per-field caps and zero skipping without an
+upstream codec or a separate framing parser. Its strict source-marker adapter
+must admit the actual reserved wire type (`-16`) rather than use the permissive
+`Reserved` mapping, which deliberately skips any supplied value. Required fields,
+minimum lengths, exact shapes, duplicates, authority and recovery remain its
+responsibility. The public consumer test demonstrates nested 1024/256 caps and
+unchanged bytes; this is not Backup product or recovery qualification.
+
 ## Owned management DTOs on all targets (unreleased)
 
 The maintainer authorized removing Platform's production

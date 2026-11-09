@@ -4,6 +4,15 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.21.1] - Unreleased
+
+### 🛠️ Tooling
+
+- Adopt Toko Tooling 0.38.2 and audit product/qualification package placement.
+  All five maintained crates already use the product layout; disposable fixture
+  templates and vendored upstream sources retain their documented locations.
+  Production boundaries and the three release groups remain unchanged.
+
 ## [0.21.0] - 2026-11-09
 
 ### ⚠️ Breaking

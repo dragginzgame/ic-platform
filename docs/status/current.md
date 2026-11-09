@@ -1,5 +1,67 @@
 # Current handoff — 2026-11-09
 
+## Platform 0.29 decoder admission — release preparation
+
+The maintainer authorized implementing and publishing the missing Backup codec
+controls in Platform only. `Reader::bounded_vec` checks a field's count before
+storage reservation; `strict_option` rejects promotion/fallback. Explicit
+`decode_one_with_skip_limit` / `decode_args_with_skip_limit` entrypoints provide
+independent cumulative skipped-work admission, including zero-skip refusal.
+Existing entrypoints retain their behavior. Migration details and consumer
+responsibilities are in `docs/migration.md`.
+
+Focused Clippy and 57 library tests pass with management types selected; the
+public consumer proves nested 1024/256 bounds and identical bytes. Management
+consumer tests and final 32/256/1024/4096 cap/skip regressions pass. Logs:
+/tmp/platform-decoder-clippy.log, /tmp/platform-decoder-tests.log,
+/tmp/platform-decoder-consumer.log, /tmp/platform-decoder-limits-final.log.
+Snapshot/inventory/docs/boundary/formatting and feature-closure checks pass
+(/tmp/platform-decoder-checks.log, /tmp/platform-decoder-features.log).
+The minimal codec-only unit-test Clippy selection exposes pre-existing unused
+shared oracle helpers; the relevant management profile uses those helpers and
+passes without suppression. Full release validation remains required.
+
+Only Platform is selected for this release. Types, Runtime and browser versions
+stay unchanged; the accepted Toko adoption is included as source metadata.
+Backup source, product recovery and deployment remain its owner's work. No
+Backup acceptance is claimed from Platform's codec tests.
+
+## Pending Toko Tooling 0.38.2 adoption
+
+Updated the exact workspace dev pin, Cargo.lock and authenticated snapshot to
+0.38.2, incorporating the pending 0.37.5 and 0.38.0 adoptions. Only Toko changed in the lock.
+All recorded entrypoints and local policy remain selected. Pending patch notes
+cover all three groups; product versions are unchanged. No commit or publication
+for this update.
+
+The [placement audit](../development-and-qualification.md#package-placement)
+confirms all five maintained packages already belong under `crates/` in the
+product workspace. No package paths changed. Disposable fixture manifests and
+vendored IC source are explicit policy exclusions, not separate maintained
+qualification packages. No empty qualification workspace or extra lock was added.
+Existing release qualification and recovery custody remain required.
+
+0.38.2 brings optional qualification-workspace release preparation and scoped
+intent-to-add authority for validation. Platform has no qualification workspace
+to select; its generated Runtime fixture lock keeps its existing custody.
+No intent-to-add entries were needed. The installer added two authenticated
+qualification-release helpers; retain both with the snapshot.
+
+Snapshot, pin, inventory, documentation and Candid/CBOR/Cargo boundary checks
+pass (/tmp/platform-toko-0382-checks.log), as do group projection tests
+(/tmp/platform-toko-0382-projection.log). Locked offline Cargo metadata still
+confirms exactly five product members under `crates/`. Prior 0.38.0 feature
+isolation and release-routing evidence remains in /tmp/platform-toko-038-closures.log
+and /tmp/platform-toko-038-groups.log. No Rust implementation or package membership
+changed; full release and native-host gates were not rerun for this tooling-only
+adoption.
+
+All three groups pass preparation, rollback and custody checks with the new
+release helper; the disposable Runtime fixture also passes delivery/resume.
+Evidence: /tmp/platform-toko-0382-preparation.log and
+target/platform-group-preparation.E3cOnN. These fixtures do not publish packages
+or qualify an actual release candidate.
+
 ## Completed hard-cut deployment
 
 Batch `batch-bHpKtblk` captured caa2761ca6da9865554d75cd81138fefe3dc093c and

@@ -53,6 +53,8 @@ pub struct Reader<'a> {
     input: &'a [u8],
     pos: usize,
     work: usize,
+    skipping: usize,
+    in_skip: bool,
     allocation: usize,
     table: Vec<Wire>,
     depth: usize,
@@ -61,6 +63,9 @@ pub struct Reader<'a> {
 impl<'a> Reader<'a> {
     fn charge(&mut self, count: usize) -> Result<()> {
         self.work = self.work.checked_sub(count).ok_or(Error::Limit)?;
+        if self.in_skip {
+            self.skipping = self.skipping.checked_sub(count).ok_or(Error::Limit)?;
+        }
         Ok(())
     }
     fn allocate(&mut self, count: usize) -> Result<()> {
@@ -213,6 +218,29 @@ impl<'a> Reader<'a> {
         self.charge(1)?;
         T::read(self, id)
     }
+    /// Decode a vector with a caller-selected element cap, checked before reserving
+    /// its storage or decoding any element. Nested fields can select different caps
+    /// through their own `Decode` mappings. Global work/allocation limits still apply.
+    pub fn bounded_vec<T: Decode<'a>>(&mut self, id: Id, maximum: usize) -> Result<Vec<T>> {
+        self.enter(|r| {
+            let Wire::Vec(inner) = r.node(id)? else {
+                return Err(Error::Type);
+            };
+            let inner = *inner;
+            let n = r.count()?;
+            if n > maximum {
+                return Err(Error::Limit);
+            }
+            r.charge(n)?;
+            r.allocate(n.checked_mul(size_of::<T>()).ok_or(Error::Limit)?)?;
+            let mut values = Vec::new();
+            values.try_reserve_exact(n).map_err(|_| Error::Limit)?;
+            for _ in 0..n {
+                values.push(r.value::<T>(inner)?);
+            }
+            Ok(values)
+        })
+    }
     /// Visit record fields, validating and skipping any callback returns `false` for.
     /// Set `tuple` only when numeric labels must be contiguous from zero.
     pub fn record(
@@ -266,6 +294,21 @@ impl<'a> Reader<'a> {
             select(label, inner, r)
         })
     }
+    /// Read an exact wire option without bare-value promotion or incompatible-value
+    /// fallback. An absent record field is handled separately by `Decode::missing`.
+    pub fn strict_option<T: Decode<'a>>(&mut self, id: Id) -> Result<Option<T>> {
+        let Wire::Opt(inner) = self.node(id)? else {
+            return Err(Error::Type);
+        };
+        let inner = *inner;
+        self.enter(|r| {
+            if r.boolean()? {
+                r.value(inner).map(Some)
+            } else {
+                Ok(None)
+            }
+        })
+    }
     fn optional<T: Decode<'a>>(&mut self, id: Id) -> Result<Option<T>> {
         let position = self.pos;
         match self.value::<T>(id) {
@@ -295,6 +338,13 @@ impl<'a> Reader<'a> {
     }
     /// Validate and discard a value with the same wire depth and work accounting.
     pub fn skip(&mut self, id: Id) -> Result<()> {
+        let previous = self.in_skip;
+        self.in_skip = true;
+        let result = self.skip_value(id);
+        self.in_skip = previous;
+        result
+    }
+    fn skip_value(&mut self, id: Id) -> Result<()> {
         self.charge(1)?;
         match id {
             -1 | -16 => Ok(()),
@@ -395,6 +445,8 @@ fn message(bytes: &[u8], limits: Limits) -> Result<(Reader<'_>, Vec<Id>)> {
         input: bytes,
         pos: 0,
         work: limits.work,
+        skipping: limits.work,
+        in_skip: false,
         allocation: limits.allocation,
         table: Vec::new(),
         depth: 0,
@@ -509,7 +561,22 @@ pub fn decode_args<'a, T: super::arguments::DecodeArgs<'a>>(
     limits: Limits,
     arity: Arity,
 ) -> Result<T> {
+    decode_args_with_skip_limit(bytes, limits, arity, limits.work)
+}
+
+/// Decode with an independent cumulative skipped-work budget, in addition to
+/// `Limits::work`. Every byte-read and traversal charge made inside `Reader::skip`
+/// consumes both budgets, including nested skips and optional fallback. Failed
+/// attempts never refund charges. Zero refuses even zero-byte skipped values.
+/// These units are codec-specific, not upstream Candid skipping quotas.
+pub fn decode_args_with_skip_limit<'a, T: super::arguments::DecodeArgs<'a>>(
+    bytes: &'a [u8],
+    limits: Limits,
+    arity: Arity,
+    skipping: usize,
+) -> Result<T> {
     let (mut r, arguments) = message(bytes, limits)?;
+    r.skipping = skipping;
     if arity == Arity::Exact && arguments.len() != T::COUNT {
         return Err(Error::Arity);
     }
@@ -526,6 +593,16 @@ pub fn decode_args<'a, T: super::arguments::DecodeArgs<'a>>(
 /// Decode exactly one argument, refusing trailing bytes or surplus arguments.
 pub fn decode_one<'a, T: Decode<'a>>(bytes: &'a [u8], limits: Limits) -> Result<T> {
     Ok(decode_args::<(T,)>(bytes, limits, Arity::Exact)?.0)
+}
+
+/// Decode exactly one argument with the separate skipped-work budget described
+/// by [`decode_args_with_skip_limit`].
+pub fn decode_one_with_skip_limit<'a, T: Decode<'a>>(
+    bytes: &'a [u8],
+    limits: Limits,
+    skipping: usize,
+) -> Result<T> {
+    Ok(decode_args_with_skip_limit::<(T,)>(bytes, limits, Arity::Exact, skipping)?.0)
 }
 
 macro_rules! fixed {
@@ -578,21 +655,7 @@ impl<'a> Decode<'a> for crate::Principal {
 
 impl<'a, T: Decode<'a>> Decode<'a> for Vec<T> {
     fn read(r: &mut Reader<'a>, id: Id) -> Result<Self> {
-        r.enter(|r| {
-            let Wire::Vec(inner) = r.node(id)? else {
-                return Err(Error::Type);
-            };
-            let inner = *inner;
-            let n = r.count()?;
-            r.charge(n)?;
-            r.allocate(n.checked_mul(size_of::<T>()).ok_or(Error::Limit)?)?;
-            let mut values = Vec::new();
-            values.try_reserve_exact(n).map_err(|_| Error::Limit)?;
-            for _ in 0..n {
-                values.push(r.value::<T>(inner)?);
-            }
-            Ok(values)
-        })
+        r.bounded_vec(id, usize::MAX)
     }
 }
 impl<'a, T: Decode<'a>> Decode<'a> for Option<T> {

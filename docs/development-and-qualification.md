@@ -5,6 +5,30 @@
 Run the commands below from the repository root. Select checks by the changed
 contract; aggregate and installed-runtime gates retain their explicit scope.
 
+## Package placement
+
+All five maintained product packages live under `crates/` and belong to the
+root virtual workspace and its `Cargo.lock`. Platform, Types and Runtime retain
+their three release groups; macros and the singleton guard belong to Runtime.
+Use `cargo metadata --no-deps --locked --offline --format-version 1` to discover
+members, rather than assuming a directory depth.
+
+There are currently no separate maintained qualification packages to relocate.
+The manifests in `scripts/fixtures/` are templates for disposable projects
+rendered under `target/`, including the Runtime canister/driver workspace. Their
+source templates and selected Runtime fixture lock remain release inputs; their
+generated directories are not product package locations. The pinned IC source
+under `native/ic-profiler/upstream/ic` is vendored upstream code. These follow
+the generated-project and vendored-source exclusions in the
+[workspace placement rules](../rules/rust-workspaces.md); historical release
+and recovery evidence stays in its recorded custody.
+
+If a separate maintained qualification package is introduced, put it under an
+independent virtual `qualification/` workspace with its own catalog and lock,
+exclude it from the product workspace and release groups, and map its required
+checks explicitly. Ordinary crate-local tests remain with their product. Do not
+create an empty qualification workspace for the existing generated fixtures.
+
 ## Runtime qualification and historical evidence
 
 `make check-raw-rand` is the focused installed management-entropy proof; it needs

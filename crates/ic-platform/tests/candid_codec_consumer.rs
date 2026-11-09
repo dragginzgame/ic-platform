@@ -90,3 +90,53 @@ fn archive_reply_decodes_without_registry_candid() {
         decode_args(&bytes, limits(), Arity::Exact).unwrap();
     assert_eq!(actual, response);
 }
+
+// Consumer-selected limits are mappings, not a Platform product policy.
+#[derive(Debug, PartialEq)]
+struct Bounded<T, const N: usize>(Vec<T>);
+impl<T: ic_platform::candid_codec::Encode, const N: usize> ic_platform::candid_codec::Encode
+    for Bounded<T, N>
+{
+    const TYPE: &'static ic_platform::candid_codec::Type =
+        <Vec<T> as ic_platform::candid_codec::Encode>::TYPE;
+    fn write(
+        &self,
+        writer: &mut ic_platform::candid_codec::Writer,
+    ) -> std::result::Result<(), ic_platform::candid_codec::Error> {
+        self.0.write(writer)
+    }
+}
+impl<'a, T: ic_platform::candid_codec::decoder::Decode<'a>, const N: usize>
+    ic_platform::candid_codec::decoder::Decode<'a> for Bounded<T, N>
+{
+    fn read(
+        reader: &mut ic_platform::candid_codec::decoder::Reader<'a>,
+        wire: i64,
+    ) -> std::result::Result<Self, ic_platform::candid_codec::decoder::Error> {
+        reader.bounded_vec(wire, N).map(Self)
+    }
+}
+
+#[test]
+fn consumer_nested_caps_preserve_bytes_and_reject_before_decoding() {
+    use ic_platform::candid_codec::decoder::{Error, decode_one_with_skip_limit};
+    type Inventory = Bounded<Bounded<u8, 256>, 1024>;
+    let values = vec![vec![9u8; 256]; 1024];
+    let bytes = encode_one(&values, 1_000_000).unwrap();
+    let budget = Limits {
+        bytes: 1_000_000,
+        header: 16384,
+        types: 64,
+        work: 2_097_152,
+        allocation: 1_000_000,
+    };
+    let decoded = decode_one_with_skip_limit::<Inventory>(&bytes, budget, 0).unwrap();
+    assert_eq!(encode_one(&decoded, 1_000_000).unwrap(), bytes);
+    for excessive in [vec![vec![9u8; 257]], vec![Vec::<u8>::new(); 1025]] {
+        let bytes = encode_one(&excessive, 1_000_000).unwrap();
+        assert_eq!(
+            decode_one_with_skip_limit::<Inventory>(&bytes, budget, 0),
+            Err(Error::Limit)
+        );
+    }
+}
