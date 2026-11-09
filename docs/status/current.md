@@ -1,18 +1,35 @@
 # Current handoff — 2026-11-09
 
-## Native service export implemented locally
+## Native service export — Platform 0.29.1 published
+
+Frozen batch `batch-v1S7Tarz` delivered only Platform to GitHub and crates.io.
+Release commit `38c813012cb1ee0931869bfd16968d492cb21511` and annotated tag
+`platform-v0.29.1` are verified on origin; the normal checkout was reconciled.
+The draft 0.30.0 candidate was corrected to 0.29.1 before release because this
+is a compatible addition under the adopted pre-1.0 version policy.
+
+All required local release stages passed, including installed Runtime and
+raw_rand. Receipt: target/release-frozen/batch-v1S7Tarz/target/release-validation/qualification.ZbLcVw/receipt.json.
+The registry-only consumer at target/platform-0291-registry passes both public
+service tests and pinned didc strict Caffeine equality. It selects exact
+`ic-platform =0.29.1`, defaults disabled, feature `candid-codec`; candid_parser
+is solely its development oracle. Log: /tmp/platform-0291-registry.log.
+Downloaded archive SHA-256
+`161d78dfbe8ae905828da482c5045e25c31bdb1a4b6575be4573ef8ad6e12e6a`
+matches the retained publication archive and records the release commit.
+Types 0.19.0, Runtime 0.21.0 and browser 0.2.0 were not released. No new macOS
+or native Profiler acceptance is claimed; hosted CI remains asynchronous.
 
 [#153 — Document the native external-service schema/export owner](https://github.com/dragginzgame/ic-platform/issues/153)
-is implemented in the normal checkout, uncommitted and unpublished. Native
+is implemented and published in 0.29.1. Native
 `candid_codec::service::{Method, Mode, export}` generates bounded DID text from
 owned mappings. Pinned didc owns trusted fixture parsing and strict structural
 equality; no parser/Runtime production edge or Wasm export is added. The
 [consumer migration](../native-candid-service.md) identifies the retained Blob
 export API, retired reflection calls and independent textual-input boundary.
-No sibling edits or releases were performed. Pending Platform 0.29.1 notes link
-the issue; package versions are unchanged.
-The issue is closed with focused evidence and explicit undelivered status under
-the adopted local-completion policy.
+No sibling edits or releases were performed. The Platform 0.29.1 ledger links
+the issue. The issue was closed after focused implementation checks and now has
+the supplying publication evidence.
 
 Focused Clippy, three schema unit tests, two public consumer tests, pinned didc
 positive/negative conformance, decoder regressions, inventory, documentation,

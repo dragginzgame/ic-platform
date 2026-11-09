@@ -1,6 +1,6 @@
 # Candid and runtime ownership
 
-## Native external-service export (unreleased)
+## Native external-service export (0.29.1)
 
 `candid-codec` now supplies native-only `service::{Method, Mode, export}` from
 the actual owned schemas. Consumers emit descriptors from the same catalogue
