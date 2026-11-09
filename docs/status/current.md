@@ -1,127 +1,95 @@
 # Current handoff — 2026-11-09
 
-## Native Tooling DTO extension — included in corrected deployment
+## Completed hard-cut deployment
 
-Tooling's authorized adoption adds four native-only management DTOs and owned
-codec mappings: InstallCodeArgs, ProvisionalCreateCanisterWithCyclesArgs,
-CanisterLogRecord and FetchCanisterLogsResult. The existing snapshot source hash
-is unchanged; client-provenance.json and source-mutation checks bind the added
-0.11.0 declarations. Three focused native schema/value/Serde tests pass.
-The maintainer approved including these changes in the corrected frozen batch.
-Batch-G3rEbkX7 stopped before delivery on a stale admission-test fixture, fixed
-in 337b4b6; preserve that failed batch and its evidence. The combined source must
-pass fresh full release gates. Wire 0.18 still selects Types ^0.18.2, so downstream
-Tooling/Wire registry identity qualification needs a compatible adoption and is
-not established by this Platform release. No sibling source is changed here.
+Batch `batch-bHpKtblk` captured caa2761ca6da9865554d75cd81138fefe3dc093c and
+completed GitHub and crates.io delivery for all five packages:
 
-## Toko 0.37.4 and owned bigint 0.5.1 — current
+| Group | Version | Tag | Release commit |
+| --- | --- | --- | --- |
+| Types | 0.19.0 | types-v0.19.0 | 49ad1302847eda8745eb18072bee71edf415df12 |
+| Runtime/macros/guard | 0.21.0 | runtime-v0.21.0 | 6c3a6e33bff66938e011cc1181748a063e3d4125 |
+| Platform | 0.28.0 | platform-v0.28.0 | 3362ab53a4b8cb85a2812eafe4bdbe2a70ef4de3 |
 
-Adopted registry Toko Tooling 0.37.4 through its authenticated installer, retaining
-recorded entrypoints and local policy choices. The owned codec/ledger now selects
-num-bigint 0.5.1 independently of optional suppliers. Agent is a native-only
-optional normal dependency, not a dev-dependency; canister-signature suppliers
-also retain Candid's num-bigint 0.4.8. Codec-only Wasm selects only 0.5.1.
-Public Nat.0/Int.0 bigint identities change with the pending hard cut. Test-only
-Candid oracles bridge via decimal values rather than sharing Rust bigint types;
-wide integer, Candid, JSON, CBOR and ledger encoding comparisons still pass.
-All-feature facade Clippy, tests and doctests pass. Runtime qualification lock
-was refreshed while preserving unrelated package selections. No publication.
+The normal checkout was fast-forwarded through release-batch-reconcile. Registry
+archives match their index checksums and retained publication archives; archive
+VCS identities match the release commits. Remote main and annotated tags were
+verified. Evidence: target/deploy-hard-cut-20261109/registry-verification.json.
+Browser remains 0.2.0; no browser/npm or sibling release was performed.
 
-Crypto-common audit: direct SHA-2/ECDSA/Ed25519 suppliers already resolve 0.2.2.
-Older BLS/certification/signature/native suppliers retain 0.1.6 through digest
-0.10.7. Isolated 0.1.7 resolution forces generic-array 0.14.9 → 0.14.7; its
-changelog lists only that exact pin. No crypto lock change was adopted.
-Evidence: target/crypto-common-audit.IpBwGt. The 0.37.4 baseline now explicitly
-prefers current direct dependencies independently of older DFINITY transitives.
+All 19 required local Linux stages passed separately for every group. Under
+`target/release-frozen/batch-bHpKtblk/target/release-validation`, receipts are
+qualification.n5BAgX (Types), qualification.apQsVh (Runtime), and
+qualification.0ZXt5w (Platform). All four installed Runtime profiles and raw_rand
+checks passed. Only the admitted identical-input policy-fixture leaf reused
+results; real package, consumer and installed checks ran for each group.
+Hosted native/integration CI remains asynchronous; no new macOS, worker or
+native Profiler acceptance is claimed.
 
-## Qualification identity admission (#152) — implemented locally
+## Delivered contracts and adoption
 
-Runtime, Agent, raw-rand and benchmark fixtures now retain separate selected-owner
-and Testkit-infrastructure identity reports. Source admission checks exact owner
-paths; published admission checks the selected Runtime/macros/guard cohort.
-Agent additionally admits the real Testkit CanisterId/Agent Principal identity
-crossing. Older infrastructure facades remain permitted. BLS's unused native
-facade dependency and ECDSA driver's unused principal feature are removed.
-See [the coverage table](../platform-release-validation.md#qualification-identities-152).
+The migration contract, inventory and group changelogs own the detailed API cuts:
+- Owned typed binary Candid codec replaces legacy parser/printer/decoder surfaces.
+  Explicit budgets, numeric ranges, bytes and 16-level admission remain.
+- Principal/Account use canonical Types; external Principal aliases/conversions
+  and Types' production ic_principal are retired. Its development oracle remains.
+- Owned management DTOs cover both targets: 62 native and 44 Wasm exports. The
+  four native install/create/log DTOs retain independent source guards and
+  upstream schema, byte and Serde comparisons. Registry management is dev-only.
+- Nat.0/Int.0 now use num-bigint 0.5.1. Candid, JSON, CBOR and ledger byte
+  comparisons pass; downstream direct bigint users must select matching types.
+- Ledger hashing and Principal self-authentication share SHA-2 0.11.1, preserving
+  imported hash bodies, domains, vectors and licenses. Cryptography stays upstream.
+- Registry Toko Tooling 0.37.4 is installed, with explicit offline governance
+  entrypoints. Its current-direct-dependency policy is adopted independently of
+  older DFINITY transitives. Every member inherits the exact source-bundle pin.
 
-Focused Linux evidence: all four standalone Runtime profiles installed and passed
-at `target/cdk-runtime.1XCP3r`; Agent installed checks and Clippy passed at
-`target/agent-installed.pPW0jC`. Singleton coexistence/refusals passed at
-`target/runtime-singleton.znGiyn`; raw-rand graph admission passed at
-`target/evidence/raw-rand.3oAlCO`. Both benchmark drivers passed Clippy/build in
-`target/qualification-152-bls` and `target/qualification-152-ecdsa`; the BLS Wasm
-probe retained per-profile identities and measured artifacts at
-`target/evidence/platform-wasm-size.QKJnQS`. Synthetic identity tests cover wrong
-source, missing owners, duplicate selected types, Principal mismatch and wrong
-published cohort members. No macOS acceptance, commit or publication is claimed.
+Crypto-common is transitive: current direct SHA-2/ECDSA/Ed25519 suppliers use
+0.2.2; older BLS/certification/signature/native suppliers retain 0.1.6. Isolated
+0.1.7 resolution forced generic-array 0.14.9 → 0.14.7 and offered only that pin
+change, so it was not adopted. Evidence: target/crypto-common-audit.IpBwGt.
 
-## Pending hard-cut release
+Wire/Tooling adoption is NOT registry-qualified by this release. A registry-only
+proof with published Wire 0.18.0 passes its Wire trait for Types 0.18.3 Principal
+but rejects Types 0.19.0 Principal. Wire's ^0.18.2 selection cannot unify with
+0.19.0; its owner must publish a compatible adoption before downstream users
+select that schema integration. Evidence: target/wire-types-registry.NwkBsL,
+including metadata and positive/negative compile logs. No sibling was edited.
 
-Pending cohort: Types 0.19.0, Runtime/macros/guard 0.21.0, Platform 0.28.0.
-Manifest versions remain 0.18.3/0.20.3/0.27.1 until authorized delivery. Work is
-uncommitted/unpublished. Browser and siblings are excluded. The final committed
-batch still needs the complete frozen release gate; focused evidence is not a
-release receipt. No new macOS, worker or native Profiler acceptance is claimed.
+## Qualification ownership (#152)
 
-The migration contract, inventory and pending changelogs own the detailed scope:
-- Owned typed binary codec replaces the legacy Candid/parser/printer surfaces;
-  explicit budgets and 16-level admission remain.
-- Principal/Account use canonical Types. External Principal aliases/conversions
-  and Types' production ic_principal are retired; its dev oracle remains.
-- Management has owned DTOs on both targets (62 native/44 Wasm exports).
-  Registry management 0.11.0 is now an oracle or supplier transitive dependency.
-- Ledger hashing shares SHA-2 0.11.1 with Principal self-authentication, preserving
-  imported hash bodies, domains, fixed vectors and licenses.
-- Cryptography remains upstream. Native/signature capabilities still select
-  upstream Candid; do not claim a universally Candid-free package graph.
+Runtime, Agent, raw-rand and benchmark evidence separately identifies selected
+owners and Testkit infrastructure. Exact source paths/published Runtime cohorts
+and Agent/Testkit Principal crossings are admitted; unrelated older infrastructure
+facades remain allowed. BLS's unused native facade dependency was removed.
+See the coverage table in docs/platform-release-validation.md.
 
-## Qualification and downstream ownership
-
-Platform no longer selects Timers in its catalog, fixtures, CI or release roster.
+Platform no longer selects Timers in qualification or release metadata.
 Scheduling #91 owns downstream Timers composition; Tooling owns its adoption.
-Neither is a supplier-release gate. Standalone raw/prepared × Wire/external
-profiles retain trap, cancellation, upgrade, cycles/stable and certificate tests.
-The local release roster has 19 stages and one Runtime fixture lock.
+Neither is a supplier-release gate. Standalone trap/cancellation/upgrade checks
+and executor singleton refusals remain. Agent installed evidence is retained at
+target/agent-installed.pPW0jC; no local check establishes all sibling adoption.
 
-Latest installed Linux proof after bigint 0.5.1: target/cdk-runtime.Mc2iLW,
-all four profiles passed, including driver Clippy/tests and external endpoint,
-auth-before-decode, management await and nesting refusal. Facade all-feature
-Clippy/tests/doctest pass; two explicit timing experiments remain ignored.
-Prior complete release-command checks passed with real group preparation and
-recovery: target/platform-group-preparation.4aUAPR. This is not complete release
-qualification of today's final batch.
+## Retained failure and recovery custody
 
-Earlier management/Principal graph and consumer evidence remains at
- target/feature-graphs/attempt.hgzmPr, target/feature-graphs/attempt.JdFvoI and
- target/boundary-consumer.FFXkA0. Canonical contracts are in docs/migration.md.
-Measured pre-bigint codec savings and reproduction are in
-scripts/benchmarks/candid-codec.md: 501,988 optimized bytes saved in the management
-probe against published 0.27.1 (target/evidence/candid-removal.fREwuJ). Ledger SHA
-consolidation saved 6,784 optimized bytes in the combined hashing probe, comparing
-platform-wasm-size.olhycp and platform-wasm-size.aLmoWE under target/evidence.
-Neither result measures every canister or the new bigint version's size.
+Preserve failed batches batch-G3rEbkX7 and batch-QJcFkCdU. Neither published:
+the first exposed a stale upstream-Candid admission fixture (fixed in 337b4b6),
+the second exposed an undersized general-decoder raw_rand comparison budget
+(fixed in caa2761). The fixture-only correction passed installed comparison at
+target/evidence/raw-rand.Qetjbz, then every successful release gate.
 
-## Last delivery and recovery custody
-
-Last recorded published versions and group tags: Types 0.18.3 (17d5906),
-Runtime/macros/guard 0.20.3 (38d6e48), Platform 0.27.1 (97fe286).
-Batch batch-mG_yG4uo delivered all five packages; archive/registry/tag proofs are
-under target/deploy-toko036-20261108. Browser remains 0.2.0.
-Preserve failed/completed batches and their original recovery code, including
-batch-_leIreCI, batch-C5BoFKA5, batch-AaHi2pgO, batch-O3V4GL4T,
-batch-PIIqwepD and batch-mG_yG4uo. Do not resume older failed batches over
-already-published versions.
-
-The pre-existing supplier lock draft was excluded from that deployment, then
-restored locally: arc-swap 1.9.4, Candid/derive 0.10.40, cc 1.11.1 and smallvec
-1.16.5. Preserve those selections; never replace today's lock with the old full
-file. Original durable custody is refs/retained/platform036-lock-draft-20261108,
-commit 0263ab6e679ae3b8e9f89bddd796ca951b3f1df4. Earlier custody is
+Preserve all earlier failed/completed batches and their original recovery code,
+including batch-_leIreCI, batch-C5BoFKA5, batch-AaHi2pgO, batch-O3V4GL4T,
+batch-PIIqwepD and batch-mG_yG4uo. Do not resume old batches over published versions.
+The formerly deferred supplier lock selections are included in this qualified
+batch; original custody remains refs/retained/platform036-lock-draft-20261108
+at 0263ab6e679ae3b8e9f89bddd796ca951b3f1df4 and
 refs/retained/platform0270-lock-draft-20261108 at
-588b11a38c60b15ab5af19f30aef1c310a8b0975. #50 remains deliberately deferred.
+588b11a38c60b15ab5af19f30aef1c310a8b0975. Never restore an old complete lockfile.
 
 Historical bundles/receipts remain in
 recovery-evidence/retired-checkouts/20261104-issue139/; maintainer review is due
 2026-12-04. No cleanup, retirement, mtime renewal or custody-limit change is
 approved. Previously removed target evidence and Runtime 0.18.1 binaries must
-not be claimed present. Canic #749/#750 own adoption; Platform #151 is closed.
+not be claimed present. #50 remains deliberately deferred; Canic #749/#750 own
+separate adoption, and Platform #151 is closed.
