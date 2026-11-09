@@ -1,5 +1,20 @@
 # Current handoff — 2026-11-09
 
+## Native EffectiveId correction — release preparation
+
+Another session reported that published 0.29.1 omitted
+`ic_platform::agent::EffectiveId`. The selected upstream Agent already supplies
+the enum (including the admitted 0.49.2 lower bound). Platform now explicitly
+re-exports it, preserving upstream identity and canister/subnet routing. No
+dependency, cryptographic, transport or Wasm implementation changes.
+
+Native Agent consumer Clippy and all six tests pass, including both enum variants
+passed directly to `Agent::read_state_raw` without polling/network effects.
+Inventory, docs, boundaries and formatting pass. Evidence:
+/tmp/platform-effective-id-{clippy,tests,checks}.log. A compatible Platform-only
+0.29.2 patch completes this missing deployment surface; full release qualification
+and registry verification remain required. Sibling checkouts remain untouched.
+
 ## Native service export — Platform 0.29.1 published
 
 Frozen batch `batch-v1S7Tarz` delivered only Platform to GitHub and crates.io.

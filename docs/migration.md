@@ -1,5 +1,13 @@
 # Candid and runtime ownership
 
+## Native Agent routing selection (unreleased)
+
+The `agent` feature explicitly exports upstream `EffectiveId` at
+`ic_platform::agent::EffectiveId`. Native callers can select `Canister` or
+`Subnet` and pass the value directly to Agent APIs; no wrapper, conversion or
+new routing policy is introduced. Bare upstream Principals retain their
+canister-route conversion. This changes no dependencies, bytes or Wasm surface.
+
 ## Native external-service export (0.29.1)
 
 `candid-codec` now supplies native-only `service::{Method, Mode, export}` from

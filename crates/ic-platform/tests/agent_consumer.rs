@@ -10,13 +10,36 @@ use support::decode_hex as from_hex;
 use ic_platform::{
     agent::{
         Agent, AgentBuilder, AgentError, AnonymousIdentity, BasicIdentity, CallResponse,
-        DelegatedIdentity, Delegation, EnvelopeContent, HttpErrorPayload, Identity,
+        DelegatedIdentity, Delegation, EffectiveId, EnvelopeContent, HttpErrorPayload, Identity,
         Prime256v1Identity, RejectCode, RejectResponse, ReplyResponse, RequestId,
         RequestStatusResponse, Secp256k1Identity, SignedDelegation, SignedUpdate,
         TransportCallResponse, TransportError, lookup_value, signed_update_inspect, to_request_id,
     },
     certification::{Certificate, SubtreeLookupResult, labeled, labeled_hash, leaf},
 };
+
+#[test]
+fn effective_routing_uses_the_upstream_agent_identity() {
+    let agent = Agent::builder()
+        .with_url("http://127.0.0.1:1")
+        .with_identity(AnonymousIdentity)
+        .build()
+        .unwrap();
+    let principal = agent.get_principal().unwrap();
+    assert_eq!(
+        EffectiveId::from(principal),
+        EffectiveId::Canister(principal)
+    );
+    for route in [
+        EffectiveId::Canister(principal),
+        EffectiveId::Subnet(principal),
+    ] {
+        assert_eq!(route.as_principal(), principal);
+        // The upstream API accepts the exported type directly. Dropping the
+        // unpolled future exercises type admission without issuing a request.
+        drop(agent.read_state_raw(Vec::new(), route));
+    }
+}
 
 #[test]
 fn signing_preserves_effective_id_payload_and_request_identity() {

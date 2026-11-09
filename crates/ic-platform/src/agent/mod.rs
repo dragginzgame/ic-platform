@@ -18,7 +18,7 @@ pub use ic_agent::Certificate as ExternalCertificate;
 pub use ic_agent::agent::agent_error::{HttpErrorPayload, TransportError};
 pub use ic_agent::agent::signed::SignedUpdate;
 pub use ic_agent::agent::{
-    AgentBuilder, CallResponse, Envelope, EnvelopeContent, RejectCode, RejectResponse,
+    AgentBuilder, CallResponse, EffectiveId, Envelope, EnvelopeContent, RejectCode, RejectResponse,
     ReplyResponse, RequestStatusResponse, signed_update_inspect,
 };
 pub use ic_agent::identity::{

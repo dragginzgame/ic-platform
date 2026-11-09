@@ -4,6 +4,13 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.29.2] - Unreleased
+
+### 🩹 Fixed
+
+- Expose upstream `agent::EffectiveId` for native canister/subnet routing without
+  a direct Agent dependency. Preserve upstream type identity and routing behavior.
+
 ## [0.29.1] - 2026-11-09
 
 ### ➕ Added
