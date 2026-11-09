@@ -1517,7 +1517,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.27.1"
+version = "0.28.0"
 dependencies = [
  "candid",
  "candid_parser",
