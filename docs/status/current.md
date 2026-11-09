@@ -1,6 +1,21 @@
 # Current handoff — 2026-11-09
 
-## Platform 0.29 decoder admission — release preparation
+## Platform 0.29.0 decoder admission — published
+
+Frozen batch `batch-rDRVOX7Y` completed GitHub and crates.io delivery. Release
+commit `5f4b66f4a5fd97c6e66722aca254f2d09fabe05e` and annotated tag
+`platform-v0.29.0` are verified on origin. The normal checkout was reconciled
+through the shared workflow. Registry archive SHA-256
+`96a33522b86e1c775fbe3ce124657a4ff8a63c9a4280f3bb851e49e1b4fc210b`
+matches the retained publication archive and records that release commit.
+
+All required local release stages passed, including installed Runtime profiles
+and raw_rand. Receipt: target/release-frozen/batch-rDRVOX7Y/target/release-validation/qualification.MjrLUJ/receipt.json.
+The registry-only consumer in target/platform-029-registry passes both public
+codec tests against exact `ic-platform =0.29.0`, with defaults disabled and
+`candid-codec` selected (/tmp/platform-029-registry.log). Select
+`management-canister-types` additionally when its DTOs are needed. No new macOS
+or native Profiler acceptance is claimed; hosted CI remains asynchronous.
 
 The maintainer authorized implementing and publishing the missing Backup codec
 controls in Platform only. `Reader::bounded_vec` checks a field's count before
@@ -19,20 +34,20 @@ Snapshot/inventory/docs/boundary/formatting and feature-closure checks pass
 (/tmp/platform-decoder-checks.log, /tmp/platform-decoder-features.log).
 The minimal codec-only unit-test Clippy selection exposes pre-existing unused
 shared oracle helpers; the relevant management profile uses those helpers and
-passes without suppression. Full release validation remains required.
+passes without suppression. Full release Clippy also passed.
 
-Only Platform is selected for this release. Types, Runtime and browser versions
-stay unchanged; the accepted Toko adoption is included as source metadata.
+Only Platform was published. Types 0.19.0, Runtime 0.21.0 and browser 0.2.0
+remain unchanged; the accepted Toko adoption is included as source metadata.
 Backup source, product recovery and deployment remain its owner's work. No
 Backup acceptance is claimed from Platform's codec tests.
 
-## Pending Toko Tooling 0.38.2 adoption
+## Adopted Toko Tooling 0.38.2
 
 Updated the exact workspace dev pin, Cargo.lock and authenticated snapshot to
 0.38.2, incorporating the pending 0.37.5 and 0.38.0 adoptions. Only Toko changed in the lock.
-All recorded entrypoints and local policy remain selected. Pending patch notes
-cover all three groups; product versions are unchanged. No commit or publication
-for this update.
+All recorded entrypoints and local policy remain selected. Committed with the
+decoder work and delivered in Platform 0.29.0. Types and Runtime tooling notes
+remain pending for their next releases; no extra group release was performed.
 
 The [placement audit](../development-and-qualification.md#package-placement)
 confirms all five maintained packages already belong under `crates/` in the
