@@ -699,7 +699,7 @@ dependencies = [
  "ic-certification",
  "ic-platform-macros",
  "ic-platform-runtime",
- "ic-platform-types 0.18.3",
+ "ic-platform-types 0.19.0",
  "num-bigint 0.5.1",
  "serde",
  "serde_bytes",
@@ -722,7 +722,7 @@ version = "0.20.3"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
- "ic-platform-types 0.18.3",
+ "ic-platform-types 0.19.0",
  "pin-project-lite",
  "serde",
  "slotmap",
@@ -749,7 +749,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-types"
-version = "0.18.3"
+version = "0.19.0"
 dependencies = [
  "crc32fast",
  "data-encoding",
