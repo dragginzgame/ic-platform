@@ -1,6 +1,6 @@
 # Candid and runtime ownership
 
-## Native Agent routing selection (unreleased)
+## Native Agent routing selection (0.29.2)
 
 The `agent` feature explicitly exports upstream `EffectiveId` at
 `ic_platform::agent::EffectiveId`. Native callers can select `Canister` or

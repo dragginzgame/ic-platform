@@ -1,6 +1,6 @@
 # Current handoff — 2026-11-09
 
-## Native EffectiveId correction — release preparation
+## Native EffectiveId correction — Platform 0.29.2 published
 
 Another session reported that published 0.29.1 omitted
 `ic_platform::agent::EffectiveId`. The selected upstream Agent already supplies
@@ -12,8 +12,23 @@ Native Agent consumer Clippy and all six tests pass, including both enum variant
 passed directly to `Agent::read_state_raw` without polling/network effects.
 Inventory, docs, boundaries and formatting pass. Evidence:
 /tmp/platform-effective-id-{clippy,tests,checks}.log. A compatible Platform-only
-0.29.2 patch completes this missing deployment surface; full release qualification
-and registry verification remain required. Sibling checkouts remain untouched.
+0.29.2 patch completes this missing deployment surface. Sibling checkouts remain untouched.
+
+Frozen batch `batch-pPdjnmcJ` published only Platform to crates.io and GitHub:
+commit `f687d96c1d423e87e3083c840aa6d6472f41c165`, tag `platform-v0.29.2`.
+The normal checkout is reconciled. All required local release stages passed,
+including installed Runtime and raw_rand. Receipt:
+target/release-frozen/batch-pPdjnmcJ/target/release-validation/qualification.GyCi52/receipt.json.
+The standalone registry consumer at target/platform-0292-registry selects exact
+0.29.2 with defaults disabled and only `agent`; Clippy passes both routing
+variants and their direct admission to `Agent::read_state_raw`.
+An additional executable run failed at linking (bus error) with the filesystem
+at 100% capacity; it is not claimed as passing. Log: /tmp/platform-0292-registry.log.
+The downloaded registry archive matches the publication archive, SHA-256
+`a391440c441bebbabcce38251ff61473de37cdca09050fe6c3f71cd10ca7be42`,
+and records the release commit. Types, Runtime and browser were not released.
+No new macOS evidence or sibling CLI acceptance is claimed; hosted CI remains
+asynchronous. Callers can now adopt 0.29.2 for the missing export.
 
 ## Native service export — Platform 0.29.1 published
 
