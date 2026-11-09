@@ -4,6 +4,23 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.29.1] - Unreleased
+
+### ➕ Added
+
+- Export native external-service DIDs from owned mappings, with bounded output,
+  explicit argument/result sequences and method modes. Qualify frozen external
+  Caffeine contracts with pinned didc structural equality; no parser dependency,
+  registration or Wasm surface is added. Document the caller migration for
+  [#153 — Document the native external-service schema/export owner](https://github.com/dragginzgame/ic-platform/issues/153).
+
+### 📚 Documentation
+
+- Record completion of the supplier/consumer qualification separation already
+  delivered in 0.28, with source identities, actual crossing checks and focused
+  regression evidence:
+  [#152 — Separate supplier qualification from downstream adoption](https://github.com/dragginzgame/ic-platform/issues/152).
+
 ## [0.29.0] - 2026-11-09
 
 ### ➕ Added

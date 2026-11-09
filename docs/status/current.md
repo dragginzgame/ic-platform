@@ -1,5 +1,31 @@
 # Current handoff — 2026-11-09
 
+## Native service export implemented locally
+
+[#153 — Document the native external-service schema/export owner](https://github.com/dragginzgame/ic-platform/issues/153)
+is implemented in the normal checkout, uncommitted and unpublished. Native
+`candid_codec::service::{Method, Mode, export}` generates bounded DID text from
+owned mappings. Pinned didc owns trusted fixture parsing and strict structural
+equality; no parser/Runtime production edge or Wasm export is added. The
+[consumer migration](../native-candid-service.md) identifies the retained Blob
+export API, retired reflection calls and independent textual-input boundary.
+No sibling edits or releases were performed. Pending Platform 0.29.1 notes link
+the issue; package versions are unchanged.
+The issue is closed with focused evidence and explicit undelivered status under
+the adopted local-completion policy.
+
+Focused Clippy, three schema unit tests, two public consumer tests, pinned didc
+positive/negative conformance, decoder regressions, inventory, documentation,
+boundary and formatting checks pass. Evidence: /tmp/platform-153-clippy.log,
+/tmp/platform-153-tests.log, /tmp/platform-153-didc.log,
+/tmp/platform-153-decoder-regression.log and /tmp/platform-153-checks.log.
+The didc artifacts are at target/candid-service.m8PVfg. A standalone native
+consumer builds without Candid/parser/Runtime normal dependencies; the Wasm codec
+build passes and a Wasm service-export import correctly refuses. Evidence:
+target/platform-153-boundary and /tmp/platform-153-{native-boundary,native-graph,wasm,wasm-refusal}.log.
+This is native schema/CLI evidence, not installed callback or Blob adoption
+acceptance. Full release/native-host gates remain release-owned.
+
 ## Platform 0.29.0 decoder admission — published
 
 Frozen batch `batch-rDRVOX7Y` completed GitHub and crates.io delivery. Release
@@ -133,7 +159,20 @@ but rejects Types 0.19.0 Principal. Wire's ^0.18.2 selection cannot unify with
 select that schema integration. Evidence: target/wire-types-registry.NwkBsL,
 including metadata and positive/negative compile logs. No sibling was edited.
 
-## Qualification ownership (#152)
+## Qualification ownership
+
+[#152 — Separate supplier qualification from downstream adoption](https://github.com/dragginzgame/ic-platform/issues/152)
+was reconciled against delivered commit `1b8304b` (ancestor of both Platform
+0.28.0 and 0.29.0). No implementation change was required. Fresh identity,
+selection and graph refusal tests pass: /tmp/platform-152-identities.log,
+/tmp/platform-152-selection.log and /tmp/platform-152-graphs.log.
+The 0.29 release's `cdk-runtime.T3feSH/driver-identities.json` under
+target/release-frozen/batch-rDRVOX7Y/target reports its tested local facade/Types
+separately from Testkit 0.92's registry Platform 0.24 / Types 0.18.2. The admission
+scripts are unchanged by the pending native service-export work. Historical
+Agent evidence below remains explicitly for its recorded source, not a fresh
+0.29 Agent acceptance run. The issue can close on its delivered producer fix;
+no downstream adoption or new fleet gate is required.
 
 Runtime, Agent, raw-rand and benchmark evidence separately identifies selected
 owners and Testkit infrastructure. Exact source paths/published Runtime cohorts

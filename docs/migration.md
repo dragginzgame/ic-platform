@@ -1,5 +1,14 @@
 # Candid and runtime ownership
 
+## Native external-service export (unreleased)
+
+`candid-codec` now supplies native-only `service::{Method, Mode, export}` from
+the actual owned schemas. Consumers emit descriptors from the same catalogue
+as mounted external endpoints and use the pinned native `didc check --strict`
+against their frozen DID. No registration, generic forwarding or parser
+dependency returns. See [the exact consumer migration and evidence](native-candid-service.md).
+This resolves [#153 — Document the native external-service schema/export owner](https://github.com/dragginzgame/ic-platform/issues/153).
+
 ## Per-field decoder admission (0.29)
 
 The `candid-codec` feature adds `decoder::Reader::bounded_vec<T>(wire, maximum)`:

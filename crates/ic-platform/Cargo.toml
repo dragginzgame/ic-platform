@@ -229,5 +229,9 @@ name = "owned_codec_malformed"
 path = "tests/fixtures/candid_malformed.rs"
 required-features = ["candid-codec"]
 
+[[test]]
+name = "candid_service_consumer"
+required-features = ["candid-codec"]
+
 [lints]
 workspace = true

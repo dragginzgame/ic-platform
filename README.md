@@ -93,6 +93,11 @@ Wasm growth; see [measurements](docs/benchmarks/upstream-2026-10-31/README.md).
 
 ## Development
 
+Native external Candid providers can export owned mappings through
+`candid_codec::service` and check frozen DID equality with pinned `didc`.
+See [the native service migration](docs/native-candid-service.md); parsing and
+reflection stay outside deployed and executor graphs.
+
 Prepare the compiler selected in [rust-toolchain.toml](rust-toolchain.toml),
 including `wasm32-unknown-unknown`, then prepare tools and locked dependencies:
 

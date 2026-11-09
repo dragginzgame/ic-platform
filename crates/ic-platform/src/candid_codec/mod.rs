@@ -1,9 +1,10 @@
 //! Owned binary Candid codec for explicit external-interface adapters.
 //!
 //! Trusted Rust implementations describe their schema separately from values.
-//! No dynamic value tree, Serde visitor or textual Candid machinery is used.
-//! Select `candid-codec` without `candid` to exclude the registry codec. This
-//! initial opt-in surface is not a drop-in replacement for `CandidType` or Serde.
+//! Binary operations use no dynamic value tree, Serde visitor or text parser.
+//! On native targets, `service` exports owned external-service schemas to DID text.
+//! Select `candid-codec` to use this boundary without the registry codec. This
+//! surface is not a drop-in replacement for `CandidType` or Serde.
 //! Existing endpoints retain their qualified codec until separately migrated.
 //! `references::Func` supplies typed function payloads using the owned Principal
 //! and signature subtyping. Standalone typed service values are not yet supplied.
@@ -30,6 +31,8 @@ mod reserved;
 pub use reserved::Reserved;
 pub mod references;
 mod schema;
+#[cfg(not(target_family = "wasm"))]
+pub mod service;
 use std::ptr;
 
 /// Arbitrary-size Candid integer, backed by the maintained bigint implementation.
