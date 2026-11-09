@@ -20,20 +20,14 @@ CBOR value/Serde encoder is exposed. Consumers retain byte budgets, verification
 freshness, request bindings and effect authority. See the
 [packet migration contract](../../docs/migration.md#typed-ic-packet-and-fixture-boundary-pending-0223).
 
-Source release 0.7.4 adds `candid-endpoint` and `candid::endpoint::{query, update}` for
-required external Candid interfaces with explicit `limits`, `empty_args` and
-ordered caller guards. It reuses the existing generator/executor; select
-`candid-service` separately for native DID printing. Raw/Wire endpoints retain
-their explicit codecs. `candid::arguments` also supplies pure argument admission.
+Required external Candid endpoints select `candid-codec-endpoint` and
+`candid_codec::endpoint::{query, update}` with explicit decode limits, reply bytes,
+arity and empty-envelope policy. Ordered guards and the existing generator/executor
+are retained. The legacy endpoint feature is removed; native service registration
+is not supplied by the owned adapter. Raw/Wire endpoints retain their codecs.
 
-Select `candid` and the required DTO features for transport-free
-`candid::protocols` operations: explicit method, request encoding and bounded
-reply decoding with caller-selected arity. Cycles provider block codecs require
-both `cycles-ledger-types` and `icrc-ledger-types` to preserve legacy `Nat64`.
-Verify registry availability before downstream adoption; see the
-[migration and qualification guide](../../docs/migration.md#external-endpoint-and-protocol-codecs-78-79).
-Bounded external codecs automatically reject more than 16 constructed wire levels
-before Candid runs (see #73).
+Select the required DTO features and use `candid_codec` explicitly. Method names,
+transport, reply arity, budgets and retries remain caller-owned.
 
 Use `ic-host-artifacts` with its `gzip` feature for native bounded gzip codecs.
 Platform has no compression feature or Tooling production dependency.
@@ -56,12 +50,11 @@ Runtime's raw stable-memory system calls remain available. See the
 [retirement contract](../../docs/migration.md#stable-structures-substrate).
 
 Select `principal` for owned Principal/Account bytes, text and Serde without
-external Principal or hashing. `principal-external` adds registry identity and
-byte-copy `.into()` conversions; `principal-self-authenticating` separately adds
-unchanged upstream self-authentication. External protocol/client features select
-conversions automatically. The selected ledger DTOs now have Platform identities
-and omit the upstream package, storage/CBOR adapters and consent formatting. See
-the [packaging migration](../../docs/migration.md#minimal-principal-and-selected-icrc-packaging).
+external Principal or hashing. The owned codec, maintained DTOs and callbacks use
+this same identity. The external aliases and `principal-external` feature are
+removed; `principal-self-authenticating` separately adds unchanged upstream
+self-authentication. Native supplier APIs retain their registry identities. See
+the [hard cut](../../docs/migration.md#owned-principal-hard-cut-unreleased).
 
 Select `runtime` for prepared one-shot requests through
 `ic_platform::call::{Call, WaitPolicy}`. Methods and argument bytes can be owned
@@ -85,15 +78,27 @@ The former `candid::protocols::management::raw_rand` helper is removed in 0.27;
 this module is the sole typed entropy codec. Generic raw transports remain
 method-agnostic.
 
+Select `candid-codec` for the owned typed binary codec in `candid_codec`, without
+registry Candid or its parser. It supports explicit argument sequences, bounded
+decoding, record/payload-variant mappings, Principal and arbitrary integers.
+Registry, CMC, ICP transfer/archive, Cycles creation/withdrawal and native asset DTOs use it directly,
+preserving external Principal identity and wire bytes. Migrated Nat fields use
+`candid_codec::Nat` with the established unbounded range and Serde representation;
+registry Nat callers need an explicit conversion. ICP references validate their
+query signatures without upstream Candid; destination and method admission stay
+consumer-owned. Other adapters are not automatically migrated; see the
+[migration contract](https://github.com/dragginzgame/ic-platform/blob/main/docs/migration.md#owned-binary-codec-unreleased)
+for supported mappings and distinct resource-budget semantics.
+
 Select `candid-args` for the small dependency-free argument encoders:
 `candid_args::empty()`, `candid_args::units(count)` and `candid_args::text(value)`.
 These create empty arguments, unit/null arguments and one UTF-8 text argument.
-The `raw-rand` and `candid` features select this shared framing automatically.
-Other schemas retain the explicit upstream Candid adapter.
+The `raw-rand` and `candid-codec-endpoint` features select this shared framing automatically.
+Other supported binary schemas use `candid-codec`.
 
 All owned application endpoints use IC Wire, including public endpoints called by
 third parties. Select Runtime’s `cdk` feature for explicit-codec entrypoints,
-or the facade’s `executor` feature for the shared executor alone. Enable `candid` only for
+or the facade’s `executor` feature for the shared executor alone. Use the owned codec only for
 required management/system, NNS/SNS, ledger and other Candid interfaces, or legacy
 persisted checkpoints. Caller location does not select Candid.
 Select `principal` for Principal, Account and Subaccount. Runtime, Candid,
@@ -107,12 +112,8 @@ selected upstream 0.2.0 sources without the registry ledger package. The explici
 `GetArchivesArgs`, `ICRC3ArchiveInfo`, `QueryArchiveFn`, `ArchivedBlocks`,
 `BlockWithId`, `GetBlocksRequest`, `GetBlocksResult`, `ICRC3DataCertificate` and
 `SupportedBlockType`. These have Platform identities and preserve external Candid formats,
-account/text semantics and value hashes. Select `candid` separately for Platform
-encoding/decoding. Pending 0.7.5 also supplies
-`icrc_ledger_types::icrc10::SupportedStandard { name, url }`, Platform's passive
-external discovery record. Its Candid derive uses a direct dependency on the same
-Candid already selected transitively by the ledger crate; it does not select the
-Platform `candid` codec feature. No endpoint or standards list is automatic. Native
+account/text semantics and value hashes. Use the owned codec for encoding/decoding. ICRC-10 remains a passive external
+discovery record; no endpoint or standards list is automatic. Native
 and Wasm are supported, without selecting an executor, parser, Agent or storage
 implementation. Consumers retain amount/fee policy, byte/work limits, ledger and
 archive admission, certificate verification, interpretation, deadlines and retries.
@@ -140,8 +141,8 @@ the 14 host-only snapshot-transfer exports are absent. Complete nested types and
 external Candid bytes are retained. See the [management migration](../../docs/migration.md#selected-canister-management-dtos)
 and `src/management_canister_types/maintained/provenance.json` for the exact lists.
 The Wasm graph excludes the registry DTO crate and implicit Candid printer.
-This feature brings Candid; select Platform's `candid`
-feature separately for encoders/decoders. It selects no executor, Agent or parser.
+Native management retains registry identities and their transitive Candid.
+Wasm uses the owned codec without Candid. It selects no executor, Agent or parser.
 Consumers retain HTTP bounds, cycle pricing, transforms, call execution and retry
 policy. History consumers retain bounded calls, reply/work limits, change counts,
 instance-version checks and recovery fences. Decoding history does not establish
@@ -174,71 +175,9 @@ Use `certification` for certificate/hash-tree types, including
 signed-update inspection compares envelope fields without verifying signatures
 or authorizing replay. Existing Agent internal HTTP retries remain upstream.
 
-`ic_platform::candid::{DecodeLimits, DecodeError, decode_one, decode_args,
-decode_exactly_one}` preserves Testkit's explicit limits and typed failures.
-`decode_one` and `decode_args` allow bounded skipping of additional arguments;
-`decode_exactly_one` requires one actual wire argument. All select compact Candid
-diagnostics, which are not a redaction guarantee. Callers retain raw bytes,
-aggregate accounting, trust, resource policy and domain errors.
-
-The bounded helpers, protocol decoders and external endpoint adapters reject more
-than **16 constructed wire levels** automatically. No extra limit object or macro
-option is needed. The check includes unused type entries and skipped values; large
-byte blobs remain valid. Existing decoding/skipping quotas also cap admission
-work, without changing the quotas subsequently passed to Candid. Typed failures
-are available through `error.nesting_error()`. Low-level upstream APIs remain
-unchanged: staged callers can run `candid::nesting::check(&bytes, limits)` first.
-This bounds wire nesting, not arbitrary trusted expected Rust schemas/custom
-visitors. See the [contract](../../docs/migration.md#external-candid-nesting-qualification-73).
-
-Use `ic_platform::candid::contract` for Candid DTO derives and encoding. Add
-`#[candid_path("ic_platform::candid::contract")]` to derived types, and
-`#[serde(crate = "ic_platform::candid::contract::serde")]` when deriving Deserialize
-through the boundary's Serde export. These are external protocol types, not an
-application-wide requirement. Principal-only users import `ic_platform::Principal`
-with the `principal` feature, without declaring `ic_principal` directly. In the released
-0.3 migration the root type and `PrincipalError` are Platform-owned. Required
-Candid DTOs use `candid::contract::Principal`, which remains the original registry
-type. Selecting `principal-external` supplies `principal::{ExternalPrincipal, ExternalPrincipalError}` for that
-explicit external identity without requiring Candid. Convert principals with
-`.into()` at the client/DTO boundary; errors are distinct types.
-
-Owned parsing rejects text longer than 63 bytes before copying, retains uppercase
-acceptance and dash validation, and formats using stack buffers. Binary Serde
-uses identical raw bytes for borrowed and owned buffers. No generic range-step
-implementation or Candid trait/marker handling is provided. Explicitly select
-`principal-self-authenticating` for the original upstream implementation;
-the base owned type and runtime do not acquire hashing.
-
-Use `candid::decoder::{DecoderConfig, IDLDeserialize, decode_one_with_config,
-decode_args_with_config}` for explicit low-level configuration and staged
-decoding. These are direct upstream identities: optional/default ceilings,
-diagnostics, construction/value/finalization/drop boundaries and typed errors
-are unchanged. Callers retain pre-decoder byte admission and canonical re-encoding;
-the finite `DecodeLimits` helpers continue selecting compact diagnostics.
-Platform 0.24 removes the decoder module's unconfigured `decode_one` and
-`decode_args` shortcuts. Use the parent helpers with `DecodeLimits`, or explicitly
-select a `DecoderConfig` for the configured/staged APIs. Preserve caller byte
-admission, optional quotas, diagnostics and skipping versus exact-arity policy;
-this API cut introduces no automatic ceilings or decoding-behaviour changes.
-
-The contract explicitly exports `candid_method`, `export_service`, `Encode`,
-`Decode`, `TypeEnv`, `idl_hash`, reflection/type equality/subtyping and printer machinery.
-It also exports `DecoderConfig` and `decode_args_with_config` with their original
-upstream identities for generated-code contracts. These preserve upstream defaults
-and selected configuration, independently of the finite-limit parent helpers.
-Published upstream CDK macros 0.20.3 still hardcode `::candid`. Platform's optional
-Runtime `cdk` surface uses its maintained generator to resolve these paths.
-`contract::types::subtype::subtype` preserves upstream structural subtyping for
-narrowed reply projections; equality is a different relation.
-For service generation, write `contract::export_service!(ic_platform::candid::contract)`;
-the upstream macro accepts this explicit generated path. Update generators too.
-Import `contract::{Encode, Decode}` by those names so their recursive macro calls
-resolve without a direct Candid crate. The `candid` feature selects upstream
-`bignum`; it does not enable an executor or host parser. Service declaration
-macros (`candid_method`, `export_service`) and their printer require the separate
-`candid-service` feature. External DTO encoding/decoding needs only `candid`;
-native parsing still selects `candid-parser`.
+Use `candid_codec` for binary external Candid with explicit decode and reply budgets.
+The legacy decoder, trait bridge, parser, printer and protocol-forwarding modules
+are removed. Upstream Candid remains a dev-only compatibility oracle.
 
 Enable `certification` for `ic_platform::certification`: upstream `Certificate`,
 `Delegation`, `HashTree`, `Label`, `LookupResult`, `empty`, `fork`, `labeled`,
@@ -278,31 +217,6 @@ can be deserialized from caller-supplied bytes and used for signing; no RNG feat
 or entropy source is selected. Key generation/custody and domain/trust policy
 stay with callers. BLS alone brings neither Candid, creation, certification,
 CDK/executor nor host tooling. Native and Wasm are supported by all three features.
-
-Enable `candid-parser` on native hosts for `ic_platform::candid_parser`. It
-explicitly exports `IDLProg`, `check_prog`, `TypeEnv`, `Type`, `TypeInner`,
-`FuncMode`, `Dec`, `Error`, `Result`, `IDLArgs`, `parse_idl_args`,
-`CandidSource`, `instantiate_candid`, `service_equal`, `TypeContainer` and `type_equal`
-with their upstream identities and semantics. The pending 0.7.0 cut removes
-`compile_javascript`, `compile_typescript` and compiler-only `IDLMergedProg`;
-owned frontend bindings must use Wire. The feature does not enable Platform's
-`candid` or `executor`;
-the upstream parser itself depends on Candid with full type/value support.
-On Wasm this module and parser dependency are absent even with all features.
-Callers own source/output limits, imports and diagnostics. `check_prog` ignores
-imports; inspect `Dec` first when requiring self-contained source. Parse `IDLProg`
-and call `check_prog` for silent in-memory checking. `CandidSource::File` reads
-files/imports; its loaders and service comparison can print parser diagnostics.
-Native refusal fixtures can also import `IDLValue`, `IDLField`, `TypeSerialize`
-and `ValueSerializer` from this module. Select `candid` too when using the
-contract's derives/reflection or configured decoders. These exports impose no
-automatic bounds and do not expose dynamic fixture APIs on Wasm.
-
-The contract also exports `ArgumentEncoder`/`ArgumentDecoder` for generic call
-helpers, `Nat`/`Int` for arbitrary-precision external values, and `Reserved` for
-partial projections. The `candid` feature includes upstream big-number support.
-Use `Result<T, contract::Error>` for encoding errors and `DecodeError` for bounded
-decoding failures. Existing wire labels and caller-owned limits remain unchanged.
 
 `executor` re-exports Runtime-owned task/context types and operations from the
 single maintained task registry. Callers must preserve context placement, callbacks
@@ -352,8 +266,9 @@ explicit decoding; no-argument hooks may omit it. A renamed dependency can use
 `WaitPolicy::Unbounded` explicitly selects unbounded waiting. Neither choice
 configures retries; bounded constructors still default to 300 seconds.
 
-Select Runtime’s `runtime` or `cdk` feature and the facade’s `candid` feature
-for required external management/system-canister calls. Encode with `candid::contract::{encode_one,encode_args,encode_args_ref}`,
+Select Runtime’s `runtime` or `cdk` feature and the facade’s `candid-codec` feature
+for required external management/system-canister calls. Encode with the owned
+`encode_one` or `arguments::encode_args` and an explicit reply-byte budget,
 then supply `with_raw_args` or `take_raw_args`. Decode `Response::as_ref()` through
 the separate Candid decoder, choosing existing admission/arity policy explicitly.
 Raw constructors start with empty transport bytes; Wire callers always supply
@@ -404,3 +319,20 @@ Enable `ecdsa` for native/Wasm secp256k1 ECDSA through
 PrehashSigner, PrehashVerifier}`. K256 retains type identities and cryptography;
 consumers retain prehash construction, high-S policy, normalization and custody.
 No RNG backend is selected. Offline IC public-key derivation is not provided.
+
+The `icrc-ledger-types` selection now uses the owned binary codec for ledger,
+archive and consent DTOs, including recursive callbacks. The legacy trait/protocol bridge is removed. Nat/Int fields use the owned unbounded
+carriers; external Principal, protocol/Serde bytes and imported hash bodies remain.
+
+Management DTOs on all targets use the owned codec, including typed HTTP transform
+callbacks and budgeted `reserved` skipping. Principal, Nat and Reserved use owned
+carriers. Native snapshot transfer declarations retain their existing scope and
+external bytes. The registry package is a dev-only oracle; native callers migrate
+from upstream Candid traits to explicit owned codec budgets. Cryptographic operations,
+transport, callback authority and application policy remain with their owners.
+
+`candid-codec-endpoint` exposes `candid_codec::endpoint::{query, update}` through
+the same runtime generator. Supply `limits`, `reply_bytes`, `arity` and `empty_args`
+explicitly. Owned decoder budgets are not upstream Candid quotas: callers must
+select them anew. The legacy endpoint adapter is removed, including its implicit native service
+registration; keep checked external schemas separately.

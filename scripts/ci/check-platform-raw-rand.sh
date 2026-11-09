@@ -55,12 +55,12 @@ name = "platform-raw-rand-canister"
 version = "0.0.0"
 edition.workspace = true
 rust-version.workspace = true
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [lib]
 crate-type = ["cdylib"]
 [features]
-reference-candid = ["ic-platform/candid"]
+reference-codec = ["ic-platform/candid-codec"]
 [dependencies]
 ic-platform = { workspace = true, features = ["raw-rand"] }
 ic-platform-runtime = { workspace = true, features = ["runtime"] }
@@ -71,14 +71,20 @@ name = "platform-raw-rand-driver"
 version = "0.0.0"
 edition.workspace = true
 rust-version.workspace = true
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [dependencies]
-ic-platform = { workspace = true, features = ["raw-rand", "candid"] }
+ic-platform = { workspace = true, features = ["raw-rand", "candid-codec", "principal"] }
 ic-testkit.workspace = true
 tokio.workspace = true
 MANIFEST
 cargo +"$compiler" metadata --manifest-path "$output/consumer/Cargo.toml" --offline --format-version 1 > "$output/metadata.json" 2> "$output/metadata.log"
+for package in platform-raw-rand-canister platform-raw-rand-driver; do
+    required=ic-platform,ic-platform-runtime
+    if [[ "$package" == platform-raw-rand-driver ]]; then required=ic-platform,ic-testkit; fi
+    bash "$input_root/scripts/ci/check-qualification-identities.sh" "$output/metadata.json" "$input_root" \
+        "$package" "$required" > "$output/$package.identities.json"
+done
 for target in "$(rustc +"$compiler" -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
     cargo +"$compiler" tree --manifest-path "$output/consumer/Cargo.toml" --frozen --offline -p platform-raw-rand-canister \
         --no-default-features --target "$target" --edges normal,build --prefix none > "$output/$target.graph"
@@ -96,7 +102,7 @@ source "$input_root/scripts/ci/retain-build-artifact.sh"
 printf 'codec\traw_total\traw_code\traw_custom\toptimized_total\toptimized_code\toptimized_custom\n' > "$output/sizes.tsv"
 for codec in reference narrow; do
     features=()
-    if [[ "$codec" == reference ]]; then features=(--features reference-candid); fi
+    if [[ "$codec" == reference ]]; then features=(--features reference-codec); fi
     CARGO_TARGET_DIR="$cache/raw-rand-wasm" cargo +"$compiler" clippy --manifest-path "$output/consumer/Cargo.toml" \
         --frozen --offline -p platform-raw-rand-canister --target wasm32-unknown-unknown "${features[@]}" -- -D warnings > "$output/$codec.clippy.log" 2>&1
     CARGO_PROFILE_RELEASE_OPT_LEVEL=3 CARGO_PROFILE_RELEASE_LTO=fat CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 \

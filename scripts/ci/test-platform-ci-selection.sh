@@ -29,7 +29,7 @@ perl -MJSON::PP -0777 -e '
                 next;
             }
             if (($s->{if}//"") eq q{needs.selection.outputs.scope == '\''docs'\''}) {
-                $s->{run} eq "make install-host-tools\nmake shared-tooling-check check-doc-links\n"
+                $s->{run} eq "make install-host-tools\nmake toko-tooling-check check-doc-links\n"
                     or die "missing manifest-tool bootstrap or real docs/snapshot checks";
                 $docs++;
             } else {

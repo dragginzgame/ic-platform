@@ -1,8 +1,5 @@
 //! Stable owned account identities and explicitly selected external ledger conversions.
-//!
-//! ```compile_fail
-//! ic_platform::candid::contract::encode_one(ic_platform::Account::from(ic_platform::Principal::anonymous())).unwrap();
-//! ```
+//! Owned Account has no upstream Candid trait; external ledger DTOs carry that protocol shape.
 
 pub use ic_platform_types::account::{Account, AccountError, DEFAULT_SUBACCOUNT, Subaccount};
 
@@ -14,7 +11,7 @@ pub use crate::icrc_ledger_types::Account as ExternalAccount;
 impl From<ExternalAccount> for Account {
     fn from(value: ExternalAccount) -> Self {
         Self {
-            owner: value.owner.into(),
+            owner: value.owner,
             subaccount: value.subaccount,
         }
     }
@@ -23,7 +20,7 @@ impl From<ExternalAccount> for Account {
 impl From<Account> for ExternalAccount {
     fn from(value: Account) -> Self {
         Self {
-            owner: value.owner.into(),
+            owner: value.owner,
             subaccount: value.subaccount,
         }
     }

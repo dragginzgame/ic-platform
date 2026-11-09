@@ -71,7 +71,7 @@ Receipts cannot admit an omitted stage or a failed/incomplete run.
 
 On Linux x86_64, the two release-plan/recovery policy fixtures inside
 `check-release-commands` use Shared's `run-validation-stage.pl`. Every group still
-dispatches all 20 required parent stages, admits its committed source/index and
+dispatches all 19 required parent stages, admits its committed source/index and
 destination, and freshly runs real group metadata/preparation, Cargo, native,
 archive and publication checks. Only this bounded non-Cargo leaf can reuse an
 immutable successful execution. It does not reuse a historical whole-gate receipt
@@ -139,11 +139,39 @@ source/tooling and must not be reinterpreted under this implementation.
   are substitutes. It is not a fresh full gate or live publication receipt.
 
 These focused checks do not qualify native product execution. Real releases still
-run the entire required gate, including installed Runtime owner and Timers
-composition profiles. Keep native macOS/Profiler evidence separate from Linux
+run the entire required gate, including installed standalone Runtime profiles. Keep native macOS/Profiler evidence separate from Linux
 root-workspace results.
 
 The retired #137 pilot, earlier qualification observations and recovery history
 remain in the [0.24.0 validation record](https://github.com/dragginzgame/ic-platform/blob/platform-v0.24.0/docs/platform-release-validation.md).
 No retained batch, receipt, ref, package archive or historical recovery evidence
 is deleted by retiring the pilot's code and workflow.
+
+## Qualification identities (#152)
+
+Generated runtime, Agent, raw-rand and benchmark fixtures retain Cargo metadata
+and `*.identities.json` reports. Admission follows normal dependency edges from
+the fixture being exercised, and then Platform's owner edges. It checks the
+selected checkout paths (or the published Runtime/macros/guard cohort), rather
+than banning every older Platform package in the lockfile.
+
+| Proof | Implementation under test | Infrastructure and actual crossings |
+|---|---|---|
+| Runtime canister | Selected Runtime, macros and guard; selected facade only for external Candid profiles | Raw/prepared × Wire/external profiles retain native and Wasm graphs. Wire-only canisters exclude the facade. |
+| Runtime driver | Selected facade's certificate CBOR and external argument codecs | Testkit installs and calls canisters using bytes. Its own Platform/Types identities are reported separately. |
+| Agent installed driver | Selected facade's upstream Agent adapter | Testkit installs an echo WAT canister, which contains no Platform implementation. Testkit's management CanisterId and Agent's Principal must resolve to the same supplier package identity. |
+| BLS benchmark | Platform selected by the measured Wasm fixture | The native Testkit driver has no direct Platform dependency; it transports fixtures and reads instruction counts. |
+| ECDSA benchmark | Platform selected by the measured Wasm fixture; current facade generates native signing samples | Driver and measured Wasm identities are recorded separately, including when measuring an older source archive. |
+| Raw-rand | Selected facade codec and Runtime transport | Testkit remains the native simulator client; bytes cross the canister boundary. |
+
+Testkit's internal older facade is infrastructure, not evidence that the selected
+Platform implementation passed. It is deliberately neither patched to the local
+facade nor rejected merely for coexisting. The Agent identity check follows the
+actual Testkit → management types → Candid → Principal and Agent → Principal
+edges. Version equality alone does not establish Rust type identity.
+
+Graph admission identifies code; it does not replace installed tests, source
+custody, executor singleton refusal, cryptographic verification or native-host
+acceptance. Downstream Timers composition and Testkit adoption remain with
+Scheduling and Tooling, respectively; their release cadence is not a Platform
+supplier qualification gate.

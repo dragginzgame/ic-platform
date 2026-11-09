@@ -10,7 +10,9 @@ use std::{
     str::FromStr,
 };
 
-use candid::{CandidType, Deserialize, Principal, types::principal::PrincipalError};
+use crate::principal::Principal;
+use crate::principal::PrincipalError;
+use serde::Deserialize;
 use serde::Serialize;
 
 pub type Subaccount = [u8; 32];
@@ -19,7 +21,7 @@ pub const DEFAULT_SUBACCOUNT: &Subaccount = &[0; 32];
 
 /// [Account](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md#value)
 /// representation of ledgers supporting the ICRC-1 standard.
-#[derive(Serialize, CandidType, Deserialize, Clone, Debug, Copy)]
+#[derive(Serialize, Deserialize, Clone, Debug, Copy)]
 pub struct Account {
     pub owner: Principal,
     pub subaccount: Option<Subaccount>,

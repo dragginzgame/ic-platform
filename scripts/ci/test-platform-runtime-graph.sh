@@ -30,16 +30,16 @@ fi
 echo 'Runtime graph control and rejection cases passed'
 cp "$fixture/control" "$fixture/external"
 printf 'candid v0.10.38\ncandid_derive v0.10.38\n' >> "$fixture/external"
-bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" --external-candid
+if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" --external-candid > "$fixture/log" 2>&1; then exit 1; fi
 if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" > "$fixture/log" 2>&1; then exit 1; fi
-if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/control" --external-candid > "$fixture/log" 2>&1; then exit 1; fi
-# The native mirror retains management DTOs; installed Wasm must use owned records.
+bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/control" --external-candid
+# Native and Wasm management both use owned records.
 printf 'ic-management-canister-types v0.11.0\n' >> "$fixture/external"
 if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" --external-candid > "$fixture/log" 2>&1; then exit 1; fi
-bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" --external-candid --native-management
+if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" --external-candid --native-management > "$fixture/log" 2>&1; then exit 1; fi
 printf 'ic-agent v0.49.2\n' >> "$fixture/external"
 if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/external" --external-candid --native-management > "$fixture/log" 2>&1; then exit 1; fi
-echo 'Management native mirror and Wasm exclusion passed'
+echo 'Retired native management exception and supplier graphs refuse'
 # Selected registry signature creation may bring raw IC0, never an executor.
 cp "$fixture/control" "$fixture/signature"
 printf 'candid v0.10.39\nic-canister-sig-creation v1.3.1\nic0 v1.2.0\n' >> "$fixture/signature"

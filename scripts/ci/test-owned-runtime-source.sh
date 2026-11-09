@@ -85,18 +85,4 @@ for invalid in failed partial; do
     [[ "$result" == 23 ]]
 done
 printf 'Failed, partially emitted and empty source-roster refusals passed.\n'
-for file in mod.rs LICENSE-APACHE; do
-    destination="$fixture/management-${file//./-}"
-    cp -R "$root/crates/ic-platform/src/management_canister_types/maintained" "$destination"
-    printf '\nmutated\n' >> "$destination/$file"
-    if bash "$root/scripts/ci/check-management-source.sh" "$destination" > "$fixture/log" 2>&1; then
-        echo "Unexpectedly admitted management source/license mutation: $file" >&2; exit 1
-    fi
-done
-destination="$fixture/management-lint"
-cp -R "$root/crates/ic-platform/src/management_canister_types/maintained" "$destination"
-perl -i -pe 's/The upstream function-reference macro/Changed upstream function-reference macro/' "$destination/mod.rs"
-if bash "$root/scripts/ci/check-management-source.sh" "$destination" > "$fixture/log" 2>&1; then
-    echo 'Unexpectedly admitted management lint-normalization mutation' >&2; exit 1
-fi
-printf 'Management DTO source and license mutation refusals passed.\n'
+bash "$root/scripts/ci/test-management-source.sh"

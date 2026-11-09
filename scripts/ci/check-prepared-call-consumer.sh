@@ -23,14 +23,14 @@ edition = "2024"
 rust-version = "$msrv"
 publish = false
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [lints.rust]
 warnings = "deny"
 [features]
 default = []
 wire = ["dep:ic-wire"]
-external-candid = ["ic-platform/candid"]
+external-candid = ["ic-platform/candid-codec"]
 [dependencies]
 ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["runtime"] }
 ic-wire = { version = "$wire", optional = true }
@@ -50,7 +50,6 @@ for profile in raw wire external-candid; do
     features=()
     admission=()
     if [[ "$profile" != raw ]]; then features=(--features "$profile"); fi
-    if [[ "$profile" == external-candid ]]; then admission=(--external-candid); fi
     for target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         cargo tree --manifest-path "$fixture/Cargo.toml" --frozen ${features[@]+"${features[@]}"} --target "$target" --edges normal,build --prefix none > "$fixture/$profile-$target.graph"
         bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$profile-$target.graph" ${admission[@]+"${admission[@]}"}

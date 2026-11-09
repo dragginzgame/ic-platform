@@ -3,16 +3,19 @@
 #[cfg(test)]
 mod tests {
     use ic_platform::{
-        candid::{DecodeLimits, contract, decode_exactly_one},
+        candid_codec::{
+            decoder::{Limits as DecodeLimits, decode_one as decode_exactly_one},
+            encode_one,
+        },
         certified_assets_types::*,
     };
     fn limits() -> DecodeLimits {
         DecodeLimits {
-            reply_bytes: 4096,
-            decoding_quota: 100_000,
-            skipping_quota: 0,
-            type_entries: 32,
-            header_bytes: 2048,
+            bytes: 4096,
+            work: 100_000,
+            allocation: 16_384,
+            types: 32,
+            header: 2048,
         }
     }
     // A test consumer's selected acceptance policy, never a Platform default.
@@ -28,7 +31,7 @@ mod tests {
             key: "/index.html".into(),
             accept_encodings: vec!["identity".into()],
         };
-        let bytes = contract::encode_one(&request).unwrap();
+        let bytes = encode_one(&request, 4096).unwrap();
         assert_eq!(
             decode_exactly_one::<GetArgs>(&bytes, limits()).unwrap(),
             request
@@ -41,7 +44,7 @@ mod tests {
             sha256: Some(digest.clone()),
             total_length: 3u64.into(),
         };
-        let bytes = contract::encode_one(&response).unwrap();
+        let bytes = encode_one(&response, 4096).unwrap();
         let decoded = decode_exactly_one::<GetResult>(&bytes, limits()).unwrap();
         assert_eq!(decoded, response);
         assert!(admit(&decoded, &digest, 3));
@@ -56,7 +59,7 @@ mod tests {
             decode_exactly_one::<GetResult>(
                 &bytes,
                 DecodeLimits {
-                    reply_bytes: bytes.len() - 1,
+                    bytes: bytes.len() - 1,
                     ..limits()
                 }
             )
@@ -66,7 +69,7 @@ mod tests {
             decode_exactly_one::<GetResult>(
                 &bytes,
                 DecodeLimits {
-                    decoding_quota: 0,
+                    work: 0,
                     ..limits()
                 }
             )
@@ -79,13 +82,13 @@ mod tests {
             index: 1u64.into(),
             sha256: Some(digest),
         };
-        let bytes = contract::encode_one(&request).unwrap();
+        let bytes = encode_one(&request, 4096).unwrap();
         assert_eq!(
             decode_exactly_one::<GetChunkArgs>(&bytes, limits()).unwrap(),
             request
         );
         let response = GetChunkResult { content: vec![42] };
-        let bytes = contract::encode_one(&response).unwrap();
+        let bytes = encode_one(&response, 4096).unwrap();
         assert_eq!(
             decode_exactly_one::<GetChunkResult>(&bytes, limits()).unwrap(),
             response

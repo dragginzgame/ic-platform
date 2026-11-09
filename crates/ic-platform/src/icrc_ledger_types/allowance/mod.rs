@@ -4,7 +4,8 @@
     reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
 )]
 
-use candid::{CandidType, Deserialize, Nat};
+use crate::candid_codec::Nat;
+use serde::Deserialize;
 use serde::Serialize;
 
 use super::account::Account;
@@ -12,7 +13,7 @@ use super::account::Account;
 /// The arguments for the
 /// [ICRC-2 `allowance`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-2/README.md#icrc2_allowance)
 /// endpoint.
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct AllowanceArgs {
     pub account: Account,
     pub spender: Account,
@@ -21,7 +22,7 @@ pub struct AllowanceArgs {
 /// The `Allowance` response type for the
 /// [ICRC-2 `allowance`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-2/README.md#icrc2_allowance)
 /// endpoint.
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Allowance {
     pub allowance: Nat,
     #[serde(default)]

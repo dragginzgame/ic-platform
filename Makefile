@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-SHARED_TOOLING_RUST := 1
+TOKO_TOOLING_RUST := 1
 FORMAT_EXTRA_SOURCES := $(wildcard scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/prepared-call-consumer/*.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/fixtures/wasm-size/lib.rs)
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/stable-identities/*.rs)
@@ -65,8 +65,8 @@ LOCAL_TOOL_INSTALL_TARGETS += install-browser-tools
 LOCAL_TOOL_CHECK_TARGETS += browser-tools-check
 include make/consumer.mk
 # Keep the shared pre-capture cleanup behind tooling admission, including -j.
-clean-empty-source-dirs: shared-tooling-check
-release-batch-resume: shared-tooling-check
+clean-empty-source-dirs: toko-tooling-check
+release-batch-resume: toko-tooling-check
 export YQ := $(CURDIR)/.tools/host/bin/yq
 release-patch release-minor release-major release-resume: export IC_PLATFORM_RELEASE_PREPARE := 1
 
@@ -119,10 +119,10 @@ check-browser-runtime: browser-tools-check
 	npm test --prefix packages/browser
 	node scripts/ci/check-browser-consumer.mjs --browser
 
-publish: shared-tooling-check
+publish: toko-tooling-check
 	+$(MAKE) --no-print-directory host-tools-check check-retained-evidence
 	bash scripts/release/publish.sh publish
-publish-check: shared-tooling-check
+publish-check: toko-tooling-check
 	+$(MAKE) --no-print-directory host-tools-check check-retained-evidence
 	bash scripts/release/publish.sh check
 
@@ -192,7 +192,7 @@ check-doc-links:
 	@set -eu; mkdir -p target; \
 		records="$$(mktemp "$(CURDIR)/target/doc-link-records.XXXXXX")"; \
 		trap 'rm -f "$$records"' EXIT; \
-		bash scripts/ci/verify-shared-tooling-snapshot.sh --read-manifest .shared-tooling.snapshot > "$$records"; \
+		bash scripts/ci/verify-toko-tooling-snapshot.sh --read-manifest .toko-tooling.snapshot > "$$records"; \
 		set -- README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/history/migrations-through-0.26.md scripts/benchmarks/0.9/README.md scripts/benchmarks/0.4/README.md scripts/benchmarks/0.22/README.md scripts/benchmarks/canic-wasm/README.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md docs/platform-release-validation.md packages/browser/README.md packages/browser/CHANGELOG.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md; \
 		while IFS="$$(printf '\t')" read -r kind checksum mode path; do \
 			case "$$kind:$$path" in file:*.md) set -- "$$@" "$$path" ;; esac; \
@@ -223,7 +223,7 @@ check-release-commands:
 check-policy-fixture-evidence:
 	@perl scripts/release/policy-fixture-evidence.pl seal "$$PLATFORM_POLICY_ADMISSION" "$$PLATFORM_POLICY_SOURCE" "$$PLATFORM_POLICY_GROUP"
 ci:
-	+bash scripts/ci/run-validation-targets.sh --fail-fast shared-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check
+	+bash scripts/ci/run-validation-targets.sh --fail-fast toko-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check
 
 release-resume: check-release-resume-policy
 .PHONY: check-release-resume-policy
@@ -242,7 +242,7 @@ release-prepare-version:
 	@bash scripts/release/adapter.sh prepare
 release-prepared-check:
 	@bash scripts/release/adapter.sh check
-	@bash scripts/ci/check-platform-runtime.sh --timers --prepared-call --check-graph
+	@bash scripts/ci/check-platform-runtime.sh --prepared-call --check-graph
 release-committed-check release-tagged-check release-push-check:
 	@bash scripts/release/adapter.sh check
 release-commit-check:
@@ -259,16 +259,13 @@ check-runtime:
 check-raw-rand:
 	bash scripts/ci/check-platform-raw-rand.sh
 
-.PHONY: check-runtime-composition check-runtime-all check-runtime-independence
-check-runtime-composition:
-	bash scripts/ci/check-platform-runtime.sh --timers --prepared-call
+.PHONY: check-runtime-all
 check-runtime-all:
-	+bash scripts/ci/run-validation-targets.sh check-runtime check-runtime-composition
-check-runtime-independence:
-	bash scripts/ci/test-runtime-independence.sh
+	+bash scripts/ci/run-validation-targets.sh check-runtime
 
 .PHONY: check-runtime-lock
 check-runtime-lock:
+	bash scripts/ci/test-qualification-identities.sh
 	bash scripts/ci/test-runtime-selection.sh
 	bash scripts/ci/check-icp-account-source.sh
 	bash scripts/ci/test-published-runtime.sh

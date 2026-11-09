@@ -20,19 +20,19 @@ for selection in 'map(select(.name != "ic-platform"))' '. + map(select(.name == 
     fi
     grep -q 'expected exactly one ic-platform package' "$fixture/error"
 done
-# A passive external Principal must serialize without borrowing Candid's features.
+# Types rejects the retired external Principal feature and production dependency.
 while IFS= read -r mutation; do
     "$jq" "(.packages[] | select(.name == \"ic-platform-types\")) |= ($mutation)" \
         "$fixture/metadata.json" > "$fixture/invalid.json"
     if contract "$fixture/invalid.json" 2> "$fixture/error"; then
         echo "Types contract admitted mutation: $mutation" >&2; exit 1
     fi
-    grep -q 'Types external Principal' "$fixture/error"
+    grep -q 'Types must not have' "$fixture/error"
 done <<'MUTATIONS'
 .features["principal-external"] = ["dep:ic_principal"]
 .features["principal-external"] += ["principal-self-authenticating"]
 .features.default = ["principal-external"]
-(.dependencies[] | select(.name == "ic_principal" and .kind == null)).uses_default_features = true
+.dependencies += [{"name":"ic_principal", "kind":null, "uses_default_features":false}]
 .dependencies += [{name:"candid",kind:null}]
 MUTATIONS
 # Mutate actual Cargo observations, retaining each policy's refusal evidence.
@@ -50,7 +50,7 @@ done <<'MUTATIONS'
 .features.executor = []
 .features.ic0 = ["dep:ic0"]
 (.dependencies[] | select(.name == "ic-management-canister-types")).req = "^0.11"
-(.dependencies[] | select(.name == "ic-management-canister-types")).target = null
+(.dependencies[] | select(.name == "ic-management-canister-types")).kind = null
 .features["icrc-ledger-types"] += ["dep:icrc-ledger-types"]
 .features.principal += ["dep:ic_principal"]
 .dependencies += [{"name":"ic_principal", "features":["self_authenticating"]}]
@@ -136,12 +136,12 @@ fi
   (["none", "default", ($f | join(","))] - $r | length) == 0 and
   all($f[]; . as $a | ($r | index($a)) != null and
     all($f[] | select(. != $a); . as $b | ($r | index([$a,$b] | sort | join(","))) != null)) and
-  (["candid,executor,ic0,runtime",
+  (["candid-codec-endpoint,executor,ic0,runtime",
     "bls,ecdsa,ed25519",
     "certification,icrc-ledger-types,management-canister-types,runtime",
-    "agent,candid-parser,ic-protocol,runtime",
+    "agent,ic-protocol,runtime",
     "bls,canister-sig-creation,certification-cbor,ed25519,signature-verification",
-    ($f - ["agent","candid-parser","ic-protocol","ic-protocol-fixtures"] | join(","))] - $r | length) == 0
+    ($f - ["agent","ic-protocol","ic-protocol-fixtures"] | join(","))] - $r | length) == 0
 ' >/dev/null
 if "$jq" --arg mode typo --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-selections.jq "$fixture/features.json" >/dev/null 2>&1; then
     echo 'Unknown matrix mode was admitted' >&2; exit 1

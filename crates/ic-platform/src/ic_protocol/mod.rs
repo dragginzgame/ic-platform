@@ -6,7 +6,7 @@
 //! caller-owned. No generic CBOR value or serializer is exposed.
 
 use crate::certification::cbor::{CborError, decode, encode_framed};
-use crate::principal::ExternalPrincipal;
+use crate::principal::Principal;
 
 pub use ic_transport_types::{
     Envelope, EnvelopeContent, ReadStateResponse, SubnetMetrics, TransportCallResponse,
@@ -54,8 +54,12 @@ pub fn decode_call_content_strict(
     Ok(EnvelopeContent::Call {
         nonce: call.nonce.map(serde_bytes::ByteBuf::into_vec),
         ingress_expiry: call.ingress_expiry,
-        sender: ExternalPrincipal::try_from_slice(&call.sender).map_err(|_| invalid())?,
-        canister_id: ExternalPrincipal::try_from_slice(&call.canister_id).map_err(|_| invalid())?,
+        sender: call.sender.as_ref().try_into().map_err(|_| invalid())?,
+        canister_id: call
+            .canister_id
+            .as_ref()
+            .try_into()
+            .map_err(|_| invalid())?,
         method_name: call.method_name,
         arg: call.arg.into_vec(),
         sender_info: call.sender_info,
@@ -95,10 +99,7 @@ pub fn decode_subnet_metrics(
 
 /// Decode an IC certified controllers leaf; authentication and controller
 /// counts, ordering, uniqueness and authority remain consumer-owned.
-pub fn decode_controllers(
-    bytes: &[u8],
-    max_bytes: usize,
-) -> Result<Vec<ExternalPrincipal>, CborError> {
+pub fn decode_controllers(bytes: &[u8], max_bytes: usize) -> Result<Vec<Principal>, CborError> {
     decode(bytes, max_bytes)
 }
 

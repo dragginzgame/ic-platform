@@ -2,11 +2,9 @@
   "features": [
     "agent",
     "bls",
-    "candid",
     "candid-args",
-    "candid-endpoint",
-    "candid-parser",
-    "candid-service",
+    "candid-codec",
+    "candid-codec-endpoint",
     "canister-sig-creation",
     "certification",
     "certification-cbor",
@@ -25,7 +23,6 @@
     "management-canister-types",
     "nns-registry-types",
     "principal",
-    "principal-external",
     "principal-self-authenticating",
     "raw-rand",
     "runtime",
@@ -37,15 +34,7 @@
         "ic-agent"
       ],
       "prerequisites": [
-        "principal-external"
-      ]
-    },
-    "candid-parser": {
-      "dependencies": [
-        "candid_parser"
-      ],
-      "prerequisites": [
-        "principal-external"
+        "principal"
       ]
     },
     "ic-protocol": {
@@ -53,7 +42,7 @@
         "ic-transport-types"
       ],
       "prerequisites": [
-        "principal-external",
+        "principal",
         "certification-cbor"
       ]
     }

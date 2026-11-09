@@ -1,5 +1,9 @@
 # External canister DTO contracts
 
+Current unreleased cut: use the owned binary codec. The legacy Candid trait,
+protocol, parser and printer surfaces are removed; earlier released descriptions
+below are historical. See the [current migration](migration.md#legacy-candid-surface-removed-unreleased).
+
 The authorized pending 0.8 packaging cut also replaces the registry ICRC package
 with selected maintained DTOs and unchanged upstream value hashes. Ledger Rust
 identities, including query callbacks, now belong to Platform; external wire and
@@ -41,9 +45,19 @@ schema. No block conversion or hash change occurs. An independently parsed pinne
 Cycles DID exercises this distinction. These additions are not supplied by 0.6.20;
 see the [endpoint and codec migration](migration.md#external-endpoint-and-protocol-codecs-78-79).
 
-Each feature explicitly selects `candid`; none is default or implied by runtime,
+Registry, CMC, ICP, Cycles creation/withdrawal and native asset selections now use
+`candid-codec` with the canonical owned Principal, avoiding the upstream
+binary codec. Nat fields in migrated CMC/Cycles/asset DTOs use Platform's unbounded
+`candid_codec::Nat`; this changes Rust identity, preserving Candid and Serde bytes.
+ICRC and the combined Cycles archive surface now use the owned codec, including
+recursive values and callback signatures. Their Nat/Int carriers are owned;
+external Principal identity, Serde bytes and hash algorithms remain unchanged. ICP archive
+callbacks use the owned typed reference with preserved external Principal and
+method fields; the callback's internal carrier changes to the owned `Func`.
+See [the migration contract](migration.md#owned-binary-codec-unreleased).
+None is default or implied by runtime,
 CDK, executor or another DTO family. Asset exports are absent on Wasm. Selecting
-that feature on Wasm still selects its explicit Candid prerequisite; it does not
+that feature on Wasm still selects its owned-codec prerequisite; it does not
 supply an asset API or acquire host transport. No feature selects the host parser,
 Agent, PocketIC, executor, storage engine, payment workflow or retry policy.
 `Vec<u8>` represents upstream `blob`/`vec nat8`, and `Nat` remains unbounded.
@@ -75,8 +89,9 @@ Asset declarations derive from the
 [SDK DID at 271392a3b7746df539925a6333b4cd7ddc9f1972](https://github.com/dfinity/sdk/blob/271392a3b7746df539925a6333b4cd7ddc9f1972/src/canisters/frontend/ic-certified-assets/assets.did).
 Their Apache-2.0 licenses are retained beside each module; SDK's asset-directory
 license refers back to the root license. Changes are limited to selected DTOs,
-Rust names/documentation, standard derives and a typed archive function supplied
-by Candid's existing `define_function!` macro. No cryptographic code is copied.
+Rust names/documentation, standard derives and the typed archive function.
+The ICP callback now uses an owned codec mapping; its optional upstream trait
+bridge retains the original declared query signature. No cryptographic code is copied.
 
 Registry declarations independently express the small protocol facts observed in
 [Registry's DID at f83a764](https://github.com/dfinity/ic/blob/f83a7646c20ce18100eb87b7865c12852bef8169/rs/registry/canister/canister/registry.did).
@@ -170,3 +185,10 @@ Platform. Parser participation is solely a test selection and never implied by
 any production DTO feature. Retain actual default/executor/runtime and selected
 DTO normal/build graphs separately. Native macOS and installed services require
 their own qualification; local compilation does not claim either.
+
+For the owned codec, `candid-codec-endpoint` supplies explicit external-interface
+query/update adapters without registry Candid. Decode/reply bounds, arity and
+empty-envelope policy are mandatory; existing upstream quota values are not
+silently reused. The same generator owns guards, execution and replies. Consumers
+retain checked external schemas because this path does not register native Candid
+service metadata. See the [owned endpoint migration](migration.md#explicit-owned-external-endpoints-unreleased).

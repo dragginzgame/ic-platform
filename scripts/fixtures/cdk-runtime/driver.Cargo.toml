@@ -5,15 +5,12 @@ edition.workspace = true
 publish.workspace = true
 rust-version.workspace = true
 
-[features]
-timers-composition = []
-
 [dependencies]
-ic-platform = { workspace = true, features = ["certification-cbor", "candid"] }
+ic-platform = { workspace = true, features = ["certification-cbor", "candid-codec", "principal"] }
 ic-testkit.workspace = true
 serde.workspace = true
 ic-wire.workspace = true
 tokio.workspace = true
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"

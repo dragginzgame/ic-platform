@@ -6,7 +6,7 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 export RELEASE_GROUP
 members="$(bash scripts/release/group.sh members)"
-make --no-print-directory shared-tooling-check
+make --no-print-directory toko-tooling-check
 export CARGO_PUBLISH_PACKAGES="$members"
 if [[ "${PACKAGE+x}" == x ]]; then
     [[ -n "$PACKAGE" ]] || { echo 'Explicit PACKAGE must not be empty' >&2; exit 2; }

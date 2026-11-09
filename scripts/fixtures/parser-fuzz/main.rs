@@ -7,21 +7,21 @@ mod candid_malformed;
 #[rustfmt::skip]
 mod cbor_malformed;
 
-use ic_platform::{Account, Principal, account::ExternalAccount, principal::ExternalPrincipal};
+use ic_platform::{Account, Principal, account::ExternalAccount};
 
 libfuzzer_sys::fuzz_target!(|data: &[u8]| {
     candid_malformed::exercise(data);
     cbor_malformed::exercise(data);
     if let Ok(text) = std::str::from_utf8(data) {
         let owned = Principal::from_text(text);
-        if text.len() <= Principal::MAX_LENGTH_IN_TEXT {
-            let external = ExternalPrincipal::from_text(text);
-            assert_eq!(owned.is_ok(), external.is_ok());
-            if let (Ok(owned), Ok(external)) = (owned, external) {
-                assert_eq!(ExternalPrincipal::from(owned), external);
-            }
-        } else {
+        if text.len() > Principal::MAX_LENGTH_IN_TEXT {
             assert!(owned.is_err());
+        }
+        if let Ok(principal) = owned {
+            assert_eq!(
+                Principal::from_text(principal.to_text()).unwrap(),
+                principal
+            );
         }
         let owned = text.parse::<Account>();
         if text.len() <= Account::MAX_LENGTH_IN_TEXT {

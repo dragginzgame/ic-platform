@@ -18,15 +18,16 @@ fn wire_bytes_are_unchanged() {
 fn external_candid_is_explicit_and_unchanged() {
     let call = external_request(Principal::management_canister());
     assert_eq!(call.raw_args(), b"DIDL\0\0");
-    ic_platform::candid::decode_args::<()>(
+    ic_platform::candid_codec::decoder::decode_args::<()>(
         call.raw_args(),
-        ic_platform::candid::DecodeLimits {
-            reply_bytes: 64,
-            decoding_quota: 1000,
-            skipping_quota: 1000,
-            type_entries: 8,
-            header_bytes: 64,
+        ic_platform::candid_codec::decoder::Limits {
+            bytes: 64,
+            work: 1000,
+            allocation: 1000,
+            types: 8,
+            header: 64,
         },
+        ic_platform::candid_codec::decoder::Arity::Exact,
     )
     .unwrap();
 }

@@ -151,7 +151,7 @@ dependencies = [
  "hex",
  "ic_principal",
  "leb128",
- "num-bigint",
+ "num-bigint 0.4.8",
  "num-traits",
  "paste",
  "pretty",
@@ -696,12 +696,11 @@ dependencies = [
 name = "ic-platform"
 version = "0.27.1"
 dependencies = [
- "candid",
  "ic-certification",
- "ic-management-canister-types",
  "ic-platform-macros",
  "ic-platform-runtime",
  "ic-platform-types 0.18.3",
+ "num-bigint 0.5.1",
  "serde",
  "serde_bytes",
  "serde_cbor",
@@ -754,7 +753,6 @@ version = "0.18.3"
 dependencies = [
  "crc32fast",
  "data-encoding",
- "ic_principal",
  "serde",
  "serde_bytes",
  "thiserror 2.0.21",
@@ -1122,6 +1120,17 @@ name = "num-bigint"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c89e69e7e0f03bea5ef08013795c25018e101932225a656383bd384495ecc367"
+dependencies = [
+ "num-integer",
+ "num-traits",
+ "serde",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93e7820bc0a80a0238e650327316f929ba18d5be054b647490a3a6a339f3e7c0"
 dependencies = [
  "num-integer",
  "num-traits",

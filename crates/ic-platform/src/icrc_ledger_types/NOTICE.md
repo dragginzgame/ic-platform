@@ -9,7 +9,8 @@ Platform maintains selected Apache-2.0 declarations and helpers imported from
 The maintainer authorized removing the registry package and narrowing this
 surface. Public module paths and external Candid/Serde representations remain;
 the selected Rust types, including archive callbacks, now have Platform identity.
-The Candid Principal, Nat, Int, function and Serde-byte identities stay upstream.
+The original import retained registry scalar/function identities; the owned codec
+adoption below records the current explicit carrier changes.
 
 Packaging changes:
 
@@ -38,3 +39,27 @@ generated independently using the original 0.2.0 package and Candid 0.10.39.
 Its digest is recorded in `provenance.json`. Schema comparison includes recursive
 values and callback arguments/results/mode; existing upstream byte vectors and
 hash vectors separately qualify their representations and hashes.
+
+## Owned codec adoption (unreleased)
+
+The DTOs now select Platform's binary codec. Nat/Int use Platform-owned carriers
+around the same num-bigint magnitudes; external Principal and serde_bytes remain
+registry identities. CandidType derives and registry function conversions are
+unit-test-only upstream trait bridges. Archive constructors/fields and Serde representations
+remain; owned decoding validates signatures without authorizing destinations.
+
+`hash_encoding/mod.rs` retains `Nat::encode` from Candid 0.10.40,
+revision `f8a42490db72212b744514aac40c688cae62be40`,
+`rust/candid/src/types/number.rs`. Its complete Apache-2.0 license is retained in
+`hash_encoding/LICENSE`. Only the receiver import, visibility and error alias
+are adapted: the function body is unchanged. It still delegates its small-number
+path to registry leb128 and its large-number path to num-bigint. This is the
+existing ledger hash preimage encoder, not the new wire writer. The reconstruction
+guard checks its upstream fingerprint and license independently. The value/hash
+source guard still reconstructs the original ICRC 0.2.0 fingerprint, reversing
+only explicit carrier imports and conditional derives in addition to the earlier
+packaging changes. Hash algorithms, domain separation and vectors are unchanged.
+
+SHA-2 provider packaging now selects the same SHA-2 0.11.1 implementation as
+Types self-authentication through `use sha2_11 as sha2`. The reconstruction
+guard reverses only that exact import alias; hash bodies and vectors are unchanged.

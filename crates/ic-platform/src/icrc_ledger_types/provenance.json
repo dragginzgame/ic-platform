@@ -16,5 +16,10 @@
   },
   "license_sha256": "6f44e3f228570e343cdb96bd929d1e8c6057ac33b411e47d77427f824e5a96ac",
   "value_source_fingerprint": "d2ac05959d78324fa627813a75f277d19f4f3016abd35de47f9a0269672cfe22",
-  "reference_schema_sha256": "ce684cfcaad41f96de42b99ba402b94e2bf77033f84ba5b27e79ab34823aa903"
+  "reference_schema_sha256": "ce684cfcaad41f96de42b99ba402b94e2bf77033f84ba5b27e79ab34823aa903",
+  "nat_encoder_package": "candid",
+  "nat_encoder_version": "0.10.40",
+  "nat_encoder_revision": "f8a42490db72212b744514aac40c688cae62be40",
+  "nat_encoder_fingerprint": "115f7f2c1f1d9dde8b2acd356b01b9da8e348e73199d26e50ed6a22ad76d624f",
+  "nat_encoder_license_sha256": "3ec7531366b7e2440aa35dd675edc479f7690099821ce68b64c5548ba4849daa"
 }

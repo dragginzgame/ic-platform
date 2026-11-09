@@ -9,7 +9,6 @@ rust-version = "@MSRV@"
 publish = false
 
 [workspace.dependencies]
-@TIMERS_ROOT@
 ic-platform = { @PLATFORM@, default-features = false }
 ic-platform-runtime = { @RUNTIME@, default-features = false, features = ["cdk"] }
 ic-testkit = { @TESTKIT@ }

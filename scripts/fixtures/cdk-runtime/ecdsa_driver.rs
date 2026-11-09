@@ -1,9 +1,6 @@
 //! Compare RustCrypto's existing backends in installed Wasm.
 mod pocketic_support;
-use ic_platform::{
-    ecdsa::{PrehashSigner, Signature, SigningKey},
-    principal::ExternalPrincipal as Principal,
-};
+use ic_platform::ecdsa::{PrehashSigner, Signature, SigningKey};
 use std::time::Duration;
 
 fn main() {
@@ -69,3 +66,5 @@ async fn run_fixture() {
     pic.drop().await.unwrap();
     drop(server);
 }
+
+use ic_testkit::pocket_ic::CanisterId as Principal;

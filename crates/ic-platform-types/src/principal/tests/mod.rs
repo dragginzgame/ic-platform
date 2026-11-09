@@ -1,6 +1,5 @@
-#[cfg(feature = "principal-external")]
-use super::ExternalPrincipal;
 use super::{Principal, PrincipalError};
+use ic_principal::Principal as ExternalPrincipal;
 use serde_test::{Configure, Token, assert_de_tokens, assert_tokens};
 
 #[test]
@@ -79,7 +78,6 @@ fn deserialization_preserves_structured_format_errors() {
 }
 
 #[test]
-#[cfg(feature = "principal-external")]
 fn all_lengths_preserve_text_bytes_order_and_padding() {
     for len in 0..=Principal::MAX_LENGTH_IN_BYTES {
         for seed in 0..=255u8 {
@@ -94,13 +92,17 @@ fn all_lengths_preserve_text_bytes_order_and_padding() {
             );
             assert_eq!(owned.len() as usize, len);
             assert!(owned.as_fixed_bytes()[len..].iter().all(|&b| b == 0));
-            assert_eq!(ExternalPrincipal::from(owned), external);
-            assert_eq!(Principal::from(external), owned);
+            assert_eq!(ExternalPrincipal::from_slice(owned.as_slice()), external);
+            assert_eq!(Principal::from_slice(external.as_slice()), owned);
         }
     }
     let a = Principal::from_slice(&[255]);
     let b = Principal::from_slice(&[0, 0]);
-    assert_eq!(a.cmp(&b), ExternalPrincipal::from(a).cmp(&b.into()));
+    assert_eq!(
+        a.cmp(&b),
+        ExternalPrincipal::from_slice(a.as_slice())
+            .cmp(&ExternalPrincipal::from_slice(b.as_slice()))
+    );
     let empty = Principal::management_canister();
     let zero = Principal::from_slice(&[0]);
     assert_eq!(empty.as_fixed_bytes(), zero.as_fixed_bytes());
@@ -140,7 +142,6 @@ fn malformed_text_and_bytes_are_fallible_and_bounded() {
     );
 }
 
-#[cfg(feature = "principal-external")]
 #[test]
 fn passive_external_principal_fields_keep_upstream_serde_without_candid() {
     #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -152,7 +153,7 @@ fn passive_external_principal_fields_keep_upstream_serde_without_candid() {
         let bytes = &[2; 29][..len];
         let owned = Principal::from_slice(bytes);
         let record = PassiveRecord {
-            owner: owned.into(),
+            owner: ExternalPrincipal::from_slice(owned.as_slice()),
         };
         assert_tokens(
             &record.compact(),
@@ -185,7 +186,7 @@ fn passive_external_principal_fields_keep_upstream_serde_without_candid() {
             serde_cbor::from_slice::<PassiveRecord>(&encoded).unwrap(),
             record
         );
-        assert_eq!(Principal::from(record.owner), owned);
+        assert_eq!(Principal::from_slice(record.owner.as_slice()), owned);
     }
 }
 

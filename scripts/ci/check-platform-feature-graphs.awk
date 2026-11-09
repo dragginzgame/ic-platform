@@ -40,11 +40,10 @@ function reject(reason) {
         loaded[key] = 1
     }
     native = target !~ /^wasm/
-    parser = native && enabled("candid-parser")
+    parser = 0
     agent = native && enabled("agent")
     protocol = native && enabled("ic-protocol")
-    external_endpoint = enabled("candid-endpoint")
-    generator_enabled = enabled("candid-endpoint")
+    generator_enabled = enabled("candid-codec-endpoint")
     runtime = enabled("runtime")
     executor = enabled("executor")
     verification = enabled("signature-verification")
@@ -54,11 +53,10 @@ function reject(reason) {
     certification = creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
-    external_dto = enabled("cmc-types") || enabled("icp-ledger-types") || enabled("cycles-ledger-types") || enabled("nns-registry-types") || enabled("certified-assets-types")
-    candid = external_endpoint || enabled("candid") || enabled("candid-service") || parser || agent || protocol || management || ledger || external_dto || creation
-    external_principal = enabled("principal-external")
+    candid = agent || protocol || creation
+    external_principal = candid
     principal = enabled("principal")
-    hashing = enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519")
+    hashing = ledger || enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || enabled("icp-ledger-types")
     minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification")
     found_ed = 0
     found_curve = 0
@@ -79,7 +77,7 @@ function reject(reason) {
             reject("unselected signature hashing")
         if ((name == "serde_cbor" || name == "half") && !(creation || verification || agent || parser || enabled("certification-cbor")))
             reject("unselected CBOR parser")
-        if (name == "pretty" && !(enabled("candid-service") || parser || agent || protocol || creation || (native && management)))
+        if (name == "pretty" && !(agent || protocol || creation))
             reject("unselected Candid service printer")
         if (name == "ic-transport-types" && !(agent || protocol)) reject("unselected native IC transport types")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
@@ -117,7 +115,7 @@ function reject(reason) {
         if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified upstream BLS verifier")
         if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified upstream BLS curve")
         if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
-        if (name == "ic-management-canister-types" && !(registry && native && (management) && version == "v0.11.0")) reject("unselected or Wasm registry management types")
+        if (name == "ic-management-canister-types") reject("registry management types are dev-only")
         if (name == "icrc-ledger-types" || name == "icrc-cbor") reject("retired upstream ledger package")
         if (name == "ic-error-types" && !(agent)) reject("runtime error catalogue")
         if (name == "ic-stable-structures") reject("retired storage substrate")

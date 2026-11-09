@@ -62,7 +62,7 @@ cat > "$fixture/scripts/dev/install-host-tools.sh" <<'HOST'
 #!/usr/bin/env bash
 printf 'host admission\n' >> "$ROUTING_EFFECTS"
 HOST
-cat > "$fixture/scripts/dev/shared-tooling.sh" <<'TOOLING'
+cat > "$fixture/scripts/dev/toko-tooling.sh" <<'TOOLING'
 #!/usr/bin/env bash
 set -euo pipefail
 [[ "$1" == check ]]
@@ -139,7 +139,6 @@ for group in platform runtime types; do
     bash scripts/ci/cargo-release-group.sh files "$group" > "$fixture/$group-expected-files"
     cmp "$fixture/$group-files" "$fixture/$group-expected-files"
     tr '\0' '\n' < "$fixture/$group-files" | grep -Fx 'scripts/fixtures/cdk-runtime/Cargo.lock'
-    tr '\0' '\n' < "$fixture/$group-files" | grep -Fx 'scripts/fixtures/timers-runtime/Cargo.lock'
     for operation in publish publish-check; do
         make --no-print-directory -s -C "$fixture" "$operation" RELEASE_GROUP="$group"
         [[ "$(cat "$ROUTING_OUTPUT")" == "$(RELEASE_GROUP="$group" bash scripts/release/group.sh members)" ]]

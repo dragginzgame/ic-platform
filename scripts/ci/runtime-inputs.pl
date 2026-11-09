@@ -37,6 +37,7 @@ sub names {
     $names{$_} = 1 for ('Cargo.toml', 'rust-toolchain.toml', '.cargo/config.toml',
         'scripts/ci/check-platform-runtime.sh', 'scripts/ci/runtime-inputs.pl',
         'scripts/ci/runtime-selection.sh',
+        'scripts/ci/check-qualification-identities.sh', 'scripts/ci/qualification-identities.jq',
         'scripts/ci/retain-build-artifact.sh', 'scripts/ci/render-runtime-fixture.pl',
         'scripts/ci/workspace-dependencies.sh', 'scripts/ci/check-platform-compiler.sh',
         'scripts/ci/read-platform-msrv.sh', $lock);

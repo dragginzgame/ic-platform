@@ -4,7 +4,8 @@
     reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
 )]
 
-use candid::{CandidType, Deserialize, Int, Nat};
+use crate::candid_codec::{Int, Nat};
+use serde::Deserialize;
 use serde::Serialize;
 use serde_bytes::ByteBuf;
 
@@ -14,7 +15,7 @@ use serde_bytes::ByteBuf;
 /// ICRC-1 standard. For more information, see the
 /// [documentation of Metadata in the ICRC-1 standard](https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1#metadata).
 /// Note that the `MetadataValue` type is a subset of the [`super::ICRC3Value`] type.
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum MetadataValue {
     Nat(Nat),
     Int(Int),

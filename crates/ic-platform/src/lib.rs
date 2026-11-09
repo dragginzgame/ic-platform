@@ -5,10 +5,8 @@
 //! interfaces; caller location does not select the codec. Existing Candid
 //! checkpoints remain a legacy persisted-data compatibility exception.
 //!
-//! `principal` selects Principal and Account. `candid` selects bounded decoding;
-//! `executor` selects the shared CDK executor without a Candid dependency.
-//! `candid-parser` selects native external Candid parsing and type checking.
-//! `candid-service` separately selects Candid service declaration generation.
+//! `principal` selects Principal and Account; `candid-codec` selects owned binary encoding.
+//! Legacy Candid decoder, parser and printer exports are removed.
 //! `agent` selects native IC transport and identities, with consumer-owned policy.
 //! `ic-protocol` selects native typed packet codecs without Agent or runtime.
 //! `ic-protocol-fixtures` additionally selects native development protocol fixtures.
@@ -19,6 +17,7 @@
 //! `ic0` selects qualified raw system calls without Candid or an executor.
 //! `raw-rand` selects the dependency-free management entropy codec, without transport.
 //! `candid-args` selects small, dependency-free external argument encoders.
+//! `candid-codec` selects the owned typed binary codec without registry Candid.
 //! `management-canister-types` selects external management HTTP/history/snapshot/status DTOs.
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
 //! Consumers retain protocol schemas, resource limits and lifecycle policy.
@@ -45,12 +44,10 @@ pub mod ic_protocol;
 pub mod bls;
 #[cfg(feature = "runtime")]
 pub use ic_platform_runtime::call;
-#[cfg(feature = "candid")]
-pub mod candid;
 #[cfg(feature = "candid-args")]
 pub mod candid_args;
-#[cfg(all(feature = "candid-parser", not(target_family = "wasm")))]
-pub mod candid_parser;
+#[cfg(feature = "candid-codec")]
+pub mod candid_codec;
 #[cfg(feature = "canister-sig-creation")]
 pub mod canister_sig_creation;
 #[cfg(feature = "runtime")]
@@ -86,3 +83,6 @@ pub mod signature_verification;
 #[cfg(feature = "runtime")]
 #[doc(hidden)]
 pub use ic_platform_runtime::__platform_println;
+
+#[cfg(test)]
+mod tests;

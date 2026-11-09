@@ -13,7 +13,7 @@ git -C "$root" archive "$baseline" crates Cargo.toml Cargo.lock | tar -x -C "$ou
 # Isolate implementation effects from the user's pending dependency resolution.
 cp "$root/Cargo.lock" "$output/source/Cargo.lock"
 printf '%s\n' "$baseline" > "$output/baseline-commit"
-export WASM_BENCH_PROFILES="${WASM_BENCH_PROFILES:-principal-binary runtime external-candid verification certification-cbor}"
+export WASM_BENCH_PROFILES="${WASM_BENCH_PROFILES:-principal-binary runtime verification certification-cbor}"
 export WASM_BENCH_RECIPES="${WASM_BENCH_RECIPES:-3-fat-1}"
 export WASM_BENCH_TOOLCHAIN="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 printf 'Wasm regression evidence: %s\n' "$output"

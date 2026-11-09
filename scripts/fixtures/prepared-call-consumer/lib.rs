@@ -39,8 +39,13 @@ fn limits() -> ic_wire::Limits {
 
 #[cfg(feature = "external-candid")]
 pub fn external_request(target: Principal) -> Call<'static, 'static> {
-    let bytes = ic_platform::candid::contract::encode_args(()).unwrap();
-    Call::new(target, String::from("raw_rand"), WaitPolicy::Unbounded).take_raw_args(bytes)
+    let bytes = ic_platform::candid_codec::arguments::encode_args(&(), 64).unwrap();
+    Call::new(
+        target,
+        String::from("external_method"),
+        WaitPolicy::Unbounded,
+    )
+    .take_raw_args(bytes)
 }
 
 #[cfg(test)]

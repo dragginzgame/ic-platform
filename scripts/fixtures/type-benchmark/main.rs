@@ -1,6 +1,4 @@
-use ic_platform::{
-    Account, Principal, Subaccount, account::ExternalAccount, principal::ExternalPrincipal,
-};
+use ic_platform::{Account, Principal, Subaccount, account::ExternalAccount};
 use std::{hint::black_box, mem::size_of, time::Instant};
 
 fn measure(name: &str, mut operation: impl FnMut()) {
@@ -16,10 +14,6 @@ fn measure(name: &str, mut operation: impl FnMut()) {
 
 fn main() {
     println!("size_owned_principal\t{}", size_of::<Principal>());
-    println!(
-        "size_external_principal\t{}",
-        size_of::<ExternalPrincipal>()
-    );
     println!("size_owned_account\t{}", size_of::<Account>());
     println!("size_external_account\t{}", size_of::<ExternalAccount>());
     println!("size_subaccount\t{}", size_of::<Subaccount>());

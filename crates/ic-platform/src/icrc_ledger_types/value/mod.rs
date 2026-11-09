@@ -4,12 +4,15 @@
     reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
 )]
 
-use candid::{CandidType, Deserialize, Int, Nat, Principal};
+use crate::candid_codec::{Int, Nat};
+use crate::principal::Principal;
 use num_bigint::BigUint;
 use num_traits::ToPrimitive;
+use serde::Deserialize;
 use serde::Serialize;
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
+use sha2_11 as sha2;
 use std::collections::BTreeMap;
 
 use super::account::Account;
@@ -22,7 +25,7 @@ pub type ICRC3Map = BTreeMap<String, ICRC3Value>;
 pub type Hash = [u8; 32];
 
 /// A value defined in [the ICRC-3 standard](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md#value).
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ICRC3Value {
     Blob(ByteBuf),
     Text(String),
@@ -48,7 +51,7 @@ impl ICRC3Value {
 }
 
 /// Deprecated, use `ICRC3Value` instead
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Value {
     Blob(ByteBuf),
     Text(String),

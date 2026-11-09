@@ -1,8 +1,10 @@
 //! Selected management DTOs maintained from DFINITY 0.11.0 (Apache-2.0).
 //! See provenance.json for the canister-use selection and source identity.
 
-use candid::{CandidType, Nat, Principal, Reserved};
+use crate::candid_codec::{Nat, Reserved};
+use crate::principal::Principal;
 use serde::{Deserialize, Serialize};
+mod codec;
 
 /// # Canister ID.
 pub type CanisterId = Principal;
@@ -12,18 +14,14 @@ pub type CanisterId = Principal;
 /// A record containing only a `canister_id` field.
 ///
 /// The argument or result type of various Management Canister methods are aliases of this type.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CanisterIdRecord {
     /// Canister ID.
     pub canister_id: CanisterId,
 }
 
 /// # Chunk hash.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct ChunkHash {
     /// The hash of an uploaded chunk
     #[serde(with = "serde_bytes")]
@@ -31,9 +29,7 @@ pub struct ChunkHash {
 }
 
 /// # Log Visibility.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub enum LogVisibility {
     /// Controllers.
     #[default]
@@ -48,9 +44,7 @@ pub enum LogVisibility {
 }
 
 /// # Snapshot Visibility.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub enum SnapshotVisibility {
     /// Controllers.
     #[default]
@@ -65,9 +59,7 @@ pub enum SnapshotVisibility {
 }
 
 /// # Status Visibility.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub enum StatusVisibility {
     /// Controllers.
     #[default]
@@ -82,9 +74,7 @@ pub enum StatusVisibility {
 }
 
 /// # Environment Variable.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct EnvironmentVariable {
     /// Name of the environment variable.
     pub name: String,
@@ -99,9 +89,7 @@ pub struct EnvironmentVariable {
 /// [`provisional_create_canister_with_cycles`](https://docs.internetcomputer.org/references/management-canister/#provisional_create_canister_with_cycles).
 ///
 /// All fields are `Option` types, allowing selective settings/updates.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct CanisterSettings {
     /// A list of at most 10 principals.
     ///
@@ -200,9 +188,7 @@ pub struct CanisterSettings {
 /// Represents the actual settings in effect.
 ///
 /// For return of [`canister_status`](https://docs.internetcomputer.org/references/management-canister/#canister_status).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct DefiniteCanisterSettings {
     /// Controllers of the canister.
     pub controllers: Vec<Principal>,
@@ -235,9 +221,7 @@ pub struct DefiniteCanisterSettings {
 /// # Create Canister Args
 ///
 /// Argument type of [`create_canister`](https://docs.internetcomputer.org/references/management-canister/#create_canister).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct CreateCanisterArgs {
     /// Canister settings.
     pub settings: Option<CanisterSettings>,
@@ -248,9 +232,7 @@ pub struct CreateCanisterArgs {
 /// # Update Settings Args
 ///
 /// Argument type of [`update_settings`](https://docs.internetcomputer.org/references/management-canister/#update_settings).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct UpdateSettingsArgs {
     /// Canister ID of the canister whose settings are to be updated.
     pub canister_id: CanisterId,
@@ -263,9 +245,7 @@ pub struct UpdateSettingsArgs {
 /// # Upload Chunk Args
 ///
 /// Argument type of [`upload_chunk`](https://docs.internetcomputer.org/references/management-canister/#upload_chunk).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct UploadChunkArgs {
     /// The canister whose chunk store the chunk will be uploaded to.
     pub canister_id: CanisterId,
@@ -278,18 +258,7 @@ pub struct UploadChunkArgs {
 ///
 /// See the upstream `InstallCodeArgs` contract.
 #[derive(
-    CandidType,
-    Serialize,
-    Deserialize,
-    Debug,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Clone,
-    Copy,
-    Default,
+    Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub enum CanisterInstallMode {
     /// A fresh install of a new canister.
@@ -308,18 +277,7 @@ pub enum CanisterInstallMode {
 ///
 /// See [`CanisterInstallMode::Upgrade`].
 #[derive(
-    CandidType,
-    Serialize,
-    Deserialize,
-    Debug,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Clone,
-    Copy,
-    Default,
+    Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub struct UpgradeFlags {
     /// If set to `true`, the `pre_upgrade` step will be skipped during the canister upgrade.
@@ -332,18 +290,7 @@ pub struct UpgradeFlags {
 ///
 /// See [`UpgradeFlags::wasm_memory_persistence`].
 #[derive(
-    CandidType,
-    Serialize,
-    Deserialize,
-    Debug,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Clone,
-    Copy,
-    Default,
+    Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub enum WasmMemoryPersistence {
     /// Preserve heap memory.
@@ -358,9 +305,7 @@ pub enum WasmMemoryPersistence {
 /// # Install Chunked Code Args
 ///
 /// Argument type of [`install_chunked_code`](https://docs.internetcomputer.org/references/management-canister/#install_chunked_code).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct InstallChunkedCodeArgs {
     /// Canister install mode.
     pub mode: CanisterInstallMode,
@@ -383,9 +328,7 @@ pub struct InstallChunkedCodeArgs {
 /// # Uninstall Code Args
 ///
 /// Argument type of [`uninstall_code`](https://docs.internetcomputer.org/references/management-canister/#uninstall_code).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct UninstallCodeArgs {
     /// Canister ID.
     pub canister_id: CanisterId,
@@ -396,9 +339,7 @@ pub struct UninstallCodeArgs {
 /// # Canister Status Result
 ///
 /// Result type of [`canister_status`](https://docs.internetcomputer.org/references/management-canister/#canister_status).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CanisterStatusResult {
     /// Status of the canister.
     pub status: CanisterStatusType,
@@ -433,9 +374,7 @@ pub struct CanisterStatusResult {
 /// Status of a canister.
 ///
 /// See [`CanisterStatusResult::status`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub enum CanisterStatusType {
     /// The canister is running.
     #[serde(rename = "running")]
@@ -453,9 +392,7 @@ pub enum CanisterStatusType {
 /// Memory metrics of a canister.
 ///
 /// See [`CanisterStatusResult::memory_metrics`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct MemoryMetrics {
     /// Represents the Wasm memory usage of the canister, i.e. the heap memory used by the canister's WebAssembly code.
     pub wasm_memory_size: Nat,
@@ -482,9 +419,7 @@ pub struct MemoryMetrics {
 /// Query statistics.
 ///
 /// See [`CanisterStatusResult::query_stats`].
-#[derive(
-    CandidType, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
-)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct QueryStats {
     /// Total number of query calls.
     pub num_calls_total: Nat,
@@ -499,9 +434,7 @@ pub struct QueryStats {
 /// # Canister Info Args
 ///
 /// Argument type of [`canister_info`](https://docs.internetcomputer.org/references/management-canister/#canister_info).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CanisterInfoArgs {
     /// Canister ID.
     pub canister_id: Principal,
@@ -513,9 +446,7 @@ pub struct CanisterInfoArgs {
 /// # Canister Info Result
 ///
 /// Result type of [`canister_info`](https://docs.internetcomputer.org/references/management-canister/#canister_info).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CanisterInfoResult {
     /// Total number of changes ever recorded in canister history.
     ///
@@ -536,9 +467,7 @@ pub struct CanisterInfoResult {
 /// Details about a canister change initiated by a user.
 ///
 /// See [`ChangeOrigin::FromUser`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct FromUserRecord {
     /// Principal of the user.
     pub user_id: Principal,
@@ -549,9 +478,7 @@ pub struct FromUserRecord {
 /// Details about a canister change initiated by a canister (called _originator_).
 ///
 /// See [`ChangeOrigin::FromCanister`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct FromCanisterRecord {
     /// Canister ID of the _originator_.
     pub canister_id: Principal,
@@ -567,9 +494,7 @@ pub struct FromCanisterRecord {
 /// Provides details on who initiated a canister change.
 ///
 /// See [`Change::origin`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum ChangeOrigin {
     /// The change was initiated by a user.
     #[serde(rename = "from_user")]
@@ -584,9 +509,7 @@ pub enum ChangeOrigin {
 /// Details about a canister creation.
 ///
 /// See [`ChangeDetails::Creation`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CreationRecord {
     /// Initial set of canister controllers.
     pub controllers: Vec<Principal>,
@@ -599,9 +522,7 @@ pub struct CreationRecord {
 /// The mode with which a canister is installed.
 ///
 /// See [`CodeDeploymentRecord::mode`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub enum CodeDeploymentMode {
     /// A fresh install of a new canister.
     #[serde(rename = "install")]
@@ -619,9 +540,7 @@ pub enum CodeDeploymentMode {
 /// Details about a canister code deployment.
 ///
 /// See [`ChangeDetails::CodeDeployment`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CodeDeploymentRecord {
     /// Deployment mode.
     pub mode: CodeDeploymentMode,
@@ -635,9 +554,7 @@ pub struct CodeDeploymentRecord {
 /// Details about loading canister snapshot.
 ///
 /// See [`ChangeDetails::LoadSnapshot`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct LoadSnapshotRecord {
     /// The canister ID of the canister from which the snapshot was loaded
     /// (if that canister ID is different than the canister ID onto which the snapshot is loaded).
@@ -661,9 +578,7 @@ pub struct LoadSnapshotRecord {
 /// is overridden to this value.
 ///
 /// See [`RenameCanisterRecord::rename_to`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct RenameToRecord {
     /// The new canister ID.
     pub canister_id: Principal,
@@ -688,9 +603,7 @@ pub struct RenameToRecord {
 /// referring to the canister ID before renaming are preserved.
 ///
 /// See [`ChangeDetails::RenameCanister`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct RenameCanisterRecord {
     /// The canister ID before renaming.
     pub canister_id: Principal,
@@ -710,9 +623,7 @@ pub struct RenameCanisterRecord {
 /// Details about updating canister controllers.
 ///
 /// See [`ChangeDetails::ControllersChange`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct ControllersChangeRecord {
     /// The complete new set of canister controllers.
     pub controllers: Vec<Principal>,
@@ -723,9 +634,7 @@ pub struct ControllersChangeRecord {
 /// Provides details on the respective canister change.
 ///
 /// See [`Change::details`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum ChangeDetails {
     /// The change was canister creation.
     #[serde(rename = "creation")]
@@ -750,9 +659,7 @@ pub enum ChangeDetails {
 /// # Change
 ///
 /// Represents a canister change as stored in the canister history.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct Change {
     /// The system timestamp (in nanoseconds since Unix Epoch) at which the change was performed.
     pub timestamp_nanos: u64,
@@ -767,7 +674,7 @@ pub struct Change {
 /// # HTTP Request Args
 ///
 /// Argument type of [`http_request`](https://docs.internetcomputer.org/references/management-canister/#http_request).
-#[derive(CandidType, Deserialize, Debug, PartialEq, Eq, Clone, Default)]
+#[derive(Deserialize, Debug, PartialEq, Eq, Clone, Default)]
 pub struct HttpRequestArgs {
     /// The requested URL.
     pub url: String,
@@ -803,12 +710,10 @@ pub struct HttpRequestArgs {
 /// # HTTP Request Result
 ///
 /// Result type of [`http_request`](https://docs.internetcomputer.org/references/management-canister/#http_request).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct HttpRequestResult {
     /// The response status (e.g. 200, 404).
-    pub status: candid::Nat,
+    pub status: Nat,
     /// List of HTTP response headers and their corresponding values.
     pub headers: Vec<HttpHeader>,
     /// The response’s body.
@@ -822,25 +727,7 @@ pub struct HttpRequestResult {
 ///
 /// See [`HttpRequestArgs::method`].
 #[derive(
-    CandidType,
-    Serialize,
-    Deserialize,
-    Debug,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Clone,
-    Copy,
-    Default,
-)]
-#[cfg_attr(
-    all(test, not(target_family = "wasm")),
-    expect(
-        clippy::upper_case_acronyms,
-        reason = "Native private schema tests retain the external HTTP method names."
-    )
+    Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub enum HttpMethod {
     /// GET
@@ -869,9 +756,7 @@ pub enum HttpMethod {
 /// Represents a HTTP header.
 ///
 /// See [`HttpRequestArgs::headers`] and [`HttpRequestResult::headers`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct HttpHeader {
     /// Name of the header.
     pub name: String,
@@ -889,7 +774,7 @@ pub struct HttpHeader {
 /// ```
 ///
 /// See [`HttpRequestArgs::transform`].
-#[derive(CandidType, Clone, Debug, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct TransformContext {
     /// `func(record { response : http_request_result; context : blob }) -> (http_request_result) query;`.
     pub function: TransformFunc,
@@ -899,17 +784,7 @@ pub struct TransformContext {
     pub context: Vec<u8>,
 }
 
-mod transform_func {
-    #![cfg_attr(
-        target_family = "wasm",
-        expect(
-            missing_docs,
-            reason = "The upstream function-reference macro emits undocumented members."
-        )
-    )]
-    use super::{HttpRequestResult, TransformArgs};
-    candid::define_function!(pub TransformFunc : (TransformArgs) -> (HttpRequestResult) query);
-}
+mod transform_func;
 
 /// # Transform Function.
 ///
@@ -930,7 +805,7 @@ pub use transform_func::TransformFunc;
 /// ```
 ///
 /// See [`TransformContext`].
-#[derive(CandidType, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TransformArgs {
     /// Raw response from remote service, to be transformed
     pub response: HttpRequestResult,
@@ -943,9 +818,7 @@ pub struct TransformArgs {
 /// # ECDSA Key ID.
 ///
 /// See [`EcdsaPublicKeyArgs::key_id`] and [`SignWithEcdsaArgs::key_id`].
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct EcdsaKeyId {
     /// Curve of the key.
     pub curve: EcdsaCurve,
@@ -955,18 +828,7 @@ pub struct EcdsaKeyId {
 
 /// # ECDSA Curve.
 #[derive(
-    CandidType,
-    Serialize,
-    Deserialize,
-    Debug,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Hash,
-    Clone,
-    Copy,
-    Default,
+    Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub enum EcdsaCurve {
     /// secp256k1
@@ -990,9 +852,7 @@ impl From<EcdsaCurve> for u32 {
 /// # ECDSA Public Key Args.
 ///
 /// Argument type of [`ecdsa_public_key`](https://docs.internetcomputer.org/references/management-canister/#ecdsa_public_key).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct EcdsaPublicKeyArgs {
     /// Canister id, default to the canister id of the caller if `None`.
     pub canister_id: Option<CanisterId>,
@@ -1005,9 +865,7 @@ pub struct EcdsaPublicKeyArgs {
 /// # ECDSA Public Key Result.
 ///
 /// Result type of [`ecdsa_public_key`](https://docs.internetcomputer.org/references/management-canister/#ecdsa_public_key).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct EcdsaPublicKeyResult {
     /// An ECDSA public key encoded in SEC1 compressed form.
     #[serde(with = "serde_bytes")]
@@ -1020,9 +878,7 @@ pub struct EcdsaPublicKeyResult {
 /// # Sign With ECDSA Args.
 ///
 /// Argument type of [`sign_with_ecdsa`](https://docs.internetcomputer.org/references/management-canister/#sign_with_ecdsa).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct SignWithEcdsaArgs {
     /// Hash of the message with length of 32 bytes.
     #[serde(with = "serde_bytes")]
@@ -1036,9 +892,7 @@ pub struct SignWithEcdsaArgs {
 /// # Sign With ECDSA Result.
 ///
 /// Result type of [`sign_with_ecdsa`](https://docs.internetcomputer.org/references/management-canister/#sign_with_ecdsa).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct SignWithEcdsaResult {
     /// Encoded as the concatenation of the SEC1 encodings of the two values `r` and `s`.
     #[serde(with = "serde_bytes")]
@@ -1053,9 +907,7 @@ pub type SnapshotId = Vec<u8>;
 /// # Snapshot.
 ///
 /// A snapshot of the canister's state at a given point in time.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct Snapshot {
     /// Snapshot ID.
     pub id: SnapshotId,
@@ -1068,9 +920,7 @@ pub struct Snapshot {
 /// # Delete Canister Snapshot Args.
 ///
 /// Argument type of [`delete_canister_snapshot`](https://docs.internetcomputer.org/references/management-canister/#delete_canister_snapshot).
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct DeleteCanisterSnapshotArgs {
     /// Canister ID.
     pub canister_id: CanisterId,
@@ -1083,9 +933,7 @@ pub struct DeleteCanisterSnapshotArgs {
 /// How a canister snapshot was created.
 ///
 /// See the upstream `ReadCanisterSnapshotMetadataResult::source` contract.
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,
-)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum SnapshotSource {
     /// The snapshot was taken from a running canister.
     #[serde(rename = "taken_from_canister")]

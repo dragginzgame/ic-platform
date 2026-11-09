@@ -4,6 +4,32 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.21.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Remove the macro package's `candid_query` and `candid_update` exports. Use
+  `codec_query` / `codec_update` through Platform's `candid-codec-endpoint`
+  adapter with explicit decode/reply limits, arity and empty-envelope policy.
+  The existing generator retains guard ordering and the sole Runtime executor;
+  no upstream Candid compatibility macro remains.
+
+### 🧪 Testing
+
+- Inherit published Toko Tooling 0.37.1 in Runtime, macros and the singleton guard.
+  Release all three packages together with the exact guard requirement.
+
+### 🛠️ Tooling
+
+- Remove downstream Timers composition from Platform release admission and
+  qualification-lock custody. Retain standalone Runtime and singleton-refusal
+  coverage; Scheduling owns scheduler compatibility tests.
+
+- Adopt published Toko Tooling 0.37.1, migrating to `TOKO-TOOLING.md`,
+  `.toko-tooling.snapshot`, `toko-tooling-*` commands and Toko LOC metadata.
+  CI and publication adapters admit the renamed snapshot before effects;
+  existing product release requirements remain unchanged.
+
 ## [0.20.3] - 2026-11-08
 
 ### 🛠️ Tooling

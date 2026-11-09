@@ -145,7 +145,7 @@ unclassified source, including inline test blocks. The report counts each source
 path once and reports macro expansion limits; it is not a linked-Wasm metric.
 Owned test files use `tests.rs`, `*_tests.rs` or `tests/`; the main workspace
 has no singular `test/` or `test.rs` paths. Generated qualification and benchmark
-packages declare `[package.metadata.shared-tooling.loc]` with the appropriate
+packages declare `[package.metadata.toko-tooling.loc]` with the appropriate
 `category`, even when their library target carries a consumer proof. Use
 `--manifest /absolute/path/to/Cargo.toml` to classify an independent generated
 workspace explicitly; the default report covers the five main members only. Select one member with
@@ -181,7 +181,7 @@ TypeScript, adapters and packed consumers. Node/npm setup identities live in
 selects its development compiler independently.
 
 `bash scripts/ci/check-advisories.sh online https://github.com/RustSec/advisory-db.git target/platform-advisory-attempt`
-audits the workspace, owner-runtime and Timers-composition locks independently without compiling feature matrices. Prepare
+audits the workspace and owner-runtime locks independently without compiling feature matrices. Prepare
 `cargo-audit` explicitly first (CI selects 0.22.2) and prepare common host tools;
 the destination must be new. Online mode performs three locked dependency fetches
 in a fresh `CARGO_HOME` under the evidence directory, including the runtime's
@@ -371,9 +371,9 @@ the source bundle in its cargo-machete metadata; no Rust import or helper packag
 is needed. Vendored sources and intentionally isolated fixture manifests retain
 their own scope. Tooling stays outside normal/build production graphs.
 Cargo.lock records the selected archive checksum and
-[the snapshot](../.shared-tooling.snapshot) records installed payload hashes.
+[the snapshot](../.toko-tooling.snapshot) records installed payload hashes.
 After changing the root pin, run `cargo update -p toko-tooling`, then
-`make shared-tooling-update` (or `make shared-tooling-install`) to install that
+`make toko-tooling-update` (or `make toko-tooling-install`) to install that
 selection and prepare/check its tools. These Make commands do not edit Cargo.lock.
 Status and check commands compare all member declarations, Cargo.lock and the
 installation offline. Custom publication, release metadata and frozen setup
@@ -387,7 +387,7 @@ See [the call contract](../crates/ic-platform-runtime/src/call/README.md). `ic-p
 proc-macro support package. Its Syn/Quote dependencies generate consumer
 entrypoints. Principal, Candid, the host parser, Agent, certification, raw IC calls,
 management/ledger DTOs, signature/BLS APIs, the executor and Serde are production
-dependencies, including optional and derive use. Testkit and Timers are
+dependencies, including optional and derive use. Testkit is
 tests/tooling entries used by the independent fixture. Its host driver selects
 Platform's `certification-cbor` decoder instead of a direct generic CBOR codec.
 Optional parser
@@ -425,7 +425,7 @@ features, actual defaults, every individual feature, every feature pair, all
 features together and explicit critical groups. Those groups cover the runtime
 with its prerequisites, runtime with management/ledger/certificate DTOs, combined
 signature capabilities, runtime with all native-only leaves, and all canister
-features without host leaves. The separate CDK/Timers runtime qualification and
+features without host leaves. The separate standalone runtime qualification and
 release runtime-lock checks are unchanged. It enforces empty defaults
 and exact qualified executor/system requirements. It rejects unreviewed feature
 names until the matrix and isolation policy are updated, admits the owned
@@ -522,19 +522,11 @@ compiling/starting a server. Source fingerprints protect the imported call,
 callback/trap cleanup and protected-spawn regions; mutation cases test refusal.
 The sole executor and IC0 implementation live in `ic-platform-runtime`; the facade
 delegates to that owner. The owner fixture
-has no Timers dependency. `make check-runtime-composition` reuses the fixture with
-Timers 0.37.0, adding dispatch, callback trap/cleanup, cancellation, rearm and
-post-upgrade dispatch. `make check-runtime-all` runs both paths even if one fails.
-PR CI reports independent jobs; release verification requires both paths to pass.
-The prepared release version must also pass composition graph admission, preventing
-a version bump from silently invalidating the tested scheduler selection.
-No scheduler version mismatch waives that release requirement. This split does
-not change runtime package identity or executor singleton admission.
-After preparing both profiles' caches, run
-`bash scripts/ci/test-runtime-independence.sh --prepare` once to fetch the
-historical Timers input. Then `make check-runtime-independence` exercises
-the real resolver with incompatible Timers 0.35.1 in a disposable copy: owner
-graphs must pass and composition must fail the singleton constraint.
+has no Timers dependency. `make check-runtime-all` runs standalone qualification,
+including raw/prepared calls, both codecs, traps, cancellation and upgrades.
+Scheduling owns Timers dispatch/rearm and shared-executor composition tests.
+Platform release admission never selects a downstream scheduler. Singleton
+refusal remains covered by the independent executor guard fixtures.
 
 Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
 `IC_TESTKIT_POCKET_IC_URL`. Owned native fixtures select published Testkit 0.92
@@ -547,9 +539,7 @@ is a native fixture dependency and never enters the canister graph.
 The harness retains Testkit's bounded startup and
 teardown. It never installs a server implicitly. Artifacts, sources and metadata
 remain in `target/cdk-runtime.*`. Normal runs use the maintained frozen selection
-in `scripts/fixtures/cdk-runtime/Cargo.lock` (owner) or
-`scripts/fixtures/timers-runtime/Cargo.lock` (composition). Prefix the runtime
-script's mode with `--timers` to select composition; explicit `--refresh-lock` is a
+in `scripts/fixtures/cdk-runtime/Cargo.lock`. Explicit `--refresh-lock` is a
 reviewed dependency refresh that preserves existing foreign pins and resolves
 necessary manifest changes, not normal validation. Release metadata rendering
 runs that same operation offline inside its transaction; the native Testkit
@@ -560,7 +550,7 @@ protocol selections without starting a server. Runtime qualification remains an
 explicit target outside local full CI. Native macOS and live IC are separate
 qualification from Linux PocketIC or Wasm compilation.
 
-Owner and Timers composition each retain all four raw/prepared-call ×
+Standalone qualification retains all four raw/prepared-call ×
 Wire/external-Candid profiles on the declared compiler. Driver tests, exact Wasm
 artifacts, graph isolation and lifecycle tests remain separate obligations.
 No measured Wasm-size reduction is claimed.

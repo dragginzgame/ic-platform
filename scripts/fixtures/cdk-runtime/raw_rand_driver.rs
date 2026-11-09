@@ -1,6 +1,7 @@
 //! Focused raw_rand interoperability and unchanged Runtime behavior.
 mod pocketic_support;
-use ic_platform::{candid, principal::ExternalPrincipal as Principal, raw_rand};
+use ic_platform::{candid_codec, raw_rand};
+use ic_testkit::pocket_ic::CanisterId as Principal;
 use std::time::Duration;
 
 fn main() {
@@ -22,13 +23,19 @@ async fn run() {
                 .await
                 .unwrap();
             let random = raw_rand::decode(&bytes).unwrap();
-            let reference: Vec<u8> = candid::decoder::decode_one_with_config(
+            let reference: Vec<u8> = candid_codec::decoder::decode_one(
                 &bytes,
-                &candid::decoder::DecoderConfig::new(),
+                candid_codec::decoder::Limits {
+                    bytes: 256,
+                    header: 64,
+                    types: 8,
+                    work: 4096,
+                    allocation: 256,
+                },
             )
             .unwrap();
             assert_eq!(reference, random);
-            assert_eq!(bytes, candid::contract::encode_one(reference).unwrap());
+            assert_eq!(bytes, candid_codec::encode_one(&reference, 256).unwrap());
         }
         assert_eq!(
             pic.update_call(id, Principal::anonymous(), "entropy", vec![1])

@@ -1,6 +1,7 @@
 //! Selected ic-ledger-types 0.16.0 derivation; see NOTICE.md.
-use candid::Principal;
+use crate::principal::Principal;
 use sha2::Digest;
+use sha2_11 as sha2;
 
 struct Subaccount([u8; 32]);
 struct AccountIdentifier([u8; 32]);
@@ -32,7 +33,7 @@ impl AccountIdentifier {
 /// contain exactly 32 bytes, enforced by its type. Available on native and Wasm
 /// through the existing `icp-ledger-types` feature.
 pub fn account_identifier(owner: crate::Principal, subaccount: &[u8; 32]) -> [u8; 32] {
-    AccountIdentifier::new(&Principal::from(owner), &Subaccount(*subaccount)).0
+    AccountIdentifier::new(&owner, &Subaccount(*subaccount)).0
 }
 
 #[cfg(test)]

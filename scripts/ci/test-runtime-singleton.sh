@@ -33,7 +33,7 @@ name = "runtime-singleton-proof"
 version = "0.0.0"
 edition = "2024"
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [workspace]
 [dependencies]
@@ -55,7 +55,7 @@ name = "runtime-singleton-proof"
 version = "0.0.0"
 edition = "2024"
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [workspace]
 [dependencies]
@@ -86,7 +86,7 @@ manifest '"ic0"'
 cargo check --manifest-path "$fixture/Cargo.toml" --frozen \
     --target-dir "$fixture/target" > "$fixture/ic0-check.log" 2>&1
 # Reuse the successful native lock: enabling runtime later must still refuse.
-for features in executor runtime candid-endpoint; do
+for features in executor runtime candid-codec-endpoint; do
     manifest "$(printf '"%s"' "$features" | sed 's/,/", "/g')"
     if cargo tree --manifest-path "$fixture/Cargo.toml" --offline \
         > "$fixture/$features.tree" 2> "$fixture/$features.log"; then
@@ -123,7 +123,7 @@ name = "runtime-singleton-proof"
 version = "0.0.0"
 edition = "2024"
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [workspace]
 [dependencies]
@@ -159,7 +159,7 @@ name = "runtime-singleton-proof"
 version = "0.0.0"
 edition = "2024"
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [workspace]
 [dependencies]

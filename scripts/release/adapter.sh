@@ -11,7 +11,7 @@ export RELEASE_GROUP
 case "$operation" in
     version|files) exec bash scripts/release/group.sh "$operation" ;;
 esac
-make --no-print-directory shared-tooling-check
+make --no-print-directory toko-tooling-check
 projection=plan
 case "$operation" in preflight|prepare) projection=ready-plan ;; esac
 plan="$(bash scripts/release/group.sh "$projection")"
@@ -50,9 +50,8 @@ render_platform_metadata() {
         fi
         # A minor owner bump may leave a native supplier needing the preceding
         # registry owner. Preserve foreign pins; resolve that distinction offline
-        # inside the transaction before installing either qualification lock.
+        # inside the transaction before installing the qualification lock.
         CARGO_NET_OFFLINE=true bash scripts/ci/check-platform-runtime.sh --refresh-lock || exit
-        CARGO_NET_OFFLINE=true bash scripts/ci/check-platform-runtime.sh --timers --refresh-lock || exit
         # Match the normal commit hook before the transaction binds candidate
         # bytes. The metadata editor can compact arrays that cargo-sort expands.
         cargo sort --workspace --grouped || exit

@@ -2,10 +2,7 @@
 //!
 //! Adapted from ic_principal 0.1.5 under Apache-2.0; see NOTICE.md.
 //! No Candid marker handling or generic range stepping is implemented.
-//! `principal-external` adds registry Principal conversions; `principal-self-authenticating`
-//! separately selects upstream public-key hashing. Required Candid DTOs use the
-//! external Principal, converting at the boundary:
-//!
+//! Optional self-authentication selects the unchanged upstream public-key hashing.
 
 #[cfg(feature = "principal-self-authenticating")]
 mod self_authenticating;
@@ -343,27 +340,6 @@ impl<'de> serde::Deserialize<'de> for Principal {
     }
 }
 
-/// Original registry identity required by external IC clients and DTOs.
-/// Convert explicitly at the boundary; owned application payloads use [Principal].
-/// This capability includes upstream Serde without selecting Candid or hashing.
-#[cfg(feature = "principal-external")]
-pub use ic_principal::Principal as ExternalPrincipal;
-/// Original parse errors for the explicitly external principal identity.
-#[cfg(feature = "principal-external")]
-pub use ic_principal::PrincipalError as ExternalPrincipalError;
-
-#[cfg(feature = "principal-external")]
-impl From<ExternalPrincipal> for Principal {
-    fn from(value: ExternalPrincipal) -> Self {
-        Self::from_slice(value.as_slice())
-    }
-}
-#[cfg(feature = "principal-external")]
-impl From<Principal> for ExternalPrincipal {
-    fn from(value: Principal) -> Self {
-        Self::from_slice(value.as_slice())
-    }
-}
 impl Principal {
     fn write_text<'a>(&self, output: &'a mut [u8; Self::MAX_LENGTH_IN_TEXT]) -> &'a str {
         let mut input = [0u8; 33];

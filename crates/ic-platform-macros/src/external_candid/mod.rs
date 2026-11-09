@@ -3,12 +3,14 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{ItemFn, LitStr, Path, ext::IdentExt, parse::Parser};
 
-pub(crate) fn expand(
+pub(crate) fn expand_owned(
     query: bool,
     attr: TokenStream,
     item: TokenStream,
 ) -> syn::Result<TokenStream> {
     let mut limits = None;
+    let mut reply_bytes = None;
+    let mut arity = None;
     let mut empty = None;
     let mut name = None;
     let mut guards = Vec::new();
@@ -25,12 +27,20 @@ pub(crate) fn expand(
             return Ok(());
         }
         match key.as_str() {
-            "limits" | "empty_args" | "name" | "guard" | "platform" => {}
+            "limits" | "empty_args" | "name" | "guard" | "platform" | "reply_bytes" | "arity" => {}
             _ => return Err(meta.error(format!("unsupported external Candid option `{key}`"))),
         }
         let value: LitStr = meta.value()?.parse()?;
         match key.as_str() {
             "limits" => limits = Some(value.parse::<Path>()?),
+            "reply_bytes" => reply_bytes = Some(value.parse::<Path>()?),
+            "arity" => {
+                arity = Some(match value.value().as_str() {
+                    "exact" => quote!(Exact),
+                    "compatible" => quote!(Compatible),
+                    _ => return Err(meta.error("arity must be exact or compatible")),
+                })
+            }
             "empty_args" => {
                 empty = Some(match value.value().as_str() {
                     "reject" => quote!(Reject),
@@ -52,6 +62,12 @@ pub(crate) fn expand(
         limits.ok_or_else(|| syn::Error::new_spanned(&item, "external Candid requires limits"))?;
     let empty = empty
         .ok_or_else(|| syn::Error::new_spanned(&item, "external Candid requires empty_args"))?;
+    if reply_bytes.is_none() || arity.is_none() {
+        return Err(syn::Error::new_spanned(
+            &item,
+            "owned Candid requires reply_bytes and arity",
+        ));
+    }
     if composite && !query {
         return Err(syn::Error::new_spanned(
             &item,
@@ -81,23 +97,16 @@ pub(crate) fn expand(
     let (encode_param, encode_value) = match crate::signature::ReturnShape::of(&function.sig) {
         crate::signature::ReturnShape::Unit => (
             quote!(),
-            quote!(#platform::candid::contract::encode_args(())),
+            quote!(#platform::candid_codec::arguments::encode_args(&(), #reply_bytes)),
         ),
         crate::signature::ReturnShape::Tuple(ty, _) => (
             quote!(value: #ty),
-            quote!(#platform::candid::contract::encode_args(value)),
+            quote!(#platform::candid_codec::arguments::encode_args(&value, #reply_bytes)),
         ),
         crate::signature::ReturnShape::Scalar(ty) => (
             quote!(value: #ty),
-            quote!(#platform::candid::contract::encode_one(value)),
+            quote!(#platform::candid_codec::encode_one(&value, #reply_bytes)),
         ),
-    };
-    let mode = if composite {
-        quote!(composite_query)
-    } else if query {
-        quote!(query)
-    } else {
-        quote!(update)
     };
     let method = name.unwrap_or_else(|| LitStr::new(&ident.to_string(), ident.span()));
     guards.push(syn::parse_quote!(#admit));
@@ -110,17 +119,29 @@ pub(crate) fn expand(
         composite,
         ..Default::default()
     };
-    let declared = quote! { #[cfg_attr(not(target_family = "wasm"), #platform::candid::endpoint::__candid_method(#mode, rename = #method))] #item };
-    let entry = crate::export::external_entry(query, attrs, function, declared)?;
+    let entry = crate::export::external_entry(query, attrs, function, item)?;
+    let admission = {
+        quote! {
+            let limits: #platform::candid_codec::decoder::Limits = #limits;
+            #platform::candid_codec::endpoint::admit_len(#platform::ic0::msg_arg_data_size(), limits)
+                .unwrap_or_else(|error| #platform::cdk::api::trap(::std::format!("{error:?}")));
+        }
+    };
+    let decoding = {
+        quote! {
+            let value: #tuple = #platform::candid_codec::endpoint::decode(
+                &bytes, #limits, #platform::candid_codec::endpoint::EmptyArgs::#empty,
+                #platform::candid_codec::decoder::Arity::#arity,
+            ).unwrap_or_else(|error| #platform::cdk::api::trap(::std::format!("{error:?}")));
+        }
+    };
     Ok(quote! {
         fn #admit() -> ::std::result::Result<(), ::std::string::String> {
-            let limits: #platform::candid::arguments::ArgumentLimits = #limits;
-            limits.admit_len(#platform::ic0::msg_arg_data_size()).unwrap_or_else(|error| #platform::cdk::api::trap(error.to_string()));
+            #admission
             Ok(())
         }
         fn #decode(bytes: ::std::vec::Vec<u8>) -> #decode_type {
-            let limits: #platform::candid::arguments::ArgumentLimits = #limits;
-            let value: #tuple = limits.decode(&bytes,#platform::candid::arguments::EmptyArgs::#empty).unwrap_or_else(|error| #platform::cdk::api::trap(error.to_string()));
+            #decoding
             #decode_result
         }
         fn #encode(#encode_param) -> ::std::vec::Vec<u8> {

@@ -23,20 +23,20 @@ fi
 echo 'Long closure names retain distinct short cache IDs'
 # Native-only leaves may be removed from a Wasm key only after exact admission.
 native_metadata="$(printf '%s' "$metadata" | "$jq" '
-  .[0].packages[0] |= (.features += {principal:[],"principal-external":["principal"],agent:["principal-external","dep:ic-agent"],"candid-parser":["principal-external","dep:candid_parser"],certification:[],"certification-cbor":["certification"],"ic-protocol":["principal-external","certification-cbor","dep:ic-transport-types"]} |
-  .dependencies = ["ic-agent","candid_parser","ic-transport-types"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
-selections='["none","default","agent","agent,candid-parser","agent,cdk"]'
+  .[0].packages[0] |= (.features += {principal:[],agent:["principal","dep:ic-agent"],certification:[],"certification-cbor":["certification"],"ic-protocol":["principal","certification-cbor","dep:ic-transport-types"]} |
+  .dependencies = ["ic-agent","ic-transport-types"] | .dependencies |= map({name:.,optional:true,target:"cfg(not(target_family = \"wasm\"))"}))')"
+selections='["none","default","agent","agent,cdk"]'
 actual="$(printf '%s' "$selections" | "$jq" -r --arg target wasm32-unknown-unknown --argjson metadata "$native_metadata" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
-expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tprincipal,principal-external\nagent,candid-parser\tprincipal,principal-external\nagent,cdk\tcdk,executor,ic0,principal,principal-external')"
+expected="$(printf 'none\tnone\ndefault\tdefault\nagent\tprincipal\nagent,cdk\tcdk,executor,ic0,principal')"
 [[ "$actual" == "$expected" ]] || { echo 'Unexpected target-aware closure' >&2; exit 1; }
-for feature in agent candid-parser ic-protocol; do
+for feature in agent ic-protocol; do
     # shellcheck disable=SC2016 # $feature is a jq variable.
     changed="$(printf '%s' "$native_metadata" | "$jq" --arg feature "$feature" '.[0].packages[0].features[$feature] += ["candid"]')"
     if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$changed" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
         echo "Admitted non-leaf feature $feature" >&2; exit 1
     fi
 done
-for change in '.dependencies[0].target = null' '.dependencies[1].optional = false' '.dependencies += [.dependencies[2]]' '.dependencies[0].rename = "renamed"'; do
+for change in '.dependencies[0].target = null' '.dependencies[1].optional = false' '.dependencies += [.dependencies[1]]' '.dependencies[0].rename = "renamed"'; do
     changed="$(printf '%s' "$native_metadata" | "$jq" ".[0].packages[0] |= ($change)")"
     if printf '%s' "$selections" | "$jq" --arg target wasm32-unknown-unknown --argjson metadata "$changed" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq >/dev/null 2>&1; then
         echo "Admitted changed dependency contract: $change" >&2; exit 1
@@ -55,7 +55,7 @@ done
 
 cargo metadata --no-deps --format-version 1 --locked --offline > "$fixture/metadata.json"
 actual="$(printf '%s' '["none","executor","agent","agent,executor"]' | "$jq" -r --arg target wasm32-unknown-unknown --slurpfile metadata "$fixture/metadata.json" --slurpfile policy scripts/ci/platform-feature-policy.json -f scripts/ci/platform-feature-closures.jq)"
-expected="$(printf 'none\tnone\nexecutor\texecutor,ic0\nagent\tprincipal,principal-external\nagent,executor\texecutor,ic0,principal,principal-external')"
+expected="$(printf 'none\tnone\nexecutor\texecutor,ic0\nagent\tprincipal\nagent,executor\texecutor,ic0,principal')"
 [[ "$actual" == "$expected" ]] || { echo 'Actual Cargo native-leaf closure failed' >&2; exit 1; }
 echo 'Actual native/Wasm closures and explicit prerequisite guards passed'
 

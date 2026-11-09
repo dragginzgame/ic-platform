@@ -14,7 +14,6 @@ mkdir -p target
 fixture="$(mktemp -d "$root/target/cdk-runtime.XXXXXX")"
 mkdir -p "$fixture/crates/canister/src/fixtures" "$fixture/apps/driver/src"
 lock="scripts/fixtures/cdk-runtime/Cargo.lock"
-if [[ "$qualification" == timers ]]; then lock="scripts/fixtures/timers-runtime/Cargo.lock"; fi
 printf '%s\n' "$qualification" > "$fixture/qualification"
 printf '%s\n' "$mode" > "$fixture/operation"
 finish_runtime() {
@@ -55,13 +54,9 @@ if [[ -n "$published" ]]; then
     facade_version="$("$root/.tools/host/bin/yq" -p toml -o json -r '.package.version' "$input_root/crates/ic-platform/Cargo.toml")"
     selection="version = \"=$facade_version\""
 fi
-timers=""
-if [[ "$qualification" == timers ]]; then
-    timers="$(platform_dependency ic-timers)"
-fi
 PLATFORM_FIXTURE_RUNTIME="$runtime_selection" PLATFORM_FIXTURE_MSRV="$msrv" PLATFORM_FIXTURE_PLATFORM="$selection" \
 PLATFORM_FIXTURE_TESTKIT="$testkit" PLATFORM_FIXTURE_WIRE="$wire" PLATFORM_FIXTURE_SERDE="$serde" \
-PLATFORM_FIXTURE_TOKIO="$tokio" PLATFORM_FIXTURE_TIMERS="$timers" \
+PLATFORM_FIXTURE_TOKIO="$tokio" \
     perl "$input_root/scripts/ci/render-runtime-fixture.pl" "$input_root/scripts/fixtures/cdk-runtime" "$fixture" \
         "$qualification" "$selection_mode" "$adapter_mode"
 cp "$input_root"/scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
@@ -70,7 +65,7 @@ mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
 cp "$input_root"/crates/ic-platform/tests/management_consumer.rs "$fixture/crates/canister/src/management_proof/mod.rs"
 cp -R "$input_root"/crates/ic-platform/tests/support "$fixture/crates/canister/src/management_proof/"
 cp "$input_root"/crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/src/management_proof/fixtures/"
-cp -R "$input_root"/scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister,execution,cycles,stable_checks,system_checks,timer_checks} "$fixture/crates/canister/src/"
+cp -R "$input_root"/scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister,execution,cycles,stable_checks,system_checks} "$fixture/crates/canister/src/"
 cp "$input_root"/scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
 cp -R "$input_root/scripts/fixtures/cdk-runtime/pocketic_support" "$fixture/apps/driver/src/"
 cp "$input_root"/scripts/fixtures/cdk-runtime/driver/tests.rs "$fixture/apps/driver/src/tests.rs"
@@ -96,10 +91,6 @@ fi
 if [[ -n "$published" ]]; then
     # Resolve only the disposable lock from explicitly prepared registry caches.
     cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
-    "$root/.tools/host/bin/jq" -e --arg version "$published" --argjson runtime_owner true --argjson require_generator true -f "$root/scripts/ci/published-runtime.jq" "$fixture/metadata.json" > /dev/null || {
-        echo 'Published runtime requires the exact registry Runtime/generator and no local replacements' >&2
-        exit 1
-    }
 fi
 cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
@@ -118,7 +109,6 @@ select_runtime_profile() {
             selected_external=1 ;;
         *) echo "Unknown runtime profile: $1" >&2; exit 2 ;;
     esac
-    if [[ "$qualification" == timers ]]; then selected_features+=(--features timers-composition); fi
     if [[ "$transport" == owned ]]; then selected_features+=(--features prepared-call); fi
     selected_artifact="$protocol"
     if [[ "$transport_mode" == prepared ]]; then selected_artifact="$1"; fi
@@ -126,26 +116,28 @@ select_runtime_profile() {
 for profile in "${profiles[@]}"; do
     for graph_target in "$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do
         select_runtime_profile "$profile"
-        if [[ "$graph_target" != wasm* && -n "$selected_external" ]]; then
-            selected_admission+=(--native-management)
-        fi
         cargo tree --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${selected_features[@]+"${selected_features[@]}"} --target "$graph_target" --edges normal,build --prefix none > "$fixture/$graph_target-$transport-$protocol.graph"
+        cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter-platform "$graph_target" \
+            ${selected_features[@]+"${selected_features[@]}"} --format-version 1 > "$fixture/$graph_target-$transport-$protocol.metadata.json"
+        required=ic-platform-runtime,ic-platform-macros,ic-platform-runtime-guard
+        if [[ "$protocol" == external-candid ]]; then required+=,ic-platform; fi
+        bash "$root/scripts/ci/check-qualification-identities.sh" "$fixture/$graph_target-$transport-$protocol.metadata.json" \
+            "$root" platform-runtime-canister "$required" "$selection_mode" "$published" \
+            > "$fixture/$graph_target-$transport-$protocol.identities.json"
         bash scripts/ci/check-platform-runtime-graph.sh "$fixture/$graph_target-$transport-$protocol.graph" ${selected_admission[@]+"${selected_admission[@]}"}
         if [[ "$protocol" == wire ]] && grep -q '^ic-platform ' "$fixture/$graph_target-$transport-$protocol.graph"; then
             echo 'Runtime-only canister acquired the crypto facade' >&2; exit 1
         fi
-        if [[ "$qualification" == owner ]]; then
-            if grep -q '^ic-timers ' "$fixture/$graph_target-$transport-$protocol.graph"; then
-                echo 'Owner runtime proof acquired Timers' >&2; exit 1
-            fi
-        else
-            grep -q '^ic-timers ' "$fixture/$graph_target-$transport-$protocol.graph" || { echo 'Composition proof omitted Timers' >&2; exit 1; }
+        if grep -q '^ic-timers ' "$fixture/$graph_target-$transport-$protocol.graph"; then
+            echo 'Owner runtime proof acquired Timers' >&2; exit 1
         fi
         if [[ "$graph_target" == wasm* ]] && grep -q '^pretty ' "$fixture/$graph_target-$transport-$protocol.graph"; then
             echo 'Canister runtime acquired an unselected Candid service printer' >&2; exit 1
         fi
     done
 done
+bash "$root/scripts/ci/check-qualification-identities.sh" "$fixture/metadata.json" "$root" \
+    platform-runtime-driver ic-platform,ic-testkit "$selection_mode" "$published" > "$fixture/driver-identities.json"
 if [[ "$mode" == --check-graph ]]; then
     printf 'Runtime graph evidence retained at %s\n' "$fixture"
     exit 0
@@ -156,7 +148,6 @@ mkdir -p "$fixture/artifacts"
 # shellcheck source=scripts/ci/retain-build-artifact.sh
 source "$root/scripts/ci/retain-build-artifact.sh"
 driver_features=()
-if [[ "$qualification" == timers ]]; then driver_features=(--features timers-composition); fi
 build_runtime_driver() {
     cargo +"$msrv" clippy --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver --all-targets ${driver_features[@]+"${driver_features[@]}"} -- -D warnings || return
     cargo +"$msrv" test --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-driver ${driver_features[@]+"${driver_features[@]}"} || return

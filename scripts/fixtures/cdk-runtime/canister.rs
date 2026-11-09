@@ -1,6 +1,4 @@
 //! A standalone Wire canister consuming Platform's owned runtime and generator.
-#[cfg(feature = "external-candid")]
-use ic_platform::candid::contract;
 use ic_platform_runtime::{
     Principal,
     cdk::{api, futures},
@@ -16,8 +14,6 @@ mod cycles;
 mod execution;
 mod stable_checks;
 mod system_checks;
-#[cfg(feature = "timers-composition")]
-mod timer_checks;
 mod transport;
 
 #[cfg(feature = "external-candid")]
@@ -64,8 +60,6 @@ fn buffer_copy(baseline: bool, _payload: Vec<u8>) -> (u64, Vec<u8>) {
 )]
 fn initialize(value: u64) {
     VALUE.set(value);
-    #[cfg(feature = "timers-composition")]
-    ic_timers::initialize_runtime().unwrap();
 }
 
 #[ic_platform_runtime::cdk::post_upgrade(
@@ -74,16 +68,30 @@ fn initialize(value: u64) {
 fn after_upgrade(value: u64) {
     #[cfg(feature = "external-candid")]
     {
-        // Fixture-owned legacy bytes: deliberately retain the old no-finalization
-        // decoding policy. Platform no longer owns a checkpoint API.
-        let mut bytes = vec![0; (api::stable_size() * 65_536) as usize];
+        // Existing fixed checkpoint bytes retain their original Candid envelope.
+        // This fixture knows the fixed tuple length; stable-page padding is not input.
+        let size =
+            ic_platform::candid_codec::arguments::encode_args(&(false, false, 0u64, 0u64), 64)
+                .unwrap()
+                .len();
+        let mut bytes = vec![0; size];
         ic_platform_runtime::cdk::stable::stable_read(0, &mut bytes);
-        let mut decoder = ic_platform::candid::decoder::IDLDeserialize::new(&bytes).unwrap();
-        CHECKPOINT.set(contract::ArgumentDecoder::decode(&mut decoder).unwrap());
+        CHECKPOINT.set(
+            ic_platform::candid_codec::decoder::decode_args(
+                &bytes,
+                ic_platform::candid_codec::decoder::Limits {
+                    bytes: 64,
+                    header: 32,
+                    types: 8,
+                    work: 1024,
+                    allocation: 1024,
+                },
+                ic_platform::candid_codec::decoder::Arity::Exact,
+            )
+            .unwrap(),
+        );
     }
     VALUE.set(value);
-    #[cfg(feature = "timers-composition")]
-    ic_timers::initialize_runtime().unwrap();
 }
 
 struct Cleanup;
@@ -113,7 +121,11 @@ fn save_checkpoint() {
     {
         // This fixed fixture record fits one page. Preserve its original Candid
         // bytes without introducing a production checkpoint replacement.
-        let bytes = contract::encode_args((true, false, VALUE.get(), CLEANED.get())).unwrap();
+        let bytes = ic_platform::candid_codec::arguments::encode_args(
+            &(true, false, VALUE.get(), CLEANED.get()),
+            64,
+        )
+        .unwrap();
         assert!(bytes.len() <= 65_536);
         if api::stable_size() == 0 {
             ic_platform_runtime::cdk::stable::stable_grow(1).unwrap();
@@ -139,7 +151,8 @@ fn checkpoint() -> (bool, bool, u64, u64) {
 fn checkpoint_bytes() -> Vec<u8> {
     #[cfg(feature = "external-candid")]
     {
-        let expected = contract::encode_args(CHECKPOINT.get()).unwrap();
+        let expected =
+            ic_platform::candid_codec::arguments::encode_args(&CHECKPOINT.get(), 64).unwrap();
         let mut actual = vec![0; expected.len()];
         ic_platform_runtime::cdk::stable::stable_read(0, &mut actual);
         assert_eq!(actual, expected);

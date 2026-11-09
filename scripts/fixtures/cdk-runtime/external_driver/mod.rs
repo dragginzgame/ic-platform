@@ -1,15 +1,21 @@
 //! Installed effect/refusal checks; Testkit owns provider admission/lifecycle.
-use ic_platform::{
-    candid::{self, contract},
-    principal::ExternalPrincipal as Principal,
-};
+use ic_platform::candid_codec::decoder::{Arity, Limits, decode_one};
+pub(crate) mod contract {
+    use ic_platform::candid_codec::{self as codec, Encode, Error};
+    pub fn encode_one<T: Encode>(value: T) -> Result<Vec<u8>, Error> {
+        codec::encode_one(&value, 65536)
+    }
+    pub fn encode_args<T: codec::arguments::EncodeArgs>(value: T) -> Result<Vec<u8>, Error> {
+        codec::arguments::encode_args(&value, 65536)
+    }
+}
 use ic_testkit::pocket_ic::PocketIc;
-const LIMITS: candid::DecodeLimits = candid::DecodeLimits {
-    reply_bytes: 65536,
-    decoding_quota: 100000,
-    skipping_quota: 1000,
-    type_entries: 128,
-    header_bytes: 8192,
+const LIMITS: Limits = Limits {
+    bytes: 65536,
+    work: 100000,
+    allocation: 1000,
+    types: 128,
+    header: 8192,
 };
 async fn observed(pic: &PocketIc, id: Principal) -> u64 {
     let bytes = pic
@@ -21,7 +27,7 @@ async fn observed(pic: &PocketIc, id: Principal) -> u64 {
         )
         .await
         .unwrap();
-    candid::decode_exactly_one(&bytes, LIMITS).unwrap()
+    decode_one(&bytes, LIMITS).unwrap()
 }
 pub async fn qualify(pic: &PocketIc, id: Principal) {
     let args = contract::encode_one(7u64).unwrap();
@@ -29,10 +35,7 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
         .update_call(id, Principal::anonymous(), "external_effect", args)
         .await
         .unwrap();
-    assert_eq!(
-        candid::decode_exactly_one::<u64>(&reply, LIMITS).unwrap(),
-        7
-    );
+    assert_eq!(decode_one::<u64>(&reply, LIMITS).unwrap(), 7);
     for bytes in [
         vec![],
         vec![0],
@@ -54,7 +57,7 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
             contract::encode_one(Some(8u64)).unwrap(),
         ),
         (
-            "external_no_skip",
+            "external_no_surplus",
             contract::encode_args((8u64, 9u64)).unwrap(),
         ),
     ] {
@@ -93,7 +96,12 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
         .await
         .unwrap();
     assert_eq!(
-        candid::decode_args::<(u64, bool)>(&tuple, LIMITS).unwrap(),
+        ic_platform::candid_codec::decoder::decode_args::<(u64, bool)>(
+            &tuple,
+            LIMITS,
+            Arity::Exact
+        )
+        .unwrap(),
         (8, true)
     );
     let unit = pic
@@ -131,10 +139,7 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
         )
         .await
         .unwrap();
-    assert_eq!(
-        candid::decode_exactly_one::<u64>(&composite, LIMITS).unwrap(),
-        9
-    );
+    assert_eq!(decode_one::<u64>(&composite, LIMITS).unwrap(), 9);
     let random = pic
         .update_call(
             id,
@@ -144,12 +149,7 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
         )
         .await
         .unwrap();
-    assert_eq!(
-        candid::decode_exactly_one::<Vec<u8>>(&random, LIMITS)
-            .unwrap()
-            .len(),
-        32
-    );
+    assert_eq!(decode_one::<Vec<u8>>(&random, LIMITS).unwrap().len(), 32);
     let nested = |some: usize| {
         let mut bytes = b"DIDL\x01\x6e\0\x01\0".to_vec();
         bytes.resize(bytes.len() + some, 1);
@@ -166,10 +166,7 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
             )
             .await
             .unwrap();
-        assert_eq!(
-            candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
-            expected
-        );
+        assert_eq!(decode_one::<u8>(&response, LIMITS).unwrap(), expected);
     }
     let mut truncated = nested(1);
     truncated.pop();
@@ -183,10 +180,7 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
             )
             .await
             .unwrap();
-        assert_eq!(
-            candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
-            3
-        );
+        assert_eq!(decode_one::<u8>(&response, LIMITS).unwrap(), 3);
     }
     // Unused record definitions also reach Candid's recursive normalization.
     let leb = |mut value: usize, bytes: &mut Vec<u8>| {
@@ -229,10 +223,7 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
         )
         .await
         .unwrap();
-    assert_eq!(
-        candid::decode_exactly_one::<u8>(&response, LIMITS).unwrap(),
-        2
-    );
+    assert_eq!(decode_one::<u8>(&response, LIMITS).unwrap(), 1);
     assert!(
         pic.update_call(
             id,
@@ -251,3 +242,5 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
         "External endpoint admission, auth-before-decode, scalar/tuple/zero/null replies, mutation rollback, composite query and management await passed"
     );
 }
+
+use ic_testkit::pocket_ic::CanisterId as Principal;

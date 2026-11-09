@@ -5,6 +5,38 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.19.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Remove `principal-external`, its registry aliases/conversions and the production
+  `ic_principal` dependency. Canonical Principal bytes, text, Serde, ordering and
+  self-authentication remain unchanged; registry comparisons are development-only.
+
+### 🧭 Migration Notes
+
+- Remove the retired feature selection and use canonical `Principal` /
+  `PrincipalError` directly. Callers interacting with an independently selected
+  native supplier must handle that supplier's identity at their own boundary;
+  Types adds no replacement alias or conversion abstraction. Existing serialized
+  identities and effective-zero Account behavior require no data migration.
+
+### 🧪 Testing
+
+- Retain independent registry text/byte/self-authentication oracles as dev-only
+  dependencies and inherit published Toko Tooling 0.37.1.
+
+### 🛠️ Tooling
+
+- Remove downstream Timers composition from Platform release admission and
+  qualification-lock custody. Retain standalone Runtime and singleton-refusal
+  coverage; Scheduling owns scheduler compatibility tests.
+
+- Adopt published Toko Tooling 0.37.1, migrating to `TOKO-TOOLING.md`,
+  `.toko-tooling.snapshot`, `toko-tooling-*` commands and Toko LOC metadata.
+  CI and publication adapters admit the renamed snapshot before effects;
+  existing product release requirements remain unchanged.
+
 ## [0.18.3] - 2026-11-08
 
 ### 🛠️ Tooling

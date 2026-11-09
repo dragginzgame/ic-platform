@@ -46,7 +46,6 @@
     }
   ],
   "shared_metadata_files": [
-    "scripts/fixtures/cdk-runtime/Cargo.lock",
-    "scripts/fixtures/timers-runtime/Cargo.lock"
+    "scripts/fixtures/cdk-runtime/Cargo.lock"
   ]
 }

@@ -32,48 +32,39 @@ contract](docs/migration.md#runtime-maintenance-and-recovery).
 
 Select `principal` for owned Principal/Account bytes, text and Serde, without
 `ic_principal`, hashing or Candid. Runtime includes this minimal capability;
-executor/IC0-only builds omit application types. Select `principal-external` for
-`principal::ExternalPrincipal` and `.into()` conversions at external boundaries.
-This adds byte conversions without self-authentication. Required Candid/client
-features select it automatically. Select `principal-self-authenticating` explicitly
-for the unchanged imported derivation using upstream SHA-224, without registry
-Principal. Select both features when external conversions are also needed. Default features
-remain empty. See the [packaging migration](docs/migration.md#minimal-principal-and-selected-icrc-packaging).
-
-Types 0.18.1 makes `principal-external` self-contained for
-upstream Serde. Published Types 0.18.0 alone does not provide those external
-serialization traits. See the [passive contract audit](docs/audits/passive-contract-boundaries-2026-11-04.md)
-for supplier availability and consumer-owned feature/import changes.
+executor/IC0-only builds omit application types. The owned codec and maintained
+DTOs use the same Principal. The external aliases and `principal-external` feature
+are removed. Select `principal-self-authenticating` explicitly for the unchanged
+imported derivation using upstream SHA-224. Native supplier APIs retain their own
+identities and may require explicit byte conversion at the boundary. See the
+[hard-cut contract](docs/migration.md#owned-principal-hard-cut-unreleased).
 
 | Feature | Implemented contract |
 | --- | --- |
 | `principal` | Owned Principal/Account bytes, text and Serde; no external Principal, hashing or Candid |
-| `principal-external` | Registry Principal identity, byte conversions and upstream Serde; implies principal, no hashing or Candid |
 | `principal-self-authenticating` | Unchanged imported self-authentication using upstream SHA-224; implies principal |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `ic-protocol` | Native typed IC packet codecs with caller-selected byte budgets; upstream transport identity without Agent or runtime |
 | `ic-protocol-fixtures` | Explicit native development helpers for IC query, certificate, controller and subnet-metrics fixtures |
 | `bls` | Upstream BLS cryptography with typed errors and identity-key admission; no embedded algorithms, production RNG or Candid |
-| `candid` | Bounded single-result, exact-result and argument-list decoding; external DTO derives and encoding |
-| `candid-service` | Candid service declaration macros and printer; implies `candid` |
-| `candid-endpoint` | Explicit required-external-Candid query/update adapters with artifact-selected limits, empty-envelope policy and existing runtime; implies runtime and Candid, with separate service-printer selection |
+| `candid-codec-endpoint` | Owned-codec external query/update adapters; explicit decode/reply limits, arity and empty policy; existing runtime, no upstream Candid or service registration |
 | `runtime` | Raw calls, system and task adapters at `cdk::*`, without entrypoint macros |
-| `candid-parser` | Native external Candid parsing/type checking, service equality and dynamic refusal fixtures; owned bindings use Wire |
 | `candid-args` | Dependency-free encoding of empty, unit/null and single-text external argument lists |
+| `candid-codec` | Owned typed binary codec, canonical Principal and arbitrary integers; no registry Candid/parser |
 | `raw-rand` | Sole typed management `raw_rand` codec, dependency-free; transport and seed policy remain caller-owned |
 | `canister-sig-creation` | Upstream signature key formats/constants/hashing, owned issuer adapter and DER admission; transitive Candid/ic0, no store API |
 | `certification` | Registry certificate/hash-tree and mutable tree identities, lookup and hashing; no Candid or executor |
 | `certification-cbor` | Byte-bounded standard certificate/signature CBOR; caller-selected budgets, no verification or runtime |
 | `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |
 | `ic0` | Raw IC 1.2.0 calls, including safe stable-memory size/grow/read/write, replicated/controller flags, reply/reject bytes and debug output; independent of Candid and executor |
-| `icrc-ledger-types` | Selected maintained ICRC DTOs and unchanged upstream value hashing, plus ICRC-10; no registry ledger package, storage, CBOR or consent formatting |
-| `management-canister-types` | Management 0.11.0 DTOs including `CreateCanisterArgs`; maintained on Wasm, registry identities on native, no implicit Wasm printer or runtime. Add `candid` for typed operation codecs. |
-| `cmc-types` | External CMC top-up, mint notification and certified rate DTOs; implies Candid, no payment policy |
-| `icp-ledger-types` | Legacy ICP transfer and encoded-block/archive DTOs; implies Candid, no ledger engine or CDK |
-| `cycles-ledger-types` | External Cycles Ledger creation and withdrawal DTOs, including its distinct creation settings; implies Candid |
-| `nns-registry-types` | Exact optional-principal Registry subnet lookup DTOs; implies Candid, no topology policy |
-| `certified-assets-types` | Native-only asset get/get_chunk DTOs; implies Candid, no verification or host transport |
-| `signature-verification` | Imported canister-signature verification with optional authenticated time result; certification/BLS, no Candid/ic0, executor or host transport |
+| `icrc-ledger-types` | Selected ICRC DTOs with owned binary codec and unchanged upstream value hashing, plus ICRC-10; no registry ledger package, storage, CBOR or consent formatting |
+| `management-canister-types` | Owned management 0.11.0 DTOs and codec on native/Wasm; native snapshot transfer types retain their existing scope. No production registry management, Candid or runtime dependency. |
+| `cmc-types` | CMC top-up, mint notification and rate DTOs with the owned codec; no upstream Candid or payment policy |
+| `icp-ledger-types` | ICP transfer/archive DTOs with owned codec and typed query-reference admission; retained account derivation, no upstream Candid or CDK |
+| `cycles-ledger-types` | Cycles Ledger creation/withdrawal DTOs with owned codec; adding `icrc-ledger-types` supplies owned archive-callback codecs |
+| `nns-registry-types` | Registry subnet lookup DTOs with owned binary codec and external Principal; no upstream Candid or topology policy |
+| `certified-assets-types` | Native-only asset get/get_chunk DTOs with owned codec; no upstream Candid, verification or host transport |
+| `signature-verification` | Registry canister-signature verification with authenticated time extraction; supplier graph retains Candid/raw IC0, no executor or host transport |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
 
@@ -113,10 +104,10 @@ cargo fetch --locked
 
 Shared tooling is pinned once in root `[workspace.dependencies]` and inherited
 as a dev-dependency by every workspace member. After changing the exact pin,
-run `cargo update -p toko-tooling`, then `make shared-tooling-update` to install
+run `cargo update -p toko-tooling`, then `make toko-tooling-update` to install
 the selected archive. Retain Cargo.lock and the snapshot. Use
-`make shared-tooling-install` to reinstall that Cargo selection, and
-`make shared-tooling-status` to compare selected and installed identities offline.
+`make toko-tooling-install` to reinstall that Cargo selection, and
+`make toko-tooling-status` to compare selected and installed identities offline.
 
 For a change to Types, for example, select its focused checks:
 

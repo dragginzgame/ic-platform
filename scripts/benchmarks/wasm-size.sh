@@ -11,12 +11,12 @@ output="$(cd "$output" && pwd -P)"
 [[ ! -e "$output/Cargo.toml" ]] || { echo 'Size evidence already exists; select a new output directory' >&2; exit 2; }
 toolchain="${WASM_BENCH_TOOLCHAIN:-$(bash "$root/scripts/ci/read-platform-msrv.sh" "$source_root/Cargo.toml")}"
 build_target="${WASM_BENCH_TARGET_DIR:-$output/target}"
-profiles="${WASM_BENCH_PROFILES:-principal principal-binary principal-self-auth runtime external-candid verification}"
+profiles="${WASM_BENCH_PROFILES:-principal principal-binary principal-self-auth runtime codec-management-owned verification}"
 recipes="${WASM_BENCH_RECIPES:-3-none-16 3-thin-1 3-fat-1 s-fat-1 z-fat-1}"
 cpubits="${WASM_BENCH_CPUBITS:-auto}"
 case "$cpubits" in auto|32|64) ;; *) echo 'WASM_BENCH_CPUBITS must be auto, 32 or 64' >&2; exit 2 ;; esac
 for profile in $profiles; do
-    case "$profile" in principal|principal-binary|principal-self-auth|runtime|runtime-system|external-candid|candid-args|candid-admission|candid-exact|candid-sequence|candid-sequence-one|verification|certification-cbor|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
+    case "$profile" in ledger-hash|codec-management-owned|codec-icp-owned|codec-cmc-owned|codec-generic-record|codec-generic-composite|codec-generic-decode|codec-generic|codec-empty|codec-text-owned|principal|principal-binary|principal-self-auth|runtime|runtime-system|candid-args|verification|certification-cbor|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
 done
 for recipe in $recipes; do
     case "$recipe" in 3-none-16|3-thin-1|3-fat-1|s-fat-1|z-fat-1) ;; *) echo "Unknown size recipe: $recipe" >&2; exit 2 ;; esac
@@ -42,31 +42,42 @@ find "$source_root/crates" -type f -print0 | xargs -0 shasum -a 256 > "$output/s
 shasum -a 256 "$source_root/Cargo.toml" "$source_root/Cargo.lock" >> "$output/source-sha256.txt"
 mkdir "$output/src"
 cp "$root/scripts/fixtures/wasm-size/lib.rs" "$output/src/lib.rs"
+cp -R "$root/scripts/fixtures/wasm-size/record_probe" "$output/src/record_probe"
 cp "$source_root/Cargo.lock" "$output/Cargo.lock"
 quoted_source="$(perl -MJSON::PP -e 'print encode_json($ARGV[0])' "$source_root/crates/ic-platform")"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_dependencies_read "$source_root"
+bigint="$(platform_dependency num-bigint)"
 cat > "$output/Cargo.toml" <<MANIFEST
 [package]
 name = "platform-wasm-size-probe"
 version = "0.0.0"
 edition = "2024"
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "benchmarks"
 [workspace]
 [lib]
 crate-type = ["cdylib"]
 [features]
+ledger-hash = ["ic-platform/icp-ledger-types", "ic-platform/icrc-ledger-types", "ic-platform/principal-self-authenticating"]
+codec-management-owned = ["ic-platform/management-canister-types"]
+codec-icp-owned = ["ic-platform/icp-ledger-types"]
+codec-cmc-owned = ["ic-platform/cmc-types"]
+codec-generic = ["ic-platform/candid-codec"]
+codec-generic-decode = ["ic-platform/candid-codec"]
+codec-generic-composite = ["ic-platform/candid-codec", "dep:num-bigint"]
+codec-principal = ["ic-platform/principal"]
+codec-generic-record = ["ic-platform/candid-codec", "dep:num-bigint", "codec-principal"]
+codec-empty = []
+codec-text-owned = ["ic-platform/candid-args"]
 principal = ["ic-platform/principal", "dep:serde_json"]
 principal-binary = ["ic-platform/principal"]
 principal-self-auth = ["ic-platform/principal-self-authenticating"]
 runtime = ["ic-platform/runtime"]
 runtime-system = ["ic-platform/runtime"]
-external-candid = ["ic-platform/candid", "ic-platform/management-canister-types"]
 candid-args = ["ic-platform/candid-args"]
-candid-admission = ["ic-platform/candid"]
-candid-exact = ["ic-platform/candid", "ic-platform/management-canister-types"]
-candid-sequence = ["ic-platform/candid"]
-candid-sequence-one = ["candid-sequence"]
 verification = ["ic-platform/signature-verification"]
 certification-cbor = ["ic-platform/certification-cbor"]
 bls = ["ic-platform/bls"]
@@ -75,10 +86,14 @@ ecdsa-instructions = ["ecdsa"]
 [dependencies]
 ic-platform = { path = $quoted_source, default-features = false, features = ["ic0"] }
 serde_json = { version = "1.0", optional = true }
+num-bigint = { $bigint, optional = true }
 MANIFEST
 cargo "+$toolchain" metadata --manifest-path "$output/Cargo.toml" --offline --format-version 1 > "$output/metadata.json" 2> "$output/metadata.log"
+bash "$root/scripts/ci/check-qualification-identities.sh" "$output/metadata.json" "$source_root" \
+    platform-wasm-size-probe ic-platform > "$output/identities.json"
 bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$output" --external-ic
-shasum -a 256 "$output/src/lib.rs" "$output/Cargo.toml" "$output/Cargo.lock" > "$output/probe-sha256.txt"
+find "$output/src" -type f -print0 | xargs -0 shasum -a 256 > "$output/probe-sha256.txt"
+shasum -a 256 "$output/Cargo.toml" "$output/Cargo.lock" >> "$output/probe-sha256.txt"
 printf 'recipe\tcapability\traw_bytes\tcode_bytes\tcustom_bytes\toptimized_bytes\toptimized_code_bytes\toptimized_custom_bytes\n' > "$output/sizes.tsv"
 for recipe in $recipes; do
     IFS=- read -r optimization lto units <<< "$recipe"
@@ -86,6 +101,11 @@ for recipe in $recipes; do
     for profile in $profiles; do
         printf 'Wasm size: %s / %s\n' "$recipe" "$profile"
         stem="$output/$recipe-$profile"
+        cargo "+$toolchain" metadata --manifest-path "$output/Cargo.toml" --frozen --offline \
+            --filter-platform wasm32-unknown-unknown --no-default-features --features "$profile" \
+            --format-version 1 > "$stem.metadata.json"
+        bash "$root/scripts/ci/check-qualification-identities.sh" "$stem.metadata.json" "$source_root" \
+            platform-wasm-size-probe ic-platform > "$stem.identities.json"
         CARGO_TARGET_DIR="$build_target/$recipe" CARGO_BUILD_JOBS=4 \
             CARGO_ENCODED_RUSTFLAGS="$encoded_flags" \
             CARGO_PROFILE_RELEASE_OPT_LEVEL="$optimization" CARGO_PROFILE_RELEASE_LTO="$lto" \

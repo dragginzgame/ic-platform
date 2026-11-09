@@ -10,7 +10,6 @@ runtime_selection() {
         case "$seen" in *" $option "*) echo "Duplicate runtime option: $option" >&2; return 2 ;; esac
         seen+="$option "
         case "$option" in
-            --timers) qualification=timers ;;
             --external-adapters) explicit_adapters=true ;;
             --prepared-call) transport_mode=prepared ;;
             --published)

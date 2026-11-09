@@ -6,20 +6,18 @@ publish.workspace = true
 rust-version.workspace = true
 
 [features]
-timers-composition = []
 prepared-call = []
-external-candid = ["dep:ic-platform", "ic-platform/candid", "ic-platform/management-canister-types", "ic-platform/raw-rand"]
+external-candid = ["dep:ic-platform", "ic-platform/candid-codec", "ic-platform/management-canister-types", "ic-platform/raw-rand"]
 external-adapters = ["external-candid"@EXTERNAL_BRIDGE@]
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-@TIMERS_CANISTER@
 ic-platform = { workspace = true, optional = true }
 ic-platform-runtime.workspace = true
 ic-wire.workspace = true
 serde.workspace = true
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"

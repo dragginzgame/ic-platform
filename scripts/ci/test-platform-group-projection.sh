@@ -23,7 +23,7 @@ for group in platform runtime types; do
     export RELEASE_GROUP="$group"
     jq -n --arg group "$group" '{group:$group,primary:("ic-platform-"+$group),previous:"1.2.3",
         changelog:("releases/"+$group+"/CHANGELOG.md"),members:["member"],
-        files:(["Cargo.toml","scripts/fixtures/cdk-runtime/Cargo.lock","scripts/fixtures/timers-runtime/Cargo.lock"] +
+        files:(["Cargo.toml","scripts/fixtures/cdk-runtime/Cargo.lock"] +
             if $group=="runtime" then ["ci/dependency-pinning-exceptions.json"] else [] end)}' > "$PROJECTION_PLAN"
     cp "$PROJECTION_PLAN" "$fixture/valid.json"
     for operation in plan primary changelog members files ready ready-plan; do

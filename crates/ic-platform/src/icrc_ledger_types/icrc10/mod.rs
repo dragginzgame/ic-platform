@@ -7,7 +7,7 @@
 //! validation, admission and endpoint mounting. No discovery or consent is automatic.
 
 /// One ICRC-10 discovery result, encoded as a named Candid record, not a tuple.
-#[derive(Clone, Debug, Eq, PartialEq, candid::CandidType, serde::Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize)]
 pub struct SupportedStandard {
     /// External standard name, without normalization or an allowed-name policy.
     pub name: String,

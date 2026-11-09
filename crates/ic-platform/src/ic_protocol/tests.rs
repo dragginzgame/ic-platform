@@ -9,7 +9,7 @@ use std::borrow::Cow;
 fn testkit_read_state_preserves_sdk_framing_and_original_certificate_bytes() {
     let content = EnvelopeContent::ReadState {
         ingress_expiry: u64::MAX,
-        sender: ExternalPrincipal::anonymous(),
+        sender: candid::Principal::anonymous(),
         paths: vec![vec![
             b"subnet".to_vec().into(),
             vec![0, 255].into(),
@@ -140,8 +140,8 @@ fn subnet_metrics_null_preserves_absence_without_hiding_refusals() {
 fn sdk_envelope_bytes_identity_and_budgets_are_preserved() {
     let content = EnvelopeContent::Call {
         ingress_expiry: u64::MAX,
-        sender: ExternalPrincipal::anonymous(),
-        canister_id: ExternalPrincipal::management_canister(),
+        sender: candid::Principal::anonymous(),
+        canister_id: candid::Principal::management_canister(),
         method_name: "opaque".into(),
         arg: vec![0, 255, 128],
         nonce: Some(vec![8]),

@@ -34,7 +34,7 @@ fi
 grep -q 'Standalone Rust formatting.*FAILED' "$fixture/last.log"
 run_make fmt
 run_make fmt-check
-[[ ! -e "$fixture/work/target/shared-tooling/formatting.receipt" ]]
+[[ ! -e "$fixture/work/target/toko-tooling/formatting.receipt" ]]
 
 # A changed configuration must still be observed for this uncached selection.
 printf 'max_width = "invalid"\n' > "$fixture/work/rustfmt.toml"

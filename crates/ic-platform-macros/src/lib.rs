@@ -91,22 +91,22 @@ pub fn on_low_wasm_memory(attr: TokenStream, item: TokenStream) -> TokenStream {
     )
 }
 
-/// Generate a bounded required-external-Candid query with explicit artifact policy.
+/// Generate an external-interface query using Platform's owned binary codec and explicit budgets.
 #[proc_macro_attribute]
-pub fn candid_query(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn codec_query(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(
-        |attr, item| external_candid::expand(true, attr, item),
-        "candid_query",
+        |attr, item| external_candid::expand_owned(true, attr, item),
+        "codec_query",
         attr,
         item,
     )
 }
-/// Generate a bounded required-external-Candid update with explicit artifact policy.
+/// Generate an external-interface update using Platform's owned binary codec and explicit budgets.
 #[proc_macro_attribute]
-pub fn candid_update(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn codec_update(attr: TokenStream, item: TokenStream) -> TokenStream {
     handle_debug_and_errors(
-        |attr, item| external_candid::expand(false, attr, item),
-        "candid_update",
+        |attr, item| external_candid::expand_owned(false, attr, item),
+        "codec_update",
         attr,
         item,
     )

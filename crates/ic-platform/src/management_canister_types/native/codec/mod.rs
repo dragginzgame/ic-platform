@@ -1,0 +1,16 @@
+//! Explicit Candid schemas for the retained native snapshot surface.
+use super::*;
+crate::candid_record!(TakeCanisterSnapshotArgs {435757295 => replace_snapshot: Option<SnapshotId>, 1313628723 => canister_id: CanisterId, 2590416362 => uninstall_code: Option<bool>, 3599109322 => sender_canister_version: Option<u64>});
+crate::candid_record!(LoadCanisterSnapshotArgs {1313628723 => canister_id: CanisterId, 3599109322 => sender_canister_version: Option<u64>, 4045790262 => snapshot_id: SnapshotId});
+crate::candid_record!(ReadCanisterSnapshotMetadataArgs {1313628723 => canister_id: CanisterId, 4045790262 => snapshot_id: SnapshotId});
+crate::candid_record!(ReadCanisterSnapshotMetadataResult {339281328 => globals: Vec<Option<SnapshotMetadataGlobal>>, 783802816 => canister_version: u64, 842117339 => source: Option<SnapshotSource>, 864574658 => certified_data: Vec<u8>, 903275689 => global_timer: Option<CanisterTimer>, 1282538240 => on_low_wasm_memory_hook_status: Option<OnLowWasmMemoryHookStatus>, 1299009433 => wasm_module_size: u64, 1710030651 => stable_memory_size: u64, 1767008372 => wasm_chunk_store: StoredChunksResult, 3569147778 => taken_at_timestamp: u64, 3598099748 => wasm_memory_size: u64});
+crate::candid_record!(ReadCanisterSnapshotDataArgs {1191829844 => kind: SnapshotDataKind, 1313628723 => canister_id: CanisterId, 4045790262 => snapshot_id: SnapshotId});
+crate::candid_record!(ReadCanisterSnapshotDataResult {1170392685 => chunk: Vec<u8>});
+crate::candid_record!(UploadCanisterSnapshotMetadataArgs {339281328 => globals: Vec<SnapshotMetadataGlobal>, 435757295 => replace_snapshot: Option<SnapshotId>, 864574658 => certified_data: Vec<u8>, 903275689 => global_timer: Option<CanisterTimer>, 1282538240 => on_low_wasm_memory_hook_status: Option<OnLowWasmMemoryHookStatus>, 1299009433 => wasm_module_size: u64, 1313628723 => canister_id: CanisterId, 1710030651 => stable_memory_size: u64, 3598099748 => wasm_memory_size: u64});
+crate::candid_record!(UploadCanisterSnapshotMetadataResult {4045790262 => snapshot_id: SnapshotId});
+crate::candid_record!(UploadCanisterSnapshotDataArgs {1170392685 => chunk: Vec<u8>, 1191829844 => kind: SnapshotDataOffset, 1313628723 => canister_id: CanisterId, 4045790262 => snapshot_id: SnapshotId});
+crate::candid_variant!(SnapshotMetadataGlobal {5083781 => F32(f32), 5084452 => F64(f64), 5232968 => I32(i32), 5233639 => I64(i64), 1311016833 => V128(Nat)});
+crate::candid_variant!(CanisterTimer {373703110 => Active(u64), 1781536619 => Inactive});
+crate::candid_variant!(OnLowWasmMemoryHookStatus {1043953570 => ConditionNotSatisfied, 3210470543 => Executed, 3870990435 => Ready});
+crate::candid_variant!(SnapshotDataKind {265441191 => WasmModule { 1280549057 => size: u64, 1614780307 => offset: u64 }, 1405019644 => WasmMemory { 1280549057 => size: u64, 1614780307 => offset: u64 }, 2465514309 => StableMemory { 1280549057 => size: u64, 1614780307 => offset: u64 }, 4161627090 => WasmChunk { 1158164430 => hash: Vec<u8> }});
+crate::candid_variant!(SnapshotDataOffset {265441191 => WasmModule { 1614780307 => offset: u64 }, 1405019644 => WasmMemory { 1614780307 => offset: u64 }, 2465514309 => StableMemory { 1614780307 => offset: u64 }, 4161627090 => WasmChunk});

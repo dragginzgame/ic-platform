@@ -3,21 +3,14 @@
 use strict;
 use warnings;
 my ($source, $fixture, $qualification, $selection, $adapter) = @ARGV;
-@ARGV == 5 && $qualification =~ /\A(?:owner|timers)\z/
+@ARGV == 5 && $qualification =~ /\Aowner\z/
     && $selection =~ /\A(?:source|published)\z/ && $adapter =~ /\A(?:raw|external)\z/
-    or die "usage: render-runtime-fixture.pl TEMPLATE-DIR FIXTURE owner|timers source|published raw|external\n";
+    or die "usage: render-runtime-fixture.pl TEMPLATE-DIR FIXTURE owner source|published raw|external\n";
 my %values;
 for my $name (qw(RUNTIME PLATFORM TESTKIT WIRE SERDE TOKIO MSRV)) {
     $values{$name} = $ENV{"PLATFORM_FIXTURE_$name"} // die "missing $name\n";
 }
-$values{TIMERS_ROOT} = '';
-$values{TIMERS_CANISTER} = '';
-if ($qualification eq 'timers') {
-    my $timers = $ENV{PLATFORM_FIXTURE_TIMERS} // die "missing TIMERS\n";
-    $values{TIMERS_ROOT} = "ic-timers = { $timers }";
-    $values{TIMERS_CANISTER} = 'ic-timers.workspace = true';
-}
-$values{EXTERNAL_BRIDGE} = $adapter eq 'external' ? ', "ic-platform/candid-endpoint"' : '';
+$values{EXTERNAL_BRIDGE} = $adapter eq 'external' ? ', "ic-platform/candid-codec-endpoint"' : '';
 # Only qualification-local Runtime owners are patched; the facade stays independent.
 $values{RUNTIME_PATCH} = $selection eq 'published' ? '' : <<'PATCH';
 [patch.crates-io]

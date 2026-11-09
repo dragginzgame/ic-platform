@@ -1,5 +1,98 @@
 //! Size probes for reachable Platform capabilities, not application benchmarks.
 
+#[cfg(any(
+    feature = "codec-cmc-owned",
+    feature = "codec-icp-owned",
+    feature = "codec-management-owned",
+))]
+#[unsafe(export_name = "canister_query codec")]
+pub extern "C" fn protocol_roundtrip() {
+    #[cfg(any(feature = "codec-cmc-owned"))]
+    use ic_platform::cmc_types::NotifyTopUpResult as Value;
+    #[cfg(any(feature = "codec-icp-owned"))]
+    use ic_platform::icp_ledger_types::QueryEncodedBlocksResponse as Value;
+    #[cfg(any(feature = "codec-management-owned"))]
+    use ic_platform::management_canister_types::CanisterStatusResult as Value;
+    let bytes = input();
+    #[cfg(any(
+        feature = "codec-cmc-owned",
+        feature = "codec-icp-owned",
+        feature = "codec-management-owned"
+    ))]
+    let output = {
+        use ic_platform::candid_codec::{
+            decoder::{Limits, decode_one},
+            encode_one,
+        };
+        let value: Value = decode_one(
+            &bytes,
+            Limits {
+                bytes: 1_048_576,
+                header: 65_536,
+                types: 256,
+                work: 10_000_000,
+                allocation: 4_194_304,
+            },
+        )
+        .unwrap();
+        encode_one(&value, 1_048_576).unwrap()
+    };
+    reply(&output);
+}
+
+#[cfg(any(
+    feature = "codec-generic",
+    feature = "codec-generic-decode",
+    feature = "codec-generic-composite",
+    feature = "codec-generic-record"
+))]
+pub use ic_platform::candid_codec as codec;
+
+#[cfg(feature = "codec-generic-record")]
+pub mod record_probe;
+
+#[cfg(feature = "codec-generic-composite")]
+#[unsafe(export_name = "canister_query codec")]
+pub extern "C" fn generic_composite() {
+    type Value = (
+        Option<Result<Vec<u64>, String>>,
+        (num_bigint::BigUint, num_bigint::BigInt),
+    );
+    let bytes = input();
+    let limits = codec::decoder::Limits {
+        bytes: 1_048_576,
+        header: 65_536,
+        types: 4096,
+        work: 10_000_000,
+        allocation: 4_194_304,
+    };
+    let value: Value = codec::decoder::decode_one(&bytes, limits).unwrap();
+    reply(&codec::encode_one(&value, 1_048_576).unwrap());
+}
+
+#[cfg(feature = "codec-generic-decode")]
+#[unsafe(export_name = "canister_query codec")]
+pub extern "C" fn generic_decode_text() {
+    let bytes = input();
+    let limits = codec::decoder::Limits {
+        bytes: 1_048_576,
+        header: 65_536,
+        types: 4096,
+        work: 10_000_000,
+        allocation: 4_194_304,
+    };
+    let text: String = codec::decoder::decode_one(&bytes, limits).unwrap();
+    reply(text.as_bytes());
+}
+
+#[cfg(feature = "codec-generic")]
+#[unsafe(export_name = "canister_query codec")]
+pub extern "C" fn generic_encode_text() {
+    let bytes = input();
+    let text = std::str::from_utf8(&bytes).unwrap();
+    reply(&codec::encode_one(text, usize::MAX).unwrap());
+}
+
 fn input() -> Vec<u8> {
     let mut bytes = vec![0; ic_platform::ic0::msg_arg_data_size()];
     ic_platform::ic0::msg_arg_data_copy(&mut bytes, 0);
@@ -9,6 +102,24 @@ fn input() -> Vec<u8> {
 fn reply(bytes: &[u8]) {
     ic_platform::ic0::msg_reply_data_append(bytes);
     ic_platform::ic0::msg_reply();
+}
+
+// Dependency presence control: identical reachable code with/without Candid.
+#[cfg(feature = "codec-empty")]
+#[unsafe(export_name = "canister_query codec")]
+pub extern "C" fn codec_control() {
+    reply(&input());
+}
+
+// Matched input admission/output framing; only the encoder differs.
+#[cfg(feature = "codec-text-owned")]
+#[unsafe(export_name = "canister_query codec")]
+pub extern "C" fn codec_text() {
+    let bytes = input();
+    let text = std::str::from_utf8(&bytes).unwrap();
+    #[cfg(feature = "codec-text-owned")]
+    let encoded = ic_platform::candid_args::text(text);
+    reply(&encoded);
 }
 
 #[cfg(feature = "candid-args")]
@@ -61,29 +172,6 @@ pub extern "C" fn system_inspect() {
 #[unsafe(export_name = "canister_update system_root_key")]
 pub extern "C" fn system_root_key() {
     measure_system_read(ic_platform::cdk::api::root_key);
-}
-
-#[cfg(feature = "candid-admission")]
-#[unsafe(export_name = "canister_query candid_admission")]
-pub extern "C" fn candid_admission() {
-    let request = input();
-    let (quota, wire) = request.split_at(8);
-    let quota = usize::try_from(u64::from_le_bytes(quota.try_into().unwrap())).unwrap();
-    let limits = ic_platform::candid::DecodeLimits {
-        reply_bytes: 1_000_000,
-        header_bytes: 100_000,
-        type_entries: 10_000,
-        decoding_quota: quota,
-        skipping_quota: 0,
-    };
-    let start = ic_platform::ic0::performance_counter(0);
-    let result = ic_platform::candid::nesting::check(wire, limits);
-    let instructions = ic_platform::ic0::performance_counter(0) - start;
-    let mut response = instructions.to_le_bytes().to_vec();
-    if let Err(error) = result {
-        response.extend_from_slice(error.to_string().as_bytes());
-    }
-    reply(&response);
 }
 
 #[cfg(feature = "certification-cbor")]
@@ -208,25 +296,6 @@ pub extern "C" fn raw_call() {
     });
 }
 
-#[cfg(feature = "external-candid")]
-#[unsafe(export_name = "canister_query external_status")]
-pub extern "C" fn external_status() {
-    use ic_platform::{candid, management_canister_types::CanisterStatusResult};
-    let bytes = input();
-    let limits = candid::DecodeLimits {
-        reply_bytes: 1_000_000,
-        decoding_quota: 1_000_000,
-        skipping_quota: 1_000_000,
-        type_entries: 1_000,
-        header_bytes: 100_000,
-    };
-    let result = candid::decode_exactly_one::<CanisterStatusResult>(&bytes, limits);
-    match result {
-        Ok(status) => reply(&candid::contract::encode_one(status).unwrap()),
-        Err(error) => reply(error.to_string().as_bytes()),
-    }
-}
-
 #[cfg(feature = "verification")]
 #[unsafe(export_name = "canister_query verify")]
 pub extern "C" fn verify() {
@@ -270,121 +339,14 @@ pub extern "C" fn self_auth_borrowed() {
     reply(ic_platform::Principal::self_authenticating(&bytes).as_slice());
 }
 
-#[cfg(any(feature = "candid-exact", feature = "candid-sequence"))]
-fn candid_size_limits() -> ic_platform::candid::DecodeLimits {
-    ic_platform::candid::DecodeLimits {
-        reply_bytes: 1_000_000,
-        decoding_quota: 1_000_000,
-        skipping_quota: 0,
-        type_entries: 1_000,
-        header_bytes: 100_000,
-    }
+// Exercise both ledger hashes and self-authentication to measure provider sharing.
+#[cfg(feature = "ledger-hash")]
+#[unsafe(export_name = "canister_query ledger_hash")]
+pub extern "C" fn ledger_hash() {
+    use ic_platform::{Principal, icp_ledger_types::account_identifier, icrc_ledger_types::Value};
+    let bytes = input();
+    let principal = Principal::self_authenticating(&bytes);
+    let mut output = account_identifier(principal, &[0; 32]).to_vec();
+    output.extend_from_slice(&Value::Blob(bytes.into()).hash());
+    reply(&output);
 }
-
-// Dedicated external management DTO qualification, not owned endpoint schemas.
-#[cfg(feature = "candid-exact")]
-fn exact_reply<
-    T: ic_platform::candid::contract::CandidType
-        + for<'de> ic_platform::candid::contract::serde::Deserialize<'de>,
->() {
-    let wire = input();
-    match ic_platform::candid::decode_exactly_one::<T>(&wire, candid_size_limits()) {
-        Ok(value) => reply(&ic_platform::candid::contract::encode_one(value).unwrap()),
-        Err(error) => reply(error.to_string().as_bytes()),
-    }
-}
-
-#[cfg(feature = "candid-exact")]
-macro_rules! external_exact_probe {
-    ($name:ident, $export:literal, $dto:ident) => {
-        #[unsafe(export_name = $export)]
-        pub extern "C" fn $name() {
-            exact_reply::<ic_platform::management_canister_types::$dto>();
-        }
-    };
-}
-
-#[cfg(feature = "candid-exact")]
-external_exact_probe!(
-    exact_status,
-    "canister_query exact_status",
-    CanisterStatusResult
-);
-#[cfg(feature = "candid-exact")]
-external_exact_probe!(exact_http, "canister_query exact_http", HttpRequestResult);
-#[cfg(feature = "candid-exact")]
-external_exact_probe!(exact_key, "canister_query exact_key", EcdsaPublicKeyResult);
-#[cfg(feature = "candid-exact")]
-external_exact_probe!(
-    exact_signature,
-    "canister_query exact_signature",
-    SignWithEcdsaResult
-);
-
-// A synthetic external vec nat8 contract exercises caller-selected limits.
-#[cfg(feature = "candid-sequence")]
-struct ExternalBoundedBytes<const LIMIT: usize>(Vec<u8>);
-
-#[cfg(feature = "candid-sequence")]
-impl<const LIMIT: usize> ic_platform::candid::contract::CandidType for ExternalBoundedBytes<LIMIT> {
-    fn _ty() -> ic_platform::candid::contract::types::Type {
-        Vec::<u8>::_ty()
-    }
-
-    fn idl_serialize<S: ic_platform::candid::contract::types::Serializer>(
-        &self,
-        serializer: S,
-    ) -> Result<(), S::Error> {
-        self.0.idl_serialize(serializer)
-    }
-}
-
-#[cfg(feature = "candid-sequence")]
-impl<'de, const LIMIT: usize> ic_platform::candid::contract::serde::Deserialize<'de>
-    for ExternalBoundedBytes<LIMIT>
-{
-    fn deserialize<D: ic_platform::candid::contract::serde::Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        ic_platform::candid::sequence::deserialize::<D, u8, LIMIT>(
-            deserializer,
-            "bounded external bytes",
-            "external byte limit",
-        )
-        .map(Self)
-    }
-}
-
-#[cfg(feature = "candid-sequence")]
-fn sequence_reply<const LIMIT: usize>() {
-    let wire = input();
-    match ic_platform::candid::decode_exactly_one::<ExternalBoundedBytes<LIMIT>>(
-        &wire,
-        candid_size_limits(),
-    ) {
-        Ok(value) => reply(&value.0),
-        Err(error) => reply(error.to_string().as_bytes()),
-    }
-}
-
-#[cfg(feature = "candid-sequence")]
-macro_rules! external_sequence_probe {
-    ($name:ident, $export:literal, $limit:literal) => {
-        #[unsafe(export_name = $export)]
-        pub extern "C" fn $name() {
-            sequence_reply::<$limit>();
-        }
-    };
-}
-
-#[cfg(feature = "candid-sequence")]
-#[cfg(not(feature = "candid-sequence-one"))]
-external_sequence_probe!(sequence_zero, "canister_query sequence_zero", 0);
-#[cfg(feature = "candid-sequence")]
-external_sequence_probe!(sequence_two, "canister_query sequence_two", 2);
-#[cfg(feature = "candid-sequence")]
-#[cfg(not(feature = "candid-sequence-one"))]
-external_sequence_probe!(sequence_sixteen, "canister_query sequence_sixteen", 16);
-#[cfg(feature = "candid-sequence")]
-#[cfg(not(feature = "candid-sequence-one"))]
-external_sequence_probe!(sequence_256, "canister_query sequence_256", 256);

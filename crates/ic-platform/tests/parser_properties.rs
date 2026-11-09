@@ -1,5 +1,6 @@
 //! Reproducible generated parser corpus; no cryptographic behavior is changed.
-use ic_platform::{Account, Principal, principal::ExternalPrincipal};
+use candid::Principal as ExternalPrincipal;
+use ic_platform::{Account, Principal};
 
 #[test]
 fn generated_unicode_and_boundary_inputs_are_total() {
@@ -17,7 +18,10 @@ fn generated_unicode_and_boundary_inputs_are_total() {
                 .collect();
             if let Ok(value) = Principal::from_text(&text) {
                 assert_eq!(Principal::from_text(value.to_text()).unwrap(), value);
-                assert_eq!(ExternalPrincipal::from_text(&text).unwrap(), value.into());
+                assert_eq!(
+                    ExternalPrincipal::from_text(&text).unwrap(),
+                    ExternalPrincipal::from_slice(value.as_slice())
+                );
             }
             if let Ok(value) = text.parse::<Account>() {
                 assert_eq!(value.to_string().parse::<Account>().unwrap(), value);

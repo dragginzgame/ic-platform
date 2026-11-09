@@ -9,12 +9,6 @@ fn principal_needs_only_its_own_capability() {
     assert_eq!(principal, Principal::management_canister());
     assert_eq!(principal.to_text(), "aaaaa-aa");
     assert_eq!(Principal::from_slice(principal.as_slice()), principal);
-
-    #[cfg(feature = "candid")]
-    {
-        let contract_principal: ic_platform::candid::contract::Principal = principal.into();
-        assert_eq!(Principal::from(contract_principal), principal);
-    }
 }
 
 #[test]

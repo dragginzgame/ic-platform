@@ -2,10 +2,10 @@
 # Shared native benchmark build plumbing; callers retain cases and measurements.
 build_benchmark_driver() {
     local root="$1" output="$2" compiler="$3" kind="$4" cache="$5"
-    local features='"principal-external"' platform testkit tokio
+    local features='"ecdsa"' platform testkit tokio dependency='' required=ic-testkit
     case "$kind" in
         bls) ;;
-        ecdsa) features='"ecdsa", "principal-external"' ;;
+        ecdsa) required=ic-platform,ic-testkit ;;
         *) echo 'Expected bls or ecdsa benchmark driver' >&2; return 2 ;;
     esac
     mkdir -p "$output/driver/src"
@@ -16,6 +16,9 @@ build_benchmark_driver() {
     # shellcheck source=scripts/ci/workspace-dependencies.sh
     source "$root/scripts/ci/workspace-dependencies.sh"
     platform_dependencies_read "$root"
+    if [[ "$kind" == ecdsa ]]; then
+        dependency="ic-platform = { path = $platform, default-features = false, features = [$features] }"
+    fi
     testkit="$(platform_dependency ic-testkit)"
     tokio="$(platform_dependency tokio)"
     cat > "$output/driver/Cargo.toml" <<MANIFEST
@@ -25,17 +28,19 @@ version = "0.0.0"
 edition = "2024"
 rust-version = "$compiler"
 publish = false
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "benchmarks"
 [workspace]
 resolver = "3"
 [dependencies]
-ic-platform = { path = $platform, default-features = false, features = [$features] }
+$dependency
 ic-testkit = { $testkit }
 tokio = { $tokio }
 MANIFEST
     cargo +"$compiler" metadata --manifest-path "$output/driver/Cargo.toml" --offline \
         --format-version 1 > "$output/driver/metadata.json"
+    bash "$root/scripts/ci/check-qualification-identities.sh" "$output/driver/metadata.json" "$root" \
+        "platform-$kind-benchmark" "$required" > "$output/driver/identities.json"
     CARGO_TARGET_DIR="$cache" cargo +"$compiler" clippy --manifest-path "$output/driver/Cargo.toml" \
         --frozen --all-targets -- -D warnings > "$output/driver/clippy.log" 2>&1
     # shellcheck source=scripts/ci/retain-build-artifact.sh

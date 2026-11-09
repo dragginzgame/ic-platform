@@ -1,6 +1,17 @@
 //! Platform-only consumer of external management DTOs and Candid formats.
 mod support;
-use ic_platform::candid::{DecodeError, DecodeLimits, contract, decode_exactly_one};
+use ic_platform::candid_codec::decoder::{Error as DecodeError, Limits as DecodeLimits};
+mod contract {
+    use ic_platform::candid_codec::{self as codec, Encode, Error};
+    pub fn encode_one<T: Encode>(value: &T) -> Result<Vec<u8>, Error> {
+        codec::encode_one(value, 65536)
+    }
+    pub fn encode_args<T: codec::arguments::EncodeArgs>(value: T) -> Result<Vec<u8>, Error> {
+        codec::arguments::encode_args(&value, 65536)
+    }
+}
+use ic_platform::Principal;
+use ic_platform::candid_codec::decoder::decode_one as decode_exactly_one;
 #[cfg(not(target_family = "wasm"))]
 use ic_platform::management_canister_types::{
     CanisterIdRecord, CanisterStatusType, CanisterTimer, DefiniteCanisterSettings,
@@ -16,20 +27,18 @@ use ic_platform::management_canister_types::{
     CodeDeploymentMode, DeleteCanisterSnapshotArgs, HttpHeader, HttpMethod, HttpRequestArgs,
     HttpRequestResult, Snapshot, TransformArgs, TransformContext, TransformFunc,
 };
-use ic_platform::principal::ExternalPrincipal as Principal;
 
 /// Prepare the management request without choosing cycles, deadlines or transport.
 pub fn prepare_create_canister(
     request: &ic_platform::management_canister_types::CreateCanisterArgs,
 ) -> Vec<u8> {
-    ic_platform::candid::protocols::management::create_canister::encode(request).unwrap()
+    contract::encode_one(request).unwrap()
 }
 
 #[test]
 fn create_canister_uses_the_management_request_and_existing_reply_contract() {
-    use ic_platform::{
-        candid::protocols::{ReplyArity, management::create_canister},
-        management_canister_types::{CanisterIdRecord, CanisterSettings, CreateCanisterArgs},
+    use ic_platform::management_canister_types::{
+        CanisterIdRecord, CanisterSettings, CreateCanisterArgs,
     };
     let request = CreateCanisterArgs {
         settings: Some(CanisterSettings {
@@ -38,7 +47,7 @@ fn create_canister_uses_the_management_request_and_existing_reply_contract() {
         }),
         sender_canister_version: Some(u64::MAX),
     };
-    assert_eq!(create_canister::METHOD, "create_canister");
+
     assert_eq!(
         prepare_create_canister(&request),
         contract::encode_one(&request).unwrap()
@@ -47,19 +56,15 @@ fn create_canister_uses_the_management_request_and_existing_reply_contract() {
         canister_id: Principal::anonymous(),
     };
     let limits = DecodeLimits {
-        reply_bytes: 4096,
-        decoding_quota: 100_000,
-        skipping_quota: 1000,
-        type_entries: 64,
-        header_bytes: 2048,
+        bytes: 4096,
+        work: 100_000,
+        allocation: 65_536,
+        types: 64,
+        header: 2048,
     };
     assert_eq!(
-        create_canister::decode(
-            &contract::encode_one(&response).unwrap(),
-            limits,
-            ReplyArity::Exact
-        )
-        .unwrap(),
+        decode_exactly_one::<CanisterIdRecord>(&contract::encode_one(&response).unwrap(), limits)
+            .unwrap(),
         response
     );
     for bytes in [
@@ -67,18 +72,14 @@ fn create_canister_uses_the_management_request_and_existing_reply_contract() {
         contract::encode_args(()).unwrap(),
         contract::encode_args((&response, 7u64)).unwrap(),
     ] {
-        assert!(create_canister::decode(&bytes, limits, ReplyArity::Exact).is_err());
+        assert!(decode_exactly_one::<CanisterIdRecord>(&bytes, limits).is_err());
     }
     assert!(matches!(
-        create_canister::decode(
+        decode_exactly_one::<CanisterIdRecord>(
             &contract::encode_one(&response).unwrap(),
-            DecodeLimits {
-                reply_bytes: 0,
-                ..limits
-            },
-            ReplyArity::Exact
+            DecodeLimits { bytes: 0, ..limits }
         ),
-        Err(DecodeError::ReplyTooLarge { .. })
+        Err(DecodeError::Limit)
     ));
 }
 
@@ -94,11 +95,11 @@ pub fn roundtrip() {
         contract::encode_one(&create).unwrap()
     );
     let limits = DecodeLimits {
-        reply_bytes: 4096,
-        decoding_quota: 1_000_000,
-        skipping_quota: 10_000,
-        type_entries: 64,
-        header_bytes: 2048,
+        bytes: 4096,
+        work: 1_000_000,
+        allocation: 65_536,
+        types: 64,
+        header: 2048,
     };
     let mut request = HttpRequestArgs {
         url: "https://perf-context.invalid/0".into(),
@@ -153,7 +154,7 @@ pub fn roundtrip() {
         );
     }
     let result = HttpRequestResult {
-        status: contract::Nat::from(200_u16),
+        status: 200_u16.into(),
         headers: request.headers,
         body: vec![0, 128, 255],
     };
@@ -166,11 +167,11 @@ pub fn roundtrip() {
         decode_exactly_one::<HttpRequestResult>(
             &bytes,
             DecodeLimits {
-                reply_bytes: bytes.len() - 1,
+                bytes: bytes.len() - 1,
                 ..limits
             }
         ),
-        Err(DecodeError::ReplyTooLarge { .. })
+        Err(DecodeError::Limit)
     ));
     let transform = TransformArgs {
         response: result,
@@ -193,11 +194,11 @@ use support::decode_hex as wire_hex;
 /// Preserve Blob's bounded history request and the original owner's change records.
 pub fn history_roundtrip() {
     let limits = DecodeLimits {
-        reply_bytes: 65_536,
-        decoding_quota: 2_000_000,
-        skipping_quota: 1024,
-        type_entries: 128,
-        header_bytes: 4096,
+        bytes: 65_536,
+        work: 2_000_000,
+        allocation: 65_536,
+        types: 128,
+        header: 4096,
     };
     // Encoded once by upstream 0.11.0, without Platform or copied DTO schemas.
     let request_wire = wire_hex(include_str!("fixtures/management-info-args.hex"));
@@ -269,11 +270,11 @@ pub fn history_roundtrip() {
         decode_exactly_one::<CanisterInfoResult>(
             &history_wire,
             DecodeLimits {
-                reply_bytes: history_wire.len() - 1,
+                bytes: history_wire.len() - 1,
                 ..limits
             }
         ),
-        Err(DecodeError::ReplyTooLarge { .. })
+        Err(DecodeError::Limit)
     ));
 }
 
@@ -282,33 +283,31 @@ fn management_history_preserves_wire_and_change_variants() {
     history_roundtrip();
 }
 
-fn snapshot_value<T>(hex: &str, skipping_quota: usize) -> T
-where
-    T: contract::CandidType + for<'de> contract::serde::Deserialize<'de>,
-{
+fn snapshot_value<T: FixtureCodec>(hex: &str, allocation: usize) -> T {
     let bytes = wire_hex(hex);
+    let allocation = allocation.max(65_536);
     let limits = DecodeLimits {
-        reply_bytes: 65_536,
-        decoding_quota: 16_000_000,
-        skipping_quota,
-        type_entries: 256,
-        header_bytes: 16_384,
+        bytes: 65_536,
+        work: 16_000_000,
+        allocation,
+        types: 256,
+        header: 16_384,
     };
-    let value: T = decode_exactly_one(&bytes, limits)
-        .unwrap_or_else(|error| panic!("{}: {error}", std::any::type_name::<T>()));
-    assert_eq!(contract::encode_one(&value).unwrap(), bytes);
-    assert!(decode_exactly_one::<T>(&bytes[..bytes.len() - 1], limits).is_err());
-    let extra = contract::encode_args((&value, 0_u8)).unwrap();
-    assert!(decode_exactly_one::<T>(&extra, limits).is_err());
+    let value: T = T::fixture_decode(&bytes, limits)
+        .unwrap_or_else(|error| panic!("{}: {error:?}", std::any::type_name::<T>()));
+    assert_eq!(value.fixture_encode(), bytes);
+    assert!(T::fixture_decode(&bytes[..bytes.len() - 1], limits).is_err());
+    assert!(T::fixture_decode(&value.fixture_extra(), limits).is_err());
+
     assert!(matches!(
-        decode_exactly_one::<T>(
+        T::fixture_decode(
             &bytes,
             DecodeLimits {
-                reply_bytes: bytes.len() - 1,
+                bytes: bytes.len() - 1,
                 ..limits
             }
         ),
-        Err(DecodeError::ReplyTooLarge { .. })
+        Err(DecodeError::Limit)
     ));
     value
 }
@@ -345,22 +344,22 @@ pub fn snapshot_status_roundtrip() {
     assert_eq!(snapshots[0].taken_at_timestamp, u64::MAX);
     let read = original!(ReadCanisterSnapshotMetadataArgs, "read-metadata");
     assert_eq!(read.snapshot_id, load.snapshot_id);
-    // Upstream Reserved source payloads consume skipping work even in a full DTO.
-    // Backup's stricter zero-skipping policy must retain this refusal.
+    // The owned codec requires an explicit logical-allocation budget.
+    // Upstream decoding/skipping quota values are not interchangeable with it.
     let metadata = original!(Vec<ReadCanisterSnapshotMetadataResult>, "metadata", 1024);
     let bytes = contract::encode_one(&metadata).unwrap();
     assert!(matches!(
         decode_exactly_one::<Vec<ReadCanisterSnapshotMetadataResult>>(
             &bytes,
             DecodeLimits {
-                reply_bytes: 65_536,
-                decoding_quota: 16_000_000,
-                skipping_quota: 0,
-                type_entries: 256,
-                header_bytes: 16_384,
+                bytes: 65_536,
+                work: 16_000_000,
+                allocation: 0,
+                types: 256,
+                header: 16_384,
             }
         ),
-        Err(DecodeError::Candid(_))
+        Err(DecodeError::Limit)
     ));
     assert!(matches!(
         metadata[0].source,
@@ -459,13 +458,22 @@ pub fn snapshot_status_roundtrip() {
         CanisterStatusType::Stopped,
     ]) {
         assert_eq!(status.status, expected);
-        assert_eq!(status.cycles, contract::Nat::from(u128::MAX));
+        assert_eq!(
+            status.cycles,
+            ic_platform::candid_codec::Nat::from(u128::MAX)
+        );
         let settings: &DefiniteCanisterSettings = &status.settings;
         assert_eq!(settings.controllers, [Principal::anonymous()]);
         let memory: &MemoryMetrics = &status.memory_metrics;
-        assert_eq!(memory.snapshots_size, contract::Nat::from(8_u64));
+        assert_eq!(
+            memory.snapshots_size,
+            ic_platform::candid_codec::Nat::from(8_u64)
+        );
         let stats: &QueryStats = &status.query_stats;
-        assert_eq!(stats.num_calls_total, contract::Nat::from(1_u64));
+        assert_eq!(
+            stats.num_calls_total,
+            ic_platform::candid_codec::Nat::from(1_u64)
+        );
     }
     assert!(matches!(
         statuses[0].settings.status_visibility,
@@ -495,27 +503,21 @@ pub fn lifecycle_settings_and_ecdsa_contracts() {
         InstallChunkedCodeArgs, LogVisibility, SignWithEcdsaArgs, SignWithEcdsaResult,
         UninstallCodeArgs, UpdateSettingsArgs, UploadChunkArgs,
     };
-    fn roundtrip<T>(value: T)
-    where
-        T: contract::CandidType
-            + for<'de> contract::serde::Deserialize<'de>
-            + PartialEq
-            + std::fmt::Debug,
-    {
-        let bytes = contract::encode_one(&value).unwrap();
+    fn roundtrip<T: FixtureCodec + PartialEq + std::fmt::Debug>(value: T) {
+        let bytes = value.fixture_encode();
         let limits = DecodeLimits {
-            reply_bytes: 65_536,
-            decoding_quota: 1_000_000,
-            skipping_quota: 0,
-            type_entries: 128,
-            header_bytes: 8192,
+            bytes: 65_536,
+            work: 1_000_000,
+            allocation: 100_000,
+            types: 128,
+            header: 8192,
         };
-        assert_eq!(decode_exactly_one::<T>(&bytes, limits).unwrap(), value);
+        assert_eq!(T::fixture_decode(&bytes, limits).unwrap(), value);
         assert!(
-            decode_exactly_one::<T>(
+            T::fixture_decode(
                 &bytes,
                 DecodeLimits {
-                    reply_bytes: bytes.len() - 1,
+                    bytes: bytes.len() - 1,
                     ..limits
                 }
             )
@@ -632,4 +634,24 @@ pub fn canister_snapshot_status_roundtrip() {
 #[test]
 fn canister_status_and_snapshot_records_preserve_wire() {
     canister_snapshot_status_roundtrip();
+}
+
+trait FixtureCodec: Sized {
+    fn fixture_encode(&self) -> Vec<u8>;
+    fn fixture_extra(&self) -> Vec<u8>;
+    fn fixture_decode(bytes: &[u8], limits: DecodeLimits) -> Result<Self, DecodeError>;
+}
+impl<
+    T: ic_platform::candid_codec::Encode + for<'de> ic_platform::candid_codec::decoder::Decode<'de>,
+> FixtureCodec for T
+{
+    fn fixture_encode(&self) -> Vec<u8> {
+        ic_platform::candid_codec::encode_one(self, 65536).unwrap()
+    }
+    fn fixture_extra(&self) -> Vec<u8> {
+        ic_platform::candid_codec::arguments::encode_args(&(self, 0_u8), 65536).unwrap()
+    }
+    fn fixture_decode(bytes: &[u8], limits: DecodeLimits) -> Result<Self, DecodeError> {
+        decode_exactly_one(bytes, limits)
+    }
 }

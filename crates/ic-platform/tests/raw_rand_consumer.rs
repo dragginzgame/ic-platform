@@ -1,18 +1,18 @@
 //! Independent general-Candid reference, selected only for this test target.
-use ic_platform::{candid, raw_rand};
+use ic_platform::raw_rand;
 
 fn reference_decode(bytes: &[u8]) -> Vec<u8> {
-    candid::decoder::decode_one_with_config(bytes, &candid::decoder::DecoderConfig::new()).unwrap()
+    candid::utils::decode_one_with_config(bytes, &candid::de::DecoderConfig::new()).unwrap()
 }
 
 #[test]
 fn request_and_replica_reply_shape_match_reference_candid() {
     assert_eq!(
         raw_rand::encode().as_slice(),
-        candid::contract::encode_args(()).unwrap()
+        candid::encode_args(()).unwrap()
     );
     for value in [[0; 32], [255; 32], core::array::from_fn(|i| i as u8)] {
-        let wire = candid::contract::encode_one(value.to_vec()).unwrap();
+        let wire = candid::encode_one(value.to_vec()).unwrap();
         assert_eq!(&wire[..10], b"DIDL\x01\x6d\x7b\x01\x00\x20");
         assert_eq!(raw_rand::decode(&wire), Ok(value));
     }
@@ -61,7 +61,7 @@ fn documented_restriction_rejects_valid_unused_type_entries() {
 
 #[test]
 fn every_single_byte_mutation_is_fallible_and_successes_match_reference() {
-    let original = candid::contract::encode_one(vec![42u8; 32]).unwrap();
+    let original = candid::encode_one(vec![42u8; 32]).unwrap();
     for index in 0..original.len() {
         for byte in 0..=255 {
             let mut wire = original.clone();

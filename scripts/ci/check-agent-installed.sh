@@ -26,7 +26,7 @@ edition = "2024"
 rust-version = "$msrv"
 publish = false
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [dependencies]
 ic-platform = { path = "$root/crates/ic-platform", default-features = false, features = ["agent"] }
@@ -36,5 +36,8 @@ wat = "=1.263.0"
 MANIFEST
 export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$root/target/agent-installed-build}"
 bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler.txt"
-cargo +"$msrv" clippy --offline --manifest-path "$fixture/Cargo.toml" --all-targets -- -D warnings
+cargo +"$msrv" metadata --offline --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"
+bash "$root/scripts/ci/check-qualification-identities.sh" "$fixture/metadata.json" "$root" \
+    agent-installed-proof ic-platform,ic-testkit > "$fixture/identities.json"
+cargo +"$msrv" clippy --offline --locked --manifest-path "$fixture/Cargo.toml" --all-targets -- -D warnings
 cargo +"$msrv" run --offline --locked --manifest-path "$fixture/Cargo.toml"

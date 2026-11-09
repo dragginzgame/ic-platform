@@ -6,23 +6,24 @@ def require(condition; $message):
 . as $metadata |
 [.packages[] | select(.name == "ic-platform")] |
 if length == 1 then .[0] else error("expected exactly one ic-platform package") end |
-require((.features.candid == ["principal-external", "dep:candid", "candid/bignum", "dep:thiserror", "candid-args"] and
-    .features["candid-service"] == ["candid", "candid/printer"]); "Candid service generation must remain explicitly selected") |
+require(([.dependencies[] | select((.name == "candid" or .name == "candid_parser") and .kind != "dev")] | length == 0); "Upstream Candid/parser may only be development oracles") |
 require(((.features | keys) == $policy[0].features); "Platform feature inventory changed; update the graph matrix and isolation policy") |
-require((.features["candid-endpoint"] == ["runtime", "candid", "dep:ic-platform-macros"]); "External Candid endpoints must explicitly select the existing generator and Candid codec") |
-require((.features.principal == ["dep:ic-platform-types", "dep:serde"] and .features["principal-external"] == ["principal", "ic-platform-types/principal-external"] and .features["principal-self-authenticating"] == ["principal", "ic-platform-types/principal-self-authenticating"] and ([.dependencies[] | select(.name == "ic_principal")] | length == 0)); "Owned Principal, external byte conversion and self-authentication must remain separate") |
+require((.features["candid-codec-endpoint"] == ["runtime", "candid-codec", "candid-args", "dep:ic-platform-macros"]); "Owned external endpoints must select the existing runtime and owned codec without upstream Candid") |
+require((.features.principal == ["dep:ic-platform-types", "dep:serde"] and (.features | has("principal-external") | not) and .features["principal-self-authenticating"] == ["principal", "ic-platform-types/principal-self-authenticating"] and ([.dependencies[] | select(.name == "ic_principal")] | length == 0)); "Owned Principal and optional self-authentication must not expose registry conversions") |
 require(([$metadata.packages[] | select(.name == "ic-platform-types")] | length == 1 and
     .[0].features.default == [] and
-    .[0].features["principal-external"] == ["dep:ic_principal", "ic_principal/serde"] and
+    (.[0].features | has("principal-external") | not) and
     .[0].features["principal-self-authenticating"] == ["dep:sha2_11"] and
     ([.[0].dependencies[] | select(.kind == null and
         (.name | test("^(candid(_parser)?|ic-platform(-runtime)?|ic-agent)$")))] | length == 0) and
-    ([.[0].dependencies[] | select(.name == "ic_principal" and .kind == null)] |
-        length == 1 and .[0].optional and .[0].target == null and (.[0].uses_default_features | not) and .[0].features == ["convert"]));
-    "Types external Principal must supply upstream Serde without default hashing or a codec") |
+    ([.[0].dependencies[] | select(.name == "ic_principal" and .kind != "dev")] |
+        length == 0));
+    "Types must not have a production external Principal dependency") |
 require((.features.default == []); "Platform must declare empty default features") |
 require((.features["candid-args"] == [] and .features["raw-rand"] == ["candid-args"]); "Small argument encoding and raw_rand must select no dependency or runtime") |
-require((.features["ic-protocol"] == ["principal-external", "certification-cbor", "dep:ic-transport-types"] and
+require((.features["icp-ledger-types"] == ["candid-codec", "principal", "dep:crc32fast", "dep:sha2_11"]); "ICP DTOs use the owned codec and retain only their existing account derivation suppliers") |
+require((.features["candid-codec"] == ["principal", "dep:num-bigint", "num-bigint/serde"] and .features["nns-registry-types"] == ["candid-codec", "principal"] and .features["cmc-types"] == ["candid-codec", "principal"] and .features["cycles-ledger-types"] == ["candid-codec", "principal"] and .features["certified-assets-types"] == ["candid-codec"]); "Owned codec and migrated DTOs must not select upstream Candid") |
+require((.features["ic-protocol"] == ["principal", "certification-cbor", "dep:ic-transport-types"] and
     .features["ic-protocol-fixtures"] == ["ic-protocol"] and
     ([.dependencies[] | select(.name == "ic-transport-types")] | length == 1 and .[0].optional and .[0].req == "^0.49.1" and .[0].target == "cfg(not(target_family = \"wasm\"))"));
     "IC protocol codecs and separate fixture helpers must retain native transport identity without Agent or runtime") |
@@ -42,12 +43,12 @@ require(([$metadata.packages[] | select(.name == "ic-platform-runtime")] | lengt
     ([$r.dependencies[] | select(.name == "ic-platform-runtime-guard")] | length == 1 and .[0].optional and .[0].req == ("=" + $r.version)) and
     ([$metadata.packages[] | select(.name == "ic-platform-runtime-guard")] | length == 1 and .[0].version == $r.version and (.[0].dependencies | all(.[]; .kind == "dev")) and .[0].features == {default: []} and .[0].links == "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md") and
     ([$metadata.packages[] | select(.name == "ic-platform-macros")] | length == 1 and .[0].version == $r.version))); "Canonical runtime must retain the exact singleton guard and coordinated generator") |
-require((.features["management-canister-types"] == ["principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:serde_bytes", "dep:ic-management-canister-types"] and ([.dependencies[] | select(.name == "ic-management-canister-types")] | length == 1 and .[0].req == "=0.11.0" and .[0].optional and .[0].target == "cfg(not(target_family = \"wasm\"))")); "Platform must own selected Wasm management DTOs and retain native-only upstream 0.11.0") |
-require((.features["icrc-ledger-types"] == ["dep:crc32fast", "dep:data-encoding", "principal-external", "dep:candid", "candid/bignum", "candid/serde_bytes", "dep:hex", "dep:num-bigint", "dep:num-traits", "dep:serde_bytes", "dep:sha2"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 0)); "Selected ledger DTOs must not acquire the retired upstream package") |
+require((.features["management-canister-types"] == ["principal", "candid-codec", "dep:serde_bytes"] and ([.dependencies[] | select(.name == "ic-management-canister-types")] | length == 1 and .[0].req == "=0.11.0" and .[0].kind == "dev" and (.[0].optional | not) and .[0].target == null)); "Management DTOs must be owned on all targets; registry 0.11.0 is a dev-only oracle") |
+require((.features["icrc-ledger-types"] == ["dep:crc32fast", "dep:data-encoding", "principal", "candid-codec", "dep:leb128", "dep:hex", "dep:num-bigint", "dep:num-traits", "dep:serde_bytes", "dep:sha2_11"] and ([.dependencies[] | select(.name == "icrc-ledger-types")] | length == 0)); "Selected ledger DTOs must not acquire the retired upstream package") |
 require((.features.certification == ["dep:ic-certification"] and
     .features["certification-cbor"] == ["certification", "dep:serde", "dep:serde_bytes", "dep:serde_cbor", "dep:thiserror"] and
-    .features["canister-sig-creation"] == ["principal-external", "certification", "dep:ic-canister-sig-creation"] and
-    .features.agent == ["principal-external", "dep:ic-agent"] and
+    .features["canister-sig-creation"] == ["principal", "certification", "dep:ic-canister-sig-creation"] and
+    .features.agent == ["principal", "dep:ic-agent"] and
     ([.dependencies[] | select(.name == "ic-certification")] | length == 1 and .[0].optional and .[0].target == null and (.[0].uses_default_features | not) and .[0].features == ["serde"]) and
     ([.dependencies[] | select(.name == "ic-canister-sig-creation")] | length == 1 and .[0].optional and .[0].req == "^1.3.1" and .[0].target == null and (.[0].uses_default_features | not)) and
     ([.dependencies[] | select(.name == "ic-signature-verification")] | length == 1 and .[0].optional and .[0].req == "^0.3.0" and .[0].target == null and (.[0].uses_default_features | not)));

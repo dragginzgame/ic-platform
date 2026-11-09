@@ -21,7 +21,7 @@ while IFS='|' read -r selection package expected; do
     printf 'ic-platform v0.1.13\n%s\n' "$package" > "$fixture/native-case.txt"
     # Supply the required guard for ordinary runtime cases; explicit guard cases
     # below exercise identity and feature-selection refusals.
-    if [[ "$package" != ic-platform-runtime-guard* && ",$selection," =~ ,(executor|runtime|candid-endpoint), ]]; then
+    if [[ "$package" != ic-platform-runtime-guard* && ",$selection," =~ ,(executor|runtime|candid-codec-endpoint), ]]; then
         printf 'ic-platform-runtime-guard v0.1.13 (/fixture)\n' >> "$fixture/native-case.txt"
     fi
     printf '%s\tcase\n' "$selection" > "$fixture/mapping"
@@ -57,12 +57,8 @@ executor,ic0|serde_derive v1.0.229 (proc-macro)|reject
 principal|ic_principal v0.1.5|reject
 canister-sig-creation|ic_principal v0.1.5|pass
 signature-verification|ic_principal v0.1.5|pass
-signature-verification,principal-external|ic_principal v0.1.5|pass
-principal-external|ic_principal v0.1.5|pass
-principal-external|sha2 v0.10.9|reject
 principal-self-authenticating|sha2 v0.10.9|pass
 principal-self-authenticating|ic_principal v0.1.5|reject
-principal-self-authenticating,principal-external|ic_principal v0.1.5|pass
 runtime|ic_principal v0.1.5|reject
 runtime|sha2 v0.10.9|reject
 runtime|digest v0.10.7|reject
@@ -79,7 +75,6 @@ bls|rand v0.8.5|reject
 signature-verification|rand v0.8.5|reject
 none|rand_core v0.6.4|pass
 agent|rand v0.8.5|pass
-candid-parser|getrandom v0.2.17|pass
 none|k256 v0.13.4|reject
 executor|k256 v0.13.4|reject
 ecdsa|k256 v0.13.4|pass
@@ -96,35 +91,26 @@ ic-protocol|ic-transport-types v0.49.3|pass
 ic-protocol-fixtures|ic-agent v0.49.3|reject
 certification-cbor|ic-transport-types v0.49.3|reject
 runtime|candid v0.10.38|reject
-candid-endpoint|candid v0.10.38|pass
-candid-endpoint|pretty v0.12.5|reject
-candid-endpoint|ic-cdk-executor v2.0.0|reject
-candid-endpoint|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
+candid-codec-endpoint|candid v0.10.40|reject
+candid-codec-endpoint|candid_parser v0.4.1|reject
+candid-codec-endpoint|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
 runtime|ic-cdk-executor v2.0.0|reject
 runtime|ic0 v1.2.0|reject
 runtime|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
 runtime|candid_derive v0.10.38|reject
-runtime,candid|candid v0.10.38|pass
 none|candid_derive v0.10.38|reject
-candid|candid v0.10.38|pass
-cmc-types|candid v0.10.38|pass
-icp-ledger-types|candid_derive v0.10.38|pass
-cycles-ledger-types|ic_principal v0.1.5|pass
+cmc-types|candid v0.10.38|reject
+icp-ledger-types|candid_derive v0.10.38|reject
+cycles-ledger-types|ic_principal v0.1.5|reject
 nns-registry-types|serde v1.0.229|pass
-certified-assets-types|candid v0.10.38|pass
+certified-assets-types|candid v0.10.38|reject
 cmc-types|candid_parser v0.4.1|reject
 cycles-ledger-types|ic-cdk v0.19.0|reject
 icp-ledger-types|icrc-ledger-types v0.2.0|reject
 certified-assets-types|ic-agent v0.49.3|reject
 nns-registry-types|pocket-ic v16.1.0|reject
-candid-service|candid v0.10.38|pass
-candid|pretty v0.12.5|reject
-runtime,candid|pretty v0.12.5|reject
-candid-service|pretty v0.12.5|pass
-candid-parser|pretty v0.12.5|pass
-management-canister-types|pretty v0.12.5|pass
+management-canister-types|pretty v0.12.5|reject
 none|candid_parser v0.4.1|reject
-candid-parser|candid_parser v0.4.1|pass
 none|ic-agent v0.49.2|reject
 agent|ic-agent v0.49.2|pass
 none|ic-secp256k1 v0.3.0|reject
@@ -143,7 +129,6 @@ runtime|ic-cdk-timers v1.0.0|reject
 runtime|ic-cdk-macros v0.20.3 (proc-macro)|reject
 runtime|ic-cdk-macros v0.20.3 (proc-macro) (/local)|reject
 none|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
-candid-endpoint|ic-platform-macros v0.1.12 (proc-macro) (/fixture)|reject
 ic0|ic0 v1.2.0|reject
 ic0|ic0 v1.1.0|reject
 ic0|ic0 v1.2.0 (/local)|reject
@@ -175,11 +160,13 @@ signature-verification|ic-certification v3.2.0|pass
 agent|ic-certification v3.2.0|pass
 certification|ic-certification v3.2.1|reject
 none|ic-management-canister-types v0.11.0|reject
-management-canister-types|ic-management-canister-types v0.11.0|pass
+management-canister-types|ic-management-canister-types v0.11.0|reject
 none|icrc-ledger-types v0.2.0|reject
 icrc-ledger-types|icrc-ledger-types v0.2.0|reject
 icrc-ledger-types|icrc-cbor v0.1.0|reject
 icrc-ledger-types|pretty v0.12.5|reject
+icrc-ledger-types|candid v0.10.40|reject
+icrc-ledger-types|candid_derive v0.10.40|reject
 icrc-ledger-types|ic-stable-structures v0.7.2|reject
 agent|ic-stable-structures v0.7.2|reject
 principal|ic-stable-structures v0.7.3|reject
@@ -224,7 +211,7 @@ for package in 'pocket-ic v16.1.0' 'ic-platform-pocket-ic v0.1.12 (/fixture)' 'i
 done
 echo 'Retired PocketIC client refuses in native and Wasm graphs'
 # Native host selections cannot authorize entropy dependencies in a Wasm graph.
-for selection in agent candid-parser; do
+for selection in agent; do
     printf 'getrandom v0.2.17\n' > "$fixture/wasm32-unknown-unknown-entropy.txt"
     printf '%s\tentropy\n' "$selection" > "$fixture/mapping"
     if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \
@@ -253,7 +240,7 @@ for target in native wasm32-unknown-unknown; do
     fi
 done
 # Management DTO adoption must exclude the registry supplier and implicit printer from Wasm.
-for package in 'ic-management-canister-types v0.11.0' 'pretty v0.12.5'; do
+for package in 'ic-management-canister-types v0.11.0' 'pretty v0.12.5' 'candid v0.10.40' 'candid_derive v0.10.40'; do
     printf 'ic-platform v0.1.13\n%s\n' "$package" > "$fixture/wasm32-unknown-unknown-management.txt"
     printf 'management-canister-types\tmanagement\n' > "$fixture/mapping"
     if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \
@@ -269,7 +256,7 @@ while IFS='|' read -r mode packages expected diagnostic; do
     case "$mode" in
         wire) ;;
         external) arguments=(--external-candid) ;;
-        native) arguments=(--external-candid --native-management) ;;
+        native) arguments=(--external-candid) ;;
     esac
     actual=reject
     if bash "$root/scripts/ci/check-platform-runtime-graph.sh" "$fixture/runtime.graph" ${arguments[@]+"${arguments[@]}"} > "$fixture/runtime.log" 2>&1; then actual=pass; fi
@@ -279,11 +266,11 @@ done <<'CASES'
 wire||pass|
 wire|candid v0.10.40|reject|Wire runtime acquired Candid
 wire|candid_derive v0.10.40|reject|Wire runtime acquired Candid
-external||reject|Missing selected external Candid adapter
-external|candid v0.10.40|pass|
+external||pass|
+external|candid v0.10.40|reject|Owned external endpoint acquired Candid
 wire|ic-agent v0.49.3|reject|Canister graph contains host parsing
 external|candid v0.10.40\nic-management-canister-types v0.11.0|reject|Canister graph contains host parsing
-native|candid v0.10.40\nic-management-canister-types v0.11.0|pass|
+native|candid v0.10.40\nic-management-canister-types v0.11.0|reject|Canister graph contains host parsing
 wire|ic0 v1.2.0|reject|Retired full CDK runtime/generator
 wire|ic-cdk-executor v2.0.0|reject|Retired full CDK runtime/generator
 wire|ic-canister-sig-creation v1.3.1\nic0 v1.2.0|pass|

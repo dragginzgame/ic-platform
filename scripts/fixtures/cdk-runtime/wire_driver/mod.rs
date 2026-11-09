@@ -1,7 +1,7 @@
 //! Installed checks for explicit Wire frames, rejection and callback cleanup.
 
 use crate::wire_protocol::*;
-use ic_platform::principal::ExternalPrincipal as Principal;
+use ic_testkit::pocket_ic::CanisterId as Principal;
 use ic_testkit::pocket_ic::{PocketIc, RejectCode};
 
 const ROUNDTRIP_SIZES: [usize; 4] = [0, 1, 7, 15];
@@ -103,7 +103,7 @@ pub async fn run(pic: &PocketIc, id: Principal) {
     for bytes in [
         ic_wire::native::encode_request(ECHO, &input, REQUEST).unwrap(),
         ic_wire::native::encode_response(SET, &input, RESPONSE).unwrap(),
-        ic_platform::candid::contract::encode_one(input.clone()).unwrap(),
+        crate::external_driver::contract::encode_one(input.clone()).unwrap(),
         vec![0],
     ] {
         let error = pic

@@ -1,6 +1,4 @@
 use super::maintained as owned;
-#[cfg(not(target_family = "wasm"))]
-use candid::CandidType;
 
 // The registry schema supplier is selected only in the native graph.
 #[cfg(not(target_family = "wasm"))]
@@ -8,7 +6,12 @@ use candid::CandidType;
 fn selected_schemas_match_the_pinned_external_contract() {
     macro_rules! compare {
         ($($ty:ident),+ $(,)?) => {
-            $(assert_eq!(owned::$ty::_ty(), ic_management_canister_types::$ty::_ty(), stringify!($ty));)+
+            $(
+            assert_eq!(
+                crate::candid_codec::encode_one(&Vec::<owned::$ty>::new(), 16384).unwrap(),
+                candid::encode_one(Vec::<ic_management_canister_types::$ty>::new()).unwrap(),
+                stringify!($ty)
+            );)+
         };
     }
     compare!(
@@ -72,11 +75,12 @@ fn selected_schemas_match_the_pinned_external_contract() {
 fn create_canister_preserves_pinned_bytes_and_complete_numeric_ranges() {
     assert_eq!(
         std::any::TypeId::of::<super::CreateCanisterArgs>(),
-        std::any::TypeId::of::<ic_management_canister_types::CreateCanisterArgs>()
+        std::any::TypeId::of::<owned::CreateCanisterArgs>()
     );
-    let large: candid::Nat = "340282366920938463463374607431768211456".parse().unwrap();
+    let large: crate::candid_codec::Nat =
+        "340282366920938463463374607431768211456".parse().unwrap();
     let settings = owned::CanisterSettings {
-        controllers: Some(vec![candid::Principal::anonymous()]),
+        controllers: Some(vec![crate::Principal::anonymous()]),
         reserved_cycles_limit: Some(large),
         environment_variables: Some(vec![owned::EnvironmentVariable {
             name: "fixture".into(),
@@ -90,7 +94,7 @@ fn create_canister_preserves_pinned_bytes_and_complete_numeric_ranges() {
         Some(settings),
     ] {
         let upstream_settings: Option<ic_management_canister_types::CanisterSettings> =
-            candid::decode_one(&candid::encode_one(&settings).unwrap()).unwrap();
+            candid::decode_one(&crate::tests::reference::oracle_bytes(&settings)).unwrap();
         for version in [None, Some(0), Some(u64::MAX)] {
             let request = owned::CreateCanisterArgs {
                 settings: settings.clone(),
@@ -101,9 +105,14 @@ fn create_canister_preserves_pinned_bytes_and_complete_numeric_ranges() {
                 sender_canister_version: version,
             };
             let expected = candid::encode_one(&upstream).unwrap();
-            assert_eq!(candid::encode_one(&request).unwrap(), expected);
+            check_owned(&request);
+            assert_eq!(crate::tests::reference::oracle_bytes(&request), expected);
             assert_eq!(
-                candid::decode_one::<owned::CreateCanisterArgs>(&expected).unwrap(),
+                crate::candid_codec::decoder::decode_one::<owned::CreateCanisterArgs>(
+                    &expected,
+                    crate::tests::reference::limits()
+                )
+                .unwrap(),
                 request
             );
         }
@@ -125,8 +134,11 @@ fn owned_records_preserve_independent_history_status_and_snapshot_bytes() {
     macro_rules! roundtrip {
         ($ty:ty, $fixture:literal) => {{
             let bytes = hex(include_str!(concat!("../../../tests/fixtures/", $fixture)));
-            let value: $ty = candid::decode_one(&bytes).unwrap();
-            assert_eq!(candid::encode_one(value).unwrap(), bytes);
+            let value: $ty =
+                crate::candid_codec::decoder::decode_one(&bytes, crate::tests::reference::limits())
+                    .unwrap();
+            check_owned(&value);
+            assert_eq!(crate::tests::reference::oracle_bytes(&value), bytes);
         }};
     }
     roundtrip!(owned::CanisterInfoArgs, "management-info-args.hex");
@@ -146,4 +158,36 @@ fn owned_records_preserve_independent_history_status_and_snapshot_bytes() {
 fn ecdsa_cost_selectors_preserve_upstream_values() {
     assert_eq!(u32::from(owned::EcdsaCurve::Secp256k1), 0);
     assert_eq!(u32::from(owned::EcdsaCurve::Secp256r1), 1);
+}
+
+#[test]
+fn http_transform_callback_preserves_payload_and_signature() {
+    let value = owned::HttpRequestArgs {
+        url: "https://example.test/path".into(),
+        max_response_bytes: Some(u64::MAX),
+        is_replicated: Some(true),
+        pricing_version: Some(u32::MAX),
+        method: owned::HttpMethod::POST,
+        headers: vec![owned::HttpHeader {
+            name: "header".into(),
+            value: "value".into(),
+        }],
+        body: Some(vec![0, 255]),
+        transform: Some(owned::TransformContext {
+            function: owned::TransformFunc::new(crate::Principal::anonymous(), "transform".into()),
+            context: vec![0, 128, 255],
+        }),
+    };
+    check_owned(&value);
+}
+
+fn check_owned<
+    T: crate::candid_codec::Encode
+        + for<'a> crate::candid_codec::decoder::Decode<'a>
+        + std::fmt::Debug
+        + PartialEq,
+>(
+    value: &T,
+) {
+    crate::tests::reference::roundtrip(value);
 }

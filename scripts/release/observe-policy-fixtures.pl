@@ -24,7 +24,7 @@ for my $directory (qw(scripts/ci scripts/release docs rules make)) {
         $files{$_}=1 if -f $_;
     }},$directory);
 }
-$files{$_}=1 for qw(Makefile .shared-tooling.snapshot DRAGGINZGAME.md AGENTS.md README.md rust-toolchain.toml .cargo/config.toml ci/release-validation.json ci/cargo-release-groups.json);
+$files{$_}=1 for qw(Makefile .toko-tooling.snapshot TOKO-TOOLING.md AGENTS.md README.md rust-toolchain.toml .cargo/config.toml ci/release-validation.json ci/cargo-release-groups.json);
 my $bin=$ENV{PATH};
 $bin =~ m{\A/} && $bin !~ /:/ && -d $bin or die "policy fixtures require their closed tool PATH\n";
 opendir my $directory,$bin or die $!;

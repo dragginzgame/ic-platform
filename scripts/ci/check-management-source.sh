@@ -7,23 +7,43 @@ manifest="$root/crates/ic-platform/src/management_canister_types/maintained/prov
 mkdir -p "$root/target"
 scratch="$(mktemp -d "$root/target/management-source.XXXXXX")"
 trap 'rm -rf "$scratch"' EXIT
-perl -0777 -e '
+perl -I "$root/scripts/ci" -MSourceFingerprint=normalize -0777 -e '
     use strict; use warnings;
     local $/; my $source = <>;
-    my $current = qq{    #![cfg_attr(\n        target_family = "wasm",\n        expect(\n            missing_docs,\n            reason = "The upstream function-reference macro emits undocumented members."\n        )\n    )]};
-    $source =~ s/\Q$current\E/    #![allow(missing_docs)]/ == 1
-        or die "unexpected management callback lint scaffolding\n";
-    my $current_http = qq{#[cfg_attr(\n    all(test, not(target_family = "wasm")),\n    expect(\n        clippy::upper_case_acronyms,\n        reason = "Native private schema tests retain the external HTTP method names."\n    )\n)]};
-    my $original = qq{#[allow(\n    clippy::upper_case_acronyms,\n    reason = "Retain upstream HTTP method names"\n)]};
-    $source =~ s/\Q$current_http\E/$original/ == 1
-        or die "unexpected management HTTP method lint scaffolding\n";
-    print $source;
-' "$source_root/mod.rs" > "$scratch/mod.rs"
-for entry in 'maintained_source_sha256 mod.rs' 'license_sha256 LICENSE-APACHE'; do
-    read -r field file <<< "$entry"
-    checksum="$("$root/.tools/host/bin/jq" -er ".$field" "$manifest")"
-    selected="$source_root/$file"
-    [[ "$file" != mod.rs ]] || selected="$scratch/mod.rs"
-    bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$checksum" "$selected"
-done
-printf 'Selected management DTO source and Apache license match the reviewed 0.11.0 import.\n'
+    $source =~ s/use crate::candid_codec::\{Nat, Reserved\};\s*use crate::principal::Principal;/use candid::{CandidType, Nat, Principal, Reserved};/ == 1 or die "unexpected management carrier imports\n";
+    $source =~ s/\nmod codec;\n/\n/ == 1 or die "unexpected codec module\n";
+    $source =~ s/#\[derive\(/#[derive(CandidType, /g == 49 or die "unexpected management derives\n";
+    $source =~ s/pub status: Nat,/pub status: candid::Nat,/ == 1 or die "unexpected HTTP status carrier\n";
+    my $callback = qq{mod transform_func {
+    #![cfg_attr(
+        target_family = "wasm",
+        expect(
+            missing_docs,
+            reason = "The upstream function-reference macro emits undocumented members."
+        )
+    )]
+    use super::{HttpRequestResult, TransformArgs};
+    candid::define_function!(pub TransformFunc : (TransformArgs) -> (HttpRequestResult) query);
+}};
+    $source =~ s/mod transform_func;/$callback/ == 1 or die "unexpected transform owner\n";
+    my $http_lint = <<'LINT';
+#[cfg_attr(
+    all(test, not(target_family = "wasm")),
+    expect(
+        clippy::upper_case_acronyms,
+        reason = "Native private schema tests retain the external HTTP method names."
+    )
+)]
+LINT
+    $source =~ s/pub enum HttpMethod/$http_lint . "pub enum HttpMethod"/e == 1 or die "unexpected HTTP method declaration\n";
+    my $normalized = normalize($source);
+    $normalized =~ s/(#\[derive\([^)]*),\)\]/$1)]/g;
+    print $normalized;
+' "$source_root/mod.rs" > "$scratch/tokens"
+checksum="$("$root/.tools/host/bin/jq" -er '.codec_base_fingerprint' "$manifest")"
+bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$checksum" "$scratch/tokens"
+checksum="$("$root/.tools/host/bin/jq" -er '.license_sha256' "$manifest")"
+bash "$root/scripts/ci/verify-file-checksum.sh" sha256 "$checksum" "$source_root/LICENSE-APACHE"
+printf 'Management DTOs reconstruct the reviewed 0.11.0 declarations; Apache license matches.\n'
+
+bash "$root/scripts/ci/check-management-native-source.sh"

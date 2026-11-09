@@ -13,7 +13,7 @@ set -euo pipefail
 target="$2"
 printf 'make %s\n' "$target" >> "$FROZEN_SETUP_TRACE"
 case "$target" in
-    shared-tooling-check) [[ "${FROZEN_SETUP_TOOLING_REFUSE:-0}" == 0 ]] ;;
+    toko-tooling-check) [[ "${FROZEN_SETUP_TOOLING_REFUSE:-0}" == 0 ]] ;;
     tools-check) [[ ! -e "$FROZEN_SETUP_MISSING" ]] ;;
     install-tools) rm "$FROZEN_SETUP_MISSING" ;;
     install-hooks|prepare-consumer-dependencies) ;;
@@ -38,27 +38,27 @@ for group in types runtime platform; do
     touch "$FROZEN_SETUP_MISSING"
     : > "$FROZEN_SETUP_TRACE"
     RELEASE_SETUP_MODE=prepare bash "$root/scripts/release/candidate-setup.sh"
-    printf 'make shared-tooling-check\nmake tools-check\nmake install-tools\nmake tools-check\nmake install-hooks\ncargo fetch --locked\nmake prepare-consumer-dependencies\n' > "$fixture/expected"
+    printf 'make toko-tooling-check\nmake tools-check\nmake install-tools\nmake tools-check\nmake install-hooks\ncargo fetch --locked\nmake prepare-consumer-dependencies\n' > "$fixture/expected"
     cmp "$fixture/expected" "$FROZEN_SETUP_TRACE"
     : > "$FROZEN_SETUP_TRACE"
     RELEASE_SETUP_MODE=check bash "$root/scripts/release/candidate-setup.sh"
-    printf 'make shared-tooling-check\nmake tools-check\n' > "$fixture/expected"
+    printf 'make toko-tooling-check\nmake tools-check\n' > "$fixture/expected"
     cmp "$fixture/expected" "$FROZEN_SETUP_TRACE"
     : > "$FROZEN_SETUP_TRACE"
     RELEASE_SETUP_MODE=prepare bash "$root/scripts/release/candidate-setup.sh"
-    printf 'make shared-tooling-check\nmake tools-check\nmake install-hooks\ncargo fetch --locked\nmake prepare-consumer-dependencies\n' > "$fixture/expected"
+    printf 'make toko-tooling-check\nmake tools-check\nmake install-hooks\ncargo fetch --locked\nmake prepare-consumer-dependencies\n' > "$fixture/expected"
     cmp "$fixture/expected" "$FROZEN_SETUP_TRACE"
     touch "$FROZEN_SETUP_MISSING"
     : > "$FROZEN_SETUP_TRACE"
     if RELEASE_SETUP_MODE=check bash "$root/scripts/release/candidate-setup.sh"; then exit 1; fi
-    printf 'make shared-tooling-check\nmake tools-check\n' > "$fixture/expected"
+    printf 'make toko-tooling-check\nmake tools-check\n' > "$fixture/expected"
     cmp "$fixture/expected" "$FROZEN_SETUP_TRACE"
     rm "$FROZEN_SETUP_MISSING"
 done
 for mode in prepare check; do
     : > "$FROZEN_SETUP_TRACE"
     if FROZEN_SETUP_TOOLING_REFUSE=1 RELEASE_SETUP_MODE="$mode" bash "$root/scripts/release/candidate-setup.sh"; then exit 1; fi
-    printf 'make shared-tooling-check\n' > "$fixture/expected"
+    printf 'make toko-tooling-check\n' > "$fixture/expected"
     cmp "$fixture/expected" "$FROZEN_SETUP_TRACE"
 done
 : > "$FROZEN_SETUP_TRACE"

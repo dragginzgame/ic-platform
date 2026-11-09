@@ -1,1123 +1,265 @@
 {
-   "allowances" : [
+   "allowances": [
       {
-         "declaration" : "pub fn decode_one<'a, T: Deserialize<'a> + CandidType>(\n    bytes: &'a [u8],\n    limits: DecodeLimits,\n) -> Result<T, DecodeError>",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/candid/mod.rs",
-         "protocol" : "IC Candid",
-         "reason" : "Explicit external Candid codec adapter; not an owned application DTO."
+         "declaration": "#[derive(CandidType, Deserialize)]\nstruct Account",
+         "kind": "external-protocol",
+         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_ledger.rs",
+         "protocol": "ICP ledger ICRC-1 profiling",
+         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
       },
       {
-         "declaration" : "pub fn decode_exactly_one<'a, T: Deserialize<'a> + CandidType>(\n    bytes: &'a [u8],\n    limits: DecodeLimits,\n) -> Result<T, DecodeError>",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/candid/mod.rs",
-         "protocol" : "IC Candid",
-         "reason" : "Explicit external Candid codec adapter; not an owned application DTO."
+         "declaration": "#[derive(CandidType)]\nstruct Transfer",
+         "kind": "external-protocol",
+         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_ledger.rs",
+         "protocol": "ICP ledger ICRC-1 profiling",
+         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
       },
       {
-         "declaration" : "#[derive(Debug, PartialEq, contract::CandidType, serde::Deserialize)]\n#[candid_path(\"crate::candid::contract\")]\nenum Tree",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/src/candid/nesting/tests/mod.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
+         "declaration": "#[derive(CandidType, Deserialize)]\nstruct Account",
+         "kind": "external-protocol",
+         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
+         "protocol": "ICP ledger ICRC-1 profiling",
+         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
       },
       {
-         "declaration" : "impl CandidType for StrictReserved",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/candid/reserved/mod.rs",
-         "protocol" : "IC Candid",
-         "reason" : "Explicit external Candid codec adapter; not an owned application DTO."
+         "declaration": "#[derive(CandidType)]\nstruct Transfer",
+         "kind": "external-protocol",
+         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
+         "protocol": "ICP ledger ICRC-1 profiling",
+         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
       },
       {
-         "declaration" : "#[derive(CandidType, Deserialize)]\n    enum Strict",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/src/candid/reserved/tests/mod.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
+         "declaration": "#[derive(CandidType, Deserialize, Debug)]\nenum TransferError",
+         "kind": "external-protocol",
+         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
+         "protocol": "ICP ledger ICRC-1 profiling",
+         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
       },
       {
-         "declaration" : "#[derive(CandidType, Deserialize)]\n    enum Untrusted",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/src/candid/reserved/tests/mod.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
+         "declaration": "fn check<T>(value: T)\nwhere\n    T: Encode\n        + for<'a> Decode<'a>\n        + upstream::CandidType\n        + for<'a> serde::Deserialize<'a>\n        + PartialEq\n        + std::fmt::Debug,",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/decoder/tests.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(CandidType, Deserialize)]\n    struct Bounded",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/src/candid/sequence/tests/mod.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
+         "declaration": "fn conversion<S, T>(source: S)\nwhere\n    S: upstream::CandidType,\n    T: Encode\n        + for<'a> Decode<'a>\n        + upstream::CandidType\n        + for<'a> serde::Deserialize<'a>\n        + PartialEq\n        + std::fmt::Debug,",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/decoder/tests.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct GetArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/certified_assets_types/mod.rs",
-         "protocol" : "IC certified asset canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nstruct Record",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct GetResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/certified_assets_types/mod.rs",
-         "protocol" : "IC certified asset canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nenum Status",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct GetChunkArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/certified_assets_types/mod.rs",
-         "protocol" : "IC certified asset canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(reference::CandidType)]\n#[candid_path(\"reference\")]\nstruct Extension",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct GetChunkResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/certified_assets_types/mod.rs",
-         "protocol" : "IC certified asset canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nenum Recursive",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct NotifyTopUpArg",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cmc_types/mod.rs",
-         "protocol" : "NNS cycles minting canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "type Reference: candid::CandidType\n        + for<'a> serde::Deserialize<'a>\n        + From<candid::types::reference::Func>",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/references/tests/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub enum NotifyError",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cmc_types/mod.rs",
-         "protocol" : "NNS cycles minting canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(candid::CandidType, serde::Deserialize)]\nstruct Small",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/references/tests/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct IcpXdrConversionRate",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cmc_types/mod.rs",
-         "protocol" : "NNS cycles minting canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(candid::CandidType, serde::Deserialize)]\nstruct Large",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/references/tests/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct IcpXdrConversionRateResponse",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cmc_types/mod.rs",
-         "protocol" : "NNS cycles minting canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(candid::CandidType, serde::Deserialize)]\nenum Narrow",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/references/tests/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct NotifyMintCyclesArg",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cmc_types/mod.rs",
-         "protocol" : "NNS cycles minting canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(candid::CandidType, serde::Deserialize)]\nenum Wide",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/references/tests/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct NotifyMintCyclesSuccess",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cmc_types/mod.rs",
-         "protocol" : "NNS cycles minting canister",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(candid::CandidType, serde::Deserialize)]\nstruct Node(u64, Option<Box<Node>>)",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/references/tests/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct CreateCanisterArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "fn compare<T>(value: &T)\nwhere\n    T: Encode\n        + reference::CandidType\n        + for<'a> serde::Deserialize<'a>\n        + PartialEq\n        + std::fmt::Debug,",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/tests.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct CmcCreateCanisterArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[cfg(test)]\nimpl candid::CandidType for Reserved",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/reserved/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct EnvironmentVariable",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[cfg(test)]\nimpl candid::CandidType for Nat",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/nat/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub enum LogVisibility",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[derive(contract::CandidType)]\n        #[candid_path(\"candid\")]\n        struct LegacyRequired",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/tests/external_contract_schema/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct CanisterSettings",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "#[cfg(test)]\nimpl candid::CandidType for Int",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/int/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct SubnetFilter",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
+         "declaration": "pub(crate) fn decode_one<'a, T: candid::CandidType + serde::Deserialize<'a>>(\n    bytes: &'a [u8],\n    limits: DecodeLimits,\n) -> Result<T, DecodeError>",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/tests/reference/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only upstream decoder for independent primitive and malformed-byte oracle checks."
       },
       {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub enum SubnetSelection",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct CreateCanisterSuccess",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub enum CreateCanisterError",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct WithdrawArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub enum RejectionCode",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub enum WithdrawError",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[cfg(feature = \"icrc-ledger-types\")]\n#[derive(Clone, Debug, CandidType, Deserialize)]\npub struct BlockWithId",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[cfg(feature = \"icrc-ledger-types\")]\n#[derive(Clone, Debug, CandidType, Deserialize)]\npub struct ArchivedBlocks",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[cfg(feature = \"icrc-ledger-types\")]\n#[derive(Clone, Debug, CandidType, Deserialize)]\npub struct GetBlocksResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/cycles_ledger_types/mod.rs",
-         "protocol" : "IC cycles ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct Tokens",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icp_ledger_types/mod.rs",
-         "protocol" : "ICP ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct TimeStamp",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icp_ledger_types/mod.rs",
-         "protocol" : "ICP ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct TransferArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icp_ledger_types/mod.rs",
-         "protocol" : "ICP ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub enum TransferError",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icp_ledger_types/mod.rs",
-         "protocol" : "ICP ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct GetBlocksArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icp_ledger_types/mod.rs",
-         "protocol" : "ICP ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub enum QueryArchiveError",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icp_ledger_types/mod.rs",
-         "protocol" : "ICP ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct ArchivedEncodedBlocksRange",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icp_ledger_types/mod.rs",
-         "protocol" : "ICP ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct QueryEncodedBlocksResponse",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icp_ledger_types/mod.rs",
-         "protocol" : "ICP ledger",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Serialize, CandidType, Deserialize, Clone, Debug, Copy)]\npub struct Account",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/account/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]\npub struct AllowanceArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/allowance/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]\npub struct Allowance",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/allowance/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]\n#[serde(try_from = \"candid::types::reference::Func\")]\npub struct QueryArchiveFn<Input: CandidType, Output: CandidType>",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "impl<Input, Output> PartialOrd for QueryArchiveFn<Input, Output>\nwhere\n    Input: CandidType + Eq,\n    Output: CandidType + Eq,",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "impl<Input, Output> Ord for QueryArchiveFn<Input, Output>\nwhere\n    Input: CandidType + Eq,\n    Output: CandidType + Eq,",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "impl<Input: CandidType, Output: CandidType> QueryArchiveFn<Input, Output>",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "impl<Input: CandidType, Output: CandidType> Clone for QueryArchiveFn<Input, Output>",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "impl<Input: CandidType, Output: CandidType> From<QueryArchiveFn<Input, Output>>\n    for candid::types::reference::Func",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "impl<Input: CandidType, Output: CandidType> TryFrom<candid::types::reference::Func>\n    for QueryArchiveFn<Input, Output>",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "impl<Input: CandidType, Output: CandidType> CandidType for QueryArchiveFn<Input, Output>",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]\npub struct GetArchivesArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]\npub struct ICRC3ArchiveInfo",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct BlockWithId",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ArchivedBlocks",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct GetBlocksResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]\npub struct GetBlocksRequest",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Serialize, Deserialize)]\npub struct ICRC3DataCertificate",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Serialize, Deserialize)]\npub struct SupportedBlockType",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, Eq, PartialEq, candid::CandidType, serde::Deserialize)]\npub struct SupportedStandard",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc10/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ErrorInfo",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/errors/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub enum Icrc21Error",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/errors/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ConsentMessageMetadata",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/requests/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub enum DisplayMessageType",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/requests/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ConsentMessageSpec",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/requests/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ConsentMessageRequest",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/requests/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Serialize, Clone)]\npub enum Value",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/responses/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]\npub struct FieldsDisplay",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/responses/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub enum ConsentMessage",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/responses/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]\npub struct ConsentInfo",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/icrc21/responses/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]\npub enum MetadataValue",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/metadata/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]\npub struct TransferArg",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/transfer/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(\n    Serialize, Deserialize, CandidType, Clone, Hash, Debug, PartialEq, Eq, PartialOrd, Ord, Default,\n)]\n#[serde(transparent)]\npub struct Memo(pub ByteBuf)",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/transfer/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]\npub enum TransferError",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/transfer/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]\npub enum ICRC3Value",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/value/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]\npub enum Value",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/icrc_ledger_types/value/mod.rs",
-         "protocol" : "ICRC ledger 0.2",
-         "reason" : "Selected upstream ledger DTO or archive callback; preserve its external Candid schema and bounds."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct CanisterIdRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct ChunkHash",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub enum LogVisibility",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub enum SnapshotVisibility",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub enum StatusVisibility",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct EnvironmentVariable",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct CanisterSettings",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct DefiniteCanisterSettings",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct CreateCanisterArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct UpdateSettingsArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct UploadChunkArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType,\n    Serialize,\n    Deserialize,\n    Debug,\n    PartialEq,\n    Eq,\n    PartialOrd,\n    Ord,\n    Hash,\n    Clone,\n    Copy,\n    Default,\n)]\npub enum CanisterInstallMode",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType,\n    Serialize,\n    Deserialize,\n    Debug,\n    PartialEq,\n    Eq,\n    PartialOrd,\n    Ord,\n    Hash,\n    Clone,\n    Copy,\n    Default,\n)]\npub struct UpgradeFlags",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType,\n    Serialize,\n    Deserialize,\n    Debug,\n    PartialEq,\n    Eq,\n    PartialOrd,\n    Ord,\n    Hash,\n    Clone,\n    Copy,\n    Default,\n)]\npub enum WasmMemoryPersistence",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct InstallChunkedCodeArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct UninstallCodeArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct CanisterStatusResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy,\n)]\npub enum CanisterStatusType",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct MemoryMetrics",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,\n)]\npub struct QueryStats",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct CanisterInfoArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct CanisterInfoResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct FromUserRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct FromCanisterRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub enum ChangeOrigin",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct CreationRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy,\n)]\npub enum CodeDeploymentMode",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct CodeDeploymentRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct LoadSnapshotRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct RenameToRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct RenameCanisterRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct ControllersChangeRecord",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub enum ChangeDetails",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct Change",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Deserialize, Debug, PartialEq, Eq, Clone, Default)]\npub struct HttpRequestArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct HttpRequestResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType,\n    Serialize,\n    Deserialize,\n    Debug,\n    PartialEq,\n    Eq,\n    PartialOrd,\n    Ord,\n    Hash,\n    Clone,\n    Copy,\n    Default,\n)]\n#[cfg_attr(\n    all(test, not(target_family = \"wasm\")),\n    expect(\n        clippy::upper_case_acronyms,\n        reason = \"Native private schema tests retain the external HTTP method names.\"\n    )\n)]\npub enum HttpMethod",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct HttpHeader",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Clone, Debug, Deserialize, PartialEq, Eq)]\npub struct TransformContext",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]\npub struct TransformArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct EcdsaKeyId",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType,\n    Serialize,\n    Deserialize,\n    Debug,\n    PartialEq,\n    Eq,\n    PartialOrd,\n    Ord,\n    Hash,\n    Clone,\n    Copy,\n    Default,\n)]\npub enum EcdsaCurve",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct EcdsaPublicKeyArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct EcdsaPublicKeyResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct SignWithEcdsaArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct SignWithEcdsaResult",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default,\n)]\npub struct Snapshot",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub struct DeleteCanisterSnapshotArgs",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(\n    CandidType, Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone,\n)]\npub enum SnapshotSource",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
-         "protocol" : "IC management canister 0.11",
-         "reason" : "Selected complete upstream management declaration; fields, variants and Candid bytes remain unchanged."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct GetSubnetForCanisterRequest",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/nns_registry_types/mod.rs",
-         "protocol" : "NNS registry",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]\npub struct GetSubnetForCanisterResponseOk",
-         "kind" : "external-protocol",
-         "path" : "crates/ic-platform/src/nns_registry_types/mod.rs",
-         "protocol" : "NNS registry",
-         "reason" : "Dedicated external protocol DTO, converted at the consumer boundary; preserve external fields and Candid bytes."
-      },
-      {
-         "declaration" : "#[derive(Debug, PartialEq, contract::CandidType, contract::serde::Deserialize)]\n#[candid_path(\"ic_platform::candid::contract\")]\n#[serde(crate = \"ic_platform::candid::contract::serde\")]\nstruct Reply",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/candid_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[derive(Debug, PartialEq, contract::CandidType, contract::serde::Deserialize)]\n#[candid_path(\"ic_platform::candid::contract\")]\n#[serde(crate = \"ic_platform::candid::contract::serde\")]\nenum LedgerValue",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/candid_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[derive(contract::CandidType, contract::serde::Deserialize)]\n    #[candid_path(\"ic_platform::candid::contract\")]\n    #[serde(crate = \"ic_platform::candid::contract::serde\")]\n    struct StrictReply",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/candid_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[derive(contract::CandidType, contract::serde::Deserialize)]\n#[candid_path(\"ic_platform::candid::contract\")]\n#[serde(crate = \"ic_platform::candid::contract::serde\")]\nstruct Standard",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/candid_endpoint_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[cfg(test)]\n#[derive(Debug, PartialEq, contract::CandidType, contract::serde::Deserialize)]\n#[candid_path(\"ic_platform::candid::contract\")]\n#[serde(crate = \"ic_platform::candid::contract::serde\")]\nstruct PreparationInput",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/dynamic_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn roundtrip<T>(value: T)\n    where\n        T: contract::CandidType\n            + for<'de> contract::serde::Deserialize<'de>\n            + PartialEq\n            + std::fmt::Debug,",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/external_contract_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn equal<T: CandidType>(env: &parser::TypeEnv, name: &str)",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/external_contract_schema.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[derive(contract::CandidType)]\n        #[candid_path(\"ic_platform::candid::contract\")]\n        struct LegacyRequired",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/external_contract_schema.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn method_type<T: CandidType>(\n            env: &mut parser::TypeEnv,\n            service: &parser::Type,\n            method: &str,\n            input: bool,\n        )",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/external_contract_schema.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn operation_type<T: CandidType>(env: &mut parser::TypeEnv, declared: parser::Type)",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/external_contract_schema.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn operation<Req: CandidType, Rep: CandidType>(source: &str, method: &str)",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/external_contract_schema.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn roundtrip_value<T>(value: &T) -> Vec<u8>\nwhere\n    T: contract::CandidType + for<'de> contract::serde::Deserialize<'de>,",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/icrc_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn snapshot_value<T>(hex: &str, skipping_quota: usize) -> T\nwhere\n    T: contract::CandidType + for<'de> contract::serde::Deserialize<'de>,",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/management_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "fn roundtrip<T>(value: T)\n    where\n        T: contract::CandidType\n            + for<'de> contract::serde::Deserialize<'de>\n            + PartialEq\n            + std::fmt::Debug,",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/management_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[derive(Debug, PartialEq, contract::CandidType, contract::serde::Deserialize)]\n#[candid_path(\"ic_platform::candid::contract\")]\n#[serde(crate = \"ic_platform::candid::contract::serde\")]\nstruct ExternalRecord",
-         "kind" : "codec-comparison",
-         "path" : "crates/ic-platform/tests/nesting_consumer.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Deserialize)]\nstruct Account",
-         "kind" : "external-protocol",
-         "path" : "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_ledger.rs",
-         "protocol" : "ICP ledger ICRC-1 profiling",
-         "reason" : "Native profiling example encodes the real external ledger account/transfer contract."
-      },
-      {
-         "declaration" : "#[derive(CandidType)]\nstruct Transfer",
-         "kind" : "external-protocol",
-         "path" : "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_ledger.rs",
-         "protocol" : "ICP ledger ICRC-1 profiling",
-         "reason" : "Native profiling example encodes the real external ledger account/transfer contract."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Deserialize)]\nstruct Account",
-         "kind" : "external-protocol",
-         "path" : "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
-         "protocol" : "ICP ledger ICRC-1 profiling",
-         "reason" : "Native profiling example encodes the real external ledger account/transfer contract."
-      },
-      {
-         "declaration" : "#[derive(CandidType)]\nstruct Transfer",
-         "kind" : "external-protocol",
-         "path" : "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
-         "protocol" : "ICP ledger ICRC-1 profiling",
-         "reason" : "Native profiling example encodes the real external ledger account/transfer contract."
-      },
-      {
-         "declaration" : "#[derive(CandidType, Deserialize, Debug)]\nenum TransferError",
-         "kind" : "external-protocol",
-         "path" : "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
-         "protocol" : "ICP ledger ICRC-1 profiling",
-         "reason" : "Native profiling example encodes the real external ledger account/transfer contract."
-      },
-      {
-         "declaration" : "impl contract::CandidType for Broken",
-         "kind" : "codec-comparison",
-         "path" : "scripts/fixtures/cdk-runtime/external_canister/mod.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[cfg(feature = \"candid-exact\")]\nfn exact_reply<\n    T: ic_platform::candid::contract::CandidType\n        + for<'de> ic_platform::candid::contract::serde::Deserialize<'de>,\n>()",
-         "kind" : "codec-comparison",
-         "path" : "scripts/fixtures/wasm-size/lib.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
-      },
-      {
-         "declaration" : "#[cfg(feature = \"candid-sequence\")]\nimpl<const LIMIT: usize> ic_platform::candid::contract::CandidType for ExternalBoundedBytes<LIMIT>",
-         "kind" : "codec-comparison",
-         "path" : "scripts/fixtures/wasm-size/lib.rs",
-         "protocol" : "IC Candid codec qualification",
-         "reason" : "Named external encoding, schema, quota or size fixture compared against the upstream Candid contract."
+         "path": "crates/ic-platform/src/management_canister_types/native/tests.rs",
+         "declaration": "fn check<\n    O: Encode + for<'a> Decode<'a> + serde::Serialize,\n    R: candid::CandidType + serde::Serialize,\n>(\n    value: R,\n)",
+         "kind": "codec-comparison",
+         "protocol": "IC management Candid",
+         "reason": "Dev-only registry oracle for preserved snapshot globals, timer values and external serialization."
       }
    ],
-   "cbor_allowances" : [
+   "cbor_allowances": [
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform-types/src/account/tests/serde_formats/mod.rs",
-         "reason" : "Existing Types serializer-compatibility tests compare retained Principal/Account bytes.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform-types/src/account/tests/serde_formats/mod.rs",
+         "reason": "Existing Types serializer-compatibility tests compare retained Principal/Account bytes.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform-types/src/principal/tests/mod.rs",
-         "reason" : "Existing Types serializer-compatibility tests compare retained Principal/Account bytes.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform-types/src/principal/tests/mod.rs",
+         "reason": "Existing Types serializer-compatibility tests compare retained Principal/Account bytes.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform/src/certification/cbor/mod.rs",
-         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/certification/cbor/mod.rs",
+         "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform/src/certification/cbor/strict/mod.rs",
-         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/certification/cbor/strict/mod.rs",
+         "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform/src/certification/cbor/strict/tests.rs",
-         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/certification/cbor/strict/tests.rs",
+         "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform/src/certification/cbor/tests.rs",
-         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/certification/cbor/tests.rs",
+         "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform/src/ic_protocol/mod.rs",
-         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/ic_protocol/mod.rs",
+         "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform/src/ic_protocol/tests.rs",
-         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/ic_protocol/tests.rs",
+         "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform/src/signature_verification/mod.rs",
-         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/signature_verification/mod.rs",
+         "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "crates/ic-platform/src/signature_verification/tests.rs",
-         "reason" : "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
-         "review" : "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/signature_verification/tests.rs",
+         "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
+         "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
-         "crate" : "serde_cbor",
-         "path" : "native/ic-profiler/overlay/packages/pocket-ic/tests/memory_access_tracing.rs",
-         "reason" : "Existing maintainer-authorized imported PocketIC ingress fixture; the native infrastructure contract and provenance remain intact.",
-         "review" : "Review on native provider/client transfer; require paired native qualification before changing the imported fixture."
+         "crate": "serde_cbor",
+         "path": "native/ic-profiler/overlay/packages/pocket-ic/tests/memory_access_tracing.rs",
+         "reason": "Existing maintainer-authorized imported PocketIC ingress fixture; the native infrastructure contract and provenance remain intact.",
+         "review": "Review on native provider/client transfer; require paired native qualification before changing the imported fixture."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/candid_codec/nat/tests.rs",
+         "reason": "Compare owned carrier Serde bytes with the upstream Candid carrier; codec oracle only.",
+         "review": "Review when carrier serialization changes; no production generic CBOR API."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/candid_codec/int/tests.rs",
+         "reason": "Compare owned carrier Serde bytes with the upstream Candid carrier; codec oracle only.",
+         "review": "Review when carrier serialization changes; no production generic CBOR API."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/src/candid_codec/reserved/tests.rs",
+         "reason": "Compare owned carrier Serde bytes with the upstream Candid carrier; codec oracle only.",
+         "review": "Review when carrier serialization changes; no production generic CBOR API."
+      },
+      {
+         "path": "crates/ic-platform/src/management_canister_types/native/tests.rs",
+         "crate": "serde_cbor",
+         "reason": "Independent Serde-byte comparison of owned and registry native management DTOs; test-only protocol oracle.",
+         "review": "Review when native management carriers or serialization change."
       }
    ],
-   "schema" : 1
+   "schema": 1
 }

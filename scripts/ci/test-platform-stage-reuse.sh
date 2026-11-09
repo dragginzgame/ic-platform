@@ -15,7 +15,7 @@ repo="$fixture/repo"
 cp -R "$root/scripts/ci/." "$repo/scripts/ci/"
 cp -R "$root/scripts/release/." "$repo/scripts/release/"
 for directory in docs rules make .cargo; do mkdir -p "$repo/$directory"; cp -R "$root/$directory/." "$repo/$directory/"; done
-cp "$root/"{.shared-tooling.snapshot,DRAGGINZGAME.md,AGENTS.md,README.md,rust-toolchain.toml} "$repo/"
+cp "$root/"{.toko-tooling.snapshot,TOKO-TOOLING.md,AGENTS.md,README.md,rust-toolchain.toml} "$repo/"
 # The closed policy environment reads the compiler floor, not the product graph.
 compiler="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 printf '[workspace]\nmembers = []\n[workspace.package]\nrust-version = "%s"\n' "$compiler" > "$repo/Cargo.toml"
@@ -37,14 +37,14 @@ cat > "$repo/scripts/release/group.sh" <<'GROUP'
 printf 'versions/%s\0' "$RELEASE_GROUP"
 GROUP
 cd "$repo"
-git add scripts docs rules make .cargo .shared-tooling.snapshot DRAGGINZGAME.md AGENTS.md README.md rust-toolchain.toml Cargo.toml Makefile versions
+git add scripts docs rules make .cargo .toko-tooling.snapshot TOKO-TOOLING.md AGENTS.md README.md rust-toolchain.toml Cargo.toml Makefile versions
 git commit -qm 'Stage reuse contract fixture'
 export RELEASE_PREVIOUS=1.0.0 RELEASE_VERSION=1.0.1 RELEASE_REMOTE=origin RELEASE_BRANCH=main
 qualify() {
     bash scripts/release/qualify-validation-plan.sh "$1" none release > "$fixture/$2.log" 2>&1
     receipt="$(sed -n '\|^target/release-validation/qualification\.[A-Za-z0-9]*/receipt.json$|p' "$fixture/$2.log")"
     [[ -f "$receipt" ]]
-    jq -e '.schema==4 and .scope=="workspace" and .release_omission_admitted==false and (.validation_evidence.stages|length==20)' "$receipt" > /dev/null
+    jq -e '.schema==4 and .scope=="workspace" and .release_omission_admitted==false and (.validation_evidence.stages|length==19)' "$receipt" > /dev/null
     jq -e --arg mode "$3" '.stage_admissions["release-policy-fixtures"].admission.mode==$mode' "$receipt" > /dev/null
 }
 refuse() { if "$@" > "$fixture/refusal.log" 2>&1; then echo 'unexpected stage admission' >&2; exit 1; fi; }

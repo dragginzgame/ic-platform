@@ -55,7 +55,7 @@ pub fn read_state_response(certificate: &[u8], max_bytes: usize) -> Result<Vec<u
 }
 
 /// Encode the IC certified controllers leaf, including deliberate duplicates.
-pub fn controllers(value: &[ExternalPrincipal], max_bytes: usize) -> Result<Vec<u8>, CborError> {
+pub fn controllers(value: &[Principal], max_bytes: usize) -> Result<Vec<u8>, CborError> {
     encode_framed(&value, max_bytes, false)
 }
 

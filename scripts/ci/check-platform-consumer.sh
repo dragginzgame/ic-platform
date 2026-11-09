@@ -37,7 +37,7 @@ for capability in "${capabilities[@]}"; do
 profile="$(awk -F '\t' -v capability="$capability" '$1 == capability { print }' "$profiles")"
 IFS=$'\t' read -r _ source assets wasm graph_family <<< "$profile"
 case "$graph_family" in
-    -|minimal|principal|principal-external|principal-self-authenticating|ledger|runtime|external-candid|external-codecs) ;;
+    -|minimal|principal|principal-self-authenticating|ledger|runtime|owned-endpoint|external-codecs) ;;
     *) echo "Unknown consumer graph family: $graph_family" >&2; exit 2 ;;
 esac
 # shellcheck disable=SC2016 # $source is a jq binding selecting the test declaration.
@@ -68,16 +68,13 @@ edition.workspace = true
 rust-version.workspace = true
 publish = false
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [lints.rust]
 warnings = "deny"
 [dependencies]
 ic-platform.workspace = true
 MANIFEST
-if [[ "$capability" == principal ]]; then
-    printf '\n[features]\ncandid = ["ic-platform/candid"]\n' >> "$fixture/crates/consumer/Cargo.toml"
-fi
 cp "crates/ic-platform/tests/${source}.rs" "$fixture/crates/consumer/src/lib.rs"
 cp -R crates/ic-platform/tests/support "$fixture/crates/consumer/src/"
 if [[ "$assets" != - ]]; then
@@ -112,23 +109,19 @@ if [[ "$graph_family" != - ]]; then
                 if graph_has_forbidden minimal; then
                     echo 'Minimal consumer acquired application types/codecs/crypto' >&2; exit 1
                 fi ;;
-            principal|principal-external|principal-self-authenticating|ledger)
+            principal|principal-self-authenticating|ledger)
                 if graph_has_forbidden identity; then
                     echo 'Identity/ledger consumer acquired retired or unrelated integration machinery' >&2; exit 1
                 fi
-                if [[ "$graph_family" == principal || "$graph_family" == principal-external ]] &&
+                if [[ "$graph_family" == principal ]] &&
                     graph_has_forbidden identity-codecs; then
                     echo 'Principal byte/text capability acquired hashing or Candid' >&2; exit 1
                 fi
                 if [[ "$graph_family" == principal || "$graph_family" == principal-self-authenticating ]] && graph_has_forbidden external-principal; then
                     echo 'Owned Principal acquired the external identity' >&2; exit 1
                 fi ;;
-            runtime|external-candid)
-                if [[ "$graph_family" == external-candid ]]; then
-                    bash scripts/ci/check-platform-runtime-graph.sh "$graph" --external-candid
-                else
-                    bash scripts/ci/check-platform-runtime-graph.sh "$graph"
-                fi
+            runtime|owned-endpoint)
+                bash scripts/ci/check-platform-runtime-graph.sh "$graph"
                 if graph_has_forbidden retired-darling; then
                     echo 'Runtime/entrypoint consumer acquired retired Darling scaffolding' >&2; exit 1
                 fi

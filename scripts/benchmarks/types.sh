@@ -11,7 +11,7 @@ name = "platform-type-benchmark"
 version = "0.0.0"
 edition = "2024"
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "benchmarks"
 [workspace]
 [dependencies]

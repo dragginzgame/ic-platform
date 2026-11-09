@@ -48,7 +48,6 @@ methods! {
     Certificate = 4120 => "certificate",
     SystemHelpers = 4121 => "system_helpers",
     ExternalManagement = 4122 => "external_management",
-    TimerStart = 4123 => "timer_start",
     SubmissionPressure = 0x2000 => "submission_pressure",
     InsufficientCycles = 0x2001 => "insufficient_cycles",
     WeakPending = 0x2002 => "weak_pending",

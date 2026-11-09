@@ -3,7 +3,8 @@
 //! External Candid formats and unchanged upstream value hashes are retained.
 //! These selected types have Platform identities. Consumers retain call bounds, archive admission, certificate
 //! verification, transaction interpretation and retry policy. This feature
-//! brings Candid but selects no Platform codec, executor, parser or Agent feature.
+//! selects the owned binary codec without Candid, executor, parser or Agent.
+//! Upstream trait bridges exist only in unit-test codec oracles.
 //! Storage, CBOR adapters and consent-formatting policy are not supplied.
 //! Imported Apache-2.0 source and permitted packaging changes are recorded in NOTICE.md.
 
@@ -11,6 +12,8 @@ mod account;
 mod allowance;
 mod archive;
 mod blocks;
+mod codec;
+mod hash_encoding;
 mod metadata;
 mod transfer;
 mod value;

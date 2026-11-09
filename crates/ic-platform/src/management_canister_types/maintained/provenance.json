@@ -173,6 +173,12 @@
     "Select Candid bignum/serde_bytes explicitly without printer for Wasm; preserve all external fields, variants and serialization attributes.",
     "Retain uppercase HttpMethod variants under a localized Clippy allowance; render three links to private/omitted upstream items as code in documentation.",
     "Scope acronym expectations to native private schema tests and callback documentation expectations to public Wasm exports; the source guard reconstructs only these exact attributes before checking the unchanged maintained source hash.",
-    "For #146, select the exact 0.11.0 CreateCanisterArgs declaration with existing CanisterSettings; native builds re-export the registry identity, Wasm uses the maintained declaration."
-  ]
+    "For #146, select the exact 0.11.0 CreateCanisterArgs declaration with existing CanisterSettings; native builds re-export the registry identity, Wasm uses the maintained declaration.",
+    "Unreleased owned codec adoption: Wasm selects candid-codec and owned Nat/Reserved carriers; native registry exports retain identity. Upstream trait bridges compile only under cfg(test) as independent byte/schema oracles; no production legacy feature remains.",
+    "TransformFunc is an owned typed-reference adapter preserving constructor, principal/method payload, Serde admission and query signature; callbacks remain untrusted.",
+    "codec_base_fingerprint reconstructs the pre-adoption maintained import (verified by the original maintained_source_sha256 guard), normalizing whitespace/comments and derive trailing commas only. Explicit imports, conditional derives and the replaced macro declaration are reversed; original source/license hashes remain recorded.",
+    "Unreleased native hard cut: the same maintained declarations and owned codec are exported on native and Wasm. Registry management is dev-only. The previous native-only exports are retained in ../native with separate source reconstruction.",
+    "HttpMethod is now public on both targets; remove its no-longer-applicable private-native Clippy expectation. Reconstruction restores the exact historical attribute before verifying the unchanged fingerprint."
+  ],
+  "codec_base_fingerprint": "8ca69e54dbbae7be4e49404a260ff1c4cdf3e69efc799ea22ad9a66fc3977cc6"
 }

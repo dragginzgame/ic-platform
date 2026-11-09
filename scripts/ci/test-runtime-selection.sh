@@ -9,12 +9,12 @@ selection() {
     printf '%s/%s/%s/%s/%s/%s\n' "$qualification" "$selection_mode" "$transport_mode" "$adapter_mode" "$published" "$mode"
 }
 [[ "$(selection)" == owner/source/raw/external//run ]]
-[[ "$(selection --timers --prepared-call --check-graph)" == timers/source/prepared/external//--check-graph ]]
-[[ "$(selection --check-graph --prepared-call --timers)" == "$(selection --timers --prepared-call --check-graph)" ]]
+[[ "$(selection --prepared-call --check-graph)" == owner/source/prepared/external//--check-graph ]]
+[[ "$(selection --check-graph --prepared-call)" == "$(selection --prepared-call --check-graph)" ]]
 [[ "$(selection --published 0.20.2 --check-graph)" == owner/published/raw/raw/0.20.2/--check-graph ]]
-[[ "$(selection --external-adapters --published 0.20.2 --timers --build-only)" == timers/published/raw/external/0.20.2/--build-only ]]
-[[ "$(selection --build-only --timers --published 0.20.2 --external-adapters)" == "$(selection --external-adapters --published 0.20.2 --timers --build-only)" ]]
-[[ "$(selection --timers --refresh-lock)" == timers/source/raw/external//--refresh-lock ]]
+[[ "$(selection --external-adapters --published 0.20.2 --build-only)" == owner/published/raw/external/0.20.2/--build-only ]]
+[[ "$(selection --build-only --published 0.20.2 --external-adapters)" == "$(selection --external-adapters --published 0.20.2 --build-only)" ]]
+[[ "$(selection --refresh-lock)" == owner/source/raw/external//--refresh-lock ]]
 refuse() {
     local result=0
     (runtime_selection "$@") > /dev/null 2>&1 || result=$?
@@ -28,7 +28,7 @@ refuse --published 0.20.2 --prepared-call
 refuse --published 0.20.2 --prepare
 refuse --prepared-call --refresh-lock
 refuse --published 0.20.2 --refresh-lock
-refuse --timers --timers
+refuse --timers
 refuse run --check-graph
 refuse --unknown
 echo 'Runtime selections preserve profiles, accept reordered options and refuse conflicting operations.'

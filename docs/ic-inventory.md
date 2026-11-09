@@ -34,8 +34,8 @@ the complete closure, version choices and source/archive adoption evidence.
 
 The [passive consumer audit](audits/passive-contract-boundaries-2026-11-04.md)
 records the Types-only identity path and required consumer-owned Candid gates.
-Types 0.18.1 enables registry Principal Serde through
-`principal-external`, without adding Candid, execution, hashing or new packages.
+The pending hard cut removes external Principal aliases and conversions. Types
+keeps registry Principal only as a dev oracle; owned DTOs use canonical Principal.
 
 Platform 0.22 returns BLS, certification and canister-signature
 cryptography to registry dependencies. Platform retains only delegation, issuer
@@ -52,8 +52,9 @@ fixture additionally requires `CreateCanisterArgs` ([#146](https://github.com/dr
 snapshot-transfer names are excluded from Wasm; native builds retain the complete
 58-name registry =0.11.0 facade and its original identities for Backup/Testkit.
 The registry management crate and its implicit Candid printer disappear from the
-management-only Wasm graph. Candid bignum/serde_bytes and all external fields,
-variants, Serde bytes and function signatures remain. See the
+management-only Wasm graph. The pending owned-codec migration also removes
+upstream Candid from this graph. Owned Nat/Reserved carriers retain numeric
+ranges, external fields, variants, Serde bytes and function signatures. See the
 [selected management contract](migration.md#selected-canister-management-dtos).
 
 The pending embedded-runtime cut replaces registry IC0/executor packages with
@@ -77,13 +78,10 @@ contract above. SmallVec remains a transitive host/tooling dependency, not an
 executor dependency. Replacing SlotMap would require owning equivalent
 generation/reuse behavior; no other arena supplier is selected in this graph.
 
-The released 0.8 packaging cut makes `principal` independent of
-`ic_principal` and SHA-2. `principal-external` adds registry identity and byte
-conversions; `principal-self-authenticating` explicitly adds unchanged upstream
-hashing. Pending Platform 0.17 / Types 0.16 retains the exact derivation locally
-and uses upstream SHA-224 directly; self-authentication alone no longer selects
-registry Principal. Runtime selects only the owned capability. Required external integrations
-select conversions automatically.
+The owned Principal has no production registry Principal or hashing dependency.
+Self-authentication explicitly selects unchanged upstream SHA-224. Owned DTOs and
+callbacks now use canonical Principal; native and signature suppliers retain their
+registry identities behind explicit byte boundaries.
 
 Owned Principal self-authentication selects RustCrypto SHA-2 0.11 without default
 features. Certification, BLS and ledger hashing retain SHA-2 0.10; splitting
@@ -103,7 +101,7 @@ Source release 0.7.5 added `icrc_ledger_types::icrc10::SupportedStandard` under 
 ICRC protocol facts; it is not a registry Rust identity. The feature now names
 `dep:candid` for its derive, without selecting the facade's codec feature.
 The current selected DTO implementation supplies Candid directly; the registry
-ledger package is absent. Candid Principal/Nat and external wire schemas remain.
+ledger package is absent. External Principal and wire schemas remain; the current codec adoption uses owned Nat/Int carriers.
 Default/executor isolation remains. Canic owns opt-in mounting, advertised
 standards and consent policy; its [integration issue #706](https://github.com/dragginzgame/canic/issues/706)
 tracks adoption after supplying publication. No consumer adoption or size saving
@@ -118,15 +116,11 @@ quotas; there is no separate policy object or macro option. No dependency/featur
 is added. Default, executor and runtime isolation remains unchanged. See the
 [bounded wire contract](migration.md#external-candid-nesting-qualification-73).
 
-Source release 0.7.4 adds `candid-endpoint` for explicitly external query/update codec
-adapters over the existing generator/executor. It selects `cdk` and `candid`,
-never a parser or service printer. Native DID generation selects `candid-service`
-separately. Consumers own guards, names, limits and lifecycle; Platform owns only
-the shared codec/metadata mechanics. Existing raw/Wire entrypoints are unchanged.
-The `candid::protocols` surface is transport-free and uses only selected DTO
-features. Cycles Ledger's provider block schema requires both Cycles and ICRC
-features to preserve legacy `Value::Nat64` and upstream callback identities.
-No consumer adoption, depth protection or dependency/Wasm reduction is claimed.
+The pending owned endpoint cut replaces the historical `candid-endpoint` route
+with `candid-codec-endpoint`. It retains the generator/executor and ordered
+guards but requires explicit owned budgets and supplies no native service
+registration. The separate `candid::protocols` surface remains a transport-free
+legacy codec client; its upstream dependency has not yet been retired.
 
 `ic_platform::call` is the #75 module for prepared one-shot requests, selected
 by the existing `runtime` feature with no additional dependencies or features.
@@ -234,15 +228,16 @@ API changes or automatically establish whether sibling source still uses an API.
 
 | Upstream / owned code | Public surface and source | Observed consumers | Maintenance responsibility |
 | --- | --- | --- | --- |
-| `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting and account semantics. External Principal conversions and upstream self-authentication are separate explicit features; owned-only graphs exclude both. |
+| `ic_principal`; owned Principal/Account | `principal`, `account`, root Principal/Account/Subaccount in their `mod.rs` files | IcyDB schema/guards; Auth protocol types; Relay; most runtime clients | Platform owns parsing, formatting and account semantics. Registry Principal is dev-only in Types; optional self-authentication remains separate. |
 | Embedded IC0/executor; imported CDK adapters and owned generator | `ic0`, including safe `stable64_{size,grow,read,read_uninit,write}`; `executor`, `cdk::{api,call,futures}`; `crates/ic-platform-macros/src` | Timers `src/platform/{ffi,backend}.rs`; Canic entrypoints/core; Blob client transport; IcyDB runtime counters; Relay canisters; Storage's requested IC0-only backing | Runtime owns ordinary entrypoint macros; Platform retains the external-Candid bridge. Platform maintains non-crypto adapters/generator. Platform maintains the sole executor and unchanged IC0 1.2.0 ABI; callback/trap semantics require installed qualification. Storage retains governance; raw stable IO selects no executor or Types. No full `ic-cdk` dependency. |
 | `candid` | `candid::{contract,decoder}` and owned bounded decoder helpers | Query external DTOs; Backup management calls; Canic system calls; Tooling Host/Testkit | Upstream codec/derive identities; Platform owns narrow exposure and decoder adapters. Decoding uses finite-limit helpers or explicit configuration/staging; unconfigured decoder shortcuts are retired. Consumers own limits, arity and retry policy. Owned endpoints use Wire. |
 | `candid_parser`; Candid printer | native external parsing/typechecking and optional `candid-service` exports | Tooling Host's external service inspection; Canic external arguments/testing | 0.7.0 removed JS/TS compiler and merged-program exports after Wire adoption. Upstream parser/generator scaffolding remains transitive; no size/removal claim. |
 | Owned small argument framing | `candid_args::{empty, units, text}`, selected by `candid-args` | Shared empty requests and narrow external argument consumers | Empty/unit/single-text argument lists only, with upstream byte parity; no general Candid, parser, execution or identity dependency. |
+| Owned typed binary codec | `candid_codec`, selected by `candid-codec`; `candid_record!`, `candid_variant!` | Registry, CMC, ICP, ICRC, Cycles and native asset DTOs | Canonical Principal and num-bigint; owned Nat preserves unbounded Candid and Serde bytes. Function payloads use canonical owned Principal and signature subtyping. No upstream Candid/parser/runtime unless another capability selects it. Explicit budgets, validated skipping and 16-level admission. ICRC callbacks and other unmigrated adapters retain their qualified codec. |
 | Owned `raw_rand` framing | sole typed entropy codec, selected by `raw-rand` | [#151 — Candid-free raw_rand codec](https://github.com/dragginzgame/ic-platform/issues/151); [Canic #749 — Adopt the codec](https://github.com/dragginzgame/canic/issues/749) | The former Candid raw_rand helper is removed. Only the documented management producer profile is supported: one 32-byte blob and bounded LEB128 framing, without general Candid or execution dependencies. Generic raw transports remain method-agnostic; no randomness generation or seed policy. |
 | `ic-agent` | native `agent` builders, identities, request/error types | Query `src/agent.rs`; Tooling Host `src/agent`; Backup Agent; Blob CLI; Canic Host | Upstream transport implementation, no fork. Consumers own retries/authentication. Platform owns explicit exposure only. |
 | `ic-transport-types` | native `ic_protocol` packet identities and typed fixture operations | Query/Blob native fixtures; Testkit metrics; Canic IC packet admission | Same registry transport identities as Agent, without selecting Agent or Runtime. Optional native-only dependency; production protocol codecs and explicit development fixtures remain separate. No generic CBOR export or authentication policy. |
-| `ic-management-canister-types` | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Upstream exact DTO identity and Candid format. Platform pin does not transfer IC protocol ownership. |
+| Owned management DTOs; dev-only `ic-management-canister-types` oracle | `management_canister_types` lifecycle/settings/ECDSA/history/snapshot/status DTOs | Canic Core/Host/Control Plane; Backup snapshot/submission modules | Owned DTOs and codec preserve external Candid format on both targets. Native snapshot transfer declarations retain their target scope; registry 0.11.0 is dev-only. |
 | Selected imported ICRC 0.2.0 declarations/value helpers | `icrc_ledger_types` account/metadata/transfer/consent/archive DTOs | Query `src/icrc/{ledger.rs,live}`; Canic Host | Platform maintains selected types and callbacks; external wire/Serde representations and unchanged upstream hashes remain. Registry ledger/CBOR/storage and consent-formatting dependencies are removed. No ledger/storage policy. |
 | Registry certification 3.2.0 | `certification` certificate/hash-tree types and operations | Tooling Host certificate decoder; Query certification; Auth signature store/verification; Canic | Registry owns certificate/tree/hash/Serde implementations and identities, shared directly with native Agent. Platform’s optional `certification-cbor` owns byte-bounded certificate/signature CBOR; consumers select budgets, construct witnesses and own trust roots and verification policy. |
 | Registry `ic-verify-bls-signature` ^0.6.0 and `ic_bls12_381` ^0.10.1 | `bls`; shared by the canister verifier | Auth and Canic keys; Auth signature verification | Cryptographic implementation and algorithm tests remain upstream. Platform key adapters only delegate and cache upstream identity admission, preserving #127. Signature/errors have registry identity. Defaults/RNG are disabled; alloc verification is selected. |
@@ -359,32 +354,29 @@ profiles retain their explicitly external identities.
 <!-- BEGIN MANIFEST INVENTORY -->
 | Package | Feature | Enables |
 | --- | --- | --- |
-| ic-platform | agent | dep:ic-agent, principal-external |
+| ic-platform | agent | dep:ic-agent, principal |
 | ic-platform | bls | dep:ic-verify-bls-signature, dep:ic_bls12_381 |
-| ic-platform | candid | candid-args, candid/bignum, dep:candid, dep:thiserror, principal-external |
 | ic-platform | candid-args |  |
-| ic-platform | candid-endpoint | candid, dep:ic-platform-macros, runtime |
-| ic-platform | candid-parser | dep:candid_parser, principal-external |
-| ic-platform | candid-service | candid, candid/printer |
-| ic-platform | canister-sig-creation | certification, dep:ic-canister-sig-creation, principal-external |
+| ic-platform | candid-codec | dep:num-bigint, num-bigint/serde, principal |
+| ic-platform | candid-codec-endpoint | candid-args, candid-codec, dep:ic-platform-macros, runtime |
+| ic-platform | canister-sig-creation | certification, dep:ic-canister-sig-creation, principal |
 | ic-platform | certification | dep:ic-certification |
 | ic-platform | certification-cbor | certification, dep:serde, dep:serde_bytes, dep:serde_cbor, dep:thiserror |
-| ic-platform | certified-assets-types | candid |
-| ic-platform | cmc-types | candid |
-| ic-platform | cycles-ledger-types | candid |
+| ic-platform | certified-assets-types | candid-codec |
+| ic-platform | cmc-types | candid-codec, principal |
+| ic-platform | cycles-ledger-types | candid-codec, principal |
 | ic-platform | default |  |
 | ic-platform | ecdsa | dep:crypto-bigint, dep:k256 |
 | ic-platform | ed25519 | dep:curve25519-dalek, dep:ed25519-dalek |
 | ic-platform | executor | ic-platform-runtime/executor, ic0 |
-| ic-platform | ic-protocol | certification-cbor, dep:ic-transport-types, principal-external |
+| ic-platform | ic-protocol | certification-cbor, dep:ic-transport-types, principal |
 | ic-platform | ic-protocol-fixtures | ic-protocol |
 | ic-platform | ic0 | dep:ic-platform-runtime, ic-platform-runtime/ic0 |
-| ic-platform | icp-ledger-types | candid, dep:crc32fast, dep:sha2 |
-| ic-platform | icrc-ledger-types | candid/bignum, candid/serde_bytes, dep:candid, dep:crc32fast, dep:data-encoding, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2, principal-external |
-| ic-platform | management-canister-types | candid/bignum, candid/serde_bytes, dep:candid, dep:ic-management-canister-types, dep:serde_bytes, principal-external |
-| ic-platform | nns-registry-types | candid |
+| ic-platform | icp-ledger-types | candid-codec, dep:crc32fast, dep:sha2_11, principal |
+| ic-platform | icrc-ledger-types | candid-codec, dep:crc32fast, dep:data-encoding, dep:hex, dep:leb128, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2_11, principal |
+| ic-platform | management-canister-types | candid-codec, dep:serde_bytes, principal |
+| ic-platform | nns-registry-types | candid-codec, principal |
 | ic-platform | principal | dep:ic-platform-types, dep:serde |
-| ic-platform | principal-external | ic-platform-types/principal-external, principal |
 | ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal |
 | ic-platform | raw-rand | candid-args |
 | ic-platform | runtime | executor, ic-platform-runtime/runtime, ic0, principal |
@@ -396,13 +388,12 @@ profiles retain their explicitly external identities.
 | ic-platform-runtime | runtime | dep:ic-platform-types, dep:pin-project-lite, dep:serde, dep:thiserror, executor |
 | ic-platform-runtime-guard | default |  |
 | ic-platform-types | default |  |
-| ic-platform-types | principal-external | dep:ic_principal, ic_principal/serde |
 | ic-platform-types | principal-self-authenticating | dep:sha2_11 |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ic-platform | candid | ^0.10.38 | normal | all | true | false |  |
-| ic-platform | candid_parser | ^0.4.1 | normal | cfg(not(target_family = "wasm")) | true | false |  |
+| ic-platform | candid | ^0.10.38 | dev | all | false | false | bignum, printer, serde_bytes |
+| ic-platform | candid_parser | ^0.4.1 | dev | all | false | false |  |
 | ic-platform | crc32fast | ^1.5 | normal | all | true | true |  |
 | ic-platform | crypto-bigint | ^0.7.10 | normal | all | true | false |  |
 | ic-platform | curve25519-dalek | ^5.0.0 | normal | all | true | false |  |
@@ -412,7 +403,7 @@ profiles retain their explicitly external identities.
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
 | ic-platform | ic-canister-sig-creation | ^1.3.1 | normal | all | true | false |  |
 | ic-platform | ic-certification | ^3.2.0 | normal | all | true | false | serde |
-| ic-platform | ic-management-canister-types | =0.11.0 | normal | cfg(not(target_family = "wasm")) | true | true |  |
+| ic-platform | ic-management-canister-types | =0.11.0 | dev | all | false | true |  |
 | ic-platform | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform | ic-platform-runtime | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
@@ -421,20 +412,22 @@ profiles retain their explicitly external identities.
 | ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
 | ic-platform | ic_bls12_381 | ^0.10.1 | normal | all | true | false | groups |
 | ic-platform | k256 | ^0.14.0 | normal | all | true | false | ecdsa |
-| ic-platform | num-bigint | ^0.4.6 | normal | all | true | true |  |
+| ic-platform | leb128 | ^0.2.7 | normal | all | true | true |  |
+| ic-platform | num-bigint | ^0.5.1 | normal | all | true | true |  |
 | ic-platform | num-traits | ^0.2.19 | normal | all | true | true |  |
 | ic-platform | serde | ^1.0 | normal | all | true | false | alloc, derive |
 | ic-platform | serde_bytes | ^0.11 | normal | all | true | false | alloc |
 | ic-platform | serde_bytes | ^0.11 | dev | all | false | false | alloc |
 | ic-platform | serde_cbor | ^0.11.2 | normal | all | true | true |  |
 | ic-platform | serde_cbor | ^0.11.2 | dev | all | false | true |  |
-| ic-platform | sha2 | ^0.10 | normal | all | true | true |  |
+| ic-platform | serde_json | ^1.0 | dev | all | false | true |  |
+| ic-platform | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform | toko-tooling | =0.36.0 | dev | all | false | true |  |
+| ic-platform | toko-tooling | =0.37.4 | dev | all | false | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^3 | normal | all | false | true | full |
-| ic-platform-macros | toko-tooling | =0.36.0 | dev | all | false | true |  |
+| ic-platform-macros | toko-tooling | =0.37.4 | dev | all | false | true |  |
 | ic-platform-runtime | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform-runtime | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform-runtime | ic-platform-types | workspace-owned | normal | all | true | false |  |
@@ -443,12 +436,11 @@ profiles retain their explicitly external identities.
 | ic-platform-runtime | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-runtime | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform-runtime | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform-runtime | toko-tooling | =0.36.0 | dev | all | false | true |  |
-| ic-platform-runtime-guard | toko-tooling | =0.36.0 | dev | all | false | true |  |
+| ic-platform-runtime | toko-tooling | =0.37.4 | dev | all | false | true |  |
+| ic-platform-runtime-guard | toko-tooling | =0.37.4 | dev | all | false | true |  |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | false | alloc |
-| ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | convert |
-| ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert, self_authenticating |
+| ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert, self_authenticating, serde |
 | ic-platform-types | postcard | ^1.1.3 | dev | all | false | false | alloc |
 | ic-platform-types | serde | ^1.0 | normal | all | false | false | alloc, derive |
 | ic-platform-types | serde_bytes | ^0.11 | normal | all | false | false | alloc |
@@ -457,5 +449,11 @@ profiles retain their explicitly external identities.
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-types | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
-| ic-platform-types | toko-tooling | =0.36.0 | dev | all | false | true |  |
+| ic-platform-types | toko-tooling | =0.37.4 | dev | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->
+
+The pending `candid-codec-endpoint` feature provides an explicit external-interface
+adapter using the owned codec and the existing Runtime/macro owner. It requires
+owned decode budgets, reply size, arity and empty-envelope choices. It adds no
+Candid dependency or native service registration. The legacy `candid-endpoint` selection and endpoint macros are removed.
+Consumers must explicitly choose the owned budgets; there is no quota translation. The macros change belongs to Runtime's coordinated release group.

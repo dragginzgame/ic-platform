@@ -19,11 +19,11 @@ function platform_forbidden(family, name) {
     if (family == "identity")
         return name ~ /^(ic-platform-runtime|icrc-ledger-types|icrc-cbor|minicbor|base32|candid_parser|ic-agent|pocket-ic|ic-platform-pocket-ic)$/
     if (family == "runtime-host")
-        return platform_host_capability(name) != "" && !(allow_native_management && name == "ic-management-canister-types")
+        return platform_host_capability(name) != ""
     if (family == "retired-cdk")
         return name ~ /^ic-cdk/ || (name == "ic0" && !allow_signature_ic0)
     if (family == "external-codecs")
-        return name ~ /^(ic-cdk[^ ]*|ic0|ic-platform-macros|ic-platform-runtime|ic-platform-runtime-guard|ic-agent|pocket-ic|ic-platform-pocket-ic|ic-testkit|candid_parser|reqwest|tokio)$/
+        return name ~ /^(candid|candid_derive|ic_principal|ic-management-canister-types|ic-cdk[^ ]*|ic0|ic-platform-macros|ic-platform-runtime|ic-platform-runtime-guard|ic-agent|pocket-ic|ic-platform-pocket-ic|ic-testkit|candid_parser|reqwest|tokio)$/
     return 0
 }
 # Standalone use reports whether the graph contains a forbidden package.
@@ -50,8 +50,8 @@ END {
     if (family != "") exit !forbidden_package
     if (runtime_mode != "") {
         if (runtime_mode == "wire" && runtime_codec) runtime_reject("Wire runtime acquired Candid")
-        if (runtime_mode == "external" && !runtime_candid) runtime_reject("Missing selected external Candid adapter")
         if (runtime_host) runtime_reject("Canister graph contains host parsing, Agent or Testkit")
+        if (runtime_mode == "external" && runtime_codec && !runtime_signature) runtime_reject("Owned external endpoint acquired Candid")
         if (runtime_signature && runtime_bad_ic0) runtime_reject("Unqualified signature IC0 supplier")
         if (runtime_retired && (!runtime_signature || runtime_cdk)) runtime_reject("Retired full CDK runtime/generator")
         if (runtime_count != 1) runtime_reject("Runtime must have one canonical Runtime executor owner")

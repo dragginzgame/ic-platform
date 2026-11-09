@@ -26,12 +26,12 @@ fn native_entrypoints_link_across_consuming_crates() {
     for (name, source) in [("role-a", "role_a.rs"), ("role-b", "role_b.rs")] {
         let role = directory.join(name);
         fs::create_dir_all(role.join("src")).unwrap();
-        fs::write(role.join("Cargo.toml"), format!("[package]\nname={name:?}\nversion=\"0.0.0\"\nedition=\"2024\"\n[package.metadata.shared-tooling.loc]\ncategory=\"tests\"\n[dependencies]\nic-platform-macros={{path={macros:?}}}\n")).unwrap();
+        fs::write(role.join("Cargo.toml"), format!("[package]\nname={name:?}\nversion=\"0.0.0\"\nedition=\"2024\"\n[package.metadata.toko-tooling.loc]\ncategory=\"tests\"\n[dependencies]\nic-platform-macros={{path={macros:?}}}\n")).unwrap();
         fs::copy(fixture_sources.join(source), role.join("src/lib.rs")).unwrap();
     }
     let consumer = directory.join("consumer");
     fs::create_dir_all(consumer.join("src")).unwrap();
-    fs::write(consumer.join("Cargo.toml"), "[package]\nname=\"native-link-consumer\"\nversion=\"0.0.0\"\nedition=\"2024\"\n[package.metadata.shared-tooling.loc]\ncategory=\"tests\"\n[dependencies]\nrole-a={path=\"../role-a\"}\nrole-b={path=\"../role-b\"}\n").unwrap();
+    fs::write(consumer.join("Cargo.toml"), "[package]\nname=\"native-link-consumer\"\nversion=\"0.0.0\"\nedition=\"2024\"\n[package.metadata.toko-tooling.loc]\ncategory=\"tests\"\n[dependencies]\nrole-a={path=\"../role-a\"}\nrole-b={path=\"../role-b\"}\n").unwrap();
     fs::copy(
         fixture_sources.join("consumer.rs"),
         consumer.join("src/main.rs"),

@@ -74,7 +74,7 @@ jobs:
         if: needs.selection.outputs.scope == 'docs'
         run: |
           make install-host-tools
-          make shared-tooling-check check-doc-links
+          make toko-tooling-check check-doc-links
       - name: Prepare native HTTP fixture toolchain
         if: needs.selection.outputs.scope != 'docs'
         run: rustup toolchain install --profile minimal --no-self-update --component clippy --component rustfmt
@@ -128,7 +128,7 @@ jobs:
         if: needs.selection.outputs.scope == 'docs'
         run: |
           make install-host-tools
-          make shared-tooling-check check-doc-links
+          make toko-tooling-check check-doc-links
       - name: Save documentation tool downloads
         if: needs.selection.outputs.scope == 'docs'
         uses: ./.github/actions/cache-tool-downloads

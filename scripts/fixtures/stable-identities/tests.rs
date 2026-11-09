@@ -5,8 +5,7 @@ use super::{account, principal};
 #[test]
 fn conversions_preserve_one_identity_and_explicit_zero_fields() {
     let owner = principal(current::Principal::anonymous());
-    let registry: current::principal::ExternalPrincipal = owner.into();
-    let owner = next::Principal::from(registry);
+    let owner: next::Principal = owner;
     let value = account(next::Account {
         owner,
         subaccount: Some([0; 32]),

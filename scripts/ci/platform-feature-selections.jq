@@ -13,7 +13,7 @@ def powerset:
     range($i + 1; $features | length) as $j | [$features[$i], $features[$j]]] +
    [
      # Runtime identity with redundant explicit entrypoint prerequisites.
-     ["runtime", "candid", "executor", "ic0"],
+     ["runtime", "candid-codec-endpoint", "executor", "ic0"],
      # Combined canister DTO and certificate integrations without host features.
      ["runtime", "management-canister-types", "icrc-ledger-types", "certification"],
      # Auth's portable crypto combination must not acquire host/runtime scaffolding.

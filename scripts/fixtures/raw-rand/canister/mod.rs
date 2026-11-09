@@ -18,37 +18,37 @@ impl Drop for Cleanup {
 }
 
 fn arguments() -> Vec<u8> {
-    #[cfg(feature = "reference-candid")]
+    #[cfg(feature = "reference-codec")]
     {
         // Test-only general encoder retained solely for the matched size baseline.
-        ic_platform::candid::contract::encode_args(()).unwrap()
+        ic_platform::candid_codec::arguments::encode_args(&(), 64).unwrap()
     }
-    #[cfg(not(feature = "reference-candid"))]
+    #[cfg(not(feature = "reference-codec"))]
     {
         ic_platform::raw_rand::encode().to_vec()
     }
 }
 
 fn random(bytes: &[u8]) -> [u8; 32] {
-    #[cfg(feature = "reference-candid")]
+    #[cfg(feature = "reference-codec")]
     {
-        use ic_platform::candid::DecodeLimits;
+        use ic_platform::candid_codec::decoder::Limits as DecodeLimits;
         // Test-only general decoder; production callers use raw_rand::decode.
-        ic_platform::candid::decode_exactly_one::<Vec<u8>>(
+        ic_platform::candid_codec::decoder::decode_one::<Vec<u8>>(
             bytes,
             DecodeLimits {
-                reply_bytes: 256,
-                decoding_quota: 4_096,
-                skipping_quota: 64,
-                type_entries: 8,
-                header_bytes: 64,
+                bytes: 256,
+                work: 4_096,
+                allocation: 64,
+                types: 8,
+                header: 64,
             },
         )
         .unwrap()
         .try_into()
         .unwrap()
     }
-    #[cfg(not(feature = "reference-candid"))]
+    #[cfg(not(feature = "reference-codec"))]
     {
         ic_platform::raw_rand::decode(bytes).unwrap()
     }

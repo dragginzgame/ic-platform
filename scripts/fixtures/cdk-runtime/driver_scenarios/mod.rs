@@ -53,18 +53,6 @@ pub(super) async fn execution(pic: &PocketIc, id: Principal, legacy: bool) {
     assert_eq!(update::<u64>(pic, id, "awaited", 3u64).await, 4);
     update::<()>(pic, id, "migratory", ()).await;
     assert_eq!(query::<u64>(pic, id, "value", ()).await, 11);
-    #[cfg(feature = "timers-composition")]
-    for (trap, cancel, value, cleaned) in [
-        (false, false, 12, 1),
-        (true, false, 12, 2),
-        (false, true, 12, 2),
-        (false, false, 13, 2),
-    ] {
-        update::<()>(pic, id, "timer_start", (trap, cancel)).await;
-        advance(pic).await;
-        assert_eq!(query::<u64>(pic, id, "value", ()).await, value);
-        assert_eq!(query::<u64>(pic, id, "cleaned", ()).await, cleaned);
-    }
     update::<()>(pic, id, "weak_pending", ()).await;
     // Protected unfinished tasks must still panic, rather than quietly outlive the method.
     assert!(
@@ -85,14 +73,7 @@ pub(super) async fn execution(pic: &PocketIc, id: Principal, legacy: bool) {
 pub(super) async fn upgrade(pic: &PocketIc, id: Principal, wasm: Vec<u8>, legacy: bool) {
     let checkpoint_value = query::<u64>(pic, id, "value", ()).await;
     let checkpoint_cleaned = query::<u64>(pic, id, "cleaned", ()).await;
-    assert_eq!(
-        (checkpoint_value, checkpoint_cleaned),
-        if cfg!(feature = "timers-composition") {
-            (13, 2)
-        } else {
-            (11, 1)
-        }
-    );
+    assert_eq!((checkpoint_value, checkpoint_cleaned), (11, 1));
     pic.upgrade_canister(id, wasm.clone(), request("after_upgrade", 30u64), None)
         .await
         .unwrap();
@@ -106,7 +87,7 @@ pub(super) async fn upgrade(pic: &PocketIc, id: Principal, wasm: Vec<u8>, legacy
         // Candid is retained only for this pre-existing persisted checkpoint format.
         assert_eq!(
             bytes,
-            ic_platform::candid::contract::encode_args((
+            crate::external_driver::contract::encode_args((
                 true,
                 false,
                 checkpoint_value,
@@ -115,12 +96,6 @@ pub(super) async fn upgrade(pic: &PocketIc, id: Principal, wasm: Vec<u8>, legacy
             .unwrap()
         );
         assert!(update::<bool>(pic, id, "external_management", ()).await);
-    }
-    #[cfg(feature = "timers-composition")]
-    {
-        update::<()>(pic, id, "timer_start", (false, false)).await;
-        advance(pic).await;
-        assert_eq!(query::<u64>(pic, id, "value", ()).await, 31);
     }
 }
 
@@ -171,14 +146,7 @@ pub(super) async fn cycles(pic: &PocketIc, id: Principal, receiver: Principal) {
             .reject_message
             .contains("fixture cycle callback write trap")
     );
-    assert_eq!(
-        query::<u64>(pic, id, "value", ()).await,
-        if cfg!(feature = "timers-composition") {
-            31
-        } else {
-            30
-        }
-    );
+    assert_eq!(query::<u64>(pic, id, "value", ()).await, 30);
     assert_eq!(
         query::<u128>(pic, receiver, "cycle_total", ()).await,
         1_900_000_000

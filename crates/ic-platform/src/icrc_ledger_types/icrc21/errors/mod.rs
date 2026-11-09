@@ -4,15 +4,16 @@
     reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
 )]
 
-use candid::{CandidType, Deserialize, Nat};
+use crate::candid_codec::Nat;
+use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ErrorInfo {
     pub description: String,
 }
 
-#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Icrc21Error {
     UnsupportedCanisterCall(ErrorInfo),
     ConsentMessageUnavailable(ErrorInfo),

@@ -1,22 +1,33 @@
-use ic_platform::candid::{DecodeLimits, decode_args, decode_exactly_one, decode_one};
+//! Owned decoder malformed-input corpus shared by tests and the fuzz harness.
+use ic_platform::candid_codec::{
+    decoder::decode_args,
+    decoder::{Arity, Limits as DecodeLimits, decode_one as decode_exactly_one},
+};
+fn decode_one<T: for<'a> ic_platform::candid_codec::decoder::Decode<'a>>(
+    bytes: &[u8],
+    limits: DecodeLimits,
+) -> Result<T, ic_platform::candid_codec::decoder::Error> {
+    decode_args::<(T,)>(bytes, limits, Arity::Compatible).map(|v| v.0)
+}
 
+/// Exercise typed decoding and validated skipping under fixture-owned budgets.
 pub fn exercise(bytes: &[u8]) {
     // Test-owned budgets, not a production default. Bound zero-width vectors too.
     let limits = DecodeLimits {
-        reply_bytes: 512,
-        decoding_quota: 2_000,
-        skipping_quota: 200,
-        type_entries: 16,
-        header_bytes: 128,
+        bytes: 512,
+        work: 2_000,
+        allocation: 200,
+        types: 16,
+        header: 128,
     };
     let one = decode_one::<u64>(bytes, limits);
-    let args = decode_args::<(u64,)>(bytes, limits);
+    let args = decode_args::<(u64,)>(bytes, limits, Arity::Compatible);
     assert_eq!(one.as_ref().ok(), args.as_ref().ok().map(|v| &v.0));
     if let Ok(exact) = decode_exactly_one::<u64>(bytes, limits) {
         assert_eq!(one.unwrap(), exact);
     }
     let _ = decode_one::<Vec<()>>(bytes, limits);
-    let _ = decode_args::<(Vec<u8>,)>(bytes, limits);
+    let _ = decode_args::<(Vec<u8>,)>(bytes, limits, Arity::Compatible);
     let _ = decode_exactly_one::<Vec<u8>>(bytes, limits);
 }
 
@@ -36,17 +47,17 @@ fn malformed_corpus_and_every_truncated_prefix() {
             exercise(&bytes[..length]);
         }
     }
-    let valid = ic_platform::candid::contract::encode_args((42_u64,)).unwrap();
+    let valid = ic_platform::candid_codec::arguments::encode_args(&(42_u64,), 64).unwrap();
     exercise(&valid);
     assert_eq!(
         decode_exactly_one::<u64>(
             &valid,
             DecodeLimits {
-                reply_bytes: 512,
-                decoding_quota: 2_000,
-                skipping_quota: 200,
-                type_entries: 16,
-                header_bytes: 128,
+                bytes: 512,
+                work: 2_000,
+                allocation: 200,
+                types: 16,
+                header: 128,
             }
         )
         .unwrap(),

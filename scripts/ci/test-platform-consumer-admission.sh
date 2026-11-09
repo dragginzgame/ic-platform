@@ -45,7 +45,7 @@ case "$1" in
         fi
         printf 'ic-platform v0.17.0 (/local/platform)\n'
         case "${TEST_CAPABILITY:-runtime}" in
-            runtime|external-candid|executor|ic0)
+            runtime|owned-endpoint|executor|ic0)
                 printf 'ic-platform-runtime v0.17.0 (/local/runtime)\n' ;;
         esac
         if [[ "$TEST_CANDID" == yes ]]; then printf 'candid v0.10.38\n'; fi
@@ -77,7 +77,6 @@ grep -q 'platform-consumer-proof -> serde_cbor' "$fixture/cbor-refusal.log"
 [[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled after direct CBOR rejection' >&2; exit 1; }
 while IFS=$'\t' read -r capability _ _ wasm _; do
     TEST_CANDID=no
-    if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi
     : > "$TEST_CALLS"
     TEST_CAPABILITY="$capability" "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" "$capability" > "$fixture/log" 2>&1 || {
         cat "$fixture/log" >&2; exit 1;
@@ -108,13 +107,8 @@ derived="$(sed -n 's/^Consumer evidence retained at //p' "$fixture/derived-featu
 grep -Fq 'features = ["ecdsa", "ed25519"]' "$derived/Cargo.toml"
 cp "$fixture/test-manifest.before" "$fixture/crates/ic-platform/Cargo.toml"
 echo 'Standalone feature selection follows the Cargo test declaration'
-if TEST_CAPABILITY=external-codecs TEST_REJECT=yes "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-codecs > "$fixture/codec-rejection.log" 2>&1; then
-    echo 'External codecs admitted host transport' >&2; exit 1
-fi
-grep -q 'External codecs acquired transport' "$fixture/codec-rejection.log"
-for capability in runtime external-candid; do
+for capability in runtime owned-endpoint; do
     export TEST_CANDID=no
-    if [[ "$capability" == external-candid ]]; then TEST_CANDID=yes; fi
     for rejection in no yes; do
         export TEST_REJECT="$rejection"
         : > "$TEST_CALLS"
@@ -128,10 +122,10 @@ for capability in runtime external-candid; do
         fi
     done
 done
-echo 'Consumer admission: runtime/external Candid selection and failure propagation passed'
+echo 'Consumer admission: runtime/owned endpoint selection and failure propagation passed'
 
-export TEST_FAIL_LAST=yes TEST_REJECT=no TEST_CANDID=yes
-if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-candid > "$fixture/failure.log" 2>&1; then
+export TEST_FAIL_LAST=yes TEST_REJECT=no TEST_CANDID=no
+if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" owned-endpoint > "$fixture/failure.log" 2>&1; then
     echo 'Final Cargo failure was masked by consumer completion' >&2; exit 1
 else
     [[ $? == 42 ]] || { cat "$fixture/failure.log" >&2; exit 1; }
@@ -142,10 +136,10 @@ echo 'Final Cargo failure still propagates before successful completion'
 # Cargo may run for minutes while a maintainer edits this checkout. Rewrite the
 # same inode while the last call is paused, shifting the already-read file tail.
 mkfifo "$fixture/ready" "$fixture/resume"
-export TEST_EDIT=yes TEST_REJECT=no TEST_CANDID=yes
+export TEST_EDIT=yes TEST_REJECT=no TEST_CANDID=no
 export TEST_READY="$fixture/ready" TEST_RESUME="$fixture/resume"
 : > "$TEST_CALLS"
-"$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" external-candid > "$fixture/edit.log" 2>&1 &
+"$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" owned-endpoint > "$fixture/edit.log" 2>&1 &
 runner_pid=$!
 read -r _ < "$TEST_READY"
 {

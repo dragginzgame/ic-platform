@@ -1,16 +1,16 @@
 # IC Platform contributor instructions
 
 Read [the current handoff](docs/status/current.md) and the installed
-[baseline](DRAGGINZGAME.md). [.shared-tooling.snapshot](.shared-tooling.snapshot)
+[baseline](TOKO-TOOLING.md). [.toko-tooling.snapshot](.toko-tooling.snapshot)
 records the installed registry checksum; do not edit its payloads. The baseline
-is crates.io `toko-tooling` 0.36.0, pinned once in root workspace dependencies
+is crates.io `toko-tooling` 0.37.4, pinned once in root workspace dependencies
 and inherited as an unconditional dev-dependency by every real member, with
 the source-bundle cargo-machete exemption. Cargo.lock selects the archive.
 After changing the root pin, update that Cargo selection and run
-`make shared-tooling-update` (or `make shared-tooling-install`). Keep the normal
+`make toko-tooling-update` (or `make toko-tooling-install`). Keep the normal
 Cargo.lock and snapshot; add no metadata version, separate tooling lock,
 selection-only package or artificial Rust import. Custom deployment adapters
-must run `shared-tooling-check` before effects.
+must run `toko-tooling-check` before effects.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
   [the migration contract](docs/migration.md) before changing its public surface.
@@ -51,6 +51,18 @@ must run `shared-tooling-check` before effects.
   directory modules only. Do not add Python tooling.
 - GitHub issues are the follow-up tracker once a remote exists. Migration and
   provenance documents specify contracts and evidence, not a second issue queue.
+
+## Owned binary Candid codec
+
+The maintainer authorized removing the legacy `candid`, `candid-parser` and
+`candid-service` public features/modules and production CandidType/carrier bridges.
+Use the existing facade-owned `candid_codec` with explicit budgets and argument
+arity. Upstream Candid/parser are dev-only independent byte/schema oracles;
+DTO bridge implementations compile only under cfg(test). Do not restore legacy
+forwarders or a compatibility feature. Native management keeps registry identity;
+native clients and signature suppliers still pull Candid transitively. Those
+cryptographic implementations remain upstream-owned. This supersedes older
+legacy codec/derive/printer packaging instructions below, not the crypto rules.
 
 ## Test source layout
 
@@ -197,7 +209,8 @@ releases with macros and the exact guard. Facade paths delegate to it; crypto,
 certification and native clients stay outside its release group. Types remains
 independent. Keep empty defaults, raw executor/IC0 isolation, explicit-codec
 macros, protected source bodies and singleton refusal. Timers and Endpoint must
-select Runtime directly; qualify source/archive consumers before publication.
+select Runtime directly and own their downstream composition qualification.
+Platform qualifies its standalone source/archive Runtime before publication.
 Use the current contract in docs/migration.md; imported-source history never
 creates a second implementation or changes the current release-group owner.
 
@@ -213,6 +226,13 @@ not advance Runtime or Types. Platform re-exports the sole canonical Types;
 conversions, bytes, Serde and provenance remain with their current owners.
 
 ## Owned Principal
+
+The maintainer authorized the hard cut removing `principal-external`, external
+Principal aliases and conversions, and the Types production `ic_principal` edge.
+Owned DTOs and callbacks use canonical Principal and the owned Candid codec.
+Native and cryptographic supplier identities remain upstream at private byte
+boundaries; the registry Principal dev oracle remains. This supersedes the older
+external-identity packaging requirements below; cryptographic restrictions remain.
 
 The maintainer authorized narrowing `principal` to owned Principal/Account bytes,
 text and Serde without external Principal or hashing. `principal-external` adds
@@ -253,11 +273,19 @@ Keep protected wake routing while polling, coalesced wakeups, cached wakers,
 completed-task reclamation and destructor execution outside RefCell borrows.
 Preserve IC0 1.2.0 raw safe/unsafe signatures and imported source/license guards.
 No timer entrypoint, storage allocation or application scheduling policy is added.
-Changes require combined CDK/Timers await, callback-trap, cancellation and upgrade
-qualification plus relevant native executor regressions. See the
+Changes require standalone await, callback-trap, cancellation and upgrade
+qualification plus relevant native executor regressions. Scheduling owns its
+Timers composition tests; Platform must not depend on a scheduler release. See the
 [embedded runtime contract](docs/migration.md#embedded-ic0-and-executor).
 
 ## Management contract
+
+The maintainer authorized the native management hard cut: remove the production
+registry dependency and use owned DTOs/codec on both targets. Preserve the existing
+58 native/44 Wasm exports; maintain the 14 native snapshot declarations and their
+alias dependency from 0.11.0 without widening Wasm. Keep source/license guards and
+independent schema, frozen-byte and Serde checks. Registry management is a dev-only
+oracle. This supersedes the native registry-identity constraints below.
 
 The maintainer authorized adopting only the management DTOs used by sibling
 canisters. Wasm uses 44 explicit exports backed by 52 complete declarations from

@@ -5,10 +5,10 @@
 )]
 
 use super::requests::ConsentMessageMetadata;
-use candid::{CandidType, Deserialize};
+use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Serialize, Clone)]
+#[derive(Deserialize, Eq, PartialEq, Debug, Serialize, Clone)]
 pub enum Value {
     TokenAmount {
         decimals: u8,
@@ -26,19 +26,19 @@ pub enum Value {
     },
 }
 
-#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct FieldsDisplay {
     pub intent: String,
     pub fields: Vec<(String, Value)>,
 }
 
-#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum ConsentMessage {
     GenericDisplayMessage(String),
     FieldsDisplayMessage(FieldsDisplay),
 }
 
-#[derive(Debug, CandidType, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ConsentInfo {
     pub consent_message: ConsentMessage,
     pub metadata: ConsentMessageMetadata,

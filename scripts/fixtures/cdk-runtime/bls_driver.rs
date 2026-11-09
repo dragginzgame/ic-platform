@@ -1,6 +1,6 @@
 //! Compare unchanged upstream BLS feature variants in installed Wasm.
 mod pocketic_support;
-use ic_platform::principal::ExternalPrincipal as Principal;
+use ic_testkit::pocket_ic::CanisterId as Principal;
 use std::{path::Path, time::Duration};
 
 fn hex(path: &Path) -> Vec<u8> {

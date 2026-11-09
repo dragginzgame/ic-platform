@@ -21,13 +21,11 @@ with default features disabled. An import alias selects that provider; the obsol
 scaffolding changes before checking the original admitted module fingerprint.
 It also freezes the original Apache license, 29-byte capacity and
 existing fixed/differential tests; registry ic_principal is a test oracle only
-unless external conversions are selected. No upstream self-authentication test
+in every feature selection. No upstream self-authentication test
 module existed in that package; Platform's existing vectors remain unchanged.
 Self-authentication is selected only by `principal-self-authenticating`; the base owned type has
-no external Principal or hashing dependency. `principal-external` separately adds
-the byte-copy conversions and registry identities without self-authentication.
+no external Principal or hashing dependency. External conversions and aliases are removed.
 No SHA implementation or key encoding is copied or rewritten; the derivation body
 is imported without alteration, rather than redesigned.
-`ExternalPrincipal` explicitly exposes that registry identity for external client
-and DTO parameters; conversions copy only the significant bytes. Registry identity
-is not retained by the owned root `Principal`. This is a breaking source change.
+Owned DTOs now use this canonical Principal. Native supplier identities remain
+external, with byte conversion at their consuming boundary.

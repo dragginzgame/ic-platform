@@ -16,13 +16,12 @@ use ic_platform::{
         TransportCallResponse, TransportError, lookup_value, signed_update_inspect, to_request_id,
     },
     certification::{Certificate, SubtreeLookupResult, labeled, labeled_hash, leaf},
-    principal::ExternalPrincipal as Principal,
 };
 
 #[test]
 fn signing_preserves_effective_id_payload_and_request_identity() {
     let identity = BasicIdentity::from_raw_key(&[7; 32]);
-    let sender: Principal = identity.sender().unwrap();
+    let sender = identity.sender().unwrap();
     let builder: AgentBuilder = Agent::builder()
         .with_url("http://127.0.0.1:1")
         .with_identity(identity)
@@ -31,8 +30,8 @@ fn signing_preserves_effective_id_payload_and_request_identity() {
         .with_verify_query_signatures(true);
     let agent: Agent = builder.build().unwrap();
     assert_eq!(agent.get_principal().unwrap(), sender);
-    let canister = Principal::management_canister();
-    let effective = Principal::from_slice(&[1]);
+    let canister = (&[] as &[u8]).try_into().unwrap();
+    let effective = (&[1_u8][..]).try_into().unwrap();
     let arg = vec![0, 1, 2, 255];
     let signed: SignedUpdate = agent
         .update(&canister, "test_method")
@@ -84,14 +83,17 @@ fn signing_preserves_effective_id_payload_and_request_identity() {
 #[test]
 fn anonymous_and_delegated_identities_preserve_sender_and_signed_chain() {
     let anonymous = AnonymousIdentity;
-    assert_eq!(anonymous.sender().unwrap(), Principal::anonymous());
+    assert_eq!(
+        anonymous.sender().unwrap(),
+        AnonymousIdentity.sender().unwrap()
+    );
     assert!(anonymous.public_key().is_none());
     let unsigned = anonymous.sign_arbitrary(b"fixture").unwrap();
     assert!(unsigned.signature.is_none() && unsigned.delegations.is_none());
 
     let root = BasicIdentity::from_raw_key(&[7; 32]);
     let session = BasicIdentity::from_raw_key(&[8; 32]);
-    let target = Principal::from_slice(&[1]);
+    let target = (&[1_u8][..]).try_into().unwrap();
     let delegation = Delegation {
         pubkey: session.public_key().unwrap(),
         expiration: 1_000_000,
@@ -178,7 +180,7 @@ fn signed_update_response_variants_do_not_supply_a_retry_policy() {
         .with_url("http://127.0.0.1:1")
         .build()
         .unwrap();
-    let call = agent.update_signed(Principal::anonymous(), vec![]);
+    let call = agent.update_signed(AnonymousIdentity.sender().unwrap(), vec![]);
     // Check the real return identity without dispatching any request or polling it.
     let _: Box<dyn std::future::Future<Output = Result<CallResponse<Vec<u8>>, AgentError>> + '_> =
         Box::new(call);
@@ -209,7 +211,8 @@ fn certificates_cross_the_explicit_agent_boundary_and_lookups_do_not_authenticat
         .with_url("http://127.0.0.1:1")
         .build()
         .unwrap();
-    let result: Result<(), AgentError> = agent.verify(&external, Principal::anonymous());
+    let result: Result<(), AgentError> =
+        agent.verify(&external, AnonymousIdentity.sender().unwrap());
     assert!(result.is_err());
 }
 
@@ -218,7 +221,10 @@ fn pem_identities_and_transport_errors_remain_typed() {
     // Canic's deterministic test-only identity; no authority outside test fixtures.
     let pem = b"-----BEGIN PRIVATE KEY-----\nMIGEAgEAMBAGByqGSM49AgEGBSuBBAAKBG0wawIBAQQgCDLudkRxUeRDhnUp2pvL\nxLDICLIoNCa1sQdMgz5Y14GhRANCAASA7zusnWjPN0y8nJlD4YAEOpTEYu+CcCdO\nVwidXc26G4+/g7dUbMwbN4E3d3bpxHEP31M+2by6jY67MqFKKroR\n-----END PRIVATE KEY-----";
     let identity = Secp256k1Identity::from_pem(pem).unwrap();
-    assert_ne!(identity.sender().unwrap(), Principal::anonymous());
+    assert_ne!(
+        identity.sender().unwrap(),
+        AnonymousIdentity.sender().unwrap()
+    );
     assert!(BasicIdentity::from_pem(b"invalid").is_err());
     assert!(Prime256v1Identity::from_pem(b"invalid").is_err());
     let error = AgentError::HttpError(HttpErrorPayload {

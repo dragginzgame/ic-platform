@@ -19,11 +19,7 @@ defaults:
 
 jobs:
   runtime:
-    name: Runtime (${{ matrix.qualification }})
-    strategy:
-      fail-fast: false
-      matrix:
-        qualification: [owner, timers]
+    name: Runtime
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
@@ -48,12 +44,7 @@ jobs:
       - name: Prepare locked runtime dependencies
         run: |
           cargo fetch --locked
-          selection=()
-          if [[ '${{ matrix.qualification }}' == timers ]]; then selection=(--timers); fi
-          bash scripts/ci/check-platform-runtime.sh "${selection[@]}" --prepare
-          if [[ '${{ matrix.qualification }}' == timers ]]; then
-            bash scripts/ci/test-runtime-independence.sh --prepare
-          fi
+          bash scripts/ci/check-platform-runtime.sh --prepare
       - name: Prepare Testkit-owned server
         run: |
           version="$(.tools/host/bin/yq -p toml -r '.workspace.dependencies.ic-testkit.version' Cargo.toml)"
@@ -62,16 +53,8 @@ jobs:
           target/testkit-cli/bin/ic-testkit-server setup
           binary="$(target/testkit-cli/bin/ic-testkit-server check)"
           printf 'POCKET_IC_BIN=%s\n' "$binary" >> "$GITHUB_ENV"
-      - name: Refuse incompatible composition without failing owner graphs
-        if: matrix.qualification == 'timers'
-        run: make check-runtime-independence
       - name: Qualify both protocols and compiler versions
-        run: |
-          if [[ '${{ matrix.qualification }}' == timers ]]; then
-            make check-runtime-composition
-          else
-            make check-runtime
-          fi
+        run: make check-runtime
       - name: Retain qualification identities and results
         if: always()
         run: |

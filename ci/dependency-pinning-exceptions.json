@@ -4,7 +4,7 @@
     "file": "Cargo.toml",
     "subject": "ic-management-canister-types",
     "value": "=0.11.0",
-    "reason": "Native-only management DTO supplier for Backup/Testkit/host tooling; preserve original 0.11.0 identities while Wasm uses the selected owned records.",
+    "reason": "Independent development-only management DTO oracle; preserve the 0.11.0 schemas and bytes used to qualify owned native and Wasm records.",
     "evidence": "AGENTS.md#management-contract"
   },
   {
@@ -19,7 +19,7 @@
     "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "toko-tooling",
-    "value": "=0.36.0",
+    "value": "=0.37.4",
     "reason": "The published source-bundle installation contract requires one exact registry pin inherited by every member and matched to Cargo.lock and the installed receipt.",
     "evidence": "docs/consuming-snapshots.md#cargo-selection-and-installation"
   }

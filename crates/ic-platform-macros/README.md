@@ -6,15 +6,13 @@ Apache-2.0 generator derives from IC CDK 0.20.3 release revision
 Its entrypoint core implements no executor or implicit codec and requires no
 upstream change.
 
-The external-Candid bridge is available only through the facade's
-`candid-endpoint` feature. It supplies explicit codec functions and native Candid
-registration, then delegates to this same entrypoint generator. `limits` and
-`empty_args` are mandatory; argument decoding automatically refuses more than
-16 constructed wire levels. Caller guards retain their ordering and execute
-before byte admission/copying. No additional nesting option is needed. This
-preserves existing query/update macros' explicit-codec contract and keeps owned
-Wire endpoints on their selected codec.
-See the [migration](../../docs/migration.md#external-endpoint-and-protocol-codecs-78-79).
+The owned external-Candid bridge is available through the facade's
+`candid-codec-endpoint` feature. Explicit `limits`, `reply_bytes`, `arity` and
+`empty_args` are required. It delegates to this same runtime generator; guards
+run before byte admission/copying. It adds no registry Candid or native service
+registration. The legacy `candid_query`/`candid_update` exports are removed.
+Owned Wire endpoints keep their selected codec.
+See the [migration](../../docs/migration.md#explicit-owned-external-endpoints-unreleased).
 
 The single ordinary attribute family defaults to `::ic_platform_runtime::cdk`
 and is re-exported by Runtime. The former `runtime_*` family and ordinary facade
@@ -55,3 +53,11 @@ Wire or required external protocol. Consumers own the exactly-once reply and
 encoding-failure behavior on this path.
 The support package, Runtime and exact guard form the Runtime release group.
 The facade selects that supplier independently of its crypto release version.
+
+The facade's `candid-codec-endpoint` selection exposes the owned-codec adapters.
+They require `limits`, `reply_bytes`, `arity = "exact" | "compatible"` and
+`empty_args = "reject" | "unit"`. The adapter shares the same generator and
+ordered guard/copy/execution paths. It does not emit native Candid method
+registration or select Candid/Serde derives. External schema publication remains
+consumer-owned. The legacy adapter's work quotas and behavior are unchanged;
+there is no automatic quota conversion when moving to the owned codec.

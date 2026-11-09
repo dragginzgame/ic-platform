@@ -5,28 +5,27 @@
 //! Decoding does not authenticate a response or authorize
 //! a payment, retry, topology decision or resource allocation.
 
-use candid::CandidType;
 use serde::Deserialize;
 
 mod account_identifier;
 pub use account_identifier::account_identifier;
 
 /// Tokens.
-#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct Tokens {
     /// External Candid `e8s` field.
     pub e8s: u64,
 }
 
 /// TimeStamp.
-#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct TimeStamp {
     /// External Candid `timestamp_nanos` field.
     pub timestamp_nanos: u64,
 }
 
 /// TransferArgs.
-#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct TransferArgs {
     /// External Candid `memo` field.
     pub memo: u64,
@@ -43,7 +42,7 @@ pub struct TransferArgs {
 }
 
 /// TransferError.
-#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum TransferError {
     /// External Candid `BadFee` alternative.
     BadFee {
@@ -73,7 +72,7 @@ pub enum TransferError {
 pub type TransferResult = Result<u64, TransferError>;
 
 /// GetBlocksArgs.
-#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct GetBlocksArgs {
     /// External Candid `start` field.
     pub start: u64,
@@ -82,7 +81,7 @@ pub struct GetBlocksArgs {
 }
 
 /// QueryArchiveError.
-#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum QueryArchiveError {
     /// External Candid `BadFirstBlockIndex` alternative.
     BadFirstBlockIndex {
@@ -103,19 +102,12 @@ pub enum QueryArchiveError {
 /// External Candid QueryEncodedBlocksResult.
 pub type QueryEncodedBlocksResult = Result<Vec<Vec<u8>>, QueryArchiveError>;
 
-mod callback {
-    #![expect(
-        missing_docs,
-        reason = "The upstream function-reference macro emits undocumented members."
-    )]
-    use super::{GetBlocksArgs, QueryEncodedBlocksResult};
-    candid::define_function!(pub QueryEncodedBlocksFn : (GetBlocksArgs) -> (QueryEncodedBlocksResult) query);
-}
+mod callback;
 /// ICP encoded-block archive callback with its exact query signature.
 pub use callback::QueryEncodedBlocksFn;
 
 /// ArchivedEncodedBlocksRange.
-#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct ArchivedEncodedBlocksRange {
     /// External Candid `callback` field.
     pub callback: QueryEncodedBlocksFn,
@@ -126,7 +118,7 @@ pub struct ArchivedEncodedBlocksRange {
 }
 
 /// QueryEncodedBlocksResponse.
-#[derive(Clone, Debug, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct QueryEncodedBlocksResponse {
     /// External Candid `certificate` field.
     pub certificate: Option<Vec<u8>>,
@@ -139,3 +131,48 @@ pub struct QueryEncodedBlocksResponse {
     /// External Candid `archived_blocks` field.
     pub archived_blocks: Vec<ArchivedEncodedBlocksRange>,
 }
+
+// Numeric labels are checked against the independent pinned ledger DID.
+crate::candid_record!(Tokens {
+    5035232 => e8s: u64,
+});
+crate::candid_record!(TimeStamp {
+    268680022 => timestamp_nanos: u64,
+});
+crate::candid_record!(TransferArgs {
+    25979 => to: Vec<u8>,
+    5094982 => fee: Tokens,
+    1213809850 => memo: u64,
+    1835347746 => from_subaccount: Option<Vec<u8>>,
+    3258775938 => created_at_time: Option<TimeStamp>,
+    3573748184 => amount: Tokens,
+});
+crate::candid_record!(GetBlocksArgs {
+    2215343202 => start: u64,
+    2668074214 => length: u64,
+});
+crate::candid_record!(ArchivedEncodedBlocksRange {
+    2131139013 => callback: QueryEncodedBlocksFn,
+    2215343202 => start: u64,
+    2668074214 => length: u64,
+});
+crate::candid_record!(QueryEncodedBlocksResponse {
+    457361687 => certificate: Option<Vec<u8>>,
+    2817142406 => blocks: Vec<Vec<u8>>,
+    3385467812 => chain_length: u64,
+    3527769489 => first_block_index: u64,
+    4171053571 => archived_blocks: Vec<ArchivedEncodedBlocksRange>,
+});
+crate::candid_variant!(TransferError {
+    195874615 => TxTooOld{ 3919368871 => allowed_window_nanos: u64 },
+    2142953889 => BadFee{ 3725446591 => expected_fee: Tokens },
+    2932695879 => TxDuplicate{ 326934155 => duplicate_of: u64 },
+    4060984012 => TxCreatedInFuture,
+    4206284395 => InsufficientFunds{ 596483356 => balance: Tokens },
+});
+crate::candid_variant!(QueryArchiveError {
+    1250105008 => BadFirstBlockIndex{ 1421906497 => requested_index: u64,
+    1538714240 => first_valid_index: u64 },
+    3382957744 => Other{ 1389388560 => error_message: String,
+    3601615940 => error_code: u64 },
+});

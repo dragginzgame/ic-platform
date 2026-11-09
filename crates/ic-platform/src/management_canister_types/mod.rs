@@ -1,14 +1,11 @@
 //! Selected canister management DTOs, preserving external Candid bytes.
 //!
-//! Wasm builds use Platform-maintained definitions from 0.11.0 for observed sibling
-//! canister calls. Native builds retain the complete existing upstream DTO surface
-//! and identities for Backup, Testkit and host tooling. No transport, policy or
-//! cryptographic implementation is owned here. See maintained/provenance.json.
+//! All targets use owned definitions and the owned Candid codec. Native snapshot
+//! transfer declarations retain their existing target scope. No transport, storage
+//! or cryptographic implementation is owned here.
 
-#[cfg(any(target_family = "wasm", test))]
 mod maintained;
 
-#[cfg(target_family = "wasm")]
 pub use maintained::{
     CanisterIdRecord, CanisterInfoArgs, CanisterInfoResult, CanisterInstallMode, CanisterSettings,
     CanisterStatusResult, CanisterStatusType, Change, ChangeDetails, ChangeOrigin, ChunkHash,
@@ -22,21 +19,14 @@ pub use maintained::{
 };
 
 #[cfg(not(target_family = "wasm"))]
-pub use ic_management_canister_types::{
-    CanisterIdRecord, CanisterInfoArgs, CanisterInfoResult, CanisterInstallMode, CanisterSettings,
-    CanisterStatusResult, CanisterStatusType, CanisterTimer, Change, ChangeDetails, ChangeOrigin,
-    ChunkHash, CodeDeploymentMode, CodeDeploymentRecord, ControllersChangeRecord,
-    CreateCanisterArgs, CreationRecord, DefiniteCanisterSettings, DeleteCanisterSnapshotArgs,
-    EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs, EcdsaPublicKeyResult, EnvironmentVariable,
-    FromCanisterRecord, FromUserRecord, HttpHeader, HttpMethod, HttpRequestArgs, HttpRequestResult,
-    InstallChunkedCodeArgs, LoadCanisterSnapshotArgs, LogVisibility, MemoryMetrics,
-    OnLowWasmMemoryHookStatus, QueryStats, ReadCanisterSnapshotDataArgs,
-    ReadCanisterSnapshotDataResult, ReadCanisterSnapshotMetadataArgs,
-    ReadCanisterSnapshotMetadataResult, SignWithEcdsaArgs, SignWithEcdsaResult, Snapshot,
-    SnapshotDataKind, SnapshotDataOffset, SnapshotMetadataGlobal, SnapshotSource, StatusVisibility,
-    TakeCanisterSnapshotArgs, TransformArgs, TransformContext, TransformFunc, UninstallCodeArgs,
-    UpdateSettingsArgs, UploadCanisterSnapshotDataArgs, UploadCanisterSnapshotMetadataArgs,
-    UploadCanisterSnapshotMetadataResult, UploadChunkArgs,
+mod native;
+#[cfg(not(target_family = "wasm"))]
+pub use native::{
+    CanisterTimer, LoadCanisterSnapshotArgs, OnLowWasmMemoryHookStatus,
+    ReadCanisterSnapshotDataArgs, ReadCanisterSnapshotDataResult, ReadCanisterSnapshotMetadataArgs,
+    ReadCanisterSnapshotMetadataResult, SnapshotDataKind, SnapshotDataOffset,
+    SnapshotMetadataGlobal, TakeCanisterSnapshotArgs, UploadCanisterSnapshotDataArgs,
+    UploadCanisterSnapshotMetadataArgs, UploadCanisterSnapshotMetadataResult,
 };
 
 #[cfg(test)]

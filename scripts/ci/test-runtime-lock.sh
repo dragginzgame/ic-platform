@@ -10,7 +10,7 @@ mkdir -p "$fixture/scripts/release" "$fixture/scripts/fixtures" "$fixture/.tools
 ln -s "$root/.tools/host" "$fixture/.tools/host"
 cp "$root/scripts/release/"{runtime-lock.sh,runtime-pin.sh} "$fixture/scripts/release/"
 cp "$root/ci/"{cargo-release-groups.json,release-editor.env,dependency-pinning-exceptions.json} "$fixture/ci/"
-cp -R "$root/scripts/fixtures/"{cdk-runtime,timers-runtime} "$fixture/scripts/fixtures/"
+cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
 editor="$(bash "$root/scripts/release/editor.sh" check)"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" %q\n' "$editor" > "$fixture/scripts/release/editor.sh"
 export PATH="$root/.tools/host/bin:$PATH"
@@ -23,9 +23,8 @@ bash "$fixture/scripts/release/runtime-lock.sh" check
 # Roster failures must refuse before any selected lock can be prepared, even
 # when the reader emitted a valid first group before failing on a later one.
 cp "$fixture/ci/cargo-release-groups.json" "$fixture/valid-groups.json"
-for profile in cdk-runtime timers-runtime; do
-    cp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
-done
+profile=cdk-runtime
+cp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
 for invalid in malformed empty partial; do
     case "$invalid" in
         malformed) printf '{' > "$fixture/ci/cargo-release-groups.json" ;;
@@ -36,9 +35,8 @@ for invalid in malformed empty partial; do
         arguments=("$operation")
         [[ "$operation" != prepare ]] || arguments+=(0.0.0)
         if RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" "${arguments[@]}" > "$fixture/$invalid-$operation.log" 2>&1; then exit 1; fi
-        for profile in cdk-runtime timers-runtime; do
-            cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
-        done
+        profile=cdk-runtime
+        cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
     done
 done
 cp "$fixture/valid-groups.json" "$fixture/ci/cargo-release-groups.json"
@@ -55,33 +53,32 @@ cp "$fixture/valid-groups.json" "$fixture/ci/cargo-release-groups.json"
         result=0
         RELEASE_GROUP=platform bash "$fixture/scripts/release/runtime-lock.sh" "${arguments[@]}" > "$fixture/reader-$operation.log" 2>&1 || result=$?
         [[ "$result" == 23 ]]
-        for profile in cdk-runtime timers-runtime; do
-            cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
-        done
+        profile=cdk-runtime
+        cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.original"
     done
 )
 for group in platform runtime types; do
     primary="$(jq -r --arg group "$group" '.groups[] | select(.name == $group) | .primary' "$fixture/ci/cargo-release-groups.json")"
     members="$(jq -r --arg group "$group" '.groups[] | select(.name == $group) | .members | join(" ")' "$fixture/ci/cargo-release-groups.json")"
     previous="$(yq -p toml -r '.package.version' "$fixture/crates/$primary/Cargo.toml")"
-    for profile in cdk-runtime timers-runtime; do
-        cp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.before"
-    done
+    profile=cdk-runtime
+    cp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.before"
     printf '[package]\nversion = "99.1.0"\n' > "$fixture/crates/$primary/Cargo.toml"
     if bash "$fixture/scripts/release/runtime-lock.sh" check > "$fixture/$group-stale.log" 2>&1; then exit 1; fi
     if RELEASE_GROUP="$group" bash "$fixture/scripts/release/runtime-lock.sh" prepare 98.0.0 > "$fixture/$group-wrong.log" 2>&1; then exit 1; fi
-    for profile in cdk-runtime timers-runtime; do cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.before"; done
+    profile=cdk-runtime
+    cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.before"
     RELEASE_GROUP="$group" bash "$fixture/scripts/release/runtime-lock.sh" prepare "$previous"
     bash "$fixture/scripts/release/runtime-lock.sh" check
-    for profile in cdk-runtime timers-runtime; do
-        lock="$fixture/scripts/fixtures/$profile/Cargo.lock"
-        # shellcheck disable=SC2086 # Validated group roster contains package names.
-        "$editor" --max-input-bytes 1048576 lock "$lock" 99.1.0 "$previous" $members > "$fixture/restored"
-        cmp "$fixture/restored" "$fixture/$profile.before"
-        cp "$lock" "$fixture/$profile.after"
-    done
+    profile=cdk-runtime
+    lock="$fixture/scripts/fixtures/$profile/Cargo.lock"
+    # shellcheck disable=SC2086 # Validated group roster contains package names.
+    "$editor" --max-input-bytes 1048576 lock "$lock" 99.1.0 "$previous" $members > "$fixture/restored"
+    cmp "$fixture/restored" "$fixture/$profile.before"
+    cp "$lock" "$fixture/$profile.after"
     RELEASE_GROUP="$group" bash "$fixture/scripts/release/runtime-lock.sh" prepare "$previous"
-    for profile in cdk-runtime timers-runtime; do cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.after"; done
+    profile=cdk-runtime
+    cmp "$fixture/scripts/fixtures/$profile/Cargo.lock" "$fixture/$profile.after"
     if [[ "$group" == runtime ]]; then
         if bash "$fixture/scripts/release/runtime-pin.sh" check > "$fixture/pin-stale.log" 2>&1; then exit 1; fi
         cp "$fixture/ci/dependency-pinning-exceptions.json" "$fixture/pins-before"

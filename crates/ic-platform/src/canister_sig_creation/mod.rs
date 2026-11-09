@@ -6,7 +6,7 @@
 
 pub(crate) mod admission;
 
-use crate::principal::{ExternalPrincipal, Principal};
+use crate::principal::Principal;
 
 pub use ic_canister_sig_creation::{
     IC_ROOT_PK_DER, IC_ROOT_PK_DER_PREFIX, extract_raw_root_pk_from_der, hash_bytes,
@@ -30,14 +30,17 @@ impl CanisterSigPublicKey {
 
     fn from_upstream(key: ic_canister_sig_creation::CanisterSigPublicKey) -> Self {
         Self {
-            canister_id: key.canister_id.into(),
+            canister_id: Principal::from_slice(key.canister_id.as_slice()),
             seed: key.seed,
         }
     }
 
     fn upstream(&self) -> ic_canister_sig_creation::CanisterSigPublicKey {
         ic_canister_sig_creation::CanisterSigPublicKey::new(
-            ExternalPrincipal::from(self.canister_id),
+            self.canister_id
+                .as_slice()
+                .try_into()
+                .expect("owned Principal has at most 29 bytes"),
             self.seed.clone(),
         )
     }

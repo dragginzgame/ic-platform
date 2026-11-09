@@ -102,9 +102,9 @@ fn upstream_envelope_forms_preserve_authenticated_time() {
 #[cfg(all(feature = "agent", not(target_family = "wasm")))]
 #[test]
 fn certified_range_decoding_and_order_match_the_registry_reference() {
-    use crate::principal::ExternalPrincipal;
+    use crate::principal::Principal;
     type OwnedRanges = Vec<(Principal, Principal)>;
-    type ExternalRanges = Vec<(ExternalPrincipal, ExternalPrincipal)>;
+    type ExternalRanges = Vec<(candid::Principal, candid::Principal)>;
 
     let principals: Vec<_> = (0..=29)
         .flat_map(|length| {
@@ -113,8 +113,8 @@ fn certified_range_decoding_and_order_match_the_registry_reference() {
         .collect();
     for left in &principals {
         for right in &principals {
-            let external_left = ExternalPrincipal::from(*left);
-            let external_right = ExternalPrincipal::from(*right);
+            let external_left = candid::Principal::from_slice(left.as_slice());
+            let external_right = candid::Principal::from_slice(right.as_slice());
             assert_eq!(left.cmp(right), external_left.cmp(&external_right));
             let owned = vec![(*left, *right)];
             let external = vec![(external_left, external_right)];
@@ -148,7 +148,12 @@ fn certified_range_decoding_and_order_match_the_registry_reference() {
         if let (Ok(owned), Ok(external)) = (owned, external) {
             let converted: OwnedRanges = external
                 .into_iter()
-                .map(|(left, right)| (left.into(), right.into()))
+                .map(|(left, right)| {
+                    (
+                        Principal::from_slice(left.as_slice()),
+                        Principal::from_slice(right.as_slice()),
+                    )
+                })
                 .collect();
             assert_eq!(owned, converted);
             assert_eq!(

@@ -1,10 +1,12 @@
 use super::*;
 #[test]
 fn explicit_adapter_reuses_the_runtime_and_preserves_guard_before_copy() {
-    let generated = expand(
+    let generated = expand_owned(
         true,
         quote!(
             limits = "LIMITS",
+            reply_bytes = "REPLY",
+            arity = "exact",
             empty_args = "reject",
             guard = "auth",
             platform = "::renamed"
@@ -17,7 +19,7 @@ fn explicit_adapter_reuses_the_runtime_and_preserves_guard_before_copy() {
     )
     .unwrap()
     .to_string();
-    assert!(generated.contains("renamed :: candid :: endpoint :: __candid_method"));
+    assert!(!generated.contains("__candid_method"));
     assert!(generated.contains("renamed :: cdk :: futures :: internals"));
     let auth = generated.find("= auth ()").unwrap();
     let byte_guard = generated[auth..]
@@ -54,7 +56,7 @@ fn external_options_require_policy_and_refuse_implicit_codec_overrides() {
         ),
     ] {
         assert!(
-            expand(
+            expand_owned(
                 true,
                 attrs,
                 quote!(
@@ -64,6 +66,68 @@ fn external_options_require_policy_and_refuse_implicit_codec_overrides() {
             .unwrap_err()
             .to_string()
             .contains(text)
+        );
+    }
+}
+
+#[test]
+fn owned_adapter_requires_explicit_budgets_and_uses_the_same_guard_order() {
+    let generated = expand_owned(
+        true,
+        quote!(
+            limits = "LIMITS",
+            reply_bytes = "REPLY",
+            arity = "exact",
+            empty_args = "reject",
+            guard = "auth",
+            platform = "::renamed",
+            composite
+        ),
+        quote!(
+            async fn external(value: u64) -> (u64, bool) {
+                (value, true)
+            }
+        ),
+    )
+    .unwrap()
+    .to_string();
+    assert!(generated.contains("renamed :: candid_codec :: endpoint :: decode"));
+    assert!(generated.contains("renamed :: candid_codec :: arguments :: encode_args"));
+    assert!(generated.contains("renamed :: cdk :: futures :: internals"));
+    assert!(!generated.contains("renamed :: candid ::"));
+    assert!(!generated.contains("__candid_method"));
+    let guard = generated.find("= auth ()").unwrap();
+    let admit = generated[guard..]
+        .find("= __platform_candid_admit_external ()")
+        .unwrap()
+        + guard;
+    let copy = generated
+        .find("renamed :: cdk :: api :: msg_arg_data")
+        .unwrap();
+    assert!(guard < admit && admit < copy);
+    for attrs in [
+        quote!(limits = "LIMITS", empty_args = "reject"),
+        quote!(
+            limits = "LIMITS",
+            reply_bytes = "REPLY",
+            empty_args = "unit"
+        ),
+        quote!(
+            limits = "LIMITS",
+            reply_bytes = "REPLY",
+            arity = "guess",
+            empty_args = "unit"
+        ),
+    ] {
+        assert!(
+            expand_owned(
+                true,
+                attrs,
+                quote!(
+                    fn external() {}
+                )
+            )
+            .is_err()
         );
     }
 }

@@ -4,6 +4,96 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.28.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Upgrade the owned codec and ledger `num-bigint` selection to 0.5.1. Public
+  `Nat.0`/`Int.0` and bigint conversions now use that generation; downstream
+  code accessing those fields must select matching bigint types. Preserve
+  arbitrary numeric ranges and Candid/Serde bytes. Optional upstream suppliers
+  retain their independent 0.4 selection.
+
+- Remove `principal-external`, `ExternalPrincipal` / `ExternalPrincipalError`
+  aliases and registry conversion bridges. Platform-owned DTOs, ledger accounts,
+  callbacks and certified-controller results now use canonical Types Principal.
+  Native Agent and transport APIs retain supplier identities.
+- Remove `candid`, `candid-parser`, `candid-service` and `candid-endpoint`,
+  including upstream trait/derive forwarding, dynamic values, reflection,
+  text parsing, service registration and printer APIs. No compatibility feature
+  remains. Owned DTOs no longer implement upstream CandidType.
+- Replace upstream Nat/Int/function-reference carriers in owned contracts with
+  Platform codec carriers. Numeric ranges and qualified Candid/Serde bytes are
+  preserved, but Rust identities, diagnostic errors and resource accounting change.
+
+### ➕ Added
+
+- Provide opt-in `candid-codec` typed binary encoding and bounded decoding,
+  explicit argument arity, record/variant mappings, recursive containers,
+  canonical Principal, arbitrary integers and checked callback signatures.
+- Provide `candid-codec-endpoint` query/update adapters through Runtime's existing
+  generator, with explicit decode/reply budgets and argument policy.
+
+### 🔧 Changed
+
+- Share SHA-2 0.11.1 between ledger hashing and owned Principal self-authentication.
+  Preserve the imported SHA-224/SHA-256 hash bodies, domains and fixed vectors.
+  Remove Platform’s direct SHA-2 0.10 selection; native/signature suppliers still
+  retain their older dependencies.
+
+- Use the owned codec for registry, CMC, ICP, ICRC, Cycles, asset and Wasm
+  management contracts. Preserve qualified external schemas, ledger hash inputs,
+  account-identifier derivation and cryptographic verification. Direct Candid/parser dependencies are development oracles only;
+  native and signature suppliers can still select Candid transitively.
+
+### 🧭 Migration Notes
+
+- Replace external Principal annotations with canonical `Principal` and construct
+  owned Nat/Int/Func carriers directly. Select the required DTO feature and use
+  `candid_codec` encoding/decoding with explicit limits and arity. Replace legacy
+  endpoint attributes with the owned codec adapters. Text parsing needs a separate
+  native parser owner. Requalify consumer budgets; old upstream quotas are not
+  equivalent to the owned work/allocation limits. No storage reset or external
+  protocol migration is required by the preserved bytes. See the
+  [migration contract](../../docs/migration.md).
+
+### 🧪 Testing
+
+- Identify selected canister, native driver and Testkit infrastructure owners
+  separately in qualification evidence (#152). Admit actual Agent/CanisterId
+  identity crossings without forcing Testkit's older facade onto local sources.
+
+- Retain frozen schemas, byte fixtures, independent upstream oracles, malformed
+  input/resource-limit tests and installed endpoint qualification. Add repeatable
+  Wasm comparison against the published implementation; the management-status
+  probe saves 501,988 optimized uncompressed bytes (84.9%) before the final
+  Principal cut. This is workload evidence, not a whole-canister size guarantee.
+- Adopt published Toko Tooling 0.37.1 and its corrected LOC classification;
+  distinguish portable production, native production and development dependencies
+  in the root catalog without changing product feature activation.
+
+### 📚 Release preparation
+
+- Native management DTO ownership is being migrated concurrently. Finalize its
+  Rust identity changes, consumer migration instructions and qualification before
+  releasing this pending batch; the earlier native registry-identity guarantee
+  must not be carried into the release without reviewing that completed work.
+
+### 🛠️ Tooling
+
+- Adopt published Toko Tooling 0.37.4 with corrected conditional/development
+  dependency reporting, its standalone baseline, and current direct dependency
+  selection independent of older DFINITY transitive versions.
+
+- Remove downstream Timers composition from Platform release admission and
+  qualification-lock custody. Retain standalone Runtime and singleton-refusal
+  coverage; Scheduling owns scheduler compatibility tests.
+
+- Adopt published Toko Tooling 0.37.1, migrating to `TOKO-TOOLING.md`,
+  `.toko-tooling.snapshot`, `toko-tooling-*` commands and Toko LOC metadata.
+  CI and publication adapters admit the renamed snapshot before effects;
+  existing product release requirements remain unchanged.
+
 ## [0.27.1] - 2026-11-08
 
 ### 🔧 Changed
@@ -102,6 +192,11 @@ See also the [Types ledger](../types/CHANGELOG.md).
 ## [0.26.0] - 2026-11-08
 
 ### 💥 Breaking
+
+- Use owned management DTOs and the owned codec on native as well as Wasm. Remove
+  the production registry management dependency; retain all existing native
+  snapshot transfer exports and external bytes. Native consumers migrate their
+  Principal/Nat identities and Candid encoding/decoding calls with explicit budgets.
 
 - Retire the pure BLAKE3 feature and forwarding module after IcyDB and Wire
   removed their source callers. Existing hashing consumers select the same

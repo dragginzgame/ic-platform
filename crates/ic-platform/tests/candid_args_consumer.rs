@@ -1,5 +1,6 @@
 //! Independent upstream byte checks for the deliberately small encoding subset.
-use ic_platform::{candid::contract, candid_args};
+use candid as contract;
+use ic_platform::candid_args;
 
 #[test]
 fn empty_and_unit_arguments_preserve_candid_arity() {

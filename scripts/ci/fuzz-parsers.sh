@@ -12,7 +12,7 @@ cat > "$fixture/Cargo.toml" <<MANIFEST
 members = ["crates/probe"]
 resolver = "3"
 [workspace.dependencies]
-ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["icrc-ledger-types", "candid", "ic-protocol"] }
+ic-platform = { path = "../../crates/ic-platform", default-features = false, features = ["icrc-ledger-types", "candid-codec", "ic-protocol"] }
 libfuzzer-sys = "$version"
 MANIFEST
 cat > "$fixture/crates/probe/Cargo.toml" <<'MANIFEST'
@@ -21,7 +21,7 @@ name = "platform-parser-fuzz"
 version = "0.0.0"
 edition = "2024"
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [dependencies]
 ic-platform.workspace = true

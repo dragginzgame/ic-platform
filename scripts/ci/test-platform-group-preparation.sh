@@ -140,18 +140,17 @@ for group in "${groups[@]}"; do
     # require the preceding selected owner as an inactive registry dependency.
     members="$(bash scripts/release/group.sh members)"
     selected_members="$(printf '%s\n' "$members" | jq -R 'split(" ")')"
-    for lock in scripts/fixtures/{cdk-runtime,timers-runtime}/Cargo.lock; do
-        git show "HEAD:$lock" | yq -p toml -o json '.' |
-            jq '[.package[] | select(.source != null) | del(.dependencies)]' > "$fixture/foreign-before.json"
-        yq -p toml -o json '.' "$lock" |
-            jq '[.package[] | select(.source != null) | del(.dependencies)]' > "$fixture/foreign-after.json"
-        jq -e --slurpfile before "$fixture/foreign-before.json" \
-            --arg previous "$previous" --argjson members "$selected_members" '
-            (($before[0] - .) | length) == 0 and
-            all((. - $before[0])[];
-                .version == $previous and (.name as $name | $members | index($name)) != null)
-        ' "$fixture/foreign-after.json" > /dev/null
-    done
+    lock=scripts/fixtures/cdk-runtime/Cargo.lock
+    git show "HEAD:$lock" | yq -p toml -o json '.' |
+        jq '[.package[] | select(.source != null) | del(.dependencies)]' > "$fixture/foreign-before.json"
+    yq -p toml -o json '.' "$lock" |
+        jq '[.package[] | select(.source != null) | del(.dependencies)]' > "$fixture/foreign-after.json"
+    jq -e --slurpfile before "$fixture/foreign-before.json" \
+        --arg previous "$previous" --argjson members "$selected_members" '
+        (($before[0] - .) | length) == 0 and
+        all((. - $before[0])[];
+            .version == $previous and (.name as $name | $members | index($name)) != null)
+    ' "$fixture/foreign-after.json" > /dev/null
     # Use real prepared metadata when group versions differ; the selected batch
     # must use each package's own identity, never the facade's workspace version.
     cargo metadata --no-deps --offline --locked --format-version 1 > "$fixture/$group-publication-metadata.json"

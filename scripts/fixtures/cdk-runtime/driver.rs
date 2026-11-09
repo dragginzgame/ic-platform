@@ -7,7 +7,7 @@ mod protocol;
 mod wire_driver;
 mod wire_protocol;
 
-use ic_platform::principal::ExternalPrincipal as Principal;
+use ic_testkit::pocket_ic::CanisterId as Principal;
 use ic_testkit::pocket_ic::{PocketIc, RejectCode, RejectResponse};
 use protocol::{LIMITS, method_id};
 use serde::{Serialize, de::DeserializeOwned};
@@ -48,13 +48,6 @@ async fn update<R: DeserializeOwned>(
             .unwrap(),
     )
 }
-#[cfg(feature = "timers-composition")]
-async fn advance(pic: &PocketIc) {
-    pic.advance_time(Duration::from_secs(2)).await.unwrap();
-    for _ in 0..20 {
-        pic.tick().await.unwrap();
-    }
-}
 fn rejection(error: ic_testkit::pocket_ic::ClientError) -> RejectResponse {
     match error {
         ic_testkit::pocket_ic::ClientError::Canister(rejection) => rejection,
@@ -81,7 +74,7 @@ async fn run_fixture() {
     let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
     let builder = builder.with_application_subnet();
     // The optional root-key measurement compares against Testkit's NNS key.
-    // Keep the ordinary owner/Timers qualification topology unchanged.
+    // Keep the ordinary owner qualification topology unchanged.
     let builder = if std::env::var("PLATFORM_CODEC_BENCHMARK").as_deref() == Ok("system") {
         builder.with_nns_subnet()
     } else {
@@ -129,8 +122,7 @@ async fn run_fixture() {
         external_driver::qualify(pic, id).await;
     }
     println!(
-        "Runtime: Wire RPCs, raw awaits, trap cleanup, upgrade, cycles, stable rollback and certificates passed (external Candid: {legacy}, Timers composition: {})",
-        cfg!(feature = "timers-composition")
+        "Runtime: Wire RPCs, raw awaits, trap cleanup, upgrade, cycles, stable rollback and certificates passed (external Candid: {legacy})"
     );
     instance.drop().await.unwrap();
     drop(server);

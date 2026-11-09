@@ -25,7 +25,7 @@ edition = "2024"
 rust-version = "$msrv"
 publish = false
 
-[package.metadata.shared-tooling.loc]
+[package.metadata.toko-tooling.loc]
 category = "tests"
 [dependencies]
 ic-platform-runtime = { $selection, default-features = false, features = ["ic0"] }

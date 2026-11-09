@@ -1,7 +1,7 @@
 //! Canonical owned IC identities, released independently of Platform runtime adapters.
 //!
-//! Bytes, bounded text, Serde and account semantics belong here. External Principal
-//! conversions and unchanged upstream self-authentication require explicit features.
+//! Bytes, bounded text, Serde and account semantics belong here. Unchanged upstream
+//! self-authentication requires its explicit feature.
 
 pub mod account;
 pub mod principal;

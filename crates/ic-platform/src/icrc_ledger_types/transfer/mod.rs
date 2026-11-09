@@ -5,7 +5,8 @@
 )]
 
 use super::account::{Account, Subaccount};
-use candid::{CandidType, Deserialize, Nat};
+use crate::candid_codec::Nat;
+use serde::Deserialize;
 use serde::Serialize;
 use serde_bytes::ByteBuf;
 use std::fmt;
@@ -14,7 +15,7 @@ pub type NumTokens = Nat;
 pub type BlockIndex = Nat;
 
 /// The arguments for the [ICRC-1 `transfer`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-1/README.md#icrc1_transfer-) endpoint.
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct TransferArg {
     #[serde(default)]
     pub from_subaccount: Option<Subaccount>,
@@ -31,9 +32,7 @@ pub struct TransferArg {
 /// The [`Memo`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-1/README.md#icrc1_transfer-)
 /// is an arbitrary blob that has no meaning to the ledger. The ledger SHOULD allow memos of at
 /// least 32 bytes in length.
-#[derive(
-    Serialize, Deserialize, CandidType, Clone, Hash, Debug, PartialEq, Eq, PartialOrd, Ord, Default,
-)]
+#[derive(Serialize, Deserialize, Clone, Hash, Debug, PartialEq, Eq, PartialOrd, Ord, Default)]
 #[serde(transparent)]
 pub struct Memo(pub ByteBuf);
 
@@ -64,7 +63,7 @@ impl From<Memo> for ByteBuf {
 /// Errors defined for the
 /// [ICRC-1 `transfer`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-1/README.md#icrc1_transfer-)
 /// endpoint.
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum TransferError {
     BadFee { expected_fee: NumTokens },
     BadBurn { min_burn_amount: NumTokens },
