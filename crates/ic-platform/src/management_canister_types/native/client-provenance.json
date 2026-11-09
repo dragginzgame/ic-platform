@@ -1,0 +1,18 @@
+{
+   "changes" : [
+      "Replace CandidType derives with explicit owned codec mappings.",
+      "Use canonical Principal/Nat and Vec<u8> for the upstream WasmModule alias; retain fields and Serde attributes."
+   ],
+   "license" : "Apache-2.0; ../maintained/LICENSE-APACHE",
+   "original_source_sha256" : "11f1c93fc9034e3dbcc35ff377e2356a07439382bbcfad8ad213327d83c1c554",
+   "selected_source_fingerprint" : "8455f5fc3ae68ba0554ad17d36e881dca41e3ebb2cbb75e1224844afe5f377b0",
+   "selection" : [
+      "InstallCodeArgs",
+      "ProvisionalCreateCanisterWithCyclesArgs",
+      "CanisterLogRecord",
+      "FetchCanisterLogsResult"
+   ],
+   "upstream_package" : "ic-management-canister-types",
+   "upstream_revision" : "e74ddee846a8bd664fa0f684ba31dc37e9ebddea",
+   "upstream_version" : "0.11.0"
+}

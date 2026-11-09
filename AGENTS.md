@@ -285,7 +285,9 @@ registry dependency and use owned DTOs/codec on both targets. Preserve the exist
 58 native/44 Wasm exports; maintain the 14 native snapshot declarations and their
 alias dependency from 0.11.0 without widening Wasm. Keep source/license guards and
 independent schema, frozen-byte and Serde checks. Registry management is a dev-only
-oracle. This supersedes the native registry-identity constraints below.
+oracle. The separately authorized Tooling client extension adds four native-only
+install/create/log DTOs (62 total native exports, still 44 on Wasm); retain its
+independent source fingerprint and schema/value/Serde oracle tests. This supersedes the native registry-identity constraints below.
 
 The maintainer authorized adopting only the management DTOs used by sibling
 canisters. Wasm uses 44 explicit exports backed by 52 complete declarations from

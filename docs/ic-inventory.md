@@ -50,7 +50,10 @@ control-plane, Blob recovery and the Canic runtime-probe canister supply the
 selection evidence recorded in the maintained provenance. Canic's sharding-root
 fixture additionally requires `CreateCanisterArgs` ([#146](https://github.com/dragginzgame/ic-platform/issues/146)). Fourteen host-only
 snapshot-transfer names are excluded from Wasm; native builds retain the complete
-58-name registry =0.11.0 facade and its original identities for Backup/Testkit.
+owned facade; the Tooling install/create/log extension adds four native-only
+names, bringing native exports to 62 while Wasm stays at 44. The new declarations
+retain independent registry 0.11.0 source and byte/Serde oracle guards. Neither
+management target selects a production registry management dependency.
 The registry management crate and its implicit Candid printer disappear from the
 management-only Wasm graph. The pending owned-codec migration also removes
 upstream Candid from this graph. Owned Nat/Reserved carriers retain numeric

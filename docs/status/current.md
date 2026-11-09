@@ -1,5 +1,19 @@
 # Current handoff — 2026-11-09
 
+## Native Tooling DTO extension — included in corrected deployment
+
+Tooling's authorized adoption adds four native-only management DTOs and owned
+codec mappings: InstallCodeArgs, ProvisionalCreateCanisterWithCyclesArgs,
+CanisterLogRecord and FetchCanisterLogsResult. The existing snapshot source hash
+is unchanged; client-provenance.json and source-mutation checks bind the added
+0.11.0 declarations. Three focused native schema/value/Serde tests pass.
+The maintainer approved including these changes in the corrected frozen batch.
+Batch-G3rEbkX7 stopped before delivery on a stale admission-test fixture, fixed
+in 337b4b6; preserve that failed batch and its evidence. The combined source must
+pass fresh full release gates. Wire 0.18 still selects Types ^0.18.2, so downstream
+Tooling/Wire registry identity qualification needs a compatible adoption and is
+not established by this Platform release. No sibling source is changed here.
+
 ## Toko 0.37.4 and owned bigint 0.5.1 — current
 
 Adopted registry Toko Tooling 0.37.4 through its authenticated installer, retaining
@@ -54,7 +68,7 @@ The migration contract, inventory and pending changelogs own the detailed scope:
   explicit budgets and 16-level admission remain.
 - Principal/Account use canonical Types. External Principal aliases/conversions
   and Types' production ic_principal are retired; its dev oracle remains.
-- Management has owned DTOs on both targets (58 native/44 Wasm exports).
+- Management has owned DTOs on both targets (62 native/44 Wasm exports).
   Registry management 0.11.0 is now an oracle or supplier transitive dependency.
 - Ledger hashing shares SHA-2 0.11.1 with Principal self-authentication, preserving
   imported hash bodies, domains, fixed vectors and licenses.

@@ -3,7 +3,12 @@
 use super::maintained::{CanisterId, ChunkHash, SnapshotId, SnapshotSource};
 use crate::candid_codec::Nat;
 use serde::{Deserialize, Serialize};
+mod client;
 mod codec;
+pub use client::{
+    CanisterLogRecord, FetchCanisterLogsResult, InstallCodeArgs,
+    ProvisionalCreateCanisterWithCyclesArgs,
+};
 
 /// # Take Canister Snapshot Args.
 ///

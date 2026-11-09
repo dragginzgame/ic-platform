@@ -22,7 +22,8 @@ pub use maintained::{
 mod native;
 #[cfg(not(target_family = "wasm"))]
 pub use native::{
-    CanisterTimer, LoadCanisterSnapshotArgs, OnLowWasmMemoryHookStatus,
+    CanisterLogRecord, CanisterTimer, FetchCanisterLogsResult, InstallCodeArgs,
+    LoadCanisterSnapshotArgs, OnLowWasmMemoryHookStatus, ProvisionalCreateCanisterWithCyclesArgs,
     ReadCanisterSnapshotDataArgs, ReadCanisterSnapshotDataResult, ReadCanisterSnapshotMetadataArgs,
     ReadCanisterSnapshotMetadataResult, SnapshotDataKind, SnapshotDataOffset,
     SnapshotMetadataGlobal, TakeCanisterSnapshotArgs, UploadCanisterSnapshotDataArgs,

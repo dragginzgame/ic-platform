@@ -28,6 +28,10 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ### ➕ Added
 
+- Own native install-code, provisional-create and log request/reply DTOs required
+  by Testkit. Preserve registry 0.11.0 fields, Candid/Serde bytes and independent
+  source guards without widening Wasm or restoring the registry dependency.
+
 - Provide opt-in `candid-codec` typed binary encoding and bounded decoding,
   explicit argument arity, record/variant mappings, recursive containers,
   canonical Principal, arbitrary integers and checked callback signatures.

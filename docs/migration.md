@@ -10,6 +10,13 @@ respective targets. Fourteen native-only snapshot declarations and their
 `StoredChunksResult` dependency alias are maintained from 0.11.0 separately;
 this does not add host-only snapshot transfer APIs to the Wasm surface.
 
+The Tooling client extension adds native-only `InstallCodeArgs`,
+`ProvisionalCreateCanisterWithCyclesArgs`, `CanisterLogRecord` and
+`FetchCanisterLogsResult`. These bring the native surface to 62 names; Wasm
+remains at 44. Tooling uses Principal, ChunkHash and Vec<ChunkHash> directly
+instead of adding aliases. Independent source fingerprints preserve the
+original snapshot selection and the four additional registry 0.11.0 declarations.
+
 Method names, Candid schemas, variants, payload bytes and Serde attributes remain
 unchanged. Native Rust type identity changes: replace upstream Candid trait-based
 encoding/decoding with `candid_codec`, and supply the owned Principal and Nat.

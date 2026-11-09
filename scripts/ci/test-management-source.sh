@@ -33,3 +33,17 @@ for mutation in field serde extra; do
     fi
 done
 echo 'Native management guards reject field, Serde and declaration changes.'
+
+for mutation in field serde extra; do
+    destination="$fixture/native-client-$mutation"
+    cp -R "$root/crates/ic-platform/src/management_canister_types/native" "$destination"
+    case "$mutation" in
+        field) perl -i -pe 's/pub idx: u64/pub idx: u32/' "$destination/client.rs" ;;
+        serde) perl -i -pe 's/with = "serde_bytes"/with = "changed"/' "$destination/client.rs" ;;
+        extra) printf '\npub type Extra = u8;\n' >> "$destination/client.rs" ;;
+    esac
+    if bash "$root/scripts/ci/check-management-native-source.sh" "$destination" > "$fixture/log" 2>&1; then
+        echo "Native client source guard admitted $mutation" >&2; exit 1
+    fi
+done
+echo 'Native client guards reject field, Serde and declaration changes.'

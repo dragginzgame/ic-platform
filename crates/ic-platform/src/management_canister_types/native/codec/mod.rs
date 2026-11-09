@@ -14,3 +14,7 @@ crate::candid_variant!(CanisterTimer {373703110 => Active(u64), 1781536619 => In
 crate::candid_variant!(OnLowWasmMemoryHookStatus {1043953570 => ConditionNotSatisfied, 3210470543 => Executed, 3870990435 => Ready});
 crate::candid_variant!(SnapshotDataKind {265441191 => WasmModule { 1280549057 => size: u64, 1614780307 => offset: u64 }, 1405019644 => WasmMemory { 1280549057 => size: u64, 1614780307 => offset: u64 }, 2465514309 => StableMemory { 1280549057 => size: u64, 1614780307 => offset: u64 }, 4161627090 => WasmChunk { 1158164430 => hash: Vec<u8> }});
 crate::candid_variant!(SnapshotDataOffset {265441191 => WasmModule { 1614780307 => offset: u64 }, 1405019644 => WasmMemory { 1614780307 => offset: u64 }, 2465514309 => StableMemory { 1614780307 => offset: u64 }, 4161627090 => WasmChunk});
+crate::candid_record!(InstallCodeArgs {4849238 => arg: Vec<u8>, 265441191 => wasm_module: Vec<u8>, 1214305123 => mode: super::super::maintained::CanisterInstallMode, 1313628723 => canister_id: CanisterId, 3599109322 => sender_canister_version: Option<u64>});
+crate::candid_record!(ProvisionalCreateCanisterWithCyclesArgs {2336062691 => settings: Option<super::super::maintained::CanisterSettings>, 3348853450 => specified_id: Option<CanisterId>, 3573748184 => amount: Option<Nat>, 3599109322 => sender_canister_version: Option<u64>});
+crate::candid_record!(CanisterLogRecord {5243965 => idx: u64, 268680022 => timestamp_nanos: u64, 427265337 => content: Vec<u8>});
+crate::candid_record!(FetchCanisterLogsResult {1754302831 => canister_log_records: Vec<CanisterLogRecord>});

@@ -29,7 +29,11 @@ fn all_native_snapshot_schemas_match_registry_0110() {
         UploadCanisterSnapshotMetadataResult,
         UploadCanisterSnapshotDataArgs,
         SnapshotDataOffset,
-        StoredChunksResult
+        StoredChunksResult,
+        InstallCodeArgs,
+        ProvisionalCreateCanisterWithCyclesArgs,
+        CanisterLogRecord,
+        FetchCanisterLogsResult
     );
 }
 
@@ -71,5 +75,49 @@ fn native_globals_and_timer_payloads_preserve_external_bits_and_serde() {
         upstream::OnLowWasmMemoryHookStatus::Executed,
     ] {
         check::<OnLowWasmMemoryHookStatus, _>(value);
+    }
+}
+
+#[test]
+fn native_client_values_preserve_registry_bytes_and_serde() {
+    use ic_management_canister_types as upstream;
+    for mode in [
+        upstream::CanisterInstallMode::Install,
+        upstream::CanisterInstallMode::Reinstall,
+        upstream::CanisterInstallMode::Upgrade(None),
+    ] {
+        check::<InstallCodeArgs, _>(upstream::InstallCodeArgs {
+            mode,
+            canister_id: candid::Principal::anonymous(),
+            wasm_module: vec![0, 97, 115, 109, 255],
+            arg: vec![0, 255, 17],
+            sender_canister_version: Some(u64::MAX),
+        });
+    }
+    check::<ProvisionalCreateCanisterWithCyclesArgs, _>(
+        upstream::ProvisionalCreateCanisterWithCyclesArgs::default(),
+    );
+    check::<ProvisionalCreateCanisterWithCyclesArgs, _>(
+        upstream::ProvisionalCreateCanisterWithCyclesArgs {
+            amount: Some(u128::MAX.into()),
+            settings: Some(upstream::CanisterSettings {
+                controllers: Some(vec![candid::Principal::anonymous()]),
+                reserved_cycles_limit: Some(u128::MAX.into()),
+                ..Default::default()
+            }),
+            specified_id: Some(candid::Principal::management_canister()),
+            sender_canister_version: Some(u64::MAX),
+        },
+    );
+    let log = upstream::CanisterLogRecord {
+        idx: u64::MAX,
+        timestamp_nanos: u64::MAX,
+        content: vec![0, 255, 17],
+    };
+    check::<CanisterLogRecord, _>(log.clone());
+    for canister_log_records in [vec![], vec![log]] {
+        check::<FetchCanisterLogsResult, _>(upstream::FetchCanisterLogsResult {
+            canister_log_records,
+        });
     }
 }
