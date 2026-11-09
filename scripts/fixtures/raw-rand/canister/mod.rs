@@ -39,7 +39,9 @@ fn random(bytes: &[u8]) -> [u8; 32] {
             DecodeLimits {
                 bytes: 256,
                 work: 4_096,
-                allocation: 64,
+                // The general decoder also charges its parsed type table and
+                // argument metadata, in addition to the 32-byte result vector.
+                allocation: 512,
                 types: 8,
                 header: 64,
             },
