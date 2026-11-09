@@ -41,6 +41,7 @@ if platform_dependency_version source > "$fixture/catalog/version" 2>&1; then ex
 mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/prepared-call-consumer" "$fixture/.tools" "$fixture/bin"
 cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,runtime-selection.sh,runtime-inputs.pl,retain-build-artifact.sh,workspace-dependencies.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{check-qualification-identities.sh,qualification-identities.jq} "$fixture/scripts/ci/"
 cp "$root/scripts/fixtures/prepared-call-consumer/"{lib,tests}.rs "$fixture/scripts/fixtures/prepared-call-consumer/"
 cp -R "$root/scripts/fixtures/cdk-runtime" "$fixture/scripts/fixtures/"
 mkdir -p "$fixture/crates/ic-platform/tests/fixtures"
@@ -57,18 +58,38 @@ ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"
 export PLATFORM_ADMISSION_TOOLS="$root/scripts/fixtures/admission-tools"
 export PLATFORM_ADMISSION_PACKAGE=platform-runtime-driver
+export ADMISSION_SOURCE_ROOT="$fixture"
 cp "$PLATFORM_ADMISSION_TOOLS/rustc.sh" "$fixture/bin/rustc"
 cat > "$fixture/bin/cargo" <<'CARGO'
 #!/usr/bin/env bash
 set -euo pipefail
 for arg in "$@"; do [[ -n "$arg" ]] || { echo 'empty argument reached Cargo' >&2; exit 31; }; done
 printf '%s\n' "$*" >> "$ADMISSION_CALLS"
+# Exercise real identity admission against a synthetic resolved owner graph.
+# --no-deps remains the shared boundary fixture, including its CBOR refusal.
+if [[ "$1" == metadata && " $* " != *' --no-deps '* ]]; then
+    external=false
+    case " $* " in *' --features external-candid '*|*' --features external-adapters '*) external=true ;; esac
+    jq -n --arg root "$ADMISSION_SOURCE_ROOT" --argjson external "$external" '
+        ["ic-platform", "ic-platform-types", "ic-platform-runtime", "ic-platform-macros",
+         "ic-platform-runtime-guard", "ic-testkit", "platform-runtime-driver", "platform-runtime-canister"] as $names |
+        {packages: [$names[] | {id: ., name: ., version: "0.0.0", source: null,
+            manifest_path: ($root + "/crates/" + . + "/Cargo.toml")}],
+         resolve: {nodes: [$names[] | . as $name | {id: $name, deps:
+            ((if $name == "platform-runtime-driver" then ["ic-platform", "ic-testkit"]
+              elif $name == "platform-runtime-canister" then ["ic-platform-runtime", "ic-platform-macros"] +
+                (if $external then ["ic-platform"] else [] end)
+              elif $name == "ic-platform-runtime" then ["ic-platform-runtime-guard", "ic-platform-types"]
+              elif $name == "ic-platform" then ["ic-platform-types"] else [] end) |
+             map({pkg: ., dep_kinds: [{kind: null}]}))}]}}'
+    exit 0
+fi
 # shellcheck source=scripts/fixtures/admission-tools/cargo.sh
 source "$PLATFORM_ADMISSION_TOOLS/cargo.sh"
 case "$1" in
     tree)
         printf 'ic-platform-runtime v0.17.0 (/local/runtime)\n'
-        case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'ic-platform v0.17.0 (/local/platform)\ncandid v0.10.39\n' ;; esac
+        case " $* " in *' --features external-candid '*|*' --features external-adapters '*) printf 'ic-platform v0.17.0 (/local/platform)\nnum-bigint v0.5.1\n' ;; esac
         ;;
     +*)
         if [[ "$2" == clippy && "${ADMISSION_FAIL_CLIPPY:-no}" == yes ]]; then exit 43; fi
