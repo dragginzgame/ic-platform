@@ -12,11 +12,11 @@ all retained imports. Siblings remain untouched. The maintainer now authorizes
 deployment of the three Rust groups only; browser packaging changes receive Git
 delivery but no npm publication. Freeze reviewed source before release execution.
 
-Installed Toko is 0.39.8; compiler is 1.99.1. Latest published Platform is 0.29.2
-(`platform-v0.29.2`, `f687d96c1d423e87e3083c840aa6d6472f41c165`). Runtime/macros/
-guard remain 0.21.0 and Types 0.19.0. Pending notes select Platform 0.29.3,
-Runtime 0.21.1 and Types' existing ledger; no package version bump was performed.
-Browser remains 0.2.0. Historical release and earlier session details are preserved
+Installed Toko is 0.39.8; compiler is 1.99.1. Platform 0.29.3, Runtime/macros/
+guard 0.21.1 and Types 0.19.1 are published on crates.io and tagged on GitHub.
+Completed frozen batch `batch-nUsSSjzc` delivered commit
+`f4c904645e00b435b256d3acb87837493240fdbb`; the normal checkout is reconciled.
+Browser remains 0.2.0 and was not published. Historical release and earlier session details are preserved
 in the [prior handoff](../history/source-retirement-handoff-2026-11-10.md).
 
 ## Tooling and documentation adoption
@@ -31,7 +31,7 @@ browser packaging generates its distribution copy. See
 The 0.39.8 refresh changed only Toko in Cargo.lock and retained all 96 snapshot
 paths. Tooling/pins/inventory/links/boundaries and browser package qualification
 pass (23 tests, two compiler consumers, packed-root comparison and provider SDK
-identity). No macOS/Chromium run or delivery was performed.
+identity). These local checks do not establish macOS/Chromium acceptance.
 
 ## Latest completed work
 
@@ -92,16 +92,37 @@ documentation and dependency-boundary checks pass. Workspace Rust formatting and
 diff-whitespace checks pass; the only unrelated formatting repair wrapped two
 existing codec test assertions without changing them. No current imported
 DFINITY implementation area is identified in maintained Rust source; external
-packages retain their separate ownership. This is not full release qualification.
+packages retain their separate ownership.
 
-The authorized patch cohort is Types 0.19.1, Runtime/macros/guard 0.21.1 and
-Platform 0.29.3, in that supplier order. Full gates must complete in the managed
-frozen batch before publication; focused checks alone do not qualify it. Platform no
+The authorized patch cohort was published in supplier order: Types 0.19.1
+(`59135d5`, `types-v0.19.1`), Runtime/macros/guard 0.21.1 (`97e96c7`,
+`runtime-v0.21.1`), Platform 0.29.3 (`f4c9046`, `platform-v0.29.3`). Each passed
+all 19 local gate stages, including Clippy, workspace tests, consumer/feature
+graphs and installed execution. Retained receipts under the completed candidate
+are `qualification.Ivi4nw`, `qualification.sDGekt` and `qualification.R2gECn`.
+Publication also verified each selected package archive; the registry index
+confirms all five versions are available and not yanked. Platform no
 longer qualifies downstream Timers: Scheduling #91 owns composition. Native
 Agent and installed Runtime evidence identify tested owners separately from
 Testkit infrastructure. Published Wire 0.18 / Types 0.19 identity unification was
 not established by Platform releases; sibling adoption remains consumer-owned.
-#50 remains deferred; no broader release readiness is claimed.
+#50 remains deferred. Hosted Linux/macOS and browser jobs are asynchronous;
+local Linux qualification is not macOS acceptance.
+
+The hosted Wasm-size job failed before measuring because catalog projection
+looked for installed tools inside a Git archive. The post-release harness fix
+uses the invoking helper's tools while preserving the selected catalog bytes.
+Archive-without-tools admission and all nine benchmark harness tests pass.
+The exact failed comparison against `97e96c7` now passes all four profiles
+(`principal-binary`, `runtime`, `verification`, `certification-cbor`) with zero
+raw/optimized total/code-section deltas. Evidence is retained at
+`target/evidence/wasm-regression.upepSR`; no Rust package changes are required.
+
+The hosted history scanner identified seven non-secret findings: the IC root
+public key, current/historical deliberately published test identities, and
+migration prose. `.gitleaksignore` records only those exact commit/path/rule/line
+fingerprints; future keys and edits remain scanned. Both post-release CI repairs
+are tooling-only and do not require another crates.io version.
 
 ## Recovery custody
 
@@ -109,7 +130,7 @@ Frozen batch `batch-JKeeLzH0` stopped before publication: standalone consumer
 admission still rejected the explicit self-authentication provider. Its Clippy,
 workspace tests, release-adapter checks and documentation stages passed. The
 corrected source retains base Principal isolation and tests optional-provider
-admission plus unrelated-client refusal; deployment requires a fresh full batch.
+admission plus unrelated-client refusal; `batch-nUsSSjzc` subsequently passed.
 Preserve the failed candidate and evidence.
 
 Preserve failed batches batch-G3rEbkX7 and batch-QJcFkCdU and all earlier

@@ -19,8 +19,8 @@ finish() {
 trap finish EXIT
 # Catalog projection keeps complete tables and explicit version selections. It
 # takes one snapshot: later manifest edits cannot mix suppliers within one fixture.
-mkdir -p "$fixture/catalog/.tools"
-ln -s "$root/.tools/host" "$fixture/catalog/.tools/host"
+# Like a Git archive used by the Wasm benchmark, the catalog has no tools.
+mkdir -p "$fixture/catalog"
 cat > "$fixture/catalog/Cargo.toml" <<'CATALOG'
 [workspace.dependencies]
 scalar = "1.2.3"

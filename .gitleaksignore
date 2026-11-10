@@ -1,0 +1,13 @@
+# Exact historical findings only; keep future keys and changes scanned.
+# Published IC root public key in the reviewed protocol specification.
+d908461f1ebfdbda7fac20ffe4288235ada908ea:docs/design/canister-signatures/contract.md:generic-api-key:66
+# Deliberately public, repository-generated Agent test identities; see fixture README.
+d908461f1ebfdbda7fac20ffe4288235ada908ea:scripts/fixtures/agent-installed/prime256v1.pem:private-key:1
+d908461f1ebfdbda7fac20ffe4288235ada908ea:scripts/fixtures/agent-installed/secp256k1.pem:private-key:1
+# Historical upstream Agent fixtures, documented as non-operational at that commit.
+885a32942d12d1e740b388724787102a2d8dfcc6:scripts/fixtures/agent-installed/prime256v1.pem:private-key:1
+885a32942d12d1e740b388724787102a2d8dfcc6:scripts/fixtures/agent-installed/secp256k1.pem:private-key:1
+# Ordinary migration prose listing original-byte/retry and refund/duplicate tests.
+46964646c8b5019a20cff7cd42d7c6da25ed4431:docs/external-contracts.md:generic-api-key:122
+# Historical deterministic Canic test-only identity, explicitly documented in source.
+a9c02285739e9aeb19cb277c28596d18fe60f9b6:crates/ic-platform/tests/agent_consumer.rs:private-key:108
