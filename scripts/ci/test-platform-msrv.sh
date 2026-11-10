@@ -46,11 +46,9 @@ make --no-print-directory -C "$fixture" msrv
 grep -qx test "$fixture/calls"
 grep -qx wasm-check "$fixture/calls"
 # A failed manifest-tool lookup must stop preparation before Cargo sees a
-# template with an empty rust-version (the native-provider CI regression).
-native="$fixture/native-http"
-mkdir -p "$native/scripts/ci" "$native/scripts/fixtures/native-profiler-http" "$native/bin"
-cp "$root/scripts/ci/check-native-profiler-http.sh" "$native/scripts/ci/"
-cp "$root/scripts/fixtures/native-profiler-http/Cargo.toml.in" "$native/scripts/fixtures/native-profiler-http/"
+# template with an empty rust-version.
+native="$fixture/manifest-admission"
+mkdir -p "$native/scripts/ci" "$native/bin"
 cat > "$native/scripts/ci/read-platform-msrv.sh" <<'READER'
 #!/usr/bin/env bash
 echo 'fixture: required manifest tool unavailable' >&2
@@ -58,19 +56,14 @@ exit 23
 READER
 cat > "$native/bin/cargo" <<'CARGO'
 #!/usr/bin/env bash
-touch "$NATIVE_HTTP_CARGO_MARKER"
+touch "$MANIFEST_CARGO_MARKER"
 CARGO
 chmod +x "$native/bin/cargo"
-result=0
-PATH="$native/bin:$PATH" NATIVE_HTTP_CARGO_MARKER="$native/cargo-called" \
-    bash "$native/scripts/ci/check-native-profiler-http.sh" --prepare > "$native/refusal.log" 2>&1 || result=$?
-[[ "$result" == 23 && ! -e "$native/cargo-called" ]]
-grep -q 'required manifest tool unavailable' "$native/refusal.log"
 # Installed Agent preparation must also stop before a failed floor can reach
 # its generated manifest, dependency selection or compiler invocation.
 cp "$root/scripts/ci/check-agent-installed.sh" "$native/scripts/ci/"
 result=0
-PATH="$native/bin:$PATH" NATIVE_HTTP_CARGO_MARKER="$native/agent-cargo-called" POCKET_IC_BIN=fixture \
+PATH="$native/bin:$PATH" MANIFEST_CARGO_MARKER="$native/agent-cargo-called" POCKET_IC_BIN=fixture \
     bash "$native/scripts/ci/check-agent-installed.sh" > "$native/agent-refusal.log" 2>&1 || result=$?
 [[ "$result" == 23 && ! -e "$native/agent-cargo-called" ]]
 for agent_fixture in "$native/target"/agent-installed.*; do [[ ! -e "$agent_fixture" ]]; done

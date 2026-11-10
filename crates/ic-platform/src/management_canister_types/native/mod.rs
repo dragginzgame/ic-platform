@@ -1,290 +1,251 @@
-//! Existing native snapshot contracts maintained from DFINITY 0.11.0 (Apache-2.0).
-//! See provenance.json; declarations preserve upstream fields, variants and Serde.
+//! Native management request and response declarations.
+//!
+//! These records preserve external fields; snapshot handling, limits and
+//! orchestration remain with consumers and the IC.
+
 use super::maintained::{CanisterId, ChunkHash, SnapshotId, SnapshotSource};
 use crate::candid_codec::Nat;
 use serde::{Deserialize, Serialize};
+
 mod client;
 mod codec;
+
 pub use client::{
     CanisterLogRecord, FetchCanisterLogsResult, InstallCodeArgs,
     ProvisionalCreateCanisterWithCyclesArgs,
 };
 
-/// # Take Canister Snapshot Args.
-///
-/// Argument type of [`take_canister_snapshot`](https://docs.internetcomputer.org/references/management-canister/#take_canister_snapshot).
+/// A request to take a canister snapshot.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct TakeCanisterSnapshotArgs {
-    /// Canister ID.
+    /// The canister identified by the request.
     pub canister_id: CanisterId,
-    /// An optional snapshot ID to be replaced by the new snapshot.
-    ///
-    /// The snapshot identified by the specified ID will be deleted once a new snapshot has been successfully created.
+    /// An optional existing snapshot identifier to replace.
     pub replace_snapshot: Option<SnapshotId>,
-    /// If true, uninstall the canister code after taking the snapshot.
+    /// The optional request to uninstall the canister's code.
     pub uninstall_code: Option<bool>,
-    /// Must match the canister's [`canister_version`](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/#system-api-canister-version) value when specified.
+    /// The sender's optional canister-version value.
     pub sender_canister_version: Option<u64>,
 }
 
-/// # Load Canister Snapshot Args.
-///
-/// Argument type of [`load_canister_snapshot`](https://docs.internetcomputer.org/references/management-canister/#load_canister_snapshot).
+/// A request to load an identified snapshot into a canister.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct LoadCanisterSnapshotArgs {
-    /// Canister ID.
+    /// The destination canister.
     pub canister_id: CanisterId,
-    /// ID of the snapshot to be loaded.
+    /// The snapshot identifier preserved as ordinary sequence bytes.
     pub snapshot_id: SnapshotId,
-    /// Must match the canister's [`canister_version`](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/#system-api-canister-version) value when specified.
+    /// The sender's optional canister-version value.
     pub sender_canister_version: Option<u64>,
 }
 
-/// # Read Canister Snapshot Metadata Args.
-///
-/// Argument type of [`read_canister_snapshot_metadata`](https://docs.internetcomputer.org/references/management-canister/#read_canister_snapshot_metadata).
+/// Identifies the snapshot whose metadata is requested.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReadCanisterSnapshotMetadataArgs {
-    /// Canister ID.
+    /// The canister holding the snapshot.
     pub canister_id: CanisterId,
-    /// ID of the snapshot to be read.
+    /// The requested snapshot identifier.
     pub snapshot_id: SnapshotId,
 }
 
-/// # Read Canister Snapshot Metadata Result.
-///
-/// Result type of [`read_canister_snapshot_metadata`](https://docs.internetcomputer.org/references/management-canister/#read_canister_snapshot_metadata).
+/// Snapshot metadata reported by the IC.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReadCanisterSnapshotMetadataResult {
-    /// How the snapshot was created.
+    /// The optional reported origin of the snapshot.
     pub source: Option<SnapshotSource>,
-    /// The Unix nanosecond timestamp the snapshot was taken at.
+    /// The recorded snapshot timestamp.
     pub taken_at_timestamp: u64,
-    /// The size of the Wasm module in bytes.
+    /// The reported Wasm module size.
     pub wasm_module_size: u64,
-    /// The exported WebAssembly global variables of the canister.
+    /// Reported global values, retaining absent entries.
     pub globals: Vec<Option<SnapshotMetadataGlobal>>,
-    /// The size of the Wasm heap memory in bytes.
+    /// The reported Wasm memory size.
     pub wasm_memory_size: u64,
-    /// The size of the stable memory in bytes.
+    /// The reported stable-memory size.
     pub stable_memory_size: u64,
-    /// Hashes of the chunks in the Wasm chunk store.
+    /// The reported stored Wasm chunk hashes.
     pub wasm_chunk_store: StoredChunksResult,
-    /// The version of the canister at the time the snapshot was taken.
+    /// The recorded canister version.
     pub canister_version: u64,
-    /// The certified data of the canister.
+    /// Certified data using the response's byte-buffer Serde representation.
     #[serde(with = "serde_bytes")]
     pub certified_data: Vec<u8>,
-    /// The status of the canister's global timer.
+    /// The optional recorded global-timer state.
     pub global_timer: Option<CanisterTimer>,
-    /// The status of the on-low-Wasm-memory hook.
+    /// The optional recorded low-memory-hook state.
     pub on_low_wasm_memory_hook_status: Option<OnLowWasmMemoryHookStatus>,
 }
 
-/// # Snapshot Metadata Global.
-///
-/// An exported WebAssembly global variable of a canister snapshot.
-///
-/// See [`ReadCanisterSnapshotMetadataResult::globals`].
+/// A global value in snapshot metadata.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SnapshotMetadataGlobal {
-    /// A 32-bit integer.
+    /// A signed 32-bit integer.
     #[serde(rename = "i32")]
     I32(i32),
-    /// A 64-bit integer.
+    /// A signed 64-bit integer.
     #[serde(rename = "i64")]
     I64(i64),
-    /// A 32-bit floating point number.
+    /// A single-precision floating value.
     #[serde(rename = "f32")]
     F32(f32),
-    /// A 64-bit floating point number.
+    /// A double-precision floating value.
     #[serde(rename = "f64")]
     F64(f64),
-    /// A 128-bit integer.
+    /// A vector global represented by the existing unbounded natural number.
     #[serde(rename = "v128")]
     V128(Nat),
 }
 
-/// # Canister Timer.
-///
-/// The status of a canister's global timer.
-///
-/// See [`ReadCanisterSnapshotMetadataResult::global_timer`].
+/// A reported global-timer state, without scheduling behavior.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum CanisterTimer {
-    /// The global timer is not set.
+    /// No timer is active in the reported state.
     #[serde(rename = "inactive")]
     Inactive,
-    /// The global timer is set to fire at the given Unix nanosecond timestamp.
+    /// The reported active timer value.
     #[serde(rename = "active")]
     Active(u64),
 }
 
-/// # On Low Wasm Memory Hook Status.
-///
-/// The execution status of the on-low-Wasm-memory hook.
-///
-/// See [`ReadCanisterSnapshotMetadataResult::on_low_wasm_memory_hook_status`].
+/// The reported state of a canister's low-Wasm-memory hook.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum OnLowWasmMemoryHookStatus {
-    /// The hook's trigger condition is not satisfied.
+    /// The activation condition has not been satisfied.
     #[serde(rename = "condition_not_satisfied")]
     ConditionNotSatisfied,
-    /// The hook is scheduled to run.
+    /// The hook is reported as ready.
     #[serde(rename = "ready")]
     Ready,
-    /// The hook has already been executed.
+    /// The hook is reported as executed.
     #[serde(rename = "executed")]
     Executed,
 }
 
-/// # Read Canister Snapshot Data Args.
-///
-/// Argument type of [`read_canister_snapshot_data`](https://docs.internetcomputer.org/references/management-canister/#read_canister_snapshot_data).
+/// Selects a portion of an identified snapshot to read.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReadCanisterSnapshotDataArgs {
-    /// Canister ID.
+    /// The canister holding the snapshot.
     pub canister_id: CanisterId,
-    /// ID of the snapshot.
+    /// The snapshot identifier.
     pub snapshot_id: SnapshotId,
-    /// The region of the snapshot to read.
+    /// The requested data region or chunk.
     pub kind: SnapshotDataKind,
 }
 
-/// # Snapshot Data Kind.
-///
-/// Identifies a region within a snapshot to read.
-///
-/// See [`ReadCanisterSnapshotDataArgs::kind`].
+/// A snapshot region or stored chunk selected for reading.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SnapshotDataKind {
-    /// Wasm module.
+    /// A range of the Wasm module.
     #[serde(rename = "wasm_module")]
     WasmModule {
-        /// Offset in bytes.
+        /// The supplied range offset.
         offset: u64,
-        /// Size of the data in bytes.
+        /// The supplied range size.
         size: u64,
     },
-    /// Wasm memory.
+    /// A range of Wasm memory.
     #[serde(rename = "wasm_memory")]
     WasmMemory {
-        /// Offset in bytes.
+        /// The supplied range offset.
         offset: u64,
-        /// Size of the data in bytes.
+        /// The supplied range size.
         size: u64,
     },
-    /// Stable memory.
+    /// A range of stable memory.
     #[serde(rename = "stable_memory")]
     StableMemory {
-        /// Offset in bytes.
+        /// The supplied range offset.
         offset: u64,
-        /// Size of the data in bytes.
+        /// The supplied range size.
         size: u64,
     },
-    /// Chunk hash.
+    /// A Wasm chunk identified by opaque hash bytes.
     #[serde(rename = "wasm_chunk")]
     WasmChunk {
-        /// The hash of the chunk.
+        /// The chunk hash using byte-buffer Serde.
         #[serde(with = "serde_bytes")]
         hash: Vec<u8>,
     },
 }
 
-/// # Read Canister Snapshot Data Result.
-///
-/// Result type of [`read_canister_snapshot_data`](https://docs.internetcomputer.org/references/management-canister/#read_canister_snapshot_data).
+/// The bytes returned for a snapshot-data read.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReadCanisterSnapshotDataResult {
-    /// The requested chunk of snapshot data.
+    /// The returned chunk using byte-buffer Serde.
     #[serde(with = "serde_bytes")]
     pub chunk: Vec<u8>,
 }
 
-/// # Upload Canister Snapshot Metadata Args.
-///
-/// Argument type of [`upload_canister_snapshot_metadata`](https://docs.internetcomputer.org/references/management-canister/#upload_canister_snapshot_metadata).
+/// Metadata supplied when uploading a snapshot.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UploadCanisterSnapshotMetadataArgs {
-    /// Canister ID.
+    /// The canister receiving the uploaded snapshot.
     pub canister_id: CanisterId,
-    /// An optional snapshot ID to be replaced by the new snapshot.
-    ///
-    /// The snapshot identified by the specified ID will be deleted once a new snapshot has been successfully created.
+    /// An optional existing snapshot identifier to replace.
     pub replace_snapshot: Option<SnapshotId>,
-    /// The size of the Wasm module.
+    /// The supplied Wasm module size.
     pub wasm_module_size: u64,
-    /// The globals.
+    /// The supplied global values.
     pub globals: Vec<SnapshotMetadataGlobal>,
-    /// The size of the Wasm memory.
+    /// The supplied Wasm memory size.
     pub wasm_memory_size: u64,
-    /// The size of the stable memory.
+    /// The supplied stable-memory size.
     pub stable_memory_size: u64,
-    /// The certified data.
+    /// Certified data using the upload's ordinary sequence Serde representation.
     pub certified_data: Vec<u8>,
-    /// The status of the global timer.
+    /// The optional supplied global-timer state.
     pub global_timer: Option<CanisterTimer>,
-    /// The status of the low wasm memory hook.
+    /// The optional supplied low-memory-hook state.
     pub on_low_wasm_memory_hook_status: Option<OnLowWasmMemoryHookStatus>,
 }
 
-/// # Upload Canister Snapshot Metadata Result.
-///
-/// Result type of [`upload_canister_snapshot_metadata`](https://docs.internetcomputer.org/references/management-canister/#upload_canister_snapshot_metadata).
+/// The identifier returned after snapshot metadata is uploaded.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UploadCanisterSnapshotMetadataResult {
-    /// The ID of the snapshot.
+    /// The assigned snapshot identifier.
     pub snapshot_id: SnapshotId,
 }
 
-/// # Upload Canister Snapshot Data Args.
-///
-/// Argument type of [`upload_canister_snapshot_data`](https://docs.internetcomputer.org/references/management-canister/#upload_canister_snapshot_data).
+/// A snapshot-data upload request.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UploadCanisterSnapshotDataArgs {
-    /// Canister ID.
+    /// The canister receiving the data.
     pub canister_id: CanisterId,
-    /// ID of the snapshot.
+    /// The snapshot identifier.
     pub snapshot_id: SnapshotId,
-    /// The region of the snapshot to write.
+    /// The destination region or chunk selection.
     pub kind: SnapshotDataOffset,
-    /// The chunk of data to upload.
+    /// The uploaded bytes using ordinary sequence Serde.
     pub chunk: Vec<u8>,
 }
 
-/// # Snapshot Data Offset.
-///
-/// Identifies a region within a snapshot to write.
-///
-/// See [`UploadCanisterSnapshotDataArgs::kind`].
+/// A destination within snapshot data being uploaded.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum SnapshotDataOffset {
-    /// Wasm module.
+    /// A position in the Wasm module.
     #[serde(rename = "wasm_module")]
     WasmModule {
-        /// Offset in bytes.
+        /// The supplied destination offset.
         offset: u64,
     },
-    /// Wasm memory.
+    /// A position in Wasm memory.
     #[serde(rename = "wasm_memory")]
     WasmMemory {
-        /// Offset in bytes.
+        /// The supplied destination offset.
         offset: u64,
     },
-    /// Stable memory.
+    /// A position in stable memory.
     #[serde(rename = "stable_memory")]
     StableMemory {
-        /// Offset in bytes.
+        /// The supplied destination offset.
         offset: u64,
     },
-    /// Wasm chunk.
+    /// A complete Wasm chunk.
     #[serde(rename = "wasm_chunk")]
     WasmChunk,
 }
 
-/// # Stored Chunks Result
-///
-/// Result type of [`stored_chunks`](https://docs.internetcomputer.org/references/management-canister/#stored_chunks).
+/// Chunk hashes reported for the snapshot's Wasm chunk store.
 pub type StoredChunksResult = Vec<ChunkHash>;
 
 #[cfg(test)]

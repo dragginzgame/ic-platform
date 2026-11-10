@@ -1,379 +1,283 @@
-//! Selected management DTOs maintained from DFINITY 0.11.0 (Apache-2.0).
-//! See provenance.json for the canister-use selection and source identity.
+//! Shared management request, response and event declarations.
+//!
+//! These types carry protocol fields without applying canister or caller policy.
 
 use crate::candid_codec::{Nat, Reserved};
 use crate::principal::Principal;
 use serde::{Deserialize, Serialize};
-mod codec;
 
-/// # Canister ID.
+mod codec;
+mod transform_func;
+
+pub use transform_func::TransformFunc;
+
+/// A principal identifying a canister.
 pub type CanisterId = Principal;
 
-/// # Canister ID Record
-///
-/// A record containing only a `canister_id` field.
-///
-/// The argument or result type of various Management Canister methods are aliases of this type.
+/// An opaque snapshot identifier.
+pub type SnapshotId = Vec<u8>;
+
+/// A request identifying one canister.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CanisterIdRecord {
-    /// Canister ID.
+    /// The canister addressed by the request.
     pub canister_id: CanisterId,
 }
 
-/// # Chunk hash.
+/// An opaque hash identifying a stored chunk.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct ChunkHash {
-    /// The hash of an uploaded chunk
+    /// The hash bytes.
     #[serde(with = "serde_bytes")]
     pub hash: Vec<u8>,
 }
 
-/// # Log Visibility.
+/// The requested visibility of canister logs.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub enum LogVisibility {
-    /// Controllers.
+    /// Access for the canister's controllers.
     #[default]
     #[serde(rename = "controllers")]
     Controllers,
-    /// Public.
+    /// Public access.
     #[serde(rename = "public")]
     Public,
-    /// Allowed viewers.
+    /// Access for the listed principals.
     #[serde(rename = "allowed_viewers")]
     AllowedViewers(Vec<Principal>),
 }
 
-/// # Snapshot Visibility.
+/// The requested visibility of canister snapshots.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub enum SnapshotVisibility {
-    /// Controllers.
+    /// Access for the canister's controllers.
     #[default]
     #[serde(rename = "controllers")]
     Controllers,
-    /// Public.
+    /// Public access.
     #[serde(rename = "public")]
     Public,
-    /// Allowed viewers.
+    /// Access for the listed principals.
     #[serde(rename = "allowed_viewers")]
     AllowedViewers(Vec<Principal>),
 }
 
-/// # Status Visibility.
+/// The requested visibility of canister status.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub enum StatusVisibility {
-    /// Controllers.
+    /// Access for the canister's controllers.
     #[default]
     #[serde(rename = "controllers")]
     Controllers,
-    /// Public.
+    /// Public access.
     #[serde(rename = "public")]
     Public,
-    /// Allowed viewers.
+    /// Access for the listed principals.
     #[serde(rename = "allowed_viewers")]
     AllowedViewers(Vec<Principal>),
 }
 
-/// # Environment Variable.
+/// A named environment value.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct EnvironmentVariable {
-    /// Name of the environment variable.
+    /// The variable name.
     pub name: String,
-    /// Value of the environment variable.
+    /// The variable value.
     pub value: String,
 }
 
-/// # Canister Settings
-///
-/// For arguments of [`create_canister`](https://docs.internetcomputer.org/references/management-canister/#create_canister),
-/// [`update_settings`](https://docs.internetcomputer.org/references/management-canister/#update_settings) and
-/// [`provisional_create_canister_with_cycles`](https://docs.internetcomputer.org/references/management-canister/#provisional_create_canister_with_cycles).
-///
-/// All fields are `Option` types, allowing selective settings/updates.
+/// Optional canister settings supplied in a request.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct CanisterSettings {
-    /// A list of at most 10 principals.
-    ///
-    /// The principals in this list become the *controllers* of the canister.
-    ///
-    /// Default value: A list containing only the caller of the `create_canister` call.
+    /// The optional controller list.
     pub controllers: Option<Vec<Principal>>,
-    /// Indicates how much compute power should be guaranteed to this canister,
-    /// expressed as a percentage of the maximum compute power that a single canister can allocate.
-    ///
-    /// If the IC cannot provide the requested allocation,
-    /// for example because it is oversubscribed, the call will be **rejected**.
-    ///
-    /// Must be a number between 0 and 100, inclusively.
-    ///
-    /// Default value: `0`
+    /// The optional compute allocation.
     pub compute_allocation: Option<Nat>,
-    /// Indicates how much memory (bytes) the canister is allowed to use in total.
-    ///
-    /// If the IC cannot provide the requested allocation,
-    /// for example because it is oversubscribed, the call will be **rejected**.
-    ///
-    /// If set to 0, then memory growth of the canister will be best-effort and subject to the available memory on the IC.
-    ///
-    /// Must be a number between 0 and 2<sup>48</sup> (i.e 256TB), inclusively.
-    ///
-    /// Default value: `0`
+    /// The optional memory allocation.
     pub memory_allocation: Option<Nat>,
-    /// Indicates a length of time in seconds.
-    /// A canister is considered frozen whenever the IC estimates that the canister would be depleted of cycles
-    /// before `freezing_threshold` seconds pass, given the canister's current size and the IC's current cost for storage.
-    ///
-    /// Must be a number between 0 and 2<sup>64</sup>-1, inclusively.
-    ///
-    /// Default value: `2_592_000` (approximately 30 days).
+    /// The optional freezing threshold.
     pub freezing_threshold: Option<Nat>,
-    /// Indicates the upper limit on [`CanisterStatusResult::reserved_cycles`] of the canister.
-    ///
-    /// Must be a number between 0 and 2<sup>128</sup>-1, inclusively.
-    ///
-    /// Default value: `5_000_000_000_000` (5 trillion cycles).
+    /// The optional reserved-cycle limit.
     pub reserved_cycles_limit: Option<Nat>,
-    /// Indicates the minimum number of cycles required for an incoming call
-    /// from a different canister. Calls from a different canister with fewer
-    /// cycles are rejected with a `CanisterError` at no cycles cost to the callee.
-    /// Self-calls (from the canister itself) and ingress messages are not affected
-    /// (`canister_inspect_message` hook can be used to filter ingress messages, albeit only via non-replicated execution).
-    ///
-    /// Must be a number between 0 and 2<sup>128</sup>-1, inclusively.
-    ///
-    /// Default value: `0` (i.e., no minimum enforced).
+    /// The optional minimum cycles for incoming canister calls.
     pub minimum_incoming_canister_call_cycles: Option<Nat>,
-    /// Defines who is allowed to read the canister's logs.
-    ///
-    /// Default value: [`LogVisibility::Controllers`].
+    /// The optional log visibility.
     pub log_visibility: Option<LogVisibility>,
-    /// Indicates the upper limit on the memory used for canister logs (bytes).
-    ///
-    /// Default value: `4096`.
+    /// The optional log-memory limit.
     pub log_memory_limit: Option<Nat>,
-    /// Defines who is allowed to read the canister's snapshots.
-    ///
-    /// Default value: `SnapshotVisibility::Controllers`.
+    /// The optional snapshot visibility.
     pub snapshot_visibility: Option<SnapshotVisibility>,
-    /// Defines who is allowed to read the canister's status.
-    ///
-    /// Default value: [`StatusVisibility::Controllers`].
+    /// The optional status visibility.
     pub status_visibility: Option<StatusVisibility>,
-    /// Indicates the upper limit on the WASM heap memory (bytes) consumption of the canister.
-    ///
-    /// Must be a number between 0 and 2<sup>48</sup>-1 (i.e 256TB), inclusively.
-    ///
-    /// Default value: `3_221_225_472` (3 GiB).
+    /// The optional Wasm-memory limit.
     pub wasm_memory_limit: Option<Nat>,
-    /// Indicates the threshold on the remaining wasm memory size of the canister in bytes.
-    ///
-    /// If the remaining wasm memory size of the canister is below the threshold, execution of the "on low wasm memory" hook is scheduled.
-    ///
-    /// Must be a number between 0 and 2<sup>48</sup> (i.e 256TB), inclusively.
-    ///
-    /// Default value: `0` (i.e., the "on low wasm memory" hook is never scheduled).
+    /// The optional Wasm-memory threshold.
     pub wasm_memory_threshold: Option<Nat>,
-
-    /// A list of environment variables.
-    ///
-    /// These variables are accessible to the canister during execution
-    /// and can be used to configure canister behavior without code changes.
-    /// Each key must be unique.
-    ///
-    /// Default value: `null` (i.e., no environment variables provided).
+    /// The optional environment-variable list.
     pub environment_variables: Option<Vec<EnvironmentVariable>>,
 }
 
-/// # Definite Canister Settings
-///
-/// Represents the actual settings in effect.
-///
-/// For return of [`canister_status`](https://docs.internetcomputer.org/references/management-canister/#canister_status).
+/// Complete canister settings returned by the IC.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct DefiniteCanisterSettings {
-    /// Controllers of the canister.
+    /// The controller list.
     pub controllers: Vec<Principal>,
-    /// Guaranteed compute allocation as a percentage of the maximum compute power that a single canister can allocate.
+    /// The compute allocation.
     pub compute_allocation: Nat,
-    /// Total memory (bytes) the canister is allowed to use.
+    /// The memory allocation.
     pub memory_allocation: Nat,
-    /// Time in seconds after which the canister is considered frozen.
+    /// The freezing threshold.
     pub freezing_threshold: Nat,
-    /// Upper limit on [`CanisterStatusResult::reserved_cycles`] of the canister.
+    /// The reserved-cycle limit.
     pub reserved_cycles_limit: Nat,
-    /// Minimum number of cycles required for an incoming call from a different canister.
+    /// The minimum cycles for incoming canister calls.
     pub minimum_incoming_canister_call_cycles: Nat,
-    /// Visibility of canister logs.
+    /// The log visibility.
     pub log_visibility: LogVisibility,
-    /// Upper limit on the memory used for canister logs (bytes).
+    /// The log-memory limit.
     pub log_memory_limit: Nat,
-    /// Visibility of canister snapshots.
+    /// The snapshot visibility.
     pub snapshot_visibility: SnapshotVisibility,
-    /// Visibility of canister status.
+    /// The status visibility.
     pub status_visibility: StatusVisibility,
-    /// Upper limit on the WASM heap memory (bytes) consumption of the canister.
+    /// The Wasm-memory limit.
     pub wasm_memory_limit: Nat,
-    /// Threshold on the remaining wasm memory size of the canister in bytes.
+    /// The Wasm-memory threshold.
     pub wasm_memory_threshold: Nat,
-    /// A list of environment variables.
+    /// The environment-variable list.
     pub environment_variables: Vec<EnvironmentVariable>,
 }
 
-/// # Create Canister Args
-///
-/// Argument type of [`create_canister`](https://docs.internetcomputer.org/references/management-canister/#create_canister).
+/// Parameters for creating a canister.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct CreateCanisterArgs {
-    /// Canister settings.
+    /// Optional initial settings.
     pub settings: Option<CanisterSettings>,
-    /// Must match the canister's [`canister_version`](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/#system-api-canister-version) value when specified.
+    /// The sender's optional canister-version value.
     pub sender_canister_version: Option<u64>,
 }
 
-/// # Update Settings Args
-///
-/// Argument type of [`update_settings`](https://docs.internetcomputer.org/references/management-canister/#update_settings).
+/// Settings to apply to an existing canister.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct UpdateSettingsArgs {
-    /// Canister ID of the canister whose settings are to be updated.
+    /// The canister to update.
     pub canister_id: CanisterId,
-    ///Canister settings.
+    /// The supplied settings.
     pub settings: CanisterSettings,
-    /// Must match the canister's [`canister_version`](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/#system-api-canister-version) value when specified.
+    /// The sender's optional canister-version value.
     pub sender_canister_version: Option<u64>,
 }
 
-/// # Upload Chunk Args
-///
-/// Argument type of [`upload_chunk`](https://docs.internetcomputer.org/references/management-canister/#upload_chunk).
+/// A chunk supplied for a canister's chunk store.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct UploadChunkArgs {
-    /// The canister whose chunk store the chunk will be uploaded to.
+    /// The canister receiving the chunk.
     pub canister_id: CanisterId,
-    /// The chunk bytes (max size 1MB).
+    /// The uploaded chunk bytes.
     #[serde(with = "serde_bytes")]
     pub chunk: Vec<u8>,
 }
 
-/// # Canister Install Mode
-///
-/// See the upstream `InstallCodeArgs` contract.
+/// The requested code-installation mode.
 #[derive(
     Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub enum CanisterInstallMode {
-    /// A fresh install of a new canister.
+    /// Install code into a canister.
     #[default]
     #[serde(rename = "install")]
     Install,
-    /// Reinstalling a canister that was already installed.
+    /// Reinstall the canister's code.
     #[serde(rename = "reinstall")]
     Reinstall,
-    /// Upgrade an existing canister.
+    /// Upgrade code with optional upgrade flags.
     #[serde(rename = "upgrade")]
     Upgrade(Option<UpgradeFlags>),
 }
 
-/// # Upgrade Flags
-///
-/// See [`CanisterInstallMode::Upgrade`].
+/// Optional flags accompanying a code upgrade.
 #[derive(
     Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub struct UpgradeFlags {
-    /// If set to `true`, the `pre_upgrade` step will be skipped during the canister upgrade.
+    /// The optional request to skip the pre-upgrade hook.
     pub skip_pre_upgrade: Option<bool>,
-    /// If set to [`WasmMemoryPersistence::Keep`], the WASM heap memory will be preserved instead of cleared.
+    /// The optional Wasm-memory persistence choice.
     pub wasm_memory_persistence: Option<WasmMemoryPersistence>,
 }
 
-/// # Wasm Memory Persistence
-///
-/// See [`UpgradeFlags::wasm_memory_persistence`].
+/// The Wasm-memory persistence choice for an upgrade.
 #[derive(
     Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub enum WasmMemoryPersistence {
-    /// Preserve heap memory.
+    /// Retain Wasm memory.
     #[serde(rename = "keep")]
     Keep,
-    /// Clear heap memory.
+    /// Replace Wasm memory.
     #[default]
     #[serde(rename = "replace")]
     Replace,
 }
 
-/// # Install Chunked Code Args
-///
-/// Argument type of [`install_chunked_code`](https://docs.internetcomputer.org/references/management-canister/#install_chunked_code).
+/// Parameters for installing code assembled from stored chunks.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct InstallChunkedCodeArgs {
-    /// Canister install mode.
+    /// The requested installation mode.
     pub mode: CanisterInstallMode,
-    /// Principal of the canister being installed.
+    /// The canister receiving the code.
     pub target_canister: CanisterId,
-    /// The canister in whose chunk storage the chunks are stored (defaults to `target_canister` if not specified).
+    /// The optional canister holding the chunks.
     pub store_canister: Option<CanisterId>,
-    /// The list of chunks that make up the canister wasm.
+    /// Chunk hashes in the supplied assembly order.
     pub chunk_hashes_list: Vec<ChunkHash>,
-    /// The sha256 hash of the wasm.
+    /// The supplied module hash bytes.
     #[serde(with = "serde_bytes")]
     pub wasm_module_hash: Vec<u8>,
-    /// The argument to be passed to `canister_init` or `canister_post_upgrade`.
+    /// The supplied initialization argument bytes.
     #[serde(with = "serde_bytes")]
     pub arg: Vec<u8>,
-    /// Must match the canister's [`canister_version`](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/#system-api-canister-version) value when specified.
+    /// The sender's optional canister-version value.
     pub sender_canister_version: Option<u64>,
 }
 
-/// # Uninstall Code Args
-///
-/// Argument type of [`uninstall_code`](https://docs.internetcomputer.org/references/management-canister/#uninstall_code).
+/// A request to uninstall a canister's code.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct UninstallCodeArgs {
-    /// Canister ID.
+    /// The canister whose code is to be uninstalled.
     pub canister_id: CanisterId,
-    /// Must match the canister's [`canister_version`](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/#system-api-canister-version) value when specified.
+    /// The sender's optional canister-version value.
     pub sender_canister_version: Option<u64>,
 }
 
-/// # Canister Status Result
-///
-/// Result type of [`canister_status`](https://docs.internetcomputer.org/references/management-canister/#canister_status).
+/// The status and resource information reported for a canister.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CanisterStatusResult {
-    /// Status of the canister.
+    /// The reported execution status.
     pub status: CanisterStatusType,
-    /// Indicates whether a stopped canister is ready to be migrated to another subnet
-    /// (i.e., whether it has empty queues and flushed streams).
+    /// Whether the canister is reported ready for migration.
     pub ready_for_migration: bool,
-    /// The canister version.
+    /// The reported canister version.
     pub version: u64,
-    /// Canister settings in effect.
+    /// The reported settings.
     pub settings: DefiniteCanisterSettings,
-    /// A SHA256 hash of the module installed on the canister. This is null if the canister is empty.
+    /// The optional installed module hash, using ordinary sequence Serde.
     pub module_hash: Option<Vec<u8>>,
-    /// The memory size taken by the canister.
+    /// The reported total memory size.
     pub memory_size: Nat,
-    /// The detailed metrics on the memory consumption of the canister.
+    /// The reported memory breakdown.
     pub memory_metrics: MemoryMetrics,
-    /// The cycle balance of the canister.
+    /// The reported cycle balance.
     pub cycles: Nat,
-    /// The reserved cycles balance of the canister.
-    ///
-    /// These are cycles that are reserved by the resource reservation mechanism on storage allocation.
-    /// See also the [`CanisterSettings::reserved_cycles_limit`] parameter in canister settings.
+    /// The reported reserved cycles.
     pub reserved_cycles: Nat,
-    /// Amount of cycles burned per day.
+    /// The reported idle-cycle consumption per day.
     pub idle_cycles_burned_per_day: Nat,
-    /// Query statistics.
+    /// The reported query statistics.
     pub query_stats: QueryStats,
 }
 
-/// # Canister Status Type
-///
-/// Status of a canister.
-///
-/// See [`CanisterStatusResult::status`].
+/// A canister's reported execution status.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub enum CanisterStatusType {
     /// The canister is running.
@@ -387,558 +291,395 @@ pub enum CanisterStatusType {
     Stopped,
 }
 
-/// # Memory Metrics
-///
-/// Memory metrics of a canister.
-///
-/// See [`CanisterStatusResult::memory_metrics`].
+/// Reported memory sizes by category.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct MemoryMetrics {
-    /// Represents the Wasm memory usage of the canister, i.e. the heap memory used by the canister's WebAssembly code.
+    /// Wasm memory size.
     pub wasm_memory_size: Nat,
-    /// Represents the stable memory usage of the canister.
+    /// Stable memory size.
     pub stable_memory_size: Nat,
-    /// Represents the memory usage of the global variables that the canister is using.
+    /// Global memory size.
     pub global_memory_size: Nat,
-    /// Represents the memory occupied by the Wasm binary that is currently installed on the canister.
+    /// Wasm binary size.
     pub wasm_binary_size: Nat,
-    /// Represents the memory used by custom sections defined by the canister.
+    /// Custom-section size.
     pub custom_sections_size: Nat,
-    /// Represents the memory used for storing the canister's history.
+    /// Canister-history size.
     pub canister_history_size: Nat,
-    /// Represents the memory used by the Wasm chunk store of the canister.
+    /// Wasm chunk-store size.
     pub wasm_chunk_store_size: Nat,
-    /// Represents the memory consumed by all snapshots that belong to this canister.
+    /// Snapshot size.
     pub snapshots_size: Nat,
-    /// Represents the memory used by the canister's log store.
+    /// Log memory-store size.
     pub log_memory_store_size: Nat,
 }
 
-/// # Query Stats
-///
-/// Query statistics.
-///
-/// See [`CanisterStatusResult::query_stats`].
+/// Reported cumulative query statistics.
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct QueryStats {
-    /// Total number of query calls.
+    /// Total query calls.
     pub num_calls_total: Nat,
-    /// Total number of instructions executed by query calls.
+    /// Total query instructions.
     pub num_instructions_total: Nat,
-    /// Total number of payload bytes use for query call requests.
+    /// Total request payload bytes.
     pub request_payload_bytes_total: Nat,
-    /// Total number of payload bytes use for query call responses.
+    /// Total response payload bytes.
     pub response_payload_bytes_total: Nat,
 }
 
-/// # Canister Info Args
-///
-/// Argument type of [`canister_info`](https://docs.internetcomputer.org/references/management-canister/#canister_info).
+/// A request for canister information and recent changes.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CanisterInfoArgs {
-    /// Canister ID.
+    /// The canister to inspect.
     pub canister_id: Principal,
-    /// Number of most recent changes requested to be retrieved from canister history.
-    /// No changes are retrieved if this field is null.
+    /// The optional requested change count.
     pub num_requested_changes: Option<u64>,
 }
 
-/// # Canister Info Result
-///
-/// Result type of [`canister_info`](https://docs.internetcomputer.org/references/management-canister/#canister_info).
+/// Canister information and change history returned by the IC.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CanisterInfoResult {
-    /// Total number of changes ever recorded in canister history.
-    ///
-    /// This might be higher than the number of canister changes in `recent_changes`
-    /// because the IC might drop old canister changes from its history
-    /// (with `20` most recent canister changes to always remain in the list).
+    /// The reported total number of changes.
     pub total_num_changes: u64,
-    /// The canister changes stored in the order from the oldest to the most recent.
+    /// The returned recent changes.
     pub recent_changes: Vec<Change>,
-    /// A SHA256 hash of the module installed on the canister. This is null if the canister is empty.
+    /// The optional module hash, using ordinary sequence Serde.
     pub module_hash: Option<Vec<u8>>,
-    /// Controllers of the canister.
+    /// The reported controllers.
     pub controllers: Vec<Principal>,
 }
 
-/// # From User Record
-///
-/// Details about a canister change initiated by a user.
-///
-/// See [`ChangeOrigin::FromUser`].
+/// The user associated with a canister change.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct FromUserRecord {
-    /// Principal of the user.
+    /// The initiating user principal.
     pub user_id: Principal,
 }
 
-/// # From Canister Record
-///
-/// Details about a canister change initiated by a canister (called _originator_).
-///
-/// See [`ChangeOrigin::FromCanister`].
+/// The canister associated with a canister change.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct FromCanisterRecord {
-    /// Canister ID of the _originator_.
+    /// The initiating canister principal.
     pub canister_id: Principal,
-    /// Canister version of the _originator_ when the _originator_ initiated the change.
-    ///
-    /// This is null if the original does not include its canister version
-    /// in the field `sender_canister_version` of the management canister payload.
+    /// The optional initiating canister version.
     pub canister_version: Option<u64>,
 }
 
-/// # Change Origin
-///
-/// Provides details on who initiated a canister change.
-///
-/// See [`Change::origin`].
+/// The recorded origin of a canister change.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum ChangeOrigin {
-    /// The change was initiated by a user.
+    /// A change initiated by a user.
     #[serde(rename = "from_user")]
     FromUser(FromUserRecord),
-    /// The change was initiated by a canister.
+    /// A change initiated by a canister.
     #[serde(rename = "from_canister")]
     FromCanister(FromCanisterRecord),
 }
 
-/// # Creation Record
-///
-/// Details about a canister creation.
-///
-/// See [`ChangeDetails::Creation`].
+/// Details recorded when a canister is created.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CreationRecord {
-    /// Initial set of canister controllers.
+    /// The recorded initial controllers.
     pub controllers: Vec<Principal>,
-    /// Hash of the environment variables.
+    /// The optional environment-variable hash, using ordinary sequence Serde.
     pub environment_variables_hash: Option<Vec<u8>>,
 }
 
-/// # Code Deployment Mode
-///
-/// The mode with which a canister is installed.
-///
-/// See [`CodeDeploymentRecord::mode`].
+/// The mode recorded for a code deployment.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
 pub enum CodeDeploymentMode {
-    /// A fresh install of a new canister.
+    /// An installation.
     #[serde(rename = "install")]
     Install,
-    /// Reinstalling a canister that was already installed.
+    /// A reinstallation.
     #[serde(rename = "reinstall")]
     Reinstall,
-    /// Upgrade an existing canister.
+    /// An upgrade.
     #[serde(rename = "upgrade")]
     Upgrade,
 }
 
-/// # Code Deployment Record
-///
-/// Details about a canister code deployment.
-///
-/// See [`ChangeDetails::CodeDeployment`].
+/// Details recorded for a code deployment.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct CodeDeploymentRecord {
-    /// Deployment mode.
+    /// The recorded deployment mode.
     pub mode: CodeDeploymentMode,
-    /// A SHA256 hash of the new module installed on the canister.
+    /// The recorded module hash bytes.
     #[serde(with = "serde_bytes")]
     pub module_hash: Vec<u8>,
 }
 
-/// # Load Snapshot Record
-///
-/// Details about loading canister snapshot.
-///
-/// See [`ChangeDetails::LoadSnapshot`].
+/// Details recorded when a snapshot is loaded.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct LoadSnapshotRecord {
-    /// The canister ID of the canister from which the snapshot was loaded
-    /// (if that canister ID is different than the canister ID onto which the snapshot is loaded).
+    /// The optional source canister principal.
     pub from_canister_id: Option<Principal>,
-    /// The ID of the snapshot that was loaded.
+    /// The loaded snapshot identifier.
     pub snapshot_id: SnapshotId,
-    /// The version of the canister at the time that the snapshot was taken.
+    /// The recorded canister version.
     pub canister_version: u64,
-    /// The timestamp at which the snapshot was taken.
+    /// The recorded snapshot timestamp.
     pub taken_at_timestamp: u64,
-    /// The source from which the snapshot was taken.
+    /// The recorded snapshot source.
     pub source: SnapshotSource,
 }
 
-/// # Rename To Record
-///
-/// Details about the new canister ID in a rename operation.
-///
-/// Contains the canister ID, version, and total number of changes of the new canister ID.
-/// After renaming, the total number of canister changes reported by the IC method `canister_info`
-/// is overridden to this value.
-///
-/// See [`RenameCanisterRecord::rename_to`].
+/// The destination information recorded for a canister rename.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct RenameToRecord {
-    /// The new canister ID.
+    /// The destination canister principal.
     pub canister_id: Principal,
-    /// The version of the new canister.
+    /// The recorded destination version.
     pub version: u64,
-    /// The total number of changes in the new canister's history.
-    /// This value overrides the total reported by `canister_info` after renaming.
+    /// The recorded destination change count.
     pub total_num_changes: u64,
 }
 
-/// # Rename Canister Record
-///
-/// Details about a canister rename operation.
-///
-/// Canister renaming is described by the canister ID and the total number of canister changes
-/// before renaming as well as the canister ID, version, and total number of changes of the new
-/// canister ID. Because only a dedicated NNS canister can perform canister renaming, the actual
-/// principal who requested canister renaming is recorded in the [`requested_by`](Self::requested_by) field.
-///
-/// After renaming, the total number of canister changes reported by the IC method `canister_info`
-/// is overridden to the total number of canister changes of the new canister ID. Canister changes
-/// referring to the canister ID before renaming are preserved.
-///
-/// See [`ChangeDetails::RenameCanister`].
+/// Details recorded for a canister rename.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct RenameCanisterRecord {
-    /// The canister ID before renaming.
+    /// The canister principal recorded before the rename.
     pub canister_id: Principal,
-    /// The total number of changes in the canister's history before renaming.
+    /// The recorded change count.
     pub total_num_changes: u64,
-    /// Details about the new canister ID after renaming.
+    /// The recorded rename destination.
     pub rename_to: RenameToRecord,
-    /// The principal that requested the rename operation.
-    ///
-    /// Because only a dedicated NNS canister can perform canister renaming,
-    /// this field records the actual principal who requested it.
+    /// The principal requesting the rename.
     pub requested_by: Principal,
 }
 
-/// # Controllers Change Record
-///
-/// Details about updating canister controllers.
-///
-/// See [`ChangeDetails::ControllersChange`].
+/// Controllers recorded by a controller-change event.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct ControllersChangeRecord {
-    /// The complete new set of canister controllers.
+    /// The recorded controller list.
     pub controllers: Vec<Principal>,
 }
 
-/// # Change Details
-///
-/// Provides details on the respective canister change.
-///
-/// See [`Change::details`].
+/// The details attached to a recorded canister change.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum ChangeDetails {
-    /// The change was canister creation.
+    /// Canister creation details.
     #[serde(rename = "creation")]
     Creation(CreationRecord),
-    /// The change was canister uninstallation.
+    /// Code was uninstalled.
     #[serde(rename = "code_uninstall")]
     CodeUninstall,
-    /// The change was canister code deployment.
+    /// Code deployment details.
     #[serde(rename = "code_deployment")]
     CodeDeployment(CodeDeploymentRecord),
-    /// The change was loading a canister snapshot.
+    /// Snapshot loading details.
     #[serde(rename = "load_snapshot")]
     LoadSnapshot(LoadSnapshotRecord),
-    /// The change was updating canister controllers.
+    /// Controller change details.
     #[serde(rename = "controllers_change")]
     ControllersChange(ControllersChangeRecord),
-    /// The change was renaming a canister.
+    /// Canister rename details.
     #[serde(rename = "rename_canister")]
     RenameCanister(RenameCanisterRecord),
 }
 
-/// # Change
-///
-/// Represents a canister change as stored in the canister history.
+/// One recorded canister change.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct Change {
-    /// The system timestamp (in nanoseconds since Unix Epoch) at which the change was performed.
+    /// The recorded timestamp in nanoseconds.
     pub timestamp_nanos: u64,
-    /// The canister version after performing the change.
+    /// The recorded canister version.
     pub canister_version: u64,
-    /// The change's origin (a user or a canister).
+    /// The recorded change origin.
     pub origin: ChangeOrigin,
-    /// The change's details.
+    /// Optional change details.
     pub details: Option<ChangeDetails>,
 }
 
-/// # HTTP Request Args
-///
-/// Argument type of [`http_request`](https://docs.internetcomputer.org/references/management-canister/#http_request).
+/// Parameters supplied for a management HTTP request.
 #[derive(Deserialize, Debug, PartialEq, Eq, Clone, Default)]
 pub struct HttpRequestArgs {
     /// The requested URL.
     pub url: String,
-    /// The maximal size of the response in bytes.
-    ///
-    /// If None, 2MB will be the limit.
-    /// This value affects the cost of the http request and it is highly recommended
-    /// to set it as low as possible to avoid unnecessary extra costs.
-    ///
-    /// See also the [pricing section of HTTP outcalls documentation](https://docs.internetcomputer.org/references/cycles-costs/#https-outcalls).
+    /// The optional response-size limit supplied by the caller.
     pub max_response_bytes: Option<u64>,
-    /// The method of HTTP request.
+    /// The requested HTTP method.
     pub method: HttpMethod,
-    /// List of HTTP request headers and their corresponding values.
+    /// The supplied request headers.
     pub headers: Vec<HttpHeader>,
-    /// Optionally provide request body.
+    /// The optional request body, using ordinary sequence Serde.
     pub body: Option<Vec<u8>>,
-    /// Name of the transform function which is `func (transform_args) -> (http_response) query`.
+    /// The optional response-transform function and context.
     pub transform: Option<TransformContext>,
-    /// If `Some(false)`, the HTTP request will be made by single replica instead of all nodes in the subnet.
+    /// The optional replication choice.
     pub is_replicated: Option<bool>,
-    /// The pricing mechanism to apply to this request: `1` ("legacy") or `2` ("pay-as-you-go").
-    ///
-    /// If None, `1` is used. Version `1` is deprecated: version `2` is to become the default,
-    /// after which version `1` will be removed. Version `2` prices the resources the call
-    /// actually consumes rather than `max_response_bytes`.
-    ///
-    /// The field is not validated. Any value other than `1` or `2` is priced with version `1`
-    /// and no error is returned.
+    /// The optional pricing version.
     pub pricing_version: Option<u32>,
 }
 
-/// # HTTP Request Result
-///
-/// Result type of [`http_request`](https://docs.internetcomputer.org/references/management-canister/#http_request).
+/// A response returned for a management HTTP request.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct HttpRequestResult {
-    /// The response status (e.g. 200, 404).
+    /// The reported response status.
     pub status: Nat,
-    /// List of HTTP response headers and their corresponding values.
+    /// The returned response headers.
     pub headers: Vec<HttpHeader>,
-    /// The response’s body.
+    /// The returned response body bytes.
     #[serde(with = "serde_bytes")]
     pub body: Vec<u8>,
 }
 
-/// # HTTP Method.
-///
-/// Represents a HTTP method.
-///
-/// See [`HttpRequestArgs::method`].
+/// An HTTP method supported by the request protocol.
 #[derive(
     Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub enum HttpMethod {
-    /// GET
+    /// The GET method.
     #[default]
     #[serde(rename = "get")]
     GET,
-    /// HEAD
+    /// The HEAD method.
     #[serde(rename = "head")]
     HEAD,
-    /// POST
+    /// The POST method.
     #[serde(rename = "post")]
     POST,
-    /// PUT
+    /// The PUT method.
     #[serde(rename = "put")]
     PUT,
-    /// DELETE
+    /// The DELETE method.
     #[serde(rename = "delete")]
     DELETE,
-    /// PATCH
+    /// The PATCH method.
     #[serde(rename = "patch")]
     PATCH,
 }
 
-/// # HTTP Header.
-///
-/// Represents a HTTP header.
-///
-/// See [`HttpRequestArgs::headers`] and [`HttpRequestResult::headers`].
+/// One HTTP header name and value.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct HttpHeader {
-    /// Name of the header.
+    /// The header name.
     pub name: String,
-    /// Value of the header.
+    /// The header value.
     pub value: String,
 }
 
-/// # Transform Context.
-///
-/// ```text
-/// record {
-///     function : func(record { response : http_request_result; context : blob }) -> (http_request_result) query;
-///     context : blob;
-/// };
-/// ```
-///
-/// See [`HttpRequestArgs::transform`].
+/// A response-transform function with caller-supplied context bytes.
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
 pub struct TransformContext {
-    /// `func(record { response : http_request_result; context : blob }) -> (http_request_result) query;`.
+    /// The response-transform function reference.
     pub function: TransformFunc,
-
-    /// Context to be passed to `transform` function to transform HTTP response for consensus
+    /// The opaque context bytes passed to the transform.
     #[serde(with = "serde_bytes")]
     pub context: Vec<u8>,
 }
 
-mod transform_func;
-
-/// # Transform Function.
-///
-/// The "transform" function of type:
-/// ```text
-/// func(record { response : http_request_result; context : blob }) -> (http_request_result) query
-/// ```
-#[doc(inline)]
-pub use transform_func::TransformFunc;
-
-/// # Transform Args.
-///
-/// ```text
-/// record {
-///     response : http_response;
-///     context : blob;
-/// }
-/// ```
-///
-/// See [`TransformContext`].
+/// The response and context supplied to an HTTP transform function.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct TransformArgs {
-    /// Raw response from remote service, to be transformed
+    /// The response supplied for transformation.
     pub response: HttpRequestResult,
-
-    /// Context for response transformation
+    /// The opaque caller context bytes.
     #[serde(with = "serde_bytes")]
     pub context: Vec<u8>,
 }
 
-/// # ECDSA Key ID.
-///
-/// See [`EcdsaPublicKeyArgs::key_id`] and [`SignWithEcdsaArgs::key_id`].
+/// An ECDSA key identifier carried by management requests.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct EcdsaKeyId {
-    /// Curve of the key.
+    /// The requested curve identifier.
     pub curve: EcdsaCurve,
-    /// Name of the key.
+    /// The requested key name.
     pub name: String,
 }
 
-/// # ECDSA Curve.
+/// A protocol identifier for an ECDSA curve.
 #[derive(
     Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
 )]
 pub enum EcdsaCurve {
-    /// secp256k1
+    /// The secp256k1 curve identifier.
     #[default]
     #[serde(rename = "secp256k1")]
     Secp256k1,
-    /// secp256r1
+    /// The secp256r1 curve identifier.
     #[serde(rename = "secp256r1")]
     Secp256r1,
 }
 
 impl From<EcdsaCurve> for u32 {
-    fn from(val: EcdsaCurve) -> Self {
-        match val {
+    fn from(curve: EcdsaCurve) -> Self {
+        match curve {
             EcdsaCurve::Secp256k1 => 0,
             EcdsaCurve::Secp256r1 => 1,
         }
     }
 }
 
-/// # ECDSA Public Key Args.
-///
-/// Argument type of [`ecdsa_public_key`](https://docs.internetcomputer.org/references/management-canister/#ecdsa_public_key).
+/// Parameters requesting ECDSA public-key bytes from the management service.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct EcdsaPublicKeyArgs {
-    /// Canister id, default to the canister id of the caller if `None`.
+    /// The optional canister principal supplied for the request.
     pub canister_id: Option<CanisterId>,
-    /// A vector of variable length byte strings.
+    /// The supplied derivation path, using ordinary nested sequence Serde.
     pub derivation_path: Vec<Vec<u8>>,
-    /// The key ID.
+    /// The requested key identifier.
     pub key_id: EcdsaKeyId,
 }
 
-/// # ECDSA Public Key Result.
-///
-/// Result type of [`ecdsa_public_key`](https://docs.internetcomputer.org/references/management-canister/#ecdsa_public_key).
+/// Opaque public-key material returned by the management service.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct EcdsaPublicKeyResult {
-    /// An ECDSA public key encoded in SEC1 compressed form.
+    /// The returned public-key bytes.
     #[serde(with = "serde_bytes")]
     pub public_key: Vec<u8>,
-    /// Can be used to deterministically derive child keys of the [`public_key`](Self::public_key).
+    /// The returned chain-code bytes.
     #[serde(with = "serde_bytes")]
     pub chain_code: Vec<u8>,
 }
 
-/// # Sign With ECDSA Args.
-///
-/// Argument type of [`sign_with_ecdsa`](https://docs.internetcomputer.org/references/management-canister/#sign_with_ecdsa).
+/// Parameters requesting an ECDSA signature from the management service.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct SignWithEcdsaArgs {
-    /// Hash of the message with length of 32 bytes.
+    /// The supplied message-hash bytes.
     #[serde(with = "serde_bytes")]
     pub message_hash: Vec<u8>,
-    /// A vector of variable length byte strings.
+    /// The supplied derivation path, using ordinary nested sequence Serde.
     pub derivation_path: Vec<Vec<u8>>,
-    /// The key ID.
+    /// The requested key identifier.
     pub key_id: EcdsaKeyId,
 }
 
-/// # Sign With ECDSA Result.
-///
-/// Result type of [`sign_with_ecdsa`](https://docs.internetcomputer.org/references/management-canister/#sign_with_ecdsa).
+/// Opaque signature bytes returned by the management service.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct SignWithEcdsaResult {
-    /// Encoded as the concatenation of the SEC1 encodings of the two values `r` and `s`.
+    /// The returned signature bytes.
     #[serde(with = "serde_bytes")]
     pub signature: Vec<u8>,
 }
 
-/// # Snapshot ID.
-///
-/// See [`Snapshot::id`].
-pub type SnapshotId = Vec<u8>;
-
-/// # Snapshot.
-///
-/// A snapshot of the canister's state at a given point in time.
+/// A snapshot identifier and its reported metadata.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
 pub struct Snapshot {
-    /// Snapshot ID.
+    /// The snapshot identifier.
     pub id: SnapshotId,
-    /// Timestamp at which the snapshot was taken.
+    /// The reported snapshot timestamp.
     pub taken_at_timestamp: u64,
-    /// Total size of the snapshot in bytes.
+    /// The reported total snapshot size.
     pub total_size: u64,
 }
 
-/// # Delete Canister Snapshot Args.
-///
-/// Argument type of [`delete_canister_snapshot`](https://docs.internetcomputer.org/references/management-canister/#delete_canister_snapshot).
+/// A request to delete an identified canister snapshot.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub struct DeleteCanisterSnapshotArgs {
-    /// Canister ID.
+    /// The canister holding the snapshot.
     pub canister_id: CanisterId,
-    /// ID of the snapshot to be deleted.
+    /// The snapshot identifier to delete.
     pub snapshot_id: SnapshotId,
 }
 
-/// # Snapshot Source.
-///
-/// How a canister snapshot was created.
-///
-/// See the upstream `ReadCanisterSnapshotMetadataResult::source` contract.
+/// The recorded origin of a snapshot.
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub enum SnapshotSource {
-    /// The snapshot was taken from a running canister.
+    /// A snapshot taken from a canister, with a reserved protocol payload.
     #[serde(rename = "taken_from_canister")]
     TakenFromCanister(Reserved),
-    /// The snapshot was created by uploading metadata and data.
+    /// A snapshot supplied through metadata upload, with a reserved payload.
     #[serde(rename = "metadata_upload")]
     MetadataUpload(Reserved),
 }

@@ -1,6 +1,6 @@
 //! NNS Registry subnet lookup; independent Rust declarations of the external protocol.
 //!
-//! Passive external Candid contracts; see docs/external-contracts.md for pinned
+//! Passive external Candid contracts; see docs/protocols/external-contracts.md for pinned
 //! schemas and provenance. Decoding does not authenticate a response or authorize
 //! a payment, retry, topology decision or resource allocation.
 

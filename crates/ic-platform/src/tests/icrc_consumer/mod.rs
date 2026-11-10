@@ -315,3 +315,57 @@ pub fn transfers_and_consent_contracts() {
 fn external_transfer_and_consent_shapes_roundtrip() {
     transfers_and_consent_contracts();
 }
+
+#[test]
+fn selected_icrc_types_match_frozen_registry_schemas() {
+    use crate::icrc_ledger_types::{self as ledger, icrc21};
+    // Generated independently by icrc-ledger-types =0.2.0 and Candid =0.10.39.
+    // This includes recursive values, defaulted fields and query callbacks.
+    let source: candid_parser::IDLProg = include_str!("../../../tests/fixtures/icrc-reference.did")
+        .parse()
+        .unwrap();
+    let mut env = candid_parser::TypeEnv::new();
+    candid_parser::check_prog(&mut env, &source).unwrap();
+    use support::assert_named_schema as equal;
+    macro_rules! check {
+        ($($name:ident),+ $(,)?) => { $(equal::<ledger::$name>(&env, concat!("Expected", stringify!($name)));)+ };
+    }
+    check!(
+        Account,
+        MetadataValue,
+        Value,
+        ICRC3Value,
+        TransferArg,
+        Memo,
+        TransferError,
+        AllowanceArgs,
+        Allowance,
+        GetArchivesArgs,
+        ICRC3ArchiveInfo,
+        ArchivedBlocks,
+        BlockWithId,
+        GetBlocksRequest,
+        GetBlocksResult,
+        ICRC3DataCertificate,
+        SupportedBlockType
+    );
+    equal::<ledger::QueryArchiveFn<Vec<ledger::GetBlocksRequest>, ledger::GetBlocksResult>>(
+        &env,
+        "ExpectedQueryArchiveFn",
+    );
+    macro_rules! consent {
+        ($($name:ident),+ $(,)?) => { $(equal::<icrc21::$name>(&env, concat!("Expected", stringify!($name)));)+ };
+    }
+    consent!(
+        ConsentMessageMetadata,
+        ConsentMessageRequest,
+        ConsentMessageSpec,
+        DisplayMessageType,
+        ConsentInfo,
+        ConsentMessage,
+        FieldsDisplay,
+        ErrorInfo,
+        Icrc21Error
+    );
+    equal::<icrc21::Value>(&env, "ExpectedConsentValue");
+}

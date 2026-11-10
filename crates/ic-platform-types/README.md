@@ -7,10 +7,11 @@ and lockfile. Platform re-exports these exact definitions; Wire owns its schema
 implementations. The independent series continues from published Types 0.15.0.
 
 The default feature set is empty. Bytes, bounded text and Serde are always
-available. `principal-self-authenticating` selects the unchanged imported derivation
-with upstream SHA-224. The external-Principal feature, aliases and conversions
-are removed. Registry Principal remains only a development oracle in this package.
-There is no production runtime, executor, Wire, Candid or registry Principal dependency.
+available. `principal-self-authenticating` delegates derivation to registry
+`ic_principal`, without its default, conversion or Serde features. The
+external-Principal feature, aliases and conversions remain removed; the return
+value has canonical Types identity. Base Types selects neither registry Principal
+nor cryptography. No feature selects runtime, executor, Wire or Candid.
 
 Existing Platform consumers keep their Rust import paths and account identity
 semantics. Present subaccounts serialize through `serde_bytes` with exactly 32

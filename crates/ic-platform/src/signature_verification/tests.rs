@@ -1,3 +1,5 @@
+mod owned;
+
 use super::*;
 use crate::bls::PrivateKey;
 use crate::canister_sig_creation::CanisterSigPublicKey;
@@ -99,7 +101,6 @@ fn upstream_envelope_forms_preserve_authenticated_time() {
     }
 }
 
-#[cfg(all(feature = "agent", not(target_family = "wasm")))]
 #[test]
 fn certified_range_decoding_and_order_match_the_registry_reference() {
     use crate::principal::Principal;

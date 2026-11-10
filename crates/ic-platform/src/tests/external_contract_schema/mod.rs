@@ -1,4 +1,4 @@
-//! Independent equality against pinned external DIDs, not only self-roundtrips.
+//! Independent equality against selected protocol schemas, not only self-roundtrips.
 #![cfg(not(target_family = "wasm"))]
 #[cfg(test)]
 mod tests {
@@ -15,67 +15,7 @@ mod tests {
         parser::check_prog(&mut env, &program).unwrap();
         env
     }
-    fn equal<T: Encode>(env: &parser::TypeEnv, name: &str) {
-        let mut env = env.clone();
-        let declared = env.find_type(name).unwrap().clone();
-        let (owned_env, actual) = crate::tests::reference::schema::<T>();
-        let actual = env.merge_type(owned_env, actual);
-        candid::types::subtype::equal(
-            &mut std::collections::HashSet::new(),
-            &env,
-            &declared,
-            &actual,
-        )
-        .unwrap_or_else(|e| panic!("{name}: {e}"));
-    }
-    #[test]
-    fn selected_icrc_types_match_frozen_registry_schemas() {
-        use crate::icrc_ledger_types::{self as ledger, icrc21};
-        // Generated independently by icrc-ledger-types =0.2.0 and Candid =0.10.39.
-        // This includes recursive values, defaulted fields and query callbacks.
-        let env = env(include_str!("../../../tests/fixtures/icrc-reference.did"));
-        macro_rules! check {
-            ($($name:ident),+ $(,)?) => { $(equal::<ledger::$name>(&env, concat!("Expected", stringify!($name)));)+ };
-        }
-        check!(
-            Account,
-            MetadataValue,
-            Value,
-            ICRC3Value,
-            TransferArg,
-            Memo,
-            TransferError,
-            AllowanceArgs,
-            Allowance,
-            GetArchivesArgs,
-            ICRC3ArchiveInfo,
-            ArchivedBlocks,
-            BlockWithId,
-            GetBlocksRequest,
-            GetBlocksResult,
-            ICRC3DataCertificate,
-            SupportedBlockType
-        );
-        equal::<ledger::QueryArchiveFn<Vec<ledger::GetBlocksRequest>, ledger::GetBlocksResult>>(
-            &env,
-            "ExpectedQueryArchiveFn",
-        );
-        macro_rules! consent {
-            ($($name:ident),+ $(,)?) => { $(equal::<icrc21::$name>(&env, concat!("Expected", stringify!($name)));)+ };
-        }
-        consent!(
-            ConsentMessageMetadata,
-            ConsentMessageRequest,
-            ConsentMessageSpec,
-            DisplayMessageType,
-            ConsentInfo,
-            ConsentMessage,
-            FieldsDisplay,
-            ErrorInfo,
-            Icrc21Error
-        );
-        equal::<icrc21::Value>(&env, "ExpectedConsentValue");
-    }
+    use crate::tests::reference::assert_named_schema as equal;
     #[test]
     fn icrc10_matches_external_named_records_and_independent_reply_bytes() {
         use crate::{
@@ -114,8 +54,8 @@ mod tests {
         assert_eq!(crate::tests::reference::oracle_bytes(&decoded), bytes);
     }
     #[test]
-    fn cmc_matches_pinned_did_including_certification_and_notify_variants() {
-        let env = env(include_str!("../../../tests/fixtures/external-cmc.did"));
+    fn cmc_matches_selected_schema_including_certification_and_notify_variants() {
+        let env = env(include_str!("../../../tests/fixtures/owned-cmc.did"));
         equal::<cmc::NotifyTopUpArg>(&env, "NotifyTopUpArg");
         equal::<cmc::NotifyTopUpResult>(&env, "NotifyTopUpResult");
         equal::<cmc::NotifyError>(&env, "NotifyError");
@@ -127,7 +67,7 @@ mod tests {
     }
     #[test]
     fn icp_matches_legacy_transfer_and_recursive_archive_function_schema() {
-        let env = env(include_str!("../../../tests/fixtures/external-icp.did"));
+        let env = env(include_str!("../../../tests/fixtures/owned-icp.did"));
         equal::<icp::Tokens>(&env, "Tokens");
         equal::<icp::TimeStamp>(&env, "TimeStamp");
         equal::<icp::TransferArgs>(&env, "TransferArgs");
@@ -140,7 +80,7 @@ mod tests {
     }
     #[test]
     fn cycles_matches_its_own_settings_and_complete_creation_withdraw_errors() {
-        let env = env(include_str!("../../../tests/fixtures/external-cycles.did"));
+        let env = env(include_str!("../../../tests/fixtures/owned-cycles.did"));
         equal::<cycles::CreateCanisterArgs>(&env, "CreateCanisterArgs");
         equal::<cycles::CmcCreateCanisterArgs>(&env, "CmcCreateCanisterArgs");
         equal::<cycles::CanisterSettings>(&env, "CanisterSettings");
@@ -193,7 +133,7 @@ mod tests {
     }
     #[test]
     fn assets_match_complete_method_inputs_and_outputs() {
-        let source = include_str!("../../../tests/fixtures/external-assets.did");
+        let source = include_str!("../../../tests/fixtures/owned-assets.did");
         let (_, (mut env, service)) =
             parser::utils::instantiate_candid(parser::utils::CandidSource::Text(source)).unwrap();
         fn method_type<T: Encode>(
@@ -247,19 +187,19 @@ mod tests {
     #[test]
     fn protocol_operations_match_independent_provider_methods_and_arity() {
         use crate::icrc_ledger_types as icrc;
-        let cmc_did = include_str!("../../../tests/fixtures/external-cmc.did");
+        let cmc_did = include_str!("../../../tests/fixtures/owned-cmc.did");
         operation::<cmc::NotifyTopUpArg, cmc::NotifyTopUpResult>(cmc_did, "notify_top_up");
         operation::<cmc::NotifyMintCyclesArg, cmc::NotifyMintCyclesResult>(
             cmc_did,
             "notify_mint_cycles",
         );
-        let icp_did = include_str!("../../../tests/fixtures/external-icp.did");
+        let icp_did = include_str!("../../../tests/fixtures/owned-icp.did");
         operation::<icp::TransferArgs, icp::TransferResult>(icp_did, "transfer");
         operation::<icp::GetBlocksArgs, icp::QueryEncodedBlocksResponse>(
             icp_did,
             "query_encoded_blocks",
         );
-        let cycles_did = include_str!("../../../tests/fixtures/external-cycles.did");
+        let cycles_did = include_str!("../../../tests/fixtures/owned-cycles.did");
         operation::<cycles::CreateCanisterArgs, cycles::CreateCanisterResult>(
             cycles_did,
             "create_canister",
@@ -274,7 +214,7 @@ mod tests {
             cycles_did,
             "icrc3_get_blocks",
         );
-        let assets_did = include_str!("../../../tests/fixtures/external-assets.did");
+        let assets_did = include_str!("../../../tests/fixtures/owned-assets.did");
         operation::<assets::GetArgs, assets::GetResult>(assets_did, "get");
         operation::<assets::GetChunkArgs, assets::GetChunkResult>(assets_did, "get_chunk");
         for (source, method) in [
@@ -295,7 +235,7 @@ mod tests {
         use crate::candid_codec::decoder::{Limits, decode_one};
         let (_, (env, service)) =
             parser::utils::instantiate_candid(parser::utils::CandidSource::Text(include_str!(
-                "../../../tests/fixtures/external-cycles.did"
+                "../../../tests/fixtures/owned-cycles.did"
             )))
             .unwrap();
         let response = env.get_method(&service, "icrc3_get_blocks").unwrap().rets[0].clone();

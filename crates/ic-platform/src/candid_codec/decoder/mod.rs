@@ -23,7 +23,7 @@ pub struct Limits {
 /// Closed decoding refusals. Malformed input and exhausted budgets never become `None`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
-    /// Invalid framing, references, value bytes or truncated input.
+    /// Invalid framing, references, value bytes, fixed-array length or truncated input.
     Malformed,
     /// Unsupported constructor or opaque reference form.
     Unsupported,
@@ -222,15 +222,26 @@ impl<'a> Reader<'a> {
     /// its storage or decoding any element. Nested fields can select different caps
     /// through their own `Decode` mappings. Global work/allocation limits still apply.
     pub fn bounded_vec<T: Decode<'a>>(&mut self, id: Id, maximum: usize) -> Result<Vec<T>> {
+        self.vector(id, |n| {
+            if n > maximum {
+                Err(Error::Limit)
+            } else {
+                Ok(())
+            }
+        })
+    }
+    fn vector<T: Decode<'a>>(
+        &mut self,
+        id: Id,
+        length: impl FnOnce(usize) -> Result<()>,
+    ) -> Result<Vec<T>> {
         self.enter(|r| {
             let Wire::Vec(inner) = r.node(id)? else {
                 return Err(Error::Type);
             };
             let inner = *inner;
             let n = r.count()?;
-            if n > maximum {
-                return Err(Error::Limit);
-            }
+            length(n)?;
             r.charge(n)?;
             r.allocate(n.checked_mul(size_of::<T>()).ok_or(Error::Limit)?)?;
             let mut values = Vec::new();
@@ -475,11 +486,9 @@ fn message(bytes: &[u8], limits: Limits) -> Result<(Reader<'_>, Vec<Id>)> {
                 if count > 1 {
                     return Err(Error::Malformed);
                 }
-                let modes = r.take(count)?.to_vec();
+                let modes = r.take(count)?;
                 r.allocate(count)?;
-                if !matches!(modes.as_slice(), [] | [1] | [2] | [3])
-                    || (modes == [2] && !results.is_empty())
-                {
+                if !matches!(modes, [] | [1] | [2] | [3]) || (modes == [2] && !results.is_empty()) {
                     return Err(Error::Malformed);
                 }
                 Wire::Function(args, results, modes.first().copied().unwrap_or(0))

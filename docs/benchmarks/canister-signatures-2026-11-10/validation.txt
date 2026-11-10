@@ -1,0 +1,185 @@
+=== /tmp/platform-signature-clippy-native.log ===
+    Checking ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.23s
+
+=== /tmp/platform-signature-clippy-creation.log ===
+    Checking ic-platform-types v0.19.0 (/home/adam/projects/ic-platform/crates/ic-platform-types)
+    Checking ic-certification v3.2.0
+    Checking ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+
+=== /tmp/platform-signature-clippy-wasm.log ===
+    Checking subtle v2.6.1
+    Checking serde v1.0.229
+    Checking ff v0.13.1
+    Checking group v0.13.0
+    Checking pairing v0.23.0
+    Checking ic_bls12_381 v0.10.1
+    Checking serde_cbor v0.11.2
+    Checking ic-certification v3.2.0
+    Checking ic-platform-types v0.19.0 (/home/adam/projects/ic-platform/crates/ic-platform-types)
+    Checking ic-verify-bls-signature v0.6.0
+    Checking ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.68s
+    Checking ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+
+=== /tmp/platform-signature-unit-tests.log ===
+   Compiling ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+     Running unittests src/lib.rs (target/debug/deps/ic_platform-806a3edf7de1d1c3)
+
+running 26 tests
+test canister_sig_creation::tests::der_admission_checks_every_envelope_field ... ok
+test canister_sig_creation::tests::key_encodings_preserve_issuer_and_seed ... ok
+test canister_sig_creation::tests::protocol_hashes_use_external_sha256_with_exact_framing ... ok
+test canister_sig_creation::tests::raw_admission_rejects_missing_or_oversized_issuer ... ok
+test canister_sig_creation::tests::root_key_admission_is_exact ... ok
+test canister_sig_creation::tests::short_form_limit_does_not_change_historical_encoder ... ok
+test signature_verification::tests::owned::duplicate_required_cbor_fields_are_rejected ... ok
+test signature_verification::tests::owned::range_membership_keeps_canonical_length_first_order ... ok
+test signature_verification::tests::owned::sharded_routing_is_lexicographic_and_never_falls_back_from_visible_shards ... ok
+test signature_verification::tests::owned::time_admits_nonminimal_u64_but_rejects_overflow_and_extra_bytes ... ok
+test signature_verification::tests::owned::time_requires_one_visible_top_level_leaf ... ok
+test signature_verification::tests::signing_time_errors_preserve_display_and_absent_source ... ok
+test signature_verification::tests::owned::signature_and_certificate_decoding_preserve_serde_forms_and_reject_trailing_data ... ok
+test signature_verification::tests::certified_range_decoding_and_order_match_the_registry_reference ... ok
+test signature_verification::tests::original_failures_are_preserved_and_never_return_time ... ok
+test signature_verification::tests::owned::missing_time_is_reported_only_after_authentication ... ok
+test signature_verification::tests::identity_root_cannot_authenticate_a_certificate ... ok
+test signature_verification::tests::delegation_time_is_not_the_signing_time ... ok
+test signature_verification::tests::owned::identity_keys_are_refused_at_both_trust_levels ... ok
+test signature_verification::tests::owned::direct_authentication_binds_message_key_witness_and_time ... ok
+test signature_verification::tests::owned::delegation_authenticates_issuer_and_uses_only_signing_time ... ok
+test signature_verification::tests::upstream_envelope_forms_preserve_authenticated_time ... ok
+test signature_verification::tests::delegated_range_formats_preserve_owned_principal_admission ... ok
+test signature_verification::tests::authenticated_times_cover_u64_and_existing_nonminimal_encodings ... ok
+test signature_verification::tests::identity_keys_cannot_authenticate_either_delegation_level ... ok
+test signature_verification::tests::malformed_time_is_separate_from_signature_verification ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.56s
+
+
+=== /tmp/platform-signature-verification-tests.log ===
+   Compiling ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.39s
+     Running unittests src/lib.rs (target/debug/deps/ic_platform-806a3edf7de1d1c3)
+
+running 20 tests
+test signature_verification::tests::owned::duplicate_required_cbor_fields_are_rejected ... ok
+test signature_verification::tests::owned::sharded_routing_is_lexicographic_and_never_falls_back_from_visible_shards ... ok
+test signature_verification::tests::owned::range_membership_keeps_canonical_length_first_order ... ok
+test signature_verification::tests::owned::time_requires_one_visible_top_level_leaf ... ok
+test signature_verification::tests::owned::time_admits_nonminimal_u64_but_rejects_overflow_and_extra_bytes ... ok
+test signature_verification::tests::signing_time_errors_preserve_display_and_absent_source ... ok
+test signature_verification::tests::owned::signature_and_certificate_decoding_preserve_serde_forms_and_reject_trailing_data ... ok
+test signature_verification::tests::certified_range_decoding_and_order_match_the_registry_reference ... ok
+test signature_verification::tests::original_failures_are_preserved_and_never_return_time ... ok
+test signature_verification::tests::owned::missing_time_is_reported_only_after_authentication ... ok
+test signature_verification::tests::identity_root_cannot_authenticate_a_certificate ... ok
+test signature_verification::tests::delegation_time_is_not_the_signing_time ... ok
+test signature_verification::tests::owned::direct_authentication_binds_message_key_witness_and_time ... ok
+test signature_verification::tests::owned::identity_keys_are_refused_at_both_trust_levels ... ok
+test signature_verification::tests::owned::delegation_authenticates_issuer_and_uses_only_signing_time ... ok
+test signature_verification::tests::upstream_envelope_forms_preserve_authenticated_time ... ok
+test signature_verification::tests::delegated_range_formats_preserve_owned_principal_admission ... ok
+test signature_verification::tests::authenticated_times_cover_u64_and_existing_nonminimal_encodings ... ok
+test signature_verification::tests::identity_keys_cannot_authenticate_either_delegation_level ... ok
+test signature_verification::tests::malformed_time_is_separate_from_signature_verification ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.54s
+
+
+=== /tmp/platform-signature-public-verifier.log ===
+   Compiling ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.32s
+     Running tests/signature_consumer.rs (target/debug/deps/signature_consumer-a25a91e76a3ce1fc)
+
+running 2 tests
+test malformed_key_envelopes_are_rejected_by_parser_and_both_verifiers ... ok
+test signatures_keep_original_acceptance_and_refusal_contracts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+
+=== /tmp/platform-signature-feature-selection.log ===
+Feature selections: real singles/pairs/critical groups and bounded exhaustive completeness passed (360 routine, 17 synthetic exhaustive).
+
+=== /tmp/platform-signature-graph-tests.log ===
+Batch graph admission: 143 cases plus shared-key and missing-graph refusals passed
+Retired PocketIC client refuses in native and Wasm graphs
+Native-only feature names cannot admit Wasm entropy dependencies
+Wasm management supplier and implicit-printer refusals passed
+Single-pass runtime graph admission: Candid, host, IC0 and owner-identity cases passed
+
+=== /tmp/platform-signature-candid-boundary.log ===
+perl scripts/ci/check-candid-boundary.pl --cbor "/home/adam/projects/ic-platform" ci/candid-boundary.json crates scripts
+Candid/CBOR source boundary passed (210 Rust files; lexical, not macro expansion/type resolution).
+bash scripts/ci/test-platform-candid-boundary.sh
+Candid source boundary passed (1 Rust files; lexical, not macro expansion/type resolution).
+Platform Candid policy admits the test oracle and refuses new/stale declarations.
+Candid/CBOR source boundary passed (1 Rust files; lexical, not macro expansion/type resolution).
+Platform CBOR policy admits its codec owner and refuses new/stale codec allowances.
+Candid policy evidence: /home/adam/projects/ic-platform/target/platform-candid-boundary.mqOI8P
+
+=== final focused test batch ===
+   Compiling ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+     Running unittests src/lib.rs (target/debug/deps/ic_platform-806a3edf7de1d1c3)
+
+running 26 tests
+test canister_sig_creation::tests::der_admission_checks_every_envelope_field ... ok
+test canister_sig_creation::tests::key_encodings_preserve_issuer_and_seed ... ok
+test canister_sig_creation::tests::root_key_admission_is_exact ... ok
+test canister_sig_creation::tests::raw_admission_rejects_missing_or_oversized_issuer ... ok
+test canister_sig_creation::tests::protocol_hashes_use_external_sha256_with_exact_framing ... ok
+test canister_sig_creation::tests::short_form_limit_does_not_change_historical_encoder ... ok
+test signature_verification::tests::owned::duplicate_required_cbor_fields_are_rejected ... ok
+test signature_verification::tests::owned::range_membership_keeps_canonical_length_first_order ... ok
+test signature_verification::tests::owned::time_admits_nonminimal_u64_but_rejects_overflow_and_extra_bytes ... ok
+test signature_verification::tests::owned::sharded_routing_is_lexicographic_and_never_falls_back_from_visible_shards ... ok
+test signature_verification::tests::owned::time_requires_one_visible_top_level_leaf ... ok
+test signature_verification::tests::signing_time_errors_preserve_display_and_absent_source ... ok
+test signature_verification::tests::owned::signature_and_certificate_decoding_preserve_serde_forms_and_reject_trailing_data ... ok
+test signature_verification::tests::certified_range_decoding_and_order_match_the_registry_reference ... ok
+test signature_verification::tests::original_failures_are_preserved_and_never_return_time ... ok
+test signature_verification::tests::owned::missing_time_is_reported_only_after_authentication ... ok
+test signature_verification::tests::identity_root_cannot_authenticate_a_certificate ... ok
+test signature_verification::tests::delegation_time_is_not_the_signing_time ... ok
+test signature_verification::tests::owned::identity_keys_are_refused_at_both_trust_levels ... ok
+test signature_verification::tests::owned::direct_authentication_binds_message_key_witness_and_time ... ok
+test signature_verification::tests::owned::delegation_authenticates_issuer_and_uses_only_signing_time ... ok
+test signature_verification::tests::upstream_envelope_forms_preserve_authenticated_time ... ok
+test signature_verification::tests::delegated_range_formats_preserve_owned_principal_admission ... ok
+test signature_verification::tests::authenticated_times_cover_u64_and_existing_nonminimal_encodings ... ok
+test signature_verification::tests::identity_keys_cannot_authenticate_either_delegation_level ... ok
+test signature_verification::tests::malformed_time_is_separate_from_signature_verification ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running tests/canister_sig_consumer.rs (target/debug/deps/canister_sig_consumer-28819450c5be29dc)
+
+running 3 tests
+test short_der_is_rejected_without_panicking ... ok
+test key_and_hash_contracts_preserve_external_bytes ... ok
+test owned_issuers_preserve_raw_and_der_bytes_at_all_principal_lengths ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/signature_comparison.rs (target/debug/deps/signature_comparison-41f00a8a63834393)
+
+running 4 tests
+test benchmark_signature_protocol ... ignored, explicit release-mode native performance comparison
+test malformed_raw_keys_and_roots_match_reference ... ok
+test key_and_hash_matrix_matches_public_reference ... ok
+test signature_mutations_match_reference ... ok
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 3.79s
+
+     Running tests/signature_consumer.rs (target/debug/deps/signature_consumer-a25a91e76a3ce1fc)
+
+running 2 tests
+test malformed_key_envelopes_are_rejected_by_parser_and_both_verifiers ... ok
+test signatures_keep_original_acceptance_and_refusal_contracts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s

@@ -6,11 +6,12 @@ use super::{
 use num_bigint::{BigInt, BigUint, Sign};
 use serde::{
     Deserialize, Serialize,
-    de::{self, Visitor},
+    de::{self, SeqAccess, Visitor},
 };
 use std::{fmt, str::FromStr};
 
 /// Unbounded signed integer with the established external Int Serde representation.
+/// Deserialization also accepts the sign/magnitude pair emitted by serialization.
 #[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize)]
 pub struct Int(pub BigInt);
 impl From<BigInt> for Int {
@@ -56,7 +57,7 @@ impl fmt::Display for Int {
 impl<'de> Deserialize<'de> for Int {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         struct Integer;
-        impl Visitor<'_> for Integer {
+        impl<'de> Visitor<'de> for Integer {
             type Value = Int;
             fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
                 f.write_str("Int value")
@@ -69,6 +70,14 @@ impl<'de> Deserialize<'de> for Int {
             }
             fn visit_str<E: de::Error>(self, value: &str) -> Result<Int, E> {
                 value.parse().map_err(E::custom)
+            }
+            fn visit_seq<A: SeqAccess<'de>>(self, mut sequence: A) -> Result<Int, A::Error> {
+                let value =
+                    BigInt::deserialize(de::value::SeqAccessDeserializer::new(&mut sequence))?;
+                if sequence.next_element::<de::IgnoredAny>()?.is_some() {
+                    return Err(de::Error::invalid_length(3, &"a sign and magnitude pair"));
+                }
+                Ok(Int(value))
             }
             fn visit_byte_buf<E: de::Error>(self, value: Vec<u8>) -> Result<Int, E> {
                 match value.split_first() {

@@ -57,7 +57,7 @@ async function compileConsumer(runSmoke = false) {
   }, null, 2));
 }
 const packed = JSON.parse(await command('npm', ['pack', '--offline', '--ignore-scripts', '--json', '--pack-destination', fixture], source))['@tokostudios/ic-platform'];
-assert(packed.files.every(file => /^(dist\/.*\.(js|ts)|package\.json|README\.md|LICENSE)$/.test(file.path)));
+assert(packed.files.every(file => /^(dist\/.*\.(js|ts)|dist\/LICENSE\.md|package\.json|README\.md)$/.test(file.path)));
 const reviewedLock = JSON.parse(await readFile(resolve(source, 'package-lock.json'), 'utf8'));
 async function installConsumer(manifest) {
   // Seed the qualified selections so a fresh npm-ci cache needs tarballs only,
@@ -90,8 +90,8 @@ const supplier = graph.dependencies['@tokostudios/ic-platform'];
 assert.equal(supplier.version, packed.version);
 assert.equal(supplier.dependencies['@icp-sdk/core'].version, sdkVersion);
 await checkBrowserSdkGraph(fixture, sdkVersion, ['@tokostudios/ic-platform']);
-assert.equal(await readFile(resolve(fixture, 'node_modules/@tokostudios/ic-platform/LICENSE'), 'utf8'),
-  await readFile(resolve(root, 'LICENSE'), 'utf8'), 'Packed license differs from its owner');
+assert.equal(await readFile(resolve(fixture, 'node_modules/@tokostudios/ic-platform/dist/LICENSE.md'), 'utf8'),
+  await readFile(resolve(root, 'LICENSE.md'), 'utf8'), 'Packed license differs from its owner');
 await copyFile(resolve(source, 'tests/consumer.ts'), resolve(fixture, 'consumer.ts'));
 await checkIcSdkBoundary([resolve(fixture, 'package.json'), resolve(fixture, 'consumer.ts')]);
 const configuration = JSON.parse(await readFile(resolve(source, 'tsconfig.json'), 'utf8'));

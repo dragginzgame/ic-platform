@@ -148,8 +148,9 @@ compiles and runs through the packed public exports, and bundles for browsers.
 The Principal-only bundle must exclude Agent/identity/Candid modules.
 Tool admission and packed qualification reject duplicate/aliased locked SDKs,
 installed version drift and provider/Platform resolution to another Agent copy.
-The package's regular LICENSE copy and packed license must match the root MIT
-license. These checks do not supply the consumer-owned direct-import ban.
+The build generates `dist/LICENSE.md` from the sole maintained root `LICENSE.md`;
+the packed copy must match it exactly. These checks do not supply the
+consumer-owned direct-import ban.
 
 `make check-browser-runtime` additionally runs the packed consumer in actual
 Chromium and a module worker. Prepare the selected Playwright Chromium explicitly

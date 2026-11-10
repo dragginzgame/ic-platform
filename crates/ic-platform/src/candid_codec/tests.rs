@@ -1,5 +1,6 @@
 use super::*;
 use candid as reference;
+mod comparison;
 
 fn compare<T>(value: &T)
 where
@@ -114,6 +115,34 @@ fn recursive_schema_registration_terminates() {
     output.unsigned(0).unwrap();
     reference::decode_args_with_config::<()>(&output.bytes, &reference::DecoderConfig::new())
         .unwrap();
+}
+
+#[test]
+fn single_entry_recursive_schema_retains_its_wire_identity() {
+    static OPTION: Type = Type::Opt(&Type::Deferred(|| &OPTION));
+    let mut output = Writer {
+        bytes: Vec::new(),
+        limit: 4096,
+    };
+    header(&[&OPTION, &OPTION], &mut output).unwrap();
+    output.bytes(&[0, 0]).unwrap();
+    let expected = b"DIDL\x01\x6e\x00\x02\x00\x00\x00\x00";
+    assert_eq!(output.bytes, expected);
+    assert_eq!(
+        reference::decode_args::<(Option<bool>, Option<bool>)>(&output.bytes).unwrap(),
+        (None, None)
+    );
+    for limit in 0..expected.len() {
+        let mut output = Writer {
+            bytes: Vec::new(),
+            limit,
+        };
+        assert!(
+            header(&[&OPTION, &OPTION], &mut output)
+                .and_then(|()| output.bytes(&[0, 0]))
+                .is_err()
+        );
+    }
 }
 
 #[test]

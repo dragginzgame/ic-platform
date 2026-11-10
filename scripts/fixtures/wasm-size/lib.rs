@@ -7,11 +7,11 @@
 ))]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn protocol_roundtrip() {
-    #[cfg(any(feature = "codec-cmc-owned"))]
+    #[cfg(feature = "codec-cmc-owned")]
     use ic_platform::cmc_types::NotifyTopUpResult as Value;
-    #[cfg(any(feature = "codec-icp-owned"))]
+    #[cfg(feature = "codec-icp-owned")]
     use ic_platform::icp_ledger_types::QueryEncodedBlocksResponse as Value;
-    #[cfg(any(feature = "codec-management-owned"))]
+    #[cfg(feature = "codec-management-owned")]
     use ic_platform::management_canister_types::CanisterStatusResult as Value;
     let bytes = input();
     #[cfg(any(
@@ -43,10 +43,29 @@ pub extern "C" fn protocol_roundtrip() {
 #[cfg(any(
     feature = "codec-generic",
     feature = "codec-generic-decode",
+    feature = "codec-array-decode",
     feature = "codec-generic-composite",
     feature = "codec-generic-record"
 ))]
 pub use ic_platform::candid_codec as codec;
+
+#[cfg(feature = "codec-array-decode")]
+#[unsafe(export_name = "canister_query codec")]
+pub extern "C" fn array_decode() {
+    let bytes = input();
+    let value: [u8; 32] = codec::decoder::decode_one(
+        &bytes,
+        codec::decoder::Limits {
+            bytes: 1_048_576,
+            header: 65_536,
+            types: 4096,
+            work: 10_000_000,
+            allocation: 4_194_304,
+        },
+    )
+    .unwrap();
+    reply(&value);
+}
 
 #[cfg(feature = "codec-generic-record")]
 pub mod record_probe;

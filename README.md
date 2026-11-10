@@ -1,12 +1,14 @@
 # IC Platform
 
+[Documentation](docs/README.md) · [Current handoff](docs/status/current.md)
+
 Platform re-exports canonical Principal/Account identities from ic-platform-types.
 Platform (facade), Runtime (runtime, macros and exact guard), and Types have
 independent release groups in one workspace. The native PocketIC client now
 releases with Tooling’s Testkit. Each group
 owns explicit versions and its canonical releases/ ledger. Unrelated runtime
 releases retain the same compatible type supplier; see
-[the migration contract](docs/migration.md#stable-owned-identity-package-118).
+[the migration contract](docs/architecture/migration.md#stable-owned-identity-package-118).
 
 One controlled dependency boundary for IC runtime integration and required IC
 Candid interfaces. All application endpoints we own use IC Wire, including public
@@ -23,21 +25,21 @@ gate `make check-browser-runtime`. This does not add SDK dependencies to Rust.
 
 The released 0.5 hard cut removed the unused `cdk::storage` checkpoint helpers;
 existing data stays with its consumer and raw stable-memory passthroughs remain.
-See [the retirement contract](docs/migration.md#pending-05-retirement).
+See [the retirement contract](docs/architecture/migration.md#pending-05-retirement).
 
-Platform has no default features. Its owned runtime is Candid-free; transport,
-parsing and PocketIC are native opt-ins. Consumers retain their Wire schemas,
+Platform has no default features. Its owned runtime is Candid-free; Agent and
+IC packet clients are native opt-ins. PocketIC belongs to Tooling. Consumers retain their Wire schemas,
 authentication, budgets and retry policy. See the [maintenance and recovery
-contract](docs/migration.md#runtime-maintenance-and-recovery).
+contract](docs/architecture/migration.md#runtime-maintenance-and-recovery).
 
 Select `principal` for owned Principal/Account bytes, text and Serde, without
 `ic_principal`, hashing or Candid. Runtime includes this minimal capability;
 executor/IC0-only builds omit application types. The owned codec and maintained
 DTOs use the same Principal. The external aliases and `principal-external` feature
-are removed. Select `principal-self-authenticating` explicitly for the unchanged
-imported derivation using upstream SHA-224. Native supplier APIs retain their own
+are removed. Select `principal-self-authenticating` explicitly for derivation
+delegated to registry `ic_principal`. Native supplier APIs retain their own
 identities and may require explicit byte conversion at the boundary. See the
-[hard-cut contract](docs/migration.md#owned-principal-hard-cut-unreleased).
+[hard-cut contract](docs/architecture/migration.md#owned-principal-hard-cut-unreleased).
 
 | Feature | Implemented contract |
 | --- | --- |
@@ -52,7 +54,7 @@ identities and may require explicit byte conversion at the boundary. See the
 | `candid-args` | Dependency-free encoding of empty, unit/null and single-text external argument lists |
 | `candid-codec` | Owned typed binary codec, canonical Principal and arbitrary integers; no registry Candid/parser |
 | `raw-rand` | Sole typed management `raw_rand` codec, dependency-free; transport and seed policy remain caller-owned |
-| `canister-sig-creation` | Upstream signature key formats/constants/hashing, owned issuer adapter and DER admission; transitive Candid/ic0, no store API |
+| `canister-sig-creation` | Owned signature key framing/constants with external SHA-256, canonical Principal and strict DER admission; no Candid, IC0 or store API |
 | `certification` | Registry certificate/hash-tree and mutable tree identities, lookup and hashing; no Candid or executor |
 | `certification-cbor` | Byte-bounded standard certificate/signature CBOR; caller-selected budgets, no verification or runtime |
 | `executor` | Maintained task/context primitives with owned IC0 and SlotMap; no Candid |
@@ -64,11 +66,11 @@ identities and may require explicit byte conversion at the boundary. See the
 | `cycles-ledger-types` | Cycles Ledger creation/withdrawal DTOs with owned codec; adding `icrc-ledger-types` supplies owned archive-callback codecs |
 | `nns-registry-types` | Registry subnet lookup DTOs with owned binary codec and external Principal; no upstream Candid or topology policy |
 | `certified-assets-types` | Native-only asset get/get_chunk DTOs with owned codec; no upstream Candid, verification or host transport |
-| `signature-verification` | Registry canister-signature verification with authenticated time extraction; supplier graph retains Candid/raw IC0, no executor or host transport |
+| `signature-verification` | Owned canister-signature protocol verification and authenticated time; external BLS/certified-tree primitives, no Candid, registry Principal or runtime |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
 | `ed25519` | Native/Wasm Dalek keys, signatures and canonical scalars; no RNG, Candid or runtime |
 
-The [IC inventory](docs/ic-inventory.md) maps upstream code to exposed APIs,
+The [IC inventory](docs/architecture/dependency-inventory.md) maps upstream code to exposed APIs,
 observed consumers and maintenance ownership. `make check-inventory` rejects
 drift in its complete workspace feature and direct-dependency tables; consumer
 usage evidence is dated and reviewed separately.
@@ -95,7 +97,7 @@ Wasm growth; see [measurements](docs/benchmarks/upstream-2026-10-31/README.md).
 
 Native external Candid providers can export owned mappings through
 `candid_codec::service` and check frozen DID equality with pinned `didc`.
-See [the native service migration](docs/native-candid-service.md); parsing and
+See [the native service migration](docs/protocols/native-candid-service.md); parsing and
 reflection stay outside deployed and executor graphs.
 
 Prepare the compiler selected in [rust-toolchain.toml](rust-toolchain.toml),
@@ -121,7 +123,7 @@ cargo clippy --locked --offline -p ic-platform-types --lib -- -D warnings
 cargo test --locked --offline -p ic-platform-types --lib
 ```
 
-Use the [development and qualification guide](docs/development-and-qualification.md)
+Use the [development and qualification guide](docs/development/qualification.md)
 for browser setup, standalone consumers, feature matrices, installed runtime,
 source-preservation checks and recovery. Aggregate Make targets and `make ci`
 remain broad validation; they are not the default loop for ordinary edits.
@@ -132,11 +134,11 @@ Select `RELEASE_GROUP=platform`, `runtime` or `types` explicitly for release,
 resume and publication. No group is inferred from changed files. Root
 [Cargo.toml](Cargo.toml) lists member versions; [CHANGELOG.md](CHANGELOG.md) links
 the separate group ledgers and shared history. A Git release does not establish
-registry availability. See the [release commands and recovery guidance](docs/development-and-qualification.md#development)
+registry availability. See the [release commands and recovery guidance](docs/development/qualification.md#development)
 before executing an authorized delivery.
 
 ## Source licenses
 
-Original Platform code is MIT. Imported non-cryptographic runtime adapters and
-the generator retain Apache-2.0. The combined `ic-platform` package declares
-MIT AND Apache-2.0; included source notices identify the upstream owner/version.
+See the canonical [licence](LICENSE.md) and [contribution policy](CONTRIBUTING.md).
+Retained imported components keep their applicable notices and source records;
+the [dependency inventory](docs/architecture/dependency-inventory.md) identifies those boundaries.

@@ -1,0 +1,602 @@
+rustc 1.99.1 (58cf8f9c3 2026-10-13)
+binary: rustc
+commit-hash: 58cf8f9c35b355199727627d07ae34a4e2846d67
+commit-date: 2026-10-13
+host: x86_64-unknown-linux-gnu
+release: 1.99.1
+LLVM version: 23.1.1
+ic-wasm 0.11.1
+97fe2863cff29d362d6832e47fd46d16988e8f4d
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling version_check v0.9.5
+   Compiling serde_core v1.0.229
+    Checking typenum v1.20.1
+   Compiling generic-array v0.14.9
+   Compiling serde v1.0.229
+   Compiling autocfg v1.5.1
+   Compiling syn v2.0.119
+   Compiling syn v3.0.10
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.6
+   Compiling num-traits v0.2.19
+    Checking cfg-if v1.0.5
+   Compiling crc32fast v1.5.5
+   Compiling thiserror v1.0.69
+    Checking digest v0.10.7
+   Compiling binrw_derive v0.15.2
+    Checking sha2 v0.10.9
+   Compiling either v1.19.0
+   Compiling paste v1.0.15
+   Compiling thiserror v2.0.21
+   Compiling anyhow v1.0.104
+    Checking data-encoding v2.11.1
+   Compiling binrw v0.15.2
+    Checking num-integer v0.1.47
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+    Checking serde_bytes v0.11.19
+   Compiling lazy_static v1.5.1
+    Checking bytemuck v1.25.2
+    Checking array-init v2.1.0
+    Checking leb128 v0.2.7
+    Checking hex v0.4.3
+    Checking byteorder v1.5.0
+    Checking ic-platform-runtime v0.20.3 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime)
+   Compiling thiserror-impl v1.0.69
+   Compiling candid_derive v0.10.40
+    Checking num-bigint v0.4.8
+    Checking ic_principal v0.1.5
+    Checking ic-platform-types v0.18.3 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types)
+    Checking candid v0.10.40
+    Checking ic-platform v0.27.1 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform)
+    Checking management-codec-size-probe v0.0.0 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/before/management)
+    Finished `release` profile [optimized] target(s) in 5.26s
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling cfg-if v1.0.5
+   Compiling thiserror v1.0.69
+   Compiling crc32fast v1.5.5
+   Compiling num-traits v0.2.19
+   Compiling data-encoding v2.11.1
+   Compiling generic-array v0.14.9
+   Compiling num-integer v0.1.47
+   Compiling array-init v2.1.0
+   Compiling bytemuck v1.25.2
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.6
+   Compiling digest v0.10.7
+   Compiling binrw v0.15.2
+   Compiling sha2 v0.10.9
+   Compiling thiserror v2.0.21
+   Compiling anyhow v1.0.104
+   Compiling byteorder v1.5.0
+   Compiling leb128 v0.2.7
+   Compiling hex v0.4.3
+   Compiling ic-platform-runtime v0.20.3 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime)
+   Compiling serde v1.0.229
+   Compiling serde_bytes v0.11.19
+   Compiling ic_principal v0.1.5
+   Compiling num-bigint v0.4.8
+   Compiling ic-platform-types v0.18.3 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types)
+   Compiling candid v0.10.40
+   Compiling ic-platform v0.27.1 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform)
+   Compiling management-codec-size-probe v0.0.0 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/before/management)
+    Finished `release` profile [optimized] target(s) in 9.70s
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/README.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/external_candid_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/ic0_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/parser_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/principal.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/icp_account_identifier_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/principal_self_authenticating_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/agent_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/service_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/parser_properties.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/canister_sig_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/ed25519_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/candid_args_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/external_contract_schema.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/cbor_malformed.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/external_contract_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/bls_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/runtime_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/certification_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/dynamic_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/executor_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/icrc10_types_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-upload-metadata.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/signature-identity-root.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/ingress.tsv: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-read-data.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/icrc-value-hash.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/signature-range-legacy-valid.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/external-cmc.did: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/signature-range-legacy-outside.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/icrc-reference.did: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/candid_malformed.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/dynamic-wide.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/external-icp.did: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/signature-valid.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/signature-range-sharded-valid.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/dynamic-nested.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/agent-delegation-signable.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-upload-data.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/cbor_malformed.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-delete.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-target.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/signature-range-sharded-outside.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/external-cycles.did: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/protocol.tsv: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/bls-public.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/bls-signature.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-delete-empty.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-uploaded.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/agent-delegation-signature.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/signature-time-valid.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-read-metadata.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-metadata.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-data.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/external-assets.did: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-info-args.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-take.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-status.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/icrc-account.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/dynamic-old-field.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-info-result.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-list.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/management-snapshot-load.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/signature-public.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/fixtures/icrc-blocks.hex: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/nesting_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/protocol_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/raw_rand_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/candid_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/management_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/candid_endpoint_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/upstream_dto_identity.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/asset_contract_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/icrc_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/ecdsa_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/principal_external_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/signature_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/tests/support/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/ed25519/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid_parser/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/cycles_ledger_types/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/cycles_ledger_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/cycles_ledger_types/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/cmc_types/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/cmc_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/cmc_types/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/canister_sig_creation/admission/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/canister_sig_creation/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certified_assets_types/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certified_assets_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certified_assets_types/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/allowance/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/archive/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/metadata/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/provenance.json: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/account/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/value/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/icrc21/errors/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/icrc21/requests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/icrc21/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/icrc21/responses/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/transfer/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icrc_ledger_types/icrc10/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/raw_rand/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/raw_rand/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icp_ledger_types/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icp_ledger_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icp_ledger_types/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icp_ledger_types/account_identifier/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icp_ledger_types/account_identifier/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icp_ledger_types/account_identifier/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icp_ledger_types/account_identifier/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/icp_ledger_types/account_identifier/provenance.json: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/endpoint/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/protocols/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/nesting/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/nesting/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/sequence/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/sequence/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/reserved/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/reserved/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/arguments/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/contract/pretty/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/contract/pretty/candid/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/contract/types/internal/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/contract/types/subtype/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid/decoder/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/lib.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/nns_registry_types/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/principal/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/account/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/ecdsa/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/cdk/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certification/cbor/strict/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certification/cbor/strict/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certification/cbor/strict/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certification/cbor/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certification/cbor/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/certification/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/signature_verification/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/signature_verification/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/ic_protocol/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/ic_protocol/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/ic_protocol/fixtures.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/bls/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/candid_args/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/management_canister_types/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/management_canister_types/maintained/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/management_canister_types/maintained/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/management_canister_types/maintained/provenance.json: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/management_canister_types/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/src/agent/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform/Cargo.toml: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime-guard/build.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime-guard/src/lib.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime-guard/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime-guard/Cargo.toml: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/README.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/CHANGELOG.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/lib.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/principal/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/principal/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/principal/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/principal/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/principal/self_authenticating/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/account/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/account/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/account/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/account/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/account/tests/serde_formats/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/src/account/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-types/Cargo.toml: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/README.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/external_candid/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/external_candid/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/options/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/lib.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/export/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/export/tests/linking.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/export/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/export/tests/linking/consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/export/tests/linking/role_b.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/export/tests/linking/role_a.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/signature/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/src/signature/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-macros/Cargo.toml: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/README.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/tests/cdk_consumer.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/executor/runtime/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/executor/runtime/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/executor/runtime/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/executor/runtime/provenance.json: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/executor/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/call/README.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/call/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/call/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/lib.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/ic0/upstream/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/ic0/upstream/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/ic0/upstream/sys/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/ic0/upstream/provenance.json: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/ic0/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/stable/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/call/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/call/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/futures/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/futures/internals/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/provenance.json: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/api/tests.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/upstream/api/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/reject_code/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/reject_code/NOTICE.md: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/reject_code/tests/mod.rs: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/src/cdk/reject_code/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/LICENSE: OK
+/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/source/crates/ic-platform-runtime/Cargo.toml: OK
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling serde_core v1.0.229
+   Compiling autocfg v1.5.1
+   Compiling serde v1.0.229
+   Compiling crc32fast v1.5.5
+   Compiling num-traits v0.2.19
+   Compiling thiserror v2.0.21
+   Compiling syn v3.0.10
+    Checking cfg-if v1.0.5
+    Checking num-integer v0.1.47
+    Checking data-encoding v2.11.1
+    Checking ic0 v1.2.0
+    Checking ic-platform-runtime v0.21.0 (/home/adam/projects/ic-platform/crates/ic-platform-runtime)
+    Checking serde_bytes v0.11.19
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.21
+    Checking num-bigint v0.5.1
+    Checking ic-platform-types v0.19.0 (/home/adam/projects/ic-platform/crates/ic-platform-types)
+    Checking ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+    Checking management-codec-size-probe v0.0.0 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/after/management)
+    Finished `release` profile [optimized] target(s) in 3.70s
+   Compiling serde_core v1.0.229
+   Compiling num-traits v0.2.19
+   Compiling cfg-if v1.0.5
+   Compiling thiserror v2.0.21
+   Compiling crc32fast v1.5.5
+   Compiling ic0 v1.2.0
+   Compiling data-encoding v2.11.1
+   Compiling ic-platform-runtime v0.21.0 (/home/adam/projects/ic-platform/crates/ic-platform-runtime)
+   Compiling num-integer v0.1.47
+   Compiling serde v1.0.229
+   Compiling serde_bytes v0.11.19
+   Compiling num-bigint v0.5.1
+   Compiling ic-platform-types v0.19.0 (/home/adam/projects/ic-platform/crates/ic-platform-types)
+   Compiling ic-platform v0.29.2 (/home/adam/projects/ic-platform/crates/ic-platform)
+   Compiling management-codec-size-probe v0.0.0 (/home/adam/projects/ic-platform/target/evidence/candid-removal.EXDO1s/after/management)
+    Finished `release` profile [optimized] target(s) in 4.76s
+/home/adam/projects/ic-platform/crates/ic-platform/README.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/ic0_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/signature_comparison.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/principal.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/icp_account_identifier_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/principal_self_authenticating_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/agent_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/parser_properties.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/canister_sig_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/ed25519_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/candid_args_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/candid_service_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/cbor_malformed.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/candid_codec_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/bls_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/runtime_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/certification_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/executor_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/icrc10_types_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-upload-metadata.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/signature-identity-root.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/ingress.tsv: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-read-data.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/icrc-value-hash.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/signature-range-legacy-valid.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/external-cmc.did: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/signature-range-legacy-outside.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/icrc-reference.did: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/candid_malformed.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/dynamic-wide.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/external-icp.did: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/signature-valid.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/signature-range-sharded-valid.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/dynamic-nested.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/agent-delegation-signable.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-upload-data.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/cbor_malformed.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-delete.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-target.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/signature-range-sharded-outside.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/external-cycles.did: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/protocol.tsv: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/bls-public.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/bls-signature.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-delete-empty.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-uploaded.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/agent-delegation-signature.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/signature-time-valid.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-read-metadata.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-metadata.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-data.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/external-assets.did: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-info-args.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-take.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-status.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/icrc-account.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/dynamic-old-field.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-info-result.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-list.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/management-snapshot-load.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/signature-public.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/fixtures/icrc-blocks.hex: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/raw_rand_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/management_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/upstream_dto_identity.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/owned_icrc_contracts.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/asset_contract_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/ecdsa_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/signature_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/owned_endpoint_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/tests/support/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/ed25519/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/cycles_ledger_types/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/cycles_ledger_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/cycles_ledger_types/LICENSE: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/cmc_types/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/cmc_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/cmc_types/LICENSE: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/canister_sig_creation/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/canister_sig_creation/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certified_assets_types/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certified_assets_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certified_assets_types/LICENSE: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/hash_encoding/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/hash_encoding/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/allowance/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/NOTICE.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/archive/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/icrc21_responses/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/allowance/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/archive/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/icrc21_requests/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/blocks/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/metadata/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/icrc21_errors/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/account/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/value/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/transfer/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/codec/icrc10/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/metadata/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/provenance.json: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/account/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/value/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/icrc21/errors/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/icrc21/requests/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/icrc21/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/icrc21/responses/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/transfer/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icrc_ledger_types/icrc10/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/raw_rand/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/raw_rand/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/endpoint/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/endpoint/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/integers/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/integers.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/service/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/service/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/int/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/int/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/nat/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/nat/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/reserved/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/reserved/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/arguments/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/arguments/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/tests/comparison.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/references/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/references/tests/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/mappings/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/mappings/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/decoder/integers.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/decoder/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/decoder/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/decoder/subtyping.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/decoder/containers.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/containers.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_codec/schema/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icp_ledger_types/callback/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icp_ledger_types/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icp_ledger_types/account_identifier/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/icp_ledger_types/account_identifier/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/tests/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/tests/external_contract_consumer/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/tests/owned_external_contracts/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/tests/reference/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/tests/reference/schema.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/tests/external_contract_schema/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/tests/icrc_consumer/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/lib.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/nns_registry_types/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/nns_registry_types/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/principal/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/account/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/ecdsa/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/cdk/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certification/cbor/strict/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certification/cbor/strict/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certification/cbor/strict/LICENSE: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certification/cbor/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certification/cbor/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/certification/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/signature_verification/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/signature_verification/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/signature_verification/tests/owned.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/ic_protocol/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/ic_protocol/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/ic_protocol/fixtures.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/bls/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/candid_args/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/native/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/native/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/native/codec/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/native/client.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/native/provenance.json: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/native/client-provenance.json: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/maintained/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/maintained/transform_func/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/maintained/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/maintained/codec/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/maintained/provenance.json: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/management_canister_types/tests/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/src/agent/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform/Cargo.toml: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime-guard/build.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime-guard/src/lib.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime-guard/LICENSE: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime-guard/Cargo.toml: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/README.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/CHANGELOG.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/src/lib.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/src/principal/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/src/principal/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/src/principal/self_authenticating/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/src/principal/self_authenticating/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/src/account/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/src/account/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/LICENSE: OK
+/home/adam/projects/ic-platform/crates/ic-platform-types/Cargo.toml: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/README.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/external_candid/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/external_candid/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/options/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/lib.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/export/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/export/tests/linking.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/export/tests/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/export/tests/linking/consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/export/tests/linking/role_b.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/export/tests/linking/role_a.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/signature/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/src/signature/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/LICENSE: OK
+/home/adam/projects/ic-platform/crates/ic-platform-macros/Cargo.toml: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/README.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/tests/cdk_consumer.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/executor/runtime/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/executor/runtime/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/executor/runtime/tests/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/executor/runtime/provenance.json: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/executor/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/call/README.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/call/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/call/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/lib.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/ic0/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/stable/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/NOTICE.md: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/LICENSE-APACHE: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/call/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/call/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/futures/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/futures/internals/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/provenance.json: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/api/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/upstream/api/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/reject_code/tests.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/src/cdk/reject_code/mod.rs: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/LICENSE: OK
+/home/adam/projects/ic-platform/crates/ic-platform-runtime/Cargo.toml: OK

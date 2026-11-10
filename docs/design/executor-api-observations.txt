@@ -1,0 +1,7 @@
+foreign wake: ["protected:1", "foreign"]
+owner callback: ["protected:1", "foreign", "callback", "protected:2"]
+query repeated wake polls: 3
+migratory after query: 1
+migratory after update: 2
+recovery inside=true outside=false
+outside current task: false

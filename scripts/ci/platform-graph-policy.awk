@@ -21,7 +21,7 @@ function platform_forbidden(family, name) {
     if (family == "runtime-host")
         return platform_host_capability(name) != ""
     if (family == "retired-cdk")
-        return name ~ /^ic-cdk/ || (name == "ic0" && !allow_signature_ic0)
+        return name ~ /^ic-cdk/
     if (family == "external-codecs")
         return name ~ /^(candid|candid_derive|ic_principal|ic-management-canister-types|ic-cdk[^ ]*|ic0|ic-platform-macros|ic-platform-runtime|ic-platform-runtime-guard|ic-agent|pocket-ic|ic-platform-pocket-ic|ic-testkit|candid_parser|reqwest|tokio)$/
     return 0
@@ -32,9 +32,8 @@ runtime_mode != "" {
     if ($1 == "candid") runtime_candid = 1
     if ($1 == "candid" || $1 == "candid_derive") runtime_codec = 1
     if (platform_forbidden("runtime-host", $1)) runtime_host = 1
-    if ($0 ~ /^ic-canister-sig-creation v1\.3\.1( \(\*\))?$/) runtime_signature = 1
+    if ($1 == "ic-canister-sig-creation" || $1 == "ic-signature-verification") runtime_signature = 1
     if ($1 == "ic0" && $0 !~ /^ic0 v1\.2\.0( \(\*\))?$/) runtime_bad_ic0 = 1
-    if ($1 ~ /^ic-cdk/ || $1 == "ic0") runtime_retired = 1
     if ($1 ~ /^ic-cdk/) runtime_cdk = 1
     if ($1 == "ic-platform-runtime") {
         identity = $0
@@ -51,9 +50,10 @@ END {
     if (runtime_mode != "") {
         if (runtime_mode == "wire" && runtime_codec) runtime_reject("Wire runtime acquired Candid")
         if (runtime_host) runtime_reject("Canister graph contains host parsing, Agent or Testkit")
-        if (runtime_mode == "external" && runtime_codec && !runtime_signature) runtime_reject("Owned external endpoint acquired Candid")
-        if (runtime_signature && runtime_bad_ic0) runtime_reject("Unqualified signature IC0 supplier")
-        if (runtime_retired && (!runtime_signature || runtime_cdk)) runtime_reject("Retired full CDK runtime/generator")
+        if (runtime_mode == "external" && runtime_codec) runtime_reject("Owned external endpoint acquired Candid")
+        if (runtime_bad_ic0) runtime_reject("Unqualified IC0 supplier")
+        if (runtime_cdk) runtime_reject("Retired full CDK runtime/generator")
+        if (runtime_signature) runtime_reject("Signature oracle in production")
         if (runtime_count != 1) runtime_reject("Runtime must have one canonical Runtime executor owner")
     }
 }

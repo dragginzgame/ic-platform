@@ -53,8 +53,8 @@ function reject(reason) {
     certification = creation || agent || enabled("certification")
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
-    candid = agent || protocol || creation
-    external_principal = candid
+    candid = agent || protocol
+    external_principal = candid || enabled("principal-self-authenticating")
     principal = enabled("principal")
     hashing = ledger || enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || enabled("icp-ledger-types")
     minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification")
@@ -73,11 +73,11 @@ function reject(reason) {
             reject("external Principal in owned-only graph")
         if (platform_forbidden("hashing", name) && !hashing)
             reject("unselected hashing")
-        if (name == "ic-representation-independent-hash" && !(agent || creation))
+        if (name == "ic-representation-independent-hash" && !agent)
             reject("unselected signature hashing")
-        if ((name == "serde_cbor" || name == "half") && !(creation || verification || agent || parser || enabled("certification-cbor")))
+        if ((name == "serde_cbor" || name == "half") && !(verification || agent || parser || enabled("certification-cbor")))
             reject("unselected CBOR parser")
-        if (name == "pretty" && !(agent || protocol || creation))
+        if (name == "pretty" && !(agent || protocol))
             reject("unselected Candid service printer")
         if (name == "ic-transport-types" && !(agent || protocol)) reject("unselected native IC transport types")
         registry = n == 2 || (n == 3 && f[3] == "(*)")
@@ -103,15 +103,16 @@ function reject(reason) {
         if (name ~ /^(ic-wire|ic-wire-derive)$/) reject("Wire in production")
         if (host_capability == "candid-parser" && !parser) reject("unselected host parser")
         if (host_capability == "agent" && !agent) reject("unselected host Agent")
-        if (platform_forbidden("retired-cdk", name) && !(name == "ic0" && creation && registry && version == "v1.2.0")) reject("external CDK/executor/IC0 supplier is retired")
+        if (name == "ic0" && (!raw_system || !registry || version != "v1.2.0")) reject("unselected or unqualified IC0 supplier")
+        if (platform_forbidden("retired-cdk", name)) reject("external CDK/executor supplier is retired")
         if (name == "ic-platform-runtime" && !raw_system) reject("unselected runtime owner")
         if (name == "ic-platform-runtime-guard") {
             if (!executor || (line != guard && line != guard " (*)")) reject("unqualified runtime singleton guard")
             found_guard = 1
         }
         if (name == "ic-platform-macros" && (!generator_enabled || (line != generator && line != generator " (*)"))) reject("unqualified generator")
-        if (name == "ic-canister-sig-creation" && (!creation || !registry || version != "v1.3.1")) reject("unqualified signature key dependency")
-        if (name == "ic-signature-verification" && (!verification || !registry || version != "v0.3.0")) reject("unqualified signature verifier")
+        if (name == "ic-canister-sig-creation") reject("signature creation oracle in production")
+        if (name == "ic-signature-verification") reject("signature verification oracle in production")
         if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified upstream BLS verifier")
         if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified upstream BLS curve")
         if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")

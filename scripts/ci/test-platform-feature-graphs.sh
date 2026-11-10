@@ -55,18 +55,18 @@ ic0|serde v1.0.229|reject
 executor,ic0|sha2 v0.10.9|reject
 executor,ic0|serde_derive v1.0.229 (proc-macro)|reject
 principal|ic_principal v0.1.5|reject
-canister-sig-creation|ic_principal v0.1.5|pass
-signature-verification|ic_principal v0.1.5|pass
+canister-sig-creation|ic_principal v0.1.5|reject
+signature-verification|ic_principal v0.1.5|reject
 principal-self-authenticating|sha2 v0.10.9|pass
-principal-self-authenticating|ic_principal v0.1.5|reject
+principal-self-authenticating|ic_principal v0.1.5|pass
 runtime|ic_principal v0.1.5|reject
 runtime|sha2 v0.10.9|reject
 runtime|digest v0.10.7|reject
 principal,executor|serde v1.0.229|pass
-canister-sig-creation|ic-representation-independent-hash v3.2.0|pass
-signature-verification|ic-representation-independent-hash v3.2.0|pass
-canister-sig-creation|serde_cbor v0.11.2|pass
-canister-sig-creation|half v1.8.3|pass
+canister-sig-creation|ic-representation-independent-hash v3.2.0|reject
+signature-verification|ic-representation-independent-hash v3.2.0|reject
+canister-sig-creation|serde_cbor v0.11.2|reject
+canister-sig-creation|half v1.8.3|reject
 signature-verification|serde_cbor v0.11.2|pass
 none|rand v0.8.5|reject
 executor|rand_chacha v0.3.1|reject
@@ -95,7 +95,7 @@ candid-codec-endpoint|candid v0.10.40|reject
 candid-codec-endpoint|candid_parser v0.4.1|reject
 candid-codec-endpoint|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|pass
 runtime|ic-cdk-executor v2.0.0|reject
-runtime|ic0 v1.2.0|reject
+runtime|ic0 v1.2.0|pass
 runtime|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
 runtime|candid_derive v0.10.38|reject
 none|candid_derive v0.10.38|reject
@@ -129,17 +129,20 @@ runtime|ic-cdk-timers v1.0.0|reject
 runtime|ic-cdk-macros v0.20.3 (proc-macro)|reject
 runtime|ic-cdk-macros v0.20.3 (proc-macro) (/local)|reject
 none|ic-platform-macros v0.1.13 (proc-macro) (/fixture)|reject
-ic0|ic0 v1.2.0|reject
+ic0|ic0 v1.2.0|pass
+executor|ic0 v1.2.0|pass
+none|ic0 v1.2.0|reject
+principal|ic0 v1.2.0|reject
 ic0|ic0 v1.1.0|reject
 ic0|ic0 v1.2.0 (/local)|reject
-canister-sig-creation|ic-canister-sig-creation v1.3.1|pass
-canister-sig-creation|candid v0.10.38|pass
-signature-verification|candid v0.10.38|pass
-canister-sig-creation|ic0 v1.2.0|pass
-signature-verification|ic0 v1.2.0|pass
+canister-sig-creation|ic-canister-sig-creation v1.3.1|reject
+canister-sig-creation|candid v0.10.38|reject
+signature-verification|candid v0.10.38|reject
+canister-sig-creation|ic0 v1.2.0|reject
+signature-verification|ic0 v1.2.0|reject
 runtime|ic-error-types v0.2.0|reject
 canister-sig-creation|ic-canister-sig-creation v1.3.2|reject
-signature-verification|ic-signature-verification v0.3.0|pass
+signature-verification|ic-signature-verification v0.3.0|reject
 signature-verification|ic-signature-verification v0.2.0|reject
 bls|ic-verify-bls-signature v0.6.0|pass
 signature-verification|ic-verify-bls-signature v0.6.0|pass
@@ -211,15 +214,14 @@ for package in 'pocket-ic v16.1.0' 'ic-platform-pocket-ic v0.1.12 (/fixture)' 'i
 done
 echo 'Retired PocketIC client refuses in native and Wasm graphs'
 # Native host selections cannot authorize entropy dependencies in a Wasm graph.
-for selection in agent; do
-    printf 'getrandom v0.2.17\n' > "$fixture/wasm32-unknown-unknown-entropy.txt"
-    printf '%s\tentropy\n' "$selection" > "$fixture/mapping"
-    if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \
-        -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then
-        echo "Unexpected Wasm entropy admission for $selection" >&2; exit 1
-    fi
-    rg -q 'unselected RNG/entropy scaffolding' "$fixture/log"
-done
+selection=agent
+printf 'getrandom v0.2.17\n' > "$fixture/wasm32-unknown-unknown-entropy.txt"
+printf '%s\tentropy\n' "$selection" > "$fixture/mapping"
+if admit -v target=wasm32-unknown-unknown -v cache="$fixture" \
+    -f "$root/scripts/ci/check-platform-feature-graphs.awk" "$fixture/mapping" > "$fixture/log" 2>&1; then
+    echo "Unexpected Wasm entropy admission for $selection" >&2; exit 1
+fi
+rg -q 'unselected RNG/entropy scaffolding' "$fixture/log"
 echo 'Native-only feature names cannot admit Wasm entropy dependencies'
 # Wire belongs to tooling only; Principal cannot admit it into deployed graphs.
 for package in ic-wire ic-wire-derive; do
@@ -271,11 +273,13 @@ external|candid v0.10.40|reject|Owned external endpoint acquired Candid
 wire|ic-agent v0.49.3|reject|Canister graph contains host parsing
 external|candid v0.10.40\nic-management-canister-types v0.11.0|reject|Canister graph contains host parsing
 native|candid v0.10.40\nic-management-canister-types v0.11.0|reject|Canister graph contains host parsing
-wire|ic0 v1.2.0|reject|Retired full CDK runtime/generator
+wire|ic0 v1.2.0|pass|
+wire|ic0 v1.1.0|reject|Unqualified IC0 supplier
+wire|ic0 v1.2.0 (/local)|reject|Unqualified IC0 supplier
 wire|ic-cdk-executor v2.0.0|reject|Retired full CDK runtime/generator
-wire|ic-canister-sig-creation v1.3.1\nic0 v1.2.0|pass|
-wire|ic-canister-sig-creation v1.3.1 (*)\nic0 v1.2.0 (*)|pass|
-wire|ic-canister-sig-creation v1.3.1\nic0 v9.0.0|reject|Unqualified signature IC0 supplier
+wire|ic-canister-sig-creation v1.3.1\nic0 v1.2.0|reject|Signature oracle in production
+wire|ic-canister-sig-creation v1.3.1 (*)\nic0 v1.2.0 (*)|reject|Signature oracle in production
+wire|ic-canister-sig-creation v1.3.1\nic0 v9.0.0|reject|Unqualified IC0 supplier
 wire|ic-canister-sig-creation v1.3.1\nic-cdk v0.20.3|reject|Retired full CDK runtime/generator
 wire|ic-platform-runtime v0.20.1 (/fixture) (*)|pass|
 wire|ic-platform-runtime v0.20.1 (/other)|reject|one canonical Runtime executor owner

@@ -1,0 +1,4359 @@
+{
+  "date": "2026-11-10",
+  "head": "a37b15165a4f87a99f2845cb8263ad565f4a4864",
+  "method": "Physical source lines including comments and blank lines; nonblank is not comment-stripped LOC. Registry: all .rs in exact resolved package, including tests/examples/build scripts and disabled features. Imported/adapted: non-test .rs in listed directories, excluding owned codec and external_candid modules; inline tests and local edits remain. Schema adaptations are separate from Rust source imports. Native: tracked .rs assigned to nearest package Cargo.toml; entire pinned checkout, NOT the compiled Profiler closure. Npm: original src TypeScript/JavaScript where shipped; otherwise one lib/esm JavaScript build, explicitly labelled. No duplicate CommonJS builds, declarations or maps. Categories overlap in ancestry and must not be summed as unique authored code. No historical recovery copies, target output or sibling projects.",
+  "imports": [
+    {
+      "package": "ic-cdk",
+      "version": "0.20.3",
+      "path": "crates/ic-platform-runtime/src/cdk/upstream",
+      "files": 6,
+      "lines": 1243,
+      "nonblank": 1128,
+      "source_files": [
+        "crates/ic-platform-runtime/src/cdk/upstream/api/mod.rs",
+        "crates/ic-platform-runtime/src/cdk/upstream/call/mod.rs",
+        "crates/ic-platform-runtime/src/cdk/upstream/futures/internals/mod.rs",
+        "crates/ic-platform-runtime/src/cdk/upstream/futures/mod.rs",
+        "crates/ic-platform-runtime/src/cdk/upstream/mod.rs",
+        "crates/ic-platform-runtime/src/cdk/upstream/stable/mod.rs"
+      ]
+    },
+    {
+      "package": "ic-cdk-executor",
+      "version": "2.0.0",
+      "path": "crates/ic-platform-runtime/src/executor/runtime",
+      "files": 1,
+      "lines": 486,
+      "nonblank": 450,
+      "source_files": [
+        "crates/ic-platform-runtime/src/executor/runtime/mod.rs"
+      ]
+    },
+    {
+      "package": "ic0",
+      "version": "1.2.0",
+      "path": "crates/ic-platform-runtime/src/ic0/upstream",
+      "files": 2,
+      "lines": 1219,
+      "nonblank": 1133,
+      "source_files": [
+        "crates/ic-platform-runtime/src/ic0/upstream/mod.rs",
+        "crates/ic-platform-runtime/src/ic0/upstream/sys/mod.rs"
+      ]
+    },
+    {
+      "package": "ic-cdk-macros",
+      "version": "0.20.3",
+      "path": "crates/ic-platform-macros/src",
+      "files": 4,
+      "lines": 712,
+      "nonblank": 655,
+      "source_files": [
+        "crates/ic-platform-macros/src/export/mod.rs",
+        "crates/ic-platform-macros/src/lib.rs",
+        "crates/ic-platform-macros/src/options/mod.rs",
+        "crates/ic-platform-macros/src/signature/mod.rs"
+      ]
+    },
+    {
+      "package": "ic-error-types (RejectCode)",
+      "version": "0.2.0",
+      "path": "crates/ic-platform-runtime/src/cdk/reject_code",
+      "files": 1,
+      "lines": 54,
+      "nonblank": 50,
+      "source_files": [
+        "crates/ic-platform-runtime/src/cdk/reject_code/mod.rs"
+      ]
+    },
+    {
+      "package": "ic_principal",
+      "version": "0.1.5",
+      "path": "crates/ic-platform-types/src/principal",
+      "files": 2,
+      "lines": 388,
+      "nonblank": 340,
+      "source_files": [
+        "crates/ic-platform-types/src/principal/mod.rs",
+        "crates/ic-platform-types/src/principal/self_authenticating/mod.rs"
+      ]
+    },
+    {
+      "package": "icrc-ledger-types (Account)",
+      "version": "0.2.0",
+      "path": "crates/ic-platform-types/src/account",
+      "files": 1,
+      "lines": 199,
+      "nonblank": 187,
+      "source_files": [
+        "crates/ic-platform-types/src/account/mod.rs"
+      ]
+    },
+    {
+      "package": "icrc-ledger-types (selected DTOs/helpers)",
+      "version": "0.2.0",
+      "path": "crates/ic-platform/src/icrc_ledger_types",
+      "files": 12,
+      "lines": 1383,
+      "nonblank": 1236,
+      "source_files": [
+        "crates/ic-platform/src/icrc_ledger_types/account/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/allowance/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/archive/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/blocks/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/icrc21/errors/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/icrc21/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/icrc21/requests/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/icrc21/responses/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/metadata/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/transfer/mod.rs",
+        "crates/ic-platform/src/icrc_ledger_types/value/mod.rs"
+      ]
+    },
+    {
+      "package": "ic-management-canister-types",
+      "version": "0.11.0",
+      "path": "crates/ic-platform/src/management_canister_types",
+      "files": 5,
+      "lines": 1367,
+      "nonblank": 1284,
+      "source_files": [
+        "crates/ic-platform/src/management_canister_types/maintained/mod.rs",
+        "crates/ic-platform/src/management_canister_types/maintained/transform_func/mod.rs",
+        "crates/ic-platform/src/management_canister_types/mod.rs",
+        "crates/ic-platform/src/management_canister_types/native/client.rs",
+        "crates/ic-platform/src/management_canister_types/native/mod.rs"
+      ]
+    },
+    {
+      "package": "ic-ledger-types (account identifier)",
+      "version": "0.16.0",
+      "path": "crates/ic-platform/src/icp_ledger_types/account_identifier",
+      "files": 1,
+      "lines": 40,
+      "nonblank": 34,
+      "source_files": [
+        "crates/ic-platform/src/icp_ledger_types/account_identifier/mod.rs"
+      ]
+    },
+    {
+      "package": "candid (Nat hash encoding)",
+      "version": "0.10.40",
+      "path": "crates/ic-platform/src/icrc_ledger_types/hash_encoding",
+      "files": 1,
+      "lines": 28,
+      "nonblank": 28,
+      "source_files": [
+        "crates/ic-platform/src/icrc_ledger_types/hash_encoding/mod.rs"
+      ]
+    }
+  ],
+  "schema": [
+    {
+      "component": "cmc_types",
+      "path": "crates/ic-platform/src/cmc_types",
+      "files": 1,
+      "lines": 122,
+      "nonblank": 112
+    },
+    {
+      "component": "icp_ledger_types",
+      "path": "crates/ic-platform/src/icp_ledger_types",
+      "files": 2,
+      "lines": 223,
+      "nonblank": 208
+    },
+    {
+      "component": "cycles_ledger_types",
+      "path": "crates/ic-platform/src/cycles_ledger_types",
+      "files": 1,
+      "lines": 356,
+      "nonblank": 336
+    },
+    {
+      "component": "certified_assets_types",
+      "path": "crates/ic-platform/src/certified_assets_types",
+      "files": 1,
+      "lines": 74,
+      "nonblank": 68
+    },
+    {
+      "component": "nns_registry_types",
+      "path": "crates/ic-platform/src/nns_registry_types",
+      "files": 1,
+      "lines": 31,
+      "nonblank": 25
+    }
+  ],
+  "registry": [
+    {
+      "package": "candid",
+      "version": "0.10.40",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/candid",
+      "files": 24,
+      "lines": 9734,
+      "nonblank": 9268,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/candid-0.10.40"
+    },
+    {
+      "package": "candid_derive",
+      "version": "0.10.40",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/candid",
+      "files": 4,
+      "lines": 901,
+      "nonblank": 854,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/candid_derive-0.10.40"
+    },
+    {
+      "package": "candid_parser",
+      "version": "0.4.1",
+      "scope": "development only",
+      "repository": "https://github.com/dfinity/candid",
+      "files": 20,
+      "lines": 6247,
+      "nonblank": 5972,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/candid_parser-0.4.1"
+    },
+    {
+      "package": "ic-agent",
+      "version": "0.49.3",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/agent-rs",
+      "files": 34,
+      "lines": 10030,
+      "nonblank": 9105,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-agent-0.49.3"
+    },
+    {
+      "package": "ic-canister-sig-creation",
+      "version": "1.3.1",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/ic-canister-sig-creation",
+      "files": 3,
+      "lines": 773,
+      "nonblank": 669,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-canister-sig-creation-1.3.1"
+    },
+    {
+      "package": "ic-certification",
+      "version": "3.2.0",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/response-verification",
+      "files": 7,
+      "lines": 3694,
+      "nonblank": 3292,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-certification-3.2.0"
+    },
+    {
+      "package": "ic-ed25519",
+      "version": "0.6.0",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/ic",
+      "files": 1,
+      "lines": 972,
+      "nonblank": 845,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-ed25519-0.6.0"
+    },
+    {
+      "package": "ic-management-canister-types",
+      "version": "0.11.0",
+      "scope": "development only",
+      "repository": "https://github.com/dfinity/ic",
+      "files": 1,
+      "lines": 2187,
+      "nonblank": 2052,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-management-canister-types-0.11.0"
+    },
+    {
+      "package": "ic-representation-independent-hash",
+      "version": "3.2.0",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/response-verification",
+      "files": 2,
+      "lines": 237,
+      "nonblank": 201,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-representation-independent-hash-3.2.0"
+    },
+    {
+      "package": "ic-signature-verification",
+      "version": "0.3.0",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/ic",
+      "files": 2,
+      "lines": 364,
+      "nonblank": 332,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-signature-verification-0.3.0"
+    },
+    {
+      "package": "ic-transport-types",
+      "version": "0.49.3",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/agent-rs",
+      "files": 4,
+      "lines": 1645,
+      "nonblank": 1503,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-transport-types-0.49.3"
+    },
+    {
+      "package": "ic-verify-bls-signature",
+      "version": "0.6.0",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/verify-bls-signatures",
+      "files": 2,
+      "lines": 401,
+      "nonblank": 332,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic-verify-bls-signature-0.6.0"
+    },
+    {
+      "package": "ic0",
+      "version": "1.2.0",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/cdk-rs",
+      "files": 2,
+      "lines": 1214,
+      "nonblank": 1128,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic0-1.2.0"
+    },
+    {
+      "package": "ic_bls12_381",
+      "version": "0.10.1",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/bls12_381",
+      "files": 21,
+      "lines": 14512,
+      "nonblank": 13044,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic_bls12_381-0.10.1"
+    },
+    {
+      "package": "ic_principal",
+      "version": "0.1.5",
+      "scope": "normal/build (some feature or target)",
+      "repository": "https://github.com/dfinity/candid",
+      "files": 1,
+      "lines": 483,
+      "nonblank": 428,
+      "path": "/home/adam/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ic_principal-0.1.5"
+    }
+  ],
+  "npm": [
+    {
+      "measurement": "original TS/JS source",
+      "package": "@icp-sdk/auth",
+      "version": "10.0.2",
+      "scope": "development compatibility dependency/transitive",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dfinity/icp-js-auth.git"
+      },
+      "files": 20,
+      "lines": 4499,
+      "nonblank": 4112,
+      "path": "packages/browser/node_modules/@icp-sdk/auth/src"
+    },
+    {
+      "measurement": "shipped ESM JavaScript; original TypeScript absent",
+      "package": "@icp-sdk/core",
+      "version": "6.1.1",
+      "scope": "production",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/dfinity/icp-js-core.git",
+        "directory": "packages/core"
+      },
+      "files": 62,
+      "lines": 10402,
+      "nonblank": 10402,
+      "path": "packages/browser/node_modules/@icp-sdk/core/lib/esm"
+    },
+    {
+      "measurement": "shipped ESM JavaScript; original TypeScript absent",
+      "package": "@icp-sdk/signer",
+      "version": "6.1.0",
+      "scope": "development compatibility dependency/transitive",
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dfinity/icp-js-signer.git"
+      },
+      "files": 17,
+      "lines": 2043,
+      "nonblank": 2043,
+      "path": "packages/browser/node_modules/@icp-sdk/signer/lib/esm"
+    }
+  ],
+  "native": {
+    "revision": "ee8086a9773725fd1058832a9400297cf0990112",
+    "packages": [
+      {
+        "package": "ic-execution-environment",
+        "path": "rs/execution_environment",
+        "files": 108,
+        "lines": 113170,
+        "nonblank": 103064
+      },
+      {
+        "package": "ic-nns-governance",
+        "path": "rs/nns/governance",
+        "files": 158,
+        "lines": 87678,
+        "nonblank": 80265
+      },
+      {
+        "package": "ic-sns-governance",
+        "path": "rs/sns/governance",
+        "files": 54,
+        "lines": 57423,
+        "nonblank": 52471
+      },
+      {
+        "package": "ic-replicated-state",
+        "path": "rs/replicated_state",
+        "files": 74,
+        "lines": 52068,
+        "nonblank": 46578
+      },
+      {
+        "package": "registry-canister",
+        "path": "rs/registry/canister",
+        "files": 136,
+        "lines": 47564,
+        "nonblank": 42010
+      },
+      {
+        "package": "ic-cketh-minter",
+        "path": "rs/ethereum/cketh/minter",
+        "files": 102,
+        "lines": 45652,
+        "nonblank": 41671
+      },
+      {
+        "package": "ic-types",
+        "path": "rs/types/types",
+        "files": 109,
+        "lines": 40327,
+        "nonblank": 36107
+      },
+      {
+        "package": "ic-crypto",
+        "path": "rs/crypto",
+        "files": 91,
+        "lines": 36069,
+        "nonblank": 32389
+      },
+      {
+        "package": "ic-embedders",
+        "path": "rs/embedders",
+        "files": 44,
+        "lines": 35078,
+        "nonblank": 32496
+      },
+      {
+        "package": "ic-crypto-internal-csp",
+        "path": "rs/crypto/internal/crypto_service_provider",
+        "files": 104,
+        "lines": 31186,
+        "nonblank": 28436
+      },
+      {
+        "package": "ic-state-manager",
+        "path": "rs/state_manager",
+        "files": 28,
+        "lines": 30836,
+        "nonblank": 27489
+      },
+      {
+        "package": "ic-system-test-driver",
+        "path": "rs/tests/driver",
+        "files": 58,
+        "lines": 29964,
+        "nonblank": 27500
+      },
+      {
+        "package": "ic-consensus",
+        "path": "rs/consensus",
+        "files": 34,
+        "lines": 21079,
+        "nonblank": 19506
+      },
+      {
+        "package": "ic-ckbtc-minter",
+        "path": "rs/bitcoin/ckbtc/minter",
+        "files": 43,
+        "lines": 20390,
+        "nonblank": 18278
+      },
+      {
+        "package": "ic-messaging",
+        "path": "rs/messaging",
+        "files": 18,
+        "lines": 19819,
+        "nonblank": 18230
+      },
+      {
+        "package": "ic-icrc-rosetta",
+        "path": "rs/rosetta-api/icrc1",
+        "files": 37,
+        "lines": 18718,
+        "nonblank": 16946
+      },
+      {
+        "package": "ic-consensus-idkg",
+        "path": "rs/consensus/idkg",
+        "files": 15,
+        "lines": 18318,
+        "nonblank": 16762
+      },
+      {
+        "package": "ic-sns-swap",
+        "path": "rs/sns/swap",
+        "files": 18,
+        "lines": 18281,
+        "nonblank": 16853
+      },
+      {
+        "package": "ic-https-outcalls-consensus",
+        "path": "rs/https_outcalls/consensus",
+        "files": 11,
+        "lines": 18253,
+        "nonblank": 16746
+      },
+      {
+        "package": "orchestrator",
+        "path": "rs/orchestrator",
+        "files": 29,
+        "lines": 17700,
+        "nonblank": 15973
+      },
+      {
+        "package": "ic-crypto-internal-threshold-sig-canister-threshold-sig",
+        "path": "rs/crypto/internal/crypto_lib/threshold_sig/canister_threshold_sig",
+        "files": 43,
+        "lines": 17305,
+        "nonblank": 14888
+      },
+      {
+        "package": "ic-rosetta-api",
+        "path": "rs/rosetta-api/icp",
+        "files": 73,
+        "lines": 16759,
+        "nonblank": 15518
+      },
+      {
+        "package": "ic-nns-integration-tests",
+        "path": "rs/nns/integration_tests",
+        "files": 54,
+        "lines": 15572,
+        "nonblank": 13936
+      },
+      {
+        "package": "ic-artifact-pool",
+        "path": "rs/artifact_pool",
+        "files": 22,
+        "lines": 15407,
+        "nonblank": 13982
+      },
+      {
+        "package": "pocket-ic",
+        "path": "packages/pocket-ic",
+        "files": 11,
+        "lines": 14378,
+        "nonblank": 13042
+      },
+      {
+        "package": "ic-protobuf",
+        "path": "rs/protobuf",
+        "files": 95,
+        "lines": 14149,
+        "nonblank": 13925
+      },
+      {
+        "package": "ic-sns-integration-tests",
+        "path": "rs/sns/integration_tests",
+        "files": 21,
+        "lines": 13479,
+        "nonblank": 11737
+      },
+      {
+        "package": "ic-xnet-payload-builder",
+        "path": "rs/xnet/payload_builder",
+        "files": 11,
+        "lines": 13313,
+        "nonblank": 11937
+      },
+      {
+        "package": "pocket-ic-server",
+        "path": "rs/pocket_ic_server",
+        "files": 15,
+        "lines": 12939,
+        "nonblank": 11890
+      },
+      {
+        "package": "ic-boundary",
+        "path": "rs/boundary_node/ic_boundary",
+        "files": 32,
+        "lines": 12692,
+        "nonblank": 10935
+      },
+      {
+        "package": "ic-canister-sandbox-backend-lib",
+        "path": "rs/canister_sandbox",
+        "files": 44,
+        "lines": 11925,
+        "nonblank": 10871
+      },
+      {
+        "package": "networking-system-tests",
+        "path": "rs/tests/networking",
+        "files": 20,
+        "lines": 11587,
+        "nonblank": 10504
+      },
+      {
+        "package": "ic-admin",
+        "path": "rs/registry/admin",
+        "files": 10,
+        "lines": 11376,
+        "nonblank": 10283
+      },
+      {
+        "package": "ic-btc-adapter",
+        "path": "rs/bitcoin/adapter",
+        "files": 20,
+        "lines": 10958,
+        "nonblank": 9852
+      },
+      {
+        "package": "ic-crypto-internal-threshold-sig-bls12381",
+        "path": "rs/crypto/internal/crypto_lib/threshold_sig/bls12_381",
+        "files": 58,
+        "lines": 10899,
+        "nonblank": 9514
+      },
+      {
+        "package": "ic-sns-wasm",
+        "path": "rs/nns/sns-wasm",
+        "files": 21,
+        "lines": 10391,
+        "nonblank": 9337
+      },
+      {
+        "package": "ic-nervous-system-integration-tests",
+        "path": "rs/nervous_system/integration_tests",
+        "files": 21,
+        "lines": 10284,
+        "nonblank": 9381
+      },
+      {
+        "package": "ic-ledger-suite-orchestrator",
+        "path": "rs/ethereum/ledger-suite-orchestrator",
+        "files": 23,
+        "lines": 9790,
+        "nonblank": 8802
+      },
+      {
+        "package": "ic-http-endpoints-public",
+        "path": "rs/http_endpoints/public",
+        "files": 18,
+        "lines": 9428,
+        "nonblank": 8465
+      },
+      {
+        "package": "ic-canonical-state",
+        "path": "rs/canonical_state",
+        "files": 19,
+        "lines": 9424,
+        "nonblank": 8666
+      },
+      {
+        "package": "ic-consensus-dkg",
+        "path": "rs/consensus/dkg",
+        "files": 8,
+        "lines": 9383,
+        "nonblank": 8671
+      },
+      {
+        "package": "ic-crypto-tree-hash",
+        "path": "rs/crypto/tree_hash",
+        "files": 15,
+        "lines": 8486,
+        "nonblank": 7519
+      },
+      {
+        "package": "ic-ledger-suite-state-machine-tests",
+        "path": "rs/ledger_suite/tests/sm-tests",
+        "files": 6,
+        "lines": 8180,
+        "nonblank": 7428
+      },
+      {
+        "package": "ic-state-machine-tests",
+        "path": "rs/state_machine_tests",
+        "files": 10,
+        "lines": 7979,
+        "nonblank": 7307
+      },
+      {
+        "package": "ic-interfaces",
+        "path": "rs/interfaces",
+        "files": 35,
+        "lines": 7658,
+        "nonblank": 7016
+      },
+      {
+        "package": "ic-recovery",
+        "path": "rs/recovery",
+        "files": 19,
+        "lines": 7589,
+        "nonblank": 6748
+      },
+      {
+        "package": "execution-system-tests",
+        "path": "rs/tests/execution",
+        "files": 31,
+        "lines": 7325,
+        "nonblank": 6692
+      },
+      {
+        "package": "ic-management-canister-types-private",
+        "path": "rs/types/management_canister_types",
+        "files": 6,
+        "lines": 7021,
+        "nonblank": 6305
+      },
+      {
+        "package": "ic-nns-test-utils",
+        "path": "rs/nns/test_utils",
+        "files": 12,
+        "lines": 7010,
+        "nonblank": 6344
+      },
+      {
+        "package": "ic-artifact-downloader",
+        "path": "rs/p2p/artifact_downloader",
+        "files": 16,
+        "lines": 6940,
+        "nonblank": 6222
+      },
+      {
+        "package": "ledger-canister",
+        "path": "rs/ledger_suite/icp/ledger",
+        "files": 7,
+        "lines": 6925,
+        "nonblank": 6236
+      },
+      {
+        "package": "ic-crypto-internal-bls12-381-type",
+        "path": "rs/crypto/internal/crypto_lib/bls12_381/type",
+        "files": 7,
+        "lines": 6724,
+        "nonblank": 5713
+      },
+      {
+        "package": "icp-ledger",
+        "path": "rs/ledger_suite/icp",
+        "files": 9,
+        "lines": 6723,
+        "nonblank": 6067
+      },
+      {
+        "package": "ic-cketh-test-utils",
+        "path": "rs/ethereum/cketh/test_utils",
+        "files": 10,
+        "lines": 6682,
+        "nonblank": 6104
+      },
+      {
+        "package": "ic-icrc1-ledger",
+        "path": "rs/ledger_suite/icrc1/ledger",
+        "files": 9,
+        "lines": 6400,
+        "nonblank": 5746
+      },
+      {
+        "package": "ic-sns-init",
+        "path": "rs/sns/init",
+        "files": 7,
+        "lines": 5605,
+        "nonblank": 5118
+      },
+      {
+        "package": "ic-sns-cli",
+        "path": "rs/sns/cli",
+        "files": 18,
+        "lines": 5523,
+        "nonblank": 4813
+      },
+      {
+        "package": "ic_crypto_system_tests",
+        "path": "rs/tests/crypto",
+        "files": 10,
+        "lines": 5471,
+        "nonblank": 4892
+      },
+      {
+        "package": "ic-nns-governance-api",
+        "path": "rs/nns/governance/api",
+        "files": 7,
+        "lines": 5352,
+        "nonblank": 5169
+      },
+      {
+        "package": "ic-state-layout",
+        "path": "rs/state_layout",
+        "files": 6,
+        "lines": 5315,
+        "nonblank": 4844
+      },
+      {
+        "package": "cycles-minting-canister",
+        "path": "rs/nns/cmc",
+        "files": 7,
+        "lines": 5272,
+        "nonblank": 4708
+      },
+      {
+        "package": "ic-node-rewards-canister",
+        "path": "rs/node_rewards/canister",
+        "files": 21,
+        "lines": 5167,
+        "nonblank": 4565
+      },
+      {
+        "package": "ic-migration-canister",
+        "path": "rs/migration_canister",
+        "files": 12,
+        "lines": 5130,
+        "nonblank": 4702
+      },
+      {
+        "package": "ic-replay",
+        "path": "rs/replay",
+        "files": 10,
+        "lines": 5033,
+        "nonblank": 4632
+      },
+      {
+        "package": "ic-ckdoge-minter",
+        "path": "rs/dogecoin/ckdoge/minter",
+        "files": 25,
+        "lines": 4978,
+        "nonblank": 4509
+      },
+      {
+        "package": "ic-icrc1-index-ng",
+        "path": "rs/ledger_suite/icrc1/index-ng",
+        "files": 8,
+        "lines": 4905,
+        "nonblank": 4403
+      },
+      {
+        "package": "ic-sns-root",
+        "path": "rs/sns/root",
+        "files": 9,
+        "lines": 4880,
+        "nonblank": 4486
+      },
+      {
+        "package": "ic-ingress-manager",
+        "path": "rs/ingress_manager",
+        "files": 8,
+        "lines": 4845,
+        "nonblank": 4459
+      },
+      {
+        "package": "ic_consensus_system_tests",
+        "path": "rs/tests/consensus",
+        "files": 17,
+        "lines": 4750,
+        "nonblank": 4252
+      },
+      {
+        "package": "ic-btc-checker",
+        "path": "rs/bitcoin/checker",
+        "files": 15,
+        "lines": 4637,
+        "nonblank": 4300
+      },
+      {
+        "package": "ic-test-utilities-execution-environment",
+        "path": "rs/test_utilities/execution_environment",
+        "files": 6,
+        "lines": 4559,
+        "nonblank": 4140
+      },
+      {
+        "package": "ic-replica-tests",
+        "path": "rs/replica_tests",
+        "files": 5,
+        "lines": 4503,
+        "nonblank": 4080
+      },
+      {
+        "package": "icrc-ledger-types",
+        "path": "packages/icrc-ledger-types",
+        "files": 32,
+        "lines": 4384,
+        "nonblank": 3950
+      },
+      {
+        "package": "ic-nervous-system-agent",
+        "path": "rs/nervous_system/agent",
+        "files": 41,
+        "lines": 4136,
+        "nonblank": 3524
+      },
+      {
+        "package": "guest_vm_runner",
+        "path": "rs/ic_os/os_tools/guest_vm_runner",
+        "files": 9,
+        "lines": 4088,
+        "nonblank": 3604
+      },
+      {
+        "package": "ic-cycles-account-manager",
+        "path": "rs/cycles_account_manager",
+        "files": 5,
+        "lines": 3969,
+        "nonblank": 3688
+      },
+      {
+        "package": "ic-ledger-canister-blocks-synchronizer",
+        "path": "rs/rosetta-api/icp/ledger_canister_blocks_synchronizer",
+        "files": 10,
+        "lines": 3943,
+        "nonblank": 3588
+      },
+      {
+        "package": "ic-consensus-manager",
+        "path": "rs/p2p/consensus_manager",
+        "files": 5,
+        "lines": 3845,
+        "nonblank": 3536
+      },
+      {
+        "package": "ic-tests-ckbtc",
+        "path": "rs/tests/ckbtc",
+        "files": 10,
+        "lines": 3817,
+        "nonblank": 3465
+      },
+      {
+        "package": "ic-consensus-utils",
+        "path": "rs/consensus/utils",
+        "files": 7,
+        "lines": 3771,
+        "nonblank": 3486
+      },
+      {
+        "package": "ic-icrc1",
+        "path": "rs/ledger_suite/icrc1",
+        "files": 10,
+        "lines": 3506,
+        "nonblank": 3244
+      },
+      {
+        "package": "ic-config",
+        "path": "rs/config",
+        "files": 25,
+        "lines": 3503,
+        "nonblank": 3086
+      },
+      {
+        "package": "nns-system-tests",
+        "path": "rs/tests/nns",
+        "files": 11,
+        "lines": 3460,
+        "nonblank": 3091
+      },
+      {
+        "package": "ic-icp-index",
+        "path": "rs/ledger_suite/icp/index",
+        "files": 5,
+        "lines": 3355,
+        "nonblank": 3058
+      },
+      {
+        "package": "ic-quic-transport",
+        "path": "rs/p2p/quic_transport",
+        "files": 8,
+        "lines": 3354,
+        "nonblank": 3008
+      },
+      {
+        "package": "ic-crypto-test-utils-canister-threshold-sigs",
+        "path": "rs/crypto/test_utils/canister_threshold_sigs",
+        "files": 2,
+        "lines": 3328,
+        "nonblank": 2999
+      },
+      {
+        "package": "ic-sns-governance-api",
+        "path": "rs/sns/governance/api",
+        "files": 6,
+        "lines": 3268,
+        "nonblank": 3215
+      },
+      {
+        "package": "rewards-calculation",
+        "path": "rs/node_rewards/rewards_calculation",
+        "files": 9,
+        "lines": 3234,
+        "nonblank": 2853
+      },
+      {
+        "package": "config_tool",
+        "path": "rs/ic_os/config/tool",
+        "files": 13,
+        "lines": 3217,
+        "nonblank": 2776
+      },
+      {
+        "package": "rosetta-core",
+        "path": "rs/rosetta-api/common/rosetta_core",
+        "files": 10,
+        "lines": 3215,
+        "nonblank": 2825
+      },
+      {
+        "package": "ic-validator-ingress-message",
+        "path": "rs/validator/ingress_message",
+        "files": 4,
+        "lines": 3102,
+        "nonblank": 2822
+      },
+      {
+        "package": "rate_limits",
+        "path": "rs/boundary_node/rate_limits",
+        "files": 13,
+        "lines": 3093,
+        "nonblank": 2757
+      },
+      {
+        "package": "ic-prep",
+        "path": "rs/prep",
+        "files": 9,
+        "lines": 3056,
+        "nonblank": 2703
+      },
+      {
+        "package": "manual_guestos_recovery",
+        "path": "rs/ic_os/os_tools/manual_guestos_recovery",
+        "files": 3,
+        "lines": 3017,
+        "nonblank": 2619
+      },
+      {
+        "package": "ic-registry-client-helpers",
+        "path": "rs/registry/helpers",
+        "files": 17,
+        "lines": 2960,
+        "nonblank": 2660
+      },
+      {
+        "package": "consensus-orchestrator-system-tests",
+        "path": "rs/tests/consensus/orchestrator",
+        "files": 10,
+        "lines": 2925,
+        "nonblank": 2584
+      },
+      {
+        "package": "guest_disk",
+        "path": "rs/ic_os/os_tools/guest_disk",
+        "files": 7,
+        "lines": 2913,
+        "nonblank": 2570
+      },
+      {
+        "package": "ic-https-outcalls-pricing",
+        "path": "rs/https_outcalls/pricing",
+        "files": 6,
+        "lines": 2906,
+        "nonblank": 2702
+      },
+      {
+        "package": "ic-make-proposal",
+        "path": "rs/cross-chain/proposal-cli",
+        "files": 14,
+        "lines": 2869,
+        "nonblank": 2648
+      },
+      {
+        "package": "ic-btc-validation",
+        "path": "rs/bitcoin/validation",
+        "files": 9,
+        "lines": 2772,
+        "nonblank": 2476
+      },
+      {
+        "package": "ic-registry-replicator",
+        "path": "rs/orchestrator/registry_replicator",
+        "files": 6,
+        "lines": 2751,
+        "nonblank": 2455
+      },
+      {
+        "package": "ic-nns-handler-root",
+        "path": "rs/nns/handlers/root/impl",
+        "files": 19,
+        "lines": 2692,
+        "nonblank": 2422
+      },
+      {
+        "package": "ic-nervous-system-common",
+        "path": "rs/nervous_system/common",
+        "files": 9,
+        "lines": 2644,
+        "nonblank": 2261
+      },
+      {
+        "package": "ic-canonical-state-tree-hash",
+        "path": "rs/canonical_state/tree_hash",
+        "files": 6,
+        "lines": 2618,
+        "nonblank": 2355
+      },
+      {
+        "package": "consensus-tecdsa-system-tests",
+        "path": "rs/tests/consensus/tecdsa",
+        "files": 14,
+        "lines": 2568,
+        "nonblank": 2352
+      },
+      {
+        "package": "ic-validator",
+        "path": "rs/validator",
+        "files": 5,
+        "lines": 2539,
+        "nonblank": 2258
+      },
+      {
+        "package": "sns_system_test_lib",
+        "path": "rs/tests/nns/sns/lib",
+        "files": 5,
+        "lines": 2506,
+        "nonblank": 2279
+      },
+      {
+        "package": "ic-backup",
+        "path": "rs/backup",
+        "files": 8,
+        "lines": 2503,
+        "nonblank": 2245
+      },
+      {
+        "package": "tla_instrumentation",
+        "path": "rs/tla_instrumentation/tla_instrumentation",
+        "files": 9,
+        "lines": 2501,
+        "nonblank": 2277
+      },
+      {
+        "package": "ic-state-sync-manager",
+        "path": "rs/p2p/state_sync_manager",
+        "files": 10,
+        "lines": 2497,
+        "nonblank": 2271
+      },
+      {
+        "package": "ic-icrc1-test-utils",
+        "path": "rs/ledger_suite/icrc1/test_utils",
+        "files": 2,
+        "lines": 2433,
+        "nonblank": 2243
+      },
+      {
+        "package": "ic_consensus_system_test_subnet_recovery",
+        "path": "rs/tests/consensus/subnet_recovery",
+        "files": 16,
+        "lines": 2432,
+        "nonblank": 2183
+      },
+      {
+        "package": "ic-management-canister-types",
+        "path": "packages/ic-management-canister-types",
+        "files": 2,
+        "lines": 2421,
+        "nonblank": 2242
+      },
+      {
+        "package": "memory_tracker",
+        "path": "rs/memory_tracker",
+        "files": 8,
+        "lines": 2385,
+        "nonblank": 2139
+      },
+      {
+        "package": "ic_consensus_system_test_utils",
+        "path": "rs/tests/consensus/utils",
+        "files": 8,
+        "lines": 2384,
+        "nonblank": 2173
+      },
+      {
+        "package": "metrics-proxy",
+        "path": "rs/monitoring/metrics_proxy",
+        "files": 9,
+        "lines": 2381,
+        "nonblank": 2197
+      },
+      {
+        "package": "testnets",
+        "path": "rs/tests/testnets",
+        "files": 19,
+        "lines": 2346,
+        "nonblank": 2157
+      },
+      {
+        "package": "ic-sns-test-utils",
+        "path": "rs/sns/test_utils",
+        "files": 4,
+        "lines": 2315,
+        "nonblank": 2101
+      },
+      {
+        "package": "ic-ckdoge-minter-test-utils",
+        "path": "rs/dogecoin/ckdoge/test_utils",
+        "files": 8,
+        "lines": 2252,
+        "nonblank": 2052
+      },
+      {
+        "package": "ic-icp-rosetta-client",
+        "path": "rs/rosetta-api/icp/client",
+        "files": 2,
+        "lines": 2183,
+        "nonblank": 2013
+      },
+      {
+        "package": "ic-nervous-system-clients",
+        "path": "rs/nervous_system/clients",
+        "files": 14,
+        "lines": 2169,
+        "nonblank": 1951
+      },
+      {
+        "package": "ic-secp256k1",
+        "path": "packages/ic-secp256k1",
+        "files": 2,
+        "lines": 2163,
+        "nonblank": 1858
+      },
+      {
+        "package": "rosetta_test_lib",
+        "path": "rs/tests/financial_integrations/rosetta/rosetta_test_lib",
+        "files": 7,
+        "lines": 2133,
+        "nonblank": 1976
+      },
+      {
+        "package": "ic-sns-testing",
+        "path": "rs/sns/testing",
+        "files": 8,
+        "lines": 2108,
+        "nonblank": 1948
+      },
+      {
+        "package": "ic-state-tool",
+        "path": "rs/state_tool",
+        "files": 18,
+        "lines": 2108,
+        "nonblank": 1872
+      },
+      {
+        "package": "ic-nns-delegation-manager",
+        "path": "rs/http_endpoints/nns_delegation_manager",
+        "files": 3,
+        "lines": 2100,
+        "nonblank": 1897
+      },
+      {
+        "package": "ic-base-types",
+        "path": "rs/types/base_types",
+        "files": 9,
+        "lines": 2090,
+        "nonblank": 1836
+      },
+      {
+        "package": "ic-http-endpoints-xnet",
+        "path": "rs/http_endpoints/xnet",
+        "files": 2,
+        "lines": 2079,
+        "nonblank": 1847
+      },
+      {
+        "package": "ic-https-outcalls-adapter",
+        "path": "rs/https_outcalls/adapter",
+        "files": 7,
+        "lines": 2064,
+        "nonblank": 1823
+      },
+      {
+        "package": "message-routing-system-tests",
+        "path": "rs/tests/message_routing",
+        "files": 8,
+        "lines": 2062,
+        "nonblank": 1887
+      },
+      {
+        "package": "ic-consensus-certification",
+        "path": "rs/consensus/certification",
+        "files": 3,
+        "lines": 2045,
+        "nonblank": 1882
+      },
+      {
+        "package": "dfn_core",
+        "path": "rs/rust_canisters/dfn_core",
+        "files": 9,
+        "lines": 2005,
+        "nonblank": 1757
+      },
+      {
+        "package": "message-routing-system-tests-xnet",
+        "path": "rs/tests/message_routing/xnet",
+        "files": 8,
+        "lines": 2005,
+        "nonblank": 1856
+      },
+      {
+        "package": "ic-certification",
+        "path": "rs/certification",
+        "files": 3,
+        "lines": 1960,
+        "nonblank": 1781
+      },
+      {
+        "package": "ic-subnet-splitting",
+        "path": "rs/recovery/subnet_splitting",
+        "files": 8,
+        "lines": 1938,
+        "nonblank": 1712
+      },
+      {
+        "package": "ic-consensus-chain-key",
+        "path": "rs/consensus/chain_key",
+        "files": 4,
+        "lines": 1934,
+        "nonblank": 1801
+      },
+      {
+        "package": "ic-tests-cross-chain",
+        "path": "rs/tests/cross_chain",
+        "files": 4,
+        "lines": 1928,
+        "nonblank": 1755
+      },
+      {
+        "package": "ic-query-stats",
+        "path": "rs/query_stats",
+        "files": 4,
+        "lines": 1914,
+        "nonblank": 1731
+      },
+      {
+        "package": "idx-tests",
+        "path": "rs/tests/idx",
+        "files": 6,
+        "lines": 1895,
+        "nonblank": 1748
+      },
+      {
+        "package": "ic-nns-delegation-reader",
+        "path": "rs/http_endpoints/nns_delegation_reader",
+        "files": 4,
+        "lines": 1886,
+        "nonblank": 1717
+      },
+      {
+        "package": "ic-ed25519",
+        "path": "packages/ic-ed25519",
+        "files": 3,
+        "lines": 1881,
+        "nonblank": 1597
+      },
+      {
+        "package": "ic-sys",
+        "path": "rs/sys",
+        "files": 5,
+        "lines": 1858,
+        "nonblank": 1675
+      },
+      {
+        "package": "ic-registry-transport",
+        "path": "rs/registry/transport",
+        "files": 7,
+        "lines": 1843,
+        "nonblank": 1673
+      },
+      {
+        "package": "ic-crypto-internal-multi-sig-bls12381",
+        "path": "rs/crypto/internal/crypto_lib/multi_sig/bls12_381",
+        "files": 13,
+        "lines": 1799,
+        "nonblank": 1592
+      },
+      {
+        "package": "ic-https-outcalls-adapter-client",
+        "path": "rs/https_outcalls/client",
+        "files": 3,
+        "lines": 1783,
+        "nonblank": 1654
+      },
+      {
+        "package": "ic-registry-routing-table",
+        "path": "rs/registry/routing_table",
+        "files": 3,
+        "lines": 1783,
+        "nonblank": 1579
+      },
+      {
+        "package": "ic-ledger-core",
+        "path": "rs/ledger_suite/common/ledger_core",
+        "files": 9,
+        "lines": 1746,
+        "nonblank": 1529
+      },
+      {
+        "package": "ic-ledger-canister-core",
+        "path": "rs/ledger_suite/common/ledger_canister_core",
+        "files": 7,
+        "lines": 1716,
+        "nonblank": 1508
+      },
+      {
+        "package": "dfx-core-vendored",
+        "path": "rs/sns/dfx-core-vendored",
+        "files": 24,
+        "lines": 1693,
+        "nonblank": 1477
+      },
+      {
+        "package": "ic-test-utilities-consensus",
+        "path": "rs/test_utilities/consensus",
+        "files": 5,
+        "lines": 1661,
+        "nonblank": 1526
+      },
+      {
+        "package": "ic-crypto-test-utils-ni-dkg",
+        "path": "rs/crypto/test_utils/ni-dkg",
+        "files": 3,
+        "lines": 1609,
+        "nonblank": 1449
+      },
+      {
+        "package": "ic-p2p-test-utils",
+        "path": "rs/p2p/test_utils",
+        "files": 4,
+        "lines": 1595,
+        "nonblank": 1426
+      },
+      {
+        "package": "ic-ledger-suite-in-memory-ledger",
+        "path": "rs/ledger_suite/test_utils/in_memory_ledger",
+        "files": 2,
+        "lines": 1577,
+        "nonblank": 1485
+      },
+      {
+        "package": "ic-test-utilities",
+        "path": "rs/test_utilities",
+        "files": 12,
+        "lines": 1565,
+        "nonblank": 1393
+      },
+      {
+        "package": "ic-btc-adapter-test-utils",
+        "path": "rs/bitcoin/adapter/test_utils",
+        "files": 4,
+        "lines": 1548,
+        "nonblank": 1394
+      },
+      {
+        "package": "ic_consensus_threshold_sig_system_test_utils",
+        "path": "rs/tests/consensus/tecdsa/utils",
+        "files": 1,
+        "lines": 1546,
+        "nonblank": 1428
+      },
+      {
+        "package": "ic-crypto-temp-crypto",
+        "path": "rs/crypto/temp_crypto",
+        "files": 2,
+        "lines": 1494,
+        "nonblank": 1363
+      },
+      {
+        "package": "canister-test",
+        "path": "rs/rust_canisters/canister_test",
+        "files": 4,
+        "lines": 1491,
+        "nonblank": 1382
+      },
+      {
+        "package": "icp-rosetta-integration-tests",
+        "path": "rs/rosetta-api/icp/tests/integration_tests",
+        "files": 2,
+        "lines": 1481,
+        "nonblank": 1380
+      },
+      {
+        "package": "universal-canister",
+        "path": "rs/universal_canister/impl",
+        "files": 3,
+        "lines": 1478,
+        "nonblank": 1333
+      },
+      {
+        "package": "ic-universal-canister",
+        "path": "rs/universal_canister/lib",
+        "files": 2,
+        "lines": 1457,
+        "nonblank": 1273
+      },
+      {
+        "package": "ic-secp256r1",
+        "path": "packages/ic-secp256r1",
+        "files": 3,
+        "lines": 1452,
+        "nonblank": 1228
+      },
+      {
+        "package": "vsock_lib",
+        "path": "rs/ic_os/vsock",
+        "files": 10,
+        "lines": 1449,
+        "nonblank": 1240
+      },
+      {
+        "package": "ic-crypto-test-utils-tls",
+        "path": "rs/crypto/test_utils/tls",
+        "files": 7,
+        "lines": 1424,
+        "nonblank": 1272
+      },
+      {
+        "package": "ic-fstrim-tool",
+        "path": "rs/ic_os/os_tools/fstrim_tool",
+        "files": 6,
+        "lines": 1423,
+        "nonblank": 1284
+      },
+      {
+        "package": "ic-types-cycles",
+        "path": "rs/types/cycles",
+        "files": 7,
+        "lines": 1415,
+        "nonblank": 1219
+      },
+      {
+        "package": "wasm_fuzzers",
+        "path": "rs/embedders/fuzz",
+        "files": 13,
+        "lines": 1409,
+        "nonblank": 1267
+      },
+      {
+        "package": "ic-nervous-system-governance",
+        "path": "rs/nervous_system/governance",
+        "files": 5,
+        "lines": 1392,
+        "nonblank": 1239
+      },
+      {
+        "package": "ic-crypto-internal-threshold-sig-canister-threshold-sig-test-utils",
+        "path": "rs/crypto/internal/crypto_lib/threshold_sig/canister_threshold_sig/test_utils",
+        "files": 1,
+        "lines": 1362,
+        "nonblank": 1186
+      },
+      {
+        "package": "ic-heap-bytes",
+        "path": "packages/ic-heap-bytes",
+        "files": 2,
+        "lines": 1348,
+        "nonblank": 1260
+      },
+      {
+        "package": "ic-rosetta-test-utils",
+        "path": "rs/rosetta-api/icp/test_utils",
+        "files": 2,
+        "lines": 1345,
+        "nonblank": 1226
+      },
+      {
+        "package": "ic-replica",
+        "path": "rs/replica",
+        "files": 8,
+        "lines": 1337,
+        "nonblank": 1213
+      },
+      {
+        "package": "ic-interfaces-mocks",
+        "path": "rs/interfaces/mocks",
+        "files": 5,
+        "lines": 1332,
+        "nonblank": 1166
+      },
+      {
+        "package": "ic-neurons-fund",
+        "path": "rs/nervous_system/neurons_fund",
+        "files": 4,
+        "lines": 1330,
+        "nonblank": 1216
+      },
+      {
+        "package": "ic_boundary_node_system_tests",
+        "path": "rs/tests/boundary_nodes",
+        "files": 8,
+        "lines": 1326,
+        "nonblank": 1150
+      },
+      {
+        "package": "ic_nested_nns_recovery_common",
+        "path": "rs/tests/nested/nns_recovery",
+        "files": 6,
+        "lines": 1313,
+        "nonblank": 1187
+      },
+      {
+        "package": "ic-test-utilities-state",
+        "path": "rs/test_utilities/state",
+        "files": 2,
+        "lines": 1310,
+        "nonblank": 1169
+      },
+      {
+        "package": "ic-crypto-tree-hash-fuzz-check-witness-equality-utils",
+        "path": "rs/crypto/tree_hash/fuzz/check_witness_equality_utils",
+        "files": 2,
+        "lines": 1300,
+        "nonblank": 1178
+      },
+      {
+        "package": "ic-regedit",
+        "path": "rs/registry/regedit",
+        "files": 11,
+        "lines": 1291,
+        "nonblank": 1147
+      },
+      {
+        "package": "attestation",
+        "path": "rs/ic_os/sev/attestation",
+        "files": 8,
+        "lines": 1284,
+        "nonblank": 1134
+      },
+      {
+        "package": "ic-canister-client",
+        "path": "rs/canister_client",
+        "files": 5,
+        "lines": 1279,
+        "nonblank": 1147
+      },
+      {
+        "package": "release-runscript",
+        "path": "rs/nervous_system/tools/release-runscript",
+        "files": 4,
+        "lines": 1270,
+        "nonblank": 1120
+      },
+      {
+        "package": "canister_http",
+        "path": "rs/tests/networking/canister_http",
+        "files": 1,
+        "lines": 1266,
+        "nonblank": 1149
+      },
+      {
+        "package": "ic-crypto-internal-types",
+        "path": "rs/crypto/internal/crypto_lib/types",
+        "files": 15,
+        "lines": 1259,
+        "nonblank": 1128
+      },
+      {
+        "package": "phantom_newtype",
+        "path": "rs/phantom_newtype",
+        "files": 5,
+        "lines": 1253,
+        "nonblank": 1154
+      },
+      {
+        "package": "ic-icrc-rosetta-client",
+        "path": "rs/rosetta-api/icrc1/client",
+        "files": 3,
+        "lines": 1248,
+        "nonblank": 1128
+      },
+      {
+        "package": "ic-testnet-mainnet-nns",
+        "path": "rs/tests/testnets/mainnet_nns",
+        "files": 2,
+        "lines": 1210,
+        "nonblank": 1092
+      },
+      {
+        "package": "ic-registry-nns-data-provider",
+        "path": "rs/registry/nns_data_provider",
+        "files": 5,
+        "lines": 1206,
+        "nonblank": 1078
+      },
+      {
+        "package": "ic-btc-consensus",
+        "path": "rs/bitcoin/consensus",
+        "files": 6,
+        "lines": 1190,
+        "nonblank": 1082
+      },
+      {
+        "package": "ic-logger",
+        "path": "rs/monitoring/logger",
+        "files": 4,
+        "lines": 1183,
+        "nonblank": 1050
+      },
+      {
+        "package": "nested",
+        "path": "rs/tests/nested",
+        "files": 6,
+        "lines": 1169,
+        "nonblank": 1028
+      },
+      {
+        "package": "ic-icrc3-test-ledger",
+        "path": "rs/ledger_suite/icrc1/test_utils/icrc3_test_ledger",
+        "files": 3,
+        "lines": 1129,
+        "nonblank": 978
+      },
+      {
+        "package": "partition_tools",
+        "path": "rs/ic_os/build_tools/partition_tools",
+        "files": 6,
+        "lines": 1123,
+        "nonblank": 956
+      },
+      {
+        "package": "ic-crypto-node-key-validation",
+        "path": "rs/crypto/node_key_validation",
+        "files": 5,
+        "lines": 1120,
+        "nonblank": 954
+      },
+      {
+        "package": "execution-environment-bench",
+        "path": "rs/execution_environment/benches/lib",
+        "files": 4,
+        "lines": 1096,
+        "nonblank": 1028
+      },
+      {
+        "package": "os_qualification_utils",
+        "path": "rs/tests/dre/utils",
+        "files": 8,
+        "lines": 1064,
+        "nonblank": 947
+      },
+      {
+        "package": "ic-metrics",
+        "path": "rs/monitoring/metrics",
+        "files": 7,
+        "lines": 1045,
+        "nonblank": 934
+      },
+      {
+        "package": "ic-validator-http-request-test-utils",
+        "path": "rs/validator/http_request_test_utils",
+        "files": 2,
+        "lines": 1037,
+        "nonblank": 907
+      },
+      {
+        "package": "ic-ledger-suite-orchestrator-test-utils",
+        "path": "rs/ethereum/ledger-suite-orchestrator/test_utils",
+        "files": 4,
+        "lines": 1033,
+        "nonblank": 935
+      },
+      {
+        "package": "financial_integrations-system-tests",
+        "path": "rs/tests/financial_integrations",
+        "files": 2,
+        "lines": 1033,
+        "nonblank": 946
+      },
+      {
+        "package": "ic-nervous-system-canisters",
+        "path": "rs/nervous_system/canisters",
+        "files": 5,
+        "lines": 1030,
+        "nonblank": 925
+      },
+      {
+        "package": "ic-http-utils",
+        "path": "rs/http_utils",
+        "files": 3,
+        "lines": 1027,
+        "nonblank": 894
+      },
+      {
+        "package": "bare_metal_deployment",
+        "path": "rs/ic_os/dev_test_tools/bare_metal_deployment",
+        "files": 4,
+        "lines": 1025,
+        "nonblank": 905
+      },
+      {
+        "package": "ic-icrc1-archive",
+        "path": "rs/ledger_suite/icrc1/archive",
+        "files": 4,
+        "lines": 1025,
+        "nonblank": 904
+      },
+      {
+        "package": "ic-nervous-system-root",
+        "path": "rs/nervous_system/root",
+        "files": 5,
+        "lines": 1018,
+        "nonblank": 894
+      },
+      {
+        "package": "ic-nervous-system-timer-task",
+        "path": "rs/nervous_system/timer_task",
+        "files": 4,
+        "lines": 1011,
+        "nonblank": 886
+      },
+      {
+        "package": "ic-crypto-internal-bls12-381-vetkd",
+        "path": "rs/crypto/internal/crypto_lib/bls12_381/vetkd",
+        "files": 3,
+        "lines": 1010,
+        "nonblank": 825
+      },
+      {
+        "package": "ic-engine-controller",
+        "path": "rs/engine_controller",
+        "files": 4,
+        "lines": 1006,
+        "nonblank": 914
+      },
+      {
+        "package": "ic_device",
+        "path": "rs/ic_os/device",
+        "files": 4,
+        "lines": 995,
+        "nonblank": 883
+      },
+      {
+        "package": "ic-pub-key",
+        "path": "packages/ic-pub-key",
+        "files": 2,
+        "lines": 990,
+        "nonblank": 898
+      },
+      {
+        "package": "ic-test-artifact-pool",
+        "path": "rs/test_utilities/artifact_pool",
+        "files": 3,
+        "lines": 985,
+        "nonblank": 899
+      },
+      {
+        "package": "ic-systest-firewall",
+        "path": "rs/tests/networking/firewall",
+        "files": 4,
+        "lines": 983,
+        "nonblank": 873
+      },
+      {
+        "package": "rosetta-system-tests",
+        "path": "rs/tests/financial_integrations/rosetta",
+        "files": 2,
+        "lines": 977,
+        "nonblank": 883
+      },
+      {
+        "package": "ic-wasm-types",
+        "path": "rs/types/wasm_types",
+        "files": 2,
+        "lines": 974,
+        "nonblank": 905
+      },
+      {
+        "package": "ic-crypto-internal-logmon",
+        "path": "rs/crypto/internal/logmon",
+        "files": 6,
+        "lines": 970,
+        "nonblank": 884
+      },
+      {
+        "package": "blob-store",
+        "path": "rs/cross-chain/blob_store",
+        "files": 10,
+        "lines": 958,
+        "nonblank": 840
+      },
+      {
+        "package": "ic-consensus-cup-utils",
+        "path": "rs/consensus/cup_utils",
+        "files": 1,
+        "lines": 942,
+        "nonblank": 863
+      },
+      {
+        "package": "ic-subnet-merging",
+        "path": "rs/recovery/subnet_merging",
+        "files": 3,
+        "lines": 940,
+        "nonblank": 876
+      },
+      {
+        "package": "ic-registry-canister-client",
+        "path": "rs/registry/canister-client",
+        "files": 4,
+        "lines": 930,
+        "nonblank": 813
+      },
+      {
+        "package": "consensus-upgrade-system-tests",
+        "path": "rs/tests/consensus/upgrade",
+        "files": 5,
+        "lines": 930,
+        "nonblank": 829
+      },
+      {
+        "package": "ic-nervous-system-humanize",
+        "path": "rs/nervous_system/humanize",
+        "files": 14,
+        "lines": 907,
+        "nonblank": 798
+      },
+      {
+        "package": "ic-sns-governance-token-valuation",
+        "path": "rs/sns/governance/token_valuation",
+        "files": 2,
+        "lines": 907,
+        "nonblank": 788
+      },
+      {
+        "package": "open_rootfs",
+        "path": "rs/ic_os/open_rootfs",
+        "files": 5,
+        "lines": 906,
+        "nonblank": 808
+      },
+      {
+        "package": "ic-ledger-suite-state-machine-helpers",
+        "path": "rs/ledger_suite/test_utils/state_machine_helpers",
+        "files": 1,
+        "lines": 902,
+        "nonblank": 862
+      },
+      {
+        "package": "rejoin-test-lib",
+        "path": "rs/tests/message_routing/rejoin_test_lib",
+        "files": 1,
+        "lines": 899,
+        "nonblank": 830
+      },
+      {
+        "package": "ic-test-utilities-types",
+        "path": "rs/test_utilities/types",
+        "files": 14,
+        "lines": 895,
+        "nonblank": 785
+      },
+      {
+        "package": "ic-subnet-tools",
+        "path": "rs/recovery/subnet_tools",
+        "files": 7,
+        "lines": 893,
+        "nonblank": 769
+      },
+      {
+        "package": "ic-crypto-internal-csp-proptest-utils",
+        "path": "rs/crypto/internal/crypto_service_provider/csp_proptest_utils",
+        "files": 2,
+        "lines": 892,
+        "nonblank": 801
+      },
+      {
+        "package": "rate-limits-api",
+        "path": "rs/boundary_node/rate_limits/api",
+        "files": 3,
+        "lines": 876,
+        "nonblank": 782
+      },
+      {
+        "package": "ic-crypto-tree-hash-test-utils",
+        "path": "rs/crypto/tree_hash/test_utils",
+        "files": 5,
+        "lines": 876,
+        "nonblank": 814
+      },
+      {
+        "package": "ic-nns-gtc",
+        "path": "rs/nns/gtc",
+        "files": 8,
+        "lines": 874,
+        "nonblank": 764
+      },
+      {
+        "package": "node-system-tests",
+        "path": "rs/tests/node",
+        "files": 7,
+        "lines": 868,
+        "nonblank": 763
+      },
+      {
+        "package": "ic-crypto-internal-basic-sig-ed25519",
+        "path": "rs/crypto/internal/crypto_lib/basic_sig/ed25519",
+        "files": 11,
+        "lines": 865,
+        "nonblank": 756
+      },
+      {
+        "package": "ic-btc-replica-types",
+        "path": "rs/bitcoin/replica_types",
+        "files": 1,
+        "lines": 841,
+        "nonblank": 756
+      },
+      {
+        "package": "ic-crypto-sha2",
+        "path": "rs/crypto/sha2",
+        "files": 9,
+        "lines": 825,
+        "nonblank": 693
+      },
+      {
+        "package": "ic-canister-serve",
+        "path": "rs/rust_canisters/canister_serve",
+        "files": 2,
+        "lines": 824,
+        "nonblank": 736
+      },
+      {
+        "package": "ic-icp-archive",
+        "path": "rs/ledger_suite/icp/archive",
+        "files": 4,
+        "lines": 811,
+        "nonblank": 726
+      },
+      {
+        "package": "tree-deserializer",
+        "path": "rs/tree_deserializer",
+        "files": 4,
+        "lines": 811,
+        "nonblank": 723
+      },
+      {
+        "package": "ic-nervous-system-proxied-canister-calls-tracker",
+        "path": "rs/nervous_system/proxied_canister_calls_tracker",
+        "files": 3,
+        "lines": 758,
+        "nonblank": 652
+      },
+      {
+        "package": "ic-crypto-secrets-containers",
+        "path": "rs/crypto/secrets_containers",
+        "files": 5,
+        "lines": 745,
+        "nonblank": 594
+      },
+      {
+        "package": "ic-crypto-standalone-sig-verifier",
+        "path": "rs/crypto/standalone-sig-verifier",
+        "files": 6,
+        "lines": 737,
+        "nonblank": 655
+      },
+      {
+        "package": "network",
+        "path": "rs/ic_os/networking/network",
+        "files": 3,
+        "lines": 735,
+        "nonblank": 641
+      },
+      {
+        "package": "ic-crypto-internal-basic-sig-der-utils",
+        "path": "rs/crypto/internal/crypto_lib/basic_sig/der_utils",
+        "files": 2,
+        "lines": 734,
+        "nonblank": 661
+      },
+      {
+        "package": "ic-registry-client",
+        "path": "rs/registry/client",
+        "files": 3,
+        "lines": 729,
+        "nonblank": 646
+      },
+      {
+        "package": "guest_upgrade_tests",
+        "path": "rs/ic_os/guest_upgrade/tests",
+        "files": 1,
+        "lines": 720,
+        "nonblank": 636
+      },
+      {
+        "package": "ic-test-utilities-privileges",
+        "path": "rs/test_utilities/privileges",
+        "files": 2,
+        "lines": 707,
+        "nonblank": 640
+      },
+      {
+        "package": "ic-utils",
+        "path": "rs/utils",
+        "files": 9,
+        "lines": 702,
+        "nonblank": 627
+      },
+      {
+        "package": "ic-crypto-node-key-generation",
+        "path": "rs/crypto/node_key_generation",
+        "files": 3,
+        "lines": 694,
+        "nonblank": 611
+      },
+      {
+        "package": "ic-replica-setup-ic-network",
+        "path": "rs/replica/setup_ic_network",
+        "files": 1,
+        "lines": 690,
+        "nonblank": 649
+      },
+      {
+        "package": "sync-with-released-nervous-system-wasms",
+        "path": "rs/nervous_system/tools/sync-with-released-nervous-system-wasms",
+        "files": 1,
+        "lines": 689,
+        "nonblank": 620
+      },
+      {
+        "package": "guest_upgrade_server",
+        "path": "rs/ic_os/guest_upgrade/server",
+        "files": 5,
+        "lines": 682,
+        "nonblank": 616
+      },
+      {
+        "package": "ic-crypto-iccsa",
+        "path": "rs/crypto/iccsa",
+        "files": 8,
+        "lines": 680,
+        "nonblank": 602
+      },
+      {
+        "package": "guestos_tool",
+        "path": "rs/ic_os/os_tools/guestos_tool",
+        "files": 3,
+        "lines": 680,
+        "nonblank": 583
+      },
+      {
+        "package": "ic-crypto-tls-cert-validation",
+        "path": "rs/crypto/node_key_validation/tls_cert_validation",
+        "files": 2,
+        "lines": 667,
+        "nonblank": 581
+      },
+      {
+        "package": "ic-hpke",
+        "path": "packages/ic-hpke",
+        "files": 2,
+        "lines": 665,
+        "nonblank": 567
+      },
+      {
+        "package": "ic-peer-manager",
+        "path": "rs/p2p/peer_manager",
+        "files": 3,
+        "lines": 658,
+        "nonblank": 581
+      },
+      {
+        "package": "ic-boundary-nodes-integration-test-common",
+        "path": "rs/tests/boundary_nodes/integration_test_common",
+        "files": 2,
+        "lines": 655,
+        "nonblank": 548
+      },
+      {
+        "package": "pocket-ic-test-canister",
+        "path": "packages/pocket-ic/test_canister",
+        "files": 1,
+        "lines": 653,
+        "nonblank": 575
+      },
+      {
+        "package": "ic-nervous-system-rate-limits",
+        "path": "rs/nervous_system/rate_limits",
+        "files": 2,
+        "lines": 653,
+        "nonblank": 561
+      },
+      {
+        "package": "rust-canister-tests",
+        "path": "rs/rust_canisters/tests",
+        "files": 13,
+        "lines": 647,
+        "nonblank": 559
+      },
+      {
+        "package": "memory-test",
+        "path": "rs/rust_canisters/memory_test",
+        "files": 2,
+        "lines": 644,
+        "nonblank": 591
+      },
+      {
+        "package": "ic-crypto-internal-basic-sig-ecdsa-secp256k1",
+        "path": "rs/crypto/internal/crypto_lib/basic_sig/ecdsa_secp256k1",
+        "files": 5,
+        "lines": 642,
+        "nonblank": 562
+      },
+      {
+        "package": "hostos_tool",
+        "path": "rs/ic_os/os_tools/hostos_tool",
+        "files": 3,
+        "lines": 625,
+        "nonblank": 549
+      },
+      {
+        "package": "salt_sharing",
+        "path": "rs/boundary_node/salt_sharing",
+        "files": 7,
+        "lines": 623,
+        "nonblank": 540
+      },
+      {
+        "package": "ic-registry-keys",
+        "path": "rs/registry/keys",
+        "files": 1,
+        "lines": 621,
+        "nonblank": 561
+      },
+      {
+        "package": "ic-utils-lru-cache",
+        "path": "rs/utils/lru_cache",
+        "files": 1,
+        "lines": 620,
+        "nonblank": 538
+      },
+      {
+        "package": "ic-nervous-system-initial-supply",
+        "path": "rs/nervous_system/initial_supply",
+        "files": 2,
+        "lines": 602,
+        "nonblank": 525
+      },
+      {
+        "package": "ic-nns-gtc-accounts",
+        "path": "rs/nns/gtc_accounts",
+        "files": 1,
+        "lines": 602,
+        "nonblank": 598
+      },
+      {
+        "package": "fe-derive",
+        "path": "rs/crypto/internal/crypto_lib/threshold_sig/canister_threshold_sig/fe-derive",
+        "files": 1,
+        "lines": 600,
+        "nonblank": 482
+      },
+      {
+        "package": "ic-cup-explorer",
+        "path": "rs/cup_explorer",
+        "files": 4,
+        "lines": 600,
+        "nonblank": 535
+      },
+      {
+        "package": "kv_store",
+        "path": "rs/tests/test_canisters/kv_store",
+        "files": 7,
+        "lines": 599,
+        "nonblank": 528
+      },
+      {
+        "package": "canlog",
+        "path": "packages/canlog",
+        "files": 3,
+        "lines": 586,
+        "nonblank": 519
+      },
+      {
+        "package": "consensus-backup-system-tests",
+        "path": "rs/tests/consensus/backup",
+        "files": 2,
+        "lines": 586,
+        "nonblank": 537
+      },
+      {
+        "package": "sns-treasury-manager",
+        "path": "rs/sns/treasury_manager",
+        "files": 1,
+        "lines": 584,
+        "nonblank": 493
+      },
+      {
+        "package": "ic-signature-verification",
+        "path": "packages/ic-signature-verification",
+        "files": 3,
+        "lines": 571,
+        "nonblank": 516
+      },
+      {
+        "package": "ic-crypto-internal-basic-sig-cose",
+        "path": "rs/crypto/internal/crypto_lib/basic_sig/cose",
+        "files": 2,
+        "lines": 567,
+        "nonblank": 493
+      },
+      {
+        "package": "ic-crypto-internal-tls",
+        "path": "rs/crypto/internal/crypto_lib/tls",
+        "files": 2,
+        "lines": 564,
+        "nonblank": 496
+      },
+      {
+        "package": "ic-error-types",
+        "path": "packages/ic-error-types",
+        "files": 1,
+        "lines": 562,
+        "nonblank": 525
+      },
+      {
+        "package": "xnet-slo-test-lib",
+        "path": "rs/tests/message_routing/xnet/slo_test_lib",
+        "files": 1,
+        "lines": 561,
+        "nonblank": 515
+      },
+      {
+        "package": "sev_host",
+        "path": "rs/ic_os/sev/host",
+        "files": 3,
+        "lines": 556,
+        "nonblank": 487
+      },
+      {
+        "package": "ic_stable_memory_integrity",
+        "path": "rs/rust_canisters/stable_memory_integrity",
+        "files": 3,
+        "lines": 552,
+        "nonblank": 514
+      },
+      {
+        "package": "ic-icp-test-ledger",
+        "path": "rs/ledger_suite/icp/test_utils/icp_test_ledger",
+        "files": 3,
+        "lines": 546,
+        "nonblank": 481
+      },
+      {
+        "package": "guest_upgrade_client",
+        "path": "rs/ic_os/guest_upgrade/client",
+        "files": 3,
+        "lines": 539,
+        "nonblank": 476
+      },
+      {
+        "package": "ic-crypto-test-utils-crypto-returning-ok",
+        "path": "rs/crypto/test_utils/crypto_returning_ok",
+        "files": 1,
+        "lines": 536,
+        "nonblank": 483
+      },
+      {
+        "package": "ic-utils-thread",
+        "path": "rs/utils/thread",
+        "files": 3,
+        "lines": 532,
+        "nonblank": 463
+      },
+      {
+        "package": "ic-nns-init",
+        "path": "rs/nns/init",
+        "files": 2,
+        "lines": 530,
+        "nonblank": 476
+      },
+      {
+        "package": "proxy_canister",
+        "path": "rs/rust_canisters/proxy_canister",
+        "files": 2,
+        "lines": 523,
+        "nonblank": 470
+      },
+      {
+        "package": "ic-nervous-system-proto",
+        "path": "rs/nervous_system/proto",
+        "files": 5,
+        "lines": 520,
+        "nonblank": 482
+      },
+      {
+        "package": "ic-registry-canister-chunkify",
+        "path": "rs/registry/canister/chunkify",
+        "files": 2,
+        "lines": 517,
+        "nonblank": 441
+      },
+      {
+        "package": "ic-nervous-system-common-test-utils",
+        "path": "rs/nervous_system/common/test_utils",
+        "files": 3,
+        "lines": 516,
+        "nonblank": 459
+      },
+      {
+        "package": "sns_tests",
+        "path": "rs/tests/nns/sns",
+        "files": 10,
+        "lines": 510,
+        "nonblank": 461
+      },
+      {
+        "package": "ic-artifact-manager",
+        "path": "rs/p2p/artifact_manager",
+        "files": 1,
+        "lines": 507,
+        "nonblank": 471
+      },
+      {
+        "package": "ic-crypto-internal-basic-sig-ecdsa-secp256r1",
+        "path": "rs/crypto/internal/crypto_lib/basic_sig/ecdsa_secp256r1",
+        "files": 5,
+        "lines": 497,
+        "nonblank": 435
+      },
+      {
+        "package": "ic-https-outcalls-socks-proxy",
+        "path": "rs/https_outcalls/socks_proxy",
+        "files": 1,
+        "lines": 489,
+        "nonblank": 429
+      },
+      {
+        "package": "config_types",
+        "path": "rs/ic_os/config/types",
+        "files": 1,
+        "lines": 489,
+        "nonblank": 444
+      },
+      {
+        "package": "ic-protobuf-generator",
+        "path": "rs/protobuf/generator",
+        "files": 2,
+        "lines": 486,
+        "nonblank": 450
+      },
+      {
+        "package": "ic-test-utilities-registry",
+        "path": "rs/test_utilities/registry",
+        "files": 1,
+        "lines": 484,
+        "nonblank": 437
+      },
+      {
+        "package": "local_key",
+        "path": "rs/tla_instrumentation/local_key",
+        "files": 1,
+        "lines": 482,
+        "nonblank": 445
+      },
+      {
+        "package": "ic-registry-local-store",
+        "path": "rs/registry/local_store",
+        "files": 1,
+        "lines": 475,
+        "nonblank": 426
+      },
+      {
+        "package": "ic-bitcoin-canister-mock",
+        "path": "rs/bitcoin/mock",
+        "files": 3,
+        "lines": 473,
+        "nonblank": 418
+      },
+      {
+        "package": "ic-types-test-utils",
+        "path": "rs/types/types_test_utils",
+        "files": 3,
+        "lines": 470,
+        "nonblank": 417
+      },
+      {
+        "package": "candid-utils",
+        "path": "rs/nervous_system/candid_utils",
+        "files": 5,
+        "lines": 464,
+        "nonblank": 429
+      },
+      {
+        "package": "linux_kernel_command_line",
+        "path": "rs/ic_os/linux_kernel_command_line",
+        "files": 1,
+        "lines": 459,
+        "nonblank": 429
+      },
+      {
+        "package": "ic-ledger-test-utils",
+        "path": "rs/ledger_suite/icp/test_utils",
+        "files": 7,
+        "lines": 459,
+        "nonblank": 437
+      },
+      {
+        "package": "xnet-test",
+        "path": "rs/rust_canisters/xnet_test",
+        "files": 2,
+        "lines": 459,
+        "nonblank": 397
+      },
+      {
+        "package": "ic-certification-test-utils",
+        "path": "rs/certification/test-utils",
+        "files": 1,
+        "lines": 456,
+        "nonblank": 408
+      },
+      {
+        "package": "ic-interfaces-state-manager",
+        "path": "rs/interfaces/state_manager",
+        "files": 1,
+        "lines": 455,
+        "nonblank": 414
+      },
+      {
+        "package": "ic-crypto-utils-threshold-sig-der",
+        "path": "rs/crypto/utils/threshold_sig_der",
+        "files": 3,
+        "lines": 454,
+        "nonblank": 398
+      },
+      {
+        "package": "ic-determinism-test",
+        "path": "rs/determinism_test",
+        "files": 3,
+        "lines": 454,
+        "nonblank": 423
+      },
+      {
+        "package": "statesync-test",
+        "path": "rs/rust_canisters/statesync_test",
+        "files": 3,
+        "lines": 454,
+        "nonblank": 406
+      },
+      {
+        "package": "ic-http-endpoints-metrics",
+        "path": "rs/http_endpoints/metrics",
+        "files": 2,
+        "lines": 449,
+        "nonblank": 410
+      },
+      {
+        "package": "ic-boundary-nodes-performance-test-common",
+        "path": "rs/tests/boundary_nodes/performance_test_common",
+        "files": 1,
+        "lines": 445,
+        "nonblank": 413
+      },
+      {
+        "package": "ic-crypto-internal-test-vectors",
+        "path": "rs/crypto/internal/test_vectors",
+        "files": 5,
+        "lines": 442,
+        "nonblank": 409
+      },
+      {
+        "package": "grub",
+        "path": "rs/ic_os/boot/grub",
+        "files": 1,
+        "lines": 440,
+        "nonblank": 379
+      },
+      {
+        "package": "ic-icp-rosetta-runner",
+        "path": "rs/rosetta-api/icp/runner",
+        "files": 3,
+        "lines": 439,
+        "nonblank": 402
+      },
+      {
+        "package": "ic-nns-common",
+        "path": "rs/nns/common",
+        "files": 8,
+        "lines": 435,
+        "nonblank": 383
+      },
+      {
+        "package": "messaging-test",
+        "path": "rs/rust_canisters/messaging_test",
+        "files": 3,
+        "lines": 431,
+        "nonblank": 397
+      },
+      {
+        "package": "ic-icrc-rosetta-runner",
+        "path": "rs/rosetta-api/icrc1/runner",
+        "files": 2,
+        "lines": 429,
+        "nonblank": 368
+      },
+      {
+        "package": "cycles_minting",
+        "path": "rs/tests/nns/cycles_minting",
+        "files": 1,
+        "lines": 429,
+        "nonblank": 390
+      },
+      {
+        "package": "ic-nns-handler-root-interface",
+        "path": "rs/nns/handlers/root/interface",
+        "files": 2,
+        "lines": 423,
+        "nonblank": 375
+      },
+      {
+        "package": "ic-crypto-tls-interfaces",
+        "path": "rs/crypto/tls_interfaces",
+        "files": 2,
+        "lines": 420,
+        "nonblank": 359
+      },
+      {
+        "package": "ic-nervous-system-tools-signed-canister-reply",
+        "path": "rs/nervous_system/tools/signed-canister-reply",
+        "files": 3,
+        "lines": 417,
+        "nonblank": 357
+      },
+      {
+        "package": "ic-registry-node-provider-rewards",
+        "path": "rs/registry/node_provider_rewards",
+        "files": 2,
+        "lines": 417,
+        "nonblank": 380
+      },
+      {
+        "package": "rate-limit-canister-integration-tests",
+        "path": "rs/boundary_node/rate_limits/integration_tests",
+        "files": 3,
+        "lines": 416,
+        "nonblank": 368
+      },
+      {
+        "package": "ic-http-endpoints-async-utils",
+        "path": "rs/http_endpoints/async_utils",
+        "files": 4,
+        "lines": 416,
+        "nonblank": 366
+      },
+      {
+        "package": "icrc-ledger-agent",
+        "path": "packages/icrc-ledger-agent",
+        "files": 1,
+        "lines": 415,
+        "nonblank": 383
+      },
+      {
+        "package": "setupos-image-config",
+        "path": "rs/ic_os/dev_test_tools/setupos-image-config",
+        "files": 2,
+        "lines": 415,
+        "nonblank": 338
+      },
+      {
+        "package": "dflate",
+        "path": "rs/ic_os/build_tools/dflate",
+        "files": 4,
+        "lines": 414,
+        "nonblank": 342
+      },
+      {
+        "package": "deterministic_ips",
+        "path": "rs/ic_os/networking/deterministic_ips",
+        "files": 3,
+        "lines": 412,
+        "nonblank": 346
+      },
+      {
+        "package": "ic-node-rewards-canister-api",
+        "path": "rs/node_rewards/canister/api",
+        "files": 5,
+        "lines": 403,
+        "nonblank": 370
+      },
+      {
+        "package": "ic-image-upgrader",
+        "path": "rs/orchestrator/image_upgrader",
+        "files": 2,
+        "lines": 403,
+        "nonblank": 355
+      },
+      {
+        "package": "ic-http-types",
+        "path": "packages/ic-http-types",
+        "files": 1,
+        "lines": 400,
+        "nonblank": 369
+      },
+      {
+        "package": "tla_instrumentation_proc_macros",
+        "path": "rs/tla_instrumentation/tla_instrumentation_proc_macros",
+        "files": 2,
+        "lines": 399,
+        "nonblank": 363
+      },
+      {
+        "package": "ic-registry-subnet-features",
+        "path": "rs/registry/subnet_features",
+        "files": 1,
+        "lines": 396,
+        "nonblank": 351
+      },
+      {
+        "package": "ic-nns-governance-init",
+        "path": "rs/nns/governance/init",
+        "files": 1,
+        "lines": 388,
+        "nonblank": 346
+      },
+      {
+        "package": "ic-crypto-prng",
+        "path": "rs/crypto/prng",
+        "files": 3,
+        "lines": 386,
+        "nonblank": 322
+      },
+      {
+        "package": "ic-crypto-test-utils-keygen",
+        "path": "rs/crypto/test_utils/keygen",
+        "files": 1,
+        "lines": 382,
+        "nonblank": 358
+      },
+      {
+        "package": "ic-http-endpoints-test-agent",
+        "path": "rs/http_endpoints/test_agent",
+        "files": 1,
+        "lines": 379,
+        "nonblank": 334
+      },
+      {
+        "package": "httpbin-rs",
+        "path": "rs/tests/httpbin-rs",
+        "files": 1,
+        "lines": 379,
+        "nonblank": 332
+      },
+      {
+        "package": "salt-sharing-canister-integration-tests",
+        "path": "rs/boundary_node/salt_sharing/integration_tests",
+        "files": 3,
+        "lines": 377,
+        "nonblank": 342
+      },
+      {
+        "package": "attestation_testing",
+        "path": "rs/ic_os/sev/attestation/testing",
+        "files": 3,
+        "lines": 374,
+        "nonblank": 324
+      },
+      {
+        "package": "ic-registry-canister-api",
+        "path": "rs/registry/canister/api",
+        "files": 2,
+        "lines": 374,
+        "nonblank": 322
+      },
+      {
+        "package": "ic-test-utilities-metrics",
+        "path": "rs/test_utilities/metrics",
+        "files": 1,
+        "lines": 374,
+        "nonblank": 326
+      },
+      {
+        "package": "consensus-vetkd-system-tests",
+        "path": "rs/tests/consensus/vetkd",
+        "files": 1,
+        "lines": 369,
+        "nonblank": 334
+      },
+      {
+        "package": "ic-canister-client-sender",
+        "path": "rs/canister_client/sender",
+        "files": 3,
+        "lines": 366,
+        "nonblank": 333
+      },
+      {
+        "package": "ic-registry-proto-data-provider",
+        "path": "rs/registry/proto_data_provider",
+        "files": 1,
+        "lines": 361,
+        "nonblank": 311
+      },
+      {
+        "package": "ic-networking-subnet-update-workload",
+        "path": "rs/tests/networking/subnet_update_workload",
+        "files": 1,
+        "lines": 355,
+        "nonblank": 340
+      },
+      {
+        "package": "ic-crypto-internal-seed",
+        "path": "rs/crypto/internal/crypto_lib/seed",
+        "files": 4,
+        "lines": 353,
+        "nonblank": 293
+      },
+      {
+        "package": "ic-ethereum-types",
+        "path": "packages/ic-ethereum-types",
+        "files": 5,
+        "lines": 352,
+        "nonblank": 305
+      },
+      {
+        "package": "ic-crypto-internal-basic-sig-rsa-pkcs1",
+        "path": "rs/crypto/internal/crypto_lib/basic_sig/rsa_pkcs1",
+        "files": 3,
+        "lines": 350,
+        "nonblank": 288
+      },
+      {
+        "package": "nns_dapp",
+        "path": "rs/tests/nns/nns_dapp",
+        "files": 1,
+        "lines": 350,
+        "nonblank": 326
+      },
+      {
+        "package": "sev_guest",
+        "path": "rs/ic_os/sev/guest",
+        "files": 3,
+        "lines": 343,
+        "nonblank": 300
+      },
+      {
+        "package": "ic-registry-local-registry",
+        "path": "rs/registry/local_registry",
+        "files": 1,
+        "lines": 343,
+        "nonblank": 309
+      },
+      {
+        "package": "ic-sns-audit",
+        "path": "rs/sns/audit",
+        "files": 2,
+        "lines": 343,
+        "nonblank": 305
+      },
+      {
+        "package": "ic-sns-governance-proposals-amount-total-limit",
+        "path": "rs/sns/governance/proposals_amount_total_limit",
+        "files": 2,
+        "lines": 334,
+        "nonblank": 290
+      },
+      {
+        "package": "ic-consensus-mocks",
+        "path": "rs/consensus/mocks",
+        "files": 1,
+        "lines": 330,
+        "nonblank": 302
+      },
+      {
+        "package": "test-canister",
+        "path": "rs/execution_environment/benches/management_canister/test_canister",
+        "files": 2,
+        "lines": 317,
+        "nonblank": 282
+      },
+      {
+        "package": "ic-memory-transport",
+        "path": "rs/p2p/memory_transport",
+        "files": 1,
+        "lines": 313,
+        "nonblank": 291
+      },
+      {
+        "package": "ic-btc-adapter-client",
+        "path": "rs/bitcoin/client",
+        "files": 2,
+        "lines": 308,
+        "nonblank": 286
+      },
+      {
+        "package": "ic-nns-test-utils-golden-nns-state",
+        "path": "rs/nns/test_utils/golden_nns_state",
+        "files": 2,
+        "lines": 305,
+        "nonblank": 281
+      },
+      {
+        "package": "ic-exhaustive-derive",
+        "path": "rs/types/exhaustive_derive",
+        "files": 1,
+        "lines": 305,
+        "nonblank": 279
+      },
+      {
+        "package": "ic-crypto-internal-hmac",
+        "path": "rs/crypto/internal/crypto_lib/hmac",
+        "files": 3,
+        "lines": 302,
+        "nonblank": 250
+      },
+      {
+        "package": "ic-sha3",
+        "path": "packages/ic-sha3",
+        "files": 3,
+        "lines": 299,
+        "nonblank": 266
+      },
+      {
+        "package": "depcheck",
+        "path": "rs/depcheck",
+        "files": 2,
+        "lines": 298,
+        "nonblank": 271
+      },
+      {
+        "package": "ic-read-state-response-parser",
+        "path": "rs/canister_client/read_state_response_parser",
+        "files": 1,
+        "lines": 297,
+        "nonblank": 258
+      },
+      {
+        "package": "ic-nervous-system-timers",
+        "path": "rs/nervous_system/timers",
+        "files": 2,
+        "lines": 296,
+        "nonblank": 254
+      },
+      {
+        "package": "ic-nns-constants",
+        "path": "rs/nns/constants",
+        "files": 1,
+        "lines": 295,
+        "nonblank": 278
+      },
+      {
+        "package": "ic-ledger-canister-blocks-synchronizer-test-utils",
+        "path": "rs/rosetta-api/icp/ledger_canister_blocks_synchronizer/test_utils",
+        "files": 2,
+        "lines": 294,
+        "nonblank": 260
+      },
+      {
+        "package": "ic-nervous-system-long-message",
+        "path": "rs/nervous_system/long_message",
+        "files": 3,
+        "lines": 279,
+        "nonblank": 243
+      },
+      {
+        "package": "ic-nns-governance-protobuf-generator",
+        "path": "rs/nns/governance/protobuf_generator",
+        "files": 2,
+        "lines": 278,
+        "nonblank": 249
+      },
+      {
+        "package": "embedders_bench",
+        "path": "rs/embedders/benches/embedders_bench",
+        "files": 1,
+        "lines": 277,
+        "nonblank": 260
+      },
+      {
+        "package": "ic-crypto-test-utils-local-csp-vault",
+        "path": "rs/crypto/test_utils/local_csp_vault",
+        "files": 1,
+        "lines": 275,
+        "nonblank": 244
+      },
+      {
+        "package": "ic-canister-log",
+        "path": "rs/rust_canisters/canister_log",
+        "files": 2,
+        "lines": 273,
+        "nonblank": 235
+      },
+      {
+        "package": "ic-nns-test-utils-prepare-golden-state",
+        "path": "rs/nns/test_utils/prepare_golden_state",
+        "files": 2,
+        "lines": 272,
+        "nonblank": 241
+      },
+      {
+        "package": "ic-registry-client-fake",
+        "path": "rs/registry/fake",
+        "files": 2,
+        "lines": 266,
+        "nonblank": 240
+      },
+      {
+        "package": "ic-query-stats-tests",
+        "path": "rs/tests/query_stats/lib",
+        "files": 2,
+        "lines": 264,
+        "nonblank": 229
+      },
+      {
+        "package": "ic-icrc1-tokens-u256",
+        "path": "rs/ledger_suite/icrc1/tokens_u256",
+        "files": 2,
+        "lines": 262,
+        "nonblank": 222
+      },
+      {
+        "package": "ic-nervous-system-lock",
+        "path": "rs/nervous_system/lock",
+        "files": 2,
+        "lines": 259,
+        "nonblank": 227
+      },
+      {
+        "package": "http_counter",
+        "path": "rs/tests/test_canisters/http_counter",
+        "files": 2,
+        "lines": 258,
+        "nonblank": 232
+      },
+      {
+        "package": "icrc-cbor",
+        "path": "packages/icrc-cbor",
+        "files": 5,
+        "lines": 255,
+        "nonblank": 226
+      },
+      {
+        "package": "canister-creator",
+        "path": "rs/rust_canisters/canister_creator",
+        "files": 2,
+        "lines": 255,
+        "nonblank": 230
+      },
+      {
+        "package": "ic-nervous-system-access-list",
+        "path": "rs/nervous_system/access_list",
+        "files": 2,
+        "lines": 254,
+        "nonblank": 225
+      },
+      {
+        "package": "ic-boundary-nodes-system-test-utils",
+        "path": "rs/tests/boundary_nodes/utils",
+        "files": 4,
+        "lines": 249,
+        "nonblank": 227
+      },
+      {
+        "package": "ic-canister-profiler",
+        "path": "rs/rust_canisters/canister_profiler",
+        "files": 3,
+        "lines": 247,
+        "nonblank": 218
+      },
+      {
+        "package": "ic-nervous-system-submit-motion-proposal",
+        "path": "rs/nervous_system/tools/submit-motion-proposal",
+        "files": 1,
+        "lines": 243,
+        "nonblank": 213
+      },
+      {
+        "package": "alternative_guestos_tool",
+        "path": "rs/ic_os/build_tools/alternative_guestos",
+        "files": 3,
+        "lines": 241,
+        "nonblank": 219
+      },
+      {
+        "package": "canister-threshold-sig-fuzz",
+        "path": "rs/crypto/internal/crypto_lib/threshold_sig/canister_threshold_sig/fuzz",
+        "files": 5,
+        "lines": 237,
+        "nonblank": 206
+      },
+      {
+        "package": "os_qualification",
+        "path": "rs/tests/dre",
+        "files": 1,
+        "lines": 237,
+        "nonblank": 231
+      },
+      {
+        "package": "ic-crypto-temp-crypto-vault",
+        "path": "rs/crypto/temp_crypto/temp_vault",
+        "files": 1,
+        "lines": 236,
+        "nonblank": 210
+      },
+      {
+        "package": "ic-test-utilities-embedders",
+        "path": "rs/test_utilities/embedders",
+        "files": 1,
+        "lines": 236,
+        "nonblank": 212
+      },
+      {
+        "package": "ic-nervous-system-string",
+        "path": "rs/nervous_system/string",
+        "files": 2,
+        "lines": 232,
+        "nonblank": 206
+      },
+      {
+        "package": "ic-crypto-utils-ni-dkg",
+        "path": "rs/crypto/utils/ni_dkg",
+        "files": 2,
+        "lines": 228,
+        "nonblank": 207
+      },
+      {
+        "package": "dfn_http",
+        "path": "rs/rust_canisters/dfn_http",
+        "files": 3,
+        "lines": 228,
+        "nonblank": 204
+      },
+      {
+        "package": "ic_consensus_system_test_catch_up_test_common",
+        "path": "rs/tests/consensus/catch_up_test_common",
+        "files": 1,
+        "lines": 225,
+        "nonblank": 197
+      },
+      {
+        "package": "ic-nervous-system-collections-union-multi-map",
+        "path": "rs/nervous_system/collections/union_multi_map",
+        "files": 4,
+        "lines": 222,
+        "nonblank": 199
+      },
+      {
+        "package": "sev_guest_testing",
+        "path": "rs/ic_os/sev/guest/testing",
+        "files": 1,
+        "lines": 216,
+        "nonblank": 190
+      },
+      {
+        "package": "ic-metrics-assert",
+        "path": "packages/ic-metrics-assert",
+        "files": 1,
+        "lines": 214,
+        "nonblank": 194
+      },
+      {
+        "package": "ic-test-utilities-in-memory-logger",
+        "path": "rs/test_utilities/in_memory_logger",
+        "files": 2,
+        "lines": 214,
+        "nonblank": 193
+      },
+      {
+        "package": "config_types_compatibility_lib",
+        "path": "rs/ic_os/config/types/compatibility_tests",
+        "files": 4,
+        "lines": 210,
+        "nonblank": 183
+      },
+      {
+        "package": "nft_exporter",
+        "path": "rs/ic_os/metrics/nft_exporter",
+        "files": 1,
+        "lines": 209,
+        "nonblank": 182
+      },
+      {
+        "package": "ic-canonical-state-tree-hash-test-utils",
+        "path": "rs/canonical_state/tree_hash/test_utils",
+        "files": 1,
+        "lines": 205,
+        "nonblank": 181
+      },
+      {
+        "package": "lifeline",
+        "path": "rs/nns/handlers/lifeline/impl",
+        "files": 4,
+        "lines": 204,
+        "nonblank": 179
+      },
+      {
+        "package": "dfn_candid",
+        "path": "rs/rust_canisters/dfn_candid",
+        "files": 3,
+        "lines": 202,
+        "nonblank": 171
+      },
+      {
+        "package": "remote_attestation_server",
+        "path": "rs/ic_os/remote_attestation/server",
+        "files": 1,
+        "lines": 198,
+        "nonblank": 175
+      },
+      {
+        "package": "ic_consensus_system_test_node_registration_test_common",
+        "path": "rs/tests/consensus/node_registration_test_common",
+        "files": 1,
+        "lines": 197,
+        "nonblank": 179
+      },
+      {
+        "package": "ic-nervous-system-runtime",
+        "path": "rs/nervous_system/runtime",
+        "files": 1,
+        "lines": 196,
+        "nonblank": 178
+      },
+      {
+        "package": "ic-ckbtc-agent",
+        "path": "rs/bitcoin/ckbtc/agent",
+        "files": 1,
+        "lines": 192,
+        "nonblank": 173
+      },
+      {
+        "package": "ic-validate-eq",
+        "path": "rs/utils/validate_eq",
+        "files": 1,
+        "lines": 192,
+        "nonblank": 174
+      },
+      {
+        "package": "rate-limiting-canister-client",
+        "path": "rs/boundary_node/rate_limits/canister_client",
+        "files": 2,
+        "lines": 190,
+        "nonblank": 162
+      },
+      {
+        "package": "ic-nns-governance-derive-self-describing",
+        "path": "rs/nns/governance/derive_self_describing",
+        "files": 1,
+        "lines": 190,
+        "nonblank": 179
+      },
+      {
+        "package": "ic-crypto-test-utils-metrics",
+        "path": "rs/crypto/test_utils/metrics",
+        "files": 2,
+        "lines": 189,
+        "nonblank": 174
+      },
+      {
+        "package": "ic-nervous-system-histogram",
+        "path": "rs/nervous_system/histogram",
+        "files": 2,
+        "lines": 188,
+        "nonblank": 164
+      },
+      {
+        "package": "ic-ckdoge-agent",
+        "path": "rs/dogecoin/ckdoge/agent",
+        "files": 1,
+        "lines": 185,
+        "nonblank": 168
+      },
+      {
+        "package": "ic-crypto-internal-csp-test-utils",
+        "path": "rs/crypto/internal/csp_test_utils",
+        "files": 4,
+        "lines": 184,
+        "nonblank": 170
+      },
+      {
+        "package": "ic-crypto-test-utils-csp",
+        "path": "rs/crypto/test_utils/csp",
+        "files": 1,
+        "lines": 184,
+        "nonblank": 162
+      },
+      {
+        "package": "ic-sns-governance-protobuf-generator",
+        "path": "rs/sns/governance/protobuf_generator",
+        "files": 2,
+        "lines": 184,
+        "nonblank": 171
+      },
+      {
+        "package": "ic-xnet-uri",
+        "path": "rs/xnet/uri",
+        "files": 2,
+        "lines": 181,
+        "nonblank": 160
+      },
+      {
+        "package": "setupos_tool",
+        "path": "rs/ic_os/os_tools/setupos_tool",
+        "files": 1,
+        "lines": 179,
+        "nonblank": 153
+      },
+      {
+        "package": "ic-nervous-system-instruction-stats",
+        "path": "rs/nervous_system/instruction_stats",
+        "files": 2,
+        "lines": 175,
+        "nonblank": 152
+      },
+      {
+        "package": "ic-crypto-test-utils-keys",
+        "path": "rs/crypto/test_utils/keys",
+        "files": 1,
+        "lines": 174,
+        "nonblank": 164
+      },
+      {
+        "package": "ic-neurons-fund-audit",
+        "path": "rs/nervous_system/neurons_fund/nfplot",
+        "files": 1,
+        "lines": 173,
+        "nonblank": 155
+      },
+      {
+        "package": "messaging-test-utils",
+        "path": "rs/rust_canisters/messaging_test/utils",
+        "files": 1,
+        "lines": 173,
+        "nonblank": 162
+      },
+      {
+        "package": "ic-nervous-system-chunks",
+        "path": "rs/nervous_system/chunks",
+        "files": 3,
+        "lines": 172,
+        "nonblank": 141
+      },
+      {
+        "package": "ic-icrc1-tokens-u64",
+        "path": "rs/ledger_suite/icrc1/tokens_u64",
+        "files": 2,
+        "lines": 170,
+        "nonblank": 141
+      },
+      {
+        "package": "ic-validator-http-request-arbitrary",
+        "path": "rs/validator/http_request_arbitrary",
+        "files": 1,
+        "lines": 169,
+        "nonblank": 155
+      },
+      {
+        "package": "mock_treasury_manager",
+        "path": "rs/sns/treasury_manager/mock",
+        "files": 1,
+        "lines": 167,
+        "nonblank": 123
+      },
+      {
+        "package": "ic-interfaces-registry",
+        "path": "rs/interfaces/registry",
+        "files": 1,
+        "lines": 163,
+        "nonblank": 148
+      },
+      {
+        "package": "ic-crypto-utils-threshold-sig",
+        "path": "rs/crypto/utils/threshold_sig",
+        "files": 2,
+        "lines": 162,
+        "nonblank": 153
+      },
+      {
+        "package": "ic-test-utilities-time",
+        "path": "rs/test_utilities/time",
+        "files": 1,
+        "lines": 161,
+        "nonblank": 143
+      },
+      {
+        "package": "ic-nervous-system-temporary",
+        "path": "rs/nervous_system/temporary",
+        "files": 2,
+        "lines": 159,
+        "nonblank": 139
+      },
+      {
+        "package": "ic-heap-bytes-derive",
+        "path": "packages/ic-heap-bytes-derive",
+        "files": 1,
+        "lines": 157,
+        "nonblank": 137
+      },
+      {
+        "package": "stable_structures",
+        "path": "rs/rust_canisters/stable_structures",
+        "files": 1,
+        "lines": 157,
+        "nonblank": 135
+      },
+      {
+        "package": "setupos-disable-checks",
+        "path": "rs/ic_os/dev_test_tools/setupos-disable-checks",
+        "files": 1,
+        "lines": 156,
+        "nonblank": 136
+      },
+      {
+        "package": "ic-validate-eq-derive",
+        "path": "rs/utils/validate_eq_derive",
+        "files": 1,
+        "lines": 149,
+        "nonblank": 137
+      },
+      {
+        "package": "ic-nervous-system-common-test-canister",
+        "path": "rs/nervous_system/common/test_canister",
+        "files": 3,
+        "lines": 143,
+        "nonblank": 120
+      },
+      {
+        "package": "nss_icos",
+        "path": "rs/ic_os/networking/nss_icos",
+        "files": 1,
+        "lines": 140,
+        "nonblank": 127
+      },
+      {
+        "package": "ic_consensus_system_test_liveness_test_common",
+        "path": "rs/tests/consensus/liveness_test_common",
+        "files": 1,
+        "lines": 139,
+        "nonblank": 131
+      },
+      {
+        "package": "ic-utils-mem-lru",
+        "path": "rs/utils/mem-lru",
+        "files": 1,
+        "lines": 139,
+        "nonblank": 125
+      },
+      {
+        "package": "ic-crypto-iccsa-test-utils",
+        "path": "rs/crypto/iccsa/test_utils",
+        "files": 1,
+        "lines": 138,
+        "nonblank": 124
+      },
+      {
+        "package": "ic-registry-common-proto",
+        "path": "rs/registry/proto",
+        "files": 9,
+        "lines": 138,
+        "nonblank": 132
+      },
+      {
+        "package": "call-tree-test",
+        "path": "rs/rust_canisters/call_tree_test",
+        "files": 1,
+        "lines": 138,
+        "nonblank": 121
+      },
+      {
+        "package": "ic-crypto-tree-hash-fuzz",
+        "path": "rs/crypto/tree_hash/fuzz",
+        "files": 3,
+        "lines": 137,
+        "nonblank": 120
+      },
+      {
+        "package": "ic-nervous-system-linear-map",
+        "path": "rs/nervous_system/linear_map",
+        "files": 2,
+        "lines": 137,
+        "nonblank": 118
+      },
+      {
+        "package": "cloud-engine-stub",
+        "path": "rs/rust_canisters/cloud_engine_stub",
+        "files": 1,
+        "lines": 136,
+        "nonblank": 118
+      },
+      {
+        "package": "ic-ledger-hash-of",
+        "path": "packages/ic-ledger-hash-of",
+        "files": 1,
+        "lines": 135,
+        "nonblank": 118
+      },
+      {
+        "package": "icrc-ledger-client",
+        "path": "packages/icrc-ledger-client",
+        "files": 1,
+        "lines": 134,
+        "nonblank": 119
+      },
+      {
+        "package": "ic_os_logging",
+        "path": "rs/ic_os/logging",
+        "files": 1,
+        "lines": 134,
+        "nonblank": 124
+      },
+      {
+        "package": "ic-crypto-test-utils-vetkd",
+        "path": "rs/crypto/test_utils/vetkd",
+        "files": 2,
+        "lines": 132,
+        "nonblank": 110
+      },
+      {
+        "package": "ic-nervous-system-common-test-keys",
+        "path": "rs/nervous_system/common/test_keys",
+        "files": 1,
+        "lines": 131,
+        "nonblank": 120
+      },
+      {
+        "package": "systest-message-routing-common",
+        "path": "rs/tests/message_routing/common",
+        "files": 1,
+        "lines": 131,
+        "nonblank": 127
+      },
+      {
+        "package": "ic-test-utilities-serialization",
+        "path": "rs/test_utilities/serialization",
+        "files": 1,
+        "lines": 130,
+        "nonblank": 116
+      },
+      {
+        "package": "alternative_guestos",
+        "path": "rs/ic_os/alternative_guestos",
+        "files": 2,
+        "lines": 129,
+        "nonblank": 110
+      },
+      {
+        "package": "ic-interfaces-certified-stream-store",
+        "path": "rs/interfaces/certified_stream_store",
+        "files": 1,
+        "lines": 126,
+        "nonblank": 117
+      },
+      {
+        "package": "ic-sns-wasm-protobuf-generator",
+        "path": "rs/nns/sns-wasm/protobuf_generator",
+        "files": 2,
+        "lines": 126,
+        "nonblank": 113
+      },
+      {
+        "package": "on_wire",
+        "path": "rs/rust_canisters/on_wire",
+        "files": 1,
+        "lines": 126,
+        "nonblank": 111
+      },
+      {
+        "package": "ic-crypto-test-utils-multi-sigs",
+        "path": "rs/crypto/test_utils/multi_sigs",
+        "files": 1,
+        "lines": 123,
+        "nonblank": 109
+      },
+      {
+        "package": "ic-sns-swap-protobuf-generator",
+        "path": "rs/sns/swap/protobuf_generator",
+        "files": 2,
+        "lines": 123,
+        "nonblank": 105
+      },
+      {
+        "package": "ic-registry-resource-limits",
+        "path": "rs/registry/resource_limits",
+        "files": 1,
+        "lines": 121,
+        "nonblank": 112
+      },
+      {
+        "package": "xrc-mock",
+        "path": "rs/rust_canisters/xrc_mock",
+        "files": 2,
+        "lines": 121,
+        "nonblank": 110
+      },
+      {
+        "package": "ic-xnet-hyper",
+        "path": "rs/xnet/hyper",
+        "files": 1,
+        "lines": 119,
+        "nonblank": 110
+      },
+      {
+        "package": "ic-crypto-test-utils-reproducible-rng",
+        "path": "rs/crypto/test_utils/reproducible_rng",
+        "files": 2,
+        "lines": 117,
+        "nonblank": 100
+      },
+      {
+        "package": "ic-certification-version",
+        "path": "rs/canonical_state/certification_version",
+        "files": 1,
+        "lines": 115,
+        "nonblank": 104
+      },
+      {
+        "package": "ic-sender-canister",
+        "path": "rs/rosetta-api/icp/test_utils/sender_canister",
+        "files": 2,
+        "lines": 113,
+        "nonblank": 102
+      },
+      {
+        "package": "ic-signer",
+        "path": "rs/tests/test_canisters/signer",
+        "files": 2,
+        "lines": 113,
+        "nonblank": 102
+      },
+      {
+        "package": "ic-limits",
+        "path": "rs/limits",
+        "files": 1,
+        "lines": 111,
+        "nonblank": 99
+      },
+      {
+        "package": "ic-tracing-logging-layer",
+        "path": "rs/monitoring/tracing/logging_layer",
+        "files": 1,
+        "lines": 109,
+        "nonblank": 101
+      },
+      {
+        "package": "ic-nervous-system-query-instruction-logger",
+        "path": "rs/nervous_system/query_instruction_logger",
+        "files": 2,
+        "lines": 109,
+        "nonblank": 90
+      },
+      {
+        "package": "ic-admin-derive",
+        "path": "rs/registry/admin-derive",
+        "files": 1,
+        "lines": 109,
+        "nonblank": 94
+      },
+      {
+        "package": "ic-test-utilities-load-wasm",
+        "path": "rs/test_utilities/load_wasm",
+        "files": 1,
+        "lines": 109,
+        "nonblank": 100
+      },
+      {
+        "package": "canlog_derive",
+        "path": "packages/canlog_derive",
+        "files": 1,
+        "lines": 108,
+        "nonblank": 91
+      },
+      {
+        "package": "ic-registry-subnet-type",
+        "path": "rs/registry/subnet_type",
+        "files": 1,
+        "lines": 108,
+        "nonblank": 101
+      },
+      {
+        "package": "ic-pprof",
+        "path": "rs/monitoring/pprof",
+        "files": 1,
+        "lines": 103,
+        "nonblank": 90
+      },
+      {
+        "package": "icp-config",
+        "path": "rs/execution_environment/tools",
+        "files": 1,
+        "lines": 102,
+        "nonblank": 93
+      },
+      {
+        "package": "ic-consensus-upgrade",
+        "path": "rs/consensus/upgrade",
+        "files": 2,
+        "lines": 101,
+        "nonblank": 92
+      },
+      {
+        "package": "ic-validator-fuzz",
+        "path": "rs/validator/fuzz",
+        "files": 2,
+        "lines": 101,
+        "nonblank": 96
+      },
+      {
+        "package": "ic-registry-nns-data-provider-wrappers",
+        "path": "rs/registry/nns_data_provider_wrappers",
+        "files": 1,
+        "lines": 100,
+        "nonblank": 93
+      },
+      {
+        "package": "registry-canister-protobuf-generator",
+        "path": "rs/registry/canister/protobuf_generator",
+        "files": 2,
+        "lines": 97,
+        "nonblank": 86
+      },
+      {
+        "package": "ic-dashboard",
+        "path": "rs/orchestrator/dashboard",
+        "files": 1,
+        "lines": 95,
+        "nonblank": 86
+      },
+      {
+        "package": "cloner-canister-types",
+        "path": "rs/tests/networking/canisters",
+        "files": 1,
+        "lines": 95,
+        "nonblank": 83
+      },
+      {
+        "package": "ic-test-utilities-compare-dirs",
+        "path": "rs/test_utilities/compare_dirs",
+        "files": 1,
+        "lines": 94,
+        "nonblank": 86
+      },
+      {
+        "package": "ic-validator-ingress-message-test-canister",
+        "path": "rs/validator/ingress_message/test_canister",
+        "files": 3,
+        "lines": 94,
+        "nonblank": 87
+      },
+      {
+        "package": "backtrace-canister",
+        "path": "rs/rust_canisters/backtrace_canister",
+        "files": 1,
+        "lines": 93,
+        "nonblank": 80
+      },
+      {
+        "package": "ecdsa-canister",
+        "path": "rs/rust_canisters/ecdsa",
+        "files": 1,
+        "lines": 91,
+        "nonblank": 83
+      },
+      {
+        "package": "ic-nervous-system-instruction-stats-update-attribute",
+        "path": "rs/nervous_system/instruction_stats_update_attribute",
+        "files": 2,
+        "lines": 90,
+        "nonblank": 74
+      },
+      {
+        "package": "ic-nervous-system-proto-protobuf-generator",
+        "path": "rs/nervous_system/proto/protobuf_generator",
+        "files": 2,
+        "lines": 90,
+        "nonblank": 75
+      },
+      {
+        "package": "ic-test-utilities-net",
+        "path": "rs/test_utilities/net",
+        "files": 1,
+        "lines": 90,
+        "nonblank": 84
+      },
+      {
+        "package": "ic-adapter-metrics-client",
+        "path": "rs/monitoring/adapter_metrics/client",
+        "files": 1,
+        "lines": 89,
+        "nonblank": 82
+      },
+      {
+        "package": "ic-sns-init-protobuf-generator",
+        "path": "rs/sns/init/protobuf_generator",
+        "files": 2,
+        "lines": 89,
+        "nonblank": 79
+      },
+      {
+        "package": "diroid",
+        "path": "rs/ic_os/build_tools/diroid",
+        "files": 1,
+        "lines": 87,
+        "nonblank": 71
+      },
+      {
+        "package": "criterion-time",
+        "path": "rs/criterion_time",
+        "files": 1,
+        "lines": 84,
+        "nonblank": 72
+      },
+      {
+        "package": "ic-crypto-utils-basic-sig",
+        "path": "rs/crypto/utils/basic_sig",
+        "files": 3,
+        "lines": 82,
+        "nonblank": 68
+      },
+      {
+        "package": "ic-crypto-interfaces-sig-verification",
+        "path": "rs/crypto/interfaces/sig_verification",
+        "files": 1,
+        "lines": 79,
+        "nonblank": 74
+      },
+      {
+        "package": "ic-sns-governance-api-helpers",
+        "path": "rs/sns/governance/api_helpers",
+        "files": 1,
+        "lines": 79,
+        "nonblank": 72
+      },
+      {
+        "package": "ic-crypto-test-utils",
+        "path": "rs/crypto/test_utils",
+        "files": 3,
+        "lines": 78,
+        "nonblank": 69
+      },
+      {
+        "package": "ic-interfaces-state-manager-mocks",
+        "path": "rs/interfaces/state_manager/mocks",
+        "files": 1,
+        "lines": 76,
+        "nonblank": 53
+      },
+      {
+        "package": "ic-nervous-system-common-build-metadata",
+        "path": "rs/nervous_system/common/build_metadata",
+        "files": 1,
+        "lines": 76,
+        "nonblank": 71
+      },
+      {
+        "package": "guest_upgrade_shared",
+        "path": "rs/ic_os/guest_upgrade/shared",
+        "files": 4,
+        "lines": 75,
+        "nonblank": 65
+      },
+      {
+        "package": "ic-test-utilities-privileges-macros",
+        "path": "rs/test_utilities/privileges/macros",
+        "files": 1,
+        "lines": 75,
+        "nonblank": 69
+      },
+      {
+        "package": "ic-nns-gtc-protobuf-generator",
+        "path": "rs/nns/gtc/protobuf_generator",
+        "files": 2,
+        "lines": 73,
+        "nonblank": 64
+      },
+      {
+        "package": "ic-crypto-for-verification-only",
+        "path": "rs/crypto/for_verification_only",
+        "files": 2,
+        "lines": 72,
+        "nonblank": 65
+      },
+      {
+        "package": "utils",
+        "path": "rs/ic_os/utils",
+        "files": 1,
+        "lines": 72,
+        "nonblank": 66
+      },
+      {
+        "package": "dfn_protobuf",
+        "path": "rs/rust_canisters/dfn_protobuf",
+        "files": 1,
+        "lines": 72,
+        "nonblank": 61
+      },
+      {
+        "package": "ic-crypto-utils-tls",
+        "path": "rs/crypto/utils/tls",
+        "files": 1,
+        "lines": 71,
+        "nonblank": 63
+      },
+      {
+        "package": "ic-nns-test-utils-macros",
+        "path": "rs/nns/test_utils_macros",
+        "files": 1,
+        "lines": 71,
+        "nonblank": 64
+      },
+      {
+        "package": "load-simulator",
+        "path": "rs/rust_canisters/load_simulator",
+        "files": 1,
+        "lines": 71,
+        "nonblank": 62
+      },
+      {
+        "package": "ic-utils-thousands",
+        "path": "rs/utils/thousands",
+        "files": 1,
+        "lines": 71,
+        "nonblank": 65
+      },
+      {
+        "package": "ic-adapter-metrics-server",
+        "path": "rs/monitoring/adapter_metrics/server",
+        "files": 1,
+        "lines": 70,
+        "nonblank": 64
+      },
+      {
+        "package": "ic-nns-governance-conversions",
+        "path": "rs/nns/governance/conversions",
+        "files": 1,
+        "lines": 70,
+        "nonblank": 64
+      },
+      {
+        "package": "ic-message",
+        "path": "rs/tests/test_canisters/message",
+        "files": 2,
+        "lines": 70,
+        "nonblank": 60
+      },
+      {
+        "package": "ic-nervous-system-timestamp",
+        "path": "rs/nervous_system/timestamp",
+        "files": 2,
+        "lines": 69,
+        "nonblank": 65
+      },
+      {
+        "package": "ic-registry-provisional-whitelist",
+        "path": "rs/registry/provisional_whitelist",
+        "files": 1,
+        "lines": 69,
+        "nonblank": 63
+      },
+      {
+        "package": "ic-sns-governance-proposal-criticality",
+        "path": "rs/sns/governance/proposal_criticality",
+        "files": 1,
+        "lines": 69,
+        "nonblank": 63
+      },
+      {
+        "package": "ic-sns-root-protobuf-generator",
+        "path": "rs/sns/root/protobuf_generator",
+        "files": 2,
+        "lines": 69,
+        "nonblank": 60
+      },
+      {
+        "package": "ic-crypto-test-utils-canister-sigs",
+        "path": "rs/crypto/test_utils/canister_sigs",
+        "files": 1,
+        "lines": 67,
+        "nonblank": 59
+      },
+      {
+        "package": "ic-interfaces-adapter-client",
+        "path": "rs/interfaces/adapter_client",
+        "files": 1,
+        "lines": 67,
+        "nonblank": 55
+      },
+      {
+        "package": "ic-nns-common-protobuf-generator",
+        "path": "rs/nns/common/protobuf_generator",
+        "files": 2,
+        "lines": 67,
+        "nonblank": 57
+      },
+      {
+        "package": "ledger-canister-protobuf-generator",
+        "path": "rs/ledger_suite/icp/protobuf_generator",
+        "files": 2,
+        "lines": 66,
+        "nonblank": 55
+      },
+      {
+        "package": "ic-nervous-system-common-validation",
+        "path": "rs/nervous_system/common/validation",
+        "files": 1,
+        "lines": 66,
+        "nonblank": 58
+      },
+      {
+        "package": "ic-node-rewards-protobuf-generator",
+        "path": "rs/node_rewards/canister/protobuf_generator",
+        "files": 2,
+        "lines": 66,
+        "nonblank": 58
+      },
+      {
+        "package": "ic-test-utilities-logger",
+        "path": "rs/test_utilities/logger",
+        "files": 1,
+        "lines": 66,
+        "nonblank": 55
+      },
+      {
+        "package": "ic-custom-metrics",
+        "path": "rs/ic_os/metrics/custom_metrics",
+        "files": 1,
+        "lines": 65,
+        "nonblank": 55
+      },
+      {
+        "package": "ic-registry-transport-protobuf-generator",
+        "path": "rs/registry/transport/protobuf_generator",
+        "files": 2,
+        "lines": 65,
+        "nonblank": 59
+      },
+      {
+        "package": "ic-registry-fetch-large-record-test-canister",
+        "path": "rs/registry/fetch_large_record_test_canister",
+        "files": 2,
+        "lines": 63,
+        "nonblank": 52
+      },
+      {
+        "package": "call-loop-canister",
+        "path": "rs/rust_canisters/call_loop_canister",
+        "files": 1,
+        "lines": 63,
+        "nonblank": 56
+      },
+      {
+        "package": "sev_guest_firmware",
+        "path": "rs/ic_os/sev/guest/firmware",
+        "files": 1,
+        "lines": 61,
+        "nonblank": 54
+      },
+      {
+        "package": "icrc-ledger-client-cdk",
+        "path": "packages/icrc-ledger-client-cdk",
+        "files": 1,
+        "lines": 60,
+        "nonblank": 57
+      },
+      {
+        "package": "ic-nns-handler-root-protobuf-generator",
+        "path": "rs/nns/handlers/root/impl/protobuf_generator",
+        "files": 2,
+        "lines": 60,
+        "nonblank": 52
+      },
+      {
+        "package": "stable_reader",
+        "path": "rs/rust_canisters/stable_reader",
+        "files": 2,
+        "lines": 57,
+        "nonblank": 56
+      },
+      {
+        "package": "command_runner",
+        "path": "rs/ic_os/command_runner",
+        "files": 1,
+        "lines": 56,
+        "nonblank": 46
+      },
+      {
+        "package": "ic-tracing",
+        "path": "rs/monitoring/tracing",
+        "files": 2,
+        "lines": 56,
+        "nonblank": 47
+      },
+      {
+        "package": "ic-test-identity",
+        "path": "rs/test_utilities/identity",
+        "files": 1,
+        "lines": 55,
+        "nonblank": 45
+      },
+      {
+        "package": "dfn_http_metrics",
+        "path": "rs/rust_canisters/dfn_http_metrics",
+        "files": 1,
+        "lines": 53,
+        "nonblank": 51
+      },
+      {
+        "package": "ic-nns-handler-lifeline-interface",
+        "path": "rs/nns/handlers/lifeline/interface",
+        "files": 1,
+        "lines": 50,
+        "nonblank": 44
+      },
+      {
+        "package": "ic-base-types-protobuf-generator",
+        "path": "rs/types/base_types/protobuf_generator",
+        "files": 2,
+        "lines": 45,
+        "nonblank": 41
+      },
+      {
+        "package": "management-canister-types-fuzz",
+        "path": "rs/types/management_canister_types/fuzz",
+        "files": 4,
+        "lines": 44,
+        "nonblank": 36
+      },
+      {
+        "package": "salt-sharing-api",
+        "path": "rs/boundary_node/salt_sharing/api",
+        "files": 1,
+        "lines": 40,
+        "nonblank": 32
+      },
+      {
+        "package": "ic-nns-delegation-reader-test-utils",
+        "path": "rs/http_endpoints/nns_delegation_reader/test_utils",
+        "files": 1,
+        "lines": 40,
+        "nonblank": 35
+      },
+      {
+        "package": "ic-dummy-getrandom-for-wasm",
+        "path": "packages/ic-dummy-getrandom-for-wasm",
+        "files": 1,
+        "lines": 38,
+        "nonblank": 36
+      },
+      {
+        "package": "ic-registry-common-proto-generator",
+        "path": "rs/registry/proto/generator",
+        "files": 2,
+        "lines": 38,
+        "nonblank": 33
+      },
+      {
+        "package": "ic-interfaces-certified-stream-store-mocks",
+        "path": "rs/interfaces/certified_stream_store/mocks",
+        "files": 1,
+        "lines": 37,
+        "nonblank": 32
+      },
+      {
+        "package": "dfn_json",
+        "path": "rs/rust_canisters/dfn_json",
+        "files": 1,
+        "lines": 37,
+        "nonblank": 32
+      },
+      {
+        "package": "ic-crypto-internal-csp-protobuf-generator",
+        "path": "rs/crypto/internal/crypto_service_provider/protobuf_generator",
+        "files": 2,
+        "lines": 36,
+        "nonblank": 31
+      },
+      {
+        "package": "ic-tracing-jaeger-exporter",
+        "path": "rs/monitoring/tracing/jaeger_exporter",
+        "files": 1,
+        "lines": 36,
+        "nonblank": 31
+      },
+      {
+        "package": "ic-utils-rustfmt",
+        "path": "rs/utils/rustfmt",
+        "files": 1,
+        "lines": 33,
+        "nonblank": 31
+      },
+      {
+        "package": "ic-nervous-system-ids",
+        "path": "rs/nervous_system/ids",
+        "files": 2,
+        "lines": 31,
+        "nonblank": 26
+      },
+      {
+        "package": "ic-utils-ensure",
+        "path": "rs/utils/ensure",
+        "files": 1,
+        "lines": 31,
+        "nonblank": 30
+      },
+      {
+        "package": "ic-nervous-system-tools-neuron-subaccount",
+        "path": "rs/nervous_system/tools/neuron-subaccount",
+        "files": 1,
+        "lines": 29,
+        "nonblank": 24
+      },
+      {
+        "package": "ic-test-utilities-io",
+        "path": "rs/test_utilities/io",
+        "files": 1,
+        "lines": 29,
+        "nonblank": 25
+      },
+      {
+        "package": "ic-crypto-tls-interfaces-mocks",
+        "path": "rs/crypto/tls_interfaces/mocks",
+        "files": 1,
+        "lines": 28,
+        "nonblank": 23
+      },
+      {
+        "package": "ic-crypto-utils-canister-threshold-sig",
+        "path": "rs/crypto/utils/canister_threshold_sig",
+        "files": 1,
+        "lines": 26,
+        "nonblank": 25
+      },
+      {
+        "package": "remote_attestation_shared",
+        "path": "rs/ic_os/remote_attestation/shared",
+        "files": 2,
+        "lines": 26,
+        "nonblank": 21
+      },
+      {
+        "package": "ic-interfaces-registry-mocks",
+        "path": "rs/interfaces/registry/mocks",
+        "files": 1,
+        "lines": 26,
+        "nonblank": 21
+      },
+      {
+        "package": "ic-crypto-test-utils-root-of-trust",
+        "path": "rs/crypto/test_utils/root_of_trust",
+        "files": 1,
+        "lines": 25,
+        "nonblank": 19
+      },
+      {
+        "package": "ic-nervous-system-time-helpers",
+        "path": "rs/nervous_system/time_helpers",
+        "files": 1,
+        "lines": 24,
+        "nonblank": 20
+      },
+      {
+        "package": "response-payload-test",
+        "path": "rs/rust_canisters/response_payload_test",
+        "files": 1,
+        "lines": 21,
+        "nonblank": 18
+      },
+      {
+        "package": "ic-os-metrics-utils",
+        "path": "rs/ic_os/metrics/utils",
+        "files": 1,
+        "lines": 18,
+        "nonblank": 17
+      },
+      {
+        "package": "ic-ledger-suite-state-machine-tests-constants",
+        "path": "rs/ledger_suite/tests/sm-tests/constants",
+        "files": 1,
+        "lines": 17,
+        "nonblank": 16
+      },
+      {
+        "package": "ic-test-utilities-tmpdir",
+        "path": "rs/test_utilities/tmpdir",
+        "files": 1,
+        "lines": 15,
+        "nonblank": 15
+      },
+      {
+        "package": "ic-adapter-metrics-service",
+        "path": "rs/monitoring/adapter_metrics/service",
+        "files": 2,
+        "lines": 11,
+        "nonblank": 10
+      },
+      {
+        "package": "ic-btc-service",
+        "path": "rs/bitcoin/service",
+        "files": 2,
+        "lines": 9,
+        "nonblank": 9
+      },
+      {
+        "package": "ic-https-outcalls-service",
+        "path": "rs/https_outcalls/service",
+        "files": 2,
+        "lines": 9,
+        "nonblank": 9
+      },
+      {
+        "package": "ic-consensus-features",
+        "path": "rs/consensus/features",
+        "files": 1,
+        "lines": 8,
+        "nonblank": 8
+      },
+      {
+        "package": "ic-sns-swap-proto-library",
+        "path": "rs/sns/swap/proto_library",
+        "files": 2,
+        "lines": 4,
+        "nonblank": 4
+      },
+      {
+        "package": "identity-canister",
+        "path": "rs/nns/identity",
+        "files": 1,
+        "lines": 2,
+        "nonblank": 2
+      },
+      {
+        "package": "nns-ui-canister",
+        "path": "rs/nns/nns-ui",
+        "files": 1,
+        "lines": 2,
+        "nonblank": 2
+      },
+      {
+        "package": "ic-registry-local-store-artifacts",
+        "path": "rs/registry/local_store/artifacts",
+        "files": 1,
+        "lines": 2,
+        "nonblank": 2
+      }
+    ],
+    "unassigned": {
+      "files": 16,
+      "lines": 728,
+      "nonblank": 638
+    }
+  }
+}

@@ -9,7 +9,7 @@
   },
   {
     "dependency": "ic0",
-    "allowed_packages": []
+    "allowed_packages": ["ic-platform-runtime"]
   },
   {
     "dependency": "ic-agent",

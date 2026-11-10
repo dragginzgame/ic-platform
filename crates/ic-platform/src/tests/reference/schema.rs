@@ -5,6 +5,22 @@ use candid::types::{Field, Function, Label, Type as ExternalType, TypeEnv, TypeI
 use std::collections::HashMap;
 use std::rc::Rc;
 
+/// Compares an owned schema against one named in an independent provider DID.
+#[cfg(feature = "icrc-ledger-types")]
+pub(crate) fn assert_named_schema<T: Encode>(env: &TypeEnv, name: &str) {
+    let mut env = env.clone();
+    let declared = env.find_type(name).unwrap().clone();
+    let (owned_env, actual) = schema::<T>();
+    let actual = env.merge_type(owned_env, actual);
+    candid::types::subtype::equal(
+        &mut std::collections::HashSet::new(),
+        &env,
+        &declared,
+        &actual,
+    )
+    .unwrap_or_else(|e| panic!("{name}: {e}"));
+}
+
 pub(crate) fn schema<T: Encode>() -> (TypeEnv, ExternalType) {
     let mut env = TypeEnv::new();
     let ty = project(T::TYPE, &mut env, &mut HashMap::new());

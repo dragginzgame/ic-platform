@@ -1,16 +1,17 @@
-//! Shared syntax facts; each adapter retains its own admission and diagnostics.
-use syn::{FnArg, ReturnType, Signature, Type};
+//! Syntactic argument and return-shape inspection shared by entrypoint adapters.
+
+use syn::{FnArg, Receiver, ReturnType, Signature, Type};
 
 pub(crate) fn argument_types(
     signature: &Signature,
-    receiver_error: impl Fn(&syn::Receiver) -> syn::Error,
+    receiver_error: impl Fn(&Receiver) -> syn::Error,
 ) -> syn::Result<Vec<&Type>> {
     signature
         .inputs
         .iter()
-        .map(|arg| match arg {
-            FnArg::Typed(arg) => Ok(arg.ty.as_ref()),
-            FnArg::Receiver(arg) => Err(receiver_error(arg)),
+        .map(|argument| match argument {
+            FnArg::Typed(argument) => Ok(argument.ty.as_ref()),
+            FnArg::Receiver(receiver) => Err(receiver_error(receiver)),
         })
         .collect()
 }
@@ -32,10 +33,11 @@ impl<'a> ReturnShape<'a> {
             },
         }
     }
+
     pub(crate) fn arity(&self) -> usize {
         match self {
             Self::Unit => 0,
-            Self::Tuple(_, n) => *n,
+            Self::Tuple(_, count) => *count,
             Self::Scalar(_) => 1,
         }
     }

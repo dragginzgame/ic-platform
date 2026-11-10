@@ -55,7 +55,7 @@ New releases belong to the [Platform](platform/CHANGELOG.md) and
 - Remove the native gzip forwarding feature and exports. Consumers select
   `ic-host-artifacts/gzip` and import its `artifact` codecs directly. Platform
   no longer depends on generic Host artifacts; codec bytes and admission stay
-  owned by Tooling. See the [migration](../docs/migration.md#host-gzip-boundary).
+  owned by Tooling. See the [migration](../docs/architecture/migration.md#host-gzip-boundary).
 
 ### ⬆️ Dependencies
 
@@ -178,7 +178,7 @@ New releases belong to the [Platform](platform/CHANGELOG.md) and
 - Own the management DTO subset used by sibling canisters on Wasm, retaining
   external Candid bytes while removing the registry supplier and implicit printer.
   Native tooling keeps its upstream identities; host-only snapshot-transfer types
-  are no longer exported on Wasm. See the [management migration](../docs/migration.md#selected-canister-management-dtos).
+  are no longer exported on Wasm. See the [management migration](../docs/architecture/migration.md#selected-canister-management-dtos).
 - Remove the native viewer API's blanket integer rewriting and encoding/version
   labels. Producers encode counters directly; typed PocketIC documents retain
   their own serialization. Saved reports and raw PocketIC trace exports stay unchanged.
@@ -191,7 +191,7 @@ New releases belong to the [Platform](platform/CHANGELOG.md) and
 
 ### 🧭 Migration Notes
 
-- Follow the [embedded runtime migration](../docs/migration.md#embedded-ic0-and-executor).
+- Follow the [embedded runtime migration](../docs/architecture/migration.md#embedded-ic0-and-executor).
   This requires a minor release; package versions and publication remain unchanged
   during implementation. Imported Apache-2.0 licenses and provenance are retained.
 
@@ -365,7 +365,7 @@ New releases belong to the [Platform](platform/CHANGELOG.md) and
   and unchanged upstream value-hashing code. Ledger Rust types and callbacks now
   have Platform identities; Candid/Serde representations and value hashes remain.
   Unused CBOR/storage and consent-formatting APIs are no longer supplied.
-  See the [migration contract](../docs/migration.md#minimal-principal-and-selected-icrc-packaging).
+  See the [migration contract](../docs/architecture/migration.md#minimal-principal-and-selected-icrc-packaging).
 
 ### 🩹 Fixed
 
@@ -891,7 +891,7 @@ New releases belong to the [Platform](platform/CHANGELOG.md) and
   the original cryptographic implementation.
 - Bound principal text admission and remove intermediate formatting allocations.
   Treat owned/borrowed binary Serde bytes identically; do not inherit Candid marker
-  handling or generic range stepping. See the [Principal migration](../docs/migration.md#owned-principal-migration-03).
+  handling or generic range stepping. See the [Principal migration](../docs/architecture/migration.md#owned-principal-migration-03).
 
 ## [0.2.2] - 2026-10-19
 

@@ -1,486 +1,579 @@
-//! Maintained from DFINITY's ic-cdk-executor 2.0.0 (Apache-2.0).
-//! Platform changes are recorded in provenance.json; IC callback/trap semantics remain.
+//! Runtime's thread-local executor and retained method contexts.
+//!
+//! Protected tasks remain with their originating method. Migratory tasks are
+//! admitted only by update execution; neither mode owns application scheduling.
 
+use slotmap::{SlotMap, new_key_type};
 use std::{
-    cell::{Cell, RefCell},
+    cell::RefCell,
     collections::VecDeque,
     future::Future,
-    mem::take,
     pin::Pin,
     sync::Arc,
     task::{Context, Poll, Wake, Waker},
 };
 
-use slotmap::{Key, SlotMap, new_key_type};
-
-/// Represents an active canister method.
-#[derive(Clone, Debug)]
-pub(crate) struct MethodContext {
-    /// Whether this method is an update or a query.
-    pub(crate) kind: ContextKind,
-    /// The number of handles to this method context. When this drops to zero, the method context gets deleted.
-    /// The refcount is managed by `MethodHandle`.
-    pub(crate) handles: usize,
-    /// An index for Task.method_binding; all protected tasks attached to this method.
-    pub(crate) tasks: Vec<TaskId>,
-    /// Woken protected tasks, owned and reclaimed with this method.
-    wakeups: VecDeque<TaskId>,
-}
-
-impl MethodContext {
-    pub(crate) fn new_update() -> Self {
-        Self {
-            kind: ContextKind::Update,
-            handles: 0,
-            tasks: Vec::new(),
-            wakeups: VecDeque::new(),
-        }
-    }
-    pub(crate) fn new_query() -> Self {
-        Self {
-            kind: ContextKind::Query,
-            handles: 0,
-            tasks: Vec::new(),
-            wakeups: VecDeque::new(),
-        }
-    }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub(crate) enum ContextKind {
-    Update,
-    Query,
-}
-
-// Null method ID corresponds to 'null context', used for migratory tasks.
-// Null task ID is an error.
 new_key_type! {
-    pub(crate) struct MethodId;
-    pub(crate) struct TaskId;
+    struct MethodId;
+    struct TaskId;
+}
+
+type UserFuture = Pin<Box<dyn Future<Output = ()>>>;
+
+#[derive(Clone, Copy)]
+struct ExecutionContext {
+    method: Option<MethodId>,
+    query: bool,
+    recovering: bool,
+}
+
+struct Method {
+    retentions: usize,
+    query: bool,
+    members: Vec<TaskId>,
+    ready: VecDeque<TaskId>,
+}
+
+struct Task {
+    owner: Option<MethodId>,
+    future: Option<UserFuture>,
+    waker: Waker,
+    queued: bool,
+}
+
+struct Executor {
+    methods: SlotMap<MethodId, Method>,
+    tasks: SlotMap<TaskId, Task>,
+    migratory_ready: VecDeque<TaskId>,
+    context: Option<ExecutionContext>,
+    current_task: Option<TaskId>,
+}
+
+impl Executor {
+    fn new() -> Self {
+        Self {
+            methods: SlotMap::with_key(),
+            tasks: SlotMap::with_key(),
+            migratory_ready: VecDeque::new(),
+            context: None,
+            current_task: None,
+        }
+    }
+
+    fn enqueue(&mut self, id: TaskId) {
+        let Some(task) = self.tasks.get_mut(id) else {
+            return;
+        };
+        if task.queued {
+            return;
+        }
+        task.queued = true;
+        match task.owner {
+            Some(owner) => {
+                self.methods
+                    .get_mut(owner)
+                    .expect("a protected task has a live owner")
+                    .ready
+                    .push_back(id);
+            }
+            None => self.migratory_ready.push_back(id),
+        }
+    }
+
+    fn remove_task(&mut self, id: TaskId) -> Option<Task> {
+        let task = self.tasks.remove(id)?;
+        match task.owner {
+            Some(owner) => {
+                if let Some(method) = self.methods.get_mut(owner) {
+                    if method.members.last() == Some(&id) {
+                        method.members.pop();
+                    } else {
+                        method.members.retain(|member| *member != id);
+                    }
+                    if task.queued {
+                        method.ready.retain(|queued| *queued != id);
+                    }
+                }
+            }
+            None => {
+                if task.queued {
+                    self.migratory_ready.retain(|queued| *queued != id);
+                }
+            }
+        }
+        Some(task)
+    }
+
+    fn release_method(&mut self, id: MethodId) -> Vec<Task> {
+        let Some(method) = self.methods.get_mut(id) else {
+            return Vec::new();
+        };
+        method.retentions -= 1;
+        if method.retentions != 0 {
+            return Vec::new();
+        }
+        let method = self.methods.remove(id).expect("the method was present");
+        let mut removed = Vec::with_capacity(method.members.len());
+        for member in method.members {
+            if let Some(task) = self.tasks.remove(member) {
+                removed.push(task);
+            }
+        }
+        removed
+    }
+
+    fn next_poll(&mut self) -> Option<PollWork> {
+        let surrounding = self.context.expect("draining requires a context");
+        let protected = surrounding.method.and_then(|id| {
+            self.methods
+                .get_mut(id)
+                .expect("the active method is retained")
+                .ready
+                .pop_front()
+        });
+        let id = protected.or_else(|| {
+            if surrounding.query {
+                None
+            } else {
+                self.migratory_ready.pop_front()
+            }
+        })?;
+        let task = self.tasks.get_mut(id).expect("queued tasks remain live");
+        task.queued = false;
+        let future = task
+            .future
+            .take()
+            .expect("a queued task is not being polled");
+        let waker = task.waker.clone();
+        let method = task.owner;
+        let query = method.is_some_and(|id| {
+            self.methods
+                .get(id)
+                .expect("the task owner is retained")
+                .query
+        });
+        self.context = Some(ExecutionContext {
+            method,
+            query,
+            recovering: false,
+        });
+        self.current_task = Some(id);
+        Some(PollWork {
+            id,
+            future,
+            waker,
+            surrounding,
+        })
+    }
 }
 
 thread_local! {
-    // global: list of all method contexts currently active
-    pub(crate) static METHODS: RefCell<SlotMap<MethodId, MethodContext>> = RefCell::default();
-    // global: list of all tasks currently spawned
-    pub(crate) static TASKS: RefCell<SlotMap<TaskId, Task>> = RefCell::default();
-    // global: list of migratory tasks that have been woken up
-    pub(crate) static MIGRATORY_WAKEUPS: RefCell<VecDeque<TaskId>> = const { RefCell::new(VecDeque::new()) };
-    // dynamically scoped: the current method context. None means a context function was not called (which is a user error),
-    // vs null which means no method in particular.
-    pub(crate) static CURRENT_METHOD: Cell<Option<MethodId>> = const { Cell::new(None) };
-    // dynamically scoped: whether we are currently recovering from a trap
-    pub(crate) static RECOVERING: Cell<bool> = const { Cell::new(false) };
-    // dynamically scoped: the current task ID, or None if a task is not running
-    pub(crate) static CURRENT_TASK_ID: Cell<Option<TaskId>> = const { Cell::new(None) };
+    static EXECUTOR: RefCell<Executor> = RefCell::new(Executor::new());
 }
 
-/// A registered task in the executor.
-pub(crate) struct Task {
-    /// Only the future leaves the table during a poll; wake routing remains intact.
-    future: Option<Pin<Box<dyn Future<Output = ()>>>>,
-    waker: Waker,
-    queued: bool,
-    /// If Some, this task will always resume during that method, regardless of where the waker is woken from.
-    /// If None, this task will resume wherever it is awoken from.
-    method_binding: Option<MethodId>,
+struct TaskWake {
+    id: TaskId,
 }
 
-impl Task {
-    fn new(
-        task_id: TaskId,
-        future: impl Future<Output = ()> + 'static,
-        method_binding: Option<MethodId>,
-    ) -> Self {
-        Self {
-            future: Some(Box::pin(future)),
-            waker: Waker::from(Arc::new(TaskWaker { task_id })),
-            queued: true,
-            method_binding,
-        }
-    }
-}
-
-/// Execute an update function in a context that allows calling [`spawn_protected`] and [`spawn_migratory`].
-pub fn in_tracking_executor_context<R>(f: impl FnOnce() -> R) -> R {
-    setup_panic_hook();
-    let method = METHODS.with_borrow_mut(|methods| methods.insert(MethodContext::new_update()));
-    let guard = MethodHandle::for_method(method);
-    enter_current_method(guard, || {
-        let res = f();
-        poll_all();
-        res
-    })
-}
-
-/// Execute a query function in a context that allows calling [`spawn_protected`] but not [`spawn_migratory`].
-pub fn in_tracking_query_executor_context<R>(f: impl FnOnce() -> R) -> R {
-    setup_panic_hook();
-    let method = METHODS.with_borrow_mut(|methods| methods.insert(MethodContext::new_query()));
-    let guard = MethodHandle::for_method(method);
-    enter_current_method(guard, || {
-        let res = f();
-        poll_all();
-        res
-    })
-}
-
-/// Execute an inter-canister call callback in the context of the method that made it.
-pub fn in_callback_executor_context_for<R>(
-    method_handle: MethodHandle,
-    f: impl FnOnce() -> R,
-) -> R {
-    setup_panic_hook();
-    enter_current_method(method_handle, || {
-        let res = f();
-        poll_all();
-        res
-    })
-}
-
-/// Enters a trap/panic recovery context for calling [`cancel_all_tasks_attached_to_current_method`] in.
-pub fn in_trap_recovery_context_for<R>(method: MethodHandle, f: impl FnOnce() -> R) -> R {
-    setup_panic_hook();
-    enter_current_method(method, || {
-        RECOVERING.set(true);
-        let res = f();
-        RECOVERING.set(false);
-        res
-    })
-}
-
-/// Cancels all tasks made with [`spawn_protected`] attached to the current method.
-pub fn cancel_all_tasks_attached_to_current_method() {
-    let Some(method_id) = CURRENT_METHOD.get() else {
-        panic!(
-            "`cancel_all_tasks_attached_to_current_method` can only be called within a method context"
-        );
-    };
-    cancel_all_tasks_attached_to_method(method_id);
-}
-
-/// Cancels all tasks made with [`spawn_protected`] attached to the given method.
-fn cancel_all_tasks_attached_to_method(method_id: MethodId) {
-    let Some(to_cancel) = METHODS.with_borrow_mut(|methods| {
-        methods.get_mut(method_id).map(|method| {
-            method.wakeups.clear();
-            take(&mut method.tasks)
-        })
-    }) else {
-        return; // method context null or already deleted
-    };
-    let _tasks = TASKS.with(|tasks| {
-        let Ok(mut tasks) = tasks.try_borrow_mut() else {
-            panic!(
-                "`cancel_all_tasks_attached_to_current_method` cannot be called from an async task"
-            );
-        };
-        let mut canceled = Vec::with_capacity(to_cancel.len());
-        for task_id in to_cancel {
-            canceled.push(tasks.remove(task_id));
-        }
-        canceled
-    });
-    drop(_tasks); // always run task destructors outside of a refcell borrow
-}
-
-/// Removes a specific task. Use this instead of `remove` for guaranteed drop order.
-pub(crate) fn delete_task(task_id: TaskId) {
-    let _task = TASKS.with_borrow_mut(|tasks| tasks.remove(task_id));
-    if let Some(method_id) = _task.as_ref().and_then(|task| task.method_binding) {
-        METHODS.with_borrow_mut(|methods| {
-            if let Some(method) = methods.get_mut(method_id) {
-                // The common single-task and reverse-completion cases need no
-                // scan. Locate interior entries once, then bulk-shift the tail,
-                // retaining the original membership and cancellation order.
-                if method.tasks.last() == Some(&task_id) {
-                    method.tasks.pop();
-                } else if let Some(index) = method.tasks.iter().position(|id| *id == task_id) {
-                    method.tasks.remove(index);
-                }
-            }
+impl TaskWake {
+    fn enqueue(&self) {
+        let _ = EXECUTOR.try_with(|executor| {
+            executor.borrow_mut().enqueue(self.id);
         });
     }
-    drop(_task); // always run task destructors outside of a refcell borrow
 }
 
-/// Cancels a specific task by its handle.
-pub fn cancel_task(task_handle: &TaskHandle) {
-    delete_task(task_handle.task_id);
-}
-
-/// Returns true if tasks are being canceled due to a trap or panic.
-pub fn is_recovering_from_trap() -> bool {
-    RECOVERING.get()
-}
-
-/// Produces a handle to the current method context.
-///
-/// The method is active as long as the handle is alive.
-pub fn extend_current_method_context() -> MethodHandle {
-    setup_panic_hook();
-    let Some(method_id) = CURRENT_METHOD.get() else {
-        panic!("`extend_method_context` can only be called within a tracking executor context");
-    };
-    MethodHandle::for_method(method_id)
-}
-
-/// Polls all tasks that have been woken up. Called after all context closures besides cancelation.
-///
-/// Should never be called inside a task, because it should only be called inside a context closure, and context closures
-/// should only be at the top level of an entrypoint.
-pub(crate) fn poll_all() {
-    let Some(method_id) = CURRENT_METHOD.get() else {
-        panic!("tasks can only be polled within an executor context");
-    };
-    let kind = METHODS
-        .with_borrow(|methods| methods.get(method_id).map(|m| m.kind))
-        .unwrap_or(ContextKind::Update);
-    fn pop_wakeup(method_id: MethodId, update: bool) -> Option<TaskId> {
-        if let Some(task_id) = METHODS.with_borrow_mut(|methods| {
-            methods
-                .get_mut(method_id)
-                .and_then(|method| method.wakeups.pop_front())
-        }) {
-            Some(task_id)
-        } else if update {
-            MIGRATORY_WAKEUPS.with_borrow_mut(|unattached| unattached.pop_front())
-        } else {
-            None
-        }
+impl Wake for TaskWake {
+    fn wake(self: Arc<Self>) {
+        self.enqueue();
     }
-    while let Some(task_id) = pop_wakeup(method_id, kind == ContextKind::Update) {
-        // Poll without borrowing TASKS, but retain ownership and queue metadata
-        // so a wake during polling cannot migrate a protected task.
-        let Some((mut future, waker, current_method)) = TASKS.with_borrow_mut(|tasks| {
-            let task = tasks.get_mut(task_id)?;
-            let future = task.future.take()?;
-            task.queued = false;
-            Some((
-                future,
-                task.waker.clone(),
-                task.method_binding.unwrap_or_else(MethodId::null),
-            ))
-        }) else {
-            // This waker handle appears to be dead. The most likely cause is that the method returned before
-            // a canceled call came back.
-            continue;
-            // In the case that a task panicked and that's why it's missing, but it was in an earlier callback so a later
-            // one tries to re-wake, the responsibility for re-trapping lies with CallFuture.
-        };
-        let prev_current_method_var = CURRENT_METHOD.replace(Some(current_method));
-        CURRENT_TASK_ID.set(Some(task_id));
-        let poll = future.as_mut().poll(&mut Context::from_waker(&waker));
-        CURRENT_TASK_ID.set(None);
-        CURRENT_METHOD.set(prev_current_method_var);
-        match poll {
-            Poll::Pending => {
-                // more to do, put the task back in the table
-                let mut future = Some(future);
-                TASKS.with_borrow_mut(|tasks| {
-                    if let Some(t) = tasks.get_mut(task_id) {
-                        t.future = future.take();
-                    }
-                });
-                // Self-cancellation may have removed the task while polling.
-                // Its future's destructor must still run outside every borrow.
-                drop(future);
-            }
-            Poll::Ready(()) => {
-                // task complete, remove its entry from the table fully
-                delete_task(task_id);
-            }
-        }
+
+    fn wake_by_ref(self: &Arc<Self>) {
+        self.enqueue();
     }
 }
 
-/// Begin a context closure for the given method. Destroys the method afterwards if there are no outstanding handles.
-pub(crate) fn enter_current_method<R>(method_guard: MethodHandle, f: impl FnOnce() -> R) -> R {
-    CURRENT_METHOD.with(|context_var| {
-        assert!(
-            context_var.get().is_none(),
-            "in_*_context called within an existing async context"
-        );
-        context_var.set(Some(method_guard.method_id));
-    });
-    let r = f();
-    drop(method_guard); // drop the guard *before* the method freeing logic, but *after* the in-context code
-    let method_id = CURRENT_METHOD.replace(None);
-    if let Some(method_id) = method_id {
-        let handles = METHODS.with_borrow_mut(|methods| methods.get(method_id).map(|m| m.handles));
-        if handles == Some(0) {
-            cancel_all_tasks_attached_to_method(method_id);
-            METHODS.with_borrow_mut(|methods| methods.remove(method_id));
-        }
-    }
-    r
-}
-
-/// A handle to a method context. If the function returns and all handles have been dropped, the method is considered returned.
+/// Retains a tracked method, or the untracked context of a migratory poll.
 ///
-/// This should be created before performing an inter-canister call via [`extend_current_method_context`],
-/// threaded through the `env` parameter, and then used when calling [`in_callback_executor_context_for`] or
-/// [`in_trap_recovery_context_for`]. Failure to track this properly may result in unexpected cancellation of tasks.
+/// Dropping the last retention outside execution cancels that method's remaining
+/// protected tasks. Execution state is local to each native thread.
 #[derive(Debug)]
 pub struct MethodHandle {
-    method_id: MethodId,
+    method: Option<MethodId>,
 }
 
 impl MethodHandle {
-    /// Creates a live handle for the given method.
-    pub(crate) fn for_method(method_id: MethodId) -> Self {
-        if method_id.is_null() {
-            return Self { method_id };
-        }
-        METHODS.with_borrow_mut(|methods| {
-            let Some(method) = methods.get_mut(method_id) else {
-                panic!("internal error: method context deleted while in use (for_method)");
-            };
-            method.handles += 1;
-        });
-        Self { method_id }
+    fn new(method: Option<MethodId>) -> Self {
+        Self { method }
     }
 }
 
 impl Drop for MethodHandle {
     fn drop(&mut self) {
-        METHODS.with_borrow_mut(|methods| {
-            if let Some(method) = methods.get_mut(self.method_id) {
-                method.handles -= 1;
-            }
-        })
+        let Some(id) = self.method else {
+            return;
+        };
+        let removed = EXECUTOR
+            .try_with(|executor| executor.borrow_mut().release_method(id))
+            .unwrap_or_default();
+        // All table borrows ended before invoking any future destructor.
+        for task in removed {
+            drop(task);
+        }
     }
 }
 
-/// A handle to a spawned task.
+/// Identifies one task generation for cancellation without retaining its method.
 #[derive(Debug)]
 pub struct TaskHandle {
-    task_id: TaskId,
+    id: TaskId,
 }
 
 impl TaskHandle {
-    /// A handle to the task currently executing, or None if no task is executing.
+    fn new(id: TaskId) -> Self {
+        Self { id }
+    }
+
+    /// Returns a handle only while a task's Future is being polled.
     pub fn current() -> Option<Self> {
-        let task_id = CURRENT_TASK_ID.get()?;
-        Some(Self { task_id })
+        EXECUTOR.with(|executor| executor.borrow().current_task.map(Self::new))
     }
 }
 
-pub(crate) struct TaskWaker {
-    pub(crate) task_id: TaskId,
+struct ContextGuard {
+    retention: Option<MethodHandle>,
 }
 
-impl Wake for TaskWaker {
-    fn wake(self: Arc<Self>) {
-        self.wake_by_ref();
+impl Drop for ContextGuard {
+    fn drop(&mut self) {
+        EXECUTOR.with(|executor| {
+            let mut executor = executor.borrow_mut();
+            executor.context = None;
+            executor.current_task = None;
+        });
+        // Final automatic reclamation deliberately occurs outside the context.
+        drop(self.retention.take());
     }
+}
 
-    fn wake_by_ref(self: &Arc<Self>) {
-        TASKS.with_borrow_mut(|tasks| {
-            if let Some(task) = tasks.get_mut(self.task_id) {
-                if task.queued {
-                    return;
-                }
-                task.queued = true;
-                if let Some(method_id) = task.method_binding {
-                    METHODS.with_borrow_mut(|methods| {
-                        if let Some(method) = methods.get_mut(method_id) {
-                            method.wakeups.push_back(self.task_id);
-                        }
-                    });
-                } else {
-                    MIGRATORY_WAKEUPS.with_borrow_mut(|unattached| {
-                        unattached.push_back(self.task_id);
-                    });
+struct PollWork {
+    id: TaskId,
+    future: UserFuture,
+    waker: Waker,
+    surrounding: ExecutionContext,
+}
+
+struct PollGuard {
+    id: TaskId,
+    surrounding: ExecutionContext,
+    finished: bool,
+}
+
+impl PollGuard {
+    fn finish(&mut self, future: UserFuture, result: Poll<()>) {
+        let mut future = Some(future);
+        let removed = EXECUTOR.with(|executor| {
+            let mut executor = executor.borrow_mut();
+            executor.context = Some(self.surrounding);
+            executor.current_task = None;
+            match result {
+                Poll::Ready(()) => executor.remove_task(self.id),
+                Poll::Pending => {
+                    if let Some(task) = executor.tasks.get_mut(self.id) {
+                        task.future = future.take();
+                    }
+                    None
                 }
             }
-        })
+        });
+        self.finished = true;
+        drop(removed);
+        // Completion and cancellation during poll both leave the local future
+        // here. Its Drop observes the surrounding context and no current task.
+        drop(future);
     }
 }
 
-/// Spawns a task that can migrate between methods.
-///
-/// When the task is awoken, it will run in the context of the method that woke it.
-pub fn spawn_migratory(f: impl Future<Output = ()> + 'static) -> TaskHandle {
-    setup_panic_hook();
-    let Some(method_id) = CURRENT_METHOD.get() else {
-        panic!("`spawn_*` can only be called within an executor context");
-    };
-    if is_recovering_from_trap() {
-        panic!("tasks cannot be spawned while recovering from a trap");
+impl Drop for PollGuard {
+    fn drop(&mut self) {
+        if !self.finished {
+            // Native unwinding restores bookkeeping. IC traps instead roll back
+            // the message and enter the separately requested recovery callback.
+            let removed = EXECUTOR.with(|executor| {
+                let mut executor = executor.borrow_mut();
+                executor.context = Some(self.surrounding);
+                executor.current_task = None;
+                executor.remove_task(self.id)
+            });
+            drop(removed);
+        }
     }
-    let kind = METHODS
-        .with_borrow(|methods| methods.get(method_id).map(|m| m.kind))
-        .unwrap_or(ContextKind::Update);
-    if kind == ContextKind::Query {
-        panic!("unprotected spawns cannot be made within a query context");
-    }
-    let task_id = TASKS.with_borrow_mut(|tasks| tasks.insert_with_key(|id| Task::new(id, f, None)));
-    MIGRATORY_WAKEUPS.with_borrow_mut(|unattached| {
-        unattached.push_back(task_id);
-    });
-    TaskHandle { task_id }
 }
 
-/// Spawns a task attached to the current method.
-///
-/// When the task is awoken, if a different method is currently running, the task will not run until the method
-/// it is attached to continues. If the attached method returns before the task completes, the task will be canceled.
-pub fn spawn_protected(f: impl Future<Output = ()> + 'static) -> TaskHandle {
-    setup_panic_hook();
-    if is_recovering_from_trap() {
-        panic!("tasks cannot be spawned while recovering from a trap");
-    }
-    let Some(method_id) = CURRENT_METHOD.get() else {
-        panic!("`spawn_*` can only be called within an executor context");
-    };
-    if method_id.is_null() {
-        panic!("`spawn_protected` cannot be called outside of a tracked method context");
-    }
-    let task_id = TASKS
-        .with_borrow_mut(|tasks| tasks.insert_with_key(|id| Task::new(id, f, Some(method_id))));
-    METHODS.with_borrow_mut(|methods| {
-        let Some(method) = methods.get_mut(method_id) else {
-            panic!("internal error: method context deleted while in use (spawn_protected)");
+fn drain() {
+    loop {
+        let Some(mut work) = EXECUTOR.with(|executor| executor.borrow_mut().next_poll()) else {
+            return;
         };
-        method.tasks.push(task_id);
-        method.wakeups.push_back(task_id);
-    });
-    TaskHandle { task_id }
+        let mut guard = PollGuard {
+            id: work.id,
+            surrounding: work.surrounding,
+            finished: false,
+        };
+        let result = work
+            .future
+            .as_mut()
+            .poll(&mut Context::from_waker(&work.waker));
+        guard.finish(work.future, result);
+    }
 }
 
-fn setup_panic_hook() {
-    // Native callers can inspect/test bookkeeping but cannot execute IC syscalls.
-    // Only an installed canister should replace the process panic hook with ic0.
-    #[cfg(target_family = "wasm")]
-    setup_ic_panic_hook();
+fn require_no_context() {
+    EXECUTOR.with(|executor| {
+        assert!(
+            executor.borrow().context.is_none(),
+            "executor contexts cannot nest"
+        );
+    });
+}
+
+fn run_context<R>(method: MethodHandle, recovering: bool, f: impl FnOnce() -> R) -> R {
+    install_panic_hook();
+    require_no_context();
+    EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        let query = method.method.is_some_and(|id| {
+            executor
+                .methods
+                .get(id)
+                .expect("a retained method is live")
+                .query
+        });
+        executor.context = Some(ExecutionContext {
+            method: method.method,
+            query,
+            recovering,
+        });
+    });
+    let guard = ContextGuard {
+        retention: Some(method),
+    };
+    let result = f();
+    if !recovering {
+        drain();
+    }
+    drop(guard);
+    result
+}
+
+fn track<R>(query: bool, f: impl FnOnce() -> R) -> R {
+    install_panic_hook();
+    require_no_context();
+    let id = EXECUTOR.with(|executor| {
+        executor.borrow_mut().methods.insert(Method {
+            retentions: 1,
+            query,
+            members: Vec::new(),
+            ready: VecDeque::new(),
+        })
+    });
+    run_context(MethodHandle::new(Some(id)), false, f)
+}
+
+/// Executes an update closure in a new tracked method and drains eligible tasks.
+///
+/// # Panics
+/// Panics if an executor context is already active.
+pub fn in_tracking_executor_context<R>(f: impl FnOnce() -> R) -> R {
+    track(false, f)
+}
+
+/// Executes a query closure and drains only its protected tasks.
+///
+/// # Panics
+/// Panics if an executor context is already active.
+pub fn in_tracking_query_executor_context<R>(f: impl FnOnce() -> R) -> R {
+    track(true, f)
+}
+
+/// Resumes the retained method, retaining its update/query eligibility.
+///
+/// # Panics
+/// Panics if an executor context is already active.
+pub fn in_callback_executor_context_for<R>(method: MethodHandle, f: impl FnOnce() -> R) -> R {
+    run_context(method, false, f)
+}
+
+/// Enters explicit recovery without draining wakeups; the caller owns cancellation.
+///
+/// # Panics
+/// Panics if an executor context is already active.
+pub fn in_trap_recovery_context_for<R>(method: MethodHandle, f: impl FnOnce() -> R) -> R {
+    run_context(method, true, f)
+}
+
+/// Retains the current tracked method or current untracked migratory context.
+///
+/// # Panics
+/// Panics outside an executor context.
+pub fn extend_current_method_context() -> MethodHandle {
+    let method = EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        let method = executor
+            .context
+            .expect("method retention requires a context")
+            .method;
+        if let Some(id) = method {
+            executor
+                .methods
+                .get_mut(id)
+                .expect("the active method is live")
+                .retentions += 1;
+        }
+        method
+    });
+    MethodHandle::new(method)
+}
+
+/// Reports whether explicit trap recovery is active on this native thread.
+pub fn is_recovering_from_trap() -> bool {
+    EXECUTOR.with(|executor| {
+        executor
+            .borrow()
+            .context
+            .is_some_and(|context| context.recovering)
+    })
+}
+
+/// Cancels one task generation, including during its own poll.
+///
+/// Repeated cancellation and handles for already completed tasks have no effect.
+pub fn cancel_task(handle: &TaskHandle) {
+    let removed = EXECUTOR.with(|executor| executor.borrow_mut().remove_task(handle.id));
+    drop(removed);
+}
+
+/// Cancels the current method's protected tasks in their creation order.
+///
+/// The old batch is detached before destructors run, so destructor-spawned tasks
+/// survive this operation. An untracked context has no protected tasks.
+///
+/// # Panics
+/// Panics outside an executor context.
+pub fn cancel_all_tasks_attached_to_current_method() {
+    let removed = EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        let context = executor
+            .context
+            .expect("bulk cancellation requires a context");
+        let Some(owner) = context.method else {
+            return Vec::new();
+        };
+        let method = executor
+            .methods
+            .get_mut(owner)
+            .expect("the active method is live");
+        let members = std::mem::take(&mut method.members);
+        method.ready.clear();
+        let mut removed = Vec::with_capacity(members.len());
+        for id in members {
+            if let Some(task) = executor.tasks.remove(id) {
+                removed.push(task);
+            }
+        }
+        removed
+    });
+    for task in removed {
+        drop(task);
+    }
+}
+
+fn spawn(future: UserFuture, protected: bool) -> TaskHandle {
+    let owner = EXECUTOR.with(|executor| {
+        let executor = executor.borrow();
+        let context = executor.context.expect("spawning requires a context");
+        assert!(
+            !context.recovering,
+            "spawning is forbidden during trap recovery"
+        );
+        if protected {
+            Some(
+                context
+                    .method
+                    .expect("protected tasks require a tracked method"),
+            )
+        } else {
+            assert!(!context.query, "queries cannot spawn migratory tasks");
+            None
+        }
+    });
+    let id = EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        let id = executor.tasks.insert_with_key(|id| Task {
+            owner,
+            future: Some(future),
+            waker: Waker::from(Arc::new(TaskWake { id })),
+            queued: false,
+        });
+        if let Some(owner) = owner {
+            executor
+                .methods
+                .get_mut(owner)
+                .expect("the owner is retained")
+                .members
+                .push(id);
+        }
+        executor.enqueue(id);
+        id
+    });
+    TaskHandle::new(id)
+}
+
+/// Queues a task that remains attached to its originating tracked method.
+///
+/// # Panics
+/// Panics without a tracked context or during explicit trap recovery.
+pub fn spawn_protected(f: impl Future<Output = ()> + 'static) -> TaskHandle {
+    spawn(Box::pin(f), true)
+}
+
+/// Queues a task that can survive its spawning method and run in later updates.
+///
+/// # Panics
+/// Panics outside execution, in a query, or during explicit trap recovery.
+pub fn spawn_migratory(f: impl Future<Output = ()> + 'static) -> TaskHandle {
+    spawn(Box::pin(f), false)
 }
 
 #[cfg(target_family = "wasm")]
-fn setup_ic_panic_hook() {
-    use crate::ic0::upstream as ic0;
-    use std::sync::Once;
-    static SETUP: Once = Once::new();
-    SETUP.call_once(|| {
+fn install_panic_hook() {
+    static INSTALL: std::sync::Once = std::sync::Once::new();
+    INSTALL.call_once(|| {
         std::panic::set_hook(Box::new(|info| {
-            let file = info.location().unwrap().file();
-            let line = info.location().unwrap().line();
-            let col = info.location().unwrap().column();
-
-            let msg = match info.payload().downcast_ref::<&'static str>() {
-                Some(s) => *s,
-                None => match info.payload().downcast_ref::<String>() {
-                    Some(s) => &s[..],
-                    None => "Box<Any>",
-                },
+            let payload = if let Some(text) = info.payload().downcast_ref::<&str>() {
+                *text
+            } else if let Some(text) = info.payload().downcast_ref::<String>() {
+                text.as_str()
+            } else {
+                "non-string panic payload"
             };
-
-            let err_info = format!("Panicked at '{msg}', {file}:{line}:{col}");
-            ic0::debug_print(err_info.as_bytes());
-            ic0::trap(err_info.as_bytes());
+            let report = match info.location() {
+                Some(location) => format!(
+                    "{payload} at {}:{}:{}",
+                    location.file(),
+                    location.line(),
+                    location.column()
+                ),
+                None => format!("{payload} at an unknown source location"),
+            };
+            crate::ic0::upstream::debug_print(report.as_bytes());
+            crate::ic0::upstream::trap(report.as_bytes());
         }));
     });
 }
+
+#[cfg(not(target_family = "wasm"))]
+fn install_panic_hook() {}
 
 #[cfg(test)]
 mod tests;

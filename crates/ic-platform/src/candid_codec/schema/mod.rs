@@ -3,6 +3,11 @@ use super::{Error, Type};
 use std::ptr;
 pub(super) type Aliases = Vec<(&'static Type, &'static Type)>;
 pub(super) fn compact(table: &mut Vec<&'static Type>) -> Result<Aliases, Error> {
+    // Registration already validated these declarations. With at most one
+    // entry there are no distinct declarations to merge, including self-cycles.
+    if table.len() <= 1 {
+        return Ok(table.iter().map(|ty| (*ty, *ty)).collect());
+    }
     let mut classes: Vec<usize> = (0..table.len()).collect();
     loop {
         let id = |ty: &'static Type| -> Result<i64, Error> {

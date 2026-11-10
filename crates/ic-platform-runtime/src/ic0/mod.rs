@@ -1,7 +1,7 @@
 //! Explicit IC 1.2.0 raw system calls used by Timers, Testkit and raw actors.
 //!
-//! Maintained bindings preserve the upstream safe/unsafe signatures, callback ABI
-//! and trap behavior; function identities now belong to Platform.
+//! Explicit exports from the registry IC0 supplier preserve its safe/unsafe
+//! signatures, callback ABI and trap behavior. Platform maintains no copied bindings.
 //! Callers retain callback environments, byte admission, reply/call ownership,
 //! cycle policy and executor contexts. No entrypoint, global timer, scheduler or
 //! executor is installed here. `stable64_{size,grow,read,read_uninit,write}` are infrastructure
@@ -9,21 +9,8 @@
 //! applications retain Storage governance; these bindings own no allocation or
 //! access policy. Native compilation does not qualify IC execution.
 
-// Reviewed imported ABI wrappers are the only unsafe implementation in this module.
-// Unexposed upstream entrypoints remain private and can be removed by the linker.
-#[expect(
-    unsafe_code,
-    reason = "Imported raw System API bindings preserve the reviewed IC ABI."
-)]
-#[expect(
-    missing_docs,
-    reason = "The selected upstream ABI wrappers retain undocumented exported functions."
-)]
-#[expect(
-    dead_code,
-    reason = "Only the explicitly exported subset of imported IC0 is public."
-)]
-pub(crate) mod upstream;
+// Keep the internal adapter path without exposing the supplier's entire API.
+pub(crate) use ::ic0 as upstream;
 
 pub use upstream::{
     call_data_append, call_new, call_on_cleanup, call_perform, call_with_best_effort_response,

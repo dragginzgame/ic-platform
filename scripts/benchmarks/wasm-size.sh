@@ -16,7 +16,7 @@ recipes="${WASM_BENCH_RECIPES:-3-none-16 3-thin-1 3-fat-1 s-fat-1 z-fat-1}"
 cpubits="${WASM_BENCH_CPUBITS:-auto}"
 case "$cpubits" in auto|32|64) ;; *) echo 'WASM_BENCH_CPUBITS must be auto, 32 or 64' >&2; exit 2 ;; esac
 for profile in $profiles; do
-    case "$profile" in ledger-hash|codec-management-owned|codec-icp-owned|codec-cmc-owned|codec-generic-record|codec-generic-composite|codec-generic-decode|codec-generic|codec-empty|codec-text-owned|principal|principal-binary|principal-self-auth|runtime|runtime-system|candid-args|verification|certification-cbor|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
+    case "$profile" in codec-array-decode|ledger-hash|codec-management-owned|codec-icp-owned|codec-cmc-owned|codec-generic-record|codec-generic-composite|codec-generic-decode|codec-generic|codec-empty|codec-text-owned|principal|principal-binary|principal-self-auth|runtime|runtime-system|candid-args|verification|certification-cbor|bls|ecdsa|ecdsa-instructions) ;; *) echo "Unknown size profile: $profile" >&2; exit 2 ;; esac
 done
 for recipe in $recipes; do
     case "$recipe" in 3-none-16|3-thin-1|3-fat-1|s-fat-1|z-fat-1) ;; *) echo "Unknown size recipe: $recipe" >&2; exit 2 ;; esac
@@ -67,6 +67,7 @@ codec-icp-owned = ["ic-platform/icp-ledger-types"]
 codec-cmc-owned = ["ic-platform/cmc-types"]
 codec-generic = ["ic-platform/candid-codec"]
 codec-generic-decode = ["ic-platform/candid-codec"]
+codec-array-decode = ["ic-platform/candid-codec"]
 codec-generic-composite = ["ic-platform/candid-codec", "dep:num-bigint"]
 codec-principal = ["ic-platform/principal"]
 codec-generic-record = ["ic-platform/candid-codec", "dep:num-bigint", "codec-principal"]

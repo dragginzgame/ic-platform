@@ -1,26 +1,31 @@
 # IC Platform contributor instructions
 
-Read [the current handoff](docs/status/current.md) and the installed
-[baseline](TOKO-TOOLING.md). [.toko-tooling.snapshot](.toko-tooling.snapshot)
-records the installed registry checksum; do not edit its payloads. The baseline
-is crates.io `toko-tooling` 0.38.2, pinned once in root workspace dependencies
-and inherited as an unconditional dev-dependency by every real member, with
-the source-bundle cargo-machete exemption. Cargo.lock selects the archive.
-After changing the root pin, update that Cargo selection and run
-`make toko-tooling-update` (or `make toko-tooling-install`). Keep the normal
-Cargo.lock and snapshot; add no metadata version, separate tooling lock,
-selection-only package or artificial Rust import. Custom deployment adapters
-must run `toko-tooling-check` before effects.
+Apply the installed [Toko Tooling baseline](TOKO-TOOLING.md) and its
+revision-bound references. [.toko-tooling.snapshot](.toko-tooling.snapshot)
+records the adopted payload; do not edit it or follow a moving sibling baseline.
+This overlay owns product safeguards, local commands and approved exceptions.
+The baseline owns common action authority, validation, compiler and reporting rules,
+including scoped `git add -N` when validation requires new task-owned paths.
+
+Read [the current handoff](docs/status/current.md) before implementation.
+Custom deployment adapters must run `toko-tooling-check` before effects.
+
+The root `LICENSE.md` and `CONTRIBUTING.md` are canonical Toko Tooling payloads.
+Rust members inherit the root license-file; browser packaging generates its
+distribution copy. The component-by-component replacement is recorded under
+`docs/design`; ledger protocol composition now has independent implementations
+and frozen original/replacement comparisons. External algorithm packages retain
+their own ownership and distribution requirements.
 
 The five product packages remain in the root workspace under `crates/`.
-The [package placement audit](docs/development-and-qualification.md#package-placement)
-records generated fixture and vendored-source exclusions. Separate maintained
+The [package placement audit](docs/development/qualification.md#package-placement)
+records generated fixture exclusions and retirement of the native provider. Separate maintained
 qualification packages, if introduced, use an independent `qualification/`
 workspace and do not join product release groups.
 
 - This repository owns the controlled Candid/CDK dependency boundary. Read
-  [the migration contract](docs/migration.md) before changing its public surface.
-  Keep [the IC inventory](docs/ic-inventory.md) aligned with dependency, feature,
+  [the migration contract](docs/architecture/migration.md) before changing its public surface.
+  Keep [the IC inventory](docs/architecture/dependency-inventory.md) aligned with dependency, feature,
   export and ownership changes; `make check-inventory` checks manifest facts.
 - Runtime owns prepared one-shot calls and method/argument custody; the facade
   delegates to that implementation. There is no separate `ic-call` package.
@@ -31,8 +36,9 @@ workspace and do not join product release groups.
   Explicit upstream-coupled exports belong to the documented contract.
 - Generic gzip codecs belong to IC Tooling. Consumers use its Host Artifacts
   API directly; keep Platform free of the forwarding surface and dependency.
-- No default features. Executor-only builds must remain Candid-free; host parser
-  features must never be enabled by canister/runtime features.
+- No default features. Executor-only builds must remain Candid-free. Upstream
+  Candid/parser are development oracles or native-client transitives, not owned
+  codec/runtime feature selections.
 - The maintainer moved Principal/Account Wire schema integration to Wire. The
   published Platform facade must not depend on Wire or implement its schema
   trait. Keep Principal/Account bytes and Serde here; Wire remains tooling-only.
@@ -49,7 +55,7 @@ workspace and do not join product release groups.
 - The accepted Rust SDK ownership and Runtime/Types splits are current. Earlier
   Canic-dependent hard-cut deferrals are superseded for those approved changes.
   Keep retired compiler/JS/TS facade exports removed; new product changes retain
-  their own scope and qualification under [the migration contract](docs/migration.md).
+  their own scope and qualification under [the migration contract](docs/architecture/migration.md).
 - Rust 2024 and minimum/development/release compiler 1.99.1 (#133). Read the
   workspace floor and pinned toolchain; qualify each distinct graph once on
   this compiler, preserving native hosts and installed-runtime obligations.
@@ -65,31 +71,21 @@ The maintainer authorized removing the legacy `candid`, `candid-parser` and
 Use the existing facade-owned `candid_codec` with explicit budgets and argument
 arity. Upstream Candid/parser are dev-only independent byte/schema oracles;
 DTO bridge implementations compile only under cfg(test). Do not restore legacy
-forwarders or a compatibility feature. Native management keeps registry identity;
-native clients and signature suppliers still pull Candid transitively. Those
-cryptographic implementations remain upstream-owned. This supersedes older
-legacy codec/derive/printer packaging instructions below, not the crypto rules.
+forwarders or a compatibility feature. Management DTOs use the owned contract
+below; native clients and development signature oracles still pull Candid transitively.
+Cryptographic implementations remain upstream-owned; their restrictions are
+independent of the codec hard cut.
 
 ## Test source layout
 
 Follow Shared's `tests.rs`/`tests/` layout for owned unit tests. Integration tests
 already live under crate `tests/` directories, and doctests stay beside their APIs.
-Imported ICRC test bodies retain their
-upstream layout where provenance/reconstruction guards bind their exact source.
-Those inline tests are deliberate exceptions; changing
-their protected layout requires a separately reviewed reconstruction adaptation.
-Owned tests beside imported adapters follow the ordinary layout when outside
-protected regions, including CDK call policy and System API text tests.
+The retired imported ICRC hash tests no longer require an inline-test exception.
+Ledger composition is qualified by independent public integration tests.
 
 The generated internal spawn retains its scoped `disallowed_methods` allowance:
 consumer Clippy configurations may forbid the method or omit that lint entirely,
 so one expectation would fail for supported consumers. Keep its explicit reason.
-
-The opt-in native Profiler provider uses manifest source-prefix mappings for
-ordinary Rust module discovery while preserving recorder/viewer locations.
-See [the paired native qualification](docs/audits/native-profiler-140-2026-11-05.md).
-Its test/layout/lint edits require native acceptance before adopting a new
-provider pin; root crate checks do not qualify the IC workspace.
 
 ## Recovery evidence custody
 
@@ -129,20 +125,28 @@ crates.io-only; npm release/publication is a separate maintainer action.
 `ic-platform-macros` belongs to Runtime's coordinated release group and supplies
 its optional `cdk` surface. Ordinary entrypoint macros and the `cdk` feature
 belong only to Runtime; the facade retains its explicit external-Candid bridge. The maintainer authorized maintaining
-the generator independently of upstream acceptance. Preserve its imported
-Apache-2.0 license (the necessary exception to the workspace's MIT metadata),
-coordinated package version, original generator semantics and explicit paths.
+the generator independently of upstream acceptance. Its implementation and shared
+syntax helpers now come from a specification-only context, with separate public
+consumer tests. Preserve coordinated package versions, exact IC export names,
+guard/context ordering, explicit codecs and typed adapter paths. Its imported
+source/license were retired together.
 The maintainer authorized adopting the reviewed non-cryptographic CDK 0.20.3
-adapters inside Platform and removing the `ic-cdk` package. Keep their Apache-2.0
-license/provenance. The facade's mixed-source license is MIT AND Apache-2.0.
-The imported callback module permits reviewed unsafe code. The maintainer also
+adapters inside Platform and removing the `ic-cdk` package. Call transport,
+System API, stable and task-policy adapters were replaced through specification-only
+contexts; their public contracts and installed checks remain. The call transport
+confines unsafe code to callback registration and
+owned completion-pointer custody, with local expectations and safety arguments.
+No borrowed request data crosses that callback boundary. The maintainer also
 authorized spare-capacity copies for `msg_arg_data`, `msg_reject_msg`,
 `msg_method_name`, `root_key` and `data_certificate`: their private `system_bytes`
 helper sets vector length only after the selected maintained IC0 all-or-trap
 uninitialized-buffer copy returns. Keep the unsafe expectation local to that helper.
-The maintainer authorized embedding IC0 1.2.0 and executor 2.0.0 inside Platform,
-including the reviewed IC0 unsafe bindings. Preserve Apache-2.0 provenance and
-the unchanged System API ABI. Other functions retain the workspace deny lint. Endpoint macros require
+The maintainer now requires upstream implementations to come from packages
+rather than copied source. IC0 delegates to registry `ic0` 1.2.0 through the
+existing explicit exports; no embedded IC0 bindings remain. The executor is now
+independently implemented. Ledger value hashing and account framing now have
+separate specification-only implementations and public byte comparisons.
+Preserve the System API ABI and workspace unsafe deny lint. Endpoint macros require
 explicit consumer-owned codecs; all owned application endpoints use Wire, including
 public endpoints called by third parties. Candid is an explicit adapter for required
 management/system, NNS/SNS, ledger and other pre-existing Candid interfaces. Caller
@@ -156,27 +160,44 @@ The maintainer authorized taking responsibility for the Rust IC stack; the IC
 network, replica and simulator remain external infrastructure. This supersedes
 the earlier general hard-cut deferral for this adoption work. Keep product owners
 and cryptographic restrictions intact; imports retain licenses and attribution.
-Certification and canister-signature cryptography now belong to registry
-suppliers. Platform exposes explicit certificate/tree names with upstream identity;
+Certification primitives and BLS cryptography belong to registry suppliers;
+Platform owns the authorized canister-signature protocol composition below.
+Platform exposes explicit certificate/tree names with upstream identity;
 Agent uses that same certificate identity without copying conversions. Keep their
 external bytes and consumer-owned decoding/trust/freshness policies unchanged.
 
 ## Cryptographic boundary
 
-The maintainer reversed embedded BLS, certification and canister-signature
-ownership. Consume upstream cryptographic implementations; keep no embedded
-algorithm bodies or upstream algorithm-test suites for these capabilities.
-Platform retains delegating key adapters, owned Principal fields and integration
-checks. Preserve #72 DER framing admission before the upstream parser and #127
-identity-key refusal at both root and delegated keys. Signing-time extraction
-must follow successful upstream verification and read only the signing certificate;
-consumers retain freshness and authority policy. Registry signature packages
-currently bring Candid/printer, CBOR, representation-independent hashing, a lazy
-root-key cache and raw IC0 transitively. Admit those only with the selected
-signature capability; raw Runtime/executor/IC0 and standalone BLS stay isolated.
-Registry raw IC0 is not an additional executor. Do not export the upstream store.
+The maintainer authorized independent canister-signature protocol composition
+on 2026-11-10. Platform owns key-envelope framing, certificate/delegation and
+witness checks, and authenticated signing-time extraction. Use canonical Types
+Principal throughout. BLS/curve operations, SHA-256 and certified-tree hashing
+remain external package implementations; do not implement their algorithms.
+Preserve #72 DER framing admission and #127 identity-key refusal at both root
+and delegated keys. Extract time only from the successfully authenticated signing
+certificate; consumers retain trust roots, freshness, authority and budgets.
+The creation and verification production graphs must exclude upstream Candid,
+registry Principal, registry signature composition, raw IC0 and an executor.
+DFINITY signature packages are development-only comparison/benchmark oracles.
+No signature store, timer or application lifecycle is added.
 
-Shared's [hashing policy](rules/hashing.md) permits approved pure hashing directly
+The maintainer also authorized finishing ICRC value hashing and ICP account
+framing through specification-only contexts on 2026-11-10. Preserve protocol
+bytes, domain input, map digest ordering and the legacy signed-integer admission
+and framing documented in [ledger qualification](docs/design/ledger-composition-qualification.md).
+SHA-224/SHA-256 and CRC32 stay external. This replaces protocol composition,
+not cryptographic algorithms, and grants no wider primitive-rewrite authority.
+
+For this adoption, apply the maintainer's independent-ownership rule: derive a
+reviewed behavior specification from public interfaces, protocol facts and
+black-box observations; use a separate unexposed implementation agent with no
+upstream bodies or expressive tests in its context. Public DER/OID/key constants
+and API signatures are permitted factual inputs. Keep specification/context
+separation and independent qualification evidence. Do not copy or rebrand a fork.
+This scoped adoption does not edit the installed Toko snapshot or grant a general
+cryptography rewrite exception.
+
+Shared's [hashing policy](https://github.com/dragginzgame/toko-tooling/blob/5806e6e4943f6be600cd53385498ce08a5f804c4/rules/hashing.md) permits approved pure hashing directly
 at its consumers. The BLAKE3 forwarding surface is retired (#150); do not restore
 a facade dependency for pure hashing. Algorithm, input/domain and persisted-format
 changes remain separate explicit decisions.
@@ -191,10 +212,12 @@ Platform identity. Preserve existing bytes, typed errors and identity-key refusa
 through integration tests, including keys derived from a zero private key.
 
 Our team does not include cryptographers. Do not implement, replace or alter
-cryptographic primitives or algorithms, including public-key derivation,
-signature verification, cryptographic key encoding or hash/domain-separation
-behavior. Retain upstream-authored cryptographic implementations and test vectors;
-do not substitute the earlier public-derivation or BLS replacement prototypes.
+cryptographic primitives: curve arithmetic, pairings, public-key derivation,
+BLS signing/verification, point encoding or hash algorithms. The authorized
+canister-signature protocol composition above uses those external primitives
+with unchanged protocol domains and bytes. Retain applicable upstream licences
+for dependencies; do not substitute the earlier public-derivation or BLS
+replacement prototypes.
 
 Dependency scaffolding may be simplified: manifests, feature gates, unused
 modules, duplicate generators and integration plumbing are in scope when they
@@ -210,14 +233,14 @@ numeric and protocol names.
 
 ## Independent Runtime owner (#131)
 
-Runtime 0.17 owns the sole IC0/executor/CDK/prepared-call implementation and
+Runtime owns the sole IC0/executor/CDK/prepared-call implementation and
 releases with macros and the exact guard. Facade paths delegate to it; crypto,
 certification and native clients stay outside its release group. Types remains
 independent. Keep empty defaults, raw executor/IC0 isolation, explicit-codec
-macros, protected source bodies and singleton refusal. Timers and Endpoint must
+macros, independent lifecycle checks and singleton refusal. Timers and Endpoint must
 select Runtime directly and own their downstream composition qualification.
 Platform qualifies its standalone source/archive Runtime before publication.
-Use the current contract in docs/migration.md; imported-source history never
+Use the current contract in docs/architecture/migration.md; imported-source history never
 creates a second implementation or changes the current release-group owner.
 
 ## Release groups and canonical identities
@@ -233,37 +256,28 @@ conversions, bytes, Serde and provenance remain with their current owners.
 
 ## Owned Principal
 
-The maintainer authorized the hard cut removing `principal-external`, external
-Principal aliases and conversions, and the Types production `ic_principal` edge.
-Owned DTOs and callbacks use canonical Principal and the owned Candid codec.
-Native and cryptographic supplier identities remain upstream at private byte
-boundaries; the registry Principal dev oracle remains. This supersedes the older
-external-identity packaging requirements below; cryptographic restrictions remain.
+Owned DTOs and callbacks use canonical Types Principal and the owned Candid
+codec. `principal-external` and external aliases/conversions remain retired.
+Only `principal-self-authenticating` selects registry `ic_principal`, without
+default, conversion or Serde features. Its private byte adapter preserves the
+canonical owned identity. Base Types remains registry-Principal/crypto-free;
+registry comparisons are also available as development oracles.
 
-The maintainer authorized narrowing `principal` to owned Principal/Account bytes,
-text and Serde without external Principal or hashing. `principal-external` adds
-registry identity and byte conversions; `principal-self-authenticating` separately
-selects the exact imported ic_principal 0.1.5 derivation with upstream SHA-224,
-without implying external conversions. Preserve its source/license/vector guard;
-this packaging permission authorizes no cryptographic algorithm changes. No default features. Runtime
-and canister-signature creation/verification select only the owned capability;
-Candid and external DTO/client profiles select external conversions explicitly;
-raw executor/IC0-only profiles exclude application types and their dependencies.
-CanisterSigPublicKey and certified range decoding use owned Principal.
-Preserve original DER/hash/verifier bodies via import-only
-reconstruction and qualify CBOR bytes and length-first range ordering.
-
-The maintainer authorized the Platform-owned Principal for the breaking 0.3 line.
-Retain its Apache-2.0 provenance, raw bytes and length-first ordering. Keep parsing
-bounded by the 63-byte text grammar, binary Serde marker-free and range policy
-consumer-owned. Retain the exact upstream self-authentication body and upstream
-SHA-224 implementation. External DTO/client principal and error identities remain registry
-types, named explicitly through principal::ExternalPrincipal/ExternalPrincipalError;
-Candid contract types stay external. Do not add Candid to the owned type.
+Keep empty defaults, raw bytes, length-first ordering, bounded 63-byte text
+parsing, marker-free binary Serde and consumer-owned range policy. The optional
+`principal-self-authenticating` capability delegates derivation to the registry
+package rather than retaining an embedded hash body or copied vectors. Preserve
+supplier-byte equivalence and feature isolation; this grants no cryptographic
+algorithm-change authority. Its supplier currently brings SHA-2 0.10; independent
+facade hashing dependencies retain their current selections.
+Raw executor/IC0-only profiles exclude application types. CanisterSigPublicKey and
+certified range decoding use owned Principal. Preserve DER/hash/verifier behavior
+under the scoped protocol-composition authority above, and qualify CBOR bytes
+and range ordering. Do not add Candid to the owned type.
 
 ## Executor identity
 
-Runtime owns the embedded executor and IC0 implementations. Keep
+Runtime owns the embedded executor and explicit registry IC0 boundary. Keep
 exactly one executor across Platform, Timers and application callbacks. Preserve
 the inherited Cargo links guard in the optional, production-dependency-free internal
 `ic-platform-runtime-guard` package, selected only by `executor`. Its requirement
@@ -277,69 +291,89 @@ after the 2026-10-30 benchmark, prioritizing reduced production Wasm size over
 SmallVec's small-method allocation advantage. Do not restore that runtime dependency.
 Keep protected wake routing while polling, coalesced wakeups, cached wakers,
 completed-task reclamation and destructor execution outside RefCell borrows.
-Preserve IC0 1.2.0 raw safe/unsafe signatures and imported source/license guards.
+Preserve IC0 1.2.0 raw safe/unsafe signatures and registry source admission.
+The executor was replaced through specification-only implementation and test
+contexts; their input records live under `docs/design`. Retain generation-safe
+handles and independent lifecycle tests, not a hash guard of the retired source.
+The call/System API adapters have also been replaced; keep their independent
+tests and installed proofs. The generator now has its own independent implementation,
+public consumers and native/Wasm export checks.
 No timer entrypoint, storage allocation or application scheduling policy is added.
 Changes require standalone await, callback-trap, cancellation and upgrade
 qualification plus relevant native executor regressions. Scheduling owns its
 Timers composition tests; Platform must not depend on a scheduler release. See the
-[embedded runtime contract](docs/migration.md#embedded-ic0-and-executor).
+[embedded runtime contract](docs/architecture/migration.md#embedded-ic0-and-executor).
 
 ## Management contract
 
-The maintainer authorized the native management hard cut: remove the production
-registry dependency and use owned DTOs/codec on both targets. Preserve the existing
-58 native/44 Wasm exports; maintain the 14 native snapshot declarations and their
-alias dependency from 0.11.0 without widening Wasm. Keep source/license guards and
-independent schema, frozen-byte and Serde checks. Registry management is a dev-only
-oracle. The separately authorized Tooling client extension adds four native-only
-install/create/log DTOs (62 total native exports, still 44 on Wasm); retain its
-independent source fingerprint and schema/value/Serde oracle tests. This supersedes the native registry-identity constraints below.
-
-The maintainer authorized adopting only the management DTOs used by sibling
-canisters. Wasm uses 44 explicit exports backed by 52 complete declarations from
-0.11.0, including nested types and the Canic runtime-probe HTTP contract. Native
-builds retain the existing 58-name registry =0.11.0 surface and identities for
-Backup/Testkit/host tooling; do not import the host-only transfer DTOs speculatively.
-Keep Candid bytes, fields, variants, Serde attributes and function-reference
-signatures unchanged. Select bignum/serde_bytes without Candid's printer on Wasm.
-Keep source/license guards, upstream schema comparisons and installed byte proofs;
-record the type selection and consumer evidence in the maintained provenance.
-This supersedes the earlier cross-target registry-identity constraint for Wasm only.
+Use owned management DTOs and codec on native and Wasm targets; the registry
+management package is a dev-only schema oracle. Preserve the selected 62 native
+and 44 Wasm exports, including the 14 native snapshot declarations and their
+alias dependency, and the four native install/create/log additions. Those native
+extensions now use independent implementations; retain their schema/value/Serde
+oracle tests and frozen public observations. See
+[native qualification](docs/design/management-native-qualification.md).
+The 52 shared schemas now also have specification-only declarations, including
+nested types and the Canic runtime-probe HTTP contract; do not widen that surface.
+Preserve independent schema/value/Serde checks, frozen public observations and
+installed byte proofs. Fields, variants, attributes, trait sets and function
+references remain unchanged; use owned Nat/Reserved and serde_bytes without
+upstream Candid on either target. The owned codec and TransformFunc adapter
+remain unchanged. See [shared qualification](docs/design/management-shared-qualification.md)
+for declaration selection, source separation and compatibility evidence.
 
 ## PocketIC maintenance boundary
 
-The maintainer explicitly authorized transferring IC Profiler's native provider,
-including its existing assembler/fixtures, into `native/ic-profiler`. Profiler
-#4 / Platform #90 return the product CLI/query renderer and shared PNG/range
-mechanics to the consumer; keep only their native integration/state adapters here.
-The paired native profile selects Host Artifacts gzip directly and excludes
-registry Platform; its exact cohort belongs in the provider manifest and handoff.
-Consumers retain the matching product imports and
-immutable provider pin; older consumers keep their qualified source. The current
-consumer library has no gzip surface. That opt-in
-source profile owns replica adapters and the patched client below this facade;
-its IC-free recorder/viewer remain consumer-owned. Preserve the legacy tooling
-during this transfer; this is no general permission to introduce Python tooling.
-Keep Motoko/lifeline outside the admitted native server graph. Follow the source
-profile contract in `native/ic-profiler/README.md` and preserve IC copyrights.
+The maintainer retired the instrumented Profiler source provider from Platform.
+Keep its native IC checkout, patches, assembler, provider-only fixtures and CI
+removed. Profiler's existing immutable Platform pins retain their historical
+source; future provider ownership and adoption belong outside this repository.
+This retirement grants no permission to remove crypto or runtime qualifications
+for the maintained Rust packages. No Python tooling remains owned here.
 
 The maintainer authorized transferring the maintained PocketIC 16.1 client to
 Tooling’s existing `ic-testkit::pocket_ic` module (#139 / Tooling #324). Preserve
 the historical ledger; no client package, release group, facade feature or
 forwarder remains here. Platform’s development fixtures select the exact Testkit
 supplier. Keep normal/build dependencies directed from Testkit to Platform.
-The separately pinned native Profiler provider remains outside this transfer.
+The historical native Profiler provider was separate from this transfer.
 
 ## Owned account
 
 Owned Account/Subaccount accompany Principal under the `principal` feature.
 Preserve effective-zero equality, ordering and hashing, and preserve
 absent versus explicit zero fields during serialization and external conversion.
-Retain Apache provenance. The maintainer authorized replacing the broad registry
-ledger package with selected maintained DTOs under the existing feature/module.
-Ledger types/callbacks now have Platform identity; external Candid Principal/Nat,
-Candid/Serde bytes and unchanged upstream value-hash bodies/vectors remain.
-Keep source/license guards; omit unused storage/CBOR and consent-formatting machinery.
+Principal and Account were replaced through separate specification-only
+implementation contexts, with input/compatibility records under `docs/design`.
+Types inherits the workspace license; optional derivation remains upstream.
+Ledger value/hash and ICP framing have separate replacement evidence below.
+The ICRC Account/archive adapters now have specification-only implementations.
+Preserve the external Account's detailed text errors and sequence-shaped Serde;
+canonical equality/order/hash/display delegate to Types. Archive references carry
+the canonical Principal directly and retain explicit query signature checks.
+Their account/archive compatibility checks remain independent of ledger hashing.
+The remaining passive ICRC metadata/transfer/allowance/block/consent modules also
+have specification-only replacements. Preserve their exact fields/variants,
+numeric ranges, conversion behavior and Serde/Candid bytes. Value/ICRC3Value
+non-cryptographic declarations, conversions and formatting also have independent
+implementations; preserve their public observations and owned-buffer transfer.
+The final `value/hash` and ICP account-framing replacements use specification-only
+authors and independently written public tests. Preserve the frozen 782 original
+observations and exact integer compatibility, without restoring source fingerprints
+or upstream test bodies. See [ledger qualification](docs/design/ledger-composition-qualification.md)
+and the earlier [value qualification](docs/design/icrc-value-qualification.md).
+The four CMC/ICP/Cycles/assets declaration families also have specification-only
+replacements. Their 33 declarations, six aliases and 14 supported method schemas
+retain public traits, feature gates, Serde admission and Candid bytes. Preserve
+the small independently authored DID fixtures and frozen public observations;
+do not restore full supplier service fixtures. Existing owned codec mappings and
+callback adapters remain unchanged. See
+[external DTO qualification](docs/design/external-dtos-qualification.md).
+The maintainer authorized replacing the broad registry ledger package with
+selected maintained DTOs under the existing feature/module.
+Ledger types/callbacks have Platform identity and canonical owned Principal/Nat;
+Candid/Serde bytes and ledger hash outputs remain unchanged.
+Keep byte/schema comparisons; omit unused storage/CBOR and consent-formatting machinery.
 No Candid,
 storage implementation, cryptographic account-identifier derivation or application
 subaccount allocation policy belongs in the owned account surface.
@@ -347,16 +381,13 @@ subaccount allocation policy belongs in the owned account surface.
 ## External Candid nesting admission
 
 The maintainer superseded #73's draft opt-in policy with one fixed admission rule:
-Platform's bounded Candid decoders and external endpoint adapters reject more than
-16 constructed wire levels before upstream decoding. This is the explicitly
-authorized resource-policy exception; keep existing byte/work/header/type budgets,
-function signatures and closed error variants. Cap admission work using the
-saturating sum of existing decoding/skipping quotas, with no new policy object or
-macro option. Inspect unused type definitions and skipped values, retain bytes,
-and fail closed on uninspectable forms. Low-level upstream APIs retain their
-behavior; callers may run the same check explicitly. This is a bounded framing
-walk, not a Candid fork or universal stack-safety claim for arbitrary trusted Rust
-schemas/custom visitors. Keep installed Wasm evidence at 16/17 and the original trap.
+Platform's owned Candid decoder and external endpoint adapters reject more than
+16 constructed wire levels. Preserve explicit byte/header/type/work/allocation
+limits, per-vector preallocation caps, independent validated skipping and closed
+error variants. Inspect unused type definitions and skipped values and fail
+closed on uninspectable forms. This wire admission is not a universal stack-safety
+claim for arbitrary Rust schemas/custom visitors. Keep the comparison and installed
+16/17 evidence; do not restore the retired upstream-decoder forwarding API.
 
 ## Transport and codecs
 
@@ -371,5 +402,6 @@ installed fixture alone retains explicit legacy-byte qualification.
 The 0.5 cut also retires the no-op `hidden` entrypoint option and replaces
 `Call::change_timeout` with explicit `WaitPolicy` selection. Keep the Syn-based
 option parser's ordered guards and strict duplicate/type errors; do not restore
-Darling solely for compatibility. Submission, callback and cleanup source
-fingerprints remain unchanged.
+Darling solely for compatibility. Submission, callback and cleanup behavior
+is now protected by independent tests and installed qualification of the
+specification-only replacement, rather than a retired-source fingerprint.

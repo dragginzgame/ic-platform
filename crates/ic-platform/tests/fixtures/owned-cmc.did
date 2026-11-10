@@ -1,0 +1,27 @@
+type NotifyTopUpArg = record { block_index : nat64; canister_id : principal };
+type NotifyError = variant {
+  Refunded : record { reason : text; block_index : opt nat64 };
+  Processing;
+  TransactionTooOld : nat64;
+  InvalidTransaction : text;
+  Other : record { error_code : nat64; error_message : text };
+};
+type NotifyTopUpResult = variant { Ok : nat; Err : NotifyError };
+type IcpXdrConversionRate = record { timestamp_seconds : nat64; xdr_permyriad_per_icp : nat64 };
+type IcpXdrConversionRateResponse = record {
+  data : IcpXdrConversionRate;
+  hash_tree : vec nat8;
+  certificate : vec nat8;
+};
+type NotifyMintCyclesArg = record {
+  block_index : nat64;
+  to_subaccount : opt vec nat8;
+  deposit_memo : opt vec nat8;
+};
+type NotifyMintCyclesSuccess = record { block_index : nat; minted : nat; balance : nat };
+type NotifyMintCyclesResult = variant { Ok : NotifyMintCyclesSuccess; Err : NotifyError };
+service : {
+  notify_top_up : (NotifyTopUpArg) -> (NotifyTopUpResult);
+  notify_mint_cycles : (NotifyMintCyclesArg) -> (NotifyMintCyclesResult);
+  get_icp_xdr_conversion_rate : () -> (IcpXdrConversionRateResponse) query;
+}

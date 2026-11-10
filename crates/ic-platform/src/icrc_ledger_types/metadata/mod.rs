@@ -1,78 +1,72 @@
-//! Selected upstream ICRC implementation; see ../NOTICE.md.
-#![expect(
-    missing_docs,
-    reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
-)]
+//! Typed ledger metadata values with unbounded integer representations.
 
 use crate::candid_codec::{Int, Nat};
-use serde::Deserialize;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 
-/// Variant type for the `icrc1_metadata` endpoint values. The corresponding metadata keys are
-/// arbitrary Unicode strings and must follow the pattern `<namespace>:<key>`, where `<namespace>`
-/// is a string not containing colons. The namespace `icrc1` is reserved for keys defined in the
-/// ICRC-1 standard. For more information, see the
-/// [documentation of Metadata in the ICRC-1 standard](https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1#metadata).
-/// Note that the `MetadataValue` type is a subset of the [`super::ICRC3Value`] type.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+/// A ledger metadata value in its external representation.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MetadataValue {
+    /// An unbounded nonnegative integer.
     Nat(Nat),
+    /// An unbounded signed integer.
     Int(Int),
+    /// UTF-8 text preserved verbatim.
     Text(String),
+    /// Opaque bytes.
     Blob(ByteBuf),
 }
 
 impl From<i64> for MetadataValue {
-    fn from(n: i64) -> Self {
-        MetadataValue::Int(Int::from(n))
+    fn from(value: i64) -> Self {
+        Self::Int(Int::from(value))
     }
 }
 
 impl From<i128> for MetadataValue {
-    fn from(n: i128) -> Self {
-        MetadataValue::Int(Int::from(n))
+    fn from(value: i128) -> Self {
+        Self::Int(Int::from(value))
     }
 }
 
 impl From<u64> for MetadataValue {
-    fn from(n: u64) -> Self {
-        MetadataValue::Nat(Nat::from(n))
+    fn from(value: u64) -> Self {
+        Self::Nat(Nat::from(value))
     }
 }
 
 impl From<u128> for MetadataValue {
-    fn from(n: u128) -> Self {
-        MetadataValue::Nat(Nat::from(n))
+    fn from(value: u128) -> Self {
+        Self::Nat(Nat::from(value))
     }
 }
 
 impl From<Nat> for MetadataValue {
-    fn from(n: Nat) -> Self {
-        MetadataValue::Nat(n)
+    fn from(value: Nat) -> Self {
+        Self::Nat(value)
     }
 }
 
 impl From<String> for MetadataValue {
-    fn from(s: String) -> Self {
-        MetadataValue::Text(s)
+    fn from(value: String) -> Self {
+        Self::Text(value)
     }
 }
 
-impl<'a> From<&'a str> for MetadataValue {
-    fn from(s: &'a str) -> Self {
-        MetadataValue::Text(s.to_string())
+impl From<&str> for MetadataValue {
+    fn from(value: &str) -> Self {
+        Self::Text(value.to_owned())
     }
 }
 
 impl From<Vec<u8>> for MetadataValue {
-    fn from(bytes: Vec<u8>) -> MetadataValue {
-        MetadataValue::Blob(ByteBuf::from(bytes))
+    fn from(value: Vec<u8>) -> Self {
+        Self::Blob(ByteBuf::from(value))
     }
 }
 
-impl<'a> From<&'a [u8]> for MetadataValue {
-    fn from(bytes: &'a [u8]) -> MetadataValue {
-        MetadataValue::Blob(ByteBuf::from(bytes.to_vec()))
+impl From<&[u8]> for MetadataValue {
+    fn from(value: &[u8]) -> Self {
+        Self::Blob(ByteBuf::from(value))
     }
 }

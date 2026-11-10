@@ -3,7 +3,7 @@
 These investigations and migration records retain their original evidence and
 provenance. Earlier pending versions, compiler floors, embedded crypto ownership
 and client locations are historical. They do not override the
-[current contract](../migration.md), [contributor instructions](../../AGENTS.md)
+[current contract](../architecture/migration.md), [contributor instructions](../../AGENTS.md)
 or the supplying source for an old recovery attempt.
 
 ## Candid codec packaging investigation
@@ -513,7 +513,7 @@ A facade release does not rewrite a frozen provider input or its evidence.
 
 Published Platform 0.6.20 supplies optional CMC, legacy ICP, Cycles
 Ledger, NNS Registry and native certified-asset contract modules. See the
-[external contract and migration guide](../external-contracts.md) for exact features,
+[external contract and migration guide](../protocols/external-contracts.md) for exact features,
 import mappings, pinned schema/license provenance and qualification commands.
 Registry archive identity is verified; Canic consumer adoption is not claimed. Required
 external Candid remains; Canic retains effects, limits, retry bytes and policy.
@@ -542,7 +542,7 @@ report uncompressed module plus code-section sizes.
 ## Instrumented PocketIC source provider
 
 The maintainer approved moving native ownership from IC Profiler into Platform.
-The opt-in Git source profile [native/ic-profiler](../../native/ic-profiler/README.md)
+The opt-in Git source profile [native/ic-profiler](https://github.com/dragginzgame/ic-platform/blob/a37b15165a4f87a99f2845cb8263ad565f4a4864/native/ic-profiler/README.md)
 owns the pinned IC gitlink, patch series, native adapters, patched PocketIC client
 and source/build receipts. Consumers select a full Platform commit and the
 `instrumented-pocket-ic` profile. This is an explicit source-provider interface,
@@ -550,7 +550,7 @@ not a new default feature or a replacement for the published registry client.
 
 Profiler retains its IC-free recorder, reports, retention, workloads and viewer.
 The paired #90 cut also requires consumer-owned CLI/query-rendering files and
-private PNG/range helpers listed in the [source contract](../../native/ic-profiler/README.md#paired-product-source-contract).
+private PNG/range helpers listed in the [source contract](https://github.com/dragginzgame/ic-platform/blob/a37b15165a4f87a99f2845cb8263ad565f4a4864/native/ic-profiler/README.md#paired-product-source-contract).
 Do not select this source revision with an older consumer that omits them.
 The existing native integration module paths remain unchanged; no compatibility
 copies remain in the provider.
@@ -592,7 +592,7 @@ from consuming this source profile.
 ## Retired BLAKE3 facade (Platform 0.26)
 
 Pure hashing belongs directly with its consumers under Shared's
-[hashing policy](../../rules/hashing.md). The `blake3` feature and forwarding module
+[hashing policy](https://github.com/dragginzgame/toko-tooling/blob/5806e6e4943f6be600cd53385498ce08a5f804c4/rules/hashing.md). The `blake3` feature and forwarding module
 are removed. IcyDB and Wire have removed their source callers; IcyDB's own
 qualification and deployment remain consumer-owned.
 
@@ -1119,7 +1119,7 @@ The maintained native PocketIC 16.1 client moved to `ic_testkit::pocket_ic`
 under #139 / Tooling #324. Its module, DTO and error identity now belong to Testkit,
 with lifecycle helpers in `ic_testkit::pic`. Platform no longer maintains a client
 package, feature, facade forwarder or release group. See the
-[client migration](../pocket-ic-client.md) for exact source and qualification custody.
+[client migration](pocket-ic-client.md) for exact source and qualification custody.
 
 ## Owned Principal migration (0.3)
 
@@ -2787,7 +2787,7 @@ graphs remain runtime/Candid-free. Wire #36 owns actual product adoption.
 ## Maintained PocketIC Rust client
 
 The native client implementation now belongs to Testkit, with no Platform facade
-forwarder or independently maintained client package. See the [ownership and migration contract](../pocket-ic-client.md).
+forwarder or independently maintained client package. See the [ownership and migration contract](pocket-ic-client.md).
 The server, IC execution engine and native Profiler provider remain external or
 separately pinned; this is not an executor, Candid or server fork.
 

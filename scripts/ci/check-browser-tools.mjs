@@ -15,8 +15,7 @@ for (const [name, version] of Object.entries({ ...manifest.dependencies, ...mani
 }
 await checkBrowserSdkGraph(fileURLToPath(new URL('../../packages/browser', import.meta.url)),
   manifest.dependencies['@icp-sdk/core'], ['@caffeineai/object-storage', '@icp-sdk/auth', '@icp-sdk/signer']);
-const license = new URL('../../packages/browser/LICENSE', import.meta.url);
-assert((await lstat(license)).isFile(), 'Browser LICENSE must be a regular file');
-assert.equal(await readFile(license, 'utf8'), await readFile(new URL('../../LICENSE', import.meta.url), 'utf8'),
-  'Browser LICENSE must match the workspace MIT license');
+const license = new URL('../../LICENSE.md', import.meta.url);
+assert((await lstat(license)).isFile(), 'Root LICENSE.md must be a regular file');
+assert.equal(manifest.license, 'SEE LICENSE IN dist/LICENSE.md');
 console.log('Browser SDK and test dependencies match their exact selections');

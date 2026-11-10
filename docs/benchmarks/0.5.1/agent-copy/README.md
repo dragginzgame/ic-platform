@@ -78,4 +78,4 @@ historical summaries; old local artifacts were not reverified and are not claime
 as independently available evidence. Git history retains the previous records.
 
 The experiment was not adopted; its standalone probe implementations are retired.
-Current Agent ownership and distribution follow the [migration contract](../../../migration.md).
+Current Agent ownership and distribution follow the [migration contract](../../../architecture/migration.md).

@@ -1,6 +1,6 @@
 //! Platform's single maintained executor and its method-context identity.
 //!
-//! These explicit exports retain the imported task and trap contract. They are
+//! These explicit exports retain the qualified task and trap contract. They are
 //! runtime primitives, not a scheduling policy or a second executor. Consumers
 //! own entrypoint/callback context placement and must qualify it on the IC.
 

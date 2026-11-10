@@ -223,6 +223,37 @@ fn floating_point_payloads_preserve_bits() {
 }
 
 #[test]
+fn unused_function_modes_preserve_admission_and_allocation_charges() {
+    for modes in [&[][..], &[1], &[2], &[3], &[0], &[4], &[255], &[1, 1]] {
+        // One unused function type with no arguments/results, then one null.
+        let mut bytes = b"DIDL\x01\x6a\0\0".to_vec();
+        bytes.push(modes.len() as u8);
+        bytes.extend_from_slice(modes);
+        bytes.extend_from_slice(&[1, 0x7f]);
+        let valid = matches!(modes, [] | [1] | [2] | [3]);
+        assert_eq!(
+            decode_one::<()>(&bytes, limits()),
+            if valid { Ok(()) } else { Err(Error::Malformed) }
+        );
+        if valid {
+            let charge = size_of::<Wire>() + size_of::<Id>() + modes.len();
+            let mut budget = limits();
+            budget.allocation = charge;
+            assert_eq!(decode_one::<()>(&bytes, budget), Ok(()));
+            budget.allocation -= 1;
+            assert_eq!(decode_one::<()>(&bytes, budget), Err(Error::Limit));
+            assert!(upstream::decode_one::<()>(&bytes).is_ok());
+            for length in 0..bytes.len() {
+                assert!(decode_one::<()>(&bytes[..length], limits()).is_err());
+            }
+        }
+    }
+    // Oneway with a nonempty result list is malformed even when unused.
+    let bytes = b"DIDL\x01\x6a\0\x01\x7f\x01\x02\x01\x7f";
+    assert_eq!(decode_one::<()>(bytes, limits()), Err(Error::Malformed));
+}
+
+#[test]
 fn typed_tuple_requires_tuple_wire_layout() {
     let mut bytes = b"DIDL\x01\x6c\x02\x00\x78\x02\x7f\x01\x00".to_vec();
     bytes.extend_from_slice(&42u64.to_le_bytes());
@@ -324,6 +355,78 @@ fn bounded_vectors_refuse_before_storage_or_element_reads() {
     let allocation = reader.allocation;
     assert_eq!(reader.bounded_vec::<()>(args[0], 1024), Err(Error::Limit));
     assert_eq!(reader.allocation, allocation);
+}
+
+#[test]
+fn array_lengths_are_checked_before_storage_or_element_reads() {
+    for count in [0, 1, 2, 3, 128, 4096] {
+        let bytes = upstream::encode_one(vec![7u8; count]).unwrap();
+        let (mut reader, args) = message(&bytes, limits()).unwrap();
+        let allocation = reader.allocation;
+        let result = reader.value::<[u8; 2]>(args[0]);
+        if count == 2 {
+            assert_eq!(result, Ok([7; 2]));
+        } else {
+            assert_eq!(result, Err(Error::Malformed));
+            assert_eq!(reader.allocation, allocation);
+            assert_eq!(reader.input.len() - reader.pos, count);
+        }
+        let expected = upstream::decode_one::<[u8; 2]>(&bytes);
+        assert_eq!(result.is_ok(), expected.is_ok());
+    }
+    check([1u8, 2]);
+    check([0u8; 0]);
+    // Invalid fixed-array lengths must not disappear through optional fallback.
+    let bytes = upstream::encode_one(vec![7u8; 3]).unwrap();
+    assert_eq!(
+        decode_one::<Option<[u8; 2]>>(&bytes, limits()),
+        Err(Error::Malformed)
+    );
+    let mut bytes = upstream::encode_one(vec![true; 3]).unwrap();
+    *bytes.last_mut().unwrap() = 2;
+    assert_eq!(
+        decode_one::<Option<[bool; 2]>>(&bytes, limits()),
+        Err(Error::Malformed)
+    );
+    let bytes = b"DIDL\x01\x6d\x7f\x01\x00\xff\xff\xff\xff\x0f";
+    let (mut reader, args) = message(bytes, limits()).unwrap();
+    let allocation = reader.allocation;
+    assert_eq!(reader.value::<[(); 2]>(args[0]), Err(Error::Malformed));
+    assert_eq!(reader.allocation, allocation);
+}
+
+#[test]
+fn array_schema_and_bytes_match_the_independent_dynamic_oracle() {
+    crate::tests::reference::roundtrip(&[Some("héllo".to_owned()), None]);
+    crate::tests::reference::roundtrip(&[0u8; 0]);
+}
+
+#[test]
+fn optional_fallback_retains_failed_attempt_budgets() {
+    type Target = Option<(String, u64)>;
+    let text = "héllo 🌍";
+    let bytes = upstream::encode_one((text, true)).unwrap();
+    // Reading the first field allocates; the incompatible second field triggers
+    // fallback. Its cursor rollback must not refund the first field's storage.
+    let (mut reader, args) = message(&bytes, limits()).unwrap();
+    reader.allocation = text.len();
+    assert_eq!(reader.value::<Target>(args[0]), Ok(None));
+    assert_eq!(reader.allocation, 0);
+    assert_eq!(reader.pos, bytes.len());
+    assert!(!reader.in_skip);
+    for remaining in 0..text.len() {
+        let (mut reader, args) = message(&bytes, limits()).unwrap();
+        reader.allocation = remaining;
+        assert_eq!(reader.value::<Target>(args[0]), Err(Error::Limit));
+    }
+    let (mut reader, args) = message(&bytes, limits()).unwrap();
+    reader.work = 1;
+    assert_eq!(reader.value::<Target>(args[0]), Err(Error::Limit));
+    assert!(!reader.in_skip);
+    let (mut reader, args) = message(&bytes, limits()).unwrap();
+    reader.skipping = 0;
+    assert_eq!(reader.value::<Target>(args[0]), Err(Error::Limit));
+    assert!(!reader.in_skip);
 }
 
 #[test]

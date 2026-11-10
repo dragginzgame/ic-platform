@@ -4,11 +4,11 @@ description = "Canonical IC system API, executor and raw call runtime"
 version = "0.21.0"
 edition.workspace = true
 rust-version.workspace = true
-license = "MIT AND Apache-2.0"
+license-file.workspace = true
 repository.workspace = true
 readme = "README.md"
 publish = ["crates-io"]
-include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+include = ["src/**", "README.md", "Cargo.toml"]
 
 [package.metadata.cargo-machete]
 # Cargo's links constraint enforces executor uniqueness without a Rust import.
@@ -16,7 +16,7 @@ ignored = ["ic-platform-runtime-guard", "toko-tooling"]
 
 [features]
 default = []
-ic0 = []
+ic0 = ["dep:ic0"]
 executor = ["ic0", "dep:slotmap", "dep:ic-platform-runtime-guard"]
 runtime = [
     "executor",
@@ -31,6 +31,7 @@ cdk = ["runtime", "dep:ic-platform-macros"]
 ic-platform-macros = { workspace = true, optional = true }
 ic-platform-runtime-guard = { workspace = true, optional = true }
 ic-platform-types = { workspace = true, optional = true }
+ic0 = { workspace = true, optional = true }
 pin-project-lite = { workspace = true, optional = true }
 serde = { workspace = true, optional = true, features = ["alloc"] }
 slotmap = { workspace = true, optional = true }
@@ -44,6 +45,16 @@ toko-tooling.workspace = true
 name = "cdk_consumer"
 path = "tests/cdk_consumer.rs"
 required-features = ["cdk"]
+
+[[test]]
+name = "executor_consumer"
+path = "tests/executor_consumer.rs"
+required-features = ["executor"]
+
+[[test]]
+name = "call_consumer"
+path = "tests/call_consumer.rs"
+required-features = ["runtime"]
 
 [lints]
 workspace = true

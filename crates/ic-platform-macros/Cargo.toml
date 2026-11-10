@@ -4,11 +4,11 @@ description = "IC Platform entrypoint generator with explicit runtime and consum
 version = "0.21.0"
 edition.workspace = true
 rust-version.workspace = true
-license = "Apache-2.0"
+license-file.workspace = true
 repository.workspace = true
 readme = "README.md"
 publish = ["crates-io"]
-include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+include = ["src/**", "README.md", "Cargo.toml"]
 
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]

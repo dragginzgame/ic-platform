@@ -1,12 +1,4 @@
 //! Explicit external ledger and standards types used by Query and Canic.
-//!
-//! External Candid formats and unchanged upstream value hashes are retained.
-//! These selected types have Platform identities. Consumers retain call bounds, archive admission, certificate
-//! verification, transaction interpretation and retry policy. This feature
-//! selects the owned binary codec without Candid, executor, parser or Agent.
-//! Upstream trait bridges exist only in unit-test codec oracles.
-//! Storage, CBOR adapters and consent-formatting policy are not supplied.
-//! Imported Apache-2.0 source and permitted packaging changes are recorded in NOTICE.md.
 
 mod account;
 mod allowance;

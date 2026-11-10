@@ -1,0 +1,10 @@
+0: InstructionCounter projection=0 numeric-eq=true
+1: CallContextInstructionCounter projection=1 numeric-eq=true
+2: Unrecognized(2) projection=2 numeric-eq=true
+3: Unrecognized(3) projection=3 numeric-eq=true
+4294967295: Unrecognized(4294967295) projection=4294967295 numeric-eq=true
+manual unknown zero: numeric-eq=true enum-eq=false
+InvalidCurveOrAlgorithm: invalid curve or algorithm; source=false
+InvalidKeyName: invalid key name; source=false
+UnrecognizedError(4294967295): unrecognized error: 4294967295; source=false
+OutOfMemory: Out of memory; source=false

@@ -4,9 +4,9 @@ build_benchmark_driver() {
     local root="$1" output="$2" compiler="$3" kind="$4" cache="$5"
     local features='"ecdsa"' platform testkit tokio dependency='' required=ic-testkit
     case "$kind" in
-        bls) ;;
+        bls|signature) ;;
         ecdsa) required=ic-platform,ic-testkit ;;
-        *) echo 'Expected bls or ecdsa benchmark driver' >&2; return 2 ;;
+        *) echo 'Expected bls, ecdsa or signature benchmark driver' >&2; return 2 ;;
     esac
     mkdir -p "$output/driver/src"
     cp "$root/scripts/fixtures/cdk-runtime/${kind}_driver.rs" "$output/driver/src/main.rs"

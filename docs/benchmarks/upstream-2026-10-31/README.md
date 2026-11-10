@@ -118,7 +118,7 @@ of abandonment follows from this failed manifest-only trial.
 ## Later ownership decisions
 
 The older ECDSA upgrade/backend and BLS allocation/import experiments are
-superseded by the current [cryptographic ownership contract](../../migration.md#upstream-cryptographic-dependency-cut-022).
+superseded by the current [cryptographic ownership contract](../../architecture/migration.md#upstream-cryptographic-dependency-cut-022).
 Platform consumes upstream cryptographic implementations. The dependency trial
 above did not establish a safe manifest-only upgrade or repository-wide advisory
 clearance; [#50](https://github.com/dragginzgame/ic-platform/issues/50) remains.

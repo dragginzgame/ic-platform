@@ -1,53 +1,49 @@
-//! Native host certified-asset get/get_chunk contracts; decoding is not certification.
-//!
-//! Passive external Candid contracts; see docs/external-contracts.md for pinned
-//! schemas and provenance. Decoding does not authenticate a response or authorize
-//! a payment, retry, topology decision or resource allocation.
+//! Certified asset retrieval request and response declarations.
 
 use crate::candid_codec::Nat;
 use serde::Deserialize;
 
-/// GetArgs.
+/// An asset key and the content encodings accepted by the caller.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct GetArgs {
-    /// External Candid `key` field.
+    /// The requested asset key.
     pub key: String,
-    /// External Candid `accept_encodings` field.
+    /// The supplied accepted encodings.
     pub accept_encodings: Vec<String>,
 }
 
-/// GetResult.
+/// The initial asset content and its reported metadata.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct GetResult {
-    /// External Candid `content` field.
+    /// The returned content bytes.
     pub content: Vec<u8>,
-    /// External Candid `content_type` field.
+    /// The reported content type.
     pub content_type: String,
-    /// External Candid `content_encoding` field.
+    /// The reported content encoding.
     pub content_encoding: String,
-    /// External Candid `sha256` field.
+    /// Optional opaque SHA-256 digest bytes.
     pub sha256: Option<Vec<u8>>,
-    /// External Candid `total_length` field.
+    /// The reported total content length.
     pub total_length: Nat,
 }
 
-/// GetChunkArgs.
+/// Parameters selecting an asset chunk.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct GetChunkArgs {
-    /// External Candid `key` field.
+    /// The requested asset key.
     pub key: String,
-    /// External Candid `content_encoding` field.
+    /// The requested content encoding.
     pub content_encoding: String,
-    /// External Candid `index` field.
+    /// The requested chunk index.
     pub index: Nat,
-    /// External Candid `sha256` field.
+    /// Optional opaque SHA-256 digest bytes supplied by the caller.
     pub sha256: Option<Vec<u8>>,
 }
 
-/// GetChunkResult.
+/// Content returned for one asset chunk.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct GetChunkResult {
-    /// External Candid `content` field.
+    /// The returned content bytes.
     pub content: Vec<u8>,
 }
 

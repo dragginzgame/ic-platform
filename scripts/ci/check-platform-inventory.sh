@@ -16,7 +16,7 @@ perl -0777 -ne '
     my @blocks = /<!-- BEGIN MANIFEST INVENTORY -->\n(.*?)<!-- END MANIFEST INVENTORY -->/sg;
     @blocks == 1 or die "expected exactly one manifest inventory block\n";
     print $blocks[0];
-' "$root/docs/ic-inventory.md" > "$scratch/documented"
+' "$root/docs/architecture/dependency-inventory.md" > "$scratch/documented"
 diff -u "$scratch/documented" "$scratch/current" || {
     echo 'Inventory drift: review manifest changes and replace the marked block with --print output.' >&2
     exit 1

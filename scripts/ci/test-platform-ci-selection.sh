@@ -16,7 +16,7 @@ perl -MJSON::PP -0777 -e '
     $classify->{env}{CHANGE_HEAD} eq q{${{ github.sha }}} or die "untested head";
     $classify->{env}{CHANGE_BASE} eq q{${{ github.event.pull_request.base.sha || github.event.before }}} or die "wrong base";
     $classify->{env}{CHANGE_REF} eq q{${{ github.event_name == '\''pull_request'\'' && format('\''refs/heads/{0}'\'', github.base_ref) || github.ref }}} or die "wrong ref";
-    for my $name (qw(platform native-provider-source)) {
+    for my $name (qw(platform)) {
         my $j=$jobs->{$name};
         $j->{needs} eq "selection" && $j->{if} eq q{${{ !cancelled() }}} or die "missing failure fallback/cancellation";
         my ($docs,@full);
@@ -44,10 +44,6 @@ perl -MJSON::PP -0777 -e '
         or die "full Platform setup must use the shared cached tool owner";
     my @hosts=sort map { $_->{runner} } @{$jobs->{platform}{strategy}{matrix}{include}};
     join(",",@hosts) eq "macos-15,macos-15-intel,ubuntu-24.04" or die "lost native host";
-    my $native_steps=$jobs->{"native-provider-source"}{steps};
-    my ($tools)=grep { ($native_steps->[$_]{run}//"") eq "make install-host-tools" } 0..$#$native_steps;
-    my ($prepare)=grep { ($native_steps->[$_]{run}//"") eq "bash scripts/ci/check-native-profiler-http.sh --prepare" } 0..$#$native_steps;
-    defined($tools) && defined($prepare) && $tools < $prepare or die "native preparation lacks required manifest tools";
     print $classify->{run};
 ' "$fixture/workflow.json" > "$fixture/classify.sh"
 mkdir -p "$fixture/repo/ci" "$fixture/repo/scripts/ci" "$fixture/repo/docs/status" "$fixture/repo/crates/example"
@@ -86,7 +82,7 @@ printf '# changed policy\n' >> ci/docs-only-paths.txt
 git commit -qam policy
 check full push "$code" "$(git rev-parse HEAD)" refs/heads/main
 # A classifier process failure must not produce a docs output. The workflow
-# assertions above prove both required jobs retain full qualification on failure.
+# assertions above prove Platform retains full qualification on failure.
 mv scripts/ci/classify-ci-change.pl scripts/ci/classifier-unavailable
 : > "$fixture/output"
 if CHANGE_EVENT=push CHANGE_REF=refs/heads/main CHANGE_BASE="$base" CHANGE_HEAD="$docs" GITHUB_OUTPUT="$fixture/output" \

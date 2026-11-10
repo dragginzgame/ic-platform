@@ -5,9 +5,9 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/platform-inventory-test.XXXXXX")"
 trap 'rm -rf "$fixture"' EXIT
-mkdir -p "$fixture/scripts/ci" "$fixture/docs" "$fixture/bin"
+mkdir -p "$fixture/scripts/ci" "$fixture/docs/architecture" "$fixture/bin"
 cp "$root/scripts/ci/check-platform-inventory.sh" "$root/scripts/ci/platform-inventory.jq" "$fixture/scripts/ci/"
-cp "$root/docs/ic-inventory.md" "$fixture/docs/"
+cp "$root/docs/architecture/dependency-inventory.md" "$fixture/docs/architecture/"
 cp "$root/README.md" "$fixture/"
 cargo metadata --manifest-path "$root/Cargo.toml" --no-deps --format-version 1 --locked --offline > "$fixture/original.json"
 cp "$fixture/original.json" "$fixture/metadata.json"
@@ -34,12 +34,13 @@ for mutation in \
     fi
 done
 cp "$fixture/original.json" "$fixture/metadata.json"
+# shellcheck disable=SC2016 # Match literal Markdown code-span delimiters.
 sed '/^| `principal` |/d' "$root/README.md" > "$fixture/README.md"
 if bash "$fixture/scripts/ci/check-platform-inventory.sh" > "$fixture/log" 2>&1; then
     echo 'inventory accepted missing README feature' >&2; exit 1
 fi
 cp "$root/README.md" "$fixture/README.md"
-sed '/<!-- END MANIFEST INVENTORY -->/d' "$root/docs/ic-inventory.md" > "$fixture/docs/ic-inventory.md"
+sed '/<!-- END MANIFEST INVENTORY -->/d' "$root/docs/architecture/dependency-inventory.md" > "$fixture/docs/architecture/dependency-inventory.md"
 if bash "$fixture/scripts/ci/check-platform-inventory.sh" > "$fixture/log" 2>&1; then
     echo 'inventory accepted malformed document' >&2; exit 1
 fi

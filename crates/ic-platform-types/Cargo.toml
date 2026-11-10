@@ -4,25 +4,25 @@ description = "Stable owned IC Principal and Account identities"
 version = "0.19.0"
 edition.workspace = true
 rust-version.workspace = true
-license = "MIT AND Apache-2.0"
+license-file.workspace = true
 repository.workspace = true
 readme = "README.md"
 publish = ["crates-io"]
-include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+include = ["src/**", "README.md", "Cargo.toml"]
 
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
 [features]
 default = []
-principal-self-authenticating = ["dep:sha2_11"]
+principal-self-authenticating = ["dep:ic_principal"]
 
 [dependencies]
 crc32fast.workspace = true
 data-encoding.workspace = true
+ic_principal = { workspace = true, optional = true, features = ["self_authenticating"] }
 serde = { workspace = true, features = ["alloc"] }
 serde_bytes.workspace = true
-sha2_11 = { workspace = true, optional = true }
 thiserror.workspace = true
 
 [dev-dependencies]

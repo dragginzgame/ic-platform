@@ -1,51 +1,57 @@
-//! Selected upstream ICRC implementation; see ../NOTICE.md.
-#![expect(
-    missing_docs,
-    reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
-)]
+//! Block retrieval and certification response records.
+//!
+//! Network access, response validation and certification policy remain with
+//! consumers.
 
 use super::{ICRC3Value, QueryArchiveFn};
 use crate::candid_codec::Nat;
-use serde::Deserialize;
-use serde::Serialize;
+use num_traits::ToPrimitive;
+use serde::{Deserialize, Serialize};
+use serde_bytes::ByteBuf;
 
-/// A block with an ID. Returned as part of [`GetBlocksResult`].
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+/// A ledger block paired with its unbounded index.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BlockWithId {
+    /// The block's index.
     pub id: Nat,
+    /// The block value in the ICRC representation.
     pub block: ICRC3Value,
 }
 
-/// Information about where to find archived blocks. Returned as part of [`GetBlocksResult`].
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+/// Retrieval ranges delegated to an archive callback.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ArchivedBlocks {
+    /// The ranges to request from the archive.
     pub args: Vec<GetBlocksRequest>,
+    /// The query callback accepting those ranges.
     pub callback: QueryArchiveFn<Vec<GetBlocksRequest>, GetBlocksResult>,
 }
 
-/// The result type for the
-/// [ICRC-3 `icrc3_get_blocks`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md#icrc3_get_blocks)
-/// endpoint.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+/// A ledger's local blocks and references to archived ranges.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GetBlocksResult {
+    /// The total log length reported by the ledger.
     pub log_length: Nat,
+    /// Blocks returned directly in this response.
     pub blocks: Vec<BlockWithId>,
+    /// Ranges to retrieve through archive callbacks.
     pub archived_blocks: Vec<ArchivedBlocks>,
 }
 
-/// The arguments for the
-/// [ICRC-3 `icrc3_get_blocks`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md#icrc3_get_blocks)
-/// endpoint.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+/// A requested start index and block count, both unbounded until narrowed.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, PartialOrd, Ord)]
 pub struct GetBlocksRequest {
+    /// The requested first index.
     pub start: Nat,
+    /// The requested number of blocks.
     pub length: Nat,
 }
 
 impl GetBlocksRequest {
+    /// Narrows each field independently to u64, checking start before length.
+    ///
+    /// This does not add the fields or validate an interval against a ledger.
     pub fn as_start_and_length(&self) -> Result<(u64, u64), String> {
-        use num_traits::cast::ToPrimitive;
-
         let start = self.start.0.to_u64().ok_or_else(|| {
             format!(
                 "transaction index {} is too large, max allowed: {}",
@@ -64,20 +70,20 @@ impl GetBlocksRequest {
     }
 }
 
-/// The data certificate returned from the
-/// [ICRC-3 `icrc3_get_tip_certificate`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md#icrc3_get_tip_certificate)
-/// endpoint.
+/// Opaque certification material returned by a ledger.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ICRC3DataCertificate {
-    pub certificate: serde_bytes::ByteBuf,
-    pub hash_tree: serde_bytes::ByteBuf,
+    /// The returned certificate bytes, without local verification.
+    pub certificate: ByteBuf,
+    /// The returned encoded hash-tree bytes, without local interpretation.
+    pub hash_tree: ByteBuf,
 }
 
-/// The return type of the
-/// [ICRC-3 `icrc3_supported_block_types`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md#icrc3_supported_block_types)
-/// endpoint.
+/// A block-format identifier and its descriptive URL.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SupportedBlockType {
+    /// The format identifier reported by the ledger.
     pub block_type: String,
+    /// The associated URL preserved verbatim.
     pub url: String,
 }

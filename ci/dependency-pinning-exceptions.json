@@ -13,14 +13,14 @@
     "subject": "ic-platform-runtime-guard",
     "value": "=0.21.0",
     "reason": "Each canonical runtime owner selects its exact guard; facade versions may share the same runtime owner.",
-    "evidence": "docs/migration.md#independent-runtime-owner-131"
+    "evidence": "docs/architecture/migration.md#independent-runtime-owner-131"
   },
   {
     "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "toko-tooling",
-    "value": "=0.38.2",
+    "value": "=0.39.8",
     "reason": "The published source-bundle installation contract requires one exact registry pin inherited by every member and matched to Cargo.lock and the installed receipt.",
-    "evidence": "docs/consuming-snapshots.md#cargo-selection-and-installation"
+    "evidence": "README.md#development"
   }
 ]

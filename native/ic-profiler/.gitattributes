@@ -1,2 +1,0 @@
-# Unified-diff context markers contain significant trailing spaces.
-patches/ic/*.patch -whitespace

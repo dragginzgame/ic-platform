@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "description": "Controlled browser boundary for Internet Computer SDK integration",
   "type": "module",
-  "license": "MIT",
+  "license": "SEE LICENSE IN dist/LICENSE.md",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dragginzgame/ic-platform.git",
@@ -15,8 +15,7 @@
   },
   "files": [
     "dist",
-    "README.md",
-    "LICENSE"
+    "README.md"
   ],
   "exports": {
     "./principal": {
@@ -53,7 +52,7 @@
   },
   "packageManager": "npm@12.2.0",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node ../../scripts/dev/prepare-browser-package.mjs",
     "pretest": "npm run build",
     "prepack": "npm run build",
     "test": "node --test tests/*.test.mjs",

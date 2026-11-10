@@ -4,11 +4,11 @@ description = "Controlled Candid and IC runtime dependency boundary"
 version = "0.29.2"
 edition.workspace = true
 rust-version.workspace = true
-license = "MIT AND Apache-2.0"
+license-file.workspace = true
 repository.workspace = true
 readme = "README.md"
 publish = ["crates-io"]
-include = ["src/**", "README.md", "LICENSE", "Cargo.toml"]
+include = ["src/**", "README.md", "Cargo.toml"]
 
 [package.metadata.cargo-machete]
 # Constrains K256's transitive bigint to the published ECDSA security floor.
@@ -31,7 +31,7 @@ icp-ledger-types = ["candid-codec", "principal", "dep:crc32fast", "dep:sha2_11"]
 cycles-ledger-types = ["candid-codec", "principal"]
 nns-registry-types = ["candid-codec", "principal"]
 certified-assets-types = ["candid-codec"]
-canister-sig-creation = ["principal", "certification", "dep:ic-canister-sig-creation"]
+canister-sig-creation = ["principal", "certification", "dep:sha2_11"]
 runtime = ["principal", "executor", "ic0", "ic-platform-runtime/runtime"]
 certification = ["dep:ic-certification"]
 certification-cbor = [
@@ -63,7 +63,6 @@ signature-verification = [
     "canister-sig-creation",
     "dep:serde_bytes",
     "dep:serde_cbor",
-    "dep:ic-signature-verification",
     "dep:thiserror",
 ]
 
@@ -74,12 +73,10 @@ curve25519-dalek = { workspace = true, optional = true }
 data-encoding = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true, optional = true }
 hex = { workspace = true, optional = true }
-ic-canister-sig-creation = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-platform-runtime = { workspace = true, optional = true }
 ic-platform-types = { workspace = true, optional = true }
-ic-signature-verification = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 ic_bls12_381 = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
@@ -97,10 +94,12 @@ ic-agent = { workspace = true, optional = true }
 ic-transport-types = { workspace = true, optional = true }
 
 [dev-dependencies]
-# Independent byte/schema oracles, never production codec dependencies.
 candid = { workspace = true, features = ["bignum", "printer", "serde_bytes"] }
 candid_parser.workspace = true
+# Independent byte/schema oracles, never production codec dependencies.
+ic-canister-sig-creation.workspace = true
 ic-management-canister-types.workspace = true
+ic-signature-verification.workspace = true
 serde_bytes.workspace = true
 serde_cbor.workspace = true
 serde_json.workspace = true
@@ -157,6 +156,10 @@ path = "tests/signature_consumer.rs"
 required-features = ["signature-verification"]
 
 [[test]]
+name = "signature_comparison"
+required-features = ["signature-verification"]
+
+[[test]]
 name = "agent_consumer"
 path = "tests/agent_consumer.rs"
 required-features = ["agent", "certification"]
@@ -172,8 +175,28 @@ path = "tests/icrc10_types_consumer.rs"
 required-features = ["icrc-ledger-types"]
 
 [[test]]
+name = "icrc_adapters_consumer"
+path = "tests/icrc_adapters_consumer.rs"
+required-features = ["icrc-ledger-types"]
+
+[[test]]
+name = "icrc_dtos_consumer"
+path = "tests/icrc_dtos_consumer.rs"
+required-features = ["icrc-ledger-types"]
+
+[[test]]
 name = "management_consumer"
 path = "tests/management_consumer.rs"
+required-features = ["management-canister-types"]
+
+[[test]]
+name = "management_native_consumer"
+path = "tests/management_native_consumer.rs"
+required-features = ["management-canister-types"]
+
+[[test]]
+name = "management_shared_consumer"
+path = "tests/management_shared_consumer.rs"
 required-features = ["management-canister-types"]
 
 [[test]]
@@ -200,6 +223,27 @@ required-features = ["principal-self-authenticating"]
 name = "asset_contract_consumer"
 path = "tests/asset_contract_consumer.rs"
 required-features = ["certified-assets-types"]
+
+[[test]]
+name = "icrc_value_consumer"
+path = "tests/icrc_value_consumer.rs"
+required-features = ["icrc-ledger-types"]
+
+[[test]]
+name = "ledger_hash_consumer"
+path = "tests/ledger_hash_consumer.rs"
+required-features = ["icrc-ledger-types", "icp-ledger-types"]
+
+[[test]]
+name = "external_dtos_consumer"
+path = "tests/external_dtos_consumer.rs"
+required-features = [
+    "cmc-types",
+    "icp-ledger-types",
+    "cycles-ledger-types",
+    "certified-assets-types",
+    "icrc-ledger-types",
+]
 
 [[test]]
 name = "upstream_dto_identity"

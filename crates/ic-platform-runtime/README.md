@@ -1,6 +1,7 @@
 # IC Platform Runtime
 
-The sole IC0, executor, CDK adapter and prepared-call implementation. This package
+The sole executor, CDK adapter and prepared-call owner, with explicit registry
+IC0 exports. This package
 and its macros/singleton guard have an independent Runtime release group. Crypto,
 certificates, Candid and native clients remain in `ic-platform`; identities remain
 in `ic-platform-types`. There are no default features.
@@ -23,8 +24,18 @@ Existing Platform facade paths delegate to this same owner. They install no
 second executor. Different runtime generations and the older embedded Platform
 executor remain mutually exclusive through the exact Cargo singleton guard.
 IC0/executor-only selections exclude Types, Candid, hashing and host adapters.
+IC0-only selects just this package and registry `ic0` 1.2.0, which has no
+production dependencies. The copied IC0 source and its local license/provenance
+files are removed; the dependency retains its upstream licensing.
 
-Imported Apache source/licenses and protected region fingerprints are retained.
+The executor, System API, stable-memory and task-policy adapters have independent
+implementations and tests. Protected spawning uses a direct pinned wrapper with
+pin-project-lite; this measured smaller than an additional async wrapper. The
+call transport also has an independent implementation: borrowed request data
+stays outside its owned callback completion state, and arbitrary Waker operations
+run outside its state lock. The generator also has an independent implementation
+and public consumer/export tests. First-party license text and matching manifest
+metadata remain pending. See the migration contract for qualification records.
 See the repository migration contract for source/archive qualification and the
 separate installed owner and Timers composition proofs. This package owns no
 scheduler, codecs, retries or storage allocation.

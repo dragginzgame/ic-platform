@@ -1,0 +1,25 @@
+bytes=[]; text=aaaaa-aa; debug=Principal { len: 0, bytes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }; hash=["u8:0", "usize:29", "bytes:[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]"]
+bytes=[4]; text=2vxsx-fae; debug=Principal { len: 1, bytes: [4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }; hash=["u8:1", "usize:29", "bytes:[4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]"]
+bytes=[1, 2]; text=w3gef-eqbai; debug=Principal { len: 2, bytes: [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }; hash=["u8:2", "usize:29", "bytes:[1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]"]
+bytes=[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]; text=tsdi7-6x777-77777-77777-77777-77777-77777-77777-77777-77777-776; debug=Principal { len: 29, bytes: [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255] }; hash=["u8:29", "usize:29", "bytes:[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]"]
+parse("")=Err(TextTooShort)
+parse("-")=Err(TextTooShort)
+parse("a")=Err(InvalidBase32)
+parse("aaaaaaa")=Err(AbnormalGrouped(Principal { len: 0, bytes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }))
+parse("AAAAA-AA")=Ok(Principal { len: 0, bytes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] })
+parse("aaaaa-a")=Err(InvalidBase32)
+parse("aaaaa-aa-")=Err(AbnormalGrouped(Principal { len: 0, bytes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }))
+parse("-aaaaa-aa")=Err(AbnormalGrouped(Principal { len: 0, bytes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }))
+parse("aaaaa-aa ")=Err(InvalidBase32)
+parse("aaaaa-aq")=Err(CheckSequenceNotMatch)
+error=BytesTooLong; display=Bytes is longer than 29 bytes.; JSON={"BytesTooLong":[]}
+error=InvalidBase32; display=Text must be in valid Base32 encoding.; JSON={"InvalidBase32":[]}
+error=TextTooShort; display=Text is too short.; JSON={"TextTooShort":[]}
+error=TextTooLong; display=Text is too long.; JSON={"TextTooLong":[]}
+error=CheckSequenceNotMatch; display=CRC32 check sequence doesn't match with calculated from Principal bytes.; JSON={"CheckSequenceNotMatch":[]}
+error=AbnormalGrouped(Principal { len: 0, bytes: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] }); display=Text should be separated by - (dash) every 5 characters: expected "aaaaa-aa"; JSON={"AbnormalGrouped":"aaaaa-aa"}
+
+Additional published Types 0.19.0 CBOR observations (2026-11-10):
+CBOR Text("aaaaa-aa"): accepted management Principal
+CBOR Bytes([1, 2]): accepted Principal bytes [1, 2]
+CBOR Array([]): refused, invalid type: sequence, expected bytes or string

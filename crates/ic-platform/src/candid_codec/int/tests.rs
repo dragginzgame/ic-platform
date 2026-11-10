@@ -30,8 +30,52 @@ fn signed_range_wire_serde_and_display_match_registry() {
                     serde_cbor::to_vec(&owned).unwrap(),
                     serde_cbor::to_vec(&external).unwrap()
                 );
+                assert_eq!(
+                    serde_json::from_slice::<Int>(&serde_json::to_vec(&owned).unwrap()).unwrap(),
+                    owned
+                );
+                assert_eq!(
+                    serde_cbor::from_slice::<Int>(&serde_cbor::to_vec(&owned).unwrap()).unwrap(),
+                    owned
+                );
                 assert_eq!(owned.to_string(), external.to_string());
             }
+        }
+    }
+}
+
+#[test]
+fn serde_sign_and_magnitude_pair_matches_bigint_and_refuses_malformed_input() {
+    for input in [
+        "[0,[]]",
+        "[1,[1]]",
+        "[-1,[4294967295,4294967295,1]]",
+        "[0,[123]]",
+        "[1,[]]",
+        "[-1,[0]]",
+        "[]",
+        "[1]",
+        "[1,[],0]",
+        "[2,[1]]",
+        "[-2,[1]]",
+        "[null,[]]",
+        "[1,1]",
+        "[1,[-1]]",
+        "[1,[4294967296]]",
+        "[1,[1.5]]",
+    ] {
+        let expected = serde_json::from_str::<BigInt>(input);
+        let actual = serde_json::from_str::<Int>(input).map(|value| value.0);
+        assert_eq!(actual.is_ok(), expected.is_ok(), "{input}");
+        if let (Ok(actual), Ok(expected)) = (&actual, &expected) {
+            assert_eq!(actual, expected, "{input}");
+        }
+        let value: serde_json::Value = serde_json::from_str(input).unwrap();
+        let cbor = serde_cbor::to_vec(&value).unwrap();
+        let decoded = serde_cbor::from_slice::<Int>(&cbor).map(|value| value.0);
+        assert_eq!(decoded.is_ok(), expected.is_ok(), "CBOR: {input}");
+        if let (Ok(decoded), Ok(expected)) = (decoded, expected) {
+            assert_eq!(decoded, expected, "CBOR: {input}");
         }
     }
 }

@@ -4,6 +4,98 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.29.3] - Unreleased
+
+### 🩹 Fixed
+
+- Return an error when converting an empty Value array to an Account instead of
+  panicking. Int now accepts its existing sign/magnitude Serde representation,
+  restoring JSON/CBOR roundtrips without changing serialized or Candid bytes;
+  malformed pairs and trailing tuple elements remain rejected.
+- Reject incorrect fixed-array lengths as malformed values, including inside
+  `Option<[u8; 32]>` subaccounts and nested options. Invalid lengths no longer
+  disappear as `None`; valid arrays, absent options and ordinary incompatible-type
+  fallback retain their behavior.
+
+### 🔧 Changed
+
+- Replace ICRC hash composition and ICP account framing with independently
+  authored protocol adapters over the existing SHA/CRC providers. Preserve
+  exact outputs, map ordering and legacy integer limits; hash ICRC3 values
+  directly without first rebuilding a Value tree. Independent public comparisons
+  replace source-fingerprint checks.
+- Replace non-cryptographic Value/ICRC3Value helpers through a specification-only
+  context, preserving conversions, errors, formatting and external bytes.
+- Replace passive CMC, ICP Ledger, Cycles Ledger and certified-assets declarations
+  through a specification-only context, preserving public types and Serde/Candid
+  behavior. Replace four full service DID fixtures with independent schemas for
+  the 14 supported methods, checked against original contracts and frozen public
+  observations.
+- Adopt Toko Tooling 0.39.8, explicitly retain grouped-release entrypoints, and
+  remove installed shared reference guides through the exporter. Organize native
+  docs by topic and update dependency/source ownership statements and checks.
+- Replace all selected shared and native management DTO declarations through a
+  specification-only context. Preserve public exports, traits, numeric ranges,
+  floating-point bits and Serde/Candid bytes. Replace source fingerprints with
+  frozen public observations and registry schema/value comparisons.
+- Replace the remaining passive ICRC metadata/transfer/allowance/block/consent
+  declarations and helpers through a specification-only context. Preserve public
+  fields, variants, ranges, traits, diagnostics and Serde/Candid bytes; document
+  fields instead of retaining blanket documentation-lint exceptions. The imported
+  value/hash implementation and its source guards remain unchanged.
+- Replace imported ICRC Account/archive adapters through a specification-only
+  context. Delegate account identity behavior to Types, preserve detailed text
+  errors and Serde/Candid bytes, and move canonical archive Principal fields
+  directly. Retain the other ledger imports and hash-source guards.
+
+- Independently implement canister-signature key framing and protocol verification
+  with canonical Principal, while retaining external BLS, SHA-256 and certified-tree
+  primitives. Remove Candid and raw IC0 from production signature profiles;
+  preserve DER/identity-key admission and extract authenticated time without
+  decoding the certificate twice. DFINITY signature packages remain test-only
+  comparison and benchmark references.
+
+### 🛠️ Tooling
+
+- Retire the instrumented Profiler Git source provider, IC submodule, Python
+  assembler and provider-only CI/fixtures. Existing immutable consumer pins
+  retain their source; future provider ownership belongs outside Platform.
+
+### ⚡ Performance
+
+- Move the owned blob buffer when converting Value to Vec instead of copying it;
+  format ICRC3Value through borrowed children without cloning the complete tree.
+- Remove temporary padding strings and decoded vectors from external ICRC Account
+  text parsing. Preserve Unicode error offsets, oversized-input error precedence
+  and checksum diagnostics with fixed scratch buffers. No speed or Wasm-size
+  claim is made for this change.
+- Replace the copied Nat hash-input encoder with a specification-only unsigned
+  LEB128 writer using borrowed digits and 64 bytes of stack scratch. Preserve
+  arbitrary magnitudes, canonical bytes and IO failures without cloning or
+  allocating a full-magnitude temporary; ledger hash bodies remain unchanged.
+- Reject mismatched fixed-size array lengths before allocating a temporary
+  vector or decoding its elements. Preserve valid bytes; an incorrect length
+  now takes precedence over later faults.
+- Remove temporary function-mode copies and unnecessary schema-merging work
+  for simple encodings. Keep decoder budget charges and external bytes unchanged;
+  measured probes shrink further, with the native timing tradeoff recorded in
+  the codec audit.
+
+### 🧪 Testing
+
+- Make the existing 28-schema ICRC oracle runnable with ICRC alone and share its
+  comparison helper. Add public conversion/range/default tests and frozen
+  before/after JSON, CBOR and Candid observations for the passive DTO families.
+- Replace copied native Agent PEM fixtures with newly generated test keys and
+  retain upstream cryptographic parsing, verification and wrong-root checks.
+- Expand the shared codec comparison catalogue to 101 valid and 16 discard or
+  admission cases, and the Wasm comparison to seven shapes. Keep known upstream
+  admission differences explicit and record slower encoding cases alongside wins.
+
+- Qualify array admission and optional fallback budget retention, and add an
+  isolated array Wasm probe. Record current upstream/owned codec footprint and
+  throughput comparisons in the [codec audit](../../docs/benchmarks/candid-codec-2026-11-10/README.md).
+
 ## [0.29.2] - 2026-11-09
 
 ### 🩹 Fixed
@@ -99,7 +191,7 @@ See also the [Types ledger](../types/CHANGELOG.md).
   native parser owner. Requalify consumer budgets; old upstream quotas are not
   equivalent to the owned work/allocation limits. No storage reset or external
   protocol migration is required by the preserved bytes. See the
-  [migration contract](../../docs/migration.md).
+  [migration contract](../../docs/architecture/migration.md).
 
 ### 🧪 Testing
 
@@ -613,7 +705,7 @@ retained; 0.23.2 delivers the reviewed changes through forward recovery.
   selection once instead of repeating the old 1.91/development matrix.
 - The optional PocketIC facade now uses management DTO identity 0.11. Native
   clients can depend directly on the independently released `ic-platform-pocket-ic`;
-  migration details are in the [client contract](../../docs/pocket-ic-client.md).
+  migration details are in the [client contract](../../docs/history/pocket-ic-client.md).
 
 ### 🧹 Maintenance
 
@@ -718,7 +810,7 @@ retained; 0.23.2 delivers the reviewed changes through forward recovery.
   security upgrade retains a modest measured Wasm footprint increase with the
   qualified backend; Agent and native public derivation retain their older
   dependency generation.
-  [Migration and compatibility](../../docs/migration.md#standard-secp256k1-ecdsa-maintenance-boundary).
+  [Migration and compatibility](../../docs/architecture/migration.md#standard-secp256k1-ecdsa-maintenance-boundary).
 
 ### 🩹 Fixed
 

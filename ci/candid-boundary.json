@@ -1,39 +1,18 @@
 {
    "allowances": [
       {
-         "declaration": "#[derive(CandidType, Deserialize)]\nstruct Account",
-         "kind": "external-protocol",
-         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_ledger.rs",
-         "protocol": "ICP ledger ICRC-1 profiling",
-         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
+         "declaration": "fn pair<O, R>(name: &str, owned: &O, upstream: &R, measure: bool) where O: Encode + for<'a> Decode<'a> + PartialEq + Debug, R: reference::CandidType + for<'a> serde::Deserialize<'a> + PartialEq + Debug,",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/tests/comparison.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only comparison catalogue shared by byte/value checks and explicit native timings; no production forwarding."
       },
       {
-         "declaration": "#[derive(CandidType)]\nstruct Transfer",
-         "kind": "external-protocol",
-         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_ledger.rs",
-         "protocol": "ICP ledger ICRC-1 profiling",
-         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
-      },
-      {
-         "declaration": "#[derive(CandidType, Deserialize)]\nstruct Account",
-         "kind": "external-protocol",
-         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
-         "protocol": "ICP ledger ICRC-1 profiling",
-         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
-      },
-      {
-         "declaration": "#[derive(CandidType)]\nstruct Transfer",
-         "kind": "external-protocol",
-         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
-         "protocol": "ICP ledger ICRC-1 profiling",
-         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
-      },
-      {
-         "declaration": "#[derive(CandidType, Deserialize, Debug)]\nenum TransferError",
-         "kind": "external-protocol",
-         "path": "native/ic-profiler/overlay/packages/pocket-ic/examples/system_profile_overhead.rs",
-         "protocol": "ICP ledger ICRC-1 profiling",
-         "reason": "Native profiling example encodes the real external ledger account/transfer contract."
+         "declaration": "fn same<T>(name: &str, value: T, measure: bool) where T: Encode + for<'a> Decode<'a> + reference::CandidType + for<'a> serde::Deserialize<'a> + PartialEq + Debug,",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/tests/comparison.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only comparison of identical Rust mappings using the same catalogue for correctness and native timings."
       },
       {
          "declaration": "fn check<T>(value: T)\nwhere\n    T: Encode\n        + for<'a> Decode<'a>\n        + upstream::CandidType\n        + for<'a> serde::Deserialize<'a>\n        + PartialEq\n        + std::fmt::Debug,",
@@ -172,13 +151,19 @@
    "cbor_allowances": [
       {
          "crate": "serde_cbor",
-         "path": "crates/ic-platform-types/src/account/tests/serde_formats/mod.rs",
+         "path": "scripts/fixtures/signature-instructions/admitted.rs",
+         "reason": "Benchmark-only reference adapter measures DFINITY verification with root/delegated identity-key admission and authenticated certificate projection.",
+         "review": "Remove with this benchmark; keep production signature composition in Platform."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform-types/src/account/tests.rs",
          "reason": "Existing Types serializer-compatibility tests compare retained Principal/Account bytes.",
          "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
       {
          "crate": "serde_cbor",
-         "path": "crates/ic-platform-types/src/principal/tests/mod.rs",
+         "path": "crates/ic-platform-types/src/principal/tests.rs",
          "reason": "Existing Types serializer-compatibility tests compare retained Principal/Account bytes.",
          "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },
@@ -232,9 +217,9 @@
       },
       {
          "crate": "serde_cbor",
-         "path": "native/ic-profiler/overlay/packages/pocket-ic/tests/memory_access_tracing.rs",
-         "reason": "Existing maintainer-authorized imported PocketIC ingress fixture; the native infrastructure contract and provenance remain intact.",
-         "review": "Review on native provider/client transfer; require paired native qualification before changing the imported fixture."
+         "path": "crates/ic-platform/src/signature_verification/tests/owned.rs",
+         "reason": "Independent canister-signature protocol qualification constructs certificates and malformed CBOR envelopes using external primitive APIs.",
+         "review": "Review when certificate or signature protocol admission changes."
       },
       {
          "crate": "serde_cbor",
@@ -259,6 +244,42 @@
          "crate": "serde_cbor",
          "reason": "Independent Serde-byte comparison of owned and registry native management DTOs; test-only protocol oracle.",
          "review": "Review when native management carriers or serialization change."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/tests/icrc_adapters_consumer.rs",
+         "reason": "Independent public DTO compatibility observations freeze original Serde CBOR bytes; test-only oracle, not a generic production CBOR API.",
+         "review": "Review when the corresponding DTO fields or Serde representations change."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/tests/icrc_dtos_consumer.rs",
+         "reason": "Independent public DTO compatibility observations freeze original Serde CBOR bytes; test-only oracle, not a generic production CBOR API.",
+         "review": "Review when the corresponding DTO fields or Serde representations change."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/tests/management_native_consumer.rs",
+         "reason": "Independent public DTO compatibility observations freeze original Serde CBOR bytes; test-only oracle, not a generic production CBOR API.",
+         "review": "Review when the corresponding DTO fields or Serde representations change."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/tests/management_shared_consumer.rs",
+         "reason": "Independent public DTO compatibility observations freeze original Serde CBOR bytes; test-only oracle, not a generic production CBOR API.",
+         "review": "Review when the corresponding DTO fields or Serde representations change."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/tests/external_dtos_consumer.rs",
+         "reason": "Independent public DTO compatibility tests freeze Serde input admission and Candid output bytes; test-only oracle, not a production CBOR API.",
+         "review": "Review when the corresponding DTO fields or Serde representations change."
+      },
+      {
+         "crate": "serde_cbor",
+         "path": "crates/ic-platform/tests/icrc_value_consumer.rs",
+         "reason": "Independent public value-helper comparisons freeze original JSON/CBOR/Candid representations; test-only compatibility oracle.",
+         "review": "Review when Value/ICRC3Value traits, carriers or serialization change."
       }
    ],
    "schema": 1

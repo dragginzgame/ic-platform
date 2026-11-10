@@ -1,52 +1,33 @@
-//! Selected upstream ICRC implementation; see ../NOTICE.md.
-#![expect(
-    missing_docs,
-    reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
-)]
+//! Typed archive references and archive-list records.
+//!
+//! References preserve caller-supplied identities and methods without imposing
+//! network, authority, budget or retry policy.
 
-use crate::candid_codec::Nat;
-use crate::principal::Principal;
-use serde::Deserialize;
-use serde::Serialize;
-use std::marker::PhantomData;
+use crate::{
+    candid_codec::{
+        Encode, Error, Nat, Type, Writer,
+        decoder::{Decode, Error as DecodeError, Reader},
+        references::Func,
+    },
+    principal::Principal,
+};
+use serde::{Deserialize, Serialize};
+use std::{cmp::Ordering, marker::PhantomData};
 
-/// Details on the callback function using which archived blocks can be retrieved. Returned as part
-/// of [`super::GetBlocksResult`] from the
-/// [`icrc3_get_blocks`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md)
-/// endpoint.
+/// A query callback taking one Input and returning one Output.
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(try_from = "crate::candid_codec::references::Func")]
 pub struct QueryArchiveFn<Input, Output> {
+    /// The canonical Principal to which the callback refers.
     pub canister_id: Principal,
+    /// The method name, preserved verbatim.
     pub method: String,
+    /// Type-level input and output information; serialized as a unit marker.
     pub _marker: PhantomData<(Input, Output)>,
 }
 
-impl<Input, Output> PartialOrd for QueryArchiveFn<Input, Output>
-where
-    Input: Eq,
-    Output: Eq,
-{
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl<Input, Output> Ord for QueryArchiveFn<Input, Output>
-where
-    Input: Eq,
-    Output: Eq,
-{
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match self.canister_id.cmp(&other.canister_id) {
-            std::cmp::Ordering::Equal => self.method.cmp(&other.method),
-            c => c,
-        }
-        // the _marker doesn't matter
-    }
-}
-
 impl<Input, Output> QueryArchiveFn<Input, Output> {
+    /// Constructs a callback without imposing canister or method restrictions.
     pub fn new(canister_id: Principal, method: impl Into<String>) -> Self {
         Self {
             canister_id,
@@ -58,111 +39,96 @@ impl<Input, Output> QueryArchiveFn<Input, Output> {
 
 impl<Input, Output> Clone for QueryArchiveFn<Input, Output> {
     fn clone(&self) -> Self {
+        Self::new(self.canister_id, self.method.clone())
+    }
+}
+
+impl<Input: Eq, Output: Eq> Ord for QueryArchiveFn<Input, Output> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.canister_id
+            .cmp(&other.canister_id)
+            .then_with(|| self.method.cmp(&other.method))
+    }
+}
+
+impl<Input: Eq, Output: Eq> PartialOrd for QueryArchiveFn<Input, Output> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl<Input, Output> From<QueryArchiveFn<Input, Output>> for Func {
+    fn from(reference: QueryArchiveFn<Input, Output>) -> Self {
         Self {
-            canister_id: self.canister_id,
-            method: self.method.clone(),
-            _marker: PhantomData,
+            principal: reference.canister_id,
+            method: reference.method,
         }
     }
 }
 
-impl<Input, Output> From<QueryArchiveFn<Input, Output>> for crate::candid_codec::references::Func {
-    fn from(archive_fn: QueryArchiveFn<Input, Output>) -> Self {
-        let p: &Principal = &Principal::try_from(archive_fn.canister_id.as_ref())
-            .expect("could not deserialize principal");
-        Self {
-            principal: *p,
-            method: archive_fn.method,
-        }
-    }
-}
-
-impl<Input, Output> TryFrom<crate::candid_codec::references::Func>
-    for QueryArchiveFn<Input, Output>
-{
+impl<Input, Output> TryFrom<Func> for QueryArchiveFn<Input, Output> {
     type Error = String;
-    fn try_from(func: crate::candid_codec::references::Func) -> Result<Self, Self::Error> {
-        let canister_id = Principal::try_from(func.principal.as_slice())
-            .map_err(|e| format!("principal is not a canister id: {e}"))?;
-        Ok(QueryArchiveFn {
-            canister_id,
-            method: func.method,
-            _marker: PhantomData,
-        })
+
+    fn try_from(reference: Func) -> Result<Self, Self::Error> {
+        Ok(Self::new(reference.principal, reference.method))
     }
 }
 
-/// The argument for the
-/// [`icrc3_get_archives`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md)
-/// endpoint.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct GetArchivesArgs {
-    // The last archive seen by the client.
-    // The Ledger will return archives coming
-    // after this one if set, otherwise it
-    // will return the first archives.
-    pub from: Option<Principal>,
-}
-
-/// The information returned as part of the return value for the
-/// [`icrc3_get_archives`](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-3/README.md)
-/// endpoint.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct ICRC3ArchiveInfo {
-    // The id of the archive
-    pub canister_id: Principal,
-
-    // The first block in the archive
-    pub start: Nat,
-
-    // The last block in the archive
-    pub end: Nat,
-}
-
-impl<Input: crate::candid_codec::Encode, Output: crate::candid_codec::Encode>
-    crate::candid_codec::Encode for QueryArchiveFn<Input, Output>
-{
-    const TYPE: &'static crate::candid_codec::Type = &crate::candid_codec::Type::Function {
+impl<Input: Encode, Output: Encode> Encode for QueryArchiveFn<Input, Output> {
+    const TYPE: &'static Type = &Type::Function {
         args: &[Input::TYPE],
         results: &[Output::TYPE],
         annotations: &[1],
     };
-    fn write(
-        &self,
-        writer: &mut crate::candid_codec::Writer,
-    ) -> Result<(), crate::candid_codec::Error> {
-        crate::candid_codec::references::Func::write_parts(&self.canister_id, &self.method, writer)
+
+    fn write(&self, writer: &mut Writer) -> Result<(), Error> {
+        Func::write_parts(&self.canister_id, &self.method, writer)
     }
 }
-impl<'a, Input: crate::candid_codec::Encode, Output: crate::candid_codec::Encode>
-    crate::candid_codec::decoder::Decode<'a> for QueryArchiveFn<Input, Output>
-{
-    fn read(
-        reader: &mut crate::candid_codec::decoder::Reader<'a>,
-        wire: i64,
-    ) -> Result<Self, crate::candid_codec::decoder::Error> {
-        let value = crate::candid_codec::references::Func::read(
-            reader,
-            wire,
-            <Self as crate::candid_codec::Encode>::TYPE,
-        )?;
-        Ok(Self::new(value.principal, value.method))
+
+impl<'a, Input: Encode, Output: Encode> Decode<'a> for QueryArchiveFn<Input, Output> {
+    fn read(reader: &mut Reader<'a>, wire: i64) -> Result<Self, DecodeError> {
+        let reference = Func::read(reader, wire, Self::TYPE)?;
+        Ok(Self::new(reference.principal, reference.method))
     }
 }
 
 #[cfg(test)]
 impl<Input, Output> From<QueryArchiveFn<Input, Output>> for candid::types::reference::Func {
-    fn from(value: QueryArchiveFn<Input, Output>) -> Self {
+    fn from(reference: QueryArchiveFn<Input, Output>) -> Self {
         Self {
-            principal: candid::Principal::from_slice(value.canister_id.as_slice()),
-            method: value.method,
+            principal: candid::Principal::from_slice(reference.canister_id.as_slice()),
+            method: reference.method,
         }
     }
 }
+
 #[cfg(test)]
 impl<Input, Output> TryFrom<candid::types::reference::Func> for QueryArchiveFn<Input, Output> {
     type Error = String;
-    fn try_from(value: candid::types::reference::Func) -> Result<Self, Self::Error> {
-        Self::try_from(crate::candid_codec::references::Func::from(value))
+
+    fn try_from(reference: candid::types::reference::Func) -> Result<Self, Self::Error> {
+        Self::try_from(Func::from(reference))
     }
 }
+
+/// A request to list archive references.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct GetArchivesArgs {
+    /// The optional Principal identifying the caller's starting point.
+    pub from: Option<Principal>,
+}
+
+/// An archive's reported canister identity and natural-number range.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ICRC3ArchiveInfo {
+    /// The Principal of the archive canister.
+    pub canister_id: Principal,
+    /// The reported start of the archive's range.
+    pub start: Nat,
+    /// The reported end of the archive's range.
+    pub end: Nat,
+}
+
+#[cfg(test)]
+mod tests;

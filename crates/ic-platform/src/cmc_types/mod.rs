@@ -1,92 +1,89 @@
-//! CMC top-up, mint notification and certified conversion-rate contracts.
-//!
-//! Passive external Candid contracts; see docs/external-contracts.md for pinned
-//! schemas and provenance. Decoding does not authenticate a response or authorize
-//! a payment, retry, topology decision or resource allocation.
+//! Cycles-minting service request and response declarations.
 
-use crate::{candid_codec::Nat, principal::Principal};
+use crate::candid_codec::Nat;
+use crate::principal::Principal;
 use serde::Deserialize;
 
-/// NotifyTopUpArg.
+/// A notification identifying a ledger payment for a canister top-up.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct NotifyTopUpArg {
-    /// External Candid `block_index` field.
+    /// The payment's ledger block index.
     pub block_index: u64,
-    /// External Candid `canister_id` field.
+    /// The canister receiving the top-up.
     pub canister_id: Principal,
 }
 
-/// NotifyError.
+/// An error reported for a cycles-minting notification.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum NotifyError {
-    /// External Candid `Refunded` alternative.
+    /// The service reports a refund.
     Refunded {
-        /// External Candid `reason` field.
+        /// The reported refund reason.
         reason: String,
-        /// External Candid `block_index` field.
+        /// The optional refund block index.
         block_index: Option<u64>,
     },
-    /// External Candid `Processing` alternative.
+    /// The notification is still being processed.
     Processing,
-    /// External Candid `TransactionTooOld` alternative.
+    /// The service reports a transaction as too old, with its protocol value.
     TransactionTooOld(u64),
-    /// External Candid `InvalidTransaction` alternative.
+    /// The service reports an invalid transaction.
     InvalidTransaction(String),
-    /// External Candid `Other` alternative.
+    /// Another service error.
     Other {
-        /// External Candid `error_code` field.
+        /// The reported error code.
         error_code: u64,
-        /// External Candid `error_message` field.
+        /// The reported diagnostic text.
         error_message: String,
     },
 }
 
-/// External Candid NotifyTopUpResult.
+/// The cycle amount or error returned for a top-up notification.
 pub type NotifyTopUpResult = Result<Nat, NotifyError>;
 
-/// IcpXdrConversionRate.
+/// An ICP-to-XDR conversion rate and its timestamp.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct IcpXdrConversionRate {
-    /// External Candid `timestamp_seconds` field.
+    /// The reported timestamp in seconds.
     pub timestamp_seconds: u64,
-    /// External Candid `xdr_permyriad_per_icp` field.
+    /// The reported ten-thousandths of an XDR per ICP.
     pub xdr_permyriad_per_icp: u64,
 }
 
-/// IcpXdrConversionRateResponse.
+/// A reported conversion rate with opaque certification material.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct IcpXdrConversionRateResponse {
-    /// External Candid `data` field.
+    /// The reported rate data.
     pub data: IcpXdrConversionRate,
-    /// External Candid `hash_tree` field.
+    /// The supplied hash-tree bytes.
     pub hash_tree: Vec<u8>,
-    /// External Candid `certificate` field.
+    /// The supplied certificate bytes.
     pub certificate: Vec<u8>,
 }
 
-/// NotifyMintCyclesArg.
+/// A notification identifying a payment for minting ledger cycles.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct NotifyMintCyclesArg {
-    /// External Candid `block_index` field.
+    /// The payment's ledger block index.
     pub block_index: u64,
-    /// External Candid `to_subaccount` field.
+    /// The optional destination subaccount bytes.
     pub to_subaccount: Option<Vec<u8>>,
-    /// External Candid `deposit_memo` field.
+    /// The optional deposit memo bytes.
     pub deposit_memo: Option<Vec<u8>>,
 }
 
-/// NotifyMintCyclesSuccess.
+/// The ledger outcome reported after cycles are minted.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct NotifyMintCyclesSuccess {
-    /// External Candid `block_index` field.
+    /// The reported ledger block index.
     pub block_index: Nat,
-    /// External Candid `minted` field.
+    /// The reported minted cycle amount.
     pub minted: Nat,
-    /// External Candid `balance` field.
+    /// The reported balance.
     pub balance: Nat,
 }
 
-/// External Candid NotifyMintCyclesResult.
+/// The outcome of a mint-cycles notification.
 pub type NotifyMintCyclesResult = Result<NotifyMintCyclesSuccess, NotifyError>;
 
 // Numeric labels are checked against the independent pinned Candid schemas.

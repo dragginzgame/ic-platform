@@ -1,272 +1,267 @@
-//! Cycles Ledger creation, withdrawal and provider block contracts, without its service engine.
-//!
-//! Passive external Candid contracts; see docs/external-contracts.md for pinned
-//! schemas and provenance. Decoding does not authenticate a response or authorize
-//! a payment, retry, topology decision or resource allocation.
+//! Cycles ledger creation, withdrawal and block-response declarations.
 
-use crate::{candid_codec::Nat, principal::Principal};
+use crate::candid_codec::Nat;
+use crate::principal::Principal;
 use serde::Deserialize;
 
-/// CreateCanisterArgs.
+/// Parameters for creating a canister using ledger cycles.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct CreateCanisterArgs {
-    /// External Candid `from_subaccount` field.
+    /// The optional source subaccount bytes.
     pub from_subaccount: Option<Vec<u8>>,
-    /// External Candid `created_at_time` field.
+    /// The optional creation-time value.
     pub created_at_time: Option<u64>,
-    /// External Candid `amount` field.
+    /// The supplied cycle amount.
     pub amount: Nat,
-    /// External Candid `creation_args` field.
+    /// Optional cycles-minting service creation parameters.
     pub creation_args: Option<CmcCreateCanisterArgs>,
 }
 
-/// Cycles Ledger CMC creation arguments; distinct from the direct CMC method.
+/// Creation settings and subnet selection supplied to the cycles-minting service.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct CmcCreateCanisterArgs {
-    /// External Candid `settings` field.
+    /// Optional canister settings.
     pub settings: Option<CanisterSettings>,
-    /// External Candid `subnet_selection` field.
+    /// Optional subnet selection.
     pub subnet_selection: Option<SubnetSelection>,
 }
 
-/// EnvironmentVariable.
+/// A named environment value supplied during canister creation.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct EnvironmentVariable {
-    /// External Candid `name` field.
+    /// The variable name.
     pub name: String,
-    /// External Candid `value` field.
+    /// The variable value.
     pub value: String,
 }
 
-/// LogVisibility.
+/// A requested canister-log visibility setting.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum LogVisibility {
-    /// External Candid `Controllers` alternative.
+    /// Access for the canister's controllers.
     #[serde(rename = "controllers")]
     Controllers,
-    /// External Candid `Public` alternative.
+    /// Public access.
     #[serde(rename = "public")]
     Public,
-    /// External Candid `AllowedViewers` alternative.
+    /// Access for the listed principals.
     #[serde(rename = "allowed_viewers")]
     AllowedViewers(Vec<Principal>),
 }
 
-/// Cycles Ledger creation settings, not management-canister settings.
+/// Optional canister settings carried by a cycles ledger creation request.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct CanisterSettings {
-    /// External Candid `controllers` field.
+    /// The optional controller list.
     pub controllers: Option<Vec<Principal>>,
-    /// External Candid `compute_allocation` field.
+    /// The optional compute allocation.
     pub compute_allocation: Option<Nat>,
-    /// External Candid `memory_allocation` field.
+    /// The optional memory allocation.
     pub memory_allocation: Option<Nat>,
-    /// External Candid `freezing_threshold` field.
+    /// The optional freezing threshold.
     pub freezing_threshold: Option<Nat>,
-    /// External Candid `reserved_cycles_limit` field.
+    /// The optional reserved-cycle limit.
     pub reserved_cycles_limit: Option<Nat>,
-    /// External Candid `wasm_memory_limit` field.
+    /// The optional Wasm-memory limit.
     pub wasm_memory_limit: Option<Nat>,
-    /// External Candid `wasm_memory_threshold` field.
+    /// The optional Wasm-memory threshold.
     pub wasm_memory_threshold: Option<Nat>,
-    /// External Candid `log_visibility` field.
+    /// The optional log visibility.
     pub log_visibility: Option<LogVisibility>,
-    /// External Candid `environment_variables` field.
+    /// The optional environment-variable list.
     pub environment_variables: Option<Vec<EnvironmentVariable>>,
 }
 
-/// SubnetFilter.
+/// A subnet filter supplied during canister creation.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct SubnetFilter {
-    /// External Candid `subnet_type` field.
+    /// The optional subnet-type name.
     pub subnet_type: Option<String>,
 }
 
-/// SubnetSelection.
+/// A subnet choice or filter supplied during canister creation.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum SubnetSelection {
-    /// External Candid `Subnet` alternative.
+    /// An explicitly named subnet.
     Subnet {
-        /// External Candid `subnet` field.
+        /// The requested subnet principal.
         subnet: Principal,
     },
-    /// External Candid `Filter` alternative.
+    /// A filter used for subnet selection.
     Filter(SubnetFilter),
 }
 
-/// CreateCanisterSuccess.
+/// The canister and ledger block reported after successful creation.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct CreateCanisterSuccess {
-    /// External Candid `block_id` field.
+    /// The reported ledger block identifier.
     pub block_id: Nat,
-    /// External Candid `canister_id` field.
+    /// The created canister's principal.
     pub canister_id: Principal,
 }
 
-/// CreateCanisterError.
+/// An error reported for a cycles ledger canister-creation request.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum CreateCanisterError {
-    /// External Candid `InsufficientFunds` alternative.
+    /// The available funds were insufficient.
     InsufficientFunds {
-        /// External Candid `balance` field.
+        /// The reported balance.
         balance: Nat,
     },
-    /// External Candid `TooOld` alternative.
+    /// The request was reported as too old.
     TooOld,
-    /// External Candid `CreatedInFuture` alternative.
+    /// The request timestamp was reported as being in the future.
     CreatedInFuture {
-        /// External Candid `ledger_time` field.
+        /// The reported ledger time.
         ledger_time: u64,
     },
-    /// External Candid `TemporarilyUnavailable` alternative.
+    /// The service was temporarily unavailable.
     TemporarilyUnavailable,
-    /// External Candid `Duplicate` alternative.
+    /// The request was reported as a duplicate.
     Duplicate {
-        /// External Candid `duplicate_of` field.
+        /// The original request's block identifier.
         duplicate_of: Nat,
-        /// External Candid `canister_id` field.
+        /// The optionally reported canister principal.
         canister_id: Option<Principal>,
     },
-    /// External Candid `FailedToCreate` alternative.
+    /// Canister creation failed.
     FailedToCreate {
-        /// External Candid `fee_block` field.
+        /// The optional fee block identifier.
         fee_block: Option<Nat>,
-        /// External Candid `refund_block` field.
+        /// The optional refund block identifier.
         refund_block: Option<Nat>,
-        /// External Candid `error` field.
+        /// The reported diagnostic text.
         error: String,
     },
-    /// External Candid `GenericError` alternative.
+    /// Another service error.
     GenericError {
-        /// External Candid `message` field.
+        /// The reported diagnostic text.
         message: String,
-        /// External Candid `error_code` field.
+        /// The reported error code.
         error_code: Nat,
     },
 }
 
-/// External Candid CreateCanisterResult.
+/// The outcome of a cycles ledger canister-creation request.
 pub type CreateCanisterResult = Result<CreateCanisterSuccess, CreateCanisterError>;
 
-/// WithdrawArgs.
+/// Parameters supplied for a cycles withdrawal.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct WithdrawArgs {
-    /// External Candid `amount` field.
+    /// The cycle amount to withdraw.
     pub amount: Nat,
-    /// External Candid `from_subaccount` field.
+    /// The optional source subaccount bytes.
     pub from_subaccount: Option<Vec<u8>>,
-    /// External Candid `to` field.
+    /// The receiving canister principal.
     pub to: Principal,
-    /// External Candid `created_at_time` field.
+    /// The optional creation-time value.
     pub created_at_time: Option<u64>,
 }
 
-/// RejectionCode.
+/// A rejection category reported by the cycles ledger protocol.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum RejectionCode {
-    /// External Candid `NoError` alternative.
+    /// No error was reported.
     NoError,
-    /// External Candid `CanisterError` alternative.
+    /// A canister error was reported.
     CanisterError,
-    /// External Candid `SysTransient` alternative.
+    /// A transient system error was reported.
     SysTransient,
-    /// External Candid `DestinationInvalid` alternative.
+    /// An invalid destination was reported.
     DestinationInvalid,
-    /// External Candid `Unknown` alternative.
+    /// The category was reported as unknown.
     Unknown,
-    /// External Candid `SysFatal` alternative.
+    /// A fatal system error was reported.
     SysFatal,
-    /// External Candid `CanisterReject` alternative.
+    /// A canister rejection was reported.
     CanisterReject,
 }
 
-/// WithdrawError.
+/// An error reported for a cycles withdrawal.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum WithdrawError {
-    /// External Candid `GenericError` alternative.
+    /// A service error with a code and diagnostic text.
     GenericError {
-        /// External Candid `message` field.
+        /// The reported diagnostic text.
         message: String,
-        /// External Candid `error_code` field.
+        /// The reported error code.
         error_code: Nat,
     },
-    /// External Candid `TemporarilyUnavailable` alternative.
+    /// The service was temporarily unavailable.
     TemporarilyUnavailable,
-    /// External Candid `FailedToWithdraw` alternative.
+    /// Delivery of the withdrawal failed.
     FailedToWithdraw {
-        /// External Candid `fee_block` field.
+        /// The optional fee block identifier.
         fee_block: Option<Nat>,
-        /// External Candid `rejection_code` field.
+        /// The reported rejection category.
         rejection_code: RejectionCode,
-        /// External Candid `rejection_reason` field.
+        /// The reported rejection reason.
         rejection_reason: String,
     },
-    /// External Candid `Duplicate` alternative.
+    /// The withdrawal was reported as a duplicate.
     Duplicate {
-        /// External Candid `duplicate_of` field.
+        /// The original withdrawal's block identifier.
         duplicate_of: Nat,
     },
-    /// External Candid `BadFee` alternative.
+    /// The supplied fee was not accepted.
     BadFee {
-        /// External Candid `expected_fee` field.
+        /// The reported expected fee.
         expected_fee: Nat,
     },
-    /// External Candid `InvalidReceiver` alternative.
+    /// The receiving principal was not accepted.
     InvalidReceiver {
-        /// External Candid `receiver` field.
+        /// The reported receiver principal.
         receiver: Principal,
     },
-    /// External Candid `CreatedInFuture` alternative.
+    /// The request timestamp was reported as being in the future.
     CreatedInFuture {
-        /// External Candid `ledger_time` field.
+        /// The reported ledger time.
         ledger_time: u64,
     },
-    /// External Candid `TooOld` alternative.
+    /// The request was reported as too old.
     TooOld,
-    /// External Candid `InsufficientFunds` alternative.
+    /// The available funds were insufficient.
     InsufficientFunds {
-        /// External Candid `balance` field.
+        /// The reported balance.
         balance: Nat,
     },
 }
 
-/// External Candid WithdrawResult.
+/// The block identifier or error reported for a cycles withdrawal.
 pub type WithdrawResult = Result<Nat, WithdrawError>;
 
-/// Cycles Ledger's provider block retains legacy `Value::Nat64`, unlike the
-/// narrower standard ICRC-3 `ICRC3Value` projection. No value conversion is made.
+/// An ICRC block paired with its ledger identifier.
 #[cfg(feature = "icrc-ledger-types")]
 #[derive(Clone, Debug, Deserialize)]
 pub struct BlockWithId {
-    /// Exact provider block index.
+    /// The reported block identifier.
     pub id: Nat,
-    /// Exact provider value, including the legacy Nat64 alternative.
+    /// The returned block value.
     pub block: crate::icrc_ledger_types::Value,
 }
 
-/// Provider archive callback identity; admission and following stay caller-owned.
+/// Archived block ranges and the function that serves them.
 #[cfg(feature = "icrc-ledger-types")]
 #[derive(Clone, Debug, Deserialize)]
 pub struct ArchivedBlocks {
-    /// Exact provider ranges, without normalization or automatic merging.
+    /// The ranges supplied for the archive query.
     pub args: Vec<crate::icrc_ledger_types::GetBlocksRequest>,
-    /// Typed query function with this provider's complete result schema.
+    /// The archive query function reference.
     pub callback: crate::icrc_ledger_types::QueryArchiveFn<
         Vec<crate::icrc_ledger_types::GetBlocksRequest>,
         GetBlocksResult,
     >,
 }
 
-/// Exact Cycles Ledger `icrc3_get_blocks` result, including legacy Nat64 values.
-/// Both `cycles-ledger-types` and `icrc-ledger-types` select this provider schema.
+/// A cycles ledger block response with archive references.
 #[cfg(feature = "icrc-ledger-types")]
 #[derive(Clone, Debug, Deserialize)]
 pub struct GetBlocksResult {
-    /// Provider-reported total log length; not an authenticated observation.
+    /// The reported log length.
     pub log_length: Nat,
-    /// Provider blocks without standard-projection narrowing.
+    /// The returned blocks and their identifiers.
     pub blocks: Vec<BlockWithId>,
-    /// Untrusted provider callback declarations, never followed automatically.
+    /// The returned archive query ranges.
     pub archived_blocks: Vec<ArchivedBlocks>,
 }
 

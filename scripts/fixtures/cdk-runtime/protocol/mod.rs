@@ -57,5 +57,7 @@ methods! {
     CancelTask = 0x2006 => "cancel_task",
     StableRefusedGrowth = 0x2007 => "stable_refused_growth",
     StableBoundsTrap = 0x2008 => "stable_bounds_trap",
+    MultiplexedTrap = 0x2009 => "multiplexed_trap",
+    MultiplexedCleaned = 0x200a => "multiplexed_cleaned",
     Absent = 0xffff => "no_such_method",
 }

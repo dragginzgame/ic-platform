@@ -1,0 +1,3 @@
+arm	profile	raw_total	raw_code	raw_custom	optimized_total	optimized_code	optimized_custom
+before	management	639342	586330	0	591238	538216	0
+after	management	102618	98153	0	96743	92278	0

@@ -1,6 +1,62 @@
 //! Installed execution qualification scenarios.
 use super::*;
 
+thread_local! {
+    static MULTIPLEXED_CLEANED: Cell<u64> = const { Cell::new(0) };
+}
+
+#[ic_platform_runtime::cdk::query(
+    decode_with = "codec::decode::<_, { protocol::Method::MultiplexedCleaned as u64 }>",
+    encode_with = "codec::encode::<_, { protocol::Method::MultiplexedCleaned as u64 }>"
+)]
+fn multiplexed_cleaned() -> u64 {
+    MULTIPLEXED_CLEANED.get()
+}
+
+// Both requests are enqueued before either can reply. Trapping while processing
+// the first response rolls back that callback; cleanup must destroy both pending
+// futures, and the later callback must not revive the cancelled method.
+#[ic_platform_runtime::cdk::update(
+    decode_with = "codec::decode::<_, { protocol::Method::MultiplexedTrap as u64 }>",
+    encode_with = "codec::encode_unit::<{ protocol::Method::MultiplexedTrap as u64 }>"
+)]
+async fn multiplexed_trap() {
+    struct RecoveryDrop;
+    impl Drop for RecoveryDrop {
+        fn drop(&mut self) {
+            if futures::is_recovering_from_trap() {
+                MULTIPLEXED_CLEANED.set(MULTIPLEXED_CLEANED.get() + 1);
+            }
+        }
+    }
+    let _drop = RecoveryDrop;
+    let mut calls: Vec<_> = (0..2)
+        .map(|_| {
+            Box::pin(
+                transport::unbounded_wait(api::canister_self(), "scalar")
+                    .take_raw_args(codec::request("scalar", &1u64))
+                    .execute(),
+            )
+        })
+        .collect();
+    std::future::poll_fn(|cx| {
+        let mut replied = false;
+        for call in &mut calls {
+            if let std::task::Poll::Ready(result) = call.as_mut().poll(cx) {
+                result.unwrap();
+                replied = true;
+            }
+        }
+        if replied {
+            std::task::Poll::Ready(())
+        } else {
+            std::task::Poll::Pending
+        }
+    })
+    .await;
+    api::trap("fixture multiplexed callback trap");
+}
+
 // Owner-local cancellation: dropping a queued future exactly once, and refusing
 // to cancel a new task through a stale handle. No scheduler is involved.
 #[ic_platform_runtime::cdk::update(

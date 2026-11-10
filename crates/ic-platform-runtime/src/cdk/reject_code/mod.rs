@@ -1,45 +1,51 @@
-//! Runtime reject codes adapted from ic-error-types 0.2.0 (Apache-2.0).
-//! External Agent/PocketIC reject codes retain their separate upstream identities.
-use serde::{Deserialize, Serialize};
+//! Rejection codes defined by the IC protocol.
+//!
+//! This catalogue identifies responses; callers own retry and recovery policy.
 
-/// IC transport rejection classification; numeric values are protocol-defined.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
+use std::fmt;
+
+/// An IC rejection code, with its protocol number as the numeric cast.
+///
+/// Serde uses Rust unit-variant names and declaration indices, independently of
+/// the protocol numbers. Conversion from an unsupported number preserves that
+/// number in [`UnknownRejectCode`].
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum RejectCode {
-    /// Fatal system rejection.
+    /// Protocol code `SYS_FATAL`.
     SysFatal = 1,
-    /// Transient system rejection.
+    /// Protocol code `SYS_TRANSIENT`.
     SysTransient = 2,
-    /// Destination does not exist.
+    /// Protocol code `DESTINATION_INVALID`.
     DestinationInvalid = 3,
-    /// Explicit canister rejection.
+    /// Protocol code `CANISTER_REJECT`.
     CanisterReject = 4,
-    /// Canister execution failed.
+    /// Protocol code `CANISTER_ERROR`.
     CanisterError = 5,
-    /// Outcome is unknown (best-effort calls).
+    /// A best-effort call has an unknown outcome.
+    ///
+    /// This code does not establish failure or permission to retry or replay.
     SysUnknown = 6,
 }
 
-/// A numeric rejection code unknown to this runtime version.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct UnknownRejectCode(pub u64);
-
 impl TryFrom<u64> for RejectCode {
     type Error = UnknownRejectCode;
-    fn try_from(code: u64) -> Result<Self, Self::Error> {
-        match code {
+
+    fn try_from(value: u64) -> Result<Self, Self::Error> {
+        match value {
             1 => Ok(Self::SysFatal),
             2 => Ok(Self::SysTransient),
             3 => Ok(Self::DestinationInvalid),
             4 => Ok(Self::CanisterReject),
             5 => Ok(Self::CanisterError),
             6 => Ok(Self::SysUnknown),
-            _ => Err(UnknownRejectCode(code)),
+            _ => Err(UnknownRejectCode(value)),
         }
     }
 }
-impl std::fmt::Display for RejectCode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
+
+impl fmt::Display for RejectCode {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(match self {
             Self::SysFatal => "SYS_FATAL",
             Self::SysTransient => "SYS_TRANSIENT",
             Self::DestinationInvalid => "DESTINATION_INVALID",
@@ -49,6 +55,10 @@ impl std::fmt::Display for RejectCode {
         })
     }
 }
+
+/// A number outside the IC rejection catalogue, retained without truncation.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct UnknownRejectCode(pub u64);
 
 #[cfg(test)]
 mod tests;

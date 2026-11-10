@@ -350,7 +350,7 @@ now share the same mapping macro and bounded record/variant traversal. Migrated
 Nat fields use the owned unbounded carrier, with explicit registry conversion,
 binary-byte and JSON/CBOR Serde parity. This is a Rust identity change, not a
 numeric narrowing. Principal and unmigrated Cycles/ICRC archive identities stay
-unchanged; see [the migration contract](../../docs/migration.md#owned-binary-codec-unreleased).
+unchanged; see [the migration contract](../../docs/architecture/migration.md#owned-binary-codec-unreleased).
 
 Focused proof is retained at `target/evidence/owned-dtos.hq851r`: reference bytes
 and cross-decoding for every CMC/Cycles error branch, settings/visibility/subnet
@@ -394,7 +394,7 @@ Its imported constructor body and license fingerprints pass unchanged; the impor
 now names the same external Principal through Platform. The callback constructor
 and fields remain, with an owned `references::Func` payload and an optional
 upstream conversion/trait bridge. This carrier identity change is explicit in the
-[migration contract](../../docs/migration.md#owned-binary-codec-unreleased).
+[migration contract](../../docs/architecture/migration.md#owned-binary-codec-unreleased).
 
 Typed references retain function mode and check structural signature compatibility
 using an iterative pair worklist, including contravariant arguments, covariant

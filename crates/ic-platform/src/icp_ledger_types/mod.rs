@@ -1,134 +1,128 @@
-//! Legacy ICP transfer and encoded-block/archive contracts.
-//!
-//! External Candid contracts and selected upstream account-identifier derivation;
-//! see docs/external-contracts.md for pinned schemas and provenance.
-//! Decoding does not authenticate a response or authorize
-//! a payment, retry, topology decision or resource allocation.
+//! ICP ledger transfer and encoded-block declarations.
 
 use serde::Deserialize;
 
 mod account_identifier;
-pub use account_identifier::account_identifier;
+mod callback;
 
-/// Tokens.
+pub use account_identifier::account_identifier;
+pub use callback::QueryEncodedBlocksFn;
+
+/// An ICP amount represented in hundred-millionths of a token.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct Tokens {
-    /// External Candid `e8s` field.
+    /// The amount in e8s.
     pub e8s: u64,
 }
 
-/// TimeStamp.
+/// A ledger timestamp in nanoseconds.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct TimeStamp {
-    /// External Candid `timestamp_nanos` field.
+    /// The timestamp value.
     pub timestamp_nanos: u64,
 }
 
-/// TransferArgs.
+/// Parameters supplied for an ICP ledger transfer.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct TransferArgs {
-    /// External Candid `memo` field.
+    /// The supplied transfer memo.
     pub memo: u64,
-    /// External Candid `amount` field.
+    /// The amount to transfer.
     pub amount: Tokens,
-    /// External Candid `fee` field.
+    /// The supplied transfer fee.
     pub fee: Tokens,
-    /// External Candid `from_subaccount` field.
+    /// The optional source subaccount bytes.
     pub from_subaccount: Option<Vec<u8>>,
-    /// External Candid `to` field.
+    /// The destination account bytes.
     pub to: Vec<u8>,
-    /// External Candid `created_at_time` field.
+    /// The optional creation timestamp.
     pub created_at_time: Option<TimeStamp>,
 }
 
-/// TransferError.
+/// An error reported for an ICP ledger transfer.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum TransferError {
-    /// External Candid `BadFee` alternative.
+    /// The supplied fee was not accepted.
     BadFee {
-        /// External Candid `expected_fee` field.
+        /// The reported expected fee.
         expected_fee: Tokens,
     },
-    /// External Candid `InsufficientFunds` alternative.
+    /// The available funds were insufficient.
     InsufficientFunds {
-        /// External Candid `balance` field.
+        /// The reported balance.
         balance: Tokens,
     },
-    /// External Candid `TxTooOld` alternative.
+    /// The transaction was reported as too old.
     TxTooOld {
-        /// External Candid `allowed_window_nanos` field.
+        /// The reported permitted age window in nanoseconds.
         allowed_window_nanos: u64,
     },
-    /// External Candid `TxCreatedInFuture` alternative.
+    /// The transaction timestamp was reported as being in the future.
     TxCreatedInFuture,
-    /// External Candid `TxDuplicate` alternative.
+    /// The transaction was reported as a duplicate.
     TxDuplicate {
-        /// External Candid `duplicate_of` field.
+        /// The original transaction's block index.
         duplicate_of: u64,
     },
 }
 
-/// External Candid TransferResult.
+/// A transfer's block index or reported error.
 pub type TransferResult = Result<u64, TransferError>;
 
-/// GetBlocksArgs.
+/// A requested range of ledger blocks.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct GetBlocksArgs {
-    /// External Candid `start` field.
+    /// The requested starting block index.
     pub start: u64,
-    /// External Candid `length` field.
+    /// The requested block count.
     pub length: u64,
 }
 
-/// QueryArchiveError.
+/// An error reported by an encoded-block archive.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub enum QueryArchiveError {
-    /// External Candid `BadFirstBlockIndex` alternative.
+    /// The archive did not accept the starting block index.
     BadFirstBlockIndex {
-        /// External Candid `requested_index` field.
+        /// The requested index.
         requested_index: u64,
-        /// External Candid `first_valid_index` field.
+        /// The reported first valid index.
         first_valid_index: u64,
     },
-    /// External Candid `Other` alternative.
+    /// Another archive error.
     Other {
-        /// External Candid `error_code` field.
+        /// The reported error code.
         error_code: u64,
-        /// External Candid `error_message` field.
+        /// The reported diagnostic text.
         error_message: String,
     },
 }
 
-/// External Candid QueryEncodedBlocksResult.
+/// Encoded blocks or an error reported by an archive.
 pub type QueryEncodedBlocksResult = Result<Vec<Vec<u8>>, QueryArchiveError>;
 
-mod callback;
-/// ICP encoded-block archive callback with its exact query signature.
-pub use callback::QueryEncodedBlocksFn;
-
-/// ArchivedEncodedBlocksRange.
+/// An archived block range and the function that serves it.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct ArchivedEncodedBlocksRange {
-    /// External Candid `callback` field.
+    /// The archive query function reference.
     pub callback: QueryEncodedBlocksFn,
-    /// External Candid `start` field.
+    /// The reported starting block index.
     pub start: u64,
-    /// External Candid `length` field.
+    /// The reported block count.
     pub length: u64,
 }
 
-/// QueryEncodedBlocksResponse.
+/// Encoded ledger blocks with archive references and chain metadata.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 pub struct QueryEncodedBlocksResponse {
-    /// External Candid `certificate` field.
+    /// Optional opaque certificate bytes.
     pub certificate: Option<Vec<u8>>,
-    /// External Candid `blocks` field.
+    /// The returned encoded blocks.
     pub blocks: Vec<Vec<u8>>,
-    /// External Candid `chain_length` field.
+    /// The reported chain length.
     pub chain_length: u64,
-    /// External Candid `first_block_index` field.
+    /// The reported first block index.
     pub first_block_index: u64,
-    /// External Candid `archived_blocks` field.
+    /// The returned archived ranges.
     pub archived_blocks: Vec<ArchivedEncodedBlocksRange>,
 }
 

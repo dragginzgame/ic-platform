@@ -1,0 +1,18 @@
+sub-last=0 text=2vxsx-fae json={"owner":"2vxsx-fae","subaccount":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]} cbor=[a2, 65, 6f, 77, 6e, 65, 72, 41, 04, 6a, 73, 75, 62, 61, 63, 63, 6f, 75, 6e, 74, 58, 20, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00]
+sub-last=1 text=2vxsx-fae-22yutvy.1 json={"owner":"2vxsx-fae","subaccount":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]} cbor=[a2, 65, 6f, 77, 6e, 65, 72, 41, 04, 6a, 73, 75, 62, 61, 63, 63, 6f, 75, 6e, 74, 58, 20, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 01]
+sub-last=15 text=2vxsx-fae-geewjua.f json={"owner":"2vxsx-fae","subaccount":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15]} cbor=[a2, 65, 6f, 77, 6e, 65, 72, 41, 04, 6a, 73, 75, 62, 61, 63, 63, 6f, 75, 6e, 74, 58, 20, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 0f]
+sub-last=16 text=2vxsx-fae-xqawsji.10 json={"owner":"2vxsx-fae","subaccount":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16]} cbor=[a2, 65, 6f, 77, 6e, 65, 72, 41, 04, 6a, 73, 75, 62, 61, 63, 63, 6f, 75, 6e, 74, 58, 20, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 10]
+sub-last=255 text=2vxsx-fae-rs2jnta.ff json={"owner":"2vxsx-fae","subaccount":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,255]} cbor=[a2, 65, 6f, 77, 6e, 65, 72, 41, 04, 6a, 73, 75, 62, 61, 63, 63, 6f, 75, 6e, 74, 58, 20, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, ff]
+absent text=2vxsx-fae json={"owner":"2vxsx-fae","subaccount":null} cbor=[a2, 65, 6f, 77, 6e, 65, 72, 41, 04, 6a, 73, 75, 62, 61, 63, 63, 6f, 75, 6e, 74, f6]
+parse "": InvalidPrincipal(TextTooShort): invalid principal: Text is too short.
+parse "aaaaa-aa": Ok aaaaa-aa
+parse "2vxsx-fae.1": MissingChecksum: missing account checksum
+parse "2vxsx-fae-aaaaaaa.": DefaultSubaccountShouldBeOmitted: default subaccount should be omitted
+parse "2vxsx-fae-aaaaaaa.0": LeadingZeroesInSubaccount: subaccount should not have leading zeroes
+parse "2vxsx-fae-aaaaaaa.01": LeadingZeroesInSubaccount: subaccount should not have leading zeroes
+parse "bad-aaaaaaa.0": LeadingZeroesInSubaccount: subaccount should not have leading zeroes
+parse "bad-aaaaaaa.1": InvalidPrincipal(InvalidBase32): invalid principal: Text must be in valid Base32 encoding.
+parse "2vxsx-fae-aaaaaaa.g": InvalidSubaccount: subaccount must contain at most 64 hex digits
+parse "2vxsx-fae-aaaaaaa.1": InvalidChecksum: invalid account checksum
+parse "2vxsx-fae-aaaaaaa..": InvalidSubaccount: subaccount must contain at most 64 hex digits
+parse "2vxsx-fae-aaaaaa.1": MissingChecksum: missing account checksum

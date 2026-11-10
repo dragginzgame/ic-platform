@@ -4,6 +4,8 @@ use crate::candid_codec::{
     Encode,
     decoder::{Decode, Limits},
 };
+#[cfg(feature = "icrc-ledger-types")]
+pub(crate) use schema::assert_named_schema;
 pub(crate) use schema::schema;
 
 #[derive(Clone, Copy)]

@@ -2,8 +2,7 @@
 //!
 //! Derived from ic-host-tools at Tooling commit
 //! `9ed16c7a480ad80ae6ff606bd17de3350a2b0b97` with import paths adjusted. Copyright 2026 ic-host-tools
-//! contributors; MIT license and complete supplier notices are retained in
-//! this directory's LICENSE file. Admission bodies and tests are unchanged.
+//! contributors. Admission bodies and tests are unchanged.
 //!
 //! Caller owns trust roots, signatures, combined evidence budgets, commitment
 //! verification and application leaf meanings. Original bytes stay caller-owned.

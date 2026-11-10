@@ -10,4 +10,4 @@ Reproduction requires that historical checkout and its recorded compiler/caches;
 these probes are not current qualification. The identity-preserving codec saved
 7,631 bytes in its single-endpoint probe while retaining roughly 3,040 lines of
 codec source. Mixed codecs increased Wasm size. See the
-[investigation](../../../docs/migration.md#candid-codec-packaging-investigation).
+[investigation](../../../docs/architecture/migration.md#candid-codec-packaging-investigation).

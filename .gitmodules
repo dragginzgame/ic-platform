@@ -1,3 +1,0 @@
-[submodule "native/ic-profiler/upstream/ic"]
-	path = native/ic-profiler/upstream/ic
-	url = https://github.com/dfinity/ic.git

@@ -1,0 +1,314 @@
+[
+  {
+    "case": "noop-batch",
+    "owned": {
+      "cold": 10768,
+      "warm": 10768,
+      "net": 0,
+      "cycles": 6966569,
+      "coldCycles": 6967230
+    },
+    "reference": {
+      "cold": 10780,
+      "warm": 10780,
+      "net": 0,
+      "cycles": 6968670,
+      "coldCycles": 6969331
+    },
+    "reference-admitted": {
+      "cold": 10780,
+      "warm": 10780,
+      "net": 0,
+      "cycles": 6968670,
+      "coldCycles": 6969331
+    }
+  },
+  {
+    "case": "raw-encode",
+    "owned": {
+      "cold": 627249,
+      "warm": 627249,
+      "net": 616.481,
+      "cycles": 7583050,
+      "coldCycles": 7583711
+    },
+    "reference": {
+      "cold": 1293261,
+      "warm": 1293261,
+      "net": 1282.481,
+      "cycles": 8251151,
+      "coldCycles": 8251812
+    },
+    "reference-admitted": {
+      "cold": 1293261,
+      "warm": 1293261,
+      "net": 1282.481,
+      "cycles": 8251151,
+      "coldCycles": 8251812
+    }
+  },
+  {
+    "case": "der-encode",
+    "owned": {
+      "cold": 1086249,
+      "warm": 1086249,
+      "net": 1075.481,
+      "cycles": 8042050,
+      "coldCycles": 8042711
+    },
+    "reference": {
+      "cold": 2667261,
+      "warm": 2667261,
+      "net": 2656.481,
+      "cycles": 9625151,
+      "coldCycles": 9625812
+    },
+    "reference-admitted": {
+      "cold": 2667261,
+      "warm": 2667261,
+      "net": 2656.481,
+      "cycles": 9625151,
+      "coldCycles": 9625812
+    }
+  },
+  {
+    "case": "raw-decode",
+    "owned": {
+      "cold": 636300,
+      "warm": 636300,
+      "net": 625.532,
+      "cycles": 7592081,
+      "coldCycles": 7592742
+    },
+    "reference": {
+      "cold": 635312,
+      "warm": 635312,
+      "net": 624.532,
+      "cycles": 7593182,
+      "coldCycles": 7593843
+    },
+    "reference-admitted": {
+      "cold": 635312,
+      "warm": 635312,
+      "net": 624.532,
+      "cycles": 7593182,
+      "coldCycles": 7593843
+    }
+  },
+  {
+    "case": "der-decode",
+    "owned": {
+      "cold": 1082300,
+      "warm": 1082300,
+      "net": 1071.532,
+      "cycles": 8038081,
+      "coldCycles": 8038742
+    },
+    "reference": {
+      "cold": 1440281,
+      "warm": 1440281,
+      "net": 1429.501,
+      "cycles": 8398171,
+      "coldCycles": 8398832
+    },
+    "reference-admitted": {
+      "cold": 1440281,
+      "warm": 1440281,
+      "net": 1429.501,
+      "cycles": 8398171,
+      "coldCycles": 8398832
+    }
+  },
+  {
+    "case": "sha256-32",
+    "owned": {
+      "cold": 5794249,
+      "warm": 5794249,
+      "net": 5783.481,
+      "cycles": 12750050,
+      "coldCycles": 12750711
+    },
+    "reference": {
+      "cold": 5878265,
+      "warm": 5878265,
+      "net": 5867.485,
+      "cycles": 12836155,
+      "coldCycles": 12836816
+    },
+    "reference-admitted": {
+      "cold": 5878265,
+      "warm": 5878265,
+      "net": 5867.485,
+      "cycles": 12836155,
+      "coldCycles": 12836816
+    }
+  },
+  {
+    "case": "sha256-4096",
+    "owned": {
+      "cold": 333539249,
+      "warm": 333539249,
+      "net": 333528.481,
+      "cycles": 340495050,
+      "coldCycles": 340495711
+    },
+    "reference": {
+      "cold": 317266275,
+      "warm": 317266275,
+      "net": 317255.495,
+      "cycles": 324224165,
+      "coldCycles": 324224826
+    },
+    "reference-admitted": {
+      "cold": 317266275,
+      "warm": 317266275,
+      "net": 317255.495,
+      "cycles": 324224165,
+      "coldCycles": 324224826
+    }
+  },
+  {
+    "case": "noop-single",
+    "owned": {
+      "cold": 278,
+      "warm": 278,
+      "net": 0,
+      "cycles": 6956079,
+      "coldCycles": 6956740
+    },
+    "reference": {
+      "cold": 290,
+      "warm": 290,
+      "net": 0,
+      "cycles": 6958180,
+      "coldCycles": 6958841
+    },
+    "reference-admitted": {
+      "cold": 290,
+      "warm": 290,
+      "net": 0,
+      "cycles": 6958180,
+      "coldCycles": 6958841
+    }
+  },
+  {
+    "case": "direct",
+    "owned": {
+      "cold": 259270043,
+      "warm": 245671458,
+      "net": 245671180,
+      "cycles": 252627575,
+      "coldCycles": 266227457
+    },
+    "reference": {
+      "cold": 225219177,
+      "warm": 211620739,
+      "net": 211620449,
+      "cycles": 218579120,
+      "coldCycles": 232178680
+    },
+    "reference-admitted": {
+      "cold": 259286691,
+      "warm": 245688296,
+      "net": 245688006,
+      "cycles": 252646306,
+      "coldCycles": 266245234
+    }
+  },
+  {
+    "case": "delegated-legacy",
+    "owned": {
+      "cold": 504904195,
+      "warm": 491305503,
+      "net": 491305225,
+      "cycles": 498261620,
+      "coldCycles": 511861609
+    },
+    "reference": {
+      "cold": 436800463,
+      "warm": 423202380,
+      "net": 423202090,
+      "cycles": 430160761,
+      "coldCycles": 443759006
+    },
+    "reference-admitted": {
+      "cold": 504938274,
+      "warm": 491340448,
+      "net": 491340158,
+      "cycles": 498298458,
+      "coldCycles": 511896817
+    }
+  },
+  {
+    "case": "delegated-sharded",
+    "owned": {
+      "cold": 504929819,
+      "warm": 491331079,
+      "net": 491330801,
+      "cycles": 498287878,
+      "coldCycles": 511887233
+    },
+    "reference": {
+      "cold": 436825820,
+      "warm": 423227732,
+      "net": 423227442,
+      "cycles": 430186113,
+      "coldCycles": 443784363
+    },
+    "reference-admitted": {
+      "cold": 504966415,
+      "warm": 491368584,
+      "net": 491368294,
+      "cycles": 498326594,
+      "coldCycles": 511924958
+    }
+  },
+  {
+    "case": "wrong-message",
+    "owned": {
+      "cold": 21917,
+      "warm": 21917,
+      "net": 21639,
+      "cycles": 6977720,
+      "coldCycles": 6978381
+    },
+    "reference": {
+      "cold": 70620,
+      "warm": 70620,
+      "net": 70330,
+      "cycles": 7028512,
+      "coldCycles": 7029173
+    },
+    "reference-admitted": {
+      "cold": 70683,
+      "warm": 70683,
+      "net": 70393,
+      "cycles": 7028575,
+      "coldCycles": 7029236
+    }
+  },
+  {
+    "case": "identity-root",
+    "owned": {
+      "cold": 34122852,
+      "warm": 34122852,
+      "net": 34122574,
+      "cycles": 41078860,
+      "coldCycles": 41079521
+    },
+    "reference": {
+      "cold": 225219396,
+      "warm": 211621147,
+      "net": 211620857,
+      "cycles": 218579360,
+      "coldCycles": 232179102
+    },
+    "reference-admitted": {
+      "cold": 225219459,
+      "warm": 211621210,
+      "net": 211620920,
+      "cycles": 218579423,
+      "coldCycles": 232179165
+    }
+  }
+]

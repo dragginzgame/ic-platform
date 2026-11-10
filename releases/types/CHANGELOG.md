@@ -7,11 +7,24 @@ Initial 0.1 history remains below with its original scope. See the
 
 ## [0.19.1] - Unreleased
 
+### ♻️ Refactoring
+
+- Replace base Principal source and tests through a separate specification-only
+  implementation context, preserving public identity, bounded text admission,
+  ordering, error variants and Serde representations, including binary-format
+  text admission. Record the protocol contract, observations and input boundary.
+- Delegate optional self-authentication to registry `ic_principal` instead of
+  retaining its derivation source and vectors. Base Types remains crypto-free;
+  only this optional capability brings the supplier's SHA-2 0.10 dependency.
+- Replace Account through the same specification-only process, retaining
+  effective-zero equality/order/hash, text admission and exact optional-byte
+  Serde representations.
+
 ### 🛠️ Tooling
 
-- Adopt Toko Tooling 0.38.2 and audit product/qualification package placement.
+- Adopt Toko Tooling 0.39.8 and audit product/qualification package placement.
   All five maintained crates already use the product layout; disposable fixture
-  templates and vendored upstream sources retain their documented locations.
+  templates retain their documented locations; the native provider is retired.
   Production boundaries and the three release groups remain unchanged.
 
 ## [0.19.0] - 2026-11-09

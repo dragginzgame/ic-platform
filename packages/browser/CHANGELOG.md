@@ -21,5 +21,5 @@ This npm package versions independently of the Rust release groups.
 ### 🧭 Migration Notes
 
 - Replace `Cbor.decode(envelope).content` and subsequent request hashing with the
-  typed result. See the [Blob migration](../../docs/migration.md#typed-browser-call-ingress-inspection).
+  typed result. See the [Blob migration](../../docs/architecture/migration.md#typed-browser-call-ingress-inspection).
   The browser package versions independently of the Rust release groups.

@@ -168,8 +168,14 @@ fn map_order_duplicates_arrays_and_blob_match_registry() {
     let bytes = reference::encode_one(array).unwrap();
     assert_eq!(encode_one(&array, 1024).unwrap(), bytes);
     assert_eq!(decode_one::<[u8; 32]>(&bytes, limits()).unwrap(), array);
-    assert_eq!(decode_one::<[u8; 31]>(&bytes, limits()), Err(Error::Type));
-    assert_eq!(decode_one::<[u8; 33]>(&bytes, limits()), Err(Error::Type));
+    assert_eq!(
+        decode_one::<[u8; 31]>(&bytes, limits()),
+        Err(Error::Malformed)
+    );
+    assert_eq!(
+        decode_one::<[u8; 33]>(&bytes, limits()),
+        Err(Error::Malformed)
+    );
     let mut budget = limits();
     budget.allocation = 0;
     assert_eq!(decode_one::<[u8; 32]>(&bytes, budget), Err(Error::Limit));

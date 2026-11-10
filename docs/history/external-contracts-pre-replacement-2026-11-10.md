@@ -1,0 +1,194 @@
+# External canister DTO contracts
+
+Current contract: use the owned binary codec. The legacy Candid trait,
+protocol, parser and printer surfaces are removed; earlier released descriptions
+below are historical. See the [current migration](../architecture/migration.md#legacy-candid-surface-removed-unreleased).
+
+The 0.8 packaging cut replaced the registry ICRC package
+with selected maintained DTOs and unchanged upstream value hashes. Ledger Rust
+identities, including query callbacks, now belong to Platform; external wire and
+Serde representations remain. The [packaging contract](../architecture/migration.md#minimal-principal-and-selected-icrc-packaging)
+supersedes the older registry-identity statements below. Management DTO identities
+now belong to Platform on both targets; registry 0.11.0 is a development oracle.
+
+Pending 0.7.5 adds the shared
+`icrc_ledger_types::icrc10::SupportedStandard { name, url }` external record under
+`icrc-ledger-types`, with no automatic endpoint or standards advertisement.
+See the [ICRC-10 supplier and adoption contract](../architecture/migration.md#shared-icrc-10-discovery-record-pending-075).
+The existing registry ICRC-21 identities remain unchanged.
+
+Published, non-yanked Platform 0.6.20 supplies the contract families below.
+The registry archive is verified against SHA-256
+`7345878bbf473daa1989d28b1f9828e22e63c2f21e776dd5a3e9eace8609016e`;
+its VCS identity is `401a8327b669c82fe34de82963a48a952061d1d4`.
+Selected DTO source matches released main. These are external Candid protocols,
+not owned Wire endpoints. Their structs/enums are Platform-maintained Rust
+representations of pinned schemas, not identities from an upstream Rust crate.
+The Principal/Nat/function machinery retains registry Candid identities.
+
+| Feature | Import module | Selected external methods |
+| --- | --- | --- |
+| `cmc-types` | `ic_platform::cmc_types` | `notify_top_up`, `notify_mint_cycles`, `get_icp_xdr_conversion_rate` |
+| `icp-ledger-types` | `ic_platform::icp_ledger_types` | Legacy ICP `transfer`, `query_encoded_blocks`, encoded-block archive callbacks and account-identifier derivation |
+| `cycles-ledger-types` | `ic_platform::cycles_ledger_types` | `create_canister`, `withdraw` |
+| `nns-registry-types` | `ic_platform::nns_registry_types` | `get_subnet_for_canister` |
+| `certified-assets-types` | `ic_platform::certified_assets_types` | Native-host asset `get`, `get_chunk` |
+
+Source release 0.7.4 adds typed `candid::protocols` operations over these existing DTOs
+and the management/ICRC registry identities, without transport or recovery policy.
+It additionally supplies the pinned Cycles Ledger `icrc3_get_blocks` result under
+**both** `cycles-ledger-types` and `icrc-ledger-types`. Its
+`cycles_ledger_types::{BlockWithId, ArchivedBlocks, GetBlocksResult}` use upstream
+`Value` (including `Nat64`) and the exact `QueryArchiveFn` identity. The standard
+upstream ICRC-3 projection omits `Nat64` and is not a substitute for that provider
+schema. No block conversion or hash change occurs. An independently parsed pinned
+Cycles DID exercises this distinction. These additions are not supplied by 0.6.20;
+see the [endpoint and codec migration](../architecture/migration.md#external-endpoint-and-protocol-codecs-78-79).
+
+Registry, CMC, ICP, Cycles creation/withdrawal and native asset selections now use
+`candid-codec` with the canonical owned Principal, avoiding the upstream
+binary codec. Nat fields in migrated CMC/Cycles/asset DTOs use Platform's unbounded
+`candid_codec::Nat`; this changes Rust identity, preserving Candid and Serde bytes.
+ICRC and the combined Cycles archive surface now use the owned codec, including
+recursive values and callback signatures. Their Nat/Int carriers are owned;
+external Principal identity, Serde bytes and hash algorithms remain unchanged. ICP archive
+callbacks use the owned typed reference with preserved external Principal and
+method fields; the callback's internal carrier changes to the owned `Func`.
+See [the migration contract](../architecture/migration.md#owned-binary-codec-unreleased).
+None is default or implied by runtime,
+CDK, executor or another DTO family. Asset exports are absent on Wasm. Selecting
+that feature on Wasm still selects its owned-codec prerequisite; it does not
+supply an asset API or acquire host transport. No feature selects the host parser,
+Agent, PocketIC, executor, storage engine, payment workflow or retry policy.
+`Vec<u8>` represents upstream `blob`/`vec nat8`, and `Nat` remains unbounded.
+Account and subaccount allocation, digest length checks and decode limits are
+consumer-owned. Decoding never authenticates a rate, asset, archive or payment.
+
+## Source and licensing
+
+The ICP account-identifier constructor is separately selected from Apache-2.0
+`ic-ledger-types` 0.16.0 at cdk-rs revision
+`80d82348b7de1f10117aead50ad26669da7e2b79`. Its body and SHA-224/CRC32 behavior
+are unchanged; the private carrier structs and owned-to-external Principal adapter
+do not create a new identity type. Source/license fingerprints and attribution
+live beside the implementation. It uses existing SHA-2 and CRC providers without
+the upstream ledger client's CDK dependency. The fixed vectors cover Canic's
+retained destination, management/anonymous and maximum-length Principals, and
+nonzero subaccounts. The public consumer is checked on native and Wasm targets.
+
+The CMC and ICP declarations are schema-derived adaptations of the Apache-2.0
+interfaces at IC revision `f83a7646c20ce18100eb87b7865c12852bef8169`:
+[CMC DID](https://github.com/dfinity/ic/blob/f83a7646c20ce18100eb87b7865c12852bef8169/rs/nns/cmc/cmc.did)
+and [ICP Ledger DID](https://github.com/dfinity/ic/blob/f83a7646c20ce18100eb87b7865c12852bef8169/rs/ledger_suite/icp/ledger.did).
+No closer directory license was present along those paths. The IC root license,
+including the DFINITY copyright notice, is retained beside both modules.
+
+Cycles Ledger declarations derive from its
+[DID at 2faa00a86115d92cce599345b1f5ae04f0f7f2bb](https://github.com/dfinity/cycles-ledger/blob/2faa00a86115d92cce599345b1f5ae04f0f7f2bb/cycles-ledger/cycles-ledger.did).
+Asset declarations derive from the
+[SDK DID at 271392a3b7746df539925a6333b4cd7ddc9f1972](https://github.com/dfinity/sdk/blob/271392a3b7746df539925a6333b4cd7ddc9f1972/src/canisters/frontend/ic-certified-assets/assets.did).
+Their Apache-2.0 licenses are retained beside each module; SDK's asset-directory
+license refers back to the root license. Changes are limited to selected DTOs,
+Rust names/documentation, standard derives and the typed archive function.
+The ICP callback now uses an owned codec mapping; its optional upstream trait
+bridge retains the original declared query signature. No cryptographic code is copied.
+
+Registry declarations independently express the small protocol facts observed in
+[Registry's DID at f83a764](https://github.com/dfinity/ic/blob/f83a7646c20ce18100eb87b7865c12852bef8169/rs/registry/canister/canister/registry.did).
+No Registry implementation or DID text is imported or distributed here. Registry's
+ancestor `rs/registry/LICENSE` points to IC-1.0, not Apache-2.0; it must not be
+mislabelled as an Apache source. The independently written Rust declarations and
+test schema are Platform code, using the protocol's published field/type facts.
+
+The four Apache DID fixtures are retained verbatim under
+`crates/ic-platform/tests/fixtures/external-*.did`. Their SHA-256 observations:
+
+| Fixture | SHA-256 |
+| --- | --- |
+| `external-cmc.did` | `abbcd458765c674ae0683cc90f1fa070fbdefa53cd4a46f487a9c1e50a642f37` |
+| `external-icp.did` | `18c2fe7ea500c88df92eddd83a69a3e44c07a289465e06941b07c0dffc7099df` |
+| `external-cycles.did` | `af8f846f268d1ca34f51d1c9b00ed77f90c11e8c3aa288fd915eae5aea28457f` |
+| `external-assets.did` | `af4efb9d921acb40734025cedd6a3424c8a925c5bcd5585d711cb2dbf263227b` |
+
+These pinned source contracts do not establish which revision a deployed service
+runs. Contract tests compare complete selected Candid types and callback signatures
+with the pinned DID, rather than comparing only partial Canic projections.
+
+The inspected `ic-ledger-types` 0.16.0 package includes `ic-cdk` 0.19 and account
+identifier/hash implementations beyond these requests. It is not added solely
+for these DTOs. No full Cycles Ledger or asset service/storage package is added.
+This is a deliberate maintenance surface, not a claim that no other DTO supplier
+exists or that dependency graphs/optimized Wasm are smaller.
+
+## Canic migration
+
+Require Platform >=0.6.20 and select only
+the features each runtime/host crate uses. These features also supply the existing
+`candid::contract` and bounded decoding APIs; no direct Candid dependency is needed.
+Do not replace accepted original bytes in already-retained uncertain operations.
+
+| Existing Canic mirror | Platform replacement |
+| --- | --- |
+| `NotifyTopUpArg`, `NotifyTopUpError` | `cmc_types::{NotifyTopUpArg, NotifyError}` |
+| Conversion rate and partial `RateReply` | `cmc_types::{IcpXdrConversionRate, IcpXdrConversionRateResponse}` |
+| `NotifyMintArgs`, `NotifyMintOk`, `NotifyMintError` | `cmc_types::{NotifyMintCyclesArg, NotifyMintCyclesSuccess, NotifyError}` |
+| ICP `Tokens`, `Timestamp`, `TransferArgs`, `TransferError` | `icp_ledger_types::{Tokens, TimeStamp, TransferArgs, TransferError}` |
+| ICP `ReadArgs`, `EncodedBlocksReply`, `ArchivedRange`, `ArchiveReadError` | `icp_ledger_types::{GetBlocksArgs, QueryEncodedBlocksResponse, ArchivedEncodedBlocksRange, QueryArchiveError}` |
+| `CyclesLedgerCreateCanisterArgs` and its CMC/settings/subnet/result/error mirrors | Corresponding `cycles_ledger_types` declarations |
+| `WithdrawArgs`, `WithdrawError`, `RejectionCode` | Same names under `cycles_ledger_types` |
+| Registry request/payload | `nns_registry_types::{GetSubnetForCanisterRequest, GetSubnetForCanisterResponseOk}`; outer reply is `GetSubnetForCanisterResponse` |
+| Asset `GetAsset`, `AssetReply`, `GetChunk`, `ChunkReply` | `certified_assets_types::{GetArgs, GetResult, GetChunkArgs, GetChunkResult}` |
+
+Use `TimeStamp`, matching the canonical ICP spelling. ICP accounts/subaccounts
+are raw blobs here, not the ICRC Account identity; convert existing arrays with
+`to_vec()` without deriving new account identifiers. These DTOs do not validate
+fixed-size account identifiers: retain existing
+32-byte account/subaccount admission wherever the consumer previously required
+arrays. Convert unbounded `Nat` into bounded consumer state only with checked
+conversion and the existing refusal policy. The typed ICP archive callback
+has its own exact query signature; do not substitute an ICRC block callback.
+Complete rate replies include `hash_tree` and `certificate`; encoded-block replies
+include optional `certificate`. Neither is automatically authenticated.
+
+Cycles Ledger's CMC arguments omit the direct CMC method's deprecated
+`subnet_type`; its settings also differ from management-canister and current
+CMC settings. Preserve these types rather than aliasing lookalikes. All failed
+creation fee/refund blocks, duplicate canister evidence and withdrawal rejection
+variants remain available. Canic retains bounds, target/controller/subnet binding,
+cycle accounting, fee policy, journals and outcome reconciliation.
+
+For Registry, construct `principal: Some(target)` in both cost quotation and
+submission. `None` requests caller-derived behavior and is never an implicit
+replacement. Canonical optional-principal bytes differ from Canic's old required
+field, although upstream Candid subtyping can decode the old shape. This patch
+provides the exact new DTO; it does not rewrite Canic's retained request bytes.
+
+Asset responses now include canonical `content_type`. Canic retains its admitted
+network/target, `identity` encoding selection, original key, expected digest,
+maximum total/chunk lengths and index/hash binding. Optional digest admission
+and certificate/authenticity verification stay there. No Platform default limit
+or automatic retry is added.
+
+Canic must replace its mirrors, exhaust direct dependency/import use, and rerun
+refill/operator-mint original-byte/retry, refund/duplicate, receipt authentication,
+creation/withdrawal recovery and frontend acceptance tests. Those are consumer
+qualifications; Platform's schema/codec proofs do not replace them. No sibling
+checkout, deployment, paid operation or publication is part of this work.
+
+## Focused qualification
+
+Run full `make clippy` before longer tests, then
+`bash scripts/ci/check-platform-consumer.sh external-contracts asset-contracts external-contract-schema`.
+The portable consumer covers native/MSRV/Wasm; the asset exports are native only;
+the parser-backed schema consumer is native only. Their manifests declare only
+Platform. Parser participation is solely a test selection and never implied by
+any production DTO feature. Retain actual default/executor/runtime and selected
+DTO normal/build graphs separately. Native macOS and installed services require
+their own qualification; local compilation does not claim either.
+
+For the owned codec, `candid-codec-endpoint` supplies explicit external-interface
+query/update adapters without registry Candid. Decode/reply bounds, arity and
+empty-envelope policy are mandatory; existing upstream quota values are not
+silently reused. The same generator owns guards, execution and replies. Consumers
+retain checked external schemas because this path does not register native Candid
+service metadata. See the [owned endpoint migration](../architecture/migration.md#explicit-owned-external-endpoints-unreleased).

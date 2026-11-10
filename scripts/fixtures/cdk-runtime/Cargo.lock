@@ -723,6 +723,7 @@ dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
  "ic-platform-types 0.19.0",
+ "ic0",
  "pin-project-lite",
  "serde",
  "slotmap",
@@ -824,6 +825,12 @@ dependencies = [
  "quote",
  "syn 3.0.9",
 ]
+
+[[package]]
+name = "ic0"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f05349d5c51ab6cc962c8963f877f826997ee6b737c6be3aafc9779eb8a4dd05"
 
 [[package]]
 name = "ic_principal"

@@ -35,6 +35,72 @@ fn limits() -> Limits {
         allocation: 16_384,
     }
 }
+
+#[test]
+fn optional_fixed_subaccounts_reject_invalid_lengths() {
+    use ic_platform::candid_codec::decoder::{Error, decode_one};
+    use std::option::Option;
+
+    #[derive(Debug, PartialEq)]
+    struct Account {
+        subaccount: Option<[u8; 32]>,
+    }
+    // Candid's field hash for "subaccount"; use the same field in the wire oracle.
+    ic_platform::candid_record!(Account { 1349681965 => subaccount: Option<[u8; 32]> });
+    fn wire_account(subaccount: Option<Vec<u8>>) -> Vec<u8> {
+        use candid::types::{
+            Label,
+            value::{IDLArgs, IDLField, IDLValue},
+        };
+        let val = match subaccount {
+            Some(bytes) => IDLValue::Opt(Box::new(IDLValue::Blob(bytes))),
+            None => IDLValue::None,
+        };
+        IDLArgs::new(&[IDLValue::Record(vec![IDLField {
+            id: Label::Named("subaccount".into()),
+            val,
+        }])])
+        .to_bytes()
+        .unwrap()
+    }
+
+    for length in [0, 1, 31, 32, 33, 64] {
+        let bytes = wire_account(Some(vec![7; length]));
+        let expected = if length == 32 {
+            Ok(Account {
+                subaccount: Some([7; 32]),
+            })
+        } else {
+            Err(Error::Malformed)
+        };
+        assert_eq!(decode_one::<Account>(&bytes, limits()), expected);
+
+        // Both bare-value promotion and an explicit wire option must propagate
+        // invalid lengths, including through another enclosing option.
+        for bytes in [
+            candid::encode_one(vec![7u8; length]).unwrap(),
+            candid::encode_one(Some(vec![7u8; length])).unwrap(),
+            candid::encode_one(Some(Some(vec![7u8; length]))).unwrap(),
+        ] {
+            let result = decode_one::<Option<Option<[u8; 32]>>>(&bytes, limits());
+            if length == 32 {
+                assert_eq!(result, Ok(Some(Some([7; 32]))));
+            } else {
+                assert_eq!(result, Err(Error::Malformed));
+            }
+        }
+    }
+
+    let bytes = wire_account(None);
+    assert_eq!(
+        decode_one::<Account>(&bytes, limits()),
+        Ok(Account { subaccount: None })
+    );
+    // Genuine type incompatibility retains Candid's ordinary optional fallback.
+    let bytes = candid::encode_one(true).unwrap();
+    assert_eq!(decode_one::<Option<[u8; 32]>>(&bytes, limits()), Ok(None));
+}
+
 #[test]
 fn public_mappings_and_explicit_arguments() {
     let state = State::A(Record {

@@ -20,19 +20,25 @@ for selection in 'map(select(.name != "ic-platform"))' '. + map(select(.name == 
     fi
     grep -q 'expected exactly one ic-platform package' "$fixture/error"
 done
-# Types rejects the retired external Principal feature and production dependency.
+# Types retains only the optional self-authentication supplier edge.
 while IFS= read -r mutation; do
     "$jq" "(.packages[] | select(.name == \"ic-platform-types\")) |= ($mutation)" \
         "$fixture/metadata.json" > "$fixture/invalid.json"
     if contract "$fixture/invalid.json" 2> "$fixture/error"; then
         echo "Types contract admitted mutation: $mutation" >&2; exit 1
     fi
-    grep -q 'Types must not have' "$fixture/error"
+    grep -q 'Types must isolate' "$fixture/error"
 done <<'MUTATIONS'
 .features["principal-external"] = ["dep:ic_principal"]
 .features["principal-external"] += ["principal-self-authenticating"]
 .features.default = ["principal-external"]
 .dependencies += [{"name":"ic_principal", "kind":null, "uses_default_features":false}]
+.features["principal-self-authenticating"] = []
+(.dependencies[] | select(.name == "ic_principal" and .kind == null)).optional = false
+(.dependencies[] | select(.name == "ic_principal" and .kind == null)).uses_default_features = true
+(.dependencies[] | select(.name == "ic_principal" and .kind == null)).features += ["convert"]
+(.dependencies[] | select(.name == "ic_principal" and .kind == null)).source = null
+.dependencies += [{name:"sha2",kind:null}]
 .dependencies += [{name:"candid",kind:null}]
 MUTATIONS
 # Mutate actual Cargo observations, retaining each policy's refusal evidence.
@@ -62,7 +68,9 @@ done <<'MUTATIONS'
 .features["certification-cbor"] -= ["dep:serde_cbor"]
 .features["certification-cbor"] += ["runtime"]
 .features["canister-sig-creation"] -= ["certification"]
-.features["canister-sig-creation"] -= ["dep:ic-canister-sig-creation"]
+.features["canister-sig-creation"] -= ["dep:sha2_11"]
+(.dependencies[] | select(.name == "ic-canister-sig-creation")).kind = null
+(.dependencies[] | select(.name == "ic-signature-verification")).kind = null
 .features["signature-verification"] += ["ic_principal/serde"]
 (.dependencies[] | select(.name == "ic-certification")).target = "cfg(not(target_family = \"wasm\"))"
 .features.bls = ["dep:ic-verify-bls-signature"]
@@ -88,7 +96,10 @@ done <<'MUTATIONS'
 .features.executor = []
 .features.runtime = []
 .features.cdk = []
-.features.ic0 = ["dep:ic0"]
+.features.ic0 = []
+(.dependencies[] | select(.name == "ic0")).uses_default_features = true
+(.dependencies[] | select(.name == "ic0")).req = "^1.1.0"
+(.dependencies[] | select(.name == "ic0")).source = null
 (.dependencies[] | select(.name == "ic-platform-runtime-guard")).optional = false
 (.dependencies[] | select(.name == "ic-platform-runtime-guard")).req = "^0.9.0"
 .dependencies |= map(select(.name != "ic-platform-runtime-guard"))

@@ -4,7 +4,7 @@ Platform re-exports canonical Principal/Account identities from ic-platform-type
 Platform (facade), PocketIC (native client), Runtime (runtime, macros and exact
 guard), and Types have independent release groups in one workspace. Each group
 owns explicit versions and its canonical releases/ ledger. Unrelated runtime releases retain the
-same compatible type supplier; see [the migration contract](../../docs/migration.md#stable-owned-identity-package-118).
+same compatible type supplier; see [the migration contract](../../docs/architecture/migration.md#stable-owned-identity-package-118).
 
 Platform 0.11 removed `wire-schema` and the production Wire dependency. Principal
 and Account retain their existing bytes and Serde; published Wire 0.10 supplies
@@ -18,7 +18,7 @@ supplies bounded IC packet codecs without Agent or Runtime; select
 `ic-protocol-fixtures` separately in native development dependencies. No generic
 CBOR value/Serde encoder is exposed. Consumers retain byte budgets, verification,
 freshness, request bindings and effect authority. See the
-[packet migration contract](../../docs/migration.md#typed-ic-packet-and-fixture-boundary-pending-0223).
+[packet migration contract](../../docs/architecture/migration.md#typed-ic-packet-and-fixture-boundary-pending-0223).
 
 Required external Candid endpoints select `candid-codec-endpoint` and
 `candid_codec::endpoint::{query, update}` with explicit decode limits, reply bytes,
@@ -35,7 +35,7 @@ Platform has no compression feature or Tooling production dependency.
 Published 0.6.20 provides optional `cmc-types`,
 `icp-ledger-types`, `cycles-ledger-types`, `nns-registry-types` and native-only
 `certified-assets-types` surfaces. These retain external Candid and add no service
-engine or policy. See the [exact contract and migration guide](../../docs/external-contracts.md).
+engine or policy. See the [exact contract and migration guide](../../docs/protocols/external-contracts.md).
 Consumer adoption and qualification remain separate from supplier publication.
 
 Published 0.6.21 extends `management-canister-types` with
@@ -47,14 +47,14 @@ selections; they add no calls, signing implementation or policy. Require at leas
 Platform 0.18 removes the unused `stable-structures` feature and module,
 including their upstream dependency. Storage and allocation remain consumer-owned;
 Runtime's raw stable-memory system calls remain available. See the
-[retirement contract](../../docs/migration.md#stable-structures-substrate).
+[retirement contract](../../docs/architecture/migration.md#stable-structures-substrate).
 
 Select `principal` for owned Principal/Account bytes, text and Serde without
 external Principal or hashing. The owned codec, maintained DTOs and callbacks use
 this same identity. The external aliases and `principal-external` feature are
 removed; `principal-self-authenticating` separately adds unchanged upstream
 self-authentication. Native supplier APIs retain their registry identities. See
-the [hard cut](../../docs/migration.md#owned-principal-hard-cut-unreleased).
+the [hard cut](../../docs/architecture/migration.md#owned-principal-hard-cut-unreleased).
 
 Select `runtime` for prepared one-shot requests through
 `ic_platform::call::{Call, WaitPolicy}`. Methods and argument bytes can be owned
@@ -73,7 +73,7 @@ consumer needs only management entropy. The codec adds no dependency or runtime:
 `Result<[u8; 32], DecodeError>` under its documented bounded producer profile.
 Select raw execution separately. Callers retain seed admission, including any
 all-zero refusal, and wait/retry/cancellation policy. See the
-[entropy contract](../../docs/migration.md#candid-free-management-entropy-platform-027-unreleased).
+[entropy contract](../../docs/architecture/migration.md#candid-free-management-entropy-platform-027-unreleased).
 The former `candid::protocols::management::raw_rand` helper is removed in 0.27;
 this module is the sole typed entropy codec. Generic raw transports remain
 method-agnostic.
@@ -87,7 +87,7 @@ preserving external Principal identity and wire bytes. Migrated Nat fields use
 registry Nat callers need an explicit conversion. ICP references validate their
 query signatures without upstream Candid; destination and method admission stay
 consumer-owned. Other adapters are not automatically migrated; see the
-[migration contract](https://github.com/dragginzgame/ic-platform/blob/main/docs/migration.md#owned-binary-codec-unreleased)
+[migration contract](https://github.com/dragginzgame/ic-platform/blob/main/docs/architecture/migration.md#owned-binary-codec-unreleased)
 for supported mappings and distinct resource-budget semantics.
 
 Select `candid-args` for the small dependency-free argument encoders:
@@ -135,14 +135,14 @@ Backup's snapshot and status contract also exports `CanisterIdRecord`,
 `UploadCanisterSnapshotMetadataArgs` and `UploadCanisterSnapshotMetadataResult`.
 Canic's snapshot-delete request additionally uses the same feature's explicit
 `DeleteCanisterSnapshotArgs` export, with the original canister/snapshot fields.
-Native targets retain this registry 0.11.0 surface and its type identities.
-Wasm targets use 43 Platform-owned exports selected from sibling canister use;
-the 14 host-only snapshot-transfer exports are absent. Complete nested types and
-external Candid bytes are retained. See the [management migration](../../docs/migration.md#selected-canister-management-dtos)
-and `src/management_canister_types/maintained/provenance.json` for the exact lists.
-The Wasm graph excludes the registry DTO crate and implicit Candid printer.
-Native management retains registry identities and their transitive Candid.
-Wasm uses the owned codec without Candid. It selects no executor, Agent or parser.
+Native and Wasm targets use independently authored Platform DTOs and the owned
+codec: 62 native exports and 44 shared Wasm exports. Native-only snapshot
+transfer, install/create and log additions stay absent from Wasm. All 52 shared
+schemas, nested fields, traits and external bytes remain compatible with the
+registry 0.11.0 development oracle. See the [management migration](../../docs/architecture/migration.md#selected-canister-management-dtos)
+and [shared qualification](../../docs/design/management-shared-qualification.md).
+Neither production management graph selects upstream Candid, the registry DTO
+crate, executor, Agent or parser.
 Consumers retain HTTP bounds, cycle pricing, transforms, call execution and retry
 policy. History consumers retain bounded calls, reply/work limits, change counts,
 instance-version checks and recovery fences. Decoding history does not establish
@@ -191,22 +191,25 @@ smaller Wasm artifacts.
 Enable `canister-sig-creation` for `ic_platform::canister_sig_creation`:
 `CanisterSigPublicKey`, `hash_bytes`, `hash_with_domain`,
 `extract_raw_root_pk_from_der`, `IC_ROOT_PK_DER` and `IC_ROOT_PK_DER_PREFIX`
-from registry 1.3.1. The delegating CanisterSigPublicKey adapter keeps Platform's
-Principal field and existing DER/raw bytes and String errors. The upstream
-signature store is not exported. Its dependencies do bring Candid/printer,
-representation-independent hashing, CBOR, a lazy root-key cache and raw IC0;
-these are upstream packaging costs, not additional Platform APIs or an executor.
+are independently implemented protocol APIs using canonical Platform Principal.
+DER/raw bytes and public key constants retain their compatibility contract;
+SHA-256 remains an external implementation. Strict short-form DER admission
+remains in place. There is no signature store or automatic trust-root selection.
 
 Enable `signature-verification` for
-`ic_platform::signature_verification::verify_canister_sig`, delegating to registry
-0.3.0 with the same four byte-slice arguments and Result<(), String>. Platform
-retains checked short-form DER admission and identity-key rejection for both the
-root and delegated subnet. Long-form DER remains unsupported.
-`verify_canister_sig_with_time` verifies first, then decodes the authenticated
-signing certificate to extract its unique u64 time; upstream exposes no evidence
-API, so this adds a second CBOR decode. The delegation certificate's time is
-never returned. Consumers retain byte/depth limits, roots, freshness and authority.
-There are no embedded signature/encoding/hash implementations or algorithm suites.
+`ic_platform::signature_verification::verify_canister_sig`, with the same four
+byte-slice arguments and Result<(), String>. Platform owns certificate/delegation,
+range and witness checks; external packages own BLS, curve operations and tree
+hashing. Identity keys are rejected at both the root and delegated subnet.
+`verify_canister_sig_with_time` extracts the unique authenticated signing time
+without decoding the signing certificate again. Delegation time is never returned.
+Consumers retain byte/depth limits, roots, freshness and authority.
+
+Both production signature profiles exclude Candid, registry Principal, the old
+signature packages, raw IC0 and an executor. DFINITY creation/verification
+packages are dev-only byte/behavior/benchmark oracles. See the
+[implementation contract](../../docs/design/canister-signatures/contract.md) and
+[comparison report](../../docs/benchmarks/canister-signatures-2026-11-10.md).
 
 Enable `bls` independently for `ic_platform::bls::{PublicKey, Signature,
 PrivateKey, InvalidPublicKey, InvalidSignature, InvalidPrivateKey,
@@ -278,11 +281,12 @@ their 300-second default and original cycle/timeout/error behavior.
 
 Call/response/future, cost/performance/error and stable-error types now have
 Platform identities; upstream direct-type equality is not retained. Principal
-and runtime RejectCode are owned too. Management DTO/Principal, BLS and certification
-identities remain upstream; the selected ledger DTOs have Platform identities. The 0.4 release changes signature-key identity as
+and runtime RejectCode are owned too. Management and selected ledger DTOs use
+Platform identities and canonical Types Principal; BLS and certification types
+retain their explicit upstream identities. The 0.4 release changes signature-key identity as
 documented above.
-The generator and imported non-cryptographic runtime source retain Apache-2.0
-with provenance; the combined package is MIT AND Apache-2.0. No executor or
+The generator and Runtime adapters now use specification-only implementations.
+Retained ledger value/hash and ICP derivation keep their source records. No executor or
 cryptographic implementation is forked.
 
 Published Testkit 0.54.0 call helpers use Platform's canonical limits/error types.
@@ -306,7 +310,7 @@ There is no replacement checkpoint implementation or automatic data migration.
 
 The maintained PocketIC client moved to `ic_testkit::pocket_ic`. Select Testkit
 directly for its client, DTOs, errors and lifecycle helpers; Platform provides no
-client feature or forwarding module. See the [migration](../../docs/pocket-ic-client.md).
+client feature or forwarding module. See the [migration](../../docs/history/pocket-ic-client.md).
 
 Enable `ed25519` for native/Wasm `ic_platform::ed25519::{Signature,
 SignatureError, Signer, SigningKey, VerifyingKey, Scalar}`. These are original
@@ -322,7 +326,10 @@ No RNG backend is selected. Offline IC public-key derivation is not provided.
 
 The `icrc-ledger-types` selection now uses the owned binary codec for ledger,
 archive and consent DTOs, including recursive callbacks. The legacy trait/protocol bridge is removed. Nat/Int fields use the owned unbounded
-carriers; external Principal, protocol/Serde bytes and imported hash bodies remain.
+carriers and canonical Types Principal; protocol/Serde bytes and imported hash
+bodies remain unchanged. CMC/ICP/Cycles/assets passive declarations and their
+selected DID fixtures now use independent implementations; see
+[external contract qualification](../../docs/design/external-dtos-qualification.md).
 
 Management DTOs on all targets use the owned codec, including typed HTTP transform
 callbacks and budgeted `reserved` skipping. Principal, Nat and Reserved use owned

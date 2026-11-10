@@ -1,113 +1,89 @@
-#![doc = include_str!("../README.md")]
+//! Entrypoint attributes with explicit caller-owned codecs.
 
 use proc_macro::TokenStream;
-use syn::Error;
+use proc_macro2::TokenStream as TokenStream2;
 
-mod export;
+mod entrypoint;
 mod external_candid;
 mod options;
 mod signature;
 
-fn handle_debug_and_errors<F>(
-    cb: F,
-    name: &str,
-    attr: TokenStream,
-    item: TokenStream,
-) -> TokenStream
-where
-    F: FnOnce(
-        proc_macro2::TokenStream,
-        proc_macro2::TokenStream,
-    ) -> Result<proc_macro2::TokenStream, Error>,
-{
+fn finish(result: syn::Result<TokenStream2>) -> TokenStream {
+    let expanded = result.unwrap_or_else(syn::Error::into_compile_error);
     if std::env::var_os("IC_CDK_DEBUG").is_some() {
-        eprintln!("--- IC_CDK_MACROS DEBUG ---");
-        eprintln!("{name}\n    attr: {attr}\n    item: {item}");
+        eprintln!("{expanded}");
     }
-
-    let result = cb(attr.into(), item.into());
-
-    if std::env::var_os("IC_CDK_DEBUG").is_some() {
-        eprintln!("--------- RESULT  ---------");
-        if let Ok(ref stream) = result {
-            eprintln!("{stream}");
-        }
-        eprintln!("---------------------------");
-    }
-
-    result.map_or_else(|e| e.to_compile_error().into(), Into::into)
+    expanded.into()
 }
 
-/// Generate an explicit-codec query or composite-query entrypoint.
-#[proc_macro_attribute]
-pub fn query(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(export::ic_query, "ic_query", attr, item)
+fn ordinary(kind: entrypoint::Kind, attrs: TokenStream, item: TokenStream) -> TokenStream {
+    finish(entrypoint::expand(kind, attrs.into(), item.into()))
 }
 
-/// Generate an explicit-codec update entrypoint.
+/// Exports a query with explicit decoding and automatic encoding or manual reply.
 #[proc_macro_attribute]
-pub fn update(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(export::ic_update, "ic_update", attr, item)
+pub fn query(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    ordinary(entrypoint::Kind::Query, attrs, item)
 }
 
-/// Generate an initialization entrypoint with explicit argument decoding.
+/// Exports an update with explicit decoding and automatic encoding or manual reply.
 #[proc_macro_attribute]
-pub fn init(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(export::ic_init, "ic_init", attr, item)
+pub fn update(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    ordinary(entrypoint::Kind::Update, attrs, item)
 }
 
-/// Generate a pre-upgrade entrypoint in the shared runtime context.
+/// Exports initialization; nonempty arguments require an explicit decoder.
 #[proc_macro_attribute]
-pub fn pre_upgrade(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(export::ic_pre_upgrade, "ic_pre_upgrade", attr, item)
+pub fn init(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    ordinary(entrypoint::Kind::Init, attrs, item)
 }
 
-/// Generate a post-upgrade entrypoint with explicit argument decoding.
+/// Exports a unit-returning pre-upgrade hook without arguments or codecs.
 #[proc_macro_attribute]
-pub fn post_upgrade(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(export::ic_post_upgrade, "ic_post_upgrade", attr, item)
+pub fn pre_upgrade(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    ordinary(entrypoint::Kind::PreUpgrade, attrs, item)
 }
 
-/// Generate a heartbeat entrypoint in the shared runtime context.
+/// Exports post-upgrade initialization with explicit decoding when needed.
 #[proc_macro_attribute]
-pub fn heartbeat(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(export::ic_heartbeat, "ic_heartbeat", attr, item)
+pub fn post_upgrade(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    ordinary(entrypoint::Kind::PostUpgrade, attrs, item)
 }
 
-/// Generate a message inspection entrypoint in the shared runtime context.
+/// Exports a unit-returning heartbeat hook.
 #[proc_macro_attribute]
-pub fn inspect_message(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(export::ic_inspect_message, "ic_inspect_message", attr, item)
+pub fn heartbeat(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    ordinary(entrypoint::Kind::Heartbeat, attrs, item)
 }
 
-/// Generate a low-Wasm-memory entrypoint in the shared runtime context.
+/// Exports message inspection in the query executor context.
 #[proc_macro_attribute]
-pub fn on_low_wasm_memory(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(
-        export::ic_on_low_wasm_memory,
-        "ic_on_low_wasm_memory",
-        attr,
-        item,
-    )
+pub fn inspect_message(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    ordinary(entrypoint::Kind::InspectMessage, attrs, item)
 }
 
-/// Generate an external-interface query using Platform's owned binary codec and explicit budgets.
+/// Exports a unit-returning low-Wasm-memory hook.
 #[proc_macro_attribute]
-pub fn codec_query(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(
-        |attr, item| external_candid::expand_owned(true, attr, item),
-        "codec_query",
-        attr,
-        item,
-    )
+pub fn on_low_wasm_memory(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    ordinary(entrypoint::Kind::OnLowWasmMemory, attrs, item)
 }
-/// Generate an external-interface update using Platform's owned binary codec and explicit budgets.
+
+/// Exports a query through the existing owned external-Candid adapter.
 #[proc_macro_attribute]
-pub fn codec_update(attr: TokenStream, item: TokenStream) -> TokenStream {
-    handle_debug_and_errors(
-        |attr, item| external_candid::expand_owned(false, attr, item),
-        "codec_update",
-        attr,
-        item,
-    )
+pub fn codec_query(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    finish(external_candid::expand_owned(
+        true,
+        attrs.into(),
+        item.into(),
+    ))
+}
+
+/// Exports an update through the existing owned external-Candid adapter.
+#[proc_macro_attribute]
+pub fn codec_update(attrs: TokenStream, item: TokenStream) -> TokenStream {
+    finish(external_candid::expand_owned(
+        false,
+        attrs.into(),
+        item.into(),
+    ))
 }

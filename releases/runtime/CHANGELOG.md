@@ -6,11 +6,72 @@ ic-platform-runtime-guard. Earlier macro/guard history remains in
 
 ## [0.21.1] - Unreleased
 
+### 🧹 Cleanup
+
+- Replace the imported entrypoint generator, dispatch and syntax helpers through
+  a specification-only context. Preserve exact export names, guard/context order,
+  explicit codecs, typed external adapter paths and handler inference. Retire
+  the previous export directory/tests and source records. No dependency or public
+  feature is added.
+- Replace the remaining imported raw-call implementation through a specification-only
+  context. Preserve public bytes/errors, cycle/wait policy and installed callback
+  recovery, while keeping borrowed request data out of the callback environment
+  and arbitrary Waker operations outside completion locks. Retire the old CDK
+  directory and fingerprint scripts; retain public and installed comparisons.
+- Replace imported System API, stable-memory and task-policy adapters through
+  specification-only contexts, preserving public names, bytes, numeric ranges,
+  traps and protected/weak/migratory behavior.
+- Preserve protected-task cancellation before first poll and mark completion
+  before destroying a finished inner future. Keep `pin-project-lite` for safe
+  direct projection; its wrapper measures smaller than the qualified standard
+  async alternative, with no new dependency or unsafe code.
+- Replace the imported executor through a specification-only implementation
+  context, with separate independent public lifecycle tests. Preserve the sole
+  owner, public handles, protected/migratory routing, query isolation, coalesced
+  wakes, cached wakers, generational refusal and drop outside executor borrows.
+  Retire its source-fingerprint checker in favor of behavior comparisons.
+- Reclaim protected tasks when the final method retention is dropped outside a
+  context; the previous implementation left that state allocated. Cancellation
+  still drops each future once, outside borrows and in stable membership order.
+
+- Replace the rejection catalogue from protocol/API specifications in a separate
+  implementation context. Independently written tests preserve all six numeric
+  codes, diagnostics, Serde variants and unknown-code refusal. No dependency or
+  unsafe code is added.
+- Replace copied IC0 bindings with the registry `ic0` 1.2.0 package behind the
+  existing explicit exports. Remove the embedded sources and their fingerprint
+  machinery. Public signatures, stable-memory access, callback
+  ABI and the sole executor remain unchanged; IC0 adds no production transitives.
+
+### ⚡ Performance
+
+- The matched installed raw Wire fixture shrinks by 46,580 uncompressed bytes
+  (17.0%), including 28,291 code-section bytes (15.8%). The external-Candid fixture
+  shrinks by 54,861 total bytes (7.5%) and 35,256 code bytes (6.9%). Compiler,
+  fixture sources, lock and release settings match. These are fixture results,
+  not a measured instruction-speed or application-wide size claim.
+
+### 🧪 Testing
+
+- Qualify the independent generator with fresh unit/public consumers, exact
+  native symbols and all four installed profiles. A matched old/new generator
+  comparison preserves every Wasm import/export; total size changes range from
+  −872 to +51 bytes, with no general performance claim.
+- Add independent public call contracts, 16 native call tests and an installed
+  two-outstanding-call trap/cleanup scenario. Qualify all four raw/prepared and
+  Wire/external-Candid profiles. Record the mixed size tradeoff: raw fixtures grow
+  466–950 total Wasm bytes, while prepared fixtures shrink 493–1,001 bytes; no
+  general speed or size claim is made for the call replacement.
+- Qualify independent executor unit/public tests and all four installed raw /
+  prepared × Wire / external-Candid lifecycle profiles, including callback traps,
+  cancellation, upgrades and stable rollback. Keep downstream scheduler acceptance
+  with Scheduling and native macOS evidence separate.
+
 ### 🛠️ Tooling
 
-- Adopt Toko Tooling 0.38.2 and audit product/qualification package placement.
+- Adopt Toko Tooling 0.39.8 and audit product/qualification package placement.
   All five maintained crates already use the product layout; disposable fixture
-  templates and vendored upstream sources retain their documented locations.
+  templates retain their documented locations; the native provider is retired.
   Production boundaries and the three release groups remain unchanged.
 
 ## [0.21.0] - 2026-11-09

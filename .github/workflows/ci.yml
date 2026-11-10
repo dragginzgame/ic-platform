@@ -60,38 +60,6 @@ jobs:
           case "$scope" in docs|full) ;; *) exit 1 ;; esac
           printf 'scope=%s\n' "$scope" >> "$GITHUB_OUTPUT"
 
-  native-provider-source:
-    needs: selection
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          persist-credentials: false
-      - name: Restore pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
-      - name: Validate documentation only (no native qualification)
-        if: needs.selection.outputs.scope == 'docs'
-        run: |
-          make install-host-tools
-          make toko-tooling-check check-doc-links
-      - name: Prepare native HTTP fixture toolchain
-        if: needs.selection.outputs.scope != 'docs'
-        run: rustup toolchain install --profile minimal --no-self-update --component clippy --component rustfmt
-      - name: Prepare native HTTP manifest tools
-        if: needs.selection.outputs.scope != 'docs'
-        run: make install-host-tools
-      - name: Save pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
-        with:
-          mode: save
-      - name: Prepare native HTTP fixture dependencies
-        if: needs.selection.outputs.scope != 'docs'
-        run: bash scripts/ci/check-native-profiler-http.sh --prepare
-      - name: Qualify native source-provider assembly boundaries
-        if: needs.selection.outputs.scope != 'docs'
-        run: make check-native-provider
-
   platform:
     needs: selection
     if: ${{ !cancelled() }}

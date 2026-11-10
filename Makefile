@@ -1,5 +1,6 @@
 .DEFAULT_GOAL := help
 TOKO_TOOLING_RUST := 1
+TOKO_TOOLING_RELEASE := 1
 FORMAT_EXTRA_SOURCES := $(wildcard scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/prepared-call-consumer/*.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/fixtures/wasm-size/lib.rs)
 FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/stable-identities/*.rs)
@@ -150,7 +151,7 @@ check-boundary: check-candid-boundary
 	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 .PHONY: check-candid-boundary
 check-candid-boundary:
-	perl scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates scripts native/ic-profiler/profiler native/ic-profiler/overlay
+	perl scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates scripts
 	bash scripts/ci/test-platform-candid-boundary.sh
 .PHONY: check-primitives
 check-primitives:
@@ -196,17 +197,12 @@ check-doc-links:
 		records="$$(mktemp "$(CURDIR)/target/doc-link-records.XXXXXX")"; \
 		trap 'rm -f "$$records"' EXIT; \
 		bash scripts/ci/verify-toko-tooling-snapshot.sh --read-manifest .toko-tooling.snapshot > "$$records"; \
-		set -- README.md docs/development-and-qualification.md AGENTS.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md docs/status/current.md docs/migration.md docs/history/migrations-through-0.26.md scripts/benchmarks/0.9/README.md scripts/benchmarks/0.4/README.md scripts/benchmarks/0.22/README.md scripts/benchmarks/canic-wasm/README.md docs/ic-inventory.md docs/external-contracts.md docs/pocket-ic-client.md docs/platform-release-validation.md packages/browser/README.md packages/browser/CHANGELOG.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md; \
+		set -- README.md docs AGENTS.md CONTRIBUTING.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md scripts/benchmarks/0.9/README.md scripts/benchmarks/0.4/README.md scripts/benchmarks/0.22/README.md scripts/benchmarks/canic-wasm/README.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md; \
 		while IFS="$$(printf '\t')" read -r kind checksum mode path; do \
 			case "$$kind:$$path" in file:*.md) set -- "$$@" "$$path" ;; esac; \
 		done < "$$records"; \
 		perl scripts/ci/check-documentation-links.pl --root . "$$@"
 .PHONY: check-inventory
-.PHONY: check-native-provider
-check-native-provider:
-	python3 -m unittest discover -s native/ic-profiler/tests -p 'test_*.py'
-	bash scripts/ci/check-native-profiler-http.sh
-
 check-inventory:
 	bash scripts/ci/check-platform-inventory.sh
 check-pins:
@@ -270,13 +266,7 @@ check-runtime-all:
 check-runtime-lock:
 	bash scripts/ci/test-qualification-identities.sh
 	bash scripts/ci/test-runtime-selection.sh
-	bash scripts/ci/check-icp-account-source.sh
 	bash scripts/ci/test-published-runtime.sh
-	bash scripts/ci/check-owned-runtime-source.sh
-	bash scripts/ci/test-owned-runtime-source.sh
-	bash scripts/ci/test-principal-source.sh
-	bash scripts/ci/check-icrc-source.sh
-	bash scripts/ci/test-icrc-source.sh
 	bash scripts/release/runtime-lock.sh check
 	bash scripts/release/runtime-pin.sh check
 	bash scripts/ci/test-runtime-lock.sh

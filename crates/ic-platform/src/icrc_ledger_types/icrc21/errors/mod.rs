@@ -1,25 +1,29 @@
-//! Selected upstream ICRC implementation; see ../NOTICE.md.
-#![expect(
-    missing_docs,
-    reason = "Selected upstream ICRC declarations contain undocumented public fields and variants."
-)]
+//! Passive failures returned by consent-message services.
 
 use crate::candid_codec::Nat;
-use serde::Deserialize;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+/// A service-supplied failure description.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ErrorInfo {
+    /// The description preserved verbatim.
     pub description: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+/// A consent-message service refusal in its external representation.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Icrc21Error {
+    /// The service does not support describing the requested call.
     UnsupportedCanisterCall(ErrorInfo),
+    /// No consent message is available for the request.
     ConsentMessageUnavailable(ErrorInfo),
+    /// The service reports insufficient payment.
     InsufficientPayment(ErrorInfo),
+    /// A service-defined error code and description.
     GenericError {
+        /// The unbounded error code.
         error_code: Nat,
+        /// The description preserved verbatim.
         description: String,
     },
 }

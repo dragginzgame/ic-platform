@@ -50,7 +50,28 @@ pub(super) async fn execution(pic: &PocketIc, id: Principal, legacy: bool) {
         .is_err()
     );
     assert_eq!(query::<u64>(pic, id, "cleaned", ()).await, 1);
+    let failure = pic
+        .update_call(
+            id,
+            Principal::anonymous(),
+            "multiplexed_trap",
+            request("multiplexed_trap", ()),
+        )
+        .await
+        .map_err(rejection)
+        .unwrap_err();
+    assert_eq!(failure.reject_code, RejectCode::CanisterError);
+    // The IC may report the later cancelled callback as the terminal failure.
+    assert!(
+        failure
+            .reject_message
+            .contains("fixture multiplexed callback trap")
+            || failure.reject_message.contains("Call already trapped"),
+        "unexpected multiplexed failure: {failure:?}"
+    );
+    assert_eq!(query::<u64>(pic, id, "multiplexed_cleaned", ()).await, 1);
     assert_eq!(update::<u64>(pic, id, "awaited", 3u64).await, 4);
+    assert_eq!(query::<u64>(pic, id, "multiplexed_cleaned", ()).await, 1);
     update::<()>(pic, id, "migratory", ()).await;
     assert_eq!(query::<u64>(pic, id, "value", ()).await, 11);
     update::<()>(pic, id, "weak_pending", ()).await;

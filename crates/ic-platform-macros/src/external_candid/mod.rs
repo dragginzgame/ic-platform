@@ -110,7 +110,7 @@ pub(crate) fn expand_owned(
     };
     let method = name.unwrap_or_else(|| LitStr::new(&ident.to_string(), ident.span()));
     guards.push(syn::parse_quote!(#admit));
-    let attrs = crate::export::ExportAttributes {
+    let attrs = crate::entrypoint::ExportAttributes {
         name: Some(method.value()),
         guard: guards,
         cratename: Some(syn::parse_quote!(#platform::cdk)),
@@ -119,7 +119,7 @@ pub(crate) fn expand_owned(
         composite,
         ..Default::default()
     };
-    let entry = crate::export::external_entry(query, attrs, function, item)?;
+    let entry = crate::entrypoint::external_entry(query, attrs, function, item)?;
     let admission = {
         quote! {
             let limits: #platform::candid_codec::decoder::Limits = #limits;

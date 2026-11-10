@@ -12,7 +12,7 @@
 //! `ic-protocol-fixtures` additionally selects native development protocol fixtures.
 //! `bls` selects BLS keys, signatures and verification with upstream allocation support.
 //! `canister-sig-creation` selects canister public-key formats and hashing.
-//! `signature-verification` selects upstream canister-signature verification.
+//! `signature-verification` selects owned canister-signature protocol checks with external BLS.
 //! `runtime` selects raw adapters and prepared `call` requests; ordinary entrypoints select Runtime directly.
 //! `ic0` selects qualified raw system calls without Candid or an executor.
 //! `raw-rand` selects the dependency-free management entropy codec, without transport.

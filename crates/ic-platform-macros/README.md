@@ -1,10 +1,11 @@
 # ic-platform-macros
 
-Implementation support for Runtime entrypoints and Platform’s external-Candid bridge. This maintained
-Apache-2.0 generator derives from IC CDK 0.20.3 release revision
-`624606f7fd1ecd6668e9608594946486aec29167`; its complete original license remains.
-Its entrypoint core implements no executor or implicit codec and requires no
-upstream change.
+Implementation support for Runtime entrypoints and Platform’s external-Candid
+bridge. The generator and shared syntax helpers now have independent implementations
+from a reviewed protocol/API contract, with separate public consumer tests.
+The retired imported generator and its source records were removed together. See the
+[qualification record](../../docs/design/entrypoint-generator-qualification.md).
+The entrypoint core implements no executor or implicit codec.
 
 The owned external-Candid bridge is available through the facade's
 `candid-codec-endpoint` feature. Explicit `limits`, `reply_bytes`, `arity` and
@@ -12,7 +13,7 @@ The owned external-Candid bridge is available through the facade's
 run before byte admission/copying. It adds no registry Candid or native service
 registration. The legacy `candid_query`/`candid_update` exports are removed.
 Owned Wire endpoints keep their selected codec.
-See the [migration](../../docs/migration.md#explicit-owned-external-endpoints-unreleased).
+See the [migration](../../docs/architecture/migration.md#explicit-owned-external-endpoints-unreleased).
 
 The single ordinary attribute family defaults to `::ic_platform_runtime::cdk`
 and is re-exported by Runtime. The former `runtime_*` family and ordinary facade
