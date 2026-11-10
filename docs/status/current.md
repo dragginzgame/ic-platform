@@ -105,6 +105,13 @@ not established by Platform releases; sibling adoption remains consumer-owned.
 
 ## Recovery custody
 
+Frozen batch `batch-JKeeLzH0` stopped before publication: standalone consumer
+admission still rejected the explicit self-authentication provider. Its Clippy,
+workspace tests, release-adapter checks and documentation stages passed. The
+corrected source retains base Principal isolation and tests optional-provider
+admission plus unrelated-client refusal; deployment requires a fresh full batch.
+Preserve the failed candidate and evidence.
+
 Preserve failed batches batch-G3rEbkX7 and batch-QJcFkCdU and all earlier
 failed/completed batches, including batch-_leIreCI, batch-C5BoFKA5,
 batch-AaHi2pgO, batch-O3V4GL4T, batch-PIIqwepD and batch-mG_yG4uo.

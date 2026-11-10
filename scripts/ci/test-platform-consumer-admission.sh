@@ -44,6 +44,9 @@ case "$1" in
             exit 0
         fi
         printf 'ic-platform v0.17.0 (/local/platform)\n'
+        if [[ "${TEST_PRINCIPAL:-no}" == yes || "${TEST_CAPABILITY:-}" == principal-self-authenticating ]]; then
+            printf 'ic_principal v0.1.5\n'
+        fi
         case "${TEST_CAPABILITY:-runtime}" in
             runtime|owned-endpoint|executor|ic0)
                 printf 'ic-platform-runtime v0.17.0 (/local/runtime)\n' ;;
@@ -85,6 +88,18 @@ while IFS=$'\t' read -r capability _ _ wasm _; do
     if [[ "$wasm" == skip ]]; then expected=1; fi
     [[ "$(wc -l < "$TEST_CALLS" | tr -d ' ')" == "$expected" ]] || { cat "$fixture/log" >&2; exit 1; }
 done < "$root/scripts/ci/platform-consumer-profiles.tsv"
+: > "$TEST_CALLS"
+if TEST_CAPABILITY=principal TEST_PRINCIPAL=yes "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" principal > "$fixture/principal-refusal.log" 2>&1; then
+    echo 'Base Principal admitted the optional registry provider' >&2; exit 1
+fi
+grep -q 'Owned Principal acquired the external identity' "$fixture/principal-refusal.log"
+[[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled after Principal graph rejection' >&2; exit 1; }
+if TEST_CAPABILITY=principal-self-authenticating TEST_REJECT=yes "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" principal-self-authenticating > "$fixture/self-auth-refusal.log" 2>&1; then
+    echo 'Self-authentication admitted unrelated Agent machinery' >&2; exit 1
+fi
+grep -q 'Identity/ledger consumer acquired retired or unrelated integration machinery' "$fixture/self-auth-refusal.log"
+[[ ! -s "$TEST_CALLS" ]] || { echo 'Compiled after self-authentication graph rejection' >&2; exit 1; }
+echo 'Registry derivation is admitted only for explicit self-authentication; unrelated clients remain refused'
 : > "$TEST_CALLS"
 if "$BASH" "$fixture/scripts/ci/check-platform-consumer.sh" unknown > "$fixture/log" 2>&1; then
     echo 'Unknown consumer profile was admitted' >&2; exit 1

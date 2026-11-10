@@ -22,6 +22,8 @@ Initial 0.1 history remains below with its original scope. See the
 
 ### 🛠️ Tooling
 
+- Align standalone consumer admission with the optional registry derivation
+  provider; retain base Principal isolation and unrelated-client refusal checks.
 - Adopt Toko Tooling 0.39.8 and audit product/qualification package placement.
   All five maintained crates already use the product layout; disposable fixture
   templates retain their documented locations; the native provider is retired.

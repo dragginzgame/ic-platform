@@ -117,7 +117,9 @@ if [[ "$graph_family" != - ]]; then
                     graph_has_forbidden identity-codecs; then
                     echo 'Principal byte/text capability acquired hashing or Candid' >&2; exit 1
                 fi
-                if [[ "$graph_family" == principal || "$graph_family" == principal-self-authenticating ]] && graph_has_forbidden external-principal; then
+                # Only explicit self-authentication selects the registry derivation
+                # provider; the feature contract checks its source/defaults/features.
+                if [[ "$graph_family" == principal ]] && graph_has_forbidden external-principal; then
                     echo 'Owned Principal acquired the external identity' >&2; exit 1
                 fi ;;
             runtime|owned-endpoint)
