@@ -52,6 +52,10 @@ render_platform_metadata() {
         # registry owner. Preserve foreign pins; resolve that distinction offline
         # inside the transaction before installing the qualification lock.
         CARGO_NET_OFFLINE=true bash scripts/ci/check-platform-runtime.sh --refresh-lock || exit
+        # The independent benchmark keeps an exact registry baseline alongside
+        # local product paths, so it is not a coordinated qualification cohort.
+        # Refresh only its local identities within the same metadata transaction.
+        cargo metadata --manifest-path qualification/Cargo.toml --offline --format-version 1 > /dev/null || exit
         # Match the normal commit hook before the transaction binds candidate
         # bytes. The metadata editor can compact arrays that cargo-sort expands.
         cargo sort --workspace --grouped || exit
@@ -67,6 +71,7 @@ render_platform_metadata() {
 check_platform_metadata() {
     bash scripts/release/runtime-lock.sh check || return
     bash scripts/release/runtime-pin.sh check || return
+    cargo metadata --manifest-path qualification/Cargo.toml --locked --offline --format-version 1 > /dev/null || return
     bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
 }
 case "$operation" in

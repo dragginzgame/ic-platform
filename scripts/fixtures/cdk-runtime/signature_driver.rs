@@ -8,7 +8,7 @@ fn main() {
 }
 async fn run() {
     let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
-    let pic = builder.with_application_subnet().build().await.unwrap();
+    let pic = builder.with_application_subnet().build_async().await;
     let args: Vec<_> = std::env::args().skip(1).collect();
     assert!(args.len().is_multiple_of(2));
     println!("variant\tcase\tsample\trepetitions\twindow_instructions\twhole_update_cycles");
@@ -31,20 +31,18 @@ async fn run() {
             ("identity-root", 14, 1),
         ] {
             // A fresh installation per workload makes the first sample cold.
-            let id = pic.create_canister().await.unwrap();
-            pic.add_cycles(id, 100_000_000_000_000).await.unwrap();
-            pic.install_canister(id, wasm.clone(), vec![], None)
-                .await
-                .unwrap();
+            let id = pic.create_canister().await;
+            pic.add_cycles(id, 100_000_000_000_000).await;
+            pic.install_canister(id, wasm.clone(), vec![], None).await;
             let mut request = vec![code];
             request.extend(repetitions.to_le_bytes());
             for sample in 0..4 {
-                let before = pic.cycle_balance(id).await.unwrap();
+                let before = pic.cycle_balance(id).await;
                 let response = pic
                     .update_call(id, CanisterId::anonymous(), "measure", request.clone())
                     .await
                     .unwrap();
-                let after = pic.cycle_balance(id).await.unwrap();
+                let after = pic.cycle_balance(id).await;
                 assert_eq!(response.len(), 9);
                 assert_eq!(
                     response[0],
@@ -59,6 +57,6 @@ async fn run() {
             }
         }
     }
-    pic.drop().await.unwrap();
+    pic.drop().await;
     drop(server);
 }

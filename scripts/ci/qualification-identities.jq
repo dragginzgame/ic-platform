@@ -28,15 +28,15 @@ require(($testkits | length) <= 1; "ambiguous Testkit infrastructure") |
     {testkit: ($t | identity), platform_owners: ($m | owners($t.id) | map(identity)),
      coverage: "Testkit infrastructure; not qualification of the selected Platform implementation"}
 ] as $infrastructure |
-# Agent passes Testkit's management CanisterId directly into upstream Agent APIs.
+# Agent passes the re-exported upstream PocketIC CanisterId into Agent APIs.
 # Pin that actual re-export chain's package identity; unrelated lock owners are allowed.
 [ $selected[] | select(.name == "ic-platform") | .id as $p |
     $m | edges($p)[] | . as $id | $m | package($id) | select(.name == "ic-agent")
 ] as $agents |
 [ $agents[] | . as $agent | $testkits[] | . as $t |
     ($m | dep($agent.id; "ic_principal")) as $agent_principal |
-    ($m | dep($t.id; "ic-management-canister-types")) as $management |
-    ($m | dep($management.id; "candid")) as $candid |
+    ($m | dep($t.id; "pocket-ic")) as $client |
+    ($m | dep($client.id; "candid")) as $candid |
     ($m | dep($candid.id; "ic_principal")) as $testkit_principal |
     require($agent_principal.id == $testkit_principal.id; "Agent/Testkit CanisterId identity mismatch") |
     {boundary: "Testkit CanisterId -> Agent", principal: ($agent_principal | identity)}

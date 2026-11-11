@@ -1,5 +1,6 @@
 /.tools/
 /target/
+/qualification/target/
 /recovery-evidence/
 /scripts/fixtures/wire-schema/node_modules/
 /scripts/fixtures/browser-compiler-floor/node_modules/

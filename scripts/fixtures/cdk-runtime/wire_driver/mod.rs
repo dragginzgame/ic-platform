@@ -2,7 +2,7 @@
 
 use crate::wire_protocol::*;
 use ic_testkit::pocket_ic::CanisterId as Principal;
-use ic_testkit::pocket_ic::{PocketIc, RejectCode};
+use ic_testkit::pocket_ic::{RejectCode, nonblocking::PocketIc};
 
 const ROUNDTRIP_SIZES: [usize; 4] = [0, 1, 7, 15];
 
@@ -90,7 +90,6 @@ pub async fn run(pic: &PocketIc, id: Principal) {
                 vec![0; REQUEST.bytes + 1],
             )
             .await
-            .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterReject);
         assert_eq!(
@@ -109,7 +108,6 @@ pub async fn run(pic: &PocketIc, id: Principal) {
         let error = pic
             .update_call(id, Principal::anonymous(), "wire_set", bytes)
             .await
-            .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterError);
         assert!(error.reject_message.contains("Wire fixture request:"));
@@ -128,7 +126,6 @@ pub async fn run(pic: &PocketIc, id: Principal) {
         let error = pic
             .update_call(id, Principal::anonymous(), method, frame)
             .await
-            .map_err(super::rejection)
             .unwrap_err();
         assert_eq!(error.reject_code, RejectCode::CanisterError);
         assert!(
@@ -152,7 +149,6 @@ pub async fn run(pic: &PocketIc, id: Principal) {
             ic_wire::native::encode_request(ENCODE_TRAP, &(), REQUEST).unwrap(),
         )
         .await
-        .map_err(super::rejection)
         .unwrap_err();
     assert_eq!(error.reject_code, RejectCode::CanisterError);
     assert!(

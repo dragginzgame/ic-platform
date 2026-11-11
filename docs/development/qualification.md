@@ -548,21 +548,24 @@ Platform release admission never selects a downstream scheduler. Singleton
 refusal remains covered by the independent executor guard fixtures.
 
 Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
-`IC_TESTKIT_POCKET_IC_URL`. Owned native fixtures select published Testkit 0.92
-and its async-only client. Each executable owns one current-thread Tokio runtime
+`IC_TESTKIT_POCKET_IC_URL`. Owned native fixtures select published Testkit 0.100.2
+and its re-export of upstream PocketIC's async client. Each executable owns one current-thread Tokio runtime
 for the complete scenario, awaits network/lifecycle operations and explicitly
 awaits instance teardown before releasing its managed server. Client requests
-have an explicit 60-second finite budget, separate from the 60-second startup
-budget. The benchmark and Agent fixtures use the same catalog selections; Tokio
+select upstream's 60-second request-polling limit, separate from the 60-second
+startup deadline. This is not an absolute HTTP/body deadline. The benchmark and Agent fixtures use the same catalog selections; Tokio
 is a native fixture dependency and never enters the canister graph.
-The harness retains Testkit's bounded startup and
-teardown. It never installs a server implicitly. Artifacts, sources and metadata
+The harness retains Testkit's bounded startup and upstream best-effort instance
+deletion. Transport panics propagate; returned canister rejections retain upstream
+identity. It never installs a server implicitly. Artifacts, sources and metadata
 remain in `target/cdk-runtime.*`. Normal runs use the maintained frozen selection
 in `scripts/fixtures/cdk-runtime/Cargo.lock`. Explicit `--refresh-lock` is a
 reviewed dependency refresh that preserves existing foreign pins and resolves
 necessary manifest changes, not normal validation. Release metadata rendering
 runs that same operation offline inside its transaction; the native Testkit
-supplier may retain an inactive registry Runtime after a minor owner bump.
+supplier no longer retains an older Platform client implementation. The independent
+BLS benchmark lock also belongs to the release metadata transaction: local product
+identities advance while its exact registry comparison baseline remains fixed.
 Prepared graph checks still require the sole enabled canister executor.
 `--build-only` compiles both
 protocol selections without starting a server. Runtime qualification remains an

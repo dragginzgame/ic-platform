@@ -39,20 +39,19 @@ async fn measure() {
             (Some(server), url)
         }
     };
-    let pic = PocketIcBuilder::new(timeout)
+    let pic = PocketIcBuilder::new()
+        .with_max_request_time_ms(Some(timeout.as_millis().try_into().unwrap()))
         .with_server_url(url.parse().unwrap())
         .with_application_subnet()
-        .build()
-        .await
-        .unwrap();
+        .build_async()
+        .await;
     println!("variant\tmethod\tcase\tsample\tinstructions");
     for (variant, path) in ["baseline", "candidate"].into_iter().zip(paths) {
         for method in ["verify_once", "verify_cached"] {
-            let canister = pic.create_canister().await.unwrap();
-            pic.add_cycles(canister, 20_000_000_000_000).await.unwrap();
+            let canister = pic.create_canister().await;
+            pic.add_cycles(canister, 20_000_000_000_000).await;
             pic.install_canister(canister, std::fs::read(&path).unwrap(), vec![], None)
-                .await
-                .unwrap();
+                .await;
             let input = request(7, b"independent-bls-wrapper-benchmark");
             for sample in 0..6 {
                 let output = pic
@@ -96,6 +95,6 @@ async fn measure() {
             }
         }
     }
-    pic.drop().await.unwrap();
+    pic.drop().await;
     drop(server);
 }

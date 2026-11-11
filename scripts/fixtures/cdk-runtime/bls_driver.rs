@@ -28,13 +28,13 @@ async fn run_fixture() {
     let mut request = [signature, public].concat();
     request.extend_from_slice(b"platform-signature");
     let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
-    let pic = builder.with_application_subnet().build().await.unwrap();
+    let pic = builder.with_application_subnet().build_async().await;
     println!("variant\tcase\tsample\tinstructions");
     while let Some(variant) = args.next() {
         let wasm = std::fs::read(args.next().expect("Wasm path")).unwrap();
-        let id = pic.create_canister().await.unwrap();
-        pic.add_cycles(id, 10_000_000_000_000).await.unwrap();
-        pic.install_canister(id, wasm, vec![], None).await.unwrap();
+        let id = pic.create_canister().await;
+        pic.add_cycles(id, 10_000_000_000_000).await;
+        pic.install_canister(id, wasm, vec![], None).await;
         // Updates retain the prepared-generator cache; queries do not commit it.
         for sample in 0..6 {
             let result = pic
@@ -81,6 +81,6 @@ async fn run_fixture() {
             );
         }
     }
-    pic.drop().await.unwrap();
+    pic.drop().await;
     drop(server);
 }

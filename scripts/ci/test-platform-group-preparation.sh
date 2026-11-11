@@ -151,6 +151,13 @@ for group in "${groups[@]}"; do
         all((. - $before[0])[];
             .version == $previous and (.name as $name | $members | index($name)) != null)
     ' "$fixture/foreign-after.json" > /dev/null
+    # The independent benchmark's exact registry baseline is historical, while
+    # its local candidate identity must follow every prepared product version.
+    cargo metadata --manifest-path qualification/Cargo.toml --locked --offline --format-version 1 > "$fixture/$group-qualification.json"
+    jq -e --argjson members "$selected_members" --arg version "$next" '
+        all(.packages[] | select(.source == null) |
+            select(.name as $name | $members | index($name)); .version == $version)
+    ' "$fixture/$group-qualification.json" > /dev/null
     # Use real prepared metadata when group versions differ; the selected batch
     # must use each package's own identity, never the facade's workspace version.
     cargo metadata --no-deps --offline --locked --format-version 1 > "$fixture/$group-publication-metadata.json"

@@ -18,8 +18,9 @@ historical selections and consumer observations, not current dependency claims.
 
 The root workspace retains five product packages and three Rust release groups.
 No package has default features. Runtime macros/guard release with Runtime;
-Types and the facade release independently. Testkit's PocketIC client belongs to
-IC Tooling. The former native Profiler provider is retired here.
+Types and the facade release independently. IC Tooling's Testkit re-exports its
+upstream PocketIC client; Platform fixtures select Testkit 0.100.2. The former
+native Profiler provider is retired here.
 
 ## Current external boundaries
 
@@ -162,11 +163,11 @@ facade README feature table. Package release versions are represented as
 | ic-platform | serde_json | ^1.0 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform | toko-tooling | =0.39.10 | dev | all | false | true |  |
+| ic-platform | toko-tooling | =0.39.12 | dev | all | false | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^3 | normal | all | false | true | full |
-| ic-platform-macros | toko-tooling | =0.39.10 | dev | all | false | true |  |
+| ic-platform-macros | toko-tooling | =0.39.12 | dev | all | false | true |  |
 | ic-platform-runtime | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform-runtime | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform-runtime | ic-platform-types | workspace-owned | normal | all | true | false |  |
@@ -176,8 +177,8 @@ facade README feature table. Package release versions are represented as
 | ic-platform-runtime | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-runtime | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform-runtime | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform-runtime | toko-tooling | =0.39.10 | dev | all | false | true |  |
-| ic-platform-runtime-guard | toko-tooling | =0.39.10 | dev | all | false | true |  |
+| ic-platform-runtime | toko-tooling | =0.39.12 | dev | all | false | true |  |
+| ic-platform-runtime-guard | toko-tooling | =0.39.12 | dev | all | false | true |  |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | false | alloc |
 | ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert |
@@ -189,5 +190,5 @@ facade README feature table. Package release versions are represented as
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-types | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
-| ic-platform-types | toko-tooling | =0.39.10 | dev | all | false | true |  |
+| ic-platform-types | toko-tooling | =0.39.12 | dev | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->

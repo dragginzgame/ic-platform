@@ -33,17 +33,16 @@ fn main() {
 
 async fn run() {
     let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
-    let pic = builder.with_application_subnet().build().await.unwrap();
+    let pic = builder.with_application_subnet().build_async().await;
     let args: Vec<_> = std::env::args().skip(1).collect();
     assert!(args.len().is_multiple_of(3));
     println!("arm\tprofile\tsample\tinstructions");
     for [arm, profile, path] in args.as_chunks::<3>().0 {
         let request = input(profile);
-        let id = pic.create_canister().await.unwrap();
-        pic.add_cycles(id, 10_000_000_000_000).await.unwrap();
+        let id = pic.create_canister().await;
+        pic.add_cycles(id, 10_000_000_000_000).await;
         pic.install_canister(id, std::fs::read(path).unwrap(), vec![], None)
-            .await
-            .unwrap();
+            .await;
         for sample in 0..4 {
             let response = pic
                 .update_call(id, CanisterId::anonymous(), "measure", request.clone())
@@ -58,6 +57,6 @@ async fn run() {
             println!("{arm}\t{profile}\t{sample}\t{instructions}");
         }
     }
-    pic.drop().await.unwrap();
+    pic.drop().await;
     drop(server);
 }

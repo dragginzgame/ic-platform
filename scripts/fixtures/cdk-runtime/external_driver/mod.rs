@@ -9,7 +9,7 @@ pub(crate) mod contract {
         codec::arguments::encode_args(&value, 65536)
     }
 }
-use ic_testkit::pocket_ic::PocketIc;
+use ic_testkit::pocket_ic::nonblocking::PocketIc;
 const LIMITS: Limits = Limits {
     bytes: 65536,
     work: 100000,
@@ -71,7 +71,6 @@ pub async fn qualify(pic: &PocketIc, id: Principal) {
     let denied = pic
         .update_call(id, Principal::anonymous(), "external_denied", vec![0; 1025])
         .await
-        .map_err(super::rejection)
         .unwrap_err();
     assert!(denied.reject_message.contains("fixture access refused"));
     assert_eq!(observed(pic, id).await, 7);

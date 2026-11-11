@@ -149,3 +149,30 @@ normal/build feature graphs exclude upstream Candid, Principal and Agent. The
 signature-only graph also excludes IC0, Runtime and retired verifier composition.
 Schema/byte/Serde comparisons, recursive types, malformed input, limits and the
 16/17 nesting boundary remain covered.
+## Post-release cleanup
+
+The Testkit 0.100.2 adoption changes native qualification dependencies and callers,
+not production verification. The 0.31.1 hosted verification probe's +135 total /
++133 code bytes against its committed baseline remains unresolved; its 128-byte
+allowance is unchanged. No cryptographic, certificate, delegation or freshness
+check was removed.
+
+A matched `3-fat-1/verification` follow-up measured 478,049 optimized total and
+442,480 optimized code bytes for the current source. The candidate recipes below
+used that same probe, compiler, lock and optimization selection. Total sizes are
+specific to this local probe; code-section baseline matches hosted evidence.
+
+| Experiment | Optimized total delta | Optimized code delta |
+| --- | ---: | ---: |
+| Prevent certificate-helper inlining | 0 | 0 |
+| Share checked signature decoding | 0 | 0 |
+| Permit authentication inlining | 0 | 0 |
+| Specialize root-authentication callback | +27 | +27 |
+| Allocate exact-capacity signing frame | +120 | +120 |
+| Restore growable signing frame | +282 | +282 |
+
+All experiments were removed. Shared decoding saved 35 raw bytes but did not
+improve the optimized artifact. Evidence remains under `target/evidence/`:
+`platform-wasm-size.JXhGvx` (baseline), `.1Y1J6Y`, `.2AMaMf`, `.9L0oja`,
+`.TXYc5A`, `.sncs8Y` and `.iXLTBT` respectively. Future work needs another
+measured approach; these results do not justify a threshold increase.

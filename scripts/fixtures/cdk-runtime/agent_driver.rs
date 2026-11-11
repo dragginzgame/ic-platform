@@ -15,11 +15,10 @@ async fn run_fixture() {
     let mut pic = builder
         .with_nns_subnet()
         .with_application_subnet()
-        .build()
-        .await
-        .unwrap();
-    let id = pic.create_canister().await.unwrap();
-    pic.add_cycles(id, 2_000_000_000_000).await.unwrap();
+        .build_async()
+        .await;
+    let id = pic.create_canister().await;
+    pic.add_cycles(id, 2_000_000_000_000).await;
     let wasm = wat::parse_str(
         r#"(module
       (import "ic0" "msg_arg_data_size" (func $size (result i32)))
@@ -36,9 +35,9 @@ async fn run_fixture() {
     )"#,
     )
     .unwrap();
-    pic.install_canister(id, wasm, vec![], None).await.unwrap();
-    let root = pic.root_key().await.unwrap().unwrap();
-    let endpoint = pic.make_live(None).await.unwrap();
+    pic.install_canister(id, wasm, vec![], None).await;
+    let root = pic.root_key().await.unwrap();
+    let endpoint = pic.make_live(None).await;
     let root_identity = BasicIdentity::from_raw_key(&[7; 32]);
     let session = BasicIdentity::from_raw_key(&[8; 32]);
     let delegation = Delegation {
@@ -110,7 +109,7 @@ async fn run_fixture() {
         agent.set_root_key(vec![0; 133]);
         assert!(agent.verify(&certificate, id).is_err());
     }
-    pic.drop().await.unwrap();
+    pic.drop().await;
     drop(server);
     println!(
         "Installed Agent: verified queries, update-and-wait, read-state and wrong-root refusal passed for Ed25519, delegated, P-256 and secp256k1 identities."

@@ -1,9 +1,9 @@
 //! Opt-in instruction measurements of matched Platform size probes.
 use ic_testkit::pocket_ic::CanisterId as Principal;
-use ic_testkit::pocket_ic::PocketIc;
+use ic_testkit::pocket_ic::nonblocking::PocketIc;
 
 pub async fn run(pic: &PocketIc, id: Principal, wasm: Vec<u8>, mode: &str) {
-    pic.install_canister(id, wasm, vec![], None).await.unwrap();
+    pic.install_canister(id, wasm, vec![], None).await;
     match mode {
         "system" => {
             for count in [1_u32, 32] {
@@ -21,7 +21,7 @@ pub async fn run(pic: &PocketIc, id: Principal, wasm: Vec<u8>, mode: &str) {
                     let instructions = u64::from_le_bytes(instructions.try_into().unwrap());
                     match method {
                         "system_root_key" => {
-                            assert_eq!(bytes, pic.root_key().await.unwrap().unwrap())
+                            assert_eq!(bytes, pic.root_key().await.unwrap())
                         }
                         _ => {
                             ic_platform::certification::cbor::decode_certificate(

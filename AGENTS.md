@@ -242,8 +242,8 @@ supported distribution mechanism for downstream consumers.
 
 The owned runtime RejectCode similarly replaces only its external catalogue
 dependency; Agent codes retain their external identity. PocketIC catalog
-declarations now belong to the approved native implementation, preserving their
-numeric and protocol names.
+declarations retain the upstream identities exposed through Testkit's native
+re-export; do not recreate them in Platform.
 
 ## Independent Runtime owner (#131)
 
@@ -272,6 +272,8 @@ conversions, bytes, Serde and provenance remain with their current owners.
 
 Owned DTOs and callbacks use canonical Types Principal and the owned Candid
 codec. `principal-external` and external aliases/conversions remain retired.
+This product restriction does not prohibit native simulator handles or explicit
+validated-byte conversions at the qualification boundary described below.
 The maintainer authorized owning self-authentication framing: SHA-224 of the
 supplied bytes followed by `0x02`, with no new key parsing or validation.
 Only `principal-self-authenticating` selects upstream `sha2` 0.11 without defaults.
@@ -346,12 +348,15 @@ source; future provider ownership and adoption belong outside this repository.
 This retirement grants no permission to remove crypto or runtime qualifications
 for the maintained Rust packages. No Python tooling remains owned here.
 
-The maintainer authorized transferring the maintained PocketIC 16.1 client to
-Tooling’s existing `ic-testkit::pocket_ic` module (#139 / Tooling #324). Preserve
-the historical ledger; no client package, release group, facade feature or
-forwarder remains here. Platform’s development fixtures select the exact Testkit
-supplier. Keep normal/build dependencies directed from Testkit to Platform.
-The historical native Profiler provider was separate from this transfer.
+Native simulator fixtures consume the upstream PocketIC client through Testkit's
+`ic_testkit::pocket_ic` re-export. Its native client handles and DTOs retain
+upstream identity; application/Wire DTOs retain canonical Types Principal.
+Convert validated Principal bytes explicitly only where those boundaries meet;
+do not restore product aliases or a second client implementation. Testkit owns
+managed server setup and custody. Keep normal/build dependencies directed from
+Testkit to Platform; Platform's Testkit use remains qualification-only. Preserve
+the historical transfer ledger (#139 / Tooling #324) and the separate retired
+native Profiler provider history.
 
 ## Owned account
 

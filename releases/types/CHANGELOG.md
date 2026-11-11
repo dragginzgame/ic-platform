@@ -5,6 +5,23 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.19.4] - Unreleased
+
+### 🔧 Changed
+
+- Select Toko Tooling 0.39.12 for development and CI.
+
+### 🩹 Fixed
+
+- Include the independent benchmark lock in release metadata custody, preserving
+  foreign selections while updating any selected local Types identity.
+
+### 🧪 Testing
+
+- Review current Testkit/Toko/native helpers and explicitly defer optional Wire
+  fixture and metadata-editor upgrades to their next maintenance batches before
+  the next release freeze; see the [Platform ledger](../platform/CHANGELOG.md).
+
 ## [0.19.3] - 2026-11-11
 
 ### ⚡ Performance

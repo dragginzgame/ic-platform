@@ -4,6 +4,30 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.31.2] - Unreleased
+
+### 🔧 Changed
+
+- Select Toko Tooling 0.39.12 for development, with terminal-width-aware LOC
+  labels, an explicit wide report option and supplier freshness reviews.
+- Adopt Testkit 0.100.2 for installed qualification and benchmarks, using its
+  upstream async PocketIC re-export and preserving public identity checks.
+
+### 🩹 Fixed
+
+- Include the independent benchmark lock in release metadata transactions so
+  local product identities advance without moving the historical registry baseline.
+- Prepare the required Wasm optimizer in hosted Runtime qualification.
+
+### 🧪 Testing
+
+- Review supplier freshness before freezing this batch: Testkit 0.100.2,
+  Toko 0.39.12 and native Host helpers 0.76.4 are current. Keep the intentional
+  Platform 0.30.0 comparison baseline. Defer optional Wire 0.10/0.12.1 → 0.21.2
+  fixture migration to the next qualification-dependency maintenance batch and
+  metadata editor 0.73 → 0.83 to the next release-adapter maintenance batch;
+  revisit both selections before the next release freeze.
+
 ## [0.31.1] - 2026-11-11
 
 ### ✨ Added

@@ -15,7 +15,7 @@ esac
 # One admitted observation per command; do not resolve the same graph again to
 # project adjacent fields. Later release phases still make fresh observations.
 plan="$(bash "$helper" plan "$group")"
-required="$(jq -cn --arg group "$group" '["scripts/fixtures/cdk-runtime/Cargo.lock"] +
+required="$(jq -cn --arg group "$group" '["scripts/fixtures/cdk-runtime/Cargo.lock", "qualification/Cargo.lock"] +
     (if $group == "runtime" then ["ci/dependency-pinning-exceptions.json"] else [] end)')"
 case "$1" in
     primary|changelog|members)

@@ -167,6 +167,7 @@ check-stable-identities:
 
 .PHONY: prepare-consumer-dependencies
 prepare-consumer-dependencies:
+	cargo fetch --manifest-path qualification/Cargo.toml --locked
 	bash scripts/ci/test-stable-identities.sh --prepare
 	bash scripts/ci/test-runtime-singleton.sh --prepare
 	bash scripts/ci/check-prepared-call-consumer.sh --prepare

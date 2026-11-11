@@ -4,6 +4,25 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.21.2] - Unreleased
+
+### 🔧 Changed
+
+- Select Toko Tooling 0.39.12 for development and CI.
+- Adopt Testkit 0.100.2 for installed Runtime qualification and prepare its
+  required Wasm optimizer in hosted CI.
+
+### 🩹 Fixed
+
+- Keep the independent benchmark's local Runtime identity aligned during release
+  metadata preparation, preserving its historical registry comparison baseline.
+
+### 🧪 Testing
+
+- Review current Testkit/Toko/native helpers and explicitly defer optional Wire
+  fixture and metadata-editor upgrades to their next maintenance batches before
+  the next release freeze; see the [Platform ledger](../platform/CHANGELOG.md).
+
 ## [0.21.1] - 2026-11-10
 
 ### 🧹 Cleanup

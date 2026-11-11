@@ -21,14 +21,12 @@ pub(super) async fn execution(pic: &PocketIc, id: Principal, legacy: bool) {
             request("guarded", ()),
         )
         .await
-        .map_err(rejection)
         .unwrap_err(),
     );
     for bytes in [vec![], vec![0, 1]] {
         let error = pic
             .query_call(id, Principal::anonymous(), "scalar", bytes)
             .await
-            .map_err(rejection)
             .unwrap_err();
         // Empty input must reach the decoder, not fail in buffer initialization.
         assert!(error.reject_message.contains("fixture request:"));
@@ -58,7 +56,6 @@ pub(super) async fn execution(pic: &PocketIc, id: Principal, legacy: bool) {
             request("multiplexed_trap", ()),
         )
         .await
-        .map_err(rejection)
         .unwrap_err();
     assert_eq!(failure.reject_code, RejectCode::CanisterError);
     // The IC may report the later cancelled callback as the terminal failure.
@@ -84,7 +81,6 @@ pub(super) async fn execution(pic: &PocketIc, id: Principal, legacy: bool) {
             request("protected_pending", ())
         )
         .await
-        .map_err(rejection)
         .unwrap_err()
         .reject_message
         .contains("protected task outlived its canister method")
@@ -159,7 +155,6 @@ pub(super) async fn cycles(pic: &PocketIc, id: Principal, receiver: Principal) {
             ),
         )
         .await
-        .map_err(rejection)
         .unwrap_err();
     assert_eq!(error.reject_code, RejectCode::CanisterError);
     assert!(
@@ -184,7 +179,6 @@ pub(super) async fn stable_memory(pic: &PocketIc, receiver: Principal) {
             request("stable_value", ())
         )
         .await
-        .map_err(rejection)
         .unwrap_err()
         .reject_code,
         RejectCode::CanisterError
@@ -201,7 +195,6 @@ pub(super) async fn stable_memory(pic: &PocketIc, receiver: Principal) {
             request("stable_edit", (999u64, true, true))
         )
         .await
-        .map_err(rejection)
         .unwrap_err()
         .reject_message
         .contains("fixture stable rollback")
@@ -231,7 +224,6 @@ pub(super) async fn stable_memory(pic: &PocketIc, receiver: Principal) {
                 request("stable_bounds_trap", write),
             )
             .await
-            .map_err(rejection)
             .unwrap_err();
         assert_eq!(rejection.reject_code, RejectCode::CanisterError);
         assert!(

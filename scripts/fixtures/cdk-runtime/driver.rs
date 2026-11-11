@@ -8,7 +8,7 @@ mod wire_driver;
 mod wire_protocol;
 
 use ic_testkit::pocket_ic::CanisterId as Principal;
-use ic_testkit::pocket_ic::{PocketIc, RejectCode, RejectResponse};
+use ic_testkit::pocket_ic::{RejectCode, RejectResponse, nonblocking::PocketIc};
 use protocol::{LIMITS, method_id};
 use serde::{Serialize, de::DeserializeOwned};
 use std::time::Duration;
@@ -48,12 +48,6 @@ async fn update<R: DeserializeOwned>(
             .unwrap(),
     )
 }
-fn rejection(error: ic_testkit::pocket_ic::ClientError) -> RejectResponse {
-    match error {
-        ic_testkit::pocket_ic::ClientError::Canister(rejection) => rejection,
-        other => panic!("expected canister rejection, got {other}"),
-    }
-}
 
 fn assert_guard_rejection(error: &RejectResponse) {
     assert_eq!(error.reject_code, RejectCode::CanisterReject);
@@ -80,39 +74,37 @@ async fn run_fixture() {
     } else {
         builder
     };
-    let instance = builder.build().await.unwrap();
+    let instance = builder.build_async().await;
     let pic = &instance;
-    let id = pic.create_canister().await.unwrap();
-    pic.add_cycles(id, 10_000_000_000_000).await.unwrap();
+    let id = pic.create_canister().await;
+    pic.add_cycles(id, 10_000_000_000_000).await;
     if let Ok(mode) = std::env::var("PLATFORM_CODEC_BENCHMARK") {
         benchmarks::run(pic, id, wasm, &mode).await;
-        instance.drop().await.unwrap();
+        instance.drop().await;
         drop(server);
         return;
     }
     pic.install_canister(id, wasm.clone(), request("initialize", 10u64), None)
-        .await
-        .unwrap();
+        .await;
     if std::env::var_os("PLATFORM_EXECUTOR_BENCHMARK").is_some() {
         wire_driver::benchmark_fanout(pic, id).await;
-        instance.drop().await.unwrap();
+        instance.drop().await;
         drop(server);
         return;
     }
     let measure_copies = std::env::var_os("PLATFORM_BUFFER_COPY_BENCHMARK").is_some();
     benchmarks::buffer_copy(pic, id, measure_copies).await;
     if measure_copies {
-        instance.drop().await.unwrap();
+        instance.drop().await;
         drop(server);
         return;
     }
     driver_scenarios::execution(pic, id, legacy).await;
     driver_scenarios::upgrade(pic, id, wasm.clone(), legacy).await;
-    let receiver = pic.create_canister().await.unwrap();
-    pic.add_cycles(receiver, 10_000_000_000_000).await.unwrap();
+    let receiver = pic.create_canister().await;
+    pic.add_cycles(receiver, 10_000_000_000_000).await;
     pic.install_canister(receiver, wasm, request("initialize", 0u64), None)
-        .await
-        .unwrap();
+        .await;
     assert_eq!(update::<u64>(pic, id, "cancel_task", ()).await, 2);
     driver_scenarios::cycles(pic, id, receiver).await;
     driver_scenarios::stable_memory(pic, receiver).await;
@@ -124,6 +116,6 @@ async fn run_fixture() {
     println!(
         "Runtime: Wire RPCs, raw awaits, trap cleanup, upgrade, cycles, stable rollback and certificates passed (external Candid: {legacy})"
     );
-    instance.drop().await.unwrap();
+    instance.drop().await;
     drop(server);
 }

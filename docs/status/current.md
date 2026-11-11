@@ -1,8 +1,8 @@
 # Current handoff — 2026-11-11
 
-## Pending audit improvements
+## Delivered audit improvements
 
-The post-0.31 audit is committed as `5a6a155`, not yet published. Codec
+Platform 0.31.1 publishes the post-0.31 audit (`5a6a155`, corrected by `eb98320`). Codec
 bulk-byte/bigint encoding, schema-buffer reuse, prepared-root signature APIs,
 fixed certificate framing and 22 order-compatible management declarations are
 qualified by focused Clippy, 109 tests, matched Wasm sizes and installed instruction
@@ -12,40 +12,64 @@ preserved. See the [audit report](../benchmarks/platform-031-audit.md) for gains
 small regressions, memory tradeoffs, exact recipes and retained evidence.
 No Runtime, Types, browser or sibling release is part of this work.
 
-Frozen batch `batch-uCPG6Jvb` stopped before release preparation/publication at
-`check-features`: a stale exact feature assertion still required removed `leb128`.
-The assertion and reintroduction regressions are corrected for a fresh batch.
-Preserve its `qualification.5kqUXx` evidence; do not resume that frozen source.
-
 ## Published state
 
-Toko 0.39.10 is installed; compiler is 1.99.1. Both authorized Rust releases
+Toko 0.39.12 is installed; compiler is 1.99.1. The listed Rust releases
 are available on crates.io, not yanked, and delivered to GitHub:
 
 | Group | Version | Commit | Tag | Frozen batch / local receipt |
 |---|---|---|---|---|
 | Types | 0.19.3 | `78548132b1a160894d4053510bd3b3c756283f39` | `types-v0.19.3` | `batch-1kF9qOrj` / `qualification.uqEkUL` |
-| Platform | 0.31.0 | `52e6af66c9183f4f0dc777e7290b445738b7bed5` | `platform-v0.31.0` | `batch-JYb8Sz5n` / `qualification.Kk5l7p` |
+| Platform | 0.31.1 | `5b6b761df8a029da7411e10aec3e29c97d490bad` | `platform-v0.31.1` | `batch-CqtVCFiE` / `qualification.haDuvA` |
 
 Both groups passed all 19 required local stages, including Clippy, product tests,
 consumer/feature graphs, Wasm builds and installed Runtime qualification. Each
 publication verified its package archive. Platform's published Types requirement
 is `^0.19.3`. Different increments used separate sequential frozen batches; both
 were reconciled into the ordinary checkout. The private benchmark lock then
-received only the local Platform 0.30 → 0.31 identity update; its registry baseline
+received only the local Platform 0.31.0 → 0.31.1 identity update; its registry baseline
 remains exactly 0.30.0. Runtime/macros/guard remain 0.21.1; browser remains 0.2.0.
 
-No Testkit or other sibling source/release work was included. Platform's native
-fixtures still use Testkit 0.92 and do not establish adoption of Tooling's newer
-client. The maintainer explicitly excluded Testkit delivery from this task.
+Hosted release CI has completed. [Native CI](https://github.com/dragginzgame/ic-platform/actions/runs/43024528840)
+failed at `check-release-commands` on Linux and both macOS hosts; the underlying
+exit 101 remains to be diagnosed. [Installed runtime](https://github.com/dragginzgame/ic-platform/actions/runs/43024528557)
+failed because `check-platform-raw-rand.sh` could not find `ic-wasm`.
+[Browser](https://github.com/dragginzgame/ic-platform/actions/runs/43024528522)
+passed. Local Linux passes do not establish fresh native macOS acceptance.
+[Advisories](https://github.com/dragginzgame/ic-platform/actions/runs/43024528517)
+failed on crypto-bigint 0.5.5 / RUSTSEC-2026-0387; #50 remains explicitly deferred.
 
-Hosted CI remains asynchronous. At release handoff, [native CI](https://github.com/dragginzgame/ic-platform/actions/runs/43007090463),
-[installed runtime](https://github.com/dragginzgame/ic-platform/actions/runs/43007090369),
-[Wasm size](https://github.com/dragginzgame/ic-platform/actions/runs/43007090614),
-[browser](https://github.com/dragginzgame/ic-platform/actions/runs/43007090659) and
-[advisories](https://github.com/dragginzgame/ic-platform/actions/runs/43007090677)
-were in progress. Local Linux passes do not establish fresh native macOS or real
-browser acceptance. #50 remains deferred at the maintainer's explicit request.
+The [Wasm comparison](https://github.com/dragginzgame/ic-platform/actions/runs/43024528679)
+failed against `fc55ae12184f9c21b1b0c23a4004cde150edf87d`: ordinary verification's
+optimized total grew 477,858 → 477,993 bytes (+135), code 442,347 → 442,480 (+133),
+exceeding the unchanged 128-byte allowance. Raw total/code grew +123/+121 bytes.
+The other four profiles were unchanged; all 12 harness tests passed. This is a
+measured regression, not a setup failure, and remains unresolved after publication.
+
+## Pending development cleanup
+
+Both workspaces select published Toko 0.39.12. Authenticated preview/install
+retained all 96 managed files and existing entrypoints. The prior refresh
+updated the LOC reporter; 0.39.12 updates the baseline and receipt. Compact, wide and JSON reports pass against
+this repository; snapshot verification passes. No unrelated registry selections
+changed; the private lock's existing local Platform 0.31.1 update is preserved.
+The baseline adds explicit supplier freshness reviews; detailed policy links
+retain their reviewed revision. This adoption is local,
+uncommitted and unpublished; no product release was requested.
+
+Testkit 0.100.2 is now selected in both catalogs and the maintained Runtime lock.
+Drivers use its upstream async client; old ClientError conversions are removed.
+Platform 0.24 is gone from qualification, while the intentional BLS 0.30 baseline
+remains. Native upstream dependencies increase; this is not a Wasm-size saving.
+Clippy/build checks pass for the private BLS example, runtime/Agent callers and
+all four benchmark drivers. Installed raw/prepared × Wire/external-Candid passes
+at `target/cdk-runtime.pMn8Ou`; raw_rand at `target/evidence/raw-rand.vBgXfS` and
+Agent identity/wrong-root proofs at `target/agent-installed.Q0rdFS` also pass.
+All three focused release-preparation fixtures pass with the independent benchmark
+lock in the metadata transaction; exact baseline and foreign pins are retained.
+Hosted Runtime now prepares ic-wasm; fresh hosted/macOS qualification is pending.
+Verification-size experiments were rejected and source restored unchanged; see
+the [audit follow-up](../benchmarks/platform-031-audit.md#post-release-cleanup).
 
 ## Delivered contracts
 
@@ -90,7 +114,12 @@ Scheduling owns Timers composition; this repository adds no scheduler dependency
 
 ## Recovery custody
 
-Keep completed batches above and earlier `batch-Y0aGfmfa`, `batch-VMBGwxm7` and
+Frozen `batch-uCPG6Jvb` stopped before preparation/publication at `check-features`:
+a stale exact assertion required removed `leb128`. `eb98320` corrected admission
+and added reintroduction tests; fresh `batch-CqtVCFiE` passed all 19 stages.
+Preserve failed receipt `qualification.5kqUXx`; do not resume that frozen source.
+
+Keep completed batches above and earlier `batch-JYb8Sz5n`, `batch-Y0aGfmfa`, `batch-VMBGwxm7` and
 `batch-nUsSSjzc`, with their journals, candidate archives and qualification receipts.
 Durable records are under `.git/release-state/frozen/`; candidates/evidence remain
 under `target/release-frozen/`. Do not resume old batches over published versions.

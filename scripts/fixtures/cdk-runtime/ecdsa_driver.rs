@@ -40,14 +40,14 @@ async fn run_fixture() {
     cases.push(("long-signature", extended, 0));
 
     let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
-    let pic = builder.with_application_subnet().build().await.unwrap();
+    let pic = builder.with_application_subnet().build_async().await;
     println!("backend\tcase\tsample\tinstructions");
     let mut args = std::env::args().skip(1);
     while let Some(backend) = args.next() {
         let wasm = std::fs::read(args.next().expect("Wasm path")).unwrap();
-        let id = pic.create_canister().await.unwrap();
-        pic.add_cycles(id, 10_000_000_000_000).await.unwrap();
-        pic.install_canister(id, wasm, vec![], None).await.unwrap();
+        let id = pic.create_canister().await;
+        pic.add_cycles(id, 10_000_000_000_000).await;
+        pic.install_canister(id, wasm, vec![], None).await;
         for (name, request, expected) in &cases {
             for sample in 0..3 {
                 let result = pic
@@ -63,7 +63,7 @@ async fn run_fixture() {
             }
         }
     }
-    pic.drop().await.unwrap();
+    pic.drop().await;
     drop(server);
 }
 

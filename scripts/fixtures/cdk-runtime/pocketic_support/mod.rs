@@ -27,6 +27,8 @@ pub fn builder(timeout: Duration) -> (Option<PocketIcManagedServer>, PocketIcBui
     };
     (
         server,
-        PocketIcBuilder::new(timeout).with_server_url(url.parse().unwrap()),
+        PocketIcBuilder::new()
+            .with_max_request_time_ms(Some(timeout.as_millis().try_into().unwrap()))
+            .with_server_url(url.parse().unwrap()),
     )
 }

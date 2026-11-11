@@ -20,7 +20,8 @@ add('macros', 'ic-platform-macros', true);
 add('guard', 'ic-platform-runtime-guard', true);
 add('agent', 'ic-agent', false, ['principal']);
 add('principal', 'ic_principal', false);
-add('testkit', 'ic-testkit', false, ['old-platform', 'management']);
+add('testkit', 'ic-testkit', false, ['client']);
+add('client', 'pocket-ic', false, ['management', 'candid']);
 add('old-platform', 'ic-platform', false, ['old-types']);
 add('old-types', 'ic-platform-types', false);
 add('management', 'ic-management-canister-types', false, ['candid']);
@@ -39,7 +40,9 @@ reject() {
 }
 check "$tmp/base.json" > "$tmp/report.json"
 jq -e '.selected_owners | length == 5' "$tmp/report.json" >/dev/null
-jq -e '.infrastructure[0].platform_owners[0].source != null and (.public_type_crossings | length == 1)' "$tmp/report.json" >/dev/null
+jq -e '(.infrastructure[0].platform_owners | length == 0) and (.public_type_crossings | length == 1)' "$tmp/report.json" >/dev/null
+jq '(.resolve.nodes[] | select(.id == "testkit").deps) = []' "$tmp/base.json" > "$tmp/case.json"
+reject
 jq '(.packages[] | select(.id == "platform").manifest_path) = "/wrong/Cargo.toml"' "$tmp/base.json" > "$tmp/case.json"
 reject
 jq '(.packages[] | select(.id == "platform").source) = "registry+https://github.com/rust-lang/crates.io-index"' "$tmp/base.json" > "$tmp/case.json"

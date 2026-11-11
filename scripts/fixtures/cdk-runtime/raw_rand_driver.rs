@@ -10,13 +10,12 @@ fn main() {
 
 async fn run() {
     let (server, builder) = pocketic_support::builder(Duration::from_secs(60));
-    let pic = builder.with_application_subnet().build().await.unwrap();
+    let pic = builder.with_application_subnet().build_async().await;
     for path in std::env::args().skip(1) {
-        let id = pic.create_canister().await.unwrap();
-        pic.add_cycles(id, 10_000_000_000_000).await.unwrap();
+        let id = pic.create_canister().await;
+        pic.add_cycles(id, 10_000_000_000_000).await;
         pic.install_canister(id, std::fs::read(&path).unwrap(), vec![], None)
-            .await
-            .unwrap();
+            .await;
         for _ in 0..3 {
             let bytes = pic
                 .update_call(id, Principal::anonymous(), "entropy", vec![0])
@@ -69,6 +68,6 @@ async fn run() {
             "{path}: raw_rand producer bytes, structured rejection, callback-trap cleanup, cancellation and subsequent call passed"
         );
     }
-    pic.drop().await.unwrap();
+    pic.drop().await;
     drop(server);
 }
