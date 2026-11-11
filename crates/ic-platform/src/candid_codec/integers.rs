@@ -10,11 +10,7 @@ impl Encode for BigUint {
         if count > output.limit.saturating_sub(output.bytes.len()) {
             return Err(Error::Limit);
         }
-        let digits = self.to_radix_le(128);
-        for (index, digit) in digits.iter().enumerate() {
-            output.bytes(&[digit | if index + 1 == digits.len() { 0 } else { 128 }])?;
-        }
-        Ok(())
+        write_digits(self.to_radix_le(128), output)
     }
 }
 impl Encode for BigInt {
@@ -27,11 +23,11 @@ impl Encode for BigInt {
         if lower > output.limit.saturating_sub(output.bytes.len()) {
             return Err(Error::Limit);
         }
-        let mut magnitude = self.magnitude().clone();
-        if negative {
-            magnitude -= 1u8;
-        }
-        let mut digits = magnitude.to_radix_le(128);
+        let mut digits = if negative {
+            (self.magnitude() - 1u8).to_radix_le(128)
+        } else {
+            self.magnitude().to_radix_le(128)
+        };
         if negative {
             for digit in &mut digits {
                 *digit ^= 127;
@@ -40,11 +36,17 @@ impl Encode for BigInt {
         if (digits.last().copied().unwrap_or(0) & 64 != 0) != negative {
             digits.push(if negative { 127 } else { 0 });
         }
-        for (index, digit) in digits.iter().enumerate() {
-            output.bytes(&[digit | if index + 1 == digits.len() { 0 } else { 128 }])?;
-        }
-        Ok(())
+        write_digits(digits, output)
     }
+}
+
+fn write_digits(mut digits: Vec<u8>, output: &mut Writer) -> Result<(), Error> {
+    if let Some((_, preceding)) = digits.split_last_mut() {
+        for digit in preceding {
+            *digit |= 128;
+        }
+    }
+    output.bytes(&digits)
 }
 
 #[cfg(test)]

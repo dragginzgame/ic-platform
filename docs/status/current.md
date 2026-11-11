@@ -1,5 +1,17 @@
 # Current handoff — 2026-11-11
 
+## Pending audit improvements
+
+The post-0.31 audit is implemented locally, not committed or published. Codec
+bulk-byte/bigint encoding, schema-buffer reuse, prepared-root signature APIs,
+fixed certificate framing and 22 order-compatible management declarations are
+qualified by focused Clippy, 109 tests, matched Wasm sizes and installed instruction
+comparisons. The direct-map experiment was rejected for its throughput regression;
+the original decoder/budgets remain. The separate unused `leb128` cleanup is
+preserved. See the [audit report](../benchmarks/platform-031-audit.md) for gains,
+small regressions, memory tradeoffs, exact recipes and retained evidence.
+No Runtime, Types, browser or sibling release is part of this work.
+
 ## Published state
 
 Toko 0.39.10 is installed; compiler is 1.99.1. Both authorized Rust releases

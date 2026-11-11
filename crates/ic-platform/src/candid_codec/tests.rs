@@ -2,6 +2,32 @@ use super::*;
 use candid as reference;
 mod comparison;
 
+#[test]
+fn bulk_bytes_preserve_container_framing_and_custom_element_mappings() {
+    struct Inverted(u8);
+    impl Encode for Inverted {
+        const TYPE: &'static Type = u8::TYPE;
+        fn write(&self, output: &mut Writer) -> Result<(), Error> {
+            (!self.0).write(output)
+        }
+    }
+    let array = [0, 127, 128, 255];
+    let expected = reference::encode_one(array).unwrap();
+    for actual in [
+        encode_one(&array, expected.len()),
+        encode_one(array.as_slice(), expected.len()),
+        encode_one(&array.to_vec(), expected.len()),
+        encode_one(&array.map(|byte| Inverted(!byte)), expected.len()),
+    ] {
+        assert_eq!(actual, Ok(expected.clone()));
+    }
+    assert_eq!(encode_one(&array, expected.len() - 1), Err(Error::Limit));
+    assert_eq!(
+        encode_one(&Vec::<u8>::new(), 10).unwrap(),
+        b"DIDL\x01\x6d\x7b\x01\x00\x00"
+    );
+}
+
 fn compare<T>(value: &T)
 where
     T: Encode

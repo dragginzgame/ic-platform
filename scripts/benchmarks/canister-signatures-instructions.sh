@@ -35,6 +35,7 @@ category = "benchmarks"
 crate-type = ["cdylib"]
 [features]
 owned = ["dep:ic-platform", "ic-platform/signature-verification"]
+owned-prepared = ["owned"]
 reference = ["dep:ic-canister-sig-creation", "dep:ic-signature-verification"]
 reference-admitted = ["dep:ic-canister-sig-creation", "dep:ic-signature-verification", "dep:ic-certification", "dep:ic_bls12_381", "dep:serde", "dep:serde_bytes", "dep:serde_cbor"]
 [dependencies]
@@ -60,15 +61,19 @@ if [[ -n "${POCKET_IC_BIN:-}" ]]; then
     "$POCKET_IC_BIN" --version > "$output/server-version.txt"
     sha256sum "$POCKET_IC_BIN" > "$output/server.sha256"
 fi
-for variant in owned reference reference-admitted; do
+variants="${SIGNATURE_BENCH_VARIANTS:-owned reference reference-admitted}"
+driver_args=()
+for variant in $variants; do
+    case "$variant" in owned|owned-prepared|reference|reference-admitted) ;;
+        *) echo "Unknown signature variant: $variant" >&2; exit 2 ;; esac
     cargo metadata --offline --locked --manifest-path "$output/probe/Cargo.toml" --features "$variant" --format-version 1 > "$output/$variant.metadata.json"
     required=ic-platform-runtime
-    [[ "$variant" != owned ]] || required=ic-platform,ic-platform-runtime
+    [[ "$variant" != owned* ]] || required=ic-platform,ic-platform-runtime
     bash "$root/scripts/ci/check-qualification-identities.sh" "$output/$variant.metadata.json" "$root" \
         platform-signature-instructions-probe "$required" > "$output/$variant.identities.json"
     cargo tree --offline --locked --manifest-path "$output/probe/Cargo.toml" --target wasm32-unknown-unknown \
         --features "$variant" --edges normal,build --prefix none > "$output/$variant.graph"
-    if [[ "$variant" == owned ]] && grep -Eq '^(candid|ic_principal|ic-canister-sig-creation|ic-signature-verification|ic-verify-bls-signature) v' "$output/$variant.graph"; then
+    if [[ "$variant" == owned* ]] && grep -Eq '^(candid|ic_principal|ic-canister-sig-creation|ic-signature-verification|ic-verify-bls-signature) v' "$output/$variant.graph"; then
         echo 'Owned benchmark acquired a retired signature dependency' >&2; exit 1
     fi
     cargo clippy --offline --locked --manifest-path "$output/probe/Cargo.toml" --target wasm32-unknown-unknown \
@@ -78,6 +83,7 @@ for variant in owned reference reference-admitted; do
     cp "$output/probe/target/wasm32-unknown-unknown/release/platform_signature_instructions_probe.wasm" "$output/$variant.raw.wasm"
     ic-wasm "$output/$variant.raw.wasm" -o "$output/$variant.wasm" shrink > "$output/$variant.optimizer.log" 2>&1
     sha256sum "$output/$variant.wasm" >> "$output/artifacts.sha256"
+    driver_args+=("$variant" "$output/$variant.wasm")
 done
 # shellcheck source=scripts/benchmarks/driver.sh
 source "$root/scripts/benchmarks/driver.sh"
@@ -87,7 +93,6 @@ sha256sum "$root/Cargo.toml" "$root/Cargo.lock" "$root/crates/ic-platform/Cargo.
     "$root/crates/ic-platform/src/canister_sig_creation/mod.rs" \
     "$root/crates/ic-platform/src/signature_verification/mod.rs" \
     "$output/probe/src/"* "$output/probe/Cargo.toml" "$output/probe/Cargo.lock" > "$output/inputs.sha256"
-"$driver" owned "$output/owned.wasm" reference "$output/reference.wasm" \
-    reference-admitted "$output/reference-admitted.wasm" > "$output/instructions.tsv"
+"$driver" "${driver_args[@]}" > "$output/instructions.tsv"
 cat "$output/instructions.tsv"
 printf 'Evidence: %s\n' "$output"

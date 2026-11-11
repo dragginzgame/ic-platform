@@ -4,7 +4,17 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 baseline="$(git -C "$root" rev-parse --verify "${1:-97fe286}^{commit}")"
+baseline_codec="${CANDID_BASELINE_CODEC:-upstream}"
+case "$baseline_codec" in upstream|owned) ;; *) echo 'CANDID_BASELINE_CODEC must be upstream or owned' >&2; exit 2 ;; esac
 profiles="${CANDID_COMPARISON_PROFILES:-management}"
+measure="${CANDID_MEASURE_INSTRUCTIONS:-0}"
+case "$measure" in 0|1) ;; *) echo 'CANDID_MEASURE_INSTRUCTIONS must be 0 or 1' >&2; exit 2 ;; esac
+if [[ "$measure" == 1 ]]; then
+    [[ -n "${POCKET_IC_BIN:-}${IC_TESTKIT_POCKET_IC_URL:-}" ]] || {
+        echo 'Select an explicitly prepared Testkit server first' >&2; exit 1;
+    }
+    make -C "$root" toko-tooling-check
+fi
 for profile in $profiles; do
     case "$profile" in management|blob|words|options|map|records|bigints) ;;
         *) echo "Unknown comparison profile: $profile" >&2; exit 2 ;; esac
@@ -20,6 +30,7 @@ rustc "+$toolchain" -vV > "$output/compiler.txt"
 ic-wasm --version > "$output/optimizer.txt"
 printf 'arm\tprofile\traw_total\traw_code\traw_custom\toptimized_total\toptimized_code\toptimized_custom\n' > "$output/sizes.tsv"
 printf 'Evidence: %s\n' "$output"
+driver_args=()
 for arm in before after; do
     source="$root"
     [[ "$arm" != before ]] || source="$output/source"
@@ -28,7 +39,7 @@ for arm in before after; do
     features='"ic0", "management-canister-types"'
     if [[ "$profile" != management ]]; then
         features='"ic0", "candid-codec"'
-        [[ "$arm" != before ]] || features='"ic0", "candid"'
+        [[ "$arm" != before || "$baseline_codec" == owned ]] || features='"ic0", "candid"'
     fi
     mkdir -p "$probe/src"
     cp "$root/Cargo.lock" "$probe/Cargo.lock"
@@ -52,7 +63,7 @@ MANIFEST
         records) value='Vec<(u64, Option<String>)>' ;;
         bigints)
             owner=candid_codec
-            [[ "$arm" != before ]] || owner=candid::contract
+            [[ "$arm" != before || "$baseline_codec" == owned ]] || owner=candid::contract
             value="(ic_platform::$owner::Nat, ic_platform::$owner::Int)" ;;
     esac
     printf 'type Value = %s;\n' "$value" > "$probe/src/lib.rs"
@@ -67,7 +78,7 @@ pub extern "C" fn codec() {
     ic_platform::ic0::msg_reply();
 }
 RUST
-    if [[ "$arm" == before ]]; then
+    if [[ "$arm" == before && "$baseline_codec" == upstream ]]; then
         cat >> "$probe/src/lib.rs" <<'RUST'
 fn roundtrip(bytes: &[u8]) -> Vec<u8> {
     use ic_platform::candid::{decode_exactly_one, DecodeLimits, contract::encode_one};
@@ -104,7 +115,42 @@ RUST
     ic-wasm "$probe/raw.wasm" -o "$probe/optimized.wasm" shrink > "$probe/optimizer.log" 2>&1
     { printf '%s\t%s\t' "$arm" "$profile"; perl "$root/scripts/benchmarks/wasm-sections.pl" "$probe/raw.wasm"; printf '\t'; perl "$root/scripts/benchmarks/wasm-sections.pl" "$probe/optimized.wasm"; printf '\n'; } >> "$output/sizes.tsv"
     sha256sum --check "$probe/source-sha256.txt" > "$probe/source-validation.log"
-    sha256sum "$probe/"{Cargo.toml,Cargo.lock,src/lib.rs,raw.wasm,optimized.wasm} > "$probe/artifact-sha256.txt"
+    cp "$probe/src/lib.rs" "$probe/uninstrumented.rs"
+    sha256sum "$probe/"{Cargo.toml,Cargo.lock,uninstrumented.rs,raw.wasm,optimized.wasm} > "$probe/artifact-sha256.txt"
+    if [[ "$measure" == 1 && "$profile" != management ]]; then
+        # Instrument a separate artifact; retain the uninstrumented size above.
+        cat >> "$probe/src/lib.rs" <<'RUST'
+#[unsafe(export_name = "canister_update measure")]
+pub extern "C" fn measure() {
+    let mut bytes = vec![0; ic_platform::ic0::msg_arg_data_size()];
+    ic_platform::ic0::msg_arg_data_copy(&mut bytes, 0);
+    let start = ic_platform::ic0::performance_counter(0);
+    let output = roundtrip(std::hint::black_box(&bytes));
+    let instructions = ic_platform::ic0::performance_counter(0) - start;
+    ic_platform::ic0::msg_reply_data_append(&instructions.to_le_bytes());
+    ic_platform::ic0::msg_reply_data_append(&output);
+    ic_platform::ic0::msg_reply();
+}
+RUST
+        cargo "+$toolchain" clippy --offline --locked --release --manifest-path "$probe/Cargo.toml" --target wasm32-unknown-unknown -- -D warnings > "$probe/measured-clippy.log" 2>&1
+        cargo "+$toolchain" build --frozen --release --manifest-path "$probe/Cargo.toml" --target wasm32-unknown-unknown > "$probe/measured-build.log" 2>&1
+        cp "$CARGO_TARGET_DIR/wasm32-unknown-unknown/release/management_codec_size_probe.wasm" "$probe/measured.raw.wasm"
+        ic-wasm "$probe/measured.raw.wasm" -o "$probe/measured.wasm" shrink > "$probe/measured-optimizer.log" 2>&1
+        sha256sum "$probe/src/lib.rs" "$probe/measured.wasm" > "$probe/measured-sha256.txt"
+        driver_args+=("$arm" "$profile" "$probe/measured.wasm")
+    fi
     done
 done
 cat "$output/sizes.tsv"
+if [[ "$measure" == 1 ]]; then
+    unset CARGO_ENCODED_RUSTFLAGS CARGO_PROFILE_RELEASE_PANIC CARGO_PROFILE_RELEASE_STRIP
+    # shellcheck source=scripts/benchmarks/driver.sh
+    source "$root/scripts/benchmarks/driver.sh"
+    build_benchmark_driver "$root" "$output" "$toolchain" codec "$root/target/codec-benchmark-driver"
+    if [[ -n "${POCKET_IC_BIN:-}" ]]; then
+        "$POCKET_IC_BIN" --version > "$output/server-version.txt"
+        sha256sum "$POCKET_IC_BIN" > "$output/server.sha256"
+    fi
+    "$driver" "${driver_args[@]}" > "$output/instructions.tsv"
+    cat "$output/instructions.tsv"
+fi

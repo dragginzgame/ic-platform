@@ -4,6 +4,29 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.31.1] - Unreleased
+
+### ✨ Added
+
+- Accept caller-owned prepared roots in canister-signature verification, with and
+  without authenticated signing time. Recheck certificate/delegation signatures,
+  issuer ranges, witnesses and identity-key refusal on every call; consumers retain
+  trust-root selection, freshness and preparation custody.
+
+### ⚡ Performance
+
+- Bulk-write Candid byte vectors and arbitrary integer payloads, avoid copying
+  positive integer magnitudes, reuse schema-refinement buffers and resolve final
+  type references directly. Preserve exact bytes, output limits and custom mappings.
+- Use a fixed stack buffer for certificate signing-message framing. Consolidate
+  vector/slice encoding and 22 order-compatible management DTO declarations without
+  changing field/variant order, Serde bytes or the decoder's admission budgets.
+
+### 🧹 Cleanup
+
+- Remove the unused `leb128` production dependency from ICRC ledger support,
+  preserving its public types, codecs and protocol bytes.
+
 ## [0.31.0] - 2026-11-11
 
 ### ✨ Added

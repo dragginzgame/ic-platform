@@ -230,6 +230,14 @@ hashing. Identity keys are rejected at both the root and delegated subnet.
 without decoding the signing certificate again. Delegation time is never returned.
 Consumers retain byte/depth limits, roots, freshness and authority.
 
+Repeated verification against one caller-selected root can use
+`verify_canister_sig_with_prepared_root` or
+`verify_canister_sig_with_time_and_prepared_root`. Pass the existing BLS
+`PublicKey::prepare()` result; retain it only while that root remains selected.
+Preparation retains public pairing data, with a memory cost. It does not cache
+certificate acceptance, delegation authorization or freshness: all those protocol
+checks still run, and identity roots remain rejected.
+
 Both production signature profiles exclude Candid, registry Principal, the old
 signature packages, raw IC0 and an executor. DFINITY creation/verification
 packages are dev-only byte/behavior/benchmark oracles. See the

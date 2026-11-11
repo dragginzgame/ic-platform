@@ -2,11 +2,20 @@
 #[cfg(not(feature = "owned"))]
 use ic_canister_sig_creation as creation;
 #[cfg(feature = "owned")]
-use ic_platform::{canister_sig_creation as creation, signature_verification::verify_canister_sig};
+use ic_platform::canister_sig_creation as creation;
+#[cfg(all(feature = "owned", not(feature = "owned-prepared")))]
+use ic_platform::signature_verification::verify_canister_sig;
 use ic_platform_runtime::ic0;
 #[cfg(feature = "reference")]
 use ic_signature_verification::verify_canister_sig;
 use std::hint::black_box;
+#[cfg(feature = "owned-prepared")]
+static PREPARED_ROOT: std::sync::LazyLock<ic_platform::bls::PreparedPublicKey> =
+    std::sync::LazyLock::new(|| {
+        ic_platform::bls::PublicKey::deserialize(include_bytes!("root.bin"))
+            .unwrap()
+            .prepare()
+    });
 #[cfg(feature = "reference-admitted")]
 mod admitted;
 #[cfg(feature = "reference-admitted")]
@@ -67,7 +76,7 @@ pub extern "C" fn measure() {
                 black_box(creation::hash_bytes(black_box(&payload)));
                 true
             }
-            _ => black_box(verify_canister_sig(
+            _ => black_box(verify(
                 black_box(message),
                 black_box(signature),
                 black_box(include_bytes!("public.bin")),
@@ -82,4 +91,24 @@ pub extern "C" fn measure() {
     output[1..].copy_from_slice(&instructions.to_le_bytes());
     ic0::msg_reply_data_append(&output);
     ic0::msg_reply();
+}
+
+fn verify(message: &[u8], signature: &[u8], public: &[u8], root: &[u8]) -> Result<(), String> {
+    #[cfg(feature = "owned-prepared")]
+    {
+        let alternate;
+        let prepared = if root == include_bytes!("root.bin") {
+            &*PREPARED_ROOT
+        } else {
+            alternate = ic_platform::bls::PublicKey::deserialize(root)
+                .unwrap()
+                .prepare();
+            &alternate
+        };
+        ic_platform::signature_verification::verify_canister_sig_with_prepared_root(
+            message, signature, public, prepared,
+        )
+    }
+    #[cfg(not(feature = "owned-prepared"))]
+    verify_canister_sig(message, signature, public, root)
 }

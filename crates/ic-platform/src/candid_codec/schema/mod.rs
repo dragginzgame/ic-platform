@@ -1,14 +1,19 @@
 //! Merge repeated declarations without unfolding recursive schema graphs.
 use super::{Error, Type};
 use std::ptr;
-pub(super) type Aliases = Vec<(&'static Type, &'static Type)>;
+pub(super) type Aliases = Vec<(&'static Type, usize)>;
 pub(super) fn compact(table: &mut Vec<&'static Type>) -> Result<Aliases, Error> {
     // Registration already validated these declarations. With at most one
     // entry there are no distinct declarations to merge, including self-cycles.
     if table.len() <= 1 {
-        return Ok(table.iter().map(|ty| (*ty, *ty)).collect());
+        return Ok(table.iter().enumerate().map(|(id, ty)| (*ty, id)).collect());
     }
     let mut classes: Vec<usize> = (0..table.len()).collect();
+    let mut next = vec![0; table.len()];
+    // Preserve signature buffers across refinement rounds. Sorting carries each
+    // declaration's original index, so stable wire-table ordering is unchanged.
+    let mut signatures: Vec<(Vec<i64>, usize)> =
+        (0..table.len()).map(|index| (Vec::new(), index)).collect();
     loop {
         let id = |ty: &'static Type| -> Result<i64, Error> {
             let ty = ty.resolved()?;
@@ -21,9 +26,9 @@ pub(super) fn compact(table: &mut Vec<&'static Type>) -> Result<Aliases, Error> 
                     .ok_or(Error::Schema),
             }
         };
-        let mut signatures = Vec::with_capacity(table.len());
-        for (index, ty) in table.iter().enumerate() {
-            let mut key = Vec::new();
+        for (key, index) in &mut signatures {
+            key.clear();
+            let ty = table[*index];
             match ty {
                 Type::Opt(inner) | Type::Vec(inner) => {
                     key.push(if matches!(ty, Type::Opt(_)) { -18 } else { -19 });
@@ -65,10 +70,8 @@ pub(super) fn compact(table: &mut Vec<&'static Type>) -> Result<Aliases, Error> 
                 }
                 _ => return Err(Error::Schema),
             }
-            signatures.push((key, index));
         }
         signatures.sort_unstable();
-        let mut next = classes.clone();
         let mut previous = None;
         let mut representative = 0;
         for (key, index) in &signatures {
@@ -81,12 +84,19 @@ pub(super) fn compact(table: &mut Vec<&'static Type>) -> Result<Aliases, Error> 
         if next == classes {
             break;
         }
-        classes = next;
+        std::mem::swap(&mut classes, &mut next);
+    }
+    let mut compact_id = 0;
+    for (index, class) in classes.iter().enumerate() {
+        if index == *class {
+            next[index] = compact_id;
+            compact_id += 1;
+        }
     }
     let aliases: Aliases = table
         .iter()
         .enumerate()
-        .map(|(i, ty)| (*ty, table[classes[i]]))
+        .map(|(i, ty)| (*ty, next[classes[i]]))
         .collect();
     let mut index = 0;
     table.retain(|_| {

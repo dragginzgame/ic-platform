@@ -15,6 +15,44 @@ struct CanisterSignature {
 }
 use serde_bytes::ByteBuf;
 
+// Exercise both public root forms against the same acceptance, rejection and
+// authenticated-time corpus, including identity keys and delegated signatures.
+fn verify_canister_sig(
+    message: &[u8],
+    signature: &[u8],
+    public: &[u8],
+    root: &[u8],
+) -> Result<(), String> {
+    let raw = super::verify_canister_sig(message, signature, public, root);
+    if let Ok(key) = crate::bls::PublicKey::deserialize(root) {
+        assert_eq!(
+            raw,
+            verify_canister_sig_with_prepared_root(message, signature, public, &key.prepare())
+        );
+    }
+    raw
+}
+fn verify_canister_sig_with_time(
+    message: &[u8],
+    signature: &[u8],
+    public: &[u8],
+    root: &[u8],
+) -> Result<u64, CanisterSigTimeError> {
+    let raw = super::verify_canister_sig_with_time(message, signature, public, root);
+    if let Ok(key) = crate::bls::PublicKey::deserialize(root) {
+        assert_eq!(
+            raw,
+            verify_canister_sig_with_time_and_prepared_root(
+                message,
+                signature,
+                public,
+                &key.prepare()
+            )
+        );
+    }
+    raw
+}
+
 fn key(value: u8) -> PrivateKey {
     let mut bytes = [0; 32];
     bytes[31] = value;

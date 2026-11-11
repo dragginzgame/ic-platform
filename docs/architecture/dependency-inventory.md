@@ -51,6 +51,13 @@ verifier remains a development oracle and native Agent transitive. Qualification
 contains only the matched published-baseline/current-source probe, not another
 implementation or product package.
 
+The additive prepared-root signature APIs accept caller-owned BLS pairing data;
+they retain the same `signature-verification` feature closure and every certificate,
+delegation, range, witness and authenticated-time check. No trust or freshness cache
+is introduced. Owned codec bulk-byte encoding and schema-buffer reuse add no
+dependency or feature. Twenty-two management declarations now share their Rust/codec
+definition; fields, variant order and Serde representations are unchanged.
+
 ## Source maintenance
 
 Principal/Account, executor, call/System API adapters, macros, passive ICRC DTOs
@@ -105,7 +112,7 @@ facade README feature table. Package release versions are represented as
 | ic-platform | ic-protocol-fixtures | ic-protocol |
 | ic-platform | ic0 | dep:ic-platform-runtime, ic-platform-runtime/ic0 |
 | ic-platform | icp-ledger-types | candid-codec, dep:crc32fast, dep:sha2_11, principal |
-| ic-platform | icrc-ledger-types | candid-codec, dep:crc32fast, dep:data-encoding, dep:hex, dep:leb128, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2_11, principal |
+| ic-platform | icrc-ledger-types | candid-codec, dep:crc32fast, dep:data-encoding, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2_11, principal |
 | ic-platform | management-canister-types | candid-codec, dep:serde_bytes, principal |
 | ic-platform | nns-registry-types | candid-codec, principal |
 | ic-platform | principal | dep:ic-platform-types, dep:serde |
@@ -145,7 +152,6 @@ facade README feature table. Package release versions are represented as
 | ic-platform | ic-verify-bls-signature | ^0.6.0 | dev | all | false | false | alloc |
 | ic-platform | ic_bls12_381 | ^0.10.1 | normal | all | true | false | alloc, experimental, groups, pairings |
 | ic-platform | k256 | ^0.14.0 | normal | all | true | false | ecdsa |
-| ic-platform | leb128 | ^0.2.7 | normal | all | true | true |  |
 | ic-platform | num-bigint | ^0.5.1 | normal | all | true | true |  |
 | ic-platform | num-traits | ^0.2.19 | normal | all | true | true |  |
 | ic-platform | serde | ^1.0 | normal | all | true | false | alloc, derive |

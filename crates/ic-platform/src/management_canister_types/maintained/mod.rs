@@ -17,64 +17,74 @@ pub type CanisterId = Principal;
 /// An opaque snapshot identifier.
 pub type SnapshotId = Vec<u8>;
 
-/// A request identifying one canister.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct CanisterIdRecord {
-    /// The canister addressed by the request.
-    pub canister_id: CanisterId,
+crate::candid_record! {
+    /// A request identifying one canister.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct CanisterIdRecord {
+        /// The canister addressed by the request.
+        1313628723 => pub canister_id: CanisterId,
+    }
 }
 
-/// An opaque hash identifying a stored chunk.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct ChunkHash {
-    /// The hash bytes.
-    #[serde(with = "serde_bytes")]
-    pub hash: Vec<u8>,
+crate::candid_record! {
+    /// An opaque hash identifying a stored chunk.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct ChunkHash {
+        /// The hash bytes.
+        #[serde(with = "serde_bytes")]
+        1158164430 => pub hash: Vec<u8>,
+    }
 }
 
-/// The requested visibility of canister logs.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
-pub enum LogVisibility {
-    /// Access for the canister's controllers.
-    #[default]
-    #[serde(rename = "controllers")]
-    Controllers,
-    /// Public access.
-    #[serde(rename = "public")]
-    Public,
-    /// Access for the listed principals.
-    #[serde(rename = "allowed_viewers")]
-    AllowedViewers(Vec<Principal>),
+crate::candid_variant! {
+    /// The requested visibility of canister logs.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
+    pub enum LogVisibility {
+        /// Access for the canister's controllers.
+        #[default]
+        #[serde(rename = "controllers")]
+        570880087 => Controllers,
+        /// Public access.
+        #[serde(rename = "public")]
+        1727234217 => Public,
+        /// Access for the listed principals.
+        #[serde(rename = "allowed_viewers")]
+        2235716810 => AllowedViewers(Vec<Principal>),
+    }
 }
 
-/// The requested visibility of canister snapshots.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
-pub enum SnapshotVisibility {
-    /// Access for the canister's controllers.
-    #[default]
-    #[serde(rename = "controllers")]
-    Controllers,
-    /// Public access.
-    #[serde(rename = "public")]
-    Public,
-    /// Access for the listed principals.
-    #[serde(rename = "allowed_viewers")]
-    AllowedViewers(Vec<Principal>),
+crate::candid_variant! {
+    /// The requested visibility of canister snapshots.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
+    pub enum SnapshotVisibility {
+        /// Access for the canister's controllers.
+        #[default]
+        #[serde(rename = "controllers")]
+        570880087 => Controllers,
+        /// Public access.
+        #[serde(rename = "public")]
+        1727234217 => Public,
+        /// Access for the listed principals.
+        #[serde(rename = "allowed_viewers")]
+        2235716810 => AllowedViewers(Vec<Principal>),
+    }
 }
 
-/// The requested visibility of canister status.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
-pub enum StatusVisibility {
-    /// Access for the canister's controllers.
-    #[default]
-    #[serde(rename = "controllers")]
-    Controllers,
-    /// Public access.
-    #[serde(rename = "public")]
-    Public,
-    /// Access for the listed principals.
-    #[serde(rename = "allowed_viewers")]
-    AllowedViewers(Vec<Principal>),
+crate::candid_variant! {
+    /// The requested visibility of canister status.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
+    pub enum StatusVisibility {
+        /// Access for the canister's controllers.
+        #[default]
+        #[serde(rename = "controllers")]
+        570880087 => Controllers,
+        /// Public access.
+        #[serde(rename = "public")]
+        1727234217 => Public,
+        /// Access for the listed principals.
+        #[serde(rename = "allowed_viewers")]
+        2235716810 => AllowedViewers(Vec<Principal>),
+    }
 }
 
 /// A named environment value.
@@ -148,24 +158,28 @@ pub struct DefiniteCanisterSettings {
     pub environment_variables: Vec<EnvironmentVariable>,
 }
 
-/// Parameters for creating a canister.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
-pub struct CreateCanisterArgs {
-    /// Optional initial settings.
-    pub settings: Option<CanisterSettings>,
-    /// The sender's optional canister-version value.
-    pub sender_canister_version: Option<u64>,
+crate::candid_record! {
+    /// Parameters for creating a canister.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
+    pub struct CreateCanisterArgs {
+        /// Optional initial settings.
+        2336062691 => pub settings: Option<CanisterSettings>,
+        /// The sender's optional canister-version value.
+        3599109322 => pub sender_canister_version: Option<u64>,
+    }
 }
 
-/// Settings to apply to an existing canister.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct UpdateSettingsArgs {
-    /// The canister to update.
-    pub canister_id: CanisterId,
-    /// The supplied settings.
-    pub settings: CanisterSettings,
-    /// The sender's optional canister-version value.
-    pub sender_canister_version: Option<u64>,
+crate::candid_record! {
+    /// Settings to apply to an existing canister.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct UpdateSettingsArgs {
+        /// The canister to update.
+        1313628723 => pub canister_id: CanisterId,
+        /// The supplied settings.
+        2336062691 => pub settings: CanisterSettings,
+        /// The sender's optional canister-version value.
+        3599109322 => pub sender_canister_version: Option<u64>,
+    }
 }
 
 /// A chunk supplied for a canister's chunk store.
@@ -206,18 +220,20 @@ pub struct UpgradeFlags {
     pub wasm_memory_persistence: Option<WasmMemoryPersistence>,
 }
 
-/// The Wasm-memory persistence choice for an upgrade.
-#[derive(
-    Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
-)]
-pub enum WasmMemoryPersistence {
-    /// Retain Wasm memory.
-    #[serde(rename = "keep")]
-    Keep,
-    /// Replace Wasm memory.
-    #[default]
-    #[serde(rename = "replace")]
-    Replace,
+crate::candid_variant! {
+    /// The Wasm-memory persistence choice for an upgrade.
+    #[derive(
+        Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
+    )]
+    pub enum WasmMemoryPersistence {
+        /// Retain Wasm memory.
+        #[serde(rename = "keep")]
+        1191628933 => Keep,
+        /// Replace Wasm memory.
+        #[default]
+        #[serde(rename = "replace")]
+        2871543860 => Replace,
+    }
 }
 
 /// Parameters for installing code assembled from stored chunks.
@@ -241,13 +257,15 @@ pub struct InstallChunkedCodeArgs {
     pub sender_canister_version: Option<u64>,
 }
 
-/// A request to uninstall a canister's code.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct UninstallCodeArgs {
-    /// The canister whose code is to be uninstalled.
-    pub canister_id: CanisterId,
-    /// The sender's optional canister-version value.
-    pub sender_canister_version: Option<u64>,
+crate::candid_record! {
+    /// A request to uninstall a canister's code.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct UninstallCodeArgs {
+        /// The canister whose code is to be uninstalled.
+        1313628723 => pub canister_id: CanisterId,
+        /// The sender's optional canister-version value.
+        3599109322 => pub sender_canister_version: Option<u64>,
+    }
 }
 
 /// The status and resource information reported for a canister.
@@ -327,13 +345,15 @@ pub struct QueryStats {
     pub response_payload_bytes_total: Nat,
 }
 
-/// A request for canister information and recent changes.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct CanisterInfoArgs {
-    /// The canister to inspect.
-    pub canister_id: Principal,
-    /// The optional requested change count.
-    pub num_requested_changes: Option<u64>,
+crate::candid_record! {
+    /// A request for canister information and recent changes.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct CanisterInfoArgs {
+        /// The canister to inspect.
+        1313628723 => pub canister_id: Principal,
+        /// The optional requested change count.
+        2098503289 => pub num_requested_changes: Option<u64>,
+    }
 }
 
 /// Canister information and change history returned by the IC.
@@ -349,11 +369,13 @@ pub struct CanisterInfoResult {
     pub controllers: Vec<Principal>,
 }
 
-/// The user associated with a canister change.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct FromUserRecord {
-    /// The initiating user principal.
-    pub user_id: Principal,
+crate::candid_record! {
+    /// The user associated with a canister change.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct FromUserRecord {
+        /// The initiating user principal.
+        1869947023 => pub user_id: Principal,
+    }
 }
 
 /// The canister associated with a canister change.
@@ -365,24 +387,28 @@ pub struct FromCanisterRecord {
     pub canister_version: Option<u64>,
 }
 
-/// The recorded origin of a canister change.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub enum ChangeOrigin {
-    /// A change initiated by a user.
-    #[serde(rename = "from_user")]
-    FromUser(FromUserRecord),
-    /// A change initiated by a canister.
-    #[serde(rename = "from_canister")]
-    FromCanister(FromCanisterRecord),
+crate::candid_variant! {
+    /// The recorded origin of a canister change.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub enum ChangeOrigin {
+        /// A change initiated by a user.
+        #[serde(rename = "from_user")]
+        572139648 => FromUser(FromUserRecord),
+        /// A change initiated by a canister.
+        #[serde(rename = "from_canister")]
+        3061905116 => FromCanister(FromCanisterRecord),
+    }
 }
 
-/// Details recorded when a canister is created.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct CreationRecord {
-    /// The recorded initial controllers.
-    pub controllers: Vec<Principal>,
-    /// The optional environment-variable hash, using ordinary sequence Serde.
-    pub environment_variables_hash: Option<Vec<u8>>,
+crate::candid_record! {
+    /// Details recorded when a canister is created.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct CreationRecord {
+        /// The recorded initial controllers.
+        570880087 => pub controllers: Vec<Principal>,
+        /// The optional environment-variable hash, using ordinary sequence Serde.
+        3117986754 => pub environment_variables_hash: Option<Vec<u8>>,
+    }
 }
 
 /// The mode recorded for a code deployment.
@@ -399,14 +425,16 @@ pub enum CodeDeploymentMode {
     Upgrade,
 }
 
-/// Details recorded for a code deployment.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct CodeDeploymentRecord {
-    /// The recorded deployment mode.
-    pub mode: CodeDeploymentMode,
-    /// The recorded module hash bytes.
-    #[serde(with = "serde_bytes")]
-    pub module_hash: Vec<u8>,
+crate::candid_record! {
+    /// Details recorded for a code deployment.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct CodeDeploymentRecord {
+        /// The recorded deployment mode.
+        1214305123 => pub mode: CodeDeploymentMode,
+        /// The recorded module hash bytes.
+        #[serde(with = "serde_bytes")]
+        2928387969 => pub module_hash: Vec<u8>,
+    }
 }
 
 /// Details recorded when a snapshot is loaded.
@@ -424,15 +452,17 @@ pub struct LoadSnapshotRecord {
     pub source: SnapshotSource,
 }
 
-/// The destination information recorded for a canister rename.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct RenameToRecord {
-    /// The destination canister principal.
-    pub canister_id: Principal,
-    /// The recorded destination version.
-    pub version: u64,
-    /// The recorded destination change count.
-    pub total_num_changes: u64,
+crate::candid_record! {
+    /// The destination information recorded for a canister rename.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct RenameToRecord {
+        /// The destination canister principal.
+        1313628723 => pub canister_id: Principal,
+        /// The recorded destination version.
+        2096228120 => pub version: u64,
+        /// The recorded destination change count.
+        3862312591 => pub total_num_changes: u64,
+    }
 }
 
 /// Details recorded for a canister rename.
@@ -448,11 +478,13 @@ pub struct RenameCanisterRecord {
     pub requested_by: Principal,
 }
 
-/// Controllers recorded by a controller-change event.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct ControllersChangeRecord {
-    /// The recorded controller list.
-    pub controllers: Vec<Principal>,
+crate::candid_record! {
+    /// Controllers recorded by a controller-change event.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct ControllersChangeRecord {
+        /// The recorded controller list.
+        570880087 => pub controllers: Vec<Principal>,
+    }
 }
 
 /// The details attached to a recorded canister change.
@@ -478,17 +510,19 @@ pub enum ChangeDetails {
     RenameCanister(RenameCanisterRecord),
 }
 
-/// One recorded canister change.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct Change {
-    /// The recorded timestamp in nanoseconds.
-    pub timestamp_nanos: u64,
-    /// The recorded canister version.
-    pub canister_version: u64,
-    /// The recorded change origin.
-    pub origin: ChangeOrigin,
-    /// Optional change details.
-    pub details: Option<ChangeDetails>,
+crate::candid_record! {
+    /// One recorded canister change.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct Change {
+        /// The recorded timestamp in nanoseconds.
+        268680022 => pub timestamp_nanos: u64,
+        /// The recorded canister version.
+        783802816 => pub canister_version: u64,
+        /// The recorded change origin.
+        1258363366 => pub origin: ChangeOrigin,
+        /// Optional change details.
+        2874596546 => pub details: Option<ChangeDetails>,
+    }
 }
 
 /// Parameters supplied for a management HTTP request.
@@ -559,14 +593,16 @@ pub struct HttpHeader {
     pub value: String,
 }
 
-/// A response-transform function with caller-supplied context bytes.
-#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
-pub struct TransformContext {
-    /// The response-transform function reference.
-    pub function: TransformFunc,
-    /// The opaque context bytes passed to the transform.
-    #[serde(with = "serde_bytes")]
-    pub context: Vec<u8>,
+crate::candid_record! {
+    /// A response-transform function with caller-supplied context bytes.
+    #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
+    pub struct TransformContext {
+        /// The response-transform function reference.
+        340962072 => pub function: TransformFunc,
+        /// The opaque context bytes passed to the transform.
+        #[serde(with = "serde_bytes")]
+        427267567 => pub context: Vec<u8>,
+    }
 }
 
 /// The response and context supplied to an HTTP transform function.
@@ -588,18 +624,20 @@ pub struct EcdsaKeyId {
     pub name: String,
 }
 
-/// A protocol identifier for an ECDSA curve.
-#[derive(
-    Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
-)]
-pub enum EcdsaCurve {
-    /// The secp256k1 curve identifier.
-    #[default]
-    #[serde(rename = "secp256k1")]
-    Secp256k1,
-    /// The secp256r1 curve identifier.
-    #[serde(rename = "secp256r1")]
-    Secp256r1,
+crate::candid_variant! {
+    /// A protocol identifier for an ECDSA curve.
+    #[derive(
+        Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Default,
+    )]
+    pub enum EcdsaCurve {
+        /// The secp256k1 curve identifier.
+        #[default]
+        #[serde(rename = "secp256k1")]
+        492384026 => Secp256k1,
+        /// The secp256r1 curve identifier.
+        #[serde(rename = "secp256r1")]
+        492385587 => Secp256r1,
+    }
 }
 
 impl From<EcdsaCurve> for u32 {
@@ -622,15 +660,17 @@ pub struct EcdsaPublicKeyArgs {
     pub key_id: EcdsaKeyId,
 }
 
-/// Opaque public-key material returned by the management service.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
-pub struct EcdsaPublicKeyResult {
-    /// The returned public-key bytes.
-    #[serde(with = "serde_bytes")]
-    pub public_key: Vec<u8>,
-    /// The returned chain-code bytes.
-    #[serde(with = "serde_bytes")]
-    pub chain_code: Vec<u8>,
+crate::candid_record! {
+    /// Opaque public-key material returned by the management service.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
+    pub struct EcdsaPublicKeyResult {
+        /// The returned public-key bytes.
+        #[serde(with = "serde_bytes")]
+        881350601 => pub public_key: Vec<u8>,
+        /// The returned chain-code bytes.
+        #[serde(with = "serde_bytes")]
+        3110171755 => pub chain_code: Vec<u8>,
+    }
 }
 
 /// Parameters requesting an ECDSA signature from the management service.
@@ -645,12 +685,14 @@ pub struct SignWithEcdsaArgs {
     pub key_id: EcdsaKeyId,
 }
 
-/// Opaque signature bytes returned by the management service.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
-pub struct SignWithEcdsaResult {
-    /// The returned signature bytes.
-    #[serde(with = "serde_bytes")]
-    pub signature: Vec<u8>,
+crate::candid_record! {
+    /// Opaque signature bytes returned by the management service.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Default)]
+    pub struct SignWithEcdsaResult {
+        /// The returned signature bytes.
+        #[serde(with = "serde_bytes")]
+        359375608 => pub signature: Vec<u8>,
+    }
 }
 
 /// A snapshot identifier and its reported metadata.
@@ -664,13 +706,15 @@ pub struct Snapshot {
     pub total_size: u64,
 }
 
-/// A request to delete an identified canister snapshot.
-#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub struct DeleteCanisterSnapshotArgs {
-    /// The canister holding the snapshot.
-    pub canister_id: CanisterId,
-    /// The snapshot identifier to delete.
-    pub snapshot_id: SnapshotId,
+crate::candid_record! {
+    /// A request to delete an identified canister snapshot.
+    #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+    pub struct DeleteCanisterSnapshotArgs {
+        /// The canister holding the snapshot.
+        1313628723 => pub canister_id: CanisterId,
+        /// The snapshot identifier to delete.
+        4045790262 => pub snapshot_id: SnapshotId,
+    }
 }
 
 /// The recorded origin of a snapshot.

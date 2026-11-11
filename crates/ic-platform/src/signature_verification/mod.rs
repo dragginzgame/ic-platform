@@ -64,7 +64,7 @@ pub fn verify_canister_sig(
         message,
         signature_cbor,
         public_key_der,
-        ic_root_public_key_raw,
+        RootKey::Raw(ic_root_public_key_raw),
     )
     .map(|_| ())
 }
@@ -83,17 +83,63 @@ pub fn verify_canister_sig_with_time(
         message,
         signature_cbor,
         public_key_der,
-        ic_root_public_key_raw,
+        RootKey::Raw(ic_root_public_key_raw),
     )
     .map_err(CanisterSigTimeError::Verification)?;
     signing_time(&certificate.tree).ok_or(CanisterSigTimeError::InvalidCertificateTime)
+}
+
+/// Verify with caller-owned pairing preparation for the selected IC trust root.
+///
+/// Preparation caches only immutable key data. Every certificate, delegation and
+/// witness is authenticated on every call. The caller selects and retains the
+/// root; this function neither selects trust nor caches certificate acceptance.
+pub fn verify_canister_sig_with_prepared_root(
+    message: &[u8],
+    signature_cbor: &[u8],
+    public_key_der: &[u8],
+    root: &crate::bls::PreparedPublicKey,
+) -> Result<(), String> {
+    authenticate(
+        message,
+        signature_cbor,
+        public_key_der,
+        RootKey::Prepared(root),
+    )
+    .map(|_| ())
+}
+
+/// Authenticate with a prepared root and extract the signing certificate's time.
+///
+/// Has the same checks as [`verify_canister_sig_with_time`]; freshness remains
+/// caller-owned. Preparation does not bypass identity-key refusal.
+pub fn verify_canister_sig_with_time_and_prepared_root(
+    message: &[u8],
+    signature_cbor: &[u8],
+    public_key_der: &[u8],
+    root: &crate::bls::PreparedPublicKey,
+) -> Result<u64, CanisterSigTimeError> {
+    let certificate = authenticate(
+        message,
+        signature_cbor,
+        public_key_der,
+        RootKey::Prepared(root),
+    )
+    .map_err(CanisterSigTimeError::Verification)?;
+    signing_time(&certificate.tree).ok_or(CanisterSigTimeError::InvalidCertificateTime)
+}
+
+#[derive(Clone, Copy)]
+enum RootKey<'a> {
+    Raw(&'a [u8]),
+    Prepared(&'a crate::bls::PreparedPublicKey),
 }
 
 fn authenticate(
     message: &[u8],
     signature_cbor: &[u8],
     public_key_der: &[u8],
-    root_key: &[u8],
+    root_key: RootKey<'_>,
 ) -> Result<Certificate, String> {
     let key = CanisterSigPublicKey::try_from(public_key_der)?;
     let envelope: SignatureEnvelope = decode_tagged(signature_cbor, "signature")?;
@@ -127,7 +173,7 @@ fn authenticate(
                 &[b"subnet", &delegation.subnet_id, b"public_key"],
             )?;
             let subnet_key = extract_raw_root_pk_from_der(subnet_key_der)?;
-            authenticate_certificate(&certificate, &subnet_key)?;
+            authenticate_certificate(&certificate, RootKey::Raw(&subnet_key))?;
         }
     }
     Ok(certificate)
@@ -159,14 +205,21 @@ fn required_leaf<'tree>(tree: &'tree HashTree, path: &[&[u8]]) -> Result<&'tree 
     }
 }
 
-fn authenticate_certificate(certificate: &Certificate, key: &[u8]) -> Result<(), String> {
+fn authenticate_certificate(certificate: &Certificate, key: RootKey<'_>) -> Result<(), String> {
     // The BLS boundary owns checked point/subgroup admission and identity refusal
     // for both root and delegated keys; no second point decode is needed here.
-    let mut signed = Vec::with_capacity(46);
-    signed.extend_from_slice(b"\x0dic-state-root");
-    signed.extend_from_slice(&certificate.tree.digest());
-    crate::bls::verify_bls_signature(&certificate.signature, &signed, key)
-        .map_err(|()| "invalid BLS signature".into())
+    let mut signed = [0; 46];
+    signed[..14].copy_from_slice(b"\x0dic-state-root");
+    signed[14..].copy_from_slice(&certificate.tree.digest());
+    match key {
+        RootKey::Raw(bytes) => {
+            crate::bls::verify_bls_signature(&certificate.signature, &signed, bytes)
+        }
+        RootKey::Prepared(key) => crate::bls::Signature::deserialize(&certificate.signature)
+            .map_err(|_| ())
+            .and_then(|signature| key.verify(&signed, &signature)),
+    }
+    .map_err(|()| "invalid BLS signature".into())
 }
 
 fn authorize_issuer(tree: &HashTree, subnet_id: &[u8], issuer: &Principal) -> Result<(), String> {

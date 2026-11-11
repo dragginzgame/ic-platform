@@ -5,10 +5,7 @@ impl<T: Encode> Encode for [T] {
     const TYPE: &'static Type = &Type::Vec(T::TYPE);
     fn write(&self, writer: &mut Writer) -> Result<(), Error> {
         writer.unsigned(self.len() as u128)?;
-        for value in self {
-            value.write(writer)?;
-        }
-        Ok(())
+        T::write_slice(self, writer)
     }
 }
 impl<T: Encode, const N: usize> Encode for [T; N] {

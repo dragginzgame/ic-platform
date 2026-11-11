@@ -1,4 +1,5 @@
 use super::super::*;
+use super::{verify_canister_sig, verify_canister_sig_with_time};
 use crate::canister_sig_creation::IC_ROOT_PK_DER_PREFIX;
 use ic_certification::{empty, fork, labeled, leaf, pruned};
 use ic_verify_bls_signature::PrivateKey;

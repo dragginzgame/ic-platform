@@ -4,6 +4,53 @@ use ic_platform::signature_verification::{
     CanisterSigTimeError, verify_canister_sig, verify_canister_sig_with_time,
 };
 
+#[test]
+fn prepared_root_reuse_preserves_authenticated_time_after_refusals() {
+    use ic_platform::signature_verification::verify_canister_sig_with_time_and_prepared_root;
+    let root =
+        ic_platform::bls::PublicKey::deserialize(&hex(include_str!("fixtures/bls-public.hex")))
+            .unwrap()
+            .prepare();
+    let public = ic_platform::canister_sig_creation::CanisterSigPublicKey::new(
+        ic_platform::Principal::from_slice(&[1; 10]),
+        b"seed".to_vec(),
+    )
+    .to_der();
+    for (encoded, message, expected) in [
+        (
+            include_str!("fixtures/signature-time-valid.hex"),
+            b"message".as_slice(),
+            Some(128),
+        ),
+        (
+            include_str!("fixtures/signature-time-valid.hex"),
+            b"changed".as_slice(),
+            None,
+        ),
+        (
+            include_str!("fixtures/signature-range-legacy-outside.hex"),
+            b"message".as_slice(),
+            None,
+        ),
+        (
+            include_str!("fixtures/signature-range-sharded-valid.hex"),
+            b"message".as_slice(),
+            Some(42),
+        ),
+        (
+            include_str!("fixtures/signature-time-valid.hex"),
+            b"message".as_slice(),
+            Some(128),
+        ),
+    ] {
+        assert_eq!(
+            verify_canister_sig_with_time_and_prepared_root(message, &hex(encoded), &public, &root)
+                .ok(),
+            expected
+        );
+    }
+}
+
 /// Preserve accepted signed bytes and upstream failures without adding trust policy.
 pub fn roundtrip() {
     let signature = hex(include_str!("fixtures/signature-valid.hex"));

@@ -119,6 +119,18 @@ pub trait Encode {
     const TYPE: &'static Type;
     /// Write only the value payload, matching `TYPE` exactly.
     fn write(&self, output: &mut Writer) -> Result<(), Error>;
+    /// Write consecutive element payloads, without a vector length prefix.
+    /// Overrides must produce exactly the same bytes as calling `write` on each
+    /// element and enforce the same output limit. The default supports custom mappings.
+    fn write_slice(values: &[Self], output: &mut Writer) -> Result<(), Error>
+    where
+        Self: Sized,
+    {
+        for value in values {
+            value.write(output)?;
+        }
+        Ok(())
+    }
 }
 
 // Pointer identity terminates recursive schema traversal. Structurally equal
@@ -185,7 +197,6 @@ fn register(
 }
 fn reference(
     t: &'static Type,
-    table: &[&'static Type],
     aliases: &schema::Aliases,
     output: &mut Writer,
 ) -> Result<(), Error> {
@@ -195,20 +206,19 @@ fn reference(
         _ => aliases
             .iter()
             .find(|(source, _)| ptr::eq(*source, t))
-            .and_then(|(_, target)| table.iter().position(|entry| ptr::eq(*entry, *target)))
+            .map(|(_, index)| *index)
             .ok_or(Error::Schema)? as i128,
     };
     output.signed(index)
 }
 fn refs(
     types: &[&'static Type],
-    table: &[&'static Type],
     aliases: &schema::Aliases,
     output: &mut Writer,
 ) -> Result<(), Error> {
     output.unsigned(types.len() as u128)?;
     for t in types {
-        reference(t, table, aliases, output)?;
+        reference(t, aliases, output)?;
     }
     Ok(())
 }
@@ -224,7 +234,7 @@ fn header(types: &[&'static Type], output: &mut Writer) -> Result<(), Error> {
         match t {
             Type::Opt(inner) | Type::Vec(inner) => {
                 output.signed(if matches!(t, Type::Opt(_)) { -18 } else { -19 })?;
-                reference(inner, &table, &aliases, output)?;
+                reference(inner, &aliases, output)?;
             }
             Type::Record(fields) | Type::Variant(fields) => {
                 output.signed(if matches!(t, Type::Record(_)) {
@@ -235,7 +245,7 @@ fn header(types: &[&'static Type], output: &mut Writer) -> Result<(), Error> {
                 output.unsigned(fields.len() as u128)?;
                 for (id, field) in *fields {
                     output.unsigned(u128::from(*id))?;
-                    reference(field, &table, &aliases, output)?;
+                    reference(field, &aliases, output)?;
                 }
             }
             Type::Function {
@@ -244,8 +254,8 @@ fn header(types: &[&'static Type], output: &mut Writer) -> Result<(), Error> {
                 annotations,
             } => {
                 output.signed(-22)?;
-                refs(args, &table, &aliases, output)?;
-                refs(results, &table, &aliases, output)?;
+                refs(args, &aliases, output)?;
+                refs(results, &aliases, output)?;
                 output.unsigned(annotations.len() as u128)?;
                 output.bytes(annotations)?;
             }
@@ -254,13 +264,13 @@ fn header(types: &[&'static Type], output: &mut Writer) -> Result<(), Error> {
                 output.unsigned(methods.len() as u128)?;
                 for (name, method) in *methods {
                     name.write(output)?;
-                    reference(method, &table, &aliases, output)?;
+                    reference(method, &aliases, output)?;
                 }
             }
             Type::Primitive(_) | Type::Deferred(_) => unreachable!(),
         }
     }
-    refs(types, &table, &aliases, output)
+    refs(types, &aliases, output)
 }
 
 /// Encode exactly one argument, with at most `limit` output bytes.
@@ -283,7 +293,16 @@ macro_rules! fixed {
         }
     )*};
 }
-fixed!(u8 => -5, u16 => -6, u32 => -7, u64 => -8, i8 => -9, i16 => -10, i32 => -11, i64 => -12, f32 => -13, f64 => -14);
+fixed!(u16 => -6, u32 => -7, u64 => -8, i8 => -9, i16 => -10, i32 => -11, i64 => -12, f32 => -13, f64 => -14);
+impl Encode for u8 {
+    const TYPE: &'static Type = &Type::Primitive(-5);
+    fn write(&self, output: &mut Writer) -> Result<(), Error> {
+        output.bytes(&[*self])
+    }
+    fn write_slice(values: &[Self], output: &mut Writer) -> Result<(), Error> {
+        output.bytes(values)
+    }
+}
 impl Encode for bool {
     const TYPE: &'static Type = &Type::Primitive(-2);
     fn write(&self, output: &mut Writer) -> Result<(), Error> {
@@ -322,11 +341,7 @@ impl<T: Encode> Encode for Option<T> {
 impl<T: Encode> Encode for Vec<T> {
     const TYPE: &'static Type = &Type::Vec(T::TYPE);
     fn write(&self, output: &mut Writer) -> Result<(), Error> {
-        output.unsigned(self.len() as u128)?;
-        for value in self {
-            value.write(output)?;
-        }
-        Ok(())
+        self.as_slice().write(output)
     }
 }
 impl<A: Encode, B: Encode> Encode for (A, B) {

@@ -45,7 +45,6 @@ ic-certification = { version = "3.2.0", default-features = false, features = ["s
 ic0 = { version = "1.2.0", default-features = false }
 ic_bls12_381 = { version = "0.10.1", default-features = false, features = ["alloc", "groups", "pairings", "experimental"] }
 k256 = { version = "0.14.0", default-features = false, features = ["ecdsa"] }
-leb128 = "0.2.7"
 num-bigint = "0.5.1"
 num-traits = "0.2.19"
 pin-project-lite = "0.2.17"
