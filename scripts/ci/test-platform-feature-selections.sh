@@ -61,6 +61,8 @@ done <<'MUTATIONS'
 (.dependencies[] | select(.name == "ic-management-canister-types")).req = "^0.11"
 (.dependencies[] | select(.name == "ic-management-canister-types")).kind = null
 .features["icrc-ledger-types"] += ["dep:icrc-ledger-types"]
+.features["icrc-ledger-types"] += ["dep:leb128"]
+.dependencies += [{"name":"leb128", "kind":null, "optional":true}]
 .features.principal += ["dep:ic_principal"]
 .dependencies += [{"name":"ic_principal", "features":["self_authenticating"]}]
 (.dependencies[] | select(.name == "ic-verify-bls-signature")).uses_default_features = true

@@ -2,7 +2,7 @@
 
 ## Pending audit improvements
 
-The post-0.31 audit is implemented locally, not committed or published. Codec
+The post-0.31 audit is committed as `5a6a155`, not yet published. Codec
 bulk-byte/bigint encoding, schema-buffer reuse, prepared-root signature APIs,
 fixed certificate framing and 22 order-compatible management declarations are
 qualified by focused Clippy, 109 tests, matched Wasm sizes and installed instruction
@@ -11,6 +11,11 @@ the original decoder/budgets remain. The separate unused `leb128` cleanup is
 preserved. See the [audit report](../benchmarks/platform-031-audit.md) for gains,
 small regressions, memory tradeoffs, exact recipes and retained evidence.
 No Runtime, Types, browser or sibling release is part of this work.
+
+Frozen batch `batch-uCPG6Jvb` stopped before release preparation/publication at
+`check-features`: a stale exact feature assertion still required removed `leb128`.
+The assertion and reintroduction regressions are corrected for a fresh batch.
+Preserve its `qualification.5kqUXx` evidence; do not resume that frozen source.
 
 ## Published state
 
