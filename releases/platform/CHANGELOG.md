@@ -4,7 +4,7 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
-## [Unreleased]
+## [0.31.0]
 
 ### ✨ Added
 
@@ -13,7 +13,7 @@ See also the [Types ledger](../types/CHANGELOG.md).
   Check numeric label order/uniqueness at compile time and preserve existing wire
   bytes, optional admission, unbounded naturals, recursion, callbacks and decoder
   limits. Add native/Wasm standalone consumer qualification without registry
-  Candid or new dependencies. Fixes [#156](https://github.com/dragginzgame/ic-platform/issues/156).
+  Candid or new dependencies. Fixes [#156 — Define DTOs and codec mappings together](https://github.com/dragginzgame/ic-platform/issues/156).
 
 ### 💥 Breaking
 
