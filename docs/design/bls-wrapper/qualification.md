@@ -1,6 +1,6 @@
 # Independent BLS wrapper adoption — 2026-11-11
 
-The qualified implementation is adopted locally into `ic_platform::bls`. The
+The qualified implementation shipped in Platform 0.31.0 under `ic_platform::bls`. The
 separate experimental implementation package is removed; qualification retains
 only the published-baseline/current-source probe. No new product crate or release
 group was introduced; publication follows the ordinary Platform release workflow.
@@ -151,7 +151,9 @@ adopted in both locks and the installed snapshot. Snapshot, inventory and the
 actual dependency-boundary gate pass with its reviewed Digest-adapter exception.
 Snapshot-owned files were not hand-edited and no gate was bypassed.
 
-See [reproduction commands](../../../qualification/README.md). No macOS evidence,
-live-network acceptance, sibling Auth qualification or release qualification is
-claimed. The product migration remains local, pending the normal minor release
-for changed public type identities.
+See [reproduction commands](../../../qualification/README.md). Platform 0.31.0
+passed all 19 local release stages and package archive verification before
+publication. Its commit is `52e6af66c9183f4f0dc777e7290b445738b7bed5`, tagged
+`platform-v0.31.0`; the [handoff](../../status/current.md) records the release receipt.
+The measurements above describe the qualified pre-release implementation. No fresh
+macOS, live-network or sibling Auth acceptance is claimed; hosted CI is asynchronous.
