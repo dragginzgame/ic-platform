@@ -108,10 +108,12 @@ make tools-check
 cargo fetch --locked
 ```
 
-Shared tooling is pinned once in root `[workspace.dependencies]` and inherited
-as a dev-dependency by every workspace member. After changing the exact pin,
-run `cargo update -p toko-tooling`, then `make toko-tooling-update` to install
-the selected archive. Retain Cargo.lock and the snapshot. Use
+Shared tooling is pinned in each workspace's `[workspace.dependencies]` and
+inherited as a dev-dependency by every member. Keep the product root and private
+`qualification/Cargo.toml` selections identical. After changing both exact pins
+and their documented exceptions in `ci/dependency-pinning-exceptions.json`, run
+`cargo update -p toko-tooling` in each workspace, then `make toko-tooling-update`
+to install the selected archive. Retain both Cargo.lock files and the snapshot. Use
 `make toko-tooling-install` to reinstall that Cargo selection, and
 `make toko-tooling-status` to compare selected and installed identities offline.
 

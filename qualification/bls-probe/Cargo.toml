@@ -1,0 +1,38 @@
+[package]
+name = "bls-wrapper-probe"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+ic-testkit.workspace = true
+ic-verify-bls-signature.workspace = true
+tokio.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[package.metadata.toko-tooling.loc]
+category = "benchmarks"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+baseline = ["dep:platform-baseline"]
+candidate = ["dep:ic-platform"]
+
+[dependencies]
+ic-platform = { workspace = true, optional = true }
+ic-platform-runtime.workspace = true
+platform-baseline = { workspace = true, optional = true }
+
+[dev-dependencies]
+toko-tooling.workspace = true
+
+[lints]
+workspace = true

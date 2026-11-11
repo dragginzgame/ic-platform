@@ -24,7 +24,7 @@ raw-rand = ["candid-args"]
 agent = ["principal", "dep:ic-agent"]
 ic-protocol = ["principal", "certification-cbor", "dep:ic-transport-types"]
 ic-protocol-fixtures = ["ic-protocol"]
-bls = ["dep:ic-verify-bls-signature", "dep:ic_bls12_381"]
+bls = ["dep:ic_bls12_381", "dep:digest_10", "dep:sha2_11"]
 candid-codec-endpoint = ["runtime", "candid-codec", "candid-args", "dep:ic-platform-macros"]
 cmc-types = ["candid-codec", "principal"]
 icp-ledger-types = ["candid-codec", "principal", "dep:crc32fast", "dep:sha2_11"]
@@ -71,13 +71,13 @@ crc32fast = { workspace = true, optional = true }
 crypto-bigint = { workspace = true, optional = true }
 curve25519-dalek = { workspace = true, optional = true }
 data-encoding = { workspace = true, optional = true }
+digest_10 = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true, optional = true }
 hex = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
 ic-platform-macros = { workspace = true, optional = true }
 ic-platform-runtime = { workspace = true, optional = true }
 ic-platform-types = { workspace = true, optional = true }
-ic-verify-bls-signature = { workspace = true, optional = true }
 ic_bls12_381 = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
 leb128 = { workspace = true, optional = true }
@@ -100,10 +100,15 @@ candid = { workspace = true, features = ["serde_bytes", "value"] }
 ic-canister-sig-creation.workspace = true
 ic-management-canister-types.workspace = true
 ic-signature-verification.workspace = true
+ic-verify-bls-signature.workspace = true
 serde_bytes.workspace = true
 serde_cbor.workspace = true
 serde_json.workspace = true
 toko-tooling.workspace = true
+
+[[test]]
+name = "candid_declarations_consumer"
+required-features = ["candid-codec"]
 
 [[test]]
 name = "candid_codec_consumer"
@@ -139,6 +144,10 @@ required-features = ["ed25519"]
 name = "runtime_consumer"
 path = "tests/runtime_consumer.rs"
 required-features = ["runtime"]
+
+[[test]]
+name = "bls_comparison"
+required-features = ["bls"]
 
 [[test]]
 name = "bls_consumer"

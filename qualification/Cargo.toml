@@ -1,0 +1,27 @@
+[workspace]
+members = ["bls-probe"]
+resolver = "3"
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99.1"
+license-file = "../LICENSE.md"
+repository = "https://github.com/dragginzgame/ic-platform"
+publish = false
+
+[workspace.dependencies]
+ic-platform = { path = "../crates/ic-platform", default-features = false, features = ["bls"] }
+ic-platform-runtime = { path = "../crates/ic-platform-runtime", default-features = false, features = ["ic0"] }
+ic-testkit = { version = "0.92.0", default-features = false }
+ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
+platform-baseline = { package = "ic-platform", version = "=0.30.0", default-features = false, features = ["bls"] }
+tokio = { version = "1", features = ["rt", "net", "time"] }
+toko-tooling = "=0.39.10"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }

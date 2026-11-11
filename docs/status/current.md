@@ -2,7 +2,7 @@
 
 ## Published state
 
-Installed Toko is 0.39.9; compiler is 1.99.1. The authorized deployment is
+Installed Toko is 0.39.10; compiler is 1.99.1. The previous deployment is
 complete on crates.io and GitHub, and the normal checkout is reconciled:
 
 | Group | Version | Commit | Tag | Frozen batch / local receipt |
@@ -20,12 +20,55 @@ this local Linux evidence does not establish macOS or real-browser acceptance.
 
 ## Delivered changes and boundaries
 
-Types self-authentication now composes SHA-224 of the supplied bytes followed by
-`0x02`, using RustCrypto SHA-2 0.11. Base identity stays hash-free; production
-Types no longer depends on registry Principal. Registry Principal remains a
-development oracle and native-client transitive. The maintainer declined an
-upstream self-authentication comparison suite; the fixed regression remains.
-See [identity qualification](../design/identity-qualification.md).
+Deployment now covers this repository only: Types 0.19.3 followed by Platform
+0.31.0, with Runtime/browser unchanged. The maintainer excluded Testkit delivery.
+Published Toko 0.39.10 is adopted in both workspaces and the installed snapshot;
+its Digest-policy correction passes the actual boundary gate. The maintained
+runtime fixture lock was refreshed offline without supplier upgrades. Platform's
+native fixtures still use Testkit 0.92; their evidence does not establish adoption
+of Tooling's newer client. No sibling source or release effects are included.
+
+#156 is implemented locally and closed on GitHub: `candid_record!`/`candid_variant!` accept concrete
+struct/enum declarations, eliminating duplicated field types while retaining
+existing mapping forms. New forms preserve Rust attributes/visibility and check
+numeric label order/uniqueness at compile time. Native/Wasm standalone Clippy and
+consumer checks plus 23 focused tests/doctests pass, covering oracle/frozen bytes,
+optional fields, large Nat, recursion, callbacks and bounded refusals. The consumer
+leaf is wired into `check-consumer`. Query migration/publication are not performed;
+#50 remains deferred at the maintainer's explicit request.
+
+The qualified BLS wrapper is adopted locally into the facade, with its experimental
+implementation package removed. Signatures/errors now have Platform identity;
+bytes and error variants are unchanged. External curve/hash primitives remain.
+Certificate verification uses the same checked BLS boundary without duplicate key
+parsing. Native Clippy and 39 tests pass, as do matched Wasm/installed BLS and full
+signature probes. The adopted BLS probe retains the 13.88% one-shot / 7.65% cached
+instruction reductions and 2,643-byte optimized saving against published 0.30.0.
+See [BLS qualification](../design/bls-wrapper/qualification.md).
+The previously blocking direct-Digest policy is corrected by the adopted
+published Toko 0.39.10 payload. No snapshot files were hand-edited or gates waived.
+
+The follow-up Wasm harness changes are local, not committed or deployed. Explicit
+deployment mode retains each source lock and reports dependency/feature changes;
+strict mode remains available. Both enforce the existing size allowance and
+identical probe/compiler/settings. Twelve focused harness tests pass. Comparing
+the whole deployment to `a8c3fff` found four unchanged probes, but self-authenticating
+Principal grew 954 optimized total bytes / 698 code-section bytes and exceeded
+the 128-byte allowance. No waiver or crypto change was made. The default probe
+selection now includes that capability. See the
+[measurement report](../benchmarks/platform-030-deployment.md) for absolute sizes,
+raw sizes, input identities and dependency attribution limits. Follow-up controlled
+builds attribute 928 total / 672 code bytes to the SHA-2 stack upgrade. The local
+Types framing fix constructs the completed identity directly, saving 197 total/code
+bytes with no growth in the combined ledger probe; identical-graph comparison
+with zero allowance, native/Wasm Clippy and the fixed-byte argument-form regression
+pass. Helpers with forced sharing were rejected because they grew ledger Wasm.
+SHA-2 stays at 0.11.1; +757 total / +501 code bytes remain against the old deployment,
+with no threshold waiver. No new versions have been published.
+
+Types' published identity contract and fixed regression are recorded in
+[identity qualification](../design/identity-qualification.md). The maintainer
+declined an upstream self-authentication comparison suite.
 
 Platform 0.30.0 removes textual DID export, inspection, parsing, fixtures and
 `candid_parser`, including the service module and validation target. #154/#155

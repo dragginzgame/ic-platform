@@ -1,109 +1,226 @@
-//! Upstream BLS12-381 cryptography with identity-public-key admission.
+//! IC BLS byte admission and verification over external cryptographic primitives.
 //!
-//! Arithmetic, hashing, key encoding, signing and verification belong to the
-//! registry dependencies. The adapters retain identity-key rejection while
-//! ic-verify-bls-signature 0.6.0 lacks the upstream fix for Platform #127.
-//! No RNG capability is selected; consumers retain entropy and trust policy.
+//! This module owns byte admission and API composition, not cryptographic
+//! algorithms, certificate policy, trust roots or application key caches.
 
-use std::fmt;
+use std::{fmt, sync::LazyLock};
 
-pub use ic_verify_bls_signature::{
-    InvalidPrivateKey, InvalidPublicKey, InvalidSignature, Signature,
+use ic_bls12_381::{
+    G1Affine, G1Projective, G2Affine, G2Prepared, Gt, Scalar,
+    hash_to_curve::{ExpandMsgXmd, HashToCurve},
+    multi_miller_loop,
 };
 
-/// An upstream BLS public key with cached identity-point admission.
+mod sha256;
+
+const CIPHERSUITE: &[u8] = b"BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_";
+static NEGATIVE_GENERATOR: LazyLock<G2Prepared> =
+    LazyLock::new(|| G2Prepared::from(-G2Affine::generator()));
+
+/// A checked, subgroup-valid BLS public key.
 #[derive(Clone, Eq, PartialEq)]
-pub struct PublicKey {
-    key: ic_verify_bls_signature::PublicKey,
-    identity: bool,
+pub struct PublicKey(G2Affine);
+
+/// Failure to admit a compressed public key.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum InvalidPublicKey {
+    /// The input is not 96 bytes.
+    WrongLength,
+    /// The input is not a valid compressed subgroup point.
+    InvalidPoint,
 }
 
 impl PublicKey {
-    /// Length of the upstream compressed public-key encoding.
-    pub const BYTES: usize = ic_verify_bls_signature::PublicKey::BYTES;
+    /// Length of a compressed public key.
+    pub const BYTES: usize = 96;
 
-    fn from_upstream(key: ic_verify_bls_signature::PublicKey) -> Self {
-        // Both serialization and point admission are upstream operations. This
-        // second parse is confined to construction, never repeated by verify.
-        let point = ic_bls12_381::G2Affine::from_compressed(&key.serialize()).unwrap();
-        Self {
-            key,
-            identity: point.is_identity().into(),
+    /// Decode a compressed point, checking encoding, curve and subgroup validity.
+    ///
+    /// Identity points are admitted here, but rejected by verification.
+    pub fn deserialize(bytes: &[u8]) -> Result<Self, InvalidPublicKey> {
+        let bytes = bytes
+            .try_into()
+            .map_err(|_| InvalidPublicKey::WrongLength)?;
+        Option::from(G2Affine::from_compressed(bytes))
+            .map(Self)
+            .ok_or(InvalidPublicKey::InvalidPoint)
+    }
+
+    /// Encode this key in the supplier's canonical compressed representation.
+    pub fn serialize(&self) -> [u8; Self::BYTES] {
+        self.0.to_compressed()
+    }
+
+    /// Prepare immutable public pairing data for repeated verification.
+    pub fn prepare(&self) -> PreparedPublicKey {
+        PreparedPublicKey {
+            point: G2Prepared::from(self.0),
+            identity: bool::from(self.0.is_identity()),
         }
     }
 
-    /// Serialize using the upstream key encoding.
-    pub fn serialize(&self) -> [u8; Self::BYTES] {
-        self.key.serialize()
-    }
-
-    /// Parse upstream key bytes, preserving typed errors and identity parsing.
-    pub fn deserialize(bytes: &[u8]) -> Result<Self, InvalidPublicKey> {
-        ic_verify_bls_signature::PublicKey::deserialize(bytes).map(Self::from_upstream)
-    }
-
-    /// Reject identity public keys, then delegate verification upstream.
+    /// Verify the exact supplied message; mismatches and identity keys fail.
     #[expect(
         clippy::result_unit_err,
-        reason = "Preserve the existing BLS verification contract."
+        reason = "The public BLS contract specifies opaque verification failure"
     )]
     pub fn verify(&self, message: &[u8], signature: &Signature) -> Result<(), ()> {
-        if self.identity {
+        if bool::from(self.0.is_identity()) {
             return Err(());
         }
-        self.key.verify(message, signature)
+        self.prepare().verify(message, signature)
     }
 }
 
 impl fmt::Debug for PublicKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.key.fmt(f)
+        encoded_debug(f, "PublicKey", &self.serialize())
     }
 }
 
-/// An upstream BLS private key whose public keys retain identity admission.
+/// Caller-owned public-key pairing preparation; it carries no trust decision.
+pub struct PreparedPublicKey {
+    point: G2Prepared,
+    identity: bool,
+}
+
+impl PreparedPublicKey {
+    /// Verify with the same admission decisions as [`PublicKey::verify`].
+    #[expect(
+        clippy::result_unit_err,
+        reason = "The public BLS contract specifies opaque verification failure"
+    )]
+    pub fn verify(&self, message: &[u8], signature: &Signature) -> Result<(), ()> {
+        if self.identity {
+            return Err(());
+        }
+        let message_point = G1Affine::from(hash_message(message));
+        // The supplier evaluates e(H(message), key) / e(signature, generator).
+        let product = multi_miller_loop(&[
+            (&message_point, &self.point),
+            (&signature.0, &NEGATIVE_GENERATOR),
+        ])
+        .final_exponentiation();
+        if product == Gt::identity() {
+            Ok(())
+        } else {
+            Err(())
+        }
+    }
+}
+
+/// A checked, subgroup-valid BLS signature point.
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub struct PrivateKey(ic_verify_bls_signature::PrivateKey);
+pub struct Signature(G1Affine);
+
+/// Failure to admit a compressed signature.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum InvalidSignature {
+    /// The input is not 48 bytes.
+    WrongLength,
+    /// The input is not a valid compressed subgroup point.
+    InvalidPoint,
+}
+
+impl Signature {
+    /// Length of a compressed signature.
+    pub const BYTES: usize = 48;
+
+    /// Decode a compressed point, checking encoding, curve and subgroup validity.
+    pub fn deserialize(bytes: &[u8]) -> Result<Self, InvalidSignature> {
+        let bytes = bytes
+            .try_into()
+            .map_err(|_| InvalidSignature::WrongLength)?;
+        Option::from(G1Affine::from_compressed(bytes))
+            .map(Self)
+            .ok_or(InvalidSignature::InvalidPoint)
+    }
+
+    /// Encode this signature in the supplier's canonical compressed representation.
+    pub fn serialize(&self) -> [u8; Self::BYTES] {
+        self.0.to_compressed()
+    }
+}
+
+impl fmt::Debug for Signature {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        encoded_debug(f, "Signature", &self.serialize())
+    }
+}
+
+/// A canonical scalar, including zero for byte compatibility.
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub struct PrivateKey(Scalar);
+
+/// Failure to admit a private scalar.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum InvalidPrivateKey {
+    /// The input is not 32 bytes.
+    WrongLength,
+    /// The input is at least the scalar field order.
+    OutOfRange,
+}
 
 impl PrivateKey {
-    /// Length of the upstream private-key encoding.
-    pub const BYTES: usize = ic_verify_bls_signature::PrivateKey::BYTES;
+    /// Length of a canonical big-endian private scalar.
+    pub const BYTES: usize = 32;
 
-    /// Serialize using the upstream private-key encoding.
-    pub fn serialize(&self) -> [u8; Self::BYTES] {
-        self.0.serialize()
-    }
-
-    /// Parse upstream private-key bytes with the original typed errors.
+    /// Decode a canonical big-endian scalar without reduction modulo its order.
     pub fn deserialize(bytes: &[u8]) -> Result<Self, InvalidPrivateKey> {
-        ic_verify_bls_signature::PrivateKey::deserialize(bytes).map(Self)
+        let mut bytes: [u8; Self::BYTES] = bytes
+            .try_into()
+            .map_err(|_| InvalidPrivateKey::WrongLength)?;
+        bytes.reverse();
+        Option::from(Scalar::from_bytes(&bytes))
+            .map(Self)
+            .ok_or(InvalidPrivateKey::OutOfRange)
     }
 
-    /// Delegate public-key derivation upstream and retain identity admission.
+    /// Encode this scalar in canonical big-endian form.
+    pub fn serialize(&self) -> [u8; Self::BYTES] {
+        let mut bytes = self.0.to_bytes();
+        bytes.reverse();
+        bytes
+    }
+
+    /// Derive the public key using supplier scalar multiplication.
+    ///
+    /// Zero produces an identity key, which cannot verify signatures.
     pub fn public_key(&self) -> PublicKey {
-        PublicKey::from_upstream(self.0.public_key())
+        PublicKey(G2Affine::from(G2Affine::generator() * self.0))
     }
 
-    /// Delegate signing upstream.
+    /// Sign the exact supplied bytes using supplier hash-to-curve and multiplication.
     pub fn sign(&self, message: &[u8]) -> Signature {
-        self.0.sign(message)
+        Signature(G1Affine::from(hash_message(message) * self.0))
     }
 }
 
 impl fmt::Debug for PrivateKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        f.write_str("PrivateKey(REDACTED)")
     }
 }
 
-/// Verify upstream signature/key encodings with identity-public-key rejection.
+/// Decode and verify a signature; malformed inputs, mismatches and identity keys fail.
 #[expect(
     clippy::result_unit_err,
-    reason = "Preserve the existing BLS verification contract."
+    reason = "The public BLS contract specifies opaque verification failure"
 )]
-pub fn verify_bls_signature(signature: &[u8], message: &[u8], key: &[u8]) -> Result<(), ()> {
+pub fn verify_bls_signature(signature: &[u8], message: &[u8], public_key: &[u8]) -> Result<(), ()> {
     let signature = Signature::deserialize(signature).map_err(|_| ())?;
-    PublicKey::deserialize(key)
-        .map_err(|_| ())?
-        .verify(message, &signature)
+    let key = PublicKey::deserialize(public_key).map_err(|_| ())?;
+    key.verify(message, &signature)
+}
+
+fn hash_message(message: &[u8]) -> G1Projective {
+    <G1Projective as HashToCurve<ExpandMsgXmd<sha256::Sha256>>>::hash_to_curve(message, CIPHERSUITE)
+}
+
+fn encoded_debug(f: &mut fmt::Formatter<'_>, name: &str, bytes: &[u8]) -> fmt::Result {
+    write!(f, "{name}(")?;
+    for byte in bytes {
+        write!(f, "{byte:02x}")?;
+    }
+    f.write_str(")")
 }

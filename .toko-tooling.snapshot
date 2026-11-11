@@ -1,8 +1,8 @@
 # Toko Tooling snapshot v1
-# version	0.39.9
+# version	0.39.10
 format	1
 source	https://crates.io/crates/toko-tooling
-revision	1dd7bdb5bbb9bb8076dd35d8dc179c9e49196d9945c8e585990e40091b468b48
+revision	ea181684d772d4632ba534b80bd47bb8b2044278ea346f2c02e37d2ea9991a57
 # entrypoint	TOKO-TOOLING.md
 # entrypoint	make/consumer.mk
 # entrypoint	scripts/ci/check-cargo-dependency-boundaries.sh
@@ -34,7 +34,7 @@ revision	1dd7bdb5bbb9bb8076dd35d8dc179c9e49196d9945c8e585990e40091b468b48
 # entrypoint	scripts/ci/fixture-lifecycle.sh
 file	cfed3d5ae20733a798849caa2656fde5195e1188af45109c40850f4cd62a93d8	-	TOKO-TOOLING.md
 file	91a8c4e1dc4ddb8fbba5825b1190716ddf29eb3cb49784067620b9a86b45c784	-	make/consumer.mk
-file	7e38c947d6d66c75a83ac45a6d49d11e602153d7906893436ec5083ff0c55cf0	x	scripts/ci/check-cargo-dependency-boundaries.sh
+file	38ff7dec5ac00d527023a4d13b89339f5d4298824ee0193ec785c1c7fc075244	x	scripts/ci/check-cargo-dependency-boundaries.sh
 file	468ff88c6e6fca8c79447ceaa8d04d11f2e1c668664bb9732da708b696a6041b	x	scripts/ci/check-documentation-links.pl
 file	531d272b312e7ba4e2c2234ea27d71dd5cc965aecf287055c34697a3b30144d4	x	scripts/ci/check-dependency-pins.sh
 file	36a6a380703ffa6c9f686b0502d3100b2edd1279b8bc77cc34084dcb1557c410	x	scripts/ci/check-release-commands.sh
@@ -71,7 +71,7 @@ file	f83e4bd3143a04e954f77eb23d38b1924658aa298b0c1d3486748197861d696d	-	make/car
 file	9976e6cd4e60bfa86298f4b4209f5ffde0651105feef208a9c5ea9c90a432f2d	x	scripts/dev/install-git-hooks.sh
 file	94bd2fe49818a11955dcb56f5ff6be26f47f50ae0d947d3eba96c15962db0689	-	ci/external-ic-dependencies.txt
 file	e6f6faf964a19009aa00a07bd1cb491fe9bd728be9d07fcde3a0bc6a00f4f568	-	ci/cbor-dependencies.json
-file	3cd252e070f971d54b8966f81e7917296e31b51aa0a0fa7670a555d47f8e629a	-	ci/hash-dependencies.json
+file	8de4cc409b28314667ddf6af521c421f9abc9be1e937f6f0130815a6861b7421	-	ci/hash-dependencies.json
 file	27c70a759e2afc949bfa998a9e10d6fd6e2d25413d4f84c643c944e981a30d54	-	scripts/ci/dependency-pins.jq
 file	6261109212af1d0dd337fd71239c3adcd03eaa54263cfaffac42cab41b082e81	-	scripts/ci/cargo-release-group.sh
 file	ec0ee173807556f931a08a173fc4e38397f26bab00539b748b829cb24d310138	x	scripts/ci/prepare-script-fixture.sh

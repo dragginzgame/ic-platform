@@ -763,7 +763,30 @@ sources, factual constants and the separated implementation context. The
 native timing and graph evidence. This supersedes the signature-composition
 ownership portion of the historical 0.22 cut below, not its primitive boundary.
 
+## Owned BLS wrapper adoption (pending)
+
+The qualified, independently authored wrapper now lives in `ic_platform::bls`.
+No additional product crate or release group is introduced. `PublicKey`,
+`PrivateKey`, `Signature` and all three deserialization error types have Platform
+identity. Existing method names, bytes, typed error variants and identity-key
+refusal remain; direct registry `Signature`/error exchanges must migrate imports
+or use explicit serialized-byte admission. This is a Platform minor hard cut.
+
+`PublicKey::prepare()` exposes caller-owned `PreparedPublicKey` for repeated
+verification. It is not a trust decision or an automatic application cache.
+Curve, pairing, hash-to-curve and point/scalar codecs remain external, with SHA-2
+0.11 behind a Digest 0.10 trait adapter. Registry `ic-verify-bls-signature` is a
+development oracle and native Agent transitive, absent from owned Wasm graphs.
+Root and delegated certificate checks use the same BLS boundary; duplicate key
+parsing is removed while preserving subgroup and identity admission. Certificate
+and tree identities, protocol domains, delegation, authenticated time and caller
+freshness remain unchanged. See [qualification](../design/bls-wrapper/qualification.md)
+for the measured gain and pending Toko checker adoption requirement.
+
 ## Upstream cryptographic dependency cut (0.22)
+
+Historical behavior below is superseded by the owned signature composition and
+BLS wrapper sections above; certificate/tree and primitive ownership remains.
 
 The embedded BLS curve/verifier, certification certificate/hash/tree code and
 canister-signature creation/verifier bodies are removed, together with their
@@ -983,12 +1006,14 @@ Their earlier ownership/version language is not the current contract:
   exact versus compatible arity, numeric ranges and typed errors. Configured
   low-level upstream APIs retain their behavior. This is not a Candid fork or a
   universal claim about arbitrary trusted Rust schemas/custom visitors.
-- **Certification and signatures:** implementations and identities belong to
-  registry suppliers. Keep no embedded BLS/curve/verifier bodies or algorithm
-  suites. Preserve DER admission, identity-key refusal at root and delegated
-  keys, upstream verification and signing-time extraction only after successful
-  verification from the signing certificate. Consumers own trust/freshness.
-- **Crypto adapters:** upstream BLS selects alloc/groups without RNG/defaults.
+- **Certification and signatures:** certificate/tree identities and cryptographic
+  primitives belong to registry suppliers; Platform owns the qualified BLS and
+  canister-signature compositions. Keep no embedded curve/hash bodies or imported
+  algorithm suites. Preserve DER admission, subgroup/identity refusal at root and
+  delegated keys, and time extraction only from the authenticated signing
+  certificate. Consumers own trust/freshness.
+- **Crypto adapters:** BLS primitives select alloc/groups/pairings/experimental
+  without RNG/defaults; SHA-2 0.11 uses the reviewed Digest trait bridge.
   Standard ECDSA/Ed25519 stay upstream. Preserve the ECDSA bigint security floor
   and the qualified Wasm backend; do not alter algorithms, encodings or domains.
   Native Agent retains its upstream graph and advisory #50 remains deferred.

@@ -59,7 +59,7 @@ printf 'profile\traw_total\traw_code\traw_custom\toptimized_total\toptimized_cod
 for profile in owned-creation reference-creation owned-verification reference-verification; do
     cargo tree --offline --locked --manifest-path "$output/Cargo.toml" --target wasm32-unknown-unknown \
         --no-default-features --features "$profile" --edges normal,build --prefix none > "$output/$profile.graph"
-    if [[ "$profile" == owned-* ]] && grep -Eq '^(candid|ic_principal|ic-canister-sig-creation|ic-signature-verification|ic0|ic-platform-runtime) v' "$output/$profile.graph"; then
+    if [[ "$profile" == owned-* ]] && grep -Eq '^(candid|ic_principal|ic-canister-sig-creation|ic-signature-verification|ic-verify-bls-signature|ic0|ic-platform-runtime) v' "$output/$profile.graph"; then
         echo 'Owned signature probe acquired a forbidden production dependency' >&2; exit 1
     fi
     cargo clippy --offline --locked --manifest-path "$output/Cargo.toml" --target wasm32-unknown-unknown \

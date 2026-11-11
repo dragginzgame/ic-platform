@@ -96,6 +96,6 @@ pub fn roundtrip() {
 use support::decode_hex as hex;
 
 #[test]
-fn bls_keys_signatures_and_errors_keep_upstream_identity() {
+fn bls_keys_signatures_and_errors_preserve_bytes_and_admission() {
     roundtrip();
 }

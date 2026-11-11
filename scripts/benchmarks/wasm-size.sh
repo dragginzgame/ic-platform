@@ -32,6 +32,8 @@ if [[ "$cpubits" != auto ]]; then
     encoded_flags="$(printf '%s\037%s' "$encoded_flags" "--cfg=cpubits=\"$cpubits\"")"
 fi
 printf '%s\n' "$cpubits" > "$output/cpubits.txt"
+printf '%s\n' 'target=wasm32-unknown-unknown' 'panic=abort' 'strip=symbols' \
+    'default-features=false' 'optimizer=ic-wasm shrink' > "$output/build-settings.txt"
 if [[ "$(git -C "$source_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$source_root" ]] &&
     git -C "$source_root" rev-parse HEAD > "$output/source-head.txt" 2>/dev/null; then
     git -C "$source_root" diff --binary -- crates Cargo.toml Cargo.lock > "$output/source.patch"

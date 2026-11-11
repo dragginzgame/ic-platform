@@ -2,7 +2,7 @@
 TOKO_TOOLING_RUST := 1
 TOKO_TOOLING_RELEASE := 1
 FORMAT_EXTRA_SOURCES := $(wildcard scripts/fixtures/cdk-runtime/*.rs scripts/fixtures/cdk-runtime/transport/*.rs scripts/fixtures/prepared-call-consumer/*.rs scripts/fixtures/type-benchmark/main.rs scripts/fixtures/parser-fuzz/main.rs scripts/fixtures/wasm-size/lib.rs)
-FORMAT_RUST_ARGS = --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
+FORMAT_RUST_ARGS = --extra-workspace qualification --rustfmt-edition 2024 $(foreach source,$(FORMAT_EXTRA_SOURCES),--rustfmt-source "$(source)")
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/stable-identities/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/ic0-consumer/*.rs)
 FORMAT_EXTRA_SOURCES += $(wildcard scripts/fixtures/canic-wasm-benchmark/*.rs)
@@ -177,6 +177,7 @@ check-consumer:
 	bash scripts/ci/test-platform-consumer-admission.sh
 	bash scripts/ci/test-prepared-call-consumer-admission.sh
 	bash scripts/ci/check-prepared-call-consumer.sh
+	bash scripts/ci/check-candid-declarations-consumer.sh
 	bash scripts/ci/check-platform-consumer.sh
 check-features:
 	bash scripts/ci/test-platform-feature-selections.sh

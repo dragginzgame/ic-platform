@@ -1,14 +1,13 @@
 //! Authentication of IC canister signatures and their signing-certificate time.
 //!
-//! Certified-tree hashing, point admission and BLS verification remain external
-//! implementations. Callers supply their trust root and own freshness, input
-//! budgets and application authorization.
+//! Certified-tree hashing and curve primitives remain external implementations;
+//! the BLS boundary owns checked admission and verification composition. Callers
+//! supply their trust root and own freshness, input budgets and authorization.
 
 use crate::canister_sig_creation::{
     CanisterSigPublicKey, extract_raw_root_pk_from_der, hash_bytes,
 };
 use crate::principal::Principal;
-use ic_bls12_381::G2Affine;
 use ic_certification::{
     Certificate, Delegation, HashTree, HashTreeNode, LookupResult, SubtreeLookupResult,
 };
@@ -161,16 +160,12 @@ fn required_leaf<'tree>(tree: &'tree HashTree, path: &[&[u8]]) -> Result<&'tree 
 }
 
 fn authenticate_certificate(certificate: &Certificate, key: &[u8]) -> Result<(), String> {
-    let compressed: &[u8; 96] = key.try_into().map_err(|_| "invalid BLS signature")?;
-    let point = Option::<G2Affine>::from(G2Affine::from_compressed(compressed))
-        .ok_or("invalid BLS signature")?;
-    if bool::from(point.is_identity()) {
-        return Err("invalid BLS signature".into());
-    }
+    // The BLS boundary owns checked point/subgroup admission and identity refusal
+    // for both root and delegated keys; no second point decode is needed here.
     let mut signed = Vec::with_capacity(46);
     signed.extend_from_slice(b"\x0dic-state-root");
     signed.extend_from_slice(&certificate.tree.digest());
-    ic_verify_bls_signature::verify_bls_signature(&certificate.signature, &signed, key)
+    crate::bls::verify_bls_signature(&certificate.signature, &signed, key)
         .map_err(|()| "invalid BLS signature".into())
 }
 

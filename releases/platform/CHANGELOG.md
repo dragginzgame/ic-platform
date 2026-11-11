@@ -4,6 +4,39 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [Unreleased]
+
+### ✨ Added
+
+- Let `candid_record!` and `candid_variant!` declare concrete Rust DTOs and owned
+  codec mappings together, retaining visibility, docs, derives and attributes.
+  Check numeric label order/uniqueness at compile time and preserve existing wire
+  bytes, optional admission, unbounded naturals, recursion, callbacks and decoder
+  limits. Add native/Wasm standalone consumer qualification without registry
+  Candid or new dependencies. Fixes [#156](https://github.com/dragginzgame/ic-platform/issues/156).
+
+### 💥 Breaking
+
+- Adopt the independently qualified BLS wrapper in `ic_platform::bls`. Signature
+  and deserialization errors now have Platform identity; their bytes and error
+  variants remain unchanged. Registry verifier callers exchange serialized bytes
+  explicitly. Add caller-owned `PreparedPublicKey` for repeated verification.
+  Use SHA-2 0.11 with external curve/hash-to-curve/pairing primitives and a Digest
+  trait adapter; the old verifier remains dev-only or a native Agent transitive.
+  Certificate verification uses this same checked boundary, retaining subgroup
+  and identity-key refusal at root/delegated keys without a duplicate point parse.
+
+### 🩹 Fixed
+
+- Adopt Toko Tooling 0.39.10's narrowly scoped Digest-adapter admission and
+  include the private BLS benchmark workspace in formatting and pin checks.
+- Let hosted Wasm regression checks compare deployments with changed dependencies,
+  retaining each revision's lock selection and reporting external package/feature
+  changes alongside absolute total/code-section bytes. Keep strict comparisons
+  available, require identical nested probes and build settings, and preserve the
+  growth threshold in both modes. Include self-authenticating Principal in the
+  default probes so its supplier changes are measured.
+
 ## [0.30.0] - 2026-11-11
 
 ### 💥 Breaking

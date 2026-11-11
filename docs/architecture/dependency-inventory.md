@@ -33,7 +33,7 @@ IC Tooling. The former native Profiler provider is retired here.
 | Native agent | ic-agent | Registry client, identities and EffectiveId; Candid may remain transitive here |
 | Native IC protocol | ic-transport-types | Typed ingress/read-state/metrics adapters; same registry packet identities as Agent |
 | Certificates | ic-certification | External tree/certificate/hash identities; typed CBOR admission stays in Platform |
-| BLS | ic-verify-bls-signature, ic_bls12_381 | External crypto; Platform adapters preserve identity-key refusal |
+| BLS | ic_bls12_381, sha2 0.11, digest 0.10 traits | Owned checked wrapper over external primitives; caller-owned preparation and identity-key refusal |
 | Canister signatures | Certificate/BLS suppliers and SHA-2 | Owned protocol composition; trust/freshness policy stays consumer-owned |
 | ECDSA / Ed25519 | k256 / ed25519-dalek and curve25519-dalek | External primitives; crypto-bigint security floor remains explicit |
 | Browser SDK | @icp-sdk/core 6.1.1 | Browser 0.2.0 has typed call-ingress inspection, no generic Cbor export |
@@ -42,6 +42,14 @@ Upstream binary Candid and management/signature packages also remain as explicit
 **development oracles**. An all-features development tree is not a production
 Wasm dependency list. Use a target-specific normal/build graph for an application;
 this inventory makes no fresh fleet or whole-canister size claim.
+
+The qualified [BLS wrapper](../design/bls-wrapper/qualification.md) now lives in
+the facade. Its standalone normal graph excludes `ic-verify-bls-signature`, SHA-2
+0.10, `hex` and `lazy_static`; the curve still requires older Digest/field/group
+dependencies. Certificate hashing independently retains SHA-2 0.10. The old
+verifier remains a development oracle and native Agent transitive. Qualification
+contains only the matched published-baseline/current-source probe, not another
+implementation or product package.
 
 ## Source maintenance
 
@@ -79,7 +87,7 @@ facade README feature table. Package release versions are represented as
 | Package | Feature | Enables |
 | --- | --- | --- |
 | ic-platform | agent | dep:ic-agent, principal |
-| ic-platform | bls | dep:ic-verify-bls-signature, dep:ic_bls12_381 |
+| ic-platform | bls | dep:digest_10, dep:ic_bls12_381, dep:sha2_11 |
 | ic-platform | candid-args |  |
 | ic-platform | candid-codec | dep:num-bigint, num-bigint/serde, principal |
 | ic-platform | candid-codec-endpoint | candid-args, candid-codec, dep:ic-platform-macros, runtime |
@@ -122,6 +130,7 @@ facade README feature table. Package release versions are represented as
 | ic-platform | crypto-bigint | ^0.7.10 | normal | all | true | false |  |
 | ic-platform | curve25519-dalek | ^5.0.0 | normal | all | true | false |  |
 | ic-platform | data-encoding | ^2.11 | normal | all | true | false | alloc |
+| ic-platform | digest | ^0.10.7 | normal | all | true | false |  |
 | ic-platform | ed25519-dalek | ^3.0.0 | normal | all | true | false |  |
 | ic-platform | hex | ^0.4.3 | normal | all | true | true |  |
 | ic-platform | ic-agent | ^0.49.2 | normal | cfg(not(target_family = "wasm")) | true | false | pem |
@@ -133,8 +142,8 @@ facade README feature table. Package release versions are represented as
 | ic-platform | ic-platform-types | workspace-owned | normal | all | true | false |  |
 | ic-platform | ic-signature-verification | ^0.3.0 | dev | all | false | false |  |
 | ic-platform | ic-transport-types | ^0.49.1 | normal | cfg(not(target_family = "wasm")) | true | true |  |
-| ic-platform | ic-verify-bls-signature | ^0.6.0 | normal | all | true | false | alloc |
-| ic-platform | ic_bls12_381 | ^0.10.1 | normal | all | true | false | groups |
+| ic-platform | ic-verify-bls-signature | ^0.6.0 | dev | all | false | false | alloc |
+| ic-platform | ic_bls12_381 | ^0.10.1 | normal | all | true | false | alloc, experimental, groups, pairings |
 | ic-platform | k256 | ^0.14.0 | normal | all | true | false | ecdsa |
 | ic-platform | leb128 | ^0.2.7 | normal | all | true | true |  |
 | ic-platform | num-bigint | ^0.5.1 | normal | all | true | true |  |

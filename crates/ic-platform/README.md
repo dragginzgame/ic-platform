@@ -92,6 +92,29 @@ consumer-owned. Other adapters are not automatically migrated; see the
 [migration contract](https://github.com/dragginzgame/ic-platform/blob/main/docs/architecture/migration.md#owned-binary-codec-unreleased)
 for supported mappings and distinct resource-budget semantics.
 
+Declare an external DTO and its owned mapping together with `candid_record!` or
+`candid_variant!`, instead of repeating field types:
+
+```rust
+use ic_platform::candid_codec::Nat;
+ic_platform::candid_record! {
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct BalanceReply {
+        596_483_356 => pub balance: Nat,
+        3_582_638_454 => pub oldest_tx_id: Option<Nat>,
+    }
+}
+```
+
+The declaration forms accept concrete structs/enums, Rust visibility, docs,
+derives and attributes, with unit, single-payload (including tuple) and named-field
+variants. Integer labels must be strictly increasing at each level; duplicate or
+unordered labels fail at compile time. Attributes affect the Rust declaration,
+not the explicit Candid labels. Place shape-changing `cfg` attributes on the whole
+macro invocation. No Serde derive is required. Existing-type mapping forms remain
+available, with unchanged bytes and decoding limits. See the public macro docs
+and [consumer proof](tests/candid_declarations_consumer.rs).
+
 Select `candid-args` for the small dependency-free argument encoders:
 `candid_args::empty()`, `candid_args::units(count)` and `candid_args::text(value)`.
 These create empty arguments, unit/null arguments and one UTF-8 text argument.
@@ -215,9 +238,12 @@ packages are dev-only byte/behavior/benchmark oracles. See the
 
 Enable `bls` independently for `ic_platform::bls::{PublicKey, Signature,
 PrivateKey, InvalidPublicKey, InvalidSignature, InvalidPrivateKey,
-verify_bls_signature}` from upstream 0.6.0. This retains typed deserialization
-errors, serialized bytes and verification results. Upstream defaults are off
-and alloc is on, matching the IC verifier and Auth fixtures. Deterministic keys
+verify_bls_signature}` with Platform-owned signature and error types. This retains
+typed error variants, serialized bytes and verification results; direct exchanges
+with registry verifier types require explicit byte serialization/deserialization.
+`PublicKey::prepare()` returns caller-owned `PreparedPublicKey` for repeated
+verification. Curve primitives remain external and hashing uses SHA-2 0.11 through
+a Digest trait adapter; upstream defaults and RNG are off. Deterministic keys
 can be deserialized from caller-supplied bytes and used for signing; no RNG feature
 or entropy source is selected. Key generation/custody and domain/trust policy
 stay with callers. BLS alone brings neither Candid, creation, certification,

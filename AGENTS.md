@@ -172,6 +172,17 @@ external bytes and consumer-owned decoding/trust/freshness policies unchanged.
 
 ## Cryptographic boundary
 
+On 2026-11-11 the maintainer authorized adopting the qualified clean-room BLS
+wrapper into the existing facade `bls` module. Its source-unexposed implementer
+received protocol/API facts; independent comparisons remain separate. Arithmetic,
+pairings, hash-to-curve, point/scalar codecs and SHA-256 call external libraries
+unchanged. The Digest 0.10 trait adapter forwards to SHA-2 0.11; it implements no
+hashing or message expansion. Preserve checked subgroup admission, identity-key
+refusal and caller-owned prepared-key custody. This supersedes the earlier
+registry-verifier/type-identity requirement only for this reviewed composition.
+Do not keep a second implementation in qualification or introduce another product
+crate. See [BLS qualification](docs/design/bls-wrapper/qualification.md).
+
 The maintainer authorized independent canister-signature protocol composition
 on 2026-11-10. Platform owns key-envelope framing, certificate/delegation and
 witness checks, and authenticated signing-time extraction. Use canonical Types
@@ -206,22 +217,21 @@ at its consumers. The BLAKE3 forwarding surface is retired (#150); do not restor
 a facade dependency for pure hashing. Algorithm, input/domain and persisted-format
 changes remain separate explicit decisions.
 
-BLS cryptography belongs to registry ic-verify-bls-signature 0.6.x and
-ic_bls12_381 0.10.x. Select only alloc/groups, with defaults and RNG disabled.
-Keep no embedded curve/verifier source or algorithm-test/vector suite. Platform
-retains delegating key adapters and #127 identity-key admission: point parsing,
-identity testing, derivation, signing, serialization and verification all call
-upstream APIs. Signature/error types have upstream identity; key adapters retain
-Platform identity. Preserve existing bytes, typed errors and identity-key refusal
-through integration tests, including keys derived from a zero private key.
+BLS curve primitives belong to registry ic_bls12_381 0.10.x, selecting
+alloc/groups/pairings/experimental with defaults and RNG disabled. Keep no
+embedded curve/hash implementation or imported algorithm-test/vector suite.
+Platform owns the qualified BLS wrapper and all its key/signature/error types;
+registry ic-verify-bls-signature remains a development oracle and native Agent
+transitive. Preserve bytes, typed error variants and #127 identity-key refusal,
+including keys derived from a zero private key. Certificate verification uses
+the same checked BLS boundary for root and delegated keys without a second parse.
 
 Our team does not include cryptographers. Do not implement, replace or alter
 cryptographic primitives: curve arithmetic, pairings, public-key derivation,
-BLS signing/verification, point encoding or hash algorithms. The authorized
-canister-signature protocol composition above uses those external primitives
-with unchanged protocol domains and bytes. Retain applicable upstream licences
-for dependencies; do not substitute the earlier public-derivation or BLS
-replacement prototypes.
+hash-to-curve, point encoding or hash algorithms. The authorized BLS and
+canister-signature compositions use those external primitives with unchanged
+protocol domains and bytes. Retain applicable upstream licences for dependencies;
+do not substitute earlier primitive-replacement prototypes.
 
 Dependency scaffolding may be simplified: manifests, feature gates, unused
 modules, duplicate generators and integration plumbing are in scope when they

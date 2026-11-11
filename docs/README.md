@@ -38,6 +38,8 @@ The corresponding qualification reports are the evidence entrypoints:
   [ledger hash/account composition](design/ledger-composition-qualification.md).
 - [Candid codec comparison matrix](benchmarks/candid-codec-2026-11-10/matrix.md)
   and [canister-signature measurements](benchmarks/canister-signatures-2026-11-10.md).
+- [BLS wrapper adoption](design/bls-wrapper/qualification.md):
+  source separation, dependency limits and matched installed measurements.
 - [Toko 0.39.6 adoption](development/toko-0396-adoption.md).
 
 `audits/` contains dated technical/source inventories. `benchmarks/` retains

@@ -10,7 +10,7 @@ The [Principal](principal-implementation.md) and
 inputs and limits. This document records integrating-reviewer evidence, not a
 claim of legal clearance or a cryptographic implementation rewrite.
 
-## Self-authentication dependency cut (pending Types 0.19.2)
+## Self-authentication dependency cut (Types 0.19.2)
 
 The maintainer subsequently authorized replacing the registry Principal adapter
 with the specified composition: SHA-224 of the exact supplied bytes, followed
@@ -40,8 +40,20 @@ Focused qualification on Rust 1.99.1:
   version changed. `ic_principal` remains a development oracle and may still be
   selected by native clients. BLS independently retains SHA-2 0.10.
 
-No release, installed-runtime rerun or new native macOS evidence is claimed for
-this focused Types change. Existing identity serialization is unmodified.
+The focused observations above preceded publication; Types 0.19.2 is now released
+as recorded in the current handoff. Existing identity serialization is unmodified.
+
+### Follow-up fixed-frame construction (local)
+
+The completed SHA-224-plus-suffix frame now constructs Principal directly instead
+of passing through variable-length admission/copy. Native all-target and Wasm
+library Clippy pass, and the existing independent fixed-byte regression covers
+array reference, slice, borrowed Vec and owned Vec. SHA-2 and its features are
+unchanged. A strict identical-graph comparison saves 197 total/code-section bytes
+in the multi-call Principal probe with no size change in the combined ledger
+probe; the supplier upgrade's remaining growth is not waived. See the
+[deployment and attribution measurements](../benchmarks/platform-030-deployment.md).
+This follow-up is not published and adds no installed-runtime or macOS evidence.
 
 ## Original integration (Types 0.19.1)
 

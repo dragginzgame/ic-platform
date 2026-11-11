@@ -68,7 +68,7 @@ for variant in owned reference reference-admitted; do
         platform-signature-instructions-probe "$required" > "$output/$variant.identities.json"
     cargo tree --offline --locked --manifest-path "$output/probe/Cargo.toml" --target wasm32-unknown-unknown \
         --features "$variant" --edges normal,build --prefix none > "$output/$variant.graph"
-    if [[ "$variant" == owned ]] && grep -Eq '^(candid|ic_principal|ic-canister-sig-creation|ic-signature-verification) v' "$output/$variant.graph"; then
+    if [[ "$variant" == owned ]] && grep -Eq '^(candid|ic_principal|ic-canister-sig-creation|ic-signature-verification|ic-verify-bls-signature) v' "$output/$variant.graph"; then
         echo 'Owned benchmark acquired a retired signature dependency' >&2; exit 1
     fi
     cargo clippy --offline --locked --manifest-path "$output/probe/Cargo.toml" --target wasm32-unknown-unknown \

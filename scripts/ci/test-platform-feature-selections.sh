@@ -66,6 +66,10 @@ done <<'MUTATIONS'
 (.dependencies[] | select(.name == "ic-verify-bls-signature")).uses_default_features = true
 (.dependencies[] | select(.name == "ic-verify-bls-signature")).features += ["rand"]
 (.dependencies[] | select(.name == "ic_bls12_381")).features += ["bits"]
+(.dependencies[] | select(.name == "ic-verify-bls-signature")).kind = null
+(.dependencies[] | select(.name == "digest")).uses_default_features = true
+(.dependencies[] | select(.name == "digest")).req = "^0.11"
+.features.bls -= ["dep:sha2_11"]
 .features.certification = []
 .features["certification-cbor"] -= ["certification"]
 .features["certification-cbor"] -= ["dep:serde_cbor"]

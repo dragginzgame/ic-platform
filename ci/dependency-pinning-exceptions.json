@@ -1,6 +1,22 @@
 [
   {
     "rule": "cargo-exact",
+    "file": "qualification/Cargo.toml",
+    "subject": "platform-baseline",
+    "value": "=0.30.0",
+    "reason": "The private matched BLS benchmark must retain its published pre-adoption baseline while the candidate uses local Platform source.",
+    "evidence": "docs/design/bls-wrapper/qualification.md"
+  },
+  {
+    "rule": "cargo-exact",
+    "file": "qualification/Cargo.toml",
+    "subject": "toko-tooling",
+    "value": "=0.39.10",
+    "reason": "The private qualification workspace inherits the same exact published tooling selection as the product workspace and installed snapshot.",
+    "evidence": "README.md#development"
+  },
+  {
+    "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "ic-management-canister-types",
     "value": "=0.11.0",
@@ -19,7 +35,7 @@
     "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "toko-tooling",
-    "value": "=0.39.9",
+    "value": "=0.39.10",
     "reason": "The published source-bundle installation contract requires one exact registry pin inherited by every member and matched to Cargo.lock and the installed receipt.",
     "evidence": "README.md#development"
   }

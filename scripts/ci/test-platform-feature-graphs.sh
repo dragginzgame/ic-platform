@@ -144,8 +144,8 @@ runtime|ic-error-types v0.2.0|reject
 canister-sig-creation|ic-canister-sig-creation v1.3.2|reject
 signature-verification|ic-signature-verification v0.3.0|reject
 signature-verification|ic-signature-verification v0.2.0|reject
-bls|ic-verify-bls-signature v0.6.0|pass
-signature-verification|ic-verify-bls-signature v0.6.0|pass
+bls|ic-verify-bls-signature v0.6.0|reject
+signature-verification|ic-verify-bls-signature v0.6.0|reject
 agent|ic-verify-bls-signature v0.6.0|pass
 bls|ic_bls12_381 v0.10.1|pass
 signature-verification|ic_bls12_381 v0.10.1|pass

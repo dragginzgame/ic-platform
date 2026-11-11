@@ -146,6 +146,41 @@
          "kind": "codec-comparison",
          "protocol": "IC management Candid",
          "reason": "Dev-only registry oracle for preserved snapshot globals, timer values and external serialization."
+      },
+      {
+         "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize, serde::Serialize)]\n#[candid_path(\"reference\")]\nstruct Record",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests/declarations.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only independent schema/byte oracle for single-declaration macros; production declarations need no upstream Candid trait."
+      },
+      {
+         "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nenum Choice",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests/declarations.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only independent schema/byte oracle for single-declaration macros; production declarations need no upstream Candid trait."
+      },
+      {
+         "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nstruct Index",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests/declarations.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only independent schema/byte oracle for single-declaration macros; production declarations need no upstream Candid trait."
+      },
+      {
+         "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nenum Recursive",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests/declarations.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only independent schema/byte oracle for single-declaration macros; production declarations need no upstream Candid trait."
+      },
+      {
+         "declaration": "#[derive(candid::CandidType)]\nstruct ReferenceRecord",
+         "kind": "codec-comparison",
+         "path": "crates/ic-platform/src/candid_codec/references/tests/mod.rs",
+         "protocol": "IC Candid",
+         "reason": "Development-only independent callback-record schema/byte oracle for the declaration macro."
       }
    ],
    "cbor_allowances": [

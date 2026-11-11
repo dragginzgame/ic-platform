@@ -112,7 +112,7 @@ function reject(reason) {
         if (name == "ic-platform-macros" && (!generator_enabled || (line != generator && line != generator " (*)"))) reject("unqualified generator")
         if (name == "ic-canister-sig-creation") reject("signature creation oracle in production")
         if (name == "ic-signature-verification") reject("signature verification oracle in production")
-        if (name == "ic-verify-bls-signature" && (!bls || version != "v0.6.0" || !registry)) reject("unqualified upstream BLS verifier")
+        if (name == "ic-verify-bls-signature" && (!agent || version != "v0.6.0" || !registry)) reject("unqualified upstream BLS verifier")
         if (name == "ic_bls12_381" && (!bls || version != "v0.10.1" || !registry)) reject("unqualified upstream BLS curve")
         if (name == "ic-certification" && (!certification || version != "v3.2.0" || !registry)) reject("unqualified certification")
         if (name == "ic-management-canister-types") reject("registry management types are dev-only")

@@ -12,7 +12,9 @@ impl Principal {
         let mut bytes = [0; Self::MAX_LENGTH_IN_BYTES];
         bytes[..28].copy_from_slice(&Sha224::digest(public_key.as_ref()));
         bytes[28] = 0x02;
-        Self::from_slice(&bytes)
+        // This fixed protocol frame is already complete; avoid admitting and
+        // copying it again through the variable-length constructor.
+        Self { len: 29, bytes }
     }
 }
 

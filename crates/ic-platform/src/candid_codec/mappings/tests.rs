@@ -3,6 +3,7 @@ use crate::candid_codec::{
     encode_one,
 };
 use candid as reference;
+mod declarations;
 fn limits() -> Limits {
     Limits {
         bytes: 1_000_000,

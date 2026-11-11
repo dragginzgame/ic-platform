@@ -1,11 +1,56 @@
-//! Declarative mappings for existing Rust structs and payload variants.
+//! Single declarations and mappings for Rust structs and payload variants.
 //! Labels must be supplied in increasing Candid field-id order. This codec
 //! uses explicit mappings instead of deriving wire codecs from Serde.
 
 /// Implement the owned codec for an existing named-field struct.
 /// Supply fields in increasing numeric Candid-label order, including every field.
+///
+/// Alternatively, declare a concrete Rust struct and its mapping together:
+/// ```
+/// ic_platform::candid_record! {
+///     /// A required external protocol record, without a Serde dependency.
+///     #[derive(Debug, PartialEq)]
+///     pub struct Reply {
+///         /// Explicit Candid field identifier.
+///         97 => pub amount: u64,
+///         98 => pub(crate) memo: Option<String>,
+///     }
+/// }
+/// ```
+/// Type and field attributes apply to the Rust declaration; numeric labels,
+/// not Serde renames or Rust names, determine the Candid schema. Put conditional
+/// attributes that remove a type or field on the whole macro invocation instead,
+/// so Rust and wire declarations remain together. Generic declarations are not
+/// supported; concrete field types may use generic containers or recursive types.
+/// Declaration labels are integer literals; their ordering is checked at compile time:
+/// ```compile_fail
+/// ic_platform::candid_record! { struct Invalid { 2 => a: u8, 1 => b: u8 } }
+/// ```
+/// ```compile_fail
+/// ic_platform::candid_record! { struct Duplicate { 1 => a: u8, 1 => b: u8 } }
+/// ```
 #[macro_export]
 macro_rules! candid_record {
+    ($(#[$attribute:meta])* $visibility:vis struct $name:ident {
+        $($(#[$field_attribute:meta])* $label:literal => $field_visibility:vis $field:ident : $field_type:ty),* $(,)?
+    }) => {
+        $(#[$attribute])*
+        $visibility struct $name {
+            $($(#[$field_attribute])* $field_visibility $field: $field_type),*
+        }
+        $crate::candid_record!(@labels $($label),*);
+        $crate::candid_record!($name { $($label => $field: $field_type),* });
+    };
+    (@labels $($label:expr),* $(,)?) => {
+        const _: () = {
+            let labels: &[u32] = &[$($label),*];
+            let mut index = 1;
+            while index < labels.len() {
+                assert!(labels[index - 1] < labels[index], "Candid labels must be strictly increasing and unique");
+                index += 1;
+            }
+        };
+    };
     ($ty:ty { $($label:expr => $field:ident : $field_type:ty),* $(,)? }) => {
         impl $crate::candid_codec::Encode for $ty {
             const TYPE: &'static $crate::candid_codec::Type = &$crate::candid_codec::Type::Deferred(|| { static SCHEMA: $crate::candid_codec::Type = $crate::candid_codec::Type::Record(&[
@@ -31,8 +76,45 @@ macro_rules! candid_record {
 
 /// Implement the owned codec for an enum with unit, single-payload or named-field variants.
 /// Supply alternatives and named fields in increasing numeric Candid-label order.
+///
+/// The declaration form emits both the Rust enum and the existing codec mapping:
+/// ```
+/// ic_platform::candid_variant! {
+///     #[derive(Debug, PartialEq)]
+///     pub enum Reply {
+///         /// A unit alternative.
+///         65 => Empty,
+///         66 => Text(String),
+///         67 => Details { 97 => count: u64, 98 => memo: Option<String> },
+///     }
+/// }
+/// ```
+/// A single payload can itself be a tuple, such as `Pair((u64, String))`.
+/// Declaration attributes follow [`candid_record!`]'s contract. Labels at both
+/// the variant and named-field levels must be strictly increasing and unique:
+/// ```compile_fail
+/// ic_platform::candid_variant! { enum Invalid { 1 => A, 1 => B } }
+/// ```
+/// ```compile_fail
+/// ic_platform::candid_variant! { enum Invalid { 1 => A { 2 => a: u8, 1 => b: u8 } } }
+/// ```
 #[macro_export]
 macro_rules! candid_variant {
+    ($(#[$attribute:meta])* $visibility:vis enum $name:ident {
+        $($(#[$variant_attribute:meta])* $label:literal => $variant:ident $(($payload:ty))?
+            $({ $($(#[$field_attribute:meta])* $field_label:literal => $field:ident : $field_type:ty),* $(,)? })?),+ $(,)?
+    }) => {
+        $(#[$attribute])*
+        $visibility enum $name {
+            $($(#[$variant_attribute])* $variant $(($payload))?
+                $({ $($(#[$field_attribute])* $field: $field_type),* })?),+
+        }
+        $crate::candid_record!(@labels $($label),+);
+        $($($crate::candid_record!(@labels $($field_label),*);)?)+
+        $crate::candid_variant!($name {
+            $($label => $variant $(($payload))? $({ $($field_label => $field: $field_type),* })?),+
+        });
+    };
     ($ty:ty { $($label:expr => $variant:ident $(($payload:ty))? $({ $($field_label:expr => $field:ident : $field_type:ty),* $(,)? })?),+ $(,)? }) => {
         impl $crate::candid_codec::Encode for $ty {
             const TYPE: &'static $crate::candid_codec::Type = &$crate::candid_codec::Type::Deferred(|| { static SCHEMA: $crate::candid_codec::Type = $crate::candid_codec::Type::Variant(&[

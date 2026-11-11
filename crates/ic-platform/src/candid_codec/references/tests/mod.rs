@@ -45,6 +45,30 @@ signature!(update, &[NAT], &[NAT], &[]; (candid::Nat)->(candid::Nat));
 signature!(composite, &[NAT], &[NAT], &[3]; (candid::Nat)->(candid::Nat) composite_query);
 signature!(oneway, &[NAT], &[], &[2]; (candid::Nat)->() oneway);
 signature!(none, &[], &[], &[1]; ()->() query);
+
+#[test]
+fn declared_callback_record_preserves_signature_and_reference_bytes() {
+    crate::candid_record! { struct CallbackRecord { 97 => a: Typed<nat::Schema> } }
+    #[derive(candid::CandidType)]
+    struct ReferenceRecord {
+        a: nat::Reference,
+    }
+    let reference = candid::types::reference::Func {
+        principal: candid::Principal::anonymous(),
+        method: "callback".into(),
+    };
+    let bytes = candid::encode_one(ReferenceRecord {
+        a: reference.clone().into(),
+    })
+    .unwrap();
+    let value = decode_one::<CallbackRecord>(&bytes, limits()).unwrap();
+    assert_eq!(
+        value.a.0.principal.as_slice(),
+        reference.principal.as_slice()
+    );
+    assert_eq!(value.a.0.method, reference.method);
+    assert_eq!(encode_one(&value, 4096).unwrap(), bytes);
+}
 signature!(optional, &[&Type::Opt(NAT)], &[&Type::Opt(TEXT)], &[1]; (Option<candid::Nat>)->(Option<String>) query);
 signature!(more, &[NAT,U64], &[NAT,U64], &[1]; (candid::Nat,u64)->(candid::Nat,u64) query);
 signature!(vector, &[&Type::Vec(INT)], &[&Type::Vec(NAT)], &[1]; (Vec<candid::Int>)->(Vec<candid::Nat>) query);

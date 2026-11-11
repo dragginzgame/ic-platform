@@ -5,6 +5,15 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [Unreleased]
+
+### ⚡ Performance
+
+- Construct self-authenticating Principal directly from its completed fixed frame,
+  avoiding a second admission/copy. Preserve SHA-224, input admission and identity
+  bytes; retain the shared SHA-2 0.11 provider. The multi-call Wasm probe saves
+  197 total/code-section bytes, with unchanged combined ledger-hashing sizes.
+
 ## [0.19.2] - 2026-11-11
 
 ### ♻️ Refactoring

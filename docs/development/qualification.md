@@ -13,7 +13,12 @@ their three release groups; macros and the singleton guard belong to Runtime.
 Use `cargo metadata --no-deps --locked --offline --format-version 1` to discover
 members, rather than assuming a directory depth.
 
-There are currently no separate maintained qualification packages to relocate.
+The independent [qualification workspace](../../qualification/README.md) holds
+the matched published/current BLS Wasm and installed probe. The adopted wrapper
+and its comparisons live in the facade package. The qualification workspace has
+its own catalog and lockfile, is excluded from the root workspace, and belongs
+to no product release group. Product packages never depend on it.
+
 The manifests in `scripts/fixtures/` are templates for disposable projects
 rendered under `target/`, including the Runtime canister/driver workspace. Their
 source templates and selected Runtime fixture lock remain release inputs; their
@@ -26,13 +31,20 @@ The instrumented Profiler source provider and its IC submodule are retired from
 this checkout. Historical consumer Git pins retain that source; no native
 provider workspace or Python assembler remains maintained here.
 
-If a separate maintained qualification package is introduced, put it under an
-independent virtual `qualification/` workspace with its own catalog and lock,
-exclude it from the product workspace and release groups, and map its required
-checks explicitly. Ordinary crate-local tests remain with their product. Do not
-create an empty qualification workspace for the existing generated fixtures.
+Additional separate maintained qualification packages belong in that workspace;
+map their required checks explicitly. Ordinary crate-local tests remain with
+their product. Existing generated fixtures retain their template ownership.
 
 ## Runtime qualification and historical evidence
+
+`bash scripts/ci/check-candid-declarations-consumer.sh` qualifies a standalone
+native/Wasm consumer of the single-declaration record/variant macros. It copies
+the maintained public integration case, selects only `candid-codec`, runs strict
+Clippy on both targets and the native test, and refuses upstream Candid, Agent,
+runtime and crypto in its normal/build graphs. The owning `check-consumer` gate
+includes this leaf; ordinary development can run it directly without the broader
+runtime/fleet matrix. Product mapping/oracle tests and compile-fail doctests retain
+byte/schema and invalid-label evidence.
 
 `make check-raw-rand` is the focused installed management-entropy proof; it needs
 an explicitly prepared `POCKET_IC_BIN` or `IC_TESTKIT_POCKET_IC_URL`. It checks
@@ -102,19 +114,35 @@ This tooling-only libFuzzer selection does not enter consumer dependency graphs.
 
 Run `bash scripts/benchmarks/check-wasm-size-regression.sh BASE_REF [MAX_GROWTH_BYTES]`
 with the compiler, registry sources and `ic-wasm` already prepared. The default
-profiles are binary Principal, Runtime, external Candid, signature verification
+profiles are binary Principal, self-authenticating Principal, Runtime, signature verification
 and strict certificate CBOR, using one `3-fat-1` recipe. `WASM_BENCH_PROFILES`
 selects a smaller affected subset; opt-in `candid-args` covers the small unit/text
 encoders. Both arms use the same current probe source, compiler, recipe and
-current dependency lock; this isolates implementation changes,
-not dependency-upgrade effects. Incompatible resolved external locks refuse comparison.
-The separate asynchronous Wasm size workflow runs the default selection on relevant
+current dependency lock. This strict mode refuses changed resolved external locks
+or per-profile dependency features; it does not silently attribute supplier changes
+to Platform implementation changes. All nested probe sources and recorded compiler,
+target/backend and optimizer settings must match in either mode.
+
+For a deployment comparison, append `--allow-dependency-changes` after the byte
+allowance. Each arm then starts with its own revision's lockfile; Cargo resolves
+the disposable probe offline without modifying either source lock. The comparison
+records complete changed external lock entries and the reachable normal/build
+external package identities/features for each probe in `after/dependency-changes.json`.
+Those graphs describe resolved build inputs, not proof that every package survives
+linking. Changed dependencies are part of the measured deployment, so these deltas
+must not be described as implementation-only savings. Missing graph evidence or
+different probe/build settings still refuse; the size threshold remains enforced.
+
+The separate asynchronous Wasm size workflow uses this explicit deployment mode on relevant
 PRs and main-branch pushes and retains total uncompressed and code-section
-measurements before/after optimisation. Its default allowance is 128 bytes per
+measurements before/after optimisation, absolute before/after values and deltas,
+plus dependency reports. Its default allowance is 128 bytes per
 measurement; dispatch can choose an explicit allowance. This is a regression trigger, not a consumer Wasm
 budget, instruction benchmark or permission to weaken verification.
 Pushes compare against the event's preceding main commit; PRs use their base
 commit, and manual dispatch retains its explicitly selected baseline.
+The [0.30 deployment comparison](../benchmarks/platform-030-deployment.md) records
+the first dependency-aware run and its self-authentication size regression.
 
 `node --test scripts/benchmarks/tests/*.test.mjs` checks comparison
 admission and the common Wasm section reader. The shared ingress corpus at
