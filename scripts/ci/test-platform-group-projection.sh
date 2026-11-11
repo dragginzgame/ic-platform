@@ -23,7 +23,7 @@ for group in platform runtime types; do
     export RELEASE_GROUP="$group"
     jq -n --arg group "$group" '{group:$group,primary:("ic-platform-"+$group),previous:"1.2.3",
         changelog:("releases/"+$group+"/CHANGELOG.md"),members:["member"],
-        files:(["Cargo.toml","scripts/fixtures/cdk-runtime/Cargo.lock"] +
+        files:(["Cargo.toml","scripts/fixtures/cdk-runtime/Cargo.lock","qualification/Cargo.lock"] +
             if $group=="runtime" then ["ci/dependency-pinning-exceptions.json"] else [] end)}' > "$PROJECTION_PLAN"
     cp "$PROJECTION_PLAN" "$fixture/valid.json"
     for operation in plan primary changelog members files ready ready-plan; do
@@ -37,10 +37,12 @@ for group in platform runtime types; do
     [[ "$(cat "$fixture/members.out")" == member ]]
     jq -jr '.files[] | .+"\u0000"' "$PROJECTION_PLAN" > "$fixture/expected-files"
     cmp "$fixture/expected-files" "$fixture/files.out"
-    jq '.files |= map(select(. != "scripts/fixtures/cdk-runtime/Cargo.lock"))' "$fixture/valid.json" > "$PROJECTION_PLAN"
-    for operation in plan ready ready-plan; do
-        if bash "$fixture/scripts/release/group.sh" "$operation" > "$fixture/refused" 2>&1; then exit 1; fi
-        grep -q 'release refused: Shared group custody' "$fixture/refused"
+    for missing in scripts/fixtures/cdk-runtime/Cargo.lock qualification/Cargo.lock; do
+        jq --arg missing "$missing" '.files |= map(select(. != $missing))' "$fixture/valid.json" > "$PROJECTION_PLAN"
+        for operation in plan ready ready-plan; do
+            if bash "$fixture/scripts/release/group.sh" "$operation" > "$fixture/refused" 2>&1; then exit 1; fi
+            grep -q 'release refused: Shared group custody' "$fixture/refused"
+        done
     done
     cp "$fixture/valid.json" "$PROJECTION_PLAN"
     result=0

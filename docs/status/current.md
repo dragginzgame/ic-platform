@@ -114,6 +114,10 @@ Scheduling owns Timers composition; this repository adds no scheduler dependency
 
 ## Recovery custody
 
+Preserve `batch-A6SG2UhN` / `qualification.J7lzye`: it stopped at a stale
+group-projection fixture before preparation or upload. The fixture now includes
+both required locks and tests refusal when either is missing; use fresh source.
+
 Frozen `batch-uCPG6Jvb` stopped before preparation/publication at `check-features`:
 a stale exact assertion required removed `leb128`. `eb98320` corrected admission
 and added reintroduction tests; fresh `batch-CqtVCFiE` passed all 19 stages.
