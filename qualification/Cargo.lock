@@ -152,7 +152,7 @@ name = "bls-wrapper-probe"
 version = "0.0.0"
 dependencies = [
  "ic-platform 0.30.0",
- "ic-platform 0.31.1",
+ "ic-platform 0.31.2",
  "ic-platform-runtime",
  "ic-testkit",
  "ic-verify-bls-signature",
@@ -832,7 +832,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.31.1"
+version = "0.31.2"
 dependencies = [
  "digest 0.10.7",
  "ic_bls12_381",
