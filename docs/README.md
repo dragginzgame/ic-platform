@@ -6,8 +6,7 @@
   package owners, feature boundaries, remaining imports and checked manifest facts.
 - [Migration contracts](architecture/migration.md): public compatibility rules,
   completed hard cuts and pending source replacements.
-- [External DTO contracts](protocols/external-contracts.md) and
-  [native Candid service export](protocols/native-candid-service.md).
+- [External DTO contracts](protocols/external-contracts.md): selected binary interfaces.
 - [Current handoff](status/current.md): local work, blockers and recovery custody.
 
 ## Development and delivery

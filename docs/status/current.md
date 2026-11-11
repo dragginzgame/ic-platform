@@ -1,4 +1,4 @@
-# Current handoff — 2026-11-10
+# Current handoff — 2026-11-11
 
 ## Accepted scope and current state
 
@@ -12,7 +12,7 @@ all retained imports. Siblings remain untouched. The maintainer now authorizes
 deployment of the three Rust groups only; browser packaging changes receive Git
 delivery but no npm publication. Freeze reviewed source before release execution.
 
-Installed Toko is 0.39.8; compiler is 1.99.1. Platform 0.29.3, Runtime/macros/
+Installed Toko is 0.39.9; compiler is 1.99.1. Platform 0.29.3, Runtime/macros/
 guard 0.21.1 and Types 0.19.1 are published on crates.io and tagged on GitHub.
 Completed frozen batch `batch-nUsSSjzc` delivered commit
 `f4c904645e00b435b256d3acb87837493240fdbb`; the normal checkout is reconciled.
@@ -20,6 +20,13 @@ Browser remains 0.2.0 and was not published. Historical release and earlier sess
 in the [prior handoff](../history/source-retirement-handoff-2026-11-10.md).
 
 ## Tooling and documentation adoption
+
+The 0.39.9 registry refresh updates the baseline's dependency-policy references
+and the direct IC dependency checker. Shared now admits native-only PocketIC
+dev-dependencies; Platform retains its stricter local prohibition and adds no
+simulator dependency. All 96 snapshot paths and selected entrypoints remain.
+Only Toko's registry version/checksum changed in Cargo.lock; the pending Types
+SHA-2 edge is preserved. No sibling or product release is part of this adoption.
 
 The authenticated 0.39.8 snapshot selects the baseline and required executables;
 shared reference guides now use pinned upstream links. Product guides are grouped
@@ -33,7 +40,46 @@ paths. Tooling/pins/inventory/links/boundaries and browser package qualification
 pass (23 tests, two compiler consumers, packed-root comparison and provider SDK
 identity). These local checks do not establish macOS/Chromium acceptance.
 
+## DID hard cut
+
+The maintainer superseded #154/#155 with complete DID retirement. The native
+service exporter, its consumer/check target, text fixtures and candid_parser
+dependency are removed. Binary Candid remains unchanged. Independent schemas
+were converted to frozen binary headers and checked against the original text
+fixtures before retirement; protocol value snapshots preserve byte comparisons.
+Canic adoption remains consumer-owned; no sibling source or release is included.
+Deployment is now authorized: release Types 0.19.2 first, then Platform 0.30.0.
+The different increments require separate sequential frozen batches. Runtime
+and browser versions remain unchanged. Source is captured only after the reviewed
+combined changes are committed; each group retains the full local release gate.
+
+All 110 captured schemas passed structural comparison before text retirement.
+Affected native Clippy and 34 focused schema/value/public-contract tests pass
+without candid_parser. Snapshot/pins/inventory/docs, Candid/CBOR boundaries and
+feature-selection/refusal checks pass. Cargo pruned 71 packages without other
+version changes; binrw is an already-selected test-only oracle dependency. The
+normal Wasm codec graph remains free of upstream Candid/parser and runtime.
+Generic didc entries remain only in the immutable Toko installer/catalog; no
+Platform caller selects them. Prior Principal/tooling changes are preserved.
+
+The follow-up residue audit removed obsolete parser-consumer, service-registration
+and upstream-decoder instructions from active qualification docs, and removed
+the feature checker's retired parser activation variable. All 143 graph-refusal
+cases pass. The all-feature Wasm normal/build workspace graph has no upstream
+Candid, candid_derive, candid_parser or pretty. Upstream binary Candid remains
+in independent development oracles and native Agent/IC transport; browser
+`/candid` remains SDK Core's binary IDL adapter for required external protocols.
+These are active capabilities, not text-DID leftovers. Historical evidence and
+immutable supplier tool catalogs are preserved.
+
 ## Latest completed work
+
+Pending Types 0.19.2 replaces the optional registry Principal adapter with the
+maintainer-authorized SHA-224-plus-`0x02` composition. Hashing uses the shared
+RustCrypto SHA-2 0.11 supplier. Base identity remains hash-free; the registry
+Principal remains only a development oracle and native-client transitive.
+No packages from this follow-up have been released. Qualification is recorded
+in the [identity report](../design/identity-qualification.md).
 
 The final ICRC value-hash and ICP account-framing replacements are complete.
 Separate source-unexposed authors implemented protocol composition over the
@@ -62,8 +108,8 @@ installation must refresh destination mtimes before same-checkout Cargo checks.
 
 - Principal/Account/RejectCode and Nat payload encoding: see
   [identity qualification](../design/identity-qualification.md). Base identity
-  remains crypto/Candid/Runtime/Agent-free; self-authentication uses registry
-  ic_principal. IC0 bindings are registry-owned, not embedded.
+  remains crypto/Candid/Runtime/Agent-free; pending self-authentication uses
+  upstream SHA-224 with owned framing. IC0 bindings are registry-owned, not embedded.
 - Executor, System API/task/stable adapters, raw call transport and macros:
   [executor](../design/executor-qualification.md),
   [adapters](../design/system-adapters-qualification.md),

@@ -3,40 +3,50 @@
 #[cfg(test)]
 mod tests {
     use crate::candid_codec::Encode;
+    use crate::tests::reference::{assert_named_schema as equal, frozen_schema};
     use crate::{
         certified_assets_types as assets, cmc_types as cmc, cycles_ledger_types as cycles,
         icp_ledger_types as icp, nns_registry_types as registry,
     };
     use candid as contract;
-    use candid_parser as parser;
-    fn env(source: &str) -> parser::TypeEnv {
-        let program: parser::IDLProg = source.parse().unwrap();
-        let mut env = parser::TypeEnv::new();
-        parser::check_prog(&mut env, &program).unwrap();
-        env
+    use candid::types::TypeEnv;
+    fn env(provider: &str) -> TypeEnv {
+        let source = match provider {
+            "cmc" => include_str!("../../../tests/fixtures/owned-cmc-schema.json"),
+            "icp" => include_str!("../../../tests/fixtures/owned-icp-schema.json"),
+            "cycles" => include_str!("../../../tests/fixtures/owned-cycles-schema.json"),
+            "assets" => include_str!("../../../tests/fixtures/owned-assets-schema.json"),
+            "registry" => include_str!("../../../tests/fixtures/registry-schema.json"),
+            "icrc10" => include_str!("../../../tests/fixtures/icrc10-schema.json"),
+            _ => panic!("unknown frozen provider"),
+        };
+        frozen_schema(source)
     }
-    use crate::tests::reference::assert_named_schema as equal;
+    fn provider(name: &str) -> (TypeEnv, candid::types::Type) {
+        let env = env(name);
+        let service = env.find_type("$service").unwrap().clone();
+        (env, service)
+    }
+    fn value(name: &str) -> Vec<u8> {
+        let values: std::collections::BTreeMap<String, Vec<u8>> =
+            serde_json::from_str(include_str!("../../../tests/fixtures/protocol-values.json"))
+                .unwrap();
+        values[name].clone()
+    }
     #[test]
     fn icrc10_matches_external_named_records_and_independent_reply_bytes() {
         use crate::{
             candid_codec::decoder::{Limits, decode_one},
             icrc_ledger_types::icrc10::SupportedStandard,
         };
-        // Independently express protocol facts from the pinned ICRC-10 DID.
-        let source = "type SupportedStandard = record { name : text; url : text }; service : { icrc10_supported_standards : () -> (vec SupportedStandard) query }";
-        let (_, (env, service)) =
-            parser::utils::instantiate_candid(parser::utils::CandidSource::Text(source)).unwrap();
+        let (env, service) = provider("icrc10");
         equal::<SupportedStandard>(&env, "SupportedStandard");
         let method = env
             .get_method(&service, "icrc10_supported_standards")
             .unwrap();
         assert!(method.args.is_empty());
         assert_eq!(method.rets.len(), 1);
-        let values = parser::parse_idl_args(
-            "(vec { record { name = \"ICRC-10\"; url = \"https://example.test/standard\" } })",
-        )
-        .unwrap();
-        let bytes = values.to_bytes_with_types(&env, &method.rets).unwrap();
+        let bytes = value("icrc10");
         let decoded: Vec<SupportedStandard> = decode_one(
             &bytes,
             Limits {
@@ -55,7 +65,7 @@ mod tests {
     }
     #[test]
     fn cmc_matches_selected_schema_including_certification_and_notify_variants() {
-        let env = env(include_str!("../../../tests/fixtures/owned-cmc.did"));
+        let env = env("cmc");
         equal::<cmc::NotifyTopUpArg>(&env, "NotifyTopUpArg");
         equal::<cmc::NotifyTopUpResult>(&env, "NotifyTopUpResult");
         equal::<cmc::NotifyError>(&env, "NotifyError");
@@ -67,7 +77,7 @@ mod tests {
     }
     #[test]
     fn icp_matches_legacy_transfer_and_recursive_archive_function_schema() {
-        let env = env(include_str!("../../../tests/fixtures/owned-icp.did"));
+        let env = env("icp");
         equal::<icp::Tokens>(&env, "Tokens");
         equal::<icp::TimeStamp>(&env, "TimeStamp");
         equal::<icp::TransferArgs>(&env, "TransferArgs");
@@ -80,7 +90,7 @@ mod tests {
     }
     #[test]
     fn cycles_matches_its_own_settings_and_complete_creation_withdraw_errors() {
-        let env = env(include_str!("../../../tests/fixtures/owned-cycles.did"));
+        let env = env("cycles");
         equal::<cycles::CreateCanisterArgs>(&env, "CreateCanisterArgs");
         equal::<cycles::CmcCreateCanisterArgs>(&env, "CmcCreateCanisterArgs");
         equal::<cycles::CanisterSettings>(&env, "CanisterSettings");
@@ -96,10 +106,7 @@ mod tests {
     }
     #[test]
     fn registry_optional_target_is_canonical_and_not_byte_identical_to_old_projection() {
-        // Independently expressed protocol facts from Registry's pinned DID.
-        let env = env(
-            "type Request = record { \"principal\" : opt principal }; type Response = variant { Ok : record { subnet_id : opt principal }; Err : text };",
-        );
+        let env = env("registry");
         equal::<registry::GetSubnetForCanisterRequest>(&env, "Request");
         equal::<registry::GetSubnetForCanisterResponse>(&env, "Response");
         #[derive(contract::CandidType)]
@@ -123,21 +130,13 @@ mod tests {
             .unwrap(),
             canonical
         );
-        let args =
-            parser::parse_idl_args("(record { \"principal\" = opt principal \"uuc56-gyb\" })")
-                .unwrap();
-        let expected = args
-            .to_bytes_with_types(&env, &[env.find_type("Request").unwrap().clone()])
-            .unwrap();
-        assert_eq!(canonical_bytes, expected);
+        assert_eq!(canonical_bytes, value("registry"));
     }
     #[test]
     fn assets_match_complete_method_inputs_and_outputs() {
-        let source = include_str!("../../../tests/fixtures/owned-assets.did");
-        let (_, (mut env, service)) =
-            parser::utils::instantiate_candid(parser::utils::CandidSource::Text(source)).unwrap();
+        let (mut env, service) = provider("assets");
         fn method_type<T: Encode>(
-            env: &mut parser::TypeEnv,
+            env: &mut TypeEnv,
             service: &candid::types::Type,
             method: &str,
             input: bool,
@@ -164,7 +163,7 @@ mod tests {
         method_type::<assets::GetChunkArgs>(&mut env, &service, "get_chunk", true);
         method_type::<assets::GetChunkResult>(&mut env, &service, "get_chunk", false);
     }
-    fn operation_type<T: Encode>(env: &mut parser::TypeEnv, declared: candid::types::Type) {
+    fn operation_type<T: Encode>(env: &mut TypeEnv, declared: candid::types::Type) {
         let (owned_env, actual) = crate::tests::reference::schema::<T>();
         let actual = env.merge_type(owned_env, actual);
         candid::types::subtype::equal(
@@ -176,8 +175,7 @@ mod tests {
         .unwrap();
     }
     fn operation<Req: Encode, Rep: Encode>(source: &str, method: &str) {
-        let (_, (mut env, service)) =
-            parser::utils::instantiate_candid(parser::utils::CandidSource::Text(source)).unwrap();
+        let (mut env, service) = provider(source);
         let function = env.get_method(&service, method).unwrap().clone();
         assert_eq!(function.args.len(), 1, "{method} request arity");
         assert_eq!(function.rets.len(), 1, "{method} reply arity");
@@ -187,44 +185,42 @@ mod tests {
     #[test]
     fn protocol_operations_match_independent_provider_methods_and_arity() {
         use crate::icrc_ledger_types as icrc;
-        let cmc_did = include_str!("../../../tests/fixtures/owned-cmc.did");
-        operation::<cmc::NotifyTopUpArg, cmc::NotifyTopUpResult>(cmc_did, "notify_top_up");
+        let cmc_provider = "cmc";
+        operation::<cmc::NotifyTopUpArg, cmc::NotifyTopUpResult>(cmc_provider, "notify_top_up");
         operation::<cmc::NotifyMintCyclesArg, cmc::NotifyMintCyclesResult>(
-            cmc_did,
+            cmc_provider,
             "notify_mint_cycles",
         );
-        let icp_did = include_str!("../../../tests/fixtures/owned-icp.did");
-        operation::<icp::TransferArgs, icp::TransferResult>(icp_did, "transfer");
+        let icp_provider = "icp";
+        operation::<icp::TransferArgs, icp::TransferResult>(icp_provider, "transfer");
         operation::<icp::GetBlocksArgs, icp::QueryEncodedBlocksResponse>(
-            icp_did,
+            icp_provider,
             "query_encoded_blocks",
         );
-        let cycles_did = include_str!("../../../tests/fixtures/owned-cycles.did");
+        let cycles_provider = "cycles";
         operation::<cycles::CreateCanisterArgs, cycles::CreateCanisterResult>(
-            cycles_did,
+            cycles_provider,
             "create_canister",
         );
-        operation::<cycles::WithdrawArgs, cycles::WithdrawResult>(cycles_did, "withdraw");
-        operation::<icrc::Account, crate::candid_codec::Nat>(cycles_did, "icrc1_balance_of");
+        operation::<cycles::WithdrawArgs, cycles::WithdrawResult>(cycles_provider, "withdraw");
+        operation::<icrc::Account, crate::candid_codec::Nat>(cycles_provider, "icrc1_balance_of");
         operation::<icrc::TransferArg, Result<crate::candid_codec::Nat, icrc::TransferError>>(
-            cycles_did,
+            cycles_provider,
             "icrc1_transfer",
         );
         operation::<Vec<icrc::GetBlocksRequest>, cycles::GetBlocksResult>(
-            cycles_did,
+            cycles_provider,
             "icrc3_get_blocks",
         );
-        let assets_did = include_str!("../../../tests/fixtures/owned-assets.did");
-        operation::<assets::GetArgs, assets::GetResult>(assets_did, "get");
-        operation::<assets::GetChunkArgs, assets::GetChunkResult>(assets_did, "get_chunk");
+        let assets_provider = "assets";
+        operation::<assets::GetArgs, assets::GetResult>(assets_provider, "get");
+        operation::<assets::GetChunkArgs, assets::GetChunkResult>(assets_provider, "get_chunk");
         for (source, method) in [
-            (cmc_did, "get_icp_xdr_conversion_rate"),
-            (cycles_did, "icrc1_fee"),
-            (cycles_did, "icrc3_get_tip_certificate"),
+            (cmc_provider, "get_icp_xdr_conversion_rate"),
+            (cycles_provider, "icrc1_fee"),
+            (cycles_provider, "icrc3_get_tip_certificate"),
         ] {
-            let (_, (env, service)) =
-                parser::utils::instantiate_candid(parser::utils::CandidSource::Text(source))
-                    .unwrap();
+            let (env, service) = provider(source);
             let function = env.get_method(&service, method).unwrap();
             assert!(function.args.is_empty());
             assert_eq!(function.rets.len(), 1);
@@ -233,14 +229,7 @@ mod tests {
     #[test]
     fn cycles_provider_codec_preserves_nat64_instead_of_narrowing_standard_value() {
         use crate::candid_codec::decoder::{Limits, decode_one};
-        let (_, (env, service)) =
-            parser::utils::instantiate_candid(parser::utils::CandidSource::Text(include_str!(
-                "../../../tests/fixtures/owned-cycles.did"
-            )))
-            .unwrap();
-        let response = env.get_method(&service, "icrc3_get_blocks").unwrap().rets[0].clone();
-        let value=parser::parse_idl_args("(record { log_length = 1 : nat; blocks = vec { record { id = 0 : nat; block = variant { Nat64 = 7 : nat64 } } }; archived_blocks = vec {} })").unwrap();
-        let bytes = value.to_bytes_with_types(&env, &[response]).unwrap();
+        let bytes = value("cycles_nat64");
         let limits = Limits {
             bytes: 65536,
             work: 1000000,

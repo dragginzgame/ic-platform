@@ -26,7 +26,7 @@ IC Tooling. The former native Profiler provider is retired here.
 | Selection | External owner or dependency | Current use |
 | --- | --- | --- |
 | Base Types | crc32fast, data-encoding, Serde, thiserror | Identity representation; no registry Principal in this selection |
-| Types self-authentication | ic_principal | Optional derivation only; its SHA-2 selection does not constrain facade hashing |
+| Types self-authentication | sha2 0.11 | Optional upstream SHA-224 plus owned IC suffix; no production registry Principal |
 | Runtime IC0 | ic0 1.2 | Explicit bindings; no embedded binding source or second executor |
 | Runtime executor | SlotMap, registry IC0, exact owned guard | One task/method owner; Vec task lists |
 | Candid codec and DTOs | num-bigint 0.5, Serde and selected byte helpers | Owned codec and canonical Types; no upstream Candid/parser in this production selection |
@@ -38,7 +38,7 @@ IC Tooling. The former native Profiler provider is retired here.
 | ECDSA / Ed25519 | k256 / ed25519-dalek and curve25519-dalek | External primitives; crypto-bigint security floor remains explicit |
 | Browser SDK | @icp-sdk/core 6.1.1 | Browser 0.2.0 has typed call-ingress inspection, no generic Cbor export |
 
-Upstream Candid/parser and management/signature packages also remain as explicit
+Upstream binary Candid and management/signature packages also remain as explicit
 **development oracles**. An all-features development tree is not a production
 Wasm dependency list. Use a target-specific normal/build graph for an application;
 this inventory makes no fresh fleet or whole-canister size claim.
@@ -60,9 +60,10 @@ There are no remaining identified embedded DFINITY implementation areas in the
 maintained Rust source. External cryptographic algorithms remain registry-owned;
 this is a source-maintenance inventory, not a change to external package terms.
 
-The full upstream DID fixtures are retired. The independent
-`tests/fixtures/owned-{cmc,icp,cycles,assets}.did` files describe the tested subset;
-original/replacement equality evidence is recorded in
+All textual DID fixtures and export tooling are retired. Independent
+`tests/fixtures/*-schema.json` files preserve binary schema evidence;
+`binrw` reads the oracle headers only in tests and adds no new transitive package.
+Original/replacement equality evidence is recorded in
 [external qualification](../design/external-dtos-qualification.md).
 External Cargo/npm suppliers retain their own metadata independently.
 
@@ -111,12 +112,12 @@ facade README feature table. Package release versions are represented as
 | ic-platform-runtime | runtime | dep:ic-platform-types, dep:pin-project-lite, dep:serde, dep:thiserror, executor |
 | ic-platform-runtime-guard | default |  |
 | ic-platform-types | default |  |
-| ic-platform-types | principal-self-authenticating | dep:ic_principal |
+| ic-platform-types | principal-self-authenticating | dep:sha2_11 |
 
 | Owner | Direct dependency | Requirement | Kind | Target | Optional | Defaults | Features |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ic-platform | candid | ^0.10.38 | dev | all | false | false | bignum, printer, serde_bytes |
-| ic-platform | candid_parser | ^0.4.1 | dev | all | false | false |  |
+| ic-platform | binrw | ^0.15.2 | dev | all | false | false | std |
+| ic-platform | candid | ^0.10.38 | dev | all | false | false | serde_bytes, value |
 | ic-platform | crc32fast | ^1.5 | normal | all | true | true |  |
 | ic-platform | crypto-bigint | ^0.7.10 | normal | all | true | false |  |
 | ic-platform | curve25519-dalek | ^5.0.0 | normal | all | true | false |  |
@@ -146,11 +147,11 @@ facade README feature table. Package release versions are represented as
 | ic-platform | serde_json | ^1.0 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform | toko-tooling | =0.39.8 | dev | all | false | true |  |
+| ic-platform | toko-tooling | =0.39.9 | dev | all | false | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^3 | normal | all | false | true | full |
-| ic-platform-macros | toko-tooling | =0.39.8 | dev | all | false | true |  |
+| ic-platform-macros | toko-tooling | =0.39.9 | dev | all | false | true |  |
 | ic-platform-runtime | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform-runtime | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform-runtime | ic-platform-types | workspace-owned | normal | all | true | false |  |
@@ -160,18 +161,18 @@ facade README feature table. Package release versions are represented as
 | ic-platform-runtime | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-runtime | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform-runtime | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform-runtime | toko-tooling | =0.39.8 | dev | all | false | true |  |
-| ic-platform-runtime-guard | toko-tooling | =0.39.8 | dev | all | false | true |  |
+| ic-platform-runtime | toko-tooling | =0.39.9 | dev | all | false | true |  |
+| ic-platform-runtime-guard | toko-tooling | =0.39.9 | dev | all | false | true |  |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | false | alloc |
-| ic-platform-types | ic_principal | ^0.1.5 | normal | all | true | false | self_authenticating |
-| ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | self_authenticating, serde |
+| ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert |
 | ic-platform-types | postcard | ^1.1.3 | dev | all | false | false | alloc |
 | ic-platform-types | serde | ^1.0 | normal | all | false | false | alloc, derive |
 | ic-platform-types | serde_bytes | ^0.11 | normal | all | false | false | alloc |
 | ic-platform-types | serde_cbor | ^0.11.2 | dev | all | false | true |  |
 | ic-platform-types | serde_json | ^1.0 | dev | all | false | true |  |
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
+| ic-platform-types | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
-| ic-platform-types | toko-tooling | =0.39.8 | dev | all | false | true |  |
+| ic-platform-types | toko-tooling | =0.39.9 | dev | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->

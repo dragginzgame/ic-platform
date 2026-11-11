@@ -321,11 +321,9 @@ fn selected_icrc_types_match_frozen_registry_schemas() {
     use crate::icrc_ledger_types::{self as ledger, icrc21};
     // Generated independently by icrc-ledger-types =0.2.0 and Candid =0.10.39.
     // This includes recursive values, defaulted fields and query callbacks.
-    let source: candid_parser::IDLProg = include_str!("../../../tests/fixtures/icrc-reference.did")
-        .parse()
-        .unwrap();
-    let mut env = candid_parser::TypeEnv::new();
-    candid_parser::check_prog(&mut env, &source).unwrap();
+    let env = support::frozen_schema(include_str!(
+        "../../../tests/fixtures/icrc-reference-schema.json"
+    ));
     use support::assert_named_schema as equal;
     macro_rules! check {
         ($($name:ident),+ $(,)?) => { $(equal::<ledger::$name>(&env, concat!("Expected", stringify!($name)));)+ };

@@ -2,7 +2,6 @@
 //!
 //! Trusted Rust implementations describe their schema separately from values.
 //! Binary operations use no dynamic value tree, Serde visitor or text parser.
-//! On native targets, `service` exports owned external-service schemas to DID text.
 //! Select `candid-codec` to use this boundary without the registry codec. This
 //! surface is not a drop-in replacement for `CandidType` or Serde.
 //! Existing endpoints retain their qualified codec until separately migrated.
@@ -31,8 +30,6 @@ mod reserved;
 pub use reserved::Reserved;
 pub mod references;
 mod schema;
-#[cfg(not(target_family = "wasm"))]
-pub mod service;
 use std::ptr;
 
 /// Arbitrary-size Candid integer, backed by the maintained bigint implementation.

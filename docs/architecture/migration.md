@@ -202,7 +202,17 @@ removed together. Management/ledger guards remain; CDK adapter/generator
 replacement followed in the steps above.
 See [qualification and measured sizes](../design/executor-qualification.md).
 
-## Principal implementation custody (pending Types 0.19.1)
+## Self-authentication dependency cut (pending Types 0.19.2)
+
+`principal-self-authenticating` now uses upstream `sha2` 0.11 to compute
+SHA-224 of exactly the supplied bytes and appends the IC's `0x02` suffix.
+The canonical return type, arbitrary-byte admission, identity bytes, text and
+serialization behavior are unchanged. No public-key parser or validator is added.
+`ic_principal` is development-only in Types; native Agent suppliers may still
+bring it transitively. Base Types remains free of hashing. No caller migration
+is required, and no hash algorithm is implemented locally.
+
+## Principal implementation custody (Types 0.19.1)
 
 The base Principal implementation and tests were authored in a separate context
 from the [protocol/API contract](../design/principal-contract.md) and recorded
@@ -213,12 +223,12 @@ where the format supplies it, including CBOR; numeric sequences remain refused.
 See the [implementation record](../design/principal-implementation.md) for the
 input boundary and its limits.
 
-`principal-self-authenticating` now delegates to optional registry `ic_principal`
+Types 0.19.1 delegated `principal-self-authenticating` to optional registry `ic_principal`
 0.1.5 instead of retaining an embedded derivation body. It enables only the
 supplier's self-authentication capability, without defaults, conversions or
 Serde. The byte adapter returns the sole canonical Types identity. This selection
-brings the supplier's SHA-2 0.10 dependency; base Types remains free of registry
-Principal and cryptography. Existing bytes and caller policy need no migration.
+brought the supplier's SHA-2 0.10 dependency. The pending 0.19.2 dependency cut
+above supersedes this selection while preserving the same bytes and caller policy.
 
 Account was separately replaced from its [protocol/API contract](../design/account-contract.md)
 and public observations. It retains effective-zero equality/order/hash while
@@ -262,14 +272,27 @@ The `agent` feature explicitly exports upstream `EffectiveId` at
 new routing policy is introduced. Bare upstream Principals retain their
 canister-route conversion. This changes no dependencies, bytes or Wasm surface.
 
-## Native external-service export (0.29.1)
+## DID retirement (pending 0.30)
 
-`candid-codec` now supplies native-only `service::{Method, Mode, export}` from
-the actual owned schemas. Consumers emit descriptors from the same catalogue
-as mounted external endpoints and use the pinned native `didc check --strict`
-against their frozen DID. No registration, generic forwarding or parser
-dependency returns. See [the exact consumer migration and evidence](../protocols/native-candid-service.md).
-This resolves [#153 — Document the native external-service schema/export owner](https://github.com/dragginzgame/ic-platform/issues/153).
+The maintainer retired textual DID completely. Remove imports of
+`candid_codec::service::{Method, Mode, export}` and callers of
+`check-candid-service`. There is no replacement text exporter, inspector,
+parser, declaration-Wasm interface pointer or sidecar contract. The 0.29.1
+native service-export addition is superseded. Requests
+[#154](https://github.com/dragginzgame/ic-platform/issues/154) and
+[#155](https://github.com/dragginzgame/ic-platform/issues/155) are declined.
+
+Binary Candid arguments, values, function/service references and external DTO
+compatibility remain supported. Their protocol fixtures retain independent
+binary schema equality and exact bytes, including recursive callbacks and modes.
+The parser dependency, five text fixtures and service-export tests are removed;
+`binrw`, already selected by the binary test oracle, reads the frozen headers
+only in tests. No production dependency is added.
+
+Canic must remove its DID generation/inspection and sidecar requirements from
+its build flow under its own migration. This change does not claim its current
+artifact checks passed or that consumer adoption is complete. Platform's typed
+binary references are unrelated to textual interface export and remain intact.
 
 ## Per-field decoder admission (0.29)
 
@@ -340,17 +363,17 @@ Serde remains marker-free. Remove `principal-external` and use `Principal` /
 `PrincipalError`; the external aliases and conversion impls are removed without
 compatibility features. This is a breaking change in Platform and Types.
 
-Base Types has no production `ic_principal` dependency; the optional
-self-authentication capability now delegates to that supplier as described above.
-Development oracles retain text/byte/self-authentication checks. Native Agent, transport
+Types has no production `ic_principal` dependency; optional self-authentication
+uses upstream SHA-224 with owned identity framing as described above.
+Development oracles retain text/byte checks. Native Agent, transport
 and management APIs retain their supplier identities; signature adapters copy
 validated Principal bytes into inferred supplier types at their private boundary.
 Those suppliers can still bring `ic_principal` and Candid transitively. Cryptographic
 bodies, domains, hash inputs and upstream verification remain unchanged.
 
-Owned DTOs no longer derive CandidType even in unit tests. Frozen DIDs and wire
-fixtures remain independent expectations. Oracle schema projection is compared
-against those DIDs, and upstream parsing/re-encoding checks the owned corpus;
+Owned DTOs no longer derive CandidType even in unit tests. Frozen binary schemas
+and wire fixtures remain independent expectations. Oracle schema projection is
+compared against those headers, and upstream binary decoding/re-encoding checks the owned corpus;
 that corpus check alone is not an independently constructed value oracle. Explicit
 Principal/registry value cases and the existing callback/primitive comparisons
 provide independent value encoding checks. No Candid trait is added to Types.
@@ -377,11 +400,12 @@ upstream Nat/Int/Func. Construct their owned carriers directly; integer conversi
 public magnitudes, numeric ranges and Serde/Candid bytes remain qualified.
 Native management DTO identities remain unchanged; owned DTO Principal fields
 follow the hard cut above.
-Consumers that need textual parsing must select a native parser owner explicitly;
-Platform supplies no text-parser replacement.
+Textual parsing and DID generation are retired; the 0.30 hard cut above
+supersedes earlier native parser/export guidance.
 
-Candid and candid_parser are development-only independent byte/schema oracles.
-They do not enter normal/build graphs from Platform's codec or DTO bridge.
+Binary Candid remains a development-only independent byte/schema oracle.
+The workspace no longer selects candid_parser, even in tests.
+The codec and DTO bridges do not select upstream Candid in normal/build graphs.
 Native Agent/transport/management and upstream signature suppliers still bring
 transitive Candid. Cryptographic algorithms and checks are unchanged; complete
 all-feature/lockfile elimination requires separate supplier changes.

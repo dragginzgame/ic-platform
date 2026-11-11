@@ -299,36 +299,25 @@ comma-separated asset globs (`-` for none), and Wasm command (`check`, `build` o
 test declaration. The runner preserves native and Wasm tests on the supported
 compiler and admits runtime graphs first.
 
-`make check-consumer` tests separate Candid-only, certification-only, parser-only,
-dynamic, management/Candid, ledger/Candid, ic0-only, Agent/certification three signature/BLS consumers and a CDK canister
-with only Platform declared, on Rust 1.99.1. The CDK standalone
-consumer proves raw entrypoints/calls without Candid or full CDK dependencies.
-Generated consumer packages deny warnings in ordinary library, test and Wasm
-builds, without changing lint flags for upstream dependencies.
-The `external-candid` profile separately qualifies required external Candid
-entrypoints, explicit service registration and fixed wire bytes without a direct
-Candid dependency; the supported compiler links its Wasm library.
-Candid and certification
-consumers also compile for Wasm, as do the management, ledger and raw-system
-consumers, all three signature/BLS selections and the CDK canister. `make msrv`
-remains an alias for the native all-feature tests and all-feature Wasm check;
-CI runs those proofs once through `test` and `wasm-check`.
-The ic0-only caller compiles without executing a system call on native hosts.
-Management qualification covers fixed HTTP/history wire bytes and change variants.
-Ledger qualification covers account semantics, fixed account/block wire bytes,
-representation-independent hashes, arbitrary-precision amounts and archive callbacks.
-It covers DTOs, argument helpers and wire vectors, plus hash-tree constructors,
-lookup outcomes, witness hashes and certificate/delegation fields. The parser
-consumer runs natively and covers external checking, constructor types, service drift
-and typed textual-argument encoding. The Agent consumer checks offline signing,
-request identity, effective-ID routing, typed errors and shared certificate types.
-Signature qualification preserves original-owner DER/hash/BLS/certificate vectors,
-typed errors and malformed-proof refusal. Certification also covers Auth's nested
-mutable tree updates and root-preserving witnesses. BLS keys use deterministic
-caller-supplied fixture bytes; no entropy source or signing policy is installed.
-Parser and Agent dependencies and APIs are absent on
-Wasm, including with all features enabled.
-`make check-features` verifies default, executor and parser-isolation graphs.
+`make check-consumer` qualifies the profiles in
+`scripts/ci/platform-consumer-profiles.tsv`: owned identity, executor/Runtime,
+System API, binary external endpoints/DTOs, certification, native Agent and
+selected cryptographic boundaries. This is an aggregate release check. For a
+focused source consumer, pass its profile name to
+`bash scripts/ci/check-platform-consumer.sh PROFILE`. The script derives its
+features from the corresponding Cargo test declaration and prepares a separate
+consumer with warnings denied. Native-only Agent skips Wasm; the remaining
+profiles select their declared Wasm check or build. The IC0 native test compiles
+without executing a system call.
+
+There is no textual-argument parser, DID exporter, dynamic Candid facade or
+service-registration consumer. Owned binary endpoint tests qualify explicit
+limits, argument arity and wire bytes. Management/ledger tests preserve external
+schemas, account semantics, arbitrary-precision amounts and callback signatures.
+Certification and signature tests preserve typed refusals, root/witness checks
+and malformed-proof rejection. Applications retain authentication policy.
+The feature gate verifies runtime/identity isolation and rejects candid_parser
+in every production selection; the dependency policy also rejects it in tests.
 `make install-hooks` installs the shared formatting hook; `make fmt-check`
 checks Rust and manifest formatting. Authorized releases use the shared
 `make release-patch`, `make release-minor` or `make release-major` workflow.
@@ -456,17 +445,17 @@ features without host leaves. The separate standalone runtime qualification and
 release runtime-lock checks are unchanged. It enforces empty defaults
 and exact qualified executor/system requirements. It rejects unreviewed feature
 names until the matrix and isolation policy are updated, admits the owned
-generator only with `cdk`, rejects full CDK packages, and rejects additional executor/
+generator only with `candid-codec-endpoint`, rejects full CDK packages, and rejects additional executor/
 system versions or non-registry sources in the transitive graph. It also
 rejects the retired PocketIC feature and the `ic-testkit`/`ic-testkit-candid`
 canister dependencies, and checks Candid/CDK-free defaults and Candid-free
 executor-only graphs. Cargo reports canonical package names, so dependency
 aliases do not bypass these exclusions. `check-boundary` independently checks
 direct dependency ownership; role comments themselves are not executable policy.
-`make check-features-exhaustive FEATURES=cdk,candid,executor` audits every subset
+`make check-features-exhaustive FEATURES=runtime,candid-codec,executor` audits every subset
 of 1–12 explicitly selected features and actual defaults using the same admission
 rules. Missing, unknown and oversized scopes are refused before graph queries;
-the whole 31-feature power set would exceed two billion selections. This manual
+the full feature power set is deliberately outside routine qualification. This manual
 audit is outside routine CI/release validation. Routine coverage deliberately
 omits other higher-order combinations. Wasm cache keys omit native-only leaves
 only after their exact feature/dependency/target contracts pass validation.
@@ -476,55 +465,28 @@ graphs are not copied per selection. Each `target/feature-graphs/attempt.*`
 directory retains target-specific TSV mappings and the actual Cargo graphs.
 This reduces cache-lock acquisitions; it does not eliminate contention with
 other Cargo processes or claim a measured wall-clock speedup.
-Certification-only builds are Candid/CDK-free. Native Agent itself requires
-transitive Candid and certification; it does not select those Platform features.
-Management DTOs also require transitive Candid and are admitted only when selected.
-Their `=0.11.0` requirement preserves the maintainer-selected external type contract;
-enable `candid` separately when using Platform's encoding and bounded decoding.
-Ledger DTOs similarly bring transitive Candid without selecting Platform's codec,
-executor, parser or Agent. Upstream defaults/storage integration are disabled;
-the graph gate rejects `ic-stable-structures` and unselected ledger dependencies.
-Canister-signature creation and verification select upstream certification and
-external Principal conversions. Their registry packages bring Candid/printer,
-CBOR, representation-independent hashing and raw IC0 transitively; only
-verification brings BLS. CanisterSigPublicKey retains the owned Principal field
-through a delegating adapter. DER framing and both root/delegated identity-key
-refusals remain integration guards. Signing-time extraction follows upstream
-verification and requires an additional CBOR decode. The upstream signature store
-is not exported. Standalone BLS still excludes creation, Candid, certification,
-CDK and host tooling; defaults/RNG are disabled and alloc is explicit.
-Graph admission checks the qualified registry signature/BLS/certification suppliers.
-Agent and certification expose the same registry certificate identity, removing
-tree-copying conversions. Consumers own their own qualification.
-`candid_parser` and `ic-agent` are admitted only with explicit native host
-selection; no runtime feature enables them. Host retains strict bounded CBOR decoding;
-trust roots, authentication and application interpretation remain consumer-owned.
+Certification-only builds are Candid/CDK-free. Native Agent and IC transport
+select upstream Candid transitively; their features and dependencies are native
+only. Management, ledger and other owned DTOs use the binary codec and canonical
+Types Principal without production upstream Candid. Registry management and
+signature composition packages are development-only independent oracles.
+Canister-signature protocol composition uses external BLS, certified-tree and
+SHA primitives, with no Candid, IC0, parser or executor in its production graph.
+Consumers retain trust roots, authority, freshness and decoding budgets.
 
-Platform embeds the executor and IC0 implementations from upstream 2.0.0/1.2.0.
-Their registry packages are absent from raw Runtime graphs. The selected upstream
-canister-signature dependency may bring raw IC0, but never another executor. The inherited Cargo singleton guard lives in
-an internal helper selected only by `executor`, requiring one Platform runtime
-owner across Timers and applications. Native consumers without runtime can coexist with
-an unrelated registry executor; task/method handles
-now have Platform identity. See the [breaking migration](../architecture/migration.md#embedded-ic0-and-executor).
-Changes require combined callback/trap/cancellation/upgrade qualification.
-Use `candid::decoder` when preserving upstream configuration/defaults or observing
-construction, value, finalization and drop separately. The `candid` feature also
-supports explicit service registration/export and reflection; see the packaged
-[consumer contract](../../crates/ic-platform/README.md) for generated paths and the
-CDK adoption requirements and older Testkit direct-dependency exception.
+Runtime owns the executor and delegates System API calls to registry IC0 1.2.0.
+Its exact guard prevents multiple Runtime executor owners. The facade forwards
+execution to that owner; no textual Candid feature or native registration/export
+API remains. Use `candid_codec::decoder` only for required binary external
+interfaces, with explicit caller-selected limits and argument arity. See the
+[package contract](../../crates/ic-platform/README.md) and
+[migration contract](../architecture/migration.md).
 
-This library has no deployment entrypoint. Missing deployment enforcement belongs
-at each consuming application: run exclusions against its exact final feature,
-target and lockfile selection, retain successful builds, and bind source/lockfile
-identity and artifact digest to deployed bytes. This repository does not provide
-that artifact admission or infer new exclusions automatically from role comments.
-`make publish` does not run the graph gate; registry publication is separate from
-the release gate and from deployment qualification. Native macOS must run its own
-checks; Linux/Wasm graph results do not qualify macOS or installed canisters.
-
-The facade combines MIT and Apache-2.0 sources; its imported decoder retains
-IC Testkit's copyright notice. The maintained generator is Apache-2.0.
+Consuming applications own final artifact admission: qualify their exact
+feature/target/lock selection and bind source and artifact digests to deployed
+bytes. Platform's source graph results do not establish consumer deployment or
+native macOS acceptance. Release gates and archive publication checks remain
+separate from ordinary focused development validation.
 
 ### Maintained runtime regression
 

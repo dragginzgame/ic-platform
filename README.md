@@ -37,14 +37,14 @@ Select `principal` for owned Principal/Account bytes, text and Serde, without
 executor/IC0-only builds omit application types. The owned codec and maintained
 DTOs use the same Principal. The external aliases and `principal-external` feature
 are removed. Select `principal-self-authenticating` explicitly for derivation
-delegated to registry `ic_principal`. Native supplier APIs retain their own
+using upstream SHA-224 plus the IC suffix. Native supplier APIs retain their own
 identities and may require explicit byte conversion at the boundary. See the
 [hard-cut contract](docs/architecture/migration.md#owned-principal-hard-cut-unreleased).
 
 | Feature | Implemented contract |
 | --- | --- |
 | `principal` | Owned Principal/Account bytes, text and Serde; no external Principal, hashing or Candid |
-| `principal-self-authenticating` | Unchanged imported self-authentication using upstream SHA-224; implies principal |
+| `principal-self-authenticating` | Owned identity framing using upstream SHA-224; implies principal |
 | `agent` | Native Agent transport/builders, PEM identities, typed errors and signed-request operations |
 | `ic-protocol` | Native typed IC packet codecs with caller-selected byte budgets; upstream transport identity without Agent or runtime |
 | `ic-protocol-fixtures` | Explicit native development helpers for IC query, certificate, controller and subnet-metrics fixtures |
@@ -64,7 +64,7 @@ identities and may require explicit byte conversion at the boundary. See the
 | `cmc-types` | CMC top-up, mint notification and rate DTOs with the owned codec; no upstream Candid or payment policy |
 | `icp-ledger-types` | ICP transfer/archive DTOs with owned codec and typed query-reference admission; retained account derivation, no upstream Candid or CDK |
 | `cycles-ledger-types` | Cycles Ledger creation/withdrawal DTOs with owned codec; adding `icrc-ledger-types` supplies owned archive-callback codecs |
-| `nns-registry-types` | Registry subnet lookup DTOs with owned binary codec and external Principal; no upstream Candid or topology policy |
+| `nns-registry-types` | Registry subnet lookup DTOs with owned binary codec and canonical Types Principal; no upstream Candid or topology policy |
 | `certified-assets-types` | Native-only asset get/get_chunk DTOs with owned codec; no upstream Candid, verification or host transport |
 | `signature-verification` | Owned canister-signature protocol verification and authenticated time; external BLS/certified-tree primitives, no Candid, registry Principal or runtime |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |
@@ -95,10 +95,9 @@ Wasm growth; see [measurements](docs/benchmarks/upstream-2026-10-31/README.md).
 
 ## Development
 
-Native external Candid providers can export owned mappings through
-`candid_codec::service` and check frozen DID equality with pinned `didc`.
-See [the native service migration](docs/protocols/native-candid-service.md); parsing and
-reflection stay outside deployed and executor graphs.
+Platform supports binary Candid for required external IC interfaces. Textual DID
+export, inspection and sidecar tooling are retired; there is no replacement
+service-export API. See [the hard cut](docs/architecture/migration.md#did-retirement-pending-030).
 
 Prepare the compiler selected in [rust-toolchain.toml](rust-toolchain.toml),
 including `wasm32-unknown-unknown`, then prepare tools and locked dependencies:

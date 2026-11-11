@@ -24,7 +24,9 @@ Required external Candid endpoints select `candid-codec-endpoint` and
 `candid_codec::endpoint::{query, update}` with explicit decode limits, reply bytes,
 arity and empty-envelope policy. Ordered guards and the existing generator/executor
 are retained. The legacy endpoint feature is removed; native service registration
-is not supplied by the owned adapter. Raw/Wire endpoints retain their codecs.
+is not supplied by the owned adapter. Textual DID export and inspection are
+retired, including the native `candid_codec::service` module. Binary function
+and service references remain supported. Raw/Wire endpoints retain their codecs.
 
 Select the required DTO features and use `candid_codec` explicitly. Method names,
 transport, reply arity, budgets and retries remain caller-owned.
@@ -52,8 +54,8 @@ Runtime's raw stable-memory system calls remain available. See the
 Select `principal` for owned Principal/Account bytes, text and Serde without
 external Principal or hashing. The owned codec, maintained DTOs and callbacks use
 this same identity. The external aliases and `principal-external` feature are
-removed; `principal-self-authenticating` separately adds unchanged upstream
-self-authentication. Native supplier APIs retain their registry identities. See
+removed; `principal-self-authenticating` separately adds owned identity framing
+using upstream SHA-224. Native supplier APIs retain their registry identities. See
 the [hard cut](../../docs/architecture/migration.md#owned-principal-hard-cut-unreleased).
 
 Select `runtime` for prepared one-shot requests through
@@ -82,7 +84,7 @@ Select `candid-codec` for the owned typed binary codec in `candid_codec`, withou
 registry Candid or its parser. It supports explicit argument sequences, bounded
 decoding, record/payload-variant mappings, Principal and arbitrary integers.
 Registry, CMC, ICP transfer/archive, Cycles creation/withdrawal and native asset DTOs use it directly,
-preserving external Principal identity and wire bytes. Migrated Nat fields use
+preserving canonical Types Principal identity and external wire bytes. Migrated Nat fields use
 `candid_codec::Nat` with the established unbounded range and Serde representation;
 registry Nat callers need an explicit conversion. ICP references validate their
 query signatures without upstream Candid; destination and method admission stay
@@ -102,7 +104,7 @@ or the facade’s `executor` feature for the shared executor alone. Use the owne
 required management/system, NNS/SNS, ledger and other Candid interfaces, or legacy
 persisted checkpoints. Caller location does not select Candid.
 Select `principal` for Principal, Account and Subaccount. Runtime, Candid,
-signature creation and external DTO/client/parser profiles include it.
+signature creation and external DTO/client profiles include it.
 No features are enabled by default; executor/IC0-only builds omit application
 types and their Serde, text and cryptographic dependencies.
 
@@ -326,9 +328,9 @@ No RNG backend is selected. Offline IC public-key derivation is not provided.
 
 The `icrc-ledger-types` selection now uses the owned binary codec for ledger,
 archive and consent DTOs, including recursive callbacks. The legacy trait/protocol bridge is removed. Nat/Int fields use the owned unbounded
-carriers and canonical Types Principal; protocol/Serde bytes and imported hash
-bodies remain unchanged. CMC/ICP/Cycles/assets passive declarations and their
-selected DID fixtures now use independent implementations; see
+carriers and canonical Types Principal; protocol/Serde and value-hash bytes
+remain unchanged. CMC/ICP/Cycles/assets passive declarations and their
+selected binary schema fixtures retain independent expectations; see
 [external contract qualification](../../docs/design/external-dtos-qualification.md).
 
 Management DTOs on all targets use the owned codec, including typed HTTP transform

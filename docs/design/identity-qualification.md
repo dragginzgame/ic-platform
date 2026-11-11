@@ -10,6 +10,41 @@ The [Principal](principal-implementation.md) and
 inputs and limits. This document records integrating-reviewer evidence, not a
 claim of legal clearance or a cryptographic implementation rewrite.
 
+## Self-authentication dependency cut (pending Types 0.19.2)
+
+The maintainer subsequently authorized replacing the registry Principal adapter
+with the specified composition: SHA-224 of the exact supplied bytes, followed
+by `0x02`. SHA-224 remains RustCrypto's implementation, using the existing
+workspace `sha2` 0.11.1 provider. No public-key parsing, key validation, domain
+change, new abstraction or local hash algorithm is introduced. Earlier evidence
+below describes the released 0.19.1 adapter, which this follow-up supersedes.
+
+Focused qualification on Rust 1.99.1:
+
+- Types native all-target/all-feature and Wasm library Clippy pass with warnings
+  denied. Initial registry comparisons passed for 261 input lengths. At the
+  maintainer's request that comparison test is removed; the fixed-byte framing
+  regression below remains. Types now selects only `convert` on its development
+  Principal oracle for the existing base text/byte comparisons.
+- An independent OpenSSL SHA-224 observation for `abc` matches the full 29-byte
+  Principal including the suffix. Empty and arbitrary non-key inputs continue
+  to be accepted; hashing adds no key-admission policy.
+- Source consumers for `principal` and `principal-self-authenticating` pass
+  native tests and Wasm checks. Exhaustive combinations of those two features
+  pass on native/Wasm, preserving the base graph's exclusion of hashing and
+  removing registry Principal from both production selections. Evidence is
+  `target/feature-graphs/attempt.blQ0p4`.
+- Manifest mutations, all 143 graph-refusal cases and standalone admission
+  regressions pass, including registry Principal refusal for self-authentication.
+- Cargo changed only the local Types dependency list in Cargo.lock; no registry
+  version changed. `ic_principal` remains a development oracle and may still be
+  selected by native clients. BLS independently retains SHA-2 0.10.
+
+No release, installed-runtime rerun or new native macOS evidence is claimed for
+this focused Types change. Existing identity serialization is unmodified.
+
+## Original integration (Types 0.19.1)
+
 The reviewer removed the earlier unit-test modules and integrated the newly
 authored `tests.rs` files. One Principal test needed an explicitly typed empty
 comparison (`is_empty`) because Serde JSON adds another PartialEq implementation.

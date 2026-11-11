@@ -20,7 +20,7 @@ for selection in 'map(select(.name != "ic-platform"))' '. + map(select(.name == 
     fi
     grep -q 'expected exactly one ic-platform package' "$fixture/error"
 done
-# Types retains only the optional self-authentication supplier edge.
+# Types retains only the optional SHA-224 supplier edge for self-authentication.
 while IFS= read -r mutation; do
     "$jq" "(.packages[] | select(.name == \"ic-platform-types\")) |= ($mutation)" \
         "$fixture/metadata.json" > "$fixture/invalid.json"
@@ -34,10 +34,12 @@ done <<'MUTATIONS'
 .features.default = ["principal-external"]
 .dependencies += [{"name":"ic_principal", "kind":null, "uses_default_features":false}]
 .features["principal-self-authenticating"] = []
-(.dependencies[] | select(.name == "ic_principal" and .kind == null)).optional = false
-(.dependencies[] | select(.name == "ic_principal" and .kind == null)).uses_default_features = true
-(.dependencies[] | select(.name == "ic_principal" and .kind == null)).features += ["convert"]
-(.dependencies[] | select(.name == "ic_principal" and .kind == null)).source = null
+(.dependencies[] | select(.name == "sha2" and .kind == null)).optional = false
+(.dependencies[] | select(.name == "sha2" and .kind == null)).uses_default_features = true
+(.dependencies[] | select(.name == "sha2" and .kind == null)).features += ["std"]
+(.dependencies[] | select(.name == "sha2" and .kind == null)).source = null
+(.dependencies[] | select(.name == "sha2" and .kind == null)).req = "^0.10"
+.features["principal-self-authenticating"] = ["dep:ic_principal"]
 .dependencies += [{name:"sha2",kind:null}]
 .dependencies += [{name:"candid",kind:null}]
 MUTATIONS
@@ -50,6 +52,7 @@ while IFS= read -r mutation; do
     fi
     grep -q 'jq: error' "$fixture/error"
 done <<'MUTATIONS'
+.dependencies += [{"name":"candid_parser", "kind":"dev"}]
 .features.candid = []
 .features.extra = []
 .features.default = ["runtime"]

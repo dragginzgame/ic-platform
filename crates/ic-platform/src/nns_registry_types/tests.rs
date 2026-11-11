@@ -31,12 +31,9 @@ fn registry_requests_and_all_response_states_preserve_bytes() {
 
 #[test]
 fn owned_principal_fields_match_independent_registry_values_at_every_length() {
-    let program: candid_parser::IDLProg =
-        "type Request = record { \"principal\" : opt principal };"
-            .parse()
-            .unwrap();
-    let mut env = candid::types::TypeEnv::new();
-    candid_parser::check_prog(&mut env, &program).unwrap();
+    let env = crate::tests::reference::frozen_schema(include_str!(
+        "../../tests/fixtures/registry-schema.json"
+    ));
     let ty = env.find_type("Request").unwrap().clone();
     for length in 0..=Principal::MAX_LENGTH_IN_BYTES {
         for fill in [0, 4, 255] {
@@ -55,11 +52,12 @@ fn owned_principal_fields_match_independent_registry_values_at_every_length() {
                 .unwrap(),
                 principal
             );
-            let values = candid_parser::parse_idl_args(&format!(
-                "(record {{ \"principal\" = opt principal \"{}\" }})",
-                upstream.to_text()
-            ))
-            .unwrap();
+            let values = candid::IDLArgs::new(&[candid::IDLValue::Record(vec![
+                candid::types::value::IDLField {
+                    id: candid::types::Label::Named("principal".into()),
+                    val: candid::IDLValue::Opt(Box::new(candid::IDLValue::Principal(upstream))),
+                },
+            ])]);
             let expected = values
                 .to_bytes_with_types(&env, std::slice::from_ref(&ty))
                 .unwrap();

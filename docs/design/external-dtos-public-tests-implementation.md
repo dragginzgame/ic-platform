@@ -1,5 +1,10 @@
 # Independent external DTO consumers and minimal schemas
 
+The 2026-11-11 [DID retirement](../architecture/migration.md#did-retirement-pending-030)
+supersedes the textual fixture instructions below. Their protocol schemas now
+live in independently captured binary fixtures; this record preserves the
+original implementation and qualification evidence.
+
 For this component the author read only `docs/design/external-dtos-contract.md`
 and previously admitted policy. No existing or replacement DTO, codec, callback,
 account-identifier or Value implementation, existing tests/DIDs, supplier source,

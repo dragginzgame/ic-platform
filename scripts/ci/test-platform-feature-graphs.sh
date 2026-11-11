@@ -57,8 +57,8 @@ executor,ic0|serde_derive v1.0.229 (proc-macro)|reject
 principal|ic_principal v0.1.5|reject
 canister-sig-creation|ic_principal v0.1.5|reject
 signature-verification|ic_principal v0.1.5|reject
-principal-self-authenticating|sha2 v0.10.9|pass
-principal-self-authenticating|ic_principal v0.1.5|pass
+principal-self-authenticating|sha2 v0.11.1|pass
+principal-self-authenticating|ic_principal v0.1.5|reject
 runtime|ic_principal v0.1.5|reject
 runtime|sha2 v0.10.9|reject
 runtime|digest v0.10.7|reject

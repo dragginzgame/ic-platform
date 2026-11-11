@@ -6,6 +6,8 @@ use crate::candid_codec::{
 };
 #[cfg(feature = "icrc-ledger-types")]
 pub(crate) use schema::assert_named_schema;
+#[cfg(any(feature = "icrc-ledger-types", feature = "nns-registry-types"))]
+pub(crate) use schema::frozen_schema;
 pub(crate) use schema::schema;
 
 #[derive(Clone, Copy)]
@@ -21,7 +23,7 @@ pub(crate) enum DecodeError {
     ReplyTooLarge {},
     Candid(candid::Error),
 }
-#[cfg(feature = "icrc-ledger-types")]
+#[cfg(any(feature = "icrc-ledger-types", feature = "nns-registry-types"))]
 pub(crate) fn decode_hex(text: &str) -> Vec<u8> {
     let (pairs, remainder) = text.trim().as_bytes().as_chunks::<2>();
     assert!(remainder.is_empty());

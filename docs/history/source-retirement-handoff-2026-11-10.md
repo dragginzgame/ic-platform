@@ -519,7 +519,7 @@ is implemented and published in 0.29.1. Native
 `candid_codec::service::{Method, Mode, export}` generates bounded DID text from
 owned mappings. Pinned didc owns trusted fixture parsing and strict structural
 equality; no parser/Runtime production edge or Wasm export is added. The
-[consumer migration](../protocols/native-candid-service.md) identifies the retained Blob
+[consumer migration](../architecture/migration.md#did-retirement-pending-030) identifies the retained Blob
 export API, retired reflection calls and independent textual-input boundary.
 No sibling edits or releases were performed. The Platform 0.29.1 ledger links
 the issue. The issue was closed after focused implementation checks and now has

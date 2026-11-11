@@ -1,5 +1,10 @@
 # External DTO compatibility contract
 
+The 2026-11-11 [DID retirement](../architecture/migration.md#did-retirement-pending-030)
+supersedes the textual fixture instructions below. Their protocol schemas now
+live in independently captured binary fixtures; this record preserves the
+original implementation and qualification evidence.
+
 Coordinator-reviewed public API facts for isolated implementation/test authors.
 The author must not read existing DTO bodies, comments, tests, codec mappings,
 DID fixtures, supplier source, Git history or diffs. The coordinator extracted

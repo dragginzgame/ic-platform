@@ -15,18 +15,18 @@ ignored = ["toko-tooling"]
 
 [features]
 default = []
-principal-self-authenticating = ["dep:ic_principal"]
+principal-self-authenticating = ["dep:sha2_11"]
 
 [dependencies]
 crc32fast.workspace = true
 data-encoding.workspace = true
-ic_principal = { workspace = true, optional = true, features = ["self_authenticating"] }
 serde = { workspace = true, features = ["alloc"] }
 serde_bytes.workspace = true
+sha2_11 = { workspace = true, optional = true }
 thiserror.workspace = true
 
 [dev-dependencies]
-ic_principal = { workspace = true, features = ["self_authenticating", "serde"] }
+ic_principal = { workspace = true, features = ["convert"] }
 postcard.workspace = true
 serde_cbor.workspace = true
 serde_json.workspace = true

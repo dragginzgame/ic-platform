@@ -19,8 +19,8 @@ host parser, executor, timers or a service implementation.
 
 Assets remain absent on Wasm; selecting their feature there supplies only the
 owned-codec prerequisite. Features have no defaults. The production DTO graphs
-exclude upstream Candid/parser; those packages are development schema/byte
-oracles. Separate native clients may still select them transitively.
+exclude upstream Candid; that package is a development binary schema/byte
+oracle and native-client transitive. The workspace no longer selects candid_parser.
 
 ## Compatibility and consumer responsibilities
 
@@ -59,14 +59,16 @@ instruction.
 
 ## Source and schema custody
 
-The passive declarations and small DID fixtures are authored in separate
+The passive declarations and original schema fixtures were authored in separate
 specification-only contexts. Existing owned codec mappings and ICP callback
 implementation remain unchanged. The original four declaration adaptations and
 full service DID copies are retired after exact comparison of all 14 selected
 method types, including modes, arity and recursive callback signatures.
 
-The independently written `owned-{cmc,icp,cycles,assets}.did` fixtures express only
-that supported subset. They do not describe the entire remote service or prove
+The independently captured `owned-{cmc,icp,cycles,assets}-schema.json` binary
+fixtures express only that supported subset. They preserve all named types and
+method signatures from the retired text fixtures, checked for structural equality
+before conversion. They do not describe the entire remote service or prove
 which version a deployed canister runs. Their public protocol facts were checked
 against IC `f83a7646c20ce18100eb87b7865c12852bef8169` (CMC/ICP), Cycles Ledger
 `2faa00a86115d92cce599345b1f5ae04f0f7f2bb` and SDK assets

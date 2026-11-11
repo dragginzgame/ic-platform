@@ -76,9 +76,7 @@
   },
   {
     "dependency": "candid_parser",
-    "allowed_packages": [
-      "ic-platform"
-    ]
+    "allowed_packages": []
   },
   {
     "dependency": "ic-cdk",

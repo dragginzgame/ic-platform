@@ -4,6 +4,21 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.30.0] - Unreleased
+
+### 💥 Breaking
+
+- Retire textual DID completely: remove `candid_codec::service`, its native
+  export/check workflow, text fixtures and the `candid_parser` test dependency.
+  No declaration-Wasm exporter or native inspector replaces it. The maintainer
+  declined [#154](https://github.com/dragginzgame/ic-platform/issues/154) and
+  [#155](https://github.com/dragginzgame/ic-platform/issues/155). Consumers must
+  remove their DID build/sidecar requirements. Binary Candid codecs, DTOs,
+  callback schemas and wire bytes are unchanged; independent binary fixtures
+  retain the former schema and value comparisons. Remove stale parser-consumer,
+  service-registration and upstream-decoder instructions from current docs and
+  retire parser activation scaffolding in the feature checker.
+
 ## [0.29.3] - 2026-11-10
 
 ### 🩹 Fixed

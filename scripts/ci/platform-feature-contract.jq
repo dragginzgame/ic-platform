@@ -6,22 +6,22 @@ def require(condition; $message):
 . as $metadata |
 [.packages[] | select(.name == "ic-platform")] |
 if length == 1 then .[0] else error("expected exactly one ic-platform package") end |
-require(([.dependencies[] | select((.name == "candid" or .name == "candid_parser") and .kind != "dev")] | length == 0); "Upstream Candid/parser may only be development oracles") |
+require(([.dependencies[] | select(.name == "candid_parser" or (.name == "candid" and .kind != "dev"))] | length == 0); "Textual Candid is retired; upstream binary Candid may only be a development oracle") |
 require(((.features | keys) == $policy[0].features); "Platform feature inventory changed; update the graph matrix and isolation policy") |
 require((.features["candid-codec-endpoint"] == ["runtime", "candid-codec", "candid-args", "dep:ic-platform-macros"]); "Owned external endpoints must select the existing runtime and owned codec without upstream Candid") |
 require((.features.principal == ["dep:ic-platform-types", "dep:serde"] and (.features | has("principal-external") | not) and .features["principal-self-authenticating"] == ["principal", "ic-platform-types/principal-self-authenticating"] and ([.dependencies[] | select(.name == "ic_principal")] | length == 0)); "Owned Principal and optional self-authentication must not expose registry conversions") |
 require(([$metadata.packages[] | select(.name == "ic-platform-types")] | length == 1 and
     .[0].features.default == [] and
     (.[0].features | has("principal-external") | not) and
-    .[0].features["principal-self-authenticating"] == ["dep:ic_principal"] and
+    .[0].features["principal-self-authenticating"] == ["dep:sha2_11"] and
     ([.[0].dependencies[] | select(.kind == null and
         (.name | test("^(candid(_parser)?|ic-platform(-runtime)?|ic-agent)$")))] | length == 0) and
-    ([.[0].dependencies[] | select(.name == "ic_principal" and .kind != "dev")] |
+    ([.[0].dependencies[] | select(.name == "sha2" and .kind != "dev")] |
         length == 1 and .[0].optional and .[0].kind == null and .[0].target == null and
-        (.[0].uses_default_features | not) and .[0].features == ["self_authenticating"] and
-        .[0].req == "^0.1.5" and (.[0].source // "" | startswith("registry+"))) and
-    ([.[0].dependencies[] | select(.name == "sha2" and .kind != "dev")] | length == 0));
-    "Types must isolate registry Principal behind explicit self-authentication without local cryptography") |
+        (.[0].uses_default_features | not) and .[0].features == [] and .[0].rename == "sha2_11" and
+        .[0].req == "^0.11.1" and (.[0].source // "" | startswith("registry+"))) and
+    ([.[0].dependencies[] | select(.name == "ic_principal" and .kind != "dev")] | length == 0));
+    "Types must isolate upstream SHA-224 behind explicit self-authentication without production registry Principal") |
 require((.features.default == []); "Platform must declare empty default features") |
 require((.features["candid-args"] == [] and .features["raw-rand"] == ["candid-args"]); "Small argument encoding and raw_rand must select no dependency or runtime") |
 require((.features["icp-ledger-types"] == ["candid-codec", "principal", "dep:crc32fast", "dep:sha2_11"]); "ICP DTOs use the owned codec and retain only their existing account derivation suppliers") |

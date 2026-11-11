@@ -37,7 +37,7 @@ workspace and do not join product release groups.
 - Generic gzip codecs belong to IC Tooling. Consumers use its Host Artifacts
   API directly; keep Platform free of the forwarding surface and dependency.
 - No default features. Executor-only builds must remain Candid-free. Upstream
-  Candid/parser are development oracles or native-client transitives, not owned
+  binary Candid is a development oracle or native-client transitive, not an owned
   codec/runtime feature selections.
 - The maintainer moved Principal/Account Wire schema integration to Wire. The
   published Platform facade must not depend on Wire or implement its schema
@@ -69,10 +69,14 @@ workspace and do not join product release groups.
 The maintainer authorized removing the legacy `candid`, `candid-parser` and
 `candid-service` public features/modules and production CandidType/carrier bridges.
 Use the existing facade-owned `candid_codec` with explicit budgets and argument
-arity. Upstream Candid/parser are dev-only independent byte/schema oracles;
-DTO bridge implementations compile only under cfg(test). Do not restore legacy
+arity. Upstream binary Candid is a dev-only independent byte/schema oracle;
+Primitive and callback oracle bridges compile only under cfg(test). Do not restore legacy
 forwarders or a compatibility feature. Management DTOs use the owned contract
 below; native clients and development signature oracles still pull Candid transitively.
+The maintainer retired all textual DID export, inspection, parsing and fixtures
+on 2026-11-11. Do not add declaration-Wasm export or native DID inspection;
+#154/#155 are declined. Retain independent binary schema/byte fixtures instead.
+No candid_parser dependency or DID-specific build/validation target remains.
 Cryptographic implementations remain upstream-owned; their restrictions are
 independent of the codec hard cut.
 
@@ -258,18 +262,19 @@ conversions, bytes, Serde and provenance remain with their current owners.
 
 Owned DTOs and callbacks use canonical Types Principal and the owned Candid
 codec. `principal-external` and external aliases/conversions remain retired.
-Only `principal-self-authenticating` selects registry `ic_principal`, without
-default, conversion or Serde features. Its private byte adapter preserves the
-canonical owned identity. Base Types remains registry-Principal/crypto-free;
-registry comparisons are also available as development oracles.
+The maintainer authorized owning self-authentication framing: SHA-224 of the
+supplied bytes followed by `0x02`, with no new key parsing or validation.
+Only `principal-self-authenticating` selects upstream `sha2` 0.11 without defaults.
+Registry `ic_principal` remains a development oracle, never a production Types
+dependency. Base Types remains registry-Principal/crypto-free.
 
 Keep empty defaults, raw bytes, length-first ordering, bounded 63-byte text
 parsing, marker-free binary Serde and consumer-owned range policy. The optional
-`principal-self-authenticating` capability delegates derivation to the registry
-package rather than retaining an embedded hash body or copied vectors. Preserve
-supplier-byte equivalence and feature isolation; this grants no cryptographic
-algorithm-change authority. Its supplier currently brings SHA-2 0.10; independent
-facade hashing dependencies retain their current selections.
+`principal-self-authenticating` capability composes the specified identity bytes
+over RustCrypto's SHA-224; do not embed a hash algorithm. Preserve supplier-byte
+equivalence and feature isolation. This grants no change to hash inputs, output
+format, cryptographic primitives or consumer authentication policy. Types and
+facade hashing share the workspace's SHA-2 0.11 selection.
 Raw executor/IC0-only profiles exclude application types. CanisterSigPublicKey and
 certified range decoding use owned Principal. Preserve DER/hash/verifier behavior
 under the scoped protocol-composition authority above, and qualify CBOR bytes
@@ -345,7 +350,7 @@ Preserve effective-zero equality, ordering and hashing, and preserve
 absent versus explicit zero fields during serialization and external conversion.
 Principal and Account were replaced through separate specification-only
 implementation contexts, with input/compatibility records under `docs/design`.
-Types inherits the workspace license; optional derivation remains upstream.
+Types inherits the workspace license; its SHA-224 primitive remains upstream.
 Ledger value/hash and ICP framing have separate replacement evidence below.
 The ICRC Account/archive adapters now have specification-only implementations.
 Preserve the external Account's detailed text errors and sequence-shaped Serde;
@@ -365,7 +370,7 @@ and the earlier [value qualification](docs/design/icrc-value-qualification.md).
 The four CMC/ICP/Cycles/assets declaration families also have specification-only
 replacements. Their 33 declarations, six aliases and 14 supported method schemas
 retain public traits, feature gates, Serde admission and Candid bytes. Preserve
-the small independently authored DID fixtures and frozen public observations;
+the independently captured binary schema fixtures and frozen public observations;
 do not restore full supplier service fixtures. Existing owned codec mappings and
 callback adapters remain unchanged. See
 [external DTO qualification](docs/design/external-dtos-qualification.md).

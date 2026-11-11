@@ -40,7 +40,6 @@ function reject(reason) {
         loaded[key] = 1
     }
     native = target !~ /^wasm/
-    parser = 0
     agent = native && enabled("agent")
     protocol = native && enabled("ic-protocol")
     generator_enabled = enabled("candid-codec-endpoint")
@@ -54,7 +53,7 @@ function reject(reason) {
     management = enabled("management-canister-types")
     ledger = enabled("icrc-ledger-types")
     candid = agent || protocol
-    external_principal = candid || enabled("principal-self-authenticating")
+    external_principal = candid
     principal = enabled("principal")
     hashing = ledger || enabled("principal-self-authenticating") || creation || candid || certification || bls || enabled("ecdsa") || enabled("ed25519") || enabled("icp-ledger-types")
     minimal = !principal && !enabled("bls") && !enabled("ecdsa") && !enabled("ed25519") && !enabled("certification")
@@ -75,7 +74,7 @@ function reject(reason) {
             reject("unselected hashing")
         if (name == "ic-representation-independent-hash" && !agent)
             reject("unselected signature hashing")
-        if ((name == "serde_cbor" || name == "half") && !(verification || agent || parser || enabled("certification-cbor")))
+        if ((name == "serde_cbor" || name == "half") && !(verification || agent || enabled("certification-cbor")))
             reject("unselected CBOR parser")
         if (name == "pretty" && !(agent || protocol))
             reject("unselected Candid service printer")
@@ -85,7 +84,7 @@ function reject(reason) {
         if (name == "blake3") reject("pure hashing belongs directly to consumers")
         # rand_core supplies traits and is permitted. Entropy/RNG implementations
         # belong only to the selected native host capabilities that require them.
-        if (name ~ /^(rand|rand_chacha|getrandom)$/ && !(agent || parser))
+        if (name ~ /^(rand|rand_chacha|getrandom)$/ && !agent)
             reject("unselected RNG/entropy scaffolding")
         if (name == "k256") {
             if (!(enabled("ecdsa") || agent) || !registry) reject("unselected K256")
@@ -101,7 +100,7 @@ function reject(reason) {
         if (name == "pocket-ic") reject("retired registry PocketIC client")
         if (host_capability == "testkit") reject("Testkit in production")
         if (name ~ /^(ic-wire|ic-wire-derive)$/) reject("Wire in production")
-        if (host_capability == "candid-parser" && !parser) reject("unselected host parser")
+        if (host_capability == "candid-parser") reject("textual Candid parser is retired")
         if (host_capability == "agent" && !agent) reject("unselected host Agent")
         if (name == "ic0" && (!raw_system || !registry || version != "v1.2.0")) reject("unselected or unqualified IC0 supplier")
         if (platform_forbidden("retired-cdk", name)) reject("external CDK/executor supplier is retired")

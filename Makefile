@@ -178,9 +178,6 @@ check-consumer:
 	bash scripts/ci/test-prepared-call-consumer-admission.sh
 	bash scripts/ci/check-prepared-call-consumer.sh
 	bash scripts/ci/check-platform-consumer.sh
-.PHONY: check-candid-service
-check-candid-service:
-	bash scripts/ci/check-candid-service.sh
 check-features:
 	bash scripts/ci/test-platform-feature-selections.sh
 	bash scripts/ci/test-platform-feature-closures.sh

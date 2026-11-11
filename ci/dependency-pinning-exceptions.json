@@ -19,7 +19,7 @@
     "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "toko-tooling",
-    "value": "=0.39.8",
+    "value": "=0.39.9",
     "reason": "The published source-bundle installation contract requires one exact registry pin inherited by every member and matched to Cargo.lock and the installed receipt.",
     "evidence": "README.md#development"
   }

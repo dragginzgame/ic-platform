@@ -7,8 +7,8 @@ and lockfile. Platform re-exports these exact definitions; Wire owns its schema
 implementations. The independent series continues from published Types 0.15.0.
 
 The default feature set is empty. Bytes, bounded text and Serde are always
-available. `principal-self-authenticating` delegates derivation to registry
-`ic_principal`, without its default, conversion or Serde features. The
+available. `principal-self-authenticating` computes SHA-224 with upstream `sha2`
+0.11 and appends the IC's `0x02` suffix, without parsing or validating the input. The
 external-Principal feature, aliases and conversions remain removed; the return
 value has canonical Types identity. Base Types selects neither registry Principal
 nor cryptography. No feature selects runtime, executor, Wire or Candid.

@@ -1,5 +1,10 @@
 # Independent external DTO and schema qualification
 
+The 2026-11-11 [DID retirement](../architecture/migration.md#did-retirement-pending-030)
+supersedes the textual fixture instructions below. Their protocol schemas now
+live in independently captured binary fixtures; this record preserves the
+original implementation and qualification evidence.
+
 ## Scope and authorship
 
 The [reviewed contract](external-dtos-contract.md) records public declaration and

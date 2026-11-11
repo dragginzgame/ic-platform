@@ -1,8 +1,8 @@
 # Toko Tooling snapshot v1
-# version	0.39.8
+# version	0.39.9
 format	1
 source	https://crates.io/crates/toko-tooling
-revision	baf4177553a6a818837ae9765afc021ac3e3c0722e4622f773a990dc4b41cbc9
+revision	1dd7bdb5bbb9bb8076dd35d8dc179c9e49196d9945c8e585990e40091b468b48
 # entrypoint	TOKO-TOOLING.md
 # entrypoint	make/consumer.mk
 # entrypoint	scripts/ci/check-cargo-dependency-boundaries.sh
@@ -32,9 +32,9 @@ revision	baf4177553a6a818837ae9765afc021ac3e3c0722e4622f773a990dc4b41cbc9
 # entrypoint	LICENSE.md
 # entrypoint	CONTRIBUTING.md
 # entrypoint	scripts/ci/fixture-lifecycle.sh
-file	c04bf9274df49fc32b450834ba1aec0d1efb2f7d11f9c9d88a8010a8dc924a63	-	TOKO-TOOLING.md
+file	cfed3d5ae20733a798849caa2656fde5195e1188af45109c40850f4cd62a93d8	-	TOKO-TOOLING.md
 file	91a8c4e1dc4ddb8fbba5825b1190716ddf29eb3cb49784067620b9a86b45c784	-	make/consumer.mk
-file	1782eec112f61159382411038c658ba964cd70b6b80e0d0e14cadabe98dcc71b	x	scripts/ci/check-cargo-dependency-boundaries.sh
+file	7e38c947d6d66c75a83ac45a6d49d11e602153d7906893436ec5083ff0c55cf0	x	scripts/ci/check-cargo-dependency-boundaries.sh
 file	468ff88c6e6fca8c79447ceaa8d04d11f2e1c668664bb9732da708b696a6041b	x	scripts/ci/check-documentation-links.pl
 file	531d272b312e7ba4e2c2234ea27d71dd5cc965aecf287055c34697a3b30144d4	x	scripts/ci/check-dependency-pins.sh
 file	36a6a380703ffa6c9f686b0502d3100b2edd1279b8bc77cc34084dcb1557c410	x	scripts/ci/check-release-commands.sh

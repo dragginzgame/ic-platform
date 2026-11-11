@@ -5,6 +5,20 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.19.2] - Unreleased
+
+### ♻️ Refactoring
+
+- Remove the production `ic_principal` dependency. Optional self-authentication
+  uses the shared upstream SHA-2 0.11 provider and appends the IC identity suffix,
+  preserving arbitrary input admission, Principal bytes and canonical text.
+  Base identity features remain free of hashing; registry comparisons stay dev-only.
+
+### 🛠️ Tooling
+
+- Adopt Toko Tooling 0.39.9's dependency-boundary correction while retaining
+  Platform's stricter local PocketIC restriction.
+
 ## [0.19.1] - 2026-11-10
 
 ### ♻️ Refactoring

@@ -1,15 +1,14 @@
 use super::Principal;
 
 #[test]
-fn delegates_without_key_admission_or_byte_changes() {
-    for length in [0usize, 1, 28, 32, 44, 65, 91, 512, 4096] {
-        let bytes: Vec<u8> = (0..length)
-            .map(|index| (index as u8).wrapping_mul(19))
-            .collect();
-        let expected = ic_principal::Principal::self_authenticating(&bytes);
-        let actual = Principal::self_authenticating(&bytes);
-        assert_eq!(actual.as_slice(), expected.as_slice());
-        assert_eq!(actual.len(), 29);
-        assert_eq!(actual.to_text(), expected.to_text());
-    }
+fn sha224_framing_matches_an_independent_digest() {
+    // SHA-224("abc"), independently checked with OpenSSL, plus the IC suffix.
+    assert_eq!(
+        Principal::self_authenticating(b"abc").as_slice(),
+        &[
+            0x23, 0x09, 0x7d, 0x22, 0x34, 0x05, 0xd8, 0x22, 0x86, 0x42, 0xa4, 0x77, 0xbd, 0xa2,
+            0x55, 0xb3, 0x2a, 0xad, 0xbc, 0xe4, 0xbd, 0xa0, 0xb3, 0xf7, 0xe3, 0x6c, 0x9d, 0xa7,
+            0x02,
+        ]
+    );
 }

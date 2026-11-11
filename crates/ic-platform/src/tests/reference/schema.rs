@@ -1,11 +1,39 @@
 //! Project the owned schema into the independent oracle's type representation.
-//! Frozen DIDs, rather than this projection, supply the expected protocol schemas.
+//! Frozen independent binary headers supply the expected protocol schemas.
 use crate::candid_codec::{Encode, Type};
 use candid::types::{Field, Function, Label, Type as ExternalType, TypeEnv, TypeInner};
 use std::collections::HashMap;
 use std::rc::Rc;
 
-/// Compares an owned schema against one named in an independent provider DID.
+/// Decode trusted frozen schema evidence, never application input.
+#[cfg(any(feature = "icrc-ledger-types", feature = "nns-registry-types"))]
+pub(crate) fn frozen_schema(source: &str) -> TypeEnv {
+    use binrw::BinRead;
+    #[derive(serde::Deserialize)]
+    struct Fixture {
+        names: Vec<String>,
+        hex: String,
+    }
+    let fixture: Fixture = serde_json::from_str(source).unwrap();
+    let bytes = super::decode_hex(&fixture.hex);
+    let mut cursor = std::io::Cursor::new(&bytes);
+    let header = candid::binary_parser::Header::read_le_args(&mut cursor, (Some(1024),)).unwrap();
+    let (mut env, types) = header.to_types().unwrap();
+    assert_eq!(types.len(), fixture.names.len());
+    // Each schema was captured as an absent optional value, including recursive
+    // schemas and function references. The remaining bytes must be those Nones.
+    assert_eq!(&bytes[cursor.position() as usize..], vec![0; types.len()]);
+    for (name, ty) in fixture.names.into_iter().zip(types) {
+        let resolved = env.trace_type(&ty).unwrap();
+        let TypeInner::Opt(inner) = resolved.as_ref() else {
+            panic!("expected optional schema envelope")
+        };
+        assert!(env.0.insert(name, inner.clone()).is_none());
+    }
+    env
+}
+
+/// Compares an owned schema against one named in an independent binary fixture.
 #[cfg(feature = "icrc-ledger-types")]
 pub(crate) fn assert_named_schema<T: Encode>(env: &TypeEnv, name: &str) {
     let mut env = env.clone();
