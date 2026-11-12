@@ -26,6 +26,8 @@ See also the [Types ledger](../types/CHANGELOG.md).
 
 ### 🩹 Fixed
 
+- Include the dependency-maintenance Make entrypoint in release-routing fixtures
+  so the full gate exercises the current installed command surface.
 - Treat the known workspace crypto-bigint advisory as an expected CI finding,
   retaining its full raw evidence and failure status. Keep runtime findings,
   additional advisories and incomplete/tool failures blocking. This disposition

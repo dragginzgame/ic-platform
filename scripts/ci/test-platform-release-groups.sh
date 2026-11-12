@@ -10,7 +10,7 @@ mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/platform-release-routing.XXXXXX")"
 trap 'printf "Release routing evidence: %s\n" "$fixture"' EXIT
 cd "$root"
-bash scripts/ci/prepare-script-fixture.sh "$root" "$fixture" Makefile make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh scripts/ci/check-retained-state.pl ci/release-delivery.txt
+bash scripts/ci/prepare-script-fixture.sh "$root" "$fixture" Makefile make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk make/cargo-dependencies.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh scripts/ci/check-retained-state.pl ci/release-delivery.txt
 git -C "$fixture" init -q
 mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/dev"
 ln -s "$root/.tools" "$fixture/.tools"

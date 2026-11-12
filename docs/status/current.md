@@ -18,9 +18,12 @@ The advisory adapter's refusal tests and ShellCheck pass. Registry review confir
 the adopted Toko/Testkit/Host versions are current; optional Wire 0.21.3 and editor
 0.83 migrations remain explicitly deferred in the Platform ledger.
 
-Delivery has not started at this source checkpoint. The standard frozen runner
-will require the complete local release gate for each group; focused tests above
-do not replace that qualification or native macOS evidence.
+Initial batch `batch-VCzP0I1E` stopped before preparation, delivery or upload:
+the release-routing fixture omitted the newly included dependency-maintenance
+Make entrypoint. The corrected fixture selects that entrypoint and its declared
+companions. Preserve its `qualification.YY6dQL` / `validation.MNl4ew` evidence;
+do not resume its obsolete source. A fresh batch will run the complete local gate
+for each group; focused tests do not replace that qualification or macOS evidence.
 
 ## Published state
 
