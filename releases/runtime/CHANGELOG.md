@@ -4,7 +4,7 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
-## [0.21.3] - Unreleased
+## [0.21.3] - 2026-11-12
 
 ### 🔧 Changed
 
