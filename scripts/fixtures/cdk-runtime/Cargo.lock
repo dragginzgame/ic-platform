@@ -810,6 +810,18 @@ dependencies = [
 [[package]]
 name = "ic-platform"
 version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "792290b53245519a9e2a7833ffedaefa3dd5cd70b148678727071ae3c81a2ff3"
+dependencies = [
+ "ic-platform-types 0.19.4",
+ "num-bigint 0.5.1",
+ "serde",
+ "serde_bytes",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.31.3"
 dependencies = [
  "ic-certification",
  "ic-platform-macros",
@@ -820,18 +832,6 @@ dependencies = [
  "serde_bytes",
  "serde_cbor",
  "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform"
-version = "0.31.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "792290b53245519a9e2a7833ffedaefa3dd5cd70b148678727071ae3c81a2ff3"
-dependencies = [
- "ic-platform-types 0.19.4",
- "num-bigint 0.5.1",
- "serde",
- "serde_bytes",
 ]
 
 [[package]]
@@ -894,7 +894,7 @@ dependencies = [
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
- "ic-platform 0.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.31.2",
  "ic-platform-types 0.19.4",
  "libc",
  "pocket-ic",
@@ -1402,7 +1402,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.31.2",
+ "ic-platform 0.31.3",
  "ic-platform-runtime",
  "ic-wire",
  "serde",
@@ -1412,7 +1412,7 @@ dependencies = [
 name = "platform-runtime-driver"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.31.2",
+ "ic-platform 0.31.3",
  "ic-testkit",
  "ic-wire",
  "serde",
