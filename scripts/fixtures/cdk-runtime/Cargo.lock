@@ -823,6 +823,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-platform"
+version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "792290b53245519a9e2a7833ffedaefa3dd5cd70b148678727071ae3c81a2ff3"
+dependencies = [
+ "ic-platform-types 0.19.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num-bigint 0.5.1",
+ "serde",
+ "serde_bytes",
+]
+
+[[package]]
 name = "ic-platform-macros"
 version = "0.21.2"
 dependencies = [
@@ -851,9 +863,7 @@ version = "0.21.2"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.19.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ea8eeeb34b713c34e7160bf4c49f5c13225a6464ef6d82506236e2db143dfee"
+version = "0.19.4"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -865,6 +875,8 @@ dependencies = [
 [[package]]
 name = "ic-platform-types"
 version = "0.19.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b825ed1996accf3671babc40e97cfa4def25f61d4f1d20490f82c5151f9a8e6"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -875,14 +887,15 @@ dependencies = [
 
 [[package]]
 name = "ic-testkit"
-version = "0.100.2"
+version = "0.101.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a48cc6270053eec22a3d6a8cd5dbc622589153c66b405bf9cfbfd53f379f0a3"
+checksum = "e68738d09fa6453c98d9520714ca2737b73e0ad62d556eb24a5f1a6c38040a18"
 dependencies = [
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
- "ic-platform-types 0.19.3",
+ "ic-platform 0.31.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform-types 0.19.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc",
  "pocket-ic",
  "thiserror 2.0.18",
@@ -1389,7 +1402,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
- "ic-platform",
+ "ic-platform 0.31.2",
  "ic-platform-runtime",
  "ic-wire",
  "serde",
@@ -1399,7 +1412,7 @@ dependencies = [
 name = "platform-runtime-driver"
 version = "0.0.0"
 dependencies = [
- "ic-platform",
+ "ic-platform 0.31.2",
  "ic-testkit",
  "ic-wire",
  "serde",

@@ -4,6 +4,44 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.31.3] - Unreleased
+
+### ✨ Added
+
+- Add native certificate/witness-pair authentication under Agent and strict CBOR
+  capabilities. Preserve Agent's certificate, delegation and freshness checks,
+  the caller’s trust root and explicit combined byte bound;
+  return only a witness bound to the exact canister’s certified-data commitment.
+
+### 🔧 Changed
+
+- Adopt Toko Tooling 0.39.15 and expose its canonical `make deps-update` command
+  for sequential root/qualification Cargo updates, with optional package/version scope.
+- Adopt published Testkit 0.101.0 for native qualification and benchmarks; retain
+  its upstream PocketIC identity and native-only registry management codec.
+  Advance the qualification benchmark's published Platform baseline to 0.31.2,
+  matching its prepared-key API to the local candidate, and retain compatible lock updates.
+  PocketIC's exact thiserror 2.0.18 requirement remains confined to native
+  qualification; the product workspace already selects 2.0.21.
+
+### 🩹 Fixed
+
+- Treat the known workspace crypto-bigint advisory as an expected CI finding,
+  retaining its full raw evidence and failure status. Keep runtime findings,
+  additional advisories and incomplete/tool failures blocking. This disposition
+  leaves [#50 — Resolve the crypto-bigint advisory at the Agent boundary](https://github.com/dragginzgame/ic-platform/issues/50)
+  unresolved and adds no global audit exemption.
+
+### 🧪 Testing
+
+- Refresh the pre-freeze supplier review: Testkit 0.101.0, Toko 0.39.15 and
+  Host helpers 0.76.4 are current published selections. Defer optional fixture
+  Wire 0.10/0.12.1 → 0.21.3 to the next Wire fixture migration, where its codec
+  and identity contracts can be qualified together; these are not product edges.
+  Defer editor 0.73 → 0.83 to the next release-adapter maintenance batch; the
+  selected editor retains the qualified metadata transaction. Revisit both at
+  the next applicable dependency review rather than treating them as exemptions.
+
 ## [0.31.2] - 2026-11-11
 
 ### 🔧 Changed

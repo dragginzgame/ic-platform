@@ -247,12 +247,19 @@ successful producer audits still run and retain their results.
 For offline inspection, replace `online URL` with `local DATABASE_REPOSITORY`
 and select an already prepared Cargo cache through `CARGO_HOME` when needed.
 The isolated database revision, tool version, copied locks, registry preparation,
-logs and raw audit statuses are retained. Separate `*.index-status` files report
+logs and raw audit statuses are retained. Separate `*.gate-status` files retain
+the CI decision. Separate `*.index-status` files report
 complete/incomplete coverage, or unavailable after preparation failure; index
 failures reject even if cargo-audit exits zero.
-Offline results do not establish advisory or registry freshness. Known vulnerabilities
-fail the check; informational maintenance warnings remain visible and are not
-exemptions. Yanked versions retain cargo-audit's existing warning policy; missing
+Offline results do not establish advisory or registry freshness. Vulnerabilities
+fail the check except the maintainer-approved workspace finding #50:
+`RUSTSEC-2026-0387`. Its complete unfiltered log and raw failure remain retained;
+cargo-audit rechecks the same captured input with only that advisory excluded
+to determine the gate result. The exclusion never applies to the runtime lock.
+Additional advisories, tool failures and incomplete index coverage still fail.
+Revisit this CI disposition at the next Agent dependency review; it does not
+remediate #50 or establish safety. Informational maintenance warnings stay visible.
+Yanked versions retain cargo-audit's existing warning policy; missing
 index coverage is a failing observation. No maintained lockfile or shared advisory
 cache is updated. A separate PR/main CI job
 runs the online check and retains its revision and findings in job logs.
@@ -548,7 +555,7 @@ Platform release admission never selects a downstream scheduler. Singleton
 refusal remains covered by the independent executor guard fixtures.
 
 Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
-`IC_TESTKIT_POCKET_IC_URL`. Owned native fixtures select published Testkit 0.100.2
+`IC_TESTKIT_POCKET_IC_URL`. Owned native fixtures select published Testkit 0.101.0
 and its re-export of upstream PocketIC's async client. Each executable owns one current-thread Tokio runtime
 for the complete scenario, awaits network/lifecycle operations and explicitly
 awaits instance teardown before releasing its managed server. Client requests
@@ -563,7 +570,12 @@ in `scripts/fixtures/cdk-runtime/Cargo.lock`. Explicit `--refresh-lock` is a
 reviewed dependency refresh that preserves existing foreign pins and resolves
 necessary manifest changes, not normal validation. Release metadata rendering
 runs that same operation offline inside its transaction; the native Testkit
-supplier no longer retains an older Platform client implementation. The independent
+supplier uses registry Platform 0.31.2 only for management codecs, without Runtime
+or crypto features. Identity admission records that infrastructure separately from
+the selected local Platform implementation and checks PocketIC/Agent Principal
+identity at their crossing. PocketIC 16.1.0 pins `thiserror = "=2.0.18"`, so native
+qualification retains that version while the product workspace selects 2.0.21.
+The independent
 BLS benchmark lock also belongs to the release metadata transaction: local product
 identities advance while its exact registry comparison baseline remains fixed.
 Prepared graph checks still require the sole enabled canister executor.

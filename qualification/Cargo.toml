@@ -13,11 +13,11 @@ publish = false
 [workspace.dependencies]
 ic-platform = { path = "../crates/ic-platform", default-features = false, features = ["bls"] }
 ic-platform-runtime = { path = "../crates/ic-platform-runtime", default-features = false, features = ["ic0"] }
-ic-testkit = { version = "0.100.2", default-features = false }
+ic-testkit = { version = "0.101.0", default-features = false }
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
-platform-baseline = { package = "ic-platform", version = "=0.30.0", default-features = false, features = ["bls"] }
+platform-baseline = { package = "ic-platform", version = "=0.31.2", default-features = false, features = ["bls"] }
 tokio = { version = "1", features = ["rt", "net", "time"] }
-toko-tooling = "=0.39.12"
+toko-tooling = "=0.39.15"
 
 [workspace.lints.rust]
 unsafe_code = "deny"

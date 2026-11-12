@@ -3,15 +3,15 @@
     "rule": "cargo-exact",
     "file": "qualification/Cargo.toml",
     "subject": "platform-baseline",
-    "value": "=0.30.0",
-    "reason": "The private matched BLS benchmark must retain its published pre-adoption baseline while the candidate uses local Platform source.",
-    "evidence": "docs/design/bls-wrapper/qualification.md"
+    "value": "=0.31.2",
+    "reason": "The private matched BLS benchmark explicitly adopts the latest published Platform as a reproducible registry baseline while the candidate uses local source; refresh the selection deliberately with each adoption.",
+    "evidence": "qualification/README.md"
   },
   {
     "rule": "cargo-exact",
     "file": "qualification/Cargo.toml",
     "subject": "toko-tooling",
-    "value": "=0.39.12",
+    "value": "=0.39.15",
     "reason": "The private qualification workspace inherits the same exact published tooling selection as the product workspace and installed snapshot.",
     "evidence": "README.md#development"
   },
@@ -35,7 +35,7 @@
     "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "toko-tooling",
-    "value": "=0.39.12",
+    "value": "=0.39.15",
     "reason": "The published source-bundle installation contract requires one exact registry pin inherited by every member and matched to Cargo.lock and the installed receipt.",
     "evidence": "README.md#development"
   }

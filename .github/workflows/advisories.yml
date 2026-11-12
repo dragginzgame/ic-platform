@@ -43,7 +43,7 @@ jobs:
         if: always()
         run: |
           evidence="$RUNNER_TEMP/advisory-evidence"
-          for file in revision tool-version prepare.log workspace.registry-prepare.status runtime.registry-prepare.status workspace.registry-prepare.log runtime.registry-prepare.log workspace.status runtime.status workspace.index-status runtime.index-status workspace.log runtime.log composition.registry-prepare.status composition.registry-prepare.log composition.status composition.index-status composition.log; do
+          for file in revision tool-version prepare.log workspace.registry-prepare.status runtime.registry-prepare.status workspace.registry-prepare.log runtime.registry-prepare.log workspace.status runtime.status workspace.gate-status runtime.gate-status workspace.expected-advisories workspace.gate.log workspace.index-status runtime.index-status workspace.log runtime.log composition.registry-prepare.status composition.registry-prepare.log composition.status composition.index-status composition.log; do
             if [[ -f "$evidence/$file" ]]; then
               printf '\nEvidence: %s\n' "$file"
               cat "$evidence/$file"

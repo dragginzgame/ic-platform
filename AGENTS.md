@@ -172,6 +172,14 @@ external bytes and consumer-owned decoding/trust/freshness policies unchanged.
 
 ## Cryptographic boundary
 
+On 2026-11-11 the maintainer explicitly approved treating the known #50 advisory
+`RUSTSEC-2026-0387` as expected/non-blocking in the workspace CI audit. Preserve
+its unfiltered finding and raw exit status; only the workspace gate may exclude
+that advisory. Runtime audits, new advisories and incomplete/tool-error results
+must still fail. This is a CI disposition, not a claim of remediation or safety.
+Keep #50 open and revisit this disposition with the next Agent dependency review;
+do not add a global audit ignore or broaden it to other advisories.
+
 On 2026-11-11 the maintainer authorized adopting the qualified clean-room BLS
 wrapper into the existing facade `bls` module. Its source-unexposed implementer
 received protocol/API facts; independent comparisons remain separate. Arithmetic,

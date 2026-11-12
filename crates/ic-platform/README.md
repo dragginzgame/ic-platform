@@ -207,8 +207,14 @@ are removed. Upstream Candid remains a dev-only compatibility oracle.
 Enable `certification` for `ic_platform::certification`: upstream `Certificate`,
 `Delegation`, `HashTree`, `Label`, `LookupResult`, `empty`, `fork`, `labeled`,
 `leaf`, `pruned`, `fork_hash`, `AsHashTree`, `RbTree` and `Hash`, with upstream Serde support and registry type identities. This feature is
-independent of Candid and the executor. Host retains its strict bounded CBOR
-decoder; consumers own trust roots, authentication, budgets and leaf meanings.
+independent of Candid and the executor. `certification-cbor` supplies strict bounded
+CBOR decoding; consumers select budgets and leaf meanings. On native hosts,
+selecting both `agent` and `certification-cbor` also exposes `certification::verify`.
+Its authentication helpers use the caller-configured Agent, preserving its root,
+delegation and freshness checks. `authenticate_hash_tree` additionally enforces
+the caller's combined byte allowance and binds the witness digest to the exact
+canister's certified-data leaf. `verify_witness` alone checks that commitment and
+does not authenticate the certificate. No trust root or application policy is selected.
 Neither construction nor deserialization authenticates a certificate. This
 centralizes dependency control without removing upstream code or promising
 smaller Wasm artifacts.

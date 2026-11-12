@@ -49,15 +49,30 @@ for name in workspace runtime; do
         continue
     fi
     result=0
-    cargo audit --no-fetch --db "$evidence/db" --file "$evidence/$name.lock" --color never \
-        > "$evidence/$name.log" 2>&1 || result=$?
+    audit=(cargo audit --no-fetch --db "$evidence/db" --file "$evidence/$name.lock" --color never)
+    "${audit[@]}" > "$evidence/$name.log" 2>&1 || result=$?
     cat "$evidence/$name.log"
     printf '%s\n' "$result" > "$evidence/$name.status"
-    if [[ "$result" != 0 ]]; then status=1; fi
+    gate_result=$result
+    logs=("$evidence/$name.log")
+    # Maintainer-approved CI disposition for Platform #50, not a global ignore.
+    # Keep the unfiltered finding/status, then let cargo-audit classify everything
+    # else against the same captured lock and database. Runtime has no exception.
+    if [[ "$name" == workspace && "$result" == 1 ]] &&
+        grep -Eq '^ID:[[:space:]]+RUSTSEC-2026-0387[[:space:]]*$' "$evidence/$name.log"; then
+        printf 'Expected non-blocking finding: RUSTSEC-2026-0387 (Platform #50); raw evidence retained\n'
+        printf 'RUSTSEC-2026-0387\n' > "$evidence/$name.expected-advisories"
+        gate_result=0
+        "${audit[@]}" --ignore RUSTSEC-2026-0387 > "$evidence/$name.gate.log" 2>&1 || gate_result=$?
+        cat "$evidence/$name.gate.log"
+        logs+=("$evidence/$name.gate.log")
+    fi
+    printf '%s\n' "$gate_result" > "$evidence/$name.gate-status"
+    if [[ "$gate_result" != 0 ]]; then status=1; fi
     # cargo-audit 0.22.2 can print index lookup errors without a failing exit.
     # Preserve its status separately, but never admit that as complete coverage.
     coverage=complete
-    if grep -Eq "couldn't (check if the package is yanked|open crates.io index|update crates.io index)" "$evidence/$name.log"; then
+    if grep -Eq "couldn't (check if the package is yanked|open crates.io index|update crates.io index)" "${logs[@]}"; then
         coverage=incomplete
         status=1
         echo "The $name yanked-package observation is incomplete" >&2

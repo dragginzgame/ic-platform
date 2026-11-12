@@ -19,8 +19,11 @@ historical selections and consumer observations, not current dependency claims.
 The root workspace retains five product packages and three Rust release groups.
 No package has default features. Runtime macros/guard release with Runtime;
 Types and the facade release independently. IC Tooling's Testkit re-exports its
-upstream PocketIC client; Platform fixtures select Testkit 0.100.2. The former
-native Profiler provider is retired here.
+upstream PocketIC client; Platform fixtures select Testkit 0.101.0. Its native
+snapshot helpers select registry Platform 0.31.2 with only the owned management
+codec/DTO features; this infrastructure does not enter the canister graph or
+replace the local implementation under qualification. The former native Profiler
+provider is retired here.
 
 ## Current external boundaries
 
@@ -38,6 +41,12 @@ native Profiler provider is retired here.
 | Canister signatures | Certificate/BLS suppliers and SHA-2 | Owned protocol composition; trust/freshness policy stays consumer-owned |
 | ECDSA / Ed25519 | k256 / ed25519-dalek and curve25519-dalek | External primitives; crypto-bigint security floor remains explicit |
 | Browser SDK | @icp-sdk/core 6.1.1 | Browser 0.2.0 has typed call-ingress inspection, no generic Cbor export |
+
+The native `certification::verify` composition requires both `agent` and
+`certification-cbor`. It preserves Agent authentication, delegation and freshness
+checks under the caller-selected root and binds a witness to the exact canister's
+certified data. Callers supply byte allowances and retain application leaf policy;
+the helper adds no dependency or Wasm feature edge.
 
 Upstream binary Candid and management/signature packages also remain as explicit
 **development oracles**. An all-features development tree is not a production
@@ -163,11 +172,11 @@ facade README feature table. Package release versions are represented as
 | ic-platform | serde_json | ^1.0 | dev | all | false | true |  |
 | ic-platform | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform | toko-tooling | =0.39.12 | dev | all | false | true |  |
+| ic-platform | toko-tooling | =0.39.15 | dev | all | false | true |  |
 | ic-platform-macros | proc-macro2 | ^1.0.106 | normal | all | false | true |  |
 | ic-platform-macros | quote | ^1 | normal | all | false | true |  |
 | ic-platform-macros | syn | ^3 | normal | all | false | true | full |
-| ic-platform-macros | toko-tooling | =0.39.12 | dev | all | false | true |  |
+| ic-platform-macros | toko-tooling | =0.39.15 | dev | all | false | true |  |
 | ic-platform-runtime | ic-platform-macros | workspace-owned | normal | all | true | true |  |
 | ic-platform-runtime | ic-platform-runtime-guard | workspace-owned | normal | all | true | false |  |
 | ic-platform-runtime | ic-platform-types | workspace-owned | normal | all | true | false |  |
@@ -177,8 +186,8 @@ facade README feature table. Package release versions are represented as
 | ic-platform-runtime | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-runtime | slotmap | ^1.1.1 | normal | all | true | true |  |
 | ic-platform-runtime | thiserror | ^2.0.18 | normal | all | true | true |  |
-| ic-platform-runtime | toko-tooling | =0.39.12 | dev | all | false | true |  |
-| ic-platform-runtime-guard | toko-tooling | =0.39.12 | dev | all | false | true |  |
+| ic-platform-runtime | toko-tooling | =0.39.15 | dev | all | false | true |  |
+| ic-platform-runtime-guard | toko-tooling | =0.39.15 | dev | all | false | true |  |
 | ic-platform-types | crc32fast | ^1.5 | normal | all | false | true |  |
 | ic-platform-types | data-encoding | ^2.11 | normal | all | false | false | alloc |
 | ic-platform-types | ic_principal | ^0.1.5 | dev | all | false | false | convert |
@@ -190,5 +199,5 @@ facade README feature table. Package release versions are represented as
 | ic-platform-types | serde_test | ^1.0.177 | dev | all | false | true |  |
 | ic-platform-types | sha2 | ^0.11.1 | normal | all | true | false |  |
 | ic-platform-types | thiserror | ^2.0.18 | normal | all | false | true |  |
-| ic-platform-types | toko-tooling | =0.39.12 | dev | all | false | true |  |
+| ic-platform-types | toko-tooling | =0.39.15 | dev | all | false | true |  |
 <!-- END MANIFEST INVENTORY -->

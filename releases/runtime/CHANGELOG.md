@@ -4,6 +4,14 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.21.3] - Unreleased
+
+### 🔧 Changed
+
+- Select Toko Tooling 0.39.15 for development and CI.
+- Select published Testkit 0.101.0 for installed Runtime qualification; its native
+  management codec remains outside Runtime and canister dependency graphs.
+
 ## [0.21.2] - 2026-11-11
 
 ### 🔧 Changed

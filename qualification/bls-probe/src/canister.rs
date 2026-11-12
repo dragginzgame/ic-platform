@@ -7,10 +7,7 @@ use ic_platform::bls as backend;
 #[cfg(feature = "baseline")]
 use platform_baseline::bls as backend;
 
-#[cfg(feature = "candidate")]
 type CachedKey = backend::PreparedPublicKey;
-#[cfg(feature = "baseline")]
-type CachedKey = backend::PublicKey;
 
 thread_local! {
     static KEY: RefCell<Option<([u8; 96], CachedKey)>> = const { RefCell::new(None) };
@@ -65,7 +62,6 @@ fn cached_verify(signature: &[u8], message: &[u8], key: &[u8; 96]) -> bool {
             let Ok(public) = backend::PublicKey::deserialize(key) else {
                 return false;
             };
-            #[cfg(feature = "candidate")]
             let public = public.prepare();
             *cached = Some((*key, public));
         }

@@ -112,10 +112,16 @@ Shared tooling is pinned in each workspace's `[workspace.dependencies]` and
 inherited as a dev-dependency by every member. Keep the product root and private
 `qualification/Cargo.toml` selections identical. After changing both exact pins
 and their documented exceptions in `ci/dependency-pinning-exceptions.json`, run
-`cargo update -p toko-tooling` in each workspace, then `make toko-tooling-update`
+`make deps-update DEPENDENCY_PACKAGE=toko-tooling`, then `make toko-tooling-update`
 to install the selected archive. Retain both Cargo.lock files and the snapshot. Use
 `make toko-tooling-install` to reinstall that Cargo selection, and
 `make toko-tooling-status` to compare selected and installed identities offline.
+
+For general dependency maintenance, `make deps-update` runs `cargo update -v`
+sequentially in the root and qualification workspaces. It changes lockfiles;
+review the changes and qualify the affected graphs. Select `DEPENDENCY_PACKAGE`
+and, optionally, `DEPENDENCY_PRECISE` for a scoped update. The command preserves
+normal Cargo output and does not perform a separate registry freshness audit.
 
 For a change to Types, for example, select its focused checks:
 

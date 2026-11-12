@@ -65,6 +65,7 @@ LOCAL_TOOL_CHECK_TARGETS += release-editor-check
 LOCAL_TOOL_INSTALL_TARGETS += install-browser-tools
 LOCAL_TOOL_CHECK_TARGETS += browser-tools-check
 include make/consumer.mk
+include make/cargo-dependencies.mk
 # Keep the shared pre-capture cleanup behind tooling admission, including -j.
 clean-empty-source-dirs: toko-tooling-check
 release-batch-resume: toko-tooling-check
@@ -90,6 +91,7 @@ help:
 	@echo 'Setup: install-tools, tools-check, install-hooks'
 	@echo 'Consumer cache setup: prepare-consumer-dependencies (explicit registry fetch)'
 	@echo 'Tool diagnostics: tools-report (offline, no installation)'
+	@echo 'Dependency updates: deps-update [DEPENDENCY_PACKAGE=name DEPENDENCY_PRECISE=version]'
 	@echo 'Focused: check, test, clippy, docs-check, wasm-check, msrv, check-boundary'
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
 	@echo 'Exact saved recovery: release-resume VERSION=X.Y.Z'

@@ -38,14 +38,29 @@ fi
 [[ "$1" == audit ]]
 if [[ "$2" == --version ]]; then echo cargo-audit-test; exit; fi
 [[ "$2" == --no-fetch && "$3" == --db && "$5" == --file ]]
-[[ "$7" == --color && "$8" == never && $# == 8 ]]
+[[ "$7" == --color && "$8" == never ]]
+ignored=no
+if [[ $# == 10 ]]; then
+    [[ "$6" == */workspace.lock && "$9" == --ignore && "${10}" == RUSTSEC-2026-0387 ]]
+    ignored=yes
+else [[ $# == 8 ]]; fi
 [[ -d "$4" ]]
 cat "$6" >> "$CALLS"
 echo 'warning: informational unmaintained package'
 if [[ "${YANKED:-no}" == yes ]]; then echo 'warning: package was yanked'; fi
 if [[ "${MISSING_INDEX:-no}" == yes ]]; then echo "error: couldn't check if the package is yanked: not found"; fi
 if [[ "${INDEX_OPEN_FAILURE:-no}" == yes ]]; then echo "warning: couldn't open crates.io index: unavailable"; fi
-if [[ "$6" == */workspace.lock ]]; then exit "${WORKSPACE_STATUS:-0}"; fi
+if [[ "$6" == */workspace.lock ]]; then
+    if [[ "${WORKSPACE_KNOWN:-no}" == yes ]]; then
+        printf 'Crate: crypto-bigint\nVersion: 0.5.5\nID: RUSTSEC-2026-0387\n'
+        if [[ "$ignored" != yes ]]; then exit 1; fi
+    fi
+    exit "${WORKSPACE_STATUS:-0}"
+fi
+if [[ "${RUNTIME_KNOWN:-no}" == yes ]]; then
+    printf 'Crate: crypto-bigint\nVersion: 0.5.5\nID: RUSTSEC-2026-0387\n'
+    exit 1
+fi
 AUDIT
 chmod +x "$fixture/bin/cargo"
 export PATH="$fixture/bin:$PATH" CALLS="$fixture/calls" FETCH_CALLS="$fixture/fetch-calls"
@@ -78,6 +93,30 @@ status=0
 WORKSPACE_STATUS=1 bash "$script" local ok "$fixture/fail" > "$fixture/fail.log" || status=$?
 [[ "$status" == 1 && "$(cat "$CALLS")" == workspaceruntime ]]
 [[ "$(cat "$fixture/fail/workspace.status")" == 1 && "$(cat "$fixture/fail/workspace.index-status")" == complete ]]
+: > "$CALLS"
+WORKSPACE_KNOWN=yes bash "$script" local ok "$fixture/known" > "$fixture/known.log"
+[[ "$(cat "$CALLS")" == workspaceworkspaceruntime ]]
+[[ "$(cat "$fixture/known/workspace.status")" == 1 && "$(cat "$fixture/known/workspace.gate-status")" == 0 ]]
+grep -Fx 'RUSTSEC-2026-0387' "$fixture/known/workspace.expected-advisories" > /dev/null
+grep -q 'ID: RUSTSEC-2026-0387' "$fixture/known/workspace.log"
+for failure in additional runtime incomplete tool; do
+    : > "$CALLS"
+    extra=0 runtime=no missing=no
+    case "$failure" in additional) extra=1 ;; runtime) runtime=yes ;; incomplete) missing=yes ;; tool) extra=7 ;; esac
+    status=0
+    WORKSPACE_KNOWN=yes WORKSPACE_STATUS="$extra" RUNTIME_KNOWN="$runtime" MISSING_INDEX="$missing" \
+        bash "$script" local ok "$fixture/known-$failure" > "$fixture/known-$failure.log" 2>&1 || status=$?
+    [[ "$status" == 1 ]]
+    case "$failure" in
+        additional) [[ "$(cat "$fixture/known-$failure/workspace.gate-status")" == 1 ]] ;;
+        runtime)
+            [[ "$(cat "$fixture/known-$failure/runtime.gate-status")" == 1 ]]
+            [[ ! -f "$fixture/known-$failure/runtime.expected-advisories" && ! -f "$fixture/known-$failure/runtime.gate.log" ]]
+            ;;
+        incomplete) [[ "$(cat "$fixture/known-$failure/workspace.index-status")" == incomplete ]] ;;
+        tool) [[ "$(cat "$fixture/known-$failure/workspace.gate-status")" == 7 ]] ;;
+    esac
+done
 : > "$CALLS"
 status=0
 bash "$script" local fail "$fixture/preparation-failure" > "$fixture/preparation.log" 2>&1 || status=$?
