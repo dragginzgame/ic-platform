@@ -59,6 +59,10 @@ fn cbor_input(input: &Json) -> serde_cbor::Value {
     result
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Each frozen DTO observation owns its JSON input across all serializers"
+)]
 fn observe<T>(label: &str, input: Json) -> (String, String, Vec<u8>, String, Vec<u8>)
 where
     T: for<'a> Deserialize<'a> + Encode + for<'a> Decode<'a> + Debug + Eq + Clone,

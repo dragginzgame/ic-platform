@@ -11,6 +11,10 @@ fn limits() -> Limits {
         allocation: 4_000_000,
     }
 }
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The comparison matrix owns each sample while both codec observations borrow it"
+)]
 fn check<T>(value: T)
 where
     T: Encode

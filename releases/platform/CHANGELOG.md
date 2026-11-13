@@ -4,6 +4,40 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.32.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Require Rust 1.100.0 and adopt the common Rust/Clippy/Rustdoc lint policy across
+  product, qualification and generated consumers. Mark query results as must-use
+  and preserve narrowly reviewed callback/codec ownership and safety boundaries
+  ([#157](https://github.com/dragginzgame/ic-platform/issues/157)).
+
+### 🔧 Changed
+
+- Select published Toko Tooling 0.40.1 in the product and qualification
+  workspaces, preserving the installed entrypoints. Apply its directory-module
+  layout to codec, signature tests and generated Runtime fixture sources without
+  changing public module paths or behavior. Preserve standalone formatting coverage
+  and qualification input-custody checks after the moves.
+- Adopt deployment-latency guidance while retaining the complete required release
+  gates and qualified evidence contracts for reuse.
+- Adopt 0.40.1's deployment sequencing and phase-specific recovery guidance:
+  qualify changed wiring first, retain one full-gate owner and original successful
+  evidence, and explain unsupported recovery and rerun scope before retrying.
+- Retain compatible native-client lock updates, including rustls-webpki 0.103.17;
+  the owned production Wasm dependency selections are unchanged by that refresh.
+
+### 🧪 Testing
+
+- Review release suppliers before freezing: Testkit 0.101.0 and Toko 0.40.1 are
+  the selected published releases. Wire 0.21.5 and Build 0.83.0 are available;
+  keep the older fixture codec and metadata editor until their separately
+  qualified migrations, without inserting optional upgrades into this batch.
+- Advance the private qualification benchmark's registry Platform baseline to
+  published 0.31.3, matching the local candidate. This private benchmark update
+  alone needs no product publication.
+
 ## [0.31.3] - 2026-11-12
 
 ### ✨ Added

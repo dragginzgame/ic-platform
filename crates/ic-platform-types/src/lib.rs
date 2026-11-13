@@ -3,6 +3,8 @@
 //! Bytes, bounded text, Serde and account semantics belong here. Registry-backed
 //! self-authentication requires its explicit feature.
 
+#![forbid(unsafe_code)]
+
 pub mod account;
 pub mod principal;
 pub use account::{Account, AccountError, Subaccount};

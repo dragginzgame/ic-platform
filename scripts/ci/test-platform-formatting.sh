@@ -36,6 +36,21 @@ run_make fmt
 run_make fmt-check
 [[ ! -e "$fixture/work/target/toko-tooling/formatting.receipt" ]]
 
+# Root templates project children during generation; every moved root and its
+# separately formatted child inputs must still participate in the actual gate.
+for module in canister/mod.rs driver/mod.rs wire_driver/mod.rs; do
+    selected="scripts/fixtures/cdk-runtime/$module"
+    cp "$fixture/work/$selected" "$fixture/layout-original.rs"
+    printf '\nfn layout_formatting_fixture( ){ }\n' >> "$fixture/work/$selected"
+    if run_make fmt-check; then
+        echo "Unformatted Runtime template was admitted: $module" >&2; exit 1
+    fi
+    grep -q 'Standalone Rust formatting.*FAILED' "$fixture/last.log"
+    run_make fmt
+    run_make fmt-check
+    cp "$fixture/layout-original.rs" "$fixture/work/$selected"
+done
+
 # A changed configuration must still be observed for this uncached selection.
 printf 'max_width = "invalid"\n' > "$fixture/work/rustfmt.toml"
 if run_make fmt-check; then

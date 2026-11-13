@@ -5,6 +5,7 @@
 //! application protocols continue to use Wire.
 
 /// Exact zero-argument envelope, without allocation or failure.
+#[must_use]
 pub const fn empty() -> &'static [u8; 6] {
     b"DIDL\0\0"
 }
@@ -12,6 +13,7 @@ pub const fn empty() -> &'static [u8; 6] {
 /// Encode `count` unit/null arguments: zero gives `()`, two gives `((), ())`.
 ///
 /// The count is caller-selected; no resource limit is inferred.
+#[must_use]
 pub fn units(count: usize) -> Vec<u8> {
     let mut bytes = header(count, count);
     bytes.extend(core::iter::repeat_n(0x7f, count));
@@ -19,6 +21,7 @@ pub fn units(count: usize) -> Vec<u8> {
 }
 
 /// Encode one text argument with its exact UTF-8 bytes and byte length.
+#[must_use]
 pub fn text(value: &str) -> Vec<u8> {
     let mut bytes = header(1, 1 + unsigned_len(value.len()) + value.len());
     bytes.push(0x71);

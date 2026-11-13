@@ -1,7 +1,7 @@
 //! Deliberate native IC protocol fixtures, never authentication assertions.
 //! Select only in development dependencies. These APIs cannot encode application DTOs.
 
-use super::*;
+use super::{CborError, Principal, ReadStateResponse, SubnetMetrics, encode_framed};
 use crate::certification::{Certificate, HashTree};
 use ic_transport_types::{QueryResponse, RejectResponse, ReplyResponse};
 use serde::Serialize;

@@ -5,6 +5,10 @@ pub(crate) mod contract {
     pub fn encode_one<T: Encode>(value: T) -> Result<Vec<u8>, Error> {
         codec::encode_one(&value, 65536)
     }
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The fixture preserves the owned external argument-encoding contract"
+    )]
     pub fn encode_args<T: codec::arguments::EncodeArgs>(value: T) -> Result<Vec<u8>, Error> {
         codec::arguments::encode_args(&value, 65536)
     }

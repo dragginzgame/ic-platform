@@ -206,12 +206,14 @@ pub fn performance_counter(counter_type: impl Into<PerformanceCounterType>) -> u
 
 /// Reads performance counter zero.
 #[inline]
+#[must_use]
 pub fn instruction_counter() -> u64 {
     upstream::performance_counter(0)
 }
 
 /// Reads performance counter one.
 #[inline]
+#[must_use]
 pub fn call_context_instruction_counter() -> u64 {
     upstream::performance_counter(1)
 }
@@ -220,6 +222,7 @@ pub fn call_context_instruction_counter() -> u64 {
 ///
 /// # Panics
 /// Panics if IC0 returns a value other than zero or one.
+#[must_use]
 pub fn is_controller(principal: &Principal) -> bool {
     system_bool(
         upstream::is_controller(principal.as_slice()),
@@ -231,6 +234,7 @@ pub fn is_controller(principal: &Principal) -> bool {
 ///
 /// # Panics
 /// Panics if IC0 returns a value other than zero or one.
+#[must_use]
 pub fn in_replicated_execution() -> bool {
     system_bool(
         upstream::in_replicated_execution(),

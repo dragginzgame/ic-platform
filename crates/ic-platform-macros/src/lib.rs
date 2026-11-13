@@ -1,5 +1,7 @@
 //! Entrypoint attributes with explicit caller-owned codecs.
 
+#![forbid(unsafe_code)]
+
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 

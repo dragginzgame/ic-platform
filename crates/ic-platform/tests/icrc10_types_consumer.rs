@@ -2,6 +2,7 @@
 use ic_platform::icrc_ledger_types::icrc10::SupportedStandard;
 
 /// Construct an external record without any direct Candid or Serde dependency.
+#[must_use]
 pub fn standard(name: String, url: String) -> SupportedStandard {
     SupportedStandard { name, url }
 }

@@ -6,6 +6,8 @@ use ic_platform::bls::{
 };
 
 /// Preserve upstream key/signature serialization, verification and typed failures.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn roundtrip() {
     // Upstream #127 regression: valid identity point encodings remain parseable,
     // but an identity public key must never verify an identity signature.

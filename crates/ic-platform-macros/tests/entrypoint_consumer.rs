@@ -25,6 +25,10 @@ mod runtime {
             vec![7, 8]
         }
 
+        #[expect(
+            clippy::needless_pass_by_value,
+            reason = "The generated reply boundary transfers owned encoder bytes"
+        )]
         pub fn msg_reply(bytes: Vec<u8>) {
             super::record(format!("reply:{bytes:?}"));
         }
@@ -68,6 +72,10 @@ mod runtime {
     }
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The decoder contract transfers ownership of the argument buffer"
+)]
 fn decode_unit(bytes: Vec<u8>) {
     assert_eq!(bytes, [7, 8]);
     runtime::record("decode:unit");
@@ -107,6 +115,10 @@ fn r#type() {
 }
 
 mod codecs {
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The decoder contract transfers ownership of the argument buffer"
+    )]
     pub fn one<T: From<u8>>(bytes: Vec<u8>) -> T {
         assert_eq!(bytes, [7, 8]);
         super::runtime::record("decode:one");
@@ -119,12 +131,20 @@ mod codecs {
         vec![u8::try_from(value).unwrap()]
     }
 
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The decoder contract transfers ownership of the argument buffer"
+    )]
     pub fn tuple_argument(bytes: Vec<u8>) -> (u32, u32) {
         assert_eq!(bytes, [7, 8]);
         super::runtime::record("decode:tuple-argument");
         (7, 8)
     }
 
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The decoder contract transfers ownership of the argument buffer"
+    )]
     pub fn multiple(bytes: Vec<u8>) -> ((u32, u32), u32, u32) {
         assert_eq!(bytes, [7, 8]);
         super::runtime::record("decode:multiple");
@@ -289,6 +309,10 @@ mod aliases {
 }
 
 mod reviewed_regressions {
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The decoder contract transfers ownership of the argument buffer"
+    )]
     fn decode_concrete(bytes: Vec<u8>) -> u32 {
         assert_eq!(bytes, [7, 8]);
         super::runtime::record("decode:concrete");
@@ -346,6 +370,10 @@ mod hygiene {
         ::std::result::Result::Ok(())
     }
 
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The decoder contract transfers ownership of the argument buffer"
+    )]
     fn args(bytes: ::std::vec::Vec<u8>) -> u32 {
         assert_eq!(bytes, [7, 8]);
         super::runtime::record("decode:hygiene");

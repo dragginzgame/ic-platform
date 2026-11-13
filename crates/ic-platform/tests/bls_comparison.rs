@@ -47,7 +47,7 @@ fn bytes_and_verification_match_independent_supplier_calls() {
                 verify_bls_signature(&reference.serialize(), &message, &public.serialize()),
                 Ok(())
             );
-            let mut wrong_message = message.clone();
+            let mut wrong_message = message;
             wrong_message.push(1);
             assert!(public.verify(&wrong_message, &decoded).is_err());
             assert!(prepared.verify(&wrong_message, &decoded).is_err());

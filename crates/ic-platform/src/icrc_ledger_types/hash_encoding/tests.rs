@@ -2,6 +2,10 @@ use crate::candid_codec::Nat;
 use num_bigint::BigUint;
 use std::io::{self, Write};
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Each oracle case owns the generated magnitude for all framing observations"
+)]
 fn check_against_oracle(value: BigUint) {
     let oracle: candid::Nat = value
         .to_string()

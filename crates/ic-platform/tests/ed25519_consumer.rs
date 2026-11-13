@@ -12,6 +12,8 @@ pub fn verify(key: &[u8; 32], bytes: &[u8], message: &[u8]) -> Result<(), Signat
 }
 
 /// Preserve RFC 8032 bytes and the consumer's strict refusal policy on both targets.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn roundtrip() {
     use ic_platform::ed25519::{Signer, SigningKey};
     // RFC 8032 section 7.1, test 1: independently specified seed, key and signature.

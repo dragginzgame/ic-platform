@@ -36,6 +36,9 @@ ic-platform = { path = "../../crates/ic-platform", default-features = false, fea
 ic-wire = { version = "$wire", optional = true }
 MANIFEST
 cp scripts/fixtures/prepared-call-consumer/{lib,tests}.rs "$fixture/src/"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_fixture_policy "$root" "$fixture"
 if [[ "$prepare" == true ]]; then
     cp "$root/Cargo.lock" "$fixture/Cargo.lock"
     cargo fetch --manifest-path "$fixture/Cargo.toml"

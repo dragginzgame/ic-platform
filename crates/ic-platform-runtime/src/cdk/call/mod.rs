@@ -145,6 +145,7 @@ pub struct Response(Vec<u8>);
 
 impl Response {
     /// Takes ownership of the response payload.
+    #[must_use]
     pub fn into_bytes(self) -> Vec<u8> {
         self.0
     }
@@ -207,16 +208,19 @@ pub struct CallRejected {
 
 impl CallRejected {
     /// Retains a raw rejection code and its text without interpretation.
+    #[must_use]
     pub fn with_rejection(code: u32, message: String) -> Self {
         Self { code, message }
     }
 
     /// Returns the complete supplier code.
+    #[must_use]
     pub fn raw_reject_code(&self) -> u32 {
         self.code
     }
 
     /// Borrows the exact rejection text.
+    #[must_use]
     pub fn reject_message(&self) -> &str {
         &self.message
     }

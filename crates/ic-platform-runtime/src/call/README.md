@@ -43,6 +43,6 @@ Query, Jobs and Relay may retain the already qualified raw Platform route when
 its borrowed-method contract suffices. Timers' private self-dispatch remains below
 this layer. Existing raw callers are not forced to migrate.
 
-Rust 2024 / MSRV 1.91. Native construction/inspection is supported; execution and
+Rust 2024 / MSRV 1.100.0. Native construction/inspection is supported; execution and
 cost observations require the existing IC canister/executor context. The module ships
 with Platform; actual consumer adoption remains independent.

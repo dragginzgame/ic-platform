@@ -51,11 +51,13 @@ impl Principal {
     pub const MAX_LENGTH_IN_TEXT: usize = 63;
 
     /// Returns the zero-byte management canister identity.
+    #[must_use]
     pub const fn management_canister() -> Self {
         Self::from_slice(&[])
     }
 
     /// Returns the one-byte anonymous identity, whose byte is 4.
+    #[must_use]
     pub const fn anonymous() -> Self {
         Self::from_slice(&[4])
     }
@@ -65,6 +67,7 @@ impl Principal {
     /// # Panics
     ///
     /// Panics if `slice` contains more than 29 bytes.
+    #[must_use]
     pub const fn from_slice(slice: &[u8]) -> Self {
         match Self::try_from_slice(slice) {
             Ok(principal) => principal,
@@ -140,12 +143,14 @@ impl Principal {
     }
 
     /// Returns lowercase canonical text with a dash after every five digits.
+    #[must_use]
     pub fn to_text(&self) -> String {
         let mut text = [0_u8; Self::MAX_LENGTH_IN_TEXT];
         self.text_into(&mut text).to_owned()
     }
 
     /// Borrows only the significant bytes.
+    #[must_use]
     pub const fn as_slice(&self) -> &[u8] {
         self.bytes.split_at(self.len as usize).0
     }
@@ -155,11 +160,13 @@ impl Principal {
         clippy::len_without_is_empty,
         reason = "A zero-length Principal identifies the management canister"
     )]
+    #[must_use]
     pub const fn len(&self) -> u8 {
         self.len
     }
 
     /// Borrows the fixed storage, whose tail after [`Self::len`] is zero.
+    #[must_use]
     pub const fn as_fixed_bytes(&self) -> &[u8; 29] {
         &self.bytes
     }

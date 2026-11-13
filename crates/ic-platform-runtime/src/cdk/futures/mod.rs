@@ -80,6 +80,7 @@ pub fn spawn_migratory<F: Future<Output = ()> + 'static>(future: F) {
 }
 
 /// Reports whether the current context is explicit trap recovery.
+#[must_use]
 pub fn is_recovering_from_trap() -> bool {
     crate::executor::is_recovering_from_trap()
 }

@@ -1,5 +1,5 @@
 //! Installed stable checks qualification scenarios.
-use super::*;
+use super::{api, codec, protocol};
 
 #[ic_platform_runtime::cdk::update(
     guard = "codec::admit",

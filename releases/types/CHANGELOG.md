@@ -5,6 +5,18 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.20.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Require Rust 1.100.0, apply the common lint policy, forbid unsafe code and mark
+  identity query results as must-use without changing identity bytes or admission
+  ([#157](https://github.com/dragginzgame/ic-platform/issues/157)).
+
+### 🔧 Changed
+
+- Select Toko Tooling 0.40.1 for development and CI.
+
 ## [0.19.5] - 2026-11-12
 
 ### 🔧 Changed

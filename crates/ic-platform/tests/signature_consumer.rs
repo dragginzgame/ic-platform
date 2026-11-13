@@ -52,6 +52,8 @@ fn prepared_root_reuse_preserves_authenticated_time_after_refusals() {
 }
 
 /// Preserve accepted signed bytes and upstream failures without adding trust policy.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn roundtrip() {
     let signature = hex(include_str!("fixtures/signature-valid.hex"));
     let public = hex(include_str!("fixtures/signature-public.hex"));

@@ -6,6 +6,8 @@ cd "$root"
 prepare=false
 profiles=('' external-ledger current-runtime)
 compiler="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
 case "${1:-}" in '') [[ $# == 0 ]] ;; --prepare) [[ $# == 1 ]]; prepare=true ;; *) exit 2 ;; esac
 mkdir -p target
 fixture="$(mktemp -d "$root/target/stable-identities.XXXXXX")"
@@ -13,6 +15,7 @@ printf 'Stable identity evidence: %s\n' "$fixture"
 mkdir -p "$fixture/supplier/src" "$fixture/consumer/src" "$fixture/next"
 printf '[workspace]\n[package]\nname="identity-schema-supplier"\nversion="0.0.0"\nedition="2024"\n[package.metadata.toko-tooling.loc]\ncategory="tests"\n[dependencies]\nic-wire="=0.12.1"\n' > "$fixture/supplier/Cargo.toml"
 touch "$fixture/supplier/src/lib.rs"
+platform_fixture_policy "$root" "$fixture/supplier"
 if [[ "$prepare" == true ]]; then
     cargo fetch --manifest-path "$fixture/supplier/Cargo.toml"
     exit
@@ -66,6 +69,7 @@ ic-platform-types = { path = "$root/crates/ic-platform-types" }
 ic-wire = { path = "$fixture/wire", features = ["platform-types"] }
 MANIFEST
 cp scripts/fixtures/stable-identities/{lib,tests}.rs "$fixture/consumer/src/"
+platform_fixture_policy "$root" "$fixture/consumer"
 cargo metadata --manifest-path "$fixture/consumer/Cargo.toml" --offline --all-features --format-version 1 > "$fixture/metadata.json"
 bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture/consumer" --external-ic
 bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler.txt"

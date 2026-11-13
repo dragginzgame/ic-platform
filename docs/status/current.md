@@ -1,168 +1,105 @@
-# Current handoff — 2026-11-12
+# Current handoff — 2026-11-13
 
-## Reviewed deployment batch
+## Published state and pending delivery
 
-The maintainer authorized delivery of the reviewed local batch. Select patch
-releases in supplier order: Types 0.19.5, Runtime/macros/guard 0.21.3 and Platform
-0.31.3. All five public package manifests inherit the changed exact Toko
-dev-dependency; their normalized published requirements change. Platform also
-adds the native certificate/witness authentication API. No browser/npm or sibling
-release is selected. Pending release notes cover the complete batch.
+Ordinary main remains `d524dee2fc26d4bb330ffcdbfb5a0be72b461dcb` after completed
+frozen batch `batch-CFcV6khZ`. All five packages were verified on crates.io, not
+yanked; annotated tags dereference to these release commits:
 
-The native API requires `agent,certification-cbor`, delegates certificate,
-delegation and freshness authentication to the caller-configured Agent, and
-checks the exact canister's certified-data witness commitment. It adds no dependency
-or Wasm feature edge. Focused Clippy and tests pass with and without `bls`, including
-signed evidence, unsigned/tampered/stale refusal, byte budgets and trailing CBOR.
-The advisory adapter's refusal tests and ShellCheck pass. Registry review confirms
-the adopted Toko/Testkit/Host versions are current; optional Wire 0.21.3 and editor
-0.83 migrations remain explicitly deferred in the Platform ledger.
-
-Initial batch `batch-VCzP0I1E` stopped before preparation, delivery or upload:
-the release-routing fixture omitted the newly included dependency-maintenance
-Make entrypoint. The corrected fixture selects that entrypoint and its declared
-companions. Preserve its `qualification.YY6dQL` / `validation.MNl4ew` evidence;
-do not resume its obsolete source. A fresh batch will run the complete local gate
-for each group; focused tests do not replace that qualification or macOS evidence.
-
-## Published state
-
-Frozen batch `batch-CqgSHOoJ` completed and was reconciled into ordinary main.
-All five packages are independently verified present and not yanked on crates.io;
-annotated GitHub tags dereference to the matching release commits.
-
-| Group | Version | Commit | Tag | Local receipt |
+| Group | Version | Commit | Tag | Qualification / runner |
 | --- | --- | --- | --- | --- |
-| Types | 0.19.4 | `3c0633613e5df26f9b7e646814eb5a3d809a419c` | `types-v0.19.4` | `qualification.OLqmeh` |
-| Runtime, macros, guard | 0.21.2 | `dc7ee066fd12551a95c4f7e8e6339f73affde983` | `runtime-v0.21.2` | `qualification.pvNjpf` |
-| Platform | 0.31.2 | `8b4ab73fa8fc7bdd44b32594d33b572d93b7469a` | `platform-v0.31.2` | `qualification.BvBpZQ` |
+| Types | 0.19.5 | `f0151a0f5762bdb12d1f8f4228bda62badb7a704` | `types-v0.19.5` | `h7EwY8` / `zl8TZ5` |
+| Runtime/macros/guard | 0.21.3 | `ef5dbf126aa3776756057474565ce3b5e9074a9f` | `runtime-v0.21.3` | `sQ2IRg` / `m0Nuav` |
+| Platform | 0.31.3 | `d524dee2fc26d4bb330ffcdbfb5a0be72b461dcb` | `platform-v0.31.3` | `Xy4j2v` / `EXQK2R` |
 
-Each group passed all 19 mandatory local stages, including Clippy, product tests,
-consumers, feature graphs, Wasm builds and installed Runtime qualification.
-Publication verified each archive. Platform requires Types `^0.19.4` and Runtime
-`^0.21.2`; Runtime's guard matches exactly. Browser remains 0.2.0.
-No sibling or npm release was included. Toko 0.39.15 is installed; compiler is 1.99.1.
+All 19 local stages ran for each group. Evidence is under that candidate's
+`target/release-validation/`; deployment log:
+`target/deploy-0313-tooling-certification-corrected.log`. Browser stays 0.2.0.
+The pending compiler/layout/tooling work below remains local, uncommitted and
+unpublished. Next notes target Platform 0.32.0, Runtime 0.22.0 and Types 0.20.0;
+package versions stay at published values until an authorized release.
 
-Source batch: `e63679a`, corrected by `0d396cf`. Normal log:
-`target/deploy-testkit-custody-corrected.log`; runners and receipts remain under
-`target/release-frozen/batch-CqgSHOoJ/target/release-validation/`.
-The independent qualification lock now follows local Platform 0.31.2 and Runtime
-0.21.2 automatically; that release's registry baseline was exactly 0.30.0. Locked offline
-metadata passes after reconciliation without another lock edit.
+## Pending Toko 0.40.1 / deployment-policy adoption
 
-## Delivered cleanup
+Product and qualification pins/locks select published Toko 0.40.1, checksum
+`fb884b05e2e5bbca2388dd0b757833fb5ad37e91b3ced09f6a37b454c7fe9f90`, producer
+commit `dcc51b5cab3d9993f0668bc0902252364d7dc316`. Authenticated preview/install
+retains all 98 managed files and entrypoints. Only `TOKO-TOOLING.md` differs from
+0.40.0; executable payloads are unchanged. No managed file was edited by hand.
+Both locks changed only the selected Toko package during this increment;
+existing qualification baseline, Host/Types and rustls-webpki changes survive.
 
-Pending local adoption selects Toko 0.39.15 in both workspaces. The authenticated
-exporter preserves prior entrypoints and adds canonical `make/cargo-dependencies.mk`
-and its Perl implementation (98 managed files). `make deps-update` is wired into
-Make/help/README; package/precise selection scopes normal sequential Cargo updates.
-The Toko-only invocation covered both workspaces without further lock changes.
-Snapshot, pin, inventory, documentation and formatting checks pass. This adoption
-and the #50 CI fix remain uncommitted/unpublished; no sibling changes were made.
+The [release guide](../development/release-validation.md#deployment-sequencing)
+now records wiring-first checks, retained timing review, one full-gate owner per
+group, fresh archive admission and phase-specific retries. Existing adapters
+already enforce snapshot admission before effects and avoid a second full gate
+in metadata/publication. Only the qualified policy-fixture leaf can reuse prior
+execution. General partial-gate and automatic collector-only resume remain
+unsupported; diagnose missing admission and disclose rerun scope before retry.
+No product tests were repeated solely for the unchanged 0.40.1 executables.
+Focused adoption evidence is `/tmp/platform0401-*.log`; no delivery occurred.
 
-The published batch selected Testkit 0.100.2 in both catalogs and the maintained
-Runtime lock. Drivers use
-its upstream async PocketIC re-export; old ClientError conversions and the old
-Platform 0.24 dependency path are gone. Native dependencies increase; this is
-maintenance cleanup, not a production Wasm saving. Upstream transport panics and
-best-effort deletion apply; startup custody stays with Testkit. Application
-Principal and protocol bytes remain unchanged.
+## Rust 1.100.0 and common lints (#157)
 
-Installed raw/prepared × Wire/external-Candid, raw_rand cleanup/cancellation,
-Agent identity/wrong-root proofs and all four benchmark driver builds passed
-before the complete release gates. Native identity admission now traces Testkit →
-PocketIC → Candid and refuses a different Principal supplier.
+Both workspace floors and the common development/release pin are 1.100.0.
+Explicit preparation admitted rustc `0ef1bc386059596dada8fb65b50425aab2ea637a`
+(2026-11-09), LLVM 23.1.5, Cargo `3acc79c0c` (2026-11-05), Linux x86_64,
+with Clippy, Rustfmt and Wasm. All real members inherit common Rust/Clippy/
+Rustdoc lints; safe-only product libraries forbid unsafe code. Runtime callback,
+codec ownership and fixture ABI expectations remain narrow and reasoned.
+Cryptographic function bodies, bytes and protocol behavior did not change.
 
-Release transactions include the independent benchmark lock, preserving the
-registry baseline/foreign pins while advancing local owners. All three real
-metadata/rollback fixtures pass. Hosted Runtime now prepares ic-wasm.
-Toko's authenticated update preserves all 96 managed files and entrypoints and adds
-explicit supplier-freshness reviews. No snapshot was hand-edited.
+Generated consumers project the owner's compiler/lints through the existing
+workspace-dependency helper. `check-primitives` proves actual member inheritance,
+idempotency, native/Wasm positives and must-use, unsafe, unsafe-operation,
+correctness and Rustdoc refusals (`target/lint-policy.LoNnwc/`). Runtime now
+strictly lints every generated Wasm profile before building. Old compiler strings
+remain only in frozen reports and reader/admission tests.
 
-That release's freshness review recorded Testkit 0.100.2, Toko 0.39.12 and
-Host helpers 0.76.4. Optional Wire 0.10/0.12.1 → 0.21.2 fixture migration is deferred
-to the next qualification-dependency maintenance batch, and editor 0.73 → 0.83 to
-the next release-adapter maintenance batch. Revisit both before the next freeze;
-the group ledgers record these dispositions, not permanent exemptions.
+On 0.40.0, strict native all-target/all-feature and minimal Clippy, Wasm library
+Clippy, all product tests/native macro linkage, strict native/Wasm Rustdoc and
+qualification Clippy/Rustdoc passed. Full `check-consumer`, feature graphs,
+formatting/refusal, boundary checks and ShellCheck passed. Evidence:
 
-## Pending qualification dependency adoption
+| Contract | Evidence under `target/` |
+| --- | --- |
+| Four installed Runtime profiles | `cdk-runtime.QAgzTP/` |
+| Prepared raw/Wire/external-Candid calls | `prepared-call-consumer.9cicJT/` |
+| Installed Agent verification/wrong-root refusal | `agent-installed.CTMiM1/` |
+| Canonical identity profiles | `stable-identities.Tr4xtx/` |
+| Raw-random bytes, cancellation, callback cleanup | `evidence/raw-rand.lhDAGf/` |
+| Matched BLS comparison | `evidence/bls-wrapper.t7uE2v/` |
 
-Both catalogs and the maintained Runtime lock now select published Testkit
-0.101.0. Its native snapshot helpers add registry Platform 0.31.2 with only
-`candid-codec`, `management-canister-types` and `principal`; no Runtime or crypto
-features are selected there. Identity admission records that infrastructure
-separately from the local product under qualification. The owned canister graphs
-remain unchanged. At the maintainer's request, qualification now selects the latest
-published Platform 0.31.2 as its exact BLS baseline; both arms use prepared keys.
-Historical 0.30.0 measurements remain historical evidence, not the current selection.
+BLS arms match: raw total/code 246,075/238,906 bytes; optimized 237,381/230,205;
+all 28 instruction samples equal. Logs: `/tmp/platform040-*.log`.
+Manifest warnings for fixture-only catalog entries and the links-only guard
+remain visible; no artificial imports hide them. Native macOS, hosted integration
+and opt-in nightly sanitizers have no fresh local evidence. #157 remains open for
+its remaining acceptance; these observations do not establish a delivered release.
 
-Preserve the maintainer's compatible independent-qualification lock refresh.
-`crypto-common` 0.1.7 requires exactly `generic-array` 0.14.7, explaining Cargo's
-downgrade from 0.14.9. PocketIC 16.1.0 requires exactly `thiserror` 2.0.18 and
-prevents 2.0.21 in that native graph; the main product lock already uses 2.0.21.
-No cryptographic implementation or direct production dependency changed.
+The preceding six `mod.rs` moves remain preserved, with unchanged public paths,
+explicit template formatting and exact boundary allowances. Qualification now
+uses registry Platform 0.31.3 alongside the local candidate, preserving Host
+0.76.5 and registry Types 0.19.5. Its earlier matched benchmark is retained at
+`target/evidence/bls-wrapper.ReL2gW/`. Fixture Wire 0.10/0.12.1 and metadata editor
+0.73 upgrades remain deferred to their respective maintenance/adoption batches.
 
-Focused Linux checks pass: measurement-caller Clippy, four benchmark caller
-Clippy/builds, four installed raw/prepared × Wire/external-Candid Runtime
-profiles, and Agent queries/update/read-state/wrong-root checks across Ed25519,
-delegated, P-256 and secp256k1 identities. Snapshot, pins, inventory, docs,
-formatting and identity-admission tests pass. Runtime evidence:
-`target/cdk-runtime.vVZ9QC/`; Agent: `target/agent-installed.4o8LFB/`.
-Logs: `/tmp/platform-testkit101-{clippy,checks,identities,runtime,agent,drivers}.log`.
-This adoption remains local and uncommitted; no sibling changes, publication,
-full CI matrix or fresh macOS qualification were performed.
+## Unresolved findings and custody
 
-The latest-published baseline refresh also passes the focused BLS runner, including
-both Wasm Clippy selections, native driver Clippy, installed verification/refusal
-cases and source-custody checks. Evidence: `target/evidence/bls-wrapper.KkxrFD/`.
-Published/local arms both measure 246,052 raw total / 238,906 raw code bytes and
-237,357 optimized total / 230,205 optimized code bytes. The registry selection
-is exactly 0.31.2; no Platform 0.30.0 package remains in qualification's lock.
-The pinning exception now documents this reproducible latest-adopted comparison.
+#50 remains open: `RUSTSEC-2026-0387` is expected only in the workspace CI gate,
+with raw finding/exit retained. Runtime/new findings and incomplete/tool failures
+still fail. Live audit evidence: `target/expected-advisory-live.vi6VFr/report/`.
+The historical verification-size finding (+135 total / +133 code bytes against
+`fc55ae1`, above its 128-byte allowance) is unresolved; see
+[the audit](../benchmarks/platform-031-audit.md#post-release-cleanup).
 
-## Hosted evidence and limits
-
-At handoff, the final release's [native CI](https://github.com/dragginzgame/ic-platform/actions/runs/43085107761),
-[installed Runtime](https://github.com/dragginzgame/ic-platform/actions/runs/43085107808),
-[Wasm comparison](https://github.com/dragginzgame/ic-platform/actions/runs/43085107849),
-[browser](https://github.com/dragginzgame/ic-platform/actions/runs/43085107637) and
-[advisories](https://github.com/dragginzgame/ic-platform/actions/runs/43085107561)
-were running. Linux passes do not establish fresh native macOS or real browser
-acceptance. This handoff stays local to avoid cancelling those workflow/ref runs
-with a documentation-only push.
-
-#50 remains unresolved. On 2026-11-11 the maintainer approved its known workspace
-finding as expected/non-blocking in CI. The local adapter keeps the raw finding
-and status, then excludes only that advisory from the workspace gate. Runtime,
-other advisories and incomplete/tool failures remain blocking; no global ignore
-or claim of safety is added. Revisit at the next Agent dependency review.
-Focused tests/ShellCheck pass. Real online cargo-audit 0.22.2 evidence at
-`target/expected-advisory-live.vi6VFr/report/` has workspace raw/gate 1/0,
-runtime 0/0 and complete index coverage. This CI fix is local and uncommitted.
-The prior hosted group-preparation failure and missing ic-wasm
-have local corrections; fresh hosted results remain independent proof.
-The earlier verification-size finding remains unresolved: optimized total +135 /
-code +133 bytes against `fc55ae1`, exceeding the unchanged 128-byte allowance.
-Follow-up experiments were rejected; verifier source is unchanged. See the
-[audit](../benchmarks/platform-031-audit.md#post-release-cleanup) and existing
-[BLS qualification](../design/bls-wrapper/qualification.md). No certificate,
-delegation, identity-key, witness or freshness check was removed.
-
-## Recovery custody
-
-Retain completed `batch-CqgSHOoJ`, its journals, candidate Git, archives and proofs.
-Preserve failed `batch-A6SG2UhN` / `qualification.J7lzye`: a stale projection fixture
-stopped Types qualification before preparation/upload. `0d396cf` fixed its required
-locks and rejection cases; never resume the failed source.
-Preserve failed `batch-uCPG6Jvb` / `qualification.5kqUXx` and all earlier batches,
-lock refs, bundles and receipts recorded in the
-[previous handoff](https://github.com/dragginzgame/ic-platform/blob/0d396cf01d5e33d83f10c34be9c37bf4539fe5b4/docs/status/current.md).
-Durable batch records: `.git/release-state/frozen/`; candidates/evidence:
-`target/release-frozen/`. Do not resume old batches over published versions.
-Deployment authority includes no artifact retirement or deletion.
-
-Keep `recovery-evidence/retired-checkouts/20261104-issue139/`; maintainer review is
-due 2026-12-04. No deletion, mtime renewal or budget increase is authorized.
+Preserve completed `batch-CFcV6khZ`, its Git/journals/archives/proofs and the failed
+pre-upload `batch-VCzP0I1E` (`qualification.YY6dQL` / `validation.MNl4ew`).
+`6ef3bf0` fixed its missing release-routing input; never resume obsolete source.
+Preserve completed `batch-CqgSHOoJ`, failed `batch-A6SG2UhN`/`batch-uCPG6Jvb` and
+older custody referenced by the [published handoff](https://github.com/dragginzgame/ic-platform/blob/d524dee2fc26d4bb330ffcdbfb5a0be72b461dcb/docs/status/current.md).
+Durable state lives in `.git/release-state/frozen/`, candidates/evidence in
+`target/release-frozen/`. No tag replacement, upload replay or artifact deletion
+is authorized by adoption. Retired-checkout recovery review is due 2026-12-04.
 Keep `recovery-evidence/deferred-signature-comparison-20261110.rs`, SHA-256
 `9fdee2e8b41c9b13e0d2a3127ddf95559a1094fa48d14dd17b7577d4ec86ed4a`.
-Previously removed artifacts must not be claimed present.

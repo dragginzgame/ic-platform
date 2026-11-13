@@ -1,5 +1,5 @@
 //! Installed system checks qualification scenarios.
-use super::*;
+use super::{Principal, api, codec, protocol};
 
 #[ic_platform_runtime::cdk::update(
     guard = "codec::admit",

@@ -35,6 +35,7 @@ tokio = { $tokio }
 wat = "=1.263.0"
 MANIFEST
 export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$root/target/agent-installed-build}"
+platform_fixture_policy "$root" "$fixture"
 bash "$root/scripts/ci/check-platform-compiler.sh" > "$fixture/compiler.txt"
 cargo +"$msrv" metadata --offline --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"
 bash "$root/scripts/ci/check-qualification-identities.sh" "$fixture/metadata.json" "$root" \

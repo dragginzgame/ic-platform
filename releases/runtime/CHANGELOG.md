@@ -4,6 +4,19 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.22.0] - Unreleased
+
+### ⚠️ Breaking
+
+- Require Rust 1.100.0 and apply common lints to Runtime, macros, guard and their
+  generated consumers. Keep explicit FFI/callback expectations and singleton
+  semantics ([#157](https://github.com/dragginzgame/ic-platform/issues/157)).
+
+### 🔧 Changed
+
+- Select Toko Tooling 0.40.1 for development and CI. Align installed fixture
+  templates with its directory-module layout while retaining generated crate roots.
+
 ## [0.21.3] - 2026-11-12
 
 ### 🔧 Changed

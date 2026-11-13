@@ -163,6 +163,10 @@ mod tests {
         method_type::<assets::GetChunkArgs>(&mut env, &service, "get_chunk", true);
         method_type::<assets::GetChunkResult>(&mut env, &service, "get_chunk", false);
     }
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The schema observation owns the selected declaration across environment merging"
+    )]
     fn operation_type<T: Encode>(env: &mut TypeEnv, declared: candid::types::Type) {
         let (owned_env, actual) = crate::tests::reference::schema::<T>();
         let actual = env.merge_type(owned_env, actual);

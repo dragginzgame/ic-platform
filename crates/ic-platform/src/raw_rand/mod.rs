@@ -29,6 +29,7 @@ pub const METHOD: &str = "raw_rand";
 pub const MAX_REPLY_BYTES: usize = 74;
 
 /// Exact empty Candid argument tuple. Encoding cannot fail or allocate.
+#[must_use]
 pub const fn encode() -> &'static [u8; 6] {
     crate::candid_args::empty()
 }

@@ -23,6 +23,9 @@ codegen-units = 16
 panic = "abort"
 MANIFEST
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_fixture_policy "$root" "$fixture"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --format-version 1 > "$fixture/metadata.json"
 bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 CARGO_BUILD_JOBS=4 cargo run --manifest-path "$fixture/Cargo.toml" --release --frozen > "$fixture/results.tsv"

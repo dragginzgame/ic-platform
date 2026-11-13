@@ -22,6 +22,10 @@ fn natural(value: BigUint) {
         BigInt::from(value)
     );
 }
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The integer matrix owns each generated sample through all oracle observations"
+)]
 fn integer(value: BigInt) {
     let wire = reference::encode_one(value.to_string().parse::<reference::Int>().unwrap()).unwrap();
     assert_eq!(encode_one(&value, wire.len()).unwrap(), wire);

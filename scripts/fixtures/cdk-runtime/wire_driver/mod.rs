@@ -1,6 +1,9 @@
 //! Installed checks for explicit Wire frames, rejection and callback cleanup.
 
-use crate::wire_protocol::*;
+use crate::wire_protocol::{
+    ALLOCATION, AWAIT, DEPTH, ECHO, ENCODE_TRAP, FANOUT_CANCEL, OBSERVE, REQUEST, RESPONSE, SET,
+    TIGHT, request_limits,
+};
 use ic_testkit::pocket_ic::CanisterId as Principal;
 use ic_testkit::pocket_ic::{RejectCode, nonblocking::PocketIc};
 

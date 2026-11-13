@@ -9,6 +9,8 @@ case "$#:${1:-}" in
 esac
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
 mkdir -p target
 fixture="$(mktemp -d "$root/target/runtime-singleton.XXXXXX")"
 finish() {
@@ -40,6 +42,7 @@ category = "tests"
 ic-platform = { path = "../../crates/ic-platform", default-features = false, features = [$1] }
 ic-cdk-executor = "=2.0.0"
 MANIFEST
+platform_fixture_policy "$root" "$fixture"
 }
 cp Cargo.lock "$fixture/Cargo.lock"
 if [[ "$prepare" == true ]]; then
@@ -61,6 +64,7 @@ category = "tests"
 [dependencies]
 ic-platform = { version = "=0.16.0", default-features = false, features = ["executor"] }
 MANIFEST
+    platform_fixture_policy "$root" "$fixture"
     cargo fetch --manifest-path "$fixture/Cargo.toml"
     echo 'Registry singleton dependencies prepared; normal checks remain offline.'
     exit 0
@@ -137,6 +141,7 @@ pub fn task(value: current::executor::TaskHandle) -> next::executor::TaskHandle 
 pub fn direct(value: next::executor::TaskHandle) -> ic_platform_runtime::executor::TaskHandle { value }
 pub fn call<'a, 'b>(value: current::call::Call<'a, 'b>) -> next::call::Call<'a, 'b> { value }
 RUST
+platform_fixture_policy "$root" "$fixture"
 cargo check --manifest-path "$fixture/Cargo.toml" --offline --target-dir "$fixture/target" > "$fixture/crypto-break-check.log" 2>&1
 cargo tree --manifest-path "$fixture/Cargo.toml" --offline --edges normal,build --prefix none > "$fixture/crypto-break.tree"
 [[ "$(awk '$1 == "ic-platform-runtime"' "$fixture/crypto-break.tree" | sed 's/ (\*)$//' | sort -u | wc -l | tr -d ' ')" == 1 ]]
@@ -166,6 +171,7 @@ category = "tests"
 current = { package = "ic-platform-runtime", path = "$root/crates/ic-platform-runtime", features = ["executor"] }
 next = { package = "ic-platform-runtime", path = "$other/crates/ic-platform-runtime", features = ["executor"] }
 MANIFEST
+platform_fixture_policy "$root" "$fixture"
 if cargo tree --manifest-path "$fixture/Cargo.toml" --offline > "$fixture/incompatible.tree" 2> "$fixture/incompatible.log"; then
     echo 'Mixed runtime generations unexpectedly resolved' >&2; exit 1
 fi

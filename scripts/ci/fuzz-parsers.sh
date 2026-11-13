@@ -31,6 +31,9 @@ cp "$root/scripts/fixtures/parser-fuzz/main.rs" "$fixture/crates/probe/src/main.
 cp "$root/crates/ic-platform/tests/fixtures/candid_malformed.rs" "$fixture/crates/probe/src/candid_malformed.rs"
 cp "$root/crates/ic-platform/tests/fixtures/cbor_malformed.rs" "$fixture/crates/probe/src/cbor_malformed.rs"
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_fixture_policy "$root" "$fixture"
 cargo metadata --offline --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"
 bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 printf 'DIDL\000\001\170\052\000\000\000\000\000\000\000' > "$fixture/corpus/candid-one"

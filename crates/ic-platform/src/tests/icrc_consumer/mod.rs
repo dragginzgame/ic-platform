@@ -82,7 +82,7 @@ pub fn roundtrip() {
     );
     let modern = ICRC3Value::from(legacy.clone());
     let hash = wire_hex(include_str!("../../../tests/fixtures/icrc-value-hash.hex"));
-    assert_eq!(legacy.clone().hash().as_slice(), hash);
+    assert_eq!(legacy.hash().as_slice(), hash);
     assert_eq!(modern.clone().hash().as_slice(), hash);
     assert_ne!(roundtrip_value(&legacy), roundtrip_value(&modern));
     let request = GetBlocksRequest {

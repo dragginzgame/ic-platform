@@ -1,4 +1,6 @@
 //! A standalone Wire canister consuming Platform's owned runtime and generator.
+// The runner places children beside the generated crate root. Make formats
+// these source templates and their children separately before that projection.
 use ic_platform_runtime::{
     Principal,
     cdk::{api, futures},
@@ -10,10 +12,15 @@ use transport::Execute;
 // Copied from the workspace-formatted management_consumer.rs by the runtime script.
 #[rustfmt::skip]
 mod management_proof;
+#[rustfmt::skip]
 mod cycles;
+#[rustfmt::skip]
 mod execution;
+#[rustfmt::skip]
 mod stable_checks;
+#[rustfmt::skip]
 mod system_checks;
+#[rustfmt::skip]
 mod transport;
 
 #[cfg(feature = "external-candid")]
@@ -186,9 +193,14 @@ async fn external_management() -> bool {
     ic_platform::raw_rand::decode(response.as_ref()).is_ok()
 }
 
+#[rustfmt::skip]
 mod codec;
 #[cfg(feature = "external-adapters")]
+#[rustfmt::skip]
 mod external_canister;
+#[rustfmt::skip]
 mod protocol;
+#[rustfmt::skip]
 mod wire_canister;
+#[rustfmt::skip]
 mod wire_protocol;

@@ -47,11 +47,13 @@ impl PublicKey {
     }
 
     /// Encode this key in the supplier's canonical compressed representation.
+    #[must_use]
     pub fn serialize(&self) -> [u8; Self::BYTES] {
         self.0.to_compressed()
     }
 
     /// Prepare immutable public pairing data for repeated verification.
+    #[must_use]
     pub fn prepare(&self) -> PreparedPublicKey {
         PreparedPublicKey {
             point: G2Prepared::from(self.0),
@@ -137,6 +139,7 @@ impl Signature {
     }
 
     /// Encode this signature in the supplier's canonical compressed representation.
+    #[must_use]
     pub fn serialize(&self) -> [u8; Self::BYTES] {
         self.0.to_compressed()
     }
@@ -177,6 +180,7 @@ impl PrivateKey {
     }
 
     /// Encode this scalar in canonical big-endian form.
+    #[must_use]
     pub fn serialize(&self) -> [u8; Self::BYTES] {
         let mut bytes = self.0.to_bytes();
         bytes.reverse();
@@ -186,11 +190,13 @@ impl PrivateKey {
     /// Derive the public key using supplier scalar multiplication.
     ///
     /// Zero produces an identity key, which cannot verify signatures.
+    #[must_use]
     pub fn public_key(&self) -> PublicKey {
         PublicKey(G2Affine::from(G2Affine::generator() * self.0))
     }
 
     /// Sign the exact supplied bytes using supplier hash-to-curve and multiplication.
+    #[must_use]
     pub fn sign(&self, message: &[u8]) -> Signature {
         Signature(G1Affine::from(hash_message(message) * self.0))
     }

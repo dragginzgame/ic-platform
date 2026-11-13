@@ -1,10 +1,19 @@
 //! Installed Wire runtime checks. Testkit owns server lifecycle and transport.
+// Child templates are copied beside the generated crate root and independently
+// selected by Make's standalone formatter.
+#[rustfmt::skip]
 mod benchmarks;
+#[rustfmt::skip]
 mod driver_scenarios;
+#[rustfmt::skip]
 mod external_driver;
+#[rustfmt::skip]
 mod pocketic_support;
+#[rustfmt::skip]
 mod protocol;
+#[rustfmt::skip]
 mod wire_driver;
+#[rustfmt::skip]
 mod wire_protocol;
 
 use ic_testkit::pocket_ic::CanisterId as Principal;

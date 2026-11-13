@@ -1,5 +1,7 @@
 //! Installed execution qualification scenarios.
-use super::*;
+#[cfg(not(feature = "prepared-call"))]
+use super::Execute;
+use super::{CLEANED, Cell, Cleanup, VALUE, api, codec, futures, protocol, transport};
 
 thread_local! {
     static MULTIPLEXED_CLEANED: Cell<u64> = const { Cell::new(0) };

@@ -68,6 +68,10 @@ fn decode_opaque(bytes: Vec<u8>) -> Opaque {
 fn encode_opaque(value: Opaque) -> Vec<u8> {
     value.0
 }
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The decoder consumes the generated argument buffer by contract"
+)]
 fn decode_unit(bytes: Vec<u8>) {
     assert!(bytes.is_empty());
 }

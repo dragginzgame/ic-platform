@@ -1,5 +1,14 @@
 //! Complete explicit wire schemas for the selected management declarations.
-use super::*;
+use super::{
+    CanisterId, CanisterInfoResult, CanisterInstallMode, CanisterSettings, CanisterStatusResult,
+    CanisterStatusType, Change, ChangeDetails, ChunkHash, CodeDeploymentMode, CodeDeploymentRecord,
+    ControllersChangeRecord, CreationRecord, DefiniteCanisterSettings, EcdsaCurve, EcdsaKeyId,
+    EcdsaPublicKeyArgs, EnvironmentVariable, FromCanisterRecord, HttpHeader, HttpMethod,
+    HttpRequestArgs, HttpRequestResult, InstallChunkedCodeArgs, LoadSnapshotRecord, LogVisibility,
+    MemoryMetrics, Nat, Principal, QueryStats, RenameCanisterRecord, RenameToRecord, Reserved,
+    SignWithEcdsaArgs, Snapshot, SnapshotId, SnapshotSource, SnapshotVisibility, StatusVisibility,
+    TransformArgs, TransformContext, UpgradeFlags, UploadChunkArgs, WasmMemoryPersistence,
+};
 crate::candid_record!(EnvironmentVariable {834174833 => value: String, 1224700491 => name: String});
 crate::candid_record!(CanisterSettings {238856128 => freezing_threshold: Option<Nat>, 241629288 => wasm_memory_threshold: Option<Nat>, 356749323 => environment_variables: Option<Vec<EnvironmentVariable>>, 570880087 => controllers: Option<Vec<Principal>>, 793974846 => minimum_incoming_canister_call_cycles: Option<Nat>, 1095112320 => reserved_cycles_limit: Option<Nat>, 2033331437 => log_visibility: Option<LogVisibility>, 2503910424 => log_memory_limit: Option<Nat>, 2709750061 => snapshot_visibility: Option<SnapshotVisibility>, 3380736376 => wasm_memory_limit: Option<Nat>, 3469368575 => status_visibility: Option<StatusVisibility>, 3844961758 => memory_allocation: Option<Nat>, 4174053672 => compute_allocation: Option<Nat>});
 crate::candid_record!(DefiniteCanisterSettings {238856128 => freezing_threshold: Nat, 241629288 => wasm_memory_threshold: Nat, 356749323 => environment_variables: Vec<EnvironmentVariable>, 570880087 => controllers: Vec<Principal>, 793974846 => minimum_incoming_canister_call_cycles: Nat, 1095112320 => reserved_cycles_limit: Nat, 2033331437 => log_visibility: LogVisibility, 2503910424 => log_memory_limit: Nat, 2709750061 => snapshot_visibility: SnapshotVisibility, 3380736376 => wasm_memory_limit: Nat, 3469368575 => status_visibility: StatusVisibility, 3844961758 => memory_allocation: Nat, 4174053672 => compute_allocation: Nat});

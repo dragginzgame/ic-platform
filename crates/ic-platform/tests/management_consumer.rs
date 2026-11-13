@@ -6,6 +6,10 @@ mod contract {
     pub fn encode_one<T: Encode>(value: &T) -> Result<Vec<u8>, Error> {
         codec::encode_one(value, 65536)
     }
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The fixture preserves the external owned argument-encoding contract"
+    )]
     pub fn encode_args<T: codec::arguments::EncodeArgs>(value: T) -> Result<Vec<u8>, Error> {
         codec::arguments::encode_args(&value, 65536)
     }
@@ -29,6 +33,9 @@ use ic_platform::management_canister_types::{
 };
 
 /// Prepare the management request without choosing cycles, deadlines or transport.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
+#[must_use]
 pub fn prepare_create_canister(
     request: &ic_platform::management_canister_types::CreateCanisterArgs,
 ) -> Vec<u8> {
@@ -84,6 +91,8 @@ fn create_canister_uses_the_management_request_and_existing_reply_contract() {
 }
 
 /// Preserve the probe's request bytes, transform references and caller admission.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn roundtrip() {
     // This function also runs inside the installed Wasm management proof.
     let create = ic_platform::management_canister_types::CreateCanisterArgs {
@@ -192,6 +201,8 @@ fn management_http_wire_and_transform_roundtrips() {
 use support::decode_hex as wire_hex;
 
 /// Preserve Blob's bounded history request and the original owner's change records.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn history_roundtrip() {
     let limits = DecodeLimits {
         bytes: 65_536,
@@ -314,6 +325,8 @@ fn snapshot_value<T: FixtureCodec>(hex: &str, allocation: usize) -> T {
 
 /// Preserve external snapshot/status identities and original-owner wire vectors.
 #[cfg(not(target_family = "wasm"))]
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn snapshot_status_roundtrip() {
     macro_rules! original {
         ($ty:ty, $name:literal) => {
@@ -503,6 +516,10 @@ pub fn lifecycle_settings_and_ecdsa_contracts() {
         InstallChunkedCodeArgs, LogVisibility, SignWithEcdsaArgs, SignWithEcdsaResult,
         UninstallCodeArgs, UpdateSettingsArgs, UploadChunkArgs,
     };
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "Each management DTO case owns its value for all roundtrip observations"
+    )]
     fn roundtrip<T: FixtureCodec + PartialEq + std::fmt::Debug>(value: T) {
         let bytes = value.fixture_encode();
         let limits = DecodeLimits {

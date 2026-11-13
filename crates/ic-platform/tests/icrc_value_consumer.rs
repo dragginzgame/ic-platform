@@ -138,7 +138,7 @@ fn every_accessor_and_try_from_mismatch_retains_its_error_contract() {
             let detail = if name == "Int" {
                 negative_nat_error()
             } else {
-                name.clone()
+                name
             };
             assert_eq!(value.clone().as_nat().unwrap_err(), detail);
             assert_eq!(

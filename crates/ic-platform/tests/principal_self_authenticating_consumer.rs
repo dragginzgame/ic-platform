@@ -2,6 +2,7 @@
 use ic_platform::Principal;
 
 /// Use the unchanged imported derivation through the explicit capability.
+#[must_use]
 pub fn self_authenticating(bytes: &[u8]) -> Principal {
     Principal::self_authenticating(bytes)
 }

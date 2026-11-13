@@ -18,7 +18,7 @@ cp "$root/scripts/ci/check-platform-consumer.sh" "$root/scripts/ci/check-platfor
 cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
-cp "$root/scripts/ci/consumer-fixture.sh" "$fixture/scripts/ci/"
+cp "$root/scripts/ci/"{consumer-fixture.sh,workspace-dependencies.sh} "$fixture/scripts/ci/"
 bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" scripts/ci/check-cargo-dependency-boundaries.sh
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"

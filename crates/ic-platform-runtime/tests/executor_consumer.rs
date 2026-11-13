@@ -426,6 +426,10 @@ fn recovery_marks_destruction_and_never_drains_queued_work() {
 }
 
 #[test]
+#[expect(
+    unused_must_use,
+    reason = "There must be no handle returned when context admission panics"
+)]
 fn context_requirements_reject_misuse_in_fresh_threads() {
     panics(|| {
         executor::extend_current_method_context();

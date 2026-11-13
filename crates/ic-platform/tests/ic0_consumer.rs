@@ -8,11 +8,13 @@ pub fn emit_marker(marker: &[u8]) {
 }
 
 /// Preserve the upstream replicated/query flag without normalizing its integer type.
+#[must_use]
 pub fn replicated_execution() -> u32 {
     ic_platform::ic0::in_replicated_execution()
 }
 
 /// Pass the caller's existing Principal bytes to the upstream controller check.
+#[must_use]
 pub fn controller(principal: &[u8]) -> u32 {
     ic_platform::ic0::is_controller(principal)
 }

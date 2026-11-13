@@ -1,5 +1,9 @@
 use super::*;
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Each differential case owns its selected DTO through the oracle roundtrip"
+)]
 fn differential<
     T: crate::candid_codec::Encode
         + for<'a> crate::candid_codec::decoder::Decode<'a>

@@ -132,6 +132,10 @@ where
     }
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The benchmark owns each sample while passing borrowed views to both codecs"
+)]
 fn same<T>(name: &str, value: T, measure: bool)
 where
     T: Encode

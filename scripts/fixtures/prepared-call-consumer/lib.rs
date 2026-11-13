@@ -1,6 +1,7 @@
 //! This package selects only Platform runtime for raw calls; codecs are separate selections.
 use ic_platform::call::{Call, Principal, WaitPolicy};
 
+/// Prepare a bounded raw call whose method and arguments outlive this function.
 pub fn prepare(target: Principal) -> Call<'static, 'static> {
     let method = String::from("runtime-selected-method");
     let args = vec![1, 2, 3];
@@ -14,6 +15,7 @@ pub fn prepare(target: Principal) -> Call<'static, 'static> {
     .take_raw_args(args)
 }
 
+/// Execute the prepared raw call and return its response bytes.
 pub async fn roundtrip_raw(target: Principal) -> Result<Vec<u8>, ic_platform::call::CallFailed> {
     prepare(target)
         .execute()
@@ -22,6 +24,10 @@ pub async fn roundtrip_raw(target: Principal) -> Result<Vec<u8>, ic_platform::ca
 }
 
 #[cfg(feature = "wire")]
+/// Prepare a caller-encoded Wire request independently of the raw transport.
+///
+/// # Panics
+/// Panics if the fixture's scalar request exceeds its fixed encoding limits.
 pub fn wire_request(target: Principal) -> Call<'static, 'static> {
     let bytes = ic_wire::native::encode_request(17, &42u64, limits()).unwrap();
     Call::new(target, String::from("wire"), WaitPolicy::Unbounded).take_raw_args(bytes)
@@ -38,6 +44,10 @@ fn limits() -> ic_wire::Limits {
 }
 
 #[cfg(feature = "external-candid")]
+/// Prepare an empty Candid argument list for an external interface.
+///
+/// # Panics
+/// Panics if the empty argument list exceeds the fixture's encoding allowance.
 pub fn external_request(target: Principal) -> Call<'static, 'static> {
     let bytes = ic_platform::candid_codec::arguments::encode_args(&(), 64).unwrap();
     Call::new(

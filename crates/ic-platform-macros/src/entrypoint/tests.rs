@@ -180,7 +180,7 @@ fn raw_custom_empty_and_reserved_names_follow_the_wire_contract() {
     let attrs = quote!(decode_with = "decode", encode_with = "encode");
     let (_, wrapper) = functions(
         Kind::Query,
-        attrs.clone(),
+        attrs,
         quote!(
             fn r#type() {}
         ),

@@ -54,6 +54,7 @@ panic = "abort"
 strip = "debuginfo"
 MANIFEST
 cp "$root/Cargo.lock" "$output/probe/Cargo.lock"
+platform_fixture_policy "$root" "$output/probe"
 cargo metadata --offline --manifest-path "$output/probe/Cargo.toml" --format-version 1 > "$output/probe/metadata.json"
 rustc -vV > "$output/compiler.txt"
 ic-wasm --version > "$output/optimizer.txt"

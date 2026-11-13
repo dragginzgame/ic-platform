@@ -22,6 +22,8 @@
 //! `icrc-ledger-types` selects external ledger DTOs without storage integration.
 //! Consumers retain protocol schemas, resource limits and lifecycle policy.
 
+#![forbid(unsafe_code)]
+
 #[cfg(feature = "principal")]
 pub mod account;
 #[cfg(feature = "principal")]

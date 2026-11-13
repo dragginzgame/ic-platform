@@ -78,6 +78,7 @@ ic-platform = { workspace = true, features = ["raw-rand", "candid-codec", "princ
 ic-testkit.workspace = true
 tokio.workspace = true
 MANIFEST
+platform_fixture_policy "$input_root" "$output/consumer"
 cargo +"$compiler" metadata --manifest-path "$output/consumer/Cargo.toml" --offline --format-version 1 > "$output/metadata.json" 2> "$output/metadata.log"
 for package in platform-raw-rand-canister platform-raw-rand-driver; do
     required=ic-platform,ic-platform-runtime

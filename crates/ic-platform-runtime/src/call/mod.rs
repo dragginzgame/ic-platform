@@ -85,22 +85,27 @@ impl<'m, 'a> Call<'m, 'a> {
     }
 
     /// Selected destination, without resolving topology or authenticating it.
+    #[must_use]
     pub const fn target(&self) -> Principal {
         self.target
     }
     /// Exact method name, without normalization.
+    #[must_use]
     pub fn method(&self) -> &str {
         self.method.as_ref()
     }
     /// Exact bytes available to caller-owned journals before submission.
+    #[must_use]
     pub fn raw_args(&self) -> &[u8] {
         self.args.as_ref()
     }
     /// Requested attachment, which is not a refund or settlement observation.
+    #[must_use]
     pub const fn attached_cycles(&self) -> u128 {
         self.cycles
     }
     /// Explicit selected wait, including zero as a bounded timeout.
+    #[must_use]
     pub const fn wait_policy(&self) -> WaitPolicy {
         self.wait
     }
@@ -112,6 +117,7 @@ impl<'m, 'a> Call<'m, 'a> {
     ///
     /// # Panics
     /// Requires an IC canister context; native construction alone does not provide one.
+    #[must_use]
     pub fn get_cost(&self) -> u128 {
         self.raw().get_cost()
     }

@@ -13,6 +13,7 @@ use crate::{
 pub struct TransformFunc(pub Func);
 impl TransformFunc {
     /// Construct a query reference without authorizing its destination or method.
+    #[must_use]
     pub fn new(principal: Principal, method: String) -> Self {
         Self(Func { principal, method })
     }

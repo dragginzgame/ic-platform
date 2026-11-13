@@ -5,6 +5,8 @@ use ic_platform::certification::{
 };
 
 /// Exercise receipt lookup, witness hashes and certificate field identities.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn roundtrip() {
     let payload = leaf(b"payload".to_vec());
     // SHA-256 of length-prefixed "ic-hashtree-leaf" followed by "payload".

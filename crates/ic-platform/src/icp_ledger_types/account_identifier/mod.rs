@@ -3,6 +3,7 @@
 use sha2_11::{Digest, Sha224};
 
 /// Derives the ICP account identifier for an owner and subaccount.
+#[must_use]
 pub fn account_identifier(owner: crate::Principal, subaccount: &[u8; 32]) -> [u8; 32] {
     let mut hasher = Sha224::new();
     hasher.update(b"\x0Aaccount-id");

@@ -1,6 +1,10 @@
 //! Owned wire mappings against the independently retained upstream encoder.
 #![cfg(not(target_family = "wasm"))]
 use crate::{certified_assets_types::*, cmc_types::*};
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Each differential case owns its selected DTO through the oracle roundtrip"
+)]
 fn check<
     T: crate::candid_codec::Encode
         + for<'a> crate::candid_codec::decoder::Decode<'a>

@@ -225,7 +225,7 @@ fn certificates_cross_the_explicit_agent_boundary_and_lookups_do_not_authenticat
         delegation: None,
     };
     let external: ic_platform::agent::ExternalCertificate = certificate.clone();
-    assert_eq!(external.clone(), certificate);
+    assert_eq!(external, certificate);
     assert_eq!(
         lookup_value(&external, [b"value".as_slice()]),
         Ok([42].as_slice())

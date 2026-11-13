@@ -11,7 +11,7 @@ See the [implementation contract](../docs/design/bls-wrapper/contract.md) and
 [qualification report](../docs/design/bls-wrapper/qualification.md). The
 implementation and comparison tests now belong to `ic-platform`; the
 experimental implementation package was removed after adoption. The baseline
-selects the latest adopted published Platform (currently 0.31.2), and the candidate
+selects the latest adopted published Platform (currently 0.31.3), and the candidate
 selects this checkout. Both arms use the same prepared-key API and cache policy.
 Historical reports retain their original versions and results; new runs compare
 against this selected release rather than the pre-adoption implementation.

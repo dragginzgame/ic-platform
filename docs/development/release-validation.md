@@ -49,6 +49,52 @@ Do not broaden its allowlist or remove browser caches to make retirement pass.
 
 ## Full-gate evidence and recovery
 
+### Deployment sequencing
+
+Before an authorized release, inspect the selected group's nested commands and
+review retained `timings.tsv` files under the previous batch's
+`target/release-validation/qualification.*/logs/validation.*/`. Report the
+expensive stages and expected rerun scope before starting; old timings are
+observations, not a guarantee for the new compiler or cold caches. Keep optional
+tooling/dependency/compiler upgrades outside a frozen batch unless requested or
+needed for its blocker.
+
+When release wiring changes, qualify its affected contract before product tests.
+For example, `test-platform-frozen-setup.sh` checks candidate prerequisite order;
+`test-platform-release-groups.sh` checks cohort/publication routing;
+`test-platform-group-projection.sh` checks custody projection. Run the relevant
+metadata or recovery fixture when those implementations change. These are
+disposable wiring proofs, not permission to omit a required product gate.
+
+The release hook owns one complete 19-stage validation pass per selected group.
+Do not prepend `make ci`, `check-runtime-all` or standalone full qualification
+merely to repeat that gate. Metadata preparation re-admits the saved receipt;
+publication checks the exact selected packages and final archives. The shared
+publication adapter invokes only the package-scoped Clippy verifier, not another
+complete gate. Only the qualified policy-fixture leaf can reuse earlier execution;
+there is no cross-group Rust-test or installed-runtime cache admission.
+
+### Failure-specific recovery
+
+Identify the failed phase, exact source/group and invalidated inputs before any
+retry. Preserve all successful stage evidence, logs and original paths. Never
+infer a pass from a log line, edit a journal or manufacture a new origin for an
+old proof.
+
+| Failure phase | Current recovery boundary |
+| --- | --- |
+| Candidate setup or metadata | Repair that phase and use the saved batch's supported resume. Completed validation is reused only if its original receipt and current source/context still admit it. |
+| Product stage | Keep earlier stage evidence, but do not claim partial-gate reuse. The current adapter has no general successful-stage resume; explain the required full-gate rerun and changed inputs before starting it. |
+| Receipt collection/publication after successful execution | Preserve the original plan, runner evidence and stage admissions. This alone does not invalidate completed runtime checks. There is no automatic collector-only resume/journal repair; identify the missing admission and explain any required rerun before proceeding. |
+| Git delivery after metadata preparation | Resume the saved batch, with its source, destination, tags and complete validation receipt re-admitted. Do not re-execute product stages solely because pushing failed. |
+| Registry upload or uncertain response | Reconcile each dispatched exact package/version and archive before resume. Use the supported publication disposition; do not retry the upload or full gate merely because the response was uncertain. |
+
+A future collector-only or broader stage-resume implementation must qualify
+failure after successful execution as well as missing/tampered evidence, changed
+inputs and final delivery admission. Toko 0.40.1's policy does not itself add
+that mechanism or waive the current checks. Historical attempts retain their
+recorded tooling and semantics.
+
 For standalone full qualification of committed source, without delivery:
 
 ```sh

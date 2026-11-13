@@ -31,28 +31,28 @@
       {
          "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nstruct Record",
          "kind": "codec-comparison",
-         "path": "crates/ic-platform/src/candid_codec/mappings/tests.rs",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests/mod.rs",
          "protocol": "IC Candid",
          "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
          "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nenum Status",
          "kind": "codec-comparison",
-         "path": "crates/ic-platform/src/candid_codec/mappings/tests.rs",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests/mod.rs",
          "protocol": "IC Candid",
          "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
          "declaration": "#[derive(reference::CandidType)]\n#[candid_path(\"reference\")]\nstruct Extension",
          "kind": "codec-comparison",
-         "path": "crates/ic-platform/src/candid_codec/mappings/tests.rs",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests/mod.rs",
          "protocol": "IC Candid",
          "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
       {
          "declaration": "#[derive(Debug, PartialEq, reference::CandidType, serde::Deserialize)]\n#[candid_path(\"reference\")]\nenum Recursive",
          "kind": "codec-comparison",
-         "path": "crates/ic-platform/src/candid_codec/mappings/tests.rs",
+         "path": "crates/ic-platform/src/candid_codec/mappings/tests/mod.rs",
          "protocol": "IC Candid",
          "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
@@ -101,7 +101,7 @@
       {
          "declaration": "fn compare<T>(value: &T)\nwhere\n    T: Encode\n        + reference::CandidType\n        + for<'a> serde::Deserialize<'a>\n        + PartialEq\n        + std::fmt::Debug,",
          "kind": "codec-comparison",
-         "path": "crates/ic-platform/src/candid_codec/tests.rs",
+         "path": "crates/ic-platform/src/candid_codec/tests/mod.rs",
          "protocol": "IC Candid",
          "reason": "Development-only upstream codec oracle for byte, schema and rejection compatibility. Production owned DTOs do not implement CandidType."
       },
@@ -246,7 +246,7 @@
       },
       {
          "crate": "serde_cbor",
-         "path": "crates/ic-platform/src/signature_verification/tests.rs",
+         "path": "crates/ic-platform/src/signature_verification/tests/mod.rs",
          "reason": "Platform owns typed IC certificate/signature/packet CBOR and their byte/refusal integration tests.",
          "review": "Review on external-protocol or serializer-contract changes; remove when direct codec use is retired."
       },

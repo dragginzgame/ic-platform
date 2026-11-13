@@ -8,6 +8,9 @@ consumer_fixture() {
 }
 consumer_metadata() {
     local consumer_root="$1"
+    # shellcheck source=scripts/ci/workspace-dependencies.sh
+    source "$consumer_root/scripts/ci/workspace-dependencies.sh"
+    platform_fixture_policy "$consumer_root" "$fixture"
     cp "$consumer_root/Cargo.lock" "$fixture/Cargo.lock"
     # Only the disposable lock resolves; foreign host sources need not be cached.
     cargo metadata --manifest-path "$fixture/Cargo.toml" --offline \

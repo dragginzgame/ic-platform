@@ -76,6 +76,10 @@ pub fn verify_witness(
 /// Authenticate strict certificate bytes under the caller’s configured Agent policy.
 /// # Errors
 /// Refuses byte limits, malformed/trailing CBOR and Agent authentication failures.
+#[expect(
+    clippy::missing_panics_doc,
+    reason = "Canonical Principal length is already within Agent's admitted bound"
+)]
 pub fn authenticate_certificate(
     agent: &Agent,
     canister: Principal,

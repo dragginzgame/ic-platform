@@ -207,6 +207,10 @@ const NESTED_LIMITS: Limits = Limits {
     arity = "compatible",
     empty_args = "reject"
 )]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The endpoint receives ownership of its decoded argument"
+)]
 fn nesting_probe(bytes: Vec<u8>) -> u8 {
     let limits = NESTED_LIMITS;
     match decode_one::<Reserved>(&bytes, limits) {

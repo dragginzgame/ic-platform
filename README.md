@@ -95,6 +95,11 @@ Wasm growth; see [measurements](docs/benchmarks/upstream-2026-10-31/README.md).
 
 ## Development
 
+Use the pinned Rust 1.100.0 toolchain for product and qualification workspaces.
+Members inherit the common Rust, Rustdoc and Clippy policy from their owning
+workspace. Generated consumers project that same policy; Runtime retains its
+reviewed FFI exceptions while safe-only product libraries forbid unsafe code.
+
 Platform supports binary Candid for required external IC interfaces. Textual DID
 export, inspection and sidecar tooling are retired; there is no replacement
 service-export API. See [the hard cut](docs/architecture/migration.md#did-retirement-pending-030).
@@ -143,6 +148,11 @@ resume and publication. No group is inferred from changed files. Root
 the separate group ledgers and shared history. A Git release does not establish
 registry availability. See the [release commands and recovery guidance](docs/development/qualification.md#development)
 before executing an authorized delivery.
+Deployment uses one frozen batch and one full validation owner per selected
+group, followed by fresh archive/publication admission. Check changed release
+wiring first; after failure, identify the failed phase and invalidated evidence
+before retrying. See [sequencing and recovery](docs/development/release-validation.md#deployment-sequencing)
+for the supported reuse and collector-recovery limits.
 
 ## Source licenses
 

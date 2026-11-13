@@ -9,7 +9,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 fn role_manifest(role: &str, macros: &Path) -> String {
     let macros = format!("{:?}", macros.to_str().expect("UTF-8 checkout path"));
     format!(
-        "[package]\nname = \"entrypoint-link-{role}\"\nversion = \"0.0.0\"\nedition = \"2024\"\nrust-version = \"1.99.1\"\npublish = false\n\n[package.metadata.toko-tooling.loc]\ncategory = \"tests\"\n\n[dependencies]\nic-platform-macros = {{ path = {macros} }}\n"
+        "[package]\nname = \"entrypoint-link-{role}\"\nversion = \"0.0.0\"\nedition = \"2024\"\npublish = false\n\n[package.metadata.toko-tooling.loc]\ncategory = \"tests\"\n\n[dependencies]\nic-platform-macros = {{ path = {macros} }}\n"
     )
 }
 
@@ -65,8 +65,19 @@ fn unrelated_crates_link_exact_lifecycle_and_punctuation_symbols() {
     }
     let consumer = root.join("consumer");
     fs::create_dir_all(consumer.join("src")).unwrap();
-    fs::write(consumer.join("Cargo.toml"), "[package]\nname = \"entrypoint-link-consumer\"\nversion = \"0.0.0\"\nedition = \"2024\"\nrust-version = \"1.99.1\"\npublish = false\n\n[package.metadata.toko-tooling.loc]\ncategory = \"tests\"\n\n[dependencies]\nentrypoint-link-left = { path = \"../left\" }\nentrypoint-link-right = { path = \"../right\" }\n").unwrap();
+    fs::write(consumer.join("Cargo.toml"), "[package]\nname = \"entrypoint-link-consumer\"\nversion = \"0.0.0\"\nedition = \"2024\"\npublish = false\n\n[package.metadata.toko-tooling.loc]\ncategory = \"tests\"\n\n[dependencies]\nentrypoint-link-left = { path = \"../left\" }\nentrypoint-link-right = { path = \"../right\" }\n").unwrap();
     copy(&fixtures.join("main.rs"), &consumer.join("src/main.rs"));
+    let policy = Command::new("bash")
+        .args(["-c", "source \"$1/scripts/ci/workspace-dependencies.sh\"; platform_fixture_policy \"$1\" \"$2\"", "fixture-policy"])
+        .arg(macros.join("../.."))
+        .arg(&root)
+        .output()
+        .unwrap();
+    assert!(
+        policy.status.success(),
+        "fixture policy: {}",
+        String::from_utf8_lossy(&policy.stderr)
+    );
     let output = Command::new(env!("CARGO"))
         .args([
             "run",

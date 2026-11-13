@@ -5,6 +5,8 @@ use ic_platform::canister_sig_creation::{
 };
 
 /// Preserve the original owner's key format, domain bytes and error identities.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn roundtrip() {
     let issuer =
         ic_platform::principal::Principal::from_text("rwlgt-iiaaa-aaaaa-aaaaa-cai").unwrap();

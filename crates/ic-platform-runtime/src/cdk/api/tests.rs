@@ -6,6 +6,10 @@ use std::{
     panic::{AssertUnwindSafe, catch_unwind},
 };
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "catch_unwind transfers the panic payload to this error-mapping callback"
+)]
 fn panic_message(payload: Box<dyn Any + Send>) -> String {
     if let Some(text) = payload.downcast_ref::<String>() {
         text.clone()
@@ -182,6 +186,10 @@ fn performance_counter_projections_preserve_payload_and_variant_distinctions() {
 }
 
 #[test]
+#[expect(
+    clippy::redundant_clone,
+    reason = "The public Clone and Debug contract is compared against the original error"
+)]
 fn signing_cost_retains_full_amounts_and_error_codes() {
     for amount in [
         0,

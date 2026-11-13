@@ -30,6 +30,7 @@ pub struct Account {
 
 impl Account {
     /// Borrows the explicit subaccount or the effective all-zero value.
+    #[must_use]
     pub fn effective_subaccount(&self) -> &Subaccount {
         self.subaccount.as_ref().unwrap_or(DEFAULT_SUBACCOUNT)
     }

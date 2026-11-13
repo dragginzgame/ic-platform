@@ -276,11 +276,23 @@ used by frozen standalone consumer checks. Then run
 Platform owner and Wire used
 only by standalone fixtures; the embedded runtime and schema transfer removed
 them from the root lock. CI and admitted release preparation run this setup too.
-Normal consumer checks remain offline and never install executables. Rust 1.99.1
+Normal consumer checks remain offline and never install executables. Rust 1.100.0
 is the minimum, development and release compiler. Prepare that exact toolchain
 with `wasm32-unknown-unknown`; `make check-compiler` admits and records the actual
 Cargo/rustc identities and requires the workspace floor and toolchain pin to agree.
-The previous 1.91 support promise is retired by [#133](https://github.com/dragginzgame/ic-platform/issues/133).
+The 1.100.0 support change is tracked in
+[#157](https://github.com/dragginzgame/ic-platform/issues/157); frozen historical
+reports retain their original compiler identities.
+
+Product and qualification members inherit their owning workspace's common
+Rust, Clippy and Rustdoc lints. Generated consumers receive that same policy and
+compiler floor through `platform_fixture_policy`; Cargo does not inherit lints
+from a dependency. `make check-primitives` includes actual native/Wasm admission
+and disposable must-use, unsafe, unsafe-operation, Clippy correctness and broken
+documentation refusals. The policy test verifies real member inheritance and
+idempotent projection before checking those refusals. Safe-only product libraries
+forbid unsafe code; Runtime and explicit fixture ABI exports retain local,
+reasoned expectations.
 
 Native CI uses Shared's conservative documentation classifier with the exact
 prose allowlist in `ci/docs-only-paths.txt`. Those files already participate in
@@ -528,7 +540,7 @@ separate from ordinary focused development validation.
 `make check-runtime` qualifies both raw calls and owned `ic_platform::call` requests in one
 fixture, sharing the host-driver and compiler builds. It installs Wire canisters
 through Testkit-managed
-PocketIC on Rust 1.99.1. The pure `cdk` selection rejects Candid, parser,
+PocketIC on Rust 1.100.0. The pure `cdk` selection rejects Candid, parser,
 full CDK and native host clients in its canister graph. A separate
 `external-candid` selection tests an outbound management `raw_rand` call with
 explicit Candid arguments and preserves the original persisted checkpoint bytes.
@@ -570,7 +582,7 @@ in `scripts/fixtures/cdk-runtime/Cargo.lock`. Explicit `--refresh-lock` is a
 reviewed dependency refresh that preserves existing foreign pins and resolves
 necessary manifest changes, not normal validation. Release metadata rendering
 runs that same operation offline inside its transaction; the native Testkit
-supplier uses registry Platform 0.31.2 only for management codecs, without Runtime
+supplier uses registry Platform 0.31.x only for management codecs, without Runtime
 or crypto features. Identity admission records that infrastructure separately from
 the selected local Platform implementation and checks PocketIC/Agent Principal
 identity at their crossing. PocketIC 16.1.0 pins `thiserror = "=2.0.18"`, so native

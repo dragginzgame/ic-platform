@@ -2,7 +2,10 @@
 
 #[cfg(not(feature = "prepared-call"))]
 use crate::transport::Execute as _;
-use crate::wire_protocol::*;
+use crate::wire_protocol::{
+    ALLOCATION, AWAIT, DEPTH, ECHO, ENCODE_TRAP, FANOUT_CANCEL, OBSERVE, REQUEST, RESPONSE, SET,
+    TIGHT, request_limits,
+};
 use ic_platform_runtime::cdk::{api, futures};
 use serde::{Serialize, de::DeserializeOwned};
 use std::cell::Cell;
@@ -19,6 +22,10 @@ fn admit() -> Result<(), String> {
     Ok(())
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Entrypoint codecs receive ownership of the request bytes"
+)]
 fn decode<T: DeserializeOwned, const ID: u64>(bytes: Vec<u8>) -> T {
     ic_wire::native::decode_request(ID, &bytes, request_limits(ID))
         .unwrap_or_else(|error| api::trap(format!("Wire fixture request: {error}")))

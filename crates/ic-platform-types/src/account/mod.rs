@@ -64,6 +64,7 @@ impl Account {
     pub const MAX_LENGTH_IN_TEXT: usize = 136;
 
     /// Borrows the explicit subaccount, or the effective zero value if absent.
+    #[must_use]
     pub fn effective_subaccount(&self) -> &Subaccount {
         self.subaccount.as_ref().unwrap_or(DEFAULT_SUBACCOUNT)
     }

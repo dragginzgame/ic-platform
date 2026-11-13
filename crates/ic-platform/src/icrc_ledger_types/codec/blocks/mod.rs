@@ -1,4 +1,7 @@
-use super::super::blocks::*;
+use super::super::blocks::{
+    ArchivedBlocks, BlockWithId, GetBlocksRequest, GetBlocksResult, ICRC3DataCertificate,
+    SupportedBlockType,
+};
 use super::super::{ICRC3Value, QueryArchiveFn};
 use crate::candid_codec::Nat;
 crate::candid_record!(BlockWithId {23515 => id: Nat, 3036443981 => block: ICRC3Value});

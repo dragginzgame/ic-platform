@@ -4,3 +4,4 @@
 //! coordinated version only when the executor feature is enabled. Its inherited
 //! `links` identity refuses other executor suppliers during dependency resolution.
 #![no_std]
+#![forbid(unsafe_code)]

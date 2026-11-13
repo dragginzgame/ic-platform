@@ -107,6 +107,10 @@ fn wait_policy_extrema_and_repeated_builder_selection_are_admitted_lazily() {
 }
 
 #[test]
+#[expect(
+    clippy::redundant_clone,
+    reason = "This test observes Clone preserving the public error payload and variant"
+)]
 fn balance_errors_preserve_amounts_display_and_transparent_conversions() {
     for (available, required) in [(0, 1), (u128::MAX - 1, u128::MAX)] {
         let leaf = InsufficientLiquidCycleBalance {
@@ -144,6 +148,10 @@ fn balance_errors_preserve_amounts_display_and_transparent_conversions() {
 }
 
 #[test]
+#[expect(
+    clippy::redundant_clone,
+    reason = "This test observes Clone preserving the public error variant"
+)]
 fn perform_error_preserves_display_and_transparent_conversions() {
     let leaf = CallPerformFailed;
     assert_eq!(leaf.to_string(), "call perform failed");
@@ -160,6 +168,10 @@ fn perform_error_preserves_display_and_transparent_conversions() {
     assert!(matches!(oneway.clone(), OnewayError::CallPerformFailed(_)));
 }
 
+#[expect(
+    clippy::redundant_clone,
+    reason = "The cloned rejection wrapper must retain the public message and code"
+)]
 fn assert_rejection_text_and_conversion(raw: u32, message: &str) -> CallRejected {
     let rejection = CallRejected::with_rejection(raw, message.to_owned());
     assert_eq!(rejection.raw_reject_code(), raw);

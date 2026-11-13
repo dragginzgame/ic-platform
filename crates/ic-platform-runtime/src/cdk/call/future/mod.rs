@@ -271,6 +271,10 @@ fn submit(request: &Call<'_, '_>, waker: &Waker) -> Result<Arc<Completion>, Call
     Ok(completion)
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "The callback consumes its owned completion reference and releases it after wake routing"
+)]
 fn deliver(completion: Arc<Completion>) {
     let code = system::msg_reject_code();
     let result = if code == 0 {
@@ -292,6 +296,10 @@ fn deliver(completion: Arc<Completion>) {
     });
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Cleanup consumes its owned completion reference through cancellation and wake routing"
+)]
 fn cleanup(completion: Arc<Completion>) {
     let result = Err(CallRejected::with_rejection(4, "cleanup".to_owned()).into());
     let registration = match completion.finish(result) {

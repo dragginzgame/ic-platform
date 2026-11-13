@@ -11,6 +11,8 @@ fn decode_one<T: for<'a> ic_platform::candid_codec::decoder::Decode<'a>>(
 }
 
 /// Exercise typed decoding and validated skipping under fixture-owned budgets.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn exercise(bytes: &[u8]) {
     // Test-owned budgets, not a production default. Bound zero-width vectors too.
     let limits = DecodeLimits {

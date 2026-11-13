@@ -1,5 +1,14 @@
 //! Explicit Candid schemas for the retained native snapshot surface.
-use super::*;
+use super::{
+    CanisterId, CanisterLogRecord, CanisterTimer, FetchCanisterLogsResult, InstallCodeArgs,
+    LoadCanisterSnapshotArgs, Nat, OnLowWasmMemoryHookStatus,
+    ProvisionalCreateCanisterWithCyclesArgs, ReadCanisterSnapshotDataArgs,
+    ReadCanisterSnapshotDataResult, ReadCanisterSnapshotMetadataArgs,
+    ReadCanisterSnapshotMetadataResult, SnapshotDataKind, SnapshotDataOffset, SnapshotId,
+    SnapshotMetadataGlobal, SnapshotSource, StoredChunksResult, TakeCanisterSnapshotArgs,
+    UploadCanisterSnapshotDataArgs, UploadCanisterSnapshotMetadataArgs,
+    UploadCanisterSnapshotMetadataResult,
+};
 crate::candid_record!(TakeCanisterSnapshotArgs {435757295 => replace_snapshot: Option<SnapshotId>, 1313628723 => canister_id: CanisterId, 2590416362 => uninstall_code: Option<bool>, 3599109322 => sender_canister_version: Option<u64>});
 crate::candid_record!(LoadCanisterSnapshotArgs {1313628723 => canister_id: CanisterId, 3599109322 => sender_canister_version: Option<u64>, 4045790262 => snapshot_id: SnapshotId});
 crate::candid_record!(ReadCanisterSnapshotMetadataArgs {1313628723 => canister_id: CanisterId, 4045790262 => snapshot_id: SnapshotId});

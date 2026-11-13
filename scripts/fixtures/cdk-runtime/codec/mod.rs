@@ -3,6 +3,10 @@ use crate::protocol::{LIMITS, method_id};
 use ic_platform_runtime::cdk::api;
 use serde::{Serialize, de::DeserializeOwned};
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Entrypoint codecs receive ownership of the request bytes"
+)]
 pub fn decode<T: DeserializeOwned, const ID: u64>(bytes: Vec<u8>) -> T {
     ic_wire::native::decode_request(ID, &bytes, LIMITS)
         .unwrap_or_else(|error| api::trap(format!("fixture request: {error}")))

@@ -3,6 +3,8 @@
 # Source archives and generated probes are evidence, never additional checkouts.
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
 baseline="$(git -C "$root" rev-parse --verify "${1:-97fe286}^{commit}")"
 baseline_codec="${CANDID_BASELINE_CODEC:-upstream}"
 case "$baseline_codec" in upstream|owned) ;; *) echo 'CANDID_BASELINE_CODEC must be upstream or owned' >&2; exit 2 ;; esac
@@ -101,6 +103,7 @@ fn roundtrip(bytes: &[u8]) -> Vec<u8> {
 }
 RUST
     fi
+    platform_fixture_policy "$root" "$probe"
     cargo "+$toolchain" metadata --offline --manifest-path "$probe/Cargo.toml" --format-version 1 > "$probe/metadata.json" 2> "$probe/metadata.log"
     find "$source/crates" -type f -print0 | xargs -0 sha256sum > "$probe/source-sha256.txt"
     export CARGO_TARGET_DIR="$output/$arm/target" CARGO_BUILD_JOBS=4

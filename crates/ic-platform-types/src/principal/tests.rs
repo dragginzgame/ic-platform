@@ -104,6 +104,10 @@ fn oversized_binary_conversions_are_fallible() {
 
 #[test]
 #[should_panic]
+#[expect(
+    unused_must_use,
+    reason = "The test asserts constructor refusal by panic, without a returned identity"
+)]
 fn infallible_constructor_panics_above_the_binary_bound() {
     Principal::from_slice(&[0; 30]);
 }

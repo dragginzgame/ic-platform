@@ -225,7 +225,7 @@ exec 6>&- 7>&- 8>&-
 proof="$fixture/input-proof"
 mkdir "$proof"
 input_lock=scripts/fixtures/cdk-runtime/Cargo.lock
-input_file=scripts/fixtures/cdk-runtime/canister.rs
+input_file=scripts/fixtures/cdk-runtime/canister/mod.rs
 perl "$fixture/scripts/ci/runtime-inputs.pl" capture "$fixture" "$proof" "$input_lock"
 cmp "$fixture/$input_file" "$proof/inputs/$input_file"
 printf '// added input\n' > "$fixture/crates/new-input.rs"

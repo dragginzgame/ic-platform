@@ -25,6 +25,7 @@ pub struct CanisterSigPublicKey {
 
 impl CanisterSigPublicKey {
     /// Retains the issuer and seed without changing their bytes.
+    #[must_use]
     pub fn new(canister_id: Principal, seed: Vec<u8>) -> Self {
         Self { canister_id, seed }
     }
@@ -40,6 +41,7 @@ impl CanisterSigPublicKey {
     }
 
     /// Encodes one issuer-length byte, issuer bytes, then seed bytes.
+    #[must_use]
     pub fn to_raw(&self) -> Vec<u8> {
         let mut bytes = Vec::with_capacity(1 + self.canister_id.as_slice().len() + self.seed.len());
         bytes.push(self.canister_id.len());
@@ -52,6 +54,7 @@ impl CanisterSigPublicKey {
     ///
     /// For compatibility this infallible encoder truncates length fields to a
     /// byte even for large seeds. Such output need not pass strict DER admission.
+    #[must_use]
     pub fn to_der(&self) -> Vec<u8> {
         let raw = self.to_raw();
         let mut bytes = Vec::with_capacity(19 + raw.len());
@@ -96,6 +99,7 @@ pub fn hash_bytes(bytes: impl AsRef<[u8]>) -> [u8; 32] {
 /// Hashes the one-byte domain length, domain bytes, then payload bytes.
 ///
 /// The length byte retains historical truncation for domains over 255 bytes.
+#[must_use]
 pub fn hash_with_domain(domain: &[u8], bytes: &[u8]) -> [u8; 32] {
     let mut hash = Sha256::new();
     hash.update([domain.len() as u8]);

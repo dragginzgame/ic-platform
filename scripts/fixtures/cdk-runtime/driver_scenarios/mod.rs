@@ -1,5 +1,5 @@
 //! Ordered installed assertions; lifecycle remains in the driver.
-use super::*;
+use super::{PocketIc, Principal, RejectCode, assert_guard_rejection, query, request, update};
 
 pub(super) async fn execution(pic: &PocketIc, id: Principal, legacy: bool) {
     assert_eq!(query::<u64>(pic, id, "value", ()).await, 10);

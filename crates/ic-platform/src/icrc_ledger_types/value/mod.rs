@@ -95,6 +95,7 @@ impl From<ICRC3Value> for Value {
 
 impl Value {
     /// Returns the exact spelling of this value's variant.
+    #[must_use]
     pub fn variant_name(&self) -> String {
         match self {
             Self::Blob(_) => "Blob",
@@ -109,6 +110,10 @@ impl Value {
     }
 
     /// Creates a text value from its string representation.
+    #[expect(
+        clippy::needless_pass_by_value,
+        reason = "The public generic constructor accepts owned and borrowed ToString values"
+    )]
     pub fn text(t: impl ToString) -> Self {
         Self::Text(t.to_string())
     }

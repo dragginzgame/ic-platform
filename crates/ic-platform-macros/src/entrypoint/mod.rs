@@ -161,6 +161,10 @@ pub(crate) fn external_entry(
     generate(kind, attrs, function, item)
 }
 
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Expansion consumes the parsed function and original tokens as one syntax transaction"
+)]
 fn generate<P: ResolvePath>(
     kind: Kind,
     attrs: ExportAttributes<P>,

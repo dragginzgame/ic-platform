@@ -39,6 +39,7 @@ $dependency
 ic-testkit = { $testkit }
 tokio = { $tokio }
 MANIFEST
+    platform_fixture_policy "$root" "$output/driver"
     cargo +"$compiler" metadata --manifest-path "$output/driver/Cargo.toml" --offline \
         --format-version 1 > "$output/driver/metadata.json"
     bash "$root/scripts/ci/check-qualification-identities.sh" "$output/driver/metadata.json" "$root" \

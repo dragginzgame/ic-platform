@@ -56,7 +56,7 @@ workspace and do not join product release groups.
   Canic-dependent hard-cut deferrals are superseded for those approved changes.
   Keep retired compiler/JS/TS facade exports removed; new product changes retain
   their own scope and qualification under [the migration contract](docs/architecture/migration.md).
-- Rust 2024 and minimum/development/release compiler 1.99.1 (#133). Read the
+- Rust 2024 and minimum/development/release compiler 1.100.0 (#157). Read the
   workspace floor and pinned toolchain; qualify each distinct graph once on
   this compiler, preserving native hosts and installed-runtime obligations.
   Inherit workspace metadata and dependencies; ordinary

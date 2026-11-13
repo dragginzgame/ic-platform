@@ -52,6 +52,8 @@ ic_platform::candid_variant! {
 ic_platform::candid_record! { pub struct NotSelected { 0 => unavailable: MissingType } }
 
 /// Exercise generated mappings without upstream codec or Serde traits.
+/// # Panics
+/// Panics if a consumer contract assertion fails.
 pub fn exercise() {
     let value = Response::Nested {
         values: vec![Response::Value(IcrcIndexTransactions {

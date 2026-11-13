@@ -1,5 +1,7 @@
 //! Installed cycles qualification scenarios.
-use super::*;
+#[cfg(not(feature = "prepared-call"))]
+use super::Execute;
+use super::{Cleanup, Principal, RECEIVED, VALUE, api, codec, protocol, transport};
 
 // Hidden qualification endpoints do not change the fixed public service fixture.
 #[ic_platform_runtime::cdk::update(

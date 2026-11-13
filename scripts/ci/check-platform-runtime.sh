@@ -59,17 +59,18 @@ PLATFORM_FIXTURE_TESTKIT="$testkit" PLATFORM_FIXTURE_WIRE="$wire" PLATFORM_FIXTU
 PLATFORM_FIXTURE_TOKIO="$tokio" \
     perl "$input_root/scripts/ci/render-runtime-fixture.pl" "$input_root/scripts/fixtures/cdk-runtime" "$fixture" \
         "$qualification" "$selection_mode" "$adapter_mode"
-cp "$input_root"/scripts/fixtures/cdk-runtime/canister.rs "$fixture/crates/canister/src/lib.rs"
+cp "$input_root"/scripts/fixtures/cdk-runtime/canister/mod.rs "$fixture/crates/canister/src/lib.rs"
 cp "$input_root"/scripts/fixtures/cdk-runtime/canister/tests.rs "$fixture/crates/canister/src/tests.rs"
 mkdir -p "$fixture/crates/canister/src/management_proof/fixtures"
 cp "$input_root"/crates/ic-platform/tests/management_consumer.rs "$fixture/crates/canister/src/management_proof/mod.rs"
 cp -R "$input_root"/crates/ic-platform/tests/support "$fixture/crates/canister/src/management_proof/"
 cp "$input_root"/crates/ic-platform/tests/fixtures/management-*.hex "$fixture/crates/canister/src/management_proof/fixtures/"
 cp -R "$input_root"/scripts/fixtures/cdk-runtime/{wire_canister,wire_protocol,protocol,codec,transport,external_canister,execution,cycles,stable_checks,system_checks} "$fixture/crates/canister/src/"
-cp "$input_root"/scripts/fixtures/cdk-runtime/driver.rs "$fixture/apps/driver/src/main.rs"
+cp "$input_root"/scripts/fixtures/cdk-runtime/driver/mod.rs "$fixture/apps/driver/src/main.rs"
 cp -R "$input_root/scripts/fixtures/cdk-runtime/pocketic_support" "$fixture/apps/driver/src/"
 cp "$input_root"/scripts/fixtures/cdk-runtime/driver/tests.rs "$fixture/apps/driver/src/tests.rs"
 cp -R "$input_root"/scripts/fixtures/cdk-runtime/{wire_driver,wire_protocol,protocol,external_driver,benchmarks,driver_scenarios} "$fixture/apps/driver/src/"
+platform_fixture_policy "$input_root" "$fixture"
 # Preparation modes may resolve/fetch only as explicitly requested. Qualification
 # below this phase uses the maintained lock and admits graphs before compiling.
 if [[ "$mode" == --refresh-lock ]]; then
@@ -160,6 +161,7 @@ rustc +"$toolchain" -vV > "$fixture/compiler-$toolchain.txt"
 for profile in "${profiles[@]}"; do
         select_runtime_profile "$profile"
         mkdir -p "$fixture/artifacts/$toolchain"
+        cargo +"$toolchain" clippy --manifest-path "$fixture/Cargo.toml" --locked -p platform-runtime-canister ${selected_features[@]+"${selected_features[@]}"} --lib --target wasm32-unknown-unknown -- -D warnings
         retain_build_artifact "$build/$toolchain" \
             wasm32-unknown-unknown/release/platform_runtime_canister.wasm \
             "$fixture/artifacts/$toolchain/$selected_artifact.wasm" \

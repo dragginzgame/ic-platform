@@ -91,6 +91,7 @@ ic-platform = { path = $quoted_source, default-features = false, features = ["ic
 serde_json = { version = "1.0", optional = true }
 num-bigint = { $bigint, optional = true }
 MANIFEST
+platform_fixture_policy "$root" "$output"
 cargo "+$toolchain" metadata --manifest-path "$output/Cargo.toml" --offline --format-version 1 > "$output/metadata.json" 2> "$output/metadata.log"
 bash "$root/scripts/ci/check-qualification-identities.sh" "$output/metadata.json" "$source_root" \
     platform-wasm-size-probe ic-platform > "$output/identities.json"

@@ -235,6 +235,7 @@ impl TaskHandle {
     }
 
     /// Returns a handle only while a task's Future is being polled.
+    #[must_use]
     pub fn current() -> Option<Self> {
         EXECUTOR.with(|executor| executor.borrow().current_task.map(Self::new))
     }
@@ -416,6 +417,7 @@ pub fn in_trap_recovery_context_for<R>(method: MethodHandle, f: impl FnOnce() ->
 ///
 /// # Panics
 /// Panics outside an executor context.
+#[must_use]
 pub fn extend_current_method_context() -> MethodHandle {
     let method = EXECUTOR.with(|executor| {
         let mut executor = executor.borrow_mut();
@@ -436,6 +438,7 @@ pub fn extend_current_method_context() -> MethodHandle {
 }
 
 /// Reports whether explicit trap recovery is active on this native thread.
+#[must_use]
 pub fn is_recovering_from_trap() -> bool {
     EXECUTOR.with(|executor| {
         executor

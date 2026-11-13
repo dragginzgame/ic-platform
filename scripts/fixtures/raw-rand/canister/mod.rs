@@ -56,11 +56,22 @@ fn random(bytes: &[u8]) -> [u8; 32] {
     }
 }
 
+/// Reply with the callback-cleanup count observed by this installed fixture.
+#[expect(unsafe_code, reason = "The isolated canister exports its IC query ABI")]
 #[unsafe(export_name = "canister_query cleaned")]
 pub extern "C" fn cleaned() {
     api::msg_reply([CLEANED.get()]);
 }
 
+/// Exercise raw entropy, rejection, callback traps and pending-call cancellation.
+///
+/// # Panics
+/// Panics if entropy decoding or cancellation assertions fail; mode 2 deliberately
+/// traps the callback to exercise cleanup.
+#[expect(
+    unsafe_code,
+    reason = "The isolated canister exports its IC update ABI"
+)]
 #[unsafe(export_name = "canister_update entropy")]
 pub extern "C" fn entropy() {
     futures::internals::in_executor_context(|| {
