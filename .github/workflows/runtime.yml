@@ -49,9 +49,11 @@ jobs:
           bash scripts/ci/check-platform-runtime.sh --prepare
       - name: Prepare Testkit-owned server
         run: |
-          version="$(.tools/host/bin/yq -p toml -r '.workspace.dependencies.ic-testkit.version' Cargo.toml)"
+          source scripts/ci/workspace-dependencies.sh
+          platform_dependencies_read "$PWD"
+          version="$(platform_dependency_version ic-testkit)"
           compiler="$(bash scripts/ci/read-platform-msrv.sh)"
-          cargo +"$compiler" install --locked --version "$version" --features cli --root target/testkit-cli ic-testkit --bin ic-testkit-server
+          cargo +"$compiler" install --version "=$version" --features cli --root target/testkit-cli ic-testkit --bin ic-testkit-server
           target/testkit-cli/bin/ic-testkit-server setup
           binary="$(target/testkit-cli/bin/ic-testkit-server check)"
           printf 'POCKET_IC_BIN=%s\n' "$binary" >> "$GITHUB_ENV"
