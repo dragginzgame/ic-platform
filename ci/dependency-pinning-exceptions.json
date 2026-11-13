@@ -27,7 +27,7 @@
     "rule": "cargo-exact",
     "file": "Cargo.toml",
     "subject": "ic-platform-runtime-guard",
-    "value": "=0.21.3",
+    "value": "=0.22.0",
     "reason": "Each canonical runtime owner selects its exact guard; facade versions may share the same runtime owner.",
     "evidence": "docs/architecture/migration.md#independent-runtime-owner-131"
   },
