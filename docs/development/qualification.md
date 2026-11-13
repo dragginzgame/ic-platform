@@ -194,7 +194,7 @@ does not itself remove upstream code or shrink a canister.
 
 Use `make cloc` for classified workspace totals, `make cloc CLOC_DEPTH=0` for
 crate rows, or `make cloc CLOC_DEPTH=1` to include top-level modules. The script
-equivalents use `-d 0` or `-d 1`; `bash scripts/dev/cloc.sh --json` retains schema 2. It
+equivalents use `-d 0` or `-d 1`; `bash vendor/toko-tooling/scripts/dev/cloc.sh --json` retains schema 2. It
 separates library/application, tests, examples, benchmarks, build/tooling and
 unclassified source, including inline test blocks. The report counts each source
 path once and reports macro expansion limits; it is not a linked-Wasm metric.
@@ -204,8 +204,8 @@ packages declare `[package.metadata.toko-tooling.loc]` with the appropriate
 `category`, even when their library target carries a consumer proof. Use
 `--manifest /absolute/path/to/Cargo.toml` to classify an independent generated
 workspace explicitly; the default report covers the five main members only. Select one member with
-`bash scripts/dev/cloc.sh -d 1 ic-platform-runtime`, or one branch with
-`bash scripts/dev/cloc.sh -d 1 ic-platform-runtime::executor`. Depth is relative
+`bash vendor/toko-tooling/scripts/dev/cloc.sh -d 1 ic-platform-runtime`, or one branch with
+`bash vendor/toko-tooling/scripts/dev/cloc.sh -d 1 ic-platform-runtime::executor`. Depth is relative
 to that selection; unknown crate/module names refuse.
 Terminal workspace names are green, crates blue and modules white. Redirected
 output, `TERM=dumb` or a nonempty `NO_COLOR` stays plain. Sibling scan progress
@@ -435,12 +435,17 @@ checks establish target compatibility, not installed executor/trap behavior.
 ## Dependency roles and deployment admission
 
 Root `[workspace.dependencies]` pins `toko-tooling` once at an exact registry
-version. Every real member inherits an unconditional dev-dependency and exempts
+version. Every real member inherits a development selection and exempts
 the source bundle in its cargo-machete metadata; no Rust import or helper package
 is needed. Vendored sources and intentionally isolated fixture manifests retain
 their own scope. Tooling stays outside normal/build production graphs.
 Cargo.lock records the selected archive checksum and
 [the snapshot](../../.toko-tooling.snapshot) records installed payload hashes.
+Shared executable helpers, Make fragments, composite actions and operational
+inputs live under `vendor/toko-tooling/`; product callers remain outside that
+managed tree. Root baseline, license and contribution files retain their paths.
+The snapshot explicitly selects both release and publication entrypoints. Hooks
+use repository-local `core.hooksPath=vendor/toko-tooling/.githooks`.
 After changing the root pin, run `cargo update -p toko-tooling`, then
 `make toko-tooling-update` (or `make toko-tooling-install`) to install that
 selection and prepare/check its tools. These Make commands do not edit Cargo.lock.

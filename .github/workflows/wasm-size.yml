@@ -54,14 +54,14 @@ jobs:
           node-version: '24.21.0'
           package-manager-cache: false
       - name: Restore pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
       - name: Prepare pinned tools
         run: |
           rustup toolchain install --profile minimal --no-self-update
           rustup target add wasm32-unknown-unknown
           make install-host-tools install-ic-tools IC_TOOLS=ic-wasm
       - name: Save pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
         with:
           mode: save
       - name: Prepare locked sources

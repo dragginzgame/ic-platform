@@ -26,23 +26,52 @@ no sibling or npm publication occurred.
 
 ## Current selections and boundaries
 
-Both workspaces select Toko **0.41.0**, checksum
-`4aaafc699324611501e051132e971288c16392a3ece605e9909e88e0c7e80a2f`, producer
-`b4e6308894c495169278b34ea7803973c125adb6`; the installed receipt admits 98 files.
+Both workspaces now select Toko **0.42.4**, checksum
+`697efc1801f8c8c3f563364984efff1b941e84eef2cfaade40aece5e09bced2b`, producer
+`0ac9269cfb3084826df233bfbb187aa57093b5c2`; the receipt admits 99 files.
+Deployment is authorized for Types 0.20.2, Runtime/macros/guard 0.22.2 and
+Platform 0.32.2, in supplier order through one frozen batch. Source preparation
+includes the pending 0.42.1 vendor migration; the published batch used 0.41.0. The producer exporter proved and retired the
+old paths, installing helpers, Make fragments, catalogs and composite actions in
+`vendor/toko-tooling/`. Root baseline/license/contribution paths remain canonical.
+Release/publication entrypoints remain explicit. Platform callers, fixture
+closures, Perl module lookup, CI actions and the selected formatting hook now use
+vendor paths. Validation runners receive the consumer root explicitly; the full
+19-stage release roster and three product groups remain unchanged.
+
+The 0.42.4 payload refresh changes only shared release-command admission and Rust
+tool setup/owned-tree maintenance. Its baseline, tool pins, entrypoints and product
+source remain unchanged. Preview/install and tool admission passed, reusing
+compiled tools. Snapshot, pins/inventory, package listing, formatting and docs
+checks passed. Platform release/group/publication routing and refusal checks
+passed at `target/platform-release-routing.kHdOMf/`; no product gate was run.
+Qualification's Platform 0.32.1
+baseline/native Clippy and both Wasm feature closures passed under 0.42.3; those
+consumer inputs remain unchanged, with no installed measurement or performance
+claim. Prior vendor-migration
+checks on 0.42.1 covered CI, formatting/hooks, boundaries and consumer admission.
+Release receipt/reuse fixtures passed at `target/release-plan-test.lJL9rn/`;
+group rollback/custody and Runtime resume passed at
+`target/platform-group-preparation.sGVQcE/`. Their product stages were substitutes,
+not a full product gate or native macOS acceptance. New logs:
+`/tmp/platform-toko0424-*.log`, `/tmp/platform-qualification-0321-*.log`.
+The release workflow will run all 19 local stages per group; prior timings and
+nested dispatch were reviewed before capture. Hosted native CI stays asynchronous.
 Rust minimum/development/release is **1.100.0**, rustc
 `0ef1bc386059596dada8fb65b50425aab2ea637a`, LLVM 23.1.5; Cargo `3acc79c0c`.
 All real members inherit the common Cargo/Rust/Clippy/Rustdoc policy. The Make
 Clippy leaf refuses warnings on fresh/cached artifacts through Cargo; plain JSON
 collectors retain compiler denial. Scoped FFI/ownership expectations remain local.
 
-Fixture/measurement infrastructure selects Testkit **0.102.0**, Host 0.77 and
-registry Platform 0.32.0 / Types 0.20.0. These inactive native owners stay distinct
-from current local products; actual protocol/type/executor boundaries still apply.
-The exact BLS registry baseline remains Platform 0.32.0, with canister backends
-Wasm-only and native Testkit/oracle/Tokio separate. No forced supplier cohort is
-required for release. The pre-freeze registry review found Toko/Testkit current;
-optional Wire 0.10.0 → 0.21.5 and IC Build editor 0.73.0 → 0.84.0 refreshes are
-explicitly deferred to the next dependency-maintenance batch, not permanent holds.
+The maintained Runtime fixture lock still selects Testkit **0.102.0** with registry
+Platform 0.32.0 / Types 0.20.0. Qualification now explicitly adopts the latest
+published BLS baseline, **Platform 0.32.1**; Testkit's compatible native dependency
+also resolves to registry Platform 0.32.1 / Types 0.20.1 there. Its local candidate,
+Wasm-only BLS/IC0 backends and native Testkit/oracle/Tokio driver stay distinct.
+Old reports retain their original baselines; no new size/performance claim is made.
+No forced supplier cohort is required for release. Optional Wire 0.10.0 → 0.21.5
+and IC Build editor 0.73.0 → 0.84.0 refreshes remain deferred to the next
+maintenance batch, not permanent holds.
 
 `make deps-list` reports all five product groups/versions and qualification.
 Root dependency declarations now contain actual member requirements; generated
@@ -97,7 +126,13 @@ The unrelated root/qualification `cc` 1.11.2 draft was excluded from deployment,
 preserved and restored after reconciliation. Its patch is
 `recovery-evidence/deferred-cc-1.11.2-20261113.patch`, SHA-256
 `485b2bdafb36a21f9335b2a3e91fb1d32a839c622ff629abfe92a5831f5f21e2`.
-Published locks retain 1.11.1; the two restored lockfile edits are unqualified work.
+Deployment excludes the unrelated cc 1.11.2 and qualification Host 0.77.1 drafts.
+Their exact restoration patch is
+`recovery-evidence/deferred-lock-drafts-20261113-toko0424.patch`, SHA-256
+`4128ef00d32e9b059d0cfaed3098b3b60013c5df352dc082501c8ccd4803df63`.
+Apply it only after successful batch reconciliation. Release locks retain cc
+1.11.1 / Host 0.77.0; registry Types 0.20.1 is required by the selected Platform
+0.32.1 qualification adoption and stays included.
 
 Keep prior completed batches `batch-q_67SewF`, `batch-CFcV6khZ`, failed pre-upload
 `batch-VCzP0I1E` and older custody from the

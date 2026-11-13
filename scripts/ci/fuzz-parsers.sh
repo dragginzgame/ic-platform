@@ -36,7 +36,7 @@ cp "$root/crates/ic-platform/tests/fixtures/cbor_malformed.rs" "$fixture/crates/
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
 platform_fixture_policy "$root" "$fixture"
 cargo metadata --offline --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"
-bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
+bash "$root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 printf 'DIDL\000\001\170\052\000\000\000\000\000\000\000' > "$fixture/corpus/candid-one"
 printf 'DIDL\001\156\000\001\000\001' > "$fixture/corpus/candid-recursive"
 printf 'DIDL\200\200\200\200\200\200\200\200\200\200\000' > "$fixture/corpus/candid-overlong"

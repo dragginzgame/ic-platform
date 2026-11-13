@@ -8,7 +8,7 @@ fixture="$(mktemp -d "$root/target/resume-policy.XXXXXX")"
 trap 'printf "Resume policy evidence: %s\n" "$fixture"' EXIT
 mkdir -p "$fixture/scripts/release" "$fixture/ci"
 cp "$root/scripts/release/check-resume-policy.sh" "$fixture/scripts/release/"
-bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" scripts/ci/release-plan.pl
+bash "$root/vendor/toko-tooling/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" vendor/toko-tooling/scripts/ci/release-plan.pl
 git -C "$fixture" init -q -b main
 git -C "$fixture" config user.name Fixture
 git -C "$fixture" config user.email fixture@example.invalid

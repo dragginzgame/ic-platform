@@ -14,7 +14,7 @@ repo="$fixture/repo"
 # used by the leaf, and every other gate stage remains explicitly required.
 cp -R "$root/scripts/ci/." "$repo/scripts/ci/"
 cp -R "$root/scripts/release/." "$repo/scripts/release/"
-for directory in docs rules make .cargo; do mkdir -p "$repo/$directory"; cp -R "$root/$directory/." "$repo/$directory/"; done
+for directory in docs vendor/toko-tooling .cargo; do mkdir -p "$repo/$directory"; cp -R "$root/$directory/." "$repo/$directory/"; done
 cp "$root/"{.toko-tooling.snapshot,TOKO-TOOLING.md,AGENTS.md,README.md,rust-toolchain.toml} "$repo/"
 # The closed policy environment reads the compiler floor, not the product graph.
 compiler="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
@@ -27,7 +27,7 @@ perl -0pi -e 's/\t\@bash fixture-stage.sh check-release-commands\n/\tbash script
 # Preserve the real Make export and sealing dispatch. A stage's child Make
 # prefixes PATH once more than the parent receipt process; direct sealing from
 # that parent must refuse rather than silently rebinding its environment.
-sed -n '/^export PATH :=/p' "$root/make/tools.mk" >> "$repo/Makefile"
+sed -n '/^export PATH :=/p' "$root/vendor/toko-tooling/make/tools.mk" >> "$repo/Makefile"
 perl -0777 -ne '/(^check-policy-fixture-evidence:\n(?:\t[^\n]*\n)+)/m or die "missing sealing dispatch"; print $1' "$root/Makefile" >> "$repo/Makefile"
 mkdir "$repo/versions"
 for group in platform runtime types; do printf '1.0.0\n' > "$repo/versions/$group"; done
@@ -37,7 +37,7 @@ cat > "$repo/scripts/release/group.sh" <<'GROUP'
 printf 'versions/%s\0' "$RELEASE_GROUP"
 GROUP
 cd "$repo"
-git add scripts docs rules make .cargo .toko-tooling.snapshot TOKO-TOOLING.md AGENTS.md README.md rust-toolchain.toml Cargo.toml Makefile versions
+git add scripts docs vendor/toko-tooling .cargo .toko-tooling.snapshot TOKO-TOOLING.md AGENTS.md README.md rust-toolchain.toml Cargo.toml Makefile versions
 git commit -qm 'Stage reuse contract fixture'
 export RELEASE_PREVIOUS=1.0.0 RELEASE_VERSION=1.0.1 RELEASE_REMOTE=origin RELEASE_BRANCH=main
 qualify() {

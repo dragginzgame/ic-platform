@@ -27,13 +27,13 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
       - name: Restore pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
       - name: Prepare pinned secret scanner
         run: |
-          scanner="$(bash scripts/ci/install-ci-tool.sh gitleaks --install-dir "$RUNNER_TEMP/platform-ci-bin")"
+          scanner="$(bash vendor/toko-tooling/scripts/ci/install-ci-tool.sh gitleaks --install-dir "$RUNNER_TEMP/platform-ci-bin")"
           printf 'GITLEAKS_BIN=%s\n' "$scanner" >> "$GITHUB_ENV"
       - name: Save pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
         with:
           mode: save
       - name: Scan complete repository history
@@ -56,7 +56,7 @@ jobs:
           CHANGE_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           CHANGE_HEAD: ${{ github.sha }}
         run: |
-          scope="$(perl scripts/ci/classify-ci-change.pl --event "$CHANGE_EVENT" --ref "$CHANGE_REF" --base "$CHANGE_BASE" --head "$CHANGE_HEAD" --policy ci/docs-only-paths.txt)"
+          scope="$(perl vendor/toko-tooling/scripts/ci/classify-ci-change.pl --event "$CHANGE_EVENT" --ref "$CHANGE_REF" --base "$CHANGE_BASE" --head "$CHANGE_HEAD" --policy ci/docs-only-paths.txt)"
           case "$scope" in docs|full) ;; *) exit 1 ;; esac
           printf 'scope=%s\n' "$scope" >> "$GITHUB_OUTPUT"
 
@@ -88,10 +88,10 @@ jobs:
         run: |
           args=("$EXPECTED_OS" "$EXPECTED_ARCH")
           if [[ "$EXPECTED_OS" == Darwin ]]; then args+=(15); fi
-          bash scripts/ci/check-native-host.sh "${args[@]}"
+          bash vendor/toko-tooling/scripts/ci/check-native-host.sh "${args[@]}"
       - name: Restore documentation tool downloads
         if: needs.selection.outputs.scope == 'docs'
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
       - name: Validate documentation only (no native qualification)
         if: needs.selection.outputs.scope == 'docs'
         run: |
@@ -99,7 +99,7 @@ jobs:
           make toko-tooling-check check-doc-links
       - name: Save documentation tool downloads
         if: needs.selection.outputs.scope == 'docs'
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
         with:
           mode: save
       - name: Prepare toolchains
@@ -117,7 +117,7 @@ jobs:
         run: npm install --global --ignore-scripts "$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").packageManager')"
       - name: Prepare and verify shared tools
         if: needs.selection.outputs.scope != 'docs'
-        uses: ./.github/actions/prepare-common-tools
+        uses: ./vendor/toko-tooling/.github/actions/prepare-common-tools
         with:
           cache: 'true'
           cache-save: 'true'

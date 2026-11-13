@@ -18,7 +18,8 @@ my %files;
 # These fixtures copy policy scripts/companions, extract Make recipes and create
 # their own package/version/lock files. They never read the real Cargo graph,
 # release ledgers or maintained installed-runtime locks. Enumerate additions too.
-for my $directory (qw(scripts/ci scripts/release docs rules make)) {
+for my $directory (qw(scripts/ci scripts/release docs vendor/toko-tooling)) {
+    next unless -d $directory;
     find({no_chdir=>1,wanted=>sub {
         -l $_ and die "redirected policy input $_\n";
         $files{$_}=1 if -f $_;

@@ -10,7 +10,7 @@ case "$#:${1:-all}" in
     *) echo "usage: $0 [platform|runtime|types]" >&2; exit 2 ;;
 esac
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-bash "$root/scripts/ci/check-make-execution.sh"
+bash "$root/vendor/toko-tooling/scripts/ci/check-make-execution.sh"
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES
 mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/platform-group-preparation.XXXXXX")"
@@ -86,8 +86,8 @@ for group in "${groups[@]}"; do
     # not invent the next breaking Runtime/Timers cohort after one is released.
     admitted_kind=false
     for kind in patch minor major; do
-        next="$(perl scripts/ci/validate-release-inputs.pl next-version "$previous" "$kind")"
-        if bash scripts/ci/check-release-changelog.sh "$next" "$previous" "$(date -u +%F)" "$ledger" > "$fixture/$group-kind.log" 2>&1; then
+        next="$(perl vendor/toko-tooling/scripts/ci/validate-release-inputs.pl next-version "$previous" "$kind")"
+        if bash vendor/toko-tooling/scripts/ci/check-release-changelog.sh "$next" "$previous" "$(date -u +%F)" "$ledger" > "$fixture/$group-kind.log" 2>&1; then
             admitted_kind=true
             break
         fi
@@ -102,7 +102,7 @@ for group in "${groups[@]}"; do
     git push -qu origin main
     # Real release commits must survive the normal formatter without changing
     # the exact candidate tree recorded by Shared's runner.
-    git config core.hooksPath .githooks
+    git config core.hooksPath vendor/toko-tooling/.githooks
     export RELEASE_PREVIOUS="$previous" RELEASE_VERSION="$next"
     RELEASE_DATE="$(date -u +%F)"; export RELEASE_DATE
     bash scripts/release/group.sh files > "$fixture/$group-files"
@@ -162,7 +162,7 @@ for group in "${groups[@]}"; do
     # must use each package's own identity, never the facade's workspace version.
     cargo metadata --no-deps --offline --locked --format-version 1 > "$fixture/$group-publication-metadata.json"
     members="$(bash scripts/release/group.sh members)"
-    perl scripts/ci/cargo-publication-selection.pl "$fixture/$group-publication-metadata.json" \
+    perl vendor/toko-tooling/scripts/ci/cargo-publication-selection.pl "$fixture/$group-publication-metadata.json" \
         'ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform-runtime ic-platform' \
         "$members" crates-io > "$fixture/$group-publication-selectors"
     tr '\0' '\n' < "$fixture/$group-publication-selectors" > "$fixture/$group-publication-lines"
@@ -179,7 +179,7 @@ for group in "${groups[@]}"; do
     # Runtime is the representative delivery cycle: it covers coordinated macros
     # and the exact guard. Every group above still proves real metadata custody.
     [[ "$group" == runtime ]] || continue
-    if PLATFORM_GROUP_FAIL_PUSH=1 bash scripts/ci/run-release.sh "$kind" origin main > "$fixture/$group-runner.log" 2>&1; then
+    if PLATFORM_GROUP_FAIL_PUSH=1 bash vendor/toko-tooling/scripts/ci/run-release.sh "$kind" origin main > "$fixture/$group-runner.log" 2>&1; then
         echo 'controlled pre-push failure was not observed' >&2; exit 1
     fi
     grep -q 'fixture: controlled stop before local delivery' "$fixture/$group-runner.log"
@@ -189,7 +189,7 @@ for group in "${groups[@]}"; do
     [[ -f ".git/release-state/$group-$next.plan" ]]
     other=types; [[ "$group" != types ]] || other=platform
     cp ".git/release-state/$group-$next.plan" ".git/release-state/$other-$next.plan"
-    if RELEASE_GROUP="$other" bash scripts/ci/run-release.sh resume "$next" origin main > "$fixture/$group-wrong-resume.log" 2>&1; then exit 1; fi
+    if RELEASE_GROUP="$other" bash vendor/toko-tooling/scripts/ci/run-release.sh resume "$next" origin main > "$fixture/$group-wrong-resume.log" 2>&1; then exit 1; fi
     grep -q 'group identity mismatch' "$fixture/$group-wrong-resume.log"
     [[ "$(git rev-parse HEAD)" == "$commit" ]]
     # A saved unfinished attempt cannot be reinterpreted under a changed policy.

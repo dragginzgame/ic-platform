@@ -20,4 +20,4 @@ export CARGO_PUBLISH_VERIFY_TARGETS=clippy
 export CARGO_PUBLISH_MAKE="$root/scripts/release/verify-publication.sh"
 export CARGO_PUBLISH_ALL_FEATURES=1
 export CARGO_PUBLISH_CHECK_ALLOW_DIRTY=1
-exec bash scripts/ci/cargo-publication-adapter.sh "$1"
+exec bash vendor/toko-tooling/scripts/ci/cargo-publication-adapter.sh "$1"

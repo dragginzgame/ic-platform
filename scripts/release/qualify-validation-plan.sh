@@ -11,7 +11,7 @@ attempt="$(mktemp -d target/release-validation/qualification.XXXXXX)"
 trap 'printf "Group validation evidence: %s\n" "$attempt"' EXIT
 perl scripts/release/validation-plan.pl "$RELEASE_GROUP" "$RELEASE_SOURCE" "$2" "$attempt/plan.json" "$3"
 export PLATFORM_VALIDATION_ATTEMPT="$attempt"
-VALIDATION_LOG_DIR="$attempt/logs" bash scripts/ci/run-validation-targets.sh --plan "$attempt/plan.json" > "$attempt/runner.log" 2>&1 || {
+VALIDATION_REPOSITORY_ROOT="$PWD" VALIDATION_LOG_DIR="$attempt/logs" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh --plan "$attempt/plan.json" > "$attempt/runner.log" 2>&1 || {
     cat "$attempt/runner.log" >&2
     exit 1
 }

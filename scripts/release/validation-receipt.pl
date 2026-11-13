@@ -78,7 +78,7 @@ if ($context->{baseline_tag} ne 'none') {
     command('git','rev-parse',"refs/tags/$context->{baseline_tag}^{commit}") eq "$context->{baseline}\n"
         or die "baseline moved\n";
 }
-my @verify=('perl','scripts/ci/validation-evidence.pl',
+my @verify=('perl','vendor/toko-tooling/scripts/ci/validation-evidence.pl',
     $physical_root,$plan_path,$plan->{source},$plan->{group},$run,"$plan_path.context.json");
 my $proof;
 if ($mode eq 'write') {
@@ -103,8 +103,8 @@ if ($mode eq 'write') {
         # Re-admit immutable source inputs through the existing checkpoint owner,
         # and bind every retained evidence file without parsing runner protocols.
         my ($fh,$observed)=tempfile('receipt-inputs.XXXXXX',DIR=>$run,UNLINK=>1); close $fh;
-        system('perl','scripts/ci/validation-input-checkpoint.pl',$checkpoint_root,"$run/plan-inputs.json",$observed,
-            'scripts/ci/verify-file-checksum.sh',@{$plan->{inputs}})==0 or die "input checkpoint drift\n";
+        system('perl','vendor/toko-tooling/scripts/ci/validation-input-checkpoint.pl',$checkpoint_root,"$run/plan-inputs.json",$observed,
+            'vendor/toko-tooling/scripts/ci/verify-file-checksum.sh',@{$plan->{inputs}})==0 or die "input checkpoint drift\n";
         $json->encode($proof->{inputs}) eq $json->encode($json->decode(bytes("$run/plan-inputs.json")))
             or die "Shared proof input inventory drift\n";
         for my $path (keys %{$proof->{files}}) {

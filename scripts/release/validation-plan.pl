@@ -25,8 +25,8 @@ my @groups = sort map { $_->{name} } @{$groups->{groups}};
 same_names($policy->{groups}, \@groups);
 grep($_ eq $group, @groups) or die "unknown group\n";
 my $make = bytes('Makefile');
-my ($ci) = $make =~ /^ci:\n\t\+bash scripts\/ci\/run-validation-targets\.sh --fail-fast ([^\n]+)\n/m;
-my ($runtime) = $make =~ /^check-runtime-all:\n\t\+bash scripts\/ci\/run-validation-targets\.sh ([^\n]+)\n/m;
+my ($ci) = $make =~ /^ci:\n\t\+VALIDATION_REPOSITORY_ROOT="\$\(CURDIR\)" bash vendor\/toko-tooling\/scripts\/ci\/run-validation-targets\.sh --fail-fast ([^\n]+)\n/m;
+my ($runtime) = $make =~ /^check-runtime-all:\n\t\+VALIDATION_REPOSITORY_ROOT="\$\(CURDIR\)" bash vendor\/toko-tooling\/scripts\/ci\/run-validation-targets\.sh ([^\n]+)\n/m;
 defined($ci) && defined($runtime) or die "full gate recipe changed; requalify roster\n";
 $make =~ /^release-verify:\n\t\+bash scripts\/release\/validation-gate\.sh verify\n/m
     or die "release gate changed; requalify roster\n";

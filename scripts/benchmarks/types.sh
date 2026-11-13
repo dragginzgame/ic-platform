@@ -27,6 +27,6 @@ cp "$root/Cargo.lock" "$fixture/Cargo.lock"
 source "$root/scripts/ci/workspace-dependencies.sh"
 platform_fixture_policy "$root" "$fixture"
 cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --format-version 1 > "$fixture/metadata.json"
-bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
+bash "$root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 CARGO_BUILD_JOBS=4 cargo run --manifest-path "$fixture/Cargo.toml" --release --frozen > "$fixture/results.tsv"
 printf 'Type size and Account timing evidence: %s\n' "$fixture"

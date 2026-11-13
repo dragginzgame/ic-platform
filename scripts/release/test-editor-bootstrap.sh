@@ -4,16 +4,16 @@ root="${BASH_SOURCE[0]}"
 [[ "$root" == /* ]] || root="$PWD/$root"
 root="$(CDPATH='' cd -P "${root%/*}/../.." && printf '%s/.' "$PWD")"
 root="${root%/.}"
-# shellcheck source=scripts/ci/fixture-lifecycle.sh
-source "$root/scripts/ci/fixture-lifecycle.sh"
+# shellcheck source=vendor/toko-tooling/scripts/ci/fixture-lifecycle.sh
+source "$root/vendor/toko-tooling/scripts/ci/fixture-lifecycle.sh"
 fixture="$(fixture_create "${TMPDIR:-/tmp}/editor-bootstrap.XXXXXX")"
 fixture_complete=false
 trap 'fixture_finish "$?" "$fixture" "Editor bootstrap fixture retained"' EXIT
 consumer="$fixture/consumer space"
-mkdir -p "$consumer/scripts/release" "$consumer/scripts/dev" "$consumer/ci" "$fixture/elsewhere"
+mkdir -p "$consumer/scripts/release" "$consumer/vendor/toko-tooling/scripts/dev" "$consumer/ci" "$fixture/elsewhere"
 cp "$root/scripts/release/editor.sh" "$consumer/scripts/release/"
 cp "$root/ci/release-editor.env" "$consumer/ci/"
-cat > "$consumer/scripts/dev/install-rust-tools.sh" <<'STUB'
+cat > "$consumer/vendor/toko-tooling/scripts/dev/install-rust-tools.sh" <<'STUB'
 set -euo pipefail
 [[ "$1" == --consumer && "$2" == "$EDITOR_EXPECT_ROOT" ]]
 printf '%s\n' "$@" > "$EDITOR_OBSERVATION"

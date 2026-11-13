@@ -22,7 +22,7 @@ perl -MJSON::PP -0777 -e '
         my ($docs,@full);
         for my $s (@{$j->{steps}}) {
             next if ($s->{uses}//"") =~ m{^actions/checkout@} || ($s->{name}//"") eq "Check native identity";
-            if (($s->{uses}//"") eq "./.github/actions/cache-tool-downloads") {
+            if (($s->{uses}//"") eq "./vendor/toko-tooling/.github/actions/cache-tool-downloads") {
                 my $condition=$s->{if}//"";
                 $condition eq "" || $condition eq q{needs.selection.outputs.scope == '\''docs'\''} ||
                     $condition eq q{needs.selection.outputs.scope != '\''docs'\''} or die "unsafe cache selection";
@@ -39,7 +39,7 @@ perl -MJSON::PP -0777 -e '
         }
         $docs == 1 && @full or die "missing qualification";
     }
-    my @common=grep { ($_->{uses}//"") eq "./.github/actions/prepare-common-tools" } @{$jobs->{platform}{steps}};
+    my @common=grep { ($_->{uses}//"") eq "./vendor/toko-tooling/.github/actions/prepare-common-tools" } @{$jobs->{platform}{steps}};
     @common==1 && $common[0]{with}{cache} eq "true" && $common[0]{with}{"cache-save"} eq "true"
         or die "full Platform setup must use the shared cached tool owner";
     my @hosts=sort map { $_->{runner} } @{$jobs->{platform}{strategy}{matrix}{include}};
@@ -48,14 +48,14 @@ perl -MJSON::PP -0777 -e '
 ' "$fixture/workflow.json" > "$fixture/classify.sh"
 mkdir -p "$fixture/repo/ci" "$fixture/repo/scripts/ci" "$fixture/repo/docs/status" "$fixture/repo/crates/example"
 cp "$root/ci/docs-only-paths.txt" "$fixture/repo/ci/"
-bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" scripts/ci/classify-ci-change.pl
+bash "$root/vendor/toko-tooling/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" vendor/toko-tooling/scripts/ci/classify-ci-change.pl
 cd "$fixture/repo"
 git init -q
 git config user.name 'CI selection fixture'
 git config user.email 'fixture@example.invalid'
 printf 'Initial prose\n' > docs/status/current.md
 printf 'fn original() {}\n' > crates/example/lib.rs
-git add ci scripts docs crates
+git add ci scripts docs crates vendor/toko-tooling
 git commit -qm baseline
 base="$(git rev-parse HEAD)"
 check() {
@@ -83,7 +83,7 @@ git commit -qam policy
 check full push "$code" "$(git rev-parse HEAD)" refs/heads/main
 # A classifier process failure must not produce a docs output. The workflow
 # assertions above prove Platform retains full qualification on failure.
-mv scripts/ci/classify-ci-change.pl scripts/ci/classifier-unavailable
+mv vendor/toko-tooling/scripts/ci/classify-ci-change.pl scripts/ci/classifier-unavailable
 : > "$fixture/output"
 if CHANGE_EVENT=push CHANGE_REF=refs/heads/main CHANGE_BASE="$base" CHANGE_HEAD="$docs" GITHUB_OUTPUT="$fixture/output" \
     bash "$fixture/classify.sh" > "$fixture/failed-observation.log" 2>&1; then
@@ -110,7 +110,7 @@ perl -MJSON::PP -e '
             my (@restore,@save,@setup,@scan);
             for my $i (0..$#$steps) {
                 my $step=$steps->[$i]; my $run=$step->{run}//"";
-                if (($step->{uses}//"") eq "./.github/actions/cache-tool-downloads") {
+                if (($step->{uses}//"") eq "./vendor/toko-tooling/.github/actions/cache-tool-downloads") {
                     push @{(($step->{with}{mode}//"restore") eq "save") ? \@save : \@restore}, $i;
                 }
                 if ($run =~ /make install-(?:host-tools|tools)\b|install-ci-tool\.sh gitleaks/) { push @setup,$i; }

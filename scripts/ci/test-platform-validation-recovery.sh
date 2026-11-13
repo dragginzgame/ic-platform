@@ -11,8 +11,8 @@ fixture="$(printf '%s\n' "$prepared" | sed -n 's/^Platform validation-plan fixtu
 trap 'printf "Release receipt recovery evidence: %s\n" "$fixture"' EXIT
 seed="$fixture/repo"
 cp "$root/scripts/release/validation-gate.sh" "$seed/scripts/release/"
-bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$seed" scripts/ci/run-release.sh
-cat > "$seed/scripts/ci/cargo-release-group.sh" <<'GROUP'
+bash "$root/vendor/toko-tooling/scripts/ci/prepare-script-fixture.sh" "$root" "$seed" vendor/toko-tooling/scripts/ci/run-release.sh
+cat > "$seed/vendor/toko-tooling/scripts/ci/cargo-release-group.sh" <<'GROUP'
 #!/usr/bin/env bash
 set -eu
 case "$1" in
@@ -23,7 +23,7 @@ esac
 GROUP
 cat > "$seed/scripts/release/group.sh" <<'GROUP'
 #!/usr/bin/env bash
-exec bash scripts/ci/cargo-release-group.sh "$1" "$RELEASE_GROUP"
+exec bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh "$1" "$RELEASE_GROUP"
 GROUP
 cat >> "$seed/Makefile" <<'MAKE'
 export RELEASE_GROUP RELEASE_SOURCE RELEASE_PREVIOUS RELEASE_VERSION RELEASE_REMOTE RELEASE_BRANCH
@@ -74,10 +74,10 @@ for group in platform runtime types; do
     printf '// owner change\n' >> "crates/$package/src/lib.rs"
     git commit -qam 'Scoped owner change'
     source="$(git rev-parse HEAD)"
-    FAIL_STAGE=clippy refuse bash scripts/ci/run-release.sh patch origin main
+    FAIL_STAGE=clippy refuse bash vendor/toko-tooling/scripts/ci/run-release.sh patch origin main
     [[ ! -f ".git/release-state/$group-1.0.1.plan" ]]
     [[ "$(cat "versions/$group")" == 1.0.0 ]]
-    STOP_AFTER_PREPARE=1 refuse bash scripts/ci/run-release.sh patch origin main
+    STOP_AFTER_PREPARE=1 refuse bash vendor/toko-tooling/scripts/ci/run-release.sh patch origin main
     journal=".git/release-state/$group-1.0.1.validation"
     [[ "$(cat "versions/$group")" == 1.0.1 && -f "$journal" ]]
     receipt="$(jq -r .receipt "$journal")"
@@ -94,55 +94,55 @@ for group in platform runtime types; do
         refuse bash scripts/release/validation-gate.sh check
     jq -e '.scope=="workspace" and .release_omission_admitted==false' "$receipt"
     mv "$journal" "$journal.missing"
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     mv "$journal.missing" "$journal"
     printf '// worktree drift\n' >> "crates/$package/src/lib.rs"
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     git add "crates/$package/src/lib.rs"
     git show "HEAD:crates/$package/src/lib.rs" > "crates/$package/src/lib.rs"
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     git restore --staged --worktree "crates/$package/src/lib.rs"
-    RUSTFLAGS='--cfg changed_recovery_environment' refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    RUSTFLAGS='--cfg changed_recovery_environment' refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     printf '\n# changed binary\n' >> "$POCKET_IC_BIN"
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     printf '#!/usr/bin/env bash\nexit 0\n' > "$POCKET_IC_BIN"
     log="$(jq -r '.validation_evidence | .run as $run | .stages[] | select(.target=="clippy") | $run+"/"+.log' "$receipt")"
     cp "$log" "$fixture/log"
     printf '\nchanged log\n' >> "$log"
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     cp "$fixture/log" "$log"
     # Re-admit the original proof after candidate metadata preparation without
     # rewriting absolute runner paths or replaying the product stages.
     for evidence in "$attempt/plan.json.context.json" "${runs[0]}/plan-inputs.json" "${runs[0]}/timings.tsv"; do
         cp "$evidence" "$fixture/evidence.original"
         printf '\n' >> "$evidence"
-        refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+        refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
         cp "$fixture/evidence.original" "$evidence"
     done
     jq -cS '.validation_evidence.stages=[]' "$fixture/receipt" > "$receipt"
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     cp "$fixture/receipt" "$receipt"
     jq -cS '.group="wrong"' "$fixture/receipt" > "$receipt"
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     cp "$fixture/receipt" "$receipt"
     git tag -f "$group-v1.0.0" "$source" > /dev/null
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     git tag -f "$group-v1.0.0" "$base" > /dev/null
     cp "$journal" "$fixture/redirected-journal"
     rm "$journal"
     ln -s "$fixture/redirected-journal" "$journal"
-    refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     rm "$journal"
     cp "$fixture/journal" "$journal"
     if [[ "$group" == platform ]]; then
         cp -R "$work" "$fixture/relocated"
-        (cd "$fixture/relocated"; refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main)
+        (cd "$fixture/relocated"; refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main)
     fi
-    STOP_BEFORE_PUSH=1 refuse bash scripts/ci/run-release.sh resume 1.0.1 origin main
+    STOP_BEFORE_PUSH=1 refuse bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main
     [[ "$(git log -1 --format=%s)" == "Release $group 1.0.1" ]]
     [[ "$(git --git-dir="$fixture/$group.git" rev-parse main)" == "$base" ]]
     before="$(wc -l < target/executed-stages)"
-    bash scripts/ci/run-release.sh resume 1.0.1 origin main > "$fixture/$group-resume.log" 2>&1
+    bash vendor/toko-tooling/scripts/ci/run-release.sh resume 1.0.1 origin main > "$fixture/$group-resume.log" 2>&1
     [[ "$(wc -l < target/executed-stages)" == "$before" ]]
     [[ "$(git --git-dir="$fixture/$group.git" rev-parse main)" == "$(git rev-parse HEAD)" ]]
     for other in platform runtime types; do
@@ -157,7 +157,7 @@ cd "$fixture/legacy"
 rm scripts/release/validation-gate.sh
 cat > Makefile <<'LEGACY'
 release-verify:
-	+VALIDATION_FAILURE_LOG_DIR="$$(git rev-parse --git-path release-state)/validation-failures" bash scripts/ci/run-validation-targets.sh ci
+	+VALIDATION_FAILURE_LOG_DIR="$$(git rev-parse --git-path release-state)/validation-failures" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh ci
 	+$(MAKE) check-runtime-all
 LEGACY
 git add Makefile scripts/release/validation-gate.sh

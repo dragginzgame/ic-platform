@@ -7,7 +7,7 @@ if [[ $# != 3 ]]; then
     exit 2
 fi
 cargo audit --version
-bash "$root/scripts/ci/prepare-rustsec-db.sh" "$1" "$2" "$3"
+bash "$root/vendor/toko-tooling/scripts/ci/prepare-rustsec-db.sh" "$1" "$2" "$3"
 evidence="$(cd "$3" && pwd -P)"
 cargo audit --version > "$evidence/tool-version"
 # Capture each input before registry preparation; audit only these snapshots.

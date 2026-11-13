@@ -58,7 +58,7 @@ my ($path,$source,$group)=@args;
 my $env=environment();
 my $observation;
 { local %ENV=%$env; $observation=$json->decode(command('scripts/release/observe-policy-fixtures.pl')); }
-my $sealed=$json->decode(command('perl','scripts/ci/seal-validation-stage.pl',abs_path($path)//$path,$source,$group,$observation->{configuration}{identity}));
+my $sealed=$json->decode(command('perl','vendor/toko-tooling/scripts/ci/seal-validation-stage.pl',abs_path($path)//$path,$source,$group,$observation->{configuration}{identity}));
 $sealed->{admission}{stage} eq 'release-policy-fixtures' && $sealed->{admission}{contract} eq 'platform-policy-fixtures/1'
     && $sealed->{cwd} eq abs_path('.') or die "wrong policy-fixture stage\n";
 print $json->encode($sealed),"\n";

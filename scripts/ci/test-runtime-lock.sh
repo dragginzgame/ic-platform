@@ -2,7 +2,7 @@
 set -euo pipefail
 unset RELEASE_GROUP RELEASE_COMMIT
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-source "$root/scripts/ci/fixture-lifecycle.sh"
+source "$root/vendor/toko-tooling/scripts/ci/fixture-lifecycle.sh"
 fixture="$(fixture_create "${TMPDIR:-/tmp}/platform-runtime-lock.XXXXXX")"
 fixture_complete=false
 trap 'fixture_finish "$?" "$fixture" "Runtime lock fixture retained"' EXIT

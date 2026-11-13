@@ -4,8 +4,8 @@ set -euo pipefail
 # Run with the current shell, including Bash 3.2 on supported macOS hosts.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
-# shellcheck source=scripts/ci/fixture-lifecycle.sh
-source "$root/scripts/ci/fixture-lifecycle.sh"
+# shellcheck source=vendor/toko-tooling/scripts/ci/fixture-lifecycle.sh
+source "$root/vendor/toko-tooling/scripts/ci/fixture-lifecycle.sh"
 fixture_complete=false
 fixture="$(fixture_create "$root/target/platform-consumer-admission.XXXXXX")"
 finish() {
@@ -19,7 +19,7 @@ cp "$root/scripts/ci/platform-consumer-profiles.tsv" "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"
 touch "$fixture/Cargo.lock"
 cp "$root/scripts/ci/"{consumer-fixture.sh,workspace-dependencies.sh} "$fixture/scripts/ci/"
-bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" scripts/ci/check-cargo-dependency-boundaries.sh
+bash "$root/vendor/toko-tooling/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh
 cp -R "$root/crates/ic-platform/tests/." "$fixture/crates/ic-platform/tests/"
 ln -s "$BASH" "$fixture/bin/bash"
 cp "$root/scripts/ci/"{read-platform-msrv.sh,check-platform-compiler.sh} "$fixture/scripts/ci/"

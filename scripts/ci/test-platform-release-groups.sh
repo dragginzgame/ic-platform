@@ -4,20 +4,20 @@ set -euo pipefail
 unset PACKAGE RELEASE_GROUP
 unset RELEASE_GROUPS RELEASE_PUBLISH_TARGET RELEASE_BATCH_ACTIVE
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
-bash "$root/scripts/ci/check-make-execution.sh"
+bash "$root/vendor/toko-tooling/scripts/ci/check-make-execution.sh"
 unset MAKEFLAGS MFLAGS MAKEOVERRIDES
 mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/platform-release-routing.XXXXXX")"
 trap 'printf "Release routing evidence: %s\n" "$fixture"' EXIT
 cd "$root"
-bash scripts/ci/prepare-script-fixture.sh "$root" "$fixture" Makefile make/consumer.mk make/tools.mk make/release.mk make/rust-format.mk make/execution.mk make/cargo-dependencies.mk scripts/ci/check-make-execution.sh scripts/ci/check-release-delivery.sh scripts/ci/check-retained-state.pl ci/release-delivery.txt
+bash vendor/toko-tooling/scripts/ci/prepare-script-fixture.sh "$root" "$fixture" Makefile vendor/toko-tooling/make/consumer.mk vendor/toko-tooling/make/tools.mk vendor/toko-tooling/make/release.mk vendor/toko-tooling/make/rust-format.mk vendor/toko-tooling/make/execution.mk vendor/toko-tooling/make/cargo-dependencies.mk vendor/toko-tooling/scripts/ci/check-make-execution.sh vendor/toko-tooling/scripts/ci/check-release-delivery.sh vendor/toko-tooling/scripts/ci/check-retained-state.pl ci/release-delivery.txt
 git -C "$fixture" init -q
 mkdir -p "$fixture/scripts/release" "$fixture/scripts/ci" "$fixture/scripts/dev"
 ln -s "$root/.tools" "$fixture/.tools"
 export ROUTING_OUTPUT="$fixture/selection" ROUTING_EFFECTS="$fixture/effects"
 export PLATFORM_RELEASE_TEST_ROOT="$root" PLATFORM_RELEASE_TEST_FIXTURE="$fixture"
 cargo metadata --no-deps --locked --offline --format-version 1 > "$fixture/metadata.json"
-cat > "$fixture/scripts/ci/run-release.sh" <<'RUNNER'
+cat > "$fixture/vendor/toko-tooling/scripts/ci/run-release.sh" <<'RUNNER'
 #!/usr/bin/env bash
 set -euo pipefail
 [[ "$RELEASE_GROUP" == "$EXPECTED_GROUP" && "$1" == "$EXPECTED_OPERATION" ]]
@@ -26,7 +26,7 @@ printf 'release %s %s\n' "$1" "$RELEASE_GROUP" >> "$ROUTING_EFFECTS"
 [[ "${2:-}" == review && "${3:-}" == release-review || "$1" == resume && "${2:-}" == 99.0.0 && "${3:-}" == review && "${4:-}" == release-review ]]
 exit "${ROUTING_RUNNER_RESULT:-0}"
 RUNNER
-cat > "$fixture/scripts/ci/run-release-batch.pl" <<'FROZEN'
+cat > "$fixture/vendor/toko-tooling/scripts/ci/run-release-batch.pl" <<'FROZEN'
 use strict;
 use warnings;
 use Getopt::Long qw(GetOptions);
@@ -58,18 +58,18 @@ cat > "$fixture/scripts/release/group.sh" <<'GROUP'
 #!/usr/bin/env bash
 exec bash "$PLATFORM_RELEASE_TEST_ROOT/scripts/release/group.sh" "$@"
 GROUP
-cat > "$fixture/scripts/dev/install-host-tools.sh" <<'HOST'
+cat > "$fixture/vendor/toko-tooling/scripts/dev/install-host-tools.sh" <<'HOST'
 #!/usr/bin/env bash
 printf 'host admission\n' >> "$ROUTING_EFFECTS"
 HOST
-cat > "$fixture/scripts/dev/toko-tooling.sh" <<'TOOLING'
+cat > "$fixture/vendor/toko-tooling/scripts/dev/toko-tooling.sh" <<'TOOLING'
 #!/usr/bin/env bash
 set -euo pipefail
 [[ "$1" == check ]]
 printf 'tooling admission\n' >> "$ROUTING_EFFECTS"
 [[ "${ROUTING_TOOLING_REFUSE:-0}" == 0 ]]
 TOOLING
-cat > "$fixture/scripts/ci/cargo-publication-adapter.sh" <<'PUBLISH'
+cat > "$fixture/vendor/toko-tooling/scripts/ci/cargo-publication-adapter.sh" <<'PUBLISH'
 #!/usr/bin/env bash
 set -euo pipefail
 [[ "$CARGO_PUBLISH_REGISTRY" == crates-io && "$CARGO_PUBLISH_VERIFY_TARGETS" == clippy ]]
@@ -77,7 +77,7 @@ set -euo pipefail
 [[ "$CARGO_PUBLISH_EVIDENCE_ROOT" == "$PLATFORM_RELEASE_TEST_FIXTURE/target/publication" ]]
 [[ "$CARGO_PUBLISH_MAKE" == "$PLATFORM_RELEASE_TEST_FIXTURE/scripts/release/verify-publication.sh" ]]
 [[ "$CARGO_PUBLISH_PACKAGES" == "$(bash "$PLATFORM_RELEASE_TEST_ROOT/scripts/release/group.sh" members)" ]]
-perl "$PLATFORM_RELEASE_TEST_ROOT/scripts/ci/cargo-publication-selection.pl" \
+perl "$PLATFORM_RELEASE_TEST_ROOT/vendor/toko-tooling/scripts/ci/cargo-publication-selection.pl" \
     "$PLATFORM_RELEASE_TEST_FIXTURE/metadata.json" "$CARGO_PUBLISH_PACKAGES" "$CARGO_PUBLISH_SELECTION" crates-io \
     > "$PLATFORM_RELEASE_TEST_FIXTURE/selectors"
 printf '%s\n' "$CARGO_PUBLISH_SELECTION" > "$ROUTING_OUTPUT"
@@ -136,7 +136,7 @@ for group in platform runtime types; do
     expected="$(RELEASE_GROUP="$group" bash scripts/release/group.sh version)"
     [[ "$(make --no-print-directory -s release-version RELEASE_GROUP="$group")" == "$expected" ]]
     make --no-print-directory -s release-files RELEASE_GROUP="$group" > "$fixture/$group-files"
-    bash scripts/ci/cargo-release-group.sh files "$group" > "$fixture/$group-expected-files"
+    bash vendor/toko-tooling/scripts/ci/cargo-release-group.sh files "$group" > "$fixture/$group-expected-files"
     cmp "$fixture/$group-files" "$fixture/$group-expected-files"
     tr '\0' '\n' < "$fixture/$group-files" | grep -Fx 'scripts/fixtures/cdk-runtime/Cargo.lock'
     for operation in publish publish-check; do

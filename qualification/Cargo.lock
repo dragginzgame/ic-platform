@@ -151,8 +151,8 @@ dependencies = [
 name = "bls-wrapper-probe"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.32.0",
  "ic-platform 0.32.1",
+ "ic-platform 0.32.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ic-platform-runtime",
  "ic-testkit",
  "ic-verify-bls-signature",
@@ -822,9 +822,18 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.32.0"
+version = "0.32.1"
+dependencies = [
+ "digest 0.10.7",
+ "ic_bls12_381",
+ "sha2 0.11.1",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "207beedb33b13087281c5b7ca365c97eea50f600dd4155cc21bad6bbba320877"
+checksum = "8410078a52aded890221d5789343b03452c2ee612d3dbecb3d37d19d081cc1cd"
 dependencies = [
  "digest 0.10.7",
  "ic-platform-types",
@@ -832,15 +841,6 @@ dependencies = [
  "num-bigint 0.5.1",
  "serde",
  "serde_bytes",
- "sha2 0.11.1",
-]
-
-[[package]]
-name = "ic-platform"
-version = "0.32.1"
-dependencies = [
- "digest 0.10.7",
- "ic_bls12_381",
  "sha2 0.11.1",
 ]
 
@@ -853,9 +853,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-types"
-version = "0.20.0"
+version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88677cb6751fe188b3a0c1870573e80bb62d775105256a44b73aad15e3ae48e6"
+checksum = "690329a03955692b3db6fe9f7801b9a6ffaabaee6ae7f0753348da9b81239c21"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -873,7 +873,7 @@ dependencies = [
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
- "ic-platform 0.32.0",
+ "ic-platform 0.32.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ic-platform-types",
  "libc",
  "pocket-ic",
@@ -2288,9 +2288,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.41.0"
+version = "0.42.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4aaafc699324611501e051132e971288c16392a3ece605e9909e88e0c7e80a2f"
+checksum = "697efc1801f8c8c3f563364984efff1b941e84eef2cfaade40aece5e09bced2b"
 
 [[package]]
 name = "tower"

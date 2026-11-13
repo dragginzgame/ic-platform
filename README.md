@@ -121,6 +121,10 @@ and their documented exceptions in `ci/dependency-pinning-exceptions.json`, run
 to install the selected archive. Retain both Cargo.lock files and the snapshot. Use
 `make toko-tooling-install` to reinstall that Cargo selection, and
 `make toko-tooling-status` to compare selected and installed identities offline.
+Installed helpers and operational inputs live under `vendor/toko-tooling/`;
+Platform owns its callers outside that managed tree. Release and publication
+entrypoints remain explicit snapshot selections. See the
+[deployment admission contract](docs/development/qualification.md#dependency-roles-and-deployment-admission).
 
 For general dependency maintenance, `make deps-update` runs `cargo update -v`
 sequentially in the root and qualification workspaces. It changes lockfiles;

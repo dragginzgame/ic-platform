@@ -64,8 +64,8 @@ LOCAL_TOOL_INSTALL_TARGETS += install-release-editor
 LOCAL_TOOL_CHECK_TARGETS += release-editor-check
 LOCAL_TOOL_INSTALL_TARGETS += install-browser-tools
 LOCAL_TOOL_CHECK_TARGETS += browser-tools-check
-include make/consumer.mk
-include make/cargo-dependencies.mk
+include vendor/toko-tooling/make/consumer.mk
+include vendor/toko-tooling/make/cargo-dependencies.mk
 # Keep the shared pre-capture cleanup behind tooling admission, including -j.
 clean-empty-source-dirs: toko-tooling-check
 release-batch-resume: toko-tooling-check
@@ -151,10 +151,10 @@ wasm-check: check-compiler
 # Compatibility command: these are the same supported-compiler proofs, once.
 msrv: test wasm-check
 check-boundary: check-candid-boundary
-	bash scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
+	bash vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh --consumer "$(CURDIR)" --external-ic
 .PHONY: check-candid-boundary
 check-candid-boundary:
-	perl scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates scripts
+	perl vendor/toko-tooling/scripts/ci/check-candid-boundary.pl --cbor "$(CURDIR)" ci/candid-boundary.json crates scripts
 	bash scripts/ci/test-platform-candid-boundary.sh
 .PHONY: check-primitives
 check-primitives:
@@ -162,7 +162,7 @@ check-primitives:
 	@for target in "$$(rustc -vV | sed -n 's/^host: //p')" wasm32-unknown-unknown; do \
 		for features in - executor runtime; do \
 			set --; if [ "$$features" != - ]; then set -- --features "$$features"; fi; \
-			perl scripts/ci/check-cargo-graph.pl --consumer "$(CURDIR)" --package ic-platform --target "$$target" --no-default-features --forbid blake3 "$$@" || exit $$?; \
+			perl vendor/toko-tooling/scripts/ci/check-cargo-graph.pl --consumer "$(CURDIR)" --package ic-platform --target "$$target" --no-default-features --forbid blake3 "$$@" || exit $$?; \
 		done; \
 	done
 .PHONY: check-stable-identities
@@ -199,18 +199,18 @@ check-doc-links:
 	@set -eu; mkdir -p target; \
 		records="$$(mktemp "$(CURDIR)/target/doc-link-records.XXXXXX")"; \
 		trap 'rm -f "$$records"' EXIT; \
-		bash scripts/ci/verify-toko-tooling-snapshot.sh --read-manifest .toko-tooling.snapshot > "$$records"; \
+		bash vendor/toko-tooling/scripts/ci/verify-toko-tooling-snapshot.sh --read-manifest .toko-tooling.snapshot > "$$records"; \
 		set -- README.md docs AGENTS.md CONTRIBUTING.md CHANGELOG.md releases/pocket-ic/CHANGELOG.md releases/runtime/CHANGELOG.md releases/platform/CHANGELOG.md releases/types/CHANGELOG.md releases/history.md scripts/benchmarks/0.9/README.md scripts/benchmarks/0.4/README.md scripts/benchmarks/0.22/README.md scripts/benchmarks/canic-wasm/README.md packages/browser/README.md crates/ic-platform/README.md crates/ic-platform-runtime/README.md crates/ic-platform-runtime/src/call/README.md crates/ic-platform-macros/README.md; \
 		while IFS="$$(printf '\t')" read -r kind checksum mode path; do \
 			case "$$kind:$$path" in file:*.md) set -- "$$@" "$$path" ;; esac; \
 		done < "$$records"; \
-		perl scripts/ci/check-documentation-links.pl --root . "$$@"
+		perl vendor/toko-tooling/scripts/ci/check-documentation-links.pl --root . "$$@"
 .PHONY: check-inventory
 check-inventory:
 	bash scripts/ci/check-platform-inventory.sh
 check-pins:
-	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/browser-compiler-floor --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
-	bash scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
+	bash vendor/toko-tooling/scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --cargo-inheritance --npm-root scripts/fixtures/browser-compiler-floor --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
+	bash vendor/toko-tooling/scripts/ci/check-dependency-pins.sh --consumer "$(CURDIR)" --npm-root packages/browser --node-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.node')" --npm-version "$$(node -p 'require("./scripts/fixtures/browser-compiler-floor/package.json").engines.npm')"
 check-release-commands:
 	bash scripts/ci/test-resume-policy.sh
 	perl scripts/ci/test-platform-evidence.pl
@@ -225,7 +225,7 @@ check-release-commands:
 check-policy-fixture-evidence:
 	@perl scripts/release/policy-fixture-evidence.pl seal "$$PLATFORM_POLICY_ADMISSION" "$$PLATFORM_POLICY_SOURCE" "$$PLATFORM_POLICY_GROUP"
 ci:
-	+bash scripts/ci/run-validation-targets.sh --fail-fast toko-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check
+	+VALIDATION_REPOSITORY_ROOT="$(CURDIR)" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh --fail-fast toko-tooling-check check-doc-links check-pins check-boundary check-inventory fmt-check check-formatting check-primitives clippy check-browser check-runtime-lock check-release-commands check test docs-check check-consumer check-features wasm-check
 
 release-resume: check-release-resume-policy
 .PHONY: check-release-resume-policy
@@ -235,7 +235,7 @@ check-release-resume-policy:
 version release-version:
 	@bash scripts/release/adapter.sh version
 check-retained-evidence:
-	perl scripts/ci/check-retained-state.pl --root recovery-evidence --max-bytes 335544320 --max-file-bytes 268435456 --max-age-days 30
+	perl vendor/toko-tooling/scripts/ci/check-retained-state.pl --root recovery-evidence --max-bytes 335544320 --max-file-bytes 268435456 --max-age-days 30
 release-preflight: check-retained-evidence
 	@bash scripts/release/adapter.sh preflight
 release-verify:
@@ -263,7 +263,7 @@ check-raw-rand:
 
 .PHONY: check-runtime-all
 check-runtime-all:
-	+bash scripts/ci/run-validation-targets.sh check-runtime
+	+VALIDATION_REPOSITORY_ROOT="$(CURDIR)" bash vendor/toko-tooling/scripts/ci/run-validation-targets.sh check-runtime
 
 .PHONY: check-runtime-lock
 check-runtime-lock:

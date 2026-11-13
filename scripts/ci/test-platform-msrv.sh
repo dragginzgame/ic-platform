@@ -72,7 +72,7 @@ grep -q 'required manifest tool unavailable' "$native/agent-refusal.log"
 # floor, before entering their closed environment. A failed reader has no fallback.
 mkdir -p "$fixture/scripts/release" "$fixture/target"
 cp "$root/scripts/release/"{policy-fixture-evidence.pl,PlatformEvidence.pm} "$fixture/scripts/release/"
-cp "$root/scripts/ci/ValidationPlan.pm" "$fixture/scripts/ci/"
+bash "$root/vendor/toko-tooling/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture" vendor/toko-tooling/scripts/ci/ValidationPlan.pm
 printf '[toolchain]\nchannel = "1.100.0"\n' > "$fixture/rust-toolchain.toml"
 (
     cd "$fixture"

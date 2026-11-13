@@ -2,13 +2,13 @@
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 fixture="$(mktemp -d "$root/target/advisory-test.XXXXXX")"
-mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/scripts/fixtures/cdk-runtime" "$fixture/bin"
+mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/vendor/toko-tooling/scripts/ci" "$fixture/repo/scripts/fixtures/cdk-runtime" "$fixture/bin"
 cp "$root/scripts/ci/check-advisories.sh" "$fixture/repo/scripts/ci/"
 printf workspace > "$fixture/repo/Cargo.lock"
 printf runtime > "$fixture/repo/scripts/fixtures/cdk-runtime/Cargo.lock"
 printf workspace > "$fixture/repo/Cargo.toml"
 printf runtime > "$fixture/repo/scripts/fixtures/cdk-runtime/Cargo.toml"
-cat > "$fixture/repo/scripts/ci/prepare-rustsec-db.sh" <<'PREPARE'
+cat > "$fixture/repo/vendor/toko-tooling/scripts/ci/prepare-rustsec-db.sh" <<'PREPARE'
 #!/usr/bin/env bash
 set -euo pipefail
 [[ "$2" != fail ]] || exit 7

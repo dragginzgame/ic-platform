@@ -11,7 +11,7 @@ make_bin="${RELEASE_MAKE:-make}"
 if [[ "$RELEASE_SETUP_MODE" == check ]]; then
     # No installation or graph resolution from partially prepared metadata.
     "$make_bin" --no-print-directory tools-check
-    [[ "$(git config --local --get core.hooksPath)" == .githooks ]] || { echo 'Candidate hook selection changed' >&2; exit 1; }
+    [[ "$(git config --local --get core.hooksPath)" == vendor/toko-tooling/.githooks ]] || { echo 'Candidate hook selection changed' >&2; exit 1; }
 else
     # All three groups currently retain the full tool roster. Each owner admits
     # its candidate-local selection first; prepare only a missing selection.

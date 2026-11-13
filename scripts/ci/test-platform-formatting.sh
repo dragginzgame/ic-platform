@@ -3,8 +3,8 @@ set -euo pipefail
 # Qualify Platform's actual Make policy and hook, never the caller's index.
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
-# shellcheck source=scripts/ci/fixture-lifecycle.sh
-source "$root/scripts/ci/fixture-lifecycle.sh"
+# shellcheck source=vendor/toko-tooling/scripts/ci/fixture-lifecycle.sh
+source "$root/vendor/toko-tooling/scripts/ci/fixture-lifecycle.sh"
 fixture_complete=false
 fixture="$(fixture_create "$root/target/platform-formatting.XXXXXX")"
 finish() {
@@ -103,7 +103,7 @@ git -C "$fixture/work" add -- "$source_file"
 printf '\nUnstaged fixture edit.\n' >> "$fixture/work/README.md"
 cp "$fixture/work/README.md" "$fixture/working-readme"
 cp "$fixture/work/Cargo.lock" "$fixture/lock"
-(cd "$fixture/work" && bash .githooks/pre-commit) > "$fixture/last.log" 2>&1
+(cd "$fixture/work" && bash vendor/toko-tooling/.githooks/pre-commit) > "$fixture/last.log" 2>&1
 grep -q 'Standalone Rust formatting.*ok' "$fixture/last.log"
 cmp "$fixture/work/README.md" "$fixture/working-readme"
 cmp "$fixture/work/Cargo.lock" "$fixture/lock"

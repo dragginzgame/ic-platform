@@ -25,7 +25,7 @@ if [[ "$(uname -sm)" != 'Linux x86_64' ]]; then
     exec bash "$0" --execute
 fi
 perl scripts/release/policy-fixture-evidence.pl environment "$attempt/stage-environment.json"
-perl scripts/ci/run-validation-stage.pl --state target/validation-stages/policy-fixtures \
+perl vendor/toko-tooling/scripts/ci/run-validation-stage.pl --state target/validation-stages/policy-fixtures \
     --stage release-policy-fixtures --contract platform-policy-fixtures/1 \
     --source "$source" --group "$group" --observe scripts/release/observe-policy-fixtures.pl \
     --environment "$attempt/stage-environment.json" --max-bytes 536870912 \

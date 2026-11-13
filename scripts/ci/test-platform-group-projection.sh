@@ -5,11 +5,11 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 mkdir -p "$root/target"
 fixture="$(mktemp -d "$root/target/group-projection.XXXXXX")"
 trap 'printf "Group projection evidence: %s\n" "$fixture"' EXIT
-mkdir -p "$fixture/scripts/ci" "$fixture/scripts/release" "$fixture/ci"
+mkdir -p "$fixture/vendor/toko-tooling/scripts/ci" "$fixture/scripts/release" "$fixture/ci"
 cp "$root/scripts/release/group.sh" "$fixture/scripts/release/"
 cp "$root/ci/release-editor.env" "$fixture/ci/"
 export PROJECTION_PLAN="$fixture/plan.json" PROJECTION_CALLS="$fixture/calls"
-cat > "$fixture/scripts/ci/cargo-release-group.sh" <<'HELPER'
+cat > "$fixture/vendor/toko-tooling/scripts/ci/cargo-release-group.sh" <<'HELPER'
 #!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >> "$PROJECTION_CALLS"

@@ -29,7 +29,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Restore pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
       - name: Prepare compilers and tools
         run: |
           rustup toolchain install --profile minimal --no-self-update
@@ -40,7 +40,7 @@ jobs:
           printf '%s/.tools/ic/bin\n' "$PWD" >> "$GITHUB_PATH"
           bash scripts/ci/check-platform-compiler.sh
       - name: Save pinned tool downloads
-        uses: ./.github/actions/cache-tool-downloads
+        uses: ./vendor/toko-tooling/.github/actions/cache-tool-downloads
         with:
           mode: save
       - name: Prepare locked runtime dependencies

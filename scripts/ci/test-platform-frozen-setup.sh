@@ -29,7 +29,7 @@ CARGO
 cat > "$fixture/bin/git" <<'GIT'
 #!/usr/bin/env bash
 [[ "$*" == 'config --local --get core.hooksPath' ]] || exit 99
-printf '%s\n' .githooks
+printf '%s\n' vendor/toko-tooling/.githooks
 GIT
 chmod +x "$fixture/bin/"*
 export PATH="$fixture/bin:$PATH" RELEASE_MAKE="$fixture/bin/make" RELEASE_BATCH_ACTIVE=1

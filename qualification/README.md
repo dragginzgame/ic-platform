@@ -13,11 +13,12 @@ See the [implementation contract](../docs/design/bls-wrapper/contract.md) and
 [qualification report](../docs/design/bls-wrapper/qualification.md). The
 implementation and comparison tests now belong to `ic-platform`; the
 experimental implementation package was removed after adoption. The baseline
-selects the latest adopted published Platform (currently 0.32.0), and the candidate
+selects the latest adopted published Platform (currently 0.32.1), and the candidate
 selects this checkout. Both arms use the same prepared-key API and cache policy.
 Historical reports retain their original versions and results; new runs compare
 against this selected release rather than the pre-adoption implementation.
-Testkit 0.102.0 selects registry Platform 0.32.0 and Types 0.20.0 for its native
+The qualification lock resolves Testkit 0.102.0 with registry Platform 0.32.1
+and Types 0.20.1 for its native
 measurement infrastructure. This registry generation is distinct from local
 product paths and stays outside both baseline/candidate Wasm graphs.
 

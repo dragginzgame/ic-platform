@@ -11,7 +11,7 @@ mkdir -p "$fixture/$(dirname "$source_path")"
 cp "$root/$source_path" "$fixture/$source_path"
 jq --arg path "$source_path" '{schema,allowances:[.allowances[] | select(.path==$path)]}' \
     "$root/ci/candid-boundary.json" > "$fixture/policy.json"
-check=(perl "$root/scripts/ci/check-candid-boundary.pl" "$fixture" policy.json "$source_path")
+check=(perl "$root/vendor/toko-tooling/scripts/ci/check-candid-boundary.pl" "$fixture" policy.json "$source_path")
 "${check[@]}"
 printf '\n#[derive(CandidType)] struct ApplicationCanary;\n' >> "$fixture/$source_path"
 if "${check[@]}" > "$fixture/unreviewed.log" 2>&1; then
@@ -32,7 +32,7 @@ mkdir -p "$fixture/$(dirname "$codec_path")"
 cp "$root/$codec_path" "$fixture/$codec_path"
 jq --arg path "$codec_path" '{schema,allowances:[],cbor_allowances:[.cbor_allowances[] | select(.path==$path)]}' \
     "$root/ci/candid-boundary.json" > "$fixture/cbor-policy.json"
-cbor_check=(perl "$root/scripts/ci/check-candid-boundary.pl" --cbor "$fixture" cbor-policy.json "$codec_path")
+cbor_check=(perl "$root/vendor/toko-tooling/scripts/ci/check-candid-boundary.pl" --cbor "$fixture" cbor-policy.json "$codec_path")
 "${cbor_check[@]}"
 printf '\nuse minicbor as UnreviewedCodec;\n' >> "$fixture/$codec_path"
 if "${cbor_check[@]}" > "$fixture/cbor-new.log" 2>&1; then

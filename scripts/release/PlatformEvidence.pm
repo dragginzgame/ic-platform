@@ -2,7 +2,7 @@ package PlatformEvidence;
 use strict;
 use warnings;
 use File::Basename qw(dirname);
-use lib dirname(__FILE__) . '/../ci';
+use lib dirname(__FILE__) . '/../../vendor/toko-tooling/scripts/ci';
 use ValidationPlan ();
 use Exporter 'import';
 our @EXPORT_OK = qw(bytes digest command);

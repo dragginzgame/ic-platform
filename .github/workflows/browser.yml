@@ -45,7 +45,7 @@ jobs:
         run: |
           args=("$EXPECTED_OS" "$EXPECTED_ARCH")
           if [[ "$EXPECTED_OS" == Darwin ]]; then args+=(15); fi
-          bash scripts/ci/check-native-host.sh "${args[@]}"
+          bash vendor/toko-tooling/scripts/ci/check-native-host.sh "${args[@]}"
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24.21.0'

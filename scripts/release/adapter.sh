@@ -16,7 +16,7 @@ projection=plan
 case "$operation" in preflight|prepare) projection=ready-plan ;; esac
 plan="$(bash scripts/release/group.sh "$projection")"
 primary="$(jq -er .primary <<< "$plan")"
-bash scripts/ci/check-release-delivery.sh ci/release-delivery.txt "${RELEASE_DELIVERY:-direct}"
+bash vendor/toko-tooling/scripts/ci/check-release-delivery.sh ci/release-delivery.txt "${RELEASE_DELIVERY:-direct}"
 changelog="$(jq -er .changelog <<< "$plan")"
 mkdir -p target
 metadata_files="$(mktemp "$PWD/target/platform-release-files.XXXXXX")"
@@ -28,8 +28,8 @@ while IFS= read -r -d '' path; do source_args+=(--allow "$path"); done < "$metad
 # consumer-rendered qualification lock and pin. Render in committed source with
 # the admitted working metadata overlaid; no real source is mutated until every
 # candidate and semantic check succeeds.
-# shellcheck source=scripts/ci/release-metadata-transaction.sh
-source scripts/ci/release-metadata-transaction.sh
+# shellcheck source=vendor/toko-tooling/scripts/ci/release-metadata-transaction.sh
+source vendor/toko-tooling/scripts/ci/release-metadata-transaction.sh
 # shellcheck disable=SC2329 # Shared transaction callback.
 render_platform_metadata() {
     local original="$1" candidate="$2" workspace path
@@ -43,7 +43,7 @@ render_platform_metadata() {
     ln -s "$PWD/.tools" "$workspace/.tools" || return
     (
         cd -P "$workspace" || exit
-        bash scripts/ci/cargo-release-metadata.sh prepare "$primary" || exit
+        bash vendor/toko-tooling/scripts/ci/cargo-release-metadata.sh prepare "$primary" || exit
         bash scripts/release/runtime-lock.sh prepare "${RELEASE_PREVIOUS:?}" || exit
         if [[ "$RELEASE_GROUP" == runtime ]]; then
             bash scripts/release/runtime-pin.sh prepare "$RELEASE_PREVIOUS" || exit
@@ -61,7 +61,7 @@ render_platform_metadata() {
         cargo sort --workspace --grouped || exit
         bash scripts/release/runtime-lock.sh check || exit
         bash scripts/release/runtime-pin.sh check || exit
-        bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
+        bash vendor/toko-tooling/scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
     ) || return
     while IFS= read -r -d '' path; do
         cp -p "$workspace/$path" "$candidate/$path" || return
@@ -72,24 +72,24 @@ check_platform_metadata() {
     bash scripts/release/runtime-lock.sh check || return
     bash scripts/release/runtime-pin.sh check || return
     cargo metadata --manifest-path qualification/Cargo.toml --locked --offline --format-version 1 > /dev/null || return
-    bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
+    bash vendor/toko-tooling/scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
 }
 case "$operation" in
     preflight)
         bash scripts/release/runtime-lock.sh check
         bash scripts/release/runtime-pin.sh check
-        bash scripts/ci/check-release-source.sh "${source_args[@]}"
+        bash vendor/toko-tooling/scripts/ci/check-release-source.sh "${source_args[@]}"
         current="$(jq -er .previous <<< "$plan")"
         [[ "$current" == "${RELEASE_PREVIOUS:?}" ]] || exit 1
-        bash scripts/ci/check-release-changelog.sh "${RELEASE_VERSION:?}" "$current" "${RELEASE_DATE:?}" "$changelog"
-        bash scripts/ci/cargo-release-preflight.sh "$PWD" "$prepare" \
-            --pin ci/tool-versions.env --pin ci/release-editor.env \
+        bash vendor/toko-tooling/scripts/ci/check-release-changelog.sh "${RELEASE_VERSION:?}" "$current" "${RELEASE_DATE:?}" "$changelog"
+        bash vendor/toko-tooling/scripts/ci/cargo-release-preflight.sh "$PWD" "$prepare" \
+            --pin vendor/toko-tooling/ci/tool-versions.env --pin ci/release-editor.env \
             --check tools-check --prepare install-tools \
             --prepare prepare-consumer-dependencies --prepare tools-check
         ;;
     prepare)
         bash scripts/release/validation-gate.sh check
-        bash scripts/ci/check-release-source.sh "${source_args[@]}"
+        bash vendor/toko-tooling/scripts/ci/check-release-source.sh "${source_args[@]}"
         current="$(jq -er .previous <<< "$plan")"
         [[ -z "${RELEASE_COMMIT:-}" ]] || exit 2
         if [[ "$current" == "${RELEASE_VERSION:?}" ]]; then
@@ -110,8 +110,8 @@ case "$operation" in
         bash scripts/release/validation-gate.sh check
         bash scripts/release/runtime-lock.sh check
         bash scripts/release/runtime-pin.sh check
-        bash scripts/ci/check-release-source.sh "${source_args[@]}"
-        bash scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
+        bash vendor/toko-tooling/scripts/ci/check-release-source.sh "${source_args[@]}"
+        bash vendor/toko-tooling/scripts/ci/cargo-release-metadata.sh check "$primary" --manifest-order-grouped
         if [[ "$operation" == commit-check ]]; then
             [[ -z "${RELEASE_COMMIT:-}" ]] || exit 1
             while IFS= read -r -d '' path; do

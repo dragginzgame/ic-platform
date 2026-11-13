@@ -15,9 +15,9 @@ ic-platform = { path = "../crates/ic-platform", default-features = false, featur
 ic-platform-runtime = { path = "../crates/ic-platform-runtime", default-features = false, features = ["ic0"] }
 ic-testkit = { version = "0.102.0", default-features = false }
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
-platform-baseline = { package = "ic-platform", version = "=0.32.0", default-features = false, features = ["bls"] }
+platform-baseline = { package = "ic-platform", version = "=0.32.1", default-features = false, features = ["bls"] }
 tokio = { version = "1", features = ["rt", "net", "time"] }
-toko-tooling = "=0.41.0"
+toko-tooling = "=0.42.4"
 
 [workspace.lints.cargo]
 unused_dependencies = "deny"

@@ -94,7 +94,7 @@ if [[ -n "$published" ]]; then
     cargo metadata --manifest-path "$fixture/Cargo.toml" --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
 fi
 cargo metadata --manifest-path "$fixture/Cargo.toml" --locked --offline --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" --format-version 1 > "$fixture/metadata.json"
-bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
+bash "$root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 # One selection owner for graph admission, compilation, artifacts and execution.
 profiles=(raw-wire raw-external-candid)
 if [[ "$transport_mode" == prepared ]]; then profiles+=(owned-wire owned-external-candid); fi

@@ -95,7 +95,7 @@ platform_fixture_policy "$root" "$output"
 cargo "+$toolchain" metadata --manifest-path "$output/Cargo.toml" --offline --format-version 1 > "$output/metadata.json" 2> "$output/metadata.log"
 bash "$root/scripts/ci/check-qualification-identities.sh" "$output/metadata.json" "$source_root" \
     platform-wasm-size-probe ic-platform > "$output/identities.json"
-bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$output" --external-ic
+bash "$root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$output" --external-ic
 find "$output/src" -type f -print0 | xargs -0 shasum -a 256 > "$output/probe-sha256.txt"
 shasum -a 256 "$output/Cargo.toml" "$output/Cargo.lock" >> "$output/probe-sha256.txt"
 printf 'recipe\tcapability\traw_bytes\tcode_bytes\tcustom_bytes\toptimized_bytes\toptimized_code_bytes\toptimized_custom_bytes\n' > "$output/sizes.tsv"

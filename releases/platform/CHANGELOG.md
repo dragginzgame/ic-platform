@@ -4,6 +4,17 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.32.2] - Unreleased
+
+### 🔧 Changed
+
+- Adopt Toko Tooling 0.42.4 and migrate installed helpers into
+  `vendor/toko-tooling/`. Update CI, formatting hooks, qualification fixtures and
+  release/publication callers; retain explicit entrypoint selection, readable
+  `deps-list` workspace labels and existing product release boundaries.
+- Refresh qualification’s published BLS baseline and Testkit’s compatible native
+  registry dependency to Platform 0.32.1, retaining separate local candidates.
+
 ## [0.32.1] - 2026-11-13
 
 ### 🔧 Changed

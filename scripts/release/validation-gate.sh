@@ -5,8 +5,8 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 case "${RELEASE_GROUP:-}" in platform|runtime|types) ;; *) exit 2 ;; esac
 [[ "${RELEASE_SOURCE:-}" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || exit 2
-perl scripts/ci/validate-release-inputs.pl version "${RELEASE_VERSION:?}" > /dev/null
-perl scripts/ci/validate-release-inputs.pl version "${RELEASE_PREVIOUS:?}" > /dev/null
+perl vendor/toko-tooling/scripts/ci/validate-release-inputs.pl version "${RELEASE_VERSION:?}" > /dev/null
+perl vendor/toko-tooling/scripts/ci/validate-release-inputs.pl version "${RELEASE_PREVIOUS:?}" > /dev/null
 state="$(git rev-parse --git-path release-state)"
 journal="$state/$RELEASE_GROUP-$RELEASE_VERSION.validation"
 if [[ "$1" == check ]] && ! git cat-file -e "$RELEASE_SOURCE:scripts/release/validation-gate.sh" 2>/dev/null; then
@@ -30,7 +30,7 @@ if [[ "$1" == verify ]]; then
     receipt="$(printf '%s\n' "$result" | sed -n '\|^target/release-validation/qualification\.[A-Za-z0-9]*/receipt.json$|p')"
     [[ -n "$receipt" && -f "$receipt" && "$receipt" != *$'\n'* ]] || exit 1
     temporary="$(mktemp "$journal.XXXXXX")"
-    digest="$(bash scripts/ci/verify-file-checksum.sh --print sha256 "$receipt")"
+    digest="$(bash vendor/toko-tooling/scripts/ci/verify-file-checksum.sh --print sha256 "$receipt")"
     jq -cnS --arg receipt "$receipt" --arg sha256 "$digest" '{schema:1,receipt:$receipt,sha256:$sha256}' > "$temporary"
     mv "$temporary" "$journal"
 else
@@ -39,7 +39,7 @@ else
     receipt="$(jq -r .receipt "$journal")"
     [[ "$receipt" =~ ^target/release-validation/qualification\.[A-Za-z0-9]+/receipt.json$ ]] || exit 1
     [[ ! -L "$receipt" ]] || exit 1
-    bash scripts/ci/verify-file-checksum.sh sha256 "$(jq -r .sha256 "$journal")" "$receipt"
+    bash vendor/toko-tooling/scripts/ci/verify-file-checksum.sh sha256 "$(jq -r .sha256 "$journal")" "$receipt"
     attempt="${receipt%/receipt.json}"
     runs=("$attempt"/logs/validation.*)
     [[ ${#runs[@]} == 1 && -d "${runs[0]}" ]] || exit 1

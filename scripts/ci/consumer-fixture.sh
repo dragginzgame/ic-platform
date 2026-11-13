@@ -16,5 +16,5 @@ consumer_metadata() {
     cargo metadata --manifest-path "$fixture/Cargo.toml" --offline \
         --filter-platform "$(rustc -vV | sed -n 's/^host: //p')" \
         --format-version 1 > "$fixture/metadata.json"
-    bash "$consumer_root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
+    bash "$consumer_root/vendor/toko-tooling/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
 }

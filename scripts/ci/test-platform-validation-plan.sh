@@ -9,7 +9,7 @@ trap 'printf "Platform validation-plan fixture evidence: %s\n" "$fixture"' EXIT
 mkdir -p "$fixture/repo/scripts/ci" "$fixture/repo/scripts/release" "$fixture/repo/ci"
 cp "$root/ci/"{release-validation.json,cargo-release-groups.json} "$fixture/repo/ci/"
 cp "$root/scripts/release/"{validation-plan.pl,validation-context.pl,validation-receipt.pl,qualify-validation-plan.sh,PlatformEvidence.pm} "$fixture/repo/scripts/release/"
-bash "$root/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" scripts/ci/run-validation-targets.sh scripts/ci/validation-evidence.pl scripts/ci/check-make-execution.sh
+bash "$root/vendor/toko-tooling/scripts/ci/prepare-script-fixture.sh" "$root" "$fixture/repo" vendor/toko-tooling/scripts/ci/run-validation-targets.sh vendor/toko-tooling/scripts/ci/validation-evidence.pl vendor/toko-tooling/scripts/ci/check-make-execution.sh
 # Retain the actual full-gate recipe text so roster drift is checked against it.
 perl -0777 -ne 'for my $name (qw(ci check-runtime-all release-verify)) { /(^\Q$name\E:\n(?:\t[^\n]*\n)+)/m or die "missing recipe"; print $1,"\n"; }' "$root/Makefile" > "$fixture/repo/Makefile"
 jq -r '.stages[]' "$root/ci/release-validation.json" | while read -r target; do
@@ -103,7 +103,7 @@ perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" targ
 # Platform retains the entire unmodified Shared proof, including the relative
 # run/log paths, input checkpoints and evidence inventory; not just a stage list.
 jq -cS .validation_evidence "$receipt" > target/retained-proof.json
-perl scripts/ci/validation-evidence.pl check "$PWD" "$attempt/plan.json" "$(git rev-parse HEAD)" runtime \
+perl vendor/toko-tooling/scripts/ci/validation-evidence.pl check "$PWD" "$attempt/plan.json" "$(git rev-parse HEAD)" runtime \
     "${run[0]}" "$attempt/plan.json.context.json" target/retained-proof.json > "$fixture/shared-readmission.json"
 cmp target/retained-proof.json "$fixture/shared-readmission.json"
 refuse perl scripts/release/validation-receipt.pl "$attempt/plan.json" "${run[0]}" "$receipt" check
