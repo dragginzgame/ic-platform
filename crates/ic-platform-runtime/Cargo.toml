@@ -1,7 +1,7 @@
 [package]
 name = "ic-platform-runtime"
 description = "Canonical IC system API, executor and raw call runtime"
-version = "0.22.1"
+version = "0.22.2"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
