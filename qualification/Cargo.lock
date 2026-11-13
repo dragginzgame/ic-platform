@@ -152,7 +152,7 @@ name = "bls-wrapper-probe"
 version = "0.0.0"
 dependencies = [
  "ic-platform 0.32.0",
- "ic-platform 0.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.32.1",
  "ic-platform-runtime",
  "ic-testkit",
  "ic-verify-bls-signature",
@@ -823,15 +823,6 @@ dependencies = [
 [[package]]
 name = "ic-platform"
 version = "0.32.0"
-dependencies = [
- "digest 0.10.7",
- "ic_bls12_381",
- "sha2 0.11.1",
-]
-
-[[package]]
-name = "ic-platform"
-version = "0.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "207beedb33b13087281c5b7ca365c97eea50f600dd4155cc21bad6bbba320877"
 dependencies = [
@@ -841,6 +832,15 @@ dependencies = [
  "num-bigint 0.5.1",
  "serde",
  "serde_bytes",
+ "sha2 0.11.1",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.32.1"
+dependencies = [
+ "digest 0.10.7",
+ "ic_bls12_381",
  "sha2 0.11.1",
 ]
 
@@ -873,7 +873,7 @@ dependencies = [
  "ic-host-artifacts",
  "ic-host-fs",
  "ic-host-process",
- "ic-platform 0.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.32.0",
  "ic-platform-types",
  "libc",
  "pocket-ic",
