@@ -29,7 +29,7 @@ ic-platform-runtime-guard = { version = "=0.21.3", path = "crates/ic-platform-ru
 
 # Types
 # Changelog : releases/types/CHANGELOG.md
-ic-platform-types = { version = "0.19.5", path = "crates/ic-platform-types", default-features = false }
+ic-platform-types = { version = "0.20.0", path = "crates/ic-platform-types", default-features = false }
 
 # Portable production dependencies (activated only by member feature selections)
 crc32fast = "1.5"
