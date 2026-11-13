@@ -17,6 +17,9 @@ See also the [Types ledger](../types/CHANGELOG.md).
   warnings through Cargo without changing compilation flags; qualify refusal on
   fresh and cached artifacts. Keep singleton graph checks separate from empty
   compilation and preserve real cross-generation type/refusal checks.
+- Classify native-only Agent/asset consumer tests' Platform edges as
+  dev-dependencies. Remove the empty Wasm check for the native asset tests;
+  portable consumer libraries retain normal edges and feature-graph checks.
 - Adopt Testkit 0.102.0 and required Host 0.77 selections for native qualification;
   its registry Platform 0.32 / Types 0.20 generation stays separate from local
   product identity. Refresh the private BLS baseline to published Platform 0.32.0

@@ -11,6 +11,6 @@ bls	bls_consumer	bls-*.hex	check	-
 canister-sig-creation	canister_sig_consumer	-	check	-
 signature-verification	signature_consumer	bls-*.hex,signature-*.hex	check	-
 runtime	runtime_consumer	-	check	runtime
-asset-contracts	asset_contract_consumer	-	check	-
+asset-contracts	asset_contract_consumer	-	skip	-
 owned-endpoint	owned_endpoint_consumer	-	build	owned-endpoint
 management	management_consumer	management-*.hex	check	external-codecs

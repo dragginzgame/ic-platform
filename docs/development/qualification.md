@@ -345,7 +345,8 @@ Consumer profiles are declared in
 [`platform-consumer-profiles.tsv`](../../scripts/ci/platform-consumer-profiles.tsv):
 capability, test source basename,
 comma-separated asset globs (`-` for none), and Wasm command (`check`, `build` or
-`skip`), and graph family. Required features come from the corresponding Cargo
+`skip`), and graph family. `skip` selects native-only tests with a development
+Platform edge; portable library probes keep normal dependencies. Required features come from the corresponding Cargo
 test declaration. The runner preserves native and Wasm tests on the supported
 compiler and admits runtime graphs first.
 

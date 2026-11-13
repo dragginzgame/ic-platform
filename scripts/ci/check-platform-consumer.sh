@@ -60,7 +60,11 @@ rust-version = "$msrv"
 [workspace.dependencies]
 ic-platform = { $selection, default-features = false, features = [$features] }
 MANIFEST
-cat > "$fixture/crates/consumer/Cargo.toml" <<'MANIFEST'
+dependency_role=dependencies
+# Profiles without a Wasm step are native-only tests with no library surface.
+# Portable profiles also compile real library APIs and need normal edges.
+if [[ "$wasm" == skip ]]; then dependency_role=dev-dependencies; fi
+cat > "$fixture/crates/consumer/Cargo.toml" <<MANIFEST
 [package]
 name = "platform-consumer-proof"
 version.workspace = true
@@ -72,7 +76,7 @@ publish = false
 category = "tests"
 [lints.rust]
 warnings = "deny"
-[dependencies]
+[$dependency_role]
 ic-platform.workspace = true
 MANIFEST
 cp "crates/ic-platform/tests/${source}.rs" "$fixture/crates/consumer/src/lib.rs"

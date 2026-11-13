@@ -129,6 +129,19 @@ isolated audit probe had identical Wasm.
 
 ## Recovery custody
 
+Pre-upload `batch-oC0UDdbQ` stopped at `check-consumer`: Cargo correctly refused
+the test-only Agent fixture's unused normal Platform dependency. Source `c0d856e`
+and all successful stage evidence remain retained. The normal runner now assigns
+native Agent/asset test edges to dev-dependencies while keeping portable library
+edges normal. The asset source was native-only, so its empty Wasm check is removed.
+A corrected source requires a new frozen batch/full gate, not journal
+repair or an inferred successful receipt. No package/tag/ref was delivered by
+that failed attempt.
+The corrected native roles pass real Clippy and tests; portable profiles after
+the original failure also pass native/Wasm checks. Admission routing and ShellCheck
+pass. Logs: `/tmp/platform-deploy-041-consumer-*.log` and
+`/tmp/platform-deploy-041-{agent,asset}-clippy.log`.
+
 The unrelated root/qualification `cc` 1.11.2 lock draft is excluded from this
 deployment and preserved as `recovery-evidence/deferred-cc-1.11.2-20261113.patch`,
 SHA-256 `485b2bdafb36a21f9335b2a3e91fb1d32a839c622ff629abfe92a5831f5f21e2`.
