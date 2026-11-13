@@ -17,21 +17,12 @@ repository = "https://github.com/dragginzgame/ic-platform"
 
 [workspace.dependencies]
 
-# Platform
-# Changelog : releases/platform/CHANGELOG.md
-ic-platform = { version = "0.32.0", path = "crates/ic-platform", default-features = false }
-
-# Runtime
-# Changelog : releases/runtime/CHANGELOG.md
 ic-platform-macros = { version = "0.22.0", path = "crates/ic-platform-macros" }
 ic-platform-runtime = { version = "0.22.0", path = "crates/ic-platform-runtime", default-features = false }
 ic-platform-runtime-guard = { version = "=0.22.0", path = "crates/ic-platform-runtime-guard", default-features = false }
 
-# Types
-# Changelog : releases/types/CHANGELOG.md
 ic-platform-types = { version = "0.20.0", path = "crates/ic-platform-types", default-features = false }
 
-# Portable production dependencies (activated only by member feature selections)
 crc32fast = "1.5"
 # Published ECDSA security floor; older consumer locks must not retain 0.7.5.
 crypto-bigint = { version = "0.7.10", default-features = false }
@@ -54,35 +45,41 @@ sha2_11 = { package = "sha2", version = "0.11.1", default-features = false }
 slotmap = "1.1.1"
 thiserror = "2.0.18"
 
-# External mixed production/test dependencies
 serde_bytes = { version = "0.11", default-features = false, features = ["alloc"] }
 serde_cbor = "0.11.2"
 
-# Native production clients (excluded from Wasm normal graphs)
 ic-agent = { version = "0.49.2", default-features = false, features = ["pem"] }
 ic-transport-types = "0.49.1"
 
-# External proc-macro dependencies (compiler host)
 proc-macro2 = "1.0.106"
 quote = "1"
 syn = { version = "3", features = ["full"] }
 
-# External tests and tooling only
 binrw = { version = "0.15.2", default-features = false, features = ["std"] }
 candid = { version = "0.10.38", default-features = false }
 ic-canister-sig-creation = { version = "1.3.1", default-features = false }
 ic-management-canister-types = "=0.11.0"
 ic-signature-verification = { version = "0.3.0", default-features = false }
-ic-testkit = { version = "0.101.0", default-features = false }
 ic-verify-bls-signature = { version = "0.6.0", default-features = false, features = ["alloc"] }
-ic-wire = "0.10.0"
 ic_principal = { version = "0.1.5", default-features = false }
-libfuzzer-sys = "0.4.13"
 postcard = { version = "1.1.3", default-features = false, features = ["alloc"] }
 serde_json = "1.0"
 serde_test = "1.0.177"
+toko-tooling = "=0.41.0"
+
+# Inputs to generated standalone fixtures, not dependencies of product members.
+[workspace.metadata.platform-fixtures.dependencies]
+ic-testkit = { version = "0.102.0", default-features = false }
+ic-wire = "0.10.0"
+libfuzzer-sys = "0.4.13"
 tokio = { version = "1", features = ["rt", "net", "time"] }
-toko-tooling = "=0.40.1"
+
+[workspace.lints.cargo]
+unused_dependencies = "deny"
+unused_workspace_dependencies = "deny"
+unused_workspace_package_fields = "deny"
+missing_lints_inheritance = "deny"
+unknown_lints = "deny"
 
 [workspace.lints.rust]
 dead_code = "deny"
@@ -94,6 +91,7 @@ unsafe_op_in_unsafe_fn = "deny"
 
 [workspace.lints.rustdoc]
 broken_intra_doc_links = "deny"
+invalid_markdown_table = "deny"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -2 }

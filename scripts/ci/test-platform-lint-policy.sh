@@ -47,4 +47,40 @@ if cargo doc --manifest-path "$fixture/Cargo.toml" --locked --offline --no-deps 
     echo 'Rustdoc admitted a broken intra-doc link' >&2; exit 1
 fi
 grep -Eq 'broken_intra_doc_links|unresolved link' "$fixture/broken-doc.log"
-printf 'Inherited compiler/lint policy: native/Wasm positives and must-use, unsafe, unsafe-op, correctness and Rustdoc refusals passed.\n'
+printf '//! Table admission.\n/// | One | Two |\n/// | --- | --- |\n/// | 1 | 2 | 3 |\n#[must_use]\npub fn value()->u8{1}\n' > "$fixture/src/lib.rs"
+if cargo doc --manifest-path "$fixture/Cargo.toml" --locked --offline --no-deps > "$fixture/invalid-table.log" 2>&1; then
+    echo 'Rustdoc admitted a table that discards cells' >&2; exit 1
+fi
+grep -Eq 'invalid[_-]markdown[_-]table' "$fixture/invalid-table.log"
+
+# Cargo owns workspace dependency diagnostics; no dependency is resolved here.
+cp "$fixture/first.toml" "$fixture/Cargo.toml"
+printf '\n[workspace.dependencies]\nunused_policy_probe="1"\n' >> "$fixture/Cargo.toml"
+if cargo check --manifest-path "$fixture/Cargo.toml" --locked --offline > "$fixture/unused-workspace.log" 2>&1; then
+    echo 'Cargo admitted an unused workspace dependency' >&2; exit 1
+fi
+grep -q 'unused workspace dependency' "$fixture/unused-workspace.log"
+cp "$fixture/first.toml" "$fixture/Cargo.toml"
+
+# A genuine warning must refuse in the normal adapter's mode on both fresh and
+# reused artifacts. No compiler flags change between control and warm refusal.
+printf '//! Warning-mode admission.\n/// Exercise a deliberately unused local.\npub fn exercise(){let unused=1;}\n' > "$fixture/src/lib.rs"
+if CARGO_TARGET_DIR="$fixture/warnings-fresh" CARGO_BUILD_WARNINGS=deny cargo clippy \
+    --manifest-path "$fixture/Cargo.toml" --locked --offline --message-format=json-render-diagnostics \
+    > "$fixture/warnings-fresh.jsonl" 2> "$fixture/warnings-fresh.stderr"; then
+    echo 'Cargo admitted a fresh Clippy warning' >&2; exit 1
+fi
+CARGO_TARGET_DIR="$fixture/warnings-warm" CARGO_BUILD_WARNINGS=warn cargo clippy \
+    --manifest-path "$fixture/Cargo.toml" --locked --offline --message-format=json-render-diagnostics \
+    > "$fixture/warnings-control.jsonl" 2> "$fixture/warnings-control.stderr"
+if CARGO_TARGET_DIR="$fixture/warnings-warm" CARGO_BUILD_WARNINGS=deny cargo clippy \
+    --manifest-path "$fixture/Cargo.toml" --locked --offline --message-format=json-render-diagnostics \
+    > "$fixture/warnings-warm.jsonl" 2> "$fixture/warnings-warm.stderr"; then
+    echo 'Cargo admitted a cached Clippy warning' >&2; exit 1
+fi
+for attempt in fresh control warm; do
+    # This mode renders diagnostics to stderr and keeps artifact records in JSON.
+    grep -q 'unused_variables' "$fixture/warnings-$attempt.stderr"
+done
+jq -se 'any(.[]; .reason=="compiler-artifact" and .fresh==true)' "$fixture/warnings-warm.jsonl" > /dev/null
+printf 'Inherited Cargo/Rust/Rustdoc policy and fresh/cached Clippy warning refusals passed.\n'

@@ -39,30 +39,31 @@ fn completion(future: &CallFuture<'_, '_>) -> Weak<Completion> {
     Arc::downgrade(future.completion.as_ref().expect("submitted completion"))
 }
 
-// The seam transfers each successful environment to this guard exactly once.
-// Upgrade the independently saved Weak before releasing that raw reference,
-// then exercise ordinary helpers, never an extern callback that could unwind.
+// The seam transfers each successful environment into one owned Arc. Exercise
+// ordinary helpers, never an extern callback that could unwind.
 struct Delivery {
-    environment: Environment,
-    completion: Weak<Completion>,
+    completion: Arc<Completion>,
 }
 
 impl Delivery {
     fn capture(future: &CallFuture<'_, '_>) -> Self {
         let raw = system::with_mock(|mock| mock.environments.remove(0));
-        Self {
-            environment: Environment { raw: Some(raw) },
-            completion: completion(future),
-        }
+        // SAFETY: The seam removed this successful environment exactly once;
+        // capture now owns the callback's one raw Arc reference.
+        #[expect(
+            unsafe_code,
+            reason = "Consume one environment transferred by the native callback seam"
+        )]
+        let completion = unsafe { reclaim_environment(raw) };
+        assert!(Arc::ptr_eq(
+            &completion,
+            future.completion.as_ref().expect("submitted completion")
+        ));
+        Self { completion }
     }
 
     fn run(self, action: fn(Arc<Completion>)) {
-        let owned = self
-            .completion
-            .upgrade()
-            .expect("callback ownership remains");
-        drop(self.environment);
-        action(owned);
+        action(self.completion);
     }
 }
 
@@ -151,6 +152,37 @@ fn failed_first_poll_reclaims_environment_without_a_context() {
 }
 
 #[test]
+fn successful_submission_retains_callback_ownership_when_registration_unwinds() {
+    isolated(|| {
+        let mut future = request();
+        // Submission succeeds before method retention rejects the absent context.
+        // The transferred environment must survive that native unwind.
+        assert_trap(
+            || {
+                let _ = poll(&mut future, Waker::noop());
+            },
+            "method retention requires a context",
+        );
+        assert!(future.completion.is_none());
+        assert_eq!(COMPLETION_DROPS.with(Cell::get), 0);
+        let raw = system::with_mock(|mock| {
+            assert_eq!(mock.environments.len(), 1);
+            mock.environments.remove(0)
+        });
+        // SAFETY: The seam transfers this one live raw reference after the
+        // completion counter proves it was not reclaimed during unwinding.
+        #[expect(
+            unsafe_code,
+            reason = "Reclaim the callback's retained reference after native unwind"
+        )]
+        let completion = unsafe { reclaim_environment(raw) };
+        assert_eq!(Arc::strong_count(&completion), 1);
+        drop(completion);
+        assert_eq!(COMPLETION_DROPS.with(Cell::get), 1);
+    });
+}
+
+#[test]
 fn ordinary_pending_drop_preserves_callback_and_method_ownership() {
     isolated(|| {
         let method = String::from("borrowed");
@@ -165,7 +197,7 @@ fn ordinary_pending_drop_preserves_callback_and_method_ownership() {
             let delivery = Delivery::capture(&future);
             (future, delivery)
         });
-        let weak = delivery.completion.clone();
+        let weak = Arc::downgrade(&delivery.completion);
         drop(future);
         drop(args);
         drop(method);
@@ -306,8 +338,8 @@ fn cleanup_cancels_sibling_calls_but_cancelled_cleanup_spares_later_tasks() {
         });
         let first = first_slot.borrow_mut().take().unwrap();
         let second = second_slot.borrow_mut().take().unwrap();
-        let first_weak = first.completion.clone();
-        let second_weak = second.completion.clone();
+        let first_weak = Arc::downgrade(&first.completion);
+        let second_weak = Arc::downgrade(&second.completion);
         first.run(cleanup);
         assert_eq!(first_drops.get(), 1);
         assert_eq!(second_drops.get(), 1);
@@ -340,7 +372,7 @@ fn delivery_to_recovery_cancelled_call_traps_and_releases_ownership() {
             assert!(poll(&mut future, Waker::noop()).is_pending());
             (extend_current_method_context(), Delivery::capture(&future))
         });
-        let weak = delivery.completion.clone();
+        let weak = Arc::downgrade(&delivery.completion);
         in_trap_recovery_context_for(method, || drop(future));
         assert!(weak.upgrade().is_some());
         assert_trap(|| delivery.run(deliver), "Call already trapped");
@@ -358,7 +390,7 @@ fn external_future_observes_cleanup_without_a_current_task_or_message_reads() {
             assert!(poll(&mut future, Waker::noop()).is_pending());
             Delivery::capture(&future)
         });
-        let weak = delivery.completion.clone();
+        let weak = Arc::downgrade(&delivery.completion);
         delivery.run(cleanup);
         match poll(&mut future, Waker::noop()) {
             Poll::Ready(Err(CallFailed::CallRejected(error))) => {

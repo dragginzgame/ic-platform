@@ -8,7 +8,7 @@ selected-stage release mode remains.
 
 ## Commands and effects
 
-Shared owns [frozen release batches](https://github.com/dragginzgame/toko-tooling/blob/5806e6e4943f6be600cd53385498ce08a5f804c4/docs/releases/release-batches.md). With clean committed
+Shared owns [frozen release batches](https://github.com/dragginzgame/toko-tooling/blob/626da7cd9626cc2e152594862a2d82ea82ef51da/docs/release-batches.md). With clean committed
 source, the pinned compiler and an explicitly prepared Testkit server
 (`POCKET_IC_BIN` or `IC_TESTKIT_POCKET_IC_URL`), select only affected groups:
 
@@ -59,6 +59,16 @@ observations, not a guarantee for the new compiler or cold caches. Keep optional
 tooling/dependency/compiler upgrades outside a frozen batch unless requested or
 needed for its blocker.
 
+Native qualification suppliers need not advance with the product release.
+Testkit may retain its separately qualified registry Platform/Types generation
+when its actual API, protocol and type crossings remain valid. Before capture,
+check the locked graphs and affected compilation. An unsuccessful optional
+Testkit or other test-dependency upgrade does not invalidate the unchanged
+qualified selection. Required test failures, identity/executor conflicts,
+security repairs and explicitly selected migrations still block their affected
+release. Keep optional experiments outside the frozen attempt; never rewrite its
+locks to chase a new supplier. No minimum publication age is selected here.
+
 When release wiring changes, qualify its affected contract before product tests.
 For example, `test-platform-frozen-setup.sh` checks candidate prerequisite order;
 `test-platform-release-groups.sh` checks cohort/publication routing;
@@ -73,6 +83,15 @@ publication checks the exact selected packages and final archives. The shared
 publication adapter invokes only the package-scoped Clippy verifier, not another
 complete gate. Only the qualified policy-fixture leaf can reuse earlier execution;
 there is no cross-group Rust-test or installed-runtime cache admission.
+
+The Make Clippy leaf uses Cargo 1.100's `CARGO_BUILD_WARNINGS=deny`, qualified
+against genuine warnings on fresh and cached artifacts. Publication retains the
+same warning refusal while restricting Clippy to its admitted package selection.
+Plain JSON diagnostic collectors keep compiler-level denial: Cargo's warning mode
+alone does not enforce that output mode. Rustdoc denial also remains explicit.
+The shared tool installer now relies on Cargo's default packaged lockfile instead
+of its obsolete install-only `--locked` flag; exact version/checksum admission and
+all build, test, metadata and publication locks remain required.
 
 ### Failure-specific recovery
 

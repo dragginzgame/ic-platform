@@ -4,7 +4,14 @@ platform_dependencies_read() {
     # Archived catalogs contain source, not an installed tool bundle. Use the
     # invoking helper's admitted tools while reading the selected source bytes.
     platform_dependency_tools="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)/.tools/host/bin"
-    platform_dependencies="$("$platform_dependency_tools/yq" -p toml -o json '.workspace.dependencies' "$1/Cargo.toml")"
+    # shellcheck disable=SC2016 # $members and $fixtures are jq bindings.
+    platform_dependencies="$("$platform_dependency_tools/yq" -p toml -o json '.workspace' "$1/Cargo.toml" |
+        "$platform_dependency_tools/jq" -ce '
+            (.dependencies // {}) as $members |
+            (.metadata["platform-fixtures"].dependencies // {}) as $fixtures |
+            if any($fixtures | keys[]; $members[.] != null)
+            then error("fixture selection duplicates a workspace dependency")
+            else $members + $fixtures end')"
 }
 platform_dependency() {
     # shellcheck disable=SC2016 # $name is a jq binding.
@@ -27,7 +34,7 @@ platform_fixture_policy() {
     [[ "$directory" != "$owner" ]] || { echo 'Fixture policy cannot rewrite its owning workspace' >&2; return 1; }
     tools="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)/.tools/host/bin"
     configuration="$("$tools/yq" -p toml -o json '.workspace.lints' "$owner/Cargo.toml")"
-    "$tools/jq" -e '(.rust|type=="object") and (.rustdoc|type=="object") and (.clippy|type=="object")' <<< "$configuration" > /dev/null || return
+    "$tools/jq" -e 'all(.cargo, .rust, .rustdoc, .clippy; type=="object")' <<< "$configuration" > /dev/null || return
     compiler="$(bash "$(dirname "${BASH_SOURCE[0]}")/read-platform-msrv.sh" "$owner/Cargo.toml")"
     data="$("$tools/yq" -p toml -o json '.' "$directory/Cargo.toml")"
     if [[ "$("$tools/jq" -r '.workspace.lints.rust.warnings // ""' <<< "$data")" == deny ]]; then

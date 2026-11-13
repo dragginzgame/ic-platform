@@ -1,8 +1,8 @@
 # Toko Tooling snapshot v1
-# version	0.40.1
+# version	0.41.0
 format	1
 source	https://crates.io/crates/toko-tooling
-revision	fb884b05e2e5bbca2388dd0b757833fb5ad37e91b3ced09f6a37b454c7fe9f90
+revision	4aaafc699324611501e051132e971288c16392a3ece605e9909e88e0c7e80a2f
 # entrypoint	TOKO-TOOLING.md
 # entrypoint	make/consumer.mk
 # entrypoint	scripts/ci/check-cargo-dependency-boundaries.sh
@@ -33,7 +33,7 @@ revision	fb884b05e2e5bbca2388dd0b757833fb5ad37e91b3ced09f6a37b454c7fe9f90
 # entrypoint	CONTRIBUTING.md
 # entrypoint	scripts/ci/fixture-lifecycle.sh
 # entrypoint	make/cargo-dependencies.mk
-file	2cdaad0fee111f69e993739f4d5419d1dd151aec239d65f4226abd84011a2c96	-	TOKO-TOOLING.md
+file	76d7c130459335a93f8d852fcac8995ec9a047d8e911f78cd5d49c80c60680b1	-	TOKO-TOOLING.md
 file	91a8c4e1dc4ddb8fbba5825b1190716ddf29eb3cb49784067620b9a86b45c784	-	make/consumer.mk
 file	38ff7dec5ac00d527023a4d13b89339f5d4298824ee0193ec785c1c7fc075244	x	scripts/ci/check-cargo-dependency-boundaries.sh
 file	468ff88c6e6fca8c79447ceaa8d04d11f2e1c668664bb9732da708b696a6041b	x	scripts/ci/check-documentation-links.pl
@@ -62,7 +62,7 @@ file	3a3df3b5cb0147ca2a532d963e97b186920a4fa261d1aacc5fa6989f253fb323	-	scripts/
 file	3f2971bfefccf71cf4929cabd1fa000e0c7b3d4002b9a08ca58821ccb048c123	-	LICENSE.md
 file	0ae38d62c728fb06f1a2dd2325f99f2277bfdb0cd48ac6df49d4120c0bfe88bd	-	CONTRIBUTING.md
 file	523996a3e4eb9dbe87e8daa4285293a28c5e005223feaa84bd5383d430784b09	-	scripts/ci/fixture-lifecycle.sh
-file	701efc37079afa34e41b490582f20bc3e8419d2dd0f5eca33041a2d333a50354	-	make/cargo-dependencies.mk
+file	07b59f8cc784c79c648d379561f2493e40bac5b7c2809e8eda960cba661fae7d	-	make/cargo-dependencies.mk
 file	578a5f7217e378280fe378328d39e4b7dcea653bd868159b57362461bd4e8555	x	scripts/ci/verify-file-checksum.sh
 file	be03eb1b1ed6834b4a93a35cea81d2b8e677311a094e851619de8c393b1800e0	x	scripts/ci/verify-toko-tooling-snapshot.sh
 file	da86464696f4f600f034566cef732aa680dc9c577e534519c71ee3d07172a875	-	scripts/dev/toko-tooling.sh
@@ -97,7 +97,7 @@ file	9f29743b6961b36c2fdb285c9b08d2aec4f0dbb5bcf5584b556cb98185540574	-	ci/tool-
 file	4c2ee09c8e87b43397d2df28bdbc1b5fc0197a10ebe0a94d89cb46916b93a9ca	x	scripts/ci/cargo-tool-cache-key.sh
 file	6c094eb6af59e9071c7fa5e87c917202f866b220a94e59f1b4fffe154ed5f92e	-	scripts/ci/ValidationPlan.pm
 file	f6ecd07a9577b0b307d2bef6c8185125c611e05732c119c63bb474cbf50e18d5	-	make/execution.mk
-file	4a177c60fbf09eccb6a9a70ce9ac7289cb1c25c3595098ac64b141d1325a4dc7	-	scripts/dev/cargo-dependencies.pl
+file	0dfd6978ca363ff2f82becbc69d863a909e56b6adf3fc20bb23f110a70024703	-	scripts/dev/cargo-dependencies.pl
 file	0e8e5f0eaa605ea97713595d568f420f051458f269eef287bb4756c9592eb387	-	scripts/ci/check-tooling-prerequisites.sh
 file	68e88225adfb40ff0807516b682c4882825ebbeaf3b5245ae4642db600a45ea1	-	scripts/dev/tooling-lock.pl
 file	5bb62496317accb40a1bf875dc96c15f47de6b10c2f272bc924f44adf16d0018	-	scripts/distribution/registry-package.pl
@@ -113,11 +113,11 @@ file	a52db278800a9f02d85a6b8a780a9b1eed860c49d5442cef9db1f7f9d7ddee0a	x	scripts/
 file	f3478ec454feb711fd2ad23d6c85b7b97110158f9c55293b68ed58e4781fd918	x	scripts/ci/run-formatting.sh
 file	be31909f524f1b8efc0065c353101fa793bfcd4cf6004de9f053745550d6f9bf	x	scripts/ci/run-rust-formatting.pl
 file	abbcce3e10c66d0554db519e9ab8e3e672189cfc262e15da33ea3c3610e1edbc	-	scripts/ci/cargo-publication-adapter.sh
-file	d50eec860f7e4c1f4b44c3414f1f960559e80378ba65aabd268b85ac5f8d5748	-	scripts/ci/cargo-release-groups.jq
+file	4ca77bd13961dbca51fa47714dfca5ae1097f8a6fe664110444be6ab4c031edc	-	scripts/ci/cargo-release-groups.jq
 file	b0f12a5031ecb6f4e10c1f6f79989ed9b32e110eec824f83c423d4dc41254def	-	scripts/ci/cargo-qualification-release.sh
 file	4eeaca14cfce7f551f4b9a66ebecc49a9208a861f56dced344709158dee36736	-	scripts/ci/shared-companions.sh
 file	6d99677e86759273a88fb4149cbd4c14f2aacc99e1838a0db343d76c776f1aba	-	scripts/ci/ic-tool-pins.awk
-file	2dd5d5da3a78a6b982f7eadb2c175cef9270d6e17753990817e5759f34fa1b7d	-	scripts/dev/cargo-tool-build.sh
+file	9f90cc097e9c81a0ad3e574a55c53e6301d65a5f1129a3a9fba0b7f2cff32c40	-	scripts/dev/cargo-tool-build.sh
 file	4cfa90a020aefc5115fe5f7103eb5857f837acb9e0cf91f6362947a4abea211c	x	scripts/ci/describe-tool-selection.pl
 file	ebf236f1db579744a13bc995ec1c58c2ee87e34caed23088a6d9b75e638dd27f	x	scripts/ci/verify-evidence-checksums.sh
 file	e32b68b467e75ae309748f3933fa652204617f03fb846cb042f6ab75e46837a2	-	ci/ic-tools.tsv

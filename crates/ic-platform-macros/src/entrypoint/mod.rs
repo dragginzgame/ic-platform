@@ -183,7 +183,7 @@ fn generate<P: ResolvePath>(
     };
     let handler = &function.sig.ident;
     let spelling = handler.to_string();
-    let rust_name = spelling.strip_prefix("r#").unwrap_or(&spelling);
+    let rust_name = spelling.trim_prefix("r#");
     if !kind.rpc() && attrs.name.is_some() {
         return Err(Error::new(
             handler.span(),

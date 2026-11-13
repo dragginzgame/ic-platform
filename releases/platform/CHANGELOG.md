@@ -4,6 +4,28 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.32.1] - Unreleased
+
+### 🔧 Changed
+
+- Adopt Toko Tooling 0.41.0 and its package inventory command. Remove the unused
+  facade catalog alias while retaining its release-group membership; keep
+  generated-fixture selections in contributor metadata instead of Cargo dependency
+  declarations. Preserve archived-catalog reading and refuse duplicate selections.
+- Apply common Cargo dependency/inheritance lints and Rustdoc table admission to
+  both workspaces and generated consumers. Enforce Make/publication Clippy
+  warnings through Cargo without changing compilation flags; qualify refusal on
+  fresh and cached artifacts. Keep singleton graph checks separate from empty
+  compilation and preserve real cross-generation type/refusal checks.
+- Adopt Testkit 0.102.0 and required Host 0.77 selections for native qualification;
+  its registry Platform 0.32 / Types 0.20 generation stays separate from local
+  product identity. Refresh the private BLS baseline to published Platform 0.32.0
+  and keep canister dependencies off its native driver graph.
+- Review first-party registry freshness before capture. Toko 0.41.0 and Testkit
+  0.102.0 are current. Defer optional qualification Wire 0.10.0 → 0.21.5 and
+  release-editor IC Build 0.73.0 → 0.84.0 migrations to the next dependency
+  maintenance batch; retain this release's qualified schema/editor contracts.
+
 ## [0.32.0] - 2026-11-13
 
 ### ⚠️ Breaking

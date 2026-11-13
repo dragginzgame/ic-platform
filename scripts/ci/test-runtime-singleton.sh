@@ -27,7 +27,7 @@ finish() {
 }
 trap finish EXIT
 mkdir -p "$fixture/src"
-printf '// Cargo packaging proof; execution stays in the qualified runtime fixtures.\n' > "$fixture/src/lib.rs"
+printf '//! Cargo resolution proof; execution stays in the qualified runtime fixtures.\n' > "$fixture/src/lib.rs"
 manifest() {
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [package]
@@ -86,9 +86,8 @@ for features in default ic0; do
         echo "Non-runtime $features selection acquired an executor guard" >&2; exit 1
     fi
 done
-manifest '"ic0"'
-cargo check --manifest-path "$fixture/Cargo.toml" --frozen \
-    --target-dir "$fixture/target" > "$fixture/ic0-check.log" 2>&1
+# Cargo's resolved normal/build graphs above establish links coexistence. This
+# source-free graph proof does not compile an empty crate with unused imports.
 # Reuse the successful native lock: enabling runtime later must still refuse.
 for features in executor runtime candid-codec-endpoint; do
     manifest "$(printf '"%s"' "$features" | sed 's/,/", "/g')"
@@ -136,9 +135,15 @@ next = { package = "ic-platform", path = "$copy/crates/ic-platform", default-fea
 ic-platform-runtime = { path = "$root/crates/ic-platform-runtime", features = ["runtime"] }
 MANIFEST
 cat > "$fixture/src/lib.rs" <<'RUST'
-// Public handles and calls retain a single owner across facade generations.
+//! Public handles and calls retain one owner across facade generations.
+/// Preserve task identity across facade generations.
+#[must_use]
 pub fn task(value: current::executor::TaskHandle) -> next::executor::TaskHandle { value }
+/// Preserve task identity at the direct Runtime boundary.
+#[must_use]
 pub fn direct(value: next::executor::TaskHandle) -> ic_platform_runtime::executor::TaskHandle { value }
+/// Preserve prepared-call identity across facade generations.
+#[must_use]
 pub fn call<'a, 'b>(value: current::call::Call<'a, 'b>) -> next::call::Call<'a, 'b> { value }
 RUST
 platform_fixture_policy "$root" "$fixture"

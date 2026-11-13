@@ -8,6 +8,7 @@ use std::{
     cell::RefCell,
     collections::VecDeque,
     future::Future,
+    mem::DropGuard,
     pin::Pin,
     sync::Arc,
     task::{Context, Poll, Wake, Waker},
@@ -241,22 +242,6 @@ impl TaskHandle {
     }
 }
 
-struct ContextGuard {
-    retention: Option<MethodHandle>,
-}
-
-impl Drop for ContextGuard {
-    fn drop(&mut self) {
-        EXECUTOR.with(|executor| {
-            let mut executor = executor.borrow_mut();
-            executor.context = None;
-            executor.current_task = None;
-        });
-        // Final automatic reclamation deliberately occurs outside the context.
-        drop(self.retention.take());
-    }
-}
-
 struct PollWork {
     id: TaskId,
     future: UserFuture,
@@ -356,9 +341,15 @@ fn run_context<R>(method: MethodHandle, recovering: bool, f: impl FnOnce() -> R)
             recovering,
         });
     });
-    let guard = ContextGuard {
-        retention: Some(method),
-    };
+    let guard = DropGuard::new(method, |method| {
+        EXECUTOR.with(|executor| {
+            let mut executor = executor.borrow_mut();
+            executor.context = None;
+            executor.current_task = None;
+        });
+        // Final automatic reclamation deliberately occurs outside the context.
+        drop(method);
+    });
     let result = f();
     if !recovering {
         drain();

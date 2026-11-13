@@ -26,6 +26,8 @@ cat > "$fixture/catalog/Cargo.toml" <<'CATALOG'
 scalar = "1.2.3"
 table = { version = "=4.5.6", default-features = false, features = ["one"] }
 source = { git = "https://example.invalid/source", rev = "immutable" }
+[workspace.metadata.platform-fixtures.dependencies]
+fixture = { version = "7.8.9", default-features = false }
 CATALOG
 # shellcheck source=scripts/ci/workspace-dependencies.sh
 source "$root/scripts/ci/workspace-dependencies.sh"
@@ -34,10 +36,14 @@ platform_dependencies_read "$fixture/catalog"
 [[ "$(platform_dependency_version table)" == '=4.5.6' ]]
 [[ "$(platform_dependency table)" == 'version = "=4.5.6", default-features = false, features = ["one"]' ]]
 [[ "$(platform_dependency source)" == 'git = "https://example.invalid/source", rev = "immutable"' ]]
+[[ "$(platform_dependency fixture)" == 'version = "7.8.9", default-features = false' ]]
 : > "$fixture/catalog/Cargo.toml"
 [[ "$(platform_dependency_version scalar)" == '1.2.3' ]]
 if platform_dependency missing > "$fixture/catalog/missing" 2>&1; then exit 1; fi
 if platform_dependency_version source > "$fixture/catalog/version" 2>&1; then exit 1; fi
+printf '[workspace.dependencies]\nduplicate="1"\n[workspace.metadata.platform-fixtures.dependencies]\nduplicate="2"\n' > "$fixture/catalog/Cargo.toml"
+if platform_dependencies_read "$fixture/catalog" > "$fixture/catalog/duplicate" 2>&1; then exit 1; fi
+grep -q 'fixture selection duplicates' "$fixture/catalog/duplicate"
 mkdir -p "$fixture/scripts/ci" "$fixture/scripts/fixtures/prepared-call-consumer" "$fixture/.tools" "$fixture/bin"
 cp "$root/scripts/ci/"{check-prepared-call-consumer.sh,check-platform-runtime.sh,runtime-selection.sh,runtime-inputs.pl,retain-build-artifact.sh,workspace-dependencies.sh,render-runtime-fixture.pl,check-platform-runtime-graph.sh} "$fixture/scripts/ci/"
 cp "$root/scripts/ci/platform-graph-policy.awk" "$fixture/scripts/ci/"

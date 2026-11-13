@@ -4,6 +4,24 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.22.1] - Unreleased
+
+### 🔧 Changed
+
+- Adopt Toko Tooling 0.41.0 and its Cargo/Rustdoc lint policy for development and
+  CI. Explicitly import the link-only
+  singleton guard under `executor`, without adding an API or changing exact
+  version/links refusal. Keep raw IC0 selections independent of that guard.
+- Qualify native Runtime fixtures with Testkit 0.102.0 and its aligned Platform
+  0.32 / Types 0.20 infrastructure, preserving source custody and Wasm isolation.
+- Replace the private executor context and callback environment guards with Rust
+  1.100's `DropGuard`, preserving cleanup order and the successful submission's
+  exact ownership transfer. Qualify normal/native-unwind destructor re-entry,
+  callback lifetime, cancellation and installed trap/upgrade behavior; matched
+  Runtime probes have unchanged raw and optimized Wasm total/code sizes.
+- Simplify raw identifier prefix handling in the entrypoint generator with
+  `trim_prefix`, preserving generated IC export names.
+
 ## [0.22.0] - 2026-11-13
 
 ### ⚠️ Breaking

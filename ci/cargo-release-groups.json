@@ -9,9 +9,7 @@
         "ic-platform"
       ],
       "changelog": "releases/platform/CHANGELOG.md",
-      "dependencies": [
-        "ic-platform"
-      ]
+      "dependencies": []
     },
     {
       "name": "types",

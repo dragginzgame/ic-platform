@@ -10,10 +10,13 @@ root="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$root"
 # shellcheck source=scripts/ci/consumer-fixture.sh
 source "$root/scripts/ci/consumer-fixture.sh"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_dependencies_read "$root"
 msrv="$(bash "$root/scripts/ci/read-platform-msrv.sh")"
 mkdir -p target
 consumer_fixture "$root" prepared-call-consumer src
-wire="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.ic-wire' Cargo.toml)"
+wire="$(platform_dependency_version ic-wire)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 [package]
@@ -36,8 +39,6 @@ ic-platform = { path = "../../crates/ic-platform", default-features = false, fea
 ic-wire = { version = "$wire", optional = true }
 MANIFEST
 cp scripts/fixtures/prepared-call-consumer/{lib,tests}.rs "$fixture/src/"
-# shellcheck source=scripts/ci/workspace-dependencies.sh
-source "$root/scripts/ci/workspace-dependencies.sh"
 platform_fixture_policy "$root" "$fixture"
 if [[ "$prepare" == true ]]; then
     cp "$root/Cargo.lock" "$fixture/Cargo.lock"

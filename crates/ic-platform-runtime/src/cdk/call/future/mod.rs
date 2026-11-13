@@ -8,6 +8,7 @@ use crate::executor::{
 };
 use std::{
     future::Future,
+    mem::DropGuard,
     pin::Pin,
     sync::{Arc, Mutex, MutexGuard},
     task::{Context, Poll, Waker},
@@ -187,40 +188,6 @@ impl Drop for CallFuture<'_, '_> {
     }
 }
 
-struct Environment {
-    raw: Option<usize>,
-}
-
-impl Environment {
-    fn new(completion: Arc<Completion>) -> Self {
-        Self {
-            raw: Some(Arc::into_raw(completion) as usize),
-        }
-    }
-
-    fn address(&self) -> usize {
-        self.raw.expect("the environment has not been transferred")
-    }
-
-    fn transfer(mut self) {
-        self.raw = None;
-    }
-}
-
-impl Drop for Environment {
-    #[expect(
-        unsafe_code,
-        reason = "An untransferred environment still owns exactly one raw Arc reference"
-    )]
-    fn drop(&mut self) {
-        if let Some(raw) = self.raw.take() {
-            // SAFETY: No successful perform transferred this environment, so
-            // the supplier cannot call it and this guard is its sole owner.
-            drop(unsafe { reclaim_environment(raw) });
-        }
-    }
-}
-
 #[expect(
     unsafe_code,
     reason = "The callback ABI transfers one raw Arc ownership reference through usize"
@@ -236,7 +203,15 @@ fn submit(request: &Call<'_, '_>, waker: &Waker) -> Result<Arc<Completion>, Call
     let completion = Arc::new(Completion {
         state: Mutex::new(State::Unarmed),
     });
-    let environment = Environment::new(completion.clone());
+    let environment = DropGuard::new(Arc::into_raw(completion.clone()) as usize, |raw| {
+        // SAFETY: No successful perform transferred this environment, so
+        // the supplier cannot call it and this guard is its sole owner.
+        #[expect(
+            unsafe_code,
+            reason = "An untransferred environment still owns exactly one raw Arc reference"
+        )]
+        drop(unsafe { reclaim_environment(raw) });
+    });
     // SAFETY: Only owned/static Completion data crosses the ABI. Reply/reject
     // share one environment with cleanup; the supplier commits exactly one
     // invocation, and cannot invoke it before perform returns.
@@ -249,11 +224,11 @@ fn submit(request: &Call<'_, '_>, waker: &Waker) -> Result<Arc<Completion>, Call
             request.callee.as_slice(),
             request.method,
             reply_callback,
-            environment.address(),
+            *environment,
             reply_callback,
-            environment.address(),
+            *environment,
         );
-        system::call_on_cleanup(cleanup_callback, environment.address());
+        system::call_on_cleanup(cleanup_callback, *environment);
     }
     request.configure();
     if system::call_perform() != 0 {
@@ -261,7 +236,7 @@ fn submit(request: &Call<'_, '_>, waker: &Waker) -> Result<Arc<Completion>, Call
     }
     // Successful perform owns the environment even if subsequent execution traps.
     // The replica's rollback, not native unwinding, governs that trap lifecycle.
-    environment.transfer();
+    let _ = DropGuard::dismiss(environment);
     let registration = Registration {
         method: extend_current_method_context(),
         task: TaskHandle::current(),

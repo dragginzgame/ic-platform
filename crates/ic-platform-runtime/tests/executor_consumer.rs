@@ -70,6 +70,30 @@ fn public_handles_retain_send_and_sync() {
 }
 
 #[test]
+fn context_exit_allows_destructor_reentry_after_return_and_unwind() {
+    isolated(|| {
+        for unwind in [false, true] {
+            let drops = Rc::new(Cell::new(0));
+            let observed = drops.clone();
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                executor::in_tracking_executor_context(|| {
+                    executor::spawn_protected(probe(|_| Poll::Pending).on_drop(move || {
+                        assert!(TaskHandle::current().is_none());
+                        executor::in_tracking_executor_context(|| {
+                            observed.set(observed.get() + 1);
+                        });
+                    }));
+                    assert!(!unwind, "exercise native context unwinding");
+                });
+            }));
+            assert_eq!(result.is_err(), unwind);
+            assert_eq!(drops.get(), 1);
+            executor::in_tracking_executor_context(|| {});
+        }
+    });
+}
+
+#[test]
 fn foreign_poll_wakes_wait_for_the_protected_owner() {
     isolated(|| {
         let polls = Rc::new(Cell::new(0));

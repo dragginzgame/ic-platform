@@ -143,8 +143,8 @@ remain broad validation; they are not the default loop for ordinary edits.
 ## Releases
 
 Select `RELEASE_GROUP=platform`, `runtime` or `types` explicitly for release,
-resume and publication. No group is inferred from changed files. Root
-[Cargo.toml](Cargo.toml) lists member versions; [CHANGELOG.md](CHANGELOG.md) links
+resume and publication. No group is inferred from changed files. `make deps-list`
+lists product/qualification versions and release groups; [CHANGELOG.md](CHANGELOG.md) links
 the separate group ledgers and shared history. A Git release does not establish
 registry availability. See the [release commands and recovery guidance](docs/development/qualification.md#development)
 before executing an authorized delivery.

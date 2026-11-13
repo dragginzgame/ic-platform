@@ -187,6 +187,7 @@ cat > "$fixture/lint-bin/cargo" <<'CARGO'
 #!/usr/bin/env bash
 set -euo pipefail
 [[ "$1" == clippy && -z "${CARGO_PUBLISH_PACKAGES+x}" ]]
+[[ "${CARGO_BUILD_WARNINGS:-}" == deny ]]
 printf '%s\n' "$@" > "$PUBLICATION_LINT_TRACE"
 CARGO
 chmod +x "$fixture/lint-bin/cargo"
@@ -199,7 +200,7 @@ for group in platform runtime types; do
         {
             printf '%s\n' clippy
             for package in $selection; do printf '%s\n' --package "$package"; done
-            printf '%s\n' --all-targets --all-features --locked -- -D warnings
+            printf '%s\n' --all-targets --all-features --locked
         } > "$fixture/lint-expected"
         cmp "$fixture/lint-expected" "$PUBLICATION_LINT_TRACE"
     done
@@ -210,7 +211,7 @@ for group in platform runtime types; do
         cmp "$fixture/lint-before-refusal" "$PUBLICATION_LINT_TRACE"
     done
 done
-echo 'Publication lint reaches only admitted packages/subsets, retaining compiler and Clippy flags.'
+echo 'Publication lint reaches only admitted packages/subsets with Cargo warning denial.'
 # Exercise Platform's actual retention prerequisite, with sparse disposable
 # evidence; this proves routing without replaying Shared's checker suite.
 mkdir -p "$fixture/recovery-evidence"

@@ -41,7 +41,8 @@ major="${version%%.*}" minor="${version#*.}"; minor="${minor%%.*}"
 next="$major.$((minor + 1)).0"
 PLATFORM_IDENTITY_CURRENT="$version" PLATFORM_IDENTITY_NEXT="$next" PLATFORM_IDENTITY_SOURCE="$root/crates/ic-platform-types" perl -0pi -e '
     my ($old,$new,$source)=@ENV{qw(PLATFORM_IDENTITY_CURRENT PLATFORM_IDENTITY_NEXT PLATFORM_IDENTITY_SOURCE)};
-    s/^(ic-platform = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm == 1 or die "facade catalog identity changed\n";
+    # A facade without workspace consumers has no display-only catalog alias.
+    s/^(ic-platform = \{ version = ")(=?)\Q$old\E(")/$1$2$new$3/gm;
     for my $owner (qw(ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard)) {
         my $path=$source =~ s{ic-platform-types$}{$owner}r;
         s/^    "crates\/\Q$owner\E",\n//m == 1 or die "owner member changed\n";
@@ -66,6 +67,7 @@ current-runtime = ["current/runtime"]
 current = { package = "ic-platform", path = "$root/crates/ic-platform", default-features = false, features = ["principal"] }
 next = { package = "ic-platform", path = "$fixture/next/crates/ic-platform", default-features = false, features = ["principal"] }
 ic-platform-types = { path = "$root/crates/ic-platform-types" }
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
 ic-wire = { path = "$fixture/wire", features = ["platform-types"] }
 MANIFEST
 cp scripts/fixtures/stable-identities/{lib,tests}.rs "$fixture/consumer/src/"

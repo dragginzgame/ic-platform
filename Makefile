@@ -91,6 +91,7 @@ help:
 	@echo 'Setup: install-tools, tools-check, install-hooks'
 	@echo 'Consumer cache setup: prepare-consumer-dependencies (explicit registry fetch)'
 	@echo 'Tool diagnostics: tools-report (offline, no installation)'
+	@echo 'Dependency inventory: deps-list (all workspace packages/groups; offline)'
 	@echo 'Dependency updates: deps-update [DEPENDENCY_PACKAGE=name DEPENDENCY_PRECISE=version]'
 	@echo 'Focused: check, test, clippy, docs-check, wasm-check, msrv, check-boundary'
 	@echo 'Full release gate: ci; authorized releases: release-patch, release-minor, release-major'
@@ -142,7 +143,7 @@ test: check-compiler
 	cargo test -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-features --locked
 PLATFORM_CLIPPY_PACKAGES ?= ic-platform ic-platform-types ic-platform-runtime ic-platform-macros ic-platform-runtime-guard
 clippy: check-compiler
-	cargo clippy $(foreach package,$(PLATFORM_CLIPPY_PACKAGES),--package $(package)) --all-targets --all-features --locked -- -D warnings
+	CARGO_BUILD_WARNINGS=deny cargo clippy $(foreach package,$(PLATFORM_CLIPPY_PACKAGES),--package $(package)) --all-targets --all-features --locked
 docs-check: check-compiler
 	RUSTDOCFLAGS='-D warnings' cargo doc -p ic-platform -p ic-platform-types -p ic-platform-runtime -p ic-platform-macros -p ic-platform-runtime-guard --all-features --no-deps --locked
 wasm-check: check-compiler

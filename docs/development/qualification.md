@@ -333,6 +333,9 @@ its fail-fast ordering runs Clippy before tests. Documentation-only work uses
 For a selected package with all its features/targets, the existing lint leaf
 accepts `make clippy PLATFORM_CLIPPY_PACKAGES=ic-platform-runtime`; use direct
 Cargo arguments above when only a narrower feature selection is affected.
+The Make leaf uses `CARGO_BUILD_WARNINGS=deny`, with fresh/cached warning refusal
+qualified by `test-platform-lint-policy.sh`; explicit compiler denial remains
+appropriate for plain JSON diagnostic collectors and Rustdoc.
 The former upstream-scaffolding experiment runner is retired with native offline
 public-key derivation. Historical packaging proposals remain documented in the
 [migration contract](../architecture/migration.md#scaffolding-only-packaging-qualification);
@@ -386,11 +389,13 @@ initial release command. Multiple affected groups use one
 do not append a normal-tree `publish` goal. Recover with the printed batch ID,
 using `release-batch-status`/`release-batch-resume`, then reconcile deliberately.
 See [the exact commands and effects](release-validation.md#commands-and-effects).
-Root dependency blocks name each group once, with a separate changelog comment.
-Their path entries catalog every member's full version and retain requirement
-operators. The unused facade entry adds no dependency edge. Dependency and release
-checks enforce complete catalog/alias coverage,
-owned paths and current full versions across all three groups.
+`make deps-list` reports every product and qualification package's version and
+release group without display-only dependency aliases. The JSON policy retains
+every product member; its dependency rosters cover only actual catalog aliases.
+Cargo declarations retain owned paths and full current version requirements.
+Generated standalone fixtures read their contributor-only selections from
+`workspace.metadata.platform-fixtures.dependencies`, alongside actual member
+dependencies, through the shared local reader. Duplicate selections are refused.
 
 Standalone `make publish-check RELEASE_GROUP=platform` packages/verifies the
 selected normal-checkout group without
@@ -448,18 +453,17 @@ requests with owned or borrowed methods and bytes through its existing runtime.
 The module uses the existing `runtime` feature and adds no dependencies or codecs.
 See [the call contract](../../crates/ic-platform-runtime/src/call/README.md). `ic-platform-macros` is the production
 proc-macro support package. Its Syn/Quote dependencies generate consumer
-entrypoints. Principal, Candid, the host parser, Agent, certification, raw IC calls,
-management/ledger DTOs, signature/BLS APIs, the executor and Serde are production
-dependencies, including optional and derive use. Testkit is
-tests/tooling entries used by the independent fixture. Its host driver selects
+entrypoints. Identity, the owned Candid codec, Agent, certification, raw IC calls,
+management/ledger DTOs, signature/BLS APIs, the executor and Serde have explicit
+production feature selections. Upstream Candid is a development oracle or native
+Agent transitive, never an owned codec dependency. Testkit is
+test infrastructure used by the independent fixture. Its host driver selects
 Platform's `certification-cbor` decoder instead of a direct generic CBOR codec.
-Optional parser
-and Agent dependencies are restricted to non-Wasm targets.
-The root catalog has `Production dependencies` and `Tests and tooling only`
-sections. Fixture-only selections stay in the second section and outside the
-consumer library's production graph.
-Production subsections distinguish local group catalogs, external runtime and
-native-only adapters, host proc-macro dependencies, and mixed production/test use.
+Agent dependencies are restricted to non-Wasm targets.
+The root dependency catalog contains actual product member requirements, including
+their development dependencies. Fixture-only inputs live under
+`workspace.metadata.platform-fixtures.dependencies`, read through the existing
+fixture catalog helper, and stay outside product dependency declarations.
 Members declare no build-dependencies tables; their normal macro dependencies run
 on the compiler host. Actual member tables and features determine dependency edges.
 `fmt`, `fmt-check`, the shared hook and release metadata checks all preserve
@@ -567,7 +571,7 @@ Platform release admission never selects a downstream scheduler. Singleton
 refusal remains covered by the independent executor guard fixtures.
 
 Prepare/admit PocketIC using Testkit, then set `POCKET_IC_BIN` or
-`IC_TESTKIT_POCKET_IC_URL`. Owned native fixtures select published Testkit 0.101.0
+`IC_TESTKIT_POCKET_IC_URL`. Owned native fixtures select published Testkit 0.102.0
 and its re-export of upstream PocketIC's async client. Each executable owns one current-thread Tokio runtime
 for the complete scenario, awaits network/lifecycle operations and explicitly
 awaits instance teardown before releasing its managed server. Client requests
@@ -582,7 +586,7 @@ in `scripts/fixtures/cdk-runtime/Cargo.lock`. Explicit `--refresh-lock` is a
 reviewed dependency refresh that preserves existing foreign pins and resolves
 necessary manifest changes, not normal validation. Release metadata rendering
 runs that same operation offline inside its transaction; the native Testkit
-supplier uses registry Platform 0.31.x only for management codecs, without Runtime
+supplier uses registry Platform 0.32.x only for management codecs, without Runtime
 or crypto features. Identity admission records that infrastructure separately from
 the selected local Platform implementation and checks PocketIC/Agent Principal
 identity at their crossing. PocketIC 16.1.0 pins `thiserror = "=2.0.18"`, so native

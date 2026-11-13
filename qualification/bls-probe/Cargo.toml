@@ -26,7 +26,9 @@ default = []
 baseline = ["dep:platform-baseline"]
 candidate = ["dep:ic-platform"]
 
-[dependencies]
+# Native code is the Testkit/oracle measurement driver; these implement only
+# the Wasm entrypoints and must not enter its native dependency closure.
+[target.'cfg(target_family = "wasm")'.dependencies]
 ic-platform = { workspace = true, optional = true }
 ic-platform-runtime.workspace = true
 platform-baseline = { workspace = true, optional = true }

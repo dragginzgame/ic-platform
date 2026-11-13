@@ -3,10 +3,13 @@ set -euo pipefail
 # Explicit opt-in; requires prepared nightly, registry sources and C++ compiler.
 export RUSTUP_AUTO_INSTALL=0
 root="$(cd "$(dirname "$0")/../.." && pwd -P)"
+# shellcheck source=scripts/ci/workspace-dependencies.sh
+source "$root/scripts/ci/workspace-dependencies.sh"
+platform_dependencies_read "$root"
 host="$(rustup run nightly-2026-11-05 rustc -vV | sed -n 's/^host: //p')"
 fixture="$(mktemp -d "$root/target/parser-fuzz.XXXXXX")"
 mkdir -p "$fixture/crates/probe/src" "$fixture/corpus"
-version="$("$root/.tools/host/bin/yq" -p toml -o yaml -r '.workspace.dependencies.libfuzzer-sys' "$root/Cargo.toml")"
+version="$(platform_dependency_version libfuzzer-sys)"
 cat > "$fixture/Cargo.toml" <<MANIFEST
 [workspace]
 members = ["crates/probe"]
@@ -31,8 +34,6 @@ cp "$root/scripts/fixtures/parser-fuzz/main.rs" "$fixture/crates/probe/src/main.
 cp "$root/crates/ic-platform/tests/fixtures/candid_malformed.rs" "$fixture/crates/probe/src/candid_malformed.rs"
 cp "$root/crates/ic-platform/tests/fixtures/cbor_malformed.rs" "$fixture/crates/probe/src/cbor_malformed.rs"
 cp "$root/Cargo.lock" "$fixture/Cargo.lock"
-# shellcheck source=scripts/ci/workspace-dependencies.sh
-source "$root/scripts/ci/workspace-dependencies.sh"
 platform_fixture_policy "$root" "$fixture"
 cargo metadata --offline --manifest-path "$fixture/Cargo.toml" --format-version 1 > "$fixture/metadata.json"
 bash "$root/scripts/ci/check-cargo-dependency-boundaries.sh" --consumer "$fixture" --external-ic
