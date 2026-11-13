@@ -30,6 +30,10 @@ ic_platform::candid_variant!(Status {
     2045251651 => Ready(Vec<u64>),
 });
 
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn roundtrip() {
     let bytes = super::input();

@@ -5,6 +5,10 @@
     feature = "codec-icp-owned",
     feature = "codec-management-owned",
 ))]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn protocol_roundtrip() {
     #[cfg(feature = "codec-cmc-owned")]
@@ -50,6 +54,10 @@ pub extern "C" fn protocol_roundtrip() {
 pub use ic_platform::candid_codec as codec;
 
 #[cfg(feature = "codec-array-decode")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn array_decode() {
     let bytes = input();
@@ -71,6 +79,10 @@ pub extern "C" fn array_decode() {
 pub mod record_probe;
 
 #[cfg(feature = "codec-generic-composite")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn generic_composite() {
     type Value = (
@@ -90,6 +102,10 @@ pub extern "C" fn generic_composite() {
 }
 
 #[cfg(feature = "codec-generic-decode")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn generic_decode_text() {
     let bytes = input();
@@ -105,6 +121,10 @@ pub extern "C" fn generic_decode_text() {
 }
 
 #[cfg(feature = "codec-generic")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn generic_encode_text() {
     let bytes = input();
@@ -112,12 +132,16 @@ pub extern "C" fn generic_encode_text() {
     reply(&codec::encode_one(text, usize::MAX).unwrap());
 }
 
+// The isolated raw Runtime profile uses CDK I/O directly; the other profiles
+// share these byte helpers. The runner selects exactly one profile at a time.
+#[cfg(not(feature = "runtime"))]
 fn input() -> Vec<u8> {
     let mut bytes = vec![0; ic_platform::ic0::msg_arg_data_size()];
     ic_platform::ic0::msg_arg_data_copy(&mut bytes, 0);
     bytes
 }
 
+#[cfg(not(feature = "runtime"))]
 fn reply(bytes: &[u8]) {
     ic_platform::ic0::msg_reply_data_append(bytes);
     ic_platform::ic0::msg_reply();
@@ -125,6 +149,10 @@ fn reply(bytes: &[u8]) {
 
 // Dependency presence control: identical reachable code with/without Candid.
 #[cfg(feature = "codec-empty")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn codec_control() {
     reply(&input());
@@ -132,6 +160,10 @@ pub extern "C" fn codec_control() {
 
 // Matched input admission/output framing; only the encoder differs.
 #[cfg(feature = "codec-text-owned")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query codec")]
 pub extern "C" fn codec_text() {
     let bytes = input();
@@ -142,12 +174,20 @@ pub extern "C" fn codec_text() {
 }
 
 #[cfg(feature = "candid-args")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query encode_units")]
 pub extern "C" fn encode_units() {
     reply(&ic_platform::candid_args::units(input().len()));
 }
 
 #[cfg(feature = "candid-args")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query encode_text")]
 pub extern "C" fn encode_text() {
     let bytes = input();
@@ -175,12 +215,20 @@ fn measure_system_read(read: fn() -> Vec<u8>) {
 }
 
 #[cfg(feature = "runtime-system")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query system_certificate")]
 pub extern "C" fn system_certificate() {
     measure_system_read(|| ic_platform::cdk::api::data_certificate().unwrap());
 }
 
 #[cfg(feature = "runtime-system")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_inspect_message")]
 pub extern "C" fn system_inspect() {
     assert_eq!(ic_platform::cdk::api::msg_method_name(), "system_root_key");
@@ -188,12 +236,21 @@ pub extern "C" fn system_inspect() {
 }
 
 #[cfg(feature = "runtime-system")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_update system_root_key")]
 pub extern "C" fn system_root_key() {
     measure_system_read(ic_platform::cdk::api::root_key);
 }
 
 #[cfg(feature = "certification-cbor")]
+/// Decode the supplied hash tree under the strict external-protocol byte bound.
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query decode_tree")]
 pub extern "C" fn decode_tree() {
     let bytes = input();
@@ -205,6 +262,10 @@ pub extern "C" fn decode_tree() {
 }
 
 #[cfg(feature = "ecdsa")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query verify_ecdsa")]
 pub extern "C" fn verify_ecdsa() {
     use ic_platform::ecdsa::{PrehashVerifier, Signature, VerifyingKey};
@@ -232,12 +293,20 @@ pub extern "C" fn verify_ecdsa() {
 // Signature/public-key lengths are fixed by the upstream BLS encoding. The
 // remainder is caller-supplied message data; measure verification, not framing.
 #[cfg(feature = "bls")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query verify_bls")]
 pub extern "C" fn verify_bls() {
     run_bls();
 }
 
 #[cfg(feature = "bls")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_update verify_bls_update")]
 pub extern "C" fn verify_bls_update() {
     run_bls();
@@ -279,17 +348,29 @@ mod principal {
         }
     }
 
+    #[expect(
+        unsafe_code,
+        reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+    )]
     #[unsafe(export_name = "canister_query parse_slice")]
     pub extern "C" fn parse_slice() {
         let bytes = input();
         finish(Principal::from_text(std::str::from_utf8(&bytes).unwrap()));
     }
 
+    #[expect(
+        unsafe_code,
+        reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+    )]
     #[unsafe(export_name = "canister_query parse_string")]
     pub extern "C" fn parse_string() {
         finish(Principal::from_text(String::from_utf8(input()).unwrap()));
     }
 
+    #[expect(
+        unsafe_code,
+        reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+    )]
     #[unsafe(export_name = "canister_query parse_string_ref")]
     pub extern "C" fn parse_string_ref() {
         let text = String::from_utf8(input()).unwrap();
@@ -298,6 +379,11 @@ mod principal {
 }
 
 #[cfg(feature = "runtime")]
+/// Submit a raw call to this canister and forward its response or rejection.
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_update raw_call")]
 pub extern "C" fn raw_call() {
     use ic_platform::cdk::{api, call::Call, futures};
@@ -316,6 +402,11 @@ pub extern "C" fn raw_call() {
 }
 
 #[cfg(feature = "verification")]
+/// Verify a signature using the fixture's equal-quarter input framing.
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query verify")]
 pub extern "C" fn verify() {
     let bytes = input();
@@ -329,6 +420,11 @@ pub extern "C" fn verify() {
 }
 
 #[cfg(feature = "principal-binary")]
+/// Return an admitted Principal's canonical bytes, or an empty reply on refusal.
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query binary_principal")]
 pub extern "C" fn binary_principal() {
     use ic_platform::{Account, Principal};
@@ -339,6 +435,11 @@ pub extern "C" fn binary_principal() {
 }
 
 #[cfg(feature = "principal-self-auth")]
+/// Return the self-authenticating Principal for the supplied slice.
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query self_auth_slice")]
 pub extern "C" fn self_auth_slice() {
     let bytes = input();
@@ -346,13 +447,23 @@ pub extern "C" fn self_auth_slice() {
 }
 
 #[cfg(feature = "principal-self-auth")]
+/// Return the self-authenticating Principal using an owned request vector.
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query self_auth_vec")]
 pub extern "C" fn self_auth_owned() {
     reply(ic_platform::Principal::self_authenticating(input()).as_slice());
 }
 
 #[cfg(feature = "principal-self-auth")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query self_auth_vec_ref")]
+/// Return the self-authenticating Principal using a borrowed request vector.
 pub extern "C" fn self_auth_borrowed() {
     let bytes = input();
     reply(ic_platform::Principal::self_authenticating(&bytes).as_slice());
@@ -360,6 +471,10 @@ pub extern "C" fn self_auth_borrowed() {
 
 // Exercise both ledger hashes and self-authentication to measure provider sharing.
 #[cfg(feature = "ledger-hash")]
+#[expect(
+    unsafe_code,
+    reason = "The isolated Wasm probe exports its IC entrypoint ABI"
+)]
 #[unsafe(export_name = "canister_query ledger_hash")]
 pub extern "C" fn ledger_hash() {
     use ic_platform::{Principal, icp_ledger_types::account_identifier, icrc_ledger_types::Value};

@@ -1,105 +1,92 @@
 # Current handoff — 2026-11-13
 
-## Published state and pending delivery
+## Published and reconciled
 
-Ordinary main remains `d524dee2fc26d4bb330ffcdbfb5a0be72b461dcb` after completed
-frozen batch `batch-CFcV6khZ`. All five packages were verified on crates.io, not
-yanked; annotated tags dereference to these release commits:
+Frozen batch `batch-q_67SewF` completed GitHub delivery and crates.io publication
+in supplier order, then reconciled into ordinary main. All five packages were
+verified available at their exact new versions; tags dereference to these commits:
 
 | Group | Version | Commit | Tag | Qualification / runner |
 | --- | --- | --- | --- | --- |
-| Types | 0.19.5 | `f0151a0f5762bdb12d1f8f4228bda62badb7a704` | `types-v0.19.5` | `h7EwY8` / `zl8TZ5` |
-| Runtime/macros/guard | 0.21.3 | `ef5dbf126aa3776756057474565ce3b5e9074a9f` | `runtime-v0.21.3` | `sQ2IRg` / `m0Nuav` |
-| Platform | 0.31.3 | `d524dee2fc26d4bb330ffcdbfb5a0be72b461dcb` | `platform-v0.31.3` | `Xy4j2v` / `EXQK2R` |
+| Types | 0.20.0 | `508c60b1ff2e8b5db4a80d9ba9ab50c724c98cc5` | `types-v0.20.0` | `7zMqrl` / `yHItvq` |
+| Runtime/macros/guard | 0.22.0 | `8d88fe054816e467e3eaec88e79285737f00500a` | `runtime-v0.22.0` | `qjP0cD` / `oW60AE` |
+| Platform | 0.32.0 | `14c954e5ae30ef2100ab311d8b3e6dc3db6948fa` | `platform-v0.32.0` | `624oov` / `XIahtu` |
 
-All 19 local stages ran for each group. Evidence is under that candidate's
-`target/release-validation/`; deployment log:
-`target/deploy-0313-tooling-certification-corrected.log`. Browser stays 0.2.0.
-The pending compiler/layout/tooling work below remains local, uncommitted and
-unpublished. Next notes target Platform 0.32.0, Runtime 0.22.0 and Types 0.20.0;
-package versions stay at published values until an authorized release.
+Reviewed source: `7d0d86565092aee1654ef1d3a01dea611b9262c9`. All 19 required local
+stages passed per group (57 parent dispatches), including native tests, consumers,
+feature/Wasm graphs, strict Clippy, documentation and installed Runtime. Metadata
+and exact archives were freshly admitted. Runtime's guard remains exact. Browser
+stays 0.2.0; no npm or sibling release occurred.
 
-## Pending Toko 0.40.1 / deployment-policy adoption
+Deployment log: `target/deploy-0401-rust1100.log`. Complete receipts, runner logs
+and archive/publication evidence remain under
+`target/release-frozen/batch-q_67SewF/target/{release-validation,publication}/`.
+Durable intent/Git/journals remain in `.git/release-state/frozen/batch-q_67SewF/`.
+The first release-command stage took 405 seconds; later groups took 277 each,
+reusing only the admitted immutable policy-fixture proof, with fresh metadata
+and all product obligations. No collector failure or full-gate retry occurred.
 
-Product and qualification pins/locks select published Toko 0.40.1, checksum
+## Compiler, tooling and follow-up fixture repair
+
+Both workspaces select published Toko 0.40.1, checksum
 `fb884b05e2e5bbca2388dd0b757833fb5ad37e91b3ced09f6a37b454c7fe9f90`, producer
-commit `dcc51b5cab3d9993f0668bc0902252364d7dc316`. Authenticated preview/install
-retains all 98 managed files and entrypoints. Only `TOKO-TOOLING.md` differs from
-0.40.0; executable payloads are unchanged. No managed file was edited by hand.
-Both locks changed only the selected Toko package during this increment;
-existing qualification baseline, Host/Types and rustls-webpki changes survive.
+commit `dcc51b5cab3d9993f0668bc0902252364d7dc316`. Authenticated adoption retained
+98 managed payloads/entrypoints; 0.40.1 changed only the baseline from 0.40.0.
+No snapshot-owned file was edited by hand. The
+[release guide](../development/release-validation.md#deployment-sequencing) records
+one full-gate owner per group, wiring-first checks and phase-specific recovery.
+General partial-gate and automatic collector-only resume remain unsupported;
+identify invalidated inputs and disclose rerun scope before a retry.
 
-The [release guide](../development/release-validation.md#deployment-sequencing)
-now records wiring-first checks, retained timing review, one full-gate owner per
-group, fresh archive admission and phase-specific retries. Existing adapters
-already enforce snapshot admission before effects and avoid a second full gate
-in metadata/publication. Only the qualified policy-fixture leaf can reuse prior
-execution. General partial-gate and automatic collector-only resume remain
-unsupported; diagnose missing admission and disclose rerun scope before retry.
-No product tests were repeated solely for the unchanged 0.40.1 executables.
-Focused adoption evidence is `/tmp/platform0401-*.log`; no delivery occurred.
+Rust 1.100.0 is the minimum/development/release compiler. Explicit preparation
+admitted rustc `0ef1bc386059596dada8fb65b50425aab2ea637a` (2026-11-09), LLVM
+23.1.5 and Cargo `3acc79c0c` (2026-11-05), Linux x86_64, Clippy/Rustfmt and Wasm.
+All real members inherit common lints. Safe-only libraries forbid unsafe code;
+Runtime/codec ownership and FFI expectations remain scoped and reasoned.
+Generated fixtures project the owner's policy; real refusal evidence remains in
+`target/lint-policy.LoNnwc/` and the release gate's own primitive-check evidence.
+The six directory-module moves preserve public paths and formatting/custody checks.
 
-## Rust 1.100.0 and common lints (#157)
+Hosted Wasm-size runs failed before measurement because the standalone probe's
+manual IC export attributes lacked unsafe-code expectations; Runtime-only builds
+also retained unused shared I/O helpers. The post-release Git-only fixture repair
+adds local ABI expectations, gates those helpers to their actual independent
+profiles and documents the active entrypoints. No library or package payload
+changed, so it needs no additional crate release. Strict Wasm Clippy passes for
+each of the five actual workflow profiles. Comparator tests pass.
 
-Both workspace floors and the common development/release pin are 1.100.0.
-Explicit preparation admitted rustc `0ef1bc386059596dada8fb65b50425aab2ea637a`
-(2026-11-09), LLVM 23.1.5, Cargo `3acc79c0c` (2026-11-05), Linux x86_64,
-with Clippy, Rustfmt and Wasm. All real members inherit common Rust/Clippy/
-Rustdoc lints; safe-only product libraries forbid unsafe code. Runtime callback,
-codec ownership and fixture ABI expectations remain narrow and reasoned.
-Cryptographic function bodies, bytes and protocol behavior did not change.
+Matched pre-release `d524dee` versus 0.32.0 measurements use identical corrected
+probes, Rust 1.100.0, opt=3, fat LTO, one codegen unit, abort/strip and ic-wasm
+0.11.1. Every raw/optimized total and code delta is zero for principal-binary,
+principal-self-auth, Runtime, signature verification and certificate CBOR.
+Evidence: `target/evidence/wasm-regression.Do2myE/`;
+logs: `/tmp/platform-deploy0401-{wasm-fixed,probe-*,compare-tests}.log`.
+Retain the failing hosted artifact at `target/evidence/hosted-wasm-43403360773/`.
+Fresh hosted/native macOS qualification remains asynchronous; Linux and installed
+IC evidence do not establish native macOS acceptance. #157 retains that remaining
+acceptance. #50 remains open and unresolved under its workspace-only expected
+advisory disposition; runtime/new findings and incomplete/tool failures still fail.
 
-Generated consumers project the owner's compiler/lints through the existing
-workspace-dependency helper. `check-primitives` proves actual member inheritance,
-idempotency, native/Wasm positives and must-use, unsafe, unsafe-operation,
-correctness and Rustdoc refusals (`target/lint-policy.LoNnwc/`). Runtime now
-strictly lints every generated Wasm profile before building. Old compiler strings
-remain only in frozen reports and reader/admission tests.
+For this batch, npm 12.2.0 was explicitly prepared under
+`target/deployment-tools/npm-12.2.0/node_modules/.bin`; prepend it to PATH for exact
+recovery context. The global npm was 12.2.1. PocketIC came from
+`.tools/ic-testkit-server/16.1.0-x86_64-linux/pocket-ic`. Do not change their saved
+identities while recovering this batch. Qualification's adopted registry baseline
+remains Platform 0.31.3; optional Wire fixture 0.10/0.12.1 and editor 0.73 migrations
+remain deferred to their separately qualified maintenance batches.
 
-On 0.40.0, strict native all-target/all-feature and minimal Clippy, Wasm library
-Clippy, all product tests/native macro linkage, strict native/Wasm Rustdoc and
-qualification Clippy/Rustdoc passed. Full `check-consumer`, feature graphs,
-formatting/refusal, boundary checks and ShellCheck passed. Evidence:
+## Preserved findings and recovery custody
 
-| Contract | Evidence under `target/` |
-| --- | --- |
-| Four installed Runtime profiles | `cdk-runtime.QAgzTP/` |
-| Prepared raw/Wire/external-Candid calls | `prepared-call-consumer.9cicJT/` |
-| Installed Agent verification/wrong-root refusal | `agent-installed.CTMiM1/` |
-| Canonical identity profiles | `stable-identities.Tr4xtx/` |
-| Raw-random bytes, cancellation, callback cleanup | `evidence/raw-rand.lhDAGf/` |
-| Matched BLS comparison | `evidence/bls-wrapper.t7uE2v/` |
+The historical verification-size finding against `fc55ae1` (+135 total / +133 code,
+above its 128-byte allowance) remains unresolved; the new zero-delta comparison
+uses a different baseline. See [the audit](../benchmarks/platform-031-audit.md#post-release-cleanup).
+No cryptographic, certificate, delegation, identity-key, witness or freshness check
+was removed. Earlier BLS/identity/Agent evidence remains at its existing owner.
 
-BLS arms match: raw total/code 246,075/238,906 bytes; optimized 237,381/230,205;
-all 28 instruction samples equal. Logs: `/tmp/platform040-*.log`.
-Manifest warnings for fixture-only catalog entries and the links-only guard
-remain visible; no artificial imports hide them. Native macOS, hosted integration
-and opt-in nightly sanitizers have no fresh local evidence. #157 remains open for
-its remaining acceptance; these observations do not establish a delivered release.
-
-The preceding six `mod.rs` moves remain preserved, with unchanged public paths,
-explicit template formatting and exact boundary allowances. Qualification now
-uses registry Platform 0.31.3 alongside the local candidate, preserving Host
-0.76.5 and registry Types 0.19.5. Its earlier matched benchmark is retained at
-`target/evidence/bls-wrapper.ReL2gW/`. Fixture Wire 0.10/0.12.1 and metadata editor
-0.73 upgrades remain deferred to their respective maintenance/adoption batches.
-
-## Unresolved findings and custody
-
-#50 remains open: `RUSTSEC-2026-0387` is expected only in the workspace CI gate,
-with raw finding/exit retained. Runtime/new findings and incomplete/tool failures
-still fail. Live audit evidence: `target/expected-advisory-live.vi6VFr/report/`.
-The historical verification-size finding (+135 total / +133 code bytes against
-`fc55ae1`, above its 128-byte allowance) is unresolved; see
-[the audit](../benchmarks/platform-031-audit.md#post-release-cleanup).
-
-Preserve completed `batch-CFcV6khZ`, its Git/journals/archives/proofs and the failed
-pre-upload `batch-VCzP0I1E` (`qualification.YY6dQL` / `validation.MNl4ew`).
-`6ef3bf0` fixed its missing release-routing input; never resume obsolete source.
-Preserve completed `batch-CqgSHOoJ`, failed `batch-A6SG2UhN`/`batch-uCPG6Jvb` and
-older custody referenced by the [published handoff](https://github.com/dragginzgame/ic-platform/blob/d524dee2fc26d4bb330ffcdbfb5a0be72b461dcb/docs/status/current.md).
-Durable state lives in `.git/release-state/frozen/`, candidates/evidence in
-`target/release-frozen/`. No tag replacement, upload replay or artifact deletion
-is authorized by adoption. Retired-checkout recovery review is due 2026-12-04.
-Keep `recovery-evidence/deferred-signature-comparison-20261110.rs`, SHA-256
+Preserve completed `batch-CFcV6khZ` and failed pre-upload `batch-VCzP0I1E`;
+`6ef3bf0` fixed the latter's routing input, not its obsolete source. Older custody
+is recorded in the [preceding handoff](https://github.com/dragginzgame/ic-platform/blob/7d0d86565092aee1654ef1d3a01dea611b9262c9/docs/status/current.md).
+No retirement, tag replacement, upload replay or artifact deletion is authorized.
+Retired-checkout recovery review remains due 2026-12-04. Keep
+`recovery-evidence/deferred-signature-comparison-20261110.rs`, SHA-256
 `9fdee2e8b41c9b13e0d2a3127ddf95559a1094fa48d14dd17b7577d4ec86ed4a`.
