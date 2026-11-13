@@ -7,7 +7,7 @@ import { promisify, parseArgs } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from '../../packages/browser/node_modules/esbuild/lib/main.js';
 import { checkBrowserSdkGraph } from './browser-sdk-graph.mjs';
-import { checkIcSdkBoundary } from './check-ic-sdk-boundary.mjs';
+import { checkIcSdkBoundary } from '../../vendor/toko-tooling/scripts/ci/check-ic-sdk-boundary.mjs';
 
 const { values } = parseArgs({ options: { browser: { type: 'boolean', default: false } }, allowPositionals: false });
 const root = fileURLToPath(new URL('../..', import.meta.url));

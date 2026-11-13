@@ -26,62 +26,40 @@ no sibling or npm publication occurred.
 
 ## Current selections and boundaries
 
-Both workspaces now select Toko **0.42.4**, checksum
+Deployment is authorized for Types **0.20.2**, Runtime/macros/guard **0.22.2** and
+Platform **0.32.2**, in supplier order through the frozen workflow. Browser and
+siblings remain outside scope. The first batch, `batch-2eRuqW03`, source
+`9cd572d2948e41c1e32847abad77e3663002f5da`, stopped before any delivery/upload:
+Types Clippy and earlier stages passed, but `check-browser` retained an old
+relative helper import. Preserve the complete failed candidate and
+`target/deploy-toko0424.log`; partial-stage resume is unsupported. The corrected
+browser caller passed all 23 tests, packed Node/TypeScript consumers, export/
+bundle isolation and Caffeine compatibility at `target/browser-consumer.jQXReX/`.
+All six static relative script imports resolve. Start a new batch from corrected
+committed source, with all 19 local stages per group; do not reinterpret old proof.
+
+Both workspaces select Toko **0.42.4**, checksum
 `697efc1801f8c8c3f563364984efff1b941e84eef2cfaade40aece5e09bced2b`, producer
 `0ac9269cfb3084826df233bfbb187aa57093b5c2`; the receipt admits 99 files.
-Deployment is authorized for Types 0.20.2, Runtime/macros/guard 0.22.2 and
-Platform 0.32.2, in supplier order through one frozen batch. Source preparation
-includes the pending 0.42.1 vendor migration; the published batch used 0.41.0. The producer exporter proved and retired the
-old paths, installing helpers, Make fragments, catalogs and composite actions in
+Helpers, Make fragments, catalogs/actions and hooks now live under
 `vendor/toko-tooling/`. Root baseline/license/contribution paths remain canonical.
-Release/publication entrypoints remain explicit. Platform callers, fixture
-closures, Perl module lookup, CI actions and the selected formatting hook now use
-vendor paths. Validation runners receive the consumer root explicitly; the full
-19-stage release roster and three product groups remain unchanged.
+Explicit release/publication entrypoints, consumer-root runner binding, the three
+groups and full stage roster are preserved. Tool setup reuses admitted binaries.
+Snapshot, pins/inventory, formatting/docs and release-routing checks pass; evidence
+is under `/tmp/platform-toko0424-*.log` and
+`target/platform-release-routing.kHdOMf/`. Earlier policy receipt/reuse and group
+metadata fixtures remain at `target/release-plan-test.lJL9rn/` and
+`target/platform-group-preparation.sGVQcE/`; they use substituted product stages.
 
-The 0.42.4 payload refresh changes only shared release-command admission and Rust
-tool setup/owned-tree maintenance. Its baseline, tool pins, entrypoints and product
-source remain unchanged. Preview/install and tool admission passed, reusing
-compiled tools. Snapshot, pins/inventory, package listing, formatting and docs
-checks passed. Platform release/group/publication routing and refusal checks
-passed at `target/platform-release-routing.kHdOMf/`; no product gate was run.
-Qualification's Platform 0.32.1
-baseline/native Clippy and both Wasm feature closures passed under 0.42.3; those
-consumer inputs remain unchanged, with no installed measurement or performance
-claim. Prior vendor-migration
-checks on 0.42.1 covered CI, formatting/hooks, boundaries and consumer admission.
-Release receipt/reuse fixtures passed at `target/release-plan-test.lJL9rn/`;
-group rollback/custody and Runtime resume passed at
-`target/platform-group-preparation.sGVQcE/`. Their product stages were substitutes,
-not a full product gate or native macOS acceptance. New logs:
-`/tmp/platform-toko0424-*.log`, `/tmp/platform-qualification-0321-*.log`.
-The release workflow will run all 19 local stages per group; prior timings and
-nested dispatch were reviewed before capture. Hosted native CI stays asynchronous.
-Rust minimum/development/release is **1.100.0**, rustc
-`0ef1bc386059596dada8fb65b50425aab2ea637a`, LLVM 23.1.5; Cargo `3acc79c0c`.
-All real members inherit the common Cargo/Rust/Clippy/Rustdoc policy. The Make
-Clippy leaf refuses warnings on fresh/cached artifacts through Cargo; plain JSON
-collectors retain compiler denial. Scoped FFI/ownership expectations remain local.
-
-The maintained Runtime fixture lock still selects Testkit **0.102.0** with registry
-Platform 0.32.0 / Types 0.20.0. Qualification now explicitly adopts the latest
-published BLS baseline, **Platform 0.32.1**; Testkit's compatible native dependency
-also resolves to registry Platform 0.32.1 / Types 0.20.1 there. Its local candidate,
-Wasm-only BLS/IC0 backends and native Testkit/oracle/Tokio driver stay distinct.
-Old reports retain their original baselines; no new size/performance claim is made.
-No forced supplier cohort is required for release. Optional Wire 0.10.0 → 0.21.5
-and IC Build editor 0.73.0 → 0.84.0 refreshes remain deferred to the next
-maintenance batch, not permanent holds.
-
-`make deps-list` reports all five product groups/versions and qualification.
-Root dependency declarations now contain actual member requirements; generated
-fixture inputs live under `workspace.metadata.platform-fixtures.dependencies`.
-Their shared reader admits historical catalogs and refuses duplicate selections.
-The obsolete facade display alias is removed; release membership is unchanged.
-The link-only singleton guard is explicitly used under `executor`, retaining exact
-version/links refusal and raw IC0 isolation. Native-only Agent/asset consumer tests
-use dev-dependencies; portable API probes keep normal edges. The empty asset Wasm
-check is retired; actual product Wasm/DTO coverage remains.
+Qualification adopts exact registry BLS baseline **Platform 0.32.1**; Testkit
+0.102.0 resolves compatible registry Platform 0.32.1 / Types 0.20.1 there. Local
+candidate and Wasm-only BLS/IC0 backends stay distinct from its native driver.
+Baseline/native Clippy and both Wasm closures passed; no new instruction/size
+measurement is claimed. The maintained Runtime fixture still uses registry
+Platform 0.32.0 / Types 0.20.0. Optional Wire 0.21.5 and IC Build editor 0.84.0
+refreshes remain deferred, not release blockers. No forced supplier cohort is
+required. Compiler minimum/development/release is **1.100.0**; Cargo warning denial,
+scoped ownership/FFI expectations and all cryptographic/protocol checks remain.
 
 ## Runtime cleanup and qualification
 

@@ -9,8 +9,8 @@ See also the [Types ledger](../types/CHANGELOG.md).
 ### 🔧 Changed
 
 - Adopt Toko Tooling 0.42.4 and migrate installed helpers into
-  `vendor/toko-tooling/`. Update CI, formatting hooks, qualification fixtures and
-  release/publication callers; retain explicit entrypoint selection, readable
+  `vendor/toko-tooling/`. Update CI, browser qualification, formatting hooks and
+  release/publication callers and fixtures; retain explicit entrypoint selection, readable
   `deps-list` workspace labels and existing product release boundaries.
 - Refresh qualification’s published BLS baseline and Testkit’s compatible native
   registry dependency to Platform 0.32.1, retaining separate local candidates.
