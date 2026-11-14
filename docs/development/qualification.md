@@ -192,9 +192,10 @@ does not itself remove upstream code or shrink a canister.
 
 ## Development
 
-Use `make cloc` for classified workspace totals, `make cloc CLOC_DEPTH=0` for
-crate rows, or `make cloc CLOC_DEPTH=1` to include top-level modules. The script
-equivalents use `-d 0` or `-d 1`; `bash vendor/toko-tooling/scripts/dev/cloc.sh --json` retains schema 2. It
+Use `toko-cloc` for classified workspace totals, `toko-cloc -d 0` for
+crate rows, or `toko-cloc -d 1` to include top-level modules. Install the PATH
+launcher once using the reviewed [LOC setup](https://github.com/dragginzgame/toko-tooling/blob/bd24a0b7bc95b20a849b16f63d77f6551ff48ab4/docs/fleet/fleet-tools.md#cargo-workspace-loc-report).
+`toko-cloc --json` retains schema 2. It
 separates library/application, tests, examples, benchmarks, build/tooling and
 unclassified source, including inline test blocks. The report counts each source
 path once and reports macro expansion limits; it is not a linked-Wasm metric.
@@ -203,9 +204,9 @@ has no singular `test/` or `test.rs` paths. Generated qualification and benchmar
 packages declare `[package.metadata.toko-tooling.loc]` with the appropriate
 `category`, even when their library target carries a consumer proof. Use
 `--manifest /absolute/path/to/Cargo.toml` to classify an independent generated
-workspace explicitly; the default report covers the five main members only. Select one member with
-`bash vendor/toko-tooling/scripts/dev/cloc.sh -d 1 ic-platform-runtime`, or one branch with
-`bash vendor/toko-tooling/scripts/dev/cloc.sh -d 1 ic-platform-runtime::executor`. Depth is relative
+workspace explicitly; the default report includes both product and qualification
+workspaces. Select one member with `toko-cloc -d 1 ic-platform-runtime`, or one branch
+with `toko-cloc -d 1 ic-platform-runtime::executor`. Depth is relative
 to that selection; unknown crate/module names refuse.
 Terminal workspace names are green, crates blue and modules white. Redirected
 output, `TERM=dumb` or a nonempty `NO_COLOR` stays plain. Sibling scan progress

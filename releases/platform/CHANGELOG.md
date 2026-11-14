@@ -4,6 +4,19 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.32.3] - Unreleased
+
+### 🔧 Changed
+
+- Adopt Toko Tooling 0.43.0, including CDPATH-independent hook installation
+  and staged-only formatting. Replace the retired `make cloc` instructions with
+  `toko-cloc` and qualify the checkout-selected LOC launcher.
+- Refresh qualification’s exact published Platform baseline and Testkit’s native
+  registry Platform dependency to 0.32.2, retaining separate local candidate identities.
+- Adopt Testkit 0.104.0 in the independent qualification workspace; retain the
+  root Runtime fixture’s Testkit selection and keep native dependencies outside
+  both BLS Wasm graphs.
+
 ## [0.32.2] - 2026-11-13
 
 ### 🔧 Changed

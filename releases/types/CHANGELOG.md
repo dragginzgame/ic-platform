@@ -5,6 +5,12 @@ This group covers ic-platform-types. Its current series continues from published
 Initial 0.1 history remains below with its original scope. See the
 [Platform ledger](../platform/CHANGELOG.md) and [release index](../../CHANGELOG.md).
 
+## [0.20.3] - Unreleased
+
+### 🔧 Changed
+
+- Adopt Toko Tooling 0.43.0 for development and CI.
+
 ## [0.20.2] - 2026-11-13
 
 ### 🔧 Changed

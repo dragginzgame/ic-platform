@@ -4,6 +4,13 @@ This group owns ic-platform-runtime, ic-platform-macros and
 ic-platform-runtime-guard. Earlier macro/guard history remains in
 [history](../history.md) and [Platform](../platform/CHANGELOG.md).
 
+## [0.22.3] - Unreleased
+
+### 🔧 Changed
+
+- Adopt Toko Tooling 0.43.0 for development and CI, preserving Runtime/macros/guard
+  coordination and the exact singleton requirement.
+
 ## [0.22.2] - 2026-11-13
 
 ### 🔧 Changed
