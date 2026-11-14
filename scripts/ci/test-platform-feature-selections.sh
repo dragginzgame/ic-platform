@@ -54,6 +54,8 @@ while IFS= read -r mutation; do
 done <<'MUTATIONS'
 .dependencies += [{"name":"candid_parser", "kind":"dev"}]
 .features.candid = []
+.features["nns-registry-types"] -= ["dep:thiserror"]
+.features["nns-registry-types"] += ["dep:candid"]
 .features.extra = []
 .features.default = ["runtime"]
 .features.executor = []

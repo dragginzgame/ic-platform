@@ -1,7 +1,7 @@
 # External canister DTO contracts
 
 Platform supplies passive, explicitly selected external protocol records. These
-are adapters for existing IC Candid interfaces, not owned Wire endpoints or
+are adapters for existing IC Candid and Registry protobuf interfaces, not owned Wire endpoints or
 client workflows. The canonical Principal belongs to Types; Nat and the bounded
 binary codec belong to Platform. No DTO feature implicitly selects Agent, the
 host parser, executor, timers or a service implementation.

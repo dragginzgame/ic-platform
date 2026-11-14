@@ -25,7 +25,7 @@ require(([$metadata.packages[] | select(.name == "ic-platform-types")] | length 
 require((.features.default == []); "Platform must declare empty default features") |
 require((.features["candid-args"] == [] and .features["raw-rand"] == ["candid-args"]); "Small argument encoding and raw_rand must select no dependency or runtime") |
 require((.features["icp-ledger-types"] == ["candid-codec", "principal", "dep:crc32fast", "dep:sha2_11"]); "ICP DTOs use the owned codec and retain only their existing account derivation suppliers") |
-require((.features["candid-codec"] == ["principal", "dep:num-bigint", "num-bigint/serde"] and .features["nns-registry-types"] == ["candid-codec", "principal"] and .features["cmc-types"] == ["candid-codec", "principal"] and .features["cycles-ledger-types"] == ["candid-codec", "principal"] and .features["certified-assets-types"] == ["candid-codec"]); "Owned codec and migrated DTOs must not select upstream Candid") |
+require((.features["candid-codec"] == ["principal", "dep:num-bigint", "num-bigint/serde"] and .features["nns-registry-types"] == ["candid-codec", "principal", "dep:thiserror"] and .features["cmc-types"] == ["candid-codec", "principal"] and .features["cycles-ledger-types"] == ["candid-codec", "principal"] and .features["certified-assets-types"] == ["candid-codec"]); "Owned codec and migrated DTOs must not select upstream Candid") |
 require((.features["ic-protocol"] == ["principal", "certification-cbor", "dep:ic-transport-types"] and
     .features["ic-protocol-fixtures"] == ["ic-protocol"] and
     ([.dependencies[] | select(.name == "ic-transport-types")] | length == 1 and .[0].optional and .[0].req == "^0.49.1" and .[0].target == "cfg(not(target_family = \"wasm\"))"));
