@@ -14,7 +14,7 @@ host parser, executor, timers or a service implementation.
 | `icp-ledger-types` / `icp_ledger_types` | Legacy ICP transfer, encoded blocks/archive callbacks; separate account-identifier helper |
 | `cycles-ledger-types` / `cycles_ledger_types` | Canister creation and withdrawal |
 | Both `cycles-ledger-types` and `icrc-ledger-types` | Provider block/archive records, retaining `Value::Nat64` |
-| `nns-registry-types` / `nns_registry_types` | Optional-target `get_subnet_for_canister` contract |
+| `nns-registry-types` / `nns_registry_types` | Optional-target `get_subnet_for_canister`; bounded protobuf `get_value` and subnet-list adapters |
 | `certified-assets-types` / `certified_assets_types` | Native-only `get` and `get_chunk` |
 
 Assets remain absent on Wasm; selecting their feature there supplies only the
@@ -98,3 +98,33 @@ intentionally native-only. No full fleet matrix is part of this ordinary change.
 The small schemas preserve independent protocol expectations; public observations
 freeze original Serde admission and Candid bytes. Consumer-specific policy tests,
 installed IC acceptance, macOS and downstream adoption remain separate evidence.
+
+## Registry protobuf subset
+
+`nns_registry_types::protobuf` supplies bounded `get_value` request encoding,
+borrowed inline response decoding, and a bounded vector of borrowed subnet-list
+entry bytes. Query owns the selected key, endpoint, authentication, deadline,
+principal validation and report claims. The response's version is the selected
+key's last mutation version, not the Registry's global latest version. Preserve
+its raw timestamp and application error; decoding does not certify either.
+
+The implementation and byte fixtures were independently authored from protocol
+facts in IC revision `48b6f629d74fdc4dca2c1f8e14810a9342f72fbb`:
+[transport schema](https://github.com/dfinity/ic/blob/48b6f629d74fdc4dca2c1f8e14810a9342f72fbb/rs/registry/transport/proto/ic_registry_transport/pb/v1/transport.proto)
+and [subnet schema](https://github.com/dfinity/ic/blob/48b6f629d74fdc4dca2c1f8e14810a9342f72fbb/rs/protobuf/def/registry/subnet/v1/subnet.proto).
+No upstream decoder implementation or tests were used. Request encoding includes
+optional UInt64Value version presence; response decoding targets the inline arm
+of HighCapacityRegistryGetValueResponse and refuses chunk references explicitly.
+
+Callers provide byte, field, allocation and item budgets. Response blobs and
+error text remain borrowed. Subnet decoding counts and admits entries before
+allocating their reference vector, then fills it in a second bounded pass.
+Unknown scalar/fixed/blob fields are skipped under the field and byte budgets;
+wire groups, malformed lengths/varints, invalid error UTF-8 and duplicate singular
+fields are rejected. Missing content remains distinct from an empty inline value.
+No recursive generic protobuf engine, chunk retrieval or external dependency is
+introduced. The feature additionally selects the existing `thiserror` dependency.
+
+Focused fixtures under `nns_registry_types::protobuf::tests` cover independent
+request/response bytes, raw versions/time/error codes, unknown fields, malformed
+wire data, duplicate singular fields, chunk refusals and all caller limits.

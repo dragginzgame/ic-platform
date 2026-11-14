@@ -64,7 +64,7 @@ identities and may require explicit byte conversion at the boundary. See the
 | `cmc-types` | CMC top-up, mint notification and rate DTOs with the owned codec; no upstream Candid or payment policy |
 | `icp-ledger-types` | ICP transfer/archive DTOs with owned codec and typed query-reference admission; retained account derivation, no upstream Candid or CDK |
 | `cycles-ledger-types` | Cycles Ledger creation/withdrawal DTOs with owned codec; adding `icrc-ledger-types` supplies owned archive-callback codecs |
-| `nns-registry-types` | Registry subnet lookup DTOs with owned binary codec and canonical Types Principal; no upstream Candid or topology policy |
+| `nns-registry-types` | Registry lookup DTOs, bounded inline-value and subnet-list protobuf codecs, and canonical Types Principal; no topology policy |
 | `certified-assets-types` | Native-only asset get/get_chunk DTOs with owned codec; no upstream Candid, verification or host transport |
 | `signature-verification` | Owned canister-signature protocol verification and authenticated time; external BLS/certified-tree primitives, no Candid, registry Principal or runtime |
 | `ecdsa` | Native/Wasm K256 secp256k1 ECDSA keys, signatures and prehash traits; no RNG or runtime |

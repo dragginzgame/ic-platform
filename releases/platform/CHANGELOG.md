@@ -4,6 +4,25 @@ This group covers ic-platform. The retired PocketIC [ledger](../pocket-ic/CHANGE
 Earlier coordinated history is retained once in [history](../history.md).
 See also the [Types ledger](../types/CHANGELOG.md).
 
+## [0.33.0] - Unreleased
+
+### ✨ Added
+
+- Add bounded Registry protobuf request and inline-response codecs plus subnet-list
+  entry decoding under `nns-registry-types`, for Query subnet inventory. Preserve
+  source errors and record mutation version/timestamp; reject malformed input,
+  chunked values and exhausted caller limits before unchecked allocation.
+- Qualify independent protocol fixtures, unknown fields, duplicate singular fields,
+  empty-versus-missing content, overflowing lengths/varints and all codec budgets.
+
+### 🔧 Changed
+
+- Retain current published Types 0.20.3, Runtime/macros/guard 0.22.3 and Toko 0.43.0.
+  Keep the qualified Testkit 0.102.0 Runtime fixture and 0.104.0 BLS fixture graphs;
+  defer optional Wire 0.10.0 to 0.22.1 and release-editor refreshes to the next
+  dependency-maintenance batch. Existing qualification-baseline and lock drafts
+  remain outside this release.
+
 ## [0.32.3] - 2026-11-14
 
 ### 🔧 Changed

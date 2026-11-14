@@ -4,6 +4,8 @@
 //! schemas and provenance. Decoding does not authenticate a response or authorize
 //! a payment, retry, topology decision or resource allocation.
 
+pub mod protobuf;
+
 use crate::principal::Principal;
 use serde::Deserialize;
 

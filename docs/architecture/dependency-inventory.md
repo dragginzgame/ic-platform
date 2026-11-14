@@ -124,7 +124,7 @@ facade README feature table. Package release versions are represented as
 | ic-platform | icp-ledger-types | candid-codec, dep:crc32fast, dep:sha2_11, principal |
 | ic-platform | icrc-ledger-types | candid-codec, dep:crc32fast, dep:data-encoding, dep:hex, dep:num-bigint, dep:num-traits, dep:serde_bytes, dep:sha2_11, principal |
 | ic-platform | management-canister-types | candid-codec, dep:serde_bytes, principal |
-| ic-platform | nns-registry-types | candid-codec, principal |
+| ic-platform | nns-registry-types | candid-codec, dep:thiserror, principal |
 | ic-platform | principal | dep:ic-platform-types, dep:serde |
 | ic-platform | principal-self-authenticating | ic-platform-types/principal-self-authenticating, principal |
 | ic-platform | raw-rand | candid-args |
