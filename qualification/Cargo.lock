@@ -846,7 +846,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.22.2"
+version = "0.22.3"
 dependencies = [
  "ic0",
 ]
