@@ -21,7 +21,7 @@ ic-platform-macros = { version = "0.22.2", path = "crates/ic-platform-macros" }
 ic-platform-runtime = { version = "0.22.2", path = "crates/ic-platform-runtime", default-features = false }
 ic-platform-runtime-guard = { version = "=0.22.2", path = "crates/ic-platform-runtime-guard", default-features = false }
 
-ic-platform-types = { version = "0.20.2", path = "crates/ic-platform-types", default-features = false }
+ic-platform-types = { version = "0.20.3", path = "crates/ic-platform-types", default-features = false }
 
 crc32fast = "1.5"
 # Published ECDSA security floor; older consumer locks must not retain 0.7.5.
