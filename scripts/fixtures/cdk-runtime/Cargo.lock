@@ -821,7 +821,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.32.3"
+version = "0.33.0"
 dependencies = [
  "ic-certification",
  "ic-platform-macros",
@@ -1402,7 +1402,7 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 name = "platform-runtime-canister"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.32.3",
+ "ic-platform 0.33.0",
  "ic-platform-runtime",
  "ic-wire",
  "serde",
@@ -1412,7 +1412,7 @@ dependencies = [
 name = "platform-runtime-driver"
 version = "0.0.0"
 dependencies = [
- "ic-platform 0.32.3",
+ "ic-platform 0.33.0",
  "ic-testkit",
  "ic-wire",
  "serde",
