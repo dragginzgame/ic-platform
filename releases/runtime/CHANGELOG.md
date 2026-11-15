@@ -3,7 +3,22 @@
 Release group: `runtime`. Covered package: `ic-platform-runtime`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.23.0] - Unreleased
+## [0.23.1] - Unreleased
+
+Next compatible development increment; publication remains disabled.
+
+- Fix cross-task polling of submitted call futures: retain the first polling
+  context and reject a different task before cloning/replacing its waker or
+  consuming a response. Unpolled futures can still move into their initial task.
+  Add a Wasm regression reproduced against the previous implementation.
+
+- Qualify synchronous submission refusal within an executor task: preserve the
+  raw refusal, complete the local task, and admit a subsequent successful task.
+- Correct stale implementation-status prose after reviewing the 0.23.0 delivery.
+
+## [0.23.0] - GitHub source snapshot
+
+Delivered in commit `c7650ca`; not a registry publication or qualified release.
 
 Initial unpublished replacement after registry Runtime 0.22.5. This is an
 incomplete runtime, not a qualified executor or submission implementation.

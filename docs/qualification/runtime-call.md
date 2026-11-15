@@ -62,13 +62,13 @@ trap discards its changes. Bounded-wait SYS_UNKNOWN does not establish whether
 the callee executed. Installed proofs must retain these distinctions; native
 unwinding or a fake rejection cannot stand in for cleanup/termination evidence.
 
-Remaining integration work includes the single executor's method/task context,
-callback-time response/refund capture into the completion contract,
-awaited IC0 registration and rollback-safe cleanup. Consuming notify is now
-implemented separately at the [IC0 boundary](runtime-ic0-boundary.md). The current local
-unsafe policy permits only the maintainer-approved IC import/wrapper boundary;
-callback-ABI transfer still needs its written safety obligations and installed
-qualification. This model does not enable a second executor.
+The [awaited implementation](runtime-awaited.md) now supplies experimental
+method-attached task ownership, callback-time response/refund capture and integer
+callback registration. Entrypoint admission and installed rollback/cleanup proof
+remain pending. Consuming notify is implemented at the
+[IC0 boundary](runtime-ic0-boundary.md). Unsafe code remains limited to the
+maintainer-approved IC import/wrapper boundary; the custody model is supporting
+evidence and does not enable a second executor.
 
 Local validation passes ten tests (three preparation and seven custody-model
 tests), strict Clippy/Rustdoc, Wasm test compilation, formatting and both existing

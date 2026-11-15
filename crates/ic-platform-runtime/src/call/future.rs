@@ -37,10 +37,20 @@ thread_local! {
 /// A cleaned-up future never yields a completion. If first polled by the update
 /// executor, its callback resumes that task and cleanup terminates that task.
 /// Installed rollback qualification remains pending.
+///
+/// An unpolled future may move into a task. Once first polled, it must remain
+/// in the same executor task (or remain outside the executor for manual polling).
+/// Moving submitted interest does not move the IC callback's method context.
+///
+/// # Panics
+/// Polling after completion or from a different executor task panics before
+/// replacing the registered waker or consuming a response. IC execution-context
+/// and resource-limit violations may trap at submission.
 #[must_use = "an unpolled call future sends nothing"]
 pub struct CallFuture<'m, 'a> {
     request: Option<Call<'m, 'a>>,
     shared: Shared,
+    owner: Option<TaskToken>,
     terminal: bool,
 }
 
@@ -55,6 +65,7 @@ impl<'m, 'a> Call<'m, 'a> {
         CallFuture {
             request: Some(self),
             shared: Arc::new(Mutex::new(State::Pending(None))),
+            owner: None,
             terminal: false,
         }
     }
@@ -117,6 +128,17 @@ impl Future for CallFuture<'_, '_> {
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = self.get_mut();
         assert!(!this.terminal, "call future polled after completion");
+        let current = executor::current();
+        if this.request.is_some() {
+            this.owner = current;
+        } else {
+            // Callback custody stays attached to its first polling context.
+            // Reject before invoking any replacement-waker clone/drop hooks.
+            assert!(
+                this.owner == current,
+                "call future moved between executor tasks"
+            );
+        }
         let mut replacement = Some(cx.waker().clone());
         let old = {
             let mut state = this.shared.lock().unwrap();
@@ -134,7 +156,7 @@ impl Future for CallFuture<'_, '_> {
                 let shared = Arc::clone(&this.shared);
                 let value = Registration {
                     shared,
-                    task: executor::current(),
+                    task: this.owner,
                 };
                 let registration = CALLBACKS.with(|registry| registry.borrow_mut().insert(value));
                 let id = registration.map_err(|value| {

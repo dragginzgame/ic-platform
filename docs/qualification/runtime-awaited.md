@@ -1,6 +1,6 @@
 # Experimental awaited IC0 transport
 
-Runtime 0.23.0's wasm32 `call-ic0` feature now implements `Call::execute` and
+Runtime's wasm32 `call-ic0` feature implements `Call::execute` and
 `CallFuture`. This is a transport increment, not the completed Runtime executor.
 Applications must not treat it as a qualified replacement for method/task
 retention, query/migratory context admission or installed trap recovery.
@@ -25,6 +25,13 @@ callbacks; zero stays an observed zero. Waker clone, replacement destruction and
 wake happen outside the completion lock. The experimental executor resumes only
 the task captured at first poll. Cost/balance admission and IC0 assembly are
 shared with notify.
+
+From 0.23.1, each future also retains its first polling context locally. A later
+poll from another executor task, or a crossing between manual polling and task
+polling, traps before waker replacement or response consumption. The callback's
+method context cannot follow a moved Rust future. An unpolled future remains
+freely movable into its initial task; manual polling remains an advanced path
+whose caller owns IC method-context correctness.
 
 ## Cleanup boundary
 
@@ -98,7 +105,7 @@ destructor/waker reentrancy in the installed backend and the singleton executor
 remain required installed-canister evidence. The native reentrancy model is
 supporting evidence, not a substitute for those checks.
 
-## Local run — 2026-11-15
+## GitHub snapshot 0.23.0 — 2026-11-15
 
 Rust 1.100.0 / Linux x86-64 and Node 24.21.0 passed 22 native Runtime tests,
 strict Clippy/Rustdoc, Wasm test compilation, the fifteen-submission awaited corpus
@@ -110,3 +117,27 @@ supported hosts; hosted/macOS results for this increment remain pending.
 | --- | --- |
 | Awaited callback/executor fixture, exported table | `28b14b14084baf8f28c2a21f7a21924b84c96b73d9b081acf7b8251d87becbcc` |
 | Notify/cost fixture, no callback imports | `312585dc04078dae7ca34dce320eaa643b199d4c9c41c6bb77f53ccbe3efe1e4` |
+
+## Next development version 0.23.1
+
+The local 0.23.1 increment adds synchronous submission refusal inside a root
+task. The task receives the exact raw refusal and completes; a subsequent task
+submits and completes normally. Attempting delivery through the refused call's
+former callback ID traps, proving that synchronous refusal removed its authority.
+
+The cross-task polling regression first failed against the previous code:
+the second task replaced the first task's waker without trapping. With the
+ownership check it traps before that replacement and submits no additional call.
+The fixture does not treat the trapped Node instance as replica rollback evidence.
+
+`make qualify-runtime-call qualify-runtime-awaited qualify-runtime-ic0` passes
+22 native tests, strict Clippy/Rustdoc, Wasm compilation, the expanded corpus of
+18 submissions, 11 executor task admissions (including the trapped transfer),
+six negative cases, notify/cost checks and dependency graphs on the same
+Linux/Rust/Node toolchain. This is local development evidence, not hosted CI or
+installed-canister rollback proof.
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Awaited callback/executor fixture | `4c993ee904d6a724c2b2d22c2d20a8fe30843a53b49fcbc321904e25469a02c1` |
+| Notify/cost fixture | `2fe710d19540364ca8687bb86365e2aa796f45a47e7114b7aab533c606325d1a` |

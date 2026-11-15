@@ -6,7 +6,8 @@ const bytes = readFileSync(new URL('../target/runtime-awaited/wasm32-unknown-unk
 const module = new WebAssembly.Module(bytes);
 const expected = ['cost_call','canister_liquid_cycle_balance128','call_new','call_on_cleanup','call_with_best_effort_response','call_data_append','call_cycles_add128','call_perform','in_replicated_execution','msg_cycles_refunded128','msg_reject_code','msg_reject_msg_size','msg_reject_msg_copy','msg_arg_data_size','msg_arg_data_copy'];
 assert.deepEqual(WebAssembly.Module.imports(module).map(x => `${x.module}/${x.kind}/${x.name}`).sort(), expected.map(x => `ic0/function/${x}`).sort());
-const plans = [ ['reply',7], ['reject',null], ['drop',0], ['cleanup',null], ['refuse',null], ['after',0xffffffff], ['exec-reply',null], ['exec-cleanup',null], ['exec-after',null], ['a-first',null], ['b',null], ['a-second',null], ['pair-left',null], ['pair-right',null], ['survivor',null] ];
+const plans = [ ['reply',7], ['reject',null], ['drop',0], ['cleanup',null], ['refuse',null], ['after',0xffffffff], ['exec-reply',null], ['exec-cleanup',null], ['exec-after',null], ['a-first',null], ['b',null], ['a-second',null], ['pair-left',null], ['pair-right',null], ['survivor',null], ['exec-refuse',null], ['after-refusal',null] ];
+plans.push(['handoff',null]);
 function harness() {
   let instance, assembly, response;
   let entryReplicated = true, entryObservations = 0;
@@ -43,7 +44,7 @@ function harness() {
       event('perform'); const wanted=['cost','balance','new','cleanup'];
       if(assembly.timeout!==null) wanted.push('wait');
       if(assembly.method!=='refuse') wanted.push('data','cycles'); wanted.push('perform');
-      assert.deepEqual(assembly.events,wanted); const refused=assembly.method==='refuse';
+      assert.deepEqual(assembly.events,wanted); const refused=['refuse','exec-refuse'].includes(assembly.method);
       submitted.push(assembly); assembly=undefined; return refused?-1:0;
     },
     in_replicated_execution() {
@@ -95,10 +96,17 @@ run.step(); run.deliver(13,0,[99],999n); // Orphan callback retains custody, but
 run.step(); run.deliver(14,0,[30],301n);
 run.step(); assert.equal(run.submitted.length,15);
 assert.equal(run.observations(),14);
+run.step(); run.deliver(16,0,[40],401n);
+run.step(); assert.equal(run.submitted.length,17);
+assert.equal(run.observations(),16);
+run.step(); assert.equal(run.submitted.length,18);
+assert.throws(()=>run.step(),WebAssembly.RuntimeError,'submitted call cannot move to a different executor task');
+assert.equal(run.submitted.length,18);
+assert.throws(()=>run.deliver(15,0,[]),WebAssembly.RuntimeError,'refused submission must retain no callback authority');
 assert.throws(()=>run.deliver(13,0,[]),WebAssembly.RuntimeError,'orphan registration must retire exactly once');
 assert.throws(()=>run.cleanup(3),WebAssembly.RuntimeError,'duplicate cleanup must refuse');
 const stale=harness(); stale.step(); stale.deliver(0,0,[0,128,255],(1n<<100n)+9n);
 assert.throws(()=>stale.deliver(0,0,[]),WebAssembly.RuntimeError,'stale callback must refuse');
 const malformed=harness(); malformed.step();
 assert.throws(()=>malformed.deliver(0,4,[255]),WebAssembly.RuntimeError,'malformed rejection UTF-8 must trap');
-console.log(JSON.stringify({admission:'passed',submissions:15,executor_tasks:7,negative_cases:4,sha256:createHash('sha256').update(bytes).digest('hex'),node:process.version}));
+console.log(JSON.stringify({admission:'passed',submissions:18,executor_tasks:11,negative_cases:6,sha256:createHash('sha256').update(bytes).digest('hex'),node:process.version}));

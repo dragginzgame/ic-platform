@@ -1,7 +1,8 @@
 # Development
 
 The product workspace contains unpublished Protocol 0.1.0 and the initial Types
-0.21.0 candidate, plus Runtime 0.23.0 call preparation (following registry 0.22.5).
+0.21.0 candidate, plus Runtime 0.23.1 development after the 0.23.0 GitHub snapshot
+(following registry 0.22.5).
 Types follows the published 0.20.4 baseline; its identity
 slice is not yet a replacement for the complete published identity contract.
 The private consumer fixture also starts at 0.1.0. Neither package name appeared
@@ -343,7 +344,7 @@ is needed. Repository setup and qualification notes supporting Protocol remain
 in that ledger; they do not create releases for private test packages.
 
 Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. Runtime owns its 0.23.0 candidate; its tightly coupled guard
+pending changelog. Runtime owns its 0.23.1 candidate; its tightly coupled guard
 and macros will join when implemented. Platform and Browser remain future groups. Add each
 actual product package and its own changelog to the policy when implemented.
 Check its crates.io baseline at that point under the existing version-selection

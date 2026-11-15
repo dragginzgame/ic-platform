@@ -13,6 +13,7 @@ use std::{
 };
 
 mod executor;
+mod handoff;
 mod interleaved;
 
 thread_local! {
@@ -115,7 +116,8 @@ pub(super) fn step() {
             assert_eq!(rejection.message(), "raw");
         }
         6..=9 => executor::step(phase - 6),
-        10..=16 => interleaved::step(phase - 10),
+        10..=18 => interleaved::step(phase - 10),
+        19..=20 => handoff::step(phase - 19),
         _ => panic!("unexpected fixture entry"),
     }
 }

@@ -56,12 +56,13 @@ are implemented. Production consumer migration remains pending.
 Protocol still uses registry Types 0.20.4 until the replacement
 cohort is qualified; these are distinct Rust type identities.
 
-Runtime `0.23.0` now begins the next replacement slice with opt-in inert Call
+Runtime `0.23.1` is the next unpublished development version after the GitHub
+delivery of `0.23.0`. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
-implemented request model from the pending submission, callback and executor work.
-An executable test-only custody proposal now checks first-poll submission and
-post-drop callback ownership before the production backend is introduced.
+implemented request model from the experimental IC0/executor and pending installed
+qualification. A test-only custody model supplies supporting evidence for
+first-poll submission and post-drop callback ownership.
 Completion records now retain exact responses, unknown rejection codes and refund
 snapshots, with explicit uncertain outcomes and no inferred retry policy.
 An opt-in wasm32 `call-ic0` slice now reads system call costs through the approved

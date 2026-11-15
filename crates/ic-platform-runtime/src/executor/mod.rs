@@ -49,7 +49,7 @@ pub enum EntryError {
     Capacity,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) struct TaskToken(u64);
 type UserFuture = Pin<Box<dyn Future<Output = ()>>>;
 

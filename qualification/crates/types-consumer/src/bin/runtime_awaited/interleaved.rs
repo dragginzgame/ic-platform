@@ -1,5 +1,5 @@
 use candidate_runtime::{
-    call::{Call, CallFuture, Outcome, Wait},
+    call::{Call, CallFuture, Outcome, SubmitError, Wait},
     executor::{TaskHandle, TaskState, run_update},
 };
 use candidate_types::Principal;
@@ -106,6 +106,37 @@ pub(super) fn step(phase: u32) {
             states(&[Completed, Completed, TerminatedByCleanup, Completed]);
             PAIR_POLLS.with(|value| assert_eq!(value.get(), 1));
             PAIR_DROPS.with(|value| assert_eq!(value.get(), 1));
+        }
+        7 => {
+            let handle = run_update(async {
+                let error = call("exec-refuse").await.unwrap_err();
+                assert_eq!(
+                    error,
+                    SubmitError::Refused(std::num::NonZeroU32::new(u32::MAX).unwrap())
+                );
+            })
+            .unwrap();
+            assert_eq!(handle.state(), Completed);
+            retain(handle);
+            retain(run_update(receive("after-refusal", 40, 401)).unwrap());
+            states(&[
+                Completed,
+                Completed,
+                TerminatedByCleanup,
+                Completed,
+                Completed,
+                Running,
+            ]);
+        }
+        8 => {
+            states(&[
+                Completed,
+                Completed,
+                TerminatedByCleanup,
+                Completed,
+                Completed,
+                Completed,
+            ]);
         }
         _ => panic!("unexpected interleaving phase"),
     }
