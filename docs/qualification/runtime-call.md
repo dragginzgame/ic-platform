@@ -32,48 +32,30 @@ lint. Selected Wasm normal/build graphs pass: default is dependency-free and
 published Runtime or hash supplier. Hosted/macOS and installed execution evidence
 remain pending.
 
-## First-poll custody proposal
+## Production custody qualification
 
-`call/tests/custody.rs` now contains an executable, test-only ownership model.
-It consumes the actual public Call request through a private test transport.
-No model implementation is compiled into the product, and no public execute
-method claims an available backend. The model is newly written; the published
-0.22.5 callback implementation was inspected but not copied.
+The exploratory call state machine was retired in Runtime 0.23.4. Its separate
+transport/future implementation tested itself and no longer supplied useful
+production regression coverage.
 
-The proposed transition owns two separate interests: a future's completion
-handle and one consuming delivery token retained by successful submission.
-The token contains no request borrow. A synchronous refusal drops it; dropping
-local interest after submission leaves it alive until delivery. Delivery into
-abandoned state discards the observation without waking a task. A completed
-future cannot submit again. Observed refund absence is distinct from zero.
+The real CallFuture now uses private `call/state.rs` for waker replacement,
+completion publication and retirement. Native tests exercise those exact
+functions, checking that Wake/Drop can reenter the completion mutex after it is
+released. They cover replacement, publication, abandonment and cleanup, plus
+retention of the captured completion and delivery after abandonment. Safe Wake
+fixtures do not exercise arbitrary RawWaker clone callbacks; cloning remains
+outside the lock by construction.
 
-The new tests cover unpolled drop, first-poll-only submission, repeated pending
-polls, exact request facts, raw synchronous refusal, callback lifetime after
-future/request-source destruction, terminal repoll, and reentrant Wake/Drop
-inspection during waker replacement, completion and abandonment. Waker cloning
-is outside the lock by construction; arbitrary RawWaker clone callbacks are not
-exercised by these safe-Wake fixtures. Native mutex behavior is not an IC task
-or rollback model.
+The [awaited ABI fixture](runtime-awaited.md) exercises the real transport:
+unpolled drop, first-poll-only submission, repeated pending polls, refusal,
+callback survival after borrowed request storage is destroyed, exact captured
+responses/refunds, terminal repoll refusal and orphan retirement. No second
+transport implementation is maintained for these checks.
 
-The [IC system API](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/)
-was reviewed on 2026-11-15. Submission commits only after the enclosing execution
-returns without trapping. A response callback trap can invoke cleanup; a cleanup
-trap discards its changes. Bounded-wait SYS_UNKNOWN does not establish whether
-the callee executed. Installed proofs must retain these distinctions; native
-unwinding or a fake rejection cannot stand in for cleanup/termination evidence.
-
-The [awaited implementation](runtime-awaited.md) now supplies experimental
-method-attached task ownership, callback-time response/refund capture and integer
-callback registration. Entrypoint admission and installed rollback/cleanup proof
-remain pending. Consuming notify is implemented at the
-[IC0 boundary](runtime-ic0-boundary.md). Unsafe code remains limited to the
-maintainer-approved IC import/wrapper boundary; the custody model is supporting
-evidence and does not enable a second executor.
-
-Local validation passes ten tests (three preparation and seven custody-model
-tests), strict Clippy/Rustdoc, Wasm test compilation, formatting and both existing
-Runtime graph selections. The custody model has executed on Linux only;
-Wasm compilation does not establish execution or installed-canister behavior.
+The [installed probe](runtime-installed.md) adds immediate/resumed-handler traps,
+rollback and successful cleanup. Cleanup failure, bounded-wait uncertainty and
+the other listed installed gates remain open. Native unwinding and direct host
+callback invocation do not substitute for installed rollback evidence.
 
 ## Completion observation contract
 
@@ -91,19 +73,12 @@ invented settlement meaning. Neither rejection nor uncertainty grants retry
 permission. The constructors never synthesize a response for local termination.
 
 Refunds remain `Option<u128>`: absence, zero and the maximum value are distinct.
-The record is a captured observation, not a settlement ledger. The test-only
-custody model now delivers this production type; its delayed-poll fixture
-changes the simulated ambient refund after delivery and verifies the original
-snapshot survives alongside exact rejection text and unknown codes. Actual
-callback-time system reads now execute in the [awaited ABI fixture](runtime-awaited.md);
-installed evidence remains pending.
-
-Fourteen tests now pass locally on Linux, alongside strict Clippy/Rustdoc,
-Wasm test compilation and both Runtime dependency graph selections. The added
-cases cover reply-buffer ownership, empty/large payloads, Unicode/NUL rejection
-text, all known codes, unknown codes and refund snapshot retention. This replaces
-the model-only reply record without claiming that the model is a production
-execution backend.
+The record is a captured observation, not a settlement ledger. Production-state
+tests retain exact captured values; the real awaited ABI fixture reads refunds
+at callback time before wake and later polling. Completion constructor tests
+cover reply-buffer ownership, empty/large payloads, Unicode/NUL rejection text,
+known/unknown codes and absent/zero/full-width refunds. The consolidated native
+Runtime selection passes 18 tests; it no longer counts eight model-only tests.
 
 ## Independent local-cohort consumer
 

@@ -5,6 +5,12 @@ read-only Platform issue review on 2026-11-15. GitHub owns issue status and
 resolution history. This is not a complete consumer inventory or a duplicate
 issue tracker. No row establishes replacement qualification.
 
+Active follow-up for the two remaining old-repository issues now lives here:
+[Registry settings #3](https://github.com/dragginzgame/ic-platform-new/issues/3)
+and [crypto/Agent advisory #4](https://github.com/dragginzgame/ic-platform-new/issues/4).
+Old #169 and #50 were closed as migrated at the maintainer's request; their
+links below remain provenance, not active work queues or claims of completion.
+
 ## First slice: Cloud Engine projection
 
 The named consumer contract is Query's selected `getEngineViews` topology read,

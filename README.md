@@ -56,13 +56,13 @@ are implemented. Production consumer migration remains pending.
 Protocol still uses registry Types 0.20.4 until the replacement
 cohort is qualified; these are distinct Rust type identities.
 
-Runtime `0.23.3` is the current GitHub source snapshot, with registry publication
+Runtime `0.23.4` is the current GitHub source snapshot, with registry publication
 disabled. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
 implemented request model from the experimental IC0/executor and pending installed
-qualification. A test-only custody model supplies supporting evidence for
-first-poll submission and post-drop callback ownership.
+qualification. Tests exercise the production completion-state transitions and
+real Wasm callbacks for first-poll submission and post-drop callback ownership.
 Completion records now retain exact responses, unknown rejection codes and refund
 snapshots, with explicit uncertain outcomes and no inferred retry policy.
 An opt-in wasm32 `call-ic0` slice now reads system call costs through the approved
@@ -72,7 +72,10 @@ first poll and captures responses through integer callback handles. Its
 [callback evidence](docs/qualification/runtime-awaited.md) covers real Wasm callback
 execution and an experimental method-attached executor: callbacks resume their
 owning task, cleanup terminates it, and handles expose local lifecycle state.
-Installed-canister execution and rollback remain pending.
+The first [installed rollback probe](docs/qualification/runtime-installed.md)
+covers immediate updates and inter-canister awaits, including traps before/after
+reply and successful callback cleanup. Cleanup failure and the remaining
+execution/rollback cases remain pending.
 Runtime's `system::read_args(maximum)` now supplies bounded raw argument capture
 for that entrypoint work, refusing oversized messages before allocation/copy.
 `entrypoints::prepare` composes a caller-supplied pre-copy guard and decoder
@@ -84,11 +87,11 @@ that admission with one executor-owned handler. `system::reply` supplies an
 explicit raw reply with one ordinary reply authority per task. Broader export
 modes, automatic encoding/reply ownership and installed execution remain pending.
 The opt-in `entrypoint-macros` feature now exposes an explicit manual-reply
-`update` attribute from `ic-platform-macros` 0.23.3. Its
+`update` attribute from `ic-platform-macros` 0.23.4. Its
 [generated exports](docs/qualification/runtime-exports.md) run in a separate Wasm
 consumer, including rejection and compile-fail checks. Queries and automatic
 reply generation remain unsupported in this initial macro slice.
-The separate `ic-platform-runtime-guard` now joins the Runtime group at 0.23.3.
+The separate `ic-platform-runtime-guard` shares Runtime's 0.23.4 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 

@@ -1,7 +1,5 @@
 use super::{Call, Principal, Wait};
 
-mod custody;
-
 #[test]
 fn borrowed_inputs_and_request_facts_remain_exact() {
     let method = String::from("  方法\0 ");

@@ -11,6 +11,25 @@ the raw submission result. Success keeps an owned completion registration
 independent of the future and all request borrows. Dropping the future retires
 local interest; a later callback still removes its physical registration.
 
+## Consolidated 0.23.4 evidence
+
+The exploratory native call model has been removed. Native tests now invoke the
+production completion-state functions, including Wake/Drop lock reentrancy.
+The Wasm dropped-interest case submits with a temporary borrowed method and
+argument buffer, destroys them and the future, then receives its callback.
+A retained refused future is polled again and must trap without another
+submission. The host corpus passes 21 submissions, 14 task admissions and seven
+negative cases; native Runtime coverage is 18 tests of maintained code.
+
+Both compiler-fixture groups pass through one runner (two positive controls,
+eight expected rejections), with strict Clippy/Rustdoc and graph checks.
+The [installed immediate/awaited rollback corpus](runtime-installed.md) also
+passes after consolidating the shared state implementation. Prior sections'
+incremental test counts and artifact hashes below remain historical observations.
+
+Current awaited artifact SHA-256:
+`014a33b106ba0c642fdbb85ce9596a90c63eca4a8918900fa9e2303a7e4d3fcc`.
+
 ## Identity and borrow discipline
 
 A private safe registry allocates nonzero u32 handles monotonically. Removed

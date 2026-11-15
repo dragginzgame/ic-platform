@@ -1,6 +1,10 @@
 //! Lazy transport completion with integer callback custody, not an executor.
 
-use super::{Call, Completion, SubmitError, ic0, registry::Registry};
+use super::{
+    Call, Completion, SubmitError, ic0,
+    registry::Registry,
+    state::{Shared, State, publish, replace_waker, retire},
+};
 use crate::executor::{self, TaskToken};
 use std::{
     cell::RefCell,
@@ -8,18 +12,9 @@ use std::{
     num::NonZeroU32,
     pin::Pin,
     sync::{Arc, Mutex},
-    task::{Context, Poll, Waker},
+    task::{Context, Poll},
 };
 
-enum State {
-    Pending(Option<Waker>),
-    Complete(Completion),
-    Abandoned,
-    Cleanup,
-    Consumed,
-}
-
-type Shared = Arc<Mutex<State>>;
 struct Registration {
     shared: Shared,
     task: Option<TaskToken>,
@@ -71,15 +66,6 @@ impl<'m, 'a> Call<'m, 'a> {
     }
 }
 
-fn retire(shared: &Shared, replacement: State) {
-    let previous = {
-        let mut state = shared.lock().unwrap();
-        std::mem::replace(&mut *state, replacement)
-    };
-    // Waker destruction may execute arbitrary code.
-    drop(previous);
-}
-
 fn take(id: u32) -> Registration {
     CALLBACKS
         .with(|registry| registry.borrow_mut().take(id))
@@ -90,23 +76,7 @@ pub(super) extern "C" fn response(id: u32) {
     let Registration { shared, task } = take(id);
     // Capture before publishing or waking; these observations belong to this
     // callback, never to whichever callback happens to precede a later poll.
-    let mut completion = Some(ic0::capture());
-    let previous = {
-        let mut state = shared.lock().unwrap();
-        if matches!(*state, State::Pending(_)) {
-            Some(std::mem::replace(
-                &mut *state,
-                State::Complete(completion.take().unwrap()),
-            ))
-        } else {
-            assert!(matches!(*state, State::Abandoned));
-            None
-        }
-    };
-    if let Some(State::Pending(Some(waker))) = previous {
-        waker.wake();
-    }
-    drop(completion);
+    publish(&shared, ic0::capture());
     if let Some(task) = task {
         executor::drive(task);
     }
@@ -139,16 +109,7 @@ impl Future for CallFuture<'_, '_> {
                 "call future moved between executor tasks"
             );
         }
-        let mut replacement = Some(cx.waker().clone());
-        let old = {
-            let mut state = this.shared.lock().unwrap();
-            match &mut *state {
-                State::Pending(waker) => std::mem::replace(waker, replacement.take()),
-                _ => None,
-            }
-        };
-        drop(old);
-        drop(replacement);
+        replace_waker(&this.shared, cx.waker());
 
         if let Some(request) = this.request.take() {
             let result = (|| {

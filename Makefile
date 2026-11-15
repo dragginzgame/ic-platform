@@ -37,6 +37,8 @@ help:
 	  'qualify-runtime-awaited  Execute first-poll and callback custody in the Wasm host' \
 	  'qualify-runtime-guard  Check exact guard versions and mixed-executor refusal' \
 	  'qualify-runtime-exports  Build and execute explicit generated IC update exports' \
+	  'install-runtime-server / runtime-server-check  Prepare or verify Testkit PocketIC' \
+	  'qualify-runtime-installed  Execute installed initial-update rollback cases' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
 	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
 	  'fmt / fmt-check        Format or check Rust and Cargo manifests'
@@ -86,11 +88,13 @@ qualify-runtime-consumer: qualification-tooling-check
 check-runtime-consumer-graph: qualification-tooling-check
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --no-default-features --features runtime-call --forbid-pattern '^(?!(ic-platform-runtime|$(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-runtime=1
 
-.PHONY: qualify-runtime-ic0
-qualify-runtime-ic0: qualification-tooling-check
+.PHONY: lint-runtime-ic0 qualify-runtime-ic0
+lint-runtime-ic0: qualification-tooling-check
 	cargo clippy --offline --locked -p ic-platform-runtime --features call-ic0 --all-targets --target wasm32-unknown-unknown -- -D warnings
-	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-runtime --features call-ic0 --target wasm32-unknown-unknown --no-deps
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --all-targets --target wasm32-unknown-unknown -- -D warnings
+
+qualify-runtime-ic0: lint-runtime-ic0
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-runtime --features call-ic0 --target wasm32-unknown-unknown --no-deps
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --release --target wasm32-unknown-unknown --target-dir target/types-wasm/runtime-ic0
 	node qualification/runtime-ic0.mjs
 	node qualification/runtime-arguments.mjs
@@ -98,11 +102,23 @@ qualify-runtime-ic0: qualification-tooling-check
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --target wasm32-unknown-unknown --no-default-features --features runtime-ic0 --forbid-pattern '^(?!(ic-platform-runtime|ic-platform-runtime-guard|$(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1
 
 .PHONY: qualify-runtime-awaited
-qualify-runtime-awaited: qualification-tooling-check
-	cargo clippy --offline --locked -p ic-platform-runtime --features call-ic0 --all-targets --target wasm32-unknown-unknown -- -D warnings
-	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --bin runtime-awaited --target wasm32-unknown-unknown -- -D warnings
+qualify-runtime-awaited: lint-runtime-ic0
 	$(ENGINE_WASM_ENV) CARGO_ENCODED_RUSTFLAGS='-Clink-arg=--export-table' cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --bin runtime-awaited --release --target wasm32-unknown-unknown --target-dir target/runtime-awaited
 	node qualification/runtime-awaited.mjs
+
+.PHONY: install-runtime-server runtime-server-check qualify-runtime-installed
+install-runtime-server:
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- setup
+
+runtime-server-check:
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- check
+
+qualify-runtime-installed: qualification-tooling-check runtime-server-check
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --all-targets -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-rollback
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-rollback --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-rollback|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
 
 .PHONY: qualify-runtime-guard
 qualify-runtime-guard: qualification-tooling-check
@@ -114,7 +130,7 @@ qualify-runtime-guard: qualification-tooling-check
 
 .PHONY: qualify-runtime-input-ui
 qualify-runtime-input-ui: qualification-tooling-check
-	node qualification/runtime-input-ui.mjs
+	node qualification/runtime-ui.mjs input
 
 .PHONY: qualify-runtime-exports
 qualify-runtime-exports: qualification-tooling-check
@@ -126,7 +142,7 @@ qualify-runtime-exports: qualification-tooling-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-exports --target wasm32-unknown-unknown --all-targets -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-exports --target wasm32-unknown-unknown --release --target-dir target/runtime-exports
 	node qualification/runtime-exports.mjs
-	node qualification/runtime-exports-ui.mjs
+	node qualification/runtime-ui.mjs exports
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-exports --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-exports|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
 
 check-types-graphs: qualification-tooling-check

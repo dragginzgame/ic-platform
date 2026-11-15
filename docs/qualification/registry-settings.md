@@ -3,7 +3,8 @@
 The opt-in `registry-settings` feature implements a selected protobuf decoder in
 `ic-platform-protocol`. It accepts an already extracted SubnetRecord. Registry
 transport, envelope decoding, authentication and Query reporting remain outside
-this slice. This is partial progress on [Platform #169](https://github.com/dragginzgame/ic-platform/issues/169),
+this slice. This is partial progress on [replacement #3](https://github.com/dragginzgame/ic-platform-new/issues/3),
+migrated from [Platform #169](https://github.com/dragginzgame/ic-platform/issues/169),
 not completion of the consumer requirement.
 
 ## Contract and provenance

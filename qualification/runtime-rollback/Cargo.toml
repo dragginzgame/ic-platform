@@ -1,0 +1,26 @@
+[package]
+name = "runtime-rollback"
+version = "0.1.0"
+publish = false
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+
+[target.'cfg(any())'.dev-dependencies]
+toko-tooling.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[package.metadata.toko-tooling.loc]
+category = "tests"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+candidate-runtime = { workspace = true, features = ["entrypoint-macros"] }
+candidate-types.workspace = true
+
+[lints]
+workspace = true

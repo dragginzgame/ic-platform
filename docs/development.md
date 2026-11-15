@@ -1,7 +1,7 @@
 # Development
 
 The product workspace contains unpublished Protocol 0.1.0 and the initial Types
-0.21.0 candidate, plus the Runtime 0.23.3 GitHub source snapshot
+0.21.0 candidate, plus the Runtime 0.23.4 GitHub source snapshot
 (following registry 0.22.5).
 Types follows the published 0.20.4 baseline; its identity
 slice is not yet a replacement for the complete published identity contract.
@@ -54,7 +54,8 @@ make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.4
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
-requirements. It covers the root and a qualification workspace when one exists.
+requirements. It covers the root and `qualification/Cargo.toml`, including the
+`runtime-installed` member. Both listing and updates use that same selection.
 For a deliberate Toko upgrade, review the new release, edit the exact root pin,
 update the lock, then run `make toko-tooling-preview` and `make toko-tooling-update`.
 Do not edit installed bytes or their receipt.
@@ -99,13 +100,18 @@ CI performs this preparation explicitly. See the
 decoder signatures using maintained compile-pass/fail Wasm fixtures. The driver
 uses temporary manifests and checks structured compiler error codes; it does not
 generate or replace Rust source.
+Input and export fixtures share `qualification/runtime-ui.mjs`, selected with
+`input` or `exports`. Rust error-code checks require a primary span in the
+maintained fixture; export-name conflicts still reach real Wasm code generation.
+`qualify-runtime-ic0` and `qualify-runtime-awaited` share `lint-runtime-ic0`, so
+one combined Make invocation runs the common Clippy selection once.
 
 `make qualify-runtime-exports` tests the macro crate, builds a dedicated Wasm
 export consumer and invokes its actual IC exports in a host. It also builds
 maintained invalid declarations to verify compiler/codegen refusals and checks
-the one-Runtime/one-guard/one-macro/one-Types graph. The new export fixture is the
-only qualification package using the approved generated export-attribute
-exception; older qualification targets retain crate-root unsafe forbids.
+the one-Runtime/one-guard/one-macro/one-Types graph. Export and installed-rollback
+fixtures use the approved generated export-attribute exception; older
+non-export qualification targets retain crate-root unsafe forbids.
 
 `make qualify-types` tests local Principal and Account/Subaccount identity, text and Serde contracts,
 runs strict Clippy and Rustdoc, and compiles its tests for Wasm. It selects the
@@ -130,7 +136,14 @@ make fmt-check
 
 These select the Cloud Engine request encoder, not a full future Platform gate.
 `make fmt` uses the installed formatting tools for Rust and Cargo manifests.
-No commit hook has been activated. Literal-frame unit tests stay with the product;
+Run `make install-hooks` once per clone after preparing tools. This activates the
+canonical Toko pre-commit hook through repository-local Git configuration; the
+installer refuses to replace existing hooks. The hook and `make fmt-check` use
+the same two-workspace formatting selection. Git configuration is local and
+must be set up again in a fresh checkout. Local Linux activation and the Toko
+consumer fixture passed automatic formatting/dependency sorting, partial-stage
+refusal, formatter-failure isolation and preservation of unrelated working edits.
+macOS hook behavior remains pending native evidence. Literal-frame unit tests stay with the product;
 the separate public consumer proof lives under `qualification/`.
 
 ## Initial contract and implementation boundary
@@ -173,7 +186,8 @@ compiles the portable consumer tests for Wasm. It does not
 execute Wasm or prove installed-canister/macOS behavior. `qualification/` owns
 its manifest, lockfile and target directory, has no release group and is excluded
 from product membership. Product code has no reverse qualification dependency.
-`make deps-list`, `make deps-update` and formatting cover both workspaces.
+`make deps-list`, `make deps-update` and formatting cover both workspaces,
+including the installed-runtime driver.
 
 The selected decoder requires exactly one vector result. Unknown fields are
 validated and skipped without retaining their values. It accepts the standard
@@ -356,6 +370,23 @@ fee/status corpus using the existing runner's `marketplace` selection. It report
 admission and artifact identity without a size threshold; see the
 [executed Wasm evidence](qualification/marketplace-wasm.md).
 
+## Installed Runtime qualification
+
+`qualification/runtime-installed` is a native driver package in the standard
+qualification workspace. The candidate pins `thiserror = "=2.0.18"` to align
+with PocketIC. It consumes
+the Wasm built from `qualification/runtime-rollback`, without linking candidate
+Rust identities into the native adapter. Prepare its locked sources with
+`cargo fetch --locked --manifest-path qualification/Cargo.toml`.
+
+Run `make install-runtime-server` for explicit Testkit-owned server provisioning,
+`make runtime-server-check` for offline admission, and
+`make qualify-runtime-installed` for the focused immediate/awaited update rollback probe.
+The latter checks host/fixture Clippy, actual installed execution and the Wasm
+dependency graph. See [the evidence and limits](qualification/runtime-installed.md).
+Server setup supports the existing Linux and macOS CI hosts; only local Linux
+execution is established at this point.
+
 ## Release-group ownership
 
 The [group policy](../ci/cargo-release-groups.json) records implemented product
@@ -370,7 +401,7 @@ is needed. Repository setup and qualification notes supporting Protocol remain
 in that ledger; they do not create releases for private test packages.
 
 Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. Runtime and its exact guard share version 0.23.3; advance both
+pending changelog. Runtime and its exact guard share version 0.23.4; advance both
 and the exact root guard dependency together. The macros package now shares this
 version and has an exact Runtime dependency selection as well.
 Platform and Browser remain future groups. Add each

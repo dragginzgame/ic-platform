@@ -27,6 +27,8 @@ pub use submission::{SubmitError, Submitted};
 mod future;
 #[cfg(any(test, all(feature = "call-ic0", target_arch = "wasm32")))]
 mod registry;
+#[cfg(any(test, all(feature = "call-ic0", target_arch = "wasm32")))]
+mod state;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use future::CallFuture;
 

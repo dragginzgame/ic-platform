@@ -20,6 +20,7 @@ mod update;
 thread_local! {
     static PHASE: Cell<u32> = const { Cell::new(0) };
     static PENDING: RefCell<Option<CallFuture<'static, 'static>>> = const { RefCell::new(None) };
+    static TERMINAL: RefCell<Option<CallFuture<'static, 'static>>> = const { RefCell::new(None) };
 }
 static WAKES: AtomicUsize = AtomicUsize::new(0);
 struct Counter;
@@ -84,8 +85,18 @@ pub(super) fn step() {
             };
             assert_eq!(rejection.code(), 6);
             assert_eq!(rejection.message(), "拒否\0");
-            start("drop", Wait::Bounded { seconds: 0 });
-            drop(PENDING.with(|pending| pending.borrow_mut().take()));
+            // The callback must outlive the future and all borrowed request storage.
+            let method = String::from("drop");
+            let args = vec![0, 128, 255];
+            let mut borrowed = Call::new(
+                Principal::anonymous(),
+                method.as_str(),
+                Wait::Bounded { seconds: 0 },
+            )
+            .args(&args)
+            .cycles(9)
+            .execute();
+            assert!(poll(&mut borrowed).is_pending());
         }
         3 => {
             assert_eq!(WAKES.load(Ordering::SeqCst), 2);
@@ -104,6 +115,7 @@ pub(super) fn step() {
                     NonZeroU32::new(u32::MAX).unwrap()
                 )))
             );
+            TERMINAL.with(|slot| *slot.borrow_mut() = Some(refused));
             start("after", Wait::Bounded { seconds: u32::MAX });
         }
         5 => {
@@ -120,6 +132,11 @@ pub(super) fn step() {
         10..=18 => interleaved::step(phase - 10),
         19..=22 => update::step(phase - 19),
         23..=24 => handoff::step(phase - 23),
+        25 => {
+            let mut terminal = TERMINAL.with(|slot| slot.borrow_mut().take().unwrap());
+            // Must trap before any attempt to submit a second time.
+            let _ = poll(&mut terminal);
+        }
         _ => panic!("unexpected fixture entry"),
     }
 }

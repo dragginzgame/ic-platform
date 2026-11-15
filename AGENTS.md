@@ -59,8 +59,10 @@ does not establish product or native-host qualification.
   Actual production cohort migration remains pending.
   Runtime now has call preparation, one-way submission and experimental awaited
   transport using local Types, with an experimental method-attached executor.
-  Its group is separate; installed entrypoint/callback/rollback
-  qualification remain pending. Keep child/migratory tasks outside this slice.
+  Its group is separate. The installed probe covers immediate and awaited updates,
+  initial/resumed/post-reply trap rollback and successful callback cleanup.
+  Cleanup failure and the remaining installed gates are still pending.
+  Keep child/migratory tasks outside this slice.
   Its exact-version Cargo singleton guard is now implemented in the Runtime
   group. The explicit-update macro implementation joins that group; Platform
   still joins alongside a real implementation package.

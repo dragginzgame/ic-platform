@@ -130,6 +130,8 @@ assert.equal(run.observations(),22);
 run.step(); assert.equal(run.submitted.length,21);
 assert.throws(()=>run.step(),WebAssembly.RuntimeError,'submitted call cannot move to a different executor task');
 assert.equal(run.submitted.length,21);
+assert.throws(()=>run.step(),WebAssembly.RuntimeError,'terminal repoll must refuse');
+assert.equal(run.submitted.length,21);
 assert.throws(()=>run.deliver(15,0,[]),WebAssembly.RuntimeError,'refused submission must retain no callback authority');
 assert.throws(()=>run.deliver(13,0,[]),WebAssembly.RuntimeError,'orphan registration must retire exactly once');
 assert.throws(()=>run.cleanup(3),WebAssembly.RuntimeError,'duplicate cleanup must refuse');
@@ -137,4 +139,4 @@ const stale=harness(); stale.step(); stale.deliver(0,0,[0,128,255],(1n<<100n)+9n
 assert.throws(()=>stale.deliver(0,0,[]),WebAssembly.RuntimeError,'stale callback must refuse');
 const malformed=harness(); malformed.step();
 assert.throws(()=>malformed.deliver(0,4,[255]),WebAssembly.RuntimeError,'malformed rejection UTF-8 must trap');
-console.log(JSON.stringify({admission:'passed',submissions:21,executor_tasks:14,negative_cases:6,sha256:createHash('sha256').update(bytes).digest('hex'),node:process.version}));
+console.log(JSON.stringify({admission:'passed',submissions:21,executor_tasks:14,negative_cases:7,sha256:createHash('sha256').update(bytes).digest('hex'),node:process.version}));

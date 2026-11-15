@@ -75,6 +75,10 @@ jobs:
         run: make qualify-types qualify-types-consumer
       - name: Check Runtime call preparation
         run: make qualify-runtime-call qualify-runtime-consumer qualify-runtime-ic0 qualify-runtime-awaited qualify-runtime-guard qualify-runtime-input-ui qualify-runtime-exports
+      - name: Prepare verified PocketIC server
+        run: make install-runtime-server
+      - name: Check installed Runtime rollback
+        run: make qualify-runtime-installed
       - name: Qualify public consumer and heap behavior
         run: make qualify-engine-response profile-engine-response
       - name: Check Registry settings projection

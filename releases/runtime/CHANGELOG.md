@@ -4,9 +4,31 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.23.3] - GitHub source snapshot
+## [0.23.4] - GitHub source snapshot
 
 Source delivery only; not a registry publication or qualified release.
+
+- Remove the duplicate test-only call state machine. Test production completion
+  transitions directly, and cover borrowed-request destruction and terminal
+  repoll through the real Wasm CallFuture. Merge the compiler-fixture runners
+  and give shared IC0 Clippy checks one Make prerequisite.
+
+- Resolve the workspace and hook wiring in [#2](https://github.com/dragginzgame/ic-platform-new/issues/2):
+  consolidate the native driver into the standard qualification workspace, align
+  the candidate with PocketIC's `thiserror` 2.0.18, and retain two-workspace
+  dependency/formatting coverage. Adopt and activate the canonical Toko formatting
+  hook through the authenticated installer, with per-clone setup documentation.
+
+- Add a dedicated installed-canister probe for initial-handler and post-reply
+  traps, committed-state rollback and subsequent successful updates. Server
+  provisioning and offline admission use Testkit's supported API.
+- Extend installed qualification to real inter-canister awaits, traps before and
+  after callback replies, exact-once cleanup destruction and subsequent success.
+  Verify callback writes roll back while the peer's committed effects survive.
+
+## [0.23.3] - GitHub source snapshot
+
+Delivered in commit `31a6da7`; not a registry publication or qualified release.
 
 - Add `ic-platform-macros` to the coordinated Runtime group and expose its opt-in
   `update` attribute through Runtime. Generate fixed-ABI update exports with
