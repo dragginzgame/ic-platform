@@ -18,14 +18,22 @@ ignored = ["toko-tooling"]
 [package.metadata.toko-tooling.loc]
 category = "tests"
 
+[[bin]]
+name = "runtime-awaited"
+path = "src/bin/runtime-awaited.rs"
+required-features = ["runtime-ic0"]
+
 [features]
 default = []
+runtime-call = ["dep:candidate-runtime", "candidate-runtime/call"]
+runtime-ic0 = ["runtime-call", "candidate-runtime/call-ic0"]
 self-authentication = [
     "candidate-types/principal-self-authenticating",
     "ic-platform-types/principal-self-authenticating",
 ]
 
 [dependencies]
+candidate-runtime = { workspace = true, optional = true }
 candidate-types.workspace = true
 serde_json.workspace = true
 

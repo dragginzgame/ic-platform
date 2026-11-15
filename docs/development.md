@@ -1,7 +1,8 @@
 # Development
 
 The product workspace contains unpublished Protocol 0.1.0 and the initial Types
-0.21.0 candidate. Types follows the published 0.20.4 baseline; its identity
+0.21.0 candidate, plus Runtime 0.23.0 call preparation (following registry 0.22.5).
+Types follows the published 0.20.4 baseline; its identity
 slice is not yet a replacement for the complete published identity contract.
 The private consumer fixture also starts at 0.1.0. Neither package name appeared
 in the crates.io sparse index when checked on 2026-11-15. Publication and release
@@ -16,7 +17,7 @@ version until a local replacement is actually introduced.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko 0.44.3 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko 0.44.4 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -48,7 +49,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.3
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.4
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -58,6 +59,26 @@ update the lock, then run `make toko-tooling-preview` and `make toko-tooling-upd
 Do not edit installed bytes or their receipt.
 
 ## Focused implementation checks
+
+`make qualify-runtime-call` checks inert requests and native executor ownership
+regressions, Clippy, Rustdoc and Wasm compilation. It selects local Types;
+IC0 execution is checked separately below. See the
+[Runtime slice](qualification/runtime-call.md).
+
+`make qualify-runtime-consumer check-runtime-consumer-graph` validates the
+independent public local Types/Runtime crossing and executes its standalone Wasm
+corpus. This checks request/observation APIs, not IC submission or an executor.
+
+`make qualify-runtime-ic0` builds the opt-in wasm32 cost-observation boundary and
+executes an independent import host checking exact lengths, initialized output
+storage, u128 handling, overflow and consuming one-way submission/refusal. The [IC0 record](qualification/runtime-ic0-boundary.md)
+documents the approved unsafe scope and outstanding installed qualification.
+
+`make qualify-runtime-awaited` executes the experimental awaited transport's
+first-poll, callback and cleanup corpus in a separate Wasm artifact, including
+out-of-order task completion and multiple outstanding calls across cleanup. See the
+[evidence and executor boundary](qualification/runtime-awaited.md). This host
+does not simulate or prove replica rollback.
 
 `make qualify-types` tests local Principal and Account/Subaccount identity, text and Serde contracts,
 runs strict Clippy and Rustdoc, and compiles its tests for Wasm. It selects the
@@ -322,8 +343,8 @@ is needed. Repository setup and qualification notes supporting Protocol remain
 in that ledger; they do not create releases for private test packages.
 
 Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. The next implementation groups are Runtime (including its tightly coupled
-guard and macros), and Platform; Browser stays separate if introduced. Add each
+pending changelog. Runtime owns its 0.23.0 candidate; its tightly coupled guard
+and macros will join when implemented. Platform and Browser remain future groups. Add each
 actual product package and its own changelog to the policy when implemented.
 Check its crates.io baseline at that point under the existing version-selection
 rule. Do not create placeholder packages or preselect their versions here.
@@ -331,8 +352,8 @@ Qualification workspace members remain unpublished, outside the product policy,
 and independently versioned.
 
 `make deps-list` uses the installed Toko reader to display group membership.
-The policy's empty dependency-alias lists are intentional: no product
-workspace dependency currently points to either local package. Do not add unused
+Types records the `candidate-types` alias used by Runtime. Empty dependency-alias
+lists for the other groups reflect the absence of local catalog consumers. Do not add unused
 catalog entries just to display membership; the JSON policy owns that mapping.
 
 This change establishes changelog ownership and inventory only. It installs no

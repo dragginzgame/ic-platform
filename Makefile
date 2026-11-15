@@ -31,12 +31,26 @@ help:
 	  'qualify-marketplace-wasm  Execute marketplace and availability admission in Wasm' \
 	  'qualify-types          Test and check local Principal and Account identities' \
 	  'qualify-types-consumer  Compare published identities and execute native/Wasm fixtures' \
+	  'qualify-runtime-call   Check inert call preparation and ownership' \
+	  'qualify-runtime-consumer  Execute the local Types/Runtime boundary on native and Wasm' \
+	  'qualify-runtime-ic0    Execute the IC0 cost and one-way submission ABI harness' \
+	  'qualify-runtime-awaited  Execute first-poll and callback custody in the Wasm host' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
 	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
 	  'fmt / fmt-check        Format or check Rust and Cargo manifests'
 
 test-engine-request: toko-tooling-check
 	cargo test --offline --locked -p ic-platform-protocol --features cloud-engine --lib cloud_engine::tests
+
+.PHONY: qualify-runtime-call
+qualify-runtime-call: toko-tooling-check
+	cargo check --offline --locked -p ic-platform-runtime --no-default-features
+	cargo test --offline --locked -p ic-platform-runtime --features call
+	cargo clippy --offline --locked -p ic-platform-runtime --features call --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-runtime --features call --no-deps
+	cargo check --offline --locked -p ic-platform-runtime --features call --tests --target wasm32-unknown-unknown
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-runtime --no-default-features --forbid-pattern '^(?!ic-platform-runtime$$)'
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-runtime --no-default-features --features call --forbid-pattern '^(?!(ic-platform-runtime|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-types=1
 
 .PHONY: qualify-types
 qualify-types: toko-tooling-check
@@ -60,6 +74,32 @@ qualify-types-consumer: qualification-tooling-check
 	node qualification/types-wasm.mjs
 
 TYPES_CONSUMER_PACKAGES := types-consumer|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|serde_json|itoa|memchr|zmij
+.PHONY: qualify-runtime-consumer check-runtime-consumer-graph
+qualify-runtime-consumer: qualification-tooling-check
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-call
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-call --all-targets -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-call --release --target wasm32-unknown-unknown --target-dir target/types-wasm/runtime-call
+	node qualification/types-wasm.mjs runtime-call
+
+check-runtime-consumer-graph: qualification-tooling-check
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --no-default-features --features runtime-call --forbid-pattern '^(?!(ic-platform-runtime|$(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-runtime=1
+
+.PHONY: qualify-runtime-ic0
+qualify-runtime-ic0: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-runtime --features call-ic0 --all-targets --target wasm32-unknown-unknown -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-runtime --features call-ic0 --target wasm32-unknown-unknown --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --all-targets --target wasm32-unknown-unknown -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --release --target wasm32-unknown-unknown --target-dir target/types-wasm/runtime-ic0
+	node qualification/runtime-ic0.mjs
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --target wasm32-unknown-unknown --no-default-features --features runtime-ic0 --forbid-pattern '^(?!(ic-platform-runtime|$(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-runtime=1
+
+.PHONY: qualify-runtime-awaited
+qualify-runtime-awaited: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-runtime --features call-ic0 --all-targets --target wasm32-unknown-unknown -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --bin runtime-awaited --target wasm32-unknown-unknown -- -D warnings
+	$(ENGINE_WASM_ENV) CARGO_ENCODED_RUSTFLAGS='-Clink-arg=--export-table' cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --bin runtime-awaited --release --target wasm32-unknown-unknown --target-dir target/runtime-awaited
+	node qualification/runtime-awaited.mjs
+
 check-types-graphs: qualification-tooling-check
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --no-default-features --forbid-pattern '^(?!($(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --no-default-features --features self-authentication --forbid-pattern '^(?!($(TYPES_CONSUMER_PACKAGES)|sha2|digest|block-buffer|crypto-common|hybrid-array|typenum|cpufeatures|libc)$$)' --require ic-platform-types=1 --require sha2=1

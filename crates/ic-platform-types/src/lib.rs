@@ -5,6 +5,8 @@
 //! opt-in; actual production consumer migration remains pending.
 //! Identity validity establishes neither authorization nor authenticated evidence.
 
+#![forbid(unsafe_code)]
+
 pub mod account;
 pub mod principal;
 pub use account::{Account, AccountError, DEFAULT_SUBACCOUNT, Subaccount};

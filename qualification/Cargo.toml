@@ -13,13 +13,14 @@ rust-version = "1.100.0"
 license-file = "../LICENSE.md"
 
 [workspace.dependencies]
+candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.0", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "../crates/ic-platform-types", version = "=0.21.0", default-features = false }
 dhat = "0.3.3"
 ic-platform = { version = "0.33.7", default-features = false, features = ["cloud-engine-types"] }
 ic-platform-protocol = { path = "../crates/ic-platform-protocol", default-features = false, features = ["cloud-engine-response"] }
 ic-platform-types = { version = "0.20.4", default-features = false }
 serde_json = "1.0.154"
-toko-tooling = "=0.44.3"
+toko-tooling = "=0.44.4"
 
 [workspace.lints.cargo]
 unused_dependencies = "deny"

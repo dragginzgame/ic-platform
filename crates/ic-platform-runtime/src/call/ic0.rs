@@ -1,0 +1,170 @@
+//! Reviewed wasm32 IC0 imports. No raw ownership pointers cross this boundary.
+
+#[expect(
+    unsafe_code,
+    reason = "IC0 foreign declaration at the approved IC-specific boundary"
+)]
+#[link(wasm_import_module = "ic0")]
+unsafe extern "C" {
+    fn cost_call(method_name_size: u64, payload_size: u64, dst: u32);
+    fn canister_liquid_cycle_balance128(dst: u32);
+    fn call_new(
+        callee_src: u32,
+        callee_size: u32,
+        name_src: u32,
+        name_size: u32,
+        reply_fun: u32,
+        reply_env: u32,
+        reject_fun: u32,
+        reject_env: u32,
+    );
+    fn call_data_append(src: u32, size: u32);
+    fn call_cycles_add128(high: u64, low: u64);
+    fn call_perform() -> u32;
+    fn call_on_cleanup(function: u32, environment: u32);
+    fn call_with_best_effort_response(seconds: u32);
+    fn msg_reject_code() -> u32;
+    fn msg_reject_msg_size() -> u32;
+    fn msg_reject_msg_copy(dst: u32, offset: u32, size: u32);
+    fn msg_arg_data_size() -> u32;
+    fn msg_arg_data_copy(dst: u32, offset: u32, size: u32);
+    fn msg_cycles_refunded128(dst: u32);
+    fn in_replicated_execution() -> u32;
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC0 context observation at the approved import boundary"
+)]
+pub(crate) fn replicated_execution() -> bool {
+    // SAFETY: This context observation takes no pointers and retains no state.
+    unsafe { in_replicated_execution() != 0 }
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC0 synchronously writes a u128 to initialized local Wasm memory"
+)]
+pub(super) fn liquid_balance() -> u128 {
+    let mut output = [0_u8; 16];
+    // SAFETY: The writable sixteen-byte local stays live for the synchronous
+    // copy; the system retains no pointer. Context violations trap.
+    unsafe {
+        canister_liquid_cycle_balance128(output.as_mut_ptr() as u32);
+    }
+    u128::from_le_bytes(output)
+}
+
+pub(super) fn enqueue_oneway(request: &super::Call<'_, '_>) -> u32 {
+    assemble(request, [u32::MAX; 4], None)
+}
+
+pub(super) fn enqueue(
+    request: &super::Call<'_, '_>,
+    id: u32,
+    response: extern "C" fn(u32),
+    cleanup: extern "C" fn(u32),
+) -> u32 {
+    assemble(
+        request,
+        [response as usize as u32, id, response as usize as u32, id],
+        Some(cleanup as usize as u32),
+    )
+}
+
+#[expect(
+    unsafe_code,
+    reason = "Reviewed IC0 assembly with static callbacks and integer-only environment handles"
+)]
+fn assemble(request: &super::Call<'_, '_>, callbacks: [u32; 4], cleanup: Option<u32>) -> u32 {
+    let target = request.target();
+    let method = request.method().as_bytes();
+    let args = request.raw_args();
+    // SAFETY: All source slices remain readable for these synchronous copies.
+    // wasm32 lengths/pointers fit u32. Callback entries come only from static
+    // extern C fn(u32) functions, or the non-existent MAX one-way sentinel.
+    // Environments are registry ids, never ownership or borrowed pointers.
+    // No user code runs between assembly and perform. System context/limits
+    // remain enforced by IC0 traps. Cycles are split high/low without truncation.
+    unsafe {
+        call_new(
+            target.as_slice().as_ptr() as u32,
+            target.len() as u32,
+            method.as_ptr() as u32,
+            method.len() as u32,
+            callbacks[0],
+            callbacks[1],
+            callbacks[2],
+            callbacks[3],
+        );
+        if let Some(cleanup) = cleanup {
+            call_on_cleanup(cleanup, callbacks[1]);
+            if let super::Wait::Bounded { seconds } = request.wait() {
+                call_with_best_effort_response(seconds);
+            }
+        }
+        if !args.is_empty() {
+            call_data_append(args.as_ptr() as u32, args.len() as u32);
+        }
+        let cycles = request.attached_cycles();
+        if cycles != 0 {
+            call_cycles_add128((cycles >> 64) as u64, cycles as u64);
+        }
+        call_perform()
+    }
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC0 callback reads synchronously initialize bounded live output buffers"
+)]
+pub(super) fn capture() -> super::Completion {
+    // SAFETY: Invoked only from our registered response callback. All destination
+    // buffers are initialized, sized from the matching IC0 size query, and live
+    // until the synchronous copies return. There is no caller code/reentrancy
+    // between size and copy. Refund reads are excluded in non-replicated query
+    // callbacks, where that system observation is unavailable.
+    unsafe {
+        let refund = if replicated_execution() {
+            let mut bytes = [0_u8; 16];
+            msg_cycles_refunded128(bytes.as_mut_ptr() as u32);
+            Some(u128::from_le_bytes(bytes))
+        } else {
+            None
+        };
+        if let Some(code) = std::num::NonZeroU32::new(msg_reject_code()) {
+            let size = msg_reject_msg_size();
+            let mut bytes = vec![0; size as usize];
+            msg_reject_msg_copy(bytes.as_mut_ptr() as u32, 0, size);
+            let message = String::from_utf8(bytes).expect("IC rejection text must be UTF-8");
+            super::Completion::from_rejection(code, message, refund)
+        } else {
+            let size = msg_arg_data_size();
+            let mut bytes = vec![0; size as usize];
+            msg_arg_data_copy(bytes.as_mut_ptr() as u32, 0, size);
+            super::Completion::from_reply(bytes, refund)
+        }
+    }
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC0 writes exactly sixteen bytes to initialized local Wasm memory"
+)]
+pub(super) fn cost(method_bytes: usize, argument_bytes: usize) -> u128 {
+    // This module is compiled only for wasm32: pointers/lengths fit the ABI.
+    // Initialize the complete buffer; never change a Vec's initialized length.
+    let mut output = [0_u8; 16];
+    // SAFETY: output is writable for sixteen bytes and lives through the import.
+    // IC0 synchronously copies the little-endian u128 to dst and retains no
+    // pointer. Import-context violations trap rather than return invalid data.
+    // No user callback or host reentrancy is permitted by the IC0 cost contract.
+    unsafe {
+        cost_call(
+            method_bytes as u64,
+            argument_bytes as u64,
+            output.as_mut_ptr() as u32,
+        );
+    }
+    u128::from_le_bytes(output)
+}

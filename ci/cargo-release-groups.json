@@ -15,6 +15,14 @@
       "version": "package",
       "members": ["ic-platform-types"],
       "changelog": "releases/types/CHANGELOG.md",
+      "dependencies": ["candidate-types"]
+    },
+    {
+      "name": "runtime",
+      "primary": "ic-platform-runtime",
+      "version": "package",
+      "members": ["ic-platform-runtime"],
+      "changelog": "releases/runtime/CHANGELOG.md",
       "dependencies": []
     }
   ]

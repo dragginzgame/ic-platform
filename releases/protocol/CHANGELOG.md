@@ -7,6 +7,12 @@ Return to the [group index](../../CHANGELOG.md).
 
 Initial Protocol version; publication remains disabled pending publisher selection.
 
+### 🔧 Tooling
+
+- Adopt published Toko 0.44.4 through the authenticated installer in both
+  workspace selections. Review the package-directory and shell-example rules;
+  current package directories already match their package identities.
+
 ### ➕ Added
 
 - Decode available-node pages and all nine application errors using the shared

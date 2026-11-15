@@ -1,0 +1,171 @@
+use super::{
+    EXECUTOR, EntryError, TaskHandle, TaskState, TaskToken, current, drive, start, terminate,
+};
+use std::{
+    cell::{Cell, RefCell},
+    future::{Future, poll_fn},
+    pin::Pin,
+    rc::Rc,
+    task::{Context, Poll, Waker},
+};
+
+#[test]
+fn self_wakes_coalesce_and_nested_entry_refuses() {
+    let polls = Rc::new(Cell::new(0));
+    let observed = Rc::clone(&polls);
+    let handle = start(Box::pin(poll_fn(move |cx| {
+        observed.set(observed.get() + 1);
+        assert!(matches!(
+            start(Box::pin(async {})),
+            Err(EntryError::NestedEntry)
+        ));
+        if observed.get() == 1 {
+            cx.waker().wake_by_ref();
+            cx.waker().wake_by_ref();
+            Poll::Pending
+        } else {
+            Poll::Ready(())
+        }
+    })))
+    .unwrap();
+    assert_eq!(polls.get(), 2);
+    assert_eq!(handle.state(), TaskState::Completed);
+    assert!(current().is_none());
+}
+
+struct PendingTask {
+    token: Rc<Cell<Option<TaskToken>>>,
+    wake: Rc<RefCell<Option<Waker>>>,
+    polls: Rc<Cell<usize>>,
+    handle: TaskHandle,
+}
+fn pending() -> PendingTask {
+    let token = Rc::new(Cell::new(None));
+    let wake = Rc::new(RefCell::new(None));
+    let polls = Rc::new(Cell::new(0));
+    let (t, w, p) = (Rc::clone(&token), Rc::clone(&wake), Rc::clone(&polls));
+    let handle = start(Box::pin(poll_fn(move |cx| {
+        t.set(current());
+        *w.borrow_mut() = Some(cx.waker().clone());
+        p.set(p.get() + 1);
+        Poll::Pending
+    })))
+    .unwrap();
+    PendingTask {
+        token,
+        wake,
+        polls,
+        handle,
+    }
+}
+
+#[test]
+fn only_owner_is_driven_and_stale_wake_cannot_poll_another_task() {
+    let a = pending();
+    let b = pending();
+    a.wake.borrow().as_ref().unwrap().wake_by_ref();
+    b.wake.borrow().as_ref().unwrap().wake_by_ref();
+    drive(a.token.get().unwrap());
+    assert_eq!(a.polls.get(), 2);
+    assert_eq!(b.polls.get(), 1);
+    terminate(a.token.get().unwrap());
+    assert_eq!(a.handle.state(), TaskState::TerminatedByCleanup);
+    a.wake.borrow().as_ref().unwrap().wake_by_ref();
+    drive(a.token.get().unwrap());
+    assert_eq!(b.polls.get(), 1);
+    drive(b.token.get().unwrap());
+    assert_eq!(b.polls.get(), 2);
+    terminate(b.token.get().unwrap());
+}
+
+#[test]
+fn dropping_handle_does_not_cancel_task() {
+    let task = pending();
+    drop(task.handle);
+    task.wake.borrow().as_ref().unwrap().wake_by_ref();
+    drive(task.token.get().unwrap());
+    assert_eq!(task.polls.get(), 2);
+    terminate(task.token.get().unwrap());
+}
+
+struct InspectDrop {
+    token: Rc<Cell<Option<TaskToken>>>,
+    observed: Rc<RefCell<Option<TaskHandle>>>,
+    dropped: Rc<Cell<bool>>,
+    stop_in_poll: bool,
+}
+impl Future for InspectDrop {
+    type Output = ();
+    fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<()> {
+        self.token.set(current());
+        if self.stop_in_poll {
+            terminate(current().unwrap());
+            assert!(!self.dropped.get());
+        }
+        Poll::Pending
+    }
+}
+impl Drop for InspectDrop {
+    fn drop(&mut self) {
+        assert_eq!(current().unwrap().0, self.token.get().unwrap().0);
+        // Querying executor state and attempting admission must not encounter
+        // an outstanding RefCell borrow during user destruction.
+        assert!(matches!(
+            start(Box::pin(async {})),
+            Err(EntryError::NestedEntry)
+        ));
+        if let Some(handle) = self.observed.borrow().as_ref() {
+            assert_eq!(handle.state(), TaskState::Running);
+        }
+        self.dropped.set(true);
+    }
+}
+
+#[test]
+fn cleanup_destroys_outside_borrows_before_publishing_termination() {
+    let token = Rc::new(Cell::new(None));
+    let observed = Rc::new(RefCell::new(None));
+    let dropped = Rc::new(Cell::new(false));
+    let handle = start(Box::pin(InspectDrop {
+        token: Rc::clone(&token),
+        observed: Rc::clone(&observed),
+        dropped: Rc::clone(&dropped),
+        stop_in_poll: false,
+    }))
+    .unwrap();
+    *observed.borrow_mut() = Some(handle.clone());
+    terminate(token.get().unwrap());
+    assert!(dropped.get());
+    assert_eq!(handle.state(), TaskState::TerminatedByCleanup);
+    assert!(current().is_none());
+    terminate(token.get().unwrap());
+}
+
+#[test]
+fn reentrant_termination_defers_destruction_until_poll_returns() {
+    let dropped = Rc::new(Cell::new(false));
+    let handle = start(Box::pin(InspectDrop {
+        token: Rc::new(Cell::new(None)),
+        observed: Rc::new(RefCell::new(None)),
+        dropped: Rc::clone(&dropped),
+        stop_in_poll: true,
+    }))
+    .unwrap();
+    assert!(dropped.get());
+    assert_eq!(handle.state(), TaskState::TerminatedByCleanup);
+    assert!(current().is_none());
+}
+
+#[test]
+fn exhausted_ids_refuse_without_polling_or_wrapping() {
+    let previous = EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        assert!(executor.tasks.is_empty());
+        std::mem::replace(&mut executor.last, u64::MAX)
+    });
+    let result = start(Box::pin(async {
+        panic!("refused future must not be polled")
+    }));
+    assert!(matches!(result, Err(EntryError::Capacity)));
+    EXECUTOR.with(|executor| executor.borrow_mut().last = previous);
+}

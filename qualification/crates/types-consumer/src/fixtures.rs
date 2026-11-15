@@ -1,6 +1,11 @@
 use candidate_types::{Account, Principal};
 
+#[cfg(feature = "runtime-call")]
+mod runtime;
+
 pub fn check() {
+    #[cfg(feature = "runtime-call")]
+    runtime::check();
     for len in 0..=29 {
         let bytes = vec![0xa5; len];
         let owner = Principal::from_slice(&bytes);

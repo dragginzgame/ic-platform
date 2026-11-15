@@ -66,12 +66,14 @@ jobs:
         run: make fmt-check qualification-tooling-check
       - name: Enforce product and consumer dependency boundaries
         run: |
-          make check-protocol-graphs check-types-graphs
-          make check-protocol-graphs check-types-graphs GRAPH_TARGET="$(rustc -vV | sed -n 's/^host: //p')"
+          make check-protocol-graphs check-types-graphs check-runtime-consumer-graph
+          make check-protocol-graphs check-types-graphs check-runtime-consumer-graph GRAPH_TARGET="$(rustc -vV | sed -n 's/^host: //p')"
       - name: Check request and response implementations
         run: make test-engine-request lint-engine-request doc-engine-request check-engine-request-wasm test-engine-response lint-engine-response doc-engine-response
       - name: Check local Types implementation
         run: make qualify-types qualify-types-consumer
+      - name: Check Runtime call preparation
+        run: make qualify-runtime-call qualify-runtime-consumer qualify-runtime-ic0 qualify-runtime-awaited
       - name: Qualify public consumer and heap behavior
         run: make qualify-engine-response profile-engine-response
       - name: Check Registry settings projection

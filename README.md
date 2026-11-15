@@ -23,7 +23,7 @@ crates.io packages take their next SemVer version (next minor for breaking pre-1
 APIs); new packages start at 0.1.0. Publisher selection remains separate.
 
 [Changelogs](CHANGELOG.md) are separated by product release group under
-`releases/`. Protocol and Types are registered now; the other groups are added with their
+`releases/`. Protocol, Types and Runtime are registered now; the other groups are added with their
 real implementation packages. Package versions remain independent.
 
 The first vertical slice is bounded Cloud Engine EngineView/EngineSubnet
@@ -56,6 +56,23 @@ are implemented. Production consumer migration remains pending.
 Protocol still uses registry Types 0.20.4 until the replacement
 cohort is qualified; these are distinct Rust type identities.
 
+Runtime `0.23.0` now begins the next replacement slice with opt-in inert Call
+preparation and independent method/argument ownership, using local Types. Its
+[qualification boundary](docs/qualification/runtime-call.md) distinguishes this
+implemented request model from the pending submission, callback and executor work.
+An executable test-only custody proposal now checks first-poll submission and
+post-drop callback ownership before the production backend is introduced.
+Completion records now retain exact responses, unknown rejection codes and refund
+snapshots, with explicit uncertain outcomes and no inferred retry policy.
+An opt-in wasm32 `call-ic0` slice now reads system call costs through the approved
+IC-only unsafe boundary and supports consuming one-way submission, with an
+independently executed ABI harness. Experimental awaited transport now submits on
+first poll and captures responses through integer callback handles. Its
+[callback evidence](docs/qualification/runtime-awaited.md) covers real Wasm callback
+execution and an experimental method-attached executor: callbacks resume their
+owning task, cleanup terminates it, and handles expose local lifecycle state.
+Entrypoint integration and installed-canister rollback remain pending.
+
 An opt-in `registry-settings` feature also projects selected Registry subnet
 features and resource limits, preserving presence and raw defaults under shared
 byte/field bounds. Its [contract and qualification status](docs/qualification/registry-settings.md)
@@ -67,7 +84,7 @@ The opt-in `cloud-engine-marketplace` feature adds [daily price rows](docs/quali
 with all six node classes and arbitrary naturals, plus [available-node page responses](docs/qualification/available-nodes.md).
 Bounded page argument encoding is also implemented; consumer adoption remains pending.
 
-Toko 0.44.3 is installed through its authenticated installer, including canonical
+Toko 0.44.4 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local
 packages and `make deps-update` for deliberate Cargo lock updates. See
 [development setup and focused checks](docs/development.md) for prerequisites,

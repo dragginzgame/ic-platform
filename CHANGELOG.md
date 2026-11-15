@@ -6,8 +6,9 @@ Each product release group owns its version and changelog.
 | --- | --- | --- |
 | Protocol | `ic-platform-protocol` | [Protocol changelog](releases/protocol/CHANGELOG.md) |
 | Types | `ic-platform-types` | [Types changelog](releases/types/CHANGELOG.md) |
+| Runtime | `ic-platform-runtime` | [Runtime changelog](releases/runtime/CHANGELOG.md) |
 
-Runtime (including its guard and macros), Platform and Browser will gain
+Runtime's guard and macros, Platform and Browser will gain
 separate ledgers as their implementation packages are introduced. Qualification
 packages are unpublished and outside product release groups.
 

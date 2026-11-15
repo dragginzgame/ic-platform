@@ -5,6 +5,8 @@
 //! bounded selected response decoding and canonical identities. This unpublished
 //! package is not yet a qualified replacement for Platform.
 
+#![forbid(unsafe_code)]
+
 #[cfg(feature = "cloud-engine")]
 pub mod cloud_engine;
 

@@ -17,7 +17,7 @@ also start at 0.1.0 and remain outside product release groups. Publisher selecti
 and publication remain separate. A package move alone is not rewrite progress.
 
 This repository adopts the installed [Toko engineering baseline](TOKO-TOOLING.md)
-from published Toko 0.44.3 and its revision-bound specialist rules. Cargo.lock and
+from published Toko 0.44.4 and its revision-bound specialist rules. Cargo.lock and
 `.toko-tooling.snapshot` bind the selection and installed bytes. Keep managed
 files intact; use the supported installer for updates. [Development commands](docs/development.md)
 describe the local Make interface and focused checks.
@@ -25,8 +25,14 @@ describe the local Make interface and focused checks.
 The adoption applies common authorization, source-integrity, dependency and
 validation rules. Product architecture, empty defaults, unpublished package
 status and focused acceptance remain local choices. The workspace uses the
-common lints, strengthened to forbid unsafe code, and Rust 1.100.0 as required
-by the design. No common-policy exception is selected. Tool installation alone
+common lints and Rust 1.100.0 as required by the design. Unsafe code is denied
+workspace-wide and forbidden at the Types/Protocol crate roots and throughout
+qualification. The maintainer approved only the IC-specific import/wrapper
+boundary in Runtime's private `call/ic0` module, with item-scoped justified lint
+expectations and `unsafe_op_in_unsafe_fn` still denied. No crate-wide allowance
+or non-IC unsafe code is authorized; see the
+[approved boundary](docs/qualification/runtime-ic0-boundary.md).
+No common-policy exception is selected. Tool installation alone
 does not establish product or native-host qualification.
 
 - Keep `../ic-platform` and every other sibling read-only unless separately authorized.
@@ -49,8 +55,12 @@ does not establish product or native-host qualification.
   Types now implements Principal and Account/Subaccount, with its own group;
   opt-in self-authentication and independent consumer qualification are present.
   Actual production cohort migration remains pending.
-  Add Runtime (with its guard/macros) and Platform groups alongside real
-  implementation packages. Qualification stays outside product release groups.
+  Runtime now has call preparation, one-way submission and experimental awaited
+  transport using local Types, with an experimental method-attached executor.
+  Its group is separate; entrypoint integration and installed callback/rollback
+  qualification remain pending. Keep child/migratory tasks outside this slice.
+  Add its guard/macros and Platform alongside real implementation packages.
+  Qualification stays outside product release groups.
   This metadata setup does not qualify or enable a release/publication workflow.
 - Keep the native heap profiler in its private qualification package. Allocation
   comparisons do not establish execution speed, Wasm size or macOS qualification;

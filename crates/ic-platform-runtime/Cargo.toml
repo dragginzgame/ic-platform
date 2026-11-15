@@ -1,0 +1,25 @@
+[package]
+name = "ic-platform-runtime"
+version = "0.23.0"
+description = "Explicit call ownership for the IC Platform replacement"
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish = false
+
+[target.'cfg(any())'.dev-dependencies]
+toko-tooling.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[features]
+default = []
+call = ["dep:candidate-types"]
+call-ic0 = ["call"]
+
+[dependencies]
+candidate-types = { workspace = true, optional = true }
+
+[lints]
+workspace = true
