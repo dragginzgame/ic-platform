@@ -24,6 +24,11 @@ path = "src/bin/runtime-arguments.rs"
 required-features = ["runtime-ic0"]
 
 [[bin]]
+name = "runtime-entrypoints"
+path = "src/bin/runtime-entrypoints.rs"
+required-features = ["runtime-ic0"]
+
+[[bin]]
 name = "runtime-awaited"
 path = "src/bin/runtime-awaited.rs"
 required-features = ["runtime-ic0"]

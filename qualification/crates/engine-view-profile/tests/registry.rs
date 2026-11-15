@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Isolated process measuring only Registry decoding, not fixture construction.
 #![cfg(all(feature = "registry-settings", not(target_family = "wasm")))]
 

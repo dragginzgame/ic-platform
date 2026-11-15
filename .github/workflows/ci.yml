@@ -60,6 +60,7 @@ jobs:
           make install-tools tools-check
           cargo fetch --locked
           cargo fetch --locked --manifest-path qualification/Cargo.toml
+          node qualification/runtime-guard.mjs --prepare
           rustc --version --verbose
           node --version
       - name: Check formatting and installed snapshot
@@ -73,7 +74,7 @@ jobs:
       - name: Check local Types implementation
         run: make qualify-types qualify-types-consumer
       - name: Check Runtime call preparation
-        run: make qualify-runtime-call qualify-runtime-consumer qualify-runtime-ic0 qualify-runtime-awaited
+        run: make qualify-runtime-call qualify-runtime-consumer qualify-runtime-ic0 qualify-runtime-awaited qualify-runtime-guard qualify-runtime-input-ui qualify-runtime-exports
       - name: Qualify public consumer and heap behavior
         run: make qualify-engine-response profile-engine-response
       - name: Check Registry settings projection

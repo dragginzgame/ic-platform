@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Isolated allocation check for complete-output admission.
 #![cfg(all(feature = "marketplace", not(target_family = "wasm")))]
 

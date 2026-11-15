@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Standalone Registry admission on the Wasm pointer-width boundary.
 
 use ic_platform_protocol::registry_settings::{

@@ -1,5 +1,32 @@
 //! Small reviewed IC system operations, independent of codecs and authorization.
 
+pub use crate::executor::ReplyError;
+
+/// Sends exact raw reply bytes once from the current live update task.
+///
+/// The caller owns encoding. Empty bytes mean an empty raw reply, not encoded
+/// unit. This operation appends and replies synchronously, retaining no borrow.
+/// Success is conditional on the enclosing IC execution committing; it does not
+/// terminate the task or guarantee delivery. Completing a task without calling
+/// this function still does not issue a reply automatically.
+///
+/// This ordinary path shares one reply authority per task, including resumed
+/// callbacks. It cannot police external raw IC0 calls or multiple manual roots
+/// created for one export; generated entrypoint/reply ownership remains pending.
+///
+/// # Errors
+/// Refuses outside a live task, during cleanup, or after this task already
+/// replied. Refusal performs no IC0 reply imports.
+///
+/// # Panics
+/// Invalid system contexts, oversized responses or an earlier raw reply can
+/// trap. Installed reply/rollback qualification remains pending.
+pub fn reply(bytes: &[u8]) -> Result<(), ReplyError> {
+    crate::executor::claim_reply()?;
+    crate::call::reply(bytes);
+    Ok(())
+}
+
 /// The current message exceeds the caller's raw argument-byte allowance.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ArgumentTooLarge {

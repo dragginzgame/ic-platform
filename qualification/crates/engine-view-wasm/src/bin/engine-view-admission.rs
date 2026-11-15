@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Executed Wasm admission corpus, separate from the fixed size probe.
 
 #[cfg(any(

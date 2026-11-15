@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Public raw-argument admission fixture, executed by an independent Wasm host.
 
 #[cfg(target_arch = "wasm32")]

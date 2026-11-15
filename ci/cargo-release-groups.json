@@ -21,9 +21,9 @@
       "name": "runtime",
       "primary": "ic-platform-runtime",
       "version": "package",
-      "members": ["ic-platform-runtime"],
+      "members": ["ic-platform-runtime", "ic-platform-runtime-guard", "ic-platform-macros"],
       "changelog": "releases/runtime/CHANGELOG.md",
-      "dependencies": []
+      "dependencies": ["candidate-runtime-guard", "candidate-macros"]
     }
   ]
 }

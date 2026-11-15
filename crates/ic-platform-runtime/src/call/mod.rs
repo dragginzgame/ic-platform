@@ -16,6 +16,9 @@ pub(crate) use ic0::replicated_execution;
 pub(crate) use ic0::read_args;
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub(crate) use ic0::reply;
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 mod submission;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use submission::{SubmitError, Submitted};

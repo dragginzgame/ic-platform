@@ -6,6 +6,9 @@
 //! Entrypoint and installed rollback qualification remain pending; this is not
 //! a complete canister runtime.
 
+#[cfg(feature = "call-ic0")]
+const _: () = candidate_runtime_guard::assert_runtime_version(env!("CARGO_PKG_VERSION"));
+
 #[cfg(feature = "call")]
 pub mod call;
 
@@ -17,3 +20,6 @@ pub mod system;
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub mod entrypoints;
+
+#[cfg(feature = "entrypoint-macros")]
+pub use candidate_macros::update;

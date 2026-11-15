@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Multi-entry Wasm transport fixture; host invokes callbacks between entries.
 
 #[cfg(target_arch = "wasm32")]

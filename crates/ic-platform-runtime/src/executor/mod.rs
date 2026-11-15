@@ -49,6 +49,15 @@ pub enum EntryError {
     Capacity,
 }
 
+/// Refusal to issue a reply through the current executor task.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ReplyError {
+    /// No live executor task owns the current execution, including cleanup.
+    NoActiveTask,
+    /// This task already used its ordinary reply authority.
+    AlreadyReplied,
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) struct TaskToken(u64);
 type UserFuture = Pin<Box<dyn Future<Output = ()>>>;
@@ -72,6 +81,7 @@ struct Task {
     signal: Arc<Signal>,
     status: Rc<Cell<TaskState>>,
     stop: bool,
+    replied: bool,
 }
 struct Executor {
     last: u64,
@@ -94,10 +104,25 @@ thread_local! {
 /// handle; callback rollback and cleanup behavior require installed qualification.
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub fn run_update(future: impl Future<Output = ()> + 'static) -> Result<TaskHandle, EntryError> {
+    check_update_entry()?;
+    start(Box::pin(future))
+}
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub(crate) fn check_update_entry() -> Result<(), EntryError> {
     if !crate::call::replicated_execution() {
         return Err(EntryError::NonReplicated);
     }
-    start(Box::pin(future))
+    EXECUTOR.with(|executor| {
+        let executor = executor.borrow();
+        if executor.current.is_some() {
+            Err(EntryError::NestedEntry)
+        } else if executor.last == u64::MAX {
+            Err(EntryError::Capacity)
+        } else {
+            Ok(())
+        }
+    })
 }
 
 fn start(future: UserFuture) -> Result<TaskHandle, EntryError> {
@@ -125,6 +150,7 @@ fn start(future: UserFuture) -> Result<TaskHandle, EntryError> {
                 signal,
                 status,
                 stop: false,
+                replied: false,
             },
         );
         assert!(previous.is_none(), "task id reused");
@@ -135,6 +161,27 @@ fn start(future: UserFuture) -> Result<TaskHandle, EntryError> {
 
 pub(crate) fn current() -> Option<TaskToken> {
     EXECUTOR.with(|executor| executor.borrow().current)
+}
+
+pub(crate) fn claim_reply() -> Result<(), ReplyError> {
+    EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        let token = executor.current.ok_or(ReplyError::NoActiveTask)?;
+        let task = executor
+            .tasks
+            .get_mut(&token.0)
+            .ok_or(ReplyError::NoActiveTask)?;
+        if task.stop {
+            return Err(ReplyError::NoActiveTask);
+        }
+        if task.replied {
+            return Err(ReplyError::AlreadyReplied);
+        }
+        // This mutation and the subsequent IC reply commit together. A system
+        // trap must roll both back; no native-unwind recovery is promised.
+        task.replied = true;
+        Ok(())
+    })
 }
 
 struct ResetContext(Option<TaskToken>);

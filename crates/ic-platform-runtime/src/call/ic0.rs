@@ -30,6 +30,24 @@ unsafe extern "C" {
     fn msg_arg_data_copy(dst: u32, offset: u32, size: u32);
     fn msg_cycles_refunded128(dst: u32);
     fn in_replicated_execution() -> u32;
+    fn msg_reply_data_append(src: u32, size: u32);
+    fn msg_reply();
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC0 synchronously copies the live reply slice and issues its reply"
+)]
+pub(crate) fn reply(bytes: &[u8]) {
+    // SAFETY: wasm32 pointers/lengths fit u32. The borrowed slice stays readable
+    // until the synchronous copy completes and the system retains no pointer.
+    // No user code executes between append and reply. System violations trap.
+    unsafe {
+        if !bytes.is_empty() {
+            msg_reply_data_append(bytes.as_ptr() as u32, bytes.len() as u32);
+        }
+        msg_reply();
+    }
 }
 
 #[expect(

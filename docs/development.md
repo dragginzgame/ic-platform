@@ -1,7 +1,7 @@
 # Development
 
 The product workspace contains unpublished Protocol 0.1.0 and the initial Types
-0.21.0 candidate, plus Runtime 0.23.2 development after the 0.23.1 GitHub snapshot
+0.21.0 candidate, plus the Runtime 0.23.3 GitHub source snapshot
 (following registry 0.22.5).
 Types follows the published 0.20.4 baseline; its identity
 slice is not yet a replacement for the complete published identity contract.
@@ -78,12 +78,34 @@ The same target executes the two-import raw-argument harness: size admission
 before allocation/copy, exact bytes, explicit oversize errors and guarded
 admission with caller-selected decoding. See the
 [argument boundary](qualification/runtime-arguments.md).
+It also runs the manual update adapter's context/guard/decode admission corpus
+and explicit raw reply/duplicate-refusal checks;
+see the [update boundary](qualification/runtime-update.md).
 
 `make qualify-runtime-awaited` executes the experimental awaited transport's
 first-poll, callback and cleanup corpus in a separate Wasm artifact, including
 out-of-order task completion and multiple outstanding calls across cleanup. See the
 [evidence and executor boundary](qualification/runtime-awaited.md). This host
 does not simulate or prove replica rollback.
+
+`make qualify-runtime-guard` tests guard version admission and five valid/two
+conflicting Cargo graphs offline. On a fresh cache, first run
+`node qualification/runtime-guard.mjs --prepare` after fetching both workspace
+locks; this fetches the exact published 0.22.5 guard used as a conflict oracle.
+CI performs this preparation explicitly. See the
+[guard qualification boundary](qualification/runtime-guard.md).
+
+`make qualify-runtime-input-ui` checks owned/static update inputs and explicit
+decoder signatures using maintained compile-pass/fail Wasm fixtures. The driver
+uses temporary manifests and checks structured compiler error codes; it does not
+generate or replace Rust source.
+
+`make qualify-runtime-exports` tests the macro crate, builds a dedicated Wasm
+export consumer and invokes its actual IC exports in a host. It also builds
+maintained invalid declarations to verify compiler/codegen refusals and checks
+the one-Runtime/one-guard/one-macro/one-Types graph. The new export fixture is the
+only qualification package using the approved generated export-attribute
+exception; older qualification targets retain crate-root unsafe forbids.
 
 `make qualify-types` tests local Principal and Account/Subaccount identity, text and Serde contracts,
 runs strict Clippy and Rustdoc, and compiles its tests for Wasm. It selects the
@@ -348,8 +370,10 @@ is needed. Repository setup and qualification notes supporting Protocol remain
 in that ledger; they do not create releases for private test packages.
 
 Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. Runtime owns its 0.23.2 candidate; its tightly coupled guard
-and macros will join when implemented. Platform and Browser remain future groups. Add each
+pending changelog. Runtime and its exact guard share version 0.23.3; advance both
+and the exact root guard dependency together. The macros package now shares this
+version and has an exact Runtime dependency selection as well.
+Platform and Browser remain future groups. Add each
 actual product package and its own changelog to the policy when implemented.
 Check its crates.io baseline at that point under the existing version-selection
 rule. Do not create placeholder packages or preselect their versions here.
@@ -357,8 +381,9 @@ Qualification workspace members remain unpublished, outside the product policy,
 and independently versioned.
 
 `make deps-list` uses the installed Toko reader to display group membership.
-Types records the `candidate-types` alias used by Runtime. Empty dependency-alias
-lists for the other groups reflect the absence of local catalog consumers. Do not add unused
+Types records the `candidate-types` alias used by Runtime. Runtime records its
+`candidate-runtime-guard` and `candidate-macros` aliases; Protocol has no local
+catalog consumers. Do not add unused
 catalog entries just to display membership; the JSON policy owns that mapping.
 
 This change establishes changelog ownership and inventory only. It installs no

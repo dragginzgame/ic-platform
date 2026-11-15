@@ -176,6 +176,21 @@ struct RefusedDrop {
     drops: Rc<Cell<usize>>,
 }
 
+#[test]
+fn reply_authority_is_per_task_and_unavailable_after_retirement() {
+    use super::{ReplyError, claim_reply};
+    assert_eq!(claim_reply(), Err(ReplyError::NoActiveTask));
+    for _ in 0..2 {
+        let handle = start(Box::pin(async {
+            assert_eq!(claim_reply(), Ok(()));
+            assert_eq!(claim_reply(), Err(ReplyError::AlreadyReplied));
+        }))
+        .unwrap();
+        assert_eq!(handle.state(), TaskState::Completed);
+        assert_eq!(claim_reply(), Err(ReplyError::NoActiveTask));
+    }
+}
+
 impl Future for RefusedDrop {
     type Output = ();
     fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<()> {

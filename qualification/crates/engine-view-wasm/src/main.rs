@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Matched standalone decoder probe; not an IC canister or deployment artifact.
 
 #[cfg(any(

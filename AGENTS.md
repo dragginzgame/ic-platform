@@ -26,11 +26,13 @@ The adoption applies common authorization, source-integrity, dependency and
 validation rules. Product architecture, empty defaults, unpublished package
 status and focused acceptance remain local choices. The workspace uses the
 common lints and Rust 1.100.0 as required by the design. Unsafe code is denied
-workspace-wide and forbidden at the Types/Protocol crate roots and throughout
-qualification. The maintainer approved only the IC-specific import/wrapper
-boundary in Runtime's private `call/ic0` module, with item-scoped justified lint
-expectations and `unsafe_op_in_unsafe_fn` still denied. No crate-wide allowance
-or non-IC unsafe code is authorized; see the
+workspace-wide and forbidden at the Types/Protocol crate roots and existing
+non-export qualification crate roots. The maintainer approved the IC-specific
+import/wrapper boundary in Runtime's private `call/ic0` module and, subsequently,
+generated IC entrypoint export attributes in dedicated export fixtures. Both
+use item-scoped justified lint expectations; `unsafe_op_in_unsafe_fn` stays denied.
+The macro implementation and wrapper bodies remain safe Rust. No crate-wide
+allowance or non-IC unsafe code is authorized; see the
 [approved boundary](docs/qualification/runtime-ic0-boundary.md).
 No common-policy exception is selected. Tool installation alone
 does not establish product or native-host qualification.
@@ -57,9 +59,11 @@ does not establish product or native-host qualification.
   Actual production cohort migration remains pending.
   Runtime now has call preparation, one-way submission and experimental awaited
   transport using local Types, with an experimental method-attached executor.
-  Its group is separate; entrypoint integration and installed callback/rollback
+  Its group is separate; installed entrypoint/callback/rollback
   qualification remain pending. Keep child/migratory tasks outside this slice.
-  Add its guard/macros and Platform alongside real implementation packages.
+  Its exact-version Cargo singleton guard is now implemented in the Runtime
+  group. The explicit-update macro implementation joins that group; Platform
+  still joins alongside a real implementation package.
   Qualification stays outside product release groups.
   This metadata setup does not qualify or enable a release/publication workflow.
 - Keep the native heap profiler in its private qualification package. Allocation

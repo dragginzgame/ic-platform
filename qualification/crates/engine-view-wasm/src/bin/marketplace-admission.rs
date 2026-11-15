@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Executed standalone marketplace/page corpus, independent of size acceptance.
 
 use ic_platform_protocol::{

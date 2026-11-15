@@ -1,0 +1,28 @@
+[package]
+name = "ic-platform-macros"
+version = "0.23.3"
+description = "Explicit IC update export generation for the replacement Runtime"
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish = false
+
+[target.'cfg(any())'.dev-dependencies]
+toko-tooling.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[lib]
+proc-macro = true
+
+[features]
+default = []
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true
+
+[lints]
+workspace = true

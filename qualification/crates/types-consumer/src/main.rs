@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Independent public identity consumer, also executed as standalone Wasm.
 
 mod fixtures;

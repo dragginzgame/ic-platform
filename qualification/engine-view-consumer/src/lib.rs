@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 //! Independent compile/execution fixture for the public response projection.
 
 use ic_platform_protocol::cloud_engine::EngineView;

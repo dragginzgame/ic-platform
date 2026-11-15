@@ -35,6 +35,8 @@ help:
 	  'qualify-runtime-consumer  Execute the local Types/Runtime boundary on native and Wasm' \
 	  'qualify-runtime-ic0    Execute the IC0 cost and one-way submission ABI harness' \
 	  'qualify-runtime-awaited  Execute first-poll and callback custody in the Wasm host' \
+	  'qualify-runtime-guard  Check exact guard versions and mixed-executor refusal' \
+	  'qualify-runtime-exports  Build and execute explicit generated IC update exports' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
 	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
 	  'fmt / fmt-check        Format or check Rust and Cargo manifests'
@@ -92,7 +94,8 @@ qualify-runtime-ic0: qualification-tooling-check
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --release --target wasm32-unknown-unknown --target-dir target/types-wasm/runtime-ic0
 	node qualification/runtime-ic0.mjs
 	node qualification/runtime-arguments.mjs
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --target wasm32-unknown-unknown --no-default-features --features runtime-ic0 --forbid-pattern '^(?!(ic-platform-runtime|$(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-runtime=1
+	node qualification/runtime-entrypoints.mjs
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --target wasm32-unknown-unknown --no-default-features --features runtime-ic0 --forbid-pattern '^(?!(ic-platform-runtime|ic-platform-runtime-guard|$(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1
 
 .PHONY: qualify-runtime-awaited
 qualify-runtime-awaited: qualification-tooling-check
@@ -100,6 +103,31 @@ qualify-runtime-awaited: qualification-tooling-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --bin runtime-awaited --target wasm32-unknown-unknown -- -D warnings
 	$(ENGINE_WASM_ENV) CARGO_ENCODED_RUSTFLAGS='-Clink-arg=--export-table' cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --bin runtime-awaited --release --target wasm32-unknown-unknown --target-dir target/runtime-awaited
 	node qualification/runtime-awaited.mjs
+
+.PHONY: qualify-runtime-guard
+qualify-runtime-guard: qualification-tooling-check
+	cargo test --offline --locked -p ic-platform-runtime-guard
+	cargo clippy --offline --locked -p ic-platform-runtime-guard --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-runtime-guard --no-deps
+	cargo check --offline --locked -p ic-platform-runtime-guard --target wasm32-unknown-unknown
+	node qualification/runtime-guard.mjs
+
+.PHONY: qualify-runtime-input-ui
+qualify-runtime-input-ui: qualification-tooling-check
+	node qualification/runtime-input-ui.mjs
+
+.PHONY: qualify-runtime-exports
+qualify-runtime-exports: qualification-tooling-check
+	cargo test --offline --locked -p ic-platform-macros
+	cargo clippy --offline --locked -p ic-platform-macros --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-macros --no-deps
+	cargo clippy --offline --locked -p ic-platform-runtime --features entrypoint-macros --all-targets --target wasm32-unknown-unknown -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-runtime --features entrypoint-macros --target wasm32-unknown-unknown --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-exports --target wasm32-unknown-unknown --all-targets -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-exports --target wasm32-unknown-unknown --release --target-dir target/runtime-exports
+	node qualification/runtime-exports.mjs
+	node qualification/runtime-exports-ui.mjs
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-exports --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-exports|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
 
 check-types-graphs: qualification-tooling-check
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --no-default-features --forbid-pattern '^(?!($(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1

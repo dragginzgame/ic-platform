@@ -56,8 +56,8 @@ are implemented. Production consumer migration remains pending.
 Protocol still uses registry Types 0.20.4 until the replacement
 cohort is qualified; these are distinct Rust type identities.
 
-Runtime `0.23.2` is the next unpublished development version after the GitHub
-delivery of `0.23.1`. It provides opt-in inert Call
+Runtime `0.23.3` is the current GitHub source snapshot, with registry publication
+disabled. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
 implemented request model from the experimental IC0/executor and pending installed
@@ -72,13 +72,25 @@ first poll and captures responses through integer callback handles. Its
 [callback evidence](docs/qualification/runtime-awaited.md) covers real Wasm callback
 execution and an experimental method-attached executor: callbacks resume their
 owning task, cleanup terminates it, and handles expose local lifecycle state.
-Entrypoint integration and installed-canister rollback remain pending.
+Installed-canister execution and rollback remain pending.
 Runtime's `system::read_args(maximum)` now supplies bounded raw argument capture
 for that entrypoint work, refusing oversized messages before allocation/copy.
 `entrypoints::prepare` composes a caller-supplied pre-copy guard and decoder
 around that capture, stopping at the first failure. Runtime selects neither
 authorization policy nor a codec; see the
 [argument boundary](docs/qualification/runtime-arguments.md).
+The [manual update adapter](docs/qualification/runtime-update.md) now composes
+that admission with one executor-owned handler. `system::reply` supplies an
+explicit raw reply with one ordinary reply authority per task. Broader export
+modes, automatic encoding/reply ownership and installed execution remain pending.
+The opt-in `entrypoint-macros` feature now exposes an explicit manual-reply
+`update` attribute from `ic-platform-macros` 0.23.3. Its
+[generated exports](docs/qualification/runtime-exports.md) run in a separate Wasm
+consumer, including rejection and compile-fail checks. Queries and automatic
+reply generation remain unsupported in this initial macro slice.
+The separate `ic-platform-runtime-guard` now joins the Runtime group at 0.23.3.
+Its exact version check and shared Cargo `links` identity reject incompatible
+guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 
 An opt-in `registry-settings` feature also projects selected Registry subnet
 features and resource limits, preserving presence and raw defaults under shared

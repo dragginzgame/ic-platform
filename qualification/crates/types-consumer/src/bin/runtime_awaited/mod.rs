@@ -15,6 +15,7 @@ use std::{
 mod executor;
 mod handoff;
 mod interleaved;
+mod update;
 
 thread_local! {
     static PHASE: Cell<u32> = const { Cell::new(0) };
@@ -117,7 +118,8 @@ pub(super) fn step() {
         }
         6..=9 => executor::step(phase - 6),
         10..=18 => interleaved::step(phase - 10),
-        19..=20 => handoff::step(phase - 19),
+        19..=22 => update::step(phase - 19),
+        23..=24 => handoff::step(phase - 23),
         _ => panic!("unexpected fixture entry"),
     }
 }

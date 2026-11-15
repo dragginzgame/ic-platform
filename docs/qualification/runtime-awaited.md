@@ -142,7 +142,7 @@ installed-canister rollback proof.
 | Awaited callback/executor fixture | `4c993ee904d6a724c2b2d22c2d20a8fe30843a53b49fcbc321904e25469a02c1` |
 | Notify/cost fixture | `2fe710d19540364ca8687bb86365e2aa796f45a47e7114b7aab533c606325d1a` |
 
-## Next development version 0.23.2
+## GitHub snapshot 0.23.2
 
 Two native executor regressions exercise user destruction after admission
 refusal. A refused future's destructor reenters admission, receives the same
@@ -159,3 +159,12 @@ the existing notify/awaited regressions. Current 0.23.2 artifact hashes:
 | --- | --- |
 | Awaited callback/executor fixture | `1eea4e66478836f95169624309edb9e1ad44d03c7e8b2bbc3b94cc760253afc2` |
 | Notify/cost fixture | `2388db3a38f96254150495f0738de258ef706e4bc350eba5ea1446467a67e250` |
+
+## Next development version 0.23.3
+
+The [manual update adapter](runtime-update.md) now has an integrated suspension
+corpus in this fixture. Three updates retain admitted input through awaited
+reply/cleanup, with exact stage and destructor counts and a subsequent successful
+update. The current corpus passes 21 submissions, 14 task admissions and six
+negative cases. The update record owns the current artifact hashes and keeps
+host execution separate from installed rollback qualification.

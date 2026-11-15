@@ -178,6 +178,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-platform-macros"
+version = "0.23.3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "ic-platform-protocol"
 version = "0.1.0"
 dependencies = [
@@ -188,10 +197,16 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.2"
+version = "0.23.3"
 dependencies = [
+ "ic-platform-macros",
+ "ic-platform-runtime-guard",
  "ic-platform-types 0.21.0",
 ]
+
+[[package]]
+name = "ic-platform-runtime-guard"
+version = "0.23.3"
 
 [[package]]
 name = "ic-platform-types"
@@ -353,6 +368,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed2bf2547551a7053d6fdfafda3f938979645c44812fbfcda098faae3f1a362d"
 dependencies = [
  "bitflags",
+]
+
+[[package]]
+name = "runtime-exports"
+version = "0.1.0"
+dependencies = [
+ "ic-platform-runtime",
+ "toko-tooling",
 ]
 
 [[package]]

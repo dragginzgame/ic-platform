@@ -1,9 +1,50 @@
 # Runtime changelog
 
-Release group: `runtime`. Covered package: `ic-platform-runtime`.
+Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
+0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.23.2] - Unreleased
+## [0.23.3] - GitHub source snapshot
+
+Source delivery only; not a registry publication or qualified release.
+
+- Add `ic-platform-macros` to the coordinated Runtime group and expose its opt-in
+  `update` attribute through Runtime. Generate fixed-ABI update exports with
+  explicit Runtime path, guard, decoder, byte bound, manual reply and diverging
+  failure handler. Qualify actual Wasm exports, conditional exclusion, renamed
+  Runtime imports and compiler/codegen refusal of invalid declarations.
+- Apply the maintainer-approved exception only to generated IC export attributes.
+  Keep macro code and wrapper bodies safe; preserve forbid at every existing
+  non-export qualification crate root while the dedicated export fixture uses
+  workspace deny plus the generated item-scoped expectation.
+
+- Add Wasm compile-pass/fail admission fixtures under a renamed Runtime import:
+  accept owned input, reject invalid decoder signatures, borrowed decoded input
+  and handler construction that borrows entry-local state.
+
+- Add the real Cargo singleton guard, exact-pinned and coordinated with Runtime.
+  Preserve the published executor `links` identity, reject mismatched compiled
+  cohort versions, and qualify old/new and same-version/different-source graph
+  conflicts. Default and call-only Runtime graphs still omit the guard.
+
+- Add explicit `system::reply` with task-owned reply authority, exact raw bytes
+  and typed refusal outside a live task or after its first reply. Qualify empty
+  and binary replies, duplicate refusal, resumed handlers and cleanup refusal.
+  No automatic reply or raw-IC0 bypass guarantee is introduced.
+
+- Add `entrypoints::update_manual`, composing context admission, explicit guard,
+  bounded capture and decoding with one method-attached task. Preserve stage
+  errors and defer handler invocation until the executor owns its context.
+- Qualify guard, size, decoder, nested-entry and non-replicated refusals plus
+  successful owned input. Installed-canister execution and rollback remain pending.
+- Extend the manual adapter proof through awaited replies and cleanup: retain
+  decoded input across suspension, run admission stages once, destroy a cleaned
+  handler once, and admit a subsequent successful update. The awaited corpus now
+  covers 21 submissions and 14 task admissions.
+
+## [0.23.2] - GitHub source snapshot
+
+Delivered in commit `8540d6f`; not a registry publication or qualified release.
 
 Next compatible development increment; publication remains disabled.
 
