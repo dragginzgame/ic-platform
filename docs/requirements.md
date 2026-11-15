@@ -67,6 +67,11 @@ unrelated row. Conversely, an isolated codec pass cannot qualify those rows.
 Closed supplying work remains contract evidence; read its resolution and pinned
 implementation before deciding what to reuse or retire.
 
+The opt-in [Registry settings projection](qualification/registry-settings.md)
+now has local wire/refusal tests and shared nested field accounting. Public
+consumer/Serde, executed Wasm and actual Query reporting qualification remain
+open; this does not complete #169.
+
 ## Evidence required before completing the first slice
 
 The pinned old request/response implementation was inspected without copying
@@ -111,8 +116,19 @@ The separate admission binary also executes numeric/Principal fixtures,
 truncation, trailing-data, arity and resource refusals in both Wasm artifacts
 under Node. This is standalone execution evidence, not installed IC or Query
 adoption proof.
+An [isolated Query integration experiment](qualification/query-engine-view.md)
+now passes the actual committed caller's seven EngineView tests before and after
+adaptation, topology Clippy and CLI compilation, with one canonical Types
+identity and no registry-version updates. That isolated experiment left the
+sibling checkout untouched and established consumer compatibility.
+The same checks now also pass with Protocol pinned to its public GitHub commit;
+a reviewable six-file patch and lock are retained with that evidence. After
+separate authorization, it was applied to the real Query working tree and the
+same checks passed there. The change remains uncommitted/unpushed in Query;
+consumer delivery is not claimed.
 
-The first slice's full gate remains open: real Query adoption, broader
+The first slice's full gate remains open: Query integration is applied locally,
+but consumer delivery, broader
 numeric/Serde compatibility and physical allocation, instruction-count and Wasm
 performance thresholds have not yet been fully qualified. The private
 declaration supports required and strict optional fields, not a public generic

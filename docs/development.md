@@ -27,12 +27,13 @@ make deps-list
 
 Tool setup can download executables and populate Toko's per-user store. Checks
 are offline and do not install tools. Linux x86-64 and macOS ARM64/x86-64 are the
-intended development hosts; native macOS execution has not yet been qualified in
-this checkout.
+intended development hosts. The initial focused suite passed on all three in
+[hosted run 43717278830](https://github.com/dragginzgame/ic-platform-new/actions/runs/43717278830)
+for source `08c72219ad6f261067c00eece9c8c71852e6b561`.
 
 The initial [CI workflow](../.github/workflows/ci.yml) selects Ubuntu 24.04
 x86-64, macOS 15 ARM64 and macOS 15 Intel. These are the intended native
-qualification hosts, not claims of completed hosted runs. Setup requires Bash,
+qualification hosts, covered by the initial run above. Setup requires Bash,
 GNU Make, Git, Perl/core modules, curl, tar and SHA-256 utilities, plus Rustup and
 native compiler/linker prerequisites supplied by the hosted images. Toko installs
 the selected jq/yq and other host tools before its toolchain-file preparer reads
@@ -221,9 +222,11 @@ x86-64 only; native macOS jobs do not invoke them. Gitleaks scans committed Git
 history, not uncommitted files or ignored build output.
 
 Local Linux validation passed workflow lint, the existing committed-history
-scan, tool admission, formatting and snapshot checks. Hosted and macOS
-qualification require successful runs for the delivered source; local workflow
-validation alone leaves that qualification pending.
+scan, tool admission, formatting and snapshot checks. The initial hosted run
+linked above also passed repository checks and all three native jobs, including
+tool preparation, dependency boundaries, decoder tests/docs/lints, public-consumer
+and heap qualification, and standalone Wasm execution. This proves the focused
+suite at that source, not release readiness, installed IC behavior or Query adoption.
 The native assertions retain their separately recorded local evidence; a valid
 workflow definition is not a successful hosted run.
 
@@ -234,10 +237,10 @@ offline Cargo observations on `wasm32-unknown-unknown`. Override `GRAPH_TARGET`
 with an explicit target triple for native checks; CI also runs it with the host
 reported by `rustc -vV` on every matrix runner.
 
-Five selections are checked independently: default Protocol, request-only,
+Six selections are checked independently: Registry settings, default Protocol, request-only,
 response, the public consumer's normal/build graph, and the candidate Wasm
 probe. Default and request-only builds admit only the Protocol root. The other
-three use the reviewed package-name allowlist in Makefile and require exactly
+three EngineView selections use the reviewed package-name allowlist in Makefile and require exactly
 one rendered Types identity; both consumers also require one Protocol identity.
 Dependencies outside that list, including Runtime, published Platform, registry
 Candid, crypto suppliers and heap/oracle tooling, refuse with an introducing
@@ -256,4 +259,10 @@ All five selections passed on Linux x86-64 and Wasm in local checks. An
 intentionally restricted allowlist that excluded Types failed at the response
 selection with a Types dependency path, confirming the target propagates policy
 failures. Workflow lint, formatting and the 51-file Toko snapshot check passed.
-Native macOS and hosted CI execution remain pending.
+The same checks passed on both macOS architectures in the hosted run linked above.
+
+`make qualify-registry-settings` runs the selected protobuf projection's tests,
+Clippy, Rustdoc and Wasm compilation. Its separate graph selection permits only
+Protocol and Serde's closure. The new selection passed locally; hosted evidence
+above predates this addition. See [Registry qualification](qualification/registry-settings.md)
+for exact scope and outstanding consumer gates.

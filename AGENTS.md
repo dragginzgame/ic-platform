@@ -30,6 +30,9 @@ by the design. No common-policy exception is selected. Tool installation alone
 does not establish product or native-host qualification.
 
 - Keep `../ic-platform` and every other sibling read-only unless separately authorized.
+- The maintainer separately authorized applying the six-file EngineView patch
+  to `../ic-query` and validating it. That local application is complete; it
+  grants no Query commit, push, publication or unrelated sibling-edit authority.
 - Preserve unique work here. The maintainer authorized source delivery to public
   `dragginzgame/ic-platform-new`. Registry publication,
   releases, repository deletion and sibling migration remain excluded. Keep

@@ -6,6 +6,10 @@ Initial Protocol version; publication remains disabled pending publisher selecti
 
 ### ➕ Added
 
+- Add an opt-in Registry settings protobuf projection with raw presence semantics,
+  shared byte/field bounds and duplicate selected-field refusal, plus focused
+  Make/CI checks and literal malformed-wire fixtures. Consumer adoption is pending.
+
 - Introduce an unpublished Protocol package with a bounded Cloud Engine request
   encoder and selected response decoder. Preserve opaque IDs, exact arity,
   strict optional payload admission and canonical Principal identity. Decode-only
@@ -15,13 +19,20 @@ Initial Protocol version; publication remains disabled pending publisher selecti
 - Adopt Toko 0.44.3 and Rust 1.100.0 for local development, including the shared
   `deps-list` and `deps-update` commands and focused encoder checks.
 - Add CI definitions for Linux and both macOS architectures, with one repository
-  secret-scan/workflow-lint owner and pinned tool/action selections. Hosted runs
-  remain unqualified until the workflow is delivered and executed.
+  secret-scan/workflow-lint owner and pinned tool/action selections. The initial
+  focused suite passed on all three hosted native runners at `08c7221`.
 - Enforce the current Protocol and consumer dependency closures using Toko's
   canonical graph checker on native and Wasm selections, including one Types
   identity and dependency-free default/request profiles.
 
 ### 🧪 Testing
+
+- Validate the pinned Query EngineView caller in a disposable snapshot: its seven
+  existing tests pass before and after adaptation, along with topology Clippy,
+  CLI compilation and a single Types identity. Actual consumer adoption remains
+  separate. The maintainer subsequently authorized applying the six-file adapter
+  to the actual Query working tree; its focused checks passed without committing
+  or pushing that sibling.
 
 - Characterize published empty-vector/None admission independently from present
   incompatible payload refusal; do not claim full declared-schema compatibility.

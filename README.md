@@ -33,11 +33,19 @@ with bounded `getEngineViews` request encoding and selected response decoding.
 The response records, schema and decode dispatch come from one declaration,
 without requiring Encode. Defaults are empty; the request-only feature has no
 production dependencies. A separate `qualification/` workspace checks a public
-consumer, canonical Principal identity and Serde representation. Full Query
-adoption remains pending. A separate native heap profiler compares allocation
-against the published decoder; see its [criteria and results](docs/qualification/engine-view-heap.md).
+consumer, canonical Principal identity and Serde representation. The
+[Query integration](docs/qualification/query-engine-view.md) now passes in its
+actual working tree after authorized local application; consumer delivery remains
+pending. A separate native heap
+profiler compares allocation against the published decoder; see its
+[criteria and results](docs/qualification/engine-view-heap.md).
 Protocol and its private qualification packages start at 0.1.0;
 publication remains disabled.
+
+An opt-in `registry-settings` feature also projects selected Registry subnet
+features and resource limits, preserving presence and raw defaults under shared
+byte/field bounds. Its [contract and qualification status](docs/qualification/registry-settings.md)
+describe the local tests and remaining consumer gates.
 
 Toko 0.44.3 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local

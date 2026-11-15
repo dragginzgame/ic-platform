@@ -10,3 +10,6 @@ pub mod cloud_engine;
 
 #[cfg(feature = "cloud-engine-response")]
 pub mod candid;
+
+#[cfg(feature = "registry-settings")]
+pub mod registry_settings;

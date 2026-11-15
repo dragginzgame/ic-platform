@@ -1,0 +1,162 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -13,6 +13,7 @@
+ clap = "4.6.7"
+ ic-host-text = "0.76.0"
+ ic-platform = { version = "0.33.7", default-features = false }
++ic-platform-protocol = { git = "https://github.com/dragginzgame/ic-platform-new", rev = "08c72219ad6f261067c00eece9c8c71852e6b561", version = "0.1.0", default-features = false, features = ["cloud-engine-response"] }
+ ic-platform-types = { version = "0.20.4", default-features = false }
+ ic-topology = { path = "crates/ic-topology", version = "0.105.5" }
+ serde = { version = "1.0.229", features = ["derive"] }
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -1142,6 +1142,15 @@
+ ]
+ 
+ [[package]]
++name = "ic-platform-protocol"
++version = "0.1.0"
++source = "git+https://github.com/dragginzgame/ic-platform-new?rev=08c72219ad6f261067c00eece9c8c71852e6b561#08c72219ad6f261067c00eece9c8c71852e6b561"
++dependencies = [
++ "ic-platform-types",
++ "serde",
++]
++
++[[package]]
+ name = "ic-platform-types"
+ version = "0.20.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+@@ -1179,6 +1188,7 @@
+ version = "0.105.5"
+ dependencies = [
+  "ic-platform",
++ "ic-platform-protocol",
+  "ic-platform-types",
+  "serde",
+  "serde_json",
+--- a/crates/ic-topology/Cargo.toml
++++ b/crates/ic-topology/Cargo.toml
+@@ -16,6 +16,7 @@
+ 
+ [dependencies]
+ ic-platform = { workspace = true, features = ["agent", "nns-registry-types", "cloud-engine-types"] }
++ic-platform-protocol.workspace = true
+ ic-platform-types.workspace = true
+ serde.workspace = true
+ thiserror.workspace = true
+--- a/crates/ic-topology/src/cloud_engine/engine/mod.rs
++++ b/crates/ic-topology/src/cloud_engine/engine/mod.rs
+@@ -2,7 +2,7 @@
+ 
+ use super::{CANISTER, Observation};
+ use crate::mainnet;
+-use ic_platform::{candid_codec::decoder, cloud_engine_types as wire};
++use ic_platform_protocol::{candid as decoder, cloud_engine as wire};
+ use ic_platform_types::Principal;
+ use std::{collections::BTreeSet, future::Future};
+ use tokio::time::Instant;
+@@ -18,8 +18,9 @@
+     types: 256,
+     work: 2_000_000,
+     allocation: 4 * 1024 * 1024,
++    vector: 1024,
++    skipping: 128 * 1024,
+ };
+-const SKIPPING: usize = 128 * 1024;
+ 
+ /// Read one selected engine's public control-plane view.
+ ///
+@@ -52,12 +53,8 @@
+     let argument = wire::encode_get_engine_views_args(&[engine_id.as_str().to_owned()], 512)
+         .map_err(EngineError::Encode)?;
+     let observation = query(argument).await?;
+-    let views = wire::decode_get_engine_views_response_with_skip_limit(
+-        &observation.bytes,
+-        LIMITS,
+-        SKIPPING,
+-    )
+-    .map_err(EngineError::Decode)?;
++    let views = wire::decode_get_engine_views_response(&observation.bytes, LIMITS)
++        .map_err(EngineError::Decode)?;
+     let outcome = project(&engine_id, views)?;
+     Ok(EngineReport {
+         schema: 1,
+--- a/crates/ic-topology/src/cloud_engine/engine/types.rs
++++ b/crates/ic-topology/src/cloud_engine/engine/types.rs
+@@ -1,7 +1,7 @@
+ //! Selected-engine report semantics, independent of external wire records.
+ 
+ use crate::ReadError;
+-use ic_platform::candid_codec::{self, decoder};
++use ic_platform_protocol::{candid as decoder, cloud_engine::EncodeError};
+ use ic_platform_types::Principal;
+ use serde::Serialize;
+ use std::{fmt, str::FromStr, time::Duration};
+@@ -181,7 +181,7 @@
+     Read(#[from] ReadError),
+     /// Bounded request encoding failure.
+     #[error("engine request encoding failed: {0:?}")]
+-    Encode(candid_codec::Error),
++    Encode(EncodeError),
+     /// Bounded external decoding failure.
+     #[error("engine response decoding failed: {0:?}")]
+     Decode(decoder::Error),
+--- a/crates/ic-topology/src/cloud_engine/engine/tests.rs
++++ b/crates/ic-topology/src/cloud_engine/engine/tests.rs
+@@ -38,6 +38,13 @@
+         }),
+     }
+ }
++// The candidate response projection is decode-only. Keep fixture encoding in
++// the published oracle; this conversion is test setup, not production custody.
++fn encode_views(views: &[wire::EngineView], maximum: usize) -> Vec<u8> {
++    let published: Vec<ic_platform::cloud_engine_types::EngineView> =
++        serde_json::from_value(serde_json::to_value(views).unwrap()).unwrap();
++    encode_one(&published, maximum).unwrap()
++}
+ fn read(outcome: EngineOutcome) -> EngineRecord {
+     let EngineOutcome::Read { record } = outcome else {
+         panic!("expected admitted view")
+@@ -115,7 +122,7 @@
+         assert_eq!(argument, hex("4449444c016d7101000108656e67696e652d78"));
+         async {
+             Ok(Observation {
+-                bytes: encode_one(&Vec::<wire::EngineView>::new(), 1024).unwrap(),
++                bytes: encode_views(&[], 1024),
+                 observed_at: 12,
+             })
+         }
+@@ -131,10 +138,20 @@
+     let longest: EngineId = "é".repeat(128).parse().unwrap();
+     collect(longest.clone(), |argument| async move {
+         assert!(argument.len() <= 512);
+-        let decoded: Vec<String> = decoder::decode_one(&argument, LIMITS).unwrap();
++        let decoded: Vec<String> = ic_platform::candid_codec::decoder::decode_one(
++            &argument,
++            ic_platform::candid_codec::decoder::Limits {
++                bytes: LIMITS.bytes,
++                header: LIMITS.header,
++                types: LIMITS.types,
++                work: LIMITS.work,
++                allocation: LIMITS.allocation,
++            },
++        )
++        .unwrap();
+         assert_eq!(decoded, [longest.as_str()]);
+         Ok(Observation {
+-            bytes: encode_one(&Vec::<wire::EngineView>::new(), 1024).unwrap(),
++            bytes: encode_views(&[], 1024),
+             observed_at: 12,
+         })
+     })
+@@ -325,9 +342,7 @@
+     input.node_ids = (0..128).map(id).collect();
+     input.subnet.as_mut().unwrap().node_ids = (128..256).map(id).collect();
+     input.subnet.as_mut().unwrap().replica_version = "v".repeat(256);
+-    let report = literal(encode_one(&vec![input], LIMITS.bytes).unwrap())
+-        .await
+-        .unwrap();
++    let report = literal(encode_views(&[input], LIMITS.bytes)).await.unwrap();
+     assert_eq!(read(report.outcome).record_node_ids.len(), 128);
+ }
+ 

@@ -17,6 +17,7 @@ ignored = ["toko-tooling"]
 default = []
 cloud-engine = []
 cloud-engine-response = ["cloud-engine", "dep:ic-platform-types", "dep:serde"]
+registry-settings = ["dep:serde"]
 
 [dependencies]
 ic-platform-types = { workspace = true, optional = true }

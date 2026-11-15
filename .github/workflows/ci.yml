@@ -72,5 +72,7 @@ jobs:
         run: make test-engine-request lint-engine-request doc-engine-request check-engine-request-wasm test-engine-response lint-engine-response doc-engine-response
       - name: Qualify public consumer and heap behavior
         run: make qualify-engine-response profile-engine-response
+      - name: Check Registry settings projection
+        run: make qualify-registry-settings
       - name: Execute Wasm admission corpus
         run: make qualify-engine-wasm

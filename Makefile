@@ -25,6 +25,7 @@ help:
 	  'measure-engine-wasm    Build, execute and compare standalone decoder Wasm sizes' \
 	  'qualify-engine-wasm    Execute old/new Wasm admission and refusal fixtures' \
 	  'check-protocol-graphs  Enforce selected closures (GRAPH_TARGET defaults to Wasm)' \
+	  'qualify-registry-settings  Test and check the bounded Registry projection' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
 	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
 	  'fmt / fmt-check        Format or check Rust and Cargo manifests'
@@ -100,11 +101,20 @@ check-secrets:
 	"$(CURDIR)/.tools/ci/bin/gitleaks" git --redact=100 --no-banner --no-color --log-level error
 
 # Initial projection's admitted normal/build closure. New suppliers require review.
+.PHONY: qualify-registry-settings
+qualify-registry-settings: toko-tooling-check
+	cargo test --offline --locked -p ic-platform-protocol --features registry-settings --lib registry_settings::tests
+	cargo clippy --offline --locked -p ic-platform-protocol --features registry-settings --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --features registry-settings --no-deps
+	cargo check --offline --locked -p ic-platform-protocol --features registry-settings --lib --target wasm32-unknown-unknown
+
 GRAPH_TARGET ?= wasm32-unknown-unknown
+REGISTRY_GRAPH_PACKAGES := ic-platform-protocol|serde|serde_core|serde_derive|proc-macro2|quote|syn|unicode-ident
 PROTOCOL_GRAPH_PACKAGES := ic-platform-protocol|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident
 PROTOCOL_GRAPH_CHECK = perl "$(TOKO_TOOLING_ROOT)/scripts/ci/check-cargo-graph.pl" --target "$(GRAPH_TARGET)" --edges normal,build --explain
 .PHONY: check-protocol-graphs
 check-protocol-graphs: qualification-tooling-check
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features registry-settings --forbid-pattern '^(?!($(REGISTRY_GRAPH_PACKAGES))$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --forbid-pattern '^(?!ic-platform-protocol$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine --forbid-pattern '^(?!ic-platform-protocol$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine-response --forbid-pattern '^(?!($(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1
