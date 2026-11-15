@@ -2,7 +2,11 @@
 //!
 //! This is not a general-purpose Candid API. Decoding authenticates nothing.
 
+#[cfg(feature = "cloud-engine-marketplace")]
+mod nat;
 mod wire;
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use nat::Nat;
 pub(crate) use wire::{Decode, Reader, Schema};
 
 /// Explicit budgets for one complete response; none has an implicit default.

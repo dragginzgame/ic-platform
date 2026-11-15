@@ -5,8 +5,8 @@ import { readFileSync } from 'node:fs';
 
 assert.ok(process.argv.length <= 3, 'expected at most one probe selection');
 const probe = process.argv[2] ?? 'size';
-assert.ok(['size', 'admission'].includes(probe), 'expected size or admission');
-const binary = probe === 'admission' ? 'engine-view-admission' : 'engine-view-wasm';
+assert.ok(['size', 'admission', 'registry'].includes(probe), 'expected size, admission or registry');
+const binary = { size: 'engine-view-wasm', admission: 'engine-view-admission', registry: 'registry-admission' }[probe];
 
 function measure(selection) {
   const url = new URL(`../target/engine-view-wasm/${selection}/wasm32-unknown-unknown/release/${binary}.wasm`, import.meta.url);
@@ -17,7 +17,7 @@ function measure(selection) {
   const instance = new WebAssembly.Instance(module);
   assert.equal(instance.exports.main(0, 0), 0, `${selection}: fixture failed`);
   const sha256 = createHash('sha256').update(bytes).digest('hex');
-  if (probe === 'admission') return { sha256, admission: 'passed' };
+  if (probe !== 'size') return { sha256, admission: 'passed' };
 
   let offset = 8;
   let codeBytes;
@@ -46,8 +46,8 @@ function measure(selection) {
   };
 }
 
-const published = measure('published');
-const candidate = measure('candidate');
+const published = probe === 'registry' ? undefined : measure('published');
+const candidate = measure(probe === 'registry' ? 'registry' : 'candidate');
 const delta = probe === 'size' ? {
   module_bytes: candidate.module_bytes - published.module_bytes,
   code_section_payload_bytes: candidate.code_section_payload_bytes - published.code_section_payload_bytes,

@@ -103,4 +103,12 @@ mod tests;
 #[cfg(feature = "cloud-engine-response")]
 mod response;
 #[cfg(feature = "cloud-engine-response")]
-pub use response::{EngineSubnet, EngineView, decode_get_engine_views_response};
+pub use response::{
+    EngineSubnet, EngineView, RegistryCopyStatus, decode_get_engine_views_response,
+    decode_get_network_fee_response, decode_registry_copy_status_response,
+};
+
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use response::{
+    MarketplaceEntry, NodeType, Price, PriceEntry, decode_list_marketplace_prices_response,
+};

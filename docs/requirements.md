@@ -68,9 +68,20 @@ Closed supplying work remains contract evidence; read its resolution and pinned
 implementation before deciding what to reuse or retire.
 
 The opt-in [Registry settings projection](qualification/registry-settings.md)
-now has local wire/refusal tests and shared nested field accounting. Public
-consumer/Serde, executed Wasm and actual Query reporting qualification remain
-open; this does not complete #169.
+now has local wire/refusal tests, shared nested field accounting and independent
+public consumer/Serde tests. Standalone Wasm admission and seven native zero-heap
+workloads pass locally. Hosted checks and actual Query reporting qualification
+remain open; this does not complete #169.
+Native-only composition with published Platform's Registry envelope now also
+passes application-error, content-presence, mutation-evidence and refusal tests.
+Envelope and payload budgets are independent; the selected payload's nested
+messages share its allowance. No Query settings report has been implemented.
+
+The [fee/status slice](qualification/cloud-engine-observations.md) adds two
+bounded responses from #166. Literal and published-oracle checks pass locally;
+the separate [marketplace slice](qualification/marketplace-prices.md) now adds
+price rows, bounded arbitrary naturals and all six node classes. Availability
+requests/results and application errors remain pending.
 
 ## Evidence required before completing the first slice
 

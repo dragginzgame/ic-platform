@@ -1,6 +1,10 @@
 use super::{EngineView, decode_get_engine_views_response};
 use crate::candid::{Error, Limits};
 
+#[cfg(feature = "cloud-engine-marketplace")]
+mod marketplace;
+mod observations;
+
 fn limits() -> Limits {
     Limits {
         bytes: 65536,

@@ -26,6 +26,8 @@ help:
 	  'qualify-engine-wasm    Execute old/new Wasm admission and refusal fixtures' \
 	  'check-protocol-graphs  Enforce selected closures (GRAPH_TARGET defaults to Wasm)' \
 	  'qualify-registry-settings  Test and check the bounded Registry projection' \
+	  'qualify-registry-runtime   Execute Registry Wasm and native heap fixtures' \
+	  'qualify-marketplace    Test marketplace rows, natural numbers and public consumer' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
 	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
 	  'fmt / fmt-check        Format or check Rust and Cargo manifests'
@@ -102,21 +104,46 @@ check-secrets:
 
 # Initial projection's admitted normal/build closure. New suppliers require review.
 .PHONY: qualify-registry-settings
-qualify-registry-settings: toko-tooling-check
+qualify-registry-settings: qualification-tooling-check
 	cargo test --offline --locked -p ic-platform-protocol --features registry-settings --lib registry_settings::tests
 	cargo clippy --offline --locked -p ic-platform-protocol --features registry-settings --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --features registry-settings --no-deps
 	cargo check --offline --locked -p ic-platform-protocol --features registry-settings --lib --target wasm32-unknown-unknown
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features registry-settings registry_settings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features registry-settings --all-targets -- -D warnings
+	cargo check --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features registry-settings --tests --target wasm32-unknown-unknown
 
 GRAPH_TARGET ?= wasm32-unknown-unknown
+.PHONY: qualify-marketplace
+qualify-marketplace: qualification-tooling-check
+	cargo test --offline --locked -p ic-platform-protocol --features cloud-engine-marketplace --lib
+	cargo clippy --offline --locked -p ic-platform-protocol --features cloud-engine-marketplace --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --features cloud-engine-marketplace --no-deps
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features marketplace marketplace
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features marketplace --all-targets -- -D warnings
+	cargo check --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features marketplace --tests --target wasm32-unknown-unknown
+
+.PHONY: qualify-registry-runtime
+qualify-registry-runtime: qualification-tooling-check
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-profile --features registry-settings --test registry -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features registry-settings --bin registry-admission -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-profile --features registry-settings --release --test registry -- --nocapture --test-threads=1
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin registry-admission --release --target wasm32-unknown-unknown --no-default-features --features registry-settings --target-dir target/engine-view-wasm/registry
+	node qualification/engine-view-wasm.mjs registry
+
 REGISTRY_GRAPH_PACKAGES := ic-platform-protocol|serde|serde_core|serde_derive|proc-macro2|quote|syn|unicode-ident
 PROTOCOL_GRAPH_PACKAGES := ic-platform-protocol|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident
+MARKETPLACE_GRAPH_PACKAGES := $(PROTOCOL_GRAPH_PACKAGES)|num-bigint|num-integer|num-traits|autocfg
 PROTOCOL_GRAPH_CHECK = perl "$(TOKO_TOOLING_ROOT)/scripts/ci/check-cargo-graph.pl" --target "$(GRAPH_TARGET)" --edges normal,build --explain
 .PHONY: check-protocol-graphs
 check-protocol-graphs: qualification-tooling-check
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine-marketplace --forbid-pattern '^(?!($(MARKETPLACE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require num-bigint=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --features marketplace --forbid-pattern '^(?!(engine-view-consumer|$(MARKETPLACE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1 --require num-bigint=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features registry-settings --forbid-pattern '^(?!(engine-view-wasm|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features registry-settings --forbid-pattern '^(?!($(REGISTRY_GRAPH_PACKAGES))$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --forbid-pattern '^(?!ic-platform-protocol$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine --forbid-pattern '^(?!ic-platform-protocol$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine-response --forbid-pattern '^(?!($(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --features registry-settings --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features candidate --forbid-pattern '^(?!(engine-view-wasm|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1

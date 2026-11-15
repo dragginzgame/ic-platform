@@ -19,5 +19,8 @@ toko-tooling.workspace = true
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
+[features]
+registry-settings = ["ic-platform-protocol/registry-settings"]
+
 [lints]
 workspace = true

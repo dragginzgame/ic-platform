@@ -16,6 +16,21 @@ macro_rules! absent {
     };
 }
 macro_rules! projection {
+    ($(#[$meta:meta])* enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident),+ $(,)? }) => {
+        $(#[$meta])*
+        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+        pub enum $name { $($(#[$variant_meta])* $variant,)+ }
+        impl Decode for $name {
+            const SCHEMA: Schema = Schema::Variant(&[$(($label, &Schema::Primitive(-1))),+]);
+            fn read(reader: &mut Reader<'_, '_>, id: i64) -> Result<Self, Error> {
+                let (label, wire) = reader.variant(id)?;
+                match label {
+                    $($label => { reader.value::<()>(wire)?; Ok(Self::$variant) },)+
+                    _ => Err(Error::Type),
+                }
+            }
+        }
+    };
     ($(#[$meta:meta])* $name:ident { $( $(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty [$policy:ident] ),+ $(,)? }) => {
         $(#[$meta])*
         #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -35,6 +50,42 @@ macro_rules! projection {
             }
         }
     };
+}
+
+projection! {
+    /// Raw Registry-copy progress; no freshness or atomic snapshot is implied.
+    RegistryCopyStatus {
+        /// Reported latest version.
+        1_432_552_775 => latest: u64 [required],
+        /// Reported copy version.
+        2_096_228_120 => version: u64 [required],
+        /// Source progress flag, without a derived availability claim.
+        2_653_674_110 => caught_up: bool [required],
+    }
+}
+
+/// Decode exactly one raw network-fee markup fraction.
+///
+/// All IEEE-754 bits are retained, including signed zero, infinities and NaNs.
+/// The caller owns finite/nonnegative admission and must not use a fresh fee to
+/// recalculate historical marketplace gross prices.
+///
+/// # Errors
+/// Returns the shared typed framing, type, arity and resource refusals.
+pub fn decode_get_network_fee_response(bytes: &[u8], limits: Limits) -> Result<f64, Error> {
+    candid::decode(bytes, limits)
+}
+
+/// Decode exactly one Registry-copy progress record with required fields.
+///
+/// # Errors
+/// Returns the shared typed framing, type, arity and resource refusals. Unknown
+/// fields are validated and skipped within the supplied work and skip budgets.
+pub fn decode_registry_copy_status_response(
+    bytes: &[u8],
+    limits: Limits,
+) -> Result<RegistryCopyStatus, Error> {
+    candid::decode(bytes, limits)
 }
 
 projection! {
@@ -88,3 +139,10 @@ pub fn decode_get_engine_views_response(
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(feature = "cloud-engine-marketplace")]
+mod marketplace;
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use marketplace::{
+    MarketplaceEntry, NodeType, Price, PriceEntry, decode_list_marketplace_prices_response,
+};

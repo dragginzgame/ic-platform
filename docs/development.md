@@ -237,15 +237,20 @@ offline Cargo observations on `wasm32-unknown-unknown`. Override `GRAPH_TARGET`
 with an explicit target triple for native checks; CI also runs it with the host
 reported by `rustc -vV` on every matrix runner.
 
-Six selections are checked independently: Registry settings, default Protocol, request-only,
-response, the public consumer's normal/build graph, and the candidate Wasm
-probe. Default and request-only builds admit only the Protocol root. The other
-three EngineView selections use the reviewed package-name allowlist in Makefile and require exactly
+Ten selections are checked independently: Registry settings, default Protocol, request-only,
+response, the public consumer with and without Registry settings, and the candidate Wasm
+probe with and without Registry settings, plus marketplace Protocol and its public
+consumer. Default and request-only builds admit only the Protocol root. The
+five EngineView/combined selections use the reviewed package-name allowlist in Makefile and require exactly
 one rendered Types identity; both consumers also require one Protocol identity.
 Dependencies outside that list, including Runtime, published Platform, registry
 Candid, crypto suppliers and heap/oracle tooling, refuse with an introducing
 dependency path. A new supplier requires an explicit policy review, not just
 updating the lockfile.
+
+The two marketplace selections additionally admit num-bigint, num-integer,
+num-traits and build-only autocfg, and require one bigint supplier. This separate
+allowlist preserves the bigint-free EngineView and Registry selections.
 
 Development dependencies are deliberately excluded: published Platform remains
 the native test oracle and dhat remains a separate profiler. This is not a
@@ -255,14 +260,28 @@ bytes. Locked builds and the public Principal crossing still supply separate
 evidence. This policy applies to the current Protocol slice, not future Platform
 crypto or Runtime packages.
 
-All five selections passed on Linux x86-64 and Wasm in local checks. An
+The initial five selections passed on Linux x86-64 and Wasm in local checks. An
 intentionally restricted allowlist that excluded Types failed at the response
 selection with a Types dependency path, confirming the target propagates policy
 failures. Workflow lint, formatting and the 51-file Toko snapshot check passed.
 The same checks passed on both macOS architectures in the hosted run linked above.
 
 `make qualify-registry-settings` runs the selected protobuf projection's tests,
-Clippy, Rustdoc and Wasm compilation. Its separate graph selection permits only
+Clippy, Rustdoc and Wasm compilation, followed by independent public consumer
+and Serde tests, consumer Clippy and consumer Wasm compilation. Its separate product graph selection permits only
 Protocol and Serde's closure. The new selection passed locally; hosted evidence
 above predates this addition. See [Registry qualification](qualification/registry-settings.md)
 for exact scope and outstanding consumer gates.
+
+`make qualify-registry-runtime` runs the Registry heap corpus in a separate test
+process and executes its standalone Wasm admission binary. Fixture construction
+is outside heap measurement. The Wasm runner's `registry` selection reports only
+admission and artifact identity, without changing the EngineView size comparison
+or its undecided acceptance threshold. Both checks are wired into every native
+CI job; local Linux results do not establish hosted/macOS success.
+
+`make qualify-marketplace` tests the opt-in price-row projection and its natural
+and variant readers, checks Clippy/Rustdoc, compares public JSON and wire values
+with the published native oracle, and compiles the consumer for Wasm. The
+[marketplace evidence](qualification/marketplace-prices.md) records the new
+supplier closure, logical natural-number charges and remaining gates.

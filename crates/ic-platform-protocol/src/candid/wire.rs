@@ -314,6 +314,8 @@ pub(crate) enum Schema {
     Vector(&'static Schema),
     StrictOption(&'static Schema),
     Record(&'static [(u32, &'static Schema)]),
+    #[cfg(feature = "cloud-engine-marketplace")]
+    Variant(&'static [(u32, &'static Schema)]),
 }
 pub(crate) trait Decode: Sized {
     const SCHEMA: Schema;
@@ -327,6 +329,14 @@ pub(crate) struct Reader<'n, 'a> {
 }
 
 impl Reader<'_, '_> {
+    #[cfg(feature = "cloud-engine-marketplace")]
+    pub(crate) fn variant(&mut self, id: Id) -> Result<(u32, Id)> {
+        let Node::Variant(fields) = node_at(id, self.table).map_err(|_| Error::Type)? else {
+            return Err(Error::Type);
+        };
+        let index = self.input.count()?;
+        fields.get(index).copied().ok_or(Error::Malformed)
+    }
     pub(crate) fn value<T: Decode>(&mut self, id: Id) -> Result<T> {
         self.input.charge(1)?;
         if id >= 0 {
@@ -442,19 +452,21 @@ const fn schema_valid(schema: &Schema) -> bool {
     match schema {
         Schema::Primitive(id) => (*id >= -17 && *id <= -1) || *id == -24,
         Schema::Vector(inner) | Schema::StrictOption(inner) => schema_valid(inner),
-        Schema::Record(fields) => {
-            let mut index = 0;
-            while index < fields.len() {
-                if (index > 0 && fields[index - 1].0 >= fields[index].0)
-                    || !schema_valid(fields[index].1)
-                {
-                    return false;
-                }
-                index += 1;
-            }
-            true
-        }
+        Schema::Record(fields) => fields_valid(fields),
+        #[cfg(feature = "cloud-engine-marketplace")]
+        Schema::Variant(fields) => fields_valid(fields),
     }
+}
+
+const fn fields_valid(fields: &[(u32, &Schema)]) -> bool {
+    let mut index = 0;
+    while index < fields.len() {
+        if (index > 0 && fields[index - 1].0 >= fields[index].0) || !schema_valid(fields[index].1) {
+            return false;
+        }
+        index += 1;
+    }
+    true
 }
 
 pub(super) fn decode<T: Decode>(bytes: &[u8], limits: Limits) -> Result<T> {
@@ -498,6 +510,45 @@ impl Decode for String {
         Ok(result)
     }
 }
+#[cfg(feature = "cloud-engine-marketplace")]
+impl Decode for () {
+    const SCHEMA: Schema = Schema::Primitive(-1);
+    fn read(_: &mut Reader<'_, '_>, id: Id) -> Result<Self> {
+        if id == -1 { Ok(()) } else { Err(Error::Type) }
+    }
+}
+
+#[cfg(feature = "cloud-engine-marketplace")]
+impl Decode for super::Nat {
+    const SCHEMA: Schema = Schema::Primitive(-3);
+    fn read(reader: &mut Reader<'_, '_>, id: Id) -> Result<Self> {
+        if id != -3 {
+            return Err(Error::Type);
+        }
+        let start = reader.input.offset;
+        while reader.input.byte()? & 128 != 0 {}
+        let count = reader.input.offset - start;
+        // Meter the conversion pass and both logical scratch/magnitude storage
+        // before either allocation. Round magnitude up to 64-bit words so this
+        // allowance is conservative on both native and Wasm digit widths.
+        reader.input.charge(count)?;
+        let magnitude = count
+            .checked_mul(7)
+            .and_then(|bits| bits.checked_add(63))
+            .map(|bits| bits / 64)
+            .and_then(|words| words.checked_mul(8))
+            .ok_or(Error::Limit)?;
+        reader.input.storage(magnitude)?;
+        let mut digits = reader.input.reserve::<u8>(count)?;
+        digits.extend(
+            reader.input.bytes[start..reader.input.offset]
+                .iter()
+                .map(|byte| byte & 127),
+        );
+        let value = num_bigint::BigUint::from_radix_le(&digits, 128).ok_or(Error::Malformed)?;
+        Ok(Self(value))
+    }
+}
 impl Decode for Principal {
     const SCHEMA: Schema = Schema::Primitive(-24);
     fn read(reader: &mut Reader<'_, '_>, id: Id) -> Result<Self> {
@@ -537,6 +588,7 @@ macro_rules! fixed {
 }
 fixed!(u64, -8);
 fixed!(i64, -12);
+fixed!(f64, -14);
 impl<T: Decode> Decode for Vec<T> {
     const SCHEMA: Schema = Schema::Vector(&T::SCHEMA);
     fn read(reader: &mut Reader<'_, '_>, id: Id) -> Result<Self> {

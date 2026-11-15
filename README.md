@@ -47,6 +47,11 @@ features and resource limits, preserving presence and raw defaults under shared
 byte/field bounds. Its [contract and qualification status](docs/qualification/registry-settings.md)
 describe the local tests and remaining consumer gates.
 
+The response feature also decodes raw network fees and Registry-copy status as
+the first part of the [marketplace/availability work](docs/qualification/cloud-engine-observations.md).
+The opt-in `cloud-engine-marketplace` feature adds [daily price rows](docs/qualification/marketplace-prices.md)
+with all six node classes and arbitrary naturals. Available-node pages remain pending.
+
 Toko 0.44.3 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local
 packages and `make deps-update` for deliberate Cargo lock updates. See

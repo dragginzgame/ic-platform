@@ -56,7 +56,63 @@ this feature; it admits no Types, Runtime, Platform or cryptographic supplier.
 The feature is included in the three-host CI matrix, but the new revision's
 hosted results are not yet established.
 
-Independent public consumer/Serde fixtures, executed Wasm admission, measured
-zero-allocation evidence and actual Query reporting integration remain pending.
-Existing EngineView evidence does not qualify these new surfaces. Publication
+Four independent public consumer tests now run in the existing qualification
+consumer under an opt-in `registry-settings` feature. They check literal
+protobuf-to-JSON presence, exact u64::MAX tokens in all five integer slots,
+omitted/null/unknown JSON fields, mistyped and overflowing values, and duplicate
+selected JSON fields (including null). JSON requires nonoptional scalar fields;
+protobuf absence supplies their defaults. These formats intentionally have
+different omission rules. The public consumer tests, Clippy and Wasm compilation
+pass locally through `make qualify-registry-settings`. The combined consumer
+graph is also checked without widening the existing supplier allowlist.
+
+Four further native-only tests compose published Platform 0.33.7's Registry
+envelope decoder with this settings decoder. The published `nns-registry-types`
+feature is enabled only through the qualification consumer's native development
+dependency; no published Platform edge enters the product or Wasm graph. The
+qualification lock adds its existing thiserror edge without changing versions.
+The fixture retains mutation version/timestamp and borrowed application-error
+code/reason/key, rejects application errors before interpreting inline settings,
+distinguishes missing content from present empty bytes, and keeps envelope and
+payload refusals distinct. Chunked values remain unsupported, including responses
+containing both inline and chunked content. Literal frames cover duplicate and
+malformed envelope/payload fields and exact/exceeded field allowances.
+
+This models the existing Query configuration caller's two decoder stages. Each
+stage has a separate 64 KiB byte / 4,096-field allowance; nested selected settings
+share the payload stage's allowance. Neither public API exposes remaining budget
+to the other, so composition does **not** establish a single 4,096-field budget
+over the envelope plus payload. Envelope allocation/item allowances remain with
+the published owner; this settings projection allocates no collections. A future
+combined-budget contract would require an explicit API and qualification change.
+
+Read-only review of Query found `subnet::settings::fetch` and its CLI still at the
+design stage. The composition helper exists only under qualification tests; it
+does not implement that report, verify a query signature, select an endpoint,
+bind a subnet key or create authenticated evidence. It imports no Query source
+or tests and makes no sibling changes or network requests.
+
+`make qualify-registry-runtime` now executes independent Registry Wasm admission
+and a separate native heap-test process. Both pass locally on Linux x86-64 with
+Rust 1.100.0. The heap test uses DHAT 0.3.3 in release mode and constructs inputs
+before profiling. Seven workloads each record zero total allocation blocks and
+bytes: empty input, all selected fields, a 65,536-byte opaque unknown field,
+duplicate and malformed fields after selected values, and field/byte exhaustion.
+This is measured evidence for those workloads, not a universal allocation proof
+or a performance comparison. No Serde operation is included in heap measurement.
+
+The standalone Wasm corpus verifies absence/presence, explicit false/zero,
+u64::MAX, root-boundary versus mid-field truncations, shared field and byte bounds,
+duplicates, invalid booleans, unsupported groups and overflowing varints. A
+length of 2^32 must refuse on Wasm rather than truncate to zero. The Node runner
+requires an import-free module and successful main completion. Node 24.21.0 /
+V8 13.6.233.17-node.53 executed artifact SHA-256
+`0ea28e6e1a300fdf72615c6b53fc5a0c647ce3036cbd3ac460f7c84fd0c692d0`.
+The probe reuses the existing qualification package and therefore selects its
+EngineView/Types dependency closure; the Registry-only product graph remains
+separately restricted to Serde. This is standalone Wasm evidence, not installed
+IC execution, a size acceptance decision or an authenticated Registry response.
+
+Actual Query reporting integration and hosted execution of these new checks
+remain pending. Existing EngineView evidence does not qualify these new surfaces. Publication
 stays disabled and the package remains at its initial unpublished 0.1.0 version.

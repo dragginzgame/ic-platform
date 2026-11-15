@@ -15,6 +15,10 @@ ic-platform.workspace = true
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
+[features]
+marketplace = ["ic-platform-protocol/cloud-engine-marketplace"]
+registry-settings = ["ic-platform-protocol/registry-settings", "ic-platform/nns-registry-types"]
+
 [dependencies]
 ic-platform-protocol.workspace = true
 ic-platform-types.workspace = true

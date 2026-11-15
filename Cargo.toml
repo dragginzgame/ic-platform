@@ -10,6 +10,7 @@ license-file = "LICENSE.md"
 
 [workspace.dependencies]
 ic-platform-types = { version = "0.20.4", default-features = false }
+num-bigint = { version = "0.5.1", default-features = false, features = ["serde"] }
 serde = { version = "1.0.229", default-features = false, features = ["alloc", "derive"] }
 toko-tooling = "=0.44.3"
 

@@ -12,10 +12,16 @@ toko-tooling.workspace = true
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
+[[bin]]
+name = "registry-admission"
+path = "src/bin/registry-admission.rs"
+required-features = ["registry-settings"]
+
 [features]
 default = []
 candidate = ["dep:ic-platform-protocol"]
 published = ["dep:ic-platform"]
+registry-settings = ["candidate", "ic-platform-protocol/registry-settings"]
 
 [dependencies]
 ic-platform = { workspace = true, optional = true }

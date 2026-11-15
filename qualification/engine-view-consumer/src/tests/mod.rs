@@ -39,3 +39,10 @@ fn public_projection_preserves_principal_identity_and_serde_shape() {
 mod comparison;
 
 mod serde;
+
+#[cfg(feature = "marketplace")]
+mod marketplace;
+mod observations;
+
+#[cfg(feature = "registry-settings")]
+mod registry_settings;

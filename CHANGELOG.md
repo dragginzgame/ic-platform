@@ -6,6 +6,14 @@ Initial Protocol version; publication remains disabled pending publisher selecti
 
 ### ➕ Added
 
+- Add opt-in marketplace price decoding with six node classes, arbitrary naturals,
+  signed timestamps and strict optional scopes. Reuse the record declaration and
+  bounded reader; keep the bigint supplier outside other feature closures.
+
+- Decode raw Cloud Engine network fees and Registry-copy status through the
+  existing bounded response reader, with literal and published-oracle tests.
+  Availability pages remain pending.
+
 - Add an opt-in Registry settings protobuf projection with raw presence semantics,
   shared byte/field bounds and duplicate selected-field refusal, plus focused
   Make/CI checks and literal malformed-wire fixtures. Consumer adoption is pending.
@@ -26,6 +34,15 @@ Initial Protocol version; publication remains disabled pending publisher selecti
   identity and dependency-free default/request profiles.
 
 ### 🧪 Testing
+
+- Qualify Registry settings through the public consumer with literal JSON
+  presence, exact integer, omission and duplicate/malformed-value fixtures.
+- Test composition with the published Registry envelope decoder, retaining
+  mutation evidence, application-error priority and distinct envelope/payload
+  refusals. Record the independent per-stage budget boundary.
+- Execute Registry Wasm admission, including 32-bit length overflow, and measure
+  zero heap allocation across seven successful/refused native decode workloads.
+  Wire both checks into the focused Make interface and native CI matrix.
 
 - Validate the pinned Query EngineView caller in a disposable snapshot: its seven
   existing tests pass before and after adaptation, along with topology Clippy,
