@@ -14,8 +14,20 @@ Initial Protocol version; publication remains disabled pending publisher selecti
   shared Principal type, Serde shape and portable consumer compilation.
 - Adopt Toko 0.44.3 and Rust 1.100.0 for local development, including the shared
   `deps-list` and `deps-update` commands and focused encoder checks.
+- Add CI definitions for Linux and both macOS architectures, with one repository
+  secret-scan/workflow-lint owner and pinned tool/action selections. Hosted runs
+  remain unqualified until the workflow is delivered and executed.
+- Enforce the current Protocol and consumer dependency closures using Toko's
+  canonical graph checker on native and Wasm selections, including one Types
+  identity and dependency-free default/request profiles.
 
 ### 🧪 Testing
+
+- Characterize published empty-vector/None admission independently from present
+  incompatible payload refusal; do not claim full declared-schema compatibility.
+- Execute separate old/new Wasm admission probes for signed numeric boundaries,
+  Principal bytes, truncation, trailing data, arity and resource refusals without
+  changing the fixed size-comparison workload.
 
 - Add independent literal request frames and exact output-limit cases covering
   empty vectors, text preservation and multi-byte lengths/counts.

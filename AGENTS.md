@@ -30,8 +30,8 @@ by the design. No common-policy exception is selected. Tool installation alone
 does not establish product or native-host qualification.
 
 - Keep `../ic-platform` and every other sibling read-only unless separately authorized.
-- Preserve unique work here. The maintainer authorized the initial source commit
-  and push to public `dragginzgame/ic-platform-new`. Registry publication,
+- Preserve unique work here. The maintainer authorized source delivery to public
+  `dragginzgame/ic-platform-new`. Registry publication,
   releases, repository deletion and sibling migration remain excluded. Keep
   every package unpublished; GitHub source delivery is not registry publication.
 - Create manifests only for real implementation slices. Do not add empty Cargo

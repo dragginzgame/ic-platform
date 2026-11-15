@@ -82,6 +82,11 @@ literal frames and 189 single-byte mutations. Both implementations share the
 same registry Types identity; comparison uses the published dependency, not
 copied implementation or test source. This is bounded differential evidence,
 not exhaustive protocol qualification.
+Two additional literal comparisons establish the published decoder's value-based
+admission for empty vectors and None payloads: incompatible declared inner types
+are not checked when no element/payload is read. Present incompatible boolean
+payloads still refuse with Type. This is observed compatibility, not proof of
+full schema-level admission; tightening it requires a deliberate contract choice.
 
 Separate literal JSON tests now cover 12 nested signed/unsigned boundary
 combinations, omitted/null optional fields, unknown fields, exact integer output
@@ -102,6 +107,10 @@ decoders successfully and reports a 1,693-byte code increase. Size acceptance is
 undecided: the initial agent-selected zero-growth criterion was not grounded in
 a launch requirement. Contribution analysis is deferred at the maintainer's
 request; required validation and resource limits remain intact.
+The separate admission binary also executes numeric/Principal fixtures,
+truncation, trailing-data, arity and resource refusals in both Wasm artifacts
+under Node. This is standalone execution evidence, not installed IC or Query
+adoption proof.
 
 The first slice's full gate remains open: real Query adoption, broader
 numeric/Serde compatibility and physical allocation, instruction-count and Wasm

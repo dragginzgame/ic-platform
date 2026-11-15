@@ -205,3 +205,39 @@ fn mutated_literal_admission_matches_published_projection() {
 }
 
 mod resources;
+
+#[test]
+fn empty_vectors_retain_published_value_based_admission() {
+    // One argument of type vec bool, with no elements.
+    let frame = b"DIDL\x01\x6d\x7e\x01\x00\x00";
+    let candidate = new::decode_get_engine_views_response(frame, limits());
+    let published = old::decode_get_engine_views_response_with_skip_limit(
+        frame,
+        old_limits(),
+        limits().skipping,
+    );
+    assert!(published.unwrap().is_empty());
+    assert!(candidate.unwrap().is_empty());
+}
+
+#[test]
+fn absent_payload_retains_published_strict_option_admission() {
+    // subnet is declared opt bool rather than opt EngineSubnet, but is None.
+    let frame = b"DIDL\x04\x6d\x01\x6c\x03\xdb\xb7\x01\x71\xdd\xad\x9c\xd0\x09\x03\xbb\xf8\xfd\xed\x0f\x02\x6d\x68\x6e\x7e\x01\x00\x01\x01x\x00\x00";
+    compare(frame);
+    let views = new::decode_get_engine_views_response(frame, limits()).unwrap();
+    assert_eq!(views.len(), 1);
+    assert_eq!(views[0].id, "x");
+    assert!(views[0].subnet.is_none());
+    // The same declared type with an actual bool payload must still refuse;
+    // absent-payload admission must never become optional failure fallback.
+    for boolean in [0, 1] {
+        let mut present = frame[..frame.len() - 2].to_vec();
+        present.extend_from_slice(&[1, boolean, 0]);
+        compare(&present);
+        assert_eq!(
+            new::decode_get_engine_views_response(&present, limits()),
+            Err(candid::Error::Type)
+        );
+    }
+}

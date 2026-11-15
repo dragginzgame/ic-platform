@@ -30,6 +30,15 @@ are offline and do not install tools. Linux x86-64 and macOS ARM64/x86-64 are th
 intended development hosts; native macOS execution has not yet been qualified in
 this checkout.
 
+The initial [CI workflow](../.github/workflows/ci.yml) selects Ubuntu 24.04
+x86-64, macOS 15 ARM64 and macOS 15 Intel. These are the intended native
+qualification hosts, not claims of completed hosted runs. Setup requires Bash,
+GNU Make, Git, Perl/core modules, curl, tar and SHA-256 utilities, plus Rustup and
+native compiler/linker prerequisites supplied by the hosted images. Toko installs
+the selected jq/yq and other host tools before its toolchain-file preparer reads
+`rust-toolchain.toml`; the complete tool setup/check follows. Node is pinned in
+`.node-version` for standalone Wasm execution, with no npm packages required.
+
 `deps-list` lists workspace packages, versions and release groups, not transitive
 dependencies. A dash means no release group has been configured. Use Cargo's
 `tree --locked` with the relevant target/features to inspect a dependency graph.
@@ -108,6 +117,12 @@ constructed types for skipping, including transparent service/function reference
 opaque references and future constructors refuse. Strict option fields require
 wire `opt` when present and never use fallback to hide a malformed payload. An
 absent field or an encoded None remains absent; no nested value is manufactured.
+Compatibility is currently value-based, matching published Platform 0.33.7:
+an empty `vec bool` can decode as an empty result, and a selected subnet declared
+`opt bool` with None remains absent. The same optional type with a boolean
+payload refuses with Type; no failed payload is converted to None. Literal
+comparison tests preserve this distinction. Full declared-type compatibility
+even without values is not implemented or claimed.
 
 Wire grammar was reviewed against the [Candid binary format](https://github.com/dfinity/candid/blob/master/spec/Candid.md#binary-format)
 on 2026-11-15 (document version 0.1.8; fetched Git blob
@@ -176,3 +191,69 @@ the [recipe and evidence](qualification/engine-view-wasm.md). The initial
 agent-selected zero-growth threshold had no established launch-budget basis.
 Contribution analysis is deferred; this measurement is not release admission.
 Its private package requires exactly one of `candidate` or `published`.
+
+`make qualify-engine-wasm` separately builds and executes an admission corpus in
+Node for both decoder selections, then runs Clippy. It checks signed timestamp
+extremes, Principal bytes, every truncated prefix of those frames, trailing data,
+arity and five resource limits. It uses a separate binary so the fixed size
+workload is unchanged. See [executed Wasm evidence](qualification/engine-view-wasm.md#executed-admission-corpus--2026-11-15).
+
+## Continuous integration
+
+The workflow runs on main pushes, pull requests (including documentation-only
+changes) and manual dispatch. A workflow/ref concurrency group cancels superseded
+runs. Actions are pinned to reviewed release commit SHAs, permissions are limited
+to reading repository contents, and checkout does not persist credentials. No
+publication, release, deployment or write-token step is present.
+
+Each native host prepares locked sources before running offline Make checks:
+formatting/snapshot admission, request/response tests and lints/docs, portable
+consumer qualification, heap profiling and executed Wasm admission. The fixed
+size comparison remains an explicit informational target outside required CI;
+its acceptance is undecided. No all-features build combines the two probe owners.
+
+One independent Linux repository job owns the full-history Gitleaks scan and
+Actionlint/ShellCheck validation. It is outside the native matrix and runs even
+for docs changes. Reproduce with `make install-ci-tools`, then
+`make lint-workflows check-secrets`. Installation uses Toko's pinned CI catalog;
+checks install nothing. The selected catalog provides these CI tools on Linux
+x86-64 only; native macOS jobs do not invoke them. Gitleaks scans committed Git
+history, not uncommitted files or ignored build output.
+
+Local Linux validation passed workflow lint, the existing committed-history
+scan, tool admission, formatting and snapshot checks. Hosted and macOS
+qualification require successful runs for the delivered source; local workflow
+validation alone leaves that qualification pending.
+The native assertions retain their separately recorded local evidence; a valid
+workflow definition is not a successful hosted run.
+
+## Dependency boundary checks
+
+`make check-protocol-graphs` uses the installed Toko graph checker with locked,
+offline Cargo observations on `wasm32-unknown-unknown`. Override `GRAPH_TARGET`
+with an explicit target triple for native checks; CI also runs it with the host
+reported by `rustc -vV` on every matrix runner.
+
+Five selections are checked independently: default Protocol, request-only,
+response, the public consumer's normal/build graph, and the candidate Wasm
+probe. Default and request-only builds admit only the Protocol root. The other
+three use the reviewed package-name allowlist in Makefile and require exactly
+one rendered Types identity; both consumers also require one Protocol identity.
+Dependencies outside that list, including Runtime, published Platform, registry
+Candid, crypto suppliers and heap/oracle tooling, refuse with an introducing
+dependency path. A new supplier requires an explicit policy review, not just
+updating the lockfile.
+
+Development dependencies are deliberately excluded: published Platform remains
+the native test oracle and dhat remains a separate profiler. This is not a
+whole-lock duplicate ban. The shared checker distinguishes versions and source
+qualifiers shown by Cargo; rendered identity counts do not authenticate source
+bytes. Locked builds and the public Principal crossing still supply separate
+evidence. This policy applies to the current Protocol slice, not future Platform
+crypto or Runtime packages.
+
+All five selections passed on Linux x86-64 and Wasm in local checks. An
+intentionally restricted allowlist that excluded Types failed at the response
+selection with a Types dependency path, confirming the target propagates policy
+failures. Workflow lint, formatting and the 51-file Toko snapshot check passed.
+Native macOS and hosted CI execution remain pending.

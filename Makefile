@@ -23,6 +23,10 @@ help:
 	  'measure-engine-response  Report fixed-workload logical resource charges' \
 	  'profile-engine-response  Compare native heap allocations with the published decoder' \
 	  'measure-engine-wasm    Build, execute and compare standalone decoder Wasm sizes' \
+	  'qualify-engine-wasm    Execute old/new Wasm admission and refusal fixtures' \
+	  'check-protocol-graphs  Enforce selected closures (GRAPH_TARGET defaults to Wasm)' \
+	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
+	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
 	  'fmt / fmt-check        Format or check Rust and Cargo manifests'
 
 test-engine-request: toko-tooling-check
@@ -71,6 +75,38 @@ profile-engine-response: qualification-tooling-check
 ENGINE_WASM_ENV = RUSTFLAGS= CARGO_ENCODED_RUSTFLAGS= RUSTC_WRAPPER= RUSTC_WORKSPACE_WRAPPER= CARGO_PROFILE_RELEASE_OPT_LEVEL=3 CARGO_PROFILE_RELEASE_LTO=false CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 CARGO_PROFILE_RELEASE_DEBUG=false CARGO_PROFILE_RELEASE_STRIP=none CARGO_PROFILE_RELEASE_PANIC=unwind CARGO_PROFILE_RELEASE_INCREMENTAL=false CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=false CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=false
 .PHONY: measure-engine-wasm
 measure-engine-wasm: qualification-tooling-check
-	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --release --target wasm32-unknown-unknown --no-default-features --features published --target-dir target/engine-view-wasm/published
-	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --release --target wasm32-unknown-unknown --no-default-features --features candidate --target-dir target/engine-view-wasm/candidate
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin engine-view-wasm --release --target wasm32-unknown-unknown --no-default-features --features published --target-dir target/engine-view-wasm/published
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin engine-view-wasm --release --target wasm32-unknown-unknown --no-default-features --features candidate --target-dir target/engine-view-wasm/candidate
 	node qualification/engine-view-wasm.mjs
+
+.PHONY: qualify-engine-wasm
+qualify-engine-wasm: qualification-tooling-check
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin engine-view-admission --release --target wasm32-unknown-unknown --no-default-features --features published --target-dir target/engine-view-wasm/published
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin engine-view-admission --release --target wasm32-unknown-unknown --no-default-features --features candidate --target-dir target/engine-view-wasm/candidate
+	node qualification/engine-view-wasm.mjs admission
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features published --all-targets -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features candidate --all-targets -- -D warnings
+
+.PHONY: install-ci-tools lint-workflows check-secrets
+install-ci-tools:
+	bash "$(TOKO_TOOLING_ROOT)/scripts/ci/install-ci-tool.sh" gitleaks --install-dir "$(CURDIR)/.tools/ci/bin"
+	bash "$(TOKO_TOOLING_ROOT)/scripts/ci/install-ci-tool.sh" actionlint --install-dir "$(CURDIR)/.tools/ci/bin"
+	bash "$(TOKO_TOOLING_ROOT)/scripts/ci/install-ci-tool.sh" shellcheck --install-dir "$(CURDIR)/.tools/ci/bin"
+
+lint-workflows:
+	PATH="$(CURDIR)/.tools/ci/bin:$(PATH)" "$(CURDIR)/.tools/ci/bin/actionlint" .github/workflows/ci.yml
+
+check-secrets:
+	"$(CURDIR)/.tools/ci/bin/gitleaks" git --redact=100 --no-banner --no-color --log-level error
+
+# Initial projection's admitted normal/build closure. New suppliers require review.
+GRAPH_TARGET ?= wasm32-unknown-unknown
+PROTOCOL_GRAPH_PACKAGES := ic-platform-protocol|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident
+PROTOCOL_GRAPH_CHECK = perl "$(TOKO_TOOLING_ROOT)/scripts/ci/check-cargo-graph.pl" --target "$(GRAPH_TARGET)" --edges normal,build --explain
+.PHONY: check-protocol-graphs
+check-protocol-graphs: qualification-tooling-check
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --forbid-pattern '^(?!ic-platform-protocol$$)'
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine --forbid-pattern '^(?!ic-platform-protocol$$)'
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine-response --forbid-pattern '^(?!($(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features candidate --forbid-pattern '^(?!(engine-view-wasm|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1

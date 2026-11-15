@@ -44,6 +44,8 @@ company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local
 packages and `make deps-update` for deliberate Cargo lock updates. See
 [development setup and focused checks](docs/development.md) for prerequisites,
 package-specific updates and the encoder checks.
+`make check-protocol-graphs` enforces the current projection's dependency
+boundaries and single Types identity for the selected Wasm graphs.
 
 The design's source-review baseline is IC Platform commit
 `c24e3a59583eabcf5b6bb87987269c13a209a51f`. Its findings and issue discussions are
