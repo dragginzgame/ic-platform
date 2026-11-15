@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 
 projection! {
     /// Raw source class, without an inferred hardware or capacity specification.
+    #[derive(Copy)]
     enum NodeType {
         /// Unnumbered type4 class.
         #[serde(rename = "type4")]

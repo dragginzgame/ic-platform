@@ -81,7 +81,15 @@ The [fee/status slice](qualification/cloud-engine-observations.md) adds two
 bounded responses from #166. Literal and published-oracle checks pass locally;
 the separate [marketplace slice](qualification/marketplace-prices.md) now adds
 price rows, bounded arbitrary naturals and all six node classes. Availability
-requests/results and application errors remain pending.
+[responses and application errors](qualification/available-nodes.md) now preserve
+unready/empty distinctions and strict present-page admission. Bounded page
+requests now match the published encoder's bytes; actual Query migration remains
+pending.
+
+The [standalone marketplace Wasm corpus](qualification/marketplace-wasm.md)
+passes for price rows, availability, page requests and fee/status observations.
+This includes 32-bit count overflow and large-natural conversion; installed IC
+execution and actual consumer adoption remain separate.
 
 ## Evidence required before completing the first slice
 

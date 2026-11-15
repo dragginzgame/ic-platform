@@ -28,12 +28,41 @@ help:
 	  'qualify-registry-settings  Test and check the bounded Registry projection' \
 	  'qualify-registry-runtime   Execute Registry Wasm and native heap fixtures' \
 	  'qualify-marketplace    Test marketplace rows, natural numbers and public consumer' \
+	  'qualify-marketplace-wasm  Execute marketplace and availability admission in Wasm' \
+	  'qualify-types          Test and check local Principal and Account identities' \
+	  'qualify-types-consumer  Compare published identities and execute native/Wasm fixtures' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
 	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
 	  'fmt / fmt-check        Format or check Rust and Cargo manifests'
 
 test-engine-request: toko-tooling-check
 	cargo test --offline --locked -p ic-platform-protocol --features cloud-engine --lib cloud_engine::tests
+
+.PHONY: qualify-types
+qualify-types: toko-tooling-check
+	cargo test --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml
+	cargo clippy --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --no-deps
+	cargo check --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --tests --target wasm32-unknown-unknown
+	cargo test --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating
+	cargo clippy --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating --no-deps
+	cargo check --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating --tests --target wasm32-unknown-unknown
+
+.PHONY: qualify-types-consumer check-types-graphs
+qualify-types-consumer: qualification-tooling-check
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features self-authentication
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --all-targets -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features self-authentication --all-targets -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --release --target wasm32-unknown-unknown --target-dir target/types-wasm/default
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features self-authentication --release --target wasm32-unknown-unknown --target-dir target/types-wasm/self-authentication
+	node qualification/types-wasm.mjs
+
+TYPES_CONSUMER_PACKAGES := types-consumer|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|serde_json|itoa|memchr|zmij
+check-types-graphs: qualification-tooling-check
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --no-default-features --forbid-pattern '^(?!($(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --no-default-features --features self-authentication --forbid-pattern '^(?!($(TYPES_CONSUMER_PACKAGES)|sha2|digest|block-buffer|crypto-common|hybrid-array|typenum|cpufeatures|libc)$$)' --require ic-platform-types=1 --require sha2=1
 
 lint-engine-request: toko-tooling-check
 	cargo clippy --offline --locked -p ic-platform-protocol --features cloud-engine --all-targets -- -D warnings
@@ -122,8 +151,16 @@ qualify-marketplace: qualification-tooling-check
 	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features marketplace marketplace
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features marketplace --all-targets -- -D warnings
 	cargo check --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features marketplace --tests --target wasm32-unknown-unknown
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-profile --features marketplace --test page_arguments -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-profile --features marketplace --release --test page_arguments -- --test-threads=1
 
 .PHONY: qualify-registry-runtime
+.PHONY: qualify-marketplace-wasm
+qualify-marketplace-wasm: qualification-tooling-check
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features marketplace --bin marketplace-admission -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin marketplace-admission --release --target wasm32-unknown-unknown --no-default-features --features marketplace --target-dir target/engine-view-wasm/marketplace
+	node qualification/engine-view-wasm.mjs marketplace
+
 qualify-registry-runtime: qualification-tooling-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-profile --features registry-settings --test registry -- -D warnings
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features registry-settings --bin registry-admission -- -D warnings
@@ -137,6 +174,7 @@ MARKETPLACE_GRAPH_PACKAGES := $(PROTOCOL_GRAPH_PACKAGES)|num-bigint|num-integer|
 PROTOCOL_GRAPH_CHECK = perl "$(TOKO_TOOLING_ROOT)/scripts/ci/check-cargo-graph.pl" --target "$(GRAPH_TARGET)" --edges normal,build --explain
 .PHONY: check-protocol-graphs
 check-protocol-graphs: qualification-tooling-check
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features marketplace --forbid-pattern '^(?!(engine-view-wasm|$(MARKETPLACE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1 --require num-bigint=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine-marketplace --forbid-pattern '^(?!($(MARKETPLACE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require num-bigint=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --features marketplace --forbid-pattern '^(?!(engine-view-consumer|$(MARKETPLACE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1 --require num-bigint=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features registry-settings --forbid-pattern '^(?!(engine-view-wasm|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1

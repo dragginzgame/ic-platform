@@ -20,8 +20,8 @@ non-null selected class payloads refuse. Existing strict optional semantics and
 bounded unknown-record-field skipping remain in force.
 
 Record and variant schemas, dispatch and public shapes use the existing private
-projection declaration. The variant arm currently supports null payloads only;
-availability error payloads remain future work. The reader is extended rather
+projection declaration. The variant arm now also supports typed payloads for
+[availability results and errors](available-nodes.md). The reader is extended rather
 than introducing another Candid codec. Default, request-only, EngineView and
 Registry-settings selections retain their previous dependency closures.
 
@@ -65,7 +65,9 @@ charges, non-minimal zero admission and truncated/signed-type refusal.
 Native-only published-oracle tests compare all six classes with 256-digit prices,
 canonical provider identity, preserved text and exact Serde values. JSON tests
 compare integers, strings and limbs with published Nat, including invalid values.
-Tagged-byte Serde fixtures, executed marketplace Wasm, physical heap comparisons,
+The separate [Wasm corpus](marketplace-wasm.md) now executes marketplace values
+and refusals, including 32-bit count overflow. Tagged-byte Serde fixtures, physical heap comparisons,
 actual Query adoption and hosted results for the new source remain pending.
-Availability requests/results and its nine application errors are not implemented
-by this slice. Publication remains disabled at initial version 0.1.0.
+Availability responses and its nine application errors now have a separate
+implementation slice, including bounded page requests. Publication remains disabled at
+initial version 0.1.0.

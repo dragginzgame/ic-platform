@@ -30,8 +30,10 @@ resource refusals. Public tests check exact status JSON and compare both
 decoders with native-only published Platform 0.33.7.
 
 [Marketplace prices](marketplace-prices.md), arbitrary naturals and all six
-node-class variants now have a separate opt-in slice. Available-page
-arguments/results and application-error variants remain pending.
+node-class variants now have a separate opt-in slice. [Available-page responses
+and application errors](available-nodes.md) and bounded page argument encoding are
+also implemented.
 These two methods still require the caller's existing zero-argument encoder.
-Actual Query migration, executed Wasm fixtures for these new methods and hosted
-qualification remain separate; no sibling code changed.
+The [Wasm corpus](marketplace-wasm.md) now executes these observations alongside
+marketplace and availability. Actual Query migration and hosted qualification
+remain separate; no sibling code changed.

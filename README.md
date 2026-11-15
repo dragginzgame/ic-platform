@@ -22,6 +22,10 @@ separate ESM package. Prefer existing crate names for retained concepts. Existin
 crates.io packages take their next SemVer version (next minor for breaking pre-1.0
 APIs); new packages start at 0.1.0. Publisher selection remains separate.
 
+[Changelogs](CHANGELOG.md) are separated by product release group under
+`releases/`. Protocol and Types are registered now; the other groups are added with their
+real implementation packages. Package versions remain independent.
+
 The first vertical slice is bounded Cloud Engine EngineView/EngineSubnet
 projection decoding, using published Types initially where practical. Establish
 its consumer contract and independent acceptance fixtures before broadening the
@@ -42,6 +46,16 @@ profiler compares allocation against the published decoder; see its
 Protocol and its private qualification packages start at 0.1.0;
 publication remains disabled.
 
+The local `ic-platform-types` 0.21.0 candidate now implements Principal and
+Account/Subaccount admission and Serde, including rendering into caller-owned storage. Its
+[qualification record](docs/qualification/types-principal.md) documents narrow
+source reuse and independent fixtures; [Account qualification](docs/qualification/types-account.md)
+covers effective identity and explicit Serde presence. Opt-in self-authentication
+and [independent native/Wasm consumer checks](docs/qualification/types-consumer.md)
+are implemented. Production consumer migration remains pending.
+Protocol still uses registry Types 0.20.4 until the replacement
+cohort is qualified; these are distinct Rust type identities.
+
 An opt-in `registry-settings` feature also projects selected Registry subnet
 features and resource limits, preserving presence and raw defaults under shared
 byte/field bounds. Its [contract and qualification status](docs/qualification/registry-settings.md)
@@ -50,7 +64,8 @@ describe the local tests and remaining consumer gates.
 The response feature also decodes raw network fees and Registry-copy status as
 the first part of the [marketplace/availability work](docs/qualification/cloud-engine-observations.md).
 The opt-in `cloud-engine-marketplace` feature adds [daily price rows](docs/qualification/marketplace-prices.md)
-with all six node classes and arbitrary naturals. Available-node pages remain pending.
+with all six node classes and arbitrary naturals, plus [available-node page responses](docs/qualification/available-nodes.md).
+Bounded page argument encoding is also implemented; consumer adoption remains pending.
 
 Toko 0.44.3 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local

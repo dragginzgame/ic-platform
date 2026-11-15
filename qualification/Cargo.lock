@@ -45,10 +45,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
 
 [[package]]
+name = "block-buffer"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa"
+dependencies = [
+ "hybrid-array",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
+
+[[package]]
+name = "cpufeatures"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ca28b0ae3115b884660db4118d803791fd6756b6e88f39c0f3f7859060d7566"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "crc32fast"
@@ -57,6 +75,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b929dd2a135771f40afabd1073f85eed59c800b7c61901e5c254270497dad64"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "crypto-common"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
+dependencies = [
+ "hybrid-array",
 ]
 
 [[package]]
@@ -82,12 +109,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "digest"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2"
+dependencies = [
+ "block-buffer",
+ "crypto-common",
+]
+
+[[package]]
 name = "engine-view-consumer"
 version = "0.1.0"
 dependencies = [
  "ic-platform",
  "ic-platform-protocol",
- "ic-platform-types",
+ "ic-platform-types 0.20.4",
  "serde_json",
  "toko-tooling",
 ]
@@ -99,7 +136,7 @@ dependencies = [
  "dhat",
  "ic-platform",
  "ic-platform-protocol",
- "ic-platform-types",
+ "ic-platform-types 0.20.4",
  "serde_json",
  "toko-tooling",
 ]
@@ -120,12 +157,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1033caf0b349c518623b5396bfb2cf0bddf44f0306d543a250e5743297aafd10"
 
 [[package]]
+name = "hybrid-array"
+version = "0.4.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27f864f10dfb56725ce5ce5472bc52252c8f93a4ab86327122cebf62c5f59a17"
+dependencies = [
+ "typenum",
+]
+
+[[package]]
 name = "ic-platform"
 version = "0.33.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e07e0565c70df9222016e93d6f488312176ef5e7036ded60db8b4bc3f61c05f"
 dependencies = [
- "ic-platform-types",
+ "ic-platform-types 0.20.4",
  "num-bigint",
  "serde",
  "thiserror",
@@ -135,7 +181,7 @@ dependencies = [
 name = "ic-platform-protocol"
 version = "0.1.0"
 dependencies = [
- "ic-platform-types",
+ "ic-platform-types 0.20.4",
  "num-bigint",
  "serde",
 ]
@@ -150,6 +196,19 @@ dependencies = [
  "data-encoding",
  "serde",
  "serde_bytes",
+ "sha2",
+ "thiserror",
+]
+
+[[package]]
+name = "ic-platform-types"
+version = "0.21.0"
+dependencies = [
+ "crc32fast",
+ "data-encoding",
+ "serde",
+ "serde_bytes",
+ "sha2",
  "thiserror",
 ]
 
@@ -361,6 +420,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha2"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest",
+]
+
+[[package]]
 name = "smallvec"
 version = "1.16.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -408,6 +478,22 @@ name = "toko-tooling"
 version = "0.44.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9bc7b6827044baac8134cada7ee6bc31f86c70beec9608d1d39d911eba15e1"
+
+[[package]]
+name = "typenum"
+version = "1.20.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
+
+[[package]]
+name = "types-consumer"
+version = "0.1.0"
+dependencies = [
+ "ic-platform-types 0.20.4",
+ "ic-platform-types 0.21.0",
+ "serde_json",
+ "toko-tooling",
+]
 
 [[package]]
 name = "unicode-ident"

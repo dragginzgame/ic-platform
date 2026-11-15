@@ -1,0 +1,33 @@
+[package]
+name = "types-consumer"
+version = "0.1.0"
+publish = false
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+ic-platform-types.workspace = true
+
+[target.'cfg(any())'.dev-dependencies]
+toko-tooling.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[package.metadata.toko-tooling.loc]
+category = "tests"
+
+[features]
+default = []
+self-authentication = [
+    "candidate-types/principal-self-authenticating",
+    "ic-platform-types/principal-self-authenticating",
+]
+
+[dependencies]
+candidate-types.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

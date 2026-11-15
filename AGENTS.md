@@ -42,8 +42,16 @@ does not establish product or native-host qualification.
 - The initial Protocol package implements request encoding and selected response
   decoding, with initial version 0.1.0 and publication disabled. The separate
   qualification workspace proves a public consumer/type crossing. Full Query
-  adoption and release-group setup remain pending; do not claim the first
+  adoption and release execution remain pending; do not claim the first
   projection gate has passed.
+- Maintain implemented product groups in `ci/cargo-release-groups.json` and their
+  notes in `releases/<group>/CHANGELOG.md`; root `CHANGELOG.md` is navigation only.
+  Types now implements Principal and Account/Subaccount, with its own group;
+  opt-in self-authentication and independent consumer qualification are present.
+  Actual production cohort migration remains pending.
+  Add Runtime (with its guard/macros) and Platform groups alongside real
+  implementation packages. Qualification stays outside product release groups.
+  This metadata setup does not qualify or enable a release/publication workflow.
 - Keep the native heap profiler in its private qualification package. Allocation
   comparisons do not establish execution speed, Wasm size or macOS qualification;
   retain its preselected criteria and source-bound evidence.

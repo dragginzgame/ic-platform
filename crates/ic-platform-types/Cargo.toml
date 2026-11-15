@@ -1,0 +1,33 @@
+[package]
+name = "ic-platform-types"
+version = "0.21.0"
+description = "Canonical IC identity types for the Platform rebuild"
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish = false
+
+[target.'cfg(any())'.dev-dependencies]
+toko-tooling.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[features]
+default = []
+principal-self-authenticating = ["dep:sha2"]
+
+[dependencies]
+crc32fast.workspace = true
+data-encoding.workspace = true
+serde.workspace = true
+serde_bytes.workspace = true
+sha2 = { workspace = true, optional = true }
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+serde_test.workspace = true
+
+[lints]
+workspace = true

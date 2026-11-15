@@ -2,6 +2,7 @@
 members = [
     "crates/engine-view-profile",
     "crates/engine-view-wasm",
+    "crates/types-consumer",
     "engine-view-consumer",
 ]
 resolver = "3"
@@ -12,6 +13,7 @@ rust-version = "1.100.0"
 license-file = "../LICENSE.md"
 
 [workspace.dependencies]
+candidate-types = { package = "ic-platform-types", path = "../crates/ic-platform-types", version = "=0.21.0", default-features = false }
 dhat = "0.3.3"
 ic-platform = { version = "0.33.7", default-features = false, features = ["cloud-engine-types"] }
 ic-platform-protocol = { path = "../crates/ic-platform-protocol", default-features = false, features = ["cloud-engine-response"] }

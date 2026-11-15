@@ -110,5 +110,8 @@ pub use response::{
 
 #[cfg(feature = "cloud-engine-marketplace")]
 pub use response::{
-    MarketplaceEntry, NodeType, Price, PriceEntry, decode_list_marketplace_prices_response,
+    AvailableNode, AvailableNodesPage, AvailableNodesPageResult, EngineError,
+    ListAvailableNodesPageArgs, MarketplaceEntry, NodeType, Price, PriceEntry,
+    decode_list_available_nodes_page_response, decode_list_marketplace_prices_response,
+    encode_list_available_nodes_page_args,
 };

@@ -17,11 +17,17 @@ name = "registry-admission"
 path = "src/bin/registry-admission.rs"
 required-features = ["registry-settings"]
 
+[[bin]]
+name = "marketplace-admission"
+path = "src/bin/marketplace-admission.rs"
+required-features = ["marketplace"]
+
 [features]
 default = []
 candidate = ["dep:ic-platform-protocol"]
 published = ["dep:ic-platform"]
 registry-settings = ["candidate", "ic-platform-protocol/registry-settings"]
+marketplace = ["candidate", "ic-platform-protocol/cloud-engine-marketplace"]
 
 [dependencies]
 ic-platform = { workspace = true, optional = true }

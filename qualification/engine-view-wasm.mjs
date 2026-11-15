@@ -5,8 +5,8 @@ import { readFileSync } from 'node:fs';
 
 assert.ok(process.argv.length <= 3, 'expected at most one probe selection');
 const probe = process.argv[2] ?? 'size';
-assert.ok(['size', 'admission', 'registry'].includes(probe), 'expected size, admission or registry');
-const binary = { size: 'engine-view-wasm', admission: 'engine-view-admission', registry: 'registry-admission' }[probe];
+assert.ok(['size', 'admission', 'registry', 'marketplace'].includes(probe), 'expected size, admission, registry or marketplace');
+const binary = { size: 'engine-view-wasm', admission: 'engine-view-admission', registry: 'registry-admission', marketplace: 'marketplace-admission' }[probe];
 
 function measure(selection) {
   const url = new URL(`../target/engine-view-wasm/${selection}/wasm32-unknown-unknown/release/${binary}.wasm`, import.meta.url);
@@ -46,8 +46,9 @@ function measure(selection) {
   };
 }
 
-const published = probe === 'registry' ? undefined : measure('published');
-const candidate = measure(probe === 'registry' ? 'registry' : 'candidate');
+const standalone = ['registry', 'marketplace'].includes(probe);
+const published = standalone ? undefined : measure('published');
+const candidate = measure(standalone ? probe : 'candidate');
 const delta = probe === 'size' ? {
   module_bytes: candidate.module_bytes - published.module_bytes,
   code_section_payload_bytes: candidate.code_section_payload_bytes - published.code_section_payload_bytes,

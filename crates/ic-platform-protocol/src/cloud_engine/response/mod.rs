@@ -16,16 +16,51 @@ macro_rules! absent {
     };
 }
 macro_rules! projection {
-    ($(#[$meta:meta])* enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident),+ $(,)? }) => {
+    ($(#[$meta:meta])* arguments $name:ident { $($(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty),+ $(,)? }) => {
         $(#[$meta])*
-        #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
-        pub enum $name { $($(#[$variant_meta])* $variant,)+ }
+        #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
+        pub struct $name { $($(#[$field_meta])* pub $field: $ty,)+ }
+        impl $name {
+            fn write(&self, writer: &mut ArgumentWriter) -> Result<(), EncodeError> {
+                const LABELS: &[u32] = &[$($label),+];
+                const { assert!(LABELS.len() <= 63); let mut i = 1; while i < LABELS.len() {
+                    assert!(LABELS[i - 1] < LABELS[i]); i += 1;
+                } }
+                writer.bytes(b"DIDL")?;
+                writer.uleb(LABELS.len() + 1)?;
+                writer.byte(0x6c)?;
+                writer.uleb(LABELS.len())?;
+                for (index, label) in LABELS.iter().enumerate() {
+                    writer.uleb(*label as usize)?;
+                    // This selected graph has three option entries; their
+                    // positive type references fit one signed LEB byte.
+                    writer.byte((index + 1) as u8)?;
+                }
+                $(writer.bytes(&[0x6e, <$ty as Argument>::PRIMITIVE])?;)+
+                writer.bytes(&[1, 0])?;
+                $(self.$field.write(writer)?;)+
+                Ok(())
+            }
+        }
+    };
+    (@schema) => { <() as Decode>::SCHEMA };
+    (@schema $ty:ty) => { <$ty as Decode>::SCHEMA };
+    (@read $reader:ident, $wire:ident, $name:ident, $variant:ident) => {
+        { $reader.value::<()>($wire)?; Ok($name::$variant) }
+    };
+    (@read $reader:ident, $wire:ident, $name:ident, $variant:ident, $ty:ty) => {
+        Ok($name::$variant($reader.value::<$ty>($wire)?))
+    };
+    ($(#[$meta:meta])* enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident $(($ty:ty))?),+ $(,)? }) => {
+        $(#[$meta])*
+        #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+        pub enum $name { $($(#[$variant_meta])* $variant $(($ty))?,)+ }
         impl Decode for $name {
-            const SCHEMA: Schema = Schema::Variant(&[$(($label, &Schema::Primitive(-1))),+]);
+            const SCHEMA: Schema = Schema::Variant(&[$(($label, &projection!(@schema $($ty)?))),+]);
             fn read(reader: &mut Reader<'_, '_>, id: i64) -> Result<Self, Error> {
                 let (label, wire) = reader.variant(id)?;
                 match label {
-                    $($label => { reader.value::<()>(wire)?; Ok(Self::$variant) },)+
+                    $($label => projection!(@read reader, wire, $name, $variant $(, $ty)?),)+
                     _ => Err(Error::Type),
                 }
             }
@@ -141,7 +176,18 @@ pub fn decode_get_engine_views_response(
 mod tests;
 
 #[cfg(feature = "cloud-engine-marketplace")]
+mod arguments;
+#[cfg(feature = "cloud-engine-marketplace")]
+mod availability;
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use arguments::{ListAvailableNodesPageArgs, encode_list_available_nodes_page_args};
+#[cfg(feature = "cloud-engine-marketplace")]
 mod marketplace;
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use availability::{
+    AvailableNode, AvailableNodesPage, AvailableNodesPageResult, EngineError,
+    decode_list_available_nodes_page_response,
+};
 #[cfg(feature = "cloud-engine-marketplace")]
 pub use marketplace::{
     MarketplaceEntry, NodeType, Price, PriceEntry, decode_list_marketplace_prices_response,

@@ -1,5 +1,7 @@
 use ic_platform_protocol::candid::Nat;
 
+mod availability;
+
 #[test]
 fn natural_json_forms_preserve_exact_values_and_refuse_bad_inputs() {
     for (input, expected) in [

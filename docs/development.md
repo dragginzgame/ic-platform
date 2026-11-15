@@ -1,6 +1,8 @@
 # Development
 
-The initial product workspace contains one unpublished Protocol package at 0.1.0.
+The product workspace contains unpublished Protocol 0.1.0 and the initial Types
+0.21.0 candidate. Types follows the published 0.20.4 baseline; its identity
+slice is not yet a replacement for the complete published identity contract.
 The private consumer fixture also starts at 0.1.0. Neither package name appeared
 in the crates.io sparse index when checked on 2026-11-15. Publication and release
 adapters are not enabled; name availability does not reserve a registry name.
@@ -56,6 +58,19 @@ update the lock, then run `make toko-tooling-preview` and `make toko-tooling-upd
 Do not edit installed bytes or their receipt.
 
 ## Focused implementation checks
+
+`make qualify-types` tests local Principal and Account/Subaccount identity, text and Serde contracts,
+runs strict Clippy and Rustdoc, and compiles its tests for Wasm. It selects the
+local manifest explicitly because Protocol still depends on registry Types.
+Wasm compilation does not establish execution;
+production consumer migration remains pending. See the
+[Types qualification record](qualification/types-principal.md).
+
+`make qualify-types-consumer` compares the independent consumer with published
+Types natively and executes default/self-authentication Wasm artifacts. Use
+`make check-types-graphs` to enforce their normal/build dependency closures.
+The optional product feature is `principal-self-authenticating`; defaults stay
+hash-free. See [consumer evidence](qualification/types-consumer.md).
 
 ```sh
 make test-engine-request
@@ -237,10 +252,10 @@ offline Cargo observations on `wasm32-unknown-unknown`. Override `GRAPH_TARGET`
 with an explicit target triple for native checks; CI also runs it with the host
 reported by `rustc -vV` on every matrix runner.
 
-Ten selections are checked independently: Registry settings, default Protocol, request-only,
+Eleven selections are checked independently: Registry settings, default Protocol, request-only,
 response, the public consumer with and without Registry settings, and the candidate Wasm
 probe with and without Registry settings, plus marketplace Protocol and its public
-consumer. Default and request-only builds admit only the Protocol root. The
+consumer and marketplace Wasm probe. Default and request-only builds admit only the Protocol root. The
 five EngineView/combined selections use the reviewed package-name allowlist in Makefile and require exactly
 one rendered Types identity; both consumers also require one Protocol identity.
 Dependencies outside that list, including Runtime, published Platform, registry
@@ -248,7 +263,7 @@ Candid, crypto suppliers and heap/oracle tooling, refuse with an introducing
 dependency path. A new supplier requires an explicit policy review, not just
 updating the lockfile.
 
-The two marketplace selections additionally admit num-bigint, num-integer,
+The three marketplace selections additionally admit num-bigint, num-integer,
 num-traits and build-only autocfg, and require one bigint supplier. This separate
 allowlist preserves the bigint-free EngineView and Registry selections.
 
@@ -285,3 +300,43 @@ and variant readers, checks Clippy/Rustdoc, compares public JSON and wire values
 with the published native oracle, and compiles the consumer for Wasm. The
 [marketplace evidence](qualification/marketplace-prices.md) records the new
 supplier closure, logical natural-number charges and remaining gates.
+The same target now covers available-page responses and request encoding,
+including a separate native heap test for output admission before allocation.
+
+`make qualify-marketplace-wasm` executes the standalone price/page/request and
+fee/status corpus using the existing runner's `marketplace` selection. It reports
+admission and artifact identity without a size threshold; see the
+[executed Wasm evidence](qualification/marketplace-wasm.md).
+
+## Release-group ownership
+
+The [group policy](../ci/cargo-release-groups.json) records implemented product
+groups. Each primary package's literal `package.version` owns that group's
+version; there is no workspace version or shadow version file. The root
+[changelog](../CHANGELOG.md) is an index, and group notes live under
+`releases/<group>/CHANGELOG.md`, following the adopted Toko convention.
+
+Protocol currently owns `ic-platform-protocol` and its existing pending 0.1.0
+notes. No released history exists in this rebuild, so no shared history ledger
+is needed. Repository setup and qualification notes supporting Protocol remain
+in that ledger; they do not create releases for private test packages.
+
+Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
+pending changelog. The next implementation groups are Runtime (including its tightly coupled
+guard and macros), and Platform; Browser stays separate if introduced. Add each
+actual product package and its own changelog to the policy when implemented.
+Check its crates.io baseline at that point under the existing version-selection
+rule. Do not create placeholder packages or preselect their versions here.
+Qualification workspace members remain unpublished, outside the product policy,
+and independently versioned.
+
+`make deps-list` uses the installed Toko reader to display group membership.
+The policy's empty dependency-alias lists are intentional: no product
+workspace dependency currently points to either local package. Do not add unused
+catalog entries just to display membership; the JSON policy owns that mapping.
+
+This change establishes changelog ownership and inventory only. It installs no
+release or publication commands. Packages remain unpublished. Future execution
+must explicitly select `RELEASE_GROUP`, admit all required
+proof and qualify Toko's supported release adapter before release readiness can
+be claimed. Existing full release obligations remain open.
