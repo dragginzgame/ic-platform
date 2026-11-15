@@ -118,7 +118,7 @@ supported hosts; hosted/macOS results for this increment remain pending.
 | Awaited callback/executor fixture, exported table | `28b14b14084baf8f28c2a21f7a21924b84c96b73d9b081acf7b8251d87becbcc` |
 | Notify/cost fixture, no callback imports | `312585dc04078dae7ca34dce320eaa643b199d4c9c41c6bb77f53ccbe3efe1e4` |
 
-## Next development version 0.23.1
+## GitHub snapshot 0.23.1
 
 The local 0.23.1 increment adds synchronous submission refusal inside a root
 task. The task receives the exact raw refusal and completes; a subsequent task
@@ -141,3 +141,21 @@ installed-canister rollback proof.
 | --- | --- |
 | Awaited callback/executor fixture | `4c993ee904d6a724c2b2d22c2d20a8fe30843a53b49fcbc321904e25469a02c1` |
 | Notify/cost fixture | `2fe710d19540364ca8687bb86365e2aa796f45a47e7114b7aab533c606325d1a` |
+
+## Next development version 0.23.2
+
+Two native executor regressions exercise user destruction after admission
+refusal. A refused future's destructor reenters admission, receives the same
+typed refusal, and observes unchanged task context, both for nested entry and
+exhausted task identifiers. Each refused future is dropped once and never polled.
+`make qualify-runtime-call fmt-check deps-list` passes 24 native Runtime tests,
+Clippy, Rustdoc, Wasm test compilation, graph checks and metadata checks locally.
+These checks do not add installed trap or rollback evidence.
+
+The new [argument capture boundary](runtime-arguments.md) also passes alongside
+the existing notify/awaited regressions. Current 0.23.2 artifact hashes:
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Awaited callback/executor fixture | `1eea4e66478836f95169624309edb9e1ad44d03c7e8b2bbc3b94cc760253afc2` |
+| Notify/cost fixture | `2388db3a38f96254150495f0738de258ef706e4bc350eba5ea1446467a67e250` |

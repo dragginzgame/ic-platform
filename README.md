@@ -56,8 +56,8 @@ are implemented. Production consumer migration remains pending.
 Protocol still uses registry Types 0.20.4 until the replacement
 cohort is qualified; these are distinct Rust type identities.
 
-Runtime `0.23.1` is the next unpublished development version after the GitHub
-delivery of `0.23.0`. It provides opt-in inert Call
+Runtime `0.23.2` is the next unpublished development version after the GitHub
+delivery of `0.23.1`. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
 implemented request model from the experimental IC0/executor and pending installed
@@ -73,6 +73,12 @@ first poll and captures responses through integer callback handles. Its
 execution and an experimental method-attached executor: callbacks resume their
 owning task, cleanup terminates it, and handles expose local lifecycle state.
 Entrypoint integration and installed-canister rollback remain pending.
+Runtime's `system::read_args(maximum)` now supplies bounded raw argument capture
+for that entrypoint work, refusing oversized messages before allocation/copy.
+`entrypoints::prepare` composes a caller-supplied pre-copy guard and decoder
+around that capture, stopping at the first failure. Runtime selects neither
+authorization policy nor a codec; see the
+[argument boundary](docs/qualification/runtime-arguments.md).
 
 An opt-in `registry-settings` feature also projects selected Registry subnet
 features and resource limits, preserving presence and raw defaults under shared

@@ -11,3 +11,9 @@ pub mod call;
 
 #[cfg(any(test, all(feature = "call-ic0", target_arch = "wasm32")))]
 pub mod executor;
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub mod system;
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub mod entrypoints;

@@ -3,7 +3,26 @@
 Release group: `runtime`. Covered package: `ic-platform-runtime`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.23.1] - Unreleased
+## [0.23.2] - Unreleased
+
+Next compatible development increment; publication remains disabled.
+
+- Add explicit `entrypoints::prepare`: run a pre-copy guard, bounded argument
+  capture, then a caller-selected decoder, preserving stage-specific errors.
+  Qualify rejection ordering and owned output through the public Wasm consumer;
+  export generation, reply ownership and installed execution remain pending.
+
+- Add wasm32 `system::read_args(maximum)` under `call-ic0`, checking raw message
+  size before allocation/copy and returning an explicit oversize error. Keep
+  codec selection and authorization with the caller. Qualify six ABI cases in
+  the existing IC0 check, including a u32::MAX size refused before copying.
+
+- Add native refusal-destructor regressions for nested entry and identifier
+  exhaustion, checking reentrant admission and preservation of task context.
+
+## [0.23.1] - GitHub source snapshot
+
+Delivered in commit `58e2dae`; not a registry publication or qualified release.
 
 Next compatible development increment; publication remains disabled.
 

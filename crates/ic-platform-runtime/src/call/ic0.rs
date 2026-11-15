@@ -43,6 +43,27 @@ pub(crate) fn replicated_execution() -> bool {
 
 #[expect(
     unsafe_code,
+    reason = "IC0 argument reads use initialized bounded output memory"
+)]
+pub(crate) fn read_args(maximum: usize) -> Result<Vec<u8>, crate::system::ArgumentTooLarge> {
+    // SAFETY: These imports synchronously observe the current message. No user
+    // code runs between size and copy. wasm32 lengths fit the import's u32;
+    // the initialized destination stays writable for the entire copy.
+    unsafe {
+        let actual = msg_arg_data_size() as usize;
+        if actual > maximum {
+            return Err(crate::system::ArgumentTooLarge { actual, maximum });
+        }
+        let mut bytes = vec![0; actual];
+        if actual != 0 {
+            msg_arg_data_copy(bytes.as_mut_ptr() as u32, 0, actual as u32);
+        }
+        Ok(bytes)
+    }
+}
+
+#[expect(
+    unsafe_code,
     reason = "IC0 synchronously writes a u128 to initialized local Wasm memory"
 )]
 pub(super) fn liquid_balance() -> u128 {

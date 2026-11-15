@@ -91,6 +91,7 @@ qualify-runtime-ic0: qualification-tooling-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --all-targets --target wasm32-unknown-unknown -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --release --target wasm32-unknown-unknown --target-dir target/types-wasm/runtime-ic0
 	node qualification/runtime-ic0.mjs
+	node qualification/runtime-arguments.mjs
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --target wasm32-unknown-unknown --no-default-features --features runtime-ic0 --forbid-pattern '^(?!(ic-platform-runtime|$(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-runtime=1
 
 .PHONY: qualify-runtime-awaited

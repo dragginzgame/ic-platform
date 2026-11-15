@@ -188,7 +188,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.1"
+version = "0.23.2"
 dependencies = [
  "ic-platform-types 0.21.0",
 ]

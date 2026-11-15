@@ -1,7 +1,7 @@
 # Development
 
 The product workspace contains unpublished Protocol 0.1.0 and the initial Types
-0.21.0 candidate, plus Runtime 0.23.1 development after the 0.23.0 GitHub snapshot
+0.21.0 candidate, plus Runtime 0.23.2 development after the 0.23.1 GitHub snapshot
 (following registry 0.22.5).
 Types follows the published 0.20.4 baseline; its identity
 slice is not yet a replacement for the complete published identity contract.
@@ -74,6 +74,10 @@ corpus. This checks request/observation APIs, not IC submission or an executor.
 executes an independent import host checking exact lengths, initialized output
 storage, u128 handling, overflow and consuming one-way submission/refusal. The [IC0 record](qualification/runtime-ic0-boundary.md)
 documents the approved unsafe scope and outstanding installed qualification.
+The same target executes the two-import raw-argument harness: size admission
+before allocation/copy, exact bytes, explicit oversize errors and guarded
+admission with caller-selected decoding. See the
+[argument boundary](qualification/runtime-arguments.md).
 
 `make qualify-runtime-awaited` executes the experimental awaited transport's
 first-poll, callback and cleanup corpus in a separate Wasm artifact, including
@@ -344,7 +348,7 @@ is needed. Repository setup and qualification notes supporting Protocol remain
 in that ledger; they do not create releases for private test packages.
 
 Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. Runtime owns its 0.23.1 candidate; its tightly coupled guard
+pending changelog. Runtime owns its 0.23.2 candidate; its tightly coupled guard
 and macros will join when implemented. Platform and Browser remain future groups. Add each
 actual product package and its own changelog to the policy when implemented.
 Check its crates.io baseline at that point under the existing version-selection

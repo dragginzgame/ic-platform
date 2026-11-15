@@ -169,3 +169,67 @@ fn exhausted_ids_refuse_without_polling_or_wrapping() {
     assert!(matches!(result, Err(EntryError::Capacity)));
     EXECUTOR.with(|executor| executor.borrow_mut().last = previous);
 }
+
+struct RefusedDrop {
+    expected_context: Option<TaskToken>,
+    expected_error: EntryError,
+    drops: Rc<Cell<usize>>,
+}
+
+impl Future for RefusedDrop {
+    type Output = ();
+    fn poll(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<()> {
+        panic!("refused future must not be polled");
+    }
+}
+
+impl Drop for RefusedDrop {
+    fn drop(&mut self) {
+        assert!(current() == self.expected_context);
+        // This admission reenters while the rejected outer future is being
+        // destroyed. It must observe the same refusal, not a RefCell panic.
+        assert!(matches!(start(Box::pin(async {})), Err(error) if error == self.expected_error));
+        assert!(current() == self.expected_context);
+        self.drops.set(self.drops.get() + 1);
+    }
+}
+
+#[test]
+fn nested_refusal_destroys_outside_borrow_and_preserves_active_context() {
+    let drops = Rc::new(Cell::new(0));
+    let observed = Rc::clone(&drops);
+    let handle = start(Box::pin(async move {
+        let owner = current();
+        assert!(owner.is_some());
+        let result = start(Box::pin(RefusedDrop {
+            expected_context: owner,
+            expected_error: EntryError::NestedEntry,
+            drops: observed,
+        }));
+        assert!(matches!(result, Err(EntryError::NestedEntry)));
+        assert!(current() == owner);
+    }))
+    .unwrap();
+    assert_eq!(handle.state(), TaskState::Completed);
+    assert_eq!(drops.get(), 1);
+    assert!(current().is_none());
+}
+
+#[test]
+fn capacity_refusal_destroys_outside_borrow_without_entering_a_task() {
+    let previous = EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        assert!(executor.tasks.is_empty());
+        std::mem::replace(&mut executor.last, u64::MAX)
+    });
+    let drops = Rc::new(Cell::new(0));
+    let result = start(Box::pin(RefusedDrop {
+        expected_context: None,
+        expected_error: EntryError::Capacity,
+        drops: Rc::clone(&drops),
+    }));
+    assert!(matches!(result, Err(EntryError::Capacity)));
+    assert_eq!(drops.get(), 1);
+    assert!(current().is_none());
+    EXECUTOR.with(|executor| executor.borrow_mut().last = previous);
+}

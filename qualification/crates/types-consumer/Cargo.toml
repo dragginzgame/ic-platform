@@ -19,6 +19,11 @@ ignored = ["toko-tooling"]
 category = "tests"
 
 [[bin]]
+name = "runtime-arguments"
+path = "src/bin/runtime-arguments.rs"
+required-features = ["runtime-ic0"]
+
+[[bin]]
 name = "runtime-awaited"
 path = "src/bin/runtime-awaited.rs"
 required-features = ["runtime-ic0"]
