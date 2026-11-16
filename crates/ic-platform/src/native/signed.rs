@@ -108,33 +108,12 @@ impl Ed25519Identity {
         PreparedUpdate::from_bytes(&bytes, effective, maximum_bytes)
     }
 }
-// Two passes admit complete serialized output before allocating the buffer.
+// Packet construction has one bounded serializer shared with ingress admission.
 fn encode<T: Serialize>(value: &T, maximum: usize) -> Result<Vec<u8>, ReadError> {
-    struct Count {
-        count: usize,
-        maximum: usize,
-    }
-    impl std::io::Write for Count {
-        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
-            self.count = self
-                .count
-                .checked_add(bytes.len())
-                .filter(|n| *n <= self.maximum)
-                .ok_or_else(|| std::io::Error::other("message limit"))?;
-            Ok(bytes.len())
-        }
-        fn flush(&mut self) -> std::io::Result<()> {
-            Ok(())
-        }
-    }
-    let mut count = Count { count: 0, maximum };
-    serde_cbor::to_writer(&mut count, value).map_err(|_| ReadError::ByteLimit)?;
-    let mut bytes = Vec::new();
-    bytes
-        .try_reserve_exact(count.count)
-        .map_err(|_| ReadError::ByteLimit)?;
-    serde_cbor::to_writer(&mut bytes, value).map_err(|_| ReadError::Packet)?;
-    Ok(bytes)
+    ingress::encode(value, maximum).map_err(|error| match error {
+        ingress::EncodeError::ByteLimit | ingress::EncodeError::Allocation => ReadError::ByteLimit,
+        ingress::EncodeError::Packet => ReadError::Packet,
+    })
 }
 /// Immutable, signature-checked original update. Loading does not check expiry:
 /// recovery must remain possible after the original ingress has expired.

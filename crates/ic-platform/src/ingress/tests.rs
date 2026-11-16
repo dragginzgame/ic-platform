@@ -1,6 +1,118 @@
 use super::*;
 use std::borrow::Cow;
 
+#[test]
+fn bounded_construction_preserves_external_envelopes_without_authenticating() {
+    let read = ic_transport_types::EnvelopeContent::ReadState {
+        ingress_expiry: 0,
+        sender: serde_cbor::from_slice(&[0x41, 4]).unwrap(),
+        paths: vec![vec![
+            b"request_status".to_vec().into(),
+            vec![255; 32].into(),
+        ]],
+    };
+    for content in [original(), read] {
+        for delegation in [
+            None,
+            Some(vec![]),
+            Some(vec![ic_transport_types::SignedDelegation {
+                delegation: ic_transport_types::Delegation {
+                    pubkey: vec![0, 255],
+                    expiration: u64::MAX,
+                    targets: Some(vec![]),
+                    permissions: Some(ic_transport_types::DelegationPermissions::Queries),
+                },
+                signature: vec![128, 0],
+            }]),
+        ] {
+            let upstream = ic_transport_types::Envelope {
+                content: Cow::Borrowed(&content),
+                sender_pubkey: Some(vec![]),
+                sender_sig: Some(vec![0; 3]),
+                sender_delegation: delegation,
+            };
+            let original = upstream.encode_bytes();
+            let admitted = decode_envelope(&original, original.len()).unwrap();
+            let encoded = encode_envelope(&admitted.value, 4096).unwrap();
+            assert_eq!(
+                encode_envelope(&admitted.value, encoded.len()).unwrap(),
+                encoded
+            );
+            assert_eq!(
+                encode_envelope(&admitted.value, encoded.len() - 1),
+                Err(EncodeError::ByteLimit)
+            );
+            assert_eq!(
+                encode_envelope(&admitted.value, 0),
+                Err(EncodeError::ByteLimit)
+            );
+            // Independent upstream envelope serialization, including optional presence.
+            let value = |bytes: &[u8]| serde_cbor::from_slice::<serde_cbor::Value>(bytes).unwrap();
+            assert_eq!(value(&encoded), value(&original));
+            let decoded = decode_envelope(&encoded, encoded.len()).unwrap();
+            assert_eq!(
+                decoded.value.content.request_id().unwrap(),
+                *content.to_request_id()
+            );
+            assert_eq!(
+                decoded.value.content.signable().unwrap(),
+                content.to_request_id().signable()
+            );
+            assert_eq!(decoded.value.sender_sig, Some(vec![0; 3]));
+        }
+    }
+}
+
+#[test]
+fn construction_admits_full_two_mib_output_and_preserves_sender_info() {
+    const MAXIMUM: usize = 2 * 1024 * 1024;
+    let mut envelope = Envelope {
+        content: Content::Call {
+            nonce: Some(vec![]),
+            ingress_expiry: u64::MAX,
+            sender: Principal::anonymous(),
+            canister_id: Principal::management_canister(),
+            method_name: "method".into(),
+            arg: vec![255; MAXIMUM],
+            sender_info: Some(SenderInfo {
+                info: vec![],
+                signer: vec![0],
+                sig: vec![255],
+            }),
+        },
+        sender_pubkey: None,
+        sender_sig: None,
+        sender_delegation: None,
+    };
+    assert_eq!(
+        encode_envelope(&envelope, MAXIMUM),
+        Err(EncodeError::ByteLimit)
+    );
+    let length = encode_envelope(&envelope, MAXIMUM + 4096).unwrap().len();
+    if let Content::Call { arg, .. } = &mut envelope.content {
+        arg.truncate(2 * MAXIMUM - length);
+    }
+    let bytes = encode_envelope(&envelope, MAXIMUM).unwrap();
+    assert_eq!(bytes.len(), MAXIMUM);
+    let decoded = decode_envelope(&bytes, MAXIMUM).unwrap();
+    assert_eq!(
+        decoded.value.content.request_id().unwrap(),
+        envelope.content.request_id().unwrap()
+    );
+    let Content::Call {
+        sender_info, nonce, ..
+    } = decoded.value.content
+    else {
+        panic!()
+    };
+    assert_eq!(nonce, Some(vec![]));
+    assert_eq!(sender_info.unwrap().sig, [255]);
+    assert_eq!(
+        encode_envelope(&envelope, MAXIMUM - 1),
+        Err(EncodeError::ByteLimit)
+    );
+}
+
 fn original() -> ic_transport_types::EnvelopeContent {
     ic_transport_types::EnvelopeContent::Call {
         nonce: Some(vec![]),

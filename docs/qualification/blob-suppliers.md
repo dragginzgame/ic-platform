@@ -101,13 +101,13 @@ implementations. New synthetic reply fixtures use native WAT only. Native Testki
 held fixtures retain their registry Types/Protocol behind an explicit simulator
 identity conversion; those are not public product type crossings.
 
-## Remaining gates
+## Gates at the initial supplier qualification
 
 The full certificate issuance/CLI custody and management CLI process journeys are
 not yet migrated or admitted by these targets. In particular, the native supplier
 proof does not replace fresh-process interrupted-dispatch/transfer-custody evidence.
 The enrollment example's legacy commercial outcome decoder is not a newly supplied
-settlement contract. Those consumer migrations and final qualification keep both
+settlement contract. At that initial qualification, those consumer migrations kept both
 issues open; passing selected supplier and installed probe tests does not close
 the complete acceptance checklist.
 
@@ -158,3 +158,36 @@ Logs: `target/external-status-tests.log`, `target/external-status-qualification.
 Neither signing nor the recovery fixture contacts a live provider or canister.
 Platform 0.34.8 is published; see [delivery evidence](../releases.md#external-signing-and-managementledger-release). Full Canic journal
 integration and Blob fresh-CLI stop/upgrade/start/custody journeys remain unproved.
+
+## Published Blob consumer acceptance
+
+Read-only review now finds clean Blob source `9c26943`, documenting published
+0.103.0 at `75f08fddf6b5f3f6516dded561fa72eb88da5e33`. Its migration commit
+`1032653bc14019ff3e5c31520b509f4dcb7bae5b` selects Platform 0.34.8 and product
+Protocol 0.2.7; the directly affected CLI/test source is unchanged by the release
+commit. Qualification uses Protocol 0.2.6 because Testkit 0.107.3 pins it; that
+version already supplies the same selected Caffeine formats. No legacy Platform
+remains in Blob's product graph. Remaining private malformed-input oracles,
+metrics and opaque top-up outcome decoding are outside these selected supplier
+formats. No broader legacy-removal claim is made.
+
+Reviewed original logs under Blob's `target/platform-testkit-adoption/`:
+
+| Evidence | Result / SHA-256 |
+| --- | --- |
+| `ci-final.log` | 13 CLI cases, including certificate root/reply, expired-original binding and independent Cashier literals; `05b73a4c2ee27ac26bdc03571d58f797e1256da5d2554aef173792f1579db04f` |
+| `custody-final.log` | All seven non-browser callbacks pass, including old CLI custody recovery after expiry, transfer/cancellation and no reissuance; `328b2c9cb90ae558c8025839ecf50905b455ef3e602487b02ae681cb0fef9a01` |
+| `installed-remaining.log` | Actual signed-uploader authority/no-repeat case passes; `8f17040124073866db545d64fe8671c05033eadc2acbd06db6d9bfe22a1062d4` |
+| `management-final.log` | Three lifecycle/custody/overview cases pass; target case failed and was rerun separately; `391508ca46cde25b0074051310fac059664c0169eecd033e5edb995c3bea69af` |
+| `target-final.log` | Target/controller/absent-module case passes with strict Clippy; `393329dbbf87b7fe72156a479ade0e5813c08e0e5ce229f00e3257f2c824b623` |
+
+The retained aggregate logs include earlier failures; they are not represented as
+all-green runs. The final targeted reruns and source review supply the corrected
+assertions and completed cases. `installed-final.log` supplies four enrollment
+cases covering one attempt, revocation, lost/late/malformed replies and upgrades.
+The browser case remains explicitly ignored and no live provider qualification is
+inferred. These results close the remaining Blob acceptance for Platform #17 and
+#18. The published external-signing supplier fixtures separately cover Canic's
+specified ICP envelopes; full Canic application delivery remains its own work.
+Backup's snapshot/recovery obligations in #11/#12 are not closed by Blob evidence.
+No sibling checkout was modified or tests executed there during this review.

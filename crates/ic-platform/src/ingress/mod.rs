@@ -6,6 +6,79 @@ use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 mod wire;
 
+/// Offline envelope construction failure, without a partial output.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
+#[error("ingress encoding refusal: {self:?}")]
+pub enum EncodeError {
+    /// Complete encoded output exceeds the inclusive byte ceiling.
+    ByteLimit,
+    /// Storage for the admitted output could not be reserved.
+    Allocation,
+    /// Serialization refused the supplied fields.
+    Packet,
+}
+
+/// Construct one unverified envelope from caller-supplied fields and signatures.
+/// Counts the complete CBOR output before reserving its buffer. No signature,
+/// identity, path, expiry or delegation policy is imposed; even invalid signature
+/// fixtures can be encoded. The caller retains the returned bytes before dispatch.
+/// This constructs new bytes and must not replace an already retained envelope.
+///
+/// # Errors
+/// Refuses output exceeding `maximum_bytes`, allocation or serialization failure.
+pub fn encode_envelope(envelope: &Envelope, maximum_bytes: usize) -> Result<Vec<u8>, EncodeError> {
+    encode(envelope, maximum_bytes)
+}
+
+// Internal reuse for the native client's selected query and envelope records.
+pub(crate) fn encode<T: Serialize>(value: &T, maximum: usize) -> Result<Vec<u8>, EncodeError> {
+    struct Count {
+        count: usize,
+        maximum: usize,
+        exceeded: bool,
+    }
+    impl std::io::Write for Count {
+        fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+            let Some(next) = self
+                .count
+                .checked_add(bytes.len())
+                .filter(|n| *n <= self.maximum)
+            else {
+                self.exceeded = true;
+                return Err(std::io::Error::other("message limit"));
+            };
+            self.count = next;
+            Ok(bytes.len())
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+    let mut count = Count {
+        count: 0,
+        maximum,
+        exceeded: false,
+    };
+    if serde_cbor::to_writer(&mut count, value).is_err() {
+        return Err(if count.exceeded {
+            EncodeError::ByteLimit
+        } else {
+            EncodeError::Packet
+        });
+    }
+    let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(count.count)
+        .map_err(|_| EncodeError::Allocation)?;
+    bytes.resize(count.count, 0);
+    let mut output = bytes.as_mut_slice();
+    serde_cbor::to_writer(&mut output, value).map_err(|_| EncodeError::Packet)?;
+    if !output.is_empty() {
+        return Err(EncodeError::Packet);
+    }
+    Ok(bytes)
+}
+
 /// Admission failure without a partially decoded packet.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
 #[error("ingress packet refusal: {self:?}")]

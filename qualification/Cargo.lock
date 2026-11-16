@@ -1094,9 +1094,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.7"
+version = "0.34.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "479e4899fe08d50c582e6b5b57668ed5cdcc3e0f75b81fde40ffb3ed2b14c093"
+checksum = "33bf34291d82ae3a1735c12aa20f1457c87e36bda3215a0a3e48c4c20efedbb1"
 dependencies = [
  "ic-certification",
  "ic-platform-types 0.21.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1108,7 +1108,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.8"
+version = "0.34.9"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -1790,7 +1790,7 @@ version = "0.1.0"
 dependencies = [
  "candid",
  "ic-certification",
- "ic-platform 0.34.8",
+ "ic-platform 0.34.9",
  "ic-platform-types 0.21.2",
  "ic-testkit",
  "serde_cbor",
@@ -2135,8 +2135,8 @@ dependencies = [
  "candid",
  "ic-certification",
  "ic-management-canister-types",
- "ic-platform 0.34.7",
  "ic-platform 0.34.8",
+ "ic-platform 0.34.9",
  "ic-testkit",
  "tokio",
  "toko-tooling",

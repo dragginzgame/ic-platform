@@ -48,3 +48,30 @@ Actual Backup source adaptation, interruption/offline recovery replay and regist
 qualification remain open. The associated snapshot/status codec gap (#11) also
 remains independent. Supplier packet tests do not qualify Backup's spending,
 authentication, recovery or exact-once policy, and do not close #12.
+
+## Bounded offline construction — 0.34.9 candidate
+
+The additive native-only `encode_envelope(&Envelope, maximum_bytes)` API supplies
+Backup's externally signed Call and ReadState construction requirement. It emits
+one complete CBOR envelope without a self-describing tag. The returned bytes are
+new evidence for the caller to retain before dispatch; never re-encode a retained
+request in place. Construction does not authenticate signatures, bind a sender,
+validate expiry/paths or authorize a submission. Invalid signatures and explicit
+empty delegation lists remain constructible for consumer rejection fixtures.
+
+A shared private serializer counts the complete output under the inclusive byte
+ceiling before reserving storage, then writes to a fixed-size slice. Native
+Ed25519 signing and signed queries use the same implementation. Public errors
+separate byte refusal, allocation and serialization failure. This is an output
+bound, not a claim about total process memory or an independent traversal quota.
+No generic serializer is made public and no new supplier is selected.
+
+Eight ingress tests, five signing tests and three HTTP/fresh-process recovery
+cases pass, alongside Clippy, Rustdoc, the native dependency boundary and combined
+Wasm compilation. Independent upstream envelopes cover Call/one-path ReadState,
+absent/empty/nonempty delegation, invalid signatures, request IDs/signable bytes,
+nonce and sender-info presence. A full 2 MiB encoded envelope passes at its exact
+ceiling and refuses one byte below. Logs: `target/encoder-qualification.log`,
+`target/encoder-signing-regression.log`, `target/encoder-external-regression.log`.
+Platform 0.34.9 is selected for publication. Actual Backup call/lookup, interrupted
+allocation and offline spending-preservation acceptance remain required by #12.

@@ -261,3 +261,19 @@ affected qualification callers found no new actionable issue. Hosted
 [CI](https://github.com/dragginzgame/ic-platform/actions/runs/43957664273) and
 [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/43957664311)
 were observed once as in progress; neither was awaited or reported as passing.
+
+## Offline ingress construction release
+
+Platform 0.34.9 adds bounded offline envelope construction for externally supplied
+signatures. Qualification compares against published Platform 0.34.8 and tests the
+local 0.34.9 candidate. Types 0.21.2, Protocol 0.2.7 and Runtime/macros/guard
+0.23.14 product contents remain unchanged and are not republished. Registry review
+confirmed Platform 0.34.8 as current and 0.34.9 absent before selection.
+
+The existing complete local catalog and explicit receipt remain the admission
+route. The pinned Query/Blob fixture copies are selected through QUERY_SOURCE and
+BLOB_SOURCE, preserving recorded hashes and leaving siblings read-only. Deliver
+main and annotated tag `platform-v0.34.9`, then use the supported publication
+adapter and independent registry archive/source readback. Hosted CI is asynchronous.
+Backup's actual migration/recovery acceptance remains separate from supplier
+publication; see [the ingress contract](qualification/ingress-packets.md).

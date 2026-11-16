@@ -3,6 +3,26 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.9] - 2026-11-16
+
+### ➕ Added
+
+- Supply offline bounded ingress envelope construction for
+  [Platform #12](https://github.com/dragginzgame/ic-platform/issues/12), preserving
+  externally supplied signatures, optional fields and exact request-status paths.
+  Count complete output before allocation and share the serializer with native
+  signing. Backup migration and installed recovery acceptance remain separate.
+
+### 🧪 Testing
+
+- Update qualification’s registry Platform comparison to 0.34.8 while testing
+  the local 0.34.9 candidate; retain the canonical Types 0.21.2 identities.
+
+- Reconcile Blob's published 0.103.0 signed CLI/custody and Caffeine acceptance for
+  [Platform #17](https://github.com/dragginzgame/ic-platform/issues/17) and
+  [Platform #18](https://github.com/dragginzgame/ic-platform/issues/18).
+  See [consumer evidence](../../docs/qualification/blob-suppliers.md#published-blob-consumer-acceptance).
+
 ## [0.34.8] - 2026-11-16
 
 ### ➕ Added
