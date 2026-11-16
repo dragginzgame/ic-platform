@@ -32,10 +32,9 @@ assert.equal(remote[0], commit, 'exact release tag must already be delivered');
 const hosted = JSON.parse(run('gh', ['run', 'list', '--repo', 'dragginzgame/ic-platform',
   '--workflow', 'types-release.yml', '--branch', 'main', '--commit', commit, '--limit', '1',
   '--json', 'databaseId,headSha,status,conclusion']));
-assert.equal(hosted.length, 1, 'exact source needs hosted CI evidence');
-assert.equal(hosted[0].headSha, commit);
-assert.equal(hosted[0].status, 'completed');
-assert.equal(hosted[0].conclusion, 'success', 'all supported hosts must pass');
+// Hosted validation is asynchronous evidence, not a publication prerequisite.
+// The maintainer selected local qualification as the dispatch gate.
+assert(hosted.every(observation => observation.headSha === commit));
 const index = run('curl', ['--fail', '--silent', '--show-error',
   'https://index.crates.io/ic/-p/ic-platform-types']).trim().split('\n').map(JSON.parse);
 assert(!index.some(p => p.vers === product.version), 'version already exists; reconcile instead of uploading');

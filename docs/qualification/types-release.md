@@ -41,15 +41,15 @@ identity boundary, not release readiness of Runtime.
 ## Release evidence
 
 The executable [profile catalog](../../ci/types-release-profiles.json) is the
-Types-specific roster. `types-publication-admission` requires successful hosted CI
-for the exact source, reruns the catalog and retains its logs, records audit and
+Types-specific roster. `types-publication-admission` records hosted CI
+for the exact source without waiting for completion, reruns the local catalog and retains its logs, records audit and
 registry observations, and checks Cargo archive VCS provenance against a fresh
 fetch from the declared repository. The shared publication runner separately
 retains each check/upload attempt. Final registry bytes must match the admitted
 archive and carry the selected clean source revision before delivery is complete.
 
 `make check-types-publication` exercises dirty source, wrong repository, lightweight
-/local-remote tag mismatch, expanded publishable roster, failed hosted validation,
+/local-remote tag mismatch, expanded publishable roster,
 unavailable registry, existing version, failed audit and failed profile observations.
 A controlled success verifies the full admission path without dispatching an upload.
 These checks qualify policy wiring; actual host, archive and registry evidence remain

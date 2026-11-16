@@ -41,7 +41,7 @@ for (const tool of ['bash', 'git', 'cargo', 'gh', 'curl', 'make']) {
   writeFileSync(`${fixture}/bin/${tool}`, stub, { mode: 0o755 });
 }
 for (const mode of ['dirty', 'repository', 'lightweight', 'remote-tag', 'roster',
-  'hosted', 'unavailable', 'existing', 'audit', 'profile', 'success']) {
+  'unavailable', 'existing', 'audit', 'profile', 'success']) {
   const result = spawnSync(process.execPath, [resolve(root, 'scripts/types-publication-admission.mjs')], {
     cwd: fixture, encoding: 'utf8', env: { ...process.env,
       PATH: `${fixture}/bin:${process.env.PATH}`, ADMISSION_CASE: mode } });

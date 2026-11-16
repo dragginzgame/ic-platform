@@ -38,7 +38,9 @@ supported `make publish-check PACKAGE=ic-platform-types` and
 
 - Clean source, only Types publishable, empty defaults and the intended repository.
 - An annotated tag at HEAD, independently observed at the remote.
-- Successful exact-commit Types release CI across Linux, Apple Silicon and Intel macOS.
+- Record exact-commit hosted CI observations separately. The maintainer selected
+  passing local qualification as the upload gate; do not wait for CI completion
+  or claim uncompleted host checks passed.
 - Successful registry observation showing the exact version absent; lookup failure
   and an existing version both refuse instead of triggering a blind retry.
 - Security audit, the complete profile catalog and archive provenance fetched

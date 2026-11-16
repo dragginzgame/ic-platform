@@ -52,6 +52,6 @@
       "make",
       "check-types-publication"
     ],
-    "scope": "controlled dirty-source, repository, tag, roster, hosted, audit, registry and profile refusals; no upload"
+    "scope": "controlled dirty-source, repository, tag, roster, audit, registry and profile refusals; no upload"
   }
 ]
