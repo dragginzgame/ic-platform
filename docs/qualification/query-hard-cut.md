@@ -97,8 +97,9 @@ cargo run --locked --manifest-path qualification/Cargo.toml \
 
 ## Remaining gates
 
-No macOS execution, production sibling migration or registry-only publication is
-claimed. Siblings remain unchanged. Auth installed proof is recorded separately
+No macOS execution or production sibling migration is claimed. Siblings remain
+unchanged. The published cohort subsequently passed the registry-only product
+checks recorded below. Auth installed proof is recorded separately
 in [Auth qualification](auth-crypto.md). These local results are not issue closure
 or evidence that every design gate is complete.
 
@@ -126,3 +127,16 @@ cargo-machete scan reported `serde_bytes` in Platform and Types; both are used
 by `#[serde(with = "serde_bytes")]` (certificate construction and account
 serialization respectively). These are inspected attribute-use false positives,
 not removed edges or added lint exemptions.
+
+## Published cohort verification
+
+Platform 0.34.5 and Protocol 0.2.4 are now published; the
+[publication record](../releases.md#native-read-and-consumer-publication) binds
+source, tags, archives and registry checksums. An isolated actual Query run
+resolved all product edges from crates.io and passed the same 184 tests plus
+Clippy. Its independent schema fixture remained private. Actual Auth also
+passed all five installed tests with registry Platform, Types and Runtime.
+Metadata confirms one canonical registry Platform 0.34.5 and Types 0.21.1,
+with no Agent or legacy Platform. The retained reproduction and results are at
+`target/registry-cohort/1794853809864/verified.json`. This proves the published
+cohort, not production sibling adoption or macOS qualification.

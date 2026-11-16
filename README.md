@@ -43,7 +43,7 @@ actual working tree after authorized local application; consumer delivery remain
 pending. A separate native heap
 profiler checks allocation against retained historical bounds; see its
 [criteria and results](docs/qualification/engine-view-heap.md).
-Protocol 0.2.3 is published; private qualification packages
+Protocol 0.2.4 is published; private qualification packages
 remain at 0.1.0. Changed product crates advance after each GitHub source snapshot,
 independently of registry publication. Each implemented group has now been published independently.
 
@@ -54,7 +54,7 @@ source reuse and independent fixtures; [Account qualification](docs/qualificatio
 covers effective identity and explicit Serde presence. Opt-in self-authentication
 and [independent native/Wasm consumer checks](docs/qualification/types-consumer.md)
 are implemented. Production consumer migration remains pending.
-Protocol 0.2.3 now uses local Types 0.21.1, matching Runtime. Its public Principal
+Protocol 0.2.4 uses local Types 0.21.1, matching Runtime. Its public Principal
 identity changes from the registry type; consumers must migrate as one cohort.
 Registry Types remains only in qualification oracles. See the
 [cohort boundary](docs/qualification/types-consumer.md#protocol-cohort-020).
@@ -147,9 +147,9 @@ remain pending before the full authentication gate.
 
 Published Platform 0.34.4 restores opt-in Ed25519 and secp256k1 upstream
 primitives. [Actual Auth checks](docs/qualification/auth-crypto.md) pass without
-legacy Platform. The 0.34.5 candidate also passes certified-issuer and all five
+legacy Platform. Published 0.34.5 also passes certified-issuer and all five
 installed cases. Its opt-in native read client and Protocol 0.2.4 codecs pass
-[actual Query qualification](docs/qualification/query-hard-cut.md); publication,
+[actual Query qualification](docs/qualification/query-hard-cut.md);
 macOS proof and the separate Agent signing/derivation correction remain pending. [Published Wire 0.24.2 with Types 0.21.1](docs/qualification/auth-wire.md)
 also passes Auth's unchanged generator and retained browser-codec checks.
 

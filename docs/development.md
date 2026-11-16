@@ -1,14 +1,14 @@
 # Development
 
-The current published product versions are Types 0.21.1, Platform 0.34.4,
-Protocol 0.2.3, and Runtime/macros/guard 0.23.12. Qualification packages remain
+The current published product versions are Types 0.21.1, Platform 0.34.5,
+Protocol 0.2.4, and Runtime/macros/guard 0.23.12. Qualification packages remain
 private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.
 See the [latest release evidence](qualification/2026-11-16-timer-crypto-publication.md).
 
 Qualification now selects Testkit 0.107.1 and explicitly names two Platform
 roles: `candidate-platform` tests the local 0.34.5 source, `published-platform`
-checks the current registry 0.34.4 verifier independently. Legacy decoder
+checks the prior registry 0.34.4 verifier independently. Legacy decoder
 oracles have been removed; qualification uses independent schemas and literal
 fixtures. The separately pinned Auth fixture
 also uses Testkit 0.107.1 with the current local Platform authentication and

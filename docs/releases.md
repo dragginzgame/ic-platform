@@ -106,9 +106,11 @@ The same registry Types version must be used across public identities. Keep the
 experimental Runtime limits, strict Platform refusals, and selected Protocol
 surface explicit; no removed legacy facade is restored or silently promised.
 
-## Current native-read and consumer release selection
+## Native-read and consumer publication
 
-The authorized next publication selects Platform 0.34.5 and Protocol 0.2.4.
+Platform 0.34.5 and Protocol 0.2.4 are published from clean source
+`1e92703bc803b81dbe1e3d815fd1077d440d62b4`, with annotated
+`platform-v0.34.5` and `protocol-v0.2.4` tags pushed atomically with main.
 Both add compatible opt-in capabilities; existing defaults stay empty. Types
 0.21.1 and Runtime/macros/guard 0.23.12 have unchanged product contents and are
 not republished. The complete local release catalog now includes actual Query,
@@ -123,3 +125,28 @@ latency rule. The existing thiserror hold and frozen Auth supplier selections
 remain unchanged. Newly added transport suppliers were reviewed at implementation
 selection; their provenance and qualification are recorded in
 [Query's hard-cut boundary](qualification/query-hard-cut.md).
+
+The complete local catalog passed at that commit; its receipt is
+`target/release-qualification/1794853493857-3415366/receipt.json`. Packaging caught
+and corrected an accidental thiserror lock refresh before delivery: the root now
+retains the documented exact 2.0.18 constraint required by published Types. Both
+extracted archives passed all-feature native/Wasm Clippy, native tests and
+independently fetched source provenance checks. Hosted CI was not awaited.
+
+| Package | Registry archive SHA-256 | Dry run / upload evidence under `target/publication/` |
+| --- | --- | --- |
+| [ic-platform-protocol 0.2.4](https://crates.io/crates/ic-platform-protocol/0.2.4) | `0a3177e65f7005b317a0eac7f3fafc257d7aee16f72bf2be9419dd43b1fd8409` | `check.selection.aKLPRZ` / `publish.selection.Ln2b2D` |
+| [ic-platform 0.34.5](https://crates.io/crates/ic-platform/0.34.5) | `acc6568e65c44808ebdf058087f24398ca165c79a17ce8ea84bbeac85608946d` | `check.selection.SAbgGR` / `publish.selection.16j0OP` |
+
+Each upload ran once. Independent downloads matched sparse-index checksums,
+locally admitted archives and exact clean-source VCS identities; reproduction and
+readback are retained at `target/registry-readback/1794853805046/verified.json`.
+
+The published product cohort passed actual consumer qualification:
+184 Query topology/CLI tests plus Clippy, and all five installed Auth tests.
+Product dependencies resolve from crates.io, with one Platform 0.34.5 and Types
+0.21.1 identity and no Agent or legacy Platform. Protocol is 0.2.4 and Runtime
+remains 0.23.12. Reproduction, full metadata and results are retained at
+`target/registry-cohort/1794853809864/verified.json`. The independent schema
+fixture remains private; sibling production sources are unchanged. macOS proof
+and the separate Agent signing/derivation obligation remain open.

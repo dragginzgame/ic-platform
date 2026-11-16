@@ -128,3 +128,10 @@ qualification lock SHA-256:
 Use `make qualify-auth-runtime`; the server wrapper supplies the explicit
 PocketIC endpoint and reaps its owned process. Invoking the inner runner alone
 without that endpoint is refused before preparing or running a fixture.
+
+Platform 0.34.5 is now published. The subsequent registry-only product cohort
+passed all five actual installed Auth tests, using registry Types 0.21.1 and
+Runtime 0.23.12 with no legacy Platform or Agent. Reproduction, metadata and
+results are retained at `target/registry-cohort/1794853809864/verified.json`; see
+[publication evidence](../releases.md#native-read-and-consumer-publication).
+Production source adoption remains with Auth; its checkout was not modified.
