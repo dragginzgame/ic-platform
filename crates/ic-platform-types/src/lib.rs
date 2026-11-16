@@ -1,8 +1,8 @@
-//! Canonical identity ownership for the local Types cohort.
+//! Canonical owned IC Principal, Account and Subaccount identities.
 //!
-//! This identity slice is unpublished and not yet a replacement for
-//! published Types across the full production cohort. Self-authentication is
-//! opt-in; actual production consumer migration remains pending.
+//! Byte/text admission, ordering and Serde belong here. Self-authentication is
+//! opt-in and delegates SHA-224 to its upstream supplier. Consumers must select
+//! one Cargo source/version cohort when exchanging these public Rust types.
 //! Identity validity establishes neither authorization nor authenticated evidence.
 
 #![forbid(unsafe_code)]

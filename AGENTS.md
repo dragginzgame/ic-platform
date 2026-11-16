@@ -55,6 +55,10 @@ does not establish product or native-host qualification.
   publication disabled until the selected release is admitted. Repository deletion
   and sibling migration remain excluded. GitHub source delivery is not registry
   publication. See the [initial release plan](docs/releases.md).
+- The maintainer approved releasing Types independently after its retained-contract,
+  packaged-crate and real-consumer qualification. Downstream production migration
+  remains a separate gate; this scoped sequencing choice does not waive Types
+  correctness, source integrity, host or publication evidence.
 - Create manifests only for real implementation slices. Do not add empty Cargo
   packages solely to select tooling; this restriction was explicitly reaffirmed.
 - The initial Protocol package implements request encoding and selected response
@@ -84,7 +88,7 @@ does not establish product or native-host qualification.
   Keep child/migratory tasks outside this slice.
   Its exact-version Cargo singleton guard is now implemented in the Runtime
   group. The explicit-update macro implementation shares that group. Platform
-  0.34.1 has its own group, a strict untrusted certificate decoder and an opt-in
+  0.34.2 has its own group, a strict untrusted certificate decoder and an opt-in
   direct-root/single-delegation authentication path; follow its
   [reuse and acceptance boundary](docs/qualification/platform-certificate.md).
   Decode success must not imply authentication. Direct-root evidence requires
@@ -98,7 +102,7 @@ does not establish product or native-host qualification.
   qualification path. Independently observed mainnet direct-root and delegated certificates now pass
   native/Wasm replay, including explicit root-subnet binding. Broader mainnet interoperability and production consumer proof remain
   pending before the full authentication gate.
-  Protocol 0.2.0 now selects local Types 0.21.0 alongside Runtime. Preserve that
+  Protocol 0.2.1 now selects local Types 0.21.1 alongside Runtime. Preserve that
   canonical source identity; registry Types is only a qualification oracle.
   Query's older 0.1.x integration needs cohort migration before adoption.
   Qualification stays outside product release groups.

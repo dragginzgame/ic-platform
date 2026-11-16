@@ -43,23 +43,23 @@ actual working tree after authorized local application; consumer delivery remain
 pending. A separate native heap
 profiler compares allocation against the published decoder; see its
 [criteria and results](docs/qualification/engine-view-heap.md).
-Protocol is now the 0.2.0 development candidate; private qualification packages
+Protocol is now the 0.2.1 development candidate; private qualification packages
 remain at 0.1.0. Changed product crates advance after each GitHub source snapshot,
 independently of registry publication. Publication remains disabled.
 
-The local `ic-platform-types` 0.21.0 candidate now implements Principal and
+The local `ic-platform-types` 0.21.1 candidate now implements Principal and
 Account/Subaccount admission and Serde, including rendering into caller-owned storage. Its
 [qualification record](docs/qualification/types-principal.md) documents narrow
 source reuse and independent fixtures; [Account qualification](docs/qualification/types-account.md)
 covers effective identity and explicit Serde presence. Opt-in self-authentication
 and [independent native/Wasm consumer checks](docs/qualification/types-consumer.md)
 are implemented. Production consumer migration remains pending.
-Protocol 0.2.0 now uses local Types 0.21.0, matching Runtime. Its public Principal
+Protocol 0.2.1 now uses local Types 0.21.1, matching Runtime. Its public Principal
 identity changes from the registry type; consumers must migrate as one cohort.
 Registry Types remains only in qualification oracles. See the
 [cohort boundary](docs/qualification/types-consumer.md#protocol-cohort-020).
 
-Runtime `0.23.7` is the current local development increment after the `0.23.6`
+Runtime `0.23.8` is the current local development increment after the `0.23.6`
 GitHub source snapshot, with registry publication disabled. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
@@ -101,11 +101,11 @@ that admission with one executor-owned handler. `system::reply` supplies an
 explicit raw reply with one ordinary reply authority per task. Broader export
 modes, automatic encoding/reply ownership and installed execution remain pending.
 The opt-in `entrypoint-macros` feature now exposes an explicit manual-reply
-`update` attribute from `ic-platform-macros` 0.23.7. Its
+`update` attribute from `ic-platform-macros` 0.23.8. Its
 [generated exports](docs/qualification/runtime-exports.md) run in a separate Wasm
 consumer, including rejection and compile-fail checks. Queries and automatic
 reply generation remain unsupported in this initial macro slice.
-The separate `ic-platform-runtime-guard` shares Runtime's 0.23.7 version.
+The separate `ic-platform-runtime-guard` shares Runtime's 0.23.8 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 
@@ -120,7 +120,7 @@ The opt-in `cloud-engine-marketplace` feature adds [daily price rows](docs/quali
 with all six node classes and arbitrary naturals, plus [available-node page responses](docs/qualification/available-nodes.md).
 Bounded page argument encoding is also implemented; consumer adoption remains pending.
 
-Platform `0.34.1` now has an opt-in `certificate-decode` capability and empty
+Platform `0.34.2` now has an opt-in `certificate-decode` capability and empty
 defaults. It strictly decodes untrusted certificate grammar, retains the original
 bytes by borrow and exposes an immutable, explicitly unverified view. See the
 [certificate boundary](docs/qualification/platform-certificate.md) for reuse

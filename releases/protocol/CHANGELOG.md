@@ -3,6 +3,14 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.2.1] - Unreleased
+
+### 🔧 Dependencies
+
+- Align exact local Types dependency with the 0.21.1 release candidate. Advance
+  the group after its delivered source snapshot; registry publication remains
+  disabled. Runtime support packages advance together.
+
 ## [0.2.0] - 2026-11-16 (GitHub source snapshot)
 
 ### ⚠️ Breaking changes

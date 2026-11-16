@@ -1,11 +1,15 @@
 [package]
 name = "ic-platform-types"
-version = "0.21.0"
+version = "0.21.1"
 description = "Canonical IC identity types for the Platform rebuild"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
-publish = false
+publish = ["crates-io"]
+repository = "https://github.com/dragginzgame/ic-platform"
+documentation = "https://docs.rs/ic-platform-types"
+readme = "README.md"
+include = ["src/**", "README.md", "Cargo.toml"]
 
 [target.'cfg(any())'.dev-dependencies]
 toko-tooling.workspace = true

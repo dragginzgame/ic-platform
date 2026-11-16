@@ -73,6 +73,17 @@ jobs:
         run: make test-engine-request lint-engine-request doc-engine-request check-engine-request-wasm test-engine-response lint-engine-response doc-engine-response
       - name: Check local Types implementation
         run: make qualify-types qualify-types-consumer
+      - name: Prepare pinned Auth passive source for archive qualification
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: dragginzgame/ic-auth
+          ref: b78991e9833320692921bf766e51ad361c9c8c4d
+          path: target/auth-source
+          persist-credentials: false
+      - name: Qualify Types archive through Auth passive model
+        env:
+          AUTH_SOURCE: ${{ github.workspace }}/target/auth-source
+        run: make qualify-types-auth-archive
       - name: Check Platform certificate boundary
         run: make qualify-platform-authentication qualify-platform-wasm qualify-canister-signature-decode qualify-canister-signature-authentication
       - name: Replay observed canister signatures on native and Wasm

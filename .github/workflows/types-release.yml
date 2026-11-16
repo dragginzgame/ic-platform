@@ -1,0 +1,85 @@
+name: Types release qualification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  repository:
+    name: Repository checks
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare pinned CI tools
+        run: make install-ci-tools
+      - name: Scan complete repository history
+        run: make check-secrets
+      - name: Validate workflow
+        if: ${{ !cancelled() }}
+        run: make lint-workflows
+
+  native:
+    name: Native (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - name: Prepare host prerequisites
+        run: |
+          make install-host-tools
+          echo "$PWD/.tools/host/bin" >> "$GITHUB_PATH"
+      - name: Prepare selected Rust toolchain
+        run: bash vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
+      - name: Prepare tools and locked sources
+        run: |
+          make install-tools tools-check
+          cargo fetch --locked
+          cargo fetch --locked --manifest-path qualification/Cargo.toml
+          rustc --version --verbose
+          node --version
+      - name: Check formatting and installed snapshot
+        run: make fmt-check qualification-tooling-check
+      - name: Enforce product and consumer dependency boundaries
+        run: |
+          make check-protocol-graphs check-types-graphs check-runtime-consumer-graph
+          make check-protocol-graphs check-types-graphs check-runtime-consumer-graph GRAPH_TARGET="$(rustc -vV | sed -n 's/^host: //p')"
+      - name: Check local Types implementation
+        run: make qualify-types qualify-types-consumer
+      - name: Prepare pinned Auth passive source for archive qualification
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: dragginzgame/ic-auth
+          ref: b78991e9833320692921bf766e51ad361c9c8c4d
+          path: target/auth-source
+          persist-credentials: false
+      - name: Qualify Types archive through Auth passive model
+        env:
+          AUTH_SOURCE: ${{ github.workspace }}/target/auth-source
+        run: make qualify-types-auth-archive
+      - name: Check canonical Runtime type crossing
+        run: make qualify-runtime-consumer

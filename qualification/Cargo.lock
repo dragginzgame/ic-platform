@@ -461,7 +461,7 @@ dependencies = [
  "ic-platform-protocol",
  "ic-platform-runtime",
  "ic-platform-types 0.20.4",
- "ic-platform-types 0.21.0",
+ "ic-platform-types 0.21.1",
  "serde_json",
  "toko-tooling",
 ]
@@ -474,7 +474,7 @@ dependencies = [
  "ic-platform 0.33.7",
  "ic-platform-protocol",
  "ic-platform-types 0.20.4",
- "ic-platform-types 0.21.0",
+ "ic-platform-types 0.21.1",
  "serde_json",
  "toko-tooling",
 ]
@@ -907,10 +907,10 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.1"
+version = "0.34.2"
 dependencies = [
  "ic-certification",
- "ic-platform-types 0.21.0",
+ "ic-platform-types 0.21.1",
  "ic-verify-bls-signature",
  "serde",
  "serde_cbor",
@@ -921,7 +921,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.7"
+version = "0.23.8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -930,25 +930,25 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
- "ic-platform-types 0.21.0",
+ "ic-platform-types 0.21.1",
  "num-bigint 0.5.1",
  "serde",
 ]
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.7"
+version = "0.23.8"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
- "ic-platform-types 0.21.0",
+ "ic-platform-types 0.21.1",
 ]
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.7"
+version = "0.23.8"
 
 [[package]]
 name = "ic-platform-types"
@@ -966,7 +966,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-types"
-version = "0.21.0"
+version = "0.21.1"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1510,8 +1510,8 @@ version = "0.1.0"
 dependencies = [
  "candid",
  "ic-certification",
- "ic-platform 0.34.1",
- "ic-platform-types 0.21.0",
+ "ic-platform 0.34.2",
+ "ic-platform-types 0.21.1",
  "ic-testkit",
  "serde_cbor",
  "sha2 0.11.1",
@@ -1809,7 +1809,7 @@ name = "runtime-rollback"
 version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
- "ic-platform-types 0.21.0",
+ "ic-platform-types 0.21.1",
  "toko-tooling",
 ]
 
@@ -2636,7 +2636,7 @@ version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
  "ic-platform-types 0.20.4",
- "ic-platform-types 0.21.0",
+ "ic-platform-types 0.21.1",
  "serde_json",
  "toko-tooling",
 ]

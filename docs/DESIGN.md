@@ -520,6 +520,12 @@ Remove the old builders, facade paths, duplicate mappings, mutable authenticated
 
 Before the release cut:
 
+The maintainer subsequently selected an independent first Types release after
+retained-contract, packaged-crate and real-consumer qualification. For that
+release only, downstream production migration remains a separate gate rather
+than an upload prerequisite. The other correctness, identity, host and source
+integrity obligations below still apply to the selected Types scope.
+
 - All required consumers use the selected package/source cohort.
 
 - Every security and byte-compatibility obligation has passing evidence.

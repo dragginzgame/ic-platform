@@ -5,6 +5,17 @@ FORMAT_RUST_ARGS := --extra-workspace qualification
 include vendor/toko-tooling/make/consumer.mk
 include vendor/toko-tooling/make/cargo-dependencies.mk
 
+# Only Types is eligible. Shared owns exact selectors and upload attempt custody.
+CARGO_PUBLISH_PACKAGES := ic-platform-types
+CARGO_PUBLISH_REGISTRY := crates-io
+CARGO_PUBLISH_ALL_FEATURES := 1
+CARGO_PUBLISH_VERIFY_TARGETS := types-publication-admission
+include vendor/toko-tooling/make/cargo-publication.mk
+
+.PHONY: types-publication-admission
+types-publication-admission: toko-tooling-check qualification-tooling-check
+	node scripts/types-publication-admission.mjs
+
 .PHONY: help test-engine-request lint-engine-request doc-engine-request check-engine-request-wasm
 help:
 	@printf '%s\n' \
@@ -36,6 +47,7 @@ help:
 	  'qualify-canister-signature-observed  Capture and authenticate replica signatures' \
 	  'qualify-canister-signature-wasm  Replay observed signatures on native and Wasm' \
 	  'qualify-auth-consumer  Exercise isolated Auth issuer policy on native and Wasm' \
+	  'qualify-types-auth-archive  Test packaged Types through pinned Auth passive source' \
 	  'qualify-platform-wasm  Execute certificate authentication and refusals in Wasm' \
 	  'qualify-platform-observed  Verify replica-issued certificates through public APIs' \
 	  'qualify-types          Test and check local Principal and Account identities' \
@@ -68,26 +80,31 @@ qualify-runtime-call: toko-tooling-check
 
 .PHONY: qualify-types
 qualify-types: toko-tooling-check
-	cargo test --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml
 	cargo clippy --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --all-targets -- -D warnings
+	cargo clippy --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating --all-targets -- -D warnings
+	cargo test --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --no-deps
 	cargo check --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --tests --target wasm32-unknown-unknown
 	cargo test --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating
-	cargo clippy --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating --no-deps
 	cargo check --offline --locked --manifest-path crates/ic-platform-types/Cargo.toml --features principal-self-authenticating --tests --target wasm32-unknown-unknown
 
 .PHONY: qualify-types-consumer check-types-graphs
 qualify-types-consumer: qualification-tooling-check
-	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer
-	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features self-authentication
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --all-targets -- -D warnings
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features self-authentication --all-targets -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features self-authentication
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --release --target wasm32-unknown-unknown --target-dir target/types-wasm/default
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features self-authentication --release --target wasm32-unknown-unknown --target-dir target/types-wasm/self-authentication
 	node qualification/types-wasm.mjs
 
 TYPES_CONSUMER_PACKAGES := types-consumer|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|serde_json|itoa|memchr|zmij
+
+.PHONY: qualify-types-auth-archive
+qualify-types-auth-archive: qualification-tooling-check
+	node qualification/types-auth/qualify.mjs
+
 .PHONY: qualify-runtime-consumer check-runtime-consumer-graph
 qualify-runtime-consumer: qualification-tooling-check
 	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-call

@@ -1,100 +1,75 @@
 # Initial crates.io deployment
 
-The maintainer requested starting crates.io deployment after source snapshot
-`1ed002ce9a59a0272af1a875f5d3b8914d6a09a6`. This supersedes the earlier
-source-only authorization. It does not waive the acceptance gates in
-[the design](DESIGN.md#9-cutover-and-final-release-gate), authorize sibling changes,
-or establish registry publication. No upload or release tag has been attempted.
+The maintainer authorized crates.io deployment from public
+`dragginzgame/ic-platform` and then selected **Types independently after
+qualification**. Downstream production migration remains a separate gate.
+This sequencing does not waive retained identity contracts, archive/real-consumer
+proof, supported hosts, source provenance or registry readback. Siblings remain
+read-only. Platform, Runtime, Protocol and qualification packages remain unpublished.
 
-## First proposed cohort
+## Selected release
 
-Start with **Types, then Platform**, supporting Auth's issuer-signature integration.
-Runtime and Protocol have independent release obligations; they are not required
-by this verifier graph. Qualification packages remain private and outside product
-release groups. This is the proposed initial scope, not approval to omit an
-obligation that applies to either selected product.
+Types 0.21.1 follows registry 0.20.4 and delivered source 0.21.0. Its patch increment
+identifies changed package metadata/documentation after source delivery. Principal,
+Account/Subaccount, Serde and opt-in self-authentication retain their contracts;
+caller-buffer text rendering is additive. Empty defaults remain mandatory.
+Protocol 0.2.1, Platform 0.34.2 and coordinated Runtime 0.23.8 advance because
+normalized exact Types dependency contents change. They are not upload candidates.
 
-Use this repository, `https://github.com/dragginzgame/ic-platform`, as the intended
-source publisher. On 2026-11-16, read-only `cargo owner --list` reported `borovan`
-for both existing registry packages. This identifies registered ownership, not
-the credentials of a future upload. The publication workflow must admit the
-actual credential and exact registry destination without recording secrets.
-Do not publish the same replacement packages from the legacy source repository.
+The repository publisher is `https://github.com/dragginzgame/ic-platform`.
+Read-only `cargo owner --list` reported `borovan` on 2026-11-16. Credentials stay
+with Cargo and are never recorded. The only declared publication package is
+`ic-platform-types`, targeting `crates-io` with all features.
 
-| Group | Registry baseline observed | Delivered source candidate | Next action |
-| --- | --- | --- | --- |
-| Types | `ic-platform-types` 0.20.4 | 0.21.0 | Complete retained-contract/cohort acceptance and archive qualification first. |
-| Platform | `ic-platform` 0.33.7 | 0.34.1 | Complete authentication consumer acceptance, then qualify with the selected Types archive/registry identity. |
+## Qualification and execution
 
-Registry baselines were checked against the crates.io sparse index; both are
-stable and non-yanked. The hard-cut minor lines were selected before this task.
-Final publication versions are not frozen. Changing package metadata after the
-source snapshot consumes a new version under the local delivery rule: enabling
-publication must not silently reuse changed contents under a delivered version.
-Recheck registry availability at selection time. Updating Types also requires
-reviewing exact dependency pins and normalized package contents in Protocol and
-Runtime, even when those groups are not selected for this first upload.
+[The Types profile catalog](../ci/types-release-profiles.json) names the retained
+contract, independent consumer, portable graph, actual archive and Runtime type
+crossing checks. The [real-consumer proof](qualification/types-release.md) uses
+pinned Auth passive model source in an isolated workspace; it does not migrate
+Auth's working tree or claim full Auth application acceptance.
 
-## Readiness evidence
+The authenticated Toko 0.44.5 installation supplies publication selection,
+retained attempts, source checks, release metadata checks and archive provenance.
+The generic release runner is not enabled. The first Types release uses an
+explicit reviewed commit and annotated `types-v0.21.1` tag, followed by the
+supported `make publish-check PACKAGE=ic-platform-types` and
+`make publish PACKAGE=ic-platform-types` adapter. Its Types admission requires:
 
-- `cargo package --list --locked --offline` succeeds for both selected products.
-  The inventories include source, tests, normalized manifests and the root licence;
-  they contain no qualification workspace or native simulator implementation.
-- `cargo package --locked --offline -p ic-platform-types` succeeds, including
-  Cargo's default-feature compilation from the generated 0.21.0 archive. This
-  is packaging evidence, not all-feature consumer or release admission.
-- The equivalent Platform command fails before creating an admitted package:
-  its normalized manifest requires registry Types `=0.21.0`, which is unpublished.
-  This is the expected supplier-first constraint. A local path build does not
-  resolve it; do not weaken the exact cohort pin to package against older Types.
-- Both manifests currently omit repository/documentation metadata, and all
-  products retain `publish = false`. Those metadata changes belong in a reviewed
-  release preparation batch with the required version increments.
-- [CI run 43889896773](https://github.com/dragginzgame/ic-platform/actions/runs/43889896773)
-  failed on all three native hosts at qualification manifest ordering, before
-  product validation. The formatter's first pass had interleaved package metadata
-  with target tables; the follow-up groups target tables before metadata and
-  passes both `make fmt-check` and a subsequent `make fmt`/`make fmt-check` cycle.
-  A new hosted run is required; the earlier failure is not a product-test pass.
+- Clean source, only Types publishable, empty defaults and the intended repository.
+- An annotated tag at HEAD, independently observed at the remote.
+- Successful exact-commit Types release CI across Linux, Apple Silicon and Intel macOS.
+- Successful registry observation showing the exact version absent; lookup failure
+  and an existing version both refuse instead of triggering a blind retry.
+- Security audit, the complete profile catalog and archive provenance fetched
+  from the declared repository. Evidence is retained below `target/`.
 
-## Work required before upload
+The supported runner rechecks source and retains intent, dispatch, Cargo output
+and completion statuses. An interrupted upload requires registry/provenance
+reconciliation before any new attempt. Success still needs independent sparse
+index and archive readback. No upload has occurred as of this preparation record;
+publication results are recorded separately after execution.
 
-1. **Consumer and retained-contract acceptance.** Types still records incomplete
-   production cohort/compatibility proof. Platform's observed signature replay and
-   isolated Auth adapter are passing evidence, but actual Auth compilation/adoption
-   and broader authentication acceptance remain open. Map those obligations to
-   the selected release; do not declare the whole Auth application migrated from
-   the isolated issuer-policy test. Existing ECDSA/root-delegation needs and the
-   old feature surface need explicit consumer disposition. Siblings remain
-   read-only without separate authorization.
-2. **Supported release execution.** The installed Toko 0.44.5 selection does not
-   contain the release or Cargo publication entrypoints, and this repository has
-   no qualified release adapters or complete source-bound release gate. Adopt
-   needed tools through the authenticated installer with a complete retained
-   entrypoint list; do not edit the vendor tree. Use the supported metadata,
-   source/provenance, publication custody and uncertain-upload recovery contracts.
-   The design forbids dropping the old obligation floor or activating group-based
-   omissions merely because the new group metadata exists.
-3. **Candidate preparation.** Review current direct suppliers and security evidence
-   for the selected product and qualification graphs, resolve publisher/credential
-   admission, select new versions, update exact cohort pins, supply repository
-   metadata and enable only admitted product packages. Keep private fixtures
-   unpublished and all defaults empty. Qualify all affected independent locks.
-4. **Archive and host proof.** Qualify the actual Cargo archives and their public
-   consumer crossings, including selected features and supported hosts. Before
-   Types is in the registry, use the supported coordinated-archive qualification
-   route; a path-patched experiment must not masquerade as registry admission.
-   Preserve original-byte, immutable-evidence, authority, time and resource checks.
-5. **Delivery and readback.** Run the qualified complete release workflow, bind
-   version/tag/archive evidence to the exact source and publish Types first.
-   Independently observe registry availability and provenance before admitting
-   Platform's registry consumer build and upload. Reconcile uncertain uploads;
-   never retry them automatically. Report registry readback separately from Git
-   delivery and hosted qualification.
+## Supplier review
 
-These are release blockers, not another permission request. Do not run a direct
-`cargo publish` around missing admission, change acceptance thresholds, or label
-an experimental release qualified to bypass them.
+The 2026-11-16 direct-supplier review retained crc32fast 1.5.5, data-encoding
+2.11.1, serde 1.0.229, serde_bytes 0.11.19, sha2 0.11.1, serde_json 1.0.154
+and serde_test 1.0.177. The existing thiserror 2.0.18 selection is retained for
+PocketIC cohort alignment; optional refresh to 2.0.21 is deferred to the next
+dependency-maintenance batch. No dependency upgrade is needed for this release.
+RustSec database commit `02e2517f457a359fc6d3440ea4560c8ea188fee8` matched its
+remote HEAD at review. Root-lock audit found no vulnerabilities. The existing
+serde_cbor unmaintained warning belongs outside the Types product closure.
 
-The pinned Toko contracts are [release execution](https://github.com/dragginzgame/toko-tooling/blob/626da7cd9626cc2e152594862a2d82ea82ef51da/docs/releases.md)
+Platform admission still needs its own authentication acceptance and a qualified
+registry Types consumer graph. Types release does not qualify other groups or
+the full rebuild. The pinned shared contracts are
+[release execution](https://github.com/dragginzgame/toko-tooling/blob/626da7cd9626cc2e152594862a2d82ea82ef51da/docs/releases.md)
 and [Cargo publication](https://github.com/dragginzgame/toko-tooling/blob/626da7cd9626cc2e152594862a2d82ea82ef51da/docs/cargo-publication.md).
+
+The Types host workflow preserves repository/secret/format checks, Types and
+consumer profiles, native/Wasm graph checks and Runtime identity crossing. The
+full CI workflow remains unchanged in scope. Its simulator and other product
+checks are separate release obligations, not Types dependencies. The preceding
+source run passed Linux but failed macOS PocketIC server setup; no simulator
+qualification is inferred from the focused Types workflow.

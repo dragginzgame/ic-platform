@@ -3,6 +3,14 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.2] - Unreleased
+
+### 🔧 Dependencies
+
+- Align exact local Types dependency with the 0.21.1 release candidate. Advance
+  the group after its delivered source snapshot; registry publication remains
+  disabled. Runtime support packages advance together.
+
 ## [0.34.1] - Unreleased
 
 ### ✨ Added

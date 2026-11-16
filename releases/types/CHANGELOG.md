@@ -3,7 +3,19 @@
 Release group: `types`. Covered package: `ic-platform-types`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.21.0] - Unreleased
+## [0.21.1] - 2026-11-16
+
+### 📦 Release preparation
+
+- Prepare the first independent Types release with repository metadata, packaged
+  documentation and an explicit crates.io publisher selection. Production
+  migration remains a separate gate, as approved by the maintainer.
+- Qualify the packaged crate through pinned Auth passive model source on native
+  and Wasm; extend published-oracle checks to all Principal lengths and each
+  Subaccount bit, including typed malformed-Principal refusals.
+- Preserve empty defaults, opt-in self-authentication and one source/type identity.
+
+## [0.21.0] - Historical GitHub source candidate
 
 Initial local cohort candidate after registry Types 0.20.4. This incomplete
 pre-1.0 implementation is unpublished and must not replace the published cohort

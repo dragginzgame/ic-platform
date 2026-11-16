@@ -4,6 +4,14 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.8] - Unreleased
+
+### 🔧 Dependencies
+
+- Align exact local Types dependency with the 0.21.1 release candidate. Advance
+  the group after its delivered source snapshot; registry publication remains
+  disabled. Runtime support packages advance together.
+
 ## [0.23.7] - 2026-11-16 (GitHub source snapshot)
 
 ### 🧪 Tests
