@@ -51,5 +51,7 @@ mod serde;
 mod marketplace;
 mod observations;
 
+#[cfg(not(target_family = "wasm"))]
+mod query_fixtures;
 #[cfg(feature = "registry-settings")]
 mod registry_settings;

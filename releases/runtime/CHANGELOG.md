@@ -4,6 +4,15 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.14] - 2026-11-16
+
+### ➕ Added
+
+- Expose the dependency-free `raw::in_replicated_execution` boolean for Entropy's
+  pre-custody context guard. Installed ordinary-query, update and replicated-query
+  observations pass without a dummy executor or call. This does not authenticate
+  an export kind; actual Entropy migration and publication remain separate.
+
 ## [0.23.13] - 2026-11-16
 
 ### ➕ Added

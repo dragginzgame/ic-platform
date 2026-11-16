@@ -8,8 +8,68 @@ macro_rules! absent {
     (strict_optional) => {
         Ok(None)
     };
+    (known_optional) => {
+        Ok(None)
+    };
+    (known_elements) => {
+        Err(Error::Type)
+    };
 }
 macro_rules! projection {
+    ($(#[$meta:meta])* both $name:ident { $($(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty [$policy:ident $(, max = $maximum:expr)?]),+ $(,)? }) => {
+        projection! { $(#[$meta])* $name { $($(#[$field_meta])* $label => $field: $ty [$policy $(, max = $maximum)?]),+ } }
+        impl Encode for $name {
+            const SCHEMA: Schema = <Self as Decode>::SCHEMA;
+            fn write(&self, writer: &mut Writer<'_>) -> Result<(), EncodeError> { $(self.$field.write(writer)?;)+ Ok(()) }
+        }
+    };
+    ($(#[$meta:meta])* both enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident $(($ty:ty))?),+ $(,)? }) => {
+        projection! { $(#[$meta])* enum $name { $($(#[$variant_meta])* $label => $variant $(($ty))?),+ } }
+        impl Encode for $name {
+            const SCHEMA: Schema = <Self as Decode>::SCHEMA;
+            fn write(&self, writer: &mut Writer<'_>) -> Result<(), EncodeError> {
+                const LABELS: &[u32] = &[$($label),+];
+                match self {
+                    $(projection!(@pattern $name, $variant $(, $ty)?) => {
+                        writer.unsigned(LABELS.iter().position(|label| *label == $label).ok_or(EncodeError::Schema)? as u64)?;
+                        projection!(@write self, writer, $name, $variant $(, $ty)?)
+                    }),+
+                }
+            }
+        }
+    };
+    (@pattern $name:ident, $variant:ident) => { $name::$variant };
+    (@pattern $name:ident, $variant:ident, $ty:ty) => { $name::$variant(_) };
+    (@write $value:ident, $writer:ident, $name:ident, $variant:ident) => { Ok(()) };
+    (@write $value:ident, $writer:ident, $name:ident, $variant:ident, $ty:ty) => {
+        if let $name::$variant(value) = $value { value.write($writer) } else { Err(EncodeError::Schema) }
+    };
+    ($(#[$meta:meta])* encoding $name:ident { $($(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty),+ $(,)? }) => {
+        $(#[$meta])*
+        #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+        pub struct $name { $($(#[$field_meta])* pub $field: $ty,)+ }
+        impl Encode for $name {
+            const SCHEMA: Schema = Schema::Record(&[$(($label, &<$ty as Encode>::SCHEMA)),+]);
+            fn write(&self, writer: &mut Writer<'_>) -> Result<(), EncodeError> {
+                $(self.$field.write(writer)?;)+
+                Ok(())
+            }
+        }
+        impl $name {
+            /// Encode one complete argument. Size admission precedes output allocation.
+            /// # Errors
+            /// Refuses an output over the inclusive bound or allocation failure.
+            pub fn encode(&self, maximum_bytes: usize) -> Result<Vec<u8>, EncodeError> {
+                crate::candid::encode::encode(self, maximum_bytes)
+            }
+        }
+    };
+    (@value $reader:ident, $wire:ident, $ty:ty, known_optional) => { <$ty as crate::candid::KnownOptional>::read_known($reader, $wire) };
+    (@value $reader:ident, $wire:ident, $ty:ty, known_elements) => { <$ty as crate::candid::KnownElements>::read_known($reader, $wire) };
+    (@value $reader:ident, $wire:ident, $ty:ty, $policy:ident) => { $reader.value::<$ty>($wire) };
+    (@value $reader:ident, $wire:ident, $ty:ty, $policy:ident, $maximum:expr) => {
+        $reader.with_vector_limit($maximum, |$reader| projection!(@value $reader, $wire, $ty, $policy))
+    };
     ($(#[$meta:meta])* arguments $name:ident { $($(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty),+ $(,)? }) => {
         $(#[$meta])*
         #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
@@ -60,7 +120,7 @@ macro_rules! projection {
             }
         }
     };
-    ($(#[$meta:meta])* $name:ident { $( $(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty [$policy:ident] ),+ $(,)? }) => {
+    ($(#[$meta:meta])* $name:ident { $( $(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty [$policy:ident $(, max = $maximum:expr)?] ),+ $(,)? }) => {
         $(#[$meta])*
         #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
         pub struct $name { $( $(#[$field_meta])* pub $field: $ty, )+ }
@@ -70,7 +130,7 @@ macro_rules! projection {
                 $(let mut $field = None;)+
                 reader.record(id, |label, wire, reader| {
                     match label {
-                        $($label => { $field = Some(reader.value::<$ty>(wire)?); },)+
+                        $($label => { $field = Some(projection!(@value reader, wire, $ty, $policy $(, $maximum)?)?); },)+
                         _ => return Ok(false),
                     }
                     Ok(true)

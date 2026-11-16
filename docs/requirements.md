@@ -120,7 +120,7 @@ Actual Canic installed/native consumer qualification remains required.
 
 ## Canister-signature consumer
 
-For Auth's broader migration, [#7](https://github.com/dragginzgame/ic-platform/issues/7)
+For Auth's broader migration, [Platform #7](https://github.com/dragginzgame/ic-platform/issues/7)
 now has qualified local primitives, certified-issuer mappings, certificate
 construction and all five installed cases without legacy Platform. Published
 cohort delivery remains separate. See [Auth evidence](qualification/auth-crypto.md).
@@ -302,3 +302,17 @@ Backup's [original ingress packet boundary](qualification/ingress-packets.md)
 preserves strict content, original bytes and upstream request identity. Decoding
 never substitutes for direct-key policy, certificate authentication or recovery
 admission. Snapshot/status supply and installed recovery remain separate gates.
+
+The pending [snapshot/status protocol boundary](qualification/management-snapshots.md)
+supplies Backup's finite management message profile with independent native/Wasm
+checks. Actual caller migration, installed recovery and publication are not
+established by these codec tests.
+
+### Blob signed and Caffeine supplier slices
+
+[Platform #17](https://github.com/dragginzgame/ic-platform/issues/17) belongs to Platform
+native transport; [Platform #18](https://github.com/dragginzgame/ic-platform/issues/18) belongs
+to Protocol. Explicit Ed25519 signing/original recovery and selected bounded
+Caffeine codecs are implemented with independent and installed qualification.
+Full CLI custody/management migration remains separate. See the
+[contracts, evidence and remaining gates](qualification/blob-suppliers.md).

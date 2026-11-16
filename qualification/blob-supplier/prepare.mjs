@@ -1,0 +1,42 @@
+import {adoptTooling} from '../tooling-selection.mjs';
+import {codecs,callbackTests,enrollmentTests} from './codecs.mjs';
+// Materialize the committed Blob caller without modifying its checkout.
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {createHash} from 'node:crypto';
+const root=process.cwd(),source=resolve('../ic-blob-storage'),out=resolve('target/blob-supplier/source');
+const revision='31dd236814879afd2fd0faf0851e6b46184476ac';
+assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:source,encoding:'utf8'}).trim(),revision);
+assert.equal(execFileSync('git',['status','--porcelain'],{cwd:source,encoding:'utf8'}).trim(),'','expected clean pinned Blob source');
+mkdirSync(out,{recursive:true});
+const archive=execFileSync('git',['archive',revision],{cwd:source,maxBuffer:64*1024*1024});
+execFileSync('tar',['-x','-C',out],{input:archive});
+function edit(name,fn){const path=`${out}/${name}`;writeFileSync(path,fn(readFileSync(path,'utf8')))}
+for(const name of ['Cargo.toml','qualification/Cargo.toml'])edit(name,s=>{for(const p of ['ic-platform-types','ic-platform-runtime'])s=s.replace(p+' = { version = ',p+' = { path = "'+root+'/crates/'+p+'", version = ');return s;});
+edit('qualification/Cargo.toml',s=>s.replace('ic-platform = { version = "0.34.6",','ic-platform = { path = "'+root+'/crates/ic-platform", version = "0.34.6",').replace('ic-testkit = { version = "0.106.0",','ic-testkit = { version = "=0.107.1",'));
+edit('qualification/ic-blob-storage-tests/Cargo.toml',s=>s.replace(/^ic-platform-legacy = .*\n/m,'').replace('features = ["ingress-packets"]','features = ["native-signed"]').replace('features = ["held-reply-fixtures"]','features = []'));
+const helper=readFileSync('qualification/blob-supplier/signed-client.rs','utf8');
+edit('qualification/ic-blob-storage-tests/tests/signed.rs',s=>{
+ s=s.replace('use ic_platform_legacy::agent::{Agent, AgentError, BasicIdentity, Identity};','// SUPPLIER_CLIENT').replace('use ic_testkit::{pic::PocketIcStartupConfig, pocket_ic::PocketIcBuilder};','use ic_testkit::pocket_ic::PocketIcBuilder;').replace('use std::{path::Path, time::Duration};','use std::time::Duration;');
+ const start=s.indexOf('fn principal('),end=s.indexOf('fn encode<T:',start);assert(start>0&&end>start);s=s.slice(0,start)+s.slice(end);
+ s=s.replace(/agent: &Agent/g,'agent: &Client');
+ s=s.replace(/let bytes = agent\s*\.update\([\s\S]*?\.unwrap\(\);/,`let bytes = agent.update(target,"blob_update",encode("blob_update",command)).await;`);
+ s=s.replace(/let bytes = agent\s*\.query\([\s\S]*?\.unwrap\(\);/,`let bytes = agent.query(target,"blob_query",encode("blob_query",&request)).await.unwrap();`);
+ const a=s.indexOf('    let server_directory'),b=s.indexOf('    let input = Installation',a);assert(a>0&&b>a);
+ s=s.slice(0,a)+`    let mut owned = PocketIcBuilder::new().with_nns_subnet().with_application_subnet().with_server_url(std::env::var("POCKET_IC_SERVER_URL").unwrap().parse().unwrap()).build_async().await;\n    let root_subnet=Principal::from_slice(owned.topology().await.get_nns().unwrap().as_slice());\n`+s.slice(b);
+ s=s.replaceAll(/\.instance_mut\(\)/g,'').replaceAll(/\.instance\(\)/g,'');
+ s=s.replaceAll(/agent\(url.as_str\(\), &root, (\d)\)/g,'client(url.as_str(), &root, root_subnet, $1)');
+ s=s.replace(/drop\(\s*uploader\s*\.update\([\s\S]*?\.unwrap\(\),\s*\);/,`drop(uploader.update(target,"blob_update",encode("blob_update",&Command::Register(request.root))).await);`);
+ const x=s.indexOf('    let mut wrong_root = root;'),y=s.indexOf('    owned.close().await;',x);assert(x>0&&y>x);
+ s=s.slice(0,x)+`    let wrong_root=include_bytes!("${root}/qualification/platform-certificates/fixtures/mainnet-root.der");\n    let untrusted=client(url.as_str(),wrong_root,root_subnet,1);\n    assert!(untrusted.query(target,"blob_query",encode("blob_query",&Inspection::Usage)).await.is_err());\n    owned.drop().await;\n`+s.slice(y+'    owned.close().await;'.length);
+ assert(!s.includes('BasicIdentity')&&!s.includes('AgentError')&&!s.includes('call_and_wait'));
+ return s.replace('// SUPPLIER_CLIENT',helper);
+});
+for(const name of ['Cargo.toml','qualification/Cargo.toml']) adoptTooling(`${out}/${name}`);
+codecs(out,root);
+callbackTests(out);
+enrollmentTests(out);
+writeFileSync('target/blob-supplier/source.json',JSON.stringify({revision,archive_sha256:createHash('sha256').update(archive).digest('hex'),helper_sha256:createHash('sha256').update(helper).digest('hex')},null,2)+'\n');
+console.log(out);

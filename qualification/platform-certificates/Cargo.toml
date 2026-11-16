@@ -47,7 +47,19 @@ name = "native-read"
 path = "src/bin/native-read.rs"
 required-features = ["native-read"]
 
+[[bin]]
+name = "native-signed-installed"
+path = "src/bin/native-signed-installed.rs"
+required-features = ["native-signed"]
+
 [features]
+native-signed = [
+    "native-read",
+    "candidate-platform/native-signed",
+    "candidate-platform/certificate-construction",
+    "candidate-platform/certificate-fixture-signing",
+    "dep:serde_cbor",
+]
 native-read = ["candidate-platform/native-read"]
 crypto = ["candidate-platform/ed25519", "candidate-platform/ecdsa"]
 auth-consumer = ["canister-signature", "dep:sha2"]

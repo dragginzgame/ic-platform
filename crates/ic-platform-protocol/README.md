@@ -23,3 +23,15 @@ explicit complete-message bound. `management-chunks` provides bounded
 `stored_chunks`/`upload_chunk` request and response codecs using canonical Types.
 The HTTP GET encoder also offers explicit pricing version one. Consumer custody,
 cache authority, transport and cycle-spending decisions remain outside Protocol.
+
+`management-snapshots` supplies bounded canister-status and snapshot
+list/take/read/upload/load messages for Backup's finite profile. It preserves
+exact global float bits and applies per-field collection limits before allocation.
+Callers still own identity/hash admission, capture/restore geometry, spending and
+recovery; passing codec checks does not qualify those application workflows.
+
+`caffeine` supplies selected bounded callback, certificate-record and Cashier
+formats, arbitrary signed balances and optional natural top-up targets. The
+enrollment outer option has an explicit encoder. Application admission and
+settlement stay with the caller; see the
+[Blob supplier contract](../../docs/qualification/blob-suppliers.md).

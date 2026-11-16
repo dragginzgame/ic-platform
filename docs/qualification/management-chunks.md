@@ -39,7 +39,13 @@ LEB boundaries; every truncation; wrong type, surplus argument, trailing data;
 and malformed/over-budget skipped values. Native upstream schemas remain private
 qualification dependencies.
 
-Registry delivery and actual installed Store preparation/reuse, final-callback
-authority, expiry and epoch-fence qualification remain outstanding. This is not
-an installed management success or a Store migration. Controller/pin checks,
-transport uncertainty, admission epochs and retry policy stay with Store.
+The [publication record](2026-11-16-supplier-publication.md) verifies registry
+delivery. Store's [actual consumer evidence](https://github.com/dragginzgame/ic-platform/issues/16#issuecomment-6926752673)
+then passed all four installed scenarios against published Protocol 0.2.5,
+Runtime 0.23.13 and Types 0.21.2: cache preparation/reuse, final callbacks after
+controller revocation and close/reopen, closed-maintenance fences and capacity
+at 4,096 labels. The predecessor-to-candidate upload/upgrade witness also passed.
+This completes the requested supplier and consumer boundary for #16; Store's
+uncommitted adoption is not a published Store release. Storage's old raw-memory
+edge remains separately owned by ic-storage#3. Controller/pin checks, transport
+uncertainty, admission epochs and retry policy stay with Store.

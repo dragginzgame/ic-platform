@@ -1,5 +1,6 @@
-//! Anonymous read-only IC HTTP transport with explicit trust, limits and time.
-//! No Agent, signing identity, root discovery, cache, retry or polling is selected.
+//! IC HTTP transport with explicit trust, limits and time. Anonymous reads are
+//! selected by `native-read`; `native-signed` adds explicit Ed25519 operations.
+//! No Agent, root discovery, cache, retry or polling is selected.
 //! Dropping an operation drops its HTTP future; callers own whole-operation deadlines.
 use crate::certificate::{
     CertificateDecodeLimits, PreparedRootKey, TimePolicy, VerificationLimits, VerifyError,
@@ -9,6 +10,12 @@ use candidate_types::Principal;
 use ic_transport_types::{Envelope, EnvelopeContent, QueryResponse, ReadStateResponse};
 use std::{borrow::Cow, collections::BTreeMap, time::Duration};
 mod query;
+#[cfg(feature = "native-signed")]
+mod signed;
+#[cfg(feature = "native-signed")]
+pub use signed::{
+    Dispatch, Ed25519Identity, PreparedUpdate, RequestObservation, RequestStatus, UpdateArgs,
+};
 mod subnet;
 pub use ic_transport_types::SubnetMetrics;
 pub use subnet::SubnetObservation;
@@ -41,7 +48,7 @@ pub enum ReadError {
     /// Complete request/response exceeds its byte allowance.
     #[error("native message exceeds byte allowance")]
     ByteLimit,
-    /// Request ID or CBOR packet failed admission.
+    /// Request ID, signing identity, envelope signature or CBOR packet failed admission.
     #[error("invalid native packet")]
     Packet,
     /// Certificate bytes failed strict decoding.
@@ -70,7 +77,7 @@ pub enum ReadError {
         error_code: Option<String>,
     },
 }
-/// Reusable anonymous client. No signing, canister mutation or implicit retries.
+/// Reusable bounded client. Signed operations require `native-signed`.
 #[derive(Clone)]
 pub struct ReadClient {
     config: ReadConfig,
@@ -122,6 +129,16 @@ impl ReadClient {
             sender_delegation: None,
         };
         let body = envelope.encode_bytes();
+        self.post_bytes(path, body).await
+    }
+    async fn post_bytes(&self, path: &str, body: Vec<u8>) -> Result<Vec<u8>, ReadError> {
+        self.post_response(path, body).await.map(|(_, bytes)| bytes)
+    }
+    async fn post_response(
+        &self,
+        path: &str,
+        body: Vec<u8>,
+    ) -> Result<(reqwest::StatusCode, Vec<u8>), ReadError> {
         if body.len() > self.config.message_bytes {
             return Err(ReadError::ByteLimit);
         }
@@ -137,6 +154,10 @@ impl ReadClient {
             .send()
             .await?
             .error_for_status()?;
+        let status = response.status();
+        if !status.is_success() {
+            return Err(ReadError::Packet);
+        }
         if response
             .content_length()
             .is_some_and(|n| n > self.config.message_bytes as u64)
@@ -150,7 +171,7 @@ impl ReadClient {
             }
             bytes.extend_from_slice(&chunk);
         }
-        Ok(bytes)
+        Ok((status, bytes))
     }
     async fn state(
         &self,
@@ -189,3 +210,6 @@ impl ReadClient {
         )?)
     }
 }
+
+#[cfg(all(test, feature = "native-signed", feature = "certificate-construction"))]
+mod signed_tests;

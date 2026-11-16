@@ -181,3 +181,26 @@ its dependents; hosted CI remains asynchronous and is not awaited.
 This cohort is now published and independently read back. See the
 [complete supplier publication evidence](qualification/2026-11-16-supplier-publication.md)
 for source/tag identity, checksums, retained attempts and registry-backed Query/Auth results.
+
+## Signed transport and selected protocol release
+
+The 2026-11-16 deployment selects Platform 0.34.7, Protocol 0.2.6 and coordinated
+Runtime/macros/guard 0.23.14, after checking current registry baselines. Types
+0.21.2 is unchanged. Both workspaces and materialized candidate qualification
+consumers adopt Toko 0.44.10 through its supported installer/selection. The
+reviewed tooling archive checksum is
+`8806e8986952ad5feff3b12967e042107c3ead27aed368fc5478ccc175abe98d`.
+
+Platform adds explicit Ed25519 signing, exact-envelope dispatch, signed queries
+and authenticated original-request observation. Protocol adds management snapshot
+formats and bounded Caffeine codecs. Runtime adds the synchronous replicated
+execution observation. Query's portable schema corpus removes its private fixture
+dependency. Full consumer migration and the CLI custody/management acceptance
+journeys remain separate from independently qualified supplier publication; see
+[the Blob contract](qualification/blob-suppliers.md) and
+[management snapshot scope](qualification/management-snapshots.md).
+
+Run the complete local release catalog at the clean release commit, then publish
+guard, macros, Runtime, Protocol and Platform in that order with independent
+registry readback between dependency layers. Hosted CI is observed asynchronously,
+not awaited. No sibling delivery or unchanged Types release is selected.

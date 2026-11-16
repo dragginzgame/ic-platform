@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-protocol"
-version = "0.2.5"
+version = "0.2.6"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -18,8 +18,10 @@ ignored = ["toko-tooling"]
 
 [features]
 default = []
+caffeine = ["dep:candidate-types", "dep:serde", "dep:num-bigint"]
 raw-rand = []
 management-chunks = ["dep:candidate-types", "dep:serde"]
+management-snapshots = ["dep:candidate-types", "dep:serde"]
 http-request = []
 cloud-engine = []
 cloud-engine-response = ["cloud-engine", "dep:candidate-types", "dep:serde"]

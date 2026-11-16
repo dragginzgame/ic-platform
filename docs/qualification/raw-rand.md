@@ -41,3 +41,10 @@ checks exact output limits.
 Actual installed Entropy contention, stale-result and cancellation qualification
 still requires the Scheduling/Timers migration. No registry-backed consumer or
 production adoption is claimed by these supplier checks.
+
+The [publication record](2026-11-16-supplier-publication.md) verifies delivery of
+these capabilities. Entropy's [registry reassessment](https://github.com/dragginzgame/ic-platform/issues/13#issuecomment-6926751538)
+confirms the supplied API and identifies the remaining Timers singleton conflict
+under ic-scheduling#2. Supplier issue #13 is complete; the conditional whole-Entropy
+registry integration and installed lifecycle proof remain with their consumer
+owners once that prerequisite is available.

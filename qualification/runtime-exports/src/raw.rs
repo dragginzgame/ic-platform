@@ -3,6 +3,34 @@ use candidate_runtime::raw as ic0;
 use std::cell::Cell;
 
 thread_local! { static VALUE: Cell<u8> = const { Cell::new(0) }; }
+thread_local! { static CONTEXT_MUTATIONS: Cell<u8> = const { Cell::new(0) }; }
+
+fn context_guard() {
+    let replicated = ic0::in_replicated_execution();
+    // Same ordering required by Entropy: context refusal precedes all custody
+    // mutation and call submission. No dummy root or transport is involved.
+    if replicated {
+        CONTEXT_MUTATIONS.set(CONTEXT_MUTATIONS.get() + 1);
+    }
+    ic0::msg_reply_data_append(&[u8::from(replicated), CONTEXT_MUTATIONS.get()]);
+    ic0::msg_reply();
+}
+#[expect(
+    unsafe_code,
+    reason = "Caller-owned IC export in the approved export fixture"
+)]
+#[unsafe(export_name = "canister_query context")]
+extern "C" fn context_query() {
+    context_guard();
+}
+#[expect(
+    unsafe_code,
+    reason = "Caller-owned IC export in the approved export fixture"
+)]
+#[unsafe(export_name = "canister_update context_update")]
+extern "C" fn context_update() {
+    context_guard();
+}
 
 fn caller() -> ([u8; 29], usize) {
     let size = ic0::msg_caller_size();

@@ -3,6 +3,21 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.7] - 2026-11-16
+
+### ➕ Added
+
+- Add explicit Ed25519 PEM signing, immutable original update preparation,
+  single-attempt dispatch, certified original-request recovery and signed queries.
+  Preserve exact proof bytes and independent historical time policy. See the
+  [supplier evidence and remaining consumer gates](../../docs/qualification/blob-suppliers.md).
+
+### 🧪 Testing
+
+- Replace Query's private fixture dependency with a versioned independent replay
+  corpus; qualify actual topology/CLI tests, strict Clippy and portable Cargo
+  archives against published products. See [the evidence](../../docs/qualification/query-hard-cut.md).
+
 ## [0.34.6] - 2026-11-16
 
 ### ➕ Added

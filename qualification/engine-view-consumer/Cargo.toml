@@ -23,6 +23,8 @@ ignored = ["toko-tooling"]
 category = "tests"
 
 [features]
+caffeine = ["ic-platform-protocol/caffeine"]
+management-snapshots = ["ic-platform-protocol/management-snapshots"]
 management-chunks = ["ic-platform-protocol/management-chunks"]
 raw-rand = ["ic-platform-protocol/raw-rand"]
 http-request = ["ic-platform-protocol/http-request"]

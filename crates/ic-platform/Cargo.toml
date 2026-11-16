@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform"
-version = "0.34.6"
+version = "0.34.7"
 description = "Explicit IC certificate and authentication boundaries"
 edition.workspace = true
 rust-version.workspace = true
@@ -25,6 +25,13 @@ ingress-packets = [
     "dep:serde_cbor",
     "dep:ic-transport-types",
     "dep:thiserror",
+]
+native-signed = [
+    "native-read",
+    "ingress-packets",
+    "ed25519-dalek/pem",
+    "ed25519-dalek/zeroize",
+    "candidate-types/principal-self-authenticating",
 ]
 native-read = [
     "certificate-authentication",

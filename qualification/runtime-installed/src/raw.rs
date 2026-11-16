@@ -36,6 +36,12 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
         let id = pic.create_canister().await;
         pic.add_cycles(id, 1u128 << 70).await;
         pic.install_canister(id, wasm.clone(), vec![], None).await;
+        assert_eq!(pic.query_call(id, original, "context", vec![]).await.unwrap(), [0,0]);
+        assert_eq!(pic.query_call(id, original, "context", vec![]).await.unwrap(), [0,0]);
+        assert_eq!(pic.update_call(id, original, "context_update", vec![]).await.unwrap(), [1,1]);
+        assert_eq!(pic.query_call(id, original, "context", vec![]).await.unwrap(), [0,1]);
+        let replicated_query = pic.update_call(id, original, "context", vec![]).await.unwrap();
+        assert_eq!(replicated_query[0],1, "replicated query must follow the IC observation");
         assert_eq!(pic.query_call(id, original, "stable_observe", vec![]).await.unwrap(), [2u64.to_le_bytes().as_slice(), &[0,0,0]].concat());
         assert_eq!(pic.update_call(id, original, "system_probe", vec![0]).await.unwrap(), 2u64.to_le_bytes());
         let before_burn = pic.cycle_balance(id).await;

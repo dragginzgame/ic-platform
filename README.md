@@ -195,3 +195,8 @@ publishes Types 0.21.2, Runtime/macros/guard 0.23.13, Protocol 0.2.5 and Platfor
 raw_rand and chunk-cache codecs, explicit HTTP pricing, and strict native ingress
 packets. Archive and registry-backed Query/Auth checks pass; broader consumer
 migrations remain separate.
+
+The next independently qualified supplier release adds signed native transport,
+original-request recovery, bounded Caffeine and management snapshot codecs, and
+the raw replicated-execution observation. See the [release selection](docs/releases.md#signed-transport-and-selected-protocol-release)
+and [remaining Blob consumer gates](docs/qualification/blob-suppliers.md).

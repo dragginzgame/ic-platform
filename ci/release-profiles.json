@@ -25,8 +25,11 @@
     "qualify-http-request",
     "qualify-raw-rand",
     "qualify-management-chunks",
+    "qualify-management-snapshots",
     "qualify-registry-codecs",
-    "qualify-query-hard-cut"
+    "qualify-query-hard-cut",
+    "qualify-caffeine",
+    "qualify-blob-suppliers"
   ],
   "runtime": [
     "qualify-runtime-call",
@@ -54,6 +57,8 @@
     "qualify-auth-consumer",
     "qualify-platform-crypto",
     "qualify-auth-crypto",
-    "qualify-native-read"
+    "qualify-native-read",
+    "qualify-native-signed",
+    "qualify-blob-suppliers"
   ]
 }

@@ -5,8 +5,8 @@ import { readFileSync } from 'node:fs';
 
 assert.ok(process.argv.length <= 3, 'expected at most one probe selection');
 const probe = process.argv[2] ?? 'size';
-assert.ok(['size', 'admission', 'registry', 'marketplace', 'raw-rand', 'management-chunks'].includes(probe), 'unknown probe');
-const binary = { size: 'engine-view-wasm', admission: 'engine-view-admission', registry: 'registry-admission', marketplace: 'marketplace-admission', 'raw-rand': 'raw-rand-admission', 'management-chunks': 'management-chunks-admission' }[probe];
+assert.ok(['size', 'admission', 'registry', 'marketplace', 'raw-rand', 'management-chunks', 'management-snapshots', 'caffeine'].includes(probe), 'unknown probe');
+const binary = { size: 'engine-view-wasm', admission: 'engine-view-admission', registry: 'registry-admission', marketplace: 'marketplace-admission', 'raw-rand': 'raw-rand-admission', 'management-chunks': 'management-chunks-admission', 'management-snapshots': 'management-snapshots-admission', caffeine: 'caffeine-admission' }[probe];
 
 function measure(selection) {
   const url = new URL(`../target/engine-view-wasm/${selection}/wasm32-unknown-unknown/release/${binary}.wasm`, import.meta.url);
@@ -46,7 +46,7 @@ function measure(selection) {
   };
 }
 
-const standalone = ['registry', 'marketplace', 'raw-rand', 'management-chunks'].includes(probe);
+const standalone = ['registry', 'marketplace', 'raw-rand', 'management-chunks', 'management-snapshots', 'caffeine'].includes(probe);
 const candidate = measure(standalone ? probe : 'candidate');
 // No launch-derived size budget has been selected. Report evidence without
 // converting a relative size change into an acceptance decision.

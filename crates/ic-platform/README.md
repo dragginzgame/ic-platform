@@ -20,3 +20,9 @@ a separate opt-in capability. `native-read` supplies anonymous HTTP queries with
 verified node signatures and authenticated selected-subnet observations. Callers
 provide endpoint, root, root-subnet binding, time windows, resource limits and
 whole-operation deadlines. There is no implicit root discovery or retry policy.
+
+`native-signed` adds explicit Ed25519 PEM signing, exact offline update custody,
+single-attempt dispatch and authenticated original-request observation, including
+expired-original recovery. Signed queries reuse the native read verifier. There
+is no implicit polling, retry, renewal or root discovery. See the
+[Blob supplier contract](../../docs/qualification/blob-suppliers.md).

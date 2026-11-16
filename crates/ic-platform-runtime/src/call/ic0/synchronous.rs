@@ -32,6 +32,27 @@ unsafe extern "C" {
     #[link_name = "trap"]
     fn abort(src: u32, size: u32) -> !;
     fn performance_counter(counter_type: u32) -> u64;
+    #[link_name = "in_replicated_execution"]
+    fn replicated_execution() -> u32;
+}
+
+/// Observe the IC's replicated-execution flag without allocating, submitting a
+/// call, entering an executor or modifying source custody.
+///
+/// Ordinary non-replicated queries return false. Updates and replicated queries
+/// follow the IC's true observation. This does not authenticate an export kind,
+/// prove update reply authority, authorize a caller or make a query an update.
+///
+/// # Panics
+/// IC execution-context restrictions still apply; there is no native fallback.
+#[must_use]
+#[expect(
+    unsafe_code,
+    reason = "Scalar IC context observation with no memory pointers"
+)]
+pub fn in_replicated_execution() -> bool {
+    // SAFETY: The scalar import retains no pointer and has no application effects.
+    unsafe { replicated_execution() != 0 }
 }
 
 /// Returns the current raw message argument length without allocating or copying.

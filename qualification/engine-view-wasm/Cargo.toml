@@ -35,7 +35,19 @@ name = "management-chunks-admission"
 path = "src/bin/management-chunks-admission.rs"
 required-features = ["management-chunks"]
 
+[[bin]]
+name = "management-snapshots-admission"
+path = "src/bin/management-snapshots-admission.rs"
+required-features = ["management-snapshots"]
+
+[[bin]]
+name = "caffeine-admission"
+path = "src/bin/caffeine-admission.rs"
+required-features = ["caffeine"]
+
 [features]
+caffeine = ["candidate", "ic-platform-protocol/caffeine"]
+management-snapshots = ["candidate", "ic-platform-protocol/management-snapshots"]
 default = []
 management-chunks = ["candidate", "ic-platform-protocol/management-chunks"]
 raw-rand = ["candidate", "ic-platform-protocol/raw-rand"]

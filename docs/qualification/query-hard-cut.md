@@ -1,4 +1,43 @@
-# Query hard-cut candidate — Platform 0.34.5 / Protocol 0.2.4
+# Query hard-cut qualification
+
+## Portable registry-backed fixtures — 16 November 2026
+
+The [v1 corpus](../../qualification/query-hard-cut/portable/README.md) replaces the
+private sibling fixture dependency for #10. All 313 frames regenerate from the
+independent native schemas; Query only replays data. The retained tests still
+exercise large collections, all node classes, large naturals, floating-point
+bits, partial outcomes, request arguments and all valid Principal byte lengths.
+Missing corpus inputs fail rather than silently generating expected data with
+the implementation under test.
+
+`make qualify-query-hard-cut` checks both the local candidate cohort and published
+Platform 0.34.6, Protocol 0.2.5 and Types 0.21.2, with no Agent, legacy Platform, private fixture dependency or
+direct Query Candid dependency. Linux run
+`target/query-hard-cut/1794859108582/verified.json` passed all 184 topology/CLI
+tests and strict all-target Clippy. Cargo packaged topology 0.108.0 and CLI
+0.105.10 together through its supported multi-package command. Both normalized
+archives have no outside path requirement. The extracted topology archive passed
+all 136 tests and Clippy independently, including its embedded replay corpus.
+An empty `[workspace]` only isolates the extraction from the enclosing validation
+workspace; no dependency was replaced for those checks.
+
+Source revision: `4a7305c4c804dcd0a0ce3e3433c6a8662d81fd75`, with the complete
+dirty-source inventory SHA-256
+`e6afbae2caa9cd813812fb076d0b1def3404cd67eaff32bedc8ac9a296da37d2`.
+Only the reviewed dependency pins differed from the previous patch inputs.
+Corpus SHA-256: `7613ee62431c7208dfa32ceff52ef6f52f0933b60b1f5f3211e013388692135b`;
+helper: `2988961f71c159ca6166b6c4509b4793f98abcf97817446b1db5714f1fdf3249`;
+patch: `3be1910d15165651ce159f57a4443f9855832deed80eec7dd234cc073c4af717`;
+resolved lock: `cfb5bdc79c8527d12d2e3c8d1d5292c80eb5adf982383af31e5a70c6dccc78ef`.
+Topology archive: `7a1803057c248eec3eae96fb7c54bfadc27db1e91d8a73028da1205d54e9745d`;
+CLI archive: `fc8f630870fd5ef6835501feeb0854fb9cbcc16ae9c648e188c5f47b44b18661`.
+
+This is supplier qualification of the actual consumer patch. Query's checkout
+was read-only; adoption, publication and macOS execution are not claimed.
+The candidate-cohort run at `target/query-hard-cut/1794859015974/verified.json`
+also passed 184 tests and Clippy; its lock SHA-256 is
+`9cb02bd0e14d54716f16a8546cdf5ff4af31cf6fefb1d177260d393aa52d1c41`.
+The earlier local-path evidence below remains historical, not the current route.
 
 This candidate supplies the Query read boundary from issue #4 without selecting
 legacy Platform, Agent or signing identities. Defaults remain empty. Platform

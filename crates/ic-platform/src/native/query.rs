@@ -43,11 +43,24 @@ impl ReadClient {
             nonce: None,
             sender_info: None,
         };
+        self.query_content(canister, &content, expiry, time, None)
+            .await
+    }
+    pub(super) async fn query_content(
+        &self,
+        canister: Principal,
+        content: &EnvelopeContent,
+        expiry: u64,
+        time: TimePolicy,
+        signed: Option<Vec<u8>>,
+    ) -> Result<Vec<u8>, ReadError> {
         let request_id =
-            ic_transport_types::to_request_id(&content).map_err(|_| ReadError::Packet)?;
-        let bytes = self
-            .post(&format!("api/v3/canister/{canister}/query"), &content)
-            .await?;
+            ic_transport_types::to_request_id(content).map_err(|_| ReadError::Packet)?;
+        let path = format!("api/v3/canister/{canister}/query");
+        let bytes = match signed {
+            Some(body) => self.post_bytes(&path, body).await?,
+            None => self.post(&path, content).await?,
+        };
         let response: QueryResponse =
             serde_cbor::from_slice(&bytes).map_err(|_| ReadError::Packet)?;
         // No caller-supplied subnet or self-reported range can authorize a node.

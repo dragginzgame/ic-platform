@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 const wasm=readFileSync(new URL('../target/runtime-raw/wasm32-unknown-unknown/release/runtime_exports.wasm',import.meta.url));
 const module=new WebAssembly.Module(wasm);
-const names=['msg_arg_data_size','msg_arg_data_copy','msg_caller_size','msg_caller_copy','is_controller','msg_reply_data_append','msg_reply','trap','performance_counter','stable64_size','stable64_grow','stable64_read','stable64_write','canister_liquid_cycle_balance128','cycles_burn128','cost_http_request'];
+const names=['msg_arg_data_size','msg_arg_data_copy','msg_caller_size','msg_caller_copy','is_controller','msg_reply_data_append','msg_reply','trap','performance_counter','stable64_size','stable64_grow','stable64_read','stable64_write','canister_liquid_cycle_balance128','cycles_burn128','cost_http_request','in_replicated_execution'];
 assert.deepEqual(WebAssembly.Module.imports(module).map(i=>`${i.module}/${i.kind}/${i.name}`).sort(), names.map(n=>`ic0/function/${n}`).sort());
 function run(data,method='canister_update probe',caller=[4]) {
   let instance,done=false,counter=0n;
@@ -19,6 +19,7 @@ function run(data,method='canister_update probe',caller=[4]) {
     target.set(source.slice(offset,offset+size));
   }
   instance=new WebAssembly.Instance(module,{ic0:{
+    in_replicated_execution(){return method.startsWith('canister_query') ? 0 : 1;},
     msg_arg_data_size(){return data.length;},
     msg_arg_data_copy(p,o,n){copy('args',data,p,o,n);},
     msg_caller_size(){return caller.length;},
@@ -53,4 +54,6 @@ for(const caller of [[],[4],Array(29).fill(255)]) {
   assert.equal(Buffer.from(result.reply).readBigUInt64LE(result.reply.length-16),1n);
   assert.equal(Buffer.from(result.reply).readBigUInt64LE(result.reply.length-8),2n);
 }
-console.log(JSON.stringify({admission:'passed',imports:names.length,cases:12,sha256:createHash('sha256').update(wasm).digest('hex')}));
+assert.deepEqual(run([], 'canister_query context').reply, [0,0]);
+assert.deepEqual(run([], 'canister_update context_update').reply, [1,1]);
+console.log(JSON.stringify({admission:'passed',imports:names.length,cases:14,sha256:createHash('sha256').update(wasm).digest('hex')}));

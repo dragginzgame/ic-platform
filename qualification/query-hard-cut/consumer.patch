@@ -1,26 +1,33 @@
+diff --git a/crates/ic-topology/src/mainnet/root.der b/crates/ic-topology/src/mainnet/root.der
+new file mode 100644
+index 0000000000000000000000000000000000000000..aa41cc75d5c050a677a3f3d79b82d3e601505145
+GIT binary patch
+literal 133
+zcmXqLY%-8#<JD$kWMOQ&Q^U&4$i&FTgWxhTGAA-L`tao)mtP%W&9S%9+(tFV##~yj
+zrOjr>l8+C%OO#_pe#g$?x$1T^BYvV454X-y6Vc}V-p-Srq~D%)EqeBr(}jgXKiu_r
+fqkKgI;{TSkY!I5rDHGqmv!mI~eg>x$_o{UOUY9Oj
+
+literal 0
+HcmV?d00001
+
 diff --git a/Cargo.toml b/Cargo.toml
-index d76656d..c4270bf 100644
+index d32fb2c..d3c636f 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -10,12 +10,12 @@ repository = "https://github.com/dragginzgame/ic-query"
- publish = true
- 
+@@ -12,9 +12,8 @@ publish = true
  [workspace.dependencies]
-+engine-view-consumer = { path = "__PLATFORM_ROOT__/qualification/engine-view-consumer" }
  clap = "4.6.7"
  ic-host-text = "0.77.2"
 -ic-platform = { version = "0.33.7", default-features = false }
--ic-platform-next = { package = "ic-platform", version = "=0.34.5", default-features = false, features = ["certificate-authentication"] }
--ic-platform-protocol = { version = "=0.2.4", default-features = false, features = ["cloud-engine-marketplace", "registry-settings"] }
--ic-platform-types = { version = "=0.21.1", default-features = false }
-+ic-platform = { path = "__PLATFORM_ROOT__/crates/ic-platform", version = "=0.34.6", default-features = false }
-+ic-platform-protocol = { path = "__PLATFORM_ROOT__/crates/ic-platform-protocol", version = "=0.2.5", default-features = false, features = ["cloud-engine-marketplace", "registry-settings", "registry", "registry-placement"] }
-+ic-platform-types = { path = "__PLATFORM_ROOT__/crates/ic-platform-types", version = "=0.21.2", default-features = false }
+-ic-platform-next = { package = "ic-platform", version = "=0.34.6", default-features = false, features = ["certificate-authentication"] }
+-ic-platform-protocol = { version = "=0.2.5", default-features = false, features = ["cloud-engine-marketplace", "registry-settings"] }
++ic-platform = { version = "=0.34.6", default-features = false }
++ic-platform-protocol = { version = "=0.2.5", default-features = false, features = ["cloud-engine-marketplace", "registry-settings", "registry", "registry-placement"] }
+ ic-platform-types = { version = "=0.21.2", default-features = false }
  ic-topology = { path = "crates/ic-topology", version = "0.108.0" }
  serde = { version = "1.0.229", features = ["derive"] }
- serde_json = "1.0.154"
 diff --git a/crates/ic-topology/Cargo.toml b/crates/ic-topology/Cargo.toml
-index 7b3da2f..fe5e69a 100644
+index 7b3da2f..b818c44 100644
 --- a/crates/ic-topology/Cargo.toml
 +++ b/crates/ic-topology/Cargo.toml
 @@ -15,8 +15,7 @@ toko-tooling.workspace = true
@@ -33,14 +40,6 @@ index 7b3da2f..fe5e69a 100644
  ic-platform-protocol.workspace = true
  ic-platform-types.workspace = true
  serde.workspace = true
-@@ -24,6 +23,7 @@ thiserror.workspace = true
- tokio = { workspace = true, features = ["macros", "time"] }
- 
- [dev-dependencies]
-+engine-view-consumer.workspace = true
- serde_json.workspace = true
- tokio = { workspace = true, features = ["rt", "test-util"] }
- 
 diff --git a/crates/ic-topology/src/cloud_engine/available/mod.rs b/crates/ic-topology/src/cloud_engine/available/mod.rs
 index 029464c..9db4ecd 100644
 --- a/crates/ic-topology/src/cloud_engine/available/mod.rs
@@ -67,7 +66,7 @@ diff --git a/crates/ic-topology/src/cloud_engine/available/source.rs b/crates/ic
 index 2488689..d09a3e1 100644
 --- a/crates/ic-topology/src/cloud_engine/available/source.rs
 +++ b/crates/ic-topology/src/cloud_engine/available/source.rs
-@@ -1,7 +1,8 @@
+@@ -1,6 +1,7 @@
  //! Only the selected public status and new-engine page requests.
  
  use super::{AvailableError, Observation, PAGE_METHOD, PAGE_SIZE, STATUS_METHOD};
@@ -76,7 +75,6 @@ index 2488689..d09a3e1 100644
 +use ic_platform_protocol::cloud_engine::encode_empty_args;
  use ic_platform_protocol::cloud_engine as wire;
  use ic_platform_types::Principal;
- 
 @@ -10,7 +11,7 @@ pub(super) trait Source {
      async fn page(&self, start: Option<Principal>) -> Result<Observation, AvailableError>;
  }
@@ -96,13 +94,13 @@ index 2488689..d09a3e1 100644
      async fn page(&self, start: Option<Principal>) -> Result<Observation, AvailableError> {
          Ok(super::super::query(&self.0, PAGE_METHOD, page_argument(start)?).await?)
 diff --git a/crates/ic-topology/src/cloud_engine/available/tests.rs b/crates/ic-topology/src/cloud_engine/available/tests.rs
-index db50850..34fd47d 100644
+index db50850..d6006ac 100644
 --- a/crates/ic-topology/src/cloud_engine/available/tests.rs
 +++ b/crates/ic-topology/src/cloud_engine/available/tests.rs
 @@ -1,13 +1,13 @@
  use super::*;
 -use ic_platform::candid_codec::encode_one;
-+use engine_view_consumer::fixtures::{self as fixtures, encode_fixture as encode_one};
++use crate::tests::{self as fixtures, encode_fixture as encode_one};
  use std::{cell::RefCell, collections::VecDeque};
  
  fn id(n: u16) -> Principal {
@@ -116,7 +114,7 @@ index db50850..34fd47d 100644
          serde_json::from_value(serde_json::to_value(value).unwrap()).unwrap();
      encode_one(&fixture, 1024 * 1024).unwrap()
  }
-@@ -118,17 +118,8 @@ fn request_is_exactly_public_rejoining_none_with_100_node_limit_and_cursor() {
+@@ -118,23 +118,6 @@ fn request_is_exactly_public_rejoining_none_with_100_node_limit_and_cursor() {
      );
      for cursor in [None, Some(id(1)), Some(Principal::from_slice(&[255; 29]))] {
          let bytes = source::page_argument(cursor).unwrap();
@@ -131,12 +129,17 @@ index db50850..34fd47d 100644
 -                    allocation: LIMITS.allocation,
 -                },
 -            )
-+        let decoded: fixtures::PageArgs =
-+            fixtures::candid::decode_one(&bytes)
-             .unwrap();
-         assert!(decoded.rejoining.is_none());
-         assert_eq!(
-@@ -178,7 +169,7 @@ impl Fake {
+-            .unwrap();
+-        assert!(decoded.rejoining.is_none());
+-        assert_eq!(
+-            decoded.start.map(|id| Principal::from_slice(id.as_slice())),
+-            cursor
+-        );
+-        assert_eq!(decoded.limit, Some(100u64.into()));
++        assert_eq!(bytes, fixtures::frame("page-argument", &serde_json::to_value(cursor.map(|id| id.as_slice().to_vec())).unwrap()));
+     }
+ }
+@@ -178,7 +161,7 @@ impl Fake {
              status: RefCell::new(Some(Step {
                  wait: 0,
                  result: Ok(encode_one(
@@ -226,14 +229,14 @@ index c650a88..dda3971 100644
          super::query(&agent, METHOD, argument)
              .await
 diff --git a/crates/ic-topology/src/cloud_engine/engine/tests.rs b/crates/ic-topology/src/cloud_engine/engine/tests.rs
-index f29ee7d..e6b5398 100644
+index f29ee7d..0ea0875 100644
 --- a/crates/ic-topology/src/cloud_engine/engine/tests.rs
 +++ b/crates/ic-topology/src/cloud_engine/engine/tests.rs
 @@ -1,6 +1,6 @@
  use super::*;
  use crate::ReadError;
 -use ic_platform::candid_codec::encode_one;
-+use engine_view_consumer::fixtures::{self as fixtures, encode_fixture as encode_one};
++use crate::tests::{self as fixtures, encode_fixture as encode_one};
  use std::{cell::Cell, time::Duration};
  
  // Independently assembled from the selected IDL and Candid binary specification,
@@ -249,7 +252,7 @@ index f29ee7d..e6b5398 100644
          serde_json::from_value(serde_json::to_value(views).unwrap()).unwrap();
      encode_one(&published, maximum).unwrap()
  }
-@@ -139,16 +139,7 @@ async fn one_argument_one_query_and_successful_omission() {
+@@ -139,18 +139,7 @@ async fn one_argument_one_query_and_successful_omission() {
      let longest: EngineId = "é".repeat(128).parse().unwrap();
      collect(longest.clone(), |argument| async move {
          assert!(argument.len() <= 512);
@@ -263,11 +266,13 @@ index f29ee7d..e6b5398 100644
 -                allocation: LIMITS.allocation,
 -            },
 -        )
-+        let decoded: Vec<String> = fixtures::candid::decode_one(&argument)
-         .unwrap();
-         assert_eq!(decoded, [longest.as_str()]);
+-        .unwrap();
+-        assert_eq!(decoded, [longest.as_str()]);
++        assert_eq!(argument, fixtures::frame("view-argument", &longest.as_str().into()));
          Ok(Observation {
-@@ -384,7 +375,7 @@ async fn shared_deadline_errors_and_cancellation_do_not_retry() {
+             bytes: encode_views(&[], 1024),
+             observed_at: 12,
+@@ -384,7 +373,7 @@ async fn shared_deadline_errors_and_cancellation_do_not_retry() {
      assert!(result.is_err() && dropped.get());
      let result = collect(request(), |_| async {
          Err(EngineError::Read(ReadError::Transport(Box::new(
@@ -329,7 +334,7 @@ diff --git a/crates/ic-topology/src/cloud_engine/prices/mod.rs b/crates/ic-topol
 index 69e0da2..dc1f19c 100644
 --- a/crates/ic-topology/src/cloud_engine/prices/mod.rs
 +++ b/crates/ic-topology/src/cloud_engine/prices/mod.rs
-@@ -2,7 +2,7 @@
+@@ -2,6 +2,6 @@
  
  use std::{collections::BTreeSet, time::Duration};
  
@@ -337,7 +342,6 @@ index 69e0da2..dc1f19c 100644
 +use ic_platform_protocol::cloud_engine::NodeType;
  use ic_platform_protocol::{candid as decoder, cloud_engine as wire};
  use tokio::time::Instant;
- 
 @@ -12,7 +12,7 @@ use crate::mainnet;
  use source::{Observation, Source};
  pub use types::*;
@@ -347,7 +351,7 @@ index 69e0da2..dc1f19c 100644
  const PRICES_METHOD: &str = "listMarketplacePrices";
  const FEE_METHOD: &str = "getNetworkFee";
  const OVERALL: Duration = Duration::from_secs(30);
-@@ -42,7 +42,7 @@ const LIMITS: decoder::Limits = decoder::Limits {
+@@ -42,6 +42,6 @@ const LIMITS: decoder::Limits = decoder::Limits {
  /// Returns a typed error if the first price read or admission fails. Later errors
  /// are retained in the report's `network_fee` outcome, with `complete = false`.
  pub async fn fetch() -> Result<CloudEnginePricesReport, PriceError> {
@@ -355,7 +359,6 @@ index 69e0da2..dc1f19c 100644
 +    let agent = mainnet::client()?;
      collect(&source::MainnetSource(agent)).await
  }
- 
 @@ -107,7 +107,7 @@ fn project_prices(observation: &Observation) -> Result<PriceObservation, PriceEr
              .entry
              .provider
@@ -392,25 +395,24 @@ index 35659c6..09611c7 100644
      }
  }
 diff --git a/crates/ic-topology/src/cloud_engine/prices/tests.rs b/crates/ic-topology/src/cloud_engine/prices/tests.rs
-index 057027f..a399852 100644
+index 057027f..a8bd978 100644
 --- a/crates/ic-topology/src/cloud_engine/prices/tests.rs
 +++ b/crates/ic-topology/src/cloud_engine/prices/tests.rs
-@@ -1,8 +1,5 @@
+@@ -1,7 +1,4 @@
  use super::*;
 -use ic_platform::{
 -    candid_codec::{self, encode_one},
 -    cloud_engine_types as wire,
 -};
-+use engine_view_consumer::fixtures::{self as wire, encode_fixture as encode_one, candid::CandidType};
++use crate::tests::{self as wire, encode_fixture as encode_one, Fixture};
  use ic_platform_types::Principal;
  use std::{cell::RefCell, collections::VecDeque};
- 
 @@ -12,7 +9,7 @@ fn observation(bytes: Vec<u8>) -> Observation {
          observed_at: 123,
      }
  }
 -fn encoded<T: candid_codec::Encode>(value: &T) -> Vec<u8> {
-+fn encoded<T: CandidType>(value: &T) -> Vec<u8> {
++fn encoded<T: Fixture>(value: &T) -> Vec<u8> {
      encode_one(value, 2 * 1024 * 1024).unwrap()
  }
  fn row(class: NodeType, provider: Option<Principal>, dc: Option<&str>) -> wire::MarketplaceEntry {
@@ -421,7 +423,7 @@ index 057027f..a399852 100644
 -            node_type: class,
 -            provider: provider.map(|id| ic_platform::Principal::from_slice(id.as_slice())),
 +            node_type: serde_json::from_value(serde_json::to_value(class).unwrap()).unwrap(),
-+            provider: provider.map(|id| wire::candid::Principal::from_slice(id.as_slice())),
++            provider: provider.map(|id| ic_platform_types::Principal::from_slice(id.as_slice())),
              dc: dc.map(str::to_owned),
              updated_at: i64::MIN,
              price: wire::Price {
@@ -434,6 +436,15 @@ index 057027f..a399852 100644
                  entry.entry.price.net_cycles = "9".repeat(256).parse().unwrap();
                  entry.entry.price.gross_cycles = entry.entry.price.net_cycles.clone();
                  let report = project(&[entry.clone()]).unwrap();
+@@ -108,7 +105,7 @@ fn classes_scopes_raw_text_and_exact_numeric_extremes() {
+                     "9".repeat(256)
+                 );
+                 entry.entry.updated_at = i64::MAX;
+-                entry.entry.price.net_cycles = 0u8.into();
++                entry.entry.price.net_cycles = 0u64.into();
+                 assert_eq!(
+                     project(&[entry]).unwrap().entries[0].updated_at_unix_nanoseconds,
+                     i64::MAX
 diff --git a/crates/ic-topology/src/cloud_engine/prices/types.rs b/crates/ic-topology/src/cloud_engine/prices/types.rs
 index a6e9cf9..bb2e4db 100644
 --- a/crates/ic-topology/src/cloud_engine/prices/types.rs
@@ -537,30 +548,17 @@ index 9b679e8..ba0ff7a 100644
  ) -> Result<T, ReadError> {
      tokio::time::timeout(DEADLINE, operation)
          .await
-diff --git a/crates/ic-topology/src/mainnet/root.der b/crates/ic-topology/src/mainnet/root.der
-new file mode 100644
-index 0000000000000000000000000000000000000000..aa41cc75d5c050a677a3f3d79b82d3e601505145
-GIT binary patch
-literal 133
-zcmXqLY%-8#<JD$kWMOQ&Q^U&4$i&FTgWxhTGAA-L`tao)mtP%W&9S%9+(tFV##~yj
-zrOjr>l8+C%OO#_pe#g$?x$1T^BYvV454X-y6Vc}V-p-Srq~D%)EqeBr(}jgXKiu_r
-fqkKgI;{TSkY!I5rDHGqmv!mI~eg>x$_o{UOUY9Oj
-
-literal 0
-HcmV?d00001
-
 diff --git a/crates/ic-topology/src/mainnet/tests.rs b/crates/ic-topology/src/mainnet/tests.rs
 index 07dbe85..439e83b 100644
 --- a/crates/ic-topology/src/mainnet/tests.rs
 +++ b/crates/ic-topology/src/mainnet/tests.rs
-@@ -1,6 +1,6 @@
+@@ -1,5 +1,5 @@
  use std::future;
  
 -use ic_platform::agent::AgentError;
 +use ic_platform::native::ReadError as AgentError;
  
  use super::{ReadError, read};
- 
 @@ -12,13 +12,11 @@ async fn stalled_read_reaches_deadline_without_waiting_on_wall_time() {
  
  #[tokio::test]
@@ -589,7 +587,7 @@ index 50f538b..c0d05df 100644
  use ic_platform_types::{Principal, PrincipalError};
  use serde::Serialize;
  use thiserror::Error;
-@@ -108,11 +108,11 @@ pub enum NodeError {
+@@ -108,10 +108,10 @@ pub enum NodeError {
  pub async fn fetch(node_id: Principal) -> Result<NodeReport, NodeError> {
      let key = source_key(node_id);
      let argument = protobuf::encode_get_value_request(key.as_bytes(), None, 256)?;
@@ -602,7 +600,6 @@ index 50f538b..c0d05df 100644
 +    let bytes = mainnet::query(&agent, registry, METHOD, &argument).await?;
      project(node_id, &bytes, mainnet::observed_at()?)
  }
- 
 diff --git a/crates/ic-topology/src/placement/mod.rs b/crates/ic-topology/src/placement/mod.rs
 index 6883d1d..c942d89 100644
 --- a/crates/ic-topology/src/placement/mod.rs
@@ -677,12 +674,12 @@ index 6883d1d..c942d89 100644
  
  fn report(canister_id: Principal, subnet_id: Principal, observed_at: u64) -> PlacementReport {
 diff --git a/crates/ic-topology/src/placement/tests.rs b/crates/ic-topology/src/placement/tests.rs
-index 2ee0c8c..b28eb99 100644
+index 2ee0c8c..291cfc4 100644
 --- a/crates/ic-topology/src/placement/tests.rs
 +++ b/crates/ic-topology/src/placement/tests.rs
 @@ -1,14 +1,14 @@
 -use ic_platform::nns_registry_types::GetSubnetForCanisterResponseOk;
-+use engine_view_consumer::fixtures::{Placement as GetSubnetForCanisterResponseOk, candid, encode_fixture};
++use crate::tests::{Placement as GetSubnetForCanisterResponseOk, frame, encode_fixture};
  
  use super::{
 -    PlacementError, Principal, REPLY_LIMITS, candid_codec, decode_subnet, decoder, report,
@@ -692,22 +689,29 @@ index 2ee0c8c..b28eb99 100644
  fn reply(subnet_id: Option<Principal>) -> Vec<u8> {
      let response: Result<_, String> = Ok(GetSubnetForCanisterResponseOk {
 -        subnet_id: subnet_id.map(|id| ic_platform::Principal::from_slice(id.as_slice())),
-+        subnet_id: subnet_id.map(|id| candid::Principal::from_slice(id.as_slice())),
++        subnet_id,
      });
 -    candid_codec::encode_one(&response, 1024).expect("fixture encodes")
 +    encode_fixture(&response, 1024).expect("fixture encodes")
  }
  
  #[test]
-@@ -16,7 +16,7 @@ fn replacement_identity_preserves_registry_bytes_and_report_json() {
+@@ -16,12 +16,12 @@ fn replacement_identity_preserves_registry_bytes_and_report_json() {
      for length in 0..=29 {
          let bytes: Vec<_> = (0..length).map(|index| index as u8).collect();
          let identity = Principal::from_slice(&bytes);
 -        let legacy = ic_platform::Principal::from_slice(&bytes);
-+        let legacy = candid::Principal::from_slice(&bytes);
++        let independent = String::from_utf8(frame("principal-text", &serde_json::to_value(&bytes).unwrap())).unwrap();
          assert_eq!(decode_subnet(&reply(Some(identity))).unwrap(), identity);
-         assert_eq!(identity.to_text(), legacy.to_text());
+-        assert_eq!(identity.to_text(), legacy.to_text());
++        assert_eq!(identity.to_text(), independent);
          assert_eq!(
+             serde_json::to_value(identity).unwrap(),
+-            serde_json::to_value(legacy).unwrap()
++            serde_json::to_value(independent).unwrap()
+         );
+     }
+ }
 @@ -57,7 +57,7 @@ fn registry_rejection_and_missing_subnet_are_distinct_failures() {
          Err(PlacementError::MissingSubnet)
      ));
@@ -717,12 +721,13 @@ index 2ee0c8c..b28eb99 100644
      assert!(
          matches!(decode_subnet(&bytes), Err(PlacementError::RegistryRejected(message)) if message == "unmapped 🌍")
      );
-@@ -76,7 +76,7 @@ fn malformed_trailing_surplus_and_oversized_replies_are_refused() {
+@@ -75,8 +75,7 @@ fn malformed_trailing_surplus_and_oversized_replies_are_refused() {
+         decode_subnet(&trailing),
          Err(PlacementError::Decode(decoder::Error::Trailing))
      ));
-     let response: Result<_, String> = Ok(GetSubnetForCanisterResponseOk { subnet_id: None });
+-    let response: Result<_, String> = Ok(GetSubnetForCanisterResponseOk { subnet_id: None });
 -    let surplus = candid_codec::arguments::encode_args(&(response, 1u8), 1024).unwrap();
-+    let surplus = candid::encode_args((response, 1u8)).unwrap();
++    let surplus = frame("placement-surplus", &serde_json::Value::Null);
      assert!(matches!(
          decode_subnet(&surplus),
          Err(PlacementError::Decode(decoder::Error::Arity))
@@ -738,7 +743,7 @@ index a37c5cf..975a3dc 100644
  use ic_platform_types::{Principal, PrincipalError};
  use serde::Serialize;
  use thiserror::Error;
-@@ -116,11 +116,11 @@ pub async fn fetch(
+@@ -116,10 +116,10 @@ pub async fn fetch(
  ) -> Result<SubnetConfigurationReport, SubnetConfigurationError> {
      let key = source_key(subnet_id);
      let argument = protobuf::encode_get_value_request(key.as_bytes(), None, 256)?;
@@ -751,12 +756,11 @@ index a37c5cf..975a3dc 100644
 +    let bytes = mainnet::query(&agent, registry, METHOD, &argument).await?;
      project(subnet_id, &bytes, mainnet::observed_at()?)
  }
- 
 diff --git a/crates/ic-topology/src/subnet/distribution/mod.rs b/crates/ic-topology/src/subnet/distribution/mod.rs
 index 11e70ce..4c88fe9 100644
 --- a/crates/ic-topology/src/subnet/distribution/mod.rs
 +++ b/crates/ic-topology/src/subnet/distribution/mod.rs
-@@ -6,7 +6,7 @@
+@@ -6,6 +6,6 @@
  use std::collections::BTreeSet;
  use std::time::Duration;
  
@@ -764,8 +768,7 @@ index 11e70ce..4c88fe9 100644
 +use ic_platform_protocol::registry as protobuf;
  use ic_platform_types::Principal;
  use tokio::time::{Instant, sleep_until};
- 
-@@ -47,7 +47,7 @@ pub const DEADLINE: Duration = Duration::from_secs(60);
+@@ -47,6 +47,6 @@ pub const DEADLINE: Duration = Duration::from_secs(60);
  /// no report. Later record failures are retained in the returned partial report.
  pub async fn fetch(subnet_id: Principal) -> Result<SubnetDistributionReport, DistributionError> {
      let started_at = mainnet::observed_at()?;
@@ -773,7 +776,6 @@ index 11e70ce..4c88fe9 100644
 +    let source = source::MainnetSource(mainnet::client()?);
      collect(subnet_id, started_at, &source).await
  }
- 
 diff --git a/crates/ic-topology/src/subnet/distribution/source.rs b/crates/ic-topology/src/subnet/distribution/source.rs
 index b2f383d..f66a9d1 100644
 --- a/crates/ic-topology/src/subnet/distribution/source.rs
@@ -831,7 +833,7 @@ index 9f93591..625f65a 100644
  use ic_platform_types::{Principal, PrincipalError};
  use serde::Serialize;
  use thiserror::Error;
-@@ -102,11 +102,11 @@ pub enum SubnetListError {
+@@ -102,10 +102,10 @@ pub enum SubnetListError {
  /// are refused explicitly. Completeness applies to the returned record only.
  pub async fn fetch() -> Result<SubnetListReport, SubnetListError> {
      let argument = protobuf::encode_get_value_request(KEY.as_bytes(), None, 256)?;
@@ -844,7 +846,6 @@ index 9f93591..625f65a 100644
 +    let bytes = mainnet::query(&agent, registry, METHOD, &argument).await?;
      project(&bytes, mainnet::observed_at()?)
  }
- 
 diff --git a/crates/ic-topology/src/subnet/metrics/mod.rs b/crates/ic-topology/src/subnet/metrics/mod.rs
 index 7a4db25..1cec9e9 100644
 --- a/crates/ic-topology/src/subnet/metrics/mod.rs
@@ -1013,7 +1014,7 @@ index 1850122..62ed22e 100644
  use ic_platform_protocol::registry_settings as wire;
  use ic_platform_types::Principal;
  use serde::Serialize;
-@@ -97,17 +97,11 @@ pub enum SubnetSettingsError {
+@@ -97,16 +97,10 @@ pub enum SubnetSettingsError {
  pub async fn fetch(subnet_id: Principal) -> Result<SubnetSettingsReport, SubnetSettingsError> {
      let key = source_key(subnet_id);
      let argument = protobuf::encode_get_value_request(key.as_bytes(), None, 256)?;
@@ -1032,7 +1033,6 @@ index 1850122..62ed22e 100644
 +    let bytes = mainnet::query(&agent, registry, mainnet::REGISTRY_METHOD, &argument).await?;
      project(subnet_id, &bytes, mainnet::observed_at()?)
  }
- 
 diff --git a/crates/ic-topology/src/subnet/tests.rs b/crates/ic-topology/src/subnet/tests.rs
 index 4d087c9..b2c6608 100644
 --- a/crates/ic-topology/src/subnet/tests.rs
@@ -1084,3 +1084,14 @@ index 4d087c9..b2c6608 100644
      assert!(matches!(
          project(id, id, [id], 0, Some(&excess)),
          Err(SubnetError::SubnetTypeLimit)
+diff --git a/crates/ic-topology/src/lib.rs b/crates/ic-topology/src/lib.rs
+index 1908a49..a92b6bf 100644
+--- a/crates/ic-topology/src/lib.rs
++++ b/crates/ic-topology/src/lib.rs
+@@ -40,3 +40,6 @@ pub use mainnet::ReadError;
+ pub mod node;
+ pub mod placement;
+ pub mod subnet;
++
++#[cfg(test)]
++mod tests;

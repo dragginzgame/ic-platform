@@ -24,7 +24,7 @@ function edit(name, transform) {
   writeFileSync(file, transform(readFileSync(file, 'utf8')));
 }
 for (const name of ['Cargo.toml', 'qualification/Cargo.toml']) edit(name, text => text
-  .replace('ic-platform = { version = "0.33.7",', `ic-platform = { path = ${JSON.stringify(`${root}/crates/ic-platform`)}, version = "=0.34.6",`)
+  .replace('ic-platform = { version = "0.33.7",', `ic-platform = { path = ${JSON.stringify(`${root}/crates/ic-platform`)}, version = "=0.34.7",`)
   .replace('ic-platform-types = { version = "0.20.4",', `ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.2",`)
   .replace('ic-wire = "0.24.1"', 'ic-wire = "=0.24.2"'));
 // Select the actual consumer's primitive and certified conformance packages.
@@ -50,10 +50,10 @@ run('cargo', ['clippy', ...qualification, '-p', 'ic-auth-certified-conformance',
 const metadata = JSON.parse(run('cargo', ['metadata', ...qualification, '--format-version=1']));
 const platforms = metadata.packages.filter(p => p.name === 'ic-platform');
 assert.equal(platforms.length, 1);
-assert.equal(platforms[0].version, '0.34.6');
+assert.equal(platforms[0].version, '0.34.7');
 const bigint = metadata.packages.filter(p => p.name === 'crypto-bigint');
 assert.deepEqual(bigint.map(p => p.version), ['0.7.11']);
-const evidence = {revision, patchSha256:createHash('sha256').update(readFileSync(`${root}/qualification/auth-crypto/consumer.patch`)).digest('hex'), candidate:'0.34.6', verification, scalar, delegation,
+const evidence = {revision, patchSha256:createHash('sha256').update(readFileSync(`${root}/qualification/auth-crypto/consumer.patch`)).digest('hex'), candidate:'0.34.7', verification, scalar, delegation,
   sourceSha256:createHash('sha256').update(readFileSync(`${output}/source.tar`)).digest('hex'),
   lockSha256:createHash('sha256').update(readFileSync(`${output}/qualification/Cargo.lock`)).digest('hex'),
   scope:'actual Auth Ed25519, root delegation and certified issuer; no legacy Platform; installed migration is separate', status:'passed'};

@@ -447,6 +447,7 @@ qualify-storage-runtime:
 
 .PHONY: qualify-query-hard-cut qualify-native-read
 qualify-query-hard-cut:
+	QUERY_COHORT=candidate node qualification/query-hard-cut.mjs
 	node qualification/query-hard-cut.mjs
 
 qualify-native-read: qualification-tooling-check
@@ -490,3 +491,37 @@ qualify-ingress-packets: toko-tooling-check
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --no-default-features --features ingress-packets --no-deps
 	cargo check --offline --locked -p ic-platform --all-features --target wasm32-unknown-unknown
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --target x86_64-unknown-linux-gnu --no-default-features --features ingress-packets --forbid-pattern '^(ic-agent|reqwest|ic-platform-runtime)$$' --require ic-platform-types=1 --require ic-transport-types=1
+
+.PHONY: qualify-management-snapshots
+qualify-management-snapshots: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features management-snapshots --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features management-snapshots --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features management-snapshots --test management_snapshots -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features management-snapshots --test management_snapshots
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features management-snapshots --bin management-snapshots-admission -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin management-snapshots-admission --release --target wasm32-unknown-unknown --no-default-features --features management-snapshots --target-dir target/engine-view-wasm/management-snapshots
+	node qualification/engine-view-wasm.mjs management-snapshots
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features management-snapshots --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1
+
+.PHONY: qualify-caffeine qualify-native-signed
+qualify-caffeine: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features caffeine --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features caffeine --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features caffeine --test caffeine -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features caffeine --test caffeine
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features caffeine --bin caffeine-admission -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin caffeine-admission --release --target wasm32-unknown-unknown --no-default-features --features caffeine --target-dir target/engine-view-wasm/caffeine
+	node qualification/engine-view-wasm.mjs caffeine
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features caffeine --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1
+
+qualify-native-signed: qualification-tooling-check
+	cargo test --offline --locked -p ic-platform --all-features native::
+	cargo clippy --offline --locked -p ic-platform --no-default-features --features native-signed --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --no-default-features --features native-signed --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed --test native_signed --bin native-signed-installed -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed --test native_signed
+	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed --bin native-signed-installed
+
+.PHONY: qualify-blob-suppliers
+qualify-blob-suppliers: qualification-tooling-check
+	node qualification/blob-supplier/run.mjs

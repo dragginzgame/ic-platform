@@ -1,7 +1,7 @@
 {
-  "revision": "12844b628d96bfd203ffbd900f10d02c4a896988",
+  "revision": "4a7305c4c804dcd0a0ce3e3433c6a8662d81fd75",
   "files": {
-    "Cargo.toml": "3751699fa7db07bf89bcb030facc3c2ae3ef88e24d2a5f282487fbd3d3d18b61",
+    "Cargo.toml": "c1816a7ca6deb86f15e03eb7e69caff59d85ffd56b71b792ff14b14680c860f5",
     "crates/ic-topology/Cargo.toml": "eebcc35c01212a27ccaf8716aebdf54d3a3fadf0e3db6b6410b9893cc964974f",
     "crates/ic-topology/src/cloud_engine/available/mod.rs": "876b38ffbaa3f2e4c784a3843613dbd8fd5e456cc6edeca488c9942b9cb92a49",
     "crates/ic-topology/src/cloud_engine/available/source.rs": "8c46fd0acd803ebf03729544efd17d6317da6fc7629304f0203a4a8e2a3f7a63",
@@ -30,6 +30,7 @@
     "crates/ic-topology/src/subnet/progress/mod.rs": "7115ba4dbadcd48fb7e452ac634f855dc24b2bd87f58234954e4c1ce04e2baf2",
     "crates/ic-topology/src/subnet/progress/tests.rs": "8f75f4df3b235f187ac58b3a1d4b6aee3077e071b2cbe958645c080975f5a0f2",
     "crates/ic-topology/src/subnet/settings/mod.rs": "7b1420bef67b919a927e702be6929747341d8956a5a7898e2816b8d7c3e1dbe8",
-    "crates/ic-topology/src/subnet/tests.rs": "af23af223cfa98b7a2742253b4758ad383a7c17aa5e9ea1ffdba9877154b8e82"
+    "crates/ic-topology/src/subnet/tests.rs": "af23af223cfa98b7a2742253b4758ad383a7c17aa5e9ea1ffdba9877154b8e82",
+    "crates/ic-topology/src/lib.rs": "2de00c5c0b7f86f51ec356bb019a4687a2dce444286ebd2892708c99a094d8df"
   }
 }

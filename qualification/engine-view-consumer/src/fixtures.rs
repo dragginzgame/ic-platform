@@ -1,14 +1,15 @@
 //! Independent native Candid schemas; no product projection macros are reused.
 use candid::{CandidType, Deserialize, Nat, Principal};
+use serde::Serialize;
 
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct SubnetFrame {
     pub replica_version: String,
     pub maximum_state_size: Option<u64>,
     pub halted: bool,
     pub node_ids: Vec<Principal>,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct ViewFrame {
     #[serde(rename = "")]
     pub extra: Vec<String>,
@@ -19,7 +20,7 @@ pub struct ViewFrame {
     pub deleted_at: Option<i64>,
     pub node_ids: Vec<Principal>,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct FullViewFrame {
     pub id: String,
     pub subnet_id: Option<Principal>,
@@ -28,7 +29,7 @@ pub struct FullViewFrame {
     pub deleted_at: Option<i64>,
     pub node_ids: Vec<Principal>,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub enum NodeClass {
     #[serde(rename = "type4")]
     Type4,
@@ -43,12 +44,12 @@ pub enum NodeClass {
     #[serde(rename = "type4_5")]
     Type4_5,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct Price {
     pub gross_cycles: Nat,
     pub net_cycles: Nat,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct PriceEntry {
     pub dc: Option<String>,
     pub updated_at: i64,
@@ -56,18 +57,18 @@ pub struct PriceEntry {
     pub provider: Option<Principal>,
     pub price: Price,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct MarketplaceEntry {
     pub key: String,
     pub entry: PriceEntry,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct PageArgs {
     pub limit: Option<Nat>,
     pub start: Option<Principal>,
     pub rejoining: Option<String>,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct AvailableNode {
     pub dc: Option<String>,
     pub node_type: NodeClass,
@@ -76,13 +77,13 @@ pub struct AvailableNode {
     pub operator: Principal,
     pub sev_enabled: bool,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub struct Page {
     pub next: Option<Principal>,
     pub registry_version: u64,
     pub nodes: Vec<AvailableNode>,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub enum EngineError {
     Internal(String),
     ControllerError(String),
@@ -94,7 +95,7 @@ pub enum EngineError {
     NotVetted,
     BadRequest(String),
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(Serialize, CandidType, Deserialize, Debug, Clone)]
 pub enum PageResult {
     #[serde(rename = "ok")]
     Ok(Option<Page>),
@@ -117,7 +118,7 @@ pub fn encode_fixture<T: CandidType>(value: &T, maximum: usize) -> Result<Vec<u8
     Ok(bytes)
 }
 /// Independent Registry-copy status schema.
-#[derive(CandidType, Deserialize)]
+#[derive(Serialize, CandidType, Deserialize)]
 pub struct RegistryCopyStatus {
     /// Source version.
     pub version: u64,
@@ -127,7 +128,7 @@ pub struct RegistryCopyStatus {
     pub caught_up: bool,
 }
 /// Independent placement result record.
-#[derive(CandidType, Deserialize)]
+#[derive(Serialize, CandidType, Deserialize)]
 pub struct Placement {
     /// Optional returned subnet.
     pub subnet_id: Option<Principal>,

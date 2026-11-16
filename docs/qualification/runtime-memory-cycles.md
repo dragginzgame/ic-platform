@@ -5,6 +5,33 @@ boundary for Scheduling issues [#14](https://github.com/dragginzgame/ic-platform
 and [#15](https://github.com/dragginzgame/ic-platform/issues/15).
 No allocator, checkpoint format, timer policy or executor is added.
 
+## Pending replicated-execution observation
+
+[Issue #19](https://github.com/dragginzgame/ic-platform/issues/19), discovered during
+Scheduling's Entropy integration, is supplied locally by
+`raw::in_replicated_execution() -> bool` under `system-raw`. It forwards the IC
+scalar directly, without allocation, root admission, source mutation or a call.
+Entropy's `require_replicated` maps its old scalar `!= 0` test to this boolean and
+retains `Error::NonReplicated` before source claim or transport creation.
+The native Entropy branch remains its existing typed refusal; raw is Wasm-only.
+
+Ordinary non-replicated queries observe false. Updates and replicated queries
+observe true, following the IC rather than inferring an export kind. This is not
+update authentication, reply authority, freshness, authorization or permission
+to perform a context-restricted operation. IC context restrictions remain intact.
+
+The focused raw qualification passes on Linux: 17 exact IC imports, 14 independent
+ABI cases, strict Clippy/docs, zero-dependency product/fixture graphs and installed
+ordinary-query/update/replicated-query checks. Repeated ordinary queries refuse
+before the fixture's custody counter changes; an update changes it exactly once.
+Existing stable-memory, cycle-burn, rollback and stopped-upgrade cases still pass.
+Wasm SHA-256: `ec24f75d27b76ab8b89ea137518c70798dc4c86c01ad1116b246ac296ade1576`.
+Evidence: `target/runtime-context-qualification.log`.
+Actual Entropy source and installed lifecycle migration remain with its read-only
+consumer; supplier publication is pending, so #19 remains open.
+
+## Published memory and cycle boundary
+
 The ABI contract is the original
 [IC canister interface](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/).
 The implementation consists of safe slice wrappers around the existing approved,

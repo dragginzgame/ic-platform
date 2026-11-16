@@ -3,6 +3,26 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.2.6] - 2026-11-16
+
+### ➕ Added
+
+- Add bounded Caffeine callback/certificate/Cashier formats, arbitrary signed
+  balances and natural targets, and exact optional enrollment arguments. Keep
+  application checks and settlement outside decoding. See the
+  [supplier qualification](../../docs/qualification/blob-suppliers.md).
+
+- Add bounded management snapshot/status requests and projections for Backup,
+  preserving exact global float bits, optional provenance and per-field caps
+  before allocation. Native independent schemas, twenty-MiB chunk sequencing and
+  standalone Wasm replay pass; actual Backup qualification and delivery remain
+  pending. See [the contract](../../docs/qualification/management-snapshots.md).
+
+### 🧪 Testing
+
+- Supply Query's independent portable replay corpus and registry-backed package
+  qualification without the private sibling fixture dependency.
+
 ## [0.2.5] - 2026-11-16
 
 ### ➕ Added

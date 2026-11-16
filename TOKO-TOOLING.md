@@ -864,6 +864,18 @@ preserving required hosts on the retained run.
 
 ## Feedback and handoff
 
+Every issue reference must name its owning repository and issue number, even
+for the current repository: `Canic #14`, `WasmStore #1`, `BlobStorage #3`.
+The display name may omit the `IC` prefix, but must identify the repository
+containing the issue, not the package or subject being discussed. For example,
+a Platform migration tracked in Canic is `Canic #14 — Platform migration`, not
+`Platform #14`. Use that repository-qualified label in links and link directly
+to the issue when available. Never use a bare `#14` or rely on a heading to
+supply its repository. Apply this in conversation, progress updates, final
+reports, handoffs, documentation, changelogs and newly written issue/PR text.
+Use `owner/repository#number` when a shortened name would be ambiguous or GitHub
+closing syntax requires it. Verify an uncertain owner rather than guessing.
+
 Shared dependency defects and advisories have one remediation issue at the
 supplying owner. Do not create a waiting issue in every consumer; separate
 consumer issues need distinct actionable work. Apply the

@@ -599,7 +599,7 @@ prepares assets and `make runtime-server-check` verifies them without downloadin
 ## Toko 0.44.9 adoption
 
 Both workspace catalogs/locks and the installed snapshot select published Toko
-0.44.9. Its supported installer verified the registry source, installed managed
+0.44.10. Its supported installer verified the registry source, installed managed
 files and admitted the existing host/Rust tools. This is a local tooling update,
 not a product release or a reason to repeat the complete release catalog.
 

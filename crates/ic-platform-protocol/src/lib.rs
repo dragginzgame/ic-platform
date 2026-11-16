@@ -8,11 +8,22 @@
 
 #![forbid(unsafe_code)]
 
+#[cfg(feature = "caffeine")]
+pub mod caffeine;
+
 #[cfg(feature = "cloud-engine")]
 pub mod cloud_engine;
 
-#[cfg(any(feature = "cloud-engine-response", feature = "management-chunks"))]
+#[cfg(any(
+    feature = "cloud-engine-response",
+    feature = "management-chunks",
+    feature = "management-snapshots",
+    feature = "caffeine"
+))]
 pub mod candid;
+
+#[cfg(feature = "management-snapshots")]
+pub mod management_snapshots;
 
 #[cfg(feature = "management-chunks")]
 pub mod management_chunks;
