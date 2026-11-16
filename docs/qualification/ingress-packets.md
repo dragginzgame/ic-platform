@@ -49,7 +49,7 @@ qualification remain open. The associated snapshot/status codec gap (#11) also
 remains independent. Supplier packet tests do not qualify Backup's spending,
 authentication, recovery or exact-once policy, and do not close #12.
 
-## Bounded offline construction — 0.34.9 candidate
+## Bounded offline construction — 0.34.9
 
 The additive native-only `encode_envelope(&Envelope, maximum_bytes)` API supplies
 Backup's externally signed Call and ReadState construction requirement. It emits
@@ -73,5 +73,5 @@ absent/empty/nonempty delegation, invalid signatures, request IDs/signable bytes
 nonce and sender-info presence. A full 2 MiB encoded envelope passes at its exact
 ceiling and refuses one byte below. Logs: `target/encoder-qualification.log`,
 `target/encoder-signing-regression.log`, `target/encoder-external-regression.log`.
-Platform 0.34.9 is selected for publication. Actual Backup call/lookup, interrupted
+Platform 0.34.9 is published; see [delivery evidence](../releases.md#offline-ingress-construction-release). Actual Backup call/lookup, interrupted
 allocation and offline spending-preservation acceptance remain required by #12.

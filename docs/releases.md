@@ -277,3 +277,25 @@ main and annotated tag `platform-v0.34.9`, then use the supported publication
 adapter and independent registry archive/source readback. Hosted CI is asynchronous.
 Backup's actual migration/recovery acceptance remains separate from supplier
 publication; see [the ingress contract](qualification/ingress-packets.md).
+
+Platform 0.34.9 is now published from clean source
+`def09efbb7a19aa8ded742af9eb851c379ef062d`. Main and annotated
+`platform-v0.34.9` were pushed atomically. The complete local catalog passed
+once at this source; receipt:
+`target/release-qualification/1794866137708-2025997/receipt.json`.
+The release lock audit found no known vulnerabilities using current RustSec
+`02e2517f457a359fc6d3440ea4560c8ea188fee8`. Native execution is Linux evidence.
+
+The independent crates.io archive SHA-256 is
+`87c8d12d9b6294a3319e54cbe0ade3ac937a240ba85e3e762b4b56999055f35b`,
+matching the sparse index, admitted local archive and exact tagged VCS source.
+All-feature extracted-archive native/Wasm Clippy and native tests passed. Retained
+dry run: `target/publication/check.selection.S09orl`; single upload:
+`target/publication/publish.selection.opPmmH`; independent readback:
+`target/registry-readback/ic-platform-0.34.9/verified.json`.
+
+Post-push review of the shared serializer, public construction boundary and
+qualification wiring found no new actionable issue. Hosted
+[CI](https://github.com/dragginzgame/ic-platform/actions/runs/43965577962) and
+[Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/43965577864)
+were observed once in progress; neither was awaited or reported as passing.
