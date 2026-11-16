@@ -3,7 +3,13 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.2.3] - Unreleased
+## [0.2.3] - 2026-11-16
+
+### 📦 Publication
+
+- Publish the qualified encoder and verify its schema/limit tests from a
+  registry-only consumer. Testkit adoption remains separate; see the
+  [release evidence](../../docs/qualification/2026-11-16-runtime-protocol-publication.md).
 
 ### ✨ Added
 

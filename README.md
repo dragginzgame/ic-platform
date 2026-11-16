@@ -43,7 +43,7 @@ actual working tree after authorized local application; consumer delivery remain
 pending. A separate native heap
 profiler compares allocation against the published decoder; see its
 [criteria and results](docs/qualification/engine-view-heap.md).
-Protocol 0.2.2 is published; private qualification packages
+Protocol 0.2.3 is published; private qualification packages
 remain at 0.1.0. Changed product crates advance after each GitHub source snapshot,
 independently of registry publication. Each implemented group has now been published independently.
 
@@ -54,12 +54,12 @@ source reuse and independent fixtures; [Account qualification](docs/qualificatio
 covers effective identity and explicit Serde presence. Opt-in self-authentication
 and [independent native/Wasm consumer checks](docs/qualification/types-consumer.md)
 are implemented. Production consumer migration remains pending.
-Protocol 0.2.2 now uses local Types 0.21.1, matching Runtime. Its public Principal
+Protocol 0.2.3 now uses local Types 0.21.1, matching Runtime. Its public Principal
 identity changes from the registry type; consumers must migrate as one cohort.
 Registry Types remains only in qualification oracles. See the
 [cohort boundary](docs/qualification/types-consumer.md#protocol-cohort-020).
 
-Runtime `0.23.9`, macros and its singleton guard are published together. It provides opt-in inert Call
+Runtime `0.23.11`, macros and its singleton guard are published together. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
 implemented request model from the experimental IC0/executor and pending installed
@@ -102,7 +102,7 @@ explicit application choices. Caller/canister identity, IC time, controller chec
 bounded query certificates and certified-data publication are available through
 `system`. The [Auth execution qualification](docs/qualification/runtime-auth.md)
 records installed consumer and byte-boundary evidence and remaining migration
-limits. The separate `ic-platform-runtime-guard` shares Runtime's 0.23.11 candidate version.
+limits. The separate `ic-platform-runtime-guard` shares Runtime's published 0.23.11 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 
@@ -161,7 +161,8 @@ deployment. The [initial release plan](docs/releases.md) proposes Types followed
 by Platform and records the remaining acceptance and execution blockers.
 All six product crates are now published; qualification packages remain private.
 Deletion and sibling consumer migration remain excluded. See the
-[publication record](docs/qualification/2026-11-16-publication.md).
+[publication record](docs/qualification/2026-11-16-publication.md) and the
+[Runtime/Protocol update](docs/qualification/2026-11-16-runtime-protocol-publication.md).
 
 The opt-in `canister-signature-decode` capability now admits bounded tagged
 signature envelopes and reuses strict certificate tree grammar. It retains exact

@@ -1,13 +1,10 @@
 # Development
 
-The product workspace contains unpublished Protocol 0.2.0 and the initial Types
-0.21.0 candidate, plus the Runtime 0.23.7 local development increment
-(following registry 0.22.5).
-Types follows the published 0.20.4 baseline; its identity
-slice is not yet a replacement for the complete published identity contract.
-The private consumer fixture also starts at 0.1.0. Neither package name appeared
-in the crates.io sparse index when checked on 2026-11-15. Publication and release
-adapters are not enabled; name availability does not reserve a registry name.
+The current published product versions are Types 0.21.1, Platform 0.34.3,
+Protocol 0.2.3, and Runtime/macros/guard 0.23.11. Qualification packages remain
+private and outside release groups. Publication covers implemented scopes;
+production migrations and broader design qualification remain separate.
+See the [latest release evidence](qualification/2026-11-16-runtime-protocol-publication.md).
 
 Prefer existing names for retained concepts. Check crates.io when introducing
 each package: select its next SemVer version if it already exists, otherwise

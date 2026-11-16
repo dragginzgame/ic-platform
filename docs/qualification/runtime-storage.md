@@ -44,7 +44,7 @@ Raw reply calls do not participate in executor reply ownership. Choose one reply
 owner per call; do not mix them with automatic endpoints or managed replies.
 The consumer owns authorization, buffers, offsets, exports and upgrade hooks.
 No codecs, futures, persistent state, allocation or callbacks are introduced.
-The version above is a source candidate until registry publication completes.
+Runtime 0.23.11 is [published and independently verified](2026-11-16-runtime-protocol-publication.md).
 
 ## Context and memory contract
 
@@ -98,6 +98,6 @@ to their own workspace. It does not modify the sibling checkout or its protocols
 Storage's published `ic-storage` 0.74.1 oracle still brings legacy Runtime 0.22.5;
 this test does not claim that legacy edge has been removed.
 
-Registry publication, Storage's own installed startup/retention/checkpoint/job and
+Storage's own installed startup/retention/checkpoint/job and
 benchmark reruns, and downstream adoption remain separate. These local checks
 prove the supplier surface and consumer compilation, not those consumer results.

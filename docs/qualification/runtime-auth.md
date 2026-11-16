@@ -68,3 +68,9 @@ This proves Auth's Runtime execution requirements with its retained crypto
 supplier. It does not prove replacement of that supplier, full Platform migration,
 production adoption, macOS execution, composite/async queries or broader executor
 contracts. Existing failed-cleanup and experimental transport limits remain.
+
+
+Runtime 0.23.11 now carries this capability on crates.io. Its actual pinned Auth
+fixture passes all five installed tests using the published Runtime/Types cohort;
+see the [registry proof](2026-11-16-runtime-protocol-publication.md). This fulfills
+the packaged-cohort check while retaining the crypto and production-migration limits.

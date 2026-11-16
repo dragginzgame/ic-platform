@@ -45,6 +45,7 @@ let encoded = encode_http_get_args(
 
 Select Protocol's `http-request` feature and map the new structured `EncodeError`
 into the consumer's error type. The encoder requires no legacy Platform edge.
-This repository has not changed Testkit, published Protocol 0.2.3, or run Testkit's
-installed held-reply suite against it. Those remain delivery/adoption obligations;
+Protocol 0.2.3 is [published and registry-qualified](2026-11-16-runtime-protocol-publication.md).
+This repository has not changed Testkit or run its installed held-reply suite
+against this version. Those remain consumer adoption obligations;
 the schema tests alone do not close the issue's consumer gate.
