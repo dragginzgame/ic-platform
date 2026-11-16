@@ -521,9 +521,11 @@ Remove the old builders, facade paths, duplicate mappings, mutable authenticated
 Before the release cut:
 
 The maintainer subsequently selected an independent first Types release after
-retained-contract, packaged-crate and real-consumer qualification. For that
-release only, downstream production migration remains a separate gate rather
-than an upload prerequisite. The other correctness, identity, host and source
+retained-contract, packaged-crate and real-consumer qualification. The maintainer then extended independent publication to the implemented
+Platform, Protocol and Runtime scopes, including Runtime support packages.
+Downstream production migration and broader design completion remain separate
+gates rather than upload prerequisites. Local qualification is required; hosted
+CI is asynchronous evidence and is not awaited. The other correctness, identity, host and source
 integrity obligations below still apply to the selected Types scope.
 
 - All required consumers use the selected package/source cohort.

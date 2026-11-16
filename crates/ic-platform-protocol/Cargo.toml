@@ -1,10 +1,13 @@
 [package]
 name = "ic-platform-protocol"
-version = "0.2.1"
+version = "0.2.2"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
-publish = false
+publish = ["crates-io"]
+repository = "https://github.com/dragginzgame/ic-platform"
+documentation = "https://docs.rs/ic-platform-protocol"
+readme = "README.md"
 description = "Bounded external protocol formats for IC Platform"
 
 [target.'cfg(any())'.dev-dependencies]

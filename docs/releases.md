@@ -75,3 +75,31 @@ full CI workflow remains unchanged in scope. Its simulator and other product
 checks are separate release obligations, not Types dependencies. The preceding
 source run passed Linux but failed macOS PocketIC server setup; no simulator
 qualification is inferred from the focused Types workflow.
+
+## Remaining groups: independent publication
+
+The maintainer subsequently directed publication of every remaining implemented
+product scope and confirmed updated local release rules. This extends independent
+sequencing to Platform, Protocol and Runtime/support packages. It does not claim
+production migration or completion of the broader design. Hosted CI is not awaited.
+
+Select Platform 0.34.3, Protocol 0.2.2 and coordinated Runtime/macros/guard 0.23.9.
+Types 0.21.1 is already published and unchanged. The new patch increments account
+for publication metadata and packaged documentation after source delivery.
+Registry baseline checks returned Platform 0.33.7 and Runtime/support 0.22.5;
+Protocol returned an observed 404, distinguishing a new package from lookup failure.
+
+The [local catalog](../ci/release-profiles.json) preserves all implemented group
+checks, including installed Runtime and fresh observed certificates/signatures.
+`make qualify-release` binds complete logs, audit and catalog to clean source.
+Pass its explicit `RELEASE_RECEIPT` to `make publish-check PACKAGE=...` and
+`make publish PACKAGE=...`. Admission verifies receipt/log hashes, source, annotated
+remote group tag, registry absence, all-feature Cargo packaging, extracted-archive
+native/Wasm Clippy and native tests, and independently fetched archive provenance.
+No existing receipt is silently selected and no upload is automatically retried.
+
+Publish guard and macros first, then Runtime, Protocol and Platform. Independently
+read back each registry archive and checksum before proceeding to dependents.
+The same registry Types version must be used across public identities. Keep the
+experimental Runtime limits, strict Platform refusals, and selected Protocol
+surface explicit; no removed legacy facade is restored or silently promised.

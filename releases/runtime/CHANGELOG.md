@@ -4,6 +4,16 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.9] - 2026-11-16
+
+### 📦 Publication
+
+- Publish the implemented scope independently, with explicit repository and
+  package documentation. Keep production migration and the broader design gates
+  separate; preserve existing experimental limits and all correctness checks.
+- Advance package metadata after source delivery; Runtime support packages remain
+  coordinated. Types stays at registry 0.21.1.
+
 ## [0.23.8] - Unreleased
 
 ### 🔧 Dependencies

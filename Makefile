@@ -2,11 +2,11 @@
 
 override TOKO_TOOLING_ROOT := $(CURDIR)/vendor/toko-tooling
 FORMAT_RUST_ARGS := --extra-workspace qualification
-# Only Types is eligible. Shared owns exact selectors and upload attempt custody.
-CARGO_PUBLISH_PACKAGES := ic-platform-types
+# Explicit remaining release roster; Types 0.21.1 is already published.
+CARGO_PUBLISH_PACKAGES := ic-platform-runtime-guard ic-platform-macros ic-platform-runtime ic-platform-protocol ic-platform
 CARGO_PUBLISH_REGISTRY := crates-io
 CARGO_PUBLISH_ALL_FEATURES := 1
-CARGO_PUBLISH_VERIFY_TARGETS := types-publication-admission
+CARGO_PUBLISH_VERIFY_TARGETS := release-publication-admission
 include vendor/toko-tooling/make/consumer.mk
 include vendor/toko-tooling/make/cargo-dependencies.mk
 
@@ -377,3 +377,10 @@ qualify-auth-consumer: qualification-tooling-check
 .PHONY: check-types-publication
 check-types-publication:
 	node qualification/types-auth/publication-refusals.mjs
+
+.PHONY: qualify-release release-publication-admission
+qualify-release: qualification-tooling-check
+	node scripts/qualify-release.mjs
+
+release-publication-admission: qualification-tooling-check
+	node scripts/release-publication-admission.mjs

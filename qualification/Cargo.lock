@@ -907,7 +907,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.2"
+version = "0.34.3"
 dependencies = [
  "ic-certification",
  "ic-platform-types 0.21.1",
@@ -921,7 +921,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.8"
+version = "0.23.9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -930,7 +930,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "ic-platform-types 0.21.1",
  "num-bigint 0.5.1",
@@ -939,7 +939,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.8"
+version = "0.23.9"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -948,7 +948,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.8"
+version = "0.23.9"
 
 [[package]]
 name = "ic-platform-types"
@@ -1510,7 +1510,7 @@ version = "0.1.0"
 dependencies = [
  "candid",
  "ic-certification",
- "ic-platform 0.34.2",
+ "ic-platform 0.34.3",
  "ic-platform-types 0.21.1",
  "ic-testkit",
  "serde_cbor",
