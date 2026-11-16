@@ -49,8 +49,8 @@ supported `make publish-check PACKAGE=ic-platform-types` and
 The supported runner rechecks source and retains intent, dispatch, Cargo output
 and completion statuses. An interrupted upload requires registry/provenance
 reconciliation before any new attempt. Success still needs independent sparse
-index and archive readback. No upload has occurred as of this preparation record;
-publication results are recorded separately after execution.
+index and archive readback. Types 0.21.1 is now published; its [publication record](qualification/types-0.21.1-publication.md)
+binds the upload and independent registry readback.
 
 ## Supplier review
 

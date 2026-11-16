@@ -2,15 +2,13 @@
 
 override TOKO_TOOLING_ROOT := $(CURDIR)/vendor/toko-tooling
 FORMAT_RUST_ARGS := --extra-workspace qualification
-include vendor/toko-tooling/make/consumer.mk
-include vendor/toko-tooling/make/cargo-dependencies.mk
-
 # Only Types is eligible. Shared owns exact selectors and upload attempt custody.
 CARGO_PUBLISH_PACKAGES := ic-platform-types
 CARGO_PUBLISH_REGISTRY := crates-io
 CARGO_PUBLISH_ALL_FEATURES := 1
 CARGO_PUBLISH_VERIFY_TARGETS := types-publication-admission
-include vendor/toko-tooling/make/cargo-publication.mk
+include vendor/toko-tooling/make/consumer.mk
+include vendor/toko-tooling/make/cargo-dependencies.mk
 
 .PHONY: types-publication-admission
 types-publication-admission: toko-tooling-check qualification-tooling-check
