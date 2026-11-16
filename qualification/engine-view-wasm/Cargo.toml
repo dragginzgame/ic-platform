@@ -50,7 +50,17 @@ name = "ledger-admission"
 path = "src/bin/ledger-admission.rs"
 required-features = ["ledger"]
 
+[[bin]]
+name = "sns-admission"
+path = "src/bin/sns-admission.rs"
+required-features = ["sns-neurons"]
+
 [features]
+sns-neurons = [
+    "candidate",
+    "ic-platform-protocol/sns-neurons",
+    "ic-platform-protocol/ledger",
+]
 ledger = ["candidate", "ic-platform-protocol/ledger"]
 caffeine = ["candidate", "ic-platform-protocol/caffeine"]
 management-snapshots = ["candidate", "ic-platform-protocol/management-snapshots"]

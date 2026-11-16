@@ -30,7 +30,8 @@
     "qualify-query-hard-cut",
     "qualify-caffeine",
     "qualify-blob-suppliers",
-    "qualify-management-ledger"
+    "qualify-management-ledger",
+    "qualify-sns-neurons"
   ],
   "runtime": [
     "qualify-runtime-call",

@@ -205,6 +205,8 @@ macro_rules! integer {
     };
 }
 integer!(i32, -11);
+#[cfg(feature = "sns-neurons")]
+integer!(u32, -7);
 integer!(i64, -12);
 impl Encode for bool {
     const SCHEMA: Schema = Schema::Primitive(-2);

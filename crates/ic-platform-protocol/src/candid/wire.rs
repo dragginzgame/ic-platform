@@ -319,7 +319,8 @@ pub(crate) enum Schema {
         feature = "cloud-engine-marketplace",
         feature = "registry-placement",
         feature = "management-snapshots",
-        feature = "caffeine"
+        feature = "caffeine",
+        feature = "sns-neurons"
     ))]
     Variant(&'static [(u32, &'static Schema)]),
 }
@@ -360,7 +361,8 @@ impl Reader<'_, '_> {
         feature = "cloud-engine-marketplace",
         feature = "registry-placement",
         feature = "management-snapshots",
-        feature = "caffeine"
+        feature = "caffeine",
+        feature = "sns-neurons"
     ))]
     pub(crate) fn variant(&mut self, id: Id) -> Result<(u32, Id)> {
         let Node::Variant(fields) = node_at(id, self.table).map_err(|_| Error::Type)? else {
@@ -489,7 +491,8 @@ pub(crate) const fn schema_valid(schema: &Schema) -> bool {
             feature = "cloud-engine-marketplace",
             feature = "registry-placement",
             feature = "management-snapshots",
-            feature = "caffeine"
+            feature = "caffeine",
+            feature = "sns-neurons"
         ))]
         Schema::Variant(fields) => fields_valid(fields),
     }
@@ -552,7 +555,8 @@ impl Decode for String {
 #[cfg(any(
     feature = "cloud-engine-marketplace",
     feature = "management-snapshots",
-    feature = "caffeine"
+    feature = "caffeine",
+    feature = "sns-neurons"
 ))]
 impl Decode for () {
     const SCHEMA: Schema = Schema::Primitive(-1);
@@ -617,7 +621,8 @@ impl Decode for bool {
 #[cfg(any(
     feature = "management-chunks",
     feature = "management-snapshots",
-    feature = "caffeine"
+    feature = "caffeine",
+    feature = "sns-neurons"
 ))]
 impl Decode for u8 {
     const SCHEMA: Schema = Schema::Primitive(-5);
@@ -650,7 +655,7 @@ macro_rules! fixed {
 fixed!(u64, -8);
 fixed!(i64, -12);
 fixed!(f64, -14);
-#[cfg(feature = "management-snapshots")]
+#[cfg(any(feature = "management-snapshots", feature = "sns-neurons"))]
 fixed!(i32, -11);
 #[cfg(feature = "management-snapshots")]
 fixed!(f32, -13);

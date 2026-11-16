@@ -77,7 +77,11 @@ pub(crate) fn decode<T: Decode>(input: &[u8], limits: Limits) -> Result<T, Error
     wire::decode(input, limits)
 }
 
-#[cfg(any(feature = "management-snapshots", feature = "caffeine"))]
+#[cfg(any(
+    feature = "management-snapshots",
+    feature = "caffeine",
+    feature = "sns-neurons"
+))]
 pub(crate) mod encode;
 #[cfg(any(feature = "management-snapshots", feature = "caffeine"))]
 pub(crate) use wire::decode_empty;

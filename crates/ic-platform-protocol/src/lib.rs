@@ -18,7 +18,8 @@ pub mod cloud_engine;
     feature = "cloud-engine-response",
     feature = "management-chunks",
     feature = "management-snapshots",
-    feature = "caffeine"
+    feature = "caffeine",
+    feature = "sns-neurons"
 ))]
 pub mod candid;
 
@@ -47,3 +48,6 @@ pub mod raw_rand;
 pub mod ledger;
 #[cfg(feature = "management")]
 pub mod management;
+
+#[cfg(feature = "sns-neurons")]
+pub mod sns;

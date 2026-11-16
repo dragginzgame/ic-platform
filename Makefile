@@ -536,3 +536,14 @@ qualify-management-ledger: qualification-tooling-check
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features ledger --bin ledger-admission --release --target wasm32-unknown-unknown --target-dir target/engine-view-wasm/ledger
 	node qualification/engine-view-wasm.mjs ledger
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features ledger --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1
+
+.PHONY: qualify-sns-neurons
+qualify-sns-neurons: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features sns-neurons --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features sns-neurons --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features sns-neurons --test sns -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features sns-neurons --test sns
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features sns-neurons --bin sns-admission -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features sns-neurons --bin sns-admission --release --target wasm32-unknown-unknown --target-dir target/engine-view-wasm/sns-neurons
+	node qualification/engine-view-wasm.mjs sns-neurons
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features sns-neurons --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types|num-bigint|sha2)$$' --require ic-platform-types=1

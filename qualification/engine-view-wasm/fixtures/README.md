@@ -34,3 +34,11 @@ The `caffeine-*.bin` files are independent native Candid schema frames from
 only explicitly with `REGENERATE_CAFFEINE_CORPUS=1`; ordinary tests compare their
 bytes. They cover root batches, the plain certificate record and an arbitrary
 negative Cashier balance. See `docs/qualification/blob-suppliers.md` for limits.
+
+The `sns-*.bin`, `icrc-symbol.bin` and `icrc-balance.bin` frames come from independent
+Candid schemas in `engine-view-consumer/tests/sns.rs`. Ordinary tests compare
+frozen bytes; regenerate with `REGENERATE_SNS_FIXTURES=1 cargo test --locked
+--manifest-path qualification/Cargo.toml -p engine-view-consumer --features
+sns-neurons --test sns` (as one shell command), review bytes, then run
+`make qualify-sns-neurons`. See the [pinned contracts and projection
+limits](../../../docs/qualification/sns-neurons.md).

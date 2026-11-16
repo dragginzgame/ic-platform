@@ -23,6 +23,7 @@ ignored = ["toko-tooling"]
 category = "tests"
 
 [features]
+sns-neurons = ["ic-platform-protocol/sns-neurons", "ic-platform-protocol/ledger"]
 ledger = ["ic-platform-protocol/ledger"]
 caffeine = ["ic-platform-protocol/caffeine"]
 management-snapshots = ["ic-platform-protocol/management-snapshots"]

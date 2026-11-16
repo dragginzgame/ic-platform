@@ -35,3 +35,10 @@ formats, arbitrary signed balances and optional natural top-up targets. The
 enrollment outer option has an explicit encoder. Application admission and
 settlement stay with the caller; see the
 [Blob supplier contract](../../docs/qualification/blob-suppliers.md).
+
+`sns-neurons` supplies bounded SNS get/list request encoders and selected raw
+neuron/error decoders. IDs, permission codes, stake and dissolve fields remain
+consumer evidence. Independently, `ledger` supplies zero-argument ICRC display
+metadata calls and bounded symbol/decimals decoding alongside canonical Account
+and arbitrary-Nat balance support. See the
+[SNS and ICRC supplier contract](../../docs/qualification/sns-neurons.md).

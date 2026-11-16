@@ -196,3 +196,24 @@ pub fn icp_account_identifier(account: &Account) -> [u8; 32] {
     result[4..].copy_from_slice(&digest);
     result
 }
+
+/// Encode exact zero arguments for icrc1_decimals or icrc1_symbol.
+/// # Errors
+/// Refuses the complete output above the inclusive ceiling or allocation failure.
+pub fn encode_metadata_args(maximum_bytes: usize) -> Result<Vec<u8>, EncodeError> {
+    encode_fee_args(maximum_bytes)
+}
+/// Decode exactly one nat8 decimals observation; no balance scaling is performed.
+/// # Errors
+/// Refuses wrong arity/type, malformed, trailing or over-budget input.
+pub fn decode_decimals(bytes: &[u8], limits: Limits) -> Result<u8, Error> {
+    candid::decode(bytes, limits)
+}
+/// Decode exactly one symbol, charging its UTF-8 bytes before reserving storage.
+/// The caller's byte, work and logical-allocation ceilings bound the text.
+/// This observation is independent of a successful raw balance read.
+/// # Errors
+/// Refuses wrong arity/type, malformed UTF-8, trailing or over-budget input.
+pub fn decode_symbol(bytes: &[u8], limits: Limits) -> Result<String, Error> {
+    candid::decode(bytes, limits)
+}

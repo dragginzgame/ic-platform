@@ -321,3 +321,9 @@ The selected [management/ledger supplier](qualification/management-ledger.md) no
 implements Platform #20 locally, including provisional/ledger creation, controller
 settings, exact install/upgrade arguments, complete duplicate/error outcomes and
 canonical balance/fee accounts. Production Canic migration remains separate.
+
+The [SNS/ICRC supplier contract](qualification/sns-neurons.md) implements the
+Platform #21 codec boundary in Protocol: selected raw neuron observations,
+governance errors, exact optional requests and independent ledger display
+metadata. Query retains identity, pagination, eligibility and entitlement policy;
+supplier qualification does not establish actual Query adoption or real reads.

@@ -299,3 +299,20 @@ qualification wiring found no new actionable issue. Hosted
 [CI](https://github.com/dragginzgame/ic-platform/actions/runs/43965577962) and
 [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/43965577864)
 were observed once in progress; neither was awaited or reported as passing.
+
+## SNS/ICRC supplier and qualification refresh
+
+Protocol 0.2.8 adds the opt-in bounded SNS neuron and independent ICRC display
+metadata codecs for #21. It supports any explicitly selected deployment of the
+supported contracts; Dragginz and Toko are consumer qualification examples.
+Registry review found Protocol 0.2.7 current and 0.2.8 absent. Platform 0.34.9,
+Types 0.21.2 and Runtime/macros/guard 0.23.14 product contents are unchanged.
+
+Qualification now selects registry Platform 0.34.9 and Testkit 0.107.4, also in
+materialized Auth/Blob fixtures. Testkit's archive checksum is
+`8629db43fa7a3e3655184c6173a5ccdecf67a87d29f0c929228bec7f8a1c392b`;
+its new optional CLI is outside this dependency refresh. Existing explicit
+qualification-server ownership remains selected. Run the complete local catalog,
+then publish Protocol alone using its clean source, annotated remote tag and
+explicit receipt. Verify archive checksum and source independently after upload.
+Hosted CI remains asynchronous; downstream Query/Backup adoption is separate.

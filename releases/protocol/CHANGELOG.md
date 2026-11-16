@@ -3,6 +3,22 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.2.8] - 2026-11-16
+
+### ➕ Added
+
+- Add bounded SNS neuron get/list codecs and independent ICRC symbol/decimals
+  metadata for [Platform #21](https://github.com/dragginzgame/ic-platform/issues/21).
+  Preserve raw neuron evidence, unknown signed codes and optional presence;
+  retain canonical Accounts and arbitrary-Nat balances. Independent native
+  schemas and standalone Wasm replay cover the
+  [supplier contract](../../docs/qualification/sns-neurons.md).
+
+### 🔧 Changed
+
+- Refresh qualification to published Platform 0.34.9 and Testkit 0.107.4,
+  including materialized Auth and Blob fixtures.
+
 ## [0.2.7] - 2026-11-16
 
 ### ➕ Added

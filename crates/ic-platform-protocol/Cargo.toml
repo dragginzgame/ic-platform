@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-protocol"
-version = "0.2.7"
+version = "0.2.8"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -17,6 +17,7 @@ toko-tooling.workspace = true
 ignored = ["toko-tooling"]
 
 [features]
+sns-neurons = ["dep:candidate-types", "dep:serde"]
 default = []
 management = ["management-snapshots", "dep:num-bigint"]
 ledger = ["management", "dep:sha2", "dep:crc32fast"]
