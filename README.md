@@ -130,12 +130,16 @@ explicit root, target, separate time windows and resource limits. Its evidence i
 immutable. Delegation verifies certified subnet authority and complete selected
 legacy/sharded ranges; nested delegations refuse. Fresh PocketIC observations and
 frozen direct/delegated certificate replays now pass through the public API.
+`make qualify-platform-wasm` also executes authentication and selected refusals
+in standalone Wasm, beyond the compile-only checks.
 The same verifier now supplies immutable selected-subnet signing time for Query
 issue #1, with explicit root-subnet binding when no delegation exists.
-Mainnet interoperability and production consumer
-qualification remain pending before the full authentication gate.
+Independently observed mainnet direct-root and delegated certificates now pass
+native and Wasm replay, including explicit root-subnet binding, separate
+signing/delegation timestamps and authority refusals. Broader mainnet interoperability and production consumer qualification
+remain pending before the full authentication gate.
 
-Toko 0.44.4 is installed through its authenticated installer, including canonical
+Toko 0.44.5 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local
 packages and `make deps-update` for deliberate Cargo lock updates. See
 [development setup and focused checks](docs/development.md) for prerequisites,

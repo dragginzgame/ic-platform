@@ -31,6 +31,7 @@ help:
 	  'qualify-marketplace-wasm  Execute marketplace and availability admission in Wasm' \
 	  'qualify-platform-certificate  Check strict unverified certificate decoding' \
 	  'qualify-platform-authentication  Check direct and delegated certificate authentication' \
+	  'qualify-platform-wasm  Execute certificate authentication and refusals in Wasm' \
 	  'qualify-platform-observed  Verify replica-issued certificates through public APIs' \
 	  'qualify-types          Test and check local Principal and Account identities' \
 	  'qualify-types-consumer  Compare published identities and execute native/Wasm fixtures' \
@@ -304,3 +305,12 @@ qualify-platform-authentication: qualify-platform-certificate
 qualify-platform-observed: qualification-tooling-check runtime-server-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --all-targets -- -D warnings
 	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates
+
+.PHONY: qualify-platform-wasm
+qualify-platform-wasm: qualification-tooling-check
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --bin certificate-admission --bin mainnet-admission -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --bin certificate-admission --bin mainnet-admission --target wasm32-unknown-unknown -- -D warnings
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --bin certificate-admission
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --bin certificate-admission --bin mainnet-admission --release --target wasm32-unknown-unknown --target-dir target/platform-certificate-wasm
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --bin mainnet-admission
+	node qualification/platform-certificate-wasm.mjs

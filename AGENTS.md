@@ -22,7 +22,7 @@ also start at 0.1.0 and remain outside product release groups. Publisher selecti
 and publication remain separate. A package move alone is not rewrite progress.
 
 This repository adopts the installed [Toko engineering baseline](TOKO-TOOLING.md)
-from published Toko 0.44.4 and its revision-bound specialist rules. Cargo.lock and
+from published Toko 0.44.5 and its revision-bound specialist rules. Cargo.lock and
 `.toko-tooling.snapshot` bind the selection and installed bytes. Keep managed
 files intact; use the supported installer for updates. [Development commands](docs/development.md)
 describe the local Make interface and focused checks.
@@ -92,8 +92,9 @@ does not establish product or native-host qualification.
   or require an independently trusted root-subnet binding without delegation.
   Never substitute effective-canister authority for this subnet contract.
   Keep fresh PocketIC observations and frozen public-API replay tests in the
-  qualification path. Mainnet interoperability and production consumer proof
-  remain pending before the full authentication gate.
+  qualification path. Independently observed mainnet direct-root and delegated certificates now pass
+  native/Wasm replay, including explicit root-subnet binding. Broader mainnet interoperability and production consumer proof remain
+  pending before the full authentication gate.
   Protocol 0.2.0 now selects local Types 0.21.0 alongside Runtime. Preserve that
   canonical source identity; registry Types is only a qualification oracle.
   Query's older 0.1.x integration needs cohort migration before adoption.

@@ -74,7 +74,7 @@ jobs:
       - name: Check local Types implementation
         run: make qualify-types qualify-types-consumer
       - name: Check Platform certificate boundary
-        run: make qualify-platform-authentication
+        run: make qualify-platform-authentication qualify-platform-wasm
       - name: Check Runtime call preparation
         run: make qualify-runtime-call qualify-runtime-consumer qualify-runtime-ic0 qualify-runtime-awaited qualify-runtime-guard qualify-runtime-input-ui qualify-runtime-exports
       - name: Prepare verified PocketIC server

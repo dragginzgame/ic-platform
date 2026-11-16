@@ -81,7 +81,8 @@ authenticated field/tree mutation, implicit promotion and arbitrary deserializat
 Native/Wasm Clippy, Rustdoc and selected normal/build graph checks pass. Empty
 defaults have no dependencies. Authentication selects exactly one local Types,
 ic-certification and BLS verifier; Protocol, Runtime and Agent remain absent.
-Wasm validation is compilation, not installed execution.
+The ordinary gate compiles Wasm; the standalone execution gate below also runs
+the verifier. Neither establishes installed verifier execution.
 
 A fresh root-lockfile `cargo audit` on 2026-11-16 reports zero vulnerabilities
 against RustSec revision `02e2517f457a359fc6d3440ea4560c8ea188fee8`
@@ -92,8 +93,9 @@ contracts; the warning is not resolved by these tests. This audit does not cover
 separate qualification lockfiles or close crypto/Agent issue #4: neither Agent nor
 EC signing is admitted here.
 
-The full authentication gate remains open: mainnet interoperability and
-production consumer qualification remain pending. Canister-signature witness checks are a separate unimplemented surface.
+The full authentication gate remains open: frozen direct and delegated mainnet observations now
+pass native/Wasm replay (below); broader interoperability and production
+consumer qualification remain pending. Canister-signature witness checks are a separate unimplemented surface.
 Decode success alone proves syntax; authentication does not accept an application's
 request path or status on its behalf.
 
@@ -236,9 +238,9 @@ Platform owner, with defaults off and only `groups` requested. It was already
 selected transitively by production BLS verification; no dependency version,
 production feature or normal/build graph changed. Native tests, native/Wasm
 Clippy, Rustdoc and graph checks pass through the ordinary authentication target.
-Wasm is compilation evidence, not execution of the subgroup tests. The three
-open replacement issues remain #1, #3 and #4; this security qualification does
-not complete their separate delivery, consumer or Agent-remediation obligations.
+Wasm is compilation evidence, not execution of the subgroup tests. This subgroup qualification does not complete the separate consumer or
+Agent-remediation obligations in #3 and #4. The later supplier delivery for #1
+is recorded below.
 
 ## Agent response compatibility and supplier completion — issue #1
 
@@ -283,3 +285,75 @@ compile-fail test prevents mutation through retained evidence. The encoded-path
 full-width/malformed/nonminimal time tests use the same private time verifier.
 This supplies issue #1's projection without implementing Query's two-read sampler,
 relaxing advisory #4, or claiming production deployment/mainnet qualification.
+
+## Standalone Wasm authentication execution
+
+`make qualify-platform-wasm` executes the public verifier against the existing
+PocketIC-issued direct and delegated fixtures, first natively and then as an
+optimized `wasm32-unknown-unknown` binary under Node. The small admission binary
+lives in the existing private `platform-certificates` qualification package.
+No product code, dependency versions or package versions changed.
+
+Both paths check canister authentication, certified-data lookup, exact original
+byte custody, selected-subnet time and parsed-object borrowing. They reject wrong
+subnets, altered signatures, stale signing times, exhausted tree-node allowances
+and oversized encoded input. The runner rejects any Wasm imports and fails on
+assertion traps or a nonzero result. Native and Wasm Clippy also pass with warnings
+denied. CI runs this target alongside the certificate authentication gate.
+
+On 2026-11-16, Rust 1.100.0 and Node 24.21.0 / V8 13.6.233.17-node.53 passed;
+the executed artifact SHA-256 was
+`a9934ea2c1261913c291e55ed4e027d482999d09df52d91b3e265d78a0d4af79`.
+This establishes execution of the upstream BLS verifier and Platform composition
+on 32-bit Wasm for this corpus. It does not establish IC instruction cost,
+installed verifier execution, exhaustive refusal coverage or mainnet acceptance.
+
+## Mainnet delegated certificate replay
+
+The same `qualify-platform-wasm` target now runs `mainnet-admission`, using an
+independent read-only observation from the ICP documentation canister. Its
+[fixture provenance](../../qualification/crates/platform-certificates/fixtures/README.md)
+records the URL, public trust anchor, exact certificate hash and distinct signing
+and delegation times. The verifier successfully checks the real delegation,
+canister ranges and certified-data presence against the pinned mainnet root.
+
+Encoded and parsed selected-subnet projections return the signing timestamp;
+exact separate historical windows check delegation freshness independently.
+Wrong root, unauthorized canister, wrong subnet, corrupted outer signature and
+swapping either time window to the other certificate's time all refuse. The
+parsed projection retains the exact object without claiming original bytes.
+The root and expected subnet/times are fixed fixture inputs, not discovered from
+arbitrary input during replay. No production dependency or API changed.
+
+On 2026-11-16, both native execution and optimized standalone Wasm execution
+passed with native/Wasm Clippy. Rust 1.100.0, Node 24.21.0 and V8
+13.6.233.17-node.53 executed Wasm SHA-256
+`0410194c5d4592ffd22c45c8b1700a9251ee2305782419ee5993ca71aa8deb9a`.
+This is bounded mainnet interoperability evidence for one delegated certificate,
+not full network qualification, live freshness, HTTP body/witness verification,
+installed verifier execution or production consumer adoption. CI replays the
+frozen bytes without network access.
+
+## Mainnet direct-root binding replay
+
+The existing `mainnet-admission` binary now also replays a directly root-signed
+NNS frontend observation. The fixture record above links the independent
+system-canister reference used to select the root-subnet identity. Both the
+general and direct-only canister authenticators succeed; certified-data presence
+is checked separately. No delegation or range allowance is needed for this path.
+
+Encoded and borrowed selected-subnet projections succeed only with the explicit
+NNS binding supplied by the caller. Missing bindings return `RootSubnetRequired`;
+requests for another subnet return `SubnetMismatch`. Corrupted signatures and a
+one-nanosecond stale signing window also refuse. Exact byte/object custody and
+absence of delegation remain observable. This verifies the no-delegation contract
+against a mainnet-issued certificate rather than only simulator or synthetic data.
+
+`make qualify-platform-wasm` passes native and Wasm execution and Clippy for both
+mainnet observations. The combined mainnet binary's new Wasm SHA-256 is
+`1fd711ff1cf4f007c666ad3bc24c37969f16be53312e9558ec1750964882e1b8`
+with Rust 1.100.0, Node 24.21.0 and V8 13.6.233.17-node.53 on 2026-11-16.
+The earlier delegated-only artifact hash remains historical evidence. These two
+observations still do not establish exhaustive mainnet interoperability, live
+freshness, HTTP body authentication, installed verifier costs or consumer adoption.
+Product contents and versions remain unchanged; publication remains disabled.

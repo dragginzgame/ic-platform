@@ -93,7 +93,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko 0.44.4 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko 0.44.5 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -125,7 +125,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.4
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.5
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -536,3 +536,8 @@ encoded bytes are unavailable and reported as None. Do not re-encode the object
 into the encoded entry point. Consumer migration must align the candidate's exact
 thiserror 2.0.18 pin; see the
 [qualified response boundary](qualification/platform-certificate.md#agent-response-compatibility-and-supplier-completion--issue-1).
+
+`make qualify-platform-wasm` runs the frozen PocketIC and mainnet direct/delegated certificate corpora
+through native and standalone Wasm authentication, with native/Wasm Clippy.
+It needs Node and the installed Wasm target, but no PocketIC server. It checks
+signature, subnet, freshness and resource refusals; it is not an IC cost model.

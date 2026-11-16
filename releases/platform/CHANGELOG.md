@@ -48,5 +48,8 @@ Return to the [group index](../../CHANGELOG.md).
   signing/delegation time, full u64 values and malformed/future/stale admission.
 - Add independently selected non-subgroup G1/G2 inputs, upstream point classification
   and refusal checks for root keys, delegated keys and both authentication paths.
-- Mainnet interoperability and production consumer
-  qualification remain pending. Decode success is not security evidence.
+- Add standalone native/Wasm replay of PocketIC and independently captured
+  mainnet direct-root/delegated certificates, including root-subnet binding and
+  distinct signing/delegation time refusals. CI runs the offline corpus.
+- Broader mainnet interoperability and production consumer qualification remain
+  pending. Decode success is not security evidence.
