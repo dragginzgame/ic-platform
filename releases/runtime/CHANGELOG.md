@@ -4,6 +4,20 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.11] - Unreleased
+
+### ✨ Added
+
+- Add dependency-free `system-raw` for Storage's caller-owned synchronous exports
+  (#6): argument/caller byte slices with offsets, current-controller checks,
+  raw append/reply, byte traps and instruction counter zero.
+- Qualify raw ABI limits, empty replies, live controller changes, trap rollback
+  and lifecycle execution without an executor. Compile the pinned actual Storage
+  startup, checkpoint migration-job and benchmark consumers through a retained
+  migration patch. Registry publication and consumer installed adoption remain separate.
+- Advance Runtime support packages after the 0.23.10 source snapshot; preserve
+  existing task-managed reply and explicit-entrypoint contracts.
+
 ## [0.23.10] - Unreleased
 
 ### ✨ Added

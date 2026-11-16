@@ -17,6 +17,7 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
             server_assets::check(directory)?;
             return Ok(());
         }
+        Some("raw") => return crate::raw::run(server_assets::check(directory)?),
         None => {}
         _ => return Err("expected no arguments, setup or check".into()),
     }

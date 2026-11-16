@@ -232,3 +232,15 @@ range remains `crypto-bigint >=0.7.6`. Neither current workspace lock selects
 `crypto-bigint`, `k256`, `ic-agent` or `ic-secp256k1`. Consequently there is no
 current lock edge to repair here; this does not qualify the absent legacy
 Agent/derivation capabilities or resolve their consumers' affected graphs.
+
+
+## Storage synchronous system operations
+
+[Issue #6](https://github.com/dragginzgame/ic-platform/issues/6) requires raw
+argument/caller copies with offsets, live controller checks, task-free synchronous
+replies, byte traps and instruction counter zero for caller-owned fixture exports.
+Runtime owns this opt-in dependency-free `system-raw` surface; Storage retains
+buffer, authorization, persistence, export and upgrade policy. The
+[contract and qualification](qualification/runtime-storage.md) records installed
+supplier evidence and pinned actual consumer compilation. Publication and
+Storage's own installed migration cases remain distinct acceptance obligations.

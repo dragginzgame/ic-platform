@@ -1,6 +1,6 @@
 {
   "repository": ["fmt-check", "qualification-tooling-check", "lint-workflows", "check-secrets", "check-protocol-graphs", "check-types-graphs", "check-runtime-consumer-graph"],
   "protocol": ["lint-engine-request", "lint-engine-response", "test-engine-request", "test-engine-response", "doc-engine-request", "doc-engine-response", "check-engine-request-wasm", "qualify-engine-response", "profile-engine-response", "qualify-engine-wasm", "qualify-registry-settings", "qualify-registry-runtime", "qualify-marketplace", "qualify-marketplace-wasm", "qualify-http-request"],
-  "runtime": ["qualify-runtime-call", "qualify-runtime-consumer", "qualify-runtime-ic0", "qualify-runtime-awaited", "qualify-runtime-guard", "qualify-runtime-input-ui", "qualify-runtime-exports", "qualify-runtime-installed", "check-upgrade-tooling", "qualify-auth-runtime"],
+  "runtime": ["qualify-runtime-call", "qualify-runtime-consumer", "qualify-runtime-ic0", "qualify-runtime-awaited", "qualify-runtime-guard", "qualify-runtime-input-ui", "qualify-runtime-exports", "qualify-runtime-installed", "check-upgrade-tooling", "qualify-auth-runtime", "qualify-runtime-raw", "qualify-storage-runtime"],
   "platform": ["qualify-platform-authentication", "qualify-platform-wasm", "qualify-canister-signature-decode", "qualify-canister-signature-authentication", "qualify-platform-observed", "qualify-canister-signature-observed", "qualify-canister-signature-wasm", "qualify-auth-consumer"]
 }

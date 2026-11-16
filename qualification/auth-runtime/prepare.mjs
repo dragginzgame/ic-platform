@@ -11,7 +11,7 @@ run('git',['archive',`--output=${output}/auth.tar`,revision,'Cargo.toml','Cargo.
 run('tar',['-xf',`${output}/auth.tar`,'-C',output]);
 const edit=(path,fn)=>{const file=`${output}/${path}`;writeFileSync(file,fn(readFileSync(file,'utf8')));};
 edit('Cargo.toml',s=>s.replace('ic-platform-types = { version = "0.20.4",',`ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.1",`));
-edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.10",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
+edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.11",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
 edit('qualification/ic-auth-host-fixture/Cargo.toml',s=>s.replace('features = ["cdk"]','features = ["entrypoint-macros"]'));
 edit('qualification/ic-auth-host-conformance/Cargo.toml', s => s.replace('[dev-dependencies]', '[dev-dependencies]\nic-management-canister-types = "=0.8.0"'));
 // Legacy crypto remains a qualification supplier. Compare its key parser's raw

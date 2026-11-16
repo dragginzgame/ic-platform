@@ -102,9 +102,13 @@ explicit application choices. Caller/canister identity, IC time, controller chec
 bounded query certificates and certified-data publication are available through
 `system`. The [Auth execution qualification](docs/qualification/runtime-auth.md)
 records installed consumer and byte-boundary evidence and remaining migration
-limits. The separate `ic-platform-runtime-guard` shares Runtime's 0.23.10 version.
+limits. The separate `ic-platform-runtime-guard` shares Runtime's 0.23.11 candidate version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
+
+Runtime's opt-in `system-raw` feature also supplies dependency-free synchronous
+operations for caller-owned exports, without a task or executor. See the
+[Storage migration contract](docs/qualification/runtime-storage.md).
 
 An opt-in `registry-settings` feature also projects selected Registry subnet
 features and resource limits, preserving presence and raw defaults under shared

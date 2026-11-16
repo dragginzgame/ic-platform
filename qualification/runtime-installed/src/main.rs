@@ -14,3 +14,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(target_family = "wasm")]
 fn main() {}
+
+#[cfg(not(target_family = "wasm"))]
+mod raw;

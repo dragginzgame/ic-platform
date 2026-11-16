@@ -12,7 +12,10 @@ const _: () = candidate_runtime_guard::assert_runtime_version(env!("CARGO_PKG_VE
 #[cfg(feature = "call")]
 pub mod call;
 
-#[cfg(any(test, all(feature = "call-ic0", target_arch = "wasm32")))]
+#[cfg(any(
+    all(test, feature = "call"),
+    all(feature = "call-ic0", target_arch = "wasm32")
+))]
 pub mod executor;
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
@@ -23,3 +26,9 @@ pub mod entrypoints;
 
 #[cfg(feature = "entrypoint-macros")]
 pub use candidate_macros::{init, post_upgrade, pre_upgrade, query, update};
+
+#[cfg(all(not(feature = "call"), feature = "system-raw", target_arch = "wasm32"))]
+mod call;
+
+#[cfg(all(feature = "system-raw", target_arch = "wasm32"))]
+pub use call::ic0::synchronous as raw;

@@ -24,7 +24,7 @@ try {
       ? join(root, 'qualification/runtime-exports/src/lib.rs')
       : join(root, `qualification/ui/runtime-${selection}`, `${name}.rs`);
     const manifest = join(directory, 'Cargo.toml');
-    writeFileSync(manifest, `[workspace]\n[package]\nname="runtime-ui-probe"\nversion="0.1.0"\nedition="2024"\npublish=false\n[lib]\n${group.command === 'build' ? 'crate-type=["cdylib"]\n' : ''}path=${JSON.stringify(source)}\n[dependencies]\n${group.alias}={package="ic-platform-runtime",path=${JSON.stringify(join(root, 'crates/ic-platform-runtime'))},default-features=false,features=["${group.feature}"]}\n[lints.rust]\nunsafe_code="deny"\nunfulfilled_lint_expectations="deny"\n`);
+    writeFileSync(manifest, `[workspace]\n[package]\nname="runtime-ui-probe"\nversion="0.1.0"\nedition="2024"\npublish=false\n[lib]\n${group.command === 'build' ? 'crate-type=["cdylib"]\n' : ''}path=${JSON.stringify(source)}\n[features]\nraw=[]\n[dependencies]\n${group.alias}={package="ic-platform-runtime",path=${JSON.stringify(join(root, 'crates/ic-platform-runtime'))},default-features=false,features=["${group.feature}"]}\n[lints.rust]\nunsafe_code="deny"\nunfulfilled_lint_expectations="deny"\n`);
     const result = spawnSync('cargo', [group.command, '--offline', '--manifest-path', manifest, '--target', 'wasm32-unknown-unknown', '--target-dir', join(root, `target/runtime-${selection}-ui`), '--message-format=json'], { encoding: 'utf8', timeout: 60000, maxBuffer: 8 * 1024 * 1024 });
     assert.ifError(result.error);
     assert.equal(result.signal, null);

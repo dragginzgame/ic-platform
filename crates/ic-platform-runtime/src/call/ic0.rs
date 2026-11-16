@@ -1,5 +1,6 @@
 //! Reviewed wasm32 IC0 imports. No raw ownership pointers cross this boundary.
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC0 foreign declaration at the approved IC-specific boundary"
@@ -45,6 +46,7 @@ unsafe extern "C" {
     fn trap(src: u32, size: u32) -> !;
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC identity copies use initialized, size-checked Principal storage"
@@ -73,18 +75,21 @@ pub(crate) fn principal(caller: bool) -> candidate_types::Principal {
     candidate_types::Principal::from_slice(&bytes[..size as usize])
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(unsafe_code, reason = "IC time observation takes no pointers")]
 pub(crate) fn system_time() -> u64 {
     // SAFETY: Scalar-only system observation; context violations trap.
     unsafe { time() }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(unsafe_code, reason = "IC argument-size observation takes no pointers")]
 pub(crate) fn argument_size() -> usize {
     // SAFETY: Scalar-only observation; context violations trap.
     unsafe { msg_arg_data_size() as usize }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC controller observation synchronously reads a valid Principal"
@@ -94,6 +99,7 @@ pub(crate) fn controller(principal: &candidate_types::Principal) -> bool {
     unsafe { is_controller(principal.as_slice().as_ptr() as u32, principal.len() as u32) != 0 }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC certified-data publication synchronously reads a fixed-size root"
@@ -105,6 +111,7 @@ pub(crate) fn certified_root(root: &[u8; 32]) {
     }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC certificate reads use initialized bounded owned memory"
@@ -130,6 +137,7 @@ pub(crate) fn certificate(
     }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC trap synchronously reads the diagnostic and never returns"
@@ -139,6 +147,7 @@ pub(crate) fn trap_message(message: &str) -> ! {
     unsafe { trap(message.as_ptr() as u32, message.len() as u32) }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC0 synchronously copies the live reply slice and issues its reply"
@@ -155,6 +164,7 @@ pub(crate) fn reply(bytes: &[u8]) {
     }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC0 context observation at the approved import boundary"
@@ -164,6 +174,7 @@ pub(crate) fn replicated_execution() -> bool {
     unsafe { in_replicated_execution() != 0 }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC0 argument reads use initialized bounded output memory"
@@ -185,6 +196,7 @@ pub(crate) fn read_args(maximum: usize) -> Result<Vec<u8>, crate::system::Argume
     }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC0 synchronously writes a u128 to initialized local Wasm memory"
@@ -199,10 +211,12 @@ pub(super) fn liquid_balance() -> u128 {
     u128::from_le_bytes(output)
 }
 
+#[cfg(feature = "call-ic0")]
 pub(super) fn enqueue_oneway(request: &super::Call<'_, '_>) -> u32 {
     assemble(request, [u32::MAX; 4], None)
 }
 
+#[cfg(feature = "call-ic0")]
 pub(super) fn enqueue(
     request: &super::Call<'_, '_>,
     id: u32,
@@ -216,6 +230,7 @@ pub(super) fn enqueue(
     )
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "Reviewed IC0 assembly with static callbacks and integer-only environment handles"
@@ -258,6 +273,7 @@ fn assemble(request: &super::Call<'_, '_>, callbacks: [u32; 4], cleanup: Option<
     }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC0 callback reads synchronously initialize bounded live output buffers"
@@ -291,6 +307,7 @@ pub(super) fn capture() -> super::Completion {
     }
 }
 
+#[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
     reason = "IC0 writes exactly sixteen bytes to initialized local Wasm memory"
@@ -312,3 +329,6 @@ pub(super) fn cost(method_bytes: usize, argument_bytes: usize) -> u128 {
     }
     u128::from_le_bytes(output)
 }
+
+#[cfg(feature = "system-raw")]
+pub mod synchronous;

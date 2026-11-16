@@ -1,13 +1,20 @@
 //! One consuming request shape, with independent method and argument ownership.
 
+#[cfg(feature = "call")]
 use candidate_types::Principal;
+#[cfg(feature = "call")]
 use std::borrow::Cow;
 
+#[cfg(feature = "call")]
 mod completion;
+#[cfg(feature = "call")]
 pub use completion::{Completion, Outcome, RejectCode, Rejection};
 
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-mod ic0;
+#[cfg(all(
+    any(feature = "call-ic0", feature = "system-raw"),
+    target_arch = "wasm32"
+))]
+pub(crate) mod ic0;
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub(crate) use ic0::replicated_execution;
@@ -30,9 +37,15 @@ pub use submission::{SubmitError, Submitted};
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 mod future;
-#[cfg(any(test, all(feature = "call-ic0", target_arch = "wasm32")))]
+#[cfg(any(
+    all(test, feature = "call"),
+    all(feature = "call-ic0", target_arch = "wasm32")
+))]
 mod registry;
-#[cfg(any(test, all(feature = "call-ic0", target_arch = "wasm32")))]
+#[cfg(any(
+    all(test, feature = "call"),
+    all(feature = "call-ic0", target_arch = "wasm32")
+))]
 mod state;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use future::CallFuture;
@@ -45,6 +58,7 @@ pub struct CostOverflow;
 
 /// Explicit response-wait selection for a future submission backend.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[cfg(feature = "call")]
 pub enum Wait {
     /// Request bounded waiting; expiry does not establish remote nonexecution.
     Bounded {
@@ -62,6 +76,7 @@ pub enum Wait {
 /// Preparation does not establish spending or endpoint authority.
 #[derive(Debug)]
 #[must_use = "a prepared request has no effect by itself"]
+#[cfg(feature = "call")]
 pub struct Call<'m, 'a> {
     target: Principal,
     method: Cow<'m, str>,
@@ -70,6 +85,7 @@ pub struct Call<'m, 'a> {
     cycles: u128,
 }
 
+#[cfg(feature = "call")]
 impl<'m> Call<'m, 'static> {
     /// Prepares an inert request with empty raw arguments and no attached cycles.
     ///
@@ -85,6 +101,7 @@ impl<'m> Call<'m, 'static> {
     }
 }
 
+#[cfg(feature = "call")]
 impl<'m, 'a> Call<'m, 'a> {
     /// Observes the current system cost plus the requested cycle attachment.
     ///
@@ -164,5 +181,5 @@ impl<'m, 'a> Call<'m, 'a> {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "call"))]
 mod tests;

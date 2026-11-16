@@ -59,6 +59,8 @@ help:
 	  'install-runtime-server / runtime-server-check  Prepare or verify Testkit PocketIC' \
 	  'qualify-runtime-installed  Execute installed calls, rollback and drained upgrades' \
 	  'qualify-auth-runtime   Test pinned actual Auth endpoints in PocketIC' \
+	  'qualify-runtime-raw    Check synchronous system ABI and installed behavior' \
+	  'qualify-storage-runtime  Compile pinned Storage against synchronous Runtime' \
 	  'qualify-http-request   Check bounded management GET argument encoding' \
 	  'upgrade-help / check-upgrade-tooling  Preview operator usage or test failure handling' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
@@ -400,3 +402,18 @@ qualify-http-request: qualification-tooling-check
 	cargo check --offline --locked -p ic-platform-protocol --no-default-features --features http-request --target wasm32-unknown-unknown
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features http-request --no-deps
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features http-request --forbid-pattern '^(?!ic-platform-protocol$$)'
+
+.PHONY: qualify-runtime-raw qualify-storage-runtime
+qualify-runtime-raw: qualification-tooling-check runtime-server-check
+	cargo clippy --offline --locked -p ic-platform-runtime --no-default-features --features system-raw --all-targets --target wasm32-unknown-unknown -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-runtime --no-default-features --features system-raw --target wasm32-unknown-unknown --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-exports --no-default-features --features raw --target wasm32-unknown-unknown -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-exports --no-default-features --features raw --target wasm32-unknown-unknown --release --target-dir target/runtime-raw
+	node qualification/runtime-raw.mjs
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- raw
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-runtime --no-default-features --features system-raw --forbid-pattern '^(?!ic-platform-runtime$$)'
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-exports --no-default-features --features raw --forbid-pattern '^(?!(runtime-exports|ic-platform-runtime)$$)'
+
+qualify-storage-runtime:
+	node qualification/storage-runtime/check.mjs
