@@ -99,3 +99,16 @@ pub fn decode_certificate(
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(feature = "canister-signature-decode")]
+mod canister_signature;
+#[cfg(feature = "canister-signature-decode")]
+pub use canister_signature::{
+    CanisterSignatureDecodeError, DecodedCanisterSignature, decode_canister_signature,
+};
+
+#[cfg(feature = "canister-signature-authentication")]
+pub use authentication::{
+    AuthenticatedCanisterSignature, CanisterSignatureKey, CanisterSignatureLimits,
+    CanisterSignatureVerifyError, authenticate_canister_signature,
+};

@@ -107,7 +107,7 @@ make deps-list
 Tool setup can download executables and populate Toko's per-user store. Checks
 are offline and do not install tools. Linux x86-64 and macOS ARM64/x86-64 are the
 intended development hosts. The initial focused suite passed on all three in
-[hosted run 43717278830](https://github.com/dragginzgame/ic-platform-new/actions/runs/43717278830)
+[hosted run 43717278830](https://github.com/dragginzgame/ic-platform/actions/runs/43717278830)
 for source `08c72219ad6f261067c00eece9c8c71852e6b561`.
 
 The initial [CI workflow](../.github/workflows/ci.yml) selects Ubuntu 24.04
@@ -541,3 +541,32 @@ thiserror 2.0.18 pin; see the
 through native and standalone Wasm authentication, with native/Wasm Clippy.
 It needs Node and the installed Wasm target, but no PocketIC server. It checks
 signature, subnet, freshness and resource refusals; it is not an IC cost model.
+
+`make qualify-canister-signature-decode` checks the unverified canister-signature
+envelope boundary: literal/refusal tests, compile-fail immutability, native/Wasm
+Clippy, Rustdoc and the dependency graph. It does not authenticate signatures.
+
+`make qualify-canister-signature-authentication` checks key admission and complete
+signature composition: message/seed witness, certified-data binding, certificate
+authority, separate time policies and the signature-specific subnet-type rule.
+It includes synthetic direct/delegated refusal tests, compile-fail evidence,
+native/Wasm Clippy, Rustdoc and normal/build dependency checks. Observed canister
+signature execution is covered separately below; Auth integration remains pending.
+
+`make qualify-canister-signature-observed` uses the admitted PocketIC server to
+capture direct/delegated signature envelopes and authenticate them through the
+public API. Prepare the server with `make install-runtime-server`. Fresh output
+goes to `target/platform-signatures/` without changing frozen fixtures.
+
+`make qualify-canister-signature-wasm` replays frozen envelopes and refusal cases
+on native and standalone Wasm, checks native/Wasm Clippy and the portable graph,
+and reports the Wasm digest. It requires Node and the Wasm target, but no server
+or network. These targets qualify controlled replica signatures, not Auth
+adoption or mainnet signature interoperability; see the
+[evidence](qualification/canister-signature.md#observed-public-consumer-replay--2026-11-16).
+
+`make qualify-auth-consumer` runs an isolated issuer-policy adapter on native
+and Wasm, including focused Clippy and graph checks. It uses frozen signatures
+over Auth's exact domain-framed claims digest; fresh capture is included in
+`make qualify-canister-signature-observed`. No Auth or Canic checkout is built or
+modified. See the [component contract and limits](qualification/canister-signature.md#isolated-auth-issuer-policy-consumer--2026-11-16).

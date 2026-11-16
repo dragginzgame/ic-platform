@@ -3,7 +3,7 @@
 The opt-in `cloud-engine-marketplace` feature now exports `AvailableNode`,
 `AvailableNodesPage`, `AvailableNodesPageResult`, `EngineError` and
 `decode_list_available_nodes_page_response`. This is the response portion of
-[the retained #166 contract](https://github.com/dragginzgame/ic-platform/issues/166).
+[the retained #166 contract](https://github.com/dragginzgame/ic-platform-legacy/issues/166).
 The existing declaration macro now handles both null and typed variant payloads;
 the shared reader, source identities and dependency closure are unchanged.
 

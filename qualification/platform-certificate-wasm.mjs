@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
-for (const binary of ['certificate-admission', 'mainnet-admission']) {
+const requested = process.argv.slice(2);
+const binaries = requested.length ? requested : ['certificate-admission', 'mainnet-admission'];
+for (const binary of binaries) {
+  assert(['certificate-admission', 'mainnet-admission', 'signature-admission', 'auth-admission'].includes(binary));
   const bytes = readFileSync(new URL(`../target/platform-certificate-wasm/wasm32-unknown-unknown/release/${binary}.wasm`, import.meta.url));
   const module = new WebAssembly.Module(bytes);
   assert.deepEqual(WebAssembly.Module.imports(module), []);

@@ -49,7 +49,7 @@ does not establish product or native-host qualification.
   to `../ic-query` and validating it. That local application is complete; it
   grants no Query commit, push, publication or unrelated sibling-edit authority.
 - Preserve unique work here. The maintainer authorized source delivery to public
-  `dragginzgame/ic-platform-new`. Registry publication,
+  `dragginzgame/ic-platform`. Registry publication,
   releases, repository deletion and sibling migration remain excluded. Keep
   every package unpublished; GitHub source delivery is not registry publication.
 - Create manifests only for real implementation slices. Do not add empty Cargo
@@ -81,7 +81,7 @@ does not establish product or native-host qualification.
   Keep child/migratory tasks outside this slice.
   Its exact-version Cargo singleton guard is now implemented in the Runtime
   group. The explicit-update macro implementation shares that group. Platform
-  0.34.0 has its own group, a strict untrusted certificate decoder and an opt-in
+  0.34.1 has its own group, a strict untrusted certificate decoder and an opt-in
   direct-root/single-delegation authentication path; follow its
   [reuse and acceptance boundary](docs/qualification/platform-certificate.md).
   Decode success must not imply authentication. Direct-root evidence requires
@@ -134,3 +134,8 @@ does not establish product or native-host qualification.
 - Use focused checks for each coherent slice. Preserve full release obligations
   until a qualified replacement exists; do not import historical orchestration
   solely to obtain a green gate or claim native/macOS proof from Linux checks.
+
+- Canister-signature envelope decoding is now implemented as an opt-in unverified
+  capability. Keep the embedded certificate opaque at that stage; no evidence of
+  authentication may escape before key/message/witness, authority and explicit
+  time policies are checked. Follow the [consumer contract](docs/qualification/canister-signature.md).

@@ -3,6 +3,34 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.1] - Unreleased
+
+### ✨ Added
+
+- Add opt-in bounded, tagged canister-signature envelope decoding, retaining
+  original bytes and exposing an immutable, explicitly unverified witness and
+  opaque embedded certificate. Reuse the strict CBOR tree visitors.
+- Refuse oversized input, missing tags, malformed trees, duplicate/unknown fields
+  and trailing data.
+- Add opt-in canister-signature authentication with immutable message/key/root/time
+  evidence, shared witness/certificate traversal bounds and explicit input limits.
+  Reuse certificate signature/delegation/range checks; require a certified known
+  non-cloud-engine subnet type for delegated signatures.
+- Use RustCrypto `spki` for bounded canonical DER key admission and the existing
+  `sha2` selection for seed/message hashing. Keep all cryptographic primitives
+  upstream; no Agent, Runtime, signature store or authorization policy is added.
+
+### 🧪 Testing
+
+- Add independently observed direct/delegated PocketIC canister signatures and
+  public-API native/Wasm replay, including binding, signature, authority, time
+  and resource refusals. Keep capture provenance and frozen offline fixtures;
+  production Auth adoption and mainnet signer interoperability remain pending.
+- Qualify an isolated Auth issuer-policy adapter against observed signatures for
+  its exact claims-message domain on native and Wasm. Keep protected signer/seed,
+  raw-root adaptation and signing freshness in the consumer; no Auth or Canic
+  product migration is included.
+
 ## [0.34.0] - Unreleased
 
 ### ⚠️ Breaking changes
@@ -25,7 +53,7 @@ Return to the [group index](../../CHANGELOG.md).
   limits and complete selected legacy/sharded ranges. Compare principal bytes
   lexicographically, validate pairs after a match and bind shard start labels.
 
-- Add immutable selected-subnet signing-time projection for [Query issue #1](https://github.com/dragginzgame/ic-platform-new/issues/1),
+- Add immutable selected-subnet signing-time projection for [Query issue #1](https://github.com/dragginzgame/ic-platform/issues/1),
   sharing signature/time checks while enforcing exact delegated subnet identity
   or an explicitly trusted root-subnet binding. Add no transport or default clock.
 

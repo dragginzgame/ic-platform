@@ -31,6 +31,11 @@ help:
 	  'qualify-marketplace-wasm  Execute marketplace and availability admission in Wasm' \
 	  'qualify-platform-certificate  Check strict unverified certificate decoding' \
 	  'qualify-platform-authentication  Check direct and delegated certificate authentication' \
+	  'qualify-canister-signature-authentication  Check key, witness and certificate binding' \
+	  'qualify-canister-signature-decode  Check bounded unverified signature envelopes' \
+	  'qualify-canister-signature-observed  Capture and authenticate replica signatures' \
+	  'qualify-canister-signature-wasm  Replay observed signatures on native and Wasm' \
+	  'qualify-auth-consumer  Exercise isolated Auth issuer policy on native and Wasm' \
 	  'qualify-platform-wasm  Execute certificate authentication and refusals in Wasm' \
 	  'qualify-platform-observed  Verify replica-issued certificates through public APIs' \
 	  'qualify-types          Test and check local Principal and Account identities' \
@@ -314,3 +319,42 @@ qualify-platform-wasm: qualification-tooling-check
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --bin certificate-admission --bin mainnet-admission --release --target wasm32-unknown-unknown --target-dir target/platform-certificate-wasm
 	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --bin mainnet-admission
 	node qualification/platform-certificate-wasm.mjs
+
+.PHONY: qualify-canister-signature-decode
+qualify-canister-signature-decode: toko-tooling-check
+	cargo test --offline --locked -p ic-platform --features canister-signature-decode
+	cargo clippy --offline --locked -p ic-platform --features canister-signature-decode --all-targets -- -D warnings
+	cargo clippy --offline --locked -p ic-platform --features canister-signature-decode --all-targets --target wasm32-unknown-unknown -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --features canister-signature-decode --no-deps
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --features canister-signature-decode --forbid-pattern '^(?!(ic-platform|ic-certification|serde|serde_core|serde_derive|serde_cbor|half|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|hex|sha2|digest|block-buffer|crypto-common|generic-array|typenum|version_check|cfg-if|cpufeatures|libc)$$)' --require ic-certification=1
+
+.PHONY: qualify-canister-signature-authentication
+qualify-canister-signature-authentication: toko-tooling-check
+	cargo test --offline --locked -p ic-platform --features canister-signature-authentication
+	cargo clippy --offline --locked -p ic-platform --features canister-signature-authentication --all-targets -- -D warnings
+	cargo clippy --offline --locked -p ic-platform --features canister-signature-authentication --all-targets --target wasm32-unknown-unknown -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --features canister-signature-authentication --no-deps
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --features canister-signature-authentication --forbid-pattern '^(?!(ic-platform|ic-platform-types|ic-certification|ic-verify-bls-signature|ic_bls12_381|ff|group|pairing|rand_core|subtle|lazy_static|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|serde_cbor|half|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|hex|sha2|digest|block-buffer|crypto-common|generic-array|typenum|version_check|cfg-if|cpufeatures|libc|spki|der|const-oid|hybrid-array)$$)' --require ic-platform-types=1 --require ic-certification=1 --require ic-verify-bls-signature=1 --require spki=1
+
+.PHONY: qualify-canister-signature-observed
+qualify-canister-signature-observed: qualification-tooling-check runtime-server-check
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-observed -- -D warnings
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-observed
+
+.PHONY: qualify-canister-signature-wasm
+qualify-canister-signature-wasm: qualification-tooling-check
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package platform-certificates --features canister-signature --forbid ic-testkit --forbid candid --forbid wat --forbid ic-platform-runtime --forbid ic-platform-protocol --forbid ic-agent --require ic-platform-types=1 --require ic-platform=1
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-admission -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-admission --target wasm32-unknown-unknown -- -D warnings
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-admission
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-admission --release --target wasm32-unknown-unknown --target-dir target/platform-certificate-wasm
+	node qualification/platform-certificate-wasm.mjs signature-admission
+
+.PHONY: qualify-auth-consumer
+qualify-auth-consumer: qualification-tooling-check
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package platform-certificates --features auth-consumer --forbid ic-testkit --forbid candid --forbid wat --forbid ic-platform-runtime --forbid ic-platform-protocol --forbid ic-agent --forbid ic-auth --forbid canic --require ic-platform-types=1 --require ic-platform=1
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features auth-consumer --bin auth-admission -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features auth-consumer --bin auth-admission --target wasm32-unknown-unknown -- -D warnings
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features auth-consumer --bin auth-admission
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features auth-consumer --bin auth-admission --release --target wasm32-unknown-unknown --target-dir target/platform-certificate-wasm
+	node qualification/platform-certificate-wasm.mjs auth-admission

@@ -166,7 +166,7 @@ production consumer adoption. The product graph and defaults are unchanged.
 
 ## Selected-subnet signing time — issue #1
 
-[Issue #1](https://github.com/dragginzgame/ic-platform-new/issues/1) supplies the
+[Issue #1](https://github.com/dragginzgame/ic-platform/issues/1) supplies the
 concrete Query requirement. `authenticate_subnet_time` now returns a narrow,
 immutable `AuthenticatedSubnetTime` projection under `certificate-authentication`.
 It consumes the original decoded certificate and releases its allocated tree;

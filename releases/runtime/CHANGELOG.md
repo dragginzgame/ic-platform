@@ -123,7 +123,7 @@ Source delivery only; not a registry publication or qualified release.
   repoll through the real Wasm CallFuture. Merge the compiler-fixture runners
   and give shared IC0 Clippy checks one Make prerequisite.
 
-- Resolve the workspace and hook wiring in [#2](https://github.com/dragginzgame/ic-platform-new/issues/2):
+- Resolve the workspace and hook wiring in [#2](https://github.com/dragginzgame/ic-platform/issues/2):
   consolidate the native driver into the standard qualification workspace, align
   the candidate with PocketIC's `thiserror` 2.0.18, and retain two-workspace
   dependency/formatting coverage. Adopt and activate the canonical Toko formatting

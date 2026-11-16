@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform"
-version = "0.34.0"
+version = "0.34.1"
 description = "Explicit IC certificate and authentication boundaries"
 edition.workspace = true
 rust-version.workspace = true
@@ -17,6 +17,14 @@ ignored = ["toko-tooling"]
 default = []
 certificate-decode = ["dep:ic-certification", "dep:serde", "dep:serde_cbor", "dep:thiserror"]
 
+canister-signature-decode = ["certificate-decode"]
+canister-signature-authentication = [
+    "canister-signature-decode",
+    "certificate-authentication",
+    "dep:sha2",
+    "dep:spki",
+]
+
 certificate-authentication = ["certificate-decode", "dep:candidate-types", "dep:ic-verify-bls-signature"]
 
 [dependencies]
@@ -25,6 +33,8 @@ ic-certification = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_cbor = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
+spki = { workspace = true, optional = true }
 thiserror = { workspace = true, optional = true }
 
 [dev-dependencies]

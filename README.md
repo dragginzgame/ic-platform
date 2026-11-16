@@ -120,7 +120,7 @@ The opt-in `cloud-engine-marketplace` feature adds [daily price rows](docs/quali
 with all six node classes and arbitrary naturals, plus [available-node page responses](docs/qualification/available-nodes.md).
 Bounded page argument encoding is also implemented; consumer adoption remains pending.
 
-Platform `0.34.0` now has an opt-in `certificate-decode` capability and empty
+Platform `0.34.1` now has an opt-in `certificate-decode` capability and empty
 defaults. It strictly decodes untrusted certificate grammar, retains the original
 bytes by borrow and exposes an immutable, explicitly unverified view. See the
 [certificate boundary](docs/qualification/platform-certificate.md) for reuse
@@ -155,6 +155,18 @@ The [standalone Wasm comparison](docs/qualification/engine-view-wasm.md) current
 reports size differences with acceptance undecided; it is not deployment qualification.
 
 All sibling checkouts remain read-only. The maintainer authorized initial source
-delivery to the public `dragginzgame/ic-platform-new` GitHub repository. Registry
+delivery to the public `dragginzgame/ic-platform` GitHub repository. Registry
 publication, releases, deletion and consumer migration remain excluded. All
 packages retain `publish = false`.
+
+The opt-in `canister-signature-decode` capability now admits bounded tagged
+signature envelopes and reuses strict certificate tree grammar. It retains exact
+original bytes, an opaque embedded certificate and an explicitly unverified
+witness. `canister-signature-authentication` now adds upstream DER key parsing,
+message/seed/witness binding and direct/delegated certificate verification with
+separate explicit time windows and shared traversal bounds. Independently observed
+PocketIC signatures now pass public-API replay on native and standalone Wasm.
+An isolated Auth issuer-policy adapter also passes on both targets using its
+exact message domain, protected signer/seed and caller-owned freshness checks.
+Mainnet signer interoperability and Auth migration remain pending; see
+[the consumer contract](docs/qualification/canister-signature.md).

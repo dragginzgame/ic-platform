@@ -3,8 +3,8 @@
 The existing `cloud-engine-response` feature now exposes
 `decode_get_network_fee_response`, `decode_registry_copy_status_response` and
 `RegistryCopyStatus`. This is the first two-method slice of the retained
-[marketplace/availability contract #166](https://github.com/dragginzgame/ic-platform/issues/166).
-The issue's declaration and [published resolution](https://github.com/dragginzgame/ic-platform/issues/166#issuecomment-6882560916)
+[marketplace/availability contract #166](https://github.com/dragginzgame/ic-platform-legacy/issues/166).
+The issue's declaration and [published resolution](https://github.com/dragginzgame/ic-platform-legacy/issues/166#issuecomment-6882560916)
 were reviewed; earlier qualification does not qualify the replacement.
 Query's marketplace design was inspected read-only.
 

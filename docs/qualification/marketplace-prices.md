@@ -3,7 +3,7 @@
 `cloud-engine-marketplace` enables `decode_list_marketplace_prices_response`
 and decode-only `MarketplaceEntry`, `PriceEntry`, `Price` and `NodeType` records
 under `cloud_engine`. It adds `candid::Nat` with upstream BigUint storage.
-These implement the price-row portion of [#166](https://github.com/dragginzgame/ic-platform/issues/166),
+These implement the price-row portion of [#166](https://github.com/dragginzgame/ic-platform-legacy/issues/166),
 using the selected declaration recorded there and its published resolution.
 The source declaration hash and live-observation provenance remain in that
 issue; this work performs no live service reads.

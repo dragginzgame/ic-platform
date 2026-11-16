@@ -22,6 +22,12 @@ pub(super) fn verify(
     if delegation.certificate.len() > limits.delegation_bytes {
         return Err(VerifyError::DelegationLimit);
     }
+    #[cfg(feature = "canister-signature-authentication")]
+    if matches!(scope, Authority::CanisterSignature(_))
+        && !delegation.certificate.starts_with(&[0xd9, 0xd9, 0xf7])
+    {
+        return Err(VerifyError::InvalidDelegationEncoding);
+    }
     let authority = decode_certificate(
         &delegation.certificate,
         CertificateDecodeLimits {
@@ -48,6 +54,22 @@ pub(super) fn verify(
             target,
             limits.canister_ranges,
         )?,
+        #[cfg(feature = "canister-signature-authentication")]
+        Authority::CanisterSignature(target) => {
+            authorize(
+                &authority.certificate.tree,
+                subnet.as_slice(),
+                target,
+                limits.canister_ranges,
+            )?;
+            let kind = required_leaf(
+                &authority.certificate.tree,
+                &[b"subnet", subnet.as_slice(), b"type"],
+            )?;
+            if !matches!(kind, b"application" | b"system" | b"verified_application") {
+                return Err(VerifyError::NotAuthorized);
+            }
+        }
         Authority::Subnet { requested, .. } => {
             if requested != subnet {
                 return Err(VerifyError::SubnetMismatch);

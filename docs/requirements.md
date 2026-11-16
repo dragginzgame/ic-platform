@@ -6,15 +6,15 @@ resolution history. This is not a complete consumer inventory or a duplicate
 issue tracker. No row establishes replacement qualification.
 
 Active follow-up for the two remaining old-repository issues now lives here:
-[Registry settings #3](https://github.com/dragginzgame/ic-platform-new/issues/3)
-and [crypto/Agent advisory #4](https://github.com/dragginzgame/ic-platform-new/issues/4).
+[Registry settings #3](https://github.com/dragginzgame/ic-platform/issues/3)
+and [crypto/Agent advisory #4](https://github.com/dragginzgame/ic-platform/issues/4).
 Old #169 and #50 were closed as migrated at the maintainer's request; their
 links below remain provenance, not active work queues or claims of completion.
 
 ## First slice: Cloud Engine projection
 
 The named consumer contract is Query's selected `getEngineViews` topology read,
-recorded in [Platform #168](https://github.com/dragginzgame/ic-platform/issues/168).
+recorded in [Platform #168](https://github.com/dragginzgame/ic-platform-legacy/issues/168).
 The design pins old Platform source to
 `c24e3a59583eabcf5b6bb87987269c13a209a51f`. Read-only inspection found Query HEAD
 `263a8e92da873543825c25e7dd6530c4db5ab673`, with the actual caller in
@@ -25,10 +25,10 @@ owns result binding and relationship admission. Its contract is
 unchanged against HEAD; the checkout has unrelated dirty work. This pins the
 existing caller, not adoption or qualification of a replacement.
 
-The [#168 delivery record](https://github.com/dragginzgame/ic-platform/issues/168#issuecomment-6892377968)
+The [#168 delivery record](https://github.com/dragginzgame/ic-platform-legacy/issues/168#issuecomment-6892377968)
 reports publication in Platform 0.33.7 at
 `663cf913997490f448553119a6caf66b3cdecc81` and registry-consumer checks. The
-[#156 implementation record](https://github.com/dragginzgame/ic-platform/issues/156#issuecomment-6792536498)
+[#156 implementation record](https://github.com/dragginzgame/ic-platform-legacy/issues/156#issuecomment-6792536498)
 describes concrete declaration macros, compile-time label checks and independent
 fixtures. These resolution comments were reviewed; neither proves the new
 decode-only declaration design or its replacement implementation.
@@ -51,23 +51,37 @@ frozen literal frames and independent oracle declarations; generated round trips
 are insufficient. Native/Wasm compilation and real consumer adoption remain
 separate from unit decoder tests.
 
-[Platform #156](https://github.com/dragginzgame/ic-platform/issues/156) supplies
+[Platform #156](https://github.com/dragginzgame/ic-platform-legacy/issues/156) supplies
 the declaration ergonomics contract: numeric labels, docs, visibility, attributes
 and derives without repeated field types. Preserve record/variant obligations as
 the surface grows; EngineView alone cannot prove general variant support.
+
+## Canister-signature consumer
+
+Current read-only inspection of ic-auth at `b78991e9833320692921bf766e51ad361c9c8c4d`
+found its unchanged `crates/ic-auth/src/issuer_signature.rs` caller of
+`verify_canister_sig_with_time`. It owns protected issuer/seed, fixed-domain claims
+message framing, signature limits, root selection and signing-time freshness.
+The isolated qualification adapter now passes native/Wasm execution against
+observed signatures for that domain; it preserves the caller's lack of delegation
+freshness through an explicit separate full-range window. Source hashes,
+acceptance differences and remaining migration obligations are recorded in the
+[canister-signature contract](qualification/canister-signature.md).
+Actual Auth compilation/adoption, complete credential policy and Canic integration
+are not established. No sibling changes or consumer migration are included.
 
 ## Other retained contracts
 
 | Consumer / canonical source | Owner | Required acceptance |
 | --- | --- | --- |
-| Query selected-subnet maintenance time, [replacement #1](https://github.com/dragginzgame/ic-platform-new/issues/1) | Platform certificate projection | Authenticate signing time for the requested subnet, preserve explicit root/freshness inputs, require trusted root-subnet binding without delegation, and retain original response bytes. The local `authenticate_subnet_time` public API and PocketIC evidence are documented in the [certificate record](qualification/platform-certificate.md#selected-subnet-signing-time--issue-1); The borrowed Agent response type also passes isolated consumer qualification without re-encoding; Query sampler integration and delivery remain consumer work. |
-| Query Registry settings, [#169](https://github.com/dragginzgame/ic-platform/issues/169) | Protocol | Absent vs present-empty nested messages, absent vs false/zero scalars, raw replica-default sentinels, shared nested budgets, duplicate-singular and malformed-wire refusals. Configured SEV is not attestation. |
-| Query marketplace/availability, [#166](https://github.com/dragginzgame/ic-platform/issues/166) | Protocol | Six node classes, arbitrary naturals, signed timestamps, daily units, exact arity and application errors; unready Registry copy differs from an empty page. Consumer owns pagination. |
-| Backup signed recovery inspection, [#167](https://github.com/dragginzgame/ic-platform/issues/167) | Platform native packet boundary | Strict read-state field/kind admission, original bytes/paths, upstream request-ID identity, duplicate/unknown/malformed/trailing refusal and honest input-bound semantics. No transport/retry or Backup policy. |
-| Canic endpoint composition, [#164](https://github.com/dragginzgame/ic-platform/issues/164) | Runtime | Guard and pre-copy admission before decoding, explicit codecs, one dispatch/reply owner and installed rollback/callback proof; no Wire-specific execution owner. |
-| Query certified classification, [#158](https://github.com/dragginzgame/ic-platform/issues/158) | Platform native | Actual upstream SubnetType identity, unknown strings and absent values; classification is not capacity or deployment permission. |
-| Crypto/Agent boundary, [#50](https://github.com/dragginzgame/ic-platform/issues/50) | Platform crypto/native | Recheck selected graphs and current advisory evidence before admission. Direct ECDSA correction alone does not resolve Agent/derivation paths. No in-house crypto, forced incompatible override or inherited risk acceptance. |
-| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko 0.44.5 through its authenticated installer; product acceptance remains separate. |
+| Query selected-subnet maintenance time, [replacement #1](https://github.com/dragginzgame/ic-platform/issues/1) | Platform certificate projection | Authenticate signing time for the requested subnet, preserve explicit root/freshness inputs, require trusted root-subnet binding without delegation, and retain original response bytes. The local `authenticate_subnet_time` public API and PocketIC evidence are documented in the [certificate record](qualification/platform-certificate.md#selected-subnet-signing-time--issue-1); The borrowed Agent response type also passes isolated consumer qualification without re-encoding; Query sampler integration and delivery remain consumer work. |
+| Query Registry settings, [#169](https://github.com/dragginzgame/ic-platform-legacy/issues/169) | Protocol | Absent vs present-empty nested messages, absent vs false/zero scalars, raw replica-default sentinels, shared nested budgets, duplicate-singular and malformed-wire refusals. Configured SEV is not attestation. |
+| Query marketplace/availability, [#166](https://github.com/dragginzgame/ic-platform-legacy/issues/166) | Protocol | Six node classes, arbitrary naturals, signed timestamps, daily units, exact arity and application errors; unready Registry copy differs from an empty page. Consumer owns pagination. |
+| Backup signed recovery inspection, [#167](https://github.com/dragginzgame/ic-platform-legacy/issues/167) | Platform native packet boundary | Strict read-state field/kind admission, original bytes/paths, upstream request-ID identity, duplicate/unknown/malformed/trailing refusal and honest input-bound semantics. No transport/retry or Backup policy. |
+| Canic endpoint composition, [#164](https://github.com/dragginzgame/ic-platform-legacy/issues/164) | Runtime | Guard and pre-copy admission before decoding, explicit codecs, one dispatch/reply owner and installed rollback/callback proof; no Wire-specific execution owner. |
+| Query certified classification, [#158](https://github.com/dragginzgame/ic-platform-legacy/issues/158) | Platform native | Actual upstream SubnetType identity, unknown strings and absent values; classification is not capacity or deployment permission. |
+| Crypto/Agent boundary, [#50](https://github.com/dragginzgame/ic-platform-legacy/issues/50) | Platform crypto/native | Recheck selected graphs and current advisory evidence before admission. Direct ECDSA correction alone does not resolve Agent/derivation paths. No in-house crypto, forced incompatible override or inherited risk acceptance. |
+| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko 0.44.5 through its authenticated installer; product acceptance remains separate. |
 
 The first projection must not import native/crypto dependencies to satisfy an
 unrelated row. Conversely, an isolated codec pass cannot qualify those rows.

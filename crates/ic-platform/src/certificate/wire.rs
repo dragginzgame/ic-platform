@@ -103,3 +103,24 @@ fn required<'de, A: SeqAccess<'de>, T: Deserialize<'de>>(seq: &mut A) -> Result<
     seq.next_element()?
         .ok_or_else(|| de::Error::custom("missing IC hash-tree element"))
 }
+
+#[cfg(feature = "canister-signature-decode")]
+pub(super) fn decode_canister_signature(
+    bytes: &[u8],
+) -> Result<(Vec<u8>, HashTree), serde_cbor::Error> {
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct SignatureWire {
+        certificate: ByteString,
+        tree: OwnedTree,
+    }
+    // The public decoder has required the three-byte tag; require a map next,
+    // rather than accepting Serde's positional struct-sequence representation.
+    if bytes.get(3).is_none_or(|byte| byte >> 5 != 5) {
+        return Err(de::Error::custom(
+            "canister-signature envelope must be a map",
+        ));
+    }
+    let wire: SignatureWire = serde_cbor::from_slice(bytes)?;
+    Ok((wire.certificate.0, wire.tree.0))
+}

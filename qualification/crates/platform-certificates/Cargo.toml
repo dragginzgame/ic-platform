@@ -7,8 +7,14 @@ edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
 
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
 [target.'cfg(any())'.dev-dependencies]
 toko-tooling.workspace = true
+
+[package.metadata.toko-tooling.loc]
+category = "tests"
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid.workspace = true
@@ -16,16 +22,35 @@ ic-testkit.workspace = true
 tokio.workspace = true
 wat.workspace = true
 
-[package.metadata.cargo-machete]
-ignored = ["toko-tooling"]
+[[bin]]
+name = "auth-admission"
+path = "src/bin/auth-admission.rs"
+required-features = ["auth-consumer"]
 
-[package.metadata.toko-tooling.loc]
-category = "tests"
+[[bin]]
+name = "signature-observed"
+path = "src/bin/signature-observed.rs"
+required-features = ["canister-signature"]
+
+[[bin]]
+name = "signature-admission"
+path = "src/bin/signature-admission.rs"
+required-features = ["canister-signature"]
+
+[features]
+auth-consumer = ["canister-signature", "dep:sha2"]
+canister-signature = [
+    "candidate-platform/canister-signature-authentication",
+    "dep:serde_cbor",
+    "ic-certification/serde",
+]
 
 [dependencies]
 candidate-platform = { workspace = true, features = ["certificate-authentication"] }
 candidate-types.workspace = true
 ic-certification.workspace = true
+serde_cbor = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
 
 [lints]
 workspace = true

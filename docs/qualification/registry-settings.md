@@ -3,8 +3,8 @@
 The opt-in `registry-settings` feature implements a selected protobuf decoder in
 `ic-platform-protocol`. It accepts an already extracted SubnetRecord. Registry
 transport, envelope decoding, authentication and Query reporting remain outside
-this slice. This is partial progress on [replacement #3](https://github.com/dragginzgame/ic-platform-new/issues/3),
-migrated from [Platform #169](https://github.com/dragginzgame/ic-platform/issues/169),
+this slice. This is partial progress on [replacement #3](https://github.com/dragginzgame/ic-platform/issues/3),
+migrated from [Platform #169](https://github.com/dragginzgame/ic-platform-legacy/issues/169),
 not completion of the consumer requirement.
 
 ## Contract and provenance
@@ -120,7 +120,7 @@ Publication remains disabled; the current Protocol development version is 0.2.0.
 
 ## Source-bound Query settings acceptance — 2026-11-16
 
-A new read-only review for [replacement #3](https://github.com/dragginzgame/ic-platform-new/issues/3)
+A new read-only review for [replacement #3](https://github.com/dragginzgame/ic-platform/issues/3)
 found the actual settings report and CLI implemented in Query's working tree.
 This supersedes the earlier design-only observation above. The supplying decoder
 was already adopted from immutable Git revision
@@ -182,5 +182,5 @@ crypto-bigint 0.5.5, introduced through elliptic-curve 0.13.8 and Agent 0.49.3
 (K256/P256/identity paths), via registry Platform 0.33.7 into topology 0.106.1.
 It also reports unmaintained paste/serde_cbor warnings. This is lock/graph evidence,
 not an exploitability assessment; no exemption or consumer acceptance follows
-from the settings tests. [Issue #4](https://github.com/dragginzgame/ic-platform-new/issues/4)
+from the settings tests. [Issue #4](https://github.com/dragginzgame/ic-platform/issues/4)
 remains the remediation owner. No advisory setting or dependency was changed.

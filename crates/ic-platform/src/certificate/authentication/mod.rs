@@ -1,8 +1,15 @@
 //! Certificate authentication with explicit roots, authority and time windows.
 
+#[cfg(feature = "canister-signature-authentication")]
+mod canister_signature;
 mod delegation;
 mod ranges;
 mod subnet;
+#[cfg(feature = "canister-signature-authentication")]
+pub use canister_signature::{
+    AuthenticatedCanisterSignature, CanisterSignatureKey, CanisterSignatureLimits,
+    CanisterSignatureVerifyError, authenticate_canister_signature,
+};
 pub use subnet::{
     AuthenticatedSubnetTime, authenticate_subnet_time, authenticate_subnet_time_from_certificate,
 };
@@ -304,6 +311,8 @@ pub fn authenticate_certificate<'a>(
 #[derive(Clone, Copy)]
 enum Authority {
     Canister(Principal),
+    #[cfg(feature = "canister-signature-authentication")]
+    CanisterSignature(Principal),
     Subnet {
         requested: Principal,
         root_subnet: Option<Principal>,
