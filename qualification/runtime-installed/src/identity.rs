@@ -43,7 +43,7 @@ pub(super) async fn verify(pic: &PocketIc, canister: Principal, root_bytes: [u8;
             max_age_ns: 60_000_000_000,
             max_future_skew_ns: 0,
         };
-        let target = candidate_types::Principal::from_slice(canister.as_slice());
+        let target = canister.as_slice().try_into().unwrap();
         let evidence = authenticate_certificate(
             certificate,
             &root,
@@ -84,7 +84,7 @@ pub(super) async fn verify(pic: &PocketIc, canister: Principal, root_bytes: [u8;
             )
             .unwrap(),
             &published_root,
-            published_types::Principal::from_slice(canister.as_slice()),
+            canister.as_slice().try_into().unwrap(),
             published::TimePolicy {
                 certificate: published_window,
                 delegation: published_window,
