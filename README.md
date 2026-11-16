@@ -140,7 +140,7 @@ native and Wasm replay, including explicit root-subnet binding, separate
 signing/delegation timestamps and authority refusals. Broader mainnet interoperability and production consumer qualification
 remain pending before the full authentication gate.
 
-Toko 0.44.5 is installed through its authenticated installer, including canonical
+Toko 0.44.6 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local
 packages and `make deps-update` for deliberate Cargo lock updates. See
 [development setup and focused checks](docs/development.md) for prerequisites,

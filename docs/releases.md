@@ -31,7 +31,7 @@ crossing checks. The [real-consumer proof](qualification/types-release.md) uses
 pinned Auth passive model source in an isolated workspace; it does not migrate
 Auth's working tree or claim full Auth application acceptance.
 
-The authenticated Toko 0.44.5 installation supplies publication selection,
+The authenticated Toko 0.44.6 installation supplies publication selection,
 retained attempts, source checks, release metadata checks and archive provenance.
 The generic release runner is not enabled. The first Types release uses an
 explicit reviewed commit and annotated `types-v0.21.1` tag, followed by the
