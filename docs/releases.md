@@ -316,3 +316,26 @@ qualification-server ownership remains selected. Run the complete local catalog,
 then publish Protocol alone using its clean source, annotated remote tag and
 explicit receipt. Verify archive checksum and source independently after upload.
 Hosted CI remains asynchronous; downstream Query/Backup adoption is separate.
+
+Protocol 0.2.8 is published from clean source
+`4e14822ca504b43e47942aeda4074ca2766da944`, with main and annotated
+`protocol-v0.2.8` pushed atomically. The complete local catalog passed at that
+source, including the refreshed qualification suppliers; receipt:
+`target/release-qualification/1794867686137-2542022/receipt.json`.
+The root-lock audit found no known vulnerabilities against current RustSec
+`02e2517f457a359fc6d3440ea4560c8ea188fee8`.
+
+Independent registry archive SHA-256:
+`e6c994e205363960ac400252160967bfdec2e9574e5086232d0ccef88ffa5d77`.
+It matches the sparse index, admitted archive and exact clean tagged source.
+All-feature extracted-archive native/Wasm Clippy and native tests passed.
+Retained dry run: `target/publication/check.selection.ZS4Z1A`; single upload:
+`target/publication/publish.selection.2i7MzP`; independent readback:
+`target/registry-readback/ic-platform-protocol-0.2.8/verified.json`.
+
+Post-push review of the selected codec features, bounds, canonical Types and
+qualification dependency wiring found no new actionable issue. Hosted
+[CI](https://github.com/dragginzgame/ic-platform/actions/runs/43969961422) and
+[Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/43969961475)
+were observed in progress once; neither was awaited or claimed passing. Native
+execution is Linux evidence, not new macOS qualification.
