@@ -156,5 +156,5 @@ Fixtures and generation provenance are in
 `qualification/platform-certificates/fixtures/icp-signing/`.
 Logs: `target/external-status-tests.log`, `target/external-status-qualification.log`.
 Neither signing nor the recovery fixture contacts a live provider or canister.
-Platform 0.34.8 is selected for publication. Full Canic journal
+Platform 0.34.8 is published; see [delivery evidence](../releases.md#external-signing-and-managementledger-release). Full Canic journal
 integration and Blob fresh-CLI stop/upgrade/start/custody journeys remain unproved.

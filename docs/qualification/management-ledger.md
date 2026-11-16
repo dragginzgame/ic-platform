@@ -3,7 +3,7 @@
 Protocol 0.2.7 supplies
 [Platform #20](https://github.com/dragginzgame/ic-platform/issues/20) and the
 installation portion of [Platform #11](https://github.com/dragginzgame/ic-platform/issues/11).
-Publication is selected for this release; consumer migration/delivery remains separate.
+Protocol 0.2.7 is published; see [delivery evidence](../releases.md#external-signing-and-managementledger-release). Consumer migration/delivery remains separate.
 
 ## Public mapping
 

@@ -226,3 +226,38 @@ independently verify each registry archive before proceeding. Hosted CI remains
 asynchronous. Actual consumer migration and remaining advisory obligations remain
 separate; see [management/ledger](qualification/management-ledger.md) and
 [external signing](qualification/blob-suppliers.md).
+
+Both packages are now published from clean source
+`26834168a74cf76a4b8f93d4450c3da4f9e3f5db`. Main and both annotated tags
+were pushed atomically. The complete local catalog passed; receipt:
+`target/release-qualification/1794863276300-1287140/receipt.json`.
+The current RustSec database was `02e2517f457a359fc6d3440ea4560c8ea188fee8`;
+the release lock audit found no known vulnerabilities. Linux execution does not
+establish macOS qualification or clear legacy consumer advisory obligations.
+
+| Package | Independently downloaded archive SHA-256 |
+| --- | --- |
+| [Protocol 0.2.7](https://crates.io/crates/ic-platform-protocol/0.2.7) | `db4ea27c2705897b24b1c7c239db916abbb4c15eb97c1adcda896d0ca3891ff4` |
+| [Platform 0.34.8](https://crates.io/crates/ic-platform/0.34.8) | `33bf34291d82ae3a1735c12aa20f1457c87e36bda3215a0a3e48c4c20efedbb1` |
+
+Each archive passed all-feature native/Wasm Clippy, native tests and independently
+fetched source provenance before its single upload. Registry readbacks matched
+the sparse-index checksum, admitted local archive and clean tagged VCS identity.
+Attempts under `target/publication/`: Protocol dry run `check.selection.ZYo8bV`,
+upload `publish.selection.pR7uji`; Platform dry run `check.selection.SndGAJ`,
+upload `publish.selection.bYoxP9`. Combined readbacks:
+`target/deploy-0348/published.json`.
+
+The first catalog attempt retained under
+`target/release-qualification/1794863145331-1240725` refused the advanced sibling
+Query HEAD. The successful attempt used `QUERY_SOURCE=target/deploy-query-source`
+at the existing pinned revision with every recorded input hash verified, and
+`BLOB_SOURCE=target/blob-types-source` at its clean pinned revision. Both are
+disposable qualification-only copies; no sibling was modified. The existing
+adapter lacks partial-stage resume, so a new complete receipt was executed.
+
+Post-push review of the delivered APIs, feature/dependency wiring and directly
+affected qualification callers found no new actionable issue. Hosted
+[CI](https://github.com/dragginzgame/ic-platform/actions/runs/43957664273) and
+[Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/43957664311)
+were observed once as in progress; neither was awaited or reported as passing.
