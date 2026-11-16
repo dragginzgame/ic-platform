@@ -4,11 +4,11 @@ The current published product versions are Types 0.21.1, Platform 0.34.3,
 Protocol 0.2.3, and Runtime/macros/guard 0.23.11. Qualification packages remain
 private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.
-See the [latest release evidence](qualification/2026-11-16-runtime-protocol-publication.md).
+See the [latest release evidence](qualification/2026-11-16-timer-crypto-publication.md).
 
 Qualification now selects Testkit 0.107.1 and explicitly names three Platform
 roles: `candidate-platform` tests the local 0.34.4 source, `published-platform`
-checks the current registry 0.34.3 verifier independently, and `legacy-platform`
+checks the current registry 0.34.4 verifier independently, and `legacy-platform`
 is the frozen 0.33.7 codec oracle. The latter retains APIs intentionally absent
 from the rewrite and is not a live product dependency. Published Types 0.21.1
 belongs to the registry verifier; local Types belongs to the candidate. Only

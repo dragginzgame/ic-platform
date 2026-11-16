@@ -266,7 +266,7 @@ URL construction, simulator behavior and downstream installation/adoption.
 
 The crypto/Agent retained obligation was rechecked on 2026-11-16 against
 [RUSTSEC-2026-0387](https://rustsec.org/advisories/RUSTSEC-2026-0387): the patched
-range remains `crypto-bigint >=0.7.6`. Platform 0.34.4's local primitive addition
+range remains `crypto-bigint >=0.7.6`. Platform 0.34.4's published primitive addition
 now selects K256 0.14.0 and crypto-bigint 0.7.11 with an explicit compatible
 security floor. See the [Auth primitive evidence](qualification/auth-crypto.md).
 Agent/derivation #4 remains unresolved; neither a corrected direct ECDSA graph

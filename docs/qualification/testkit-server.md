@@ -34,8 +34,8 @@ notice remains in that supplier. No lifecycle, artifact or process implementatio
 was copied. The data identifies DFINITY PocketIC release artifacts, not executable
 Rust. Native Linux observations do not establish macOS execution qualification.
 
-The current published Platform 0.34.3 verifier also independently checks installed
-Runtime certificates. Candidate 0.34.4 and registry 0.34.3 receive the same original
+The current published Platform 0.34.4 verifier also independently checks installed
+Runtime certificates. Candidate 0.34.4 and registry 0.34.4 receive the same original
 certificate bytes with separately constructed identities and explicit root/time/
 resource policies. Legacy 0.33.7 remains named `legacy-platform` solely for retained
 codec comparisons; it is not claimed as the latest Platform or used to implement

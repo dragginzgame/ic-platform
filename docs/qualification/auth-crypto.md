@@ -1,8 +1,9 @@
-# Auth primitive migration — Platform 0.34.4 candidate
+# Auth primitive migration — Platform 0.34.4
 
-This local, unpublished compatible addition supplies the missing `ed25519` and
+This published compatible addition supplies the missing `ed25519` and
 `ecdsa` primitives for [Auth crypto migration #7](https://github.com/dragginzgame/ic-platform/issues/7).
 It does not yet complete certified-issuer construction or installed migration.
+See the [publication evidence](2026-11-16-timer-crypto-publication.md).
 
 ## Reuse and ownership
 

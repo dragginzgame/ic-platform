@@ -110,7 +110,7 @@ Runtime's opt-in `system-raw` feature also supplies dependency-free synchronous
 operations for caller-owned exports, without a task or executor. See the
 [Storage migration contract](docs/qualification/runtime-storage.md).
 
-The local Runtime 0.23.12 candidate adds global-timer roots to the same executor,
+Published Runtime 0.23.12 adds global-timer roots to the same executor,
 with no update-reply authority, and IC timer/version operations. Its
 [installed timer evidence](docs/qualification/runtime-timers.md) is separate from
 the still-required Scheduling transport migration and publication.
@@ -145,7 +145,7 @@ native and Wasm replay, including explicit root-subnet binding, separate
 signing/delegation timestamps and authority refusals. Broader mainnet interoperability and production consumer qualification
 remain pending before the full authentication gate.
 
-The local Platform 0.34.4 candidate restores opt-in Ed25519 and secp256k1 upstream
+Published Platform 0.34.4 restores opt-in Ed25519 and secp256k1 upstream
 primitives. [Actual Auth checks](docs/qualification/auth-crypto.md) pass without
 legacy Platform for those paths; certified-issuer and installed migration remain
 pending. [Published Wire 0.24.2 with Types 0.21.1](docs/qualification/auth-wire.md)

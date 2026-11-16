@@ -1,8 +1,8 @@
 # Timer execution boundary
 
-Runtime 0.23.12 is the next compatible candidate after the published 0.23.11
-baseline, checked in the crates.io sparse index on 16 November 2026. Macros and
-guard advance with Runtime. This work is local and unpublished.
+Runtime 0.23.12 is published with its coordinated macros and guard. It advances
+the 0.23.11 baseline checked on 16 November 2026. See the
+[publication evidence](2026-11-16-timer-crypto-publication.md).
 
 ## Consumer and ownership
 
