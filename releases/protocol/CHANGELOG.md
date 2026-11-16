@@ -3,9 +3,20 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.1.0] - Unreleased
+## [0.1.1] - 2026-11-16 (GitHub source snapshot)
 
-Initial Protocol version; publication remains disabled pending publisher selection.
+- Correct Protocol snapshot versioning after multiple GitHub deliveries reused
+  0.1.0 while adding Registry settings, marketplace and available-node support.
+  This increment identifies the accumulated implementation; it introduces no
+  additional API or behavior change relative to the latest 0.1.0 snapshot.
+- Apply the same post-delivery version rule as other product groups. Future
+  changed crate contents receive a new version even before registry publication.
+
+## [0.1.0] - Historical GitHub source snapshots
+
+Initial Protocol version, reused across successive deliveries in error. The
+cumulative notes below describe those snapshots; no retroactive versions are
+assigned. Publication remains disabled pending publisher selection.
 
 ### 🔧 Tooling
 

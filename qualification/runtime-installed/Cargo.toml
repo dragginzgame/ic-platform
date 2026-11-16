@@ -7,8 +7,11 @@ rust-version.workspace = true
 license-file.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
+candid.workspace = true
+ic-management-canister-types.workspace = true
 ic-testkit.workspace = true
 tokio.workspace = true
+wat.workspace = true
 
 [target.'cfg(any())'.dev-dependencies]
 toko-tooling.workspace = true

@@ -78,7 +78,7 @@ jobs:
       - name: Prepare verified PocketIC server
         run: make install-runtime-server
       - name: Check installed Runtime rollback
-        run: make qualify-runtime-installed
+        run: make qualify-runtime-installed check-upgrade-tooling
       - name: Qualify public consumer and heap behavior
         run: make qualify-engine-response profile-engine-response
       - name: Check Registry settings projection

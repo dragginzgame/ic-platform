@@ -31,7 +31,10 @@ thread_local! {
 /// registration and local wake interest without fabricating a remote rejection.
 /// A cleaned-up future never yields a completion. If first polled by the update
 /// executor, its callback resumes that task and cleanup terminates that task.
-/// Installed rollback qualification remains pending.
+/// Before upgrading, stop the canister and wait until its IC status is Stopped
+/// so all outstanding callbacks have drained. Then upgrade and restart it.
+/// Callback registrations and suspended futures are heap-local, not upgrade
+/// persistence. Upgrading a running/stopping canister is unsupported.
 ///
 /// An unpolled future may move into a task. Once first polled, it must remain
 /// in the same executor task (or remain outside the executor for manual polling).

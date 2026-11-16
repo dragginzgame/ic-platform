@@ -38,7 +38,8 @@ help:
 	  'qualify-runtime-guard  Check exact guard versions and mixed-executor refusal' \
 	  'qualify-runtime-exports  Build and execute explicit generated IC update exports' \
 	  'install-runtime-server / runtime-server-check  Prepare or verify Testkit PocketIC' \
-	  'qualify-runtime-installed  Execute installed initial-update rollback cases' \
+	  'qualify-runtime-installed  Execute installed calls, rollback and drained upgrades' \
+	  'upgrade-help / check-upgrade-tooling  Preview operator usage or test failure handling' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
 	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
 	  'fmt / fmt-check        Format or check Rust and Cargo manifests'
@@ -270,3 +271,10 @@ check-protocol-graphs: qualification-tooling-check
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --features registry-settings --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features candidate --forbid-pattern '^(?!(engine-view-wasm|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
+
+.PHONY: upgrade-help check-upgrade-tooling
+upgrade-help:
+	node scripts/upgrade-canister.mjs --help
+
+check-upgrade-tooling:
+	node --test qualification/upgrade-tooling.test.mjs

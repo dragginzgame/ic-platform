@@ -415,7 +415,11 @@ Required installed cases:
 
 - One-way local receipt with no implied remote delivery or callback.
 
-- Upgrade reconstruction and any required snapshot procedure.
+- Stop/drain/upgrade/start: require IC status Stopped before replacing code,
+  prove outstanding callbacks settle first and fresh calls work after restart.
+  Suspended Rust futures/callback registrations are not persisted across upgrade.
+  Upgrading with live callbacks is outside the supported contract; do not add a
+  recovery subsystem or pre-upgrade guard to make that workflow work.
 
 Implement Scheduling's task observation only with a precise committed-state contract. A cleanup failure cannot be converted into “terminated successfully.” Prove the interaction with a committed timer dispatch record. Platform qualification uses a minimal probe for this contract and must not depend on the Scheduling product release.
 

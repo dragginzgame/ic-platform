@@ -43,8 +43,9 @@ actual working tree after authorized local application; consumer delivery remain
 pending. A separate native heap
 profiler compares allocation against the published decoder; see its
 [criteria and results](docs/qualification/engine-view-heap.md).
-Protocol and its private qualification packages start at 0.1.0;
-publication remains disabled.
+Protocol is now the 0.1.1 development candidate; private qualification packages
+remain at 0.1.0. Changed product crates advance after each GitHub source snapshot,
+independently of registry publication. Publication remains disabled.
 
 The local `ic-platform-types` 0.21.0 candidate now implements Principal and
 Account/Subaccount admission and Serde, including rendering into caller-owned storage. Its
@@ -56,8 +57,8 @@ are implemented. Production consumer migration remains pending.
 Protocol still uses registry Types 0.20.4 until the replacement
 cohort is qualified; these are distinct Rust type identities.
 
-Runtime `0.23.4` is the current GitHub source snapshot, with registry publication
-disabled. It provides opt-in inert Call
+Runtime `0.23.5` is the current local development increment after the `0.23.4`
+GitHub source snapshot, with registry publication disabled. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
 implemented request model from the experimental IC0/executor and pending installed
@@ -74,8 +75,19 @@ execution and an experimental method-attached executor: callbacks resume their
 owning task, cleanup terminates it, and handles expose local lifecycle state.
 The first [installed rollback probe](docs/qualification/runtime-installed.md)
 covers immediate updates and inter-canister awaits, including traps before/after
-reply and successful callback cleanup. Cleanup failure and the remaining
-execution/rollback cases remain pending.
+reply, successful callback cleanup and rollback when cleanup itself traps.
+It also checks committed task observations, destructor re-entry, stale wakes,
+notification rollback, resource refusals and refund capture across callbacks.
+A controlled cross-subnet test observes SYS_UNKNOWN despite a committed remote
+effect, preserving the distinction between timeout and nonexecution.
+Upgrades follow the IC lifecycle: **stop → wait for Stopped → upgrade → start**.
+The installed probe verifies outstanding callbacks drain before installation.
+Use ICP CLI (`icp`) exclusively. The preview-first [operator tool](scripts/upgrade-canister.mjs) and
+[upgrade instructions](docs/development.md#canister-upgrades) provide status reporting,
+timeouts and artifact verification. Runtime does not preserve suspended futures
+across upgrades or automatically cancel/retry remote calls.
+Retained custody after failed cleanup and the remaining execution/rollback cases
+remain pending.
 Runtime's `system::read_args(maximum)` now supplies bounded raw argument capture
 for that entrypoint work, refusing oversized messages before allocation/copy.
 `entrypoints::prepare` composes a caller-supplied pre-copy guard and decoder
@@ -87,11 +99,11 @@ that admission with one executor-owned handler. `system::reply` supplies an
 explicit raw reply with one ordinary reply authority per task. Broader export
 modes, automatic encoding/reply ownership and installed execution remain pending.
 The opt-in `entrypoint-macros` feature now exposes an explicit manual-reply
-`update` attribute from `ic-platform-macros` 0.23.4. Its
+`update` attribute from `ic-platform-macros` 0.23.5. Its
 [generated exports](docs/qualification/runtime-exports.md) run in a separate Wasm
 consumer, including rejection and compile-fail checks. Queries and automatic
 reply generation remain unsupported in this initial macro slice.
-The separate `ic-platform-runtime-guard` shares Runtime's 0.23.4 version.
+The separate `ic-platform-runtime-guard` shares Runtime's 0.23.5 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 

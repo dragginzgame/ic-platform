@@ -1,7 +1,7 @@
 # Development
 
-The product workspace contains unpublished Protocol 0.1.0 and the initial Types
-0.21.0 candidate, plus the Runtime 0.23.4 GitHub source snapshot
+The product workspace contains unpublished Protocol 0.1.1 and the initial Types
+0.21.0 candidate, plus the Runtime 0.23.5 local development increment
 (following registry 0.22.5).
 Types follows the published 0.20.4 baseline; its identity
 slice is not yet a replacement for the complete published identity contract.
@@ -14,6 +14,81 @@ each package: select its next SemVer version if it already exists, otherwise
 0.1.0. Breaking pre-1.0 APIs require the next minor, while compatible changes use
 the next patch. A published dependency such as Types retains its supplier's
 version until a local replacement is actually introduced.
+
+GitHub source delivery is a version boundary for every product group, including
+Protocol and Types. When crate contents change after a delivered snapshot,
+advance the version before the next delivery, even with `publish = false`.
+Compatible changes advance the patch; breaking pre-1.0 contracts advance the
+minor. Unchanged groups retain their versions. Runtime's macros and guard
+advance together with Runtime. Keep both workspace locks and group notes aligned.
+
+## Canister upgrades
+
+The supported Runtime upgrade workflow is **stop → wait for Stopped → upgrade →
+start**. `Stopping` means the IC is still draining call contexts; it is not
+permission to install. The old handler must finish before its Wasm heap is
+replaced. Runtime does not persist suspended futures, cancel remote effects,
+or add a pre-upgrade guard. This follows the
+[IC upgrade contract](https://docs.internetcomputer.org/references/ic-interface-spec/management-canister/).
+
+Preview the operator workflow with an explicitly selected network, identity,
+canister principal and already-built, uncompressed Wasm artifact:
+
+```sh
+node scripts/upgrade-canister.mjs \
+  --network "$NETWORK" --identity "$IDENTITY" \
+  --canister "$CANISTER_ID" --wasm "$WASM_FILE"
+```
+
+The preview prints the target, SHA-256 and stages without invoking icp. Add
+`--execute` to carry out that exact workflow. Run from the consuming deployment
+project if its network configuration is required. The operator supplies icp and
+controller credentials; this repository has no deployment target or identity
+configured. No live deployment was performed to validate the wrapper.
+
+Optional `--argument-file "$HEX_FILE"` supplies raw upgrade argument bytes as
+hexadecimal (for example `4449444c0000` for Candid's empty argument sequence).
+Omitting it supplies zero raw bytes. The wrapper does not infer argument schemas
+or add textual DID tooling. Use the bytes required by the consuming canister.
+`--timeout-seconds 300` bounds each icp command; allowed values are 1–3600.
+
+The tool checks status, requests stop if needed, prints periodic drain progress,
+and explicitly requires `Stopped` before installing with `--mode upgrade`.
+It refuses unrecognized status output and changed local artifacts. After install,
+it verifies the reported module hash against the chosen Wasm and requires that
+the canister is still stopped. Only then does it start and confirm `Running`.
+An initially stopped target is upgraded and started by the same workflow.
+An application-specific health check remains the operator's responsibility.
+
+| Operator observation | Meaning and action |
+| --- | --- |
+| Waiting for stop / Stopping | Outstanding call contexts are draining. Do not install code yet. An unbounded call can delay this indefinitely. |
+| Stop timeout or error | No install follows. The on-chain stop may still be progressing; inspect status and dependent services before deciding to continue or start the old canister. |
+| Install or hash-verification failure | No automatic start follows. Inspect status/module hash and resolve the failure while the canister remains stopped. |
+| Start failure | The upgrade may already have committed. Inspect status and module hash; do not blindly repeat installation. |
+| Running confirmed | The lifecycle workflow completed; perform the application's health check. |
+
+For inspection and deliberate recovery, use the same explicit identity/network:
+
+```sh
+icp canister status "$CANISTER_ID" --identity "$IDENTITY" --network "$NETWORK" --json
+# Only after assessing the current module and state:
+icp canister start "$CANISTER_ID" --identity "$IDENTITY" --network "$NETWORK"
+```
+
+A local timeout does not cancel an on-chain operation. The wrapper does not
+silently retry install/start or force installation while stopping. Coordinate a
+single deployment owner: a separate controller could otherwise start or change
+the canister between checks. Keep the selected artifact immutable during use.
+
+Use ICP CLI exclusively for canister operations. The wrapper uses its JSON status
+output, requiring the selected principal and a full management status; public-only
+fallback output fails closed. The command interface was checked against installed
+ICP CLI 1.6.0 help and [its status implementation](https://github.com/dfinity/icp-cli/blob/v1.6.0/crates/icp-cli/src/commands/canister/status.rs).
+Select a configured network name; URL/root-key selection is outside this wrapper.
+`make check-upgrade-tooling` checks command sequencing and failure handling with
+a fake executable; `make qualify-runtime-installed` separately exercises real
+IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 
 ## Setup and dependencies
 
@@ -395,13 +470,13 @@ version; there is no workspace version or shadow version file. The root
 [changelog](../CHANGELOG.md) is an index, and group notes live under
 `releases/<group>/CHANGELOG.md`, following the adopted Toko convention.
 
-Protocol currently owns `ic-platform-protocol` and its existing pending 0.1.0
-notes. No released history exists in this rebuild, so no shared history ledger
-is needed. Repository setup and qualification notes supporting Protocol remain
+Protocol currently owns `ic-platform-protocol` and its pending 0.1.1
+notes. Its earlier GitHub snapshots reused 0.1.0; the changelog records that
+historical versioning gap without assigning retroactive versions. Repository setup and qualification notes supporting Protocol remain
 in that ledger; they do not create releases for private test packages.
 
 Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. Runtime and its exact guard share version 0.23.4; advance both
+pending changelog. Runtime and its exact guard share version 0.23.5; advance both
 and the exact root guard dependency together. The macros package now shares this
 version and has an exact Runtime dependency selection as well.
 Platform and Browser remain future groups. Add each

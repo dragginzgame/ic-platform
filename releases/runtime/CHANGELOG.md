@@ -4,6 +4,81 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.5] - 2026-11-16 (GitHub source snapshot)
+
+Adopt the IC stop/drain/upgrade/start contract. The earlier live-upgrade
+experiment bypassed that contract; it is not a supported-workflow blocker.
+
+- Replace the failing live-upgrade acceptance experiment with a real held-call
+  test proving Stopping waits for callbacks, Stopped precedes installation, and
+  new calls work after restart. Keep callback/future state heap-local.
+- Add a preview-first icp operator wrapper with explicit target selection, stage
+  reporting, per-command timeout, stopped-state checks and module-hash validation.
+  Failures do not force an upgrade or automatically restart a stopped canister.
+
+- Extend the existing installed rollback probe with a destructor that traps
+  during cleanup and a subsequent successful call. Check failed-cleanup writes
+  roll back without undoing the peer's committed effect. No automatic recovery,
+  retry or successful task-termination claim is introduced.
+- Observe retained public task handles in the installed probe: completion and
+  successful cleanup commit their respective terminal states; failed cleanup
+  leaves `Running` observable even after a later independent call succeeds.
+
+- Extend the installed corpus with unpolled drop, submitted future/input drop,
+  a second await in the same handler and subsequent ordinary success. Verify
+  exact peer effects and retained task states without adding product APIs or
+  claiming direct observation of callback-registration reclamation.
+
+- Qualify installed ordinary rejection and full refunds of distinct cycle
+  attachments. Retain an earlier completion across a later callback, checking
+  its reply/refund remains unchanged and the rejected peer update rolls back.
+
+- Check installed callback-time refund capture against delayed future polling:
+  observe publication through a dedicated waker, await a different callback,
+  then require the first future to be immediately ready with its original refund.
+  Repeat with attachments above u64::MAX and independently compare both u128
+  refunds in the native driver to cover nonzero high and low words.
+
+- Qualify installed cost-overflow and insufficient-balance refusals through
+  both notify and first-poll awaited execution. Check exact required-cost facts,
+  no peer increment and successful subsequent submission in the same handler.
+
+- Qualify installed one-way admission: committed remote effects, rollback of
+  queued notification on an initial caller trap, local receipt despite peer
+  failure, and a later successful notification with prior task states intact.
+
+- Qualify installed non-replicated query and nested root-entry refusal before
+  guard/decoder/handler execution. Check the outer task can still reply and a
+  subsequent ordinary update succeeds, without adding a query adapter.
+
+- Qualify stale wakers retained after normal task completion: both wake forms
+  leave the old task untouched and do not spuriously poll a later live call.
+  Repeat with distinct tasks and verify the real callback completes normally.
+
+- Reuse the entry-refusal helper from user destructors during installed normal
+  completion and successful cleanup. Require nested-entry refusal before any
+  admission callbacks, then verify destruction commits exactly once.
+
+- Qualify cross-subnet bounded-wait uncertainty with controlled simulator time:
+  require SYS_UNKNOWN while an independent read proves the remote increment
+  committed, followed by a successful bounded call. Add no retry policy.
+
+- Check fresh executor operation after a same-artifact heap-reset upgrade:
+  local observations reset, independent peer effects persist, and a new awaited
+  task completes and drops once. No persistence or in-flight migration claim.
+
+- Qualify real system queue refusal after 500 read-only notifications in the
+  pinned simulator: both notify and first-poll awaited execution preserve raw
+  code 2, and submission succeeds after the queue drains. No retry is added.
+
+- Qualify cleanup with two outstanding calls and a delayed orphan response:
+  preserve both peer effects, commit one handler destruction and cleanup state,
+  observe the final no-reply ingress result, and admit a later successful call.
+
+- Qualify partial cycle acceptance and its rollback using a small independent
+  WAT peer: acceptance of 5 from 17 refunds 12; trapping after acceptance refunds
+  all 29 attached cycles. Keep the pinned WAT parser native-qualification-only.
+
 ## [0.23.4] - GitHub source snapshot
 
 Source delivery only; not a registry publication or qualified release.

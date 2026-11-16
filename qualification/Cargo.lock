@@ -868,7 +868,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.4"
+version = "0.23.5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -877,7 +877,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ic-platform-types 0.20.4",
  "num-bigint 0.5.1",
@@ -886,7 +886,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.4"
+version = "0.23.5"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -895,7 +895,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.4"
+version = "0.23.5"
 
 [[package]]
 name = "ic-platform-types"
@@ -1179,6 +1179,12 @@ name = "leb128"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c83bff1d572d6b9aeef67ddfc8448e4a3737909cb28e81f97c791b9018703e52"
+
+[[package]]
+name = "leb128fmt"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "09edd9e8b54e49e587e4f6295a7d29c3ea94d469cb40ab8ca70b288248a81db2"
 
 [[package]]
 name = "libc"
@@ -1679,9 +1685,12 @@ dependencies = [
 name = "runtime-installed"
 version = "0.1.0"
 dependencies = [
+ "candid",
+ "ic-management-canister-types",
  "ic-testkit",
  "tokio",
  "toko-tooling",
+ "wat",
 ]
 
 [[package]]
@@ -2656,6 +2665,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasm-encoder"
+version = "0.254.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ebaca0b540bdb15d195ff34fb23074255948708b8916a11a339ba4513dc61906"
+dependencies = [
+ "leb128fmt",
+ "wasmparser",
+]
+
+[[package]]
 name = "wasm-streams"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2666,6 +2685,39 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "wasmparser"
+version = "0.254.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5ff8685b587722894b6f25958fc608d315b93b8d23647bfb567664e7006d757"
+dependencies = [
+ "bitflags",
+ "indexmap",
+ "semver",
+]
+
+[[package]]
+name = "wast"
+version = "254.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "febc59cde513fc8f39b8ffd487893723c555fdd024e2e3dc7d165181e6397ea0"
+dependencies = [
+ "bumpalo",
+ "leb128fmt",
+ "memchr",
+ "unicode-width",
+ "wasm-encoder",
+]
+
+[[package]]
+name = "wat"
+version = "1.254.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7127f7f9b8f127c879991cecd35f494e4628bae1b0874c681414d8d8831e952c"
+dependencies = [
+ "wast",
 ]
 
 [[package]]

@@ -15,8 +15,8 @@ rust-version = "1.100.0"
 license-file = "LICENSE.md"
 
 [workspace.dependencies]
-candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.4", default-features = false }
-candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.4", default-features = false }
+candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.5", default-features = false }
+candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.5", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "crates/ic-platform-types", version = "=0.21.0", default-features = false }
 crc32fast = "1.5.5"
 data-encoding = "2.11.0"

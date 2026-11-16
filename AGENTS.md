@@ -11,7 +11,12 @@ Prefer existing crate names when concept and functionality are retained; changes
 are allowed when the ownership boundary warrants them. Before creating a local
 package, check crates.io: use the next SemVer version for an existing package and
 0.1.0 for a new package. Breaking pre-1.0 contracts advance the minor version;
-compatible changes advance the patch. Check the published baseline at selection
+compatible changes advance the patch. After a GitHub source snapshot, changes
+to a product crate require a new version for its next delivery, even while
+unpublished. Apply this to every product group, including Protocol and Types;
+unchanged groups retain their versions. Coordinate Runtime support packages
+with Runtime. Do not reuse a delivered version for changed crate contents.
+Check the published baseline at selection
 time rather than copying an old checkout's version. Private qualification packages
 also start at 0.1.0 and remain outside product release groups. Publisher selection
 and publication remain separate. A package move alone is not rewrite progress.
@@ -29,7 +34,7 @@ common lints and Rust 1.100.0 as required by the design. Unsafe code is denied
 workspace-wide and forbidden at the Types/Protocol crate roots and existing
 non-export qualification crate roots. The maintainer approved the IC-specific
 import/wrapper boundary in Runtime's private `call/ic0` module and, subsequently,
-generated IC entrypoint export attributes in dedicated export fixtures. Both
+IC entrypoint export attributes in dedicated export fixtures. Both
 use item-scoped justified lint expectations; `unsafe_op_in_unsafe_fn` stays denied.
 The macro implementation and wrapper bodies remain safe Rust. No crate-wide
 allowance or non-IC unsafe code is authorized; see the
@@ -37,6 +42,8 @@ allowance or non-IC unsafe code is authorized; see the
 No common-policy exception is selected. Tool installation alone
 does not establish product or native-host qualification.
 
+- Use ICP CLI (`icp`) exclusively for canister operations. Never invoke `dfx`
+  or introduce commands, wrappers or fallbacks that use it.
 - Keep `../ic-platform` and every other sibling read-only unless separately authorized.
 - The maintainer separately authorized applying the six-file EngineView patch
   to `../ic-query` and validating it. That local application is complete; it
@@ -59,9 +66,18 @@ does not establish product or native-host qualification.
   Actual production cohort migration remains pending.
   Runtime now has call preparation, one-way submission and experimental awaited
   transport using local Types, with an experimental method-attached executor.
-  Its group is separate. The installed probe covers immediate and awaited updates,
-  initial/resumed/post-reply trap rollback and successful callback cleanup.
-  Cleanup failure and the remaining installed gates are still pending.
+  Its group is separate. The [installed qualification](docs/qualification/runtime-installed.md)
+  covers rollback/cleanup, task ownership, refunds, resource refusals, bounded
+  uncertainty and draining callbacks before upgrade. Keep its remaining limits
+  explicit; passing these cases does not qualify the entire design.
+  The supported upgrade workflow is stop, wait for IC status Stopped, upgrade,
+  then start. Qualify this operational boundary; do not require live-call
+  reconstruction or add callback persistence, automatic cancellation/retries,
+  or a Runtime pre-upgrade guard. Operator tooling reports stages and refuses
+  installation unless stopped. Suspended futures and callback IDs stay heap-local.
+  Native-only WAT/Candid tools support independent fixtures and management calls;
+  keep them out of product graphs. Retained custody after failed cleanup remains
+  a separate obligation, not a reason to invent an upgrade recovery subsystem.
   Keep child/migratory tasks outside this slice.
   Its exact-version Cargo singleton guard is now implemented in the Runtime
   group. The explicit-update macro implementation joins that group; Platform

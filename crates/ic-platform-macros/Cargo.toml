@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-macros"
-version = "0.23.4"
+version = "0.23.5"
 description = "Explicit IC update export generation for the replacement Runtime"
 edition.workspace = true
 rust-version.workspace = true
