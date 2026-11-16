@@ -66,6 +66,12 @@ does not establish product or native-host qualification.
   experimental limitations explicit.
 - Create manifests only for real implementation slices. Do not add empty Cargo
   packages solely to select tooling; this restriction was explicitly reaffirmed.
+- Prioritize Auth's missing Runtime capabilities for the next Runtime release:
+  query/lifecycle exports, caller/canister identity and IC time, certification
+  publication/retrieval, and explicit guard/decode/encode/reply composition.
+  Follow the [consumer acceptance contract](docs/requirements.md#next-runtime-release-priority-auth-execution-requirements)
+  and qualify Auth's actual installed fixture. These are unfinished retained
+  requirements; do not replace their behavior with consumer compatibility shims.
 - The initial Protocol package implements request encoding and selected response
   decoding, with initial version 0.1.0 and publication disabled. The separate
   qualification workspace proves a public consumer/type crossing. Full Query

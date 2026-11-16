@@ -56,6 +56,37 @@ the declaration ergonomics contract: numeric labels, docs, visibility, attribute
 and derives without repeated field types. Preserve record/variant obligations as
 the surface grows; EngineView alone cannot prove general variant support.
 
+## Next Runtime release priority: Auth execution requirements
+
+The maintainer selected these gaps as the next Runtime release priority after
+Auth's review of Platform source `ea359de` and Runtime 0.23.9. They are retained
+consumer requirements awaiting implementation, not intentionally retired behavior.
+Independent publication of the implemented slices did not qualify Auth migration.
+
+| Required capability | Owner and acceptance evidence |
+| --- | --- |
+| Caller, canister identity and IC system time | Runtime system APIs using canonical Types. Verify actual caller/canister bytes and IC-provided time in installed executions; preserve execution-context restrictions. Time access does not establish application freshness or authorization. |
+| Certification-root publication and certificate retrieval | Runtime system APIs. Verify the required root size and exact bytes, query certificate presence/absence and context behavior, and independently authenticate the resulting installed certificate against the published root. Retrieval alone does not authenticate evidence. |
+| Query and lifecycle exports used by Auth | Runtime's single generator and coordinated macro package. Inventory the exact Auth entrypoint kinds before implementation; qualify their exported ABI, permitted contexts and lifecycle behavior in Auth's installed fixture. Preserve stop/drain/upgrade/start without callback persistence or a new Runtime pre-upgrade guard. |
+| Guard/decode/encode integration | Explicit Runtime entrypoint composition. Qualify guard and pre-copy ordering, decoder failures, explicit encoding and exactly one reply owner, including manual and automatic replies required by Auth. Keep application authorization and codec selection in the consumer. |
+
+Implement the system observations and certification boundary first, then the
+required export/composition modes, and qualify them together through Auth's actual
+installed fixture. Use read-only pinned Auth source in an isolated qualification
+workspace here; this priority grants no sibling migration or delivery authority.
+Do not substitute import renaming, compatibility shims or a synthetic-only fixture
+for the missing behavior and real consumer proof.
+
+Acceptance for this work includes native/Wasm boundary and compile-fail checks,
+installed positive/refusal cases, one canonical Types source and one executor,
+and the packaged candidate cohort. Record source, dependency and fixture identities
+with the evidence. These cases extend the existing Runtime obligations rather
+than replacing rollback, resource accounting or context-isolation checks.
+Auth remains on its working Runtime cohort until this acceptance passes. Release
+Runtime, macros and guard together; select the next version when the concrete
+change's compatibility impact is known. No implementation or passing proof is
+claimed by this priority record. GitHub remains the issue tracker.
+
 ## Canister-signature consumer
 
 Current read-only inspection of ic-auth at `b78991e9833320692921bf766e51ad361c9c8c4d`

@@ -441,6 +441,12 @@ Exit gate: all required verification profiles pass positive, negative and differ
 
 ## 6 Migrate entrypoints and real consumers
 
+The next Runtime release prioritizes [Auth's missing execution capabilities](requirements.md#next-runtime-release-priority-auth-execution-requirements):
+system identity/time, certification publication/retrieval, required query/lifecycle
+exports, and explicit guard/decode/encode/reply composition. Implement and qualify
+these against Auth's actual installed fixture before treating the new Runtime as
+an Auth replacement. This is retained coverage, not a return to the old facade.
+
 Use one Runtime generator with explicit decoder/encoder composition. Migrate a Wire application endpoint and a required external-Candid endpoint. Verify guards, manual replies, async context and renamed dependency paths.
 
 Then migrate consumers by owner:
