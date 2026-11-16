@@ -55,14 +55,42 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
    }).await??;
    assert_eq!(observed.status(),&RequestStatus::Replied(b"exact original reply".to_vec()));assert_eq!(observed.request_id(),&id);assert_eq!(recovered.envelope_bytes(),bytes);
    assert_eq!(client.signed_query(&identity,target,"read_echo",b"signed query",now()+60_000_000_000,policy()).await?,b"signed query");
+   let metadata=client.read_canister(target,now()+60_000_000_000,policy(),10).await?;
+   assert_eq!(metadata.canister(),target);assert_eq!(metadata.controllers(),[identity.principal()]);
+   let expected=pic.get_subnet(candid::Principal::from_slice(target.as_slice())).await.ok_or("missing subnet")?;
+   assert_eq!(metadata.subnet().as_slice(),expected.as_slice());assert!(!metadata.certificate_bytes().is_empty());
    let hash=client.canister_module_hash(target,now()+60_000_000_000,policy()).await?;assert_ne!(hash,[0;32]);
    #[derive(candid::CandidType)]struct Target{canister_id:candid::Principal}
    let arg=candid::encode_one(Target{canister_id:candid::Principal::from_slice(target.as_slice())})?;
    let management=identity.prepare_update(UpdateArgs{recipient:Principal::management_canister(),effective:target,method:"canister_status",arg:&arg,expiry:now()+60_000_000_000,nonce:None},4096)?;
    let dispatch=client.dispatch(&management,policy()).await?;
    let observation=match dispatch{Dispatch::Observed(o)=>o,_=>client.observe_request(&identity,&management,now()+60_000_000_000,policy()).await?};
-   assert!(matches!(observation.status(),RequestStatus::Replied(bytes) if bytes.starts_with(b"DIDL")));
-   println!("{target}: signed original update/recovery, signed query, module hash and effective-routed management status passed");
+
+   let limits=ic_platform_protocol::candid::Limits{bytes:131072,header:8192,types:128,work:1_000_000,allocation:1_000_000,vector:65536,skipping:131072};
+   let RequestStatus::Replied(status_bytes)=observation.status() else {panic!("management status refused")};
+   let before=ic_platform_protocol::management::decode_canister_status(status_bytes,limits)?;
+   let id=candid::Principal::from_slice(target.as_slice());
+   let chunk=pic.upload_chunk(id,Some(sender),wasm.clone()).await.unwrap();
+   pic.stop_canister(id,Some(sender)).await.unwrap();
+   let chunked=ic_platform_protocol::management::InstallChunkedCodeArgs{
+       mode:ic_platform_protocol::management::InstallMode::Upgrade(None),target_canister:target,store_canister:None,
+       chunk_hashes_list:vec![ic_platform_protocol::management_chunks::ChunkHash{hash:chunk}],wasm_module_hash:hash.to_vec(),arg:vec![],sender_canister_version:None,
+   }.encode(4096)?;
+   let prepared=identity.prepare_update(UpdateArgs{recipient:Principal::management_canister(),effective:target,method:"install_chunked_code",arg:&chunked,expiry:now()+60_000_000_000,nonce:None},8192)?;
+   let exact=prepared.envelope_bytes().to_vec();
+   let result=match client.dispatch(&prepared,policy()).await?{Dispatch::Observed(o)=>o,_=>client.observe_request(&identity,&prepared,now()+60_000_000_000,policy()).await?};
+   assert_eq!(exact,prepared.envelope_bytes());
+   let RequestStatus::Replied(reply)=result.status() else {panic!("chunked upgrade refused: {:?}",result.status())};
+   ic_platform_protocol::management::decode_empty_response(reply,limits)?;
+   pic.start_canister(id,Some(sender)).await.unwrap();
+   let status_request=identity.prepare_update(UpdateArgs{recipient:Principal::management_canister(),effective:target,method:"canister_status",arg:&arg,expiry:now()+60_000_000_000,nonce:None},4096)?;
+   let result=match client.dispatch(&status_request,policy()).await?{Dispatch::Observed(o)=>o,_=>client.observe_request(&identity,&status_request,now()+60_000_000_000,policy()).await?};
+   let RequestStatus::Replied(reply)=result.status() else {panic!("post-upgrade status refused")};
+   let after=ic_platform_protocol::management::decode_canister_status(reply,limits)?;
+   assert!(after.version>before.version);assert!(matches!(after.status,ic_platform_protocol::management_snapshots::Status::Running));
+   assert_eq!(after.version,pic.canister_status(id,Some(sender)).await.unwrap().version);
+
+   println!("{target}: signed original update/recovery, signed query, certified controllers/subnet, module hash, chunked upgrade and status-version checks passed");
   }
   pic.drop().await;Ok::<_,Box<dyn std::error::Error>>(())
  })

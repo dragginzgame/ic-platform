@@ -26,3 +26,8 @@ single-attempt dispatch and authenticated original-request observation, includin
 expired-original recovery. Signed queries reuse the native read verifier. There
 is no implicit polling, retry, renewal or root discovery. See the
 [Blob supplier contract](../../docs/qualification/blob-suppliers.md).
+
+`native-read` also provides `ReadClient::read_canister`: one immutable certified
+observation of controllers and hosting subnet, with original certificate bytes,
+explicit count/time/resource limits and the caller's admitted root-subnet binding.
+See the [Canic supplier contract](../../docs/qualification/canic-management.md).

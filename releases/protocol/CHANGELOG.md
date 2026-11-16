@@ -3,6 +3,22 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.3.0] - 2026-11-16
+
+### ➕ Added
+
+- Supply ordinary creation and chunked-install arguments for
+  [#23](https://github.com/dragginzgame/ic-platform/issues/23), with native/Wasm
+  retained-byte fixtures and installed status-version checks.
+
+### 🔧 Changed
+
+- Use the complete management CanisterSettings in provisional creation and
+  update_settings, preserving legacy request bytes and keeping CMC's nine-field
+  CreationSettings separate. Require version in the shared status projection.
+  These Rust/decode contract changes require the minor version bump; see
+  [migration and qualification](../../docs/qualification/canic-management.md).
+
 ## [0.2.8] - 2026-11-16
 
 ### ➕ Added

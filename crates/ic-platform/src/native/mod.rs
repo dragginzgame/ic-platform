@@ -9,6 +9,8 @@ use crate::certificate::{
 use candidate_types::Principal;
 use ic_transport_types::{Envelope, EnvelopeContent, QueryResponse, ReadStateResponse};
 use std::{borrow::Cow, collections::BTreeMap, time::Duration};
+mod canister;
+pub use canister::{CanisterObservation, CanisterReadError};
 mod query;
 #[cfg(feature = "native-signed")]
 mod signed;
@@ -214,3 +216,6 @@ impl ReadClient {
 
 #[cfg(all(test, feature = "native-signed", feature = "certificate-construction"))]
 mod signed_tests;
+
+#[cfg(all(test, feature = "certificate-fixture-signing"))]
+mod canister_tests;

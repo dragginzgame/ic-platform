@@ -42,3 +42,8 @@ frozen bytes; regenerate with `REGENERATE_SNS_FIXTURES=1 cargo test --locked
 sns-neurons --test sns` (as one shell command), review bytes, then run
 `make qualify-sns-neurons`. See the [pinned contracts and projection
 limits](../../../docs/qualification/sns-neurons.md).
+
+The `root-*.bin` requests are frozen registry Platform 0.33.7 output; `root-status.bin`
+is independently authored Candid output. Native and Wasm compare exact retained
+request bytes and required version decoding. Provenance and deliberate regeneration
+are documented in [Canic supplier qualification](../../../docs/qualification/canic-management.md).

@@ -3,6 +3,15 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.10] - 2026-11-16
+
+### ➕ Added
+
+- Add certified controller and hosting-subnet observations under native-read for
+  [#22](https://github.com/dragginzgame/ic-platform/issues/22), retaining explicit
+  root/time/limits, range authority and missing/pruned refusals. See the
+  [supplier evidence](../../docs/qualification/canic-management.md).
+
 ## [0.34.9] - 2026-11-16
 
 ### ➕ Added

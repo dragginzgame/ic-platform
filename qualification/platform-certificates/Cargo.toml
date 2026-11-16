@@ -12,6 +12,7 @@ toko-tooling.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid.workspace = true
+ic-platform-protocol = { workspace = true, optional = true, features = ["management"] }
 ic-testkit.workspace = true
 tokio.workspace = true
 wat.workspace = true
@@ -55,6 +56,7 @@ required-features = ["native-signed"]
 [features]
 native-signed-secp256k1 = ["native-signed", "candidate-platform/native-signed-secp256k1"]
 native-signed = [
+    "dep:ic-platform-protocol",
     "native-read",
     "candidate-platform/native-signed",
     "candidate-platform/certificate-construction",

@@ -237,6 +237,7 @@ struct Settings {
 }
 #[derive(CandidType)]
 struct StatusReply {
+    version: u64,
     status: Status,
     settings: Settings,
     module_hash: Option<Vec<u8>>,
@@ -245,6 +246,7 @@ struct StatusReply {
 fn selected_status_skips_discarded_values_and_caps_fields() {
     for (count, hash, accepted) in [(10, 32, true), (11, 32, false), (10, 33, false)] {
         let bytes = candid::encode_one(StatusReply {
+            version: u64::MAX,
             status: Status::Stopped,
             settings: Settings {
                 controllers: vec![Principal::anonymous(); count],
@@ -490,4 +492,77 @@ fn inventory_count_limit_does_not_become_a_nested_skip_limit() {
         wire::decode_list_snapshots(&bytes, restricted),
         Err(Error::Limit)
     );
+}
+
+#[test]
+fn required_status_version_is_lossless_and_refuses_missing_or_wrong_type() {
+    #[derive(CandidType)]
+    struct WithoutVersion {
+        status: Status,
+        settings: Settings,
+        module_hash: Option<Vec<u8>>,
+    }
+    #[derive(CandidType)]
+    struct WrongVersion {
+        status: Status,
+        settings: Settings,
+        module_hash: Option<Vec<u8>>,
+        version: String,
+    }
+    let settings = || Settings {
+        controllers: vec![],
+        discarded: String::new(),
+    };
+    let missing = candid::encode_one(WithoutVersion {
+        status: Status::Stopped,
+        settings: settings(),
+        module_hash: None,
+    })
+    .unwrap();
+    assert!(wire::decode_canister_status(&missing, limits()).is_err());
+    let wrong = candid::encode_one(WrongVersion {
+        status: Status::Stopped,
+        settings: settings(),
+        module_hash: None,
+        version: "1".into(),
+    })
+    .unwrap();
+    assert!(wire::decode_canister_status(&wrong, limits()).is_err());
+    for version in [0, u64::MAX] {
+        let bytes = candid::encode_one(StatusReply {
+            status: Status::Stopped,
+            settings: settings(),
+            module_hash: None,
+            version,
+        })
+        .unwrap();
+        assert_eq!(
+            wire::decode_canister_status(&bytes, limits())
+                .unwrap()
+                .version,
+            version
+        );
+        if version == u64::MAX {
+            let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+                .join("../engine-view-wasm/fixtures/root-status.bin");
+            if std::env::var_os("REGENERATE_ROOT_STATUS").is_some() {
+                std::fs::write(&path, &bytes).unwrap();
+            }
+            assert_eq!(std::fs::read(path).unwrap(), bytes);
+        }
+        for end in 0..bytes.len() {
+            assert!(wire::decode_canister_status(&bytes[..end], limits()).is_err());
+        }
+        let mut trailing = bytes.clone();
+        trailing.push(0);
+        assert_eq!(
+            wire::decode_canister_status(&trailing, limits()),
+            Err(Error::Trailing)
+        );
+        let mut cap = limits();
+        cap.bytes = bytes.len();
+        assert!(wire::decode_canister_status(&bytes, cap).is_ok());
+        cap.bytes -= 1;
+        assert_eq!(wire::decode_canister_status(&bytes, cap), Err(Error::Limit));
+    }
 }

@@ -1,5 +1,11 @@
 # Selected management and ledger formats
 
+Protocol 0.3.0 updates this boundary: management requests use the complete
+thirteen-field CanisterSettings, CMC keeps CreationSettings, and status now
+requires version. Ordinary creation and chunked installation are also supplied.
+See [current migration and retained-byte evidence](canic-management.md).
+The earlier release scope and observations below remain historical evidence.
+
 Protocol 0.2.7 supplies
 [Platform #20](https://github.com/dragginzgame/ic-platform/issues/20) and the
 installation portion of [Platform #11](https://github.com/dragginzgame/ic-platform/issues/11).

@@ -1,5 +1,11 @@
 # Bounded management snapshots and status
 
+Protocol 0.3.0 updates this boundary: management requests use the complete
+thirteen-field CanisterSettings, CMC keeps CreationSettings, and status now
+requires version. Ordinary creation and chunked installation are also supplied.
+See [current migration and retained-byte evidence](canic-management.md).
+The earlier release scope and observations below remain historical evidence.
+
 The pending `management-snapshots` Protocol capability supplies the wire boundary
 requested by [Backup #11](https://github.com/dragginzgame/ic-platform/issues/11).
 Defaults remain empty, Principal is the canonical Types identity, and this

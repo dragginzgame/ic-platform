@@ -7,7 +7,7 @@ import {dirname, relative, resolve} from 'node:path';
 import {adoptTooling} from './tooling-selection.mjs';
 const root = process.cwd();
 const cohort = process.env.QUERY_COHORT ?? 'registry';
-const versions = cohort === 'candidate' ? {platform:'0.34.9',protocol:'0.2.8',types:'0.21.2'} : {platform:'0.34.6',protocol:'0.2.5',types:'0.21.2'};
+const versions = cohort === 'candidate' ? {platform:'0.34.10',protocol:'0.3.0',types:'0.21.2'} : {platform:'0.34.6',protocol:'0.2.5',types:'0.21.2'};
 assert(['registry', 'candidate'].includes(cohort), 'unknown Query qualification cohort');
 const source = resolve(process.env.QUERY_SOURCE ?? '../ic-query');
 const output = resolve(`target/query-hard-cut/${Date.now()}`);

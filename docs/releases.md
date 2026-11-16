@@ -339,3 +339,18 @@ qualification dependency wiring found no new actionable issue. Hosted
 [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/43969961475)
 were observed in progress once; neither was awaited or claimed passing. Native
 execution is Linux evidence, not new macOS qualification.
+
+## Canic management supplier release
+
+Select Platform 0.34.10 and Protocol 0.3.0 for #22/#23. Registry review confirmed
+Platform 0.34.9 and Protocol 0.2.8 current and both candidates absent. Platform
+adds certified controller/subnet observations. Protocol separates complete
+management settings from unchanged CMC settings, requires status version and
+adds ordinary creation/chunked installation. Its breaking Rust/decode changes
+require a minor increment. See [migration and evidence](qualification/canic-management.md).
+Types 0.21.2 and Runtime/macros/guard 0.23.14 are unchanged.
+
+Use the complete local catalog, clean release source and annotated remote tags
+`platform-v0.34.10` and `protocol-v0.3.0`. Publish Protocol then Platform through
+the supported adapter, independently verifying each registry archive/source.
+Keep CI asynchronous and downstream Canic adoption/recovery acceptance separate.

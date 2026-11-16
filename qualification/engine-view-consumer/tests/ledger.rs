@@ -34,7 +34,7 @@ fn request<T: CandidType + for<'a> Deserialize<'a>>(
 fn management_creation_settings_install_and_exact_bounds() {
     let create = management::ProvisionalCreateArgs {
         amount: Some("340282366920938463463374607431768211456".parse().unwrap()),
-        settings: Some(management::CreationSettings {
+        settings: Some(management::CanisterSettings {
             controllers: Some(vec![target()]),
             ..Default::default()
         }),
@@ -58,7 +58,7 @@ fn management_creation_settings_install_and_exact_bounds() {
     );
     let update = management::UpdateSettingsArgs {
         canister_id: target(),
-        settings: management::CreationSettings {
+        settings: management::CanisterSettings {
             controllers: Some(vec![]),
             compute_allocation: Some(0.into()),
             log_visibility: Some(management::LogVisibility::AllowedViewers(vec![target()])),
@@ -463,4 +463,79 @@ fn unselected_fields_share_work_and_skip_budgets() {
         .is_err()
     );
     assert!(ledger::decode_created(&bytes[..bytes.len() - 1], limits()).is_err());
+}
+
+#[test]
+fn retained_management_requests_match_legacy_bytes() {
+    fn frozen(name: &str, bytes: &[u8]) {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../engine-view-wasm/fixtures")
+            .join(format!("root-{name}.bin"));
+        assert_eq!(bytes, std::fs::read(path).unwrap(), "retained {name}");
+    }
+    let cmc = ledger::CmcCreationArgs {
+        settings: Some(management::CreationSettings {
+            controllers: Some(vec![target()]),
+            ..Default::default()
+        }),
+        subnet_selection: None,
+    };
+    frozen("cmc", &cmc.encode(4096).unwrap());
+    for present in [false, true] {
+        let settings = present.then(|| management::CanisterSettings {
+            controllers: Some(vec![target()]),
+            ..Default::default()
+        });
+        let label = if present { "present" } else { "absent" };
+        let provisional = management::ProvisionalCreateArgs {
+            settings: settings.clone(),
+            specified_id: None,
+            amount: Some(0u64.into()),
+            sender_canister_version: None,
+        };
+        frozen(
+            &format!("provisional-{label}"),
+            &provisional.encode(4096).unwrap(),
+        );
+        let create = management::CreateCanisterArgs {
+            settings,
+            sender_canister_version: Some(u64::MAX),
+        };
+        frozen(&format!("create-{label}"), &create.encode(4096).unwrap());
+        let args = management::InstallChunkedCodeArgs {
+            mode: management::InstallMode::Upgrade(None),
+            target_canister: target(),
+            store_canister: present.then_some(target()),
+            chunk_hashes_list: vec![
+                ic_platform_protocol::management_chunks::ChunkHash { hash: vec![1; 32] },
+                ic_platform_protocol::management_chunks::ChunkHash { hash: vec![2; 32] },
+            ],
+            wasm_module_hash: vec![3; 32],
+            arg: vec![0, 255, 128],
+            sender_canister_version: present.then_some(u64::MAX),
+        };
+        let decoded: management_schema::InstallChunkedCodeArgs = request(|n| args.encode(n));
+        assert_eq!(decoded.wasm_module_hash, args.wasm_module_hash);
+        assert_eq!(decoded.chunk_hashes_list[0].hash, vec![1; 32]);
+        frozen(
+            if present {
+                "chunked-present"
+            } else {
+                "chunked-absent"
+            },
+            &args.encode(4096).unwrap(),
+        );
+    }
+    let update = management::UpdateSettingsArgs {
+        canister_id: target(),
+        settings: management::CanisterSettings {
+            controllers: Some(vec![target()]),
+            minimum_incoming_canister_call_cycles: Some(1u64.into()),
+            log_memory_limit: Some(2u64.into()),
+            status_visibility: Some(management::StatusVisibility::Public),
+            ..Default::default()
+        },
+        sender_canister_version: None,
+    };
+    frozen("update", &update.encode(4096).unwrap());
 }

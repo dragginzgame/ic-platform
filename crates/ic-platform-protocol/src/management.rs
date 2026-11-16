@@ -35,7 +35,7 @@ projection! {
     }
 }
 projection! {
-    /// Selected management/CMC settings; absence stays absent.
+    /// Nine-field CMC creation settings; not the management settings schema.
     #[derive(Default)]
     encoding CreationSettings {
         /// Freezing threshold.
@@ -59,10 +59,70 @@ projection! {
     }
 }
 projection! {
+    /// Explicit selected snapshot access policy.
+    both enum SnapshotVisibility {
+        /// Controllers only.
+        #[serde(rename = "controllers")]
+        570880087 => Controllers,
+        /// Public access.
+        #[serde(rename = "public")]
+        1727234217 => Public,
+        /// Explicit viewer identities.
+        #[serde(rename = "allowed_viewers")]
+        2235716810 => AllowedViewers(Vec<Principal>),
+    }
+}
+projection! {
+    /// Explicit selected status access policy.
+    both enum StatusVisibility {
+        /// Controllers only.
+        #[serde(rename = "controllers")]
+        570880087 => Controllers,
+        /// Public access.
+        #[serde(rename = "public")]
+        1727234217 => Public,
+        /// Explicit viewer identities.
+        #[serde(rename = "allowed_viewers")]
+        2235716810 => AllowedViewers(Vec<Principal>),
+    }
+}
+projection! {
+    /// Complete thirteen-field management settings; distinct from CMC.
+    #[derive(Default)]
+    encoding CanisterSettings {
+        /// Freezing threshold.
+        238856128 => freezing_threshold: Option<Nat>,
+        /// Wasm memory threshold.
+        241629288 => wasm_memory_threshold: Option<Nat>,
+        /// Environment variables.
+        356749323 => environment_variables: Option<Vec<EnvironmentVariable>>,
+        /// Explicit controller list; policy and count admission belong to the caller.
+        570880087 => controllers: Option<Vec<Principal>>,
+        /// Minimum incoming call cycles.
+        793974846 => minimum_incoming_canister_call_cycles: Option<Nat>,
+        /// Reserved cycles limit.
+        1095112320 => reserved_cycles_limit: Option<Nat>,
+        /// Log visibility.
+        2033331437 => log_visibility: Option<LogVisibility>,
+        /// Log memory limit.
+        2503910424 => log_memory_limit: Option<Nat>,
+        /// Snapshot access policy.
+        2709750061 => snapshot_visibility: Option<SnapshotVisibility>,
+        /// Wasm memory limit.
+        3380736376 => wasm_memory_limit: Option<Nat>,
+        /// Status access policy.
+        3469368575 => status_visibility: Option<StatusVisibility>,
+        /// Memory allocation.
+        3844961758 => memory_allocation: Option<Nat>,
+        /// Compute allocation.
+        4174053672 => compute_allocation: Option<Nat>,
+    }
+}
+projection! {
     /// One provisional_create_canister_with_cycles argument.
     encoding ProvisionalCreateArgs {
         /// Selected creation settings.
-        2336062691 => settings: Option<CreationSettings>,
+        2336062691 => settings: Option<CanisterSettings>,
         /// Explicit requested identity.
         3348853450 => specified_id: Option<Principal>,
         /// Explicit cycle amount.
@@ -77,7 +137,7 @@ projection! {
         /// Exact target.
         1313628723 => canister_id: Principal,
         /// Explicit settings changes.
-        2336062691 => settings: CreationSettings,
+        2336062691 => settings: CanisterSettings,
         /// Explicit sender version.
         3599109322 => sender_canister_version: Option<u64>,
     }
@@ -143,4 +203,33 @@ projection! {
 /// Refuses malformed, incompatible, trailing or over-budget input.
 pub fn decode_created(bytes: &[u8], limits: Limits) -> Result<CreatedCanister, Error> {
     candid::decode(bytes, limits)
+}
+
+projection! {
+    /// One ordinary create_canister argument; attached cycles remain Runtime-owned.
+    encoding CreateCanisterArgs {
+        /// Explicit settings; optional presence is preserved.
+        2336062691 => settings: Option<CanisterSettings>,
+        /// Explicit sender_canister_version; optional presence is preserved.
+        3599109322 => sender_canister_version: Option<u64>,
+    }
+}
+projection! {
+    /// One install_chunked_code argument; chunk order and exact bytes are retained.
+    encoding InstallChunkedCodeArgs {
+        /// Exact initialization or upgrade argument bytes.
+        4849238 => arg: Vec<u8>,
+        /// Exact complete-module hash bytes; no implicit hashing or comparison.
+        1176624806 => wasm_module_hash: Vec<u8>,
+        /// Explicit installation mode, without fallback.
+        1214305123 => mode: InstallMode,
+        /// Chunk hashes in the requested assembly order.
+        1847393007 => chunk_hashes_list: Vec<crate::management_chunks::ChunkHash>,
+        /// Exact installation target.
+        2807510037 => target_canister: Principal,
+        /// Optional chunk store; absence is preserved for the management contract.
+        3052241285 => store_canister: Option<Principal>,
+        /// Explicit sender_canister_version; optional presence is preserved.
+        3599109322 => sender_canister_version: Option<u64>,
+    }
 }

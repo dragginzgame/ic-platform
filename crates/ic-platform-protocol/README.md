@@ -42,3 +42,9 @@ consumer evidence. Independently, `ledger` supplies zero-argument ICRC display
 metadata calls and bounded symbol/decimals decoding alongside canonical Account
 and arbitrary-Nat balance support. See the
 [SNS and ICRC supplier contract](../../docs/qualification/sns-neurons.md).
+
+Protocol 0.3 uses `management::CanisterSettings` for management creation and
+settings updates; `CreationSettings` remains the distinct CMC schema. The
+`management` feature also encodes ordinary creation and chunked installs, while
+the shared status projection requires `version`. See the
+[retained-byte migration contract](../../docs/qualification/canic-management.md).

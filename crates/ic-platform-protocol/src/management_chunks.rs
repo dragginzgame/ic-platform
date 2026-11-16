@@ -1,5 +1,7 @@
 //! Bounded management chunk-cache messages. Transport, hash comparison, cache
 //! authority, expiry and retries remain caller-owned. Decode authenticates nothing.
+#[cfg(feature = "management")]
+use crate::candid::encode::{Encode, Writer};
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
     projection::{absent, projection},
@@ -9,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 projection! {
     /// Exact returned hash bytes, without assuming their length or algorithm.
-    ChunkHash {
+    both ("management") ChunkHash {
         /// Caller-owned comparison against its expected chunk digest.
         1_158_164_430 => hash: Vec<u8> [required],
     }

@@ -76,6 +76,8 @@ projection! {
     CanisterStatus {
         /// Reported lifecycle state.
         100_394_802 => status: Status [required],
+        /// Raw observed canister version, required for upgrade proofs.
+        2096228120 => version: u64 [required],
         /// Selected controller settings.
         2_336_062_691 => settings: Settings [required],
         /// Absent versus present module hash, at most 32 bytes.

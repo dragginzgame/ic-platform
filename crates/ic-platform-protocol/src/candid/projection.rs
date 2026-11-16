@@ -16,11 +16,12 @@ macro_rules! absent {
     };
 }
 macro_rules! projection {
-    ($(#[$meta:meta])* both $name:ident { $($(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty [$policy:ident $(, max = $maximum:expr)?]),+ $(,)? }) => {
+    ($(#[$meta:meta])* both $(($feature:literal))? $name:ident { $($(#[$field_meta:meta])* $label:literal => $field:ident : $ty:ty [$policy:ident $(, max = $maximum:expr)?]),+ $(,)? }) => {
         projection! { $(#[$meta])* $name { $($(#[$field_meta])* $label => $field: $ty [$policy $(, max = $maximum)?]),+ } }
+        $(#[cfg(feature = $feature)])?
         impl Encode for $name {
             const SCHEMA: Schema = <Self as Decode>::SCHEMA;
-            fn write(&self, writer: &mut Writer<'_>) -> Result<(), EncodeError> { $(self.$field.write(writer)?;)+ Ok(()) }
+            fn write(&self, writer: &mut Writer<'_>) -> Result<(), crate::candid::encode::EncodeError> { $(self.$field.write(writer)?;)+ Ok(()) }
         }
     };
     ($(#[$meta:meta])* both enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident $(($ty:ty))?),+ $(,)? }) => {

@@ -327,3 +327,9 @@ Platform #21 codec boundary in Protocol: selected raw neuron observations,
 governance errors, exact optional requests and independent ledger display
 metadata. Query retains identity, pagination, eligibility and entitlement policy;
 supplier qualification does not establish actual Query adoption or real reads.
+
+The [Canic management supplier contract](qualification/canic-management.md) covers
+#22's certified controller/hosting-subnet observation and #23's complete management
+settings, ordinary creation, chunked installation and required status version.
+CMC retains its separate nine-field encoding. Canic still owns explicit root-subnet
+admission, approval/retained-request binding and its actual migration/recovery proof.
