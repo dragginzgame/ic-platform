@@ -4,6 +4,16 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.15] - Unreleased
+
+### 🧪 Testing
+
+- Reconcile actual Scheduling checkpoint/cycle-refusal and pinned Entropy guard
+  evidence for [Platform #14](https://github.com/dragginzgame/ic-platform/issues/14),
+  [Platform #15](https://github.com/dragginzgame/ic-platform/issues/15), and
+  [Platform #19](https://github.com/dragginzgame/ic-platform/issues/19).
+  Published Runtime is unchanged; consumer delivery remains separate.
+
 ## [0.23.14] - 2026-11-16
 
 ### ➕ Added

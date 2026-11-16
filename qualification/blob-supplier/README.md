@@ -3,6 +3,8 @@
 Run `make qualify-blob-suppliers` from the Platform root. `prepare.mjs` requires
 clean Blob revision `31dd236814879afd2fd0faf0851e6b46184476ac`, reads its source
 archive and adapts only a disposable copy below `target/blob-supplier/`.
+Set `BLOB_SOURCE` to a clean disposable checkout of that exact commit when the
+sibling checkout has ongoing work; the revision and cleanliness checks still apply.
 
 `codecs.mjs` migrates the actual callback/enrollment probe codecs and derives
 selected retained tests. `signed-client.rs` is an explicit test-only client that

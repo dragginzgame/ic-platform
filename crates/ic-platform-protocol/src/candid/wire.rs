@@ -561,7 +561,11 @@ impl Decode for () {
     }
 }
 
-#[cfg(any(feature = "cloud-engine-marketplace", feature = "caffeine"))]
+#[cfg(any(
+    feature = "cloud-engine-marketplace",
+    feature = "caffeine",
+    feature = "management"
+))]
 impl Decode for super::Nat {
     const SCHEMA: Schema = Schema::Primitive(-3);
     fn read(reader: &mut Reader<'_, '_>, id: Id) -> Result<Self> {

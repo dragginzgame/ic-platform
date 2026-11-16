@@ -1,6 +1,6 @@
 # Auth browser generation with the published Types cohort
 
-[Issue #8](https://github.com/dragginzgame/ic-platform/issues/8) is resolved at the
+[Platform #8](https://github.com/dragginzgame/ic-platform/issues/8) is resolved at the
 supplier/cohort boundary by published Wire 0.24.2, Types 0.21.1 and Runtime
 0.23.11. Runtime and Types are the previously qualified published pair; Wire
 0.24.2 supplies the missing native `platform-types` trait integration. No trait
@@ -13,7 +13,7 @@ selects `ic-auth-wire/typescript`, which enables `ic-wire/derive` and
 `ic-wire/platform-types`. The selected integration now reaches Types 0.21.1.
 
 `make qualify-auth-wire` archives actual Auth
-`b78991e9833320692921bf766e51ad361c9c8c4d`, selects exact registry Types 0.21.1 and
+`b78991e9833320692921bf766e51ad361c9c8c4d`, selects exact registry Types 0.21.2 and
 Wire 0.24.2, and executes the unchanged consumer generator and tests. No source
 file is patched and no local Platform/Types dependency is substituted.
 
@@ -40,3 +40,10 @@ This pass does not rerun the installed browser application or certify its legacy
 crypto path. That independent migration remains #7. Production dependency edits
 and delivery belong to Auth; no sibling checkout was changed. Local qualification
 scripts/documentation are uncommitted and unpublished at this record.
+
+## Types 0.21.2 qualification refresh
+
+The current fixture selects published Types 0.21.2 with Wire 0.24.2. Native
+Clippy, all 19 consumer tests, Wasm compilation, 37 browser frames and generated
+client equality pass. Evidence: `target/auth-wire/1794861795626/verified.json`.
+The earlier publication evidence above remains historical.

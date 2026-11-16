@@ -5,7 +5,7 @@ boundary for Scheduling issues [#14](https://github.com/dragginzgame/ic-platform
 and [#15](https://github.com/dragginzgame/ic-platform/issues/15).
 No allocator, checkpoint format, timer policy or executor is added.
 
-## Pending replicated-execution observation
+## Published replicated-execution observation
 
 [Issue #19](https://github.com/dragginzgame/ic-platform/issues/19), discovered during
 Scheduling's Entropy integration, is supplied locally by
@@ -28,7 +28,7 @@ Existing stable-memory, cycle-burn, rollback and stopped-upgrade cases still pas
 Wasm SHA-256: `ec24f75d27b76ab8b89ea137518c70798dc4c86c01ad1116b246ac296ade1576`.
 Evidence: `target/runtime-context-qualification.log`.
 Actual Entropy source and installed lifecycle migration remain with its read-only
-consumer; supplier publication is pending, so #19 remains open.
+consumer; Runtime 0.23.14 is published; current actual-consumer evidence follows below.
 
 ## Published memory and cycle boundary
 
@@ -76,3 +76,36 @@ order is `stable64_read(offset, destination)` / `stable64_write(offset, source)`
 its old grow assertion must expect `Some(0)`. The once/watchdog repeated-refusal,
 funding and exact-once completion scenarios remain separate consumer gates.
 No registry delivery, Scheduling production migration or macOS proof is claimed.
+
+## Actual consumer acceptance — 16 November 2026
+
+Read-only inspection of clean Scheduling commit
+`fc5a4f16c3be0b48cec0532b0d091192ace8c039` establishes the retained
+consumer acceptance for [Platform #14](https://github.com/dragginzgame/ic-platform/issues/14),
+[Platform #15](https://github.com/dragginzgame/ic-platform/issues/15) and
+[Platform #19](https://github.com/dragginzgame/ic-platform/issues/19).
+The consumer commit is local and unpushed at this observation; its delivery
+and broader release gates are separate. Earlier pending statements above
+describe the prior supplier-only evidence.
+
+Scheduling's maintained Runtime migration passes the actual Once/watchdog/Jobs
+checkpoint, upgrade, unresolved custody, retry, cancellation and catch-up suite.
+Both real cycle-refusal cases preserve repeated backoff without acceptance, then
+complete exactly once after funding (actual quote 42,102,448,000 cycles).
+Its pinned Entropy 6c400b2 adapter uses the public boolean and retains typed
+query refusal before claim/submission. All 24 native tests and the installed
+background_refill_and_lifecycle pass, including suspension, upgrade and reinstall.
+No guard bypass, sibling edit or new executor was introduced here.
+
+Reviewed Scheduling evidence under target/evidence/platform-02313:
+
+| Log | SHA-256 |
+| --- | --- |
+| installed-final.log | 8bba30333620002a913fd68df099d250550ff0839cdac8035f4e05f28db2875d |
+| refusal-fixed.log | c0247feb577a6e3aa85d51587b13a7af4a9d1fd458a12d0e0ab37ef2d2e1f72a |
+| entropy-02314-installed-fixed.log | 9f4946393579b86fdae8ead20cdcfa0864e1eb27ea73c28d228c3abc2230b0ff |
+
+The maintained Entropy patch SHA-256 is
+`2b663d050c2271370b78a0b3458e68bc972a43f0688016584262939ee91c0d64`.
+Registry Runtime 0.23.13 provided the memory/cycle proof; 0.23.14 adds only
+the context observation and supplies the actual Entropy proof.

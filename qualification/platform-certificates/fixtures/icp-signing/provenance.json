@@ -1,0 +1,16 @@
+{
+  "cli": "1.7.0",
+  "archiveSha256": "aa5f0c102ae66e414fa43e119a249f4237998141b001cbccd523a81dadc7d01d",
+  "profiles": {
+    "ed25519": {
+      "requestId": "c235bf9e696faf28625726376d7953ca8d138f96bfd06176c7663b9479e0c871",
+      "update": "08f08d6666418b313ae4fd78d7d1572df675fdafaa9f66925bb53258ff05740d",
+      "status": "2910968a9d78922b0b27b28f16bc716ec50fa3bea7e0cc083b7ba3c0324a2eea"
+    },
+    "secp256k1": {
+      "requestId": "509a16df30427bc7eead86e69ce3bc0e3d3949f74607aab062891dccf1cbbd5d",
+      "update": "1b4c093530527eaaf28049dc6c87d49946cea690f6057f1709a7f0d7fa8ba7b3",
+      "status": "6e16441b7c776e8679167612a9d1835bc693b30cc4c1bad7479eec49e66f84c2"
+    }
+  }
+}

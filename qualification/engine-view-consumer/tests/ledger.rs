@@ -1,0 +1,466 @@
+//! Independent upstream Candid/management schemas for selected Host operations.
+#![forbid(unsafe_code)]
+#![cfg(all(feature = "ledger", not(target_family = "wasm")))]
+use candid::{CandidType, Nat, Principal};
+use ic_management_canister_types as management_schema;
+use ic_platform_protocol::{candid::Limits, ledger, management};
+use serde::Deserialize;
+fn limits() -> Limits {
+    Limits {
+        bytes: 2_100_000,
+        header: 8192,
+        types: 128,
+        work: 8_000_000,
+        allocation: 4_000_000,
+        vector: 2_100_000,
+        skipping: 262_144,
+    }
+}
+fn target() -> candidate_types::Principal {
+    candidate_types::Principal::from_slice(&[9; 29])
+}
+fn request<T: CandidType + for<'a> Deserialize<'a>>(
+    encode: impl Fn(usize) -> Result<Vec<u8>, management::EncodeError>,
+) -> T {
+    let bytes = encode(2_100_000).unwrap();
+    assert_eq!(encode(bytes.len()).unwrap(), bytes);
+    assert_eq!(
+        encode(bytes.len() - 1),
+        Err(management::EncodeError::OutputLimit)
+    );
+    candid::decode_one(&bytes).unwrap()
+}
+#[test]
+fn management_creation_settings_install_and_exact_bounds() {
+    let create = management::ProvisionalCreateArgs {
+        amount: Some("340282366920938463463374607431768211456".parse().unwrap()),
+        settings: Some(management::CreationSettings {
+            controllers: Some(vec![target()]),
+            ..Default::default()
+        }),
+        specified_id: Some(target()),
+        sender_canister_version: Some(u64::MAX),
+    };
+    let decoded: management_schema::ProvisionalCreateCanisterWithCyclesArgs =
+        request(|max| create.encode(max));
+    assert_eq!(
+        decoded.amount.unwrap().0.to_string(),
+        "340282366920938463463374607431768211456"
+    );
+    assert_eq!(decoded.sender_canister_version, Some(u64::MAX));
+    assert_eq!(
+        decoded.specified_id.unwrap().as_slice(),
+        target().as_slice()
+    );
+    assert_eq!(
+        decoded.settings.unwrap().controllers.unwrap()[0].as_slice(),
+        target().as_slice()
+    );
+    let update = management::UpdateSettingsArgs {
+        canister_id: target(),
+        settings: management::CreationSettings {
+            controllers: Some(vec![]),
+            compute_allocation: Some(0.into()),
+            log_visibility: Some(management::LogVisibility::AllowedViewers(vec![target()])),
+            environment_variables: Some(vec![management::EnvironmentVariable {
+                name: "key".into(),
+                value: "value".into(),
+            }]),
+            ..Default::default()
+        },
+        sender_canister_version: None,
+    };
+    let decoded: management_schema::UpdateSettingsArgs = request(|max| update.encode(max));
+    assert_eq!(decoded.settings.controllers, Some(vec![]));
+    assert_eq!(decoded.settings.compute_allocation, Some(Nat::from(0_u64)));
+    assert_eq!(decoded.sender_canister_version, None);
+    assert_eq!(
+        decoded.settings.environment_variables.unwrap()[0].value,
+        "value"
+    );
+    assert!(matches!(
+        decoded.settings.log_visibility,
+        Some(management_schema::LogVisibility::AllowedViewers(_))
+    ));
+    for (mode, expected) in [
+        (
+            management::InstallMode::Install,
+            management_schema::CanisterInstallMode::Install,
+        ),
+        (
+            management::InstallMode::Reinstall,
+            management_schema::CanisterInstallMode::Reinstall,
+        ),
+        (
+            management::InstallMode::Upgrade(None),
+            management_schema::CanisterInstallMode::Upgrade(None),
+        ),
+        (
+            management::InstallMode::Upgrade(Some(management::UpgradeFlags {
+                skip_pre_upgrade: Some(false),
+                wasm_memory_persistence: Some(management::MemoryPersistence::Keep),
+            })),
+            management_schema::CanisterInstallMode::Upgrade(Some(
+                management_schema::UpgradeFlags {
+                    skip_pre_upgrade: Some(false),
+                    wasm_memory_persistence: Some(management_schema::WasmMemoryPersistence::Keep),
+                },
+            )),
+        ),
+    ] {
+        let args = management::InstallCodeArgs {
+            mode,
+            canister_id: target(),
+            wasm_module: vec![0xA5; 1024 * 1024],
+            arg: vec![0, 255, 128],
+            sender_canister_version: None,
+        };
+        let decoded: management_schema::InstallCodeArgs = request(|max| args.encode(max));
+        assert_eq!(decoded.mode, expected);
+        assert_eq!(decoded.wasm_module, args.wasm_module);
+        assert_eq!(decoded.arg, args.arg);
+        assert_eq!(decoded.sender_canister_version, None);
+    }
+    let reply = candid::encode_one(management_schema::CanisterIdRecord {
+        canister_id: Principal::from_slice(target().as_slice()),
+    })
+    .unwrap();
+    assert_eq!(
+        management::decode_created(&reply, limits())
+            .unwrap()
+            .canister_id,
+        target()
+    );
+    for n in 0..reply.len() {
+        assert!(management::decode_created(&reply[..n], limits()).is_err());
+    }
+    assert!(management::decode_empty_response(&candid::encode_one(()).unwrap(), limits()).is_err());
+    assert!(management::decode_empty_response(b"DIDL\0\0", limits()).is_ok());
+}
+#[derive(CandidType, Deserialize)]
+struct Cmc {
+    settings: Option<management_schema::CanisterSettings>,
+    subnet_selection: Option<Selection>,
+}
+#[derive(CandidType, Deserialize)]
+enum Selection {
+    Subnet { subnet: Principal },
+    Filter { subnet_type: Option<String> },
+}
+#[derive(CandidType, Deserialize)]
+struct Create {
+    from_subaccount: Option<Vec<u8>>,
+    created_at_time: Option<u64>,
+    amount: Nat,
+    creation_args: Option<Cmc>,
+}
+#[test]
+fn ledger_creation_preserves_subnet_options_and_wide_amounts() {
+    for subaccount in [None, Some([0; 32]), Some([255; 32])] {
+        for timestamp in [None, Some(u64::MAX)] {
+            for subnet in [
+                None,
+                Some(ledger::SubnetSelection::Subnet(ledger::ExplicitSubnet {
+                    subnet: target(),
+                })),
+                Some(ledger::SubnetSelection::Filter(ledger::SubnetFilter {
+                    subnet_type: Some("application".into()),
+                })),
+            ] {
+                let args = ledger::CreateCanisterArgs {
+                    from_subaccount: subaccount,
+                    created_at_time: timestamp,
+                    amount: "340282366920938463463374607431768211456".parse().unwrap(),
+                    creation_args: Some(ledger::CmcCreationArgs {
+                        subnet_selection: subnet,
+                        settings: Some(management::CreationSettings {
+                            controllers: Some(vec![target()]),
+                            freezing_threshold: Some(42.into()),
+                            ..Default::default()
+                        }),
+                    }),
+                };
+                let value: Create = request(|max| args.encode(max));
+                assert_eq!(value.from_subaccount, subaccount.map(|s| s.to_vec()));
+                assert_eq!(value.created_at_time, timestamp);
+                assert_eq!(
+                    value.amount.0.to_string(),
+                    "340282366920938463463374607431768211456"
+                );
+                let creation = value.creation_args.unwrap();
+                assert_eq!(
+                    creation.settings.unwrap().freezing_threshold,
+                    Some(Nat::from(42_u64))
+                );
+                match creation.subnet_selection {
+                    None => assert!(args.creation_args.unwrap().subnet_selection.is_none()),
+                    Some(Selection::Subnet { subnet }) => {
+                        assert_eq!(subnet.as_slice(), target().as_slice())
+                    }
+                    Some(Selection::Filter { subnet_type }) => {
+                        assert_eq!(subnet_type.as_deref(), Some("application"))
+                    }
+                }
+            }
+        }
+    }
+    let args = ledger::CreateCanisterArgs {
+        from_subaccount: None,
+        created_at_time: None,
+        amount: 0.into(),
+        creation_args: None,
+    };
+    let value: Create = request(|max| args.encode(max));
+    assert!(value.creation_args.is_none());
+}
+#[derive(CandidType)]
+struct Created {
+    block_id: Nat,
+    canister_id: Principal,
+}
+#[derive(CandidType)]
+enum Failure {
+    InsufficientFunds {
+        balance: Nat,
+    },
+    TooOld,
+    CreatedInFuture {
+        ledger_time: u64,
+    },
+    TemporarilyUnavailable,
+    Duplicate {
+        duplicate_of: Nat,
+        canister_id: Option<Principal>,
+    },
+    FailedToCreate {
+        fee_block: Option<Nat>,
+        refund_block: Option<Nat>,
+        error: String,
+    },
+    GenericError {
+        message: String,
+        error_code: Nat,
+    },
+}
+#[test]
+fn complete_ledger_outcomes_preserve_duplicates_and_refuse_malformed_frames() {
+    let large: Nat = "340282366920938463463374607431768211456".parse().unwrap();
+    let success: Result<Created, Failure> = Ok(Created {
+        block_id: large.clone(),
+        canister_id: Principal::from_slice(target().as_slice()),
+    });
+    let bytes = candid::encode_one(success).unwrap();
+    if std::env::var_os("REGENERATE_LEDGER_FIXTURE").is_some() {
+        std::fs::write(
+            concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../engine-view-wasm/fixtures/ledger-created.bin"
+            ),
+            &bytes,
+        )
+        .unwrap();
+    }
+    assert_eq!(
+        bytes.as_slice(),
+        include_bytes!("../../engine-view-wasm/fixtures/ledger-created.bin")
+    );
+    let ledger::CreateResult::Ok(value) = ledger::decode_created(&bytes, limits()).unwrap() else {
+        panic!()
+    };
+    assert_eq!(value.block_id.0.to_string(), large.0.to_string());
+    assert_eq!(value.canister_id, target());
+    let errors = [
+        Failure::InsufficientFunds {
+            balance: large.clone(),
+        },
+        Failure::TooOld,
+        Failure::CreatedInFuture {
+            ledger_time: u64::MAX,
+        },
+        Failure::TemporarilyUnavailable,
+        Failure::Duplicate {
+            duplicate_of: large.clone(),
+            canister_id: None,
+        },
+        Failure::Duplicate {
+            duplicate_of: large.clone(),
+            canister_id: Some(Principal::from_slice(target().as_slice())),
+        },
+        Failure::FailedToCreate {
+            fee_block: Some(large.clone()),
+            refund_block: None,
+            error: "failed".into(),
+        },
+        Failure::GenericError {
+            message: "unknown".into(),
+            error_code: large,
+        },
+    ];
+    for (index, error) in errors.into_iter().enumerate() {
+        let value: Result<Created, Failure> = Err(error);
+        let bytes = candid::encode_one(value).unwrap();
+        let decoded = ledger::decode_created(
+            &bytes,
+            Limits {
+                bytes: bytes.len(),
+                ..limits()
+            },
+        )
+        .unwrap();
+        match (&decoded, index) {
+            (ledger::CreateResult::Err(ledger::CreateError::InsufficientFunds(v)), 0) => {
+                assert_eq!(
+                    v.balance.0.to_string(),
+                    "340282366920938463463374607431768211456"
+                )
+            }
+            (ledger::CreateResult::Err(ledger::CreateError::TooOld), 1) => {}
+            (ledger::CreateResult::Err(ledger::CreateError::CreatedInFuture(v)), 2) => {
+                assert_eq!(v.ledger_time, u64::MAX)
+            }
+            (ledger::CreateResult::Err(ledger::CreateError::TemporarilyUnavailable), 3) => {}
+            (ledger::CreateResult::Err(ledger::CreateError::Duplicate(_)), 4 | 5) => {}
+            (ledger::CreateResult::Err(ledger::CreateError::FailedToCreate(v)), 6) => {
+                assert_eq!(v.error, "failed");
+                assert!(v.refund_block.is_none());
+                assert_eq!(
+                    v.fee_block.as_ref().unwrap().0.to_string(),
+                    "340282366920938463463374607431768211456"
+                );
+            }
+            (ledger::CreateResult::Err(ledger::CreateError::GenericError(v)), 7) => {
+                assert_eq!(v.message, "unknown");
+                assert_eq!(
+                    v.error_code.0.to_string(),
+                    "340282366920938463463374607431768211456"
+                );
+            }
+            _ => panic!("changed ledger error"),
+        }
+        if let ledger::CreateResult::Err(ledger::CreateError::Duplicate(value)) = decoded {
+            assert_eq!(
+                value.canister_id,
+                if index == 4 { None } else { Some(target()) }
+            );
+            assert_eq!(
+                value.duplicate_of.0.to_string(),
+                "340282366920938463463374607431768211456"
+            );
+        }
+        assert!(
+            ledger::decode_created(
+                &bytes,
+                Limits {
+                    bytes: bytes.len() - 1,
+                    ..limits()
+                }
+            )
+            .is_err()
+        );
+        for n in 0..bytes.len() {
+            assert!(ledger::decode_created(&bytes[..n], limits()).is_err());
+        }
+        let mut trailing = bytes;
+        trailing.push(0);
+        assert!(ledger::decode_created(&trailing, limits()).is_err());
+    }
+    #[derive(CandidType)]
+    enum Unknown {
+        NewError,
+    }
+    let unknown: Result<Created, Unknown> = Err(Unknown::NewError);
+    assert!(ledger::decode_created(&candid::encode_one(unknown).unwrap(), limits()).is_err());
+}
+#[derive(CandidType, Deserialize)]
+struct IcrcAccount {
+    owner: Principal,
+    subaccount: Option<Vec<u8>>,
+}
+#[test]
+fn canonical_accounts_amounts_and_icp_identity() {
+    let mut identities = vec![];
+    for subaccount in [None, Some([0; 32]), Some([255; 32])] {
+        let account = candidate_types::Account {
+            owner: candidate_types::Principal::management_canister(),
+            subaccount,
+        };
+        let decoded: IcrcAccount = request(|max| ledger::encode_balance_account(&account, max));
+        assert_eq!(decoded.owner, Principal::management_canister());
+        assert_eq!(decoded.subaccount, subaccount.map(|s| s.to_vec()));
+        identities.push(ledger::icp_account_identifier(&account));
+    }
+    assert_eq!(identities[0], identities[1]);
+    assert_ne!(identities[0], identities[2]);
+    let literal = identities[0]
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect::<String>();
+    assert_eq!(
+        literal,
+        "2d0e897f7e862d2b57d9bc9ea5c65f9a24ac6c074575f47898314b8d6cb0929d"
+    );
+    let bytes = candid::encode_one(
+        "340282366920938463463374607431768211456"
+            .parse::<Nat>()
+            .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        ledger::decode_amount(&bytes, limits())
+            .unwrap()
+            .0
+            .to_string(),
+        "340282366920938463463374607431768211456"
+    );
+    assert!(
+        ledger::decode_amount(
+            &bytes,
+            Limits {
+                allocation: 0,
+                ..limits()
+            }
+        )
+        .is_err()
+    );
+    assert_eq!(ledger::encode_fee_args(6).unwrap(), b"DIDL\0\0");
+    assert!(ledger::encode_fee_args(5).is_err());
+    assert!(ledger::decode_amount(b"DIDL\0\0", limits()).is_err());
+}
+
+#[test]
+fn unselected_fields_share_work_and_skip_budgets() {
+    #[derive(CandidType)]
+    struct FutureCreated {
+        block_id: Nat,
+        canister_id: Principal,
+        extra: Vec<Vec<u8>>,
+    }
+    let value: Result<FutureCreated, Failure> = Ok(FutureCreated {
+        block_id: 0_u64.into(),
+        canister_id: Principal::management_canister(),
+        extra: vec![vec![5; 64]; 4],
+    });
+    let bytes = candid::encode_one(value).unwrap();
+    assert!(ledger::decode_created(&bytes, limits()).is_ok());
+    assert!(
+        ledger::decode_created(
+            &bytes,
+            Limits {
+                skipping: 0,
+                ..limits()
+            }
+        )
+        .is_err()
+    );
+    assert!(
+        ledger::decode_created(
+            &bytes,
+            Limits {
+                work: 0,
+                ..limits()
+            }
+        )
+        .is_err()
+    );
+    assert!(ledger::decode_created(&bytes[..bytes.len() - 1], limits()).is_err());
+}

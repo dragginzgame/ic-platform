@@ -45,7 +45,13 @@ name = "caffeine-admission"
 path = "src/bin/caffeine-admission.rs"
 required-features = ["caffeine"]
 
+[[bin]]
+name = "ledger-admission"
+path = "src/bin/ledger-admission.rs"
+required-features = ["ledger"]
+
 [features]
+ledger = ["candidate", "ic-platform-protocol/ledger"]
 caffeine = ["candidate", "ic-platform-protocol/caffeine"]
 management-snapshots = ["candidate", "ic-platform-protocol/management-snapshots"]
 default = []

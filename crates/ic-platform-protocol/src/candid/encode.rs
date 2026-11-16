@@ -240,7 +240,7 @@ impl Encode for String {
         writer.bytes(self.as_bytes())
     }
 }
-#[cfg(feature = "caffeine")]
+#[cfg(any(feature = "caffeine", feature = "management"))]
 impl Encode for super::Nat {
     const SCHEMA: Schema = Schema::Primitive(-3);
     fn write(&self, writer: &mut Writer<'_>) -> Result<()> {
@@ -260,5 +260,14 @@ impl<T: Encode> Encode for &T {
     const SCHEMA: Schema = T::SCHEMA;
     fn write(&self, writer: &mut Writer<'_>) -> Result<()> {
         (*self).write(writer)
+    }
+}
+
+#[cfg(feature = "ledger")]
+impl Encode for [u8; 32] {
+    const SCHEMA: Schema = Schema::Vector(&Schema::Primitive(-5));
+    fn write(&self, writer: &mut Writer<'_>) -> Result<()> {
+        writer.unsigned(32)?;
+        writer.bytes(self)
     }
 }

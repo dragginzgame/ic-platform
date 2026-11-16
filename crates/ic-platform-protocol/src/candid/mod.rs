@@ -2,10 +2,18 @@
 //!
 //! This is not a general-purpose Candid API. Decoding authenticates nothing.
 
-#[cfg(any(feature = "cloud-engine-marketplace", feature = "caffeine"))]
+#[cfg(any(
+    feature = "cloud-engine-marketplace",
+    feature = "caffeine",
+    feature = "management"
+))]
 mod nat;
 mod wire;
-#[cfg(any(feature = "cloud-engine-marketplace", feature = "caffeine"))]
+#[cfg(any(
+    feature = "cloud-engine-marketplace",
+    feature = "caffeine",
+    feature = "management"
+))]
 pub use nat::Nat;
 pub(crate) use wire::{Decode, Reader, Schema};
 #[cfg(feature = "management-snapshots")]

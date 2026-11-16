@@ -1094,12 +1094,12 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.4"
+version = "0.34.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f26d836ddaf94dfb76ca3a9e3eb43ea6dee3fbb90266b3532cb218af5abaf26"
+checksum = "479e4899fe08d50c582e6b5b57668ed5cdcc3e0f75b81fde40ffb3ed2b14c093"
 dependencies = [
  "ic-certification",
- "ic-platform-types 0.21.1",
+ "ic-platform-types 0.21.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ic-verify-bls-signature",
  "serde",
  "serde_cbor",
@@ -1108,7 +1108,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.7"
+version = "0.34.8"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -1138,11 +1138,13 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
+ "crc32fast",
  "ic-platform-types 0.21.2",
  "num-bigint 0.5.1",
  "serde",
+ "sha2 0.11.1",
 ]
 
 [[package]]
@@ -1160,9 +1162,7 @@ version = "0.23.14"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.21.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "339477b696137ec7fd6f96725c5733b80d67c5fd75b27c8dfaa83846629b9958"
+version = "0.21.2"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1175,6 +1175,8 @@ dependencies = [
 [[package]]
 name = "ic-platform-types"
 version = "0.21.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b08201b2ebbb9a9f0e1c8ee2854f48ff3f68a777c441147273c600bf6723d7d"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1186,9 +1188,9 @@ dependencies = [
 
 [[package]]
 name = "ic-testkit"
-version = "0.107.1"
+version = "0.107.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4fe4ea7882118e731ef1ebe8c668fc5dfa5252c1c972b1de68bc444868fae42"
+checksum = "f1abdecdc13e767e8f5f7f83f2c19e48a414d6a7eea2e2ffdbfe95222c56d6c2"
 dependencies = [
  "pocket-ic",
 ]
@@ -1788,7 +1790,7 @@ version = "0.1.0"
 dependencies = [
  "candid",
  "ic-certification",
- "ic-platform 0.34.7",
+ "ic-platform 0.34.8",
  "ic-platform-types 0.21.2",
  "ic-testkit",
  "serde_cbor",
@@ -2133,8 +2135,8 @@ dependencies = [
  "candid",
  "ic-certification",
  "ic-management-canister-types",
- "ic-platform 0.34.4",
  "ic-platform 0.34.7",
+ "ic-platform 0.34.8",
  "ic-testkit",
  "tokio",
  "toko-tooling",
@@ -3003,8 +3005,8 @@ name = "types-consumer"
 version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
- "ic-platform-types 0.21.1",
  "ic-platform-types 0.21.2",
+ "ic-platform-types 0.21.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json",
  "toko-tooling",
 ]

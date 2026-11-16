@@ -208,3 +208,21 @@ not awaited. No sibling delivery or unchanged Types release is selected.
 This cohort is now published and independently verified. See the
 [signed supplier publication evidence](qualification/2026-11-16-signed-supplier-publication.md)
 for registry checksums, source tags, complete local qualification and retained attempts.
+
+## External signing and management/ledger release
+
+The selected compatible releases are Platform 0.34.8 and Protocol 0.2.7.
+Registry checks on 16 November confirmed baselines 0.34.7 and 0.2.6 and absence
+of both candidates. Types 0.21.2 and Runtime/macros/guard 0.23.14 product contents
+are unchanged. Qualification and generated Auth/Blob consumers select Testkit
+0.107.3 (registry SHA-256 `f1abdecdc13e767e8f5f7f83f2c19e48a414d6a7eea2e2ffdbfe95222c56d6c2`).
+Its optional managed-server capability is not selected; the existing admitted
+qualification server owner remains in use.
+
+Run the complete local catalog once at clean committed source, then retain its
+explicit receipt for the existing publication adapter. Deliver main with annotated
+`protocol-v0.2.7` and `platform-v0.34.8` tags, publish Protocol then Platform, and
+independently verify each registry archive before proceeding. Hosted CI remains
+asynchronous. Actual consumer migration and remaining advisory obligations remain
+separate; see [management/ledger](qualification/management-ledger.md) and
+[external signing](qualification/blob-suppliers.md).

@@ -23,6 +23,7 @@ ignored = ["toko-tooling"]
 category = "tests"
 
 [features]
+ledger = ["ic-platform-protocol/ledger"]
 caffeine = ["ic-platform-protocol/caffeine"]
 management-snapshots = ["ic-platform-protocol/management-snapshots"]
 management-chunks = ["ic-platform-protocol/management-chunks"]

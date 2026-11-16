@@ -316,3 +316,8 @@ to Protocol. Explicit Ed25519 signing/original recovery and selected bounded
 Caffeine codecs are implemented with independent and installed qualification.
 Full CLI custody/management migration remains separate. See the
 [contracts, evidence and remaining gates](qualification/blob-suppliers.md).
+
+The selected [management/ledger supplier](qualification/management-ledger.md) now
+implements Platform #20 locally, including provisional/ledger creation, controller
+settings, exact install/upgrade arguments, complete duplicate/error outcomes and
+canonical balance/fee accounts. Production Canic migration remains separate.

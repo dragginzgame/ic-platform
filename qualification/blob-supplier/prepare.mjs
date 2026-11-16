@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {createHash} from 'node:crypto';
-const root=process.cwd(),source=resolve('../ic-blob-storage'),out=resolve('target/blob-supplier/source');
+const root=process.cwd(),source=resolve(process.env.BLOB_SOURCE ?? '../ic-blob-storage'),out=resolve('target/blob-supplier/source');
 const revision='31dd236814879afd2fd0faf0851e6b46184476ac';
 assert.equal(execFileSync('git',['rev-parse','HEAD'],{cwd:source,encoding:'utf8'}).trim(),revision);
 assert.equal(execFileSync('git',['status','--porcelain'],{cwd:source,encoding:'utf8'}).trim(),'','expected clean pinned Blob source');
@@ -15,7 +15,7 @@ const archive=execFileSync('git',['archive',revision],{cwd:source,maxBuffer:64*1
 execFileSync('tar',['-x','-C',out],{input:archive});
 function edit(name,fn){const path=`${out}/${name}`;writeFileSync(path,fn(readFileSync(path,'utf8')))}
 for(const name of ['Cargo.toml','qualification/Cargo.toml'])edit(name,s=>{for(const p of ['ic-platform-types','ic-platform-runtime'])s=s.replace(p+' = { version = ',p+' = { path = "'+root+'/crates/'+p+'", version = ');return s;});
-edit('qualification/Cargo.toml',s=>s.replace('ic-platform = { version = "0.34.6",','ic-platform = { path = "'+root+'/crates/ic-platform", version = "0.34.6",').replace('ic-testkit = { version = "0.106.0",','ic-testkit = { version = "=0.107.1",'));
+edit('qualification/Cargo.toml',s=>s.replace('ic-platform = { version = "0.34.6",','ic-platform = { path = "'+root+'/crates/ic-platform", version = "0.34.6",').replace('ic-testkit = { version = "0.106.0",','ic-testkit = { version = "=0.107.3",'));
 edit('qualification/ic-blob-storage-tests/Cargo.toml',s=>s.replace(/^ic-platform-legacy = .*\n/m,'').replace('features = ["ingress-packets"]','features = ["native-signed"]').replace('features = ["held-reply-fixtures"]','features = []'));
 const helper=readFileSync('qualification/blob-supplier/signed-client.rs','utf8');
 edit('qualification/ic-blob-storage-tests/tests/signed.rs',s=>{

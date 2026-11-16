@@ -14,7 +14,8 @@ mod query;
 mod signed;
 #[cfg(feature = "native-signed")]
 pub use signed::{
-    Dispatch, Ed25519Identity, PreparedUpdate, RequestObservation, RequestStatus, UpdateArgs,
+    Dispatch, Ed25519Identity, PreparedRequestStatus, PreparedUpdate, RequestObservation,
+    RequestStatus, UpdateArgs,
 };
 mod subnet;
 pub use ic_transport_types::SubnetMetrics;

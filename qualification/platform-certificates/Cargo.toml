@@ -53,6 +53,7 @@ path = "src/bin/native-signed-installed.rs"
 required-features = ["native-signed"]
 
 [features]
+native-signed-secp256k1 = ["native-signed", "candidate-platform/native-signed-secp256k1"]
 native-signed = [
     "native-read",
     "candidate-platform/native-signed",

@@ -12,11 +12,11 @@ published test source is copied.
 
 `qualification/types-consumer` is a private 0.1.0 package outside product
 release groups. Its normal dependency selects the local Types path and exact
-0.21.1 version. The `candidate-types` alias distinguishes source selection, not
+0.21.2 version. The `candidate-types` alias distinguishes source selection, not
 a wrapper or a second identity in its production graph. Public assignments
 between directly imported Principal and Account.owner compile and execute.
 
-Registry Types 0.21.1 is a native-only development oracle. It is compared through
+Registry Types 0.21.2 is a native-only development oracle. It is compared through
 bytes, text and JSON, never by pretending the two sources have the same Rust
 type. Native comparison covers all 30 Principal lengths, four subaccount states,
 every single-position `!` mutation of the resulting account text, and twelve
@@ -86,3 +86,22 @@ Local validation passed 37 product tests and 29 all-feature consumer tests,
 strict Clippy/Rustdoc, Wasm consumer compilation, EngineView and marketplace
 Wasm execution, normal/build graph checks, and the existing heap and argument
 allocation gates. No new allocation threshold or performance claim is introduced.
+
+## Qualification cohort refresh — 16 November 2026
+
+Both the local candidate and registry comparison now select Types 0.21.2.
+They retain distinct Cargo source identities; comparisons cross bytes rather
+than Rust types. The registry certificate comparison moves to Platform 0.34.7
+and Testkit to 0.107.2, which permits the updated registry Types identity.
+Auth browser qualification and the Blob simulator alias also select 0.21.2.
+Historical publication records and synthetic refusal fixtures remain unchanged.
+
+Types native/Wasm comparisons, production graph checks, installed Runtime, five
+installed Auth tests, browser-codec interoperability and all seven Blob supplier
+journeys pass. Logs: `target/qualification-types-0.21.2.log` and
+`target/qualification-blob-types-0.21.2.log`; graph evidence:
+`target/qualification-types-graph.json`. Blob qualification used a clean disposable
+checkout of its pinned commit via `BLOB_SOURCE`, after the default sibling
+cleanliness check correctly refused unrelated uncommitted work. No sibling
+checkout was changed. These are qualification-only changes; product versions
+and published archives remain unchanged.

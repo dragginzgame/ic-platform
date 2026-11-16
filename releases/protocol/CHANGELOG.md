@@ -3,6 +3,19 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.2.7] - 2026-11-16
+
+### ➕ Added
+
+- Supply bounded management creation/settings/install and cycles-ledger creation,
+  complete success/error decoding, canonical ICRC accounts, Nat balances/fees and
+  ICP identifiers for [Platform #20](https://github.com/dragginzgame/ic-platform/issues/20).
+  Preserve duplicate outcomes, optional fields and exact Wasm/argument bytes.
+  Reuse the existing status projection for
+  [Platform #11](https://github.com/dragginzgame/ic-platform/issues/11).
+  Independent native schemas, resource refusals and standalone Wasm replay pass;
+  see [supplier qualification](../../docs/qualification/management-ledger.md).
+
 ## [0.2.6] - 2026-11-16
 
 ### ➕ Added

@@ -3,6 +3,23 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.8] - 2026-11-16
+
+### ➕ Added
+
+- Add exact externally signed request-status admission and one-attempt observation
+  without private keys, replacement reads or update renewal for
+  [Platform #17](https://github.com/dragginzgame/ic-platform/issues/17).
+  The opt-in native-signed-secp256k1 profile verifies direct ICP envelopes with
+  upstream K256; Ed25519 remains available through native-signed.
+  Actual ICP CLI 1.7.0 fixtures and fresh-process recovery are qualified locally;
+  full consumer lifecycle migration remains separate.
+
+### 🧪 Testing
+
+- Adopt Testkit 0.107.3 in qualification and generated Auth/Blob fixtures, with
+  registry Types 0.21.2 and Platform 0.34.7 comparison identities.
+
 ## [0.34.7] - 2026-11-16
 
 ### ➕ Added
@@ -15,7 +32,7 @@ Return to the [group index](../../CHANGELOG.md).
 ### 🧪 Testing
 
 - Replace Query's private fixture dependency with a versioned independent replay
-  corpus; qualify actual topology/CLI tests, strict Clippy and portable Cargo
+  corpus for [Platform #10](https://github.com/dragginzgame/ic-platform/issues/10); qualify actual topology/CLI tests, strict Clippy and portable Cargo
   archives against published products. See [the evidence](../../docs/qualification/query-hard-cut.md).
 
 ## [0.34.6] - 2026-11-16

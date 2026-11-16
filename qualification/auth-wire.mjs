@@ -31,12 +31,12 @@ const manifest = readFileSync(`${directory}/Cargo.toml`, 'utf8');
 assert(manifest.includes('ic-platform-types = { version = "0.20.4",'));
 assert(manifest.includes('ic-wire = "0.24.1"'));
 writeFileSync(`${directory}/Cargo.toml`, manifest
-  .replace('ic-platform-types = { version = "0.20.4",', 'ic-platform-types = { version = "=0.21.1",')
+  .replace('ic-platform-types = { version = "0.20.4",', 'ic-platform-types = { version = "=0.21.2",')
   .replace('ic-wire = "0.24.1"', 'ic-wire = "=0.24.2"'));
 adoptTooling(`${directory}/Cargo.toml`);
 run('cargo', ['update', '--offline', '-p', 'ic-wire', '-p', 'toko-tooling']);
 const metadata = JSON.parse(run('cargo', ['metadata', '--offline', '--locked', '--format-version=1']));
-for (const [name, version] of [['ic-wire','0.24.2'], ['ic-platform-types','0.21.1']]) {
+for (const [name, version] of [['ic-wire','0.24.2'], ['ic-platform-types','0.21.2']]) {
   const selected = metadata.packages.find(p => p.name === name && p.version === version);
   assert(selected?.source?.startsWith('registry+'), `${name} must be published`);
 }
@@ -53,7 +53,7 @@ for (const name of modules.flatMap(name => [`${name}.js`, `${name}.d.ts`])) {
   assert.deepEqual(readFileSync(`${directory}/target/javascript/${name}`),
     readFileSync(`${directory}/packages/client/src/generated/${name}`), `generated client changed: ${name}`);
 }
-const evidence = {revision, referenceRevision, packages: {types:'0.21.1', wire:'0.24.2'},
+const evidence = {revision, referenceRevision, packages: {types:'0.21.2', wire:'0.24.2'},
   archiveSha256: hash(readFileSync(`${directory}/source.tar`)), lockSha256: hash(readFileSync(`${directory}/Cargo.lock`)),
   generated: Object.fromEntries(readdirSync(`${directory}/target/generated`).map(name => [name, hash(readFileSync(`${directory}/target/generated/${name}`))])),
   tests, interoperability, status:'passed'};

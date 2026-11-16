@@ -4,8 +4,9 @@ use crate::certificate::{
     TimeWindow,
     construction::{Certificate, encode_certificate, fork, labeled, leaf},
 };
-use crate::ed25519::SigningKey;
+use crate::ed25519::{Signer, SigningKey};
 use crate::ingress;
+use crate::ingress::Content;
 use ed25519_dalek::pkcs8::EncodePrivateKey;
 use ic_verify_bls_signature::PrivateKey;
 fn identity() -> Ed25519Identity {
@@ -297,5 +298,111 @@ fn delegated_original_request_requires_effective_target_and_both_time_windows() 
                 }
             )
             .is_err()
+    );
+}
+
+fn status_envelope(update: &PreparedUpdate) -> ingress::Envelope {
+    ingress::Envelope {
+        content: ingress::Content::ReadState {
+            ingress_expiry: 777,
+            sender: update.sender(),
+            paths: vec![vec![
+                b"request_status".to_vec(),
+                update.request_id().to_vec(),
+            ]],
+        },
+        sender_pubkey: None,
+        sender_sig: None,
+        sender_delegation: None,
+    }
+}
+fn sign_status(mut envelope: ingress::Envelope, seed: u8) -> Vec<u8> {
+    let key = SigningKey::from_bytes(&[seed; 32]);
+    envelope.sender_pubkey = Some(
+        [
+            b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00".as_slice(),
+            &key.verifying_key().to_bytes(),
+        ]
+        .concat(),
+    );
+    envelope.sender_sig = Some(
+        key.sign(&envelope.content.signable().unwrap())
+            .to_bytes()
+            .to_vec(),
+    );
+    serde_cbor::to_vec(&envelope).unwrap()
+}
+#[test]
+fn external_status_admission_preserves_bytes_and_refuses_binding_changes() {
+    let update = update();
+    let bytes = [
+        b"\xd9\xd9\xf7".as_slice(),
+        &sign_status(status_envelope(&update), 9),
+    ]
+    .concat();
+    let status = PreparedRequestStatus::from_bytes(&bytes, &update, bytes.len()).unwrap();
+    assert_eq!(status.envelope_bytes(), bytes);
+    assert_eq!(status.expiry(), 777);
+    assert_eq!(update.expiry(), 1);
+    assert!(PreparedRequestStatus::from_bytes(&bytes, &update, bytes.len() - 1).is_err());
+    for index in 0..6 {
+        let mut envelope = status_envelope(&update);
+        if let Content::ReadState { sender, paths, .. } = &mut envelope.content {
+            match index {
+                0 => *sender = Principal::anonymous(),
+                1 => paths[0][0] = b"time".to_vec(),
+                2 => paths[0][1][0] ^= 1,
+                3 => paths.push(vec![b"time".to_vec()]),
+                4 => paths[0].push(b"reply".to_vec()),
+                _ => paths.clear(),
+            }
+        }
+        assert!(
+            PreparedRequestStatus::from_bytes(&sign_status(envelope, 9), &update, 4096).is_err()
+        );
+    }
+    assert!(
+        PreparedRequestStatus::from_bytes(&sign_status(status_envelope(&update), 8), &update, 4096)
+            .is_err()
+    );
+    let mut envelope = ingress::decode_envelope(&bytes, 4096).unwrap().value;
+    envelope.sender_delegation = Some(vec![]);
+    assert!(
+        PreparedRequestStatus::from_bytes(&serde_cbor::to_vec(&envelope).unwrap(), &update, 4096)
+            .is_err()
+    );
+    for length in 0..bytes.len() {
+        assert!(PreparedRequestStatus::from_bytes(&bytes[..length], &update, 4096).is_err());
+    }
+    let mut trailing = bytes;
+    trailing.push(0);
+    assert!(PreparedRequestStatus::from_bytes(&trailing, &update, 4096).is_err());
+}
+
+#[cfg(feature = "native-signed-secp256k1")]
+#[test]
+fn direct_secp256k1_external_profile_uses_upstream_verifier() {
+    let key = crate::ecdsa::SigningKey::from_slice(&[7; 32]).unwrap();
+    let public = [b"\x30\x56\x30\x10\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x05\x2b\x81\x04\x00\x0a\x03\x42\x00".as_slice(), key.verifying_key().to_sec1_point(false).as_bytes()].concat();
+    let mut envelope = ingress::decode_envelope(update().envelope_bytes(), 4096)
+        .unwrap()
+        .value;
+    if let Content::Call { sender, .. } = &mut envelope.content {
+        *sender = Principal::self_authenticating(&public);
+    }
+    envelope.sender_pubkey = Some(public);
+    let signature: crate::ecdsa::Signature = key.sign(&envelope.content.signable().unwrap());
+    envelope.sender_sig = Some(signature.to_bytes().to_vec());
+    let bytes = serde_cbor::to_vec(&envelope).unwrap();
+    let admitted = PreparedUpdate::from_bytes(&bytes, Principal::from_slice(&[1]), 4096).unwrap();
+    assert_eq!(admitted.envelope_bytes(), bytes);
+    envelope.sender_sig.as_mut().unwrap()[0] ^= 1;
+    assert!(
+        PreparedUpdate::from_bytes(
+            &serde_cbor::to_vec(&envelope).unwrap(),
+            Principal::from_slice(&[1]),
+            4096
+        )
+        .is_err()
     );
 }

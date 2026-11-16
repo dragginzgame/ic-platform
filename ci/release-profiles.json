@@ -29,7 +29,8 @@
     "qualify-registry-codecs",
     "qualify-query-hard-cut",
     "qualify-caffeine",
-    "qualify-blob-suppliers"
+    "qualify-blob-suppliers",
+    "qualify-management-ledger"
   ],
   "runtime": [
     "qualify-runtime-call",

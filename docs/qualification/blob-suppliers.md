@@ -1,8 +1,9 @@
 # Blob signed transport and Caffeine codecs
 
 This implements the supplier surfaces requested by [Platform #17](https://github.com/dragginzgame/ic-platform/issues/17)
-and [Platform #18](https://github.com/dragginzgame/ic-platform/issues/18). The changes are
-local candidates, not published releases or a completed Blob hard cut.
+and [Platform #18](https://github.com/dragginzgame/ic-platform/issues/18). The original supplier slice is published in Platform 0.34.7 and Protocol 0.2.6;
+this is not a completed Blob hard cut. The external-signer extension below is
+a local Platform 0.34.8 candidate.
 
 ## Ownership and public contracts
 
@@ -127,3 +128,33 @@ Root and qualification lock audits using RustSec revision
 `02e2517f457a359fc6d3440ea4560c8ea188fee8` reported zero known vulnerabilities.
 The existing unmaintained notices for `paste` and `serde_cbor` remain; this check
 introduces no exemption or claim that dependency maintenance is complete.
+
+## Externally signed status requests — Platform 0.34.8 candidate
+
+`PreparedRequestStatus::from_bytes(bytes, &update, maximum)` admits one exact
+`request_status/<original-id>` read-state path, the same sender, a valid direct
+signature and no delegation. It preserves original CBOR framing and read expiry.
+`ReadClient::observe_prepared_request` checks the request/sender/effective-target
+binding again, sends those exact bytes once and authenticates the returned
+certificate through the existing root/range/time verifier. It takes no identity
+or private key. A caller may explicitly admit a newly authorized read, but the
+library never renews a read or update, polls, retries or resubmits an update.
+The consumer still admits the planned target/method/argument bytes and network.
+
+Direct Ed25519 remains under `native-signed`. The additive
+`native-signed-secp256k1` feature admits the strict uncompressed secp256k1 SPKI
+and compact ECDSA signature profile through original K256 0.14.0 (MIT/Apache-2.0),
+ECDSA 0.17.0, elliptic-curve 0.14.3 and crypto-bigint 0.7.6. No Agent or algorithm
+implementation is copied. P-256 and delegated signatures are unsupported and
+refuse; this does not resolve Platform #4's retained Agent/derivation graph.
+
+`make qualify-native-signed` passes with actual official ICP CLI 1.7.0
+Ed25519/secp256k1 sign-only outputs, a fresh-process retained-status recovery,
+exact HTTP bytes, sender/path/route/signature/bounds refusals, direct/delegated
+certificates and the existing installed signed update/query/management cases.
+Fixtures and generation provenance are in
+`qualification/platform-certificates/fixtures/icp-signing/`.
+Logs: `target/external-status-tests.log`, `target/external-status-qualification.log`.
+Neither signing nor the recovery fixture contacts a live provider or canister.
+Platform 0.34.8 is selected for publication. Full Canic journal
+integration and Blob fresh-CLI stop/upgrade/start/custody journeys remain unproved.

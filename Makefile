@@ -518,10 +518,21 @@ qualify-native-signed: qualification-tooling-check
 	cargo test --offline --locked -p ic-platform --all-features native::
 	cargo clippy --offline --locked -p ic-platform --no-default-features --features native-signed --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --no-default-features --features native-signed --no-deps
-	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed --test native_signed --bin native-signed-installed -- -D warnings
-	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed --test native_signed
-	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed --bin native-signed-installed
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed-secp256k1 --test native_signed --bin native-signed-installed -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed-secp256k1 --test native_signed
+	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed-secp256k1 --bin native-signed-installed
 
 .PHONY: qualify-blob-suppliers
 qualify-blob-suppliers: qualification-tooling-check
 	node qualification/blob-supplier/run.mjs
+
+.PHONY: qualify-management-ledger
+qualify-management-ledger: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features ledger --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features ledger --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features ledger --test ledger -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features ledger --test ledger
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features ledger --bin ledger-admission -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features ledger --bin ledger-admission --release --target wasm32-unknown-unknown --target-dir target/engine-view-wasm/ledger
+	node qualification/engine-view-wasm.mjs ledger
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features ledger --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1

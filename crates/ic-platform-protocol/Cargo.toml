@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-protocol"
-version = "0.2.6"
+version = "0.2.7"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -18,6 +18,8 @@ ignored = ["toko-tooling"]
 
 [features]
 default = []
+management = ["management-snapshots", "dep:num-bigint"]
+ledger = ["management", "dep:sha2", "dep:crc32fast"]
 caffeine = ["dep:candidate-types", "dep:serde", "dep:num-bigint"]
 raw-rand = []
 management-chunks = ["dep:candidate-types", "dep:serde"]
@@ -32,8 +34,10 @@ registry-settings = ["dep:serde"]
 
 [dependencies]
 candidate-types = { workspace = true, optional = true }
+crc32fast = { workspace = true, optional = true }
 num-bigint = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
+sha2 = { workspace = true, optional = true }
 
 [lints]
 workspace = true

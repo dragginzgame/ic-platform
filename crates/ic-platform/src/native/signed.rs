@@ -1,4 +1,5 @@
-//! Explicit Ed25519 identity and original-request transport. No discovery,
+//! Explicit Ed25519 identity and original-request transport, with optional
+//! externally signed direct secp256k1 admission. No discovery,
 //! polling, renewal, redirect, proxy or retry is performed by these operations.
 use super::{ReadClient, ReadError, TimePolicy, authenticate_certificate};
 use crate::{
@@ -148,7 +149,8 @@ pub struct PreparedUpdate {
 }
 impl PreparedUpdate {
     /// Admit exact retained bytes from durable custody; never re-encode them.
-    /// Only direct Ed25519 envelopes are selected. Caller admits effective routing.
+    /// Direct Ed25519 is supported; `native-signed-secp256k1` also admits direct
+    /// secp256k1. Caller admits effective routing.
     /// # Errors
     /// Refuses malformed/oversized envelopes, delegation, sender info, wrong sender
     /// binding, weak keys or invalid signatures. No freshness claim is made.
@@ -173,23 +175,7 @@ impl PreparedUpdate {
         if envelope.sender_delegation.is_some() || sender_info.is_some() {
             return Err(ReadError::Packet);
         }
-        let public = envelope.sender_pubkey.as_deref().ok_or(ReadError::Packet)?;
-        let raw: &[u8; 32] = public
-            .strip_prefix(b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00")
-            .and_then(|p| p.try_into().ok())
-            .ok_or(ReadError::Packet)?;
-        let key = VerifyingKey::from_bytes(raw).map_err(|_| ReadError::Packet)?;
-        if key.is_weak() || Principal::self_authenticating(public) != sender {
-            return Err(ReadError::Packet);
-        }
-        let signature =
-            Signature::from_slice(envelope.sender_sig.as_deref().ok_or(ReadError::Packet)?)
-                .map_err(|_| ReadError::Packet)?;
-        key.verify_strict(
-            &envelope.content.signable().map_err(|_| ReadError::Packet)?,
-            &signature,
-        )
-        .map_err(|_| ReadError::Packet)?;
+        verify_envelope(&envelope, sender)?;
         Ok(Self {
             bytes: bytes.to_vec(),
             id: envelope
@@ -233,6 +219,103 @@ impl PreparedUpdate {
         self.effective
     }
 }
+// Strict direct-key profiles; cryptographic verification remains upstream.
+fn verify_envelope(envelope: &Envelope, sender: Principal) -> Result<(), ReadError> {
+    if envelope.sender_delegation.is_some() {
+        return Err(ReadError::Packet);
+    }
+    let public = envelope.sender_pubkey.as_deref().ok_or(ReadError::Packet)?;
+    if Principal::self_authenticating(public) != sender {
+        return Err(ReadError::Packet);
+    }
+    let signature = envelope.sender_sig.as_deref().ok_or(ReadError::Packet)?;
+    let message = envelope.content.signable().map_err(|_| ReadError::Packet)?;
+    if let Some(raw) = public.strip_prefix(b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00") {
+        let raw = raw.try_into().map_err(|_| ReadError::Packet)?;
+        let key = VerifyingKey::from_bytes(raw).map_err(|_| ReadError::Packet)?;
+        if key.is_weak() {
+            return Err(ReadError::Packet);
+        }
+        return key
+            .verify_strict(
+                &message,
+                &Signature::from_slice(signature).map_err(|_| ReadError::Packet)?,
+            )
+            .map_err(|_| ReadError::Packet);
+    }
+    #[cfg(feature = "native-signed-secp256k1")]
+    if let Some(raw) = public.strip_prefix(b"\x30\x56\x30\x10\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x05\x2b\x81\x04\x00\x0a\x03\x42\x00") {
+        use k256::ecdsa::{Signature, VerifyingKey, signature::Verifier};
+        if raw.len() != 65 || raw[0] != 4 { return Err(ReadError::Packet); }
+        let key = VerifyingKey::from_sec1_bytes(raw).map_err(|_| ReadError::Packet)?;
+        let signature = Signature::from_slice(signature).map_err(|_| ReadError::Packet)?;
+        return key.verify(&message, &signature).map_err(|_| ReadError::Packet);
+    }
+    Err(ReadError::Packet)
+}
+
+/// Signature-checked externally prepared status read for one original update.
+/// No key custody, expiry renewal or network operation occurs on admission.
+#[derive(Debug)]
+pub struct PreparedRequestStatus {
+    bytes: Vec<u8>,
+    id: [u8; 32],
+    sender: Principal,
+    effective: Principal,
+    expiry: u64,
+}
+impl PreparedRequestStatus {
+    /// Admit exactly one request-status path bound to this update and sender.
+    /// Preserves the original read expiry without imposing current-time policy.
+    /// A freshly authorized read is an explicit caller decision, never automatic.
+    /// # Errors
+    /// Refuses malformed, oversized, delegated, unsupported-key or incorrectly
+    /// signed envelopes, wrong senders, extra paths and mismatched request IDs.
+    pub fn from_bytes(
+        bytes: &[u8],
+        update: &PreparedUpdate,
+        maximum_bytes: usize,
+    ) -> Result<Self, ReadError> {
+        let envelope = ingress::decode_envelope(bytes, maximum_bytes)
+            .map_err(|_| ReadError::Packet)?
+            .value;
+        let Content::ReadState {
+            sender,
+            ingress_expiry,
+            ref paths,
+        } = envelope.content
+        else {
+            return Err(ReadError::Packet);
+        };
+        if sender != update.sender
+            || paths.len() != 1
+            || paths[0].len() != 2
+            || paths[0][0] != b"request_status"
+            || paths[0][1] != update.id
+        {
+            return Err(ReadError::Packet);
+        }
+        verify_envelope(&envelope, sender)?;
+        Ok(Self {
+            bytes: bytes.to_vec(),
+            id: update.id,
+            sender,
+            effective: update.effective,
+            expiry: ingress_expiry,
+        })
+    }
+    /// Exact retained signed read-state envelope, without re-encoding.
+    #[must_use]
+    pub fn envelope_bytes(&self) -> &[u8] {
+        &self.bytes
+    }
+    /// Explicit expiry of this read authorization, independent of update expiry.
+    #[must_use]
+    pub const fn expiry(&self) -> u64 {
+        self.expiry
+    }
+}
+
 /// Certified observation of exactly the original request. Absence and pruning
 /// are not evidence of nonexecution and never authorize replacement submission.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -384,6 +467,37 @@ impl ReadClient {
             .post_bytes(
                 &format!("api/v3/canister/{}/read_state", update.effective),
                 body,
+            )
+            .await?;
+        let response = ingress::decode_read_state_response(&bytes, self.config.message_bytes)
+            .map_err(|_| ReadError::Packet)?;
+        self.authenticate_request(update, &response.value.certificate, time)
+    }
+    /// Send an externally signed status read exactly once, without replacing it.
+    /// Fresh authorization, expiry admission and subsequent reads remain caller-owned.
+    /// Only the supplied original request is observed; this never dispatches it.
+    /// # Errors
+    /// Refuses changed request/sender/effective bindings, transport or proof failures.
+    /// Failure does not establish that the original update was not executed.
+    pub async fn observe_prepared_request(
+        &self,
+        update: &PreparedUpdate,
+        status: &PreparedRequestStatus,
+        time: TimePolicy,
+    ) -> Result<RequestObservation, ReadError> {
+        if status.bytes.len() > self.config.message_bytes {
+            return Err(ReadError::ByteLimit);
+        }
+        if status.id != update.id
+            || status.sender != update.sender
+            || status.effective != update.effective
+        {
+            return Err(ReadError::Packet);
+        }
+        let bytes = self
+            .post_bytes(
+                &format!("api/v3/canister/{}/read_state", status.effective),
+                status.bytes.clone(),
             )
             .await?;
         let response = ingress::decode_read_state_response(&bytes, self.config.message_bytes)
