@@ -354,3 +354,30 @@ Use the complete local catalog, clean release source and annotated remote tags
 `platform-v0.34.10` and `protocol-v0.3.0`. Publish Protocol then Platform through
 the supported adapter, independently verifying each registry archive/source.
 Keep CI asynchronous and downstream Canic adoption/recovery acceptance separate.
+
+Platform 0.34.10 and Protocol 0.3.0 are now published from clean source
+`efdc02936dde0319ef32825a499fa28db20cb1ff`. Main and both annotated tags were
+pushed atomically. The complete local catalog passed at that source; receipt:
+`target/release-qualification/1794869942834-3185288/receipt.json`.
+The root-lock audit found no known vulnerabilities against current RustSec
+`02e2517f457a359fc6d3440ea4560c8ea188fee8`.
+
+| Package | Independent registry archive SHA-256 | Retained dry run / single upload under target/publication |
+| --- | --- | --- |
+| ic-platform-protocol 0.3.0 | `86ff8ba66bf3212d37cc5d5120f4cae5f1e968cb5c98c9d92bdfa980d53cc628` | `check.selection.cBgnRZ` / `publish.selection.kLr7Hl` |
+| ic-platform 0.34.10 | `7798e7684a2e857355408f2c4252d1187589380609b5f2ef259482e6e1a34571` | `check.selection.6B0mi5` / `publish.selection.b6XrYe` |
+
+Both archives match the sparse index, admitted local archives and exact tagged
+VCS source. Extracted-archive all-feature native/Wasm Clippy and native tests
+passed. Readback records are under `target/registry-readback/`, in each named
+package/version directory; combined delivery evidence is
+`target/deploy-canic-supplier/published.json`. Uploads completed on 16 November
+UTC (17 November in Europe/Monaco).
+
+Post-push review of the certified observation boundary, controller byte parsing,
+shared management schema/writer and retained fixtures found no new actionable
+issue. Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/43975911701)
+was observed in progress and [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/43975911516)
+queued once; neither was awaited or claimed passing. Native execution remains
+Linux evidence; Canic adoption, its independent root-subnet admission and its
+installed recovery proof remain separate.
