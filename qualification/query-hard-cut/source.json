@@ -1,7 +1,7 @@
 {
   "revision": "12844b628d96bfd203ffbd900f10d02c4a896988",
   "files": {
-    "Cargo.toml": "8a1fb314fae28b89f24e50071b6f95fc7b418cff1d0f16ce411cb55a41c36359",
+    "Cargo.toml": "3751699fa7db07bf89bcb030facc3c2ae3ef88e24d2a5f282487fbd3d3d18b61",
     "crates/ic-topology/Cargo.toml": "eebcc35c01212a27ccaf8716aebdf54d3a3fadf0e3db6b6410b9893cc964974f",
     "crates/ic-topology/src/cloud_engine/available/mod.rs": "876b38ffbaa3f2e4c784a3843613dbd8fd5e456cc6edeca488c9942b9cb92a49",
     "crates/ic-topology/src/cloud_engine/available/source.rs": "8c46fd0acd803ebf03729544efd17d6317da6fc7629304f0203a4a8e2a3f7a63",

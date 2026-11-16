@@ -10,8 +10,8 @@ index d76656d..c4270bf 100644
  clap = "4.6.7"
  ic-host-text = "0.77.2"
 -ic-platform = { version = "0.33.7", default-features = false }
--ic-platform-next = { package = "ic-platform", version = "=0.34.3", default-features = false, features = ["certificate-authentication"] }
--ic-platform-protocol = { version = "=0.2.3", default-features = false, features = ["cloud-engine-marketplace", "registry-settings"] }
+-ic-platform-next = { package = "ic-platform", version = "=0.34.5", default-features = false, features = ["certificate-authentication"] }
+-ic-platform-protocol = { version = "=0.2.4", default-features = false, features = ["cloud-engine-marketplace", "registry-settings"] }
 -ic-platform-types = { version = "=0.21.1", default-features = false }
 +ic-platform = { path = "__PLATFORM_ROOT__/crates/ic-platform", version = "=0.34.6", default-features = false }
 +ic-platform-protocol = { path = "__PLATFORM_ROOT__/crates/ic-platform-protocol", version = "=0.2.5", default-features = false, features = ["cloud-engine-marketplace", "registry-settings", "registry", "registry-placement"] }
