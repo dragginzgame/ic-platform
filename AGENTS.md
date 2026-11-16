@@ -48,10 +48,13 @@ does not establish product or native-host qualification.
 - The maintainer separately authorized applying the six-file EngineView patch
   to `../ic-query` and validating it. That local application is complete; it
   grants no Query commit, push, publication or unrelated sibling-edit authority.
-- Preserve unique work here. The maintainer authorized source delivery to public
-  `dragginzgame/ic-platform`. Registry publication,
-  releases, repository deletion and sibling migration remain excluded. Keep
-  every package unpublished; GitHub source delivery is not registry publication.
+- Preserve unique work here. The maintainer authorized source delivery and,
+  subsequently, starting crates.io deployment from public `dragginzgame/ic-platform`.
+  Release preparation and publication are authorized subject to the design's
+  existing acceptance gates; this does not waive qualification. Keep package
+  publication disabled until the selected release is admitted. Repository deletion
+  and sibling migration remain excluded. GitHub source delivery is not registry
+  publication. See the [initial release plan](docs/releases.md).
 - Create manifests only for real implementation slices. Do not add empty Cargo
   packages solely to select tooling; this restriction was explicitly reaffirmed.
 - The initial Protocol package implements request encoding and selected response

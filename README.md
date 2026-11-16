@@ -154,10 +154,12 @@ execution-speed, security or installed-runtime qualification is claimed.
 The [standalone Wasm comparison](docs/qualification/engine-view-wasm.md) currently
 reports size differences with acceptance undecided; it is not deployment qualification.
 
-All sibling checkouts remain read-only. The maintainer authorized initial source
-delivery to the public `dragginzgame/ic-platform` GitHub repository. Registry
-publication, releases, deletion and consumer migration remain excluded. All
-packages retain `publish = false`.
+All sibling checkouts remain read-only. The maintainer authorized source delivery
+to `dragginzgame/ic-platform` and subsequently requested starting crates.io
+deployment. The [initial release plan](docs/releases.md) proposes Types followed
+by Platform and records the remaining acceptance and execution blockers.
+Packages retain `publish = false` until admitted for release; deletion and sibling
+consumer migration remain excluded.
 
 The opt-in `canister-signature-decode` capability now admits bounded tagged
 signature envelopes and reuses strict certificate tree grammar. It retains exact
