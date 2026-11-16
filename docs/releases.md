@@ -204,3 +204,7 @@ Run the complete local release catalog at the clean release commit, then publish
 guard, macros, Runtime, Protocol and Platform in that order with independent
 registry readback between dependency layers. Hosted CI is observed asynchronously,
 not awaited. No sibling delivery or unchanged Types release is selected.
+
+This cohort is now published and independently verified. See the
+[signed supplier publication evidence](qualification/2026-11-16-signed-supplier-publication.md)
+for registry checksums, source tags, complete local qualification and retained attempts.
