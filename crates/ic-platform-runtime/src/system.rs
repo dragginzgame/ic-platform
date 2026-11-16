@@ -58,6 +58,10 @@ pub fn set_certified_data(root: &[u8; 32]) {
 ///
 /// # Panics
 /// The IC traps in contexts where setting the global timer is forbidden.
+#[expect(
+    clippy::must_use_candidate,
+    reason = "arming or disarming is the operation; observing the previous deadline is optional"
+)]
 pub fn global_timer_set(timestamp: u64) -> u64 {
     crate::call::set_global_timer(timestamp)
 }
@@ -71,6 +75,7 @@ pub fn global_timer_set(timestamp: u64) -> u64 {
 ///
 /// # Panics
 /// The IC traps in contexts where version observation is forbidden.
+#[must_use]
 pub fn canister_version() -> u64 {
     crate::call::system_version()
 }
