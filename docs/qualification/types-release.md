@@ -47,3 +47,10 @@ registry observations, and checks Cargo archive VCS provenance against a fresh
 fetch from the declared repository. The shared publication runner separately
 retains each check/upload attempt. Final registry bytes must match the admitted
 archive and carry the selected clean source revision before delivery is complete.
+
+`make check-types-publication` exercises dirty source, wrong repository, lightweight
+/local-remote tag mismatch, expanded publishable roster, failed hosted validation,
+unavailable registry, existing version, failed audit and failed profile observations.
+A controlled success verifies the full admission path without dispatching an upload.
+These checks qualify policy wiring; actual host, archive and registry evidence remain
+separate. Live checks also refused the dirty preparation and a Platform selector.

@@ -83,3 +83,5 @@ jobs:
         run: make qualify-types-auth-archive
       - name: Check canonical Runtime type crossing
         run: make qualify-runtime-consumer
+      - name: Check publication refusal wiring
+        run: make check-types-publication

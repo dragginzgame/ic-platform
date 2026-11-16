@@ -1,7 +1,57 @@
 [
-  {"id":"identity-contract","owner":"types","command":["make","qualify-types"],"scope":"empty defaults and self-authentication: native tests, docs, Clippy and Wasm compilation"},
-  {"id":"public-consumer","owner":"types","command":["make","qualify-types-consumer"],"scope":"native published-oracle comparison and default/self-authentication standalone Wasm"},
-  {"id":"portable-closure","owner":"types","command":["make","check-types-graphs"],"scope":"normal/build Wasm closures and one canonical Types identity"},
-  {"id":"real-consumer-archive","owner":"types","command":["make","qualify-types-auth-archive"],"scope":"Cargo archive all-feature tests and pinned Auth passive model, native and Wasm"},
-  {"id":"runtime-type-crossing","owner":"types","command":["make","qualify-runtime-consumer","check-runtime-consumer-graph"],"scope":"exact local Types/Runtime cohort crossing after metadata alignment; not Runtime release qualification"}
+  {
+    "id": "identity-contract",
+    "owner": "types",
+    "command": [
+      "make",
+      "qualify-types"
+    ],
+    "scope": "empty defaults and self-authentication: native tests, docs, Clippy and Wasm compilation"
+  },
+  {
+    "id": "public-consumer",
+    "owner": "types",
+    "command": [
+      "make",
+      "qualify-types-consumer"
+    ],
+    "scope": "native published-oracle comparison and default/self-authentication standalone Wasm"
+  },
+  {
+    "id": "portable-closure",
+    "owner": "types",
+    "command": [
+      "make",
+      "check-types-graphs"
+    ],
+    "scope": "normal/build Wasm closures and one canonical Types identity"
+  },
+  {
+    "id": "real-consumer-archive",
+    "owner": "types",
+    "command": [
+      "make",
+      "qualify-types-auth-archive"
+    ],
+    "scope": "Cargo archive all-feature tests and pinned Auth passive model, native and Wasm"
+  },
+  {
+    "id": "runtime-type-crossing",
+    "owner": "types",
+    "command": [
+      "make",
+      "qualify-runtime-consumer",
+      "check-runtime-consumer-graph"
+    ],
+    "scope": "exact local Types/Runtime cohort crossing after metadata alignment; not Runtime release qualification"
+  },
+  {
+    "id": "publication-refusals",
+    "owner": "types",
+    "command": [
+      "make",
+      "check-types-publication"
+    ],
+    "scope": "controlled dirty-source, repository, tag, roster, hosted, audit, registry and profile refusals; no upload"
+  }
 ]

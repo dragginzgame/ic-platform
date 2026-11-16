@@ -375,3 +375,7 @@ qualify-auth-consumer: qualification-tooling-check
 	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features auth-consumer --bin auth-admission
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features auth-consumer --bin auth-admission --release --target wasm32-unknown-unknown --target-dir target/platform-certificate-wasm
 	node qualification/platform-certificate-wasm.mjs auth-admission
+
+.PHONY: check-types-publication
+check-types-publication:
+	node qualification/types-auth/publication-refusals.mjs
