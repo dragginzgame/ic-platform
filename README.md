@@ -32,7 +32,7 @@ its consumer contract and independent acceptance fixtures before broadening the
 codec or adding other protocol families. Create packages only for real slices;
 do not add empty packages to carry tooling.
 
-The Rust workspace now contains an unpublished `ic-platform-protocol` package
+The Rust workspace now contains the published `ic-platform-protocol` package
 with bounded `getEngineViews` request encoding and selected response decoding.
 The response records, schema and decode dispatch come from one declaration,
 without requiring Encode. Defaults are empty; the request-only feature has no
@@ -43,24 +43,23 @@ actual working tree after authorized local application; consumer delivery remain
 pending. A separate native heap
 profiler compares allocation against the published decoder; see its
 [criteria and results](docs/qualification/engine-view-heap.md).
-Protocol is now the 0.2.1 development candidate; private qualification packages
+Protocol 0.2.2 is published; private qualification packages
 remain at 0.1.0. Changed product crates advance after each GitHub source snapshot,
-independently of registry publication. Publication remains disabled.
+independently of registry publication. Each implemented group has now been published independently.
 
-The local `ic-platform-types` 0.21.1 candidate now implements Principal and
+The published `ic-platform-types` 0.21.1 release now implements Principal and
 Account/Subaccount admission and Serde, including rendering into caller-owned storage. Its
 [qualification record](docs/qualification/types-principal.md) documents narrow
 source reuse and independent fixtures; [Account qualification](docs/qualification/types-account.md)
 covers effective identity and explicit Serde presence. Opt-in self-authentication
 and [independent native/Wasm consumer checks](docs/qualification/types-consumer.md)
 are implemented. Production consumer migration remains pending.
-Protocol 0.2.1 now uses local Types 0.21.1, matching Runtime. Its public Principal
+Protocol 0.2.2 now uses local Types 0.21.1, matching Runtime. Its public Principal
 identity changes from the registry type; consumers must migrate as one cohort.
 Registry Types remains only in qualification oracles. See the
 [cohort boundary](docs/qualification/types-consumer.md#protocol-cohort-020).
 
-Runtime `0.23.8` is the current local development increment after the `0.23.6`
-GitHub source snapshot, with registry publication disabled. It provides opt-in inert Call
+Runtime `0.23.9`, macros and its singleton guard are published together. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
 implemented request model from the experimental IC0/executor and pending installed
@@ -101,11 +100,11 @@ that admission with one executor-owned handler. `system::reply` supplies an
 explicit raw reply with one ordinary reply authority per task. Broader export
 modes, automatic encoding/reply ownership and installed execution remain pending.
 The opt-in `entrypoint-macros` feature now exposes an explicit manual-reply
-`update` attribute from `ic-platform-macros` 0.23.8. Its
+`update` attribute from `ic-platform-macros` 0.23.9. Its
 [generated exports](docs/qualification/runtime-exports.md) run in a separate Wasm
 consumer, including rejection and compile-fail checks. Queries and automatic
 reply generation remain unsupported in this initial macro slice.
-The separate `ic-platform-runtime-guard` shares Runtime's 0.23.8 version.
+The separate `ic-platform-runtime-guard` shares Runtime's 0.23.9 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 
@@ -120,7 +119,7 @@ The opt-in `cloud-engine-marketplace` feature adds [daily price rows](docs/quali
 with all six node classes and arbitrary naturals, plus [available-node page responses](docs/qualification/available-nodes.md).
 Bounded page argument encoding is also implemented; consumer adoption remains pending.
 
-Platform `0.34.2` now has an opt-in `certificate-decode` capability and empty
+Platform `0.34.3` now has an opt-in `certificate-decode` capability and empty
 defaults. It strictly decodes untrusted certificate grammar, retains the original
 bytes by borrow and exposes an immutable, explicitly unverified view. See the
 [certificate boundary](docs/qualification/platform-certificate.md) for reuse
@@ -158,8 +157,9 @@ All sibling checkouts remain read-only. The maintainer authorized source deliver
 to `dragginzgame/ic-platform` and subsequently requested starting crates.io
 deployment. The [initial release plan](docs/releases.md) proposes Types followed
 by Platform and records the remaining acceptance and execution blockers.
-Packages retain `publish = false` until admitted for release; deletion and sibling
-consumer migration remain excluded.
+All six product crates are now published; qualification packages remain private.
+Deletion and sibling consumer migration remain excluded. See the
+[publication record](docs/qualification/2026-11-16-publication.md).
 
 The opt-in `canister-signature-decode` capability now admits bounded tagged
 signature envelopes and reuses strict certificate tree grammar. It retains exact

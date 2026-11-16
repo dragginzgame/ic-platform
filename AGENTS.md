@@ -111,7 +111,9 @@ does not establish product or native-host qualification.
   canonical source identity; registry Types is only a qualification oracle.
   Query's older 0.1.x integration needs cohort migration before adoption.
   Qualification stays outside product release groups.
-  This metadata setup does not qualify or enable a release/publication workflow.
+  The independently qualified releases are recorded in the
+  [publication evidence](docs/qualification/2026-11-16-publication.md); broader
+  product and production migration gates remain separate.
 - Keep the native heap profiler in its private qualification package. Allocation
   comparisons do not establish execution speed, Wasm size or macOS qualification;
   retain its preselected criteria and source-bound evidence.

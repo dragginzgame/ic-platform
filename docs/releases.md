@@ -5,21 +5,23 @@ The maintainer authorized crates.io deployment from public
 qualification**. Downstream production migration remains a separate gate.
 This sequencing does not waive retained identity contracts, archive/real-consumer
 proof, supported hosts, source provenance or registry readback. Siblings remain
-read-only. Platform, Runtime, Protocol and qualification packages remain unpublished.
+read-only. All six product crates are now published; qualification packages remain private.
+See the [complete publication record](qualification/2026-11-16-publication.md).
 
-## Selected release
+## Initial Types release selection
 
 Types 0.21.1 follows registry 0.20.4 and delivered source 0.21.0. Its patch increment
 identifies changed package metadata/documentation after source delivery. Principal,
 Account/Subaccount, Serde and opt-in self-authentication retain their contracts;
 caller-buffer text rendering is additive. Empty defaults remain mandatory.
 Protocol 0.2.1, Platform 0.34.2 and coordinated Runtime 0.23.8 advance because
-normalized exact Types dependency contents change. They are not upload candidates.
+normalized exact Types dependency contents change. Those were prepublication source increments; the subsequent independent releases
+are recorded below.
 
 The repository publisher is `https://github.com/dragginzgame/ic-platform`.
 Read-only `cargo owner --list` reported `borovan` on 2026-11-16. Credentials stay
-with Cargo and are never recorded. The only declared publication package is
-`ic-platform-types`, targeting `crates-io` with all features.
+with Cargo and are never recorded. The first publication selected only `ic-platform-types`, targeting `crates-io`
+with all features. The later roster covers the remaining five packages.
 
 ## Qualification and execution
 
@@ -63,9 +65,9 @@ RustSec database commit `02e2517f457a359fc6d3440ea4560c8ea188fee8` matched its
 remote HEAD at review. Root-lock audit found no vulnerabilities. The existing
 serde_cbor unmaintained warning belongs outside the Types product closure.
 
-Platform admission still needs its own authentication acceptance and a qualified
-registry Types consumer graph. Types release does not qualify other groups or
-the full rebuild. The pinned shared contracts are
+The initial Types release did not qualify other groups. Their subsequent local,
+archive and registry evidence is recorded separately below; none of these releases
+claims completion of the full rebuild. The pinned shared contracts are
 [release execution](https://github.com/dragginzgame/toko-tooling/blob/626da7cd9626cc2e152594862a2d82ea82ef51da/docs/releases.md)
 and [Cargo publication](https://github.com/dragginzgame/toko-tooling/blob/626da7cd9626cc2e152594862a2d82ea82ef51da/docs/cargo-publication.md).
 
