@@ -480,10 +480,9 @@ Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
 pending changelog. Runtime and its exact guard share version 0.23.7; advance both
 and the exact root guard dependency together. The macros package now shares this
 version and has an exact Runtime dependency selection as well.
-Platform and Browser remain future groups. Add each
-actual product package and its own changelog to the policy when implemented.
-Check its crates.io baseline at that point under the existing version-selection
-rule. Do not create placeholder packages or preselect their versions here.
+Platform now owns `ic-platform` 0.34.0 and its certificate-decoding slice. Browser
+remains a future group; register it only with a real package and a checked
+published baseline. Do not create placeholder packages.
 Qualification workspace members remain unpublished, outside the product policy,
 and independently versioned.
 
@@ -498,3 +497,42 @@ release or publication commands. Packages remain unpublished. Future execution
 must explicitly select `RELEASE_GROUP`, admit all required
 proof and qualify Toko's supported release adapter before release readiness can
 be claimed. Existing full release obligations remain open.
+
+## Platform certificate boundary
+
+`make qualify-platform-certificate` checks empty defaults, independent literal
+certificate/refusal tests, compile-fail immutable-access checks, native/Wasm
+Clippy, Rustdoc and normal/build dependency boundaries. The opt-in
+`certificate-decode` feature currently supplies decoding only; see the
+[scope and provenance](qualification/platform-certificate.md).
+
+`make qualify-platform-authentication` includes those checks and exercises the
+opt-in direct/delegated verifier, its immutable evidence, refusal cases and selected
+BLS dependency graph. Callers supply a prepared trusted root, effective canister,
+separate inclusive signing/delegation windows, combined traversal bounds, embedded
+certificate byte allowance and selected range count. Exactly one delegation is
+supported, with complete legacy or selected sharded range admission.
+Wasm checks compile the tests; they do not prove installed execution or completion
+of the full authentication gate.
+
+`make qualify-platform-observed` runs the native public-API consumer against
+fresh direct/delegated certificates from installed PocketIC canisters. Prepare
+its verified server with `make install-runtime-server`. It writes observations
+under `target/platform-certificates/`; frozen reviewed frames are replayed by
+`qualify-platform-authentication` without the server. This exercises the native
+verifier against replica output, not verifier execution in Wasm or mainnet adoption.
+
+For selected-subnet observations, `authenticate_subnet_time` uses the same feature
+and qualification targets. Supply the requested subnet, explicit signing/delegation
+windows, and an optional trusted root-subnet identity. Direct-root observations
+refuse without that independent trust binding. Query owns network admission,
+response retrieval, sampling and presentation; see
+[issue #1 acceptance](qualification/platform-certificate.md#selected-subnet-signing-time--issue-1).
+
+Agent callers that already received an upstream certificate use
+`authenticate_subnet_time_from_certificate(&certificate, ...)`. It rechecks the
+same authority/time contract and retains the immutable object borrow; original
+encoded bytes are unavailable and reported as None. Do not re-encode the object
+into the encoded entry point. Consumer migration must align the candidate's exact
+thiserror 2.0.18 pin; see the
+[qualified response boundary](qualification/platform-certificate.md#agent-response-compatibility-and-supplier-completion--issue-1).

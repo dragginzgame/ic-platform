@@ -23,8 +23,8 @@ crates.io packages take their next SemVer version (next minor for breaking pre-1
 APIs); new packages start at 0.1.0. Publisher selection remains separate.
 
 [Changelogs](CHANGELOG.md) are separated by product release group under
-`releases/`. Protocol, Types and Runtime are registered now; the other groups are added with their
-real implementation packages. Package versions remain independent.
+`releases/`. Protocol, Types, Runtime and Platform are registered with real
+implementation packages. Package versions remain independent.
 
 The first vertical slice is bounded Cloud Engine EngineView/EngineSubnet
 projection decoding, using published Types initially where practical. Establish
@@ -119,6 +119,21 @@ the first part of the [marketplace/availability work](docs/qualification/cloud-e
 The opt-in `cloud-engine-marketplace` feature adds [daily price rows](docs/qualification/marketplace-prices.md)
 with all six node classes and arbitrary naturals, plus [available-node page responses](docs/qualification/available-nodes.md).
 Bounded page argument encoding is also implemented; consumer adoption remains pending.
+
+Platform `0.34.0` now has an opt-in `certificate-decode` capability and empty
+defaults. It strictly decodes untrusted certificate grammar, retains the original
+bytes by borrow and exposes an immutable, explicitly unverified view. See the
+[certificate boundary](docs/qualification/platform-certificate.md) for reuse
+provenance and tests. The separate opt-in `certificate-authentication` capability
+verifies direct-root or singly delegated signatures through upstream BLS, with
+explicit root, target, separate time windows and resource limits. Its evidence is
+immutable. Delegation verifies certified subnet authority and complete selected
+legacy/sharded ranges; nested delegations refuse. Fresh PocketIC observations and
+frozen direct/delegated certificate replays now pass through the public API.
+The same verifier now supplies immutable selected-subnet signing time for Query
+issue #1, with explicit root-subnet binding when no delegation exists.
+Mainnet interoperability and production consumer
+qualification remain pending before the full authentication gate.
 
 Toko 0.44.4 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local

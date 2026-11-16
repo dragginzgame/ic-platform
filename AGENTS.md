@@ -80,8 +80,20 @@ does not establish product or native-host qualification.
   a separate obligation, not a reason to invent an upgrade recovery subsystem.
   Keep child/migratory tasks outside this slice.
   Its exact-version Cargo singleton guard is now implemented in the Runtime
-  group. The explicit-update macro implementation joins that group; Platform
-  still joins alongside a real implementation package.
+  group. The explicit-update macro implementation shares that group. Platform
+  0.34.0 has its own group, a strict untrusted certificate decoder and an opt-in
+  direct-root/single-delegation authentication path; follow its
+  [reuse and acceptance boundary](docs/qualification/platform-certificate.md).
+  Decode success must not imply authentication. Direct-root evidence requires
+  explicit root, target, time window and traversal limits. Delegated evidence also
+  checks subnet authority, complete selected ranges and a separate time window.
+  Keep nested-delegation refusal and bytewise range ordering; do not substitute
+  Principal's Rust ordering. Selected-subnet time must match the delegated subnet,
+  or require an independently trusted root-subnet binding without delegation.
+  Never substitute effective-canister authority for this subnet contract.
+  Keep fresh PocketIC observations and frozen public-API replay tests in the
+  qualification path. Mainnet interoperability and production consumer proof
+  remain pending before the full authentication gate.
   Protocol 0.2.0 now selects local Types 0.21.0 alongside Runtime. Preserve that
   canonical source identity; registry Types is only a qualification oracle.
   Query's older 0.1.x integration needs cohort migration before adoption.

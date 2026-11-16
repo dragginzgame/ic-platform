@@ -1,0 +1,17 @@
+;; Independent observation probe: set 32 zero bytes and return the IC's certificate.
+(module
+  (import "ic0" "certified_data_set" (func $set (param i32 i32)))
+  (import "ic0" "data_certificate_present" (func $present (result i32)))
+  (import "ic0" "data_certificate_size" (func $size (result i32)))
+  (import "ic0" "data_certificate_copy" (func $copy (param i32 i32 i32)))
+  (import "ic0" "msg_reply_data_append" (func $append (param i32 i32)))
+  (import "ic0" "msg_reply" (func $reply))
+  (memory (export "memory") 2)
+  (func (export "canister_init") (call $set (i32.const 0) (i32.const 32)))
+  (func (export "canister_query certificate") (local $len i32)
+    (if (i32.eqz (call $present)) (then unreachable))
+    (local.set $len (call $size))
+    (if (i32.gt_u (local.get $len) (i32.const 131072)) (then unreachable))
+    (call $copy (i32.const 0) (i32.const 0) (local.get $len))
+    (call $append (i32.const 0) (local.get $len))
+    (call $reply)))

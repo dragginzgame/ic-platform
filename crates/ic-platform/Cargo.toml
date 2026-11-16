@@ -1,0 +1,34 @@
+[package]
+name = "ic-platform"
+version = "0.34.0"
+description = "Explicit IC certificate and authentication boundaries"
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+publish = false
+
+[target.'cfg(any())'.dev-dependencies]
+toko-tooling.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[features]
+default = []
+certificate-decode = ["dep:ic-certification", "dep:serde", "dep:serde_cbor", "dep:thiserror"]
+
+certificate-authentication = ["certificate-decode", "dep:candidate-types", "dep:ic-verify-bls-signature"]
+
+[dependencies]
+candidate-types = { workspace = true, optional = true }
+ic-certification = { workspace = true, optional = true }
+ic-verify-bls-signature = { workspace = true, optional = true }
+serde = { workspace = true, optional = true }
+serde_cbor = { workspace = true, optional = true }
+thiserror = { workspace = true, optional = true }
+
+[dev-dependencies]
+ic_bls12_381.workspace = true
+
+[lints]
+workspace = true

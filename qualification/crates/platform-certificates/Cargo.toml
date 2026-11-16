@@ -1,0 +1,28 @@
+[package]
+name = "platform-certificates"
+version = "0.1.0"
+publish = false
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+
+[target.'cfg(any())'.dev-dependencies]
+toko-tooling.workspace = true
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+candid.workspace = true
+candidate-platform = { workspace = true, features = ["certificate-authentication"] }
+candidate-types.workspace = true
+ic-certification.workspace = true
+ic-testkit.workspace = true
+tokio.workspace = true
+wat.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[package.metadata.toko-tooling.loc]
+category = "tests"
+
+[lints]
+workspace = true

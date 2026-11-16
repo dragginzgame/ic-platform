@@ -2,6 +2,7 @@
 members = [
     "crates/engine-view-profile",
     "crates/engine-view-wasm",
+    "crates/platform-certificates",
     "crates/types-consumer",
     "engine-view-consumer",
     "runtime-exports",
@@ -17,9 +18,11 @@ license-file = "../LICENSE.md"
 
 [workspace.dependencies]
 candid = "0.10.40"
+candidate-platform = { package = "ic-platform", path = "../crates/ic-platform", version = "=0.34.0", default-features = false }
 candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.7", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "../crates/ic-platform-types", version = "=0.21.0", default-features = false }
 dhat = "0.3.3"
+ic-certification = { version = "=3.2.0", default-features = false }
 ic-management-canister-types = "0.8.0"
 ic-platform = { version = "0.33.7", default-features = false, features = ["cloud-engine-types"] }
 ic-platform-protocol = { path = "../crates/ic-platform-protocol", default-features = false, features = ["cloud-engine-response"] }

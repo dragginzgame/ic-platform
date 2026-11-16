@@ -29,6 +29,9 @@ help:
 	  'qualify-registry-runtime   Execute Registry Wasm and native heap fixtures' \
 	  'qualify-marketplace    Test marketplace rows, natural numbers and public consumer' \
 	  'qualify-marketplace-wasm  Execute marketplace and availability admission in Wasm' \
+	  'qualify-platform-certificate  Check strict unverified certificate decoding' \
+	  'qualify-platform-authentication  Check direct and delegated certificate authentication' \
+	  'qualify-platform-observed  Verify replica-issued certificates through public APIs' \
 	  'qualify-types          Test and check local Principal and Account identities' \
 	  'qualify-types-consumer  Compare published identities and execute native/Wasm fixtures' \
 	  'qualify-runtime-call   Check inert call preparation and ownership' \
@@ -278,3 +281,26 @@ upgrade-help:
 
 check-upgrade-tooling:
 	node --test qualification/upgrade-tooling.test.mjs
+
+.PHONY: qualify-platform-certificate
+qualify-platform-certificate: toko-tooling-check
+	cargo check --offline --locked -p ic-platform --no-default-features
+	cargo test --offline --locked -p ic-platform --features certificate-decode
+	cargo clippy --offline --locked -p ic-platform --features certificate-decode --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --features certificate-decode --no-deps
+	cargo clippy --offline --locked -p ic-platform --features certificate-decode --all-targets --target wasm32-unknown-unknown -- -D warnings
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --no-default-features --forbid-pattern '^(?!ic-platform$$)'
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --features certificate-decode --forbid-pattern '^(?!(ic-platform|ic-certification|serde|serde_core|serde_derive|serde_cbor|half|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|hex|sha2|digest|block-buffer|crypto-common|generic-array|typenum|version_check|cfg-if|cpufeatures|libc)$$)' --require ic-certification=1
+
+.PHONY: qualify-platform-authentication
+qualify-platform-authentication: qualify-platform-certificate
+	cargo test --offline --locked -p ic-platform --features certificate-authentication
+	cargo clippy --offline --locked -p ic-platform --features certificate-authentication --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --features certificate-authentication --no-deps
+	cargo clippy --offline --locked -p ic-platform --features certificate-authentication --all-targets --target wasm32-unknown-unknown -- -D warnings
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --features certificate-authentication --forbid-pattern '^(?!(ic-platform|ic-platform-types|ic-certification|ic-verify-bls-signature|ic_bls12_381|ff|group|pairing|rand_core|subtle|lazy_static|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|serde_cbor|half|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|hex|sha2|digest|block-buffer|crypto-common|generic-array|typenum|version_check|cfg-if|cpufeatures|libc)$$)' --require ic-platform-types=1 --require ic-certification=1 --require ic-verify-bls-signature=1
+
+.PHONY: qualify-platform-observed
+qualify-platform-observed: qualification-tooling-check runtime-server-check
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --all-targets -- -D warnings
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates

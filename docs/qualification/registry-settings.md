@@ -87,7 +87,7 @@ over the envelope plus payload. Envelope allocation/item allowances remain with
 the published owner; this settings projection allocates no collections. A future
 combined-budget contract would require an explicit API and qualification change.
 
-Read-only review of Query found `subnet::settings::fetch` and its CLI still at the
+The earlier read-only review of Query found `subnet::settings::fetch` and its CLI still at the
 design stage. The composition helper exists only under qualification tests; it
 does not implement that report, verify a query signature, select an endpoint,
 bind a subnet key or create authenticated evidence. It imports no Query source
@@ -114,6 +114,73 @@ EngineView/Types dependency closure; the Registry-only product graph remains
 separately restricted to Serde. This is standalone Wasm evidence, not installed
 IC execution, a size acceptance decision or an authenticated Registry response.
 
-Actual Query reporting integration and hosted execution of these new checks
-remain pending. Existing EngineView evidence does not qualify these new surfaces. Publication
-stays disabled and the package remains at its initial unpublished 0.1.0 version.
+The initial checks did not qualify actual Query reporting or hosted execution.
+The later source-bound consumer evidence below supersedes that reporting gap.
+Publication remains disabled; the current Protocol development version is 0.2.0.
+
+## Source-bound Query settings acceptance — 2026-11-16
+
+A new read-only review for [replacement #3](https://github.com/dragginzgame/ic-platform-new/issues/3)
+found the actual settings report and CLI implemented in Query's working tree.
+This supersedes the earlier design-only observation above. The supplying decoder
+was already adopted from immutable Git revision
+`8ee1e58ce6577054d58fba729546989e8b6fc041` as Protocol 0.1.0. Query still selects
+registry Platform 0.33.7 for Agent/Registry envelopes and registry Types 0.20.4.
+
+The reviewed Query HEAD is `0a3eca919f05d777798406087049cc51ab7ae2a8`, with
+uncommitted tracked changes and untracked settings implementation files. HEAD
+alone therefore does not identify the tested source. A frozen copy of all 159
+tracked/nonignored untracked files was tested under `/tmp`; no sibling source,
+lock, Git state or build directory was changed. SHA-256 of the sorted JSON
+path/content-hash inventory is
+`40f849785199ca42a4a6c6ce3a6c37486ac941b2c6bebbce3f54e397ec6020af`.
+All captured source hashes were compared with the sibling again after testing.
+
+Selected source identities (SHA-256):
+
+| Input | SHA-256 |
+| --- | --- |
+| Query Cargo.lock | f1b5418e0998d38a2db06d4f429b51631123721cb1ec384a277cf491daca203a |
+| topology subnet/settings/mod.rs | 7b1420bef67b919a927e702be6929747341d8956a5a7898e2816b8d7c3e1dbe8 |
+| topology subnet/settings/tests.rs | ae18449e4772171e5fa2ce329736c3bf2321dc30956b4efeabc853f79888adcf |
+| CLI presentation/settings.rs | baa06c7cbb27ef010a861764901bd4599cb02ca8514eeab6dc933b3b48d2596e |
+| Protocol registry_settings/mod.rs | c43577fac3257a724548b491c57d8039678e9a5b9cebae86e51aa135b7b95cd8 |
+| Protocol registry_settings/wire.rs | ac65c01e8e589f0221c0a9ac016137a79c6cf24e605a37479cf5e346c1fbea65 |
+
+The two Protocol implementation files match the adopted Git checkout and current
+local Protocol 0.2.0 byte for byte. This is settings implementation equivalence,
+not whole-package or source/type-identity compatibility.
+
+Focused commands against the frozen snapshot, using an external temporary target
+folder, passed on Linux x86-64 with Rust 1.100.0:
+
+```sh
+cargo test --offline --locked --manifest-path "$QUERY_SNAPSHOT/Cargo.toml" --target-dir "$QUERY_TARGET" -p ic-topology subnet::settings::
+cargo test --offline --locked --manifest-path "$QUERY_SNAPSHOT/Cargo.toml" --target-dir "$QUERY_TARGET" -p ic-topology settings_comparison
+cargo test --offline --locked --manifest-path "$QUERY_SNAPSHOT/Cargo.toml" --target-dir "$QUERY_TARGET" -p ic-query-cli settings
+cargo clippy --offline --locked --manifest-path "$QUERY_SNAPSHOT/Cargo.toml" --target-dir "$QUERY_TARGET" -p ic-topology -p ic-query-cli --all-targets -- -D warnings
+```
+
+Five settings-library tests cover raw presence, source evidence, envelope/payload
+refusals, nested field bounds, inclusive envelope bytes, rejection precedence and
+safe failure JSON. Two comparison tests cover acquisition order, independent
+versions, partial outcomes, admission and cancellation. One presentation test
+covers text/JSON raw values and default-selected labels, including comparison
+output. Two CLI tests cover help, invalid IDs and duplicate selections without
+network reads. No live endpoint, query-signature, mainnet or deployment test ran.
+
+The reviewed caller keeps separate envelope/payload budgets, fixed endpoint and
+query verification, and does not reinterpret configured SEV as attestation or
+raw defaults as spare capacity. Consumer delivery, hosted host coverage and the
+Protocol 0.2.0/Types cohort migration remain open. This does not close issue #3
+or claim that Query's dirty working tree has been committed or pushed.
+
+The captured consumer lock was also audited with `--no-fetch --no-yanked` against
+the prepared RustSec checkout at
+`02e2517f457a359fc6d3440ea4560c8ea188fee8`. It reports RUSTSEC-2026-0387 for
+crypto-bigint 0.5.5, introduced through elliptic-curve 0.13.8 and Agent 0.49.3
+(K256/P256/identity paths), via registry Platform 0.33.7 into topology 0.106.1.
+It also reports unmaintained paste/serde_cbor warnings. This is lock/graph evidence,
+not an exploitability assessment; no exemption or consumer acceptance follows
+from the settings tests. [Issue #4](https://github.com/dragginzgame/ic-platform-new/issues/4)
+remains the remediation owner. No advisory setting or dependency was changed.

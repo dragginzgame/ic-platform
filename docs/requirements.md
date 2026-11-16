@@ -60,6 +60,7 @@ the surface grows; EngineView alone cannot prove general variant support.
 
 | Consumer / canonical source | Owner | Required acceptance |
 | --- | --- | --- |
+| Query selected-subnet maintenance time, [replacement #1](https://github.com/dragginzgame/ic-platform-new/issues/1) | Platform certificate projection | Authenticate signing time for the requested subnet, preserve explicit root/freshness inputs, require trusted root-subnet binding without delegation, and retain original response bytes. The local `authenticate_subnet_time` public API and PocketIC evidence are documented in the [certificate record](qualification/platform-certificate.md#selected-subnet-signing-time--issue-1); The borrowed Agent response type also passes isolated consumer qualification without re-encoding; Query sampler integration and delivery remain consumer work. |
 | Query Registry settings, [#169](https://github.com/dragginzgame/ic-platform/issues/169) | Protocol | Absent vs present-empty nested messages, absent vs false/zero scalars, raw replica-default sentinels, shared nested budgets, duplicate-singular and malformed-wire refusals. Configured SEV is not attestation. |
 | Query marketplace/availability, [#166](https://github.com/dragginzgame/ic-platform/issues/166) | Protocol | Six node classes, arbitrary naturals, signed timestamps, daily units, exact arity and application errors; unready Registry copy differs from an empty page. Consumer owns pagination. |
 | Backup signed recovery inspection, [#167](https://github.com/dragginzgame/ic-platform/issues/167) | Platform native packet boundary | Strict read-state field/kind admission, original bytes/paths, upstream request-ID identity, duplicate/unknown/malformed/trailing refusal and honest input-bound semantics. No transport/retry or Backup policy. |
@@ -76,12 +77,15 @@ implementation before deciding what to reuse or retire.
 The opt-in [Registry settings projection](qualification/registry-settings.md)
 now has local wire/refusal tests, shared nested field accounting and independent
 public consumer/Serde tests. Standalone Wasm admission and seven native zero-heap
-workloads pass locally. Hosted checks and actual Query reporting qualification
-remain open; this does not complete #169.
+workloads pass locally. Ten focused tests and topology/CLI Clippy now pass against
+a source-bound snapshot of Query's implemented settings report using Git-pinned
+Protocol 0.1.0. Hosted checks, consumer delivery and the Protocol 0.2.0 identity
+cohort migration remain open; this does not close replacement #3.
 Native-only composition with published Platform's Registry envelope now also
 passes application-error, content-presence, mutation-evidence and refusal tests.
 Envelope and payload budgets are independent; the selected payload's nested
-messages share its allowance. No Query settings report has been implemented.
+messages share its allowance. The [consumer evidence](qualification/registry-settings.md#source-bound-query-settings-acceptance--2026-11-16)
+records the exact dirty source/lock and retains the unresolved Agent advisory.
 
 The [fee/status slice](qualification/cloud-engine-observations.md) adds two
 bounded responses from #166. Literal and published-oracle checks pass locally;

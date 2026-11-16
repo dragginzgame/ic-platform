@@ -24,6 +24,14 @@
       "members": ["ic-platform-runtime", "ic-platform-runtime-guard", "ic-platform-macros"],
       "changelog": "releases/runtime/CHANGELOG.md",
       "dependencies": ["candidate-runtime-guard", "candidate-macros"]
+    },
+    {
+      "name": "platform",
+      "primary": "ic-platform",
+      "version": "package",
+      "members": ["ic-platform"],
+      "changelog": "releases/platform/CHANGELOG.md",
+      "dependencies": []
     }
   ]
 }
