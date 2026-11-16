@@ -5,15 +5,11 @@ use candidate_platform::certificate::{
     decode_canister_signature,
 };
 use ic_certification::{labeled, leaf};
-use ic_testkit::{
-    pic::{PocketIcStartupConfig, server_assets},
-    pocket_ic::PocketIcBuilder,
-};
+use ic_testkit::pocket_ic::PocketIcBuilder;
 use serde_cbor::{Value, value::to_value};
-use std::{collections::BTreeMap, path::Path, time::Duration};
+use std::{collections::BTreeMap, path::Path};
 
 pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let server_binary = server_assets::check(Path::new(server_assets::DEFAULT_DIRECTORY))?;
     let wasm = wat::parse_file(concat!(env!("CARGO_MANIFEST_DIR"), "/signature.wat"))?;
     // Literal SHA-256 results independently obtained with Node crypto, recorded
     // in the fixture provenance. The candidate's hash helpers are never called.
@@ -37,12 +33,8 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
     std::fs::create_dir_all(output)?;
     std::fs::write(output.join("probe.wasm"), &wasm)?;
     tokio::runtime::Builder::new_current_thread().enable_all().build()?.block_on(async {
-        let owned = PocketIcStartupConfig::Spawn {
-            server_binary, timeout: Duration::from_secs(30),
-            server_hard_ttl: Some(Duration::from_secs(120)), server_idle_ttl: None,
-            server_output_files: None,
-        }.build_instance(PocketIcBuilder::new().with_nns_subnet().with_application_subnet()).await?;
-        let pic = owned.instance();
+        let owned = PocketIcBuilder::new().with_nns_subnet().with_application_subnet().with_server_url(std::env::var("POCKET_IC_SERVER_URL")?.parse()?).with_max_request_time_ms(Some(30_000)).build_async().await;
+        let pic = &owned;
         let topology = pic.topology().await;
         let root_subnet = topology.get_nns().ok_or("NNS subnet missing")?;
         let app_subnet = topology.get_app_subnets()[0];
@@ -93,7 +85,7 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
                 evidence.time_ns(), evidence.delegation()))?;
             println!("{name}: {} replica-signed envelope bytes authenticated", signature.len());
         }
-        owned.close().await;
+        owned.drop().await;
         Ok::<(), Box<dyn std::error::Error>>(())
     })
 }

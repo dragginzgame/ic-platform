@@ -1,7 +1,7 @@
 //! Composition fixture only: no transport, authentication or Query report policy.
 
-use ic_platform::nns_registry_types::protobuf;
 use ic_platform_protocol::registry_settings::{self, SubnetSettings};
+use legacy_platform::nns_registry_types::protobuf;
 
 #[derive(Debug, PartialEq, Eq)]
 enum Refusal<'a> {

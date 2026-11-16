@@ -10,6 +10,37 @@ use std::{
 };
 
 #[test]
+fn timer_root_never_gains_method_reply_authority() {
+    let polls = Rc::new(Cell::new(0));
+    let observed = Rc::clone(&polls);
+    let handle = super::start_root(
+        Box::pin(poll_fn(move |cx| {
+            assert_eq!(super::claim_reply(), Err(super::ReplyError::NoActiveTask));
+            assert!(matches!(
+                start(Box::pin(async {})),
+                Err(EntryError::NestedEntry)
+            ));
+            observed.set(observed.get() + 1);
+            if observed.get() == 1 {
+                cx.waker().wake_by_ref();
+                Poll::Pending
+            } else {
+                Poll::Ready(())
+            }
+        })),
+        false,
+    )
+    .unwrap();
+    assert_eq!(polls.get(), 2);
+    assert_eq!(handle.state(), TaskState::Completed);
+    // A subsequent update retains its own independent authority.
+    start(Box::pin(async {
+        assert_eq!(super::claim_reply(), Ok(()));
+    }))
+    .unwrap();
+}
+
+#[test]
 fn self_wakes_coalesce_and_nested_entry_refuses() {
     let polls = Rc::new(Cell::new(0));
     let observed = Rc::clone(&polls);

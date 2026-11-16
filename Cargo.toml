@@ -16,14 +16,18 @@ rust-version = "1.100.0"
 license-file = "LICENSE.md"
 
 [workspace.dependencies]
-candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.11", default-features = false }
-candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.11", default-features = false }
+candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.12", default-features = false }
+candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.12", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "crates/ic-platform-types", version = "=0.21.1", default-features = false }
 crc32fast = "1.5.5"
+crypto-bigint = { version = "0.7.11", default-features = false }
+curve25519-dalek = { version = "=5.0.0", default-features = false }
 data-encoding = "2.11.0"
+ed25519-dalek = { version = "=3.0.0", default-features = false }
 ic-certification = { version = "=3.2.0", default-features = false }
 ic-verify-bls-signature = { version = "=0.6.0", default-features = false, features = ["alloc"] }
 ic_bls12_381 = { version = "=0.10.1", default-features = false, features = ["groups"] }
+k256 = { version = "=0.14.0", default-features = false, features = ["ecdsa"] }
 num-bigint = { version = "0.5.1", default-features = false, features = ["serde"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"

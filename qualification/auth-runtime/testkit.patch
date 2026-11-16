@@ -1,0 +1,174 @@
+--- a/qualification/ic-auth-host-conformance/tests/support/mod.rs
++++ b/qualification/ic-auth-host-conformance/tests/support/mod.rs
+@@ -1,7 +1,6 @@
+ //! Shared installed-fixture setup; Build and Testkit retain their ownership boundaries.
+ use ic_build::{Artifact, BuildRequest, Limits, build};
+ use ic_testkit::{
+-    pic::{InstallSpec, PocketIcInstance, PocketIcStartupConfig, create_and_install},
+     pocket_ic::{CanisterId, PocketIcBuilder, nonblocking::PocketIc},
+ };
+ use sha2::{Digest, Sha256};
+@@ -63,27 +62,17 @@
+     .to_vec()
+ }
+ 
+-pub(crate) async fn start() -> PocketIcInstance {
+-    PocketIcStartupConfig::from_env(Duration::from_secs(30))
+-        .unwrap()
+-        .build_instance(
+-            PocketIcBuilder::new()
+-                .with_max_request_time_ms(Some(30_000))
+-                // A single root subnet supplies the certificate trust key too.
+-                .with_nns_subnet(),
+-        )
++pub(crate) async fn start() -> PocketIc {
++    PocketIcBuilder::new()
++        .with_server_url(std::env::var("POCKET_IC_SERVER_URL").unwrap().parse().unwrap())
++        .with_max_request_time_ms(Some(30_000))
++        .with_nns_subnet()
++        .build_async()
+         .await
+-        .unwrap()
+ }
+ pub(crate) async fn install(pic: &PocketIc, wasm: &[u8]) -> CanisterId {
+-    create_and_install(
+-        pic,
+-        InstallSpec {
+-            wasm: wasm.to_vec(),
+-            init_bytes: vec![],
+-            cycles: 5_000_000_000_000,
+-            install_sender: None,
+-        },
+-    )
+-    .await
++    let id = pic.create_canister().await;
++    pic.add_cycles(id, 5_000_000_000_000).await;
++    pic.install_canister(id, wasm.to_vec(), vec![], None).await;
++    id
+ }
+--- a/qualification/ic-auth-host-conformance/tests/installed/mod.rs
++++ b/qualification/ic-auth-host-conformance/tests/installed/mod.rs
+@@ -85,7 +85,7 @@
+ async fn traps_restore_issuer_leaf_and_system_root_then_original_completion_verifies() {
+     let wasm = wasm();
+     let owned = start().await;
+-    let pic = owned.instance();
++    let pic = &owned;
+     let id = install(pic, &wasm).await;
+     let account = CanisterId::from_slice(&[9]);
+     assert_eq!(
+@@ -163,7 +163,7 @@
+     assert_eq!(retry.claims, complete.claims);
+     assert_eq!(retry.root, complete.root);
+     assert_eq!(retry.usage, complete.usage);
+-    owned.close().await;
++    owned.drop().await;
+ }
+ 
+ #[tokio::test]
+@@ -171,7 +171,7 @@
+ async fn actual_time_revocation_and_upgrade_loss_never_publish_or_recreate_authority() {
+     let wasm = wasm();
+     let owned = start().await;
+-    let pic = owned.instance();
++    let pic = &owned;
+     let account = CanisterId::from_slice(&[9]);
+     for revoked in [false, true] {
+         let id = install(pic, &wasm).await;
+@@ -227,5 +227,5 @@
+             Err(Refusal::Closed)
+         );
+     }
+-    owned.close().await;
++    owned.drop().await;
+ }
+--- a/qualification/ic-auth-host-conformance/tests/installed/enrollment.rs
++++ b/qualification/ic-auth-host-conformance/tests/installed/enrollment.rs
+@@ -9,7 +9,6 @@
+     receiver::{Command, Observation, Outcome, Refusal, TIME_ORIGIN_NS},
+ };
+ use ic_testkit::{
+-    pic::{InstallSpec, create_and_install},
+     pocket_ic::{CanisterId, RejectResponse, nonblocking::PocketIc},
+ };
+ 
+@@ -37,21 +36,11 @@
+     Ok(())
+ }
+ async fn install_receiver(pic: &PocketIc, wasm: &[u8], authority: CanisterId) -> CanisterId {
+-    create_and_install(
+-        pic,
+-        InstallSpec {
+-            wasm: wasm.to_vec(),
+-            cycles: 5_000_000_000_000,
+-            install_sender: None,
+-            init_bytes: ic_wire::encode(
+-                &authority.as_slice().to_vec(),
+-                ic_wire::Encoding::Payload,
+-                LIMITS,
+-            )
+-            .unwrap(),
+-        },
+-    )
+-    .await
++    let id = pic.create_canister().await;
++    pic.add_cycles(id, 5_000_000_000_000).await;
++    let init = ic_wire::encode(&authority.as_slice().to_vec(), ic_wire::Encoding::Payload, LIMITS).unwrap();
++    pic.install_canister(id, wasm.to_vec(), init, None).await;
++    id
+ }
+ fn retained(before: &Observation, after: &Observation) {
+     assert_eq!(after.enrollment, before.enrollment);
+@@ -73,7 +62,7 @@
+     let caller = CanisterId::from_slice(&vectors["initial-caller"]);
+     let admin = CanisterId::anonymous();
+     let owned = start().await;
+-    let pic = owned.instance();
++    let pic = &owned;
+     time(pic, 0).await;
+     let authority = install(pic, &wasm).await;
+     let id = install_receiver(pic, &wasm, authority).await;
+@@ -214,5 +203,5 @@
+         Err(Refusal::Closed)
+     );
+     assert!(!observe(pic, id).await.present);
+-    owned.close().await;
++    owned.drop().await;
+ }
+--- a/qualification/ic-auth-host-conformance/tests/installed/receiver.rs
++++ b/qualification/ic-auth-host-conformance/tests/installed/receiver.rs
+@@ -118,7 +118,7 @@
+     let vectors = vectors();
+     let caller = CanisterId::from_slice(&vectors["initial-caller"]);
+     let owned = start().await;
+-    let pic = owned.instance();
++    let pic = &owned;
+     time(pic, 0).await;
+     let id = install(pic, &wasm()).await;
+     time(pic, 25).await;
+@@ -203,7 +203,7 @@
+     assert_eq!((revoked.usage.0, revoked.usage.1), (0, 1));
+     assert_eq!(revoked.logins, (1, 0));
+     assert_eq!(revoked.application_writes, 2);
+-    owned.close().await;
++    owned.drop().await;
+ }
+ 
+ #[tokio::test]
+@@ -213,7 +213,7 @@
+     let wasm = wasm();
+     for known in [true, false] {
+         let owned = start().await;
+-        let pic = owned.instance();
++        let pic = &owned;
+         time(pic, 0).await;
+         let id = install(pic, &wasm).await;
+         let intact = install(pic, &wasm).await;
+@@ -302,6 +302,6 @@
+             );
+         }
+         assert_eq!(observe(pic, id).await, lost);
+-        owned.close().await;
++        owned.drop().await;
+     }
+ }

@@ -9,9 +9,9 @@ license-file.workspace = true
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 candidate-types.workspace = true
 dhat.workspace = true
-ic-platform.workspace = true
 ic-platform-protocol.workspace = true
 ic-platform-types.workspace = true
+legacy-platform.workspace = true
 serde_json.workspace = true
 
 [target.'cfg(any())'.dev-dependencies]

@@ -17,3 +17,6 @@ fn main() {}
 
 #[cfg(not(target_family = "wasm"))]
 mod raw;
+
+#[cfg(not(target_family = "wasm"))]
+mod timer;

@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform"
-version = "0.34.3"
+version = "0.34.4"
 description = "Explicit IC certificate and authentication boundaries"
 edition.workspace = true
 rust-version.workspace = true
@@ -14,10 +14,12 @@ readme = "README.md"
 toko-tooling.workspace = true
 
 [package.metadata.cargo-machete]
-ignored = ["toko-tooling"]
+ignored = ["toko-tooling", "crypto-bigint"]
 
 [features]
 default = []
+ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
+ecdsa = ["dep:k256", "dep:crypto-bigint"]
 certificate-decode = ["dep:ic-certification", "dep:serde", "dep:serde_cbor", "dep:thiserror"]
 
 canister-signature-decode = ["certificate-decode"]
@@ -32,8 +34,14 @@ certificate-authentication = ["certificate-decode", "dep:candidate-types", "dep:
 
 [dependencies]
 candidate-types = { workspace = true, optional = true }
+# Security floor for K256's compatible transitive graph (RUSTSEC-2026-0387).
+# This deliberately constrains resolution without copying or calling arithmetic.
+crypto-bigint = { workspace = true, optional = true }
+curve25519-dalek = { workspace = true, optional = true }
+ed25519-dalek = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
+k256 = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 serde_cbor = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }

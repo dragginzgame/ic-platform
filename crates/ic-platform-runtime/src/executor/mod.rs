@@ -1,4 +1,4 @@
-//! One method-attached root task per update entry; no migratory or child tasks.
+//! Update and global-timer root tasks; no migratory or child tasks.
 //!
 //! The manual update adapter is experimental. Export/context and installed
 //! rollback qualification remain required before production adoption.
@@ -44,10 +44,10 @@ impl TaskHandle {
     }
 }
 
-/// Refusal before admitting a new update-entry task.
+/// Refusal before admitting a new root task.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EntryError {
-    /// Non-replicated execution cannot enter the update adapter.
+    /// Non-replicated execution cannot enter a root-task adapter.
     NonReplicated,
     /// A task is already being polled or destroyed in this entry.
     NestedEntry,
@@ -58,7 +58,7 @@ pub enum EntryError {
 /// Refusal to issue a reply through the current executor task.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ReplyError {
-    /// No live executor task owns the current execution, including cleanup.
+    /// No live method task owns reply authority, including timer roots and cleanup.
     NoActiveTask,
     /// This task already used its ordinary reply authority.
     AlreadyReplied,
@@ -88,6 +88,7 @@ struct Task {
     status: Rc<Cell<TaskState>>,
     stop: bool,
     replied: bool,
+    method_reply: bool,
 }
 struct Executor {
     last: u64,
@@ -137,6 +138,31 @@ pub fn run_update(future: impl Future<Output = ()> + 'static) -> Result<TaskHand
     start(Box::pin(future))
 }
 
+/// Enters a root future from the caller-owned `canister_global_timer` export.
+///
+/// The task uses the same executor and callback custody as updates, but has no
+/// ordinary reply authority, including in resumed callbacks. It is attached to
+/// this timer invocation; it is neither a child task nor migratory work. Call
+/// once per root from that export, never from an update, query or lifecycle hook.
+/// The replicated-execution flag cannot authenticate the export kind; the export
+/// owner must enforce this entry contract. Runtime does not arm or rearm timers.
+///
+/// # Errors
+/// Refuses non-replicated execution, nested polling/destruction and exhausted
+/// task identifiers before admission. Dropping the handle does not cancel work.
+///
+/// # Panics
+/// User polling/destruction may trap. Initial traps can prevent returning a
+/// handle. A failed callback cleanup leaves `Running` as an uncertain observation,
+/// not permission to retry. The consumer owns its committed dispatch record.
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub fn run_global_timer(
+    future: impl Future<Output = ()> + 'static,
+) -> Result<TaskHandle, EntryError> {
+    check_update_entry()?;
+    start_root(Box::pin(future), false)
+}
+
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub(crate) fn check_update_entry() -> Result<(), EntryError> {
     if !crate::call::replicated_execution() {
@@ -155,6 +181,10 @@ pub(crate) fn check_update_entry() -> Result<(), EntryError> {
 }
 
 fn start(future: UserFuture) -> Result<TaskHandle, EntryError> {
+    start_root(future, true)
+}
+
+fn start_root(future: UserFuture, method_reply: bool) -> Result<TaskHandle, EntryError> {
     let status = Rc::new(Cell::new(TaskState::Running));
     let signal = Arc::new(Signal {
         ready: AtomicBool::new(true),
@@ -180,6 +210,7 @@ fn start(future: UserFuture) -> Result<TaskHandle, EntryError> {
                 status,
                 stop: false,
                 replied: false,
+                method_reply,
             },
         );
         assert!(previous.is_none(), "task id reused");
@@ -200,7 +231,7 @@ pub(crate) fn claim_reply() -> Result<(), ReplyError> {
             .tasks
             .get_mut(&token.0)
             .ok_or(ReplyError::NoActiveTask)?;
-        if task.stop {
+        if task.stop || !task.method_reply {
             return Err(ReplyError::NoActiveTask);
         }
         if task.replied {

@@ -19,8 +19,8 @@ of each and excludes Testkit and the published runtime. No historical canister
 source or generated fixture was copied.
 
 The native driver is the `qualification/runtime-installed` member of the
-standard qualification workspace. It selects published `ic-testkit` 0.106.0
-and uses its upstream PocketIC client re-export. Testkit owns checksum-verified
+standard qualification workspace. It now selects published `ic-testkit` 0.107.1
+and uses its upstream PocketIC client re-export. The [private qualification supervisor](testkit-server.md) owns checksum-verified
 server setup, offline admission and managed process teardown. The driver owns
 one instance with four canisters on two application subnets and explicitly closes it after the checks. Failure drops the owned
 server, stopping its disposable instance. No public network canisters are used.

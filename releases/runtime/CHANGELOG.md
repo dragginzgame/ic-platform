@@ -4,6 +4,21 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.12] - 2026-11-16
+
+### ➕ Added
+
+- Supply global-timer roots through the existing executor, without update-reply
+  authority, plus IC timer arming and canister-version observation. Preserve
+  callback cleanup and uncertain task observations; Scheduling migration remains
+  separate. See the [timer boundary](../../docs/qualification/runtime-timers.md).
+
+### 🧪 Qualification
+
+- Adopt Testkit 0.107.1 for installed Runtime and pinned Auth qualification.
+  Independently authenticate emitted certificates with the latest published
+  Platform as well as the candidate implementation.
+
 ## [0.23.11] - 2026-11-16
 
 ### 📦 Publication
@@ -15,7 +30,8 @@ Return to the [group index](../../CHANGELOG.md).
 ### ✨ Added
 
 - Add dependency-free `system-raw` for Storage's caller-owned synchronous exports
-  (#6): argument/caller byte slices with offsets, current-controller checks,
+  ([#6 — Synchronous system API for Storage](https://github.com/dragginzgame/ic-platform/issues/6)):
+  argument/caller byte slices with offsets, current-controller checks,
   raw append/reply, byte traps and instruction counter zero.
 - Qualify raw ABI limits, empty replies, live controller changes, trap rollback
   and lifecycle execution without an executor. Compile the pinned actual Storage

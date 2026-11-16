@@ -3,6 +3,25 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.4] - 2026-11-16
+
+### ➕ Added
+
+- Restore opt-in upstream Ed25519 and secp256k1 primitives for
+  [#7 — Auth crypto migration](https://github.com/dragginzgame/ic-platform/issues/7).
+  Qualify Auth's strict verification and root-delegation paths, including
+  feature-unified scalar refusal and independent native/Wasm vectors.
+  Certificate construction and complete installed migration remain pending.
+- Constrain the direct ECDSA graph to corrected crypto-bigint releases.
+  [#4 — Crypto/Agent advisory](https://github.com/dragginzgame/ic-platform/issues/4)
+  remains open for the separate Agent and derivation paths.
+
+### 🧪 Qualification
+
+- Adopt Testkit 0.107.1 and published Platform 0.34.3 in the installed
+  certificate checks. Name the frozen 0.33.7 codec oracle explicitly; retain its
+  independent comparison coverage without treating it as the current supplier.
+
 ## [0.34.3] - 2026-11-16
 
 ### 📦 Publication

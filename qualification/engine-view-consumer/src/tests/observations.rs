@@ -13,9 +13,9 @@ fn limits() -> Limits {
 }
 
 #[cfg(not(target_family = "wasm"))]
-fn old_limits() -> ic_platform::candid_codec::decoder::Limits {
+fn old_limits() -> legacy_platform::candid_codec::decoder::Limits {
     let cap = limits();
-    ic_platform::candid_codec::decoder::Limits {
+    legacy_platform::candid_codec::decoder::Limits {
         bytes: cap.bytes,
         header: cap.header,
         types: cap.types,
@@ -41,9 +41,12 @@ fn public_fee_matches_literal_bits_and_published_decoder() {
         #[cfg(not(target_family = "wasm"))]
         assert_eq!(
             fee.to_bits(),
-            ic_platform::cloud_engine_types::decode_get_network_fee_response(&bytes, old_limits())
-                .unwrap()
-                .to_bits()
+            legacy_platform::cloud_engine_types::decode_get_network_fee_response(
+                &bytes,
+                old_limits()
+            )
+            .unwrap()
+            .to_bits()
         );
     }
 }
@@ -64,7 +67,7 @@ fn public_copy_status_matches_literal_json_and_published_decoder() {
     #[cfg(not(target_family = "wasm"))]
     assert_eq!(
         serde_json::to_value(
-            ic_platform::cloud_engine_types::decode_registry_copy_status_response(
+            legacy_platform::cloud_engine_types::decode_registry_copy_status_response(
                 &bytes,
                 old_limits()
             )

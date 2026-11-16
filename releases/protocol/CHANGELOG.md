@@ -3,6 +3,16 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.2.4] - Unreleased
+
+### 🧪 Testing
+
+- Complete source-bound Query settings qualification against registry Protocol
+  0.2.3 and Types 0.21.1 for
+  [#3 — Registry subnet settings qualification](https://github.com/dragginzgame/ic-platform/issues/3).
+  Record delivered consumer code separately from its local dependency migration.
+  The Protocol package remains unchanged at 0.2.3.
+
 ## [0.2.3] - 2026-11-16
 
 ### 📦 Publication
@@ -18,7 +28,8 @@ Return to the [group index](../../CHANGELOG.md).
   values, empty headers and absent transform/pricing version.
 - Qualify whole-message limits and LEB128 boundaries with independent upstream
   Candid and legacy consumer schema decoders. Testkit installed adoption remains
-  downstream work; this change supplies its missing Protocol capability (#5).
+  downstream work; this change supplies its missing Protocol capability
+  ([#5 — Bounded management http_request encoding for Testkit](https://github.com/dragginzgame/ic-platform/issues/5)).
 
 ## [0.2.2] - 2026-11-16
 

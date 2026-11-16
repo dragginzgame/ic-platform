@@ -89,7 +89,43 @@ surfaces and passes the actual pinned Auth installed fixture; see the
 [source and boundary evidence](qualification/runtime-auth.md). Packaged-cohort
 release admission and production migration remain separate. GitHub remains the issue tracker.
 
+## Scheduling and Canic Host migration requirements
+
+Scheduling source `170599fbf3e4fac51b09519645d8dc11d9633e4f` uses Timers 0.45.11
+and exact Runtime 0.22.5. The latter conflicts with the current executor singleton.
+The [timer contract](qualification/runtime-timers.md) records the new Runtime
+prerequisites, installed evidence and remaining real-consumer migration. Keep the
+singleton; do not resolve the conflict by allowing both executors.
+
+Read-only Canic source `e84702b3bdcf4eb209476aadd053df21f18dd8eb`,
+`crates/canic-host`, still requests the old Platform Agent and protocol features.
+Platform 0.34.3 does not provide those features. Retained calls are:
+
+| Owner | Actual consumer obligation |
+| --- | --- |
+| Platform native | Agent transport, selected roots and verification, request IDs, exact signed envelope bytes, status responses and bounded certified-controller decoding. Current `signed` code delegates keys/signing to ICP CLI; that does not waive supported Agent identity dependency obligations. |
+| Protocol management | Provisional creation with explicit cycles and controllers; install/upgrade with exact Wasm and empty arguments; controller handover through update_settings; bounded canister-ID result decoding. Preserve optional sender version and install-mode distinctions. |
+| Protocol cycles ledger | Creation amount, timestamp, optional subnet selection and settings; all creation success/error results, particularly Duplicate with optional canister ID. A retained error does not authorize retry. |
+| Protocol/Types ledger boundary | ICRC account balance arguments, bounded arbitrary-natural balance/fee responses and ICP account identifiers using one canonical Principal/Account cohort. Keep absent subaccounts distinct from explicit zero bytes on the wire. |
+
+Fresh crates.io inspection on 16 November 2026 still selects Agent 0.49.3 as
+latest, with nonoptional elliptic-curve 0.13, k256 0.13.4 and p256 0.13.2 paths.
+The [current advisory](https://rustsec.org/advisories/RUSTSEC-2026-0387.html) still
+requires crypto-bigint >=0.7.6. Disabling Agent default features does not remove
+those paths. [Issue #4](https://github.com/dragginzgame/ic-platform/issues/4)
+therefore remains an admission blocker; no Agent dependency, incompatible
+override, fork or exemption was added. Protocol codecs are independent work,
+still required before Host migration, and must not introduce Agent or Runtime.
+Actual Canic installed/native consumer qualification remains required.
+
 ## Canister-signature consumer
+
+For Auth's broader migration, [#7](https://github.com/dragginzgame/ic-platform/issues/7)
+now has qualified local Ed25519/secp256k1 primitives; its complete certificate
+fixture and installed migration remain pending. See [primitive evidence](qualification/auth-crypto.md).
+The separate [Wire/Types cohort issue #8](https://github.com/dragginzgame/ic-platform/issues/8)
+is resolved by published Wire 0.24.2/Types 0.21.1 with actual unchanged generator
+and retained browser-codec checks; see [cohort evidence](qualification/auth-wire.md).
 
 Current read-only inspection of ic-auth at `b78991e9833320692921bf766e51ad361c9c8c4d`
 found its unchanged `crates/ic-auth/src/issuer_signature.rs` caller of
@@ -126,8 +162,10 @@ now has local wire/refusal tests, shared nested field accounting and independent
 public consumer/Serde tests. Standalone Wasm admission and seven native zero-heap
 workloads pass locally. Ten focused tests and topology/CLI Clippy now pass against
 a source-bound snapshot of Query's implemented settings report using Git-pinned
-Protocol 0.1.0. Hosted checks, consumer delivery and the Protocol 0.2.0 identity
-cohort migration remain open; this does not close replacement #3.
+Protocol 0.1.0. The later
+[published-cohort qualification](qualification/registry-settings.md#published-cohort-and-delivered-consumer--16-november-2026)
+completes supplier acceptance for #3 with delivered settings source and registry
+Protocol 0.2.3/Types 0.21.1. Query's production dependency delivery remains separate.
 Native-only composition with published Platform's Registry envelope now also
 passes application-error, content-presence, mutation-evidence and refusal tests.
 Envelope and payload budgets are independent; the selected payload's nested
@@ -228,10 +266,11 @@ URL construction, simulator behavior and downstream installation/adoption.
 
 The crypto/Agent retained obligation was rechecked on 2026-11-16 against
 [RUSTSEC-2026-0387](https://rustsec.org/advisories/RUSTSEC-2026-0387): the patched
-range remains `crypto-bigint >=0.7.6`. Neither current workspace lock selects
-`crypto-bigint`, `k256`, `ic-agent` or `ic-secp256k1`. Consequently there is no
-current lock edge to repair here; this does not qualify the absent legacy
-Agent/derivation capabilities or resolve their consumers' affected graphs.
+range remains `crypto-bigint >=0.7.6`. Platform 0.34.4's local primitive addition
+now selects K256 0.14.0 and crypto-bigint 0.7.11 with an explicit compatible
+security floor. See the [Auth primitive evidence](qualification/auth-crypto.md).
+Agent/derivation #4 remains unresolved; neither a corrected direct ECDSA graph
+nor the absence of Agent from this product graph qualifies those consumer paths.
 
 
 ## Storage synchronous system operations

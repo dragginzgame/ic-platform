@@ -50,6 +50,31 @@ pub fn set_certified_data(root: &[u8; 32]) {
     crate::call::certified_root(root);
 }
 
+/// Sets the IC global timer to an absolute timestamp in nanoseconds since Unix epoch.
+///
+/// Returns the previous timer value. Zero deactivates the timer. The IC resets
+/// the timer before invoking `canister_global_timer`; the export owner chooses
+/// rearming and scheduling policy. State changes commit with the execution.
+///
+/// # Panics
+/// The IC traps in contexts where setting the global timer is forbidden.
+pub fn global_timer_set(timestamp: u64) -> u64 {
+    crate::call::set_global_timer(timestamp)
+}
+
+/// Observes the monotonically increasing IC canister version.
+///
+/// The IC increments this for state-changing executions, including updates,
+/// timer invocations and upgrades. It is not constant within an installation.
+/// Consumers may capture it during initialization as an incarnation marker;
+/// reading it does not authenticate an external dispatch or a schema version.
+///
+/// # Panics
+/// The IC traps in contexts where version observation is forbidden.
+pub fn canister_version() -> u64 {
+    crate::call::system_version()
+}
+
 /// An available certificate exceeds the caller's pre-allocation byte allowance.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct CertificateTooLarge {
@@ -95,7 +120,7 @@ pub fn trap(message: &str) -> ! {
 /// created for one export. Generated automatic updates share this reply authority.
 ///
 /// # Errors
-/// Refuses outside a live task, during cleanup, or after this task already
+/// Refuses outside a live method task, in timer roots, during cleanup, or after this task already
 /// replied. Refusal performs no IC0 reply imports.
 ///
 /// # Panics

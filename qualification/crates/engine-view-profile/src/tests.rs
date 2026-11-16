@@ -1,12 +1,12 @@
-use ic_platform::{candid_codec, cloud_engine_types as old};
 use ic_platform_protocol::{candid, cloud_engine as new};
 use ic_platform_types::Principal;
+use legacy_platform::{candid_codec, cloud_engine_types as old};
 
 #[global_allocator]
 static ALLOCATOR: dhat::Alloc = dhat::Alloc;
 
 // Deliberately minimal independent wire shape for the discarded-text cases.
-ic_platform::candid_record! {
+legacy_platform::candid_record! {
     struct ExtraFrame {
         0 => extra: String,
         23_515 => id: String,

@@ -38,6 +38,8 @@ unsafe extern "C" {
     fn canister_self_size() -> u32;
     fn canister_self_copy(dst: u32, offset: u32, size: u32);
     fn time() -> u64;
+    fn global_timer_set(timestamp: u64) -> u64;
+    fn canister_version() -> u64;
     fn is_controller(src: u32, size: u32) -> u32;
     fn certified_data_set(src: u32, size: u32);
     fn data_certificate_present() -> u32;
@@ -80,6 +82,20 @@ pub(crate) fn principal(caller: bool) -> candidate_types::Principal {
 pub(crate) fn system_time() -> u64 {
     // SAFETY: Scalar-only system observation; context violations trap.
     unsafe { time() }
+}
+
+#[cfg(feature = "call-ic0")]
+#[expect(unsafe_code, reason = "IC timer operation takes scalar values only")]
+pub(crate) fn set_global_timer(timestamp: u64) -> u64 {
+    // SAFETY: Scalar-only system operation; the IC enforces allowed contexts.
+    unsafe { global_timer_set(timestamp) }
+}
+
+#[cfg(feature = "call-ic0")]
+#[expect(unsafe_code, reason = "IC version observation takes no pointers")]
+pub(crate) fn system_version() -> u64 {
+    // SAFETY: Scalar-only system observation; context violations trap.
+    unsafe { canister_version() }
 }
 
 #[cfg(feature = "call-ic0")]

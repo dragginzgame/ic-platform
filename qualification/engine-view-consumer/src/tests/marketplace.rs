@@ -22,7 +22,7 @@ fn natural_json_forms_preserve_exact_values_and_refuse_bad_inputs() {
         assert_eq!(serde_json::from_str::<Nat>(&json).unwrap(), value);
         #[cfg(not(target_family = "wasm"))]
         {
-            let old: ic_platform::candid_codec::Nat = serde_json::from_str(input).unwrap();
+            let old: legacy_platform::candid_codec::Nat = serde_json::from_str(input).unwrap();
             assert_eq!(old.0, value.0);
             assert_eq!(serde_json::to_string(&old).unwrap(), json);
         }
@@ -39,16 +39,16 @@ fn natural_json_forms_preserve_exact_values_and_refuse_bad_inputs() {
     ] {
         assert!(serde_json::from_str::<Nat>(input).is_err());
         #[cfg(not(target_family = "wasm"))]
-        assert!(serde_json::from_str::<ic_platform::candid_codec::Nat>(input).is_err());
+        assert!(serde_json::from_str::<legacy_platform::candid_codec::Nat>(input).is_err());
     }
 }
 
 #[cfg(not(target_family = "wasm"))]
 #[test]
 fn marketplace_matches_published_records_across_all_classes() {
-    use ic_platform::{candid_codec, cloud_engine_types as old};
     use ic_platform_protocol::{candid, cloud_engine as new};
     use ic_platform_types::Principal;
+    use legacy_platform::{candid_codec, cloud_engine_types as old};
     let cap = candid::Limits {
         bytes: 65536,
         header: 4096,

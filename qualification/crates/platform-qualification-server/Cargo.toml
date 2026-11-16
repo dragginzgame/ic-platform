@@ -1,0 +1,17 @@
+[package]
+name = "platform-qualification-server"
+version = "0.1.0"
+publish = false
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+
+[package.metadata.toko-tooling.loc]
+category = "tests"
+
+[dependencies]
+ic-host-process = "=0.80.2"
+tempfile = "3.27.0"
+
+[lints]
+workspace = true

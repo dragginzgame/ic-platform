@@ -8,10 +8,10 @@
 ))]
 compile_error!("select exactly one of candidate or published");
 
-#[cfg(feature = "published")]
-use ic_platform::{candid_codec::decoder::Limits, cloud_engine_types as engine};
 #[cfg(feature = "candidate")]
 use ic_platform_protocol::{candid::Limits, cloud_engine as engine};
+#[cfg(feature = "published")]
+use legacy_platform::{candid_codec::decoder::Limits, cloud_engine_types as engine};
 
 fn main() {
     // Independent literal: one view with id="x" and an empty node list.

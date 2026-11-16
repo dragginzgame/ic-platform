@@ -27,7 +27,8 @@ pub(crate) use ic0::reply;
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub(crate) use ic0::{
-    argument_size, certificate, certified_root, controller, principal, system_time, trap_message,
+    argument_size, certificate, certified_root, controller, principal, set_global_timer,
+    system_time, system_version, trap_message,
 };
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]

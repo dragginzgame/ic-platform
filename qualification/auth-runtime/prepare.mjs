@@ -9,10 +9,12 @@ const output=resolve(`target/auth-runtime/${Date.now()}`);mkdirSync(output,{recu
 const run=(cmd,args,cwd=root)=>{const r=spawnSync(cmd,args,{cwd,encoding:'utf8',maxBuffer:16*1024*1024});assert.equal(r.status,0,r.stderr);return r.stdout;};
 run('git',['archive',`--output=${output}/auth.tar`,revision,'Cargo.toml','Cargo.lock','LICENSE.md','crates','qualification'],source);
 run('tar',['-xf',`${output}/auth.tar`,'-C',output]);
+run('git',['apply',`${root}/qualification/auth-runtime/testkit.patch`],output);
 const edit=(path,fn)=>{const file=`${output}/${path}`;writeFileSync(file,fn(readFileSync(file,'utf8')));};
 edit('Cargo.toml',s=>s.replace('ic-platform-types = { version = "0.20.4",',`ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.1",`));
-edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.11",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
+edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.12",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
 edit('qualification/ic-auth-host-fixture/Cargo.toml',s=>s.replace('features = ["cdk"]','features = ["entrypoint-macros"]'));
+edit('qualification/Cargo.toml',s=>s.replace('ic-testkit = "0.106.0"', 'ic-testkit = "=0.107.1"'));
 edit('qualification/ic-auth-host-conformance/Cargo.toml', s => s.replace('[dev-dependencies]', '[dev-dependencies]\nic-management-canister-types = "=0.8.0"'));
 // Legacy crypto remains a qualification supplier. Compare its key parser's raw
 // identity at that boundary; all Auth/Runtime public Principal values use Types.

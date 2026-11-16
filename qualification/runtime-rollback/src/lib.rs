@@ -11,3 +11,6 @@ mod upgrade;
 
 #[cfg(target_arch = "wasm32")]
 mod identity;
+
+#[cfg(target_arch = "wasm32")]
+mod timer;

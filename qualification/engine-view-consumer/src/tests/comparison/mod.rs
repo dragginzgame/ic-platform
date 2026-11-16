@@ -1,11 +1,11 @@
 //! Native-only independent declarations using the published codec as an oracle.
 //! None of these declarations come from the replacement's projection macro.
 
-use ic_platform::{candid_codec, cloud_engine_types as old};
 use ic_platform_protocol::{candid, cloud_engine as new};
 use ic_platform_types::Principal;
+use legacy_platform::{candid_codec, cloud_engine_types as old};
 
-ic_platform::candid_record! {
+legacy_platform::candid_record! {
     struct SubnetFrame {
         1_133_613_777 => replica_version: String,
         1_588_007_470 => maximum_state_size: Option<u64>,
@@ -13,7 +13,7 @@ ic_platform::candid_record! {
         4_257_184_827 => node_ids: Vec<Principal>,
     }
 }
-ic_platform::candid_record! {
+legacy_platform::candid_record! {
     struct ViewFrame {
         // An unrelated field exercises validated projection skipping.
         0 => extra: Vec<String>,

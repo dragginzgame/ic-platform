@@ -85,7 +85,7 @@ jobs:
           AUTH_SOURCE: ${{ github.workspace }}/target/auth-source
         run: make qualify-types-auth-archive
       - name: Check Platform certificate boundary
-        run: make qualify-platform-authentication qualify-platform-wasm qualify-canister-signature-decode qualify-canister-signature-authentication
+        run: make qualify-platform-authentication qualify-platform-wasm qualify-canister-signature-decode qualify-canister-signature-authentication qualify-platform-crypto
       - name: Replay observed canister signatures on native and Wasm
         run: make qualify-canister-signature-wasm
       - name: Qualify isolated Auth issuer policy

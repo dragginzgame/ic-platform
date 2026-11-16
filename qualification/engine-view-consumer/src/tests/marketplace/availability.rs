@@ -29,7 +29,7 @@ fn page_arguments_preserve_public_values_and_match_published_bytes() {
                 assert_eq!(restored, args);
                 #[cfg(not(target_family = "wasm"))]
                 {
-                    use ic_platform::cloud_engine_types as old;
+                    use legacy_platform::cloud_engine_types as old;
                     let old_args: old::ListAvailableNodesPageArgs =
                         serde_json::from_value(json).unwrap();
                     assert_eq!(
@@ -51,10 +51,10 @@ fn fixture(value: &Value) {
     assert_eq!(&serde_json::to_value(&selected).unwrap(), value);
     #[cfg(not(target_family = "wasm"))]
     {
-        use ic_platform::{candid_codec, cloud_engine_types as old};
         use ic_platform_protocol::{
             candid::Limits, cloud_engine::decode_list_available_nodes_page_response,
         };
+        use legacy_platform::{candid_codec, cloud_engine_types as old};
         let published: old::AvailableNodesPageResult =
             serde_json::from_value(value.clone()).unwrap();
         let bytes = candid_codec::encode_one(&published, 65536).unwrap();
@@ -131,7 +131,7 @@ fn malformed_json_cannot_become_unready() {
         assert!(serde_json::from_value::<AvailableNodesPageResult>(value.clone()).is_err());
         #[cfg(not(target_family = "wasm"))]
         assert!(
-            serde_json::from_value::<ic_platform::cloud_engine_types::AvailableNodesPageResult>(
+            serde_json::from_value::<legacy_platform::cloud_engine_types::AvailableNodesPageResult>(
                 value
             )
             .is_err()

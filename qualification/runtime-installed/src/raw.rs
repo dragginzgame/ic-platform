@@ -1,11 +1,7 @@
 //! Installed synchronous exports without any executor or generated entrypoint.
 use candid::Principal;
 use ic_management_canister_types::{CanisterSettings, CanisterStatusType};
-use ic_testkit::{
-    pic::PocketIcStartupConfig,
-    pocket_ic::{PocketIcBuilder, nonblocking::PocketIc},
-};
-use std::{path::PathBuf, time::Duration};
+use ic_testkit::pocket_ic::{PocketIcBuilder, nonblocking::PocketIc};
 
 async fn observe(pic: &PocketIc, id: Principal, sender: Principal, value: u8, controller: bool) {
     for replicated in [false, true] {
@@ -29,15 +25,12 @@ async fn observe(pic: &PocketIc, id: Principal, sender: Principal, value: u8, co
     }
 }
 
-pub(super) fn run(server_binary: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wasm =
         std::fs::read("target/runtime-raw/wasm32-unknown-unknown/release/runtime_exports.wasm")?;
     tokio::runtime::Builder::new_current_thread().enable_all().build()?.block_on(async {
-        let owned = PocketIcStartupConfig::Spawn {
-            server_binary, timeout:Duration::from_secs(30), server_hard_ttl:Some(Duration::from_secs(120)),
-            server_idle_ttl:None, server_output_files:None,
-        }.build_instance(PocketIcBuilder::new().with_application_subnet()).await?;
-        let pic = owned.instance();
+        let owned = PocketIcBuilder::new().with_application_subnet().with_server_url(std::env::var("POCKET_IC_SERVER_URL")?.parse()?).with_max_request_time_ms(Some(30_000)).build_async().await;
+        let pic = &owned;
         let original = Principal::anonymous();
         let replacement = Principal::from_slice(&[1,2,3]);
         let id = pic.create_canister().await;
@@ -66,6 +59,7 @@ pub(super) fn run(server_binary: PathBuf) -> Result<(), Box<dyn std::error::Erro
         pic.start_canister(id, Some(replacement)).await.unwrap();
         observe(pic, id, replacement, 9, true).await;
         println!("raw installed: offset/empty replies, query/update identity and counters, live controller changes, trap/reply rollback, stopped upgrade passed");
+        owned.drop().await;
         Ok::<(), Box<dyn std::error::Error>>(())
     })
 }

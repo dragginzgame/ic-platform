@@ -8,7 +8,8 @@ fn check(json: &str, accepted: bool) -> Option<EngineView> {
     assert_eq!(candidate.is_ok(), accepted, "{json}: {candidate:?}");
     #[cfg(not(target_family = "wasm"))]
     {
-        let published = serde_json::from_str::<ic_platform::cloud_engine_types::EngineView>(json);
+        let published =
+            serde_json::from_str::<legacy_platform::cloud_engine_types::EngineView>(json);
         assert_eq!(candidate.is_ok(), published.is_ok(), "admission: {json}");
         if let (Ok(new), Ok(old)) = (&candidate, &published) {
             assert_eq!(

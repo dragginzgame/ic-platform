@@ -3,6 +3,15 @@
 Release group: `types`. Covered package: `ic-platform-types`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.21.2] - Unreleased
+
+### 🧪 Testing
+
+- Qualify published Types 0.21.1 with Wire 0.24.2 through Auth's actual generator,
+  retained browser frames and unchanged generated client output, resolving
+  [#8 — Types/Runtime and Wire cohort for Auth](https://github.com/dragginzgame/ic-platform/issues/8).
+  This is qualification-only work; the Types package remains unchanged at 0.21.1.
+
 ## [0.21.1] - 2026-11-16
 
 ### 📦 Release preparation

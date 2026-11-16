@@ -58,6 +58,7 @@ help:
 	  'qualify-runtime-exports  Build and execute explicit generated IC update exports' \
 	  'install-runtime-server / runtime-server-check  Prepare or verify Testkit PocketIC' \
 	  'qualify-runtime-installed  Execute installed calls, rollback and drained upgrades' \
+	  'qualify-runtime-timer  Execute timer roots, trap cleanup and version observations' \
 	  'qualify-auth-runtime   Test pinned actual Auth endpoints in PocketIC' \
 	  'qualify-runtime-raw    Check synchronous system ABI and installed behavior' \
 	  'qualify-storage-runtime  Compile pinned Storage against synchronous Runtime' \
@@ -135,19 +136,28 @@ qualify-runtime-awaited: lint-runtime-ic0
 	$(ENGINE_WASM_ENV) CARGO_ENCODED_RUSTFLAGS='-Clink-arg=--export-table' cargo build --offline --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --bin runtime-awaited --release --target wasm32-unknown-unknown --target-dir target/runtime-awaited
 	node qualification/runtime-awaited.mjs
 
-.PHONY: install-runtime-server runtime-server-check qualify-runtime-installed
+.PHONY: install-runtime-server runtime-server-check qualify-runtime-installed qualify-runtime-timer
 install-runtime-server:
-	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- setup
+	node qualification/server.mjs setup
 
 runtime-server-check:
-	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- check
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-qualification-server --all-targets -- -D warnings
+	cargo build --offline --locked --manifest-path qualification/Cargo.toml -p platform-qualification-server
+	node qualification/server.test.mjs
+	node qualification/server.mjs check
+
+qualify-runtime-timer: qualification-tooling-check runtime-server-check
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --all-targets -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-rollback
+	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- timer
 
 qualify-runtime-installed: qualification-tooling-check runtime-server-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --all-targets -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-rollback
 	node qualification/runtime-system.mjs
-	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed
+	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-rollback --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-rollback|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
 
 .PHONY: qualify-runtime-guard
@@ -329,7 +339,7 @@ qualify-platform-authentication: qualify-platform-certificate
 .PHONY: qualify-platform-observed
 qualify-platform-observed: qualification-tooling-check runtime-server-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --all-targets -- -D warnings
-	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates
+	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates
 
 .PHONY: qualify-platform-wasm
 qualify-platform-wasm: qualification-tooling-check
@@ -359,7 +369,7 @@ qualify-canister-signature-authentication: toko-tooling-check
 .PHONY: qualify-canister-signature-observed
 qualify-canister-signature-observed: qualification-tooling-check runtime-server-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-observed -- -D warnings
-	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-observed
+	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features canister-signature --bin signature-observed
 
 .PHONY: qualify-canister-signature-wasm
 qualify-canister-signature-wasm: qualification-tooling-check
@@ -380,6 +390,26 @@ qualify-auth-consumer: qualification-tooling-check
 	node qualification/platform-certificate-wasm.mjs auth-admission
 
 .PHONY: check-types-publication
+.PHONY: qualify-platform-crypto qualify-auth-crypto qualify-auth-wire qualify-query-settings
+qualify-platform-crypto: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform --no-default-features --features ed25519,ecdsa --all-targets -- -D warnings
+	cargo clippy --offline --locked -p ic-platform --no-default-features --features ed25519,ecdsa --target wasm32-unknown-unknown -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --features ed25519,ecdsa --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features crypto --bin crypto-admission -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features crypto --bin crypto-admission --target wasm32-unknown-unknown -- -D warnings
+	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features crypto --bin crypto-admission
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features crypto --bin crypto-admission --release --target wasm32-unknown-unknown --target-dir target/platform-certificate-wasm
+	node qualification/platform-certificate-wasm.mjs crypto-admission
+
+qualify-auth-crypto:
+	node qualification/auth-crypto.mjs
+
+qualify-auth-wire:
+	node qualification/auth-wire.mjs
+
+qualify-query-settings:
+	node qualification/query-settings.mjs
+
 check-types-publication:
 	node qualification/types-auth/publication-refusals.mjs
 
@@ -392,7 +422,7 @@ release-publication-admission: qualification-tooling-check
 
 .PHONY: qualify-auth-runtime
 qualify-auth-runtime: qualification-tooling-check runtime-server-check
-	POCKET_IC_BIN="$(CURDIR)/.tools/ic-testkit-server/16.1.0-x86_64-linux/pocket-ic" node qualification/auth-runtime/run.mjs
+	node qualification/server.mjs run node qualification/auth-runtime/run.mjs
 
 .PHONY: qualify-http-request
 qualify-http-request: qualification-tooling-check
@@ -411,7 +441,7 @@ qualify-runtime-raw: qualification-tooling-check runtime-server-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-exports --no-default-features --features raw --target wasm32-unknown-unknown --release --target-dir target/runtime-raw
 	node qualification/runtime-raw.mjs
-	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- raw
+	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- raw
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-runtime --no-default-features --features system-raw --forbid-pattern '^(?!ic-platform-runtime$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-exports --no-default-features --features raw --forbid-pattern '^(?!(runtime-exports|ic-platform-runtime)$$)'
 

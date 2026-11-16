@@ -6,6 +6,7 @@ use candidate_platform::certificate::{
 };
 use ic_certification::LookupResult;
 use ic_testkit::pocket_ic::nonblocking::PocketIc;
+use published_platform::certificate as published;
 
 fn identity<'a>(bytes: &mut &'a [u8]) -> &'a [u8] {
     let size = usize::from(bytes[0]);
@@ -61,6 +62,43 @@ pub(super) async fn verify(pic: &PocketIc, canister: Principal, root_bytes: [u8;
         .unwrap();
         assert_eq!(
             evidence.tree().lookup_path([
+                b"canister".as_slice(),
+                canister.as_slice(),
+                b"certified_data"
+            ]),
+            LookupResult::Found(root_bytes.as_slice())
+        );
+        // Independently admit the original bytes through the latest registry
+        // release. Each verifier owns its Types source; only bytes cross here.
+        let published_root =
+            published::PreparedRootKey::from_der(&pic.root_key().await.unwrap()).unwrap();
+        let published_window = published::TimeWindow {
+            reference_ns: timestamp,
+            max_age_ns: 60_000_000_000,
+            max_future_skew_ns: 0,
+        };
+        let published_evidence = published::authenticate_certificate(
+            published::decode_certificate(
+                &bytes[10..],
+                published::CertificateDecodeLimits { bytes: 1_048_576 },
+            )
+            .unwrap(),
+            &published_root,
+            published_types::Principal::from_slice(canister.as_slice()),
+            published::TimePolicy {
+                certificate: published_window,
+                delegation: published_window,
+            },
+            published::VerificationLimits {
+                tree_nodes: 4096,
+                tree_depth: 64,
+                delegation_bytes: 131072,
+                canister_ranges: 256,
+            },
+        )
+        .unwrap();
+        assert_eq!(
+            published_evidence.tree().lookup_path([
                 b"canister".as_slice(),
                 canister.as_slice(),
                 b"certified_data"

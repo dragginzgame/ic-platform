@@ -25,13 +25,13 @@ required-features = ["marketplace"]
 [features]
 default = []
 candidate = ["dep:ic-platform-protocol"]
-published = ["dep:ic-platform"]
+published = ["dep:legacy-platform"]
 registry-settings = ["candidate", "ic-platform-protocol/registry-settings"]
 marketplace = ["candidate", "ic-platform-protocol/cloud-engine-marketplace"]
 
 [dependencies]
-ic-platform = { workspace = true, optional = true }
 ic-platform-protocol = { workspace = true, optional = true }
+legacy-platform = { workspace = true, optional = true }
 
 [lints]
 workspace = true

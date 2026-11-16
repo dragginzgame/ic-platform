@@ -6,6 +6,27 @@ private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.
 See the [latest release evidence](qualification/2026-11-16-runtime-protocol-publication.md).
 
+Qualification now selects Testkit 0.107.1 and explicitly names three Platform
+roles: `candidate-platform` tests the local 0.34.4 source, `published-platform`
+checks the current registry 0.34.3 verifier independently, and `legacy-platform`
+is the frozen 0.33.7 codec oracle. The latter retains APIs intentionally absent
+from the rewrite and is not a live product dependency. Published Types 0.21.1
+belongs to the registry verifier; local Types belongs to the candidate. Only
+original bytes cross between those independent checks. The pinned Auth fixture
+also uses Testkit 0.107.1, retaining its documented legacy crypto boundary until #7.
+
+`make qualify-platform-crypto` checks the local Platform 0.34.4 primitive
+candidate and executes independent native/Wasm signature vectors.
+`make qualify-auth-crypto` checks pinned actual Auth Ed25519/root-delegation code;
+`make qualify-auth-wire` checks its generator with published Wire 0.24.2 and
+Types 0.21.1. Both archive `AUTH_SOURCE` (default `../ic-auth`) without modifying
+it. The Wire check requires that consumer's installed TypeScript tool and fetches
+a pinned historical oracle when absent. `make qualify-query-settings` freezes
+and tests current `QUERY_SOURCE` (default `../ic-query`) read-only, recording dirty
+source separately from HEAD. These consumer commands are focused qualification,
+not sibling adoption or publication. See [crypto evidence](qualification/auth-crypto.md)
+and [Wire evidence](qualification/auth-wire.md).
+
 Prefer existing names for retained concepts. Check crates.io when introducing
 each package: select its next SemVer version if it already exists, otherwise
 0.1.0. Breaking pre-1.0 APIs require the next minor, while compatible changes use
@@ -184,6 +205,13 @@ maintained invalid declarations to verify compiler/codegen refusals and checks
 the one-Runtime/one-guard/one-macro/one-Types graph. Export and installed-rollback
 fixtures use the approved generated export-attribute exception; older
 non-export qualification targets retain crate-root unsafe forbids.
+
+`make qualify-runtime-timer` is the focused installed timer command: it checks
+the fixture with Clippy, builds its Wasm and exercises completion, initial traps,
+callback cleanup, failed-cleanup uncertainty, disarming and stopped upgrades.
+These cases also run under `qualify-runtime-installed`; do not select both for
+one validation batch. The local candidate is Runtime/macros/guard 0.23.12, still
+unpublished. See the [timer boundary](qualification/runtime-timers.md).
 
 `make qualify-types` tests local Principal and Account/Subaccount identity, text and Serde contracts,
 runs strict Clippy and Rustdoc, and compiles its tests for Wasm. It selects the
@@ -452,7 +480,7 @@ the Wasm built from `qualification/runtime-rollback`, without linking candidate
 Rust identities into the native adapter. Prepare its locked sources with
 `cargo fetch --locked --manifest-path qualification/Cargo.toml`.
 
-Run `make install-runtime-server` for explicit Testkit-owned server provisioning,
+Run `make install-runtime-server` for explicit qualification-owned server provisioning,
 `make runtime-server-check` for offline admission, and
 `make qualify-runtime-installed` for the focused immediate/awaited update rollback probe.
 The latter checks host/fixture Clippy, actual installed execution and the Wasm
@@ -567,3 +595,9 @@ and Wasm, including focused Clippy and graph checks. It uses frozen signatures
 over Auth's exact domain-framed claims digest; fresh capture is included in
 `make qualify-canister-signature-observed`. No Auth or Canic checkout is built or
 modified. See the [component contract and limits](qualification/canister-signature.md#isolated-auth-issuer-policy-consumer--2026-11-16).
+
+Testkit's removed lifecycle helpers are replaced by the private
+[qualification server owner](qualification/testkit-server.md). Installed commands
+run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
+require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
+prepares assets and `make runtime-server-check` verifies them without downloading.

@@ -33,10 +33,10 @@ fn management_schema_and_legacy_consumer_preserve_every_selected_field() {
                     assert_eq!(decoded.is_replicated, Some(replicated));
                     assert!(decoded.headers.is_empty());
                     assert!(decoded.transform.is_none());
-                    let legacy: ic_platform::management_canister_types::HttpRequestArgs =
-                        ic_platform::candid_codec::decoder::decode_one(
+                    let legacy: legacy_platform::management_canister_types::HttpRequestArgs =
+                        legacy_platform::candid_codec::decoder::decode_one(
                             &bytes,
-                            ic_platform::candid_codec::decoder::Limits {
+                            legacy_platform::candid_codec::decoder::Limits {
                                 bytes: 65536,
                                 header: 4096,
                                 types: 32,

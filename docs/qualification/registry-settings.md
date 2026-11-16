@@ -3,9 +3,10 @@
 The opt-in `registry-settings` feature implements a selected protobuf decoder in
 `ic-platform-protocol`. It accepts an already extracted SubnetRecord. Registry
 transport, envelope decoding, authentication and Query reporting remain outside
-this slice. This is partial progress on [replacement #3](https://github.com/dragginzgame/ic-platform/issues/3),
+this slice. Supplier acceptance for [replacement #3](https://github.com/dragginzgame/ic-platform/issues/3),
 migrated from [Platform #169](https://github.com/dragginzgame/ic-platform-legacy/issues/169),
-not completion of the consumer requirement.
+is complete in the published-cohort follow-up below. Earlier evidence and its
+original limits are retained; production migration remains separate.
 
 ## Contract and provenance
 
@@ -116,7 +117,7 @@ IC execution, a size acceptance decision or an authenticated Registry response.
 
 The initial checks did not qualify actual Query reporting or hosted execution.
 The later source-bound consumer evidence below supersedes that reporting gap.
-Publication remains disabled; the current Protocol development version is 0.2.0.
+At that earlier observation publication was disabled and Protocol was 0.2.0.
 
 ## Source-bound Query settings acceptance — 2026-11-16
 
@@ -184,3 +185,29 @@ It also reports unmaintained paste/serde_cbor warnings. This is lock/graph evide
 not an exploitability assessment; no exemption or consumer acceptance follows
 from the settings tests. [Issue #4](https://github.com/dragginzgame/ic-platform/issues/4)
 remains the remediation owner. No advisory setting or dependency was changed.
+
+## Published cohort and delivered consumer — 16 November 2026
+
+The settings implementation is now delivered in Query source
+`12844b628d96bfd203ffbd900f10d02c4a896988`, independently verified on GitHub.
+The relevant settings and comparison source files are unchanged from that commit.
+Query's working tree additionally selects registry Protocol 0.2.3 and Types
+0.21.1; that dependency migration is still dirty and is not claimed as delivered.
+
+`make qualify-query-settings` freezes all tracked/nonignored source into isolated
+storage, records every file hash, checks the locked registry selections and
+verifies the original source remains unchanged after testing. The current
+inventory hash is `707c7688551f16f60a91643efa055017bc2f7dcb15e1c50e90a03f1e9afb6216`.
+Evidence: `target/query-settings/1794848337307/verified.json`.
+
+All ten focused settings/library/comparison/CLI tests and topology/CLI Clippy
+pass with that published cohort. The original absence/empty/false/zero, shared
+budgets, malformed-field refusals, raw defaults and configured-SEV boundaries
+are unchanged. Protocol 0.2.3 publication and registry/archive provenance are
+already recorded in the [publication evidence](2026-11-16-runtime-protocol-publication.md).
+
+This completes the supplier's source-bound consumer and delivery evidence for
+#3. Query production adoption remains separate. No live network, additional
+hosted matrix or macOS run was performed. Legacy Agent remains isolated to the
+consumer's existing native transport graph with unresolved advisory #4; this
+settings qualification does not waive that finding. No sibling source was edited.

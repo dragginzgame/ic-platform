@@ -13,6 +13,8 @@ candidate-types.workspace = true
 ic-certification.workspace = true
 ic-management-canister-types.workspace = true
 ic-testkit.workspace = true
+published-platform = { workspace = true, features = ["certificate-authentication"] }
+published-types.workspace = true
 tokio.workspace = true
 wat.workspace = true
 

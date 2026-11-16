@@ -1,39 +1,22 @@
 use candid::Principal;
 use ic_management_canister_types::{CanisterIdRecord, CanisterStatusType};
-use ic_testkit::{
-    pic::{PocketIcStartupConfig, server_assets},
-    pocket_ic::{ErrorCode, PocketIcBuilder, common::rest::RawEffectivePrincipal},
-};
-use std::{path::Path, time::Duration};
+use ic_testkit::pocket_ic::{ErrorCode, PocketIcBuilder, common::rest::RawEffectivePrincipal};
+use std::time::Duration;
 
 pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let directory = Path::new(server_assets::DEFAULT_DIRECTORY);
     match std::env::args().nth(1).as_deref() {
-        Some("setup") => {
-            server_assets::setup(directory, || false)?;
-            return Ok(());
-        }
-        Some("check") => {
-            server_assets::check(directory)?;
-            return Ok(());
-        }
-        Some("raw") => return crate::raw::run(server_assets::check(directory)?),
+        Some("raw") => return crate::raw::run(),
+        Some("timer") => return crate::timer::run(),
         None => {}
-        _ => return Err("expected no arguments, setup or check".into()),
+        _ => return Err("expected no arguments, raw or timer".into()),
     }
-    let server_binary = server_assets::check(directory)?;
+    crate::timer::run()?;
     let wasm = std::fs::read(
         "target/runtime-rollback/wasm32-unknown-unknown/release/runtime_rollback.wasm",
     )?;
     tokio::runtime::Builder::new_current_thread().enable_all().build()?.block_on(async {
-        let owned = PocketIcStartupConfig::Spawn {
-            server_binary,
-            timeout: Duration::from_secs(30),
-            server_hard_ttl: Some(Duration::from_secs(120)),
-            server_idle_ttl: None,
-            server_output_files: None,
-        }.build_instance(PocketIcBuilder::new().with_nns_subnet().with_application_subnet().with_application_subnet()).await?;
-        let pic = owned.instance();
+        let owned = PocketIcBuilder::new().with_nns_subnet().with_application_subnet().with_application_subnet().with_server_url(std::env::var("POCKET_IC_SERVER_URL")?.parse()?).with_max_request_time_ms(Some(30_000)).build_async().await;
+        let pic = &owned;
         let canister = pic.create_canister().await;
         pic.add_cycles(canister, 1_u128 << 80).await;
         pic.install_canister(canister, wasm.clone(), vec![], None).await;
@@ -270,7 +253,7 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(pic.update_call(canister, caller, "observe_dispatch", vec![]).await.unwrap(), vec![1, 1],
             "observing the peer reply is distinct from replying to the original caller");
         println!("manual reply omission passed: DidNotReply, Completed, released handler ownership");
-        owned.close().await;
+        owned.drop().await;
         println!("installed rollback passed: 7 immediate updates; 8 awaited calls with state/destructor/peer observations; callback/cleanup traps, dropped call interest, reply/rejection refunds, resource refusals, notify commit/rollback and subsequent success");
         Ok::<(), Box<dyn std::error::Error>>(())
     })

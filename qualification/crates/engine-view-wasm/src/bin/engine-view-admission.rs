@@ -8,15 +8,15 @@
 ))]
 compile_error!("select exactly one of candidate or published");
 
-#[cfg(feature = "published")]
-use ic_platform::{
-    candid_codec::decoder::{Error, Limits},
-    cloud_engine_types as engine,
-};
 #[cfg(feature = "candidate")]
 use ic_platform_protocol::{
     candid::{Error, Limits},
     cloud_engine as engine,
+};
+#[cfg(feature = "published")]
+use legacy_platform::{
+    candid_codec::decoder::{Error, Limits},
+    cloud_engine_types as engine,
 };
 
 fn limits() -> Limits {
