@@ -17,7 +17,7 @@ license-file = "../LICENSE.md"
 
 [workspace.dependencies]
 candid = "0.10.40"
-candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.5", default-features = false }
+candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.6", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "../crates/ic-platform-types", version = "=0.21.0", default-features = false }
 dhat = "0.3.3"
 ic-management-canister-types = "0.8.0"

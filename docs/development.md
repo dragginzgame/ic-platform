@@ -1,7 +1,7 @@
 # Development
 
 The product workspace contains unpublished Protocol 0.1.1 and the initial Types
-0.21.0 candidate, plus the Runtime 0.23.5 local development increment
+0.21.0 candidate, plus the Runtime 0.23.6 local development increment
 (following registry 0.22.5).
 Types follows the published 0.20.4 baseline; its identity
 slice is not yet a replacement for the complete published identity contract.
@@ -476,7 +476,7 @@ historical versioning gap without assigning retroactive versions. Repository set
 in that ledger; they do not create releases for private test packages.
 
 Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. Runtime and its exact guard share version 0.23.5; advance both
+pending changelog. Runtime and its exact guard share version 0.23.6; advance both
 and the exact root guard dependency together. The macros package now shares this
 version and has an exact Runtime dependency selection as well.
 Platform and Browser remain future groups. Add each

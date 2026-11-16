@@ -4,6 +4,16 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.6] - 2026-11-16 (GitHub source snapshot)
+
+### 📚 Documentation
+
+- Clarify that a task handle can remain `Running` after cleanup traps and its
+  changes roll back. This local observation guarantees neither another poll nor
+  permission to retry; the installed 0.23.5 corpus already demonstrates it.
+- Advance Runtime, macros and the singleton guard together after the 0.23.5
+  GitHub snapshot. Protocol and Types remain unchanged.
+
 ## [0.23.5] - 2026-11-16 (GitHub source snapshot)
 
 Adopt the IC stop/drain/upgrade/start contract. The earlier live-upgrade

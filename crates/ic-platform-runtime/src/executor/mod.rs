@@ -19,7 +19,10 @@ use std::{
 /// Current local task observation, committed only with the enclosing execution.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TaskState {
-    /// The task retains local execution interest.
+    /// No completion or successful cleanup has committed for this task.
+    ///
+    /// A trapping cleanup can roll back to this state even after the IC has
+    /// finished handling the response. It does not guarantee another poll.
     Running,
     /// The future completed and its destruction returned successfully.
     Completed,
@@ -32,6 +35,9 @@ pub enum TaskState {
 pub struct TaskHandle(Rc<Cell<TaskState>>);
 impl TaskHandle {
     /// Observes current local state, not remote effects or final settlement.
+    ///
+    /// `Running` can survive a cleanup trap; it is not a liveness signal or
+    /// permission to retry the remote operation.
     #[must_use]
     pub fn state(&self) -> TaskState {
         self.0.get()

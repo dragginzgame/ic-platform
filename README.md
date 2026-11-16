@@ -57,7 +57,7 @@ are implemented. Production consumer migration remains pending.
 Protocol still uses registry Types 0.20.4 until the replacement
 cohort is qualified; these are distinct Rust type identities.
 
-Runtime `0.23.5` is the current local development increment after the `0.23.4`
+Runtime `0.23.6` is the current local development increment after the `0.23.5`
 GitHub source snapshot, with registry publication disabled. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
@@ -99,11 +99,11 @@ that admission with one executor-owned handler. `system::reply` supplies an
 explicit raw reply with one ordinary reply authority per task. Broader export
 modes, automatic encoding/reply ownership and installed execution remain pending.
 The opt-in `entrypoint-macros` feature now exposes an explicit manual-reply
-`update` attribute from `ic-platform-macros` 0.23.5. Its
+`update` attribute from `ic-platform-macros` 0.23.6. Its
 [generated exports](docs/qualification/runtime-exports.md) run in a separate Wasm
 consumer, including rejection and compile-fail checks. Queries and automatic
 reply generation remain unsupported in this initial macro slice.
-The separate `ic-platform-runtime-guard` shares Runtime's 0.23.5 version.
+The separate `ic-platform-runtime-guard` shares Runtime's 0.23.6 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 
