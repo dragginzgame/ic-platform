@@ -19,7 +19,7 @@ license-file = "../LICENSE.md"
 [workspace.dependencies]
 candid = "0.10.40"
 candidate-platform = { package = "ic-platform", path = "../crates/ic-platform", version = "=0.34.3", default-features = false }
-candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.9", default-features = false }
+candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.10", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "../crates/ic-platform-types", version = "=0.21.1", default-features = false }
 dhat = "0.3.3"
 ic-certification = { version = "=3.2.0", default-features = false }

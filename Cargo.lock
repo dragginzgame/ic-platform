@@ -199,7 +199,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.9"
+version = "0.23.10"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -209,7 +209,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "ic-platform-types",
  "num-bigint",
@@ -219,7 +219,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.9"
+version = "0.23.10"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -229,7 +229,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.9"
+version = "0.23.10"
 dependencies = [
  "toko-tooling",
 ]

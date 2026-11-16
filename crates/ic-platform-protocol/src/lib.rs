@@ -2,8 +2,9 @@
 //!
 //! Capabilities are explicit; default features are empty. The initial
 //! `cloud-engine` capability encodes requests only. `cloud-engine-response` adds
-//! bounded selected response decoding and canonical identities. This unpublished
-//! package is not yet a qualified replacement for Platform.
+//! bounded selected response decoding and canonical identities. `http-request`
+//! encodes a narrow management HTTP GET argument without a codec dependency.
+//! This package does not replace the complete legacy Platform surface.
 
 #![forbid(unsafe_code)]
 
@@ -15,3 +16,6 @@ pub mod candid;
 
 #[cfg(feature = "registry-settings")]
 pub mod registry_settings;
+
+#[cfg(feature = "http-request")]
+pub mod http_request;

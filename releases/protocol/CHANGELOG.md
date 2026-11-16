@@ -3,6 +3,17 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.2.3] - Unreleased
+
+### ✨ Added
+
+- Add the dependency-free opt-in `http-request` capability for bounded management
+  GET argument encoding. Preserve URL/body bytes, explicit response/replication
+  values, empty headers and absent transform/pricing version.
+- Qualify whole-message limits and LEB128 boundaries with independent upstream
+  Candid and legacy consumer schema decoders. Testkit installed adoption remains
+  downstream work; this change supplies its missing Protocol capability (#5).
+
 ## [0.2.2] - 2026-11-16
 
 ### 📦 Publication

@@ -457,6 +457,8 @@ checksum = "0e9c71c2167ca323c882b99918929403426e2373ea17242ff5653e0d5e1058be"
 name = "engine-view-consumer"
 version = "0.1.0"
 dependencies = [
+ "candid",
+ "ic-management-canister-types",
  "ic-platform 0.33.7",
  "ic-platform-protocol",
  "ic-platform-runtime",
@@ -921,7 +923,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.9"
+version = "0.23.10"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -930,7 +932,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "ic-platform-types 0.21.1",
  "num-bigint 0.5.1",
@@ -939,7 +941,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.9"
+version = "0.23.10"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -948,7 +950,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.9"
+version = "0.23.10"
 
 [[package]]
 name = "ic-platform-types"
@@ -1797,7 +1799,10 @@ name = "runtime-installed"
 version = "0.1.0"
 dependencies = [
  "candid",
+ "ic-certification",
  "ic-management-canister-types",
+ "ic-platform 0.34.3",
+ "ic-platform-types 0.21.1",
  "ic-testkit",
  "tokio",
  "toko-tooling",

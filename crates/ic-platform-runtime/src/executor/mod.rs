@@ -93,9 +93,32 @@ struct Executor {
     last: u64,
     tasks: BTreeMap<u64, Task>,
     current: Option<TaskToken>,
+    synchronous: bool,
 }
 thread_local! {
-    static EXECUTOR: RefCell<Executor> = const { RefCell::new(Executor { last: 0, tasks: BTreeMap::new(), current: None }) };
+    static EXECUTOR: RefCell<Executor> = const { RefCell::new(Executor { last: 0, tasks: BTreeMap::new(), current: None, synchronous: false }) };
+}
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub(crate) struct SynchronousEntry;
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+impl Drop for SynchronousEntry {
+    fn drop(&mut self) {
+        EXECUTOR.with(|executor| executor.borrow_mut().synchronous = false);
+    }
+}
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub(crate) fn enter_synchronous() -> Result<SynchronousEntry, EntryError> {
+    EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        if executor.current.is_some() || executor.synchronous {
+            return Err(EntryError::NestedEntry);
+        }
+        executor.synchronous = true;
+        Ok(SynchronousEntry)
+    })
 }
 
 /// Enters one method-attached root future from a manual update entrypoint.
@@ -121,7 +144,7 @@ pub(crate) fn check_update_entry() -> Result<(), EntryError> {
     }
     EXECUTOR.with(|executor| {
         let executor = executor.borrow();
-        if executor.current.is_some() {
+        if executor.current.is_some() || executor.synchronous {
             Err(EntryError::NestedEntry)
         } else if executor.last == u64::MAX {
             Err(EntryError::Capacity)
@@ -140,7 +163,7 @@ fn start(future: UserFuture) -> Result<TaskHandle, EntryError> {
     // Admission must not drop a refused user future under an executor borrow.
     let token = EXECUTOR.with(|executor| {
         let mut executor = executor.borrow_mut();
-        if executor.current.is_some() {
+        if executor.current.is_some() || executor.synchronous {
             return Err(EntryError::NestedEntry);
         }
         let id = executor.last.checked_add(1).ok_or(EntryError::Capacity)?;
@@ -201,7 +224,7 @@ pub(crate) fn drive(token: TaskToken) {
     loop {
         let work = EXECUTOR.with(|executor| {
             let mut executor = executor.borrow_mut();
-            if executor.current.is_some() {
+            if executor.current.is_some() || executor.synchronous {
                 return None;
             }
             let task = executor.tasks.get_mut(&token.0)?;

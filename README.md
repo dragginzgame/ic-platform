@@ -95,16 +95,14 @@ for that entrypoint work, refusing oversized messages before allocation/copy.
 around that capture, stopping at the first failure. Runtime selects neither
 authorization policy nor a codec; see the
 [argument boundary](docs/qualification/runtime-arguments.md).
-The [manual update adapter](docs/qualification/runtime-update.md) now composes
-that admission with one executor-owned handler. `system::reply` supplies an
-explicit raw reply with one ordinary reply authority per task. Broader export
-modes, automatic encoding/reply ownership and installed execution remain pending.
-The opt-in `entrypoint-macros` feature now exposes an explicit manual-reply
-`update` attribute from `ic-platform-macros` 0.23.9. Its
-[generated exports](docs/qualification/runtime-exports.md) run in a separate Wasm
-consumer, including rejection and compile-fail checks. Queries and automatic
-reply generation remain unsupported in this initial macro slice.
-The separate `ic-platform-runtime-guard` shares Runtime's 0.23.9 version.
+Runtime 0.23.10 adds explicit automatic updates, synchronous queries and
+init/pre-upgrade/post-upgrade exports alongside manual updates. All generated
+updates share one executor and reply authority; codecs and error behavior remain
+explicit application choices. Caller/canister identity, IC time, controller checks,
+bounded query certificates and certified-data publication are available through
+`system`. The [Auth execution qualification](docs/qualification/runtime-auth.md)
+records installed consumer and byte-boundary evidence and remaining migration
+limits. The separate `ic-platform-runtime-guard` shares Runtime's 0.23.10 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 

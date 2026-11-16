@@ -17,11 +17,20 @@ ic-platform-types.workspace = true
 ignored = ["toko-tooling"]
 
 [features]
+http-request = [
+    "ic-platform-protocol/http-request",
+    "dep:candid",
+    "dep:ic-management-canister-types",
+    "ic-platform/management-canister-types",
+    "ic-platform/candid-codec",
+]
 marketplace = ["ic-platform-protocol/cloud-engine-marketplace"]
 registry-settings = ["ic-platform-protocol/registry-settings", "ic-platform/nns-registry-types"]
 
 [dependencies]
+candid = { workspace = true, optional = true }
 candidate-types.workspace = true
+ic-management-canister-types = { workspace = true, optional = true }
 ic-platform-protocol.workspace = true
 
 [dev-dependencies]

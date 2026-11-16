@@ -70,8 +70,11 @@ does not establish product or native-host qualification.
   query/lifecycle exports, caller/canister identity and IC time, certification
   publication/retrieval, and explicit guard/decode/encode/reply composition.
   Follow the [consumer acceptance contract](docs/requirements.md#next-runtime-release-priority-auth-execution-requirements)
-  and qualify Auth's actual installed fixture. These are unfinished retained
+  and qualify Auth's actual installed fixture. These are retained
   requirements; do not replace their behavior with consumer compatibility shims.
+  Runtime 0.23.10 now passes the pinned actual Auth installed fixture; retain the
+  [scope and legacy crypto boundary](docs/qualification/runtime-auth.md).
+  Packaging and production migration remain separate admission gates.
 - The initial Protocol package implements request encoding and selected response
   decoding, with initial version 0.1.0 and publication disabled. The separate
   qualification workspace proves a public consumer/type crossing. Full Query

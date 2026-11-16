@@ -1,7 +1,7 @@
-//! Explicit guard, raw-byte admission and decoding for future entrypoint adapters.
+//! Explicit guard, bounded input and caller-selected codecs for IC entrypoints.
 //!
-//! The manual update adapter creates one task after successful admission. This
-//! slice does not generate exports, select an encoder or issue replies.
+//! Updates share one executor; synchronous queries and lifecycle handlers exclude
+//! nested Runtime entry. Automatic replies require an explicit encoder.
 //! Applications retain authorization policy and explicit codec choice.
 
 use crate::executor::{self, EntryError, TaskHandle};
@@ -56,6 +56,118 @@ pub enum UpdateError<G, D> {
     Entry(EntryError),
     /// The guard, argument bound or selected decoder refused the input.
     Admission(AdmissionError<G, D>),
+}
+
+/// A generated automatic-response endpoint refused at this stage.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum EndpointError<G, D, E> {
+    /// Execution context or root-task admission refused.
+    Entry(EntryError),
+    /// Pre-copy guard, argument bound or explicit decoding refused.
+    Admission(AdmissionError<G, D>),
+    /// The caller-selected response encoder refused; no reply bytes were appended.
+    Encode(E),
+    /// A handler already consumed the update task's reply authority.
+    Reply(system::ReplyError),
+}
+
+/// Runs one synchronous query with explicit input and response policies.
+///
+/// Call only from a query export. No future or callback is registered. Nested
+/// Runtime entries and manual Runtime replies refuse while this scope owns the
+/// response. The guard precedes argument observation; encoding succeeds before
+/// any response append. Both replicated and non-replicated queries are supported.
+///
+/// # Errors
+/// Preserves entry, input and encoder refusals without issuing a reply.
+///
+/// # Panics
+/// User code or IC imports may trap; the IC governs query rollback.
+pub fn query<T, R, G, D, E>(
+    maximum: usize,
+    guard: impl FnOnce() -> Result<(), G>,
+    decode: impl FnOnce(&[u8]) -> Result<T, D>,
+    handler: impl FnOnce(T) -> R,
+    encode: impl FnOnce(R) -> Result<Vec<u8>, E>,
+) -> Result<(), EndpointError<G, D, E>> {
+    let _scope = executor::enter_synchronous().map_err(EndpointError::Entry)?;
+    let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
+    let bytes = encode(handler(input)).map_err(EndpointError::Encode)?;
+    crate::call::reply(&bytes);
+    Ok(())
+}
+
+/// Runs one synchronous lifecycle handler without reply or async task authority.
+///
+/// Use only from the matching generated init, pre-upgrade or post-upgrade export.
+/// No persistence, migration policy or automatic upgrade guard is introduced.
+/// Pre-upgrade has no arguments: its generated adapter supplies an empty input
+/// to the explicit decoder instead of using IC argument imports.
+///
+/// # Errors
+/// Preserves nested-entry, guard, size and decoder refusals.
+///
+/// # Panics
+/// User code and system context violations may trap.
+pub fn lifecycle<T, G, D>(
+    maximum: usize,
+    has_arguments: bool,
+    guard: impl FnOnce() -> Result<(), G>,
+    decode: impl FnOnce(&[u8]) -> Result<T, D>,
+    handler: impl FnOnce(T),
+) -> Result<(), UpdateError<G, D>> {
+    let _scope = executor::enter_synchronous().map_err(UpdateError::Entry)?;
+    let input = if has_arguments {
+        prepare(maximum, guard, decode).map_err(UpdateError::Admission)?
+    } else {
+        guard().map_err(|e| UpdateError::Admission(AdmissionError::Guard(e)))?;
+        decode(&[]).map_err(|e| UpdateError::Admission(AdmissionError::Decode(e)))?
+    };
+    handler(input);
+    Ok(())
+}
+
+/// Starts one update task and encodes/replies after the handler completes.
+///
+/// The same executor and single reply authority as manual updates are used.
+/// Encoder refusal invokes the explicit non-returning error callback before any
+/// append. A manual reply from the handler makes the later automatic reply refuse.
+/// The callback also handles refusals after suspension; Runtime chooses no codec
+/// or remote error representation.
+///
+/// # Errors
+/// Returns entry/input refusals before starting the task.
+///
+/// # Panics
+/// User code, its error callback or an IC operation may trap.
+pub fn update<T, R, G, D, E, F>(
+    maximum: usize,
+    guard: impl FnOnce() -> Result<(), G>,
+    decode: impl FnOnce(&[u8]) -> Result<T, D>,
+    handler: impl FnOnce(T) -> F + 'static,
+    encode: impl FnOnce(R) -> Result<Vec<u8>, E> + 'static,
+    on_error: fn(EndpointError<G, D, E>) -> !,
+) -> Result<TaskHandle, EndpointError<G, D, E>>
+where
+    T: 'static,
+    G: 'static,
+    D: 'static,
+    E: 'static,
+    F: Future<Output = R> + 'static,
+{
+    executor::check_update_entry().map_err(EndpointError::Entry)?;
+    let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
+    executor::run_update(async move {
+        let result = handler(input).await;
+        let bytes = match encode(result) {
+            Ok(bytes) => bytes,
+            Err(error) => on_error(EndpointError::Encode(error)),
+        };
+        if let Err(error) = system::reply(&bytes) {
+            on_error(EndpointError::Reply(error));
+        }
+    })
+    .map_err(EndpointError::Entry)
 }
 
 /// Admits input and starts one update task with caller-owned manual reply policy.

@@ -2,6 +2,86 @@
 
 pub use crate::executor::ReplyError;
 
+/// Observes raw argument length without copying, for explicit pre-copy guards.
+///
+/// Valid only in argument-capable IC contexts; system context violations trap.
+#[must_use]
+pub fn argument_size() -> usize {
+    crate::call::argument_size()
+}
+
+/// The current message's caller, in the canonical Types identity.
+///
+/// Observe before awaiting when the original caller is needed. Context violations
+/// or an invalid system Principal length trap. This does not authorize the caller.
+#[must_use]
+pub fn caller() -> candidate_types::Principal {
+    crate::call::principal(true)
+}
+
+/// This canister's identity, in the canonical Types identity.
+#[must_use]
+pub fn canister_self() -> candidate_types::Principal {
+    crate::call::principal(false)
+}
+
+/// IC-provided time in nanoseconds since the Unix epoch for this execution.
+///
+/// This is not a host clock or an application freshness policy. Query results
+/// still require authentication before a remote consumer trusts the observation.
+#[must_use]
+pub fn time() -> u64 {
+    crate::call::system_time()
+}
+
+/// Whether the supplied Principal is a controller at this execution's state.
+///
+/// The caller owns the decision to use this observation for authorization.
+#[must_use]
+pub fn is_controller(principal: &candidate_types::Principal) -> bool {
+    crate::call::controller(principal)
+}
+
+/// Publishes exactly one 32-byte certification root in an allowed IC context.
+///
+/// This changes certified data only if the execution commits. IC context
+/// violations trap; Runtime neither constructs witnesses nor chooses a hash.
+pub fn set_certified_data(root: &[u8; 32]) {
+    crate::call::certified_root(root);
+}
+
+/// An available certificate exceeds the caller's pre-allocation byte allowance.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct CertificateTooLarge {
+    /// Exact certificate size reported by the IC.
+    pub actual: usize,
+    /// Inclusive caller-selected maximum.
+    pub maximum: usize,
+}
+
+/// Copies the query certificate, if present, after checking its size.
+///
+/// Absence returns `Ok(None)` without reading size or copying. Presence does not
+/// authenticate these bytes: verification belongs to the receiving consumer.
+/// Replicated executions do not receive a query certificate.
+///
+/// # Errors
+/// Returns [`CertificateTooLarge`] before allocation/copy when over the limit.
+///
+/// # Panics
+/// An allocation failure or invalid IC execution context can trap.
+pub fn data_certificate(maximum: usize) -> Result<Option<Vec<u8>>, CertificateTooLarge> {
+    crate::call::certificate(maximum)
+}
+
+/// Traps this execution with an explicit caller-supplied diagnostic.
+///
+/// The IC rolls back this execution's state changes; earlier messages and
+/// remote effects are not rolled back. This is not a reject reply or retry.
+pub fn trap(message: &str) -> ! {
+    crate::call::trap_message(message)
+}
+
 /// Sends exact raw reply bytes once from the current live update task.
 ///
 /// The caller owns encoding. Empty bytes mean an empty raw reply, not encoded
@@ -12,7 +92,7 @@ pub use crate::executor::ReplyError;
 ///
 /// This ordinary path shares one reply authority per task, including resumed
 /// callbacks. It cannot police external raw IC0 calls or multiple manual roots
-/// created for one export; generated entrypoint/reply ownership remains pending.
+/// created for one export. Generated automatic updates share this reply authority.
 ///
 /// # Errors
 /// Refuses outside a live task, during cleanup, or after this task already

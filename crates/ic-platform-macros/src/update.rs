@@ -15,13 +15,31 @@ struct Options {
     maximum: Option<LitInt>,
     on_error: Option<Path>,
     manual: bool,
+    encode: Option<Path>,
 }
 
 fn required<T>(value: Option<T>, name: &str, span: proc_macro2::Span) -> syn::Result<T> {
     value.ok_or_else(|| syn::Error::new(span, format!("missing required option `{name}`")))
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) enum Kind {
+    Update,
+    Query,
+    Init,
+    PreUpgrade,
+    PostUpgrade,
+}
+
 pub(super) fn expand(args: TokenStream, item: TokenStream) -> syn::Result<TokenStream> {
+    expand_kind(args, item, Kind::Update)
+}
+
+pub(super) fn expand_kind(
+    args: TokenStream,
+    item: TokenStream,
+    kind: Kind,
+) -> syn::Result<TokenStream> {
     let mut options = Options::default();
     let mut seen = BTreeSet::new();
     syn::meta::parser(|meta| {
@@ -40,10 +58,9 @@ pub(super) fn expand(args: TokenStream, item: TokenStream) -> syn::Result<TokenS
             "max_bytes" => options.maximum = Some(meta.value()?.parse()?),
             "on_error" => options.on_error = Some(meta.value()?.parse()?),
             "manual_reply" => options.manual = true,
+            "encode" => options.encode = Some(meta.value()?.parse()?),
             _ => {
-                return Err(meta.error(
-                    "unsupported update option; only explicit manual-reply updates are supported",
-                ));
+                return Err(meta.error("unsupported update option or entrypoint option"));
             }
         }
         Ok(())
@@ -51,7 +68,9 @@ pub(super) fn expand(args: TokenStream, item: TokenStream) -> syn::Result<TokenS
     .parse2(args)?;
     let function: ItemFn = syn::parse2(item)?;
     let signature = &function.sig;
-    if signature.asyncness.is_none()
+    let lifecycle = matches!(kind, Kind::Init | Kind::PreUpgrade | Kind::PostUpgrade);
+    if (options.manual && signature.asyncness.is_none())
+        || (kind != Kind::Update && signature.asyncness.is_some())
         || signature.constness.is_some()
         || !matches!(signature.safety, Safety::Default)
         || signature.abi.is_some()
@@ -66,7 +85,8 @@ pub(super) fn expand(args: TokenStream, item: TokenStream) -> syn::Result<TokenS
             "update requires a safe async nongeneric function with one decoded argument",
         ));
     }
-    if !matches!(&signature.output, ReturnType::Default)
+    if (options.manual || lifecycle)
+        && !matches!(&signature.output, ReturnType::Default)
         && !matches!(&signature.output, ReturnType::Type(_, ty) if matches!(ty.as_ref(), Type::Tuple(tuple) if tuple.elems.is_empty()))
     {
         return Err(syn::Error::new(
@@ -106,8 +126,15 @@ pub(super) fn expand(args: TokenStream, item: TokenStream) -> syn::Result<TokenS
     }
     let span = signature.ident.span();
     let runtime = required(options.runtime, "runtime", span)?;
-    let name = required(options.name, "name", span)?;
-    if name.value().is_empty() || name.value().contains('\0') {
+    let name = if lifecycle {
+        if options.name.is_some() {
+            return Err(syn::Error::new(span, "lifecycle exports have fixed names"));
+        }
+        LitStr::new("", span)
+    } else {
+        required(options.name, "name", span)?
+    };
+    if !lifecycle && (name.value().is_empty() || name.value().contains('\0')) {
         return Err(syn::Error::new(
             name.span(),
             "update name must be nonempty and contain no NUL",
@@ -117,23 +144,72 @@ pub(super) fn expand(args: TokenStream, item: TokenStream) -> syn::Result<TokenS
     let decode = required(options.decode, "decode", span)?;
     let maximum = required(options.maximum, "max_bytes", span)?;
     let on_error = required(options.on_error, "on_error", span)?;
-    if !options.manual {
-        return Err(syn::Error::new(span, "manual_reply must be explicit"));
+    if options.manual && (kind != Kind::Update || options.encode.is_some()) {
+        return Err(syn::Error::new(
+            span,
+            "manual_reply is exclusive to updates without an encoder",
+        ));
+    }
+    if lifecycle && options.encode.is_some() {
+        return Err(syn::Error::new(
+            span,
+            "lifecycle exports cannot encode a reply",
+        ));
+    }
+    if !lifecycle && !options.manual && options.encode.is_none() {
+        return Err(syn::Error::new(
+            span,
+            "manual_reply or an explicit encode option is required",
+        ));
     }
     let handler = &signature.ident;
     let plain = handler.to_string();
-    let wrapper = format_ident!("__ic_platform_update_{}", plain.trim_start_matches("r#"));
-    let export = LitStr::new(&format!("canister_update {}", name.value()), name.span());
+    let prefix = match kind {
+        Kind::Update => "update",
+        Kind::Query => "query",
+        Kind::Init => "init",
+        Kind::PreUpgrade => "pre_upgrade",
+        Kind::PostUpgrade => "post_upgrade",
+    };
+    let wrapper = format_ident!(
+        "__ic_platform_{}_{}",
+        prefix,
+        plain.trim_start_matches("r#")
+    );
+    let export_name = if lifecycle {
+        format!("canister_{prefix}")
+    } else {
+        format!("canister_{prefix} {}", name.value())
+    };
+    let export = LitStr::new(&export_name, name.span());
+    let invocation = if lifecycle {
+        let has_arguments = kind != Kind::PreUpgrade;
+        quote!(#runtime::entrypoints::lifecycle(#maximum, #has_arguments, #guard, #decode, #handler))
+    } else if options.manual {
+        quote!(#runtime::entrypoints::update_manual(#maximum, #guard, #decode, #handler))
+    } else {
+        let encode = options.encode.expect("encoder was required above");
+        if kind == Kind::Query {
+            quote!(#runtime::entrypoints::query(#maximum, #guard, #decode, #handler, #encode))
+        } else {
+            let invoke_handler = if signature.asyncness.is_some() {
+                quote!(#handler)
+            } else {
+                quote!(|input| async move { #handler(input) })
+            };
+            quote!(#runtime::entrypoints::update(#maximum, #guard, #decode, #invoke_handler, #encode, #on_error))
+        }
+    };
     Ok(quote! {
         #function
         #(#gating)*
         #[cfg(target_arch = "wasm32")]
         #[doc(hidden)]
-        #[expect(unsafe_code, reason = "Generated IC update export with fixed ABI and explicit method name")]
+        #[expect(unsafe_code, reason = "Generated IC entrypoint export with fixed ABI and explicit policies")]
         #[unsafe(export_name = #export)]
         pub extern "C" fn #wrapper() {
-            match #runtime::entrypoints::update_manual(#maximum, #guard, #decode, #handler) {
-                ::std::result::Result::Ok(handle) => ::std::mem::drop(handle),
+            match #invocation {
+                ::std::result::Result::Ok(_) => {},
                 ::std::result::Result::Err(error) => {
                     let failure: fn(_) -> ! = #on_error;
                     failure(error)

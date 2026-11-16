@@ -60,7 +60,7 @@ the surface grows; EngineView alone cannot prove general variant support.
 
 The maintainer selected these gaps as the next Runtime release priority after
 Auth's review of Platform source `ea359de` and Runtime 0.23.9. They are retained
-consumer requirements awaiting implementation, not intentionally retired behavior.
+consumer requirements, not intentionally retired behavior.
 Independent publication of the implemented slices did not qualify Auth migration.
 
 | Required capability | Owner and acceptance evidence |
@@ -84,8 +84,10 @@ with the evidence. These cases extend the existing Runtime obligations rather
 than replacing rollback, resource accounting or context-isolation checks.
 Auth remains on its working Runtime cohort until this acceptance passes. Release
 Runtime, macros and guard together; select the next version when the concrete
-change's compatibility impact is known. No implementation or passing proof is
-claimed by this priority record. GitHub remains the issue tracker.
+change's compatibility impact is known. Runtime 0.23.10 now implements these
+surfaces and passes the actual pinned Auth installed fixture; see the
+[source and boundary evidence](qualification/runtime-auth.md). Packaged-cohort
+release admission and production migration remain separate. GitHub remains the issue tracker.
 
 ## Canister-signature consumer
 
@@ -212,3 +214,21 @@ Extend the map with actual consumers of remaining protocol families, identity,
 Runtime, verification and browser subpaths before removing their surfaces. Record
 source/lock/compiler identities and positive/negative proof owners. Missing tests
 do not establish unused APIs; issue closure does not establish replacement proof.
+
+## Testkit management HTTP request encoding
+
+[Issue #5](https://github.com/dragginzgame/ic-platform/issues/5) requires one bounded
+Candid management `http_request` argument for Testkit held replies. Protocol's
+opt-in `http-request` capability supplies GET, verbatim UTF-8 URL/body, explicit
+response limit/replication, empty headers, absent transform and pricing version.
+Complete encoded-size admission precedes allocation; exact cap passes and
+cap-minus-one refuses without partial output. See the
+[independent schema evidence](qualification/http-request.md). Testkit owns cycles,
+URL construction, simulator behavior and downstream installation/adoption.
+
+The crypto/Agent retained obligation was rechecked on 2026-11-16 against
+[RUSTSEC-2026-0387](https://rustsec.org/advisories/RUSTSEC-2026-0387): the patched
+range remains `crypto-bigint >=0.7.6`. Neither current workspace lock selects
+`crypto-bigint`, `k256`, `ic-agent` or `ic-secp256k1`. Consequently there is no
+current lock edge to repair here; this does not qualify the absent legacy
+Agent/derivation capabilities or resolve their consumers' affected graphs.

@@ -8,7 +8,7 @@ import { spawnSync } from 'node:child_process';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const groups = {
   input: { command: 'check', alias: 'renamed-runtime', feature: 'call-ic0', cases: [['accepted', null], ['invalid-decoder', 'E0631'], ['borrowed-input', 'E0597'], ['borrowed-handler', 'E0373']] },
-  exports: { command: 'build', alias: 'candidate-runtime', feature: 'entrypoint-macros', cases: [['accepted', null], ['invalid-option', 'unsupported update option'], ['invalid-handler', 'update requires a safe async nongeneric function'], ['invalid-decoder', 'E0631'], ['returning-error', 'E0308'], ['duplicate-export', 'already defined']] },
+  exports: { command: 'build', alias: 'candidate-runtime', feature: 'entrypoint-macros', cases: [['accepted', null], ['invalid-option', 'manual_reply is exclusive'], ['invalid-handler', 'update requires a safe async nongeneric function'], ['invalid-decoder', 'E0631'], ['returning-error', 'E0308'], ['duplicate-export', 'already defined'], ['async-query', 'requires a safe'], ['async-lifecycle', 'requires a safe'], ['lifecycle-reply', 'lifecycle exports cannot encode a reply'], ['invalid-encoder', 'E0631'], ['query-manual', 'requires a safe']] },
 };
 const selection = process.argv[2];
 assert.ok(Object.hasOwn(groups, selection), 'select input or exports');

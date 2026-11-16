@@ -8,6 +8,9 @@ license-file.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid.workspace = true
+candidate-platform = { workspace = true, features = ["certificate-authentication"] }
+candidate-types.workspace = true
+ic-certification.workspace = true
 ic-management-canister-types.workspace = true
 ic-testkit.workspace = true
 tokio.workspace = true

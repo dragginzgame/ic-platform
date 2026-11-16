@@ -8,3 +8,6 @@ mod callbacks;
 
 #[cfg(target_arch = "wasm32")]
 mod upgrade;
+
+#[cfg(target_arch = "wasm32")]
+mod identity;

@@ -180,3 +180,112 @@ fn cfg_is_forwarded_and_attribute_injection_refuses() {
         .is_err()
     );
 }
+
+#[test]
+fn synchronous_and_lifecycle_modes_require_explicit_policy() {
+    use super::{Kind, expand_kind};
+    let automatic = quote!(
+        runtime = renamed,
+        name = "observe",
+        guard = guard,
+        decode = decode,
+        max_bytes = 8,
+        on_error = fail,
+        encode = encode
+    );
+    assert!(
+        expand_kind(
+            automatic.clone(),
+            quote!(
+                fn observe(input: Vec<u8>) -> Vec<u8> {
+                    input
+                }
+            ),
+            Kind::Query
+        )
+        .is_ok()
+    );
+    assert!(
+        expand_kind(
+            automatic.clone(),
+            quote!(
+                async fn observe(input: Vec<u8>) -> Vec<u8> {
+                    input
+                }
+            ),
+            Kind::Query
+        )
+        .is_err()
+    );
+    assert!(
+        expand_kind(
+            automatic,
+            quote!(
+                fn observe(input: Vec<u8>) -> Vec<u8> {
+                    input
+                }
+            ),
+            Kind::Update
+        )
+        .is_ok()
+    );
+    assert!(
+        expand_kind(
+            options(),
+            quote!(
+                async fn observe(input: Vec<u8>) {}
+            ),
+            Kind::Query
+        )
+        .is_err()
+    );
+    for kind in [Kind::Init, Kind::PreUpgrade, Kind::PostUpgrade] {
+        let args = quote!(
+            runtime = renamed,
+            guard = guard,
+            decode = decode,
+            max_bytes = 0,
+            on_error = fail
+        );
+        assert!(
+            expand_kind(
+                args.clone(),
+                quote!(
+                    fn lifecycle(input: ()) {}
+                ),
+                kind
+            )
+            .is_ok()
+        );
+        assert!(
+            expand_kind(
+                args.clone(),
+                quote!(
+                    async fn lifecycle(input: ()) {}
+                ),
+                kind
+            )
+            .is_err()
+        );
+        assert!(
+            expand_kind(
+                quote!(#args, encode = encode),
+                quote!(
+                    fn lifecycle(input: ()) {}
+                ),
+                kind
+            )
+            .is_err()
+        );
+        assert!(
+            expand_kind(
+                quote!(#args, name = "wrong"),
+                quote!(
+                    fn lifecycle(input: ()) {}
+                ),
+                kind
+            )
+            .is_err()
+        );
+    }
+}

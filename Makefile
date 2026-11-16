@@ -58,6 +58,8 @@ help:
 	  'qualify-runtime-exports  Build and execute explicit generated IC update exports' \
 	  'install-runtime-server / runtime-server-check  Prepare or verify Testkit PocketIC' \
 	  'qualify-runtime-installed  Execute installed calls, rollback and drained upgrades' \
+	  'qualify-auth-runtime   Test pinned actual Auth endpoints in PocketIC' \
+	  'qualify-http-request   Check bounded management GET argument encoding' \
 	  'upgrade-help / check-upgrade-tooling  Preview operator usage or test failure handling' \
 	  'install-ci-tools       Prepare pinned Linux workflow/security tools' \
 	  'lint-workflows / check-secrets  Validate workflows or scan Git history' \
@@ -142,6 +144,7 @@ qualify-runtime-installed: qualification-tooling-check runtime-server-check
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --all-targets -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-rollback
+	node qualification/runtime-system.mjs
 	cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-rollback --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-rollback|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
 
@@ -384,3 +387,16 @@ qualify-release: qualification-tooling-check
 
 release-publication-admission: qualification-tooling-check
 	node scripts/release-publication-admission.mjs
+
+.PHONY: qualify-auth-runtime
+qualify-auth-runtime: qualification-tooling-check runtime-server-check
+	POCKET_IC_BIN="$(CURDIR)/.tools/ic-testkit-server/16.1.0-x86_64-linux/pocket-ic" node qualification/auth-runtime/run.mjs
+
+.PHONY: qualify-http-request
+qualify-http-request: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features http-request --all-targets -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features http-request --test http_request -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features http-request --test http_request
+	cargo check --offline --locked -p ic-platform-protocol --no-default-features --features http-request --target wasm32-unknown-unknown
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features http-request --no-deps
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features http-request --forbid-pattern '^(?!ic-platform-protocol$$)'

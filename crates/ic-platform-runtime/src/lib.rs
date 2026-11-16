@@ -3,8 +3,8 @@
 //! The opt-in call slice prepares inert requests and owns response observations.
 //! The wasm32 IC0 feature adds one-way submission and experimental awaited
 //! transport with callback custody and an experimental method-attached executor.
-//! Entrypoint and installed rollback qualification remain pending; this is not
-//! a complete canister runtime.
+//! Explicit entrypoints and selected installed rollback cases are qualified;
+//! broader executor contexts remain experimental. This is not a complete runtime.
 
 #[cfg(feature = "call-ic0")]
 const _: () = candidate_runtime_guard::assert_runtime_version(env!("CARGO_PKG_VERSION"));
@@ -22,4 +22,4 @@ pub mod system;
 pub mod entrypoints;
 
 #[cfg(feature = "entrypoint-macros")]
-pub use candidate_macros::update;
+pub use candidate_macros::{init, post_upgrade, pre_upgrade, query, update};

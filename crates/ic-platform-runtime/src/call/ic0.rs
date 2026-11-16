@@ -32,6 +32,111 @@ unsafe extern "C" {
     fn in_replicated_execution() -> u32;
     fn msg_reply_data_append(src: u32, size: u32);
     fn msg_reply();
+    fn msg_caller_size() -> u32;
+    fn msg_caller_copy(dst: u32, offset: u32, size: u32);
+    fn canister_self_size() -> u32;
+    fn canister_self_copy(dst: u32, offset: u32, size: u32);
+    fn time() -> u64;
+    fn is_controller(src: u32, size: u32) -> u32;
+    fn certified_data_set(src: u32, size: u32);
+    fn data_certificate_present() -> u32;
+    fn data_certificate_size() -> u32;
+    fn data_certificate_copy(dst: u32, offset: u32, size: u32);
+    fn trap(src: u32, size: u32) -> !;
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC identity copies use initialized, size-checked Principal storage"
+)]
+pub(crate) fn principal(caller: bool) -> candidate_types::Principal {
+    let mut bytes = [0_u8; 29];
+    // SAFETY: Both IC sizes are checked before copying into initialized memory.
+    // No user code runs between observation and synchronous copy.
+    let size = unsafe {
+        if caller {
+            msg_caller_size()
+        } else {
+            canister_self_size()
+        }
+    };
+    assert!(size <= 29, "IC returned an oversized Principal");
+    if size != 0 {
+        unsafe {
+            if caller {
+                msg_caller_copy(bytes.as_mut_ptr() as u32, 0, size);
+            } else {
+                canister_self_copy(bytes.as_mut_ptr() as u32, 0, size);
+            }
+        }
+    }
+    candidate_types::Principal::from_slice(&bytes[..size as usize])
+}
+
+#[expect(unsafe_code, reason = "IC time observation takes no pointers")]
+pub(crate) fn system_time() -> u64 {
+    // SAFETY: Scalar-only system observation; context violations trap.
+    unsafe { time() }
+}
+
+#[expect(unsafe_code, reason = "IC argument-size observation takes no pointers")]
+pub(crate) fn argument_size() -> usize {
+    // SAFETY: Scalar-only observation; context violations trap.
+    unsafe { msg_arg_data_size() as usize }
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC controller observation synchronously reads a valid Principal"
+)]
+pub(crate) fn controller(principal: &candidate_types::Principal) -> bool {
+    // SAFETY: Valid bounded Principal bytes stay readable throughout the call.
+    unsafe { is_controller(principal.as_slice().as_ptr() as u32, principal.len() as u32) != 0 }
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC certified-data publication synchronously reads a fixed-size root"
+)]
+pub(crate) fn certified_root(root: &[u8; 32]) {
+    // SAFETY: Exactly 32 initialized readable bytes; no pointer is retained.
+    unsafe {
+        certified_data_set(root.as_ptr() as u32, 32);
+    }
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC certificate reads use initialized bounded owned memory"
+)]
+pub(crate) fn certificate(
+    maximum: usize,
+) -> Result<Option<Vec<u8>>, crate::system::CertificateTooLarge> {
+    // SAFETY: Check presence before size, and the limit before allocating/copying.
+    // The destination remains writable through the synchronous copy.
+    unsafe {
+        if data_certificate_present() == 0 {
+            return Ok(None);
+        }
+        let actual = data_certificate_size() as usize;
+        if actual > maximum {
+            return Err(crate::system::CertificateTooLarge { actual, maximum });
+        }
+        let mut bytes = vec![0; actual];
+        if actual != 0 {
+            data_certificate_copy(bytes.as_mut_ptr() as u32, 0, actual as u32);
+        }
+        Ok(Some(bytes))
+    }
+}
+
+#[expect(
+    unsafe_code,
+    reason = "IC trap synchronously reads the diagnostic and never returns"
+)]
+pub(crate) fn trap_message(message: &str) -> ! {
+    // SAFETY: wasm32 slice address/length fit u32 and remain readable until trap.
+    unsafe { trap(message.as_ptr() as u32, message.len() as u32) }
 }
 
 #[expect(

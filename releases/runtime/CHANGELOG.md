@@ -4,6 +4,20 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.10] - Unreleased
+
+### ✨ Added
+
+- Restore caller/canister identity, IC time, controller checks, argument length,
+  bounded query certificate retrieval and exact 32-byte certified-data publication.
+- Add synchronous queries and init/pre-upgrade/post-upgrade exports with explicit
+  guard/decode/error policies. Add synchronous and async automatic updates with
+  explicit encoding through the existing executor and single reply authority.
+- Qualify system observations, authenticated certified roots, encoder-trap rollback,
+  synchronous exclusion and lifecycle effects in the installed Runtime fixture.
+  The pinned actual Auth fixture passes all five installed tests; legacy Platform
+  crypto remains a supplier. No production migration is claimed.
+
 ## [0.23.9] - 2026-11-16
 
 ### 📦 Publication

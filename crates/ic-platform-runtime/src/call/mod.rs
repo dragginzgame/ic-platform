@@ -19,6 +19,11 @@ pub(crate) use ic0::read_args;
 pub(crate) use ic0::reply;
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub(crate) use ic0::{
+    argument_size, certificate, certified_root, controller, principal, system_time, trap_message,
+};
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 mod submission;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use submission::{SubmitError, Submitted};

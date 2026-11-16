@@ -5,6 +5,9 @@
 mod native;
 
 #[cfg(not(target_family = "wasm"))]
+mod identity;
+
+#[cfg(not(target_family = "wasm"))]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     native::run()
 }

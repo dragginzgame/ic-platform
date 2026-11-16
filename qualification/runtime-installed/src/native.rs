@@ -31,11 +31,16 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
             server_hard_ttl: Some(Duration::from_secs(120)),
             server_idle_ttl: None,
             server_output_files: None,
-        }.build_instance(PocketIcBuilder::new().with_application_subnet().with_application_subnet()).await?;
+        }.build_instance(PocketIcBuilder::new().with_nns_subnet().with_application_subnet().with_application_subnet()).await?;
         let pic = owned.instance();
         let canister = pic.create_canister().await;
         pic.add_cycles(canister, 1_u128 << 80).await;
         pic.install_canister(canister, wasm.clone(), vec![], None).await;
+        crate::identity::verify(pic, canister, [7; 32]).await;
+        assert_eq!(pic.update_call(canister, Principal::anonymous(), "system_set", vec![11; 32]).await.unwrap(), vec![11; 32]);
+        assert!(pic.update_call(canister, Principal::anonymous(), "system_encode_refusal", vec![]).await.is_err());
+        crate::identity::verify(pic, canister, [11; 32]).await;
+        assert_eq!(pic.update_call(canister, Principal::anonymous(), "system_async", vec![]).await.unwrap(), vec![42]);
         // PocketIC impersonates this explicit sender; no agent identity crosses
         // into the candidate's Wasm dependency graph.
         let caller = canister;
@@ -154,6 +159,7 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(pic.canister_status(canister, None).await.unwrap().status, CanisterStatusType::Stopped);
         pic.upgrade_canister(canister, wasm.clone(), vec![], None).await.unwrap();
         pic.start_canister(canister, None).await.unwrap();
+        crate::identity::verify(pic, canister, [9; 32]).await;
         assert_eq!(pic.update_call(canister, caller, "probe", vec![0]).await.unwrap(), vec![0]);
         assert_eq!(pic.update_call(canister, caller, "observe", vec![]).await.unwrap(), vec![0, 0, 0],
             "heap-only task observations must not survive this fixture's upgrade");
