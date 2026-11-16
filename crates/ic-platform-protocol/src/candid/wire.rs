@@ -1,5 +1,5 @@
 use super::{Error, Limits};
-use ic_platform_types::Principal;
+use candidate_types::Principal;
 use std::mem::size_of;
 
 type Result<T> = std::result::Result<T, Error>;

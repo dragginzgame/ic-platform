@@ -93,6 +93,7 @@ struct InspectDrop {
     observed: Rc<RefCell<Option<TaskHandle>>>,
     dropped: Rc<Cell<bool>>,
     stop_in_poll: bool,
+    complete: Rc<Cell<bool>>,
 }
 impl Future for InspectDrop {
     type Output = ();
@@ -102,7 +103,11 @@ impl Future for InspectDrop {
             terminate(current().unwrap());
             assert!(!self.dropped.get());
         }
-        Poll::Pending
+        if self.complete.get() {
+            Poll::Ready(())
+        } else {
+            Poll::Pending
+        }
     }
 }
 impl Drop for InspectDrop {
@@ -117,6 +122,7 @@ impl Drop for InspectDrop {
         if let Some(handle) = self.observed.borrow().as_ref() {
             assert_eq!(handle.state(), TaskState::Running);
         }
+        assert_eq!(super::claim_reply(), Err(super::ReplyError::NoActiveTask));
         self.dropped.set(true);
     }
 }
@@ -131,6 +137,7 @@ fn cleanup_destroys_outside_borrows_before_publishing_termination() {
         observed: Rc::clone(&observed),
         dropped: Rc::clone(&dropped),
         stop_in_poll: false,
+        complete: Rc::new(Cell::new(false)),
     }))
     .unwrap();
     *observed.borrow_mut() = Some(handle.clone());
@@ -149,6 +156,7 @@ fn reentrant_termination_defers_destruction_until_poll_returns() {
         observed: Rc::new(RefCell::new(None)),
         dropped: Rc::clone(&dropped),
         stop_in_poll: true,
+        complete: Rc::new(Cell::new(false)),
     }))
     .unwrap();
     assert!(dropped.get());
@@ -247,4 +255,65 @@ fn capacity_refusal_destroys_outside_borrow_without_entering_a_task() {
     assert_eq!(drops.get(), 1);
     assert!(current().is_none());
     EXECUTOR.with(|executor| executor.borrow_mut().last = previous);
+}
+
+#[test]
+fn completion_destroys_before_publishing_and_revokes_reply_authority() {
+    let token = Rc::new(Cell::new(None));
+    let observed = Rc::new(RefCell::new(None));
+    let dropped = Rc::new(Cell::new(false));
+    let complete = Rc::new(Cell::new(false));
+    let handle = start(Box::pin(InspectDrop {
+        token: Rc::clone(&token),
+        observed: Rc::clone(&observed),
+        dropped: Rc::clone(&dropped),
+        stop_in_poll: false,
+        complete: Rc::clone(&complete),
+    }))
+    .unwrap();
+    *observed.borrow_mut() = Some(handle.clone());
+    assert!(!dropped.get());
+    complete.set(true);
+    // Model the owning callback making its suspended task ready.
+    EXECUTOR.with(|executor| {
+        executor.borrow().tasks[&token.get().unwrap().0]
+            .signal
+            .ready
+            .store(true, std::sync::atomic::Ordering::SeqCst)
+    });
+    drive(token.get().unwrap());
+    assert!(dropped.get());
+    assert_eq!(handle.state(), TaskState::Completed);
+    assert!(current().is_none());
+    terminate(token.get().unwrap());
+    assert_eq!(handle.state(), TaskState::Completed);
+}
+
+#[test]
+fn reentrant_cleanup_restores_enclosing_task_and_reply_authority() {
+    let token = Rc::new(Cell::new(None));
+    let observed = Rc::new(RefCell::new(None));
+    let dropped = Rc::new(Cell::new(false));
+    let suspended = start(Box::pin(InspectDrop {
+        token: Rc::clone(&token),
+        observed: Rc::clone(&observed),
+        dropped: Rc::clone(&dropped),
+        stop_in_poll: false,
+        complete: Rc::new(Cell::new(false)),
+    }))
+    .unwrap();
+    *observed.borrow_mut() = Some(suspended.clone());
+    let enclosing = start(Box::pin(async move {
+        let owner = current().unwrap();
+        assert!(Some(owner) != token.get());
+        terminate(token.get().unwrap());
+        assert!(dropped.get());
+        assert!(current() == Some(owner));
+        assert_eq!(super::claim_reply(), Ok(()));
+        assert_eq!(super::claim_reply(), Err(super::ReplyError::AlreadyReplied));
+    }))
+    .unwrap();
+    assert_eq!(suspended.state(), TaskState::TerminatedByCleanup);
+    assert_eq!(enclosing.state(), TaskState::Completed);
+    assert!(current().is_none());
 }

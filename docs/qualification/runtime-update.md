@@ -22,6 +22,10 @@ an update export. Correct export binding, single reply ownership, unsupported
 async/query modes and installed rollback remain outstanding generator/qualification
 obligations. A completed task does not establish that the caller received a reply.
 
+The 0.23.7 [installed missing-reply case](runtime-installed.md#manual-reply-omission-0237)
+now observes this distinction directly: `CanisterDidNotReply` at ingress,
+`Completed` locally, released handler ownership and a committed remote effect.
+
 ## Executable evidence
 
 The private `runtime-entrypoints` binary uses the public API. Its host accepts

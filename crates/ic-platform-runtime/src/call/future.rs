@@ -30,7 +30,9 @@ thread_local! {
 /// capture data/refunds and wake outside internal borrows. Cleanup retires the
 /// registration and local wake interest without fabricating a remote rejection.
 /// A cleaned-up future never yields a completion. If first polled by the update
-/// executor, its callback resumes that task and cleanup terminates that task.
+/// executor, its callback resumes that task and successful cleanup terminates it.
+/// If cleanup itself traps, the IC rolls back its changes; task resources can
+/// remain retained. User destructors should be small and nontrapping.
 /// Before upgrading, stop the canister and wait until its IC status is Stopped
 /// so all outstanding callbacks have drained. Then upgrade and restart it.
 /// Callback registrations and suspended futures are heap-local, not upgrade

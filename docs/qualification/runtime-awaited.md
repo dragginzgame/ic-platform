@@ -30,6 +30,16 @@ incremental test counts and artifact hashes below remain historical observations
 Current awaited artifact SHA-256:
 `014a33b106ba0c642fdbb85ce9596a90c63eca4a8918900fa9e2303a7e4d3fcc`.
 
+## 0.23.7 native executor checks
+
+The existing destructor fixture now also checks that successful completion is
+not published until destruction returns, and neither completion nor cleanup
+destruction can claim reply authority. Reentrant cleanup of a different suspended
+task restores the enclosing task context and its own single reply authority.
+`make qualify-runtime-call` passes 20 native tests, strict Clippy/Rustdoc, Wasm
+test compilation and dependency checks. These checks exercise the actual executor;
+they do not simulate IC rollback or close the failed-cleanup reclamation gate.
+
 ## Identity and borrow discipline
 
 A private safe registry allocates nonzero u32 handles monotonically. Removed

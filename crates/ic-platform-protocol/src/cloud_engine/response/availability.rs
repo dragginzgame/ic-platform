@@ -2,7 +2,7 @@
 
 use super::marketplace::NodeType;
 use crate::candid::{self, Decode, Error, Limits, Reader, Schema};
-use ic_platform_types::Principal;
+use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {

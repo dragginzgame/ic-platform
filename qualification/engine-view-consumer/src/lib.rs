@@ -2,8 +2,8 @@
 
 //! Independent compile/execution fixture for the public response projection.
 
+use candidate_types::Principal;
 use ic_platform_protocol::cloud_engine::EngineView;
-use ic_platform_types::Principal;
 
 /// Exercise a public type crossing without byte conversion or a wrapper identity.
 #[must_use]

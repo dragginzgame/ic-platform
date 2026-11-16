@@ -1,9 +1,9 @@
 use super::selected_subnet;
+use candidate_types::Principal;
 use ic_platform_protocol::{
     candid::Limits,
     cloud_engine::{EngineView, decode_get_engine_views_response},
 };
-use ic_platform_types::Principal;
 
 #[test]
 fn public_projection_preserves_principal_identity_and_serde_shape() {
@@ -26,6 +26,13 @@ fn public_projection_preserves_principal_identity_and_serde_shape() {
     let view = views.pop().unwrap();
     let principal: Principal = selected_subnet(&view).unwrap();
     assert_eq!(principal, Principal::anonymous());
+    // Cross Protocol -> Types -> Runtime directly, with no byte conversion.
+    let call = candidate_runtime::call::Call::new(
+        principal,
+        "cohort",
+        candidate_runtime::call::Wait::Unbounded,
+    );
+    assert_eq!(call.target(), principal);
     let expected = serde_json::json!({
         "id": "x", "subnet_id": "2vxsx-fae", "engine_operator_id": null,
         "subnet": null, "deleted_at": null, "node_ids": []

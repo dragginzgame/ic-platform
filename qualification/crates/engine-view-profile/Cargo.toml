@@ -7,6 +7,7 @@ rust-version.workspace = true
 license-file.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+candidate-types.workspace = true
 dhat.workspace = true
 ic-platform.workspace = true
 ic-platform-protocol.workspace = true

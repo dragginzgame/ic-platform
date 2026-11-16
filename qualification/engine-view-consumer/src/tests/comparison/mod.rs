@@ -118,11 +118,25 @@ fn independently_declared_records_preserve_all_selected_values() {
                     assert_eq!(subnet.maximum_state_size, maximum_state_size);
                     assert!(subnet.halted);
                     assert_eq!(
-                        subnet.node_ids,
-                        principals.into_iter().rev().collect::<Vec<_>>()
+                        subnet
+                            .node_ids
+                            .iter()
+                            .map(|p| p.as_slice())
+                            .collect::<Vec<_>>(),
+                        principals
+                            .iter()
+                            .rev()
+                            .map(|p| p.as_slice())
+                            .collect::<Vec<_>>()
                     );
                 }
-                assert_eq!(view.node_ids, principals);
+                assert_eq!(
+                    view.node_ids
+                        .iter()
+                        .map(|p| p.as_slice())
+                        .collect::<Vec<_>>(),
+                    principals.iter().map(|p| p.as_slice()).collect::<Vec<_>>()
+                );
             }
         }
     }

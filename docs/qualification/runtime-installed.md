@@ -1,4 +1,4 @@
-# Installed update and callback rollback — Runtime 0.23.5
+# Installed update and callback rollback — Runtime 0.23.7
 
 This probe runs the candidate's update adapters in PocketIC 16.1.0 on
 application subnets. It covers immediate update rollback and two resumed-handler
@@ -111,6 +111,26 @@ The peer still reports `[5]`, and a subsequent independent call succeeds. This
 checks rollback of failed cleanup, not reclamation of the restored task or
 callback registration. A later successful task does not settle that retained
 local state or authorize retrying the failed operation.
+
+### Handler ownership after cleanup failure (0.23.7)
+
+Each of the eight awaited handlers owns one strong `Rc<()>` marker across its
+suspension. The fixture retains only a weak reference in a bounded observation
+list; neither that list nor the public task handle owns the marker. After every
+ingress, `observe_custody` reads all marker strong counts. Completion and
+successful cleanup leave zero; the deliberately trapping cleanup leaves one,
+which remains one across subsequent successful handlers. This directly observes
+retained handler ownership, beyond the rolled-back destructor counter. Weak
+records retain their control blocks, so this is not an allocator-byte measurement
+or proof about the private callback registry.
+
+The [IC cleanup contract](https://docs.internetcomputer.org/references/ic-interface-spec/canister-interface/)
+rolls back a trapping cleanup and takes no further action for that call. Runtime
+cannot commit retirement inside that failed execution. Keep user destructors
+small and nontrapping; application reconciliation must not infer remote failure
+or retry permission from a local trap. No automatic retry, deferred destructor
+queue or callback-recovery subsystem is introduced. Private registration
+accounting and the broader resource-retention assessment remain separate gates.
 
 ### Committed task observations
 
@@ -379,9 +399,10 @@ accepted cycles plus refund `Some(12)`. While retaining that completion, it call
 still be 12. The native driver independently checks all three returned u128s:
 accepted amount 5, partial refund 12 and rollback refund 29.
 
-`wat = 1.254.0` is pinned only in the native qualification driver, matching the
-version family used by PocketIC 16.1.0's own test dependency. Cargo's qualification
-lock binds it and its parser dependencies. The caller's production graph still
+`wat = 1.263.0` is selected only in the native qualification driver. This is
+a local exact pin, not a PocketIC constraint: PocketIC 16.1.0 lists WAT only as
+its own development dependency, which does not constrain this consumer. Cargo's
+qualification lock binds WAT and its parser dependencies. The caller's production graph still
 excludes these tools; no cycle-acceptance API or new Rust unsafe boundary was
 added. The fixture's IC0 signature was checked against published `ic0` 1.2.0's
 foreign declaration. That crate is not added as a dependency.
@@ -420,7 +441,7 @@ host calls into function-table entries. The drop case includes abandoned and awa
 cleanup-failure recovery is inferred.
 
 Local Linux x86-64 validation passed seven immediate updates, eight awaited handlers
-and sixteen observation updates, plus three invocations of the two-call refund handler and two
+and sixteen observation updates plus eight weak-ownership observations, plus three invocations of the two-call refund handler and two
 post-refund observations, and a resource handler checking four refusals plus
 a successful read and independent peer observation. Four notification handlers,
 four peer reads and a final task-state observation also passed, followed by
@@ -435,11 +456,51 @@ Testkit 0.106.0 and its admitted PocketIC 16.1.0 server. Strict host/fixture Cli
 and the Wasm graph check passed. Hosted/macOS execution remains pending.
 
 Installed artifact SHA-256:
-`441f618962acc7b7681857aa81fea7c04da8c1a2b38779f167a94a75970e770e`.
+`248f58dc52781ed261067e12a17a140d6df55469daeb426fc93530dcbf025cc8`.
+
+## Manual reply omission (0.23.7)
+
+After the final drained upgrade and successful fresh call, mode 6 of the existing
+awaited handler calls the peer, consumes its response and returns without replying.
+The destructor skips its reply-attempt assertion for this case so it cannot supply
+an accidental reply; ownership and nested-entry checks remain enabled. PocketIC
+reports `CanisterDidNotReply`, while counters become `[2, 2, 2]`, both retained
+handles report `Completed`, and both weak marker strong counts are zero. The
+peer read returns 17, confirming its effect committed. Missing an application
+reply does not turn normal local completion into cleanup termination or undo the
+remote operation. Runtime supplies no automatic response or retry.
+
+The expanded installed corpus, strict host/Wasm Clippy and dependency graph checks
+passed locally. This closes the missing-reply lifecycle case, not the remaining
+resource-accounting or production-adoption gates below.
+
+## Consumer dispatch observation (0.23.7)
+
+The same bounded awaited fixture now keeps a consumer-owned record per handler:
+`Dispatched` (wire byte 0) before the first await, then `ReplyObserved` (byte 1)
+after receiving the peer response. The native driver reads every prior record
+after each ingress, alongside the public task handles and weak ownership probes.
+No record is updated by cleanup or inferred from a task handle.
+
+| Path | Committed consumer record | Task handle |
+| --- | --- | --- |
+| Successful reply | ReplyObserved | Completed |
+| Callback trap with successful cleanup | Dispatched | TerminatedByCleanup |
+| Callback and cleanup both trap | Dispatched | Running |
+| Handler omits its own reply after observing the peer | ReplyObserved | Completed |
+
+The peer effect commits in every row. A consumer therefore cannot equate task
+termination with remote rollback, or local completion with delivery of its own
+reply. Repeated reads after later successful calls preserve those distinctions.
+This minimal probe tests transaction boundaries of an in-heap dispatch record;
+it introduces no Scheduling dependency, timer, retry decision, storage allocation
+or persistence across upgrade. Actual timer-dispatch integration remains separate.
+The expanded installed corpus, host/Wasm Clippy and dependency checks passed.
 
 ## Remaining gates
 
-Retained custody/reclamation after cleanup failure, dispatch-record integration,
+Handler retention after cleanup failure is now directly observed. Its broader
+resource-retention assessment, actual timer-dispatch integration,
 private callback reclamation accounting and broader late/deadline cases,
 application state/version-transition migration and the remaining context-isolation
 cases still need evidence. Live-call upgrade reconstruction is outside the

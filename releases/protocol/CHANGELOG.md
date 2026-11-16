@@ -3,6 +3,23 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.2.0] - 2026-11-16 (GitHub source snapshot)
+
+### ⚠️ Breaking changes
+
+- Select local Types 0.21.0 instead of registry Types 0.20.4. Protocol's public
+  Principal-bearing records and arguments now share Runtime's canonical type.
+  Consumers must adopt the same local cohort; matching bytes do not make the
+  previous registry type interchangeable. Query's earlier adoption evidence
+  does not qualify this new boundary.
+
+### 🧪 Tests
+
+- Exercise direct Protocol-to-Types-to-Runtime use without conversion. Keep
+  native registry oracles separate and compare their bytes/JSON explicitly.
+- Retain existing wire, Serde, resource, allocation and Wasm admission checks;
+  no encoding policy, decoder limits or Runtime dependency is added to Protocol.
+
 ## [0.1.1] - 2026-11-16 (GitHub source snapshot)
 
 - Correct Protocol snapshot versioning after multiple GitHub deliveries reused

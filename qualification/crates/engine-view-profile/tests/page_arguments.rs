@@ -3,10 +3,10 @@
 //! Isolated allocation check for complete-output admission.
 #![cfg(all(feature = "marketplace", not(target_family = "wasm")))]
 
+use candidate_types::Principal;
 use ic_platform_protocol::cloud_engine::{
     EncodeError, ListAvailableNodesPageArgs, encode_list_available_nodes_page_args as encode,
 };
-use ic_platform_types::Principal;
 
 #[global_allocator]
 static ALLOCATOR: dhat::Alloc = dhat::Alloc;

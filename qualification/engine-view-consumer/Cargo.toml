@@ -11,6 +11,7 @@ toko-tooling.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 ic-platform.workspace = true
+ic-platform-types.workspace = true
 
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
@@ -20,10 +21,11 @@ marketplace = ["ic-platform-protocol/cloud-engine-marketplace"]
 registry-settings = ["ic-platform-protocol/registry-settings", "ic-platform/nns-registry-types"]
 
 [dependencies]
+candidate-types.workspace = true
 ic-platform-protocol.workspace = true
-ic-platform-types.workspace = true
 
 [dev-dependencies]
+candidate-runtime = { workspace = true, features = ["call"] }
 serde_json.workspace = true
 
 [lints]

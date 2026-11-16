@@ -4,6 +4,31 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.7] - 2026-11-16 (GitHub source snapshot)
+
+### 🧪 Tests
+
+- Extend the existing executor destructor fixture to check completion becomes
+  observable only after destruction returns, and reply authority is unavailable
+  during both completion and cleanup destruction. Later cleanup cannot rewrite
+  an already completed handle. These native checks do not simulate IC rollback.
+- Check reentrant cleanup of another suspended task restores the enclosing
+  task context and preserves its single reply authority.
+- Add bounded weak-reference observations to the installed corpus: successful
+  completion/cleanup release handler ownership; a trapping cleanup retains it
+  across later successful calls. Document the IC rollback boundary without
+  adding automatic recovery or claiming private callback reclamation.
+- Qualify an awaited manual handler returning without a reply: ingress reports
+  `DidNotReply`, the task completes and releases handler ownership, and the
+  remote effect remains committed. No automatic reply or retry is added.
+- Compare a bounded consumer dispatch record with task lifecycle and ownership
+  observations across successful callbacks, callback/cleanup traps and omitted
+  replies. Keep actual timer integration and retry decisions outside the probe.
+- Update the native qualification WAT compiler from 1.254.0 to 1.263.0 and
+  its matching parser/encoder dependencies. PocketIC does not constrain this
+  consumer selection; production graphs remain unchanged.
+- Advance the coordinated Runtime group after the 0.23.6 GitHub snapshot.
+
 ## [0.23.6] - 2026-11-16 (GitHub source snapshot)
 
 ### 📚 Documentation

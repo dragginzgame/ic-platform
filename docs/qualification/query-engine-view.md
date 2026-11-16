@@ -148,3 +148,11 @@ experiment-only status. It remains uncommitted and unpushed in Query. No package
 version or release ledger was changed, no registry publication occurred, and no
 mainnet request or deployment was made. Consumer delivery and the remaining
 performance/acceptance work are still separate.
+
+## Protocol 0.2.0 follow-up
+
+The application evidence above used Protocol 0.1.x and registry Types 0.20.4.
+Protocol 0.2.0 now exposes local Types 0.21.0, a deliberate Rust type-identity
+break. The [local cohort qualification](types-consumer.md#protocol-cohort-020)
+does not requalify Query's existing patch: Query and its identity-bearing callers
+must move together before adopting this increment. This task leaves Query unchanged.

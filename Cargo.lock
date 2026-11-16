@@ -77,7 +77,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.6"
+version = "0.23.7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -87,9 +87,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
- "ic-platform-types 0.20.4",
+ "ic-platform-types",
  "num-bigint",
  "serde",
  "toko-tooling",
@@ -97,32 +97,19 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.6"
+version = "0.23.7"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
- "ic-platform-types 0.21.0",
+ "ic-platform-types",
  "toko-tooling",
 ]
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.6"
+version = "0.23.7"
 dependencies = [
  "toko-tooling",
-]
-
-[[package]]
-name = "ic-platform-types"
-version = "0.20.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8df2753db752bd0c29fa87353b98613465a5f0c5269b6fb8dd0e45ea5c12a22"
-dependencies = [
- "crc32fast",
- "data-encoding",
- "serde",
- "serde_bytes",
- "thiserror",
 ]
 
 [[package]]

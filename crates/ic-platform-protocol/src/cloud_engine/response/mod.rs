@@ -1,7 +1,7 @@
 //! Decode-only selected response records.
 
 use crate::candid::{self, Decode, Error, Limits, Reader, Schema};
-use ic_platform_types::Principal;
+use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
 // One declaration emits fields, schema and reader dispatch. Optional policy is

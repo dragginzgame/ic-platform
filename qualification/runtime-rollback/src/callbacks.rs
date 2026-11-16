@@ -9,6 +9,7 @@ use std::{
     cell::{Cell, RefCell},
     future::{Future, poll_fn},
     pin::Pin,
+    rc::{Rc, Weak},
     sync::{
         Arc,
         atomic::{AtomicBool, Ordering},
@@ -19,6 +20,8 @@ use std::{
 thread_local! {
     static STALE: RefCell<Option<Waker>> = const { RefCell::new(None) };
     static CAPTURE_POLLS: Cell<u8> = const { Cell::new(0) };
+    static DISPATCH: RefCell<Vec<bool>> = const { RefCell::new(Vec::new()) };
+    static CUSTODY: RefCell<Vec<Weak<()>>> = const { RefCell::new(Vec::new()) };
     static HANDLES: RefCell<Vec<TaskHandle>> = const { RefCell::new(Vec::new()) };
     static STARTED: Cell<u8> = const { Cell::new(0) };
     static COMPLETED: Cell<u8> = const { Cell::new(0) };
@@ -30,7 +33,7 @@ fn admit() -> Result<(), u8> {
 }
 fn decode(bytes: &[u8]) -> Result<(u8, Principal), u8> {
     let (&mode, target) = bytes.split_first().ok_or(1)?;
-    if mode > 5 || target.is_empty() {
+    if mode > 6 || target.is_empty() {
         return Err(2);
     }
     Ok((mode, Principal::try_from_slice(target).map_err(|_| 3)?))
@@ -46,11 +49,14 @@ fn fail(error: UpdateError<u8, u8>) -> ! {
     panic!("admission refused: {error:?}")
 }
 
-struct ObserveDrop(ReplyError, bool);
+struct ObserveDrop(Option<ReplyError>, bool, Rc<()>);
 impl Drop for ObserveDrop {
     fn drop(&mut self) {
+        assert_eq!(Rc::strong_count(&self.2), 1);
         // On cleanup the restored suspended future cannot claim reply authority.
-        assert_eq!(system::reply(b"destructor"), Err(self.0));
+        if let Some(expected) = self.0 {
+            assert_eq!(system::reply(b"destructor"), Err(expected));
+        }
         // Re-enter the real adapter from user destruction. It must refuse
         // before invoking admission callbacks, without a RefCell borrow trap.
         crate::exports::assert_entry_refusal(EntryError::NestedEntry);
@@ -78,7 +84,22 @@ pub extern "C" fn tracked_await_probe() {
 }
 
 async fn await_probe((mode, target): (u8, Principal)) {
-    let mut observer = ObserveDrop(ReplyError::NoActiveTask, mode == 3);
+    // Consumer-owned record: false = dispatched; true = reply observed.
+    // The prefix commits at suspension; a trapping callback rolls its update back.
+    let dispatch = DISPATCH.with(|records| {
+        let mut records = records.borrow_mut();
+        assert!(records.len() < 8, "bounded qualification corpus");
+        let id = records.len();
+        records.push(false);
+        id
+    });
+    let custody = Rc::new(());
+    CUSTODY.with(|records| {
+        let mut records = records.borrow_mut();
+        assert!(records.len() < 8, "bounded qualification corpus");
+        records.push(Rc::downgrade(&custody));
+    });
+    let mut observer = ObserveDrop(Some(ReplyError::NoActiveTask), mode == 3, custody);
     STARTED.with(|value| value.set(value.get() + 1));
     if mode == 4 {
         // An unpolled call must not increment the peer. A first-polled call
@@ -128,7 +149,7 @@ async fn await_probe((mode, target): (u8, Principal)) {
         if !pending {
             // A failed ordering check must not look like the intentional trap.
             system::reply(b"unexpected-callback-order").unwrap();
-            observer.0 = ReplyError::AlreadyReplied;
+            observer.0 = Some(ReplyError::AlreadyReplied);
             return;
         }
     }
@@ -136,10 +157,16 @@ async fn await_probe((mode, target): (u8, Principal)) {
         panic!("peer must reply")
     };
     assert_eq!(bytes.len(), 1);
+    DISPATCH.with(|records| records.borrow_mut()[dispatch] = true);
     COMPLETED.with(|value| value.set(value.get() + 1));
     assert!(!matches!(mode, 1 | 3 | 5), "trap-after-await");
+    if mode == 6 {
+        // Exercise missing application reply without the destructor supplying one.
+        observer.0 = None;
+        return;
+    }
     system::reply(bytes).unwrap();
-    observer.0 = ReplyError::AlreadyReplied;
+    observer.0 = Some(ReplyError::AlreadyReplied);
     assert_ne!(mode, 2, "trap-after-callback-reply");
     drop(orphan);
 }
@@ -160,6 +187,28 @@ async fn observe((): ()) {
         }));
     });
     system::reply(&observation).unwrap();
+}
+
+#[candidate_runtime::update(runtime = candidate_runtime, name = "observe_dispatch", guard = admit,
+    decode = empty, max_bytes = 0, on_error = fail, manual_reply)]
+async fn observe_dispatch((): ()) {
+    let records: Vec<u8> =
+        DISPATCH.with(|records| records.borrow().iter().copied().map(u8::from).collect());
+    system::reply(&records).unwrap();
+}
+
+// Weak records cannot themselves retain the handler-owned allocation.
+#[candidate_runtime::update(runtime = candidate_runtime, name = "observe_custody", guard = admit,
+    decode = empty, max_bytes = 0, on_error = fail, manual_reply)]
+async fn observe_custody((): ()) {
+    let counts: Vec<u8> = CUSTODY.with(|records| {
+        records
+            .borrow()
+            .iter()
+            .map(|record| u8::try_from(record.strong_count()).unwrap())
+            .collect()
+    });
+    system::reply(&counts).unwrap();
 }
 
 // Keep the first completion alive across a different callback context. Neither

@@ -43,7 +43,7 @@ actual working tree after authorized local application; consumer delivery remain
 pending. A separate native heap
 profiler compares allocation against the published decoder; see its
 [criteria and results](docs/qualification/engine-view-heap.md).
-Protocol is now the 0.1.1 development candidate; private qualification packages
+Protocol is now the 0.2.0 development candidate; private qualification packages
 remain at 0.1.0. Changed product crates advance after each GitHub source snapshot,
 independently of registry publication. Publication remains disabled.
 
@@ -54,10 +54,12 @@ source reuse and independent fixtures; [Account qualification](docs/qualificatio
 covers effective identity and explicit Serde presence. Opt-in self-authentication
 and [independent native/Wasm consumer checks](docs/qualification/types-consumer.md)
 are implemented. Production consumer migration remains pending.
-Protocol still uses registry Types 0.20.4 until the replacement
-cohort is qualified; these are distinct Rust type identities.
+Protocol 0.2.0 now uses local Types 0.21.0, matching Runtime. Its public Principal
+identity changes from the registry type; consumers must migrate as one cohort.
+Registry Types remains only in qualification oracles. See the
+[cohort boundary](docs/qualification/types-consumer.md#protocol-cohort-020).
 
-Runtime `0.23.6` is the current local development increment after the `0.23.5`
+Runtime `0.23.7` is the current local development increment after the `0.23.6`
 GitHub source snapshot, with registry publication disabled. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
@@ -99,11 +101,11 @@ that admission with one executor-owned handler. `system::reply` supplies an
 explicit raw reply with one ordinary reply authority per task. Broader export
 modes, automatic encoding/reply ownership and installed execution remain pending.
 The opt-in `entrypoint-macros` feature now exposes an explicit manual-reply
-`update` attribute from `ic-platform-macros` 0.23.6. Its
+`update` attribute from `ic-platform-macros` 0.23.7. Its
 [generated exports](docs/qualification/runtime-exports.md) run in a separate Wasm
 consumer, including rejection and compile-fail checks. Queries and automatic
 reply generation remain unsupported in this initial macro slice.
-The separate `ic-platform-runtime-guard` shares Runtime's 0.23.6 version.
+The separate `ic-platform-runtime-guard` shares Runtime's 0.23.7 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 

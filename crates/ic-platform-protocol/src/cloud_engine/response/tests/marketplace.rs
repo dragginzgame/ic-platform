@@ -53,7 +53,7 @@ fn six_classes_large_naturals_and_presence_are_preserved() {
                 assert_eq!(row.dc.as_deref(), present.then_some(""));
                 assert_eq!(
                     row.provider,
-                    present.then_some(ic_platform_types::Principal::anonymous())
+                    present.then_some(candidate_types::Principal::anonymous())
                 );
                 assert_eq!(
                     row.price.gross_cycles.0.to_str_radix(10),

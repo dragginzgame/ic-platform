@@ -41,8 +41,8 @@ The graph target checks normal/build closures with exactly one Types identity,
 no hash supplier in the default selection, and one SHA-2 supplier when enabled.
 Override `GRAPH_TARGET` for a native triple. CI runs these on each supported host.
 
-Protocol still selects registry Types. This fixture qualifies an independent
-public consumer, not a migration of Query, Protocol or a future Runtime cohort.
+This initial fixture qualified an independent public consumer. Protocol now
+joins the local cohort as described below; production Query migration is separate.
 Those actual crossings still need coordinated source selection and qualification.
 Publication remains disabled and no sibling is modified.
 
@@ -61,3 +61,28 @@ standalone Wasm corpora execute successfully with these artifact hashes:
 
 CI includes these checks on all three supported hosts. Hosted/macOS results for
 this change remain pending. No Wasm size acceptance threshold is introduced.
+
+## Protocol cohort (0.2.0)
+
+Protocol now selects the same exact local Types 0.21.0 package as Runtime through
+`candidate-types`. The product workspace no longer selects registry Types.
+This is a breaking Rust type-identity change, so Protocol advances from 0.1.1 to
+0.2.0. It adds no identity wrapper or conversion API and changes no wire policy.
+
+The independent EngineView consumer assigns a decoded subnet directly to local
+`Principal`, then passes it into Runtime's `Call::new`. That test executes
+natively and compiles for Wasm. Normal/build graph checks require exactly one
+Types package in each Protocol consumer closure and keep Runtime out of Protocol.
+Registry Types stays in native oracle declarations only; oracle comparisons use
+original Principal bytes and JSON, not cross-source Rust equality.
+
+The existing literal, differential, resource and standalone Wasm corpora cover
+responses and marketplace argument encoding with the new identity owner. Query's
+previous 0.1.x application record remains historical: its surrounding callers
+must migrate to the local Types cohort before adopting Protocol 0.2.0. No sibling
+source changes, registry publication or production deployment are included.
+
+Local validation passed 37 product tests and 29 all-feature consumer tests,
+strict Clippy/Rustdoc, Wasm consumer compilation, EngineView and marketplace
+Wasm execution, normal/build graph checks, and the existing heap and argument
+allocation gates. No new allocation threshold or performance claim is introduced.

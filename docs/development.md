@@ -1,7 +1,7 @@
 # Development
 
-The product workspace contains unpublished Protocol 0.1.1 and the initial Types
-0.21.0 candidate, plus the Runtime 0.23.6 local development increment
+The product workspace contains unpublished Protocol 0.2.0 and the initial Types
+0.21.0 candidate, plus the Runtime 0.23.7 local development increment
 (following registry 0.22.5).
 Types follows the published 0.20.4 baseline; its identity
 slice is not yet a replacement for the complete published identity contract.
@@ -190,7 +190,7 @@ non-export qualification targets retain crate-root unsafe forbids.
 
 `make qualify-types` tests local Principal and Account/Subaccount identity, text and Serde contracts,
 runs strict Clippy and Rustdoc, and compiles its tests for Wasm. It selects the
-local manifest explicitly because Protocol still depends on registry Types.
+local manifest explicitly; Protocol and Runtime now select that same Types source.
 Wasm compilation does not establish execution;
 production consumer migration remains pending. See the
 [Types qualification record](qualification/types-principal.md).
@@ -241,7 +241,7 @@ The response-specific implementation and evidence are described below.
 ## Selected response decoding
 
 Enable `cloud-engine-response` for `EngineView`, `EngineSubnet` and
-`decode_get_engine_views_response`. This feature selects published Types 0.20.4
+`decode_get_engine_views_response`. This feature selects local Types 0.21.0
 and Serde 1.0.229. A private declarative macro emits Rust records, schema and
 reader dispatch once; no response Encode implementation is required. Required
 and strict-optional policies are explicit. A public/general declaration API and
@@ -305,8 +305,9 @@ compare admission and decoded values. Work counters are implementation-specific
 and are not equated by these tests.
 
 The oracle is a native-only development dependency of the private consumer;
-it does not enter the product or Wasm consumer graph. Both implementations
-resolve Principal through registry Types 0.20.4. No direct registry Candid
+it does not enter the product or Wasm consumer graph. The candidate uses local
+Types 0.21.0; the oracle retains registry Types 0.20.4. Comparisons cross that
+intentional boundary through bytes or JSON, never assumed Rust type equality. No direct registry Candid
 dependency or copied source/test corpus is introduced. These checks are bounded
 differential evidence, not full Query adoption. Broader optional-coercion,
 protocol-family and real-consumer qualification remains required before cutover.
@@ -470,13 +471,13 @@ version; there is no workspace version or shadow version file. The root
 [changelog](../CHANGELOG.md) is an index, and group notes live under
 `releases/<group>/CHANGELOG.md`, following the adopted Toko convention.
 
-Protocol currently owns `ic-platform-protocol` and its pending 0.1.1
+Protocol currently owns `ic-platform-protocol` and its pending 0.2.0
 notes. Its earlier GitHub snapshots reused 0.1.0; the changelog records that
 historical versioning gap without assigning retroactive versions. Repository setup and qualification notes supporting Protocol remain
 in that ledger; they do not create releases for private test packages.
 
 Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. Runtime and its exact guard share version 0.23.6; advance both
+pending changelog. Runtime and its exact guard share version 0.23.7; advance both
 and the exact root guard dependency together. The macros package now shares this
 version and has an exact Runtime dependency selection as well.
 Platform and Browser remain future groups. Add each

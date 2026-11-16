@@ -82,6 +82,9 @@ does not establish product or native-host qualification.
   Its exact-version Cargo singleton guard is now implemented in the Runtime
   group. The explicit-update macro implementation joins that group; Platform
   still joins alongside a real implementation package.
+  Protocol 0.2.0 now selects local Types 0.21.0 alongside Runtime. Preserve that
+  canonical source identity; registry Types is only a qualification oracle.
+  Query's older 0.1.x integration needs cohort migration before adoption.
   Qualification stays outside product release groups.
   This metadata setup does not qualify or enable a release/publication workflow.
 - Keep the native heap profiler in its private qualification package. Allocation

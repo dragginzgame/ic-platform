@@ -64,6 +64,12 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
                 let rejection = result.expect_err("callback trap must roll back its reply");
                 assert_eq!(rejection.error_code, ErrorCode::CanisterTrapped);
             }
+            assert_eq!(pic.update_call(canister, caller, "observe_custody", vec![]).await.unwrap(),
+                [0, 0, 0, 0, 1, 0, 0, 0][..=index],
+                "only the trapping cleanup retains its handler-owned allocation");
+            assert_eq!(pic.update_call(canister, caller, "observe_dispatch", vec![]).await.unwrap(),
+                [1, 0, 0, 1, 0, 1, 1, 1][..=index],
+                "consumer reply records commit only when the callback returns successfully");
             let started = u8::try_from(index + 1).unwrap();
             let mut expected = vec![started, completed, dropped];
             // Every prior handle is re-observed: later success must not turn
@@ -74,6 +80,7 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
             assert_eq!(pic.update_call(peer, caller, "probe", vec![0]).await.unwrap(),
                 vec![peer_count], "caller rollback must not undo committed peer effects");
         }
+        println!("cleanup custody passed: successful paths release; trapping cleanup retains one handler allocation");
         for (mode, reply_refund, reject_refund) in [
             (0, 17_u128, 29_u128),
             (1, 17, 29),
@@ -243,6 +250,19 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(pic.update_call(canister, caller, "await_probe", input).await.unwrap(), vec![16]);
         assert_eq!(pic.update_call(canister, caller, "observe", vec![]).await.unwrap(), vec![1, 1, 1, 1]);
         println!("upgrade: Running; fresh callback completed after drained upgrade");
+        let mut input = vec![6];
+        input.extend_from_slice(peer.as_slice());
+        let missing = pic.update_call(canister, caller, "await_probe", input).await
+            .expect_err("manual handler must not receive an automatic reply");
+        assert_eq!(missing.error_code, ErrorCode::CanisterDidNotReply);
+        assert_eq!(pic.update_call(canister, caller, "observe", vec![]).await.unwrap(),
+            vec![2, 2, 2, 1, 1], "missing reply still completes and destroys the task");
+        assert_eq!(pic.update_call(canister, caller, "observe_custody", vec![]).await.unwrap(), vec![0, 0]);
+        assert_eq!(pic.update_call(peer, caller, "probe", vec![0]).await.unwrap(), vec![17],
+            "missing reply must not roll back the remote effect");
+        assert_eq!(pic.update_call(canister, caller, "observe_dispatch", vec![]).await.unwrap(), vec![1, 1],
+            "observing the peer reply is distinct from replying to the original caller");
+        println!("manual reply omission passed: DidNotReply, Completed, released handler ownership");
         owned.close().await;
         println!("installed rollback passed: 7 immediate updates; 8 awaited calls with state/destructor/peer observations; callback/cleanup traps, dropped call interest, reply/rejection refunds, resource refusals, notify commit/rollback and subsequent success");
         Ok::<(), Box<dyn std::error::Error>>(())

@@ -1,7 +1,7 @@
 //! Literal JSON contracts, independent of the Candid schema and encoder.
 
+use candidate_types::Principal;
 use ic_platform_protocol::cloud_engine::EngineView;
-use ic_platform_types::Principal;
 
 fn check(json: &str, accepted: bool) -> Option<EngineView> {
     let candidate = serde_json::from_str::<EngineView>(json);
