@@ -43,23 +43,23 @@ actual working tree after authorized local application; consumer delivery remain
 pending. A separate native heap
 profiler checks allocation against retained historical bounds; see its
 [criteria and results](docs/qualification/engine-view-heap.md).
-Protocol 0.2.4 is published; private qualification packages
+Protocol 0.2.5 is published; private qualification packages
 remain at 0.1.0. Changed product crates advance after each GitHub source snapshot,
 independently of registry publication. Each implemented group has now been published independently.
 
-The published `ic-platform-types` 0.21.1 release now implements Principal and
+The published `ic-platform-types` 0.21.2 release now implements Principal and
 Account/Subaccount admission and Serde, including rendering into caller-owned storage. Its
 [qualification record](docs/qualification/types-principal.md) documents narrow
 source reuse and independent fixtures; [Account qualification](docs/qualification/types-account.md)
 covers effective identity and explicit Serde presence. Opt-in self-authentication
 and [independent native/Wasm consumer checks](docs/qualification/types-consumer.md)
 are implemented. Production consumer migration remains pending.
-Protocol 0.2.4 uses local Types 0.21.1, matching Runtime. Its public Principal
+Protocol 0.2.5 uses local Types 0.21.2, matching Runtime. Its public Principal
 identity changes from the registry type; consumers must migrate as one cohort.
 Registry Types remains only in qualification oracles. See the
 [cohort boundary](docs/qualification/types-consumer.md#protocol-cohort-020).
 
-Runtime `0.23.11`, macros and its singleton guard are published together. It provides opt-in inert Call
+Runtime `0.23.13`, macros and its singleton guard are published together. It provides opt-in inert Call
 preparation and independent method/argument ownership, using local Types. Its
 [qualification boundary](docs/qualification/runtime-call.md) distinguishes this
 implemented request model from the experimental IC0/executor and pending installed
@@ -102,7 +102,7 @@ explicit application choices. Caller/canister identity, IC time, controller chec
 bounded query certificates and certified-data publication are available through
 `system`. The [Auth execution qualification](docs/qualification/runtime-auth.md)
 records installed consumer and byte-boundary evidence and remaining migration
-limits. The separate `ic-platform-runtime-guard` shares Runtime's published 0.23.11 version.
+limits. The separate `ic-platform-runtime-guard` shares Runtime's published 0.23.13 version.
 Its exact version check and shared Cargo `links` identity reject incompatible
 guarded executor graphs; see the [guard evidence](docs/qualification/runtime-guard.md).
 
@@ -110,7 +110,7 @@ Runtime's opt-in `system-raw` feature also supplies dependency-free synchronous
 operations for caller-owned exports, without a task or executor. See the
 [Storage migration contract](docs/qualification/runtime-storage.md).
 
-Published Runtime 0.23.12 adds global-timer roots to the same executor,
+Runtime 0.23.12 introduced global-timer roots to the same executor,
 with no update-reply authority, and IC timer/version operations. Its
 [installed timer evidence](docs/qualification/runtime-timers.md) is separate from
 the still-required Scheduling transport migration and publication.
@@ -126,7 +126,7 @@ The opt-in `cloud-engine-marketplace` feature adds [daily price rows](docs/quali
 with all six node classes and arbitrary naturals, plus [available-node page responses](docs/qualification/available-nodes.md).
 Bounded page argument encoding is also implemented; consumer adoption remains pending.
 
-Platform `0.34.3` now has an opt-in `certificate-decode` capability and empty
+Platform `0.34.6` now has an opt-in `certificate-decode` capability and empty
 defaults. It strictly decodes untrusted certificate grammar, retains the original
 bytes by borrow and exposes an immutable, explicitly unverified view. See the
 [certificate boundary](docs/qualification/platform-certificate.md) for reuse
@@ -188,3 +188,10 @@ An isolated Auth issuer-policy adapter also passes on both targets using its
 exact message domain, protected signer/seed and caller-owned freshness checks.
 Mainnet signer interoperability and Auth migration remain pending; see
 [the consumer contract](docs/qualification/canister-signature.md).
+
+The [latest supplier cohort](docs/qualification/2026-11-16-supplier-publication.md)
+publishes Types 0.21.2, Runtime/macros/guard 0.23.13, Protocol 0.2.5 and Platform
+0.34.6 with Toko Tooling 0.44.9. It adds stable-memory/cycle operations, bounded
+raw_rand and chunk-cache codecs, explicit HTTP pricing, and strict native ingress
+packets. Archive and registry-backed Query/Auth checks pass; broader consumer
+migrations remain separate.

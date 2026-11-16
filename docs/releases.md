@@ -177,3 +177,7 @@ Types uses the same package/source/remote-tag/registry/archive admission as ever
 other selected package. Publish Types first, then the Runtime guard and macros,
 Runtime, Protocol and Platform. Every upload requires independent readback before
 its dependents; hosted CI remains asynchronous and is not awaited.
+
+This cohort is now published and independently read back. See the
+[complete supplier publication evidence](qualification/2026-11-16-supplier-publication.md)
+for source/tag identity, checksums, retained attempts and registry-backed Query/Auth results.
