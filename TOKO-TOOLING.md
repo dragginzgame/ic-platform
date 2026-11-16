@@ -286,6 +286,43 @@ file or separate review framework.
   qualification. Read [validation mechanics](https://github.com/dragginzgame/toko-tooling/blob/626da7cd9626cc2e152594862a2d82ea82ef51da/rules/engineering-details.md#validation-and-evidence)
   for release ordering, Cargo preparation and external-effect recovery.
 
+### CI setup failure diagnostics
+
+Failed external-tool and setup steps on ephemeral CI runners must leave useful
+diagnostics and retrievable evidence before the runner disappears. An exit code,
+stderr byte count or runner-local path alone is insufficient.
+
+- Surface a bounded, sanitized excerpt of the underlying failure, with the tool,
+  failed phase, original status and exact evidence location. State truncation or
+  missing diagnostics explicitly; do not infer a network cause from an exit code.
+- Arrange failure-path collection even when setup fails before tests start. Select
+  only relevant logs, failure metadata and attempt identifiers; include explicitly
+  selected hidden attempt directories. Do not upload whole homes, caches, stores
+  or workspaces merely to capture a small diagnostic. Do not follow arbitrary
+  symlinks outside the selected evidence boundary.
+- Exclude credentials, private keys, tokens, sensitive payloads and environment
+  dumps from both printed and uploaded evidence. Redact known sensitive fields
+  before publication; CI log masking does not sanitize artifact contents. If raw
+  output cannot be safely retained, preserve a sanitized diagnostic and say what
+  was omitted. Set explicit size limits and a finite artifact retention period.
+- Preserve the original failing step's status through pipes, log printing,
+  collection and cleanup. Report collection/upload failures separately; neither
+  successful diagnostics nor `continue-on-error` may turn setup failure into a
+  successful job. Link the retained artifact in the CI result when available and
+  explicitly report when upload failed or required evidence was missing.
+- When changing setup or collection wiring, exercise a focused failure path
+  before relying on it: an early setup failure with a hidden attempt log must
+  produce a useful bounded diagnostic, retain only the intended sanitized files,
+  and leave the job failed. Check missing evidence and collector failure handling.
+  An offline fixture can prove local collection; claim hosted upload/retrieval
+  only when observed. Reuse unchanged evidence rather than adding a recurring
+  failure rehearsal to every deployment.
+
+Consumers own their paths, retention values and workflow wiring. Reuse existing
+collectors where they fit; this requirement does not mandate a new helper,
+framework, committed report or duplicate artifact upload. Better diagnostics do
+not by themselves fix the underlying setup failure or authorize blind retries.
+
 ## DFINITY dependencies: own the solution
 
 Do not submit DFINITY PRs or depend on future DFINITY work. Use available qualified

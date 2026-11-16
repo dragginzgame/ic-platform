@@ -22,7 +22,7 @@ also start at 0.1.0 and remain outside product release groups. Publisher selecti
 and publication remain separate. A package move alone is not rewrite progress.
 
 This repository adopts the installed [Toko engineering baseline](TOKO-TOOLING.md)
-from published Toko 0.44.10 and its revision-bound specialist rules. Cargo.lock and
+from published Toko 0.44.11 and its revision-bound specialist rules. Cargo.lock and
 `.toko-tooling.snapshot` bind the selection and installed bytes. Keep managed
 files intact; use the supported installer for updates. [Development commands](docs/development.md)
 describe the local Make interface and focused checks.

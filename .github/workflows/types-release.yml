@@ -27,12 +27,21 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Prepare pinned CI tools
-        run: make install-ci-tools
+        run: bash scripts/ci/setup-step.sh ci-tools make install-ci-tools
       - name: Scan complete repository history
         run: make check-secrets
       - name: Validate workflow
         if: ${{ !cancelled() }}
         run: make lint-workflows
+
+      - name: Retain sanitized setup failure evidence
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: setup-${{ github.job }}-repository
+          path: target/ci-setup/*.log
+          if-no-files-found: warn
+          retention-days: 7
 
   native:
     name: Native (${{ matrix.os }})
@@ -51,15 +60,15 @@ jobs:
           package-manager-cache: false
       - name: Prepare host prerequisites
         run: |
-          make install-host-tools
+          bash scripts/ci/setup-step.sh host-tools make install-host-tools
           echo "$PWD/.tools/host/bin" >> "$GITHUB_PATH"
       - name: Prepare selected Rust toolchain
-        run: bash vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
+        run: bash scripts/ci/setup-step.sh rust-toolchain bash vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
       - name: Prepare tools and locked sources
         run: |
-          make install-tools tools-check
-          cargo fetch --locked
-          cargo fetch --locked --manifest-path qualification/Cargo.toml
+          bash scripts/ci/setup-step.sh rust-tools make install-tools tools-check
+          bash scripts/ci/setup-step.sh product-sources cargo fetch --locked
+          bash scripts/ci/setup-step.sh qualification-sources cargo fetch --locked --manifest-path qualification/Cargo.toml
           rustc --version --verbose
           node --version
       - name: Check formatting and installed snapshot
@@ -85,3 +94,11 @@ jobs:
         run: make qualify-runtime-consumer
       - name: Check publication refusal wiring
         run: make check-types-publication
+      - name: Retain sanitized setup failure evidence
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: setup-${{ github.job }}-${{ matrix.os }}
+          path: target/ci-setup/*.log
+          if-no-files-found: warn
+          retention-days: 7

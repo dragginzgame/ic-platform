@@ -187,9 +187,9 @@ for source/tag identity, checksums, retained attempts and registry-backed Query/
 The 2026-11-16 deployment selects Platform 0.34.7, Protocol 0.2.6 and coordinated
 Runtime/macros/guard 0.23.14, after checking current registry baselines. Types
 0.21.2 is unchanged. Both workspaces and materialized candidate qualification
-consumers adopt Toko 0.44.10 through its supported installer/selection. The
+consumers adopt Toko 0.44.11 through its supported installer/selection. The
 reviewed tooling archive checksum is
-`8806e8986952ad5feff3b12967e042107c3ead27aed368fc5478ccc175abe98d`.
+`7d16b815ae322ae3f88580ee6af1611bdafde08b77592cd886bfa0eece0f1be8`.
 
 Platform adds explicit Ed25519 signing, exact-envelope dispatch, signed queries
 and authenticated original-request observation. Protocol adds management snapshot
