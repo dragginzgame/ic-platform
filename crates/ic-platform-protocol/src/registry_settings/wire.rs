@@ -1,12 +1,12 @@
 use super::Error;
 
-pub(super) enum FieldValue<'a> {
+pub(crate) enum FieldValue<'a> {
     Integer(u64),
     Bytes(&'a [u8]),
     Fixed,
 }
 
-pub(super) trait Read: Sized {
+pub(crate) trait Read: Sized {
     fn read(value: FieldValue<'_>, remaining: &mut usize) -> Result<Self, Error>;
 }
 
@@ -33,12 +33,12 @@ impl<T: Read> Read for Option<T> {
     }
 }
 
-pub(super) struct Reader<'a> {
+pub(crate) struct Reader<'a> {
     rest: &'a [u8],
 }
 
 impl<'a> Reader<'a> {
-    pub(super) fn new(bytes: &'a [u8]) -> Self {
+    pub(crate) fn new(bytes: &'a [u8]) -> Self {
         Self { rest: bytes }
     }
 
@@ -63,7 +63,7 @@ impl<'a> Reader<'a> {
         Err(Error::Malformed)
     }
 
-    pub(super) fn next(
+    pub(crate) fn next(
         &mut self,
         remaining: &mut usize,
     ) -> Result<Option<(u32, FieldValue<'a>)>, Error> {

@@ -121,8 +121,9 @@ Actual Canic installed/native consumer qualification remains required.
 ## Canister-signature consumer
 
 For Auth's broader migration, [#7](https://github.com/dragginzgame/ic-platform/issues/7)
-now has qualified local Ed25519/secp256k1 primitives; its complete certificate
-fixture and installed migration remain pending. See [primitive evidence](qualification/auth-crypto.md).
+now has qualified local primitives, certified-issuer mappings, certificate
+construction and all five installed cases without legacy Platform. Published
+cohort delivery remains separate. See [Auth evidence](qualification/auth-crypto.md).
 The separate [Wire/Types cohort issue #8](https://github.com/dragginzgame/ic-platform/issues/8)
 is resolved by published Wire 0.24.2/Types 0.21.1 with actual unchanged generator
 and retained browser-codec checks; see [cohort evidence](qualification/auth-wire.md).
@@ -150,7 +151,7 @@ are not established. No sibling changes or consumer migration are included.
 | Canic endpoint composition, [#164](https://github.com/dragginzgame/ic-platform-legacy/issues/164) | Runtime | Guard and pre-copy admission before decoding, explicit codecs, one dispatch/reply owner and installed rollback/callback proof; no Wire-specific execution owner. |
 | Query certified classification, [#158](https://github.com/dragginzgame/ic-platform-legacy/issues/158) | Platform native | Actual upstream SubnetType identity, unknown strings and absent values; classification is not capacity or deployment permission. |
 | Crypto/Agent boundary, [#50](https://github.com/dragginzgame/ic-platform-legacy/issues/50) | Platform crypto/native | Recheck selected graphs and current advisory evidence before admission. Direct ECDSA correction alone does not resolve Agent/derivation paths. No in-house crypto, forced incompatible override or inherited risk acceptance. |
-| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko 0.44.6 through its authenticated installer; product acceptance remains separate. |
+| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko 0.44.7 through its authenticated installer; product acceptance remains separate. |
 
 The first projection must not import native/crypto dependencies to satisfy an
 unrelated row. Conversely, an isolated codec pass cannot qualify those rows.

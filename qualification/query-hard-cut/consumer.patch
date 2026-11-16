@@ -1,0 +1,1086 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index d76656d..c4270bf 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -10,12 +10,12 @@ repository = "https://github.com/dragginzgame/ic-query"
+ publish = true
+ 
+ [workspace.dependencies]
++engine-view-consumer = { path = "__PLATFORM_ROOT__/qualification/engine-view-consumer" }
+ clap = "4.6.7"
+ ic-host-text = "0.77.2"
+-ic-platform = { version = "0.33.7", default-features = false }
+-ic-platform-next = { package = "ic-platform", version = "=0.34.3", default-features = false, features = ["certificate-authentication"] }
+-ic-platform-protocol = { version = "=0.2.3", default-features = false, features = ["cloud-engine-marketplace", "registry-settings"] }
+-ic-platform-types = { version = "=0.21.1", default-features = false }
++ic-platform = { path = "__PLATFORM_ROOT__/crates/ic-platform", version = "=0.34.5", default-features = false }
++ic-platform-protocol = { path = "__PLATFORM_ROOT__/crates/ic-platform-protocol", version = "=0.2.4", default-features = false, features = ["cloud-engine-marketplace", "registry-settings", "registry", "registry-placement"] }
++ic-platform-types = { path = "__PLATFORM_ROOT__/crates/ic-platform-types", version = "=0.21.1", default-features = false }
+ ic-topology = { path = "crates/ic-topology", version = "0.108.0" }
+ serde = { version = "1.0.229", features = ["derive"] }
+ serde_json = "1.0.154"
+diff --git a/crates/ic-topology/Cargo.toml b/crates/ic-topology/Cargo.toml
+index 7b3da2f..fe5e69a 100644
+--- a/crates/ic-topology/Cargo.toml
++++ b/crates/ic-topology/Cargo.toml
+@@ -15,8 +15,7 @@ toko-tooling.workspace = true
+ ignored = ["toko-tooling"]
+ 
+ [dependencies]
+-ic-platform = { workspace = true, features = ["agent", "nns-registry-types", "cloud-engine-types"] }
+-ic-platform-next.workspace = true
++ic-platform = { workspace = true, features = ["native-read"] }
+ ic-platform-protocol.workspace = true
+ ic-platform-types.workspace = true
+ serde.workspace = true
+@@ -24,6 +23,7 @@ thiserror.workspace = true
+ tokio = { workspace = true, features = ["macros", "time"] }
+ 
+ [dev-dependencies]
++engine-view-consumer.workspace = true
+ serde_json.workspace = true
+ tokio = { workspace = true, features = ["rt", "test-util"] }
+ 
+diff --git a/crates/ic-topology/src/cloud_engine/available/mod.rs b/crates/ic-topology/src/cloud_engine/available/mod.rs
+index 029464c..9db4ecd 100644
+--- a/crates/ic-topology/src/cloud_engine/available/mod.rs
++++ b/crates/ic-topology/src/cloud_engine/available/mod.rs
+@@ -64,7 +64,7 @@ pub async fn fetch_with_page_limit(
+             requested: page_limit,
+         });
+     }
+-    collect(&source::MainnetSource(mainnet::agent()?), page_limit).await
++    collect(&source::MainnetSource(mainnet::client()?), page_limit).await
+ }
+ 
+ async fn collect(
+@@ -131,7 +131,7 @@ async fn collect(
+                 .into_iter()
+                 .map(|node| AvailableNode {
+                     node_id: node.node_id,
+-                    node_type: super::report_class(node.node_type),
++                    node_type: node.node_type,
+                     operator_id: node.operator,
+                     provider_id: node.provider,
+                     data_center: node.dc,
+diff --git a/crates/ic-topology/src/cloud_engine/available/source.rs b/crates/ic-topology/src/cloud_engine/available/source.rs
+index 2488689..d09a3e1 100644
+--- a/crates/ic-topology/src/cloud_engine/available/source.rs
++++ b/crates/ic-topology/src/cloud_engine/available/source.rs
+@@ -1,7 +1,8 @@
+ //! Only the selected public status and new-engine page requests.
+ 
+ use super::{AvailableError, Observation, PAGE_METHOD, PAGE_SIZE, STATUS_METHOD};
+-use ic_platform::{agent::Agent, candid_codec::arguments::encode_args};
++use ic_platform::native::ReadClient;
++use ic_platform_protocol::cloud_engine::encode_empty_args;
+ use ic_platform_protocol::cloud_engine as wire;
+ use ic_platform_types::Principal;
+ 
+@@ -10,7 +11,7 @@ pub(super) trait Source {
+     async fn page(&self, start: Option<Principal>) -> Result<Observation, AvailableError>;
+ }
+ 
+-pub(super) struct MainnetSource(pub Agent);
++pub(super) struct MainnetSource(pub ReadClient);
+ 
+ pub(super) fn page_argument(start: Option<Principal>) -> Result<Vec<u8>, wire::EncodeError> {
+     wire::encode_list_available_nodes_page_args(
+@@ -25,7 +26,7 @@ pub(super) fn page_argument(start: Option<Principal>) -> Result<Vec<u8>, wire::E
+ 
+ impl Source for MainnetSource {
+     async fn status(&self) -> Result<Observation, AvailableError> {
+-        Ok(super::super::query(&self.0, STATUS_METHOD, encode_args(&(), 64)?).await?)
++        Ok(super::super::query(&self.0, STATUS_METHOD, encode_empty_args(64)?).await?)
+     }
+     async fn page(&self, start: Option<Principal>) -> Result<Observation, AvailableError> {
+         Ok(super::super::query(&self.0, PAGE_METHOD, page_argument(start)?).await?)
+diff --git a/crates/ic-topology/src/cloud_engine/available/tests.rs b/crates/ic-topology/src/cloud_engine/available/tests.rs
+index db50850..34fd47d 100644
+--- a/crates/ic-topology/src/cloud_engine/available/tests.rs
++++ b/crates/ic-topology/src/cloud_engine/available/tests.rs
+@@ -1,13 +1,13 @@
+ use super::*;
+-use ic_platform::candid_codec::encode_one;
++use engine_view_consumer::fixtures::{self as fixtures, encode_fixture as encode_one};
+ use std::{cell::RefCell, collections::VecDeque};
+ 
+ fn id(n: u16) -> Principal {
+     Principal::from_slice(&n.to_le_bytes())
+ }
+ fn encoded(value: &wire::AvailableNodesPageResult) -> Vec<u8> {
+-    // Keep the published encoder as an independent oracle for decode-only DTOs.
+-    let fixture: ic_platform::cloud_engine_types::AvailableNodesPageResult =
++    // Encode through an independently authored upstream schema.
++    let fixture: fixtures::PageResult =
+         serde_json::from_value(serde_json::to_value(value).unwrap()).unwrap();
+     encode_one(&fixture, 1024 * 1024).unwrap()
+ }
+@@ -118,17 +118,8 @@ fn request_is_exactly_public_rejoining_none_with_100_node_limit_and_cursor() {
+     );
+     for cursor in [None, Some(id(1)), Some(Principal::from_slice(&[255; 29]))] {
+         let bytes = source::page_argument(cursor).unwrap();
+-        let decoded: ic_platform::cloud_engine_types::ListAvailableNodesPageArgs =
+-            ic_platform::candid_codec::decoder::decode_one(
+-                &bytes,
+-                ic_platform::candid_codec::decoder::Limits {
+-                    bytes: LIMITS.bytes,
+-                    header: LIMITS.header,
+-                    types: LIMITS.types,
+-                    work: LIMITS.work,
+-                    allocation: LIMITS.allocation,
+-                },
+-            )
++        let decoded: fixtures::PageArgs =
++            fixtures::candid::decode_one(&bytes)
+             .unwrap();
+         assert!(decoded.rejoining.is_none());
+         assert_eq!(
+@@ -178,7 +169,7 @@ impl Fake {
+             status: RefCell::new(Some(Step {
+                 wait: 0,
+                 result: Ok(encode_one(
+-                    &ic_platform::cloud_engine_types::RegistryCopyStatus {
++                    &fixtures::RegistryCopyStatus {
+                         version: 10,
+                         latest: 20,
+                         caught_up: false,
+diff --git a/crates/ic-topology/src/cloud_engine/available/types.rs b/crates/ic-topology/src/cloud_engine/available/types.rs
+index 4156c26..8dbad91 100644
+--- a/crates/ic-topology/src/cloud_engine/available/types.rs
++++ b/crates/ic-topology/src/cloud_engine/available/types.rs
+@@ -1,7 +1,7 @@
+ //! Available-node observations, traversal coverage and typed stop reasons.
+ 
+ use crate::ReadError;
+-use ic_platform::{candid_codec, cloud_engine_types::NodeType};
++use ic_platform_protocol::cloud_engine::NodeType;
+ use ic_platform_protocol::{
+     candid as decoder,
+     cloud_engine::{EncodeError, EngineError},
+@@ -189,10 +189,7 @@ pub enum AvailableError {
+     Read(#[from] ReadError),
+     /// Bounded request encoding error, preserved as its original typed value.
+     #[error("available-node request encoding failed: {0:?}")]
+-    Encode(candid_codec::Error),
+-    /// Bounded page-request encoding failure from the replacement Protocol.
+-    #[error("available-node page request encoding failed: {0:?}")]
+-    PageEncode(#[from] EncodeError),
++    Encode(EncodeError),
+     /// Bounded response codec error, preserved as its original typed value.
+     #[error("available-node response decoding failed: {0:?}")]
+     Decode(decoder::Error),
+@@ -210,8 +207,8 @@ pub enum AvailableError {
+     OverallDeadline,
+ }
+ 
+-impl From<candid_codec::Error> for AvailableError {
+-    fn from(error: candid_codec::Error) -> Self {
++impl From<EncodeError> for AvailableError {
++    fn from(error: EncodeError) -> Self {
+         Self::Encode(error)
+     }
+ }
+@@ -227,7 +224,7 @@ impl Serialize for AvailableError {
+             Self::Read(ReadError::Transport(_)) => "transport",
+             Self::Read(ReadError::Deadline) => "read_deadline",
+             Self::Read(ReadError::Clock(_)) => "clock",
+-            Self::Encode(_) | Self::PageEncode(_) => "encode",
++            Self::Encode(_) => "encode",
+             Self::Decode(_) => "decode",
+             Self::Application(_) => "application",
+             Self::CopyNotReady => "copy_not_ready",
+diff --git a/crates/ic-topology/src/cloud_engine/candidates/tests.rs b/crates/ic-topology/src/cloud_engine/candidates/tests.rs
+index 66cb943..a58218d 100644
+--- a/crates/ic-topology/src/cloud_engine/candidates/tests.rs
++++ b/crates/ic-topology/src/cloud_engine/candidates/tests.rs
+@@ -3,7 +3,7 @@ use available::{
+     AvailableError, AvailableNode, AvailableNodesReport, AvailablePage, RegistryCopyObservation,
+     TraversalStop,
+ };
+-use ic_platform::cloud_engine_types::NodeType;
++use ic_platform_protocol::cloud_engine::NodeType;
+ use prices::{
+     CloudEnginePricesReport, FeeOutcome, MarketplacePrice, PriceError, PriceEvidence,
+     PriceObservation,
+@@ -129,7 +129,7 @@ fn exact_scopes_retain_all_overlaps_without_selecting_precedence() {
+         NodeType::Type4_5,
+     ] {
+         let mut candidate = node(None);
+-        candidate.node_type = class.clone();
++        candidate.node_type = class;
+         assert_eq!(
+             matching_indices(&candidate, &[price(class, None, None)]),
+             [0]
+diff --git a/crates/ic-topology/src/cloud_engine/engine/mod.rs b/crates/ic-topology/src/cloud_engine/engine/mod.rs
+index c650a88..dda3971 100644
+--- a/crates/ic-topology/src/cloud_engine/engine/mod.rs
++++ b/crates/ic-topology/src/cloud_engine/engine/mod.rs
+@@ -34,7 +34,7 @@ const LIMITS: decoder::Limits = decoder::Limits {
+ /// Returns original transport/codec errors or typed record-admission refusals.
+ /// A read failure never becomes a successful empty result.
+ pub async fn fetch(engine_id: EngineId) -> Result<EngineReport, EngineError> {
+-    let agent = mainnet::agent()?;
++    let agent = mainnet::client()?;
+     collect(engine_id, |argument| async move {
+         super::query(&agent, METHOD, argument)
+             .await
+diff --git a/crates/ic-topology/src/cloud_engine/engine/tests.rs b/crates/ic-topology/src/cloud_engine/engine/tests.rs
+index f29ee7d..e6b5398 100644
+--- a/crates/ic-topology/src/cloud_engine/engine/tests.rs
++++ b/crates/ic-topology/src/cloud_engine/engine/tests.rs
+@@ -1,6 +1,6 @@
+ use super::*;
+ use crate::ReadError;
+-use ic_platform::candid_codec::encode_one;
++use engine_view_consumer::fixtures::{self as fixtures, encode_fixture as encode_one};
+ use std::{cell::Cell, time::Duration};
+ 
+ // Independently assembled from the selected IDL and Candid binary specification,
+@@ -40,9 +40,9 @@ fn view() -> wire::EngineView {
+     }
+ }
+ // The candidate response projection is decode-only. Keep fixture encoding in
+-// the published oracle; this conversion is test setup, not production custody.
++// an independent upstream schema; conversion is fixture setup only.
+ fn encode_views(views: &[wire::EngineView], maximum: usize) -> Vec<u8> {
+-    let published: Vec<ic_platform::cloud_engine_types::EngineView> =
++    let published: Vec<fixtures::FullViewFrame> =
+         serde_json::from_value(serde_json::to_value(views).unwrap()).unwrap();
+     encode_one(&published, maximum).unwrap()
+ }
+@@ -139,16 +139,7 @@ async fn one_argument_one_query_and_successful_omission() {
+     let longest: EngineId = "é".repeat(128).parse().unwrap();
+     collect(longest.clone(), |argument| async move {
+         assert!(argument.len() <= 512);
+-        let decoded: Vec<String> = ic_platform::candid_codec::decoder::decode_one(
+-            &argument,
+-            ic_platform::candid_codec::decoder::Limits {
+-                bytes: LIMITS.bytes,
+-                header: LIMITS.header,
+-                types: LIMITS.types,
+-                work: LIMITS.work,
+-                allocation: LIMITS.allocation,
+-            },
+-        )
++        let decoded: Vec<String> = fixtures::candid::decode_one(&argument)
+         .unwrap();
+         assert_eq!(decoded, [longest.as_str()]);
+         Ok(Observation {
+@@ -384,7 +375,7 @@ async fn shared_deadline_errors_and_cancellation_do_not_retry() {
+     assert!(result.is_err() && dropped.get());
+     let result = collect(request(), |_| async {
+         Err(EngineError::Read(ReadError::Transport(Box::new(
+-            ic_platform::agent::AgentError::MessageError("fixture".into()),
++            ic_platform::native::ReadError::Packet,
+         ))))
+     })
+     .await;
+diff --git a/crates/ic-topology/src/cloud_engine/mod.rs b/crates/ic-topology/src/cloud_engine/mod.rs
+index 958f989..834e1f2 100644
+--- a/crates/ic-topology/src/cloud_engine/mod.rs
++++ b/crates/ic-topology/src/cloud_engine/mod.rs
+@@ -3,7 +3,7 @@
+ //! Marketplace declarations do not establish available capacity or binding quotes.
+ 
+ use crate::{ReadError, mainnet};
+-use ic_platform::agent::Agent;
++use ic_platform::native::ReadClient;
+ 
+ pub mod available;
+ pub mod candidates;
+@@ -12,23 +12,6 @@ pub mod prices;
+ 
+ const CANISTER: &str = "q6cfj-fyaaa-aaaar-qb77q-cai";
+ 
+-// Preserve the existing public node-class type during the supplier migration.
+-// Remove this projection when report consumers move to Protocol's class DTO.
+-fn report_class(
+-    class: ic_platform_protocol::cloud_engine::NodeType,
+-) -> ic_platform::cloud_engine_types::NodeType {
+-    use ic_platform::cloud_engine_types::NodeType as Report;
+-    use ic_platform_protocol::cloud_engine::NodeType as Source;
+-    match class {
+-        Source::Type4 => Report::Type4,
+-        Source::Type4_1 => Report::Type4_1,
+-        Source::Type4_2 => Report::Type4_2,
+-        Source::Type4_3 => Report::Type4_3,
+-        Source::Type4_4 => Report::Type4_4,
+-        Source::Type4_5 => Report::Type4_5,
+-    }
+-}
+-
+ struct Observation {
+     bytes: Vec<u8>,
+     observed_at: u64,
+@@ -36,9 +19,9 @@ struct Observation {
+ 
+ // Shared transport for the two concrete cloud-engine reports, not a public
+ // arbitrary-method API or a generic pagination framework.
+-async fn query(agent: &Agent, method: &str, argument: Vec<u8>) -> Result<Observation, ReadError> {
++async fn query(agent: &ReadClient, method: &str, argument: Vec<u8>) -> Result<Observation, ReadError> {
+     let canister = CANISTER.parse().expect("fixed mainnet engine principal");
+-    let bytes = mainnet::read(agent.query(&canister, method).with_arg(argument).call()).await?;
++    let bytes = mainnet::query(agent, canister, method, &argument).await?;
+     Ok(Observation {
+         bytes,
+         observed_at: mainnet::observed_at()?,
+diff --git a/crates/ic-topology/src/cloud_engine/prices/mod.rs b/crates/ic-topology/src/cloud_engine/prices/mod.rs
+index 69e0da2..dc1f19c 100644
+--- a/crates/ic-topology/src/cloud_engine/prices/mod.rs
++++ b/crates/ic-topology/src/cloud_engine/prices/mod.rs
+@@ -2,7 +2,7 @@
+ 
+ use std::{collections::BTreeSet, time::Duration};
+ 
+-use ic_platform::cloud_engine_types::NodeType;
++use ic_platform_protocol::cloud_engine::NodeType;
+ use ic_platform_protocol::{candid as decoder, cloud_engine as wire};
+ use tokio::time::Instant;
+ 
+@@ -12,7 +12,7 @@ use crate::mainnet;
+ use source::{Observation, Source};
+ pub use types::*;
+ 
+-use super::{CANISTER, report_class};
++use super::CANISTER;
+ const PRICES_METHOD: &str = "listMarketplacePrices";
+ const FEE_METHOD: &str = "getNetworkFee";
+ const OVERALL: Duration = Duration::from_secs(30);
+@@ -42,7 +42,7 @@ const LIMITS: decoder::Limits = decoder::Limits {
+ /// Returns a typed error if the first price read or admission fails. Later errors
+ /// are retained in the report's `network_fee` outcome, with `complete = false`.
+ pub async fn fetch() -> Result<CloudEnginePricesReport, PriceError> {
+-    let agent = mainnet::agent()?;
++    let agent = mainnet::client()?;
+     collect(&source::MainnetSource(agent)).await
+ }
+ 
+@@ -107,7 +107,7 @@ fn project_prices(observation: &Observation) -> Result<PriceObservation, PriceEr
+             .entry
+             .provider
+             .map_or_else(String::new, |id| format!("{id},"));
+-        let node_type = report_class(row.entry.node_type);
++        let node_type = row.entry.node_type;
+         expected.push_str(class_key(&node_type));
+         if let Some(dc) = &row.entry.dc {
+             expected.push(',');
+diff --git a/crates/ic-topology/src/cloud_engine/prices/source.rs b/crates/ic-topology/src/cloud_engine/prices/source.rs
+index 35659c6..09611c7 100644
+--- a/crates/ic-topology/src/cloud_engine/prices/source.rs
++++ b/crates/ic-topology/src/cloud_engine/prices/source.rs
+@@ -2,17 +2,18 @@
+ 
+ pub(super) use super::super::Observation;
+ use super::PriceError;
+-use ic_platform::{agent::Agent, candid_codec::arguments::encode_args};
++use ic_platform::native::ReadClient;
++use ic_platform_protocol::cloud_engine::encode_empty_args;
+ 
+ pub(super) trait Source {
+     async fn query(&self, method: &'static str) -> Result<Observation, PriceError>;
+ }
+ 
+-pub(super) struct MainnetSource(pub Agent);
++pub(super) struct MainnetSource(pub ReadClient);
+ 
+ impl Source for MainnetSource {
+     async fn query(&self, method: &'static str) -> Result<Observation, PriceError> {
+-        let argument = encode_args(&(), 64)?;
++        let argument = encode_empty_args(64)?;
+         Ok(super::super::query(&self.0, method, argument).await?)
+     }
+ }
+diff --git a/crates/ic-topology/src/cloud_engine/prices/tests.rs b/crates/ic-topology/src/cloud_engine/prices/tests.rs
+index 057027f..a399852 100644
+--- a/crates/ic-topology/src/cloud_engine/prices/tests.rs
++++ b/crates/ic-topology/src/cloud_engine/prices/tests.rs
+@@ -1,8 +1,5 @@
+ use super::*;
+-use ic_platform::{
+-    candid_codec::{self, encode_one},
+-    cloud_engine_types as wire,
+-};
++use engine_view_consumer::fixtures::{self as wire, encode_fixture as encode_one, candid::CandidType};
+ use ic_platform_types::Principal;
+ use std::{cell::RefCell, collections::VecDeque};
+ 
+@@ -12,7 +9,7 @@ fn observation(bytes: Vec<u8>) -> Observation {
+         observed_at: 123,
+     }
+ }
+-fn encoded<T: candid_codec::Encode>(value: &T) -> Vec<u8> {
++fn encoded<T: CandidType>(value: &T) -> Vec<u8> {
+     encode_one(value, 2 * 1024 * 1024).unwrap()
+ }
+ fn row(class: NodeType, provider: Option<Principal>, dc: Option<&str>) -> wire::MarketplaceEntry {
+@@ -25,8 +22,8 @@ fn row(class: NodeType, provider: Option<Principal>, dc: Option<&str>) -> wire::
+     wire::MarketplaceEntry {
+         key,
+         entry: wire::PriceEntry {
+-            node_type: class,
+-            provider: provider.map(|id| ic_platform::Principal::from_slice(id.as_slice())),
++            node_type: serde_json::from_value(serde_json::to_value(class).unwrap()).unwrap(),
++            provider: provider.map(|id| wire::candid::Principal::from_slice(id.as_slice())),
+             dc: dc.map(str::to_owned),
+             updated_at: i64::MIN,
+             price: wire::Price {
+@@ -92,7 +89,7 @@ fn classes_scopes_raw_text_and_exact_numeric_extremes() {
+     ] {
+         for provider in [None, provider] {
+             for dc in [None, Some(""), Some(" MiXeD\nDC ")] {
+-                let mut entry = row(class.clone(), provider, dc);
++                let mut entry = row(class, provider, dc);
+                 entry.entry.price.net_cycles = "9".repeat(256).parse().unwrap();
+                 entry.entry.price.gross_cycles = entry.entry.price.net_cycles.clone();
+                 let report = project(&[entry.clone()]).unwrap();
+diff --git a/crates/ic-topology/src/cloud_engine/prices/types.rs b/crates/ic-topology/src/cloud_engine/prices/types.rs
+index a6e9cf9..bb2e4db 100644
+--- a/crates/ic-topology/src/cloud_engine/prices/types.rs
++++ b/crates/ic-topology/src/cloud_engine/prices/types.rs
+@@ -1,7 +1,7 @@
+ //! Query-owned daily price reports and typed partial failures.
+ 
+ use crate::ReadError;
+-use ic_platform::{candid_codec, cloud_engine_types::NodeType};
++use ic_platform_protocol::cloud_engine::{EncodeError, NodeType};
+ use ic_platform_protocol::candid as decoder;
+ use ic_platform_types::Principal;
+ use serde::{Serialize, Serializer, ser::SerializeStruct};
+@@ -131,7 +131,7 @@ pub enum PriceError {
+     Read(#[from] ReadError),
+     /// Bounded empty-request encoding failed.
+     #[error("cloud-engine request encoding failed: {0:?}")]
+-    Encode(candid_codec::Error),
++    Encode(EncodeError),
+     /// Bounded external response decoding failed.
+     #[error("cloud-engine response decoding failed: {0:?}")]
+     Decode(decoder::Error),
+@@ -143,8 +143,8 @@ pub enum PriceError {
+     OverallDeadline,
+ }
+ 
+-impl From<candid_codec::Error> for PriceError {
+-    fn from(error: candid_codec::Error) -> Self {
++impl From<EncodeError> for PriceError {
++    fn from(error: EncodeError) -> Self {
+         Self::Encode(error)
+     }
+ }
+diff --git a/crates/ic-topology/src/mainnet/mod.rs b/crates/ic-topology/src/mainnet/mod.rs
+index 9b679e8..ba0ff7a 100644
+--- a/crates/ic-topology/src/mainnet/mod.rs
++++ b/crates/ic-topology/src/mainnet/mod.rs
+@@ -3,8 +3,10 @@
+ use std::future::Future;
+ use std::time::{Duration, SystemTime, SystemTimeError, UNIX_EPOCH};
+ 
+-use ic_platform::agent::{Agent, AgentError, AnonymousIdentity};
+-use ic_platform::nns_registry_types::protobuf;
++use ic_platform::native::{ReadClient, ReadConfig, ReadError as NativeError};
++use ic_platform::certificate::{PreparedRootKey, TimePolicy, TimeWindow, VerificationLimits};
++use ic_platform_types::Principal;
++use ic_platform_protocol::registry as protobuf;
+ use thiserror::Error;
+ 
+ pub(crate) const ENDPOINT: &str = "https://ic0.app";
+@@ -25,7 +27,7 @@ const INGRESS_EXPIRY: Duration = Duration::from_secs(300);
+ pub enum ReadError {
+     /// Agent construction, transport, certificate or query verification failed.
+     #[error("mainnet transport or verification failed: {0}")]
+-    Transport(#[source] Box<AgentError>),
++    Transport(#[source] Box<NativeError>),
+     /// The asynchronous operation exceeded its overall deadline.
+     #[error("mainnet read exceeded its 20-second deadline")]
+     Deadline,
+@@ -34,20 +36,32 @@ pub enum ReadError {
+     Clock(#[source] SystemTimeError),
+ }
+ 
+-pub(crate) fn agent() -> Result<Agent, ReadError> {
+-    Agent::builder()
+-        .with_url(ENDPOINT)
+-        .with_identity(AnonymousIdentity)
+-        .with_verify_query_signatures(true)
+-        .with_ingress_expiry(INGRESS_EXPIRY)
+-        .with_max_tcp_error_retries(0)
+-        .with_max_response_body_size(HTTP_BODY_BYTES)
+-        .build()
+-        .map_err(|error| ReadError::Transport(Box::new(error)))
++pub(crate) fn client() -> Result<ReadClient, ReadError> {
++    ReadClient::new(ReadConfig {
++        endpoint: ENDPOINT.into(),
++        root: PreparedRootKey::from_der(include_bytes!("root.der")).expect("pinned root"),
++        root_subnet: "tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe".parse().expect("pinned root subnet"),
++        message_bytes: HTTP_BODY_BYTES, request_timeout: DEADLINE,
++        verification: VerificationLimits { tree_nodes: 16384, tree_depth: 64, delegation_bytes: 131072, canister_ranges: 4096 },
++    }).map_err(|e| ReadError::Transport(Box::new(e)))
++}
++fn context() -> Result<(u64, TimePolicy), ReadError> {
++    let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(ReadError::Clock)?;
++    let now = u64::try_from(now.as_nanos()).map_err(|_| ReadError::Transport(Box::new(NativeError::Configuration)))?;
++    let window = TimeWindow { reference_ns: now, max_age_ns: 300_000_000_000, max_future_skew_ns: 60_000_000_000 };
++    Ok((now + INGRESS_EXPIRY.as_nanos() as u64, TimePolicy { certificate: window, delegation: window }))
++}
++pub(crate) async fn query(client: &ReadClient, target: Principal, method: &str, args: &[u8]) -> Result<Vec<u8>, ReadError> {
++    let (expiry, policy) = context()?;
++    read(client.query(target, method, args, expiry, policy)).await
++}
++pub(crate) async fn subnet(client: &ReadClient, target: Principal) -> Result<ic_platform::native::SubnetObservation, ReadError> {
++    let (expiry, policy) = context()?;
++    read(client.read_subnet(target, expiry, policy)).await
+ }
+ 
+ pub(crate) async fn read<T>(
+-    operation: impl Future<Output = Result<T, AgentError>>,
++    operation: impl Future<Output = Result<T, NativeError>>,
+ ) -> Result<T, ReadError> {
+     tokio::time::timeout(DEADLINE, operation)
+         .await
+diff --git a/crates/ic-topology/src/mainnet/root.der b/crates/ic-topology/src/mainnet/root.der
+new file mode 100644
+index 0000000000000000000000000000000000000000..aa41cc75d5c050a677a3f3d79b82d3e601505145
+GIT binary patch
+literal 133
+zcmXqLY%-8#<JD$kWMOQ&Q^U&4$i&FTgWxhTGAA-L`tao)mtP%W&9S%9+(tFV##~yj
+zrOjr>l8+C%OO#_pe#g$?x$1T^BYvV454X-y6Vc}V-p-Srq~D%)EqeBr(}jgXKiu_r
+fqkKgI;{TSkY!I5rDHGqmv!mI~eg>x$_o{UOUY9Oj
+
+literal 0
+HcmV?d00001
+
+diff --git a/crates/ic-topology/src/mainnet/tests.rs b/crates/ic-topology/src/mainnet/tests.rs
+index 07dbe85..439e83b 100644
+--- a/crates/ic-topology/src/mainnet/tests.rs
++++ b/crates/ic-topology/src/mainnet/tests.rs
+@@ -1,6 +1,6 @@
+ use std::future;
+ 
+-use ic_platform::agent::AgentError;
++use ic_platform::native::ReadError as AgentError;
+ 
+ use super::{ReadError, read};
+ 
+@@ -12,13 +12,11 @@ async fn stalled_read_reaches_deadline_without_waiting_on_wall_time() {
+ 
+ #[tokio::test]
+ async fn transport_failure_preserves_the_supplier_error() {
+-    let result = read(future::ready(Err::<(), _>(AgentError::MessageError(
+-        "fixture".into(),
+-    ))))
++    let result = read(future::ready(Err::<(), _>(AgentError::Packet)))
+     .await;
+     match result {
+         Err(ReadError::Transport(error)) => {
+-            assert!(matches!(*error, AgentError::MessageError(message) if message == "fixture"));
++            assert!(matches!(*error, AgentError::Packet));
+         }
+         other => panic!("unexpected result: {other:?}"),
+     }
+diff --git a/crates/ic-topology/src/node/mod.rs b/crates/ic-topology/src/node/mod.rs
+index 50f538b..c0d05df 100644
+--- a/crates/ic-topology/src/node/mod.rs
++++ b/crates/ic-topology/src/node/mod.rs
+@@ -1,6 +1,6 @@
+ //! Selected node Registry data, not verified hardware or observed running state.
+ 
+-use ic_platform::nns_registry_types::protobuf;
++use ic_platform_protocol::registry as protobuf;
+ use ic_platform_types::{Principal, PrincipalError};
+ use serde::Serialize;
+ use thiserror::Error;
+@@ -108,11 +108,11 @@ pub enum NodeError {
+ pub async fn fetch(node_id: Principal) -> Result<NodeReport, NodeError> {
+     let key = source_key(node_id);
+     let argument = protobuf::encode_get_value_request(key.as_bytes(), None, 256)?;
+-    let agent = mainnet::agent()?;
++    let agent = mainnet::client()?;
+     let registry = mainnet::REGISTRY
+         .parse()
+         .map_err(|error| NodeError::SourceIdentity(format!("{error}")))?;
+-    let bytes = mainnet::read(agent.query(&registry, METHOD).with_arg(argument).call()).await?;
++    let bytes = mainnet::query(&agent, registry, METHOD, &argument).await?;
+     project(node_id, &bytes, mainnet::observed_at()?)
+ }
+ 
+diff --git a/crates/ic-topology/src/placement/mod.rs b/crates/ic-topology/src/placement/mod.rs
+index 6883d1d..c942d89 100644
+--- a/crates/ic-topology/src/placement/mod.rs
++++ b/crates/ic-topology/src/placement/mod.rs
+@@ -6,8 +6,8 @@
+ 
+ pub mod collection;
+ 
+-use ic_platform::candid_codec::{self, decoder};
+-use ic_platform::nns_registry_types::{GetSubnetForCanisterRequest, GetSubnetForCanisterResponse};
++use ic_platform_protocol::{candid as decoder, cloud_engine::EncodeError, placement::{encode_get_subnet_for_canister_args, decode_get_subnet_for_canister_response, PlacementResult}};
++
+ use ic_platform_types::Principal;
+ use serde::Serialize;
+ use thiserror::Error;
+@@ -22,6 +22,7 @@ const REPLY_LIMITS: decoder::Limits = decoder::Limits {
+     types: 64,
+     work: 256 * 1024,
+     allocation: 128 * 1024,
++    vector: 1024, skipping: 128 * 1024,
+ };
+ 
+ /// Complete observation for one selected canister, with explicit source evidence.
+@@ -69,7 +70,7 @@ pub enum PlacementError {
+     Read(#[from] ReadError),
+     /// The bounded request encoder refused the request.
+     #[error("Registry request encoding failed: {0:?}")]
+-    Encode(candid_codec::Error),
++    Encode(EncodeError),
+     /// The bounded reply decoder refused malformed, incompatible or excessive data.
+     #[error("Registry reply decoding failed: {0:?}")]
+     Decode(decoder::Error),
+@@ -92,33 +93,24 @@ pub enum PlacementError {
+ /// Returns a typed failure for transport/verification, deadlines, codec limits,
+ /// Registry rejection, missing subnet evidence or an invalid local clock.
+ pub async fn fetch(canister_id: Principal) -> Result<PlacementReport, PlacementError> {
+-    let argument = candid_codec::encode_one(
+-        &GetSubnetForCanisterRequest {
+-            principal: Some(ic_platform::Principal::from_slice(canister_id.as_slice())),
+-        },
+-        256,
+-    )
+-    .map_err(PlacementError::Encode)?;
+-    let agent = mainnet::agent()?;
++    let argument = encode_get_subnet_for_canister_args(canister_id, 256).map_err(PlacementError::Encode)?;
++    let agent = mainnet::client()?;
+     // Agent retains its own external Principal identity. Parse at that API
+     // boundary without importing or declaring the external principal crate.
+     let registry = REGISTRY
+         .parse()
+         .map_err(|error| PlacementError::SourceIdentity(format!("{error}")))?;
+-    let bytes = mainnet::read(agent.query(&registry, METHOD).with_arg(argument).call()).await?;
++    let bytes = mainnet::query(&agent, registry, METHOD, &argument).await?;
+     let subnet_id = decode_subnet(&bytes)?;
+     let observed_at = mainnet::observed_at()?;
+     Ok(report(canister_id, subnet_id, observed_at))
+ }
+ 
+ fn decode_subnet(bytes: &[u8]) -> Result<Principal, PlacementError> {
+-    let response: GetSubnetForCanisterResponse =
+-        decoder::decode_one(bytes, REPLY_LIMITS).map_err(PlacementError::Decode)?;
+-    response
+-        .map_err(PlacementError::RegistryRejected)?
+-        .subnet_id
+-        .map(|id| Principal::from_slice(id.as_slice()))
+-        .ok_or(PlacementError::MissingSubnet)
++    match decode_get_subnet_for_canister_response(bytes, REPLY_LIMITS).map_err(PlacementError::Decode)? {
++        PlacementResult::Ok(value) => value.subnet_id.ok_or(PlacementError::MissingSubnet),
++        PlacementResult::Err(message) => Err(PlacementError::RegistryRejected(message)),
++    }
+ }
+ 
+ fn report(canister_id: Principal, subnet_id: Principal, observed_at: u64) -> PlacementReport {
+diff --git a/crates/ic-topology/src/placement/tests.rs b/crates/ic-topology/src/placement/tests.rs
+index 2ee0c8c..b28eb99 100644
+--- a/crates/ic-topology/src/placement/tests.rs
++++ b/crates/ic-topology/src/placement/tests.rs
+@@ -1,14 +1,14 @@
+-use ic_platform::nns_registry_types::GetSubnetForCanisterResponseOk;
++use engine_view_consumer::fixtures::{Placement as GetSubnetForCanisterResponseOk, candid, encode_fixture};
+ 
+ use super::{
+-    PlacementError, Principal, REPLY_LIMITS, candid_codec, decode_subnet, decoder, report,
++    PlacementError, Principal, REPLY_LIMITS, decode_subnet, decoder, report,
+ };
+ 
+ fn reply(subnet_id: Option<Principal>) -> Vec<u8> {
+     let response: Result<_, String> = Ok(GetSubnetForCanisterResponseOk {
+-        subnet_id: subnet_id.map(|id| ic_platform::Principal::from_slice(id.as_slice())),
++        subnet_id: subnet_id.map(|id| candid::Principal::from_slice(id.as_slice())),
+     });
+-    candid_codec::encode_one(&response, 1024).expect("fixture encodes")
++    encode_fixture(&response, 1024).expect("fixture encodes")
+ }
+ 
+ #[test]
+@@ -16,7 +16,7 @@ fn replacement_identity_preserves_registry_bytes_and_report_json() {
+     for length in 0..=29 {
+         let bytes: Vec<_> = (0..length).map(|index| index as u8).collect();
+         let identity = Principal::from_slice(&bytes);
+-        let legacy = ic_platform::Principal::from_slice(&bytes);
++        let legacy = candid::Principal::from_slice(&bytes);
+         assert_eq!(decode_subnet(&reply(Some(identity))).unwrap(), identity);
+         assert_eq!(identity.to_text(), legacy.to_text());
+         assert_eq!(
+@@ -57,7 +57,7 @@ fn registry_rejection_and_missing_subnet_are_distinct_failures() {
+         Err(PlacementError::MissingSubnet)
+     ));
+     let response: Result<GetSubnetForCanisterResponseOk, _> = Err("unmapped 🌍".to_owned());
+-    let bytes = candid_codec::encode_one(&response, 1024).unwrap();
++    let bytes = encode_fixture(&response, 1024).unwrap();
+     assert!(
+         matches!(decode_subnet(&bytes), Err(PlacementError::RegistryRejected(message)) if message == "unmapped 🌍")
+     );
+@@ -76,7 +76,7 @@ fn malformed_trailing_surplus_and_oversized_replies_are_refused() {
+         Err(PlacementError::Decode(decoder::Error::Trailing))
+     ));
+     let response: Result<_, String> = Ok(GetSubnetForCanisterResponseOk { subnet_id: None });
+-    let surplus = candid_codec::arguments::encode_args(&(response, 1u8), 1024).unwrap();
++    let surplus = candid::encode_args((response, 1u8)).unwrap();
+     assert!(matches!(
+         decode_subnet(&surplus),
+         Err(PlacementError::Decode(decoder::Error::Arity))
+diff --git a/crates/ic-topology/src/subnet/configuration/mod.rs b/crates/ic-topology/src/subnet/configuration/mod.rs
+index a37c5cf..975a3dc 100644
+--- a/crates/ic-topology/src/subnet/configuration/mod.rs
++++ b/crates/ic-topology/src/subnet/configuration/mod.rs
+@@ -1,6 +1,6 @@
+ //! Selected Registry subnet configuration, not observed running state or availability.
+ 
+-use ic_platform::nns_registry_types::protobuf;
++use ic_platform_protocol::registry as protobuf;
+ use ic_platform_types::{Principal, PrincipalError};
+ use serde::Serialize;
+ use thiserror::Error;
+@@ -116,11 +116,11 @@ pub async fn fetch(
+ ) -> Result<SubnetConfigurationReport, SubnetConfigurationError> {
+     let key = source_key(subnet_id);
+     let argument = protobuf::encode_get_value_request(key.as_bytes(), None, 256)?;
+-    let agent = mainnet::agent()?;
++    let agent = mainnet::client()?;
+     let registry = mainnet::REGISTRY
+         .parse()
+         .map_err(|error| SubnetConfigurationError::SourceIdentity(format!("{error}")))?;
+-    let bytes = mainnet::read(agent.query(&registry, METHOD).with_arg(argument).call()).await?;
++    let bytes = mainnet::query(&agent, registry, METHOD, &argument).await?;
+     project(subnet_id, &bytes, mainnet::observed_at()?)
+ }
+ 
+diff --git a/crates/ic-topology/src/subnet/distribution/mod.rs b/crates/ic-topology/src/subnet/distribution/mod.rs
+index 11e70ce..4c88fe9 100644
+--- a/crates/ic-topology/src/subnet/distribution/mod.rs
++++ b/crates/ic-topology/src/subnet/distribution/mod.rs
+@@ -6,7 +6,7 @@
+ use std::collections::BTreeSet;
+ use std::time::Duration;
+ 
+-use ic_platform::nns_registry_types::protobuf;
++use ic_platform_protocol::registry as protobuf;
+ use ic_platform_types::Principal;
+ use tokio::time::{Instant, sleep_until};
+ 
+@@ -47,7 +47,7 @@ pub const DEADLINE: Duration = Duration::from_secs(60);
+ /// no report. Later record failures are retained in the returned partial report.
+ pub async fn fetch(subnet_id: Principal) -> Result<SubnetDistributionReport, DistributionError> {
+     let started_at = mainnet::observed_at()?;
+-    let source = source::MainnetSource(mainnet::agent()?);
++    let source = source::MainnetSource(mainnet::client()?);
+     collect(subnet_id, started_at, &source).await
+ }
+ 
+diff --git a/crates/ic-topology/src/subnet/distribution/source.rs b/crates/ic-topology/src/subnet/distribution/source.rs
+index b2f383d..f66a9d1 100644
+--- a/crates/ic-topology/src/subnet/distribution/source.rs
++++ b/crates/ic-topology/src/subnet/distribution/source.rs
+@@ -1,6 +1,7 @@
+ //! Fixed-mainnet source and bounded relationship admission.
+ 
+-use ic_platform::{agent::Agent, nns_registry_types::protobuf};
++use ic_platform::native::ReadClient;
++use ic_platform_protocol::registry as protobuf;
+ use ic_platform_types::Principal;
+ 
+ use super::{
+@@ -19,7 +20,7 @@ pub(super) trait Source {
+     async fn value(&self, key: &str, version: u64) -> Result<Observation, DistributionError>;
+ }
+ 
+-pub(super) struct MainnetSource(pub Agent);
++pub(super) struct MainnetSource(pub ReadClient);
+ 
+ impl MainnetSource {
+     async fn query(
+@@ -31,7 +32,7 @@ impl MainnetSource {
+             .parse()
+             .map_err(|error| DistributionError::SourceIdentity(format!("{error}")))?;
+         let bytes =
+-            mainnet::read(self.0.query(&registry, method).with_arg(argument).call()).await?;
++            mainnet::query(&self.0, registry, method, &argument).await?;
+         Ok(Observation {
+             bytes,
+             observed_at: mainnet::observed_at()?,
+diff --git a/crates/ic-topology/src/subnet/distribution/types.rs b/crates/ic-topology/src/subnet/distribution/types.rs
+index f37c6e6..5c57620 100644
+--- a/crates/ic-topology/src/subnet/distribution/types.rs
++++ b/crates/ic-topology/src/subnet/distribution/types.rs
+@@ -2,7 +2,7 @@
+ 
+ use std::time::Duration;
+ 
+-use ic_platform::nns_registry_types::protobuf;
++use ic_platform_protocol::registry as protobuf;
+ use ic_platform_types::Principal;
+ use serde::{Serialize, Serializer, ser::SerializeStruct};
+ use thiserror::Error;
+diff --git a/crates/ic-topology/src/subnet/list/mod.rs b/crates/ic-topology/src/subnet/list/mod.rs
+index 9f93591..625f65a 100644
+--- a/crates/ic-topology/src/subnet/list/mod.rs
++++ b/crates/ic-topology/src/subnet/list/mod.rs
+@@ -3,7 +3,7 @@
+ //! The complete selected record is returned or the operation fails. Registration
+ //! establishes neither liveness, available capacity nor permission to deploy.
+ 
+-use ic_platform::nns_registry_types::protobuf;
++use ic_platform_protocol::registry as protobuf;
+ use ic_platform_types::{Principal, PrincipalError};
+ use serde::Serialize;
+ use thiserror::Error;
+@@ -102,11 +102,11 @@ pub enum SubnetListError {
+ /// are refused explicitly. Completeness applies to the returned record only.
+ pub async fn fetch() -> Result<SubnetListReport, SubnetListError> {
+     let argument = protobuf::encode_get_value_request(KEY.as_bytes(), None, 256)?;
+-    let agent = mainnet::agent()?;
++    let agent = mainnet::client()?;
+     let registry = mainnet::REGISTRY
+         .parse()
+         .map_err(|error| SubnetListError::SourceIdentity(format!("{error}")))?;
+-    let bytes = mainnet::read(agent.query(&registry, METHOD).with_arg(argument).call()).await?;
++    let bytes = mainnet::query(&agent, registry, METHOD, &argument).await?;
+     project(&bytes, mainnet::observed_at()?)
+ }
+ 
+diff --git a/crates/ic-topology/src/subnet/metrics/mod.rs b/crates/ic-topology/src/subnet/metrics/mod.rs
+index 7a4db25..1cec9e9 100644
+--- a/crates/ic-topology/src/subnet/metrics/mod.rs
++++ b/crates/ic-topology/src/subnet/metrics/mod.rs
+@@ -64,12 +64,9 @@ pub enum SubnetMetricsError {
+ /// metrics, deadline expiry or unavailable local observation time. Missing values
+ /// never become zero defaults. Agent owns external decoding and verification.
+ pub async fn fetch(subnet_id: Principal) -> Result<SubnetMetricsReport, SubnetMetricsError> {
+-    let agent = mainnet::agent()?;
+-    let external_id = subnet_id
+-        .as_slice()
+-        .try_into()
+-        .map_err(|error| SubnetMetricsError::SourceIdentity(format!("{error}")))?;
+-    let metrics = mainnet::read(agent.read_state_subnet_metrics(external_id)).await?;
++    let agent = mainnet::client()?;
++    let observation = mainnet::subnet(&agent, subnet_id).await?;
++    let metrics = observation.metrics().ok_or_else(|| ReadError::Transport(Box::new(ic_platform::native::ReadError::MissingPath)))?;
+     Ok(SubnetMetricsReport {
+         schema: 1,
+         subnet_id,
+diff --git a/crates/ic-topology/src/subnet/mod.rs b/crates/ic-topology/src/subnet/mod.rs
+index 77349a7..a4954bc 100644
+--- a/crates/ic-topology/src/subnet/mod.rs
++++ b/crates/ic-topology/src/subnet/mod.rs
+@@ -3,7 +3,7 @@
+ //! These observations do not establish complete Registry membership, node
+ //! liveness, allocatable capacity, hardware capabilities or authoritative routing.
+ 
+-use ic_platform::agent::SubnetType;
++
+ use ic_platform_types::Principal;
+ use serde::Serialize;
+ use thiserror::Error;
+@@ -102,21 +102,9 @@ pub enum SubnetError {
+ /// Returns typed read failures, identity mismatch, missing/duplicate node evidence
+ /// or a node-count/type-byte limit refusal. A failure does not prove subnet downtime.
+ pub async fn fetch(subnet_id: Principal) -> Result<SubnetReport, SubnetError> {
+-    let agent = mainnet::agent()?;
+-    let external_id = subnet_id
+-        .as_slice()
+-        .try_into()
+-        .map_err(|error| SubnetError::SourceIdentity(format!("{error}")))?;
+-    let observation = mainnet::read(agent.fetch_subnet_by_id(&external_id)).await?;
+-    project(
+-        subnet_id,
+-        Principal::from_slice(observation.id().as_slice()),
+-        observation
+-            .iter_nodes()
+-            .map(|node| Principal::from_slice(node.as_slice())),
+-        mainnet::observed_at()?,
+-        observation.subnet_type(),
+-    )
++    let agent = mainnet::client()?;
++    let observation = mainnet::subnet(&agent, subnet_id).await?;
++    project(subnet_id, observation.subnet(), observation.node_keys().map(|(id, _)| Principal::from_slice(id)), mainnet::observed_at()?, observation.subnet_type())
+ }
+ 
+ fn project(
+@@ -124,7 +112,7 @@ fn project(
+     returned: Principal,
+     nodes: impl IntoIterator<Item = Principal>,
+     observed_at: u64,
+-    subnet_type: Option<&SubnetType>,
++    subnet_type: Option<&str>,
+ ) -> Result<SubnetReport, SubnetError> {
+     if returned != requested {
+         return Err(SubnetError::IdentityMismatch {
+@@ -143,13 +131,6 @@ fn project(
+     if nodes.windows(2).any(|pair| pair[0] == pair[1]) {
+         return Err(SubnetError::DuplicateNode);
+     }
+-    let subnet_type = subnet_type.map(|value| match value {
+-        SubnetType::System => "system",
+-        SubnetType::Application => "application",
+-        SubnetType::VerifiedApplication => "verified_application",
+-        SubnetType::CloudEngine => "cloud_engine",
+-        SubnetType::Unknown(raw) => raw.as_str(),
+-    });
+     if subnet_type.is_some_and(|value| value.len() > MAX_SUBNET_TYPE_BYTES) {
+         return Err(SubnetError::SubnetTypeLimit);
+     }
+diff --git a/crates/ic-topology/src/subnet/progress/mod.rs b/crates/ic-topology/src/subnet/progress/mod.rs
+index 944ec53..5a705e1 100644
+--- a/crates/ic-topology/src/subnet/progress/mod.rs
++++ b/crates/ic-topology/src/subnet/progress/mod.rs
+@@ -1,7 +1,7 @@
+ //! Two authenticated subnet state times, without an uptime or completion verdict.
+ use crate::{ReadError, mainnet};
+-use ic_platform_next::certificate::{
+-    PreparedRootKey, TimePolicy, TimeWindow, VerificationLimits, VerifyError,
++use ic_platform::certificate::{
++    TimePolicy, TimeWindow, VerificationLimits, VerifyError,
+     authenticate_subnet_time_from_certificate,
+ };
+ use ic_platform_types::Principal;
+@@ -151,18 +151,14 @@ pub async fn fetch(
+ }
+ 
+ async fn observe(subnet_id: Principal) -> Result<StateTimeObservation, StateTimeError> {
+-    let agent = mainnet::agent()?;
+-    let external = subnet_id
+-        .as_slice()
+-        .try_into()
+-        .map_err(|e| StateTimeError::Identity(format!("{e}")))?;
+-    let certificate =
+-        mainnet::read(agent.read_subnet_state_raw(vec![vec!["time".into()]], external)).await?;
++    let agent = mainnet::client()?;
++    let observation = mainnet::subnet(&agent, subnet_id).await?;
++    let certificate = ic_platform::certificate::decode_certificate(observation.certificate_bytes(), ic_platform::certificate::CertificateDecodeLimits { bytes: 1024 * 1024 }).map_err(|e| ReadError::Transport(Box::new(ic_platform::native::ReadError::Decode(e))))?;
+     let now = SystemTime::now()
+         .duration_since(UNIX_EPOCH)
+         .map_err(ReadError::Clock)?;
+     let reference_ns = u64::try_from(now.as_nanos()).map_err(|_| StateTimeError::ClockRange)?;
+-    let root = PreparedRootKey::from_der(&agent.read_root_key())?;
++    let root = agent.root();
+     let root_subnet = ROOT_SUBNET
+         .parse()
+         .map_err(|e| StateTimeError::Identity(format!("{e}")))?;
+@@ -172,8 +168,8 @@ async fn observe(subnet_id: Principal) -> Result<StateTimeObservation, StateTime
+         max_future_skew_ns: FUTURE_SKEW_NS,
+     };
+     let evidence = authenticate_subnet_time_from_certificate(
+-        &certificate,
+-        &root,
++        certificate.unverified(),
++        root,
+         subnet_id,
+         Some(root_subnet),
+         TimePolicy {
+diff --git a/crates/ic-topology/src/subnet/progress/tests.rs b/crates/ic-topology/src/subnet/progress/tests.rs
+index 262f77d..2e1589d 100644
+--- a/crates/ic-topology/src/subnet/progress/tests.rs
++++ b/crates/ic-topology/src/subnet/progress/tests.rs
+@@ -1,3 +1,4 @@
++use ic_platform::certificate::PreparedRootKey;
+ use super::*;
+ use std::{cell::Cell, future::ready};
+ fn id() -> Principal {
+@@ -133,7 +134,7 @@ async fn progress_cancellation_starts_no_later_work() {
+ 
+ #[test]
+ fn local_supplier_accepts_agent_certificate_identity_and_rejects_wrong_authority() {
+-    use ic_platform_next::certificate::{CertificateDecodeLimits, decode_certificate};
++    use ic_platform::certificate::{CertificateDecodeLimits, decode_certificate};
+     let root = PreparedRootKey::from_der(include_bytes!("fixtures/root.der")).unwrap();
+     for (bytes, time, subnet, root_binding) in [
+         (
+@@ -151,7 +152,7 @@ fn local_supplier_accepts_agent_certificate_identity_and_rejects_wrong_authority
+     ] {
+         let decoded =
+             decode_certificate(bytes, CertificateDecodeLimits { bytes: 1024 * 1024 }).unwrap();
+-        let certificate: &ic_platform::agent::ExternalCertificate = decoded.unverified();
++        let certificate = decoded.unverified();
+         let subnet = subnet.parse().unwrap();
+         let binding = root_binding.then_some(subnet);
+         let window = TimeWindow {
+diff --git a/crates/ic-topology/src/subnet/settings/mod.rs b/crates/ic-topology/src/subnet/settings/mod.rs
+index 1850122..62ed22e 100644
+--- a/crates/ic-topology/src/subnet/settings/mod.rs
++++ b/crates/ic-topology/src/subnet/settings/mod.rs
+@@ -1,6 +1,6 @@
+ //! Registered feature and resource declarations, without resolving replica defaults.
+ use crate::{ReadError, mainnet};
+-use ic_platform::nns_registry_types::protobuf;
++use ic_platform_protocol::registry as protobuf;
+ use ic_platform_protocol::registry_settings as wire;
+ use ic_platform_types::Principal;
+ use serde::Serialize;
+@@ -97,17 +97,11 @@ pub enum SubnetSettingsError {
+ pub async fn fetch(subnet_id: Principal) -> Result<SubnetSettingsReport, SubnetSettingsError> {
+     let key = source_key(subnet_id);
+     let argument = protobuf::encode_get_value_request(key.as_bytes(), None, 256)?;
+-    let agent = mainnet::agent()?;
++    let agent = mainnet::client()?;
+     let registry = mainnet::REGISTRY
+         .parse()
+         .map_err(|error| SubnetSettingsError::SourceIdentity(format!("{error}")))?;
+-    let bytes = mainnet::read(
+-        agent
+-            .query(&registry, mainnet::REGISTRY_METHOD)
+-            .with_arg(argument)
+-            .call(),
+-    )
+-    .await?;
++    let bytes = mainnet::query(&agent, registry, mainnet::REGISTRY_METHOD, &argument).await?;
+     project(subnet_id, &bytes, mainnet::observed_at()?)
+ }
+ 
+diff --git a/crates/ic-topology/src/subnet/tests.rs b/crates/ic-topology/src/subnet/tests.rs
+index 4d087c9..b2c6608 100644
+--- a/crates/ic-topology/src/subnet/tests.rs
++++ b/crates/ic-topology/src/subnet/tests.rs
+@@ -1,4 +1,4 @@
+-use ic_platform::agent::SubnetType;
++
+ use ic_platform_types::Principal;
+ 
+ use super::{MAX_NODES, MAX_SUBNET_TYPE_BYTES, SubnetError, project};
+@@ -75,20 +75,20 @@ fn subnet_types_preserve_known_unknown_and_absent_values() {
+     let id = Principal::from_slice(&[1]);
+     for (source, expected) in [
+         (None, None),
+-        (Some(SubnetType::System), Some("system")),
+-        (Some(SubnetType::Application), Some("application")),
++        (Some("system".to_owned()), Some("system")),
++        (Some("application".to_owned()), Some("application")),
+         (
+-            Some(SubnetType::VerifiedApplication),
++            Some("verified_application".to_owned()),
+             Some("verified_application"),
+         ),
+-        (Some(SubnetType::CloudEngine), Some("cloud_engine")),
+-        (Some(SubnetType::Unknown(String::new())), Some("")),
++        (Some("cloud_engine".to_owned()), Some("cloud_engine")),
++        (Some(String::new()), Some("")),
+         (
+-            Some(SubnetType::Unknown("Future\n\u{1b}[31m型".into())),
++            Some("Future\n\u{1b}[31m型".to_owned()),
+             Some("Future\n\u{1b}[31m型"),
+         ),
+     ] {
+-        let report = project(id, id, [id], 0, source.as_ref()).unwrap();
++        let report = project(id, id, [id], 0, source.as_deref()).unwrap();
+         assert_eq!(report.observed_subnet_type.as_deref(), expected);
+         let json = serde_json::to_value(report).unwrap();
+         assert_eq!(
+@@ -102,10 +102,10 @@ fn subnet_types_preserve_known_unknown_and_absent_values() {
+ fn subnet_type_budget_counts_utf8_bytes_and_never_truncates() {
+     let id = Principal::from_slice(&[1]);
+     let exact = "é".repeat(MAX_SUBNET_TYPE_BYTES / 2);
+-    let source = SubnetType::Unknown(exact.clone());
++    let source = exact.clone();
+     let report = project(id, id, [id], 0, Some(&source)).unwrap();
+     assert_eq!(report.observed_subnet_type, Some(exact.clone()));
+-    let excess = SubnetType::Unknown(format!("{exact}x"));
++    let excess = format!("{exact}x");
+     assert!(matches!(
+         project(id, id, [id], 0, Some(&excess)),
+         Err(SubnetError::SubnetTypeLimit)

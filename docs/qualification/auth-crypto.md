@@ -70,7 +70,7 @@ high-S distinction. Wasm imports are empty; execution passed under Node 24.21.0.
 Native/Wasm Clippy and Rustdoc also pass. These are not installed IC instruction
 measurements or macOS execution evidence.
 
-## Remaining acceptance
+## Primitive-only baseline: remaining acceptance at 0.34.4
 
 Auth can keep the same primitive import names with the new feature selections.
 Its certified issuer path must instead map to Platform's existing explicit
@@ -80,3 +80,51 @@ key/witness construction needs a separately admitted owner. Do not restore an
 unbounded legacy facade or treat the primitive-only fixture as that migration.
 Issue #7 stays open until that mapping, no-legacy installed consumer proof and
 published replacement cohort are complete. Sibling source is unchanged.
+
+## Hard-cut candidate — Platform 0.34.5
+
+The retained `qualification/auth-crypto/consumer.patch` maps pinned Auth's
+issuer-signature component directly to `CanisterSignatureKey`,
+`PreparedRootKey::from_raw`, envelope decoding and explicit authentication.
+Auth still owns protected signer/seed admission, domain framing, byte caps,
+inclusive signing age, zero future grace and charging order. Both certificate
+timestamps must authenticate; delegation uses an explicit unrestricted u64 time
+window and does not inherit the signing-age window.
+
+Independent Auth fixtures use `certificate::construction` for tagged bounded
+certificate/signature encoding and short-form canister keys. Original upstream
+`ic-certification` 3.2.0 types and `ic-verify-bls-signature` 0.6.0 native fixture
+signing types retain their existing locked provenance/licenses; no arithmetic
+or signing implementation is copied. The small CBOR output writer and key framing
+are owned adapters, tested against literals, exact limits and the separate strict
+decoder. Construction grants no authenticated evidence. Signing is a separate
+native-only opt-in surface and does not choose an RNG or key.
+
+The synthetic delegated fixture now includes a valid old timestamp and certified
+subnet type; missing authority data is not waived. Actual consumer tests exposed
+a refusal-ordering mismatch: direct certificate time was checked before BLS.
+Authentication now precedes timestamp diagnostics, including the complete
+delegated chain. A product regression and the consumer's malformed-time plus
+corrupted-signature test retain this contract.
+
+Native consumer evidence at `target/auth-crypto/1794851767296/verified.json`
+passes 10 Ed25519 tests, the scalar negative control, 11 complete certified-proof
+tests, eight issuer-signature cases and eight root-delegation cases. Clippy and
+Auth Wasm compilation also pass. The actual installed fixture additionally
+passes all five cases: issuer/root and trap rollback, receiver charging and
+transaction rollback, authority enrollment, timestamp/revocation boundaries and
+volatile-state loss across stopped upgrades. It selects one local Platform
+0.34.5, Types 0.21.1 and Runtime 0.23.12 plus Testkit 0.107.1, with no legacy
+Platform or Agent. `qualification/auth-runtime/run.mjs` now enforces this graph
+and retains patch/lock hashes and test output in `verified.json`. Publication
+and downstream source adoption remain separate; siblings were not modified.
+
+The final installed run is retained at
+`target/auth-runtime/1794853025317/verified.json` (five passed).
+Consumer patch SHA-256:
+`67b1613bcf2d160c32d0ababde7b5acd70b8170386163a4ad5003d9e62040870`;
+qualification lock SHA-256:
+`a4cc2e3a0aaa917f185d67afd9f85791073a0b6f7d48f0f96c25dfc689998f71`.
+Use `make qualify-auth-runtime`; the server wrapper supplies the explicit
+PocketIC endpoint and reaps its owned process. Invoking the inner runner alone
+without that endpoint is refused before preparing or running a fixture.

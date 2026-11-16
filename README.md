@@ -41,7 +41,7 @@ consumer, canonical Principal identity and Serde representation. The
 [Query integration](docs/qualification/query-engine-view.md) now passes in its
 actual working tree after authorized local application; consumer delivery remains
 pending. A separate native heap
-profiler compares allocation against the published decoder; see its
+profiler checks allocation against retained historical bounds; see its
 [criteria and results](docs/qualification/engine-view-heap.md).
 Protocol 0.2.3 is published; private qualification packages
 remain at 0.1.0. Changed product crates advance after each GitHub source snapshot,
@@ -147,11 +147,13 @@ remain pending before the full authentication gate.
 
 Published Platform 0.34.4 restores opt-in Ed25519 and secp256k1 upstream
 primitives. [Actual Auth checks](docs/qualification/auth-crypto.md) pass without
-legacy Platform for those paths; certified-issuer and installed migration remain
-pending. [Published Wire 0.24.2 with Types 0.21.1](docs/qualification/auth-wire.md)
+legacy Platform. The 0.34.5 candidate also passes certified-issuer and all five
+installed cases. Its opt-in native read client and Protocol 0.2.4 codecs pass
+[actual Query qualification](docs/qualification/query-hard-cut.md); publication,
+macOS proof and the separate Agent signing/derivation correction remain pending. [Published Wire 0.24.2 with Types 0.21.1](docs/qualification/auth-wire.md)
 also passes Auth's unchanged generator and retained browser-codec checks.
 
-Toko 0.44.6 is installed through its authenticated installer, including canonical
+Toko 0.44.7 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local
 packages and `make deps-update` for deliberate Cargo lock updates. See
 [development setup and focused checks](docs/development.md) for prerequisites,

@@ -66,3 +66,5 @@ impl std::error::Error for Error {}
 pub(crate) fn decode<T: Decode>(input: &[u8], limits: Limits) -> Result<T, Error> {
     wire::decode(input, limits)
 }
+
+pub(crate) mod projection;

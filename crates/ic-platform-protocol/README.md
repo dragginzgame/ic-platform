@@ -11,3 +11,9 @@ See the [design and qualification records](https://github.com/dragginzgame/ic-pl
 The opt-in `http-request` capability encodes one bounded management HTTP GET
 argument with explicit response size/replication and optional raw body. It adds
 no dependencies and selects no network or cycle policy.
+
+`registry` supplies bounded protobuf envelopes and borrowed record projections;
+`registry-placement` supplies target argument encoding and bounded placement
+results. Presence, source errors and resource refusals remain explicit. These
+codecs perform no transport or authentication. Independent schemas and actual
+Query qualification cover the current local package cohort.

@@ -13,3 +13,8 @@ pub fn selected_subnet(view: &EngineView) -> Option<Principal> {
 
 #[cfg(test)]
 mod tests;
+
+/// Independently declared schemas for native qualification only.
+#[cfg(not(target_family = "wasm"))]
+#[doc(hidden)]
+pub mod fixtures;

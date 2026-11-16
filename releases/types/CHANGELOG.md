@@ -5,7 +5,15 @@ Return to the [group index](../../CHANGELOG.md).
 
 ## [0.21.2] - Unreleased
 
+### 🔧 Tooling
+
+- Adopt Toko Tooling 0.44.7 in both workspaces and use its flat qualification
+  package layout. Retain the approved thiserror 2.0.18 compatibility selection.
+
 ### 🧪 Testing
+
+- Update the qualification registry Types selection to 0.21.1 alongside the local
+  0.21.1 candidate, retaining explicit Cargo source identity boundaries.
 
 - Qualify published Types 0.21.1 with Wire 0.24.2 through Auth's actual generator,
   retained browser frames and unchanged generated client output, resolving

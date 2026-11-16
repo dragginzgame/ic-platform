@@ -2,24 +2,31 @@
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {resolve,relative} from 'node:path';
 const root=process.cwd();const source=resolve(process.env.AUTH_SOURCE??'../ic-auth');
 const revision='b78991e9833320692921bf766e51ad361c9c8c4d';
 const output=resolve(`target/auth-runtime/${Date.now()}`);mkdirSync(output,{recursive:true});
 const run=(cmd,args,cwd=root)=>{const r=spawnSync(cmd,args,{cwd,encoding:'utf8',maxBuffer:16*1024*1024});assert.equal(r.status,0,r.stderr);return r.stdout;};
 run('git',['archive',`--output=${output}/auth.tar`,revision,'Cargo.toml','Cargo.lock','LICENSE.md','crates','qualification'],source);
 run('tar',['-xf',`${output}/auth.tar`,'-C',output]);
-run('git',['apply',`${root}/qualification/auth-runtime/testkit.patch`],output);
+run('git',['apply',`--directory=${relative(root,output)}`,`${root}/qualification/auth-runtime/testkit.patch`],root);
+run('git',['apply',`--directory=${relative(root,output)}`,`${root}/qualification/auth-crypto/consumer.patch`],root);
 const edit=(path,fn)=>{const file=`${output}/${path}`;writeFileSync(file,fn(readFileSync(file,'utf8')));};
 edit('Cargo.toml',s=>s.replace('ic-platform-types = { version = "0.20.4",',`ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.1",`));
+for (const name of ['Cargo.toml','qualification/Cargo.toml']) edit(name,s=>s
+  .replace('ic-platform = { version = "0.33.7",', `ic-platform = { path = ${JSON.stringify(`${root}/crates/ic-platform`)}, version = "=0.34.5",`)
+  .replace('ic-platform-types = { version = "0.20.4",', `ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.1",`)
+  .replace('ic-wire = "0.24.1"', 'ic-wire = "=0.24.2"'));
+edit('crates/ic-auth/Cargo.toml',s=>s.replace('ic-platform/signature-verification','ic-platform/canister-signature-authentication'));
+for (const name of ['ic-auth-certified-conformance','ic-auth-host-fixture','ic-auth-host-conformance'])
+  edit(`qualification/${name}/Cargo.toml`,s=>s
+    .replace('["certification-cbor", "ic-protocol-fixtures"]','["ecdsa", "certificate-construction", "certificate-fixture-signing", "canister-signature-authentication"]')
+    .replace('["canister-sig-creation", "certification-cbor", "ed25519"]','["certificate-construction", "ed25519"]')
+    .replace('["certification-cbor", "canister-sig-creation"]','["certificate-construction", "canister-signature-authentication"]'));
 edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.12",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
 edit('qualification/ic-auth-host-fixture/Cargo.toml',s=>s.replace('features = ["cdk"]','features = ["entrypoint-macros"]'));
 edit('qualification/Cargo.toml',s=>s.replace('ic-testkit = "0.106.0"', 'ic-testkit = "=0.107.1"'));
 edit('qualification/ic-auth-host-conformance/Cargo.toml', s => s.replace('[dev-dependencies]', '[dev-dependencies]\nic-management-canister-types = "=0.8.0"'));
-// Legacy crypto remains a qualification supplier. Compare its key parser's raw
-// identity at that boundary; all Auth/Runtime public Principal values use Types.
-edit('crates/ic-auth/src/issuer_signature.rs',s=>s.replace('key.canister_id != policy.signing_canister','key.canister_id.as_slice() != policy.signing_canister.as_slice()'));
-edit('qualification/ic-auth-host-conformance/tests/installed/mod.rs',s=>s.replace('CanisterSigPublicKey::new(Principal::from_slice(id.as_slice())','CanisterSigPublicKey::new(ic_platform::Principal::from_slice(id.as_slice())'));
 for(const file of ['canister.rs','receiver/canister.rs','browser/canister.rs','enrollment/canister.rs'])edit(`qualification/ic-auth-host-fixture/src/${file}`,s=>{
   s=s.replace('use ic_platform_runtime::{cdk, cdk::api, ic0};','use ic_platform_runtime::{self as cdk, system as api};');
   s=s.replaceAll('api::msg_caller()', 'api::caller()').replaceAll('ic0::msg_arg_data_size()', 'api::argument_size()').replaceAll('api::certified_data_set(', 'api::set_certified_data(&').replaceAll('api::data_certificate()', 'api::data_certificate(RESPONSE.bytes).unwrap()');
@@ -46,5 +53,5 @@ for (const file of ['mod.rs', 'enrollment.rs', 'receiver.rs']) edit(`qualificati
     assert_eq!(pic.canister_status(id, None).await.unwrap().status, ic_management_canister_types::CanisterStatusType::Stopped);
     pic.upgrade_canister(id, ${wasm}, vec![], None).await.unwrap();
     pic.start_canister(id, None).await.unwrap();`));
-writeFileSync(`${output}/source.json`,JSON.stringify({revision,root,scope:'actual Auth installed fixture with explicit new Runtime adapters; legacy Platform crypto retained'},null,2)+'\n');
+writeFileSync(`${output}/source.json`,JSON.stringify({revision,root,scope:'actual Auth installed fixture with explicit new Runtime adapters; current Platform authentication and construction; no legacy Platform'},null,2)+'\n');
 console.log(output);

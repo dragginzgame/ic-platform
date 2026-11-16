@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-mod wire;
+pub(crate) mod wire;
 use wire::{FieldValue, Read, Reader};
 
 /// Mandatory limits shared by the outer record and all selected nested messages.

@@ -1,6 +1,6 @@
 # Types self-authentication and public consumer
 
-The unpublished Types 0.21.0 candidate now retains the opt-in
+Types 0.21.1 now retains the opt-in
 `principal-self-authenticating` feature. It delegates SHA-224 to upstream
 `sha2` 0.11.1 with default features disabled, matching the published 0.20.4
 supplier requirement. Only the protocol frame is owned here: digest of the
@@ -10,13 +10,13 @@ published test source is copied.
 
 ## Independent consumer
 
-`qualification/crates/types-consumer` is a private 0.1.0 package outside product
+`qualification/types-consumer` is a private 0.1.0 package outside product
 release groups. Its normal dependency selects the local Types path and exact
-0.21.0 version. The `candidate-types` alias distinguishes source selection, not
+0.21.1 version. The `candidate-types` alias distinguishes source selection, not
 a wrapper or a second identity in its production graph. Public assignments
 between directly imported Principal and Account.owner compile and execute.
 
-Registry Types 0.20.4 is a native-only development oracle. It is compared through
+Registry Types 0.21.1 is a native-only development oracle. It is compared through
 bytes, text and JSON, never by pretending the two sources have the same Rust
 type. Native comparison covers all 30 Principal lengths, four subaccount states,
 every single-position `!` mutation of the resulting account text, and twelve

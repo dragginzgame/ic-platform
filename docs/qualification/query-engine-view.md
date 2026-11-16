@@ -88,46 +88,13 @@ The first projection gate remains open pending an authorized consumer migration
 and remaining acceptance decisions. macOS results from this repository's CI do
 not qualify this separate Query integration experiment.
 
-## Portable Git-pinned patch
+## Historical patch retired — 16 November 2026
 
-The reviewable [integration patch](../../qualification/patches/query-engine-view.patch)
-replaces the machine-specific path with the public repository URL, exact
-`08c72219ad6f261067c00eece9c8c71852e6b561` Git revision and package version
-0.1.0. It includes the matching lock change and sorted manifest entries. No
-registry publication is needed. This is a six-file proposal for Query, not an
-already-applied migration or an additional product implementation.
-
-The patch contains narrowly scoped edits and context from the pinned Query
-revision identified above, under that repository's `LICENSE.md`; it does not
-import a crate or test suite here. Query retains ownership of its source and
-consumer admission policies. The published codec remains test fixture machinery
-and a dependency for unrelated Query capabilities.
-
-After selecting this Git source, the same seven tests, topology Clippy with
-warnings denied, CLI compilation and single-Types graph checks passed again.
-No registry supplier version changed. `git apply --check` passed against both
-the pinned baseline and the existing sibling working tree; the latter was only
-read, and its unrelated dirty files remain untouched.
-
-- Portable patch SHA-256: `ca14d6436e0981e5be65c7fec56d65ee741c3cb5cb27373a4646b41abc5bc487`.
-- Git-pinned Query lock SHA-256: `c7e1b73cfb55e0c7df908a214932b8ea4e394424d43a73c3d8b4037196f7b5c0`.
-
-From this repository root, reproduce without changing the sibling checkout:
-
-```sh
-snapshot="$(mktemp -d)"
-git -C ../ic-query archive 263a8e92da873543825c25e7dd6530c4db5ab673 | tar -x -C "$snapshot"
-git -C "$snapshot" apply "$PWD/qualification/patches/query-engine-view.patch"
-cargo fetch --locked --manifest-path "$snapshot/Cargo.toml"
-cargo test --offline --locked --manifest-path "$snapshot/Cargo.toml" -p ic-topology cloud_engine::engine
-cargo clippy --offline --locked --manifest-path "$snapshot/Cargo.toml" -p ic-topology --all-targets -- -D warnings
-cargo check --offline --locked --manifest-path "$snapshot/Cargo.toml" -p ic-query-cli
-```
-
-Actual application to `../ic-query` requires separate authorization under the
-read-only sibling rule. The patch deliberately leaves Query versions/release
-ledgers untouched: delivery/version selection belongs to an authorized consumer
-migration, and neither crate publication nor consumer delivery is implied.
+The partial-migration patch was removed during the hard cut because it retained
+legacy fixture encoders and decoders. Its delivered history and the measurements
+above remain research evidence, not a maintained reproduction path or migration
+recommendation. Complete Query replacement is tracked in
+[#4](https://github.com/dragginzgame/ic-platform/issues/4).
 
 ## Authorized local application
 

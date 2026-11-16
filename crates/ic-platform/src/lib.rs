@@ -13,3 +13,12 @@ pub mod ed25519;
 
 #[cfg(feature = "ecdsa")]
 pub mod ecdsa;
+
+/// Upstream BLS signing types for explicitly selected native fixtures.
+#[cfg(all(feature = "certificate-fixture-signing", not(target_family = "wasm")))]
+pub mod fixture_signing {
+    pub use ic_verify_bls_signature::PrivateKey;
+}
+
+#[cfg(all(feature = "native-read", not(target_family = "wasm")))]
+pub mod native;

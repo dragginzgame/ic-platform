@@ -9,31 +9,24 @@ license-file.workspace = true
 [target.'cfg(any())'.dev-dependencies]
 toko-tooling.workspace = true
 
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+candid.workspace = true
+serde.workspace = true
+
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
-ic-platform-types.workspace = true
-legacy-platform.workspace = true
+ic-management-canister-types.workspace = true
 
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
 [features]
-http-request = [
-    "ic-platform-protocol/http-request",
-    "dep:candid",
-    "dep:ic-management-canister-types",
-    "legacy-platform/management-canister-types",
-    "legacy-platform/candid-codec",
-]
+http-request = ["ic-platform-protocol/http-request"]
 marketplace = ["ic-platform-protocol/cloud-engine-marketplace"]
-registry-settings = [
-    "ic-platform-protocol/registry-settings",
-    "legacy-platform/nns-registry-types",
-]
+registry = ["ic-platform-protocol/registry", "ic-platform-protocol/registry-placement"]
+registry-settings = ["ic-platform-protocol/registry-settings"]
 
 [dependencies]
-candid = { workspace = true, optional = true }
 candidate-types.workspace = true
-ic-management-canister-types = { workspace = true, optional = true }
 ic-platform-protocol.workspace = true
 
 [dev-dependencies]

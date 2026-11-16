@@ -1,31 +1,7 @@
-//! Native-only independent declarations using the published codec as an oracle.
-//! None of these declarations come from the replacement's projection macro.
-
+//! Independent upstream schemas and fixed admission cases.
+use crate::fixtures::{SubnetFrame, ViewFrame};
+use ::candid::Principal;
 use ic_platform_protocol::{candid, cloud_engine as new};
-use ic_platform_types::Principal;
-use legacy_platform::{candid_codec, cloud_engine_types as old};
-
-legacy_platform::candid_record! {
-    struct SubnetFrame {
-        1_133_613_777 => replica_version: String,
-        1_588_007_470 => maximum_state_size: Option<u64>,
-        3_065_459_808 => halted: bool,
-        4_257_184_827 => node_ids: Vec<Principal>,
-    }
-}
-legacy_platform::candid_record! {
-    struct ViewFrame {
-        // An unrelated field exercises validated projection skipping.
-        0 => extra: Vec<String>,
-        23_515 => id: String,
-        1_097_286_461 => subnet_id: Option<Principal>,
-        1_645_921_689 => engine_operator_id: Option<Principal>,
-        2_584_155_869 => subnet: Option<SubnetFrame>,
-        2_866_115_289 => deleted_at: Option<i64>,
-        4_257_184_827 => node_ids: Vec<Principal>,
-    }
-}
-
 fn limits() -> candid::Limits {
     candid::Limits {
         bytes: 512 * 1024,
@@ -37,50 +13,6 @@ fn limits() -> candid::Limits {
         skipping: 128 * 1024,
     }
 }
-fn old_limits() -> candid_codec::decoder::Limits {
-    let limit = limits();
-    candid_codec::decoder::Limits {
-        bytes: limit.bytes,
-        header: limit.header,
-        types: limit.types,
-        work: limit.work,
-        allocation: limit.allocation,
-    }
-}
-
-// Compare data and refusal classes, not implementation-specific work counters.
-fn compare(bytes: &[u8]) {
-    let candidate = new::decode_get_engine_views_response(bytes, limits());
-    let published = old::decode_get_engine_views_response_with_skip_limit(
-        bytes,
-        old_limits(),
-        limits().skipping,
-    );
-    match (candidate, published) {
-        (Ok(candidate), Ok(published)) => {
-            assert_eq!(
-                serde_json::to_value(candidate).unwrap(),
-                serde_json::to_value(published).unwrap()
-            );
-        }
-        (Err(candidate), Err(published)) => {
-            use candid_codec::decoder::Error as Old;
-            let expected = match published {
-                Old::Malformed => candid::Error::Malformed,
-                Old::Unsupported => candid::Error::Unsupported,
-                Old::Type => candid::Error::Type,
-                Old::Arity => candid::Error::Arity,
-                Old::Trailing => candid::Error::Trailing,
-                Old::Limit => candid::Error::Limit,
-            };
-            assert_eq!(candidate, expected);
-        }
-        (candidate, published) => {
-            panic!("decoder disagreement: candidate={candidate:?}, published={published:?}")
-        }
-    }
-}
-
 #[test]
 fn independently_declared_records_preserve_all_selected_values() {
     let principals = [
@@ -105,18 +37,23 @@ fn independently_declared_records_preserve_all_selected_values() {
                     deleted_at: timestamp,
                     node_ids: principals.to_vec(),
                 }];
-                let frame = candid_codec::encode_one(frames.as_slice(), 65536).unwrap();
-                compare(&frame);
+                let frame = ::candid::encode_one(frames.as_slice()).unwrap();
                 let view = new::decode_get_engine_views_response(&frame, limits())
                     .unwrap()
                     .pop()
                     .unwrap();
                 assert_eq!(view.id, " engine\0é ");
                 assert_eq!(view.deleted_at, timestamp);
+                assert_eq!(
+                    view.subnet_id.map(|p| p.as_slice().to_vec()),
+                    present.then(Vec::new)
+                );
+                assert_eq!(view.engine_operator_id.unwrap().as_slice(), &[4]);
                 assert_eq!(view.subnet.is_some(), present);
                 if let Some(subnet) = view.subnet {
                     assert_eq!(subnet.maximum_state_size, maximum_state_size);
                     assert!(subnet.halted);
+                    assert!(subnet.replica_version.is_empty());
                     assert_eq!(
                         subnet
                             .node_ids
@@ -143,49 +80,61 @@ fn independently_declared_records_preserve_all_selected_values() {
 }
 
 #[test]
-fn request_frames_match_published_encoder() {
+fn request_frames_match_upstream_encoder() {
     for ids in [
         vec![],
         vec![String::new()],
         vec!["a\0é".into(), "b".into()],
         vec!["x".repeat(128); 128],
     ] {
-        let expected = old::encode_get_engine_views_args(&ids, 65536).unwrap();
+        let expected = ::candid::encode_one(&ids).unwrap();
         assert_eq!(
             new::encode_get_engine_views_args(&ids, expected.len()).unwrap(),
             expected
         );
         assert!(new::encode_get_engine_views_args(&ids, expected.len() - 1).is_err());
-        assert!(old::encode_get_engine_views_args(&ids, expected.len() - 1).is_err());
     }
 }
 
 #[test]
-fn independent_literal_refusals_match_published_projection() {
+fn independent_literal_refusals_have_fixed_classes() {
     // One view, id="x", node_ids empty; optional fields omitted entirely.
     let valid = b"DIDL\x03\x6d\x01\x6c\x02\xdb\xb7\x01\x71\xbb\xf8\xfd\xed\x0f\x02\x6d\x68\x01\x00\x01\x01x\x00";
-    compare(valid);
+    assert!(new::decode_get_engine_views_response(valid, limits()).is_ok());
     for end in 0..valid.len() {
-        compare(&valid[..end]);
+        assert_eq!(
+            new::decode_get_engine_views_response(&valid[..end], limits()),
+            Err(candid::Error::Malformed)
+        );
     }
     let mut trailing = valid.to_vec();
     trailing.push(0);
-    compare(&trailing);
+    assert_eq!(
+        new::decode_get_engine_views_response(&trailing, limits()),
+        Err(candid::Error::Trailing)
+    );
     let mut required = valid.to_vec();
     required[9] = 0xda;
-    compare(&required);
-    compare(b"DIDL\0\0");
-    compare(b"DIDL\0\x02\x7f\x7f");
+    assert_eq!(
+        new::decode_get_engine_views_response(&required, limits()),
+        Err(candid::Error::Type)
+    );
+    assert_eq!(
+        new::decode_get_engine_views_response(b"DIDL\0\0", limits()),
+        Err(candid::Error::Arity)
+    );
+    assert_eq!(
+        new::decode_get_engine_views_response(b"DIDL\0\x02\x7f\x7f", limits()),
+        Err(candid::Error::Arity)
+    );
     // An incompatible present optional payload must refuse, not become None.
     let wrong = b"DIDL\x04\x6d\x01\x6c\x03\xdb\xb7\x01\x71\xdd\xad\x9c\xd0\x09\x03\xbb\xf8\xfd\xed\x0f\x02\x6d\x68\x6e\x7e\x01\x00\x01\x01x\x01\x01\x00";
-    compare(wrong);
     assert!(new::decode_get_engine_views_response(wrong, limits()).is_err());
 }
 
 #[test]
 fn empty_response_and_absent_optional_payload_match() {
-    let empty = candid_codec::encode_one(&Vec::<ViewFrame>::new(), 65536).unwrap();
-    compare(&empty);
+    let empty = ::candid::encode_one(Vec::<ViewFrame>::new()).unwrap();
     assert!(
         new::decode_get_engine_views_response(&empty, limits())
             .unwrap()
@@ -194,51 +143,41 @@ fn empty_response_and_absent_optional_payload_match() {
 }
 
 #[test]
-fn mutated_literal_admission_matches_published_projection() {
+fn retained_mutation_admission_is_explicit() {
     let valid = b"DIDL\x03\x6d\x01\x6c\x02\xdb\xb7\x01\x71\xbb\xf8\xfd\xed\x0f\x02\x6d\x68\x01\x00\x01\x01x\x00";
-    for offset in 0..valid.len() {
-        for byte in [0, 1, 2, 0x6d, 0x7f, 0x80, 0xff] {
-            let mut frame = valid.to_vec();
-            frame[offset] = byte;
-            let candidate = new::decode_get_engine_views_response(&frame, limits());
-            let published = old::decode_get_engine_views_response_with_skip_limit(
-                &frame,
-                old_limits(),
-                limits().skipping,
-            );
-            assert_eq!(
-                candidate.is_ok(),
-                published.is_ok(),
-                "offset {offset}, byte {byte:02x}: candidate={candidate:?}, published={published:?}"
-            );
-            if candidate.is_ok() {
-                compare(&frame);
-            }
-        }
+    let rows: Vec<_> = include_str!("../../../fixtures/engine-mutations.tsv")
+        .lines()
+        .collect();
+    assert_eq!(rows.len(), valid.len() * 7);
+    for row in rows {
+        let fields: Vec<_> = row.split('\t').collect();
+        let offset: usize = fields[0].parse().unwrap();
+        let byte: u8 = fields[1].parse().unwrap();
+        let expected: bool = fields[2].parse().unwrap();
+        let mut frame = valid.to_vec();
+        frame[offset] = byte;
+        assert_eq!(
+            new::decode_get_engine_views_response(&frame, limits()).is_ok(),
+            expected,
+            "{row}"
+        );
     }
 }
 
 mod resources;
 
 #[test]
-fn empty_vectors_retain_published_value_based_admission() {
+fn empty_vectors_have_value_based_admission() {
     // One argument of type vec bool, with no elements.
     let frame = b"DIDL\x01\x6d\x7e\x01\x00\x00";
     let candidate = new::decode_get_engine_views_response(frame, limits());
-    let published = old::decode_get_engine_views_response_with_skip_limit(
-        frame,
-        old_limits(),
-        limits().skipping,
-    );
-    assert!(published.unwrap().is_empty());
     assert!(candidate.unwrap().is_empty());
 }
 
 #[test]
-fn absent_payload_retains_published_strict_option_admission() {
+fn absent_payload_has_strict_option_admission() {
     // subnet is declared opt bool rather than opt EngineSubnet, but is None.
     let frame = b"DIDL\x04\x6d\x01\x6c\x03\xdb\xb7\x01\x71\xdd\xad\x9c\xd0\x09\x03\xbb\xf8\xfd\xed\x0f\x02\x6d\x68\x6e\x7e\x01\x00\x01\x01x\x00\x00";
-    compare(frame);
     let views = new::decode_get_engine_views_response(frame, limits()).unwrap();
     assert_eq!(views.len(), 1);
     assert_eq!(views[0].id, "x");
@@ -248,7 +187,6 @@ fn absent_payload_retains_published_strict_option_admission() {
     for boolean in [0, 1] {
         let mut present = frame[..frame.len() - 2].to_vec();
         present.extend_from_slice(&[1, boolean, 0]);
-        compare(&present);
         assert_eq!(
             new::decode_get_engine_views_response(&present, limits()),
             Err(candid::Error::Type)

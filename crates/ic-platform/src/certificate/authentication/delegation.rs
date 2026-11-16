@@ -46,7 +46,6 @@ pub(super) fn verify(
         &mut false,
     )?;
     verify_signature(&authority.certificate, root)?;
-    let time_ns = checked_time(&authority.certificate.tree, window.bounds()?)?;
     match scope {
         Authority::Canister(target) => authorize(
             &authority.certificate.tree,
@@ -82,6 +81,7 @@ pub(super) fn verify(
     )?;
     let key = PreparedRootKey::from_der(key)?;
     verify_signature(certificate, &key)?;
+    let time_ns = checked_time(&authority.certificate.tree, window.bounds()?)?;
     Ok((subnet, window, time_ns))
 }
 

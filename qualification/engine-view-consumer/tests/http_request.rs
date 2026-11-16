@@ -5,7 +5,7 @@
 use ic_platform_protocol::http_request::{EncodeError, encode_http_get_args};
 
 #[test]
-fn management_schema_and_legacy_consumer_preserve_every_selected_field() {
+fn management_schema_preserve_every_selected_field() {
     let urls = [
         String::new(),
         " https://ic-testkit.invalid/held/a/0\0é".into(),
@@ -33,25 +33,6 @@ fn management_schema_and_legacy_consumer_preserve_every_selected_field() {
                     assert_eq!(decoded.is_replicated, Some(replicated));
                     assert!(decoded.headers.is_empty());
                     assert!(decoded.transform.is_none());
-                    let legacy: legacy_platform::management_canister_types::HttpRequestArgs =
-                        legacy_platform::candid_codec::decoder::decode_one(
-                            &bytes,
-                            legacy_platform::candid_codec::decoder::Limits {
-                                bytes: 65536,
-                                header: 4096,
-                                types: 32,
-                                work: 1_000_000,
-                                allocation: 1_000_000,
-                            },
-                        )
-                        .unwrap();
-                    assert_eq!(legacy.url, url);
-                    assert_eq!(legacy.body.as_deref(), selected);
-                    assert_eq!(legacy.max_response_bytes, Some(u64::MAX));
-                    assert_eq!(legacy.is_replicated, Some(replicated));
-                    assert!(legacy.pricing_version.is_none());
-                    assert!(legacy.transform.is_none());
-                    assert!(legacy.headers.is_empty());
                     assert_eq!(
                         encode_http_get_args(&url, selected, u64::MAX, replicated, bytes.len())
                             .unwrap(),

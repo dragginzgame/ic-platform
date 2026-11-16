@@ -2,7 +2,7 @@ use ic_platform_protocol::cloud_engine::AvailableNodesPageResult;
 use serde_json::{Value, json};
 
 #[test]
-fn page_arguments_preserve_public_values_and_match_published_bytes() {
+fn page_arguments_preserve_public_values_and_match_independent_schema_bytes() {
     use ic_platform_protocol::cloud_engine::{
         ListAvailableNodesPageArgs, encode_list_available_nodes_page_args,
     };
@@ -16,8 +16,7 @@ fn page_arguments_preserve_public_values_and_match_published_bytes() {
         for start in [Value::Null, json!("aaaaa-aa"), json!("2vxsx-fae")] {
             for rejoining in [Value::Null, json!(""), json!(" \0é ".repeat(40))] {
                 let json = json!({"limit": limit, "start": start, "rejoining": rejoining});
-                let args: ListAvailableNodesPageArgs =
-                    serde_json::from_value(json.clone()).unwrap();
+                let args: ListAvailableNodesPageArgs = serde_json::from_value(json).unwrap();
                 let encoded = encode_list_available_nodes_page_args(&args, 4096).unwrap();
                 assert_eq!(
                     encode_list_available_nodes_page_args(&args, encoded.len()).unwrap(),
@@ -29,17 +28,17 @@ fn page_arguments_preserve_public_values_and_match_published_bytes() {
                 assert_eq!(restored, args);
                 #[cfg(not(target_family = "wasm"))]
                 {
-                    use legacy_platform::cloud_engine_types as old;
-                    let old_args: old::ListAvailableNodesPageArgs =
-                        serde_json::from_value(json).unwrap();
-                    assert_eq!(
-                        old::encode_list_available_nodes_page_args(&old_args, 4096).unwrap(),
-                        encoded
-                    );
-                    assert_eq!(
-                        serde_json::to_value(old_args).unwrap(),
-                        serde_json::to_value(args).unwrap()
-                    );
+                    let wire = crate::fixtures::PageArgs {
+                        limit: args
+                            .limit
+                            .as_ref()
+                            .map(|n| n.0.to_str_radix(10).parse::<::candid::Nat>().unwrap()),
+                        start: args
+                            .start
+                            .map(|p| ::candid::Principal::from_slice(p.as_slice())),
+                        rejoining: args.rejoining,
+                    };
+                    assert_eq!(::candid::encode_one(&wire).unwrap(), encoded);
                 }
             }
         }
@@ -54,10 +53,8 @@ fn fixture(value: &Value) {
         use ic_platform_protocol::{
             candid::Limits, cloud_engine::decode_list_available_nodes_page_response,
         };
-        use legacy_platform::{candid_codec, cloud_engine_types as old};
-        let published: old::AvailableNodesPageResult =
-            serde_json::from_value(value.clone()).unwrap();
-        let bytes = candid_codec::encode_one(&published, 65536).unwrap();
+        let wire: crate::fixtures::PageResult = serde_json::from_value(value.clone()).unwrap();
+        let bytes = ::candid::encode_one(&wire).unwrap();
         let cap = Limits {
             bytes: 65536,
             header: 4096,
@@ -70,20 +67,6 @@ fn fixture(value: &Value) {
         assert_eq!(
             decode_list_available_nodes_page_response(&bytes, cap).unwrap(),
             selected
-        );
-        let old_cap = candid_codec::decoder::Limits {
-            bytes: cap.bytes,
-            header: cap.header,
-            types: cap.types,
-            work: cap.work,
-            allocation: cap.allocation,
-        };
-        assert_eq!(
-            &serde_json::to_value(
-                old::decode_list_available_nodes_page_response(&bytes, old_cap).unwrap()
-            )
-            .unwrap(),
-            value
         );
     }
 }
@@ -128,13 +111,6 @@ fn malformed_json_cannot_become_unready() {
             "dc": null, "node_type": "unknown", "node_id": "2vxsx-fae", "provider": "aaaaa-aa", "operator": "2vxsx-fae", "sev_enabled": true
         }]}}),
     ] {
-        assert!(serde_json::from_value::<AvailableNodesPageResult>(value.clone()).is_err());
-        #[cfg(not(target_family = "wasm"))]
-        assert!(
-            serde_json::from_value::<legacy_platform::cloud_engine_types::AvailableNodesPageResult>(
-                value
-            )
-            .is_err()
-        );
+        assert!(serde_json::from_value::<AvailableNodesPageResult>(value).is_err());
     }
 }

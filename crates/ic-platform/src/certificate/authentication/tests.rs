@@ -231,6 +231,17 @@ fn traversal_limits_are_exact_and_ambiguous_forests_refuse() {
 
 #[test]
 fn missing_pruned_trailing_and_overflow_time_refuse() {
+    let signed = |tree: &[u8]| {
+        let bytes = envelope(tree, &[0; 48]);
+        let decoded =
+            decode_certificate(&bytes, CertificateDecodeLimits { bytes: bytes.len() }).unwrap();
+        let message = [
+            b"\x0dic-state-root".as_slice(),
+            &decoded.unverified().tree.digest(),
+        ]
+        .concat();
+        envelope(tree, &signer(1).sign(&message).serialize())
+    };
     let cap = VerificationLimits {
         tree_nodes: 10,
         tree_depth: 10,
@@ -245,14 +256,14 @@ fn missing_pruned_trailing_and_overflow_time_refuse() {
         b"\x83\x02\x44time\x82\x03\x4a\x80\x80\x80\x80\x80\x80\x80\x80\x80\x02",
     ] {
         assert_eq!(
-            verify(&envelope(tree, &[0; 48]), &root(1), window(), cap).unwrap_err(),
+            verify(&signed(tree), &root(1), window(), cap).unwrap_err(),
             VerifyError::InvalidTime
         );
     }
     let mut tree = b"\x83\x02\x44time\x82\x04\x58\x20".to_vec();
     tree.extend_from_slice(&[0; 32]);
     assert_eq!(
-        verify(&envelope(&tree, &[0; 48]), &root(1), window(), cap).unwrap_err(),
+        verify(&signed(&tree), &root(1), window(), cap).unwrap_err(),
         VerifyError::InvalidTime
     );
 }
@@ -399,5 +410,19 @@ fn subnet_time_retains_strict_leaf_and_inclusive_window_rules() {
         .unwrap()
         .time_ns(),
         10
+    );
+}
+
+#[test]
+fn invalid_signature_precedes_malformed_time_diagnostics() {
+    let mut bytes = signed_time(&[]);
+    assert_eq!(
+        verify(&bytes, &root(1), window(), limits()).unwrap_err(),
+        VerifyError::InvalidTime
+    );
+    *bytes.last_mut().unwrap() ^= 1;
+    assert_eq!(
+        verify(&bytes, &root(1), window(), limits()).unwrap_err(),
+        VerifyError::Signature
     );
 }

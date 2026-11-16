@@ -3,7 +3,24 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.2.4] - Unreleased
+## [0.2.4] - 2026-11-16
+
+### ➕ Added
+
+- Remove legacy decoder dependencies from qualification. Use independent upstream
+  schemas and literal expectations; retain historical heap bounds and Wasm
+  measurements for
+  [#9 — Remove legacy qualification decoders](https://github.com/dragginzgame/ic-platform/issues/9).
+- Supply bounded Registry envelopes and borrowed record projections, placement
+  arguments/results and CloudEngine empty arguments. Qualify actual Query
+  against the current local cohort for
+  [#4 — Query and crypto boundary](https://github.com/dragginzgame/ic-platform/issues/4);
+  retain separate delivery and native-host gates.
+
+### 🔧 Tooling
+
+- Adopt Toko Tooling 0.44.7 in both workspaces and use its flat qualification
+  package layout. Retain the approved thiserror 2.0.18 compatibility selection.
 
 ### 🧪 Testing
 
@@ -11,7 +28,7 @@ Return to the [group index](../../CHANGELOG.md).
   0.2.3 and Types 0.21.1 for
   [#3 — Registry subnet settings qualification](https://github.com/dragginzgame/ic-platform/issues/3).
   Record delivered consumer code separately from its local dependency migration.
-  The Protocol package remains unchanged at 0.2.3.
+  That earlier settings-only run used unchanged Protocol 0.2.3.
 
 ## [0.2.3] - 2026-11-16
 

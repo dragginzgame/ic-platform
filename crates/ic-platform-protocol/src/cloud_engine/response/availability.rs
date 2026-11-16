@@ -1,6 +1,7 @@
 //! Available-node evidence without pagination or interpretation policy.
 
 use super::marketplace::NodeType;
+use crate::candid::projection::{absent, projection};
 use crate::candid::{self, Decode, Error, Limits, Reader, Schema};
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};

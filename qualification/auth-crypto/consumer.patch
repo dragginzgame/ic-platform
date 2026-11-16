@@ -1,0 +1,338 @@
+diff --git a/crates/ic-auth/src/issuer_signature.rs b/crates/ic-auth/src/issuer_signature.rs
+index 217f0e9..73bddd8 100644
+--- a/crates/ic-auth/src/issuer_signature.rs
++++ b/crates/ic-auth/src/issuer_signature.rs
+@@ -6,9 +6,10 @@
+ //! proof bounds and charge the receiver-wide budget once for the whole proof.
+ 
+ use ic_auth_protocol_types::Principal;
+-use ic_platform::{
+-    canister_sig_creation::CanisterSigPublicKey,
+-    signature_verification::{CanisterSigTimeError, verify_canister_sig_with_time},
++use ic_platform::certificate::{
++    CanisterSignatureKey, CanisterSignatureLimits, CanisterSignatureVerifyError,
++    CertificateDecodeLimits, PreparedRootKey, TimePolicy, TimeWindow,
++    VerificationLimits, VerifyError, authenticate_canister_signature, decode_canister_signature,
+ };
+ use sha2::{Digest, Sha256};
+ use std::{error::Error, fmt};
+@@ -98,26 +99,37 @@ pub fn verify_issuer_signature(
+     if !(20..=129).contains(&public_key_der.len()) {
+         return Err(E::InvalidPublicKey);
+     }
+-    let key = CanisterSigPublicKey::try_from(public_key_der).map_err(|_| E::InvalidPublicKey)?;
+-    if key.canister_id != policy.signing_canister {
++    let key = CanisterSignatureKey::from_der(public_key_der).map_err(|_| E::InvalidPublicKey)?;
++    if key.issuer().as_slice() != policy.signing_canister.as_slice() {
+         return Err(E::CanisterMismatch);
+     }
+-    if <[u8; 32]>::from(Sha256::digest(&key.seed)) != policy.seed_hash {
++    if <[u8; 32]>::from(Sha256::digest(key.seed())) != policy.seed_hash {
+         return Err(E::SeedMismatch);
+     }
+     if policy.ic_root_public_key_raw.len() != 96 {
+         return Err(E::InvalidRootKeyLength);
+     }
+-    let time = verify_canister_sig_with_time(
+-        &certified_signature_message(claims_digest),
+-        signature_cbor,
+-        public_key_der,
+-        policy.ic_root_public_key_raw,
+-    )
+-    .map_err(|error| match error {
+-        CanisterSigTimeError::Verification(_) => E::InvalidSignature,
+-        CanisterSigTimeError::InvalidCertificateTime => E::InvalidCertificateTime,
+-    })?;
++    let root = PreparedRootKey::from_raw(policy.ic_root_public_key_raw)
++        .map_err(|_| E::InvalidSignature)?;
++    let decoded = decode_canister_signature(signature_cbor,
++        CertificateDecodeLimits { bytes: policy.max_signature_bytes.min(131_072) })
++        .map_err(|_| E::InvalidSignature)?;
++    // Authenticate both timestamps. Auth's unchanged age policy below applies
++    // only to signing time; an older delegation is not a stale signing proof.
++    let all_time = TimeWindow { reference_ns: 0, max_age_ns: 0, max_future_skew_ns: u64::MAX };
++    let message = certified_signature_message(claims_digest);
++    let evidence = authenticate_canister_signature(decoded, &message, key, &root,
++        TimePolicy { certificate: all_time, delegation: all_time },
++        CanisterSignatureLimits {
++            message_bytes: message.len(), certificate_bytes: 131_072,
++            verification: VerificationLimits {
++                tree_nodes: 16_384, tree_depth: 128, delegation_bytes: 131_072, canister_ranges: 4096,
++            },
++        }).map_err(|error| match error {
++            CanisterSignatureVerifyError::Verification(VerifyError::InvalidTime) => E::InvalidCertificateTime,
++            _ => E::InvalidSignature,
++        })?;
++    let time = evidence.time_ns();
+     let age = policy
+         .now_ns
+         .checked_sub(time)
+diff --git a/qualification/ic-auth-certified-conformance/tests/certified.rs b/qualification/ic-auth-certified-conformance/tests/certified.rs
+index a1ac81d..29dbe68 100644
+--- a/qualification/ic-auth-certified-conformance/tests/certified.rs
++++ b/qualification/ic-auth-certified-conformance/tests/certified.rs
+@@ -12,11 +12,10 @@ use ic_auth::{
+ };
+ use ic_auth_protocol_types::{MerkleStep, PortableMechanism, Principal};
+ use ic_platform::{
+-    bls::PrivateKey,
+-    canister_sig_creation::CanisterSigPublicKey,
+-    certification::{
++    fixture_signing::PrivateKey,
++    certificate::construction::{
+         Certificate,
+-        cbor::{encode_canister_signature, encode_certificate},
++        encode_canister_signature, encode_certificate,
+         fork, labeled, leaf,
+     },
+ };
+@@ -86,7 +85,7 @@ impl Fixture {
+             root: RootFixture::new(RECORDS, hash("seed_hash")),
+             claims: bytes("claims"),
+             cbor: issuer_cbor(hash("claims_digest"), vec![0x96, 1]),
+-            der: CanisterSigPublicKey::new(issuer(), SEED.to_vec()).to_der(),
++            der: ic_platform::certificate::construction::canister_key_der(issuer(), SEED).unwrap(),
+             network: bls_key().public_key().serialize(),
+         }
+     }
+@@ -329,7 +328,7 @@ fn issuer_refusals_and_changed_claims_retain_the_same_single_charge() {
+     let cases: [(FixtureChange, I); 6] = [
+         (|f| f.cbor.clear(), I::InvalidSignature),
+         (
+-            |f| f.der = CanisterSigPublicKey::new(issuer(), b"wrong seed".to_vec()).to_der(),
++            |f| f.der = ic_platform::certificate::construction::canister_key_der(issuer(), b"wrong seed").unwrap(),
+             I::SeedMismatch,
+         ),
+         (
+diff --git a/qualification/ic-auth-certified-conformance/tests/issuance/mod.rs b/qualification/ic-auth-certified-conformance/tests/issuance/mod.rs
+index b279e69..5c599aa 100644
+--- a/qualification/ic-auth-certified-conformance/tests/issuance/mod.rs
++++ b/qualification/ic-auth-certified-conformance/tests/issuance/mod.rs
+@@ -6,9 +6,9 @@ use ic_auth::issuer_memory::{
+     IssuerTicket, MemoryIssuer,
+ };
+ use ic_auth_protocol_types::Principal;
+-use ic_platform::certification::{
++use ic_platform::certificate::construction::{
+     Certificate, HashTree,
+-    cbor::{encode_canister_signature, encode_certificate},
++    encode_canister_signature, encode_certificate,
+     fork, labeled, leaf,
+ };
+ 
+diff --git a/qualification/ic-auth-certified-conformance/tests/issuer_signature.rs b/qualification/ic-auth-certified-conformance/tests/issuer_signature.rs
+index 73c0ec8..f54e422 100644
+--- a/qualification/ic-auth-certified-conformance/tests/issuer_signature.rs
++++ b/qualification/ic-auth-certified-conformance/tests/issuer_signature.rs
+@@ -1,19 +1,19 @@
+ //! Real certificates assembled without Auth's message builder or verifier.
+ //! See the package README for the pinned contract provenance and scope.
+ 
++use ic_auth_protocol_types::Principal;
+ use ic_auth::issuer_signature::{
+     IssuerSignatureError as Error, IssuerSignaturePolicy, certified_signature_message,
+     verify_issuer_signature,
+ };
+ use ic_platform::{
+-    bls::PrivateKey,
+-    canister_sig_creation::{CanisterSigPublicKey, IC_ROOT_PK_DER_PREFIX},
+-    certification::{
++    fixture_signing::PrivateKey,
++    certificate::construction::{
+         Certificate, Delegation, HashTree,
+-        cbor::{encode_canister_signature, encode_certificate},
++        encode_canister_signature, encode_certificate,
+         fork, labeled, leaf,
+     },
+-    principal::Principal,
++
+ };
+ use sha2::{Digest, Sha256};
+ 
+@@ -84,7 +84,7 @@ impl Fixture {
+         Self {
+             certificate: certificate(tree, signer, delegation),
+             witness,
+-            der: CanisterSigPublicKey::new(issuer(), SEED.to_vec()).to_der(),
++            der: ic_platform::certificate::construction::canister_key_der(issuer(), SEED).unwrap(),
+         }
+     }
+     fn bytes(&self) -> Vec<u8> {
+@@ -273,14 +273,15 @@ fn identity_bls_points_cannot_authenticate_an_arbitrary_tree() {
+ 
+ fn delegation(sharded: bool, range: Principal, nested: bool) -> Delegation {
+     let subnet_id = vec![3; 10];
+-    let der = [
+-        IC_ROOT_PK_DER_PREFIX.as_slice(),
+-        &key(2).public_key().serialize(),
+-    ]
+-    .concat();
+-    let ranges =
+-        ic_platform::ic_protocol::fixtures::canister_ranges(&[(range, range)], 1024).unwrap();
+-    let public_key = labeled(b"public_key".to_vec(), leaf(der));
++    let der = ic_platform::certificate::PreparedRootKey::from_raw(&key(2).public_key().serialize()).unwrap().as_der().to_vec();
++    // Independent CBOR: one pair of exact principal byte strings.
++    let mut ranges = vec![0x81, 0x82];
++    for _ in 0..2 {
++        ranges.push(0x40 + u8::try_from(range.as_slice().len()).unwrap());
++        ranges.extend_from_slice(range.as_slice());
++    }
++    let public_key = fork(labeled(b"public_key".to_vec(), leaf(der)),
++        labeled(b"type".to_vec(), leaf(b"application".to_vec())));
+     let tree = if sharded {
+         fork(
+             labeled(
+@@ -304,7 +305,9 @@ fn delegation(sharded: bool, range: Principal, nested: bool) -> Delegation {
+             ),
+         )
+     };
+-    // No recent time is required in root-to-subnet trust-chain material.
++    // Auth permits an older delegation; the supplier still requires a valid
++    // authenticated time and explicit certified subnet type.
++    let tree = fork(tree, labeled(b"time".to_vec(), leaf(vec![1])));
+     let cert = certificate(
+         tree,
+         &key(1),
+diff --git a/qualification/ic-auth-certified-conformance/tests/memory/mod.rs b/qualification/ic-auth-certified-conformance/tests/memory/mod.rs
+index e585725..0c0eecb 100644
+--- a/qualification/ic-auth-certified-conformance/tests/memory/mod.rs
++++ b/qualification/ic-auth-certified-conformance/tests/memory/mod.rs
+@@ -15,7 +15,7 @@ use ic_auth::{
+     },
+ };
+ use ic_auth_protocol_types::{AuthRole, Credential, CredentialProof, Principal};
+-use ic_platform::canister_sig_creation::CanisterSigPublicKey;
++use ic_platform::certificate::construction::canister_key_der;
+ 
+ const MEMORY: &str = include_str!("../fixtures/certified-memory.tsv");
+ const OTHER: &str = include_str!("../fixtures/certified-other-issuer.tsv");
+@@ -55,7 +55,7 @@ impl Case {
+                 digest.try_into().unwrap(),
+                 vec![time as u8 | 0x80, 1],
+             ),
+-            der: CanisterSigPublicKey::new(issuer, SEED.to_vec()).to_der(),
++            der: canister_key_der(issuer, SEED).unwrap(),
+             network: bls_key().public_key().serialize(),
+         };
+         // Exercise the maintained Wire envelope and consuming domain projection.
+diff --git a/qualification/ic-auth-host-conformance/tests/installed/mod.rs b/qualification/ic-auth-host-conformance/tests/installed/mod.rs
+index f8ad68a..0152159 100644
+--- a/qualification/ic-auth-host-conformance/tests/installed/mod.rs
++++ b/qualification/ic-auth-host-conformance/tests/installed/mod.rs
+@@ -13,8 +13,7 @@ use ic_auth_host_fixture::{
+ };
+ use ic_auth_protocol_types::Principal;
+ use ic_platform::{
+-    canister_sig_creation::{CanisterSigPublicKey, IC_ROOT_PK_DER_PREFIX},
+-    certification::{LookupResult, cbor::decode_certificate},
++    certificate::{construction::LookupResult, decode_certificate, CertificateDecodeLimits, PreparedRootKey},
+ };
+ use ic_testkit::pocket_ic::{CanisterId, nonblocking::PocketIc};
+ use sha2::{Digest, Sha256};
+@@ -57,9 +56,9 @@ async fn observe(pic: &PocketIc, id: CanisterId, account: CanisterId) -> Observa
+         RESPONSE,
+     )
+     .unwrap();
+-    let certificate = decode_certificate(&view.certificate, RESPONSE.bytes).unwrap();
++    let certificate = decode_certificate(&view.certificate, CertificateDecodeLimits { bytes: RESPONSE.bytes }).unwrap();
+     assert_eq!(
+-        certificate.tree.lookup_path([
++        certificate.unverified().tree.lookup_path([
+             b"canister".as_slice(),
+             id.as_slice(),
+             b"certified_data".as_slice()
+@@ -135,9 +134,10 @@ async fn traps_restore_issuer_leaf_and_system_root_then_original_completion_veri
+     assert_eq!(claims.issuer.as_slice(), id.as_slice());
+     assert_eq!(claims.account_subject.as_slice(), account.as_slice());
+     let root_der = pic.root_key().await.unwrap();
+-    let root = root_der.strip_prefix(IC_ROOT_PK_DER_PREFIX).unwrap();
++    let prepared = PreparedRootKey::from_der(&root_der).unwrap();
++    let root = &prepared.as_der()[37..];
+     let key =
+-        CanisterSigPublicKey::new(Principal::from_slice(id.as_slice()), SEED.to_vec()).to_der();
++        ic_platform::certificate::construction::canister_key_der(Principal::from_slice(id.as_slice()), SEED).unwrap();
+     verify_issuer_signature(
+         hash(&complete.claims),
+         &complete.signature,
+diff --git a/qualification/ic-auth-host-fixture/Cargo.toml b/qualification/ic-auth-host-fixture/Cargo.toml
+index f4082ad..73b864d 100644
+--- a/qualification/ic-auth-host-fixture/Cargo.toml
++++ b/qualification/ic-auth-host-fixture/Cargo.toml
+@@ -19,6 +19,7 @@ crate-type = ["cdylib", "rlib"]
+ [target.'cfg(target_family = "wasm")'.dependencies]
+ ic-auth = { workspace = true, features = ["issuer-memory", "receiver-memory", "ed25519-verification"] }
+ ic-auth-protocol-types.workspace = true
++sha2.workspace = true
+ ic-auth-wire.workspace = true
+ ic-platform = { workspace = true, features = ["canister-sig-creation", "certification-cbor", "ed25519"] }
+ ic-platform-runtime = { workspace = true, features = ["cdk"] }
+diff --git a/qualification/ic-auth-host-fixture/src/browser/canister.rs b/qualification/ic-auth-host-fixture/src/browser/canister.rs
+index be734f1..88a9070 100644
+--- a/qualification/ic-auth-host-fixture/src/browser/canister.rs
++++ b/qualification/ic-auth-host-fixture/src/browser/canister.rs
+@@ -24,8 +24,8 @@ use ic_auth_wire::{
+     CredentialEnvelope, EstablishSession, Logout, SessionInput, SessionView,
+     model::{AdmissionRefusal, LogoutResult, LogoutUnavailable, PortableCredential, PortableProof},
+ };
++use crate::hash_bytes;
+ use ic_platform::{
+-    canister_sig_creation::hash_bytes,
+     ed25519::{Signer, SigningKey},
+ };
+ use ic_platform_runtime::{cdk, cdk::api, ic0};
+diff --git a/qualification/ic-auth-host-fixture/src/canister.rs b/qualification/ic-auth-host-fixture/src/canister.rs
+index 08a99d3..e199600 100644
+--- a/qualification/ic-auth-host-fixture/src/canister.rs
++++ b/qualification/ic-auth-host-fixture/src/canister.rs
+@@ -7,9 +7,9 @@ use ic_auth::issuer_memory::{
+     IssuerPolicy, IssuerSigning, IssuerStatus, IssuerTicket, MemoryIssuer,
+ };
+ use ic_auth_protocol_types::{AudienceId, CanonicalId, DelegatedRoleGrant};
++use crate::hash_bytes;
+ use ic_platform::{
+-    canister_sig_creation::hash_bytes,
+-    certification::{HashTree, cbor::encode_canister_signature, empty, labeled, leaf},
++    certificate::construction::{HashTree, encode_canister_signature, empty, labeled, leaf},
+ };
+ use ic_platform_runtime::{cdk, cdk::api, ic0};
+ use std::cell::RefCell;
+diff --git a/qualification/ic-auth-host-fixture/src/lib.rs b/qualification/ic-auth-host-fixture/src/lib.rs
+index e03ca14..5dd4b53 100644
+--- a/qualification/ic-auth-host-fixture/src/lib.rs
++++ b/qualification/ic-auth-host-fixture/src/lib.rs
+@@ -97,3 +97,9 @@ pub struct Observation {
+     /// Actual host query time.
+     pub now_ns: u64,
+ }
++
++#[cfg(target_family = "wasm")]
++fn hash_bytes(bytes: impl AsRef<[u8]>) -> [u8; 32] {
++    use sha2::{Digest, Sha256};
++    Sha256::digest(bytes.as_ref()).into()
++}
+diff --git a/qualification/ic-auth-host-fixture/src/receiver/canister/enrollment.rs b/qualification/ic-auth-host-fixture/src/receiver/canister/enrollment.rs
+index 6dbdbd3..5e5801d 100644
+--- a/qualification/ic-auth-host-fixture/src/receiver/canister/enrollment.rs
++++ b/qualification/ic-auth-host-fixture/src/receiver/canister/enrollment.rs
+@@ -2,7 +2,7 @@
+ use super::{Outcome, Refusal, SECOND, STATE, audience};
+ use crate::enrollment::{Fault, KEY, LIMITS, METHOD, Snapshot};
+ use ic_auth::receiver_memory::EnrollmentMetadata;
+-use ic_platform::canister_sig_creation::hash_bytes;
++use crate::hash_bytes;
+ use ic_platform_runtime::{cdk::api, cdk::call::Call};
+ 
+ pub(super) async fn refresh(fault: Fault) -> Result<Outcome, Refusal> {
+diff --git a/qualification/ic-auth-host-fixture/src/receiver/canister.rs b/qualification/ic-auth-host-fixture/src/receiver/canister.rs
+index 8895ac7..e5ddec3 100644
+--- a/qualification/ic-auth-host-fixture/src/receiver/canister.rs
++++ b/qualification/ic-auth-host-fixture/src/receiver/canister.rs
+@@ -17,7 +17,7 @@ use ic_auth_protocol_types::{
+     AudienceId, CanonicalId, Credential, CredentialProof, DelegatedRoleGrant, PortableMechanism,
+     Principal,
+ };
+-use ic_platform::canister_sig_creation::hash_bytes;
++use crate::hash_bytes;
+ use ic_platform_runtime::{cdk, cdk::api, ic0};
+ use std::cell::RefCell;
+ 

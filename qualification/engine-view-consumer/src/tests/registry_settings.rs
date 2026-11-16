@@ -3,9 +3,6 @@
 use ic_platform_protocol::registry_settings::{Limits, SubnetSettings, decode_subnet_settings};
 use serde_json::json;
 
-#[cfg(not(target_family = "wasm"))]
-mod envelope;
-
 fn decode(bytes: &[u8]) -> SubnetSettings {
     decode_subnet_settings(
         bytes,

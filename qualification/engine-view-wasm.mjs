@@ -47,13 +47,8 @@ function measure(selection) {
 }
 
 const standalone = ['registry', 'marketplace'].includes(probe);
-const published = standalone ? undefined : measure('published');
 const candidate = measure(standalone ? probe : 'candidate');
-const delta = probe === 'size' ? {
-  module_bytes: candidate.module_bytes - published.module_bytes,
-  code_section_payload_bytes: candidate.code_section_payload_bytes - published.code_section_payload_bytes,
-} : undefined;
 // No launch-derived size budget has been selected. Report evidence without
 // converting a relative size change into an acceptance decision.
 const size_acceptance = probe === 'size' ? 'undecided' : undefined;
-console.log(JSON.stringify({ probe, node: process.version, v8: process.versions.v8, published, candidate, delta, size_acceptance }, null, 2));
+console.log(JSON.stringify({ probe, node: process.version, v8: process.versions.v8, candidate, size_acceptance }, null, 2));

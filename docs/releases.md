@@ -31,7 +31,7 @@ crossing checks. The [real-consumer proof](qualification/types-release.md) uses
 pinned Auth passive model source in an isolated workspace; it does not migrate
 Auth's working tree or claim full Auth application acceptance.
 
-The authenticated Toko 0.44.6 installation supplies publication selection,
+The authenticated Toko 0.44.7 installation supplies publication selection,
 retained attempts, source checks, release metadata checks and archive provenance.
 The generic release runner is not enabled. The first Types release uses an
 explicit reviewed commit and annotated `types-v0.21.1` tag, followed by the
@@ -105,3 +105,21 @@ read back each registry archive and checksum before proceeding to dependents.
 The same registry Types version must be used across public identities. Keep the
 experimental Runtime limits, strict Platform refusals, and selected Protocol
 surface explicit; no removed legacy facade is restored or silently promised.
+
+## Current native-read and consumer release selection
+
+The authorized next publication selects Platform 0.34.5 and Protocol 0.2.4.
+Both add compatible opt-in capabilities; existing defaults stay empty. Types
+0.21.1 and Runtime/macros/guard 0.23.12 have unchanged product contents and are
+not republished. The complete local release catalog now includes actual Query,
+Registry envelope/placement and native read qualification alongside existing
+installed and certificate checks. Hosted CI remains asynchronous.
+
+Registry review on 2026-11-16 confirmed the selected versions absent and current
+baselines Platform 0.34.4 / Protocol 0.2.3. Types 0.21.1 and Testkit 0.107.1 remain
+current. Toko 0.44.8 is newer than the installed, reviewed 0.44.7; its optional
+adoption is deferred outside this active release under the baseline's release
+latency rule. The existing thiserror hold and frozen Auth supplier selections
+remain unchanged. Newly added transport suppliers were reviewed at implementation
+selection; their provenance and qualification are recorded in
+[Query's hard-cut boundary](qualification/query-hard-cut.md).

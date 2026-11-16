@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-protocol"
-version = "0.2.3"
+version = "0.2.4"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -22,6 +22,8 @@ http-request = []
 cloud-engine = []
 cloud-engine-response = ["cloud-engine", "dep:candidate-types", "dep:serde"]
 cloud-engine-marketplace = ["cloud-engine-response", "dep:num-bigint"]
+registry-placement = ["cloud-engine-response"]
+registry = ["registry-settings"]
 registry-settings = ["dep:serde"]
 
 [dependencies]

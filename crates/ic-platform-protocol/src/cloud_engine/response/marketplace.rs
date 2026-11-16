@@ -1,5 +1,6 @@
 //! Selected daily-price declarations; consumer interpretation stays outside codecs.
 
+use crate::candid::projection::{absent, projection};
 use crate::candid::{self, Decode, Error, Limits, Nat, Reader, Schema};
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};

@@ -314,7 +314,7 @@ pub(crate) enum Schema {
     Vector(&'static Schema),
     StrictOption(&'static Schema),
     Record(&'static [(u32, &'static Schema)]),
-    #[cfg(feature = "cloud-engine-marketplace")]
+    #[cfg(any(feature = "cloud-engine-marketplace", feature = "registry-placement"))]
     Variant(&'static [(u32, &'static Schema)]),
 }
 pub(crate) trait Decode: Sized {
@@ -329,7 +329,7 @@ pub(crate) struct Reader<'n, 'a> {
 }
 
 impl Reader<'_, '_> {
-    #[cfg(feature = "cloud-engine-marketplace")]
+    #[cfg(any(feature = "cloud-engine-marketplace", feature = "registry-placement"))]
     pub(crate) fn variant(&mut self, id: Id) -> Result<(u32, Id)> {
         let Node::Variant(fields) = node_at(id, self.table).map_err(|_| Error::Type)? else {
             return Err(Error::Type);
@@ -453,7 +453,7 @@ const fn schema_valid(schema: &Schema) -> bool {
         Schema::Primitive(id) => (*id >= -17 && *id <= -1) || *id == -24,
         Schema::Vector(inner) | Schema::StrictOption(inner) => schema_valid(inner),
         Schema::Record(fields) => fields_valid(fields),
-        #[cfg(feature = "cloud-engine-marketplace")]
+        #[cfg(any(feature = "cloud-engine-marketplace", feature = "registry-placement"))]
         Schema::Variant(fields) => fields_valid(fields),
     }
 }

@@ -1,7 +1,7 @@
 # Observed certificate fixtures
 
 Captured locally on 2026-11-16 by the independently authored
-`qualification/crates/platform-certificates` runner and its WAT canister.
+`qualification/platform-certificates` runner and its WAT canister.
 These are raw protocol observations from PocketIC server 16.1.0 on Linux x86-64,
 using ic-testkit 0.106.0 and pocket-ic client 16.1.0. They are not copied upstream
 test assets, locally signed helper fixtures, or mainnet observations.

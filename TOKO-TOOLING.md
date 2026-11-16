@@ -417,6 +417,18 @@ selection. Preserve real incompatibility refusals and required integration tests
   no freshness exception for our independent direct dependency; security
   findings still require remediation.
 
+**Approved compatibility hold (2026-11-16):** select `thiserror` v2 at `2.0.18`
+in product and qualification graphs, including native tools. Direct users declare
+`thiserror = "=2.0.18"` in their owning workspace catalog; retain the matching
+`thiserror-impl` lock selection. PocketIC 16.1.0 requires this exact version, and
+the maintainer has selected a common v2 hold rather than separate workspaces
+solely to avoid it. For transitive-only use, retain the reviewed lock selection;
+do not add unused direct dependencies to impose the hold. Check it after dependency
+updates. Existing upstream v1 dependencies are not subject to a forced major
+migration. Revisit the hold when the selected PocketIC permits a newer v2 and
+qualify the affected callers before lifting it. This is a specific exception to
+latest-version selection, not a general requirement to match DFINITY dependencies.
+
 An unchanged release selection is not a new dependency adoption. The freshness
 review above may defer an optional upgrade to the next dependency-maintenance
 batch without a new approval round; this is not a permanent hold or permission to
@@ -741,11 +753,13 @@ not authorize sibling edits or deployment merely through policy adoption.
 Ordinary unit tests, package integration tests and examples stay beside their
 owning product code. Separate packages used only for qualification, benchmarks,
 fuzzing, test fixtures or test support live under `qualification/`, with
-`qualification/Cargo.toml` and its own `Cargo.lock`. Meaningful grouping such as
-`qualification/<domain>/<package-name>/` is supported too. Do not add a redundant
-`qualification/crates/` level or create an empty qualification
-workspace. This is the standard whenever separate qualification packages exist;
-it does not require first demonstrating a dependency conflict.
+`qualification/Cargo.toml` and its own `Cargo.lock`. Use one package tier:
+`qualification/<package-name>/Cargo.toml`. Do not mix direct packages with nested
+package trees, add domain or `crates/` wrappers, put a package in the qualification
+root, or create an empty qualification workspace. Product grouping under `crates/`
+does not extend to qualification. This is the standard whenever separate
+qualification packages exist; it does not require first demonstrating a
+dependency conflict.
 
 Classify canisters by purpose: standalone product canisters belong under
 `crates/`, product fleet components under `apps/`, and separate test, audit or

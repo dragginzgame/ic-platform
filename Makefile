@@ -30,7 +30,7 @@ help:
 	  'lint-engine-response / doc-engine-response  Check decoder code and docs' \
 	  'qualify-engine-response  Native consumer/Serde proof and Wasm compilation' \
 	  'measure-engine-response  Report fixed-workload logical resource charges' \
-	  'profile-engine-response  Compare native heap allocations with the published decoder' \
+	  'profile-engine-response  Check native heap allocations against retained bounds' \
 	  'measure-engine-wasm    Build, execute and compare standalone decoder Wasm sizes' \
 	  'qualify-engine-wasm    Execute old/new Wasm admission and refusal fixtures' \
 	  'check-protocol-graphs  Enforce selected closures (GRAPH_TARGET defaults to Wasm)' \
@@ -232,16 +232,13 @@ profile-engine-response: qualification-tooling-check
 ENGINE_WASM_ENV = RUSTFLAGS= CARGO_ENCODED_RUSTFLAGS= RUSTC_WRAPPER= RUSTC_WORKSPACE_WRAPPER= CARGO_PROFILE_RELEASE_OPT_LEVEL=3 CARGO_PROFILE_RELEASE_LTO=false CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 CARGO_PROFILE_RELEASE_DEBUG=false CARGO_PROFILE_RELEASE_STRIP=none CARGO_PROFILE_RELEASE_PANIC=unwind CARGO_PROFILE_RELEASE_INCREMENTAL=false CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=false CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=false
 .PHONY: measure-engine-wasm
 measure-engine-wasm: qualification-tooling-check
-	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin engine-view-wasm --release --target wasm32-unknown-unknown --no-default-features --features published --target-dir target/engine-view-wasm/published
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin engine-view-wasm --release --target wasm32-unknown-unknown --no-default-features --features candidate --target-dir target/engine-view-wasm/candidate
 	node qualification/engine-view-wasm.mjs
 
 .PHONY: qualify-engine-wasm
 qualify-engine-wasm: qualification-tooling-check
-	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin engine-view-admission --release --target wasm32-unknown-unknown --no-default-features --features published --target-dir target/engine-view-wasm/published
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin engine-view-admission --release --target wasm32-unknown-unknown --no-default-features --features candidate --target-dir target/engine-view-wasm/candidate
 	node qualification/engine-view-wasm.mjs admission
-	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features published --all-targets -- -D warnings
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features candidate --all-targets -- -D warnings
 
 .PHONY: install-ci-tools lint-workflows check-secrets
@@ -447,3 +444,19 @@ qualify-runtime-raw: qualification-tooling-check runtime-server-check
 
 qualify-storage-runtime:
 	node qualification/storage-runtime/check.mjs
+
+.PHONY: qualify-query-hard-cut qualify-native-read
+qualify-query-hard-cut:
+	node qualification/query-hard-cut.mjs
+
+qualify-native-read: qualification-tooling-check
+	cargo test --offline --locked -p ic-platform --all-features native::
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-read --test native_transport
+	cargo clippy --offline --locked -p ic-platform --all-features --all-targets -- -D warnings
+
+.PHONY: qualify-registry-codecs
+qualify-registry-codecs:
+	cargo test --offline --locked -p ic-platform-protocol --all-features
+	cargo clippy --offline --locked -p ic-platform-protocol --all-features --all-targets -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --all-features
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --all-features --all-targets -- -D warnings

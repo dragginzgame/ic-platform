@@ -1,5 +1,6 @@
 //! Bounded selected request encoding; no service pagination or limit policy.
 
+use crate::candid::projection::projection;
 use crate::{candid::Nat, cloud_engine::EncodeError};
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};

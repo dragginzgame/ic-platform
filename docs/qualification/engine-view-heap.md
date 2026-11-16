@@ -1,9 +1,19 @@
 # EngineView native heap comparison
 
-## Criteria selected before measurement
+## Current hard-cut execution
+
+The executable legacy decoder has been removed. Independent upstream Candid
+schemas construct the same workload shapes; current decoding must fit the
+retained Linux x86-64 total and peak bounds below (616, 1058, 9008, 425, 425
+bytes). Cleanup, refusal classes, and discarded-text allocation invariance
+remain checked. Historical paired results below are retained evidence, not
+a claim that the old implementation still runs. Other-host baseline qualification
+remains separate.
+
+## Historical criteria selected before measurement
 
 Run `make profile-engine-response` on a native host. The private
-`qualification/crates/engine-view-profile` package owns a single serial test
+`qualification/engine-view-profile` package owns a single serial test
 process using dhat 0.3.3's allocator. Product packages and the portable consumer
 do not select that allocator or dependency. The new package name was absent
 from crates.io at selection on 2026-11-15, so its unpublished version is 0.1.0.
@@ -63,7 +73,7 @@ Inputs at observation:
 - Qualification lock SHA-256: `e67d5bc6c2405a4109f47694828c42c8a98c0a77a070d0ca3c5ae591533f1856`.
 - Product/profiler file-inventory SHA-256: `3aeb07fecd9fffe5b3bfd42edca57ed231806a643a460f5fae77e7391972c85c`.
   Reproduce this source identity from the root with
-  `rg --files crates/ic-platform-protocol qualification/crates/engine-view-profile | sort | xargs sha256sum | sha256sum`.
+  `rg --files crates/ic-platform-protocol qualification/engine-view-profile | sort | xargs sha256sum | sha256sum`.
   It identifies working manifests and authored source/tests, not a commit.
 
 The profiler is an external development dependency, not imported implementation.
@@ -100,3 +110,7 @@ Refusal-run qualification lock SHA-256:
 Product/profiler inventory SHA-256, using the same inventory command above:
 `271088254392ab36ebc50755ec909b97a510691946dc52ea984839d66ae1d6a5`.
 The product lock and compiler are unchanged from the earlier observation.
+
+Toko 0.44.7 adoption moved the qualification package directly under
+`qualification/`. Historical inventory hashes above remain bound to their
+original source revision and directory layout; current reproduction paths are updated.

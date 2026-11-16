@@ -112,3 +112,6 @@ pub use authentication::{
     AuthenticatedCanisterSignature, CanisterSignatureKey, CanisterSignatureLimits,
     CanisterSignatureVerifyError, authenticate_canister_signature,
 };
+
+#[cfg(feature = "certificate-construction")]
+pub mod construction;

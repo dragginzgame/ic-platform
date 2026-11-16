@@ -129,7 +129,7 @@ digest on root/application subnet canisters and retrieves replica certificates.
 The host constructs the witness and outer envelope with upstream APIs; the
 replica supplies the BLS signatures and delegation. No candidate signing helper,
 copied upstream fixture or product implementation is used to generate them.
-See the [frozen observations and provenance](../../qualification/crates/platform-certificates/fixtures/signatures/README.md).
+See the [frozen observations and provenance](../../qualification/platform-certificates/fixtures/signatures/README.md).
 Both fresh direct and delegated observations authenticate through the public API.
 
 `make qualify-canister-signature-wasm` replays those exact envelopes on native
@@ -203,7 +203,7 @@ demonstrates that selecting a narrow delegation window refuses the same evidence
 
 Fresh PocketIC certificates now bind the exact Auth-framed message on both root
 and application subnets. The additional frozen observations are described in the
-[fixture provenance](../../qualification/crates/platform-certificates/fixtures/signatures/README.md#auth-message-observations).
+[fixture provenance](../../qualification/platform-certificates/fixtures/signatures/README.md#auth-message-observations).
 The adapter passes on native Linux and standalone Wasm: exact age and one-past
 age, future signing time including clock zero, u64 clock/age extremes, wrong
 protected issuer/seed/root, malformed key/root length/envelope, changed digest,

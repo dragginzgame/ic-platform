@@ -4,6 +4,13 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.13] - Unreleased
+
+### 🔧 Tooling
+
+- Adopt Toko Tooling 0.44.7 in both workspaces and use its flat qualification
+  package layout. Retain the approved thiserror 2.0.18 compatibility selection.
+
 ## [0.23.12] - 2026-11-16
 
 ### ➕ Added

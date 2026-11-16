@@ -115,3 +115,19 @@ pub use response::{
     decode_list_available_nodes_page_response, decode_list_marketplace_prices_response,
     encode_list_available_nodes_page_args,
 };
+
+/// Encode the external service's zero-argument Candid frame.
+///
+/// # Errors
+/// Refuses an output allowance smaller than six bytes.
+pub fn encode_empty_args(max_bytes: usize) -> Result<Vec<u8>, EncodeError> {
+    if max_bytes < 6 {
+        return Err(EncodeError::OutputLimit { max_bytes });
+    }
+    let mut bytes = Vec::new();
+    bytes
+        .try_reserve_exact(6)
+        .map_err(|_| EncodeError::Allocation)?;
+    bytes.extend_from_slice(b"DIDL\0\0");
+    Ok(bytes)
+}

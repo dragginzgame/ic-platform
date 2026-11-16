@@ -1,21 +1,20 @@
 # Development
 
-The current published product versions are Types 0.21.1, Platform 0.34.3,
-Protocol 0.2.3, and Runtime/macros/guard 0.23.11. Qualification packages remain
+The current published product versions are Types 0.21.1, Platform 0.34.4,
+Protocol 0.2.3, and Runtime/macros/guard 0.23.12. Qualification packages remain
 private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.
 See the [latest release evidence](qualification/2026-11-16-timer-crypto-publication.md).
 
-Qualification now selects Testkit 0.107.1 and explicitly names three Platform
-roles: `candidate-platform` tests the local 0.34.4 source, `published-platform`
-checks the current registry 0.34.4 verifier independently, and `legacy-platform`
-is the frozen 0.33.7 codec oracle. The latter retains APIs intentionally absent
-from the rewrite and is not a live product dependency. Published Types 0.21.1
-belongs to the registry verifier; local Types belongs to the candidate. Only
-original bytes cross between those independent checks. The pinned Auth fixture
-also uses Testkit 0.107.1, retaining its documented legacy crypto boundary until #7.
+Qualification now selects Testkit 0.107.1 and explicitly names two Platform
+roles: `candidate-platform` tests the local 0.34.5 source, `published-platform`
+checks the current registry 0.34.4 verifier independently. Legacy decoder
+oracles have been removed; qualification uses independent schemas and literal
+fixtures. The separately pinned Auth fixture
+also uses Testkit 0.107.1 with the current local Platform authentication and
+construction APIs; all five installed cases pass without legacy Platform.
 
-`make qualify-platform-crypto` checks the local Platform 0.34.4 primitive
+`make qualify-platform-crypto` checks the local Platform 0.34.5 primitive
 candidate and executes independent native/Wasm signature vectors.
 `make qualify-auth-crypto` checks pinned actual Auth Ed25519/root-delegation code;
 `make qualify-auth-wire` checks its generator with published Wire 0.24.2 and
@@ -111,7 +110,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko 0.44.6 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko 0.44.7 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -143,7 +142,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.6
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.7
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -320,22 +319,17 @@ constructed type paths and runtime nesting retain the 16-level ceiling.
 Acceptance uses independent literal frames, including malformed skipped UTF-8,
 strict optional failure, exact/one-below budgets and large zero-sized vectors.
 The qualification consumer additionally proves a direct public Principal type
-crossing and the JSON Serde shape. Native-only comparison tests use published
-Platform 0.33.7's codec with independently authored record declarations and its
-existing selected response decoder. They compare 30 combinations of absent/
-present bindings, signed timestamps, unsigned sizes, Unicode/NUL text and node
-ordering, plus request bytes, truncated/malformed frames and 189 byte mutations.
-Refusal classes are compared for the fixed malformed corpus; mutation tests
-compare admission and decoded values. Work counters are implementation-specific
-and are not equated by these tests.
+crossing and the JSON Serde shape. Native-only tests use independently authored upstream Candid
+schemas, literal expected values, fixed refusal classes and 189 retained mutation
+admission expectations. No legacy decoder is selected. Work counters remain
+implementation-specific. Local and registry Types both select 0.21.1; source
+identity remains distinct and comparisons cross that boundary only through bytes,
+text or JSON. These focused checks do not establish full Query adoption.
 
-The oracle is a native-only development dependency of the private consumer;
-it does not enter the product or Wasm consumer graph. The candidate uses local
-Types 0.21.0; the oracle retains registry Types 0.20.4. Comparisons cross that
-intentional boundary through bytes or JSON, never assumed Rust type equality. No direct registry Candid
-dependency or copied source/test corpus is introduced. These checks are bounded
-differential evidence, not full Query adoption. Broader optional-coercion,
-protocol-family and real-consumer qualification remains required before cutover.
+Protocol 0.2.4 adds Registry envelope/record and placement codecs with independent
+literal/schema checks. `make qualify-query-hard-cut` tests the actual migrated
+Query consumer; `make qualify-native-read` exercises native signature and HTTP
+refusal tests. See [contracts, evidence and remaining gates](qualification/query-hard-cut.md).
 
 `measure-engine-response` reports the smallest admitted logical work, allocation
 and skip allowances for four fixed workloads. See the [criteria and measured

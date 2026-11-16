@@ -29,6 +29,20 @@ pub struct PreparedRootKey {
     der: [u8; 133],
 }
 impl PreparedRootKey {
+    /// Admit a raw BLS key under the same checked point contract as DER.
+    ///
+    /// # Errors
+    /// Refuses incorrect lengths, invalid points and identity keys.
+    pub fn from_raw(bytes: &[u8]) -> Result<Self, VerifyError> {
+        if bytes.len() != 96 {
+            return Err(VerifyError::InvalidRootKey);
+        }
+        let mut der = [0; 133];
+        der[..37].copy_from_slice(DER_PREFIX);
+        der[37..].copy_from_slice(bytes);
+        Self::from_der(&der)
+    }
+
     /// Admit exact IC DER framing, an upstream-checked subgroup point and a
     /// nonidentity key. The caller remains responsible for selecting a trusted root.
     ///
@@ -364,10 +378,10 @@ fn verify_certificate(
         }
         None
     };
-    let time_ns = checked_time(&certificate.tree, bounds)?;
     if delegation.is_none() {
         verify_signature(certificate, root)?;
     }
+    let time_ns = checked_time(&certificate.tree, bounds)?;
     Ok(VerifiedContext {
         time_ns,
         delegation,

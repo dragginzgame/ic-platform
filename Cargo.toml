@@ -25,12 +25,14 @@ curve25519-dalek = { version = "=5.0.0", default-features = false }
 data-encoding = "2.11.0"
 ed25519-dalek = { version = "=3.0.0", default-features = false }
 ic-certification = { version = "=3.2.0", default-features = false }
+ic-transport-types = "0.49.3"
 ic-verify-bls-signature = { version = "=0.6.0", default-features = false, features = ["alloc"] }
 ic_bls12_381 = { version = "=0.10.1", default-features = false, features = ["groups"] }
 k256 = { version = "=0.14.0", default-features = false, features = ["ecdsa"] }
 num-bigint = { version = "0.5.1", default-features = false, features = ["serde"] }
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
+reqwest = { version = "0.13.5", default-features = false, features = ["rustls"] }
 serde = { version = "1.0.229", default-features = false, features = ["alloc", "derive"] }
 serde_bytes = "0.11.19"
 serde_cbor = "0.11.2"
@@ -39,8 +41,8 @@ serde_test = "1.0.177"
 sha2 = { version = "0.11.1", default-features = false }
 spki = { version = "0.8.1", default-features = false }
 syn = { version = "3.0.10", features = ["full"] }
-thiserror = "=2.0.18"
-toko-tooling = "=0.44.6"
+thiserror = "2.0.18"
+toko-tooling = "=0.44.7"
 
 [workspace.lints.cargo]
 unused_dependencies = "deny"

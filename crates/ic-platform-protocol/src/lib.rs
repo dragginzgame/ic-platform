@@ -19,3 +19,9 @@ pub mod registry_settings;
 
 #[cfg(feature = "http-request")]
 pub mod http_request;
+
+#[cfg(feature = "registry")]
+pub mod registry;
+
+#[cfg(feature = "registry-placement")]
+pub mod placement;

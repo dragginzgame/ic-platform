@@ -13,3 +13,10 @@ native and Wasm. Consumers retain strict verification, canonical-scalar/high-S
 admission, exact message framing and key policy. These features do not select
 Agent, Runtime or RNG integration. See the
 [Auth primitive contract](https://github.com/dragginzgame/ic-platform/blob/main/docs/qualification/auth-crypto.md).
+
+`certificate-construction` supplies bounded certificate/signature encoding and
+canister-key framing without authenticated evidence. Native fixture signing is
+a separate opt-in capability. `native-read` supplies anonymous HTTP queries with
+verified node signatures and authenticated selected-subnet observations. Callers
+provide endpoint, root, root-subnet binding, time windows, resource limits and
+whole-operation deadlines. There is no implicit root discovery or retry policy.

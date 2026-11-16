@@ -3,6 +3,27 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.5] - 2026-11-16
+
+### ➕ Added
+
+- Supply bounded certificate/signature construction, canister-key DER framing,
+  raw-root admission and separately selected native fixture signing for
+  [#7 — Auth crypto migration](https://github.com/dragginzgame/ic-platform/issues/7).
+- Map Auth certified verification to explicit replacement APIs in pinned
+  qualification; authenticate signatures before reporting malformed timestamps.
+
+- Add opt-in anonymous native reads with authenticated query node signatures,
+  explicit root/subnet/time policies, selected-subnet metadata and bounded HTTP.
+  Qualify actual Query and all five installed Auth cases without legacy Platform.
+  [#4 — Query and crypto boundary](https://github.com/dragginzgame/ic-platform/issues/4)
+  retains separate Agent signing/derivation and macOS obligations.
+
+### 🔧 Tooling
+
+- Adopt Toko Tooling 0.44.7 in both workspaces and use its flat qualification
+  package layout. Retain the approved thiserror 2.0.18 compatibility selection.
+
 ## [0.34.4] - 2026-11-16
 
 ### ➕ Added

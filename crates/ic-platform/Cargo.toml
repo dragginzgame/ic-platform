@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform"
-version = "0.34.4"
+version = "0.34.5"
 description = "Explicit IC certificate and authentication boundaries"
 edition.workspace = true
 rust-version.workspace = true
@@ -18,6 +18,19 @@ ignored = ["toko-tooling", "crypto-bigint"]
 
 [features]
 default = []
+native-read = [
+    "certificate-authentication",
+    "ed25519",
+    "dep:ic-transport-types",
+    "dep:reqwest",
+]
+certificate-construction = [
+    "certificate-decode",
+    "dep:candidate-types",
+    "dep:serde_bytes",
+    "ic-certification/serde",
+]
+certificate-fixture-signing = ["dep:ic-verify-bls-signature"]
 ed25519 = ["dep:curve25519-dalek", "dep:ed25519-dalek"]
 ecdsa = ["dep:k256", "dep:crypto-bigint"]
 certificate-decode = ["dep:ic-certification", "dep:serde", "dep:serde_cbor", "dep:thiserror"]
@@ -43,10 +56,15 @@ ic-certification = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
+serde_bytes = { workspace = true, optional = true }
 serde_cbor = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }
 spki = { workspace = true, optional = true }
 thiserror = { workspace = true, optional = true }
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+ic-transport-types = { workspace = true, optional = true }
+reqwest = { workspace = true, optional = true }
 
 [dev-dependencies]
 ic_bls12_381.workspace = true

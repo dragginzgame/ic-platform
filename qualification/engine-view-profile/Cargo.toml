@@ -1,0 +1,28 @@
+[package]
+name = "engine-view-profile"
+version = "0.1.0"
+publish = false
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+
+[target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
+candid.workspace = true
+candidate-types.workspace = true
+dhat.workspace = true
+engine-view-consumer.workspace = true
+ic-platform-protocol.workspace = true
+serde.workspace = true
+
+[target.'cfg(any())'.dev-dependencies]
+toko-tooling.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["toko-tooling"]
+
+[features]
+marketplace = ["ic-platform-protocol/cloud-engine-marketplace"]
+registry-settings = ["ic-platform-protocol/registry-settings"]
+
+[lints]
+workspace = true

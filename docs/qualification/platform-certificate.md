@@ -312,7 +312,7 @@ installed verifier execution, exhaustive refusal coverage or mainnet acceptance.
 
 The same `qualify-platform-wasm` target now runs `mainnet-admission`, using an
 independent read-only observation from the ICP documentation canister. Its
-[fixture provenance](../../qualification/crates/platform-certificates/fixtures/README.md)
+[fixture provenance](../../qualification/platform-certificates/fixtures/README.md)
 records the URL, public trust anchor, exact certificate hash and distinct signing
 and delegation times. The verifier successfully checks the real delegation,
 canister ranges and certified-data presence against the pinned mainnet root.
