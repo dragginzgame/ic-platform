@@ -150,3 +150,30 @@ remains 0.23.12. Reproduction, full metadata and results are retained at
 `target/registry-cohort/1794853809864/verified.json`. The independent schema
 fixture remains private; sibling production sources are unchanged. macOS proof
 and the separate Agent signing/derivation obligation remain open.
+
+## Next supplier cohort: 16 November 2026
+
+The selected compatible releases are Types 0.21.2, Runtime/macros/guard 0.23.13,
+Protocol 0.2.5 and Platform 0.34.6. Registry review confirmed their preceding
+versions as current and each candidate absent before preparation. Toko Tooling
+0.44.9 is adopted through its supported installer in both workspaces and in
+materialized candidate consumer manifests. Original archived source and explicitly
+frozen historical comparison evidence remain unchanged. Testkit 0.107.1 and Wire
+0.24.2 remain current. Registry Types 0.21.1 and Platform 0.34.4 are deliberately
+retained as independent qualification oracles, not candidate product suppliers.
+
+Types removes the exact thiserror hold; the product lock selects 2.0.21 while
+PocketIC qualification can retain 2.0.18. Runtime adds synchronous stable-memory,
+liquid-cycle/burn and version-one HTTP cost operations. Protocol adds bounded
+raw_rand, explicit version-one HTTP encoding and chunk-cache codecs. Platform
+adds strict native ingress packet admission using upstream request identities.
+The corresponding qualification documents retain each consumer's remaining gates.
+These releases do not close the outstanding Query, Backup, Scheduling, Entropy
+or Wasm Store production migrations or the separate Agent crypto obligation.
+
+The complete local release runner now includes the existing Types profile catalog
+alongside the other product groups. Both catalog hashes are receipt-bound, and
+Types uses the same package/source/remote-tag/registry/archive admission as every
+other selected package. Publish Types first, then the Runtime guard and macros,
+Runtime, Protocol and Platform. Every upload requires independent readback before
+its dependents; hosted CI remains asynchronous and is not awaited.

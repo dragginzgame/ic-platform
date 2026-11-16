@@ -11,8 +11,11 @@
 #[cfg(feature = "cloud-engine")]
 pub mod cloud_engine;
 
-#[cfg(feature = "cloud-engine-response")]
+#[cfg(any(feature = "cloud-engine-response", feature = "management-chunks"))]
 pub mod candid;
+
+#[cfg(feature = "management-chunks")]
+pub mod management_chunks;
 
 #[cfg(feature = "registry-settings")]
 pub mod registry_settings;
@@ -25,3 +28,6 @@ pub mod registry;
 
 #[cfg(feature = "registry-placement")]
 pub mod placement;
+
+#[cfg(feature = "raw-rand")]
+pub mod raw_rand;

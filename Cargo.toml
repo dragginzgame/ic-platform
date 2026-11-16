@@ -16,9 +16,9 @@ rust-version = "1.100.0"
 license-file = "LICENSE.md"
 
 [workspace.dependencies]
-candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.12", default-features = false }
-candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.12", default-features = false }
-candidate-types = { package = "ic-platform-types", path = "crates/ic-platform-types", version = "=0.21.1", default-features = false }
+candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.13", default-features = false }
+candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.13", default-features = false }
+candidate-types = { package = "ic-platform-types", path = "crates/ic-platform-types", version = "=0.21.2", default-features = false }
 crc32fast = "1.5.5"
 crypto-bigint = { version = "0.7.11", default-features = false }
 curve25519-dalek = { version = "=5.0.0", default-features = false }
@@ -41,8 +41,8 @@ serde_test = "1.0.177"
 sha2 = { version = "0.11.1", default-features = false }
 spki = { version = "0.8.1", default-features = false }
 syn = { version = "3.0.10", features = ["full"] }
-thiserror = "=2.0.18"
-toko-tooling = "=0.44.7"
+thiserror = "2.0.18"
+toko-tooling = "=0.44.9"
 
 [workspace.lints.cargo]
 unused_dependencies = "deny"

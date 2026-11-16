@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-runtime-guard"
-version = "0.23.12"
+version = "0.23.13"
 description = "Cargo resolution exclusion for the IC Platform executor cohort"
 edition.workspace = true
 rust-version.workspace = true

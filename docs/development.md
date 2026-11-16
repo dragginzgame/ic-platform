@@ -595,3 +595,19 @@ Testkit's removed lifecycle helpers are replaced by the private
 run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
 require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
 prepares assets and `make runtime-server-check` verifies them without downloading.
+
+## Toko 0.44.9 adoption
+
+Both workspace catalogs/locks and the installed snapshot select published Toko
+0.44.9. Its supported installer verified the registry source, installed managed
+files and admitted the existing host/Rust tools. This is a local tooling update,
+not a product release or a reason to repeat the complete release catalog.
+
+The old fleet-wide thiserror hold is superseded. The current product catalog
+uses a compatible thiserror requirement; its lock selects 2.0.21. Qualification
+may still resolve 2.0.18 because published Types 0.21.1 and PocketIC constrain
+that graph. Types' pending 0.21.2 change removes its exact pin without changing
+its error API or encoded identities. Until that release, already-published
+Types 0.21.1 still has the immutable exact requirement. Root packaging of other
+crates against that old registry cohort is not evidence for the new selection;
+qualify their archive dependencies when preparing their next delivery.

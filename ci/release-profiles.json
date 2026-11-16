@@ -23,6 +23,8 @@
     "qualify-marketplace",
     "qualify-marketplace-wasm",
     "qualify-http-request",
+    "qualify-raw-rand",
+    "qualify-management-chunks",
     "qualify-registry-codecs",
     "qualify-query-hard-cut"
   ],
@@ -41,6 +43,7 @@
     "qualify-storage-runtime"
   ],
   "platform": [
+    "qualify-ingress-packets",
     "qualify-platform-authentication",
     "qualify-platform-wasm",
     "qualify-canister-signature-decode",

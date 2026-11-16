@@ -3,12 +3,18 @@
 Release group: `types`. Covered package: `ic-platform-types`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.21.2] - Unreleased
+## [0.21.2] - 2026-11-16
+
+### 🩹 Fixed
+
+- Replace the exact thiserror 2.0.18 pin with a compatible requirement. Types
+  no longer forces consumers onto that patch; its implementation qualifies
+  with 2.0.21 while constrained qualification graphs may retain 2.0.18.
 
 ### 🔧 Tooling
 
-- Adopt Toko Tooling 0.44.7 in both workspaces and use its flat qualification
-  package layout. Retain the approved thiserror 2.0.18 compatibility selection.
+- Adopt Toko Tooling 0.44.9 in both workspaces and use its flat qualification
+  package layout. Remove the superseded fleet-wide thiserror hold.
 
 ### 🧪 Testing
 

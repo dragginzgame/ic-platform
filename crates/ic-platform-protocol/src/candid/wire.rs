@@ -567,6 +567,16 @@ impl Decode for bool {
         reader.input.boolean()
     }
 }
+#[cfg(feature = "management-chunks")]
+impl Decode for u8 {
+    const SCHEMA: Schema = Schema::Primitive(-5);
+    fn read(reader: &mut Reader<'_, '_>, id: Id) -> Result<Self> {
+        if id != -5 {
+            return Err(Error::Type);
+        }
+        reader.input.byte()
+    }
+}
 macro_rules! fixed {
     ($ty:ty, $id:literal) => {
         impl Decode for $ty {

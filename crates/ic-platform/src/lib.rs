@@ -22,3 +22,6 @@ pub mod fixture_signing {
 
 #[cfg(all(feature = "native-read", not(target_family = "wasm")))]
 pub mod native;
+
+#[cfg(all(feature = "ingress-packets", not(target_family = "wasm")))]
+pub mod ingress;

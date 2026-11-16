@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve,relative} from 'node:path';
+import {adoptTooling} from '../tooling-selection.mjs';
 const root=process.cwd();const source=resolve(process.env.AUTH_SOURCE??'../ic-auth');
 const revision='b78991e9833320692921bf766e51ad361c9c8c4d';
 const output=resolve(`target/auth-runtime/${Date.now()}`);mkdirSync(output,{recursive:true});
@@ -12,10 +13,10 @@ run('tar',['-xf',`${output}/auth.tar`,'-C',output]);
 run('git',['apply',`--directory=${relative(root,output)}`,`${root}/qualification/auth-runtime/testkit.patch`],root);
 run('git',['apply',`--directory=${relative(root,output)}`,`${root}/qualification/auth-crypto/consumer.patch`],root);
 const edit=(path,fn)=>{const file=`${output}/${path}`;writeFileSync(file,fn(readFileSync(file,'utf8')));};
-edit('Cargo.toml',s=>s.replace('ic-platform-types = { version = "0.20.4",',`ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.1",`));
+edit('Cargo.toml',s=>s.replace('ic-platform-types = { version = "0.20.4",',`ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.2",`));
 for (const name of ['Cargo.toml','qualification/Cargo.toml']) edit(name,s=>s
-  .replace('ic-platform = { version = "0.33.7",', `ic-platform = { path = ${JSON.stringify(`${root}/crates/ic-platform`)}, version = "=0.34.5",`)
-  .replace('ic-platform-types = { version = "0.20.4",', `ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.1",`)
+  .replace('ic-platform = { version = "0.33.7",', `ic-platform = { path = ${JSON.stringify(`${root}/crates/ic-platform`)}, version = "=0.34.6",`)
+  .replace('ic-platform-types = { version = "0.20.4",', `ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.2",`)
   .replace('ic-wire = "0.24.1"', 'ic-wire = "=0.24.2"'));
 edit('crates/ic-auth/Cargo.toml',s=>s.replace('ic-platform/signature-verification','ic-platform/canister-signature-authentication'));
 for (const name of ['ic-auth-certified-conformance','ic-auth-host-fixture','ic-auth-host-conformance'])
@@ -23,7 +24,7 @@ for (const name of ['ic-auth-certified-conformance','ic-auth-host-fixture','ic-a
     .replace('["certification-cbor", "ic-protocol-fixtures"]','["ecdsa", "certificate-construction", "certificate-fixture-signing", "canister-signature-authentication"]')
     .replace('["canister-sig-creation", "certification-cbor", "ed25519"]','["certificate-construction", "ed25519"]')
     .replace('["certification-cbor", "canister-sig-creation"]','["certificate-construction", "canister-signature-authentication"]'));
-edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.12",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
+edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.13",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
 edit('qualification/ic-auth-host-fixture/Cargo.toml',s=>s.replace('features = ["cdk"]','features = ["entrypoint-macros"]'));
 edit('qualification/Cargo.toml',s=>s.replace('ic-testkit = "0.106.0"', 'ic-testkit = "=0.107.1"'));
 edit('qualification/ic-auth-host-conformance/Cargo.toml', s => s.replace('[dev-dependencies]', '[dev-dependencies]\nic-management-canister-types = "=0.8.0"'));
@@ -53,5 +54,6 @@ for (const file of ['mod.rs', 'enrollment.rs', 'receiver.rs']) edit(`qualificati
     assert_eq!(pic.canister_status(id, None).await.unwrap().status, ic_management_canister_types::CanisterStatusType::Stopped);
     pic.upgrade_canister(id, ${wasm}, vec![], None).await.unwrap();
     pic.start_canister(id, None).await.unwrap();`));
+for (const name of ['Cargo.toml','qualification/Cargo.toml']) adoptTooling(`${output}/${name}`);
 writeFileSync(`${output}/source.json`,JSON.stringify({revision,root,scope:'actual Auth installed fixture with explicit new Runtime adapters; current Platform authentication and construction; no legacy Platform'},null,2)+'\n');
 console.log(output);

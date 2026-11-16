@@ -1,7 +1,8 @@
 //! Narrow management `http_request` encoding, without transport or HTTP policy.
 //!
 //! This capability supports GET with no headers or transform and unspecified
-//! pricing version. URL bytes are preserved, not parsed, normalized or authorized.
+//! pricing version, or explicitly selected version one. URL bytes are preserved,
+//! not parsed, normalized or authorized.
 
 /// Failure to construct the entire Candid request argument.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -53,10 +54,41 @@ pub fn encode_http_get_args(
     replicated: bool,
     max_bytes: usize,
 ) -> Result<Vec<u8>, EncodeError> {
+    encode_get(url, body, response_bytes, replicated, false, max_bytes)
+}
+
+/// Encodes GET with explicit `pricing_version = Some(1)` for callers using the
+/// IC version-one cost quote. Other fields and resource bounds match
+/// [`encode_http_get_args`]. This does not calculate or attach cycles.
+///
+/// # Errors
+/// Returns [`EncodeError::OutputLimit`] before allocation for an oversized frame,
+/// or [`EncodeError::Allocation`] if reservation fails.
+pub fn encode_http_get_args_v1(
+    url: &str,
+    body: Option<&[u8]>,
+    response_bytes: u64,
+    replicated: bool,
+    max_bytes: usize,
+) -> Result<Vec<u8>, EncodeError> {
+    encode_get(url, body, response_bytes, replicated, true, max_bytes)
+}
+
+fn encode_get(
+    url: &str,
+    body: Option<&[u8]>,
+    response_bytes: u64,
+    replicated: bool,
+    pricing_v1: bool,
+    max_bytes: usize,
+) -> Result<Vec<u8>, EncodeError> {
     let refused = EncodeError::OutputLimit { max_bytes };
     // method index, Some(response limit)+nat64, body tag, transform tag,
     // header count, Some(replication)+bool, pricing tag = 16 bytes.
-    let mut size = HEADER.len().checked_add(16).ok_or(refused)?;
+    let mut size = HEADER
+        .len()
+        .checked_add(if pricing_v1 { 20 } else { 16 })
+        .ok_or(refused)?;
     for amount in [leb_size(url.len()), url.len()] {
         size = size.checked_add(amount).ok_or(refused)?;
     }
@@ -83,7 +115,10 @@ pub fn encode_http_get_args(
         leb(body.len(), &mut output);
         output.extend_from_slice(body);
     }
-    output.extend_from_slice(&[0, 0, 1, u8::from(replicated), 0]);
+    output.extend_from_slice(&[0, 0, 1, u8::from(replicated), u8::from(pricing_v1)]);
+    if pricing_v1 {
+        output.extend_from_slice(&1u32.to_le_bytes());
+    }
     debug_assert_eq!(size, output.len());
     Ok(output)
 }

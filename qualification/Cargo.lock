@@ -626,7 +626,7 @@ dependencies = [
  "ic-management-canister-types",
  "ic-platform-protocol",
  "ic-platform-runtime",
- "ic-platform-types 0.21.1",
+ "ic-platform-types 0.21.2",
  "serde",
  "serde_json",
  "toko-tooling",
@@ -640,7 +640,7 @@ dependencies = [
  "dhat",
  "engine-view-consumer",
  "ic-platform-protocol",
- "ic-platform-types 0.21.1",
+ "ic-platform-types 0.21.2",
  "serde",
  "toko-tooling",
 ]
@@ -1087,7 +1087,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f26d836ddaf94dfb76ca3a9e3eb43ea6dee3fbb90266b3532cb218af5abaf26"
 dependencies = [
  "ic-certification",
- "ic-platform-types 0.21.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform-types 0.21.1",
  "ic-verify-bls-signature",
  "serde",
  "serde_cbor",
@@ -1096,13 +1096,13 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.5"
+version = "0.34.6"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
  "ed25519-dalek",
  "ic-certification",
- "ic-platform-types 0.21.1",
+ "ic-platform-types 0.21.2",
  "ic-transport-types",
  "ic-verify-bls-signature",
  "k256",
@@ -1116,7 +1116,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.12"
+version = "0.23.13"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1125,29 +1125,31 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
- "ic-platform-types 0.21.1",
+ "ic-platform-types 0.21.2",
  "num-bigint 0.5.1",
  "serde",
 ]
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.12"
+version = "0.23.13"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
- "ic-platform-types 0.21.1",
+ "ic-platform-types 0.21.2",
 ]
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.12"
+version = "0.23.13"
 
 [[package]]
 name = "ic-platform-types"
 version = "0.21.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "339477b696137ec7fd6f96725c5733b80d67c5fd75b27c8dfaa83846629b9958"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1159,9 +1161,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-types"
-version = "0.21.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "339477b696137ec7fd6f96725c5733b80d67c5fd75b27c8dfaa83846629b9958"
+version = "0.21.2"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1756,8 +1756,8 @@ version = "0.1.0"
 dependencies = [
  "candid",
  "ic-certification",
- "ic-platform 0.34.5",
- "ic-platform-types 0.21.1",
+ "ic-platform 0.34.6",
+ "ic-platform-types 0.21.2",
  "ic-testkit",
  "serde_cbor",
  "sha2 0.11.1",
@@ -2102,7 +2102,7 @@ dependencies = [
  "ic-certification",
  "ic-management-canister-types",
  "ic-platform 0.34.4",
- "ic-platform 0.34.5",
+ "ic-platform 0.34.6",
  "ic-testkit",
  "tokio",
  "toko-tooling",
@@ -2114,7 +2114,7 @@ name = "runtime-rollback"
 version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
- "ic-platform-types 0.21.1",
+ "ic-platform-types 0.21.2",
  "toko-tooling",
 ]
 
@@ -2810,9 +2810,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.44.7"
+version = "0.44.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b178292f781b0955ce9051329f4d6c6b77be7517acac7681fa3e073d4e469769"
+checksum = "bdfd5bc761f55ede02e82f8af36ca82415696209b3ff45e8f080e82cab85c418"
 
 [[package]]
 name = "tower"
@@ -2971,7 +2971,7 @@ version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
  "ic-platform-types 0.21.1",
- "ic-platform-types 0.21.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform-types 0.21.2",
  "serde_json",
  "toko-tooling",
 ]

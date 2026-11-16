@@ -3,6 +3,24 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.6] - 2026-11-16
+
+### ➕ Added
+
+- Add native strict ingress packet admission with original bytes, canonical Types
+  identities and upstream request IDs/signable bytes. Preserve unverified
+  delegation/sender-info presence and opaque response certificates. Backup's
+  actual recovery qualification remains separate; see the
+  [contract](../../docs/qualification/ingress-packets.md).
+  Supplier work addresses [#12 — Backup ingress packets](https://github.com/dragginzgame/ic-platform/issues/12);
+  consumer and delivery acceptance remain open.
+
+### 🔧 Tooling
+
+- Adopt published Toko Tooling 0.44.9 through its supported installer. The
+  fleet-wide thiserror hold is removed. Product behavior is unchanged by
+  this contributor-tooling update.
+
 ## [0.34.5] - 2026-11-16
 
 ### ➕ Added

@@ -153,7 +153,7 @@ installed cases. Its opt-in native read client and Protocol 0.2.4 codecs pass
 macOS proof and the separate Agent signing/derivation correction remain pending. [Published Wire 0.24.2 with Types 0.21.1](docs/qualification/auth-wire.md)
 also passes Auth's unchanged generator and retained browser-codec checks.
 
-Toko 0.44.7 is installed through its authenticated installer, including canonical
+Toko 0.44.9 is installed through its authenticated installer, including canonical
 company files. Rust is pinned to 1.100.0. Use `make deps-list` to list local
 packages and `make deps-update` for deliberate Cargo lock updates. See
 [development setup and focused checks](docs/development.md) for prerequisites,

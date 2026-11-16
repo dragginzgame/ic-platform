@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 
+import {adoptTooling} from './tooling-selection.mjs';
 const root = process.cwd();
 const source = resolve(process.env.AUTH_SOURCE ?? '../ic-auth');
 const revision = 'b78991e9833320692921bf766e51ad361c9c8c4d';
@@ -32,7 +33,8 @@ assert(manifest.includes('ic-wire = "0.24.1"'));
 writeFileSync(`${directory}/Cargo.toml`, manifest
   .replace('ic-platform-types = { version = "0.20.4",', 'ic-platform-types = { version = "=0.21.1",')
   .replace('ic-wire = "0.24.1"', 'ic-wire = "=0.24.2"'));
-run('cargo', ['update', '--offline', '-p', 'ic-wire']);
+adoptTooling(`${directory}/Cargo.toml`);
+run('cargo', ['update', '--offline', '-p', 'ic-wire', '-p', 'toko-tooling']);
 const metadata = JSON.parse(run('cargo', ['metadata', '--offline', '--locked', '--format-version=1']));
 for (const [name, version] of [['ic-wire','0.24.2'], ['ic-platform-types','0.21.1']]) {
   const selected = metadata.packages.find(p => p.name === name && p.version === version);

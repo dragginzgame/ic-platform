@@ -5,6 +5,39 @@
 use ic_platform_protocol::http_request::{EncodeError, encode_http_get_args};
 
 #[test]
+fn entropy_pricing_is_explicit_and_bounded() {
+    use ic_platform_protocol::http_request::encode_http_get_args_v1;
+    // The pinned upstream DTO predates this optional nat32 field.
+    #[derive(candid::CandidType, serde::Deserialize)]
+    struct Pricing {
+        pricing_version: Option<u32>,
+    }
+    let url = "https://entropy-probe.invalid/hold";
+    let bytes = encode_http_get_args_v1(url, None, 256, true, 4096).unwrap();
+    let request: ic_management_canister_types::HttpRequestArgs =
+        candid::decode_one(&bytes).unwrap();
+    assert_eq!(
+        candid::decode_one::<Pricing>(&bytes)
+            .unwrap()
+            .pricing_version,
+        Some(1)
+    );
+    assert_eq!(request.url, url);
+    assert_eq!(request.max_response_bytes, Some(256));
+    assert_eq!(request.body, None);
+    assert!(request.transform.is_none());
+    assert!(request.headers.is_empty());
+    assert_eq!(
+        encode_http_get_args_v1(url, None, 256, true, bytes.len()).unwrap(),
+        bytes
+    );
+    assert!(encode_http_get_args_v1(url, None, 256, true, bytes.len() - 1).is_err());
+    let default = encode_http_get_args(url, None, 256, true, 4096).unwrap();
+    let request: Pricing = candid::decode_one(&default).unwrap();
+    assert_eq!(request.pricing_version, None);
+}
+
+#[test]
 fn management_schema_preserve_every_selected_field() {
     let urls = [
         String::new(),

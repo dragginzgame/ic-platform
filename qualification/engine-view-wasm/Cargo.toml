@@ -12,6 +12,9 @@ toko-tooling.workspace = true
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
+[package.metadata.toko-tooling.loc]
+category = "tests"
+
 [[bin]]
 name = "registry-admission"
 path = "src/bin/registry-admission.rs"
@@ -22,8 +25,20 @@ name = "marketplace-admission"
 path = "src/bin/marketplace-admission.rs"
 required-features = ["marketplace"]
 
+[[bin]]
+name = "raw-rand-admission"
+path = "src/bin/raw-rand-admission.rs"
+required-features = ["raw-rand"]
+
+[[bin]]
+name = "management-chunks-admission"
+path = "src/bin/management-chunks-admission.rs"
+required-features = ["management-chunks"]
+
 [features]
 default = []
+management-chunks = ["candidate", "ic-platform-protocol/management-chunks"]
+raw-rand = ["candidate", "ic-platform-protocol/raw-rand"]
 candidate = ["dep:ic-platform-protocol"]
 registry-settings = [
     "candidate",

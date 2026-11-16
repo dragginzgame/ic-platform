@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {adoptTooling} from '../tooling-selection.mjs';
 const root=process.cwd(), source=resolve(process.env.STORAGE_SOURCE??'../ic-storage');
 const revision='3ad8beda21eeb9451c7755791648b2a5cbffb0c1';
 const destination=resolve(`target/storage-runtime-${Date.now()}`);
@@ -15,6 +16,7 @@ function run(command,args,cwd=destination) {
 run('git',['archive',`--output=${destination}/source.tar`,revision,'Cargo.toml','Cargo.lock','LICENSE.md','crates','qualification'],source);
 run('tar',['-xf','source.tar']);
 run('patch',['--batch','-p1','-i',resolve(root,'qualification/storage-runtime/migration.patch')]);
+for (const name of ['Cargo.toml','qualification/Cargo.toml']) adoptTooling(`${destination}/${name}`);
 const base=['--offline','--manifest-path','qualification/Cargo.toml','--target','wasm32-unknown-unknown'];
 run('cargo',['check',...base,'-p','ic-storage-rust-startup-probe','--features','managed-bench']);
 for(const [name,features,extra] of [

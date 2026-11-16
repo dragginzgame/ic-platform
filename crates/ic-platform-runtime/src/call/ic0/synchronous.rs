@@ -1,7 +1,7 @@
 //! Synchronous IC system operations for caller-owned Wasm exports.
 //!
 //! Available only on `wasm32` with `system-raw`. This feature has no dependency,
-//! executor, callback registry, allocation or initialization requirement. The
+//! executor, callback registry, heap allocation or initialization requirement. The
 //! caller owns exports, authorization, byte protocols and reply sequencing.
 //!
 //! These are raw operations: the IC enforces execution contexts, source ranges,
@@ -176,4 +176,158 @@ pub fn trap(message: &[u8]) -> ! {
 pub fn instruction_counter() -> u64 {
     // SAFETY: No pointers and a fixed supported counter type.
     unsafe { performance_counter(0) }
+}
+
+#[expect(
+    unsafe_code,
+    reason = "Stable memory and cycle imports at the approved IC0 boundary"
+)]
+#[link(wasm_import_module = "ic0")]
+unsafe extern "C" {
+    #[link_name = "stable64_size"]
+    fn stable_size() -> u64;
+    #[link_name = "stable64_grow"]
+    fn stable_grow(pages: u64) -> i64;
+    #[link_name = "stable64_read"]
+    fn stable_read(dst: u64, offset: u64, size: u64);
+    #[link_name = "stable64_write"]
+    fn stable_write(offset: u64, src: u64, size: u64);
+    fn canister_liquid_cycle_balance128(dst: u32);
+    fn cycles_burn128(high: u64, low: u64, dst: u32);
+    fn cost_http_request(request_size: u64, maximum_response_size: u64, dst: u32);
+}
+
+/// Observes stable memory size in 64 KiB pages; this grants no allocation ownership.
+///
+/// # Panics
+/// IC context violations trap. Stable allocation governance belongs to Storage.
+#[must_use]
+#[expect(unsafe_code, reason = "Scalar stable-memory observation")]
+pub fn stable64_size() -> u64 {
+    // SAFETY: No pointers; the IC enforces permitted contexts.
+    unsafe { stable_size() }
+}
+
+/// Attempts to append zero-filled stable pages, returning the previous page count.
+/// `None` preserves the IC growth-failure sentinel. No allocator or retry is added.
+///
+/// # Panics
+/// IC context violations trap; successful changes roll back if this message traps.
+#[must_use]
+#[expect(
+    unsafe_code,
+    reason = "Scalar stable-memory growth with explicit failure sentinel"
+)]
+pub fn stable64_grow(pages: u64) -> Option<u64> {
+    // SAFETY: Scalar-only ABI, without truncating the requested 64-bit page count.
+    let previous = unsafe { stable_grow(pages) };
+    if previous == -1 {
+        None
+    } else {
+        Some(previous as u64)
+    }
+}
+
+/// Copies stable bytes into initialized caller-owned storage without allocating.
+/// The offset remains 64-bit even on wasm32. Empty reads are forwarded to the IC;
+/// they access no bytes and do not establish that the offset is in bounds.
+///
+/// # Panics
+/// The IC traps on invalid context, overflow or a range outside stable memory.
+#[expect(
+    unsafe_code,
+    reason = "Synchronous stable read writes only a live initialized slice"
+)]
+pub fn stable64_read(offset: u64, destination: &mut [u8]) {
+    // SAFETY: The initialized slice is writable throughout the synchronous copy.
+    // Widening wasm32 pointer/length to u64 is exact; IC validates stable bounds.
+    unsafe {
+        stable_read(
+            destination.as_mut_ptr() as u64,
+            offset,
+            destination.len() as u64,
+        )
+    }
+}
+
+/// Copies exact caller bytes into stable memory; no pointer or borrow is retained.
+/// The offset remains 64-bit. Empty writes are forwarded to the IC and access no
+/// bytes; they do not establish that the offset is in bounds.
+///
+/// # Panics
+/// The IC traps on invalid context, overflow or a range outside stable memory.
+/// Writes commit only with their enclosing message, including lifecycle messages.
+#[expect(
+    unsafe_code,
+    reason = "Synchronous stable write reads only a live initialized slice"
+)]
+pub fn stable64_write(offset: u64, source: &[u8]) {
+    // SAFETY: Readable slice stays live; IC validates destination offset and length.
+    unsafe { stable_write(offset, source.as_ptr() as u64, source.len() as u64) }
+}
+
+/// Observes the IC's u128 liquid cycle balance, respecting reservations/freezing.
+/// This is an observation, not spending permission or a promised future balance.
+///
+/// # Panics
+/// IC execution-context violations trap.
+#[must_use]
+#[expect(
+    unsafe_code,
+    reason = "IC writes one u128 into initialized local storage"
+)]
+pub fn liquid_cycle_balance() -> u128 {
+    let mut bytes = [0; 16];
+    // SAFETY: IC synchronously writes exactly sixteen bytes and retains no pointer.
+    unsafe { canister_liquid_cycle_balance128(bytes.as_mut_ptr() as u32) }
+    u128::from_le_bytes(bytes)
+}
+
+/// Requests burning up to `amount`, returning the exact actual u128 amount burned.
+/// The IC limits burning by liquid balance and freezing/reservation constraints.
+/// Repeated calls spend again; the caller owns spending policy. A later message
+/// trap rolls back this burn together with the message's other state changes.
+///
+/// # Panics
+/// Invalid IC execution contexts trap. No automatic funding or retry is performed.
+#[must_use]
+#[expect(
+    unsafe_code,
+    reason = "IC burn uses exact high/low scalars and initialized u128 output"
+)]
+pub fn cycles_burn(amount: u128) -> u128 {
+    let mut bytes = [0; 16];
+    // SAFETY: Exact u128 split, live writable sixteen-byte output, no retained pointer.
+    unsafe {
+        cycles_burn128(
+            (amount >> 64) as u64,
+            amount as u64,
+            bytes.as_mut_ptr() as u32,
+        )
+    }
+    u128::from_le_bytes(bytes)
+}
+
+/// Quotes IC HTTP outcall cycles for explicitly selected pricing version 1.
+/// `request_bytes` is the IC's chargeable request-size measure, not Candid length.
+/// This does not submit an HTTP call, attach cycles or select a pricing policy.
+///
+/// # Panics
+/// Invalid IC execution contexts or unsupported system parameters trap.
+#[must_use]
+#[expect(
+    unsafe_code,
+    reason = "IC cost query writes a u128 into initialized local storage"
+)]
+pub fn cost_http_request_v1(request_bytes: u64, maximum_response_bytes: u64) -> u128 {
+    let mut bytes = [0; 16];
+    // SAFETY: Full-width scalar inputs and a live initialized sixteen-byte output.
+    unsafe {
+        cost_http_request(
+            request_bytes,
+            maximum_response_bytes,
+            bytes.as_mut_ptr() as u32,
+        )
+    }
+    u128::from_le_bytes(bytes)
 }

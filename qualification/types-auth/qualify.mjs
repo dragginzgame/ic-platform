@@ -7,6 +7,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {toolingVersion} from '../tooling-selection.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const source = resolve(process.env.AUTH_SOURCE ?? resolve(root, '../ic-auth'));
 const revision = 'b78991e9833320692921bf766e51ad361c9c8c4d';
@@ -50,7 +51,7 @@ const originalRoot = readFileSync(`${output}/Cargo.toml`, 'utf8');
 const lintStart = originalRoot.indexOf('[workspace.lints.cargo]');
 assert(lintStart > 0);
 // The source manifest alone changes dependency selection; Rust remains exact.
-writeFileSync(`${output}/Cargo.toml`, `[workspace]\nmembers = ["crates/ic-auth-protocol-types"]\nexclude = ["ic-platform-types-${product.version}"]\nresolver = "3"\n\n[workspace.package]\nedition = "2024"\nrust-version = "1.100.0"\nlicense-file = "LICENSE.md"\n\n[workspace.dependencies]\nic-platform-types = { path = ${JSON.stringify(extracted)}, version = "=${product.version}", default-features = false }\ntoko-tooling = "=0.44.5"\n\n${originalRoot.slice(lintStart)}`);
+writeFileSync(`${output}/Cargo.toml`, `[workspace]\nmembers = ["crates/ic-auth-protocol-types"]\nexclude = ["ic-platform-types-${product.version}"]\nresolver = "3"\n\n[workspace.package]\nedition = "2024"\nrust-version = "1.100.0"\nlicense-file = "LICENSE.md"\n\n[workspace.dependencies]\nic-platform-types = { path = ${JSON.stringify(extracted)}, version = "=${product.version}", default-features = false }\ntoko-tooling = "=${toolingVersion}"\n\n${originalRoot.slice(lintStart)}`);
 const manifest = `${output}/crates/ic-auth-protocol-types/Cargo.toml`;
 writeFileSync(manifest, `${readFileSync(manifest, 'utf8')}\n[[bin]]\nname = "types-boundary"\npath = ${JSON.stringify(resolve(root, 'qualification/types-auth/tests.rs'))}\n`);
 for (const target of [[], ['--target', 'wasm32-unknown-unknown']]) {

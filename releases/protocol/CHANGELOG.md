@@ -3,6 +3,26 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.2.5] - 2026-11-16
+
+### ➕ Added
+
+- Supply allocation-free bounded `raw_rand` request/response framing and explicit
+  version-one HTTP GET pricing for Entropy. Preserve caller-owned source custody
+  and transport policy. See the [contract](../../docs/qualification/raw-rand.md).
+- Supply bounded management chunk-cache requests and hash-record projections for
+  Wasm Store, with independent schema and Wasm proof. Installed consumer adoption
+  remains separate; see the [contract](../../docs/qualification/management-chunks.md).
+- Track the remaining consumer/delivery gates under
+  [#13 — Entropy raw_rand](https://github.com/dragginzgame/ic-platform/issues/13)
+  and [#16 — Wasm Store chunk cache](https://github.com/dragginzgame/ic-platform/issues/16).
+
+### 🔧 Tooling
+
+- Adopt published Toko Tooling 0.44.9 through its supported installer. The
+  fleet-wide thiserror hold is removed. Product behavior is unchanged by
+  this contributor-tooling update.
+
 ## [0.2.4] - 2026-11-16
 
 ### ➕ Added

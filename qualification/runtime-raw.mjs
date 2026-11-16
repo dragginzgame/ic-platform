@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 const wasm=readFileSync(new URL('../target/runtime-raw/wasm32-unknown-unknown/release/runtime_exports.wasm',import.meta.url));
 const module=new WebAssembly.Module(wasm);
-const names=['msg_arg_data_size','msg_arg_data_copy','msg_caller_size','msg_caller_copy','is_controller','msg_reply_data_append','msg_reply','trap','performance_counter'];
+const names=['msg_arg_data_size','msg_arg_data_copy','msg_caller_size','msg_caller_copy','is_controller','msg_reply_data_append','msg_reply','trap','performance_counter','stable64_size','stable64_grow','stable64_read','stable64_write','canister_liquid_cycle_balance128','cycles_burn128','cost_http_request'];
 assert.deepEqual(WebAssembly.Module.imports(module).map(i=>`${i.module}/${i.kind}/${i.name}`).sort(), names.map(n=>`ic0/function/${n}`).sort());
 function run(data,method='canister_update probe',caller=[4]) {
   let instance,done=false,counter=0n;
@@ -27,6 +27,13 @@ function run(data,method='canister_update probe',caller=[4]) {
     msg_reply_data_append(p,n){if(done)throw new Error('already replied');events.push(['append',n]);reply.push(...memory(p,n));},
     msg_reply(){if(done)throw new Error('already replied');done=true;events.push(['reply']);},
     trap(p,n){events.push(['trap',[...memory(p,n)]]);throw new Error('trap');},
+    stable64_size(){return 2n;},
+    stable64_grow(n){return n===-1n ? -1n : 2n;},
+    stable64_read(){throw new Error('unselected stable read');},
+    stable64_write(){throw new Error('unselected stable write');},
+    canister_liquid_cycle_balance128(){throw new Error('unselected balance');},
+    cycles_burn128(){throw new Error('unselected burn');},
+    cost_http_request(){throw new Error('unselected cost');},
     performance_counter(kind){assert.equal(kind,0);return ++counter;},
   }});
   let failure;

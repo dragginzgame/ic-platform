@@ -4,12 +4,22 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.23.13] - Unreleased
+## [0.23.13] - 2026-11-16
+
+### ➕ Added
+
+- Extend `system-raw` with stable64 memory, liquid cycle balance, actual cycle
+  burning and explicit version-one HTTP cost observation. Installed checks cover
+  rollback and stopped-upgrade persistence; Scheduling migration remains a
+  separate gate. See the [contract](../../docs/qualification/runtime-memory-cycles.md).
+  Supplier work addresses [#14 — Stable memory](https://github.com/dragginzgame/ic-platform/issues/14)
+  and [#15 — Cycle pressure](https://github.com/dragginzgame/ic-platform/issues/15);
+  actual Scheduling and registry acceptance remain open.
 
 ### 🔧 Tooling
 
-- Adopt Toko Tooling 0.44.7 in both workspaces and use its flat qualification
-  package layout. Retain the approved thiserror 2.0.18 compatibility selection.
+- Adopt Toko Tooling 0.44.9 in both workspaces and use its flat qualification
+  package layout. Remove the superseded fleet-wide thiserror hold.
 
 ## [0.23.12] - 2026-11-16
 

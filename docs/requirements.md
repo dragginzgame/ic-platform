@@ -151,7 +151,7 @@ are not established. No sibling changes or consumer migration are included.
 | Canic endpoint composition, [#164](https://github.com/dragginzgame/ic-platform-legacy/issues/164) | Runtime | Guard and pre-copy admission before decoding, explicit codecs, one dispatch/reply owner and installed rollback/callback proof; no Wire-specific execution owner. |
 | Query certified classification, [#158](https://github.com/dragginzgame/ic-platform-legacy/issues/158) | Platform native | Actual upstream SubnetType identity, unknown strings and absent values; classification is not capacity or deployment permission. |
 | Crypto/Agent boundary, [#50](https://github.com/dragginzgame/ic-platform-legacy/issues/50) | Platform crypto/native | Recheck selected graphs and current advisory evidence before admission. Direct ECDSA correction alone does not resolve Agent/derivation paths. No in-house crypto, forced incompatible override or inherited risk acceptance. |
-| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko 0.44.7 through its authenticated installer; product acceptance remains separate. |
+| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko 0.44.9 through its authenticated installer; product acceptance remains separate. |
 
 The first projection must not import native/crypto dependencies to satisfy an
 unrelated row. Conversely, an isolated codec pass cannot qualify those rows.
@@ -284,3 +284,21 @@ buffer, authorization, persistence, export and upgrade policy. The
 [contract and qualification](qualification/runtime-storage.md) records installed
 supplier evidence and pinned actual consumer compilation. Publication and
 Storage's own installed migration cases remain distinct acceptance obligations.
+
+### Scheduling system probes and Entropy management framing
+
+The [stable-memory and cycle boundary](qualification/runtime-memory-cycles.md)
+maps Scheduling's checkpoint and submission-refusal requirements to dependency-free
+Runtime APIs. Installed supplier proof does not replace actual Scheduling timer,
+once/watchdog and upgrade qualification. The [raw_rand contract](qualification/raw-rand.md)
+maps Entropy's fixed seed framing and explicit version-one HTTP cost/encoding
+requirements without moving source custody, retry or mixing policy into Platform.
+
+Wasm Store's [management chunk-cache contract](qualification/management-chunks.md)
+assigns bounded request/hash-record codecs to Protocol while leaving cache
+admission, authority, epoch fences, hash comparison and retries with the consumer.
+
+Backup's [original ingress packet boundary](qualification/ingress-packets.md)
+preserves strict content, original bytes and upstream request identity. Decoding
+never substitutes for direct-key policy, certificate authentication or recovery
+admission. Snapshot/status supply and installed recovery remain separate gates.

@@ -2,8 +2,8 @@
 
 override TOKO_TOOLING_ROOT := $(CURDIR)/vendor/toko-tooling
 FORMAT_RUST_ARGS := --extra-workspace qualification
-# Explicit remaining release roster; Types 0.21.1 is already published.
-CARGO_PUBLISH_PACKAGES := ic-platform-runtime-guard ic-platform-macros ic-platform-runtime ic-platform-protocol ic-platform
+# Explicit independent product groups, published one package at a time.
+CARGO_PUBLISH_PACKAGES := ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform-runtime ic-platform-protocol ic-platform
 CARGO_PUBLISH_REGISTRY := crates-io
 CARGO_PUBLISH_ALL_FEATURES := 1
 CARGO_PUBLISH_VERIFY_TARGETS := release-publication-admission
@@ -460,3 +460,33 @@ qualify-registry-codecs:
 	cargo clippy --offline --locked -p ic-platform-protocol --all-features --all-targets -- -D warnings
 	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --all-features
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --all-features --all-targets -- -D warnings
+
+.PHONY: qualify-raw-rand
+qualify-raw-rand: qualification-tooling-check
+	cargo test --offline --locked -p ic-platform-protocol --no-default-features --features raw-rand raw_rand
+	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features raw-rand --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features raw-rand --no-deps
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features raw-rand --test raw_rand
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features raw-rand --bin raw-rand-admission -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin raw-rand-admission --release --target wasm32-unknown-unknown --no-default-features --features raw-rand --target-dir target/engine-view-wasm/raw-rand
+	node qualification/engine-view-wasm.mjs raw-rand
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features raw-rand --forbid-pattern '^(?!ic-platform-protocol$$)'
+
+.PHONY: qualify-management-chunks
+qualify-management-chunks: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features management-chunks --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features management-chunks --no-deps
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features management-chunks --test management_chunks -- -D warnings
+	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features management-chunks --test management_chunks
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features management-chunks --bin management-chunks-admission -- -D warnings
+	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin management-chunks-admission --release --target wasm32-unknown-unknown --no-default-features --features management-chunks --target-dir target/engine-view-wasm/management-chunks
+	node qualification/engine-view-wasm.mjs management-chunks
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features management-chunks --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1
+
+.PHONY: qualify-ingress-packets
+qualify-ingress-packets: toko-tooling-check
+	cargo test --offline --locked -p ic-platform --no-default-features --features ingress-packets ingress
+	cargo clippy --offline --locked -p ic-platform --no-default-features --features ingress-packets --all-targets -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --no-default-features --features ingress-packets --no-deps
+	cargo check --offline --locked -p ic-platform --all-features --target wasm32-unknown-unknown
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --target x86_64-unknown-linux-gnu --no-default-features --features ingress-packets --forbid-pattern '^(ic-agent|reqwest|ic-platform-runtime)$$' --require ic-platform-types=1 --require ic-transport-types=1

@@ -19,7 +19,12 @@ ic-management-canister-types.workspace = true
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
+[package.metadata.toko-tooling.loc]
+category = "tests"
+
 [features]
+management-chunks = ["ic-platform-protocol/management-chunks"]
+raw-rand = ["ic-platform-protocol/raw-rand"]
 http-request = ["ic-platform-protocol/http-request"]
 marketplace = ["ic-platform-protocol/cloud-engine-marketplace"]
 registry = ["ic-platform-protocol/registry", "ic-platform-protocol/registry-placement"]
