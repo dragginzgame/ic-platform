@@ -16,6 +16,43 @@ and macros before Runtime, followed by Protocol and Platform; independently
 verify every registry archive and its source. Keep CI asynchronous and sibling
 checkouts read-only.
 
+All five packages are published from clean source
+`69ba457c282167ebac271ae35a3e8339b4d24e54`; main and all three annotated tags
+were pushed atomically. Complete local qualification passed once; receipt:
+`target/release-qualification/1794909927485-1025311/receipt.json`.
+The refreshed RustSec database was `1ca85dba53f83451679549b7d6cc8c73796a3b74`;
+the root-lock audit found no known vulnerabilities.
+
+| Package | Independent registry archive SHA-256 | Dry run / single upload under target/publication |
+| --- | --- | --- |
+| ic-platform-runtime-guard 0.23.16 | `153f322c800d2bb8e428bd597305834e5750d1f52d357b68aadc73fc2a9690a7` | `check.selection.1og2Vw` / `publish.selection.wBHaV4` |
+| ic-platform-macros 0.23.16 | `affde65d589d002a963eaaac97538eee39021c805125223076c65f55593cac2b` | `check.selection.ZoN8Iz` / `publish.selection.oBDYw9` |
+| ic-platform-runtime 0.23.16 | `0724826cb1344a689458e60d0e3ddcc92331ae5b82264ecdaff887923645018d` | `check.selection.VX3g6S` / `publish.selection.QKw0FG` |
+| ic-platform-protocol 0.3.4 | `f9263bb1cc99bf3eb81f6c23144873561ea7e52caa1e420a1cd58d3d2e1c5f85` | `check.selection.h9gtM8` / `publish.selection.yM7Jg2` |
+| ic-platform 0.34.12 | `22210d3951d67ea8f10e997ab05535e71c3106f4813b97832d4feac4ec1f732a` | `check.selection.pPRNx5` / `publish.selection.0Z7YGJ` |
+
+Each archive matches the sparse index, admitted archive and tagged VCS source.
+Extracted-archive all-feature native/Wasm Clippy, native tests and independent
+source provenance passed. Registry dependency records confirm Types `^0.21.2`
+in Platform, Protocol and Runtime and exact `=0.23.16` guard/macros in Runtime.
+Combined readback: `target/deploy-compatible-deps/published.json`.
+
+After guard/macros publication, the source gate refused Runtime before upload
+because a concurrent edit changed qualification's Host Process lock selection
+from 0.80.3 to 0.80.4. With explicit maintainer approval, that edit was saved,
+the tagged lock restored, and only the unpublished crates resumed. Every crate
+was uploaded once. The 0.80.4 lockfile was restored byte-for-byte afterward and
+remains a separate uncommitted change, outside this release receipt. The refused
+selection is `target/publication/selection.DumnDJ`; original and resumed logs
+are retained under `target/deploy-compatible-deps/`.
+
+Post-push review confirmed compatible Types requirements, exact Runtime support
+coupling, unchanged resolved supplier versions and one canonical Types identity.
+Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/44062398383)
+and [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44062398587)
+were observed in progress once; neither was awaited or claimed passing. Native
+execution remains Linux evidence; Types itself and siblings were not delivered.
+
 ## Capture hash promotion release
 
 Protocol 0.3.3 fixes the capture-status module-hash promotion incompatibility in
