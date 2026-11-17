@@ -16,6 +16,34 @@ Publish guard and macros before Runtime, followed by Protocol and Platform,
 using the supported publication adapter and independent archive/source readback
 for each package. Hosted CI remains asynchronous; siblings stay read-only.
 
+All five packages are now published from clean source
+`80a5b488666629dd28152f6bcb6d489091d55994`. Main and all three annotated
+tags were pushed atomically. The complete local catalog passed once at this
+source; receipt: `target/release-qualification/1794907293508-4193179/receipt.json`.
+The root-lock audit found no known vulnerabilities against current RustSec
+`02e2517f457a359fc6d3440ea4560c8ea188fee8`.
+
+| Package | Independent registry archive SHA-256 | Dry run / single upload under target/publication |
+| --- | --- | --- |
+| ic-platform-runtime-guard 0.23.15 | `4fa857e5bba51d6b57286fa6b09f2bbe430da574bb187376c7c77adb896cfb99` | `check.selection.MDQ6VT` / `publish.selection.A0kNpB` |
+| ic-platform-macros 0.23.15 | `b2d98162c6fbea8d9ea5893db8efad17fa4860c221ef4b3a3e66c5e94e6c53cd` | `check.selection.HKkjVt` / `publish.selection.9fDxZw` |
+| ic-platform-runtime 0.23.15 | `654fbae9abca1d9f1ccf1aa7835ba1303b08bc828706f12c0e8a45446a206410` | `check.selection.SZZfzo` / `publish.selection.R0XHlY` |
+| ic-platform-protocol 0.3.2 | `b2b1db444c839e816c1f2b6edec5ef8966a3f022a73a12819cc0db8477e5b560` | `check.selection.qzr3ST` / `publish.selection.g4bC2B` |
+| ic-platform 0.34.11 | `6269645258c22c1cccbaaf62ec710b7a30fbbcfe879aff6a53ba53b8526c9c84` | `check.selection.eFMZSt` / `publish.selection.uKCB9W` |
+
+Every archive matches the sparse index, admitted local archive and exact tagged
+VCS source. Extracted-archive all-feature native/Wasm Clippy, native tests and
+independently fetched provenance passed before each single upload. Combined
+readback: `target/deploy-module-layout/published.json`; individual records are
+under `target/registry-readback/<package>-<version>/verified.json`.
+
+Post-push review confirmed byte-identical module moves, unchanged public paths,
+coordinated exact Runtime dependencies and updated candidate qualification pins.
+Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/44055562803)
+and [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44055562983)
+were observed in progress once; neither was awaited or claimed passing. Native
+execution remains Linux evidence. Siblings and unchanged Types were not delivered.
+
 ## Backup fixture and projection release
 
 Protocol 0.3.1 supplies the bounded response fixture constructors and separate
