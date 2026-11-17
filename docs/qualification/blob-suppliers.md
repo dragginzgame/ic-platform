@@ -355,3 +355,9 @@ also passed. Logs: `target/platform29-independent-tests.log`,
 The pre-existing qualification lock refresh to registry Platform 0.34.14 was
 preserved; local candidate entries advance to 0.34.15. These are source-level
 checks, not archive publication or new macOS evidence.
+
+Platform 0.34.15 subsequently passed the complete clean-source catalog and was
+published with independent archive checksum/VCS verification; see the
+[release record](../releases.md#independent-status-admission-and-qualification-flow-release).
+The parent-side admission API is now available from crates.io. External signer
+publication and actual Tooling/Canic/Backup adoption remain separate.

@@ -1,6 +1,6 @@
 # Development
 
-The current recorded published product versions are Types 0.21.2, Platform 0.34.14,
+The current recorded published product versions are Types 0.21.2, Platform 0.34.15,
 Protocol 0.3.5, and Runtime/macros/guard 0.23.17. Qualification packages remain
 private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.

@@ -22,6 +22,38 @@ No separate dry run is required. Independently verify registry checksum and VCS
 source after upload; hosted CI remains asynchronous. External-signer publication
 and Tooling/Canic/Backup adoption remain separate consumer gates.
 
+Platform 0.34.15 is published from clean source
+`bede5a80a6968d3d6c780ebe418704b35c78f080`; main and annotated
+`platform-v0.34.15` were pushed atomically. Schema-2 receipt:
+`target/release-qualification/1794945604681-156039/receipt.json`.
+All 60 distinct catalog targets passed in one serial Make graph; fresh audit
+preparation plus qualification took 196.20 seconds (194.81 seconds qualification).
+Both locks report zero known vulnerabilities against freshly prepared RustSec
+`233155b4025b854c68a4b199c0e32d7fd53291a2`. Informational maintenance warnings
+and the retained Agent/derivation obligation remain separate from this release.
+
+The supported adapter performed one upload with no preceding dry run:
+`target/publication/publish.selection.XVfwZW`. Extracted-archive all-feature
+native/Wasm Clippy, native tests and independently fetched source provenance
+passed. The downloaded registry archive matches the sparse index, admitted
+archive and tagged VCS source; SHA-256:
+`70d95425a6f387880d21e9ce37e83ff6aea3fde380685f25573720231e71c30c`.
+Independent readback: `target/deploy-platform-03415/published.json`.
+
+Post-push review confirmed the narrow direct-signature admission constructor,
+explicit caller expiry/routing policy, unchanged other product versions and
+retained full release obligations. Hosted
+[CI](https://github.com/dragginzgame/ic-platform/actions/runs/44165222271) and
+[Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44165222267)
+were observed once in progress, not awaited or claimed passing. Native execution
+is Linux evidence; consumer migration and new macOS evidence remain separate.
+
+Next, [Tooling #12](https://github.com/dragginzgame/ic-tooling/issues/12) can adopt
+0.34.15 for independent parent-side status admission and qualify/publish the
+external signer, followed by [Canic #5](https://github.com/dragginzgame/canic/issues/5)
+and Backup integration. [Platform #27](https://github.com/dragginzgame/ic-platform/issues/27)
+retains the separate upstream RustSec obligation.
+
 ## Exact offline signing and secp256k1 query release
 
 Select Platform 0.34.14 for issues #28 and #29: explicit secp256k1 signed queries
