@@ -10,17 +10,6 @@ license-file.workspace = true
 [target.'cfg(any())'.dev-dependencies]
 toko-tooling.workspace = true
 
-[target.'cfg(not(target_family = "wasm"))'.dependencies]
-base64.workspace = true
-candid.workspace = true
-ic-host-process.workspace = true
-ic-platform-protocol = { workspace = true, optional = true, features = ["management"] }
-ic-testkit.workspace = true
-serde_json.workspace = true
-tempfile.workspace = true
-tokio.workspace = true
-wat.workspace = true
-
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
@@ -65,6 +54,10 @@ required-features = ["native-signed"]
 [features]
 native-signed-secp256k1 = ["native-signed", "candidate-platform/native-signed-secp256k1"]
 native-signed = [
+    "dep:base64",
+    "dep:ic-host-process",
+    "dep:serde_json",
+    "dep:tempfile",
     "dep:ic-platform-protocol",
     "native-read",
     "candidate-platform/native-signed",
@@ -80,6 +73,17 @@ canister-signature = [
     "dep:serde_cbor",
     "ic-certification/serde",
 ]
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+base64 = { workspace = true, optional = true }
+candid.workspace = true
+ic-host-process = { workspace = true, optional = true }
+ic-platform-protocol = { workspace = true, optional = true, features = ["management"] }
+ic-testkit.workspace = true
+serde_json = { workspace = true, optional = true }
+tempfile = { workspace = true, optional = true }
+tokio.workspace = true
+wat.workspace = true
 
 [dependencies]
 candidate-platform = { workspace = true, features = ["certificate-authentication"] }
