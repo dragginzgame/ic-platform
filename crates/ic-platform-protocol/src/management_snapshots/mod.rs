@@ -92,8 +92,9 @@ projection! {
         100_394_802 => status: Status [required],
         /// Selected controller settings.
         2_336_062_691 => settings: Settings [required],
-        /// Absent versus present module hash, at most 32 bytes.
-        2_928_387_969 => module_hash: Option<Vec<u8>> [strict_optional, max = 32],
+        /// At most 32 original hash bytes, including known non-option promotion.
+        /// Missing/null/reserved values remain absent; incompatible values refuse.
+        2_928_387_969 => module_hash: Option<Vec<u8>> [known_optional_bytes, max = 32],
     }
 }
 /// Decode capture preconditions without requiring a version observation.

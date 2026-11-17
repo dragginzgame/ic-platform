@@ -5,6 +5,7 @@ use ic_platform_protocol::{
     management_snapshots as wire,
 };
 fn main() {
+    capture_hash_promotion();
     let limits = Limits {
         bytes: 2 * 1024 * 1024,
         header: 65536,
@@ -89,4 +90,29 @@ fn main() {
         wire::decode_empty_response(b"DIDL\x00\x01\x7f", limits),
         Err(Error::Arity)
     );
+}
+
+fn capture_hash_promotion() {
+    let limits = Limits {
+        bytes: 1_048_576,
+        header: 65_536,
+        types: 64,
+        work: 2_097_152,
+        allocation: 2_097_152,
+        vector: 1_048_576,
+        skipping: 65_536,
+    };
+    let bytes = include_bytes!("../../fixtures/backup-status-promoted-hash.bin");
+    let value = wire::decode_capture_status(bytes, limits).unwrap();
+    assert_eq!(value.module_hash.as_deref(), Some([0x44_u8; 32].as_slice()));
+    assert_eq!(
+        wire::decode_canister_status(bytes, limits),
+        Err(Error::Type)
+    );
+    let mut bound = limits;
+    bound.vector = 31;
+    assert_eq!(wire::decode_capture_status(bytes, bound), Err(Error::Limit));
+    for end in 0..bytes.len() {
+        assert!(wire::decode_capture_status(&bytes[..end], limits).is_err());
+    }
 }

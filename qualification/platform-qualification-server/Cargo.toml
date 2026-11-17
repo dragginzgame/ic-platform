@@ -16,8 +16,8 @@ ignored = ["toko-tooling"]
 category = "tests"
 
 [dependencies]
-ic-host-process = "=0.80.3"
-tempfile = "3.27.0"
+ic-host-process.workspace = true
+tempfile.workspace = true
 
 [lints]
 workspace = true

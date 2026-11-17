@@ -736,3 +736,128 @@ fn bounded_fixture_replies_preserve_original_shapes_and_policy_failures() {
         Err(Error::Limit)
     );
 }
+
+#[derive(CandidType)]
+struct CaptureControllers {
+    controllers: Vec<Principal>,
+}
+#[derive(CandidType)]
+struct CaptureHash<T> {
+    status: Status,
+    settings: CaptureControllers,
+    module_hash: T,
+    version: u64,
+}
+fn capture_hash<T: CandidType>(hash: T) -> Vec<u8> {
+    candid::encode_one(CaptureHash {
+        status: Status::Stopped,
+        settings: CaptureControllers {
+            controllers: vec![Principal::anonymous()],
+        },
+        module_hash: hash,
+        version: u64::MAX,
+    })
+    .unwrap()
+}
+
+#[test]
+fn capture_hash_known_promotion_preserves_bytes_and_refusal_boundaries() {
+    let limits = Limits {
+        bytes: 1_048_576,
+        header: 65_536,
+        types: 64,
+        work: 2_097_152,
+        allocation: 2_097_152,
+        vector: 1_048_576,
+        skipping: 65_536,
+    };
+    let original = capture_hash([0x44_u8; 32]);
+    let fixture = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../engine-view-wasm/fixtures/backup-status-promoted-hash.bin");
+    if std::env::var_os("REGENERATE_CAPTURE_STATUS_CORPUS").is_some() {
+        std::fs::write(&fixture, &original).unwrap();
+    }
+    assert_eq!(std::fs::read(fixture).unwrap(), original);
+    for size in [0, 1, 31, 32, 33] {
+        let hash = vec![0x44_u8; size];
+        for bytes in [capture_hash(hash.clone()), capture_hash(Some(hash.clone()))] {
+            let result = wire::decode_capture_status(&bytes, limits);
+            if size <= 32 {
+                let value = result.unwrap();
+                assert_eq!(value.module_hash.as_deref(), Some(hash.as_slice()));
+                assert_eq!(
+                    value.settings.controllers,
+                    vec![candidate_types::Principal::anonymous()]
+                );
+            } else {
+                assert_eq!(result, Err(Error::Limit));
+            }
+        }
+    }
+    for bytes in [
+        capture_hash(()),
+        capture_hash(candid::Reserved),
+        capture_hash(None::<Vec<u8>>),
+        capture_hash(None::<String>),
+    ] {
+        assert_eq!(
+            wire::decode_capture_status(&bytes, limits)
+                .unwrap()
+                .module_hash,
+            None
+        );
+    }
+    for bytes in [
+        capture_hash("wrong"),
+        capture_hash(Some("wrong")),
+        capture_hash(vec![1_u64]),
+        capture_hash(Vec::<String>::new()),
+    ] {
+        assert_eq!(
+            wire::decode_capture_status(&bytes, limits),
+            Err(Error::Type)
+        );
+    }
+    assert_eq!(
+        wire::decode_canister_status(&original, limits),
+        Err(Error::Type)
+    );
+    let optional = capture_hash(Some([0x44_u8; 32]));
+    assert_eq!(
+        wire::decode_canister_status(&optional, limits)
+            .unwrap()
+            .version,
+        u64::MAX
+    );
+    for end in 0..original.len() {
+        assert!(wire::decode_capture_status(&original[..end], limits).is_err());
+    }
+    let mut trailing = original.clone();
+    trailing.push(0);
+    assert_eq!(
+        wire::decode_capture_status(&trailing, limits),
+        Err(Error::Trailing)
+    );
+    let mut bound = limits;
+    bound.bytes = original.len();
+    assert!(wire::decode_capture_status(&original, bound).is_ok());
+    bound.bytes -= 1;
+    assert_eq!(
+        wire::decode_capture_status(&original, bound),
+        Err(Error::Limit)
+    );
+    for select in 0..5 {
+        let mut bound = limits;
+        match select {
+            0 => bound.header = 0,
+            1 => bound.types = 0,
+            2 => bound.work = 0,
+            3 => bound.allocation = 0,
+            _ => bound.vector = 31,
+        }
+        assert_eq!(
+            wire::decode_capture_status(&original, bound),
+            Err(Error::Limit)
+        );
+    }
+}

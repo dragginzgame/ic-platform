@@ -98,8 +98,14 @@ minimal preconditions. Missing version is accepted here; a present version is
 validated and skipped under the caller's separate skip allowance. This reader
 never supplies a synthetic version. `CanisterStatus`/`decode_canister_status`
 continues to require a typed `u64` version for upgrade-proof consumers. Both
-readers preserve controller/hash caps, strict optional hash semantics, complete
-framing and bounded unknown-field traversal.
+readers preserve controller/hash caps, complete framing and bounded unknown-field
+traversal. Protocol 0.3.3 additionally preserves known bare `vec nat8` promotion
+for capture hashes, matching Backup's retained precondition reader. Null,
+reserved, absent fields and empty options remain absent; incompatible present
+values refuse, including empty vectors whose element type is not `nat8`.
+The upgrade-proof reader keeps its strict optional hash contract unchanged.
+Capture decoding retains original bytes up to the 32-byte cap; exact hash length,
+approved hash comparison and actual controller admission remain Backup policy.
 
 Select `management-snapshot-fixtures` only where response construction is needed.
 It enables `management_snapshots::fixtures::{canister_status, capture_status,
@@ -152,3 +158,19 @@ Wasm SHA-256: `2a6076e9a6329809e47001779ad2d7b64f68d1c8c509785ad154d14dac01f1f6`
 The registry baseline checked for version selection was Protocol 0.3.0; 0.3.1
 was selected as a compatible patch. It is now published; see the
 [release and registry evidence](../releases.md#backup-fixture-and-projection-release).
+
+The Protocol 0.3.3 capture-hash regression uses independently authored native
+Candid declarations for bare/optional bytes, null/reserved/empty options and
+incompatible present values. It checks empty/short/exact/oversized hashes,
+every truncated prefix, trailing bytes and all resource bounds using Backup's
+reported limits. Its frozen promoted-hash frame is also replayed on Wasm;
+required-version status continues to refuse that same bare-hash frame even with
+a valid version present. This resolves the supplier acceptance incompatibility
+reported in [Platform #11](https://github.com/dragginzgame/ic-platform/issues/11);
+actual Backup migration and installed recovery remain consumer-owned.
+
+On 2026-11-17, `make qualify-management-snapshots` passed all 13 native cases,
+strict Clippy/Rustdoc, both dependency graph checks and Wasm replay (SHA-256
+`5301cfabece7eeeddb0371220734365674e8188e4b1d99243103c9a3a6a0e8ce`).
+All 42 Protocol unit tests and all-feature strict Clippy passed as well.
+Protocol 0.3.3 remains a local, unpublished candidate.

@@ -810,7 +810,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "crc32fast",
  "ic-platform-types",

@@ -1,5 +1,21 @@
 # Initial crates.io deployment
 
+## Capture hash promotion release
+
+Protocol 0.3.3 fixes the capture-status module-hash promotion incompatibility in
+[Platform #11](https://github.com/dragginzgame/ic-platform/issues/11).
+Known bare byte hashes retain their original bytes and 32-byte cap; incompatible
+present shapes refuse, including empty non-byte vectors. Required-version
+upgrade status admission is unchanged. Registry review on 2026-11-17 confirmed
+Protocol 0.3.2 current and 0.3.3 absent. Other product crates are unchanged.
+
+Qualification adopts registry Platform 0.34.11 and centralizes the unchanged
+Host Process/tempfile selections in its workspace catalog. Use the complete
+local release catalog, clean source and annotated `protocol-v0.3.3` tag, then
+the supported publication adapter and independent archive/source readback.
+Hosted CI remains asynchronous. Backup migration and installed acceptance stay
+separate from supplier publication; siblings remain read-only.
+
 ## Module layout release
 
 Select Platform 0.34.11, Protocol 0.3.2 and coordinated Runtime/macros/guard

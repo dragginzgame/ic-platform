@@ -4,6 +4,14 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## Unreleased
+
+### 🧪 Testing
+
+- Adopt published Platform 0.34.11 in installed qualification and centralize
+  Host Process/tempfile selections in its workspace catalog. Product crates
+  are unchanged.
+
 ## [0.23.15] - 2026-11-17
 
 ### 🔧 Changed

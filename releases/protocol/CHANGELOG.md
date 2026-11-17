@@ -3,6 +3,16 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.3.3] - 2026-11-17
+
+### 🐛 Fixed
+
+- Preserve known bare-byte module-hash promotion in `decode_capture_status` for
+  [Platform #11](https://github.com/dragginzgame/ic-platform/issues/11), retaining
+  the 32-byte limit and refusal of incompatible present values. Missing,
+  null and reserved remain absent; callers still admit exact hashes and
+  controllers. Required-version `decode_canister_status` is unchanged.
+
 ## [0.3.2] - 2026-11-17
 
 ### 🔧 Changed

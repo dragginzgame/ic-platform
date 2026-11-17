@@ -708,6 +708,28 @@ impl<T: Decode> KnownOptional for Option<T> {
         }
     }
 }
+
+#[cfg(feature = "management-snapshots")]
+struct ByteVector(Vec<u8>);
+#[cfg(feature = "management-snapshots")]
+impl Decode for ByteVector {
+    const SCHEMA: Schema = <Vec<u8> as Decode>::SCHEMA;
+    fn read(reader: &mut Reader<'_, '_>, id: Id) -> Result<Self> {
+        // Check even empty vectors: no element read would otherwise establish
+        // that this is the known byte shape rather than an incompatible vector.
+        if !matches!(node_at(id, reader.table), Ok(Node::Vector(-5))) {
+            return Err(Error::Type);
+        }
+        Vec::<u8>::read(reader, id).map(Self)
+    }
+}
+#[cfg(feature = "management-snapshots")]
+impl Reader<'_, '_> {
+    pub(crate) fn known_optional_bytes(&mut self, id: Id) -> Result<Option<Vec<u8>>> {
+        <Option<ByteVector> as KnownOptional>::read_known(self, id)
+            .map(|value| value.map(|bytes| bytes.0))
+    }
+}
 impl<T: Decode> Decode for Vec<T> {
     const SCHEMA: Schema = Schema::Vector(&T::SCHEMA);
     fn read(reader: &mut Reader<'_, '_>, id: Id) -> Result<Self> {

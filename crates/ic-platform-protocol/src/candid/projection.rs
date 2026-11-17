@@ -11,6 +11,9 @@ macro_rules! absent {
     (known_optional) => {
         Ok(None)
     };
+    (known_optional_bytes) => {
+        Ok(None)
+    };
     (known_elements) => {
         Err(Error::Type)
     };
@@ -67,6 +70,7 @@ macro_rules! projection {
         }
     };
     (@value $reader:ident, $wire:ident, $ty:ty, known_optional) => { <$ty as crate::candid::KnownOptional>::read_known($reader, $wire) };
+    (@value $reader:ident, $wire:ident, $ty:ty, known_optional_bytes) => { $reader.known_optional_bytes($wire) };
     (@value $reader:ident, $wire:ident, $ty:ty, known_elements) => { <$ty as crate::candid::KnownElements>::read_known($reader, $wire) };
     (@value $reader:ident, $wire:ident, $ty:ty, $policy:ident) => { $reader.value::<$ty>($wire) };
     (@value $reader:ident, $wire:ident, $ty:ty, $policy:ident, $maximum:expr) => {

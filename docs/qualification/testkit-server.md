@@ -34,11 +34,11 @@ notice remains in that supplier. No lifecycle, artifact or process implementatio
 was copied. The data identifies DFINITY PocketIC release artifacts, not executable
 Rust. Native Linux observations do not establish macOS execution qualification.
 
-The current published Platform 0.34.10 verifier also independently checks installed
-Runtime certificates. Candidate 0.34.10 and registry 0.34.10 receive the same original
+The current published Platform 0.34.11 verifier also independently checks installed
+Runtime certificates. Candidate 0.34.11 and registry 0.34.11 receive the same original
 certificate bytes with separately constructed identities and explicit root/time/
 resource policies. The registry archive SHA-256 is
-`7798e7684a2e857355408f2c4252d1187589380609b5f2ef259482e6e1a34571`.
+`6269645258c22c1cccbaaf62ec710b7a30fbbcfe879aff6a53ba53b8526c9c84`.
 
 This selection passed `make qualify-runtime-installed` on Linux on 2026-11-17,
 including supervisor and asset checks, strict native/Wasm Clippy, installed
