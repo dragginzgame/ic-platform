@@ -8,6 +8,9 @@ Return to the [group index](../../CHANGELOG.md).
 
 ### 🧪 Testing
 
+- Adopt published Platform 0.34.10 and Host Process 0.80.3 in private installed
+  qualification, retaining separate candidate/registry certificate checks and
+  owned PocketIC process cleanup. Product packages are unchanged.
 - Reconcile actual Scheduling checkpoint/cycle-refusal and pinned Entropy guard
   evidence for [Platform #14](https://github.com/dragginzgame/ic-platform/issues/14),
   [Platform #15](https://github.com/dragginzgame/ic-platform/issues/15), and

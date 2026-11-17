@@ -16,7 +16,7 @@ ignored = ["toko-tooling"]
 category = "tests"
 
 [dependencies]
-ic-host-process = "=0.80.2"
+ic-host-process = "=0.80.3"
 tempfile = "3.27.0"
 
 [lints]

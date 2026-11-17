@@ -1,5 +1,21 @@
 # Initial crates.io deployment
 
+## Backup fixture and projection release
+
+Protocol 0.3.1 supplies the bounded response fixture constructors and separate
+minimal capture-status projection requested in
+[Platform #11](https://github.com/dragginzgame/ic-platform/issues/11).
+Required-version upgrade status admission is unchanged. Registry review on
+2026-11-17 confirmed Protocol 0.3.0 current and 0.3.1 absent. Other product crates
+are unchanged and are not selected for publication. Qualification also adopts
+published Platform 0.34.10 and Host Process 0.80.3.
+
+Run the complete local catalog at clean source, retaining the explicit receipt;
+deliver main and annotated `protocol-v0.3.1`, then run the supported publication
+adapter and independently verify registry archive/source identity. Hosted CI
+remains asynchronous. Backup migration and installed acceptance remain separate;
+see the [supplier contract](qualification/management-snapshots.md).
+
 The maintainer authorized crates.io deployment from public
 `dragginzgame/ic-platform` and then selected **Types independently after
 qualification**. Downstream production migration remains a separate gate.

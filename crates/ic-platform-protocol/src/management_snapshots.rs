@@ -55,7 +55,7 @@ projection! {
 
 projection! {
     /// Reported lifecycle state; this observation grants no upgrade authority.
-    enum Status {
+    both ("management-snapshot-fixtures") enum Status {
         /// Canister is stopped.
         1_130_484_237 => Stopped,
         /// Canister is draining outstanding calls.
@@ -66,14 +66,14 @@ projection! {
 }
 projection! {
     /// Selected settings; unselected settings are validated and skipped.
-    Settings {
+    both ("management-snapshot-fixtures") Settings {
         /// At most ten controller identities, in the returned order.
         570_880_087 => controllers: Vec<Principal> [required, max = 10],
     }
 }
 projection! {
     /// Status projection that does not allocate discarded management fields.
-    CanisterStatus {
+    both ("management-snapshot-fixtures") CanisterStatus {
         /// Reported lifecycle state.
         100_394_802 => status: Status [required],
         /// Raw observed canister version, required for upgrade proofs.
@@ -85,8 +85,28 @@ projection! {
     }
 }
 projection! {
+    /// Lifecycle/controller/module-hash projection for capture preconditions.
+    /// Version and other unselected fields are validated under the skip budget.
+    both ("management-snapshot-fixtures") CaptureStatus {
+        /// Reported lifecycle state.
+        100_394_802 => status: Status [required],
+        /// Selected controller settings.
+        2_336_062_691 => settings: Settings [required],
+        /// Absent versus present module hash, at most 32 bytes.
+        2_928_387_969 => module_hash: Option<Vec<u8>> [strict_optional, max = 32],
+    }
+}
+/// Decode capture preconditions without requiring a version observation.
+/// Use [`decode_canister_status`] when an upgrade proof requires version.
+/// # Errors
+/// Refuses malformed, trailing or over-budget selected and skipped fields.
+pub fn decode_capture_status(bytes: &[u8], limits: Limits) -> Result<CaptureStatus, Error> {
+    candid::decode(bytes, limits)
+}
+
+projection! {
     /// Snapshot inventory entry; size and timestamp are raw observations.
-    Snapshot {
+    both ("management-snapshot-fixtures") Snapshot {
         /// Opaque identifier, at most 256 bytes. Consumer admits nonempty IDs.
         23_515 => id: Vec<u8> [required, max = 256],
         /// Reported total snapshot size.
@@ -97,14 +117,14 @@ projection! {
 }
 projection! {
     /// Exact returned snapshot bytes; no hash or requested-length claim.
-    SnapshotData {
+    both ("management-snapshot-fixtures") SnapshotData {
         /// At most one MiB, including a valid empty chunk.
         1_170_392_685 => chunk: Vec<u8> [required, max = 1_048_576],
     }
 }
 projection! {
     /// Allocated snapshot identity; admission and spending stay with Backup.
-    SnapshotAllocation {
+    both ("management-snapshot-fixtures") SnapshotAllocation {
         /// Opaque identifier, at most 256 bytes.
         4_045_790_262 => snapshot_id: Vec<u8> [required, max = 256],
     }
@@ -217,7 +237,7 @@ projection! {
 }
 projection! {
     /// Snapshot provenance; payloads must be exactly Candid reserved.
-    enum SnapshotSource {
+    both ("management-snapshot-fixtures") enum SnapshotSource {
         /// Snapshot originated from metadata upload.
         833_703_953 => MetadataUpload(Reserved),
         /// Snapshot was taken from a canister.
@@ -255,7 +275,7 @@ projection! {
     /// Selected snapshot metadata. Missing optional fields, explicit known
     /// null/reserved absence and known value promotion are retained; incompatible
     /// present values refuse instead of becoming absence.
-    SnapshotMetadata {
+    both ("management-snapshot-fixtures") SnapshotMetadata {
         /// At most 4,096 globals; unknown global values never silently disappear.
         339_281_328 => globals: Vec<Option<Global>> [known_elements, max = 4096],
         /// Captured canister version.
@@ -386,3 +406,9 @@ projection! {
 pub fn decode_empty_response(bytes: &[u8], limits: Limits) -> Result<(), Error> {
     candid::decode_empty(bytes, limits)
 }
+
+/// Bounded response construction for tests, without policy admission.
+/// Collection/identity/hash values deliberately may exceed decoder policy caps.
+/// The inclusive complete-output bound is checked before output allocation.
+#[cfg(feature = "management-snapshot-fixtures")]
+pub mod fixtures;

@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-protocol"
-version = "0.3.0"
+version = "0.3.1"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -24,6 +24,7 @@ ledger = ["management", "dep:sha2", "dep:crc32fast"]
 caffeine = ["dep:candidate-types", "dep:serde", "dep:num-bigint"]
 raw-rand = []
 management-chunks = ["dep:candidate-types", "dep:serde"]
+management-snapshot-fixtures = ["management-snapshots"]
 management-snapshots = ["dep:candidate-types", "dep:serde"]
 http-request = []
 cloud-engine = []

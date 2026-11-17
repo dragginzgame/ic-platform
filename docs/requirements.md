@@ -307,6 +307,11 @@ The pending [snapshot/status protocol boundary](qualification/management-snapsho
 supplies Backup's finite management message profile with independent native/Wasm
 checks. Actual caller migration, installed recovery and publication are not
 established by these codec tests.
+Protocol 0.3.1 adds a separate minimal `CaptureStatus` projection and opt-in
+bounded response fixture construction for the supplier blockers in
+[Platform #11](https://github.com/dragginzgame/ic-platform/issues/11).
+The upgrade-proof status projection still requires version; malformed-schema
+tests retain independent native declarations and frozen wire evidence.
 
 ### Blob signed and Caffeine supplier slices
 

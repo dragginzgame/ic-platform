@@ -1,7 +1,7 @@
 # Latest Testkit and qualification server ownership
 
-Qualification selects published Testkit 0.107.1 (archive SHA-256
-`a4fe4ea7882118e731ef1ebe8c668fc5dfa5252c1c972b1de68bc444868fae42`).
+Qualification selects published Testkit 0.107.4 (archive SHA-256
+`8629db43fa7a3e3655184c6173a5ccdecf67a87d29f0c929228bec7f8a1c392b`).
 Its upstream PocketIC 16.1.0 client replaces the removed `pic` helpers. Fixtures
 explicitly connect to `POCKET_IC_SERVER_URL`, use a 30-second request deadline,
 and delete their instances after successful execution. Auth's pinned fixture has
@@ -9,8 +9,8 @@ a retained ordinary `qualification/auth-runtime/testkit.patch`; no sibling is ed
 
 The private unpublished `platform-qualification-server` 0.1.0 binary supervises
 one server and one qualification command. Native process ownership is delegated
-to published Host Process 0.80.2 (archive SHA-256
-`d4189c2a9262d34336c59ca7b22851cab1c629cd9afa98cd28a878e124d2e6d1`),
+to published Host Process 0.80.3 (archive SHA-256
+`2b473c407b5d0e39597559bb9b506637849c6e7ad540ef45ab3b566b97244f82`),
 which owns group signalling, unreaped leader custody and reaping. No process
 implementation or unsafe code is copied. Command failure, startup refusal and
 normal completion all close the server; cleanup errors fail qualification.
@@ -34,9 +34,13 @@ notice remains in that supplier. No lifecycle, artifact or process implementatio
 was copied. The data identifies DFINITY PocketIC release artifacts, not executable
 Rust. Native Linux observations do not establish macOS execution qualification.
 
-The current published Platform 0.34.4 verifier also independently checks installed
-Runtime certificates. Candidate 0.34.4 and registry 0.34.4 receive the same original
+The current published Platform 0.34.10 verifier also independently checks installed
+Runtime certificates. Candidate 0.34.10 and registry 0.34.10 receive the same original
 certificate bytes with separately constructed identities and explicit root/time/
-resource policies. Legacy 0.33.7 remains named `legacy-platform` solely for retained
-codec comparisons; it is not claimed as the latest Platform or used to implement
-candidate production capabilities.
+resource policies. The registry archive SHA-256 is
+`7798e7684a2e857355408f2c4252d1187589380609b5f2ef259482e6e1a34571`.
+
+This selection passed `make qualify-runtime-installed` on Linux on 2026-11-17,
+including supervisor and asset checks, strict native/Wasm Clippy, installed
+certificate observations, rollback/cleanup and stopped-upgrade scenarios, and
+the Runtime singleton dependency graph check.

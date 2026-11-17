@@ -30,6 +30,14 @@ exact global float bits and applies per-field collection limits before allocatio
 Callers still own identity/hash admission, capture/restore geometry, spending and
 recovery; passing codec checks does not qualify those application workflows.
 
+`decode_capture_status` selects lifecycle state, controllers and module hash
+without requiring a version. `decode_canister_status` retains required-version
+admission for upgrade proofs. The opt-in `management-snapshot-fixtures` feature
+exposes narrow bounded response encoders under `management_snapshots::fixtures`.
+These permit deliberately invalid policy values for rejection tests and confer
+no admission or authentication. See the
+[fixture and malformed-shape contract](../../docs/qualification/management-snapshots.md#response-fixtures-and-minimal-status).
+
 `caffeine` supplies selected bounded callback, certificate-record and Cashier
 formats, arbitrary signed balances and optional natural top-up targets. The
 enrollment outer option has an explicit encoder. Application admission and

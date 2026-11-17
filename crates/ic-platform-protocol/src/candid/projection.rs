@@ -24,8 +24,9 @@ macro_rules! projection {
             fn write(&self, writer: &mut Writer<'_>) -> Result<(), crate::candid::encode::EncodeError> { $(self.$field.write(writer)?;)+ Ok(()) }
         }
     };
-    ($(#[$meta:meta])* both enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident $(($ty:ty))?),+ $(,)? }) => {
+    ($(#[$meta:meta])* both $(($feature:literal))? enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident $(($ty:ty))?),+ $(,)? }) => {
         projection! { $(#[$meta])* enum $name { $($(#[$variant_meta])* $label => $variant $(($ty))?),+ } }
+        $(#[cfg(feature = $feature)])?
         impl Encode for $name {
             const SCHEMA: Schema = <Self as Decode>::SCHEMA;
             fn write(&self, writer: &mut Writer<'_>) -> Result<(), EncodeError> {

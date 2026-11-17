@@ -47,3 +47,22 @@ The `root-*.bin` requests are frozen registry Platform 0.33.7 output; `root-stat
 is independently authored Candid output. Native and Wasm compare exact retained
 request bytes and required version decoding. Provenance and deliberate regeneration
 are documented in [Canic supplier qualification](../../../docs/qualification/canic-management.md).
+# Backup status provenance
+
+`backup-status-{stopped,stopping,running}.bin` are the decoded `reply_hex` data
+from [Backup's original status goldens](https://github.com/dragginzgame/ic-backup/blob/2941ca1324a95c1afdb57e33cef79362c28b0731/crates/ic-backup/src/store/capture/status/wire/golden.json).
+Source ownership: Toko Studios, TOKO STUDIOS NETWORK LICENCE 1.0 (the source
+repository's `LICENSE.md`). Only wire data is retained; no implementation,
+generated mapping or test body was copied. These independent frames omit
+version and module hash and exercise all three states and canonical controllers.
+
+| State | SHA-256 |
+| --- | --- |
+| stopped | `3f618a4d42fb305f3f771d3b06265f854e9bfb1b491e8fbdba8f83cdd0871685` |
+| stopping | `1b521fcff4cc6a421cd9375eb62c6e0b32a8d9ac746b4eb6645fb20226449626` |
+| running | `7887df26eaadfc8ccdbb1e314307b1db9cfeed9ccb56c8751d387622126bcb91` |
+
+Consumers must not infer authentication from decoding these untrusted frames.
+The minimal capture projection accepts them; the upgrade projection must still
+refuse their absent version. The focused management-snapshots profile replays
+them on native and Wasm targets without reading a sibling at test time.

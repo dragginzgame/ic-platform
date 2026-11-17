@@ -494,14 +494,16 @@ qualify-ingress-packets: toko-tooling-check
 
 .PHONY: qualify-management-snapshots
 qualify-management-snapshots: qualification-tooling-check
+	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features management-snapshot-fixtures --all-targets -- -D warnings
 	cargo clippy --offline --locked -p ic-platform-protocol --no-default-features --features management-snapshots --all-targets -- -D warnings
-	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features management-snapshots --no-deps
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform-protocol --no-default-features --features management-snapshot-fixtures --no-deps
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features management-snapshots --test management_snapshots -- -D warnings
 	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features management-snapshots --test management_snapshots
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features management-snapshots --bin management-snapshots-admission -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --bin management-snapshots-admission --release --target wasm32-unknown-unknown --no-default-features --features management-snapshots --target-dir target/engine-view-wasm/management-snapshots
 	node qualification/engine-view-wasm.mjs management-snapshots
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features management-snapshots --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features management-snapshot-fixtures --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1
 
 .PHONY: qualify-caffeine qualify-native-signed
 qualify-caffeine: qualification-tooling-check

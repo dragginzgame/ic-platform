@@ -30,6 +30,36 @@ fn main() {
         value.source,
         Some(wire::SnapshotSource::TakenFromCanister(wire::Reserved))
     );
+    let encoded = wire::fixtures::snapshot_metadata(&value, limits.bytes).unwrap();
+    assert_eq!(
+        wire::decode_snapshot_metadata(&encoded, limits).unwrap(),
+        value
+    );
+    assert_eq!(
+        wire::fixtures::snapshot_metadata(&value, encoded.len()).unwrap(),
+        encoded
+    );
+    assert_eq!(
+        wire::fixtures::snapshot_metadata(&value, encoded.len() - 1),
+        Err(wire::EncodeError::OutputLimit)
+    );
+    for bytes in [
+        include_bytes!("../../fixtures/backup-status-stopped.bin"),
+        include_bytes!("../../fixtures/backup-status-stopping.bin"),
+        include_bytes!("../../fixtures/backup-status-running.bin"),
+    ] {
+        let status = wire::decode_capture_status(bytes, limits).unwrap();
+        assert_eq!(status.settings.controllers.len(), 2);
+        assert_eq!(
+            wire::decode_canister_status(bytes, limits),
+            Err(Error::Type)
+        );
+        let encoded = wire::fixtures::capture_status(&status, 1024).unwrap();
+        assert_eq!(
+            wire::decode_capture_status(&encoded, limits).unwrap(),
+            status
+        );
+    }
     for end in 0..bytes.len() {
         assert!(wire::decode_snapshot_metadata(&bytes[..end], limits).is_err());
     }

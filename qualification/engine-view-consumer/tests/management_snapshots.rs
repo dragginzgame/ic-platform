@@ -566,3 +566,173 @@ fn required_status_version_is_lossless_and_refuses_missing_or_wrong_type() {
         assert_eq!(wire::decode_canister_status(&bytes, cap), Err(Error::Limit));
     }
 }
+
+#[test]
+fn capture_status_retains_backup_goldens_without_weakening_upgrade_status() {
+    let cases: &[(&[u8], wire::Status)] = &[
+        (
+            include_bytes!("../../engine-view-wasm/fixtures/backup-status-stopped.bin"),
+            wire::Status::Stopped,
+        ),
+        (
+            include_bytes!("../../engine-view-wasm/fixtures/backup-status-stopping.bin"),
+            wire::Status::Stopping,
+        ),
+        (
+            include_bytes!("../../engine-view-wasm/fixtures/backup-status-running.bin"),
+            wire::Status::Running,
+        ),
+    ];
+    for (bytes, status) in cases {
+        let value = wire::decode_capture_status(bytes, limits()).unwrap();
+        assert_eq!(&value.status, status);
+        assert_eq!(
+            value.settings.controllers,
+            vec![
+                candidate_types::Principal::anonymous(),
+                candidate_types::Principal::management_canister()
+            ]
+        );
+        assert_eq!(value.module_hash, None);
+        assert_eq!(
+            wire::decode_canister_status(bytes, limits()),
+            Err(Error::Type)
+        );
+        for end in 0..bytes.len() {
+            assert!(wire::decode_capture_status(&bytes[..end], limits()).is_err());
+        }
+        let mut trailing = bytes.to_vec();
+        trailing.push(0);
+        assert_eq!(
+            wire::decode_capture_status(&trailing, limits()),
+            Err(Error::Trailing)
+        );
+    }
+    let bytes = candid::encode_one(StatusReply {
+        version: u64::MAX,
+        status: Status::Stopped,
+        settings: Settings {
+            controllers: vec![Principal::anonymous()],
+            discarded: "x".repeat(32768),
+        },
+        module_hash: Some(vec![7; 32]),
+    })
+    .unwrap();
+    assert_eq!(
+        wire::decode_capture_status(&bytes, limits())
+            .unwrap()
+            .module_hash,
+        Some(vec![7; 32])
+    );
+    let mut no_skip = limits();
+    no_skip.skipping = 0;
+    assert_eq!(
+        wire::decode_capture_status(&bytes, no_skip),
+        Err(Error::Limit)
+    );
+}
+
+#[test]
+fn bounded_fixture_replies_preserve_original_shapes_and_policy_failures() {
+    use wire::fixtures as fixture;
+    let value =
+        wire::decode_snapshot_metadata(&candid::encode_one(metadata()).unwrap(), limits()).unwrap();
+    let decoded: oracle::ReadCanisterSnapshotMetadataResult =
+        verify_request(|max| fixture::snapshot_metadata(&value, max));
+    assert_eq!(
+        candid::encode_one(decoded).unwrap(),
+        candid::encode_one(metadata()).unwrap()
+    );
+    let snapshot = wire::Snapshot {
+        id: vec![9; 256],
+        total_size: u64::MAX,
+        taken_at_timestamp: u64::MAX,
+    };
+    let result: oracle::TakeCanisterSnapshotResult =
+        verify_request(|max| fixture::take_snapshot(&snapshot, max));
+    assert_eq!(result.id, snapshot.id);
+    let inventory = vec![snapshot; 1025];
+    let result: Vec<oracle::Snapshot> =
+        verify_request(|max| fixture::list_snapshots(&inventory, max));
+    assert_eq!(result.len(), 1025);
+    assert_eq!(
+        wire::decode_list_snapshots(
+            &fixture::list_snapshots(&inventory, 1024 * 1024).unwrap(),
+            limits()
+        ),
+        Err(Error::Limit)
+    );
+    for size in [0, 256, 257] {
+        let value = wire::SnapshotAllocation {
+            snapshot_id: vec![1; size],
+        };
+        let result: oracle::UploadCanisterSnapshotMetadataResult =
+            verify_request(|max| fixture::snapshot_allocation(&value, max));
+        assert_eq!(result.snapshot_id, value.snapshot_id);
+        let bytes = fixture::snapshot_allocation(&value, 1024).unwrap();
+        assert_eq!(
+            wire::decode_snapshot_allocation(&bytes, limits()).is_ok(),
+            size <= 256
+        );
+    }
+    for size in [0, 1048576, 1048577] {
+        let value = wire::SnapshotData {
+            chunk: vec![0xa5; size],
+        };
+        let result: oracle::ReadCanisterSnapshotDataResult =
+            verify_request(|max| fixture::snapshot_data(&value, max));
+        assert_eq!(result.chunk, value.chunk);
+        let bytes = fixture::snapshot_data(&value, 2 * 1024 * 1024).unwrap();
+        assert_eq!(
+            wire::decode_snapshot_data(&bytes, limits()).is_ok(),
+            size <= 1048576
+        );
+    }
+    for (controllers, hash) in [(1, 32), (11, 32), (1, 33)] {
+        let value = wire::CaptureStatus {
+            status: wire::Status::Stopped,
+            settings: wire::Settings {
+                controllers: vec![target(); controllers],
+            },
+            module_hash: Some(vec![3; hash]),
+        };
+        let bytes = fixture::capture_status(&value, 4096).unwrap();
+        assert_eq!(fixture::capture_status(&value, bytes.len()).unwrap(), bytes);
+        assert_eq!(
+            fixture::capture_status(&value, bytes.len() - 1),
+            Err(wire::EncodeError::OutputLimit)
+        );
+        assert_eq!(
+            wire::decode_capture_status(&bytes, limits()).is_ok(),
+            controllers <= 10 && hash <= 32
+        );
+        let versioned = wire::CanisterStatus {
+            status: value.status,
+            version: u64::MAX,
+            settings: value.settings,
+            module_hash: value.module_hash,
+        };
+        let bytes = fixture::canister_status(&versioned, 4096).unwrap();
+        if controllers <= 10 && hash <= 32 {
+            assert_eq!(
+                wire::decode_canister_status(&bytes, limits()).unwrap(),
+                versioned
+            );
+        }
+    }
+    assert_eq!(
+        fixture::empty_response(6).unwrap(),
+        candid::encode_args(()).unwrap()
+    );
+    assert_eq!(
+        fixture::empty_response(5),
+        Err(wire::EncodeError::OutputLimit)
+    );
+    let mut oversized = value;
+    oversized.globals = vec![Some(wire::Global::V128(u128::MAX)); 4097];
+    let bytes = fixture::snapshot_metadata(&oversized, 2 * 1024 * 1024).unwrap();
+    assert_eq!(
+        wire::decode_snapshot_metadata(&bytes, limits()),
+        Err(Error::Limit)
+    );
+}

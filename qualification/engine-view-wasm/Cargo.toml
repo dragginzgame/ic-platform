@@ -63,7 +63,7 @@ sns-neurons = [
 ]
 ledger = ["candidate", "ic-platform-protocol/ledger"]
 caffeine = ["candidate", "ic-platform-protocol/caffeine"]
-management-snapshots = ["candidate", "ic-platform-protocol/management-snapshots"]
+management-snapshots = ["candidate", "ic-platform-protocol/management-snapshot-fixtures"]
 default = []
 management-chunks = ["candidate", "ic-platform-protocol/management-chunks"]
 raw-rand = ["candidate", "ic-platform-protocol/raw-rand"]

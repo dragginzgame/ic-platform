@@ -3,6 +3,21 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.3.1] - 2026-11-17
+
+### ➕ Added
+
+- Resolve the supplier gaps reported in
+  [Platform #11](https://github.com/dragginzgame/ic-platform/issues/11): add
+  `CaptureStatus`/`decode_capture_status` for Backup's minimal lifecycle,
+  controller and module-hash projection while retaining required-version
+  admission in `decode_canister_status`.
+- Add opt-in `management-snapshot-fixtures` bounded response construction for
+  status, list/take, metadata, data, allocation and empty replies. Deliberately
+  invalid policy values remain encodable for consumer refusal tests; no generic
+  codec or authentication API is exposed. Retain independent malformed-schema
+  tests and replay Backup's original status goldens on native and Wasm targets.
+
 ## [0.3.0] - 2026-11-16
 
 ### ➕ Added
