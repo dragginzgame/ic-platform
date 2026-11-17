@@ -1,0 +1,9 @@
+# Maintainer-approved exact historical false positives: public synthetic Ed25519
+# fixture seeds consisting of 32 repeated bytes of 1, 2, 3 or 9, not operational keys.
+# All other commits, files and key findings remain subject to scanning.
+450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/platform-certificates/src/bin/native-signed-installed.rs:private-key:17
+450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/blob-supplier/signed-client.rs:private-key:5
+450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/blob-supplier/signed-client.rs:private-key:6
+450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/blob-supplier/signed-client.rs:private-key:7
+450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/blob-supplier/signed-client.rs:private-key:8
+450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/platform-certificates/tests/native_signed.rs:private-key:15
