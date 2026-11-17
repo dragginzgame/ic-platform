@@ -5,6 +5,23 @@ Run the complete final-source gate once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Tooling-only release-flow follow-up — 17 November 2026
+
+Remove `check-release-evidence` and the Types `publication-refusals` profile
+from routine release qualification. CI and affected-tooling work retain the
+regression suite. Fresh real audit collection and publication admission remain
+unchanged; changed catalog hashes invalidate older qualification receipts.
+The focused suite passes all 55 tests, and formatting passes.
+
+This delivery also records the fresh [Platform #27](https://github.com/dragginzgame/ic-platform/issues/27)
+upstream review. The issue remains open awaiting compatible supplying releases.
+No public package source, manifest, dependency contract or version changes in
+this maintenance commit; package inventories were inspected. Therefore this is
+GitHub source delivery only, with no tag or crates.io upload. Platform 0.34.15
+remains the current release. Pre-existing bytes 1.12.2 lock updates and the
+qualification registry Platform refresh remain local and outside this delivery.
+Focused evidence: `target/deploy-flow-followup/checks.log`.
+
 ## Independent status admission and qualification-flow release
 
 Select Platform 0.34.15 for [Platform #29](https://github.com/dragginzgame/ic-platform/issues/29)'s

@@ -524,7 +524,7 @@ No private package or product version is introduced for this maintenance.
 | Phase / entrypoint | Owner and guarantee | Inputs and trigger |
 | --- | --- | --- |
 | Development: the focused `make qualify-…` targets below | Platform's selected product/consumer contracts; leaf commands explicitly select packages, features and native/Wasm targets | Changed source, manifests/locks, fixture source and tool pins; run affected contracts during development |
-| Tooling wiring: `make check-release-evidence` | Local audit, collector, publication-admission and Make/CI integration refusals | Collector/admission scripts, audit policy, catalogs, Makefile, group policy and workflow wiring; changed-flow work and repository CI; included once in the retained release catalog |
+| Tooling wiring: `make check-release-evidence` | Local audit, collector, publication-admission and Make/CI integration refusals | Collector/admission scripts, audit policy, catalogs, Makefile, group policy and workflow wiring; affected tooling changes and repository CI; excluded from routine release qualification |
 | Repository CI: `.github/workflows/ci.yml`, `types-release.yml` | Supported Linux/macOS coverage and product/fixture guarantees | Each workflow's committed source and host/tool selections; CI remains asynchronous and is not a blocking local publication matrix |
 | Release: `make qualify-release` | Complete local source-bound catalog, fresh isolated RustSec audits of both locks | Clean exact commit, both catalogs, compiler/host, root and qualification locks and every fixture's pinned inputs; once per final source |
 | Publication: `make publish RELEASE_GROUP=… PACKAGE=… RELEASE_RECEIPT=…` | Shared adapter owns selection/dispatch/custody; Platform admits one package's source, registry destination and extracted archive | Exact receipt, package owner/version, clean source, local/remote annotated tag, fresh registry absence, packaged dependency graph and VCS provenance; fresh for each package/upload attempt |
@@ -542,8 +542,17 @@ now run once even when multiple owners require them. `test-native` is the common
 native unit prerequisite of both read and signed qualification; both entrypoints
 still run it when invoked independently. No tests are replaced with cache hits. The obsolete Types-only admission runner
 is retired; its entrypoint delegates to the general admission and its refusal
-target depends on the same local flow fixtures. The former assertion that only
+target depends on the same local flow fixtures for affected tooling work and CI. The former assertion that only
 Types may be publishable is replaced by exact package/group admission.
+
+Run `make check-release-evidence` when changing collector/admission scripts,
+audit policy, release catalogs, Make wiring, group policy or workflow integration.
+Both CI workflows retain that coverage (Types through `check-types-publication`).
+Neither release catalog selects those regression fixtures: `qualify-release`
+still performs fresh real audits of both locks and validates their evidence;
+`publish` still performs fresh receipt/source/group/tag/registry/archive admission.
+Changing either catalog invalidates existing receipts. No audit or admission
+operation has been removed or replaced by CI success.
 
 The complete product gate is deliberately retained for every release group.
 The current catalogs do not declare complete file/feature/reverse-consumer input

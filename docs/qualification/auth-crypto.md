@@ -38,8 +38,36 @@ incompatible package. The selected graph uses elliptic-curve 0.14.3 and bigint
 The root and qualification lock audits report zero known vulnerabilities against RustSec
 `02e2517f457a359fc6d3440ea4560c8ea188fee8`, independently confirmed as the current
 remote revision during this check. Existing unmaintained notices remain.
-This correct direct ECDSA graph does not resolve Agent/derivation #4: Agent
+This correct direct ECDSA graph does not resolve the retained Agent/derivation
+obligation in [Platform #27](https://github.com/dragginzgame/ic-platform/issues/27): Agent
 0.49.3 still selects the incompatible elliptic-curve 0.13/crypto-bigint 0.5 family.
+
+## Platform #27 upstream availability review — 17 November 2026
+
+Fresh sparse-index inspection still selects non-yanked stable Agent 0.49.3 and
+`ic-secp256k1` 0.3.0. Agent has nonoptional elliptic-curve `^0.13`, K256
+`^0.13.4` and P256 `^0.13.2`; the derivation supplier requires K256 `^0.13.4`.
+The latest compatible K256 0.13.4/P256 0.13.2 paths reach elliptic-curve 0.13.8,
+which requires crypto-bigint `^0.5`. Available K256/P256 0.14.0 and
+elliptic-curve 0.14.3 are outside those requirements. The
+[RustSec advisory](https://rustsec.org/advisories/RUSTSEC-2026-0387.html) still
+requires crypto-bigint `>=0.7.6`. There is no compatible supplying correction
+for these retained paths; no forced override, fork or risk exemption is selected.
+
+Locked all-feature metadata for both current workspaces contains neither Agent
+nor `ic-secp256k1`, and selects K256 0.14.0, elliptic-curve 0.14.3 and
+crypto-bigint 0.7.11. Fresh isolated audits of both current locks report zero
+known vulnerabilities against RustSec
+`233155b4025b854c68a4b199c0e32d7fd53291a2`. This is current Platform graph
+evidence, not remediation or migration proof for retained external consumers.
+Platform #27 remains open pending compatible upstream releases and qualification.
+
+Evidence: `target/platform27-review/` retains registry observations and both
+metadata graphs; `audit-1794949227131/evidence.json` binds lock/report hashes and
+the fresh database identity. These observations include pre-existing local lock
+changes; no dependency selection or sibling source was changed by this review.
+The initial offline metadata attempt lacked the already-locked bytes 1.12.2
+archive; fetching it with `--locked` completed graph inspection without updates.
 
 ## Actual consumer evidence
 

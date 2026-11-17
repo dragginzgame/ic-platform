@@ -44,14 +44,5 @@
       "check-runtime-consumer-graph"
     ],
     "scope": "exact local Types/Runtime cohort crossing after metadata alignment; not Runtime release qualification"
-  },
-  {
-    "id": "publication-refusals",
-    "owner": "types",
-    "command": [
-      "make",
-      "check-types-publication"
-    ],
-    "scope": "controlled dirty-source, repository, tag, roster, audit, registry and profile refusals; no upload"
   }
 ]

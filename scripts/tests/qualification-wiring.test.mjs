@@ -4,8 +4,17 @@ import {readFileSync, writeFileSync, mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
+import {releaseCatalog} from '../qualify-release.mjs';
 // These are wiring contracts: the owning targets execute the actual native/Wasm
 // fixtures; this guard prevents a green workflow silently omitting them again.
+test('release flow regressions stay in CI and focused tooling checks, outside product releases', () => {
+  const targets = releaseCatalog().targets;
+  assert(!targets.includes('check-release-evidence'));
+  assert(!targets.includes('check-types-publication'));
+  assert.match(readFileSync('.github/workflows/ci.yml', 'utf8'), /run: make lint-workflows check-release-evidence/);
+  assert.match(readFileSync('.github/workflows/types-release.yml', 'utf8'), /run: make check-types-publication/);
+  assert.match(readFileSync('Makefile', 'utf8'), /^check-types-publication: check-release-evidence$/m);
+});
 test('regular native CI selects the new owning checks on every host', () => {
   const workflow = readFileSync('.github/workflows/ci.yml', 'utf8').split('  native:')[1];
   assert.match(workflow, /\[ubuntu-24.04, macos-15, macos-15-intel\]/);

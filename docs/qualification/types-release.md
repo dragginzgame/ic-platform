@@ -51,9 +51,11 @@ selects Types through the same receipt/registry/archive admission as every other
 group, requiring an explicit complete `RELEASE_RECEIPT`. The supported publisher
 is `make publish RELEASE_GROUP=types PACKAGE=ic-platform-types RELEASE_RECEIPT=…`.
 
-`check-types-publication` now depends on `check-release-evidence`, so both old
-CI and full-catalog entrypoints retain local admission refusal coverage without
-maintaining a second policy implementation. The tests preserve dirty source,
+`check-types-publication` now depends on `check-release-evidence`, so the retained
+Types CI entrypoint and affected-tooling checks retain admission refusal coverage
+without maintaining a second policy implementation. The regression target is
+excluded from the Types release catalog; fresh real audit and publication
+admission still execute for every release. The tests preserve dirty source,
 repository, annotated/remote tag, package eligibility, registry, audit and failed
 qualification refusals. The retired prohibition on other publishable products
 is superseded by exact one-package selection and release-group ownership.
