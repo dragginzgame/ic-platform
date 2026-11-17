@@ -150,4 +150,5 @@ Rustdoc, standalone Wasm replay and both production dependency graph checks.
 All 42 existing Protocol unit tests also passed with all features enabled.
 Wasm SHA-256: `2a6076e9a6329809e47001779ad2d7b64f68d1c8c509785ad154d14dac01f1f6`.
 The registry baseline checked for version selection was Protocol 0.3.0; 0.3.1
-is a compatible local candidate, not a publication claim.
+was selected as a compatible patch. It is now published; see the
+[release and registry evidence](../releases.md#backup-fixture-and-projection-release).

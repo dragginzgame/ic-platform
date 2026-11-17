@@ -16,6 +16,32 @@ adapter and independently verify registry archive/source identity. Hosted CI
 remains asynchronous. Backup migration and installed acceptance remain separate;
 see the [supplier contract](qualification/management-snapshots.md).
 
+Protocol 0.3.1 is published from clean source
+`68862a50775ec692c0feb176b6b76fb845355a33`; main and annotated
+`protocol-v0.3.1` were pushed atomically. Complete local catalog receipt:
+`target/release-qualification/1794906541699-4021355/receipt.json`.
+The root-lock audit found no known vulnerabilities using current RustSec
+`02e2517f457a359fc6d3440ea4560c8ea188fee8`.
+
+The initial attempt at `target/release-qualification/1794906427266-3965735`
+refused a stale candidate Protocol pin in the private Query fixture generator.
+Candidate versions now derive from product manifests; the frozen registry
+comparison is unchanged. The complete catalog passed after this correction.
+Pinned Query/Blob qualification copies were used; no sibling source changed.
+
+Independent archive SHA-256:
+`20790281ca3d8f457262dc008357c4a95a9fe1176c8f68a1ca674a2e916e02c8`.
+It matches the sparse index, admitted local archive and exact clean tagged VCS
+source. Extracted-archive all-feature native/Wasm Clippy, native tests and fetched
+source provenance passed before the single upload. Evidence:
+`target/publication/check.selection.T4NRWz`,
+`target/publication/publish.selection.E6fSB9`, and
+`target/registry-readback/ic-platform-protocol-0.3.1/verified.json`.
+Native execution is Linux evidence. Hosted
+[CI](https://github.com/dragginzgame/ic-platform/actions/runs/44053631968) and
+[Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44053632187)
+were observed in progress once; neither was awaited or claimed passing.
+
 The maintainer authorized crates.io deployment from public
 `dragginzgame/ic-platform` and then selected **Types independently after
 qualification**. Downstream production migration remains a separate gate.
