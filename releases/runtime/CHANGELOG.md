@@ -4,18 +4,25 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
-## [0.23.15] - Unreleased
+## [0.23.15] - 2026-11-17
+
+### 🔧 Changed
+
+- Move call and macro modules with child directories to `mod.rs`, preserving
+  public module paths and implementation bytes under Toko's layout rule.
+  Coordinate Runtime, macros and the exact-version guard at 0.23.15; qualification
+  selects this candidate cohort.
 
 ### 🧪 Testing
 
 - Adopt published Platform 0.34.10 and Host Process 0.80.3 in private installed
   qualification, retaining separate candidate/registry certificate checks and
-  owned PocketIC process cleanup. Product packages are unchanged.
+  owned PocketIC process cleanup. This dependency refresh changes no product behavior.
 - Reconcile actual Scheduling checkpoint/cycle-refusal and pinned Entropy guard
   evidence for [Platform #14](https://github.com/dragginzgame/ic-platform/issues/14),
   [Platform #15](https://github.com/dragginzgame/ic-platform/issues/15), and
   [Platform #19](https://github.com/dragginzgame/ic-platform/issues/19).
-  Published Runtime is unchanged; consumer delivery remains separate.
+  Consumer delivery remains separate.
 
 ## [0.23.14] - 2026-11-16
 

@@ -1,5 +1,21 @@
 # Initial crates.io deployment
 
+## Module layout release
+
+Select Platform 0.34.11, Protocol 0.3.2 and coordinated Runtime/macros/guard
+0.23.15 for the installed Toko module-layout rule. Thirteen source modules move
+to `mod.rs` with byte-identical contents and unchanged public paths. Candidate
+qualification pins and locks follow the new versions; registry comparison
+suppliers stay pinned. Types 0.21.2 is unchanged and is not republished.
+Registry review on 2026-11-17 confirmed all selected versions absent and the
+preceding published versions current.
+
+Run the complete local catalog at clean source, then push annotated
+`platform-v0.34.11`, `protocol-v0.3.2` and `runtime-v0.23.15` tags with main.
+Publish guard and macros before Runtime, followed by Protocol and Platform,
+using the supported publication adapter and independent archive/source readback
+for each package. Hosted CI remains asynchronous; siblings stay read-only.
+
 ## Backup fixture and projection release
 
 Protocol 0.3.1 supplies the bounded response fixture constructors and separate

@@ -75,11 +75,14 @@ does not establish product or native-host qualification.
   Runtime 0.23.10 now passes the pinned actual Auth installed fixture; retain the
   [scope and legacy crypto boundary](docs/qualification/runtime-auth.md).
   Packaging and production migration remain separate admission gates.
-- The initial Protocol package implements request encoding and selected response
-  decoding, with initial version 0.1.0 and publication disabled. The separate
-  qualification workspace proves a public consumer/type crossing. Full Query
-  adoption and release execution remain pending; do not claim the first
-  projection gate has passed.
+- Protocol 0.3.1 is published on crates.io. Its implemented scope includes bounded
+  request encoding, selected response projections and opt-in snapshot response
+  fixture construction; defaults remain empty. Preserve the independent schema,
+  native/Wasm and actual-consumer qualification in the separate private workspace.
+  See the [release evidence](docs/releases.md#backup-fixture-and-projection-release)
+  and [Query qualification scope](docs/qualification/query-hard-cut.md).
+  Supplier publication and isolated consumer qualification do not establish
+  downstream production migration or completion of the full design.
 - Maintain implemented product groups in `ci/cargo-release-groups.json` and their
   notes in `releases/<group>/CHANGELOG.md`; root `CHANGELOG.md` is navigation only.
   Types now implements Principal and Account/Subaccount, with its own group;

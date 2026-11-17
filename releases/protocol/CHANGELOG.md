@@ -3,6 +3,13 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.3.2] - 2026-11-17
+
+### 🔧 Changed
+
+- Move modules with child directories to `mod.rs`, following the installed Toko
+  layout rule. Public module paths and implementation bytes are unchanged.
+
 ## [0.3.1] - 2026-11-17
 
 ### ➕ Added

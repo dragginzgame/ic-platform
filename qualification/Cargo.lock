@@ -1094,6 +1094,20 @@ dependencies = [
 [[package]]
 name = "ic-platform"
 version = "0.34.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7798e7684a2e857355408f2c4252d1187589380609b5f2ef259482e6e1a34571"
+dependencies = [
+ "ic-certification",
+ "ic-platform-types 0.21.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-verify-bls-signature",
+ "serde",
+ "serde_cbor",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.34.11"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -1113,22 +1127,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-platform"
-version = "0.34.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7798e7684a2e857355408f2c4252d1187589380609b5f2ef259482e6e1a34571"
-dependencies = [
- "ic-certification",
- "ic-platform-types 0.21.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "ic-verify-bls-signature",
- "serde",
- "serde_cbor",
- "thiserror 2.0.18",
-]
-
-[[package]]
 name = "ic-platform-macros"
-version = "0.23.14"
+version = "0.23.15"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1137,7 +1137,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "crc32fast",
  "ic-platform-types 0.21.2",
@@ -1148,7 +1148,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.14"
+version = "0.23.15"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -1157,7 +1157,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.14"
+version = "0.23.15"
 
 [[package]]
 name = "ic-platform-types"
@@ -1780,7 +1780,7 @@ version = "0.1.0"
 dependencies = [
  "candid",
  "ic-certification",
- "ic-platform 0.34.10",
+ "ic-platform 0.34.11",
  "ic-platform-protocol",
  "ic-platform-types 0.21.2",
  "ic-testkit",
@@ -2127,7 +2127,7 @@ dependencies = [
  "ic-certification",
  "ic-management-canister-types",
  "ic-platform 0.34.10",
- "ic-platform 0.34.10 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.34.11",
  "ic-testkit",
  "tokio",
  "toko-tooling",

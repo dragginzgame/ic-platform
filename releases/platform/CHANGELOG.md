@@ -3,6 +3,13 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.11] - 2026-11-17
+
+### 🔧 Changed
+
+- Move certificate and native query modules with child directories to `mod.rs`,
+  preserving public module paths and implementation bytes under Toko's layout rule.
+
 ## [0.34.10] - 2026-11-16
 
 ### ➕ Added
