@@ -779,7 +779,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.14"
+version = "0.34.15"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",

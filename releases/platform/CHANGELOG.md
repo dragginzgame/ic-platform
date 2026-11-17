@@ -3,6 +3,25 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.15] - 2026-11-17
+
+### 🔧 Maintenance
+
+- Consolidate the complete qualification catalog into one serial Make graph for
+  [Platform #26](https://github.com/dragginzgame/ic-platform/issues/26), retaining
+  source-bound receipt admission and extracted-archive checks. Share native unit
+  prerequisites, enforce publication group ownership, and make dry-run preflight
+  optional. No product release is required by this tooling change alone.
+
+### ➕ Added
+
+- Add independent direct-signature status-envelope admission through
+  `PreparedRequestStatus::from_signed_bytes` for
+  [Platform #29](https://github.com/dragginzgame/ic-platform/issues/29).
+  The signer parent can authenticate the original request ID, sender and exact
+  single path without a private key or retained update. Callers compare the
+  authenticated expiry with their approved exact expiry and supply routing policy.
+
 ## [0.34.14] - 2026-11-17
 
 ### ➕ Added

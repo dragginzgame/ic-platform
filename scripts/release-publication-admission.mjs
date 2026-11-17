@@ -1,10 +1,9 @@
 // Explicit receipt reuse; the shared runner still owns clean-source dispatch.
 import assert from 'node:assert/strict';
-import {validateReleaseAudit} from './release-audit.mjs';
+import {validateQualificationReceipt} from './qualify-release.mjs';
 import { spawnSync } from 'node:child_process';
 import { readFileSync, mkdirSync, appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { createHash } from 'node:crypto';
 const run = (cmd,args) => {
   const r=spawnSync(cmd,args,{encoding:'utf8',maxBuffer:32*1024*1024});
   if(r.error)throw r.error;
@@ -14,27 +13,23 @@ const run = (cmd,args) => {
 run('bash',['vendor/toko-tooling/scripts/ci/check-release-source.sh']);
 assert(process.env.RELEASE_RECEIPT,'Select an explicit complete local RELEASE_RECEIPT');
 const receipt=JSON.parse(readFileSync(process.env.RELEASE_RECEIPT));
-const hash=b=>createHash('sha256').update(b).digest('hex');
 const commit=run('git',['rev-parse','HEAD']).trim();
-assert.equal(receipt.commit,commit);
-assert.equal(receipt.rust,run('rustc',['-V']).trim());
-const catalog=readFileSync('ci/release-profiles.json');
-assert.equal(receipt.catalog,hash(catalog));
-assert.equal(receipt.types_catalog,hash(readFileSync('ci/types-release-profiles.json')));
-assert.deepEqual(Object.keys(receipt.profiles).sort(),['types',...Object.keys(JSON.parse(catalog))].sort());
-for(const [name,digest] of Object.entries(receipt.profiles))assert.equal(hash(readFileSync(`${dirname(process.env.RELEASE_RECEIPT)}/${name}.log`)),digest);
-validateReleaseAudit(receipt.audit, dirname(process.env.RELEASE_RECEIPT));
+validateQualificationReceipt(receipt, dirname(process.env.RELEASE_RECEIPT), {
+  commit, rust: run('rustc',['-V']).trim(),
+});
 const selection=process.env.CARGO_PUBLISH_SELECTION?.trim().split(/\s+/);
 assert.equal(selection?.length,1,'Publish one admitted package at a time in dependency order');
 const name=selection[0];
-const groups={'ic-platform-types':'types','ic-platform':'platform','ic-platform-protocol':'protocol','ic-platform-runtime':'runtime','ic-platform-runtime-guard':'runtime','ic-platform-macros':'runtime'};
-assert(Object.hasOwn(groups,name));
+const policy=JSON.parse(readFileSync('ci/cargo-release-groups.json'));
+const groups=policy.groups.filter(group=>group.members.includes(name));
+assert.equal(groups.length,1,'package must have exactly one release owner');
+assert.equal(process.env.RELEASE_GROUP,groups[0].name,'select the package release group explicitly');
 const metadata=JSON.parse(run('cargo',['metadata','--locked','--offline','--format-version','1']));
 const product=metadata.packages.find(p=>p.name===name && metadata.workspace_members.includes(p.id));
 assert(product);assert.deepEqual(product.publish,['crates-io']);assert.deepEqual(product.features.default,[]);
 assert.equal(product.repository,'https://github.com/dragginzgame/ic-platform');
 assert.equal(run('git',['remote','get-url','origin']).trim(),`${product.repository}.git`);
-const tag=`${groups[name]}-v${product.version}`;
+const tag=`${groups[0].name}-v${product.version}`;
 assert.equal(run('git',['cat-file','-t',tag]).trim(),'tag');
 assert.equal(run('git',['rev-parse',`${tag}^{commit}`]).trim(),commit);
 assert.equal(run('git',['ls-remote','--exit-code','origin',`refs/tags/${tag}^{}`]).trim().split(/\s+/)[0],commit);

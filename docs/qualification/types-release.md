@@ -40,17 +40,23 @@ identity boundary, not release readiness of Runtime.
 
 ## Release evidence
 
-The executable [profile catalog](../../ci/types-release-profiles.json) is the
-Types-specific roster. `types-publication-admission` records hosted CI
-for the exact source without waiting for completion, reruns the local catalog and retains its logs, records audit and
-registry observations, and checks Cargo archive VCS provenance against a fresh
-fetch from the declared repository. The shared publication runner separately
-retains each check/upload attempt. Final registry bytes must match the admitted
-archive and carry the selected clean source revision before delivery is complete.
+The executable [profile catalog](../../ci/types-release-profiles.json) retains
+Types' obligations. The complete release collector now runs these with the other
+product obligations in one serial Make graph; see the
+[current flow](../development.md#qualification-and-publication-flow--platform-26).
 
-`make check-types-publication` exercises dirty source, wrong repository, lightweight
-/local-remote tag mismatch, expanded publishable roster,
-unavailable registry, existing version, failed audit and failed profile observations.
-A controlled success verifies the full admission path without dispatching an upload.
-These checks qualify policy wiring; actual host, archive and registry evidence remain
-separate. Live checks also refused the dirty preparation and a Platform selector.
+The obsolete Types-only publisher assumed every other product was unpublished
+and reran its catalog. It has been retired. `types-publication-admission` now
+selects Types through the same receipt/registry/archive admission as every other
+group, requiring an explicit complete `RELEASE_RECEIPT`. The supported publisher
+is `make publish RELEASE_GROUP=types PACKAGE=ic-platform-types RELEASE_RECEIPT=…`.
+
+`check-types-publication` now depends on `check-release-evidence`, so both old
+CI and full-catalog entrypoints retain local admission refusal coverage without
+maintaining a second policy implementation. The tests preserve dirty source,
+repository, annotated/remote tag, package eligibility, registry, audit and failed
+qualification refusals. The retired prohibition on other publishable products
+is superseded by exact one-package selection and release-group ownership.
+Shared still owns dispatch and uncertain-upload custody. Final registry bytes
+must match the admitted archive and selected clean VCS source. Simulated effects
+qualify wiring only; live host/archive/registry evidence remains separate.

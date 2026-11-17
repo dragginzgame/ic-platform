@@ -460,6 +460,32 @@ impl PreparedRequestStatus {
             AuthenticationProfile::DirectSignature,
         )
     }
+    /// Independently admit a direct-signed status envelope for an approved request.
+    /// Requires no private key or original update bytes. Verifies the signature,
+    /// key/sender binding and exactly `request_status/<original_request_id>`.
+    /// Preserves the signed expiry and original bytes without clock access.
+    /// The caller must compare [`Self::expiry`] with its approved exact expiry
+    /// and apply freshness policy. `effective` is caller-approved routing metadata,
+    /// not signed content; this check does not establish dispatch permission.
+    /// # Errors
+    /// Refuses malformed, trailing or oversized packets, unsupported authentication,
+    /// invalid signatures, wrong senders/request IDs and extra paths.
+    pub fn from_signed_bytes(
+        bytes: &[u8],
+        original_request_id: [u8; 32],
+        expected_sender: Principal,
+        effective: Principal,
+        maximum_bytes: usize,
+    ) -> Result<Self, ReadError> {
+        Self::admit_binding(
+            bytes,
+            original_request_id,
+            expected_sender,
+            effective,
+            maximum_bytes,
+            AuthenticationProfile::DirectSignature,
+        )
+    }
     /// Admit an anonymous status read bound to an anonymously admitted update.
     /// Preserves the original read expiry and bytes; makes no freshness claim.
     /// # Errors

@@ -508,32 +508,115 @@ version; there is no workspace version or shadow version file. The root
 [changelog](../CHANGELOG.md) is an index, and group notes live under
 `releases/<group>/CHANGELOG.md`, following the adopted Toko Tooling convention.
 
-Protocol currently owns `ic-platform-protocol` and its pending 0.2.0
-notes. Its earlier GitHub snapshots reused 0.1.0; the changelog records that
-historical versioning gap without assigning retroactive versions. Repository setup and qualification notes supporting Protocol remain
-in that ledger; they do not create releases for private test packages.
+Product versions are owned by their manifests; the current published cohort is
+recorded at the top of this document. Runtime, macros and guard remain coordinated.
+Private qualification packages stay outside product release groups.
+`make deps-list` uses the installed Toko Tooling reader for membership.
 
-Types owns the incomplete `ic-platform-types` 0.21.0 candidate and its separate
-pending changelog. Runtime and its exact guard share version 0.23.7; advance both
-and the exact root guard dependency together. The macros package now shares this
-version and has an exact Runtime dependency selection as well.
-Platform now owns `ic-platform` 0.34.0 and its certificate-decoding slice. Browser
-remains a future group; register it only with a real package and a checked
-published baseline. Do not create placeholder packages.
-Qualification workspace members remain unpublished, outside the product policy,
-and independently versioned.
+### Qualification and publication flow — Platform #26
 
-`make deps-list` uses the installed Toko Tooling reader to display group membership.
-Types records the `candidate-types` alias used by Runtime. Runtime records its
-`candidate-runtime-guard` and `candidate-macros` aliases; Protocol has no local
-catalog consumers. Do not add unused
-catalog entries just to display membership; the JSON policy owns that mapping.
+The execution change for [Platform #26](https://github.com/dragginzgame/ic-platform/issues/26)
+preserves the full obligation catalogs and every existing target's package,
+feature, target and pinned consumer selection. It consolidates dispatch, rather
+than inferring that an unchanged product has no reverse-consumer obligations.
+No private package or product version is introduced for this maintenance.
 
-This change establishes changelog ownership and inventory only. It installs no
-release or publication commands. Packages remain unpublished. Future execution
-must explicitly select `RELEASE_GROUP`, admit all required
-proof and qualify Toko Tooling's supported release adapter before release readiness can
-be claimed. Existing full release obligations remain open.
+| Phase / entrypoint | Owner and guarantee | Inputs and trigger |
+| --- | --- | --- |
+| Development: the focused `make qualify-…` targets below | Platform's selected product/consumer contracts; leaf commands explicitly select packages, features and native/Wasm targets | Changed source, manifests/locks, fixture source and tool pins; run affected contracts during development |
+| Tooling wiring: `make check-release-evidence` | Local audit, collector, publication-admission and Make/CI integration refusals | Collector/admission scripts, audit policy, catalogs, Makefile, group policy and workflow wiring; changed-flow work and repository CI; included once in the retained release catalog |
+| Repository CI: `.github/workflows/ci.yml`, `types-release.yml` | Supported Linux/macOS coverage and product/fixture guarantees | Each workflow's committed source and host/tool selections; CI remains asynchronous and is not a blocking local publication matrix |
+| Release: `make qualify-release` | Complete local source-bound catalog, fresh isolated RustSec audits of both locks | Clean exact commit, both catalogs, compiler/host, root and qualification locks and every fixture's pinned inputs; once per final source |
+| Publication: `make publish RELEASE_GROUP=… PACKAGE=… RELEASE_RECEIPT=…` | Shared adapter owns selection/dispatch/custody; Platform admits one package's source, registry destination and extracted archive | Exact receipt, package owner/version, clean source, local/remote annotated tag, fresh registry absence, packaged dependency graph and VCS provenance; fresh for each package/upload attempt |
+| Optional preflight: `make publish-check` with the same selections | Same admission plus Cargo dry run; no upload | Only when a separate preflight is useful; it is not a prerequisite of `publish` |
+| Recovery / readback | Shared attempt evidence plus independent registry reconciliation | Inspect intent/dispatch/status and remote index/archive/VCS evidence after uncertain upload; never automatically rerun an upload |
+
+`ci/release-profiles.json` supplies repository, Protocol, Runtime and Platform
+goals; `ci/types-release-profiles.json` supplies Types goals and their scopes.
+The collector first invokes the installed shared Make execution guard, refusing
+dry-run and ignored-error modes. It expands both catalogs once, retains
+first-occurrence order, and invokes one
+serial Make graph. Make deduplicates common targets and prerequisites. In
+particular Blob supplier qualification, Types/Runtime crossing and graph checks
+now run once even when multiple owners require them. `test-native` is the common
+native unit prerequisite of both read and signed qualification; both entrypoints
+still run it when invoked independently. No tests are replaced with cache hits. The obsolete Types-only admission runner
+is retired; its entrypoint delegates to the general admission and its refusal
+target depends on the same local flow fixtures. The former assertion that only
+Types may be publishable is replaced by exact package/group admission.
+
+The complete product gate is deliberately retained for every release group.
+The current catalogs do not declare complete file/feature/reverse-consumer input
+closures: actual Auth, Blob and Query fixtures cross owners. A selected publisher
+group is therefore not evidence that another catalog's checks are inapplicable.
+There is no new local diff classifier, cache, runner or metadata framework.
+Narrowing that gate would require a qualified input/impact policy using shared
+mechanics. This is an explicit retained-work disposition, not a claim of scoped
+product qualification. Published Toko Tooling 0.44.11 remains installed unchanged.
+
+Schema-2 receipts bind the complete ordered target list and one retained
+`qualification.log`, both catalog hashes, exact commit, compiler/host and the
+existing fresh audit evidence. The collector writes a receipt only after success
+and final clean-source admission. `timings.json` records audit, qualification and
+total elapsed time; timings are observations, never authority. Old schema-1
+receipts remain historical evidence but cannot admit publication under the new
+flow. Changed source/catalog/compiler/host, missing/tampered logs or invalid audit
+evidence require a fresh full run; there is no partial-success resume.
+
+Workspace and extracted-archive checks remain distinct: Cargo normalizes package
+manifests and resolves registry dependencies. Publication retains all-feature
+native/Wasm archive Clippy, native tests and independently fetched source
+provenance. Cargo's own package/publish compilation is retained as its integrity
+check; no `--no-verify` shortcut is introduced. If an operator elects to run both
+preflight and upload, admission repeats because no shared archive-result reuse
+contract is adopted here. Normal delivery runs `publish` once, not a mandatory
+`publish-check` followed by `publish`.
+
+For a multi-package Runtime delivery, use one final-source receipt and publish
+its guard and macros before Runtime. Other product groups retain their own tags
+and versions. Keep one package per attempt and independently verify each published
+archive against its admitted bytes and tagged VCS source. A failed dispatch
+marker without completion is uncertain: preserve the lock/evidence, inspect the
+registry and reconcile before selecting any fresh attempt.
+
+### Platform #26 local qualification evidence
+
+On 17 November 2026 the before/after real product catalogs both passed on Linux
+with the pending Platform 0.34.15 source. The harness used pinned disposable
+`QUERY_SOURCE=target/deploy-query-source` and `BLOB_SOURCE=target/blob-types-source`;
+no sibling checkout changed. The grouped baseline used the old dispatch shape;
+the final graph used shared targets and the replacement Types refusal entrypoint.
+
+| Qualification phase | Observed elapsed seconds |
+| --- | ---: |
+| Before: Types | 22.64 |
+| Before: repository | 8.25 |
+| Before: Protocol | 74.75 |
+| Before: Runtime | 50.74 |
+| Before: Platform | 86.85 |
+| Before: total grouped qualification | 243.24 |
+| After: complete single Make graph | 197.68 |
+
+These are sequential warm-cache observations, not a controlled cold-cache
+benchmark or an end-to-end publication speed claim. Later cache warming,
+changed refusal-fixture coverage and system variation prevent attributing the
+whole difference to dispatch consolidation. Fresh audit preparation, tagging,
+archive admission, upload and registry readback were outside this comparison.
+No live upload was needed. The real after-log confirms one Blob supplier run,
+one native unit run and one flow/refusal invocation. Timings and full logs:
+`target/platform26-comparison/timings.json` and its sibling log files.
+
+All 54 focused flow/audit/wiring tests pass, including the two final shared
+execution-guard cases added after the full graph's 52-case fixture invocation.
+The retained `make check-types-publication` entrypoint passes all 54 as well.
+Tests execute real Make and consumer admission processes in disposable roots;
+registry, package and provenance effects are simulated. They establish dispatch,
+refusal and fresh-run recovery behavior, not live upload or macOS proof.
+Evidence: `target/platform26-flow-final4.log`,
+`target/platform26-types-entrypoint.log`, and `target/platform26-format.log`.
+The comparison ran against a dirty development snapshot and deliberately issued
+no release receipt. Final clean-source qualification and archive admission remain
+required before deployment. Historical release receipts were not modified.
 
 ## Platform certificate boundary
 

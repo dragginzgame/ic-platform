@@ -561,3 +561,135 @@ fn offline_signing_contract(
     corrupt.pop();
     assert!(PreparedRequestStatus::from_bytes(&corrupt, &update, 4096).is_err());
 }
+
+#[test]
+fn independent_ed25519_status_admission() {
+    independent_status_admission(
+        identity().principal(),
+        |packet| sign_status(packet, 9),
+        |packet| sign_status(packet, 8),
+    );
+}
+
+#[cfg(feature = "native-signed-secp256k1")]
+#[test]
+fn independent_secp256k1_status_admission() {
+    use k256::pkcs8::EncodePublicKey;
+    let public = k256::SecretKey::from_slice(&[7; 32])
+        .unwrap()
+        .public_key()
+        .to_public_key_der()
+        .unwrap();
+    let sender = Principal::self_authenticating(public.as_bytes());
+    // Independent upstream signing and serialization, without Platform's signer.
+    let sign = |mut packet: ingress::Envelope, seed| {
+        let secret = k256::SecretKey::from_slice(&[seed; 32]).unwrap();
+        let public = secret.public_key().to_public_key_der().unwrap();
+        let key = k256::ecdsa::SigningKey::from(secret);
+        let signature: k256::ecdsa::Signature = key.sign(&packet.content.signable().unwrap());
+        packet.sender_pubkey = Some(public.as_bytes().to_vec());
+        packet.sender_sig = Some(signature.to_bytes().to_vec());
+        serde_cbor::to_vec(&packet).unwrap()
+    };
+    independent_status_admission(sender, |packet| sign(packet, 7), |packet| sign(packet, 8));
+}
+
+fn independent_status_admission(
+    sender: Principal,
+    sign: impl Fn(ingress::Envelope) -> Vec<u8>,
+    sign_wrong_key: impl Fn(ingress::Envelope) -> Vec<u8>,
+) {
+    let id = [42; 32];
+    let effective = Principal::from_slice(&[1]);
+    let expiry = 9_876_543_219;
+    let packet = ingress::Envelope {
+        content: Content::ReadState {
+            sender,
+            ingress_expiry: expiry,
+            paths: vec![vec![b"request_status".to_vec(), id.to_vec()]],
+        },
+        sender_pubkey: None,
+        sender_sig: None,
+        sender_delegation: None,
+    };
+    let bytes = [b"\xd9\xd9\xf7".as_slice(), &sign(packet.clone())].concat();
+    let admit = |bytes: &[u8], limit| {
+        PreparedRequestStatus::from_signed_bytes(bytes, id, sender, effective, limit)
+    };
+    let admitted = admit(&bytes, bytes.len()).unwrap();
+    assert_eq!(admitted.envelope_bytes(), bytes);
+    assert_eq!(admitted.request_id(), &id);
+    assert_eq!(admitted.sender(), sender);
+    assert_eq!(admitted.effective_canister(), effective);
+    assert_eq!(admitted.expiry(), expiry);
+    assert!(admit(&bytes, bytes.len() - 1).is_err());
+    assert!(
+        PreparedRequestStatus::from_signed_bytes(&bytes, [43; 32], sender, effective, 4096)
+            .is_err()
+    );
+    assert!(
+        PreparedRequestStatus::from_signed_bytes(
+            &bytes,
+            id,
+            Principal::anonymous(),
+            effective,
+            4096
+        )
+        .is_err()
+    );
+    // Routing metadata is caller policy, not a signed field.
+    let routing = Principal::from_slice(&[2]);
+    assert_eq!(
+        PreparedRequestStatus::from_signed_bytes(&bytes, id, sender, routing, 4096)
+            .unwrap()
+            .effective_canister(),
+        routing
+    );
+    for index in 0..5 {
+        let mut changed = packet.clone();
+        let Content::ReadState { sender, paths, .. } = &mut changed.content else {
+            unreachable!()
+        };
+        match index {
+            0 => *sender = Principal::anonymous(),
+            1 => paths[0][1][0] ^= 1,
+            2 => paths[0][0] = b"time".to_vec(),
+            3 => paths.push(vec![b"time".to_vec()]),
+            _ => paths[0].push(b"reply".to_vec()),
+        }
+        assert!(admit(&sign(changed), 4096).is_err());
+    }
+    let mut changed_expiry = packet.clone();
+    let Content::ReadState { ingress_expiry, .. } = &mut changed_expiry.content else {
+        unreachable!()
+    };
+    *ingress_expiry += 1;
+    // A valid signature authenticates the supplied expiry; the parent must still
+    // reject a value differing from the exact expiry it approved.
+    let changed = admit(&sign(changed_expiry), 4096).unwrap();
+    assert_ne!(changed.expiry(), expiry);
+    for index in 0..6 {
+        let mut forged = ingress::decode_envelope(&bytes, 4096).unwrap().value;
+        match index {
+            0 => forged.sender_sig.as_mut().unwrap()[0] ^= 1,
+            1 => forged.sender_sig = Some(vec![0]),
+            2 => forged.sender_sig = None,
+            3 => forged.sender_pubkey = Some(vec![0]),
+            4 => forged.sender_delegation = Some(vec![]),
+            _ => {
+                let Content::ReadState { ingress_expiry, .. } = &mut forged.content else {
+                    unreachable!()
+                };
+                *ingress_expiry += 1;
+            }
+        }
+        assert!(admit(&serde_cbor::to_vec(&forged).unwrap(), 4096).is_err());
+    }
+    assert!(admit(&sign_wrong_key(packet), 4096).is_err());
+    for end in 0..bytes.len() {
+        assert!(admit(&bytes[..end], 4096).is_err());
+    }
+    let mut trailing = bytes;
+    trailing.push(0);
+    assert!(admit(&trailing, 4096).is_err());
+}

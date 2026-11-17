@@ -17,8 +17,8 @@ include vendor/toko-tooling/make/consumer.mk
 include vendor/toko-tooling/make/cargo-dependencies.mk
 
 .PHONY: types-publication-admission
-types-publication-admission: toko-tooling-check qualification-tooling-check
-	node scripts/types-publication-admission.mjs
+types-publication-admission: qualification-tooling-check
+	CARGO_PUBLISH_SELECTION=ic-platform-types RELEASE_GROUP=types node scripts/release-publication-admission.mjs
 
 .PHONY: help test-engine-request lint-engine-request doc-engine-request check-engine-request-wasm
 help:
@@ -413,8 +413,7 @@ qualify-auth-wire:
 qualify-query-settings:
 	node qualification/query-settings.mjs
 
-check-types-publication:
-	node qualification/types-auth/publication-refusals.mjs
+check-types-publication: check-release-evidence
 
 .PHONY: qualify-release release-publication-admission
 qualify-release: qualification-tooling-check ic-tools-check
@@ -456,8 +455,11 @@ qualify-query-hard-cut:
 	QUERY_COHORT=candidate node qualification/query-hard-cut.mjs
 	node qualification/query-hard-cut.mjs
 
-qualify-native-read: qualification-tooling-check
+.PHONY: test-native
+test-native: qualification-tooling-check
 	cargo test --offline --locked -p ic-platform --all-features native::
+
+qualify-native-read: test-native
 	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-read --test native_transport
 	cargo clippy --offline --locked -p ic-platform --all-features --all-targets -- -D warnings
 
@@ -522,8 +524,7 @@ qualify-caffeine: qualification-tooling-check
 	node qualification/engine-view-wasm.mjs caffeine
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features caffeine --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1
 
-qualify-native-signed: qualification-tooling-check ic-tools-check
-	cargo test --offline --locked -p ic-platform --all-features native::
+qualify-native-signed: test-native ic-tools-check
 	cargo clippy --offline --locked -p ic-platform --no-default-features --features native-signed --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --no-default-features --features native-signed --no-deps
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed-secp256k1 --test native_signed --bin native-signed-installed --bin native-anonymous-installed -- -D warnings
@@ -559,4 +560,4 @@ qualify-sns-neurons: qualification-tooling-check
 
 .PHONY: check-release-evidence
 check-release-evidence: qualification-tooling-check
-	node --test scripts/tests/release-audit.test.mjs scripts/tests/qualification-wiring.test.mjs
+	node --test scripts/tests/release-audit.test.mjs scripts/tests/qualification-wiring.test.mjs scripts/tests/release-flow.test.mjs

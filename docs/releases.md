@@ -1,5 +1,27 @@
 # Initial crates.io deployment
 
+Current delivery uses the [qualification/publication flow](development.md#qualification-and-publication-flow--platform-26).
+Run the complete final-source gate once and then the supported `publish` adapter
+once per package; `publish-check` is an optional separate preflight. Historical
+dry-run/upload records below describe the commands actually used at the time.
+
+## Independent status admission and qualification-flow release
+
+Select Platform 0.34.15 for [Platform #29](https://github.com/dragginzgame/ic-platform/issues/29)'s
+independent direct-signature status-envelope admission. The parent supplies only
+returned bytes and approved public binding; exact expiry comparison and routing
+policy remain explicit. [Platform #26](https://github.com/dragginzgame/ic-platform/issues/26)'s
+qualified single-Make-graph collector and shared publication admission are included.
+Other product versions remain unchanged; qualification retains Testkit 0.109.0
+and its pre-existing registry Platform 0.34.14 lock selection.
+
+Registry review on 17 November 2026 confirmed 0.34.14 current and 0.34.15 absent.
+Run final clean-source qualification with pinned Query/Blob copies, deliver main
+and annotated `platform-v0.34.15`, then invoke the supported publisher once.
+No separate dry run is required. Independently verify registry checksum and VCS
+source after upload; hosted CI remains asynchronous. External-signer publication
+and Tooling/Canic/Backup adoption remain separate consumer gates.
+
 ## Exact offline signing and secp256k1 query release
 
 Select Platform 0.34.14 for issues #28 and #29: explicit secp256k1 signed queries

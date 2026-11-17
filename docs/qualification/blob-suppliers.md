@@ -307,3 +307,51 @@ Ed25519-only Clippy, installed-fixture Clippy, Rustdoc and formatting. Installed
 post-expiry original-result lookup passed for both algorithms on both subnet
 profiles; retained log: `target/issue29-installed.log`. No new macOS execution,
 registry publication, encrypted-provider access or downstream adoption is claimed.
+
+
+### Independent status-envelope admission — Platform #29 follow-up
+
+Platform 0.34.14 published standalone signing but left parent-side admission
+coupled to retained update bytes. The compatible 0.34.15 candidate adds
+`PreparedRequestStatus::from_signed_bytes(bytes, original_request_id, expected_sender, effective, maximum_bytes)`.
+It delegates to the existing direct-signature binding verifier; no new crypto,
+serializer, transport, key discovery or provider lifecycle is introduced.
+The parent supplies approved public metadata and the returned envelope only:
+
+```rust,ignore
+let status = PreparedRequestStatus::from_signed_bytes(
+    &returned_bytes, approved_request_id, approved_sender,
+    approved_effective_canister, envelope_byte_limit,
+)?;
+if status.expiry() != approved_expiry_ns {
+    return Err(ExpiryMismatch);
+}
+```
+
+Admission verifies direct signature/key-to-sender binding and exactly one
+`request_status/<original ID>` path. It preserves bytes and authenticated expiry.
+A signed expiry differing from approval is valid cryptography but must be refused
+by the parent. Effective routing is not signed read-state content: the caller
+supplies its approved target. Admission grants neither freshness nor dispatch
+permission. Anonymous/delegated profiles cannot fall back through this API.
+
+Independent test envelopes use upstream Ed25519/K256 signing and Serde CBOR,
+without the Platform preparation methods or an original update. Both algorithms
+exercise exact/over limits, wrong key/ID/sender/path, extra paths, malformed or
+missing signatures, tampered expiry, valid-but-unapproved expiry, delegation,
+truncation and trailing bytes. The external installed fixture independently
+readmits each child-produced envelope before direct-root/delegated original-result
+lookup after update expiry, preserving the original update bytes.
+
+Publication of this patch and Tooling's external signer remain separate gates;
+this local change does not claim Backup or Canic production integration.
+
+Focused Linux validation passed: all 15 native tests, five HTTP transport/recovery
+regressions, native-signed and all-feature strict Clippy, Rustdoc and formatting.
+Installed direct-root and delegated journeys passed for both algorithms, including
+independent public admission and post-expiry lookup; anonymous transport regression
+also passed. Logs: `target/platform29-independent-tests.log`,
+`target/platform29-independent-qualification.log` and `target/platform29-clippy.log`.
+The pre-existing qualification lock refresh to registry Platform 0.34.14 was
+preserved; local candidate entries advance to 0.34.15. These are source-level
+checks, not archive publication or new macOS evidence.

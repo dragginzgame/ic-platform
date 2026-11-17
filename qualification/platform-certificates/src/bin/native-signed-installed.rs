@@ -92,6 +92,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
      #[cfg(not(feature = "native-signed-secp256k1"))]
      {unreachable!()}
     };
+    let status=candidate_platform::native::PreparedRequestStatus::from_signed_bytes(status.envelope_bytes(),*original.request_id(),original.sender(),target,4096)?;
     assert_eq!(status.expiry(),expiry);
     let decoded=candidate_platform::ingress::decode_envelope(status.envelope_bytes(),4096)?.value;
     let candidate_platform::ingress::Content::ReadState{paths,..}=decoded.content else {panic!("not read state")};
