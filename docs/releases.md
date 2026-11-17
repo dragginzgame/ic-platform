@@ -26,6 +26,30 @@ publication attempt and independent registry archive/source readback. The
 focused host/Wasm and extracted-archive checks already pass. CI stays
 asynchronous; this supplier release does not establish Storage adoption.
 
+Platform 0.34.16 is published from clean source
+`a8cd1b8218175a1f345740a0b2e110d06ebdbd0c`, with main and annotated
+`platform-v0.34.16` pushed atomically. The complete local gate passed in 259.40
+seconds, including fresh zero-vulnerability audits of both locks at RustSec
+`233155b4025b854c68a4b199c0e32d7fd53291a2`. Receipt:
+`target/release-qualification/1794957987645-3181219/receipt.json`.
+
+The single supported upload is retained at
+`target/publication/publish.selection.lPkCa0`. Archive native/Wasm all-feature
+Clippy, native tests and independently fetched source provenance passed.
+The independently downloaded registry archive matches the admitted archive,
+sparse index and clean tagged VCS source, SHA-256:
+`370a236d0cc0e5a7328b344d8493cf367dd83178257ee809a48716fdb7301c4c`.
+Readback: `target/deploy-platform-03416/published.json`.
+
+Post-push review of the direct optional re-export, empty defaults, upstream type
+identity tests, candidate version callers and CI/release wiring found no further
+actionable issue. [CI](https://github.com/dragginzgame/ic-platform/actions/runs/44200053776)
+and [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44200053718)
+were observed in progress, not awaited or claimed passing. Platform #30 is closed
+on verified supplier publication. Next: Storage selects 0.34.16 with defaults
+disabled and `stable-structures` enabled, verifies a single upstream 0.7.2 and
+runs its installed upgrade/rollback acceptance. No sibling migration is claimed.
+
 ## Tooling-only release-flow follow-up — 17 November 2026
 
 Remove `check-release-evidence` and the Types `publication-refusals` profile

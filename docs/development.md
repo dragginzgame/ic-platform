@@ -823,7 +823,7 @@ product versions and registry publications remain unchanged.
 
 ## Stable structures export — Platform #30
 
-Pending Platform 0.34.16 adds `stable-structures`, re-exporting the unmodified
+Platform 0.34.16 adds `stable-structures`, re-exporting the unmodified
 upstream 0.7.2 crate as `ic_platform::stable_structures`. See the
 [consumer contract and provenance](requirements.md#storage-stable-collection-types).
 `make qualify-stable-structures` is in native CI and the Platform release catalog.
@@ -835,5 +835,5 @@ Local Linux qualification passed the focused target for native and Wasm graphs,
 all Platform feature tests (75 tests plus 12 doctests), all 56 release-tooling
 tests and workflow lint. An extracted Cargo archive outside the workspace passed
 the public integration test and Wasm compilation with only `stable-structures`
-enabled. Logs are under `target/stable-structures/`. This is pending source work,
-not registry publication or Storage installed upgrade/rollback acceptance.
+enabled. Logs are under `target/stable-structures/`. Publication is verified in the [release record](releases.md#stable-structures-export-release);
+Storage installed upgrade/rollback acceptance remains separate.
