@@ -48,6 +48,7 @@
     "qualify-storage-runtime"
   ],
   "platform": [
+    "qualify-stable-structures",
     "qualify-ingress-packets",
     "qualify-platform-authentication",
     "qualify-platform-wasm",

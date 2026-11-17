@@ -39,3 +39,8 @@ the anonymous sender and all authentication fields absent. `from_bytes` remains
 signature-only; there is no fallback. `PreparedUpdate::authentication` identifies
 the admitted profile. Admission establishes no application authorization. See
 [anonymous qualification](../../docs/qualification/anonymous-and-blob-codecs.md).
+
+`stable-structures` re-exports upstream `ic-stable-structures` through
+`ic_platform::stable_structures`, including its collection, memory, iterator and
+error types. Defaults remain empty. No wrapper or conversion changes upstream
+identity or stored bytes; consumers own memory layout, allocation and migration.

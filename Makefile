@@ -569,3 +569,12 @@ qualify-sns-neurons: qualification-tooling-check
 .PHONY: check-release-evidence
 check-release-evidence: qualification-tooling-check
 	node --test scripts/tests/release-audit.test.mjs scripts/tests/qualification-wiring.test.mjs scripts/tests/release-flow.test.mjs
+
+.PHONY: qualify-stable-structures
+qualify-stable-structures: qualification-tooling-check
+	cargo test --offline --locked -p ic-platform --no-default-features --features stable-structures --test stable_structures
+	cargo clippy --offline --locked -p ic-platform --no-default-features --features stable-structures --test stable_structures -- -D warnings
+	cargo clippy --offline --locked -p ic-platform --no-default-features --features stable-structures --test stable_structures --target wasm32-unknown-unknown -- -D warnings
+	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --no-default-features --features stable-structures --no-deps
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --no-default-features --features stable-structures --require ic-stable-structures=1 --forbid ic-platform-runtime --forbid ic-platform-protocol
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --no-default-features --forbid-pattern '^(?!ic-platform$$)'

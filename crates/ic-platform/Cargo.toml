@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform"
-version = "0.34.15"
+version = "0.34.16"
 description = "Explicit IC certificate and authentication boundaries"
 edition.workspace = true
 rust-version.workspace = true
@@ -18,6 +18,7 @@ ignored = ["toko-tooling", "crypto-bigint"]
 
 [features]
 default = []
+stable-structures = ["dep:ic-stable-structures"]
 ingress-packets = [
     "dep:candidate-types",
     "dep:serde",
@@ -69,6 +70,7 @@ crypto-bigint = { workspace = true, optional = true }
 curve25519-dalek = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
+ic-stable-structures = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }

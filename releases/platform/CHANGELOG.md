@@ -3,6 +3,15 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.16] - 2026-11-18
+
+### ➕ Added
+
+- Restore the optional `stable-structures` feature with a direct upstream 0.7.2
+  re-export for [Platform #30](https://github.com/dragginzgame/ic-platform/issues/30).
+  Collection, memory, iterator and error types retain upstream identity and bytes;
+  memory allocation and migration policy remain with consumers.
+
 ## [0.34.15] - 2026-11-17
 
 ### 🔧 Maintenance

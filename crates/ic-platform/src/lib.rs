@@ -25,3 +25,8 @@ pub mod native;
 
 #[cfg(all(feature = "ingress-packets", not(target_family = "wasm")))]
 pub mod ingress;
+
+/// Upstream stable collections and memory traits, without wrappers or format changes.
+/// Callers own memory allocation, layout, migrations and upgrade policy.
+#[cfg(feature = "stable-structures")]
+pub use ic_stable_structures as stable_structures;

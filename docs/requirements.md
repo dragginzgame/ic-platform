@@ -285,6 +285,27 @@ Agent/derivation #4 remains unresolved; neither a corrected direct ECDSA graph
 nor the absence of Agent from this product graph qualifies those consumer paths.
 
 
+## Storage stable collection types
+
+[Issue #30](https://github.com/dragginzgame/ic-platform/issues/30) requires the
+optional `stable-structures` feature and `ic_platform::stable_structures` export
+on host and Wasm. Re-export upstream 0.7.2 directly, preserving `Memory`,
+`VectorMemory`, `Storable`, `storable`, map/set/cell/vector/heap/log, iterator and
+log write-error identities. Defaults remain empty. Platform does not implement
+collections, memory allocation, stable-data migration or upgrade policy.
+
+The admitted reuse is the unmodified Apache-2.0 crate `ic-stable-structures`
+0.7.2 from DFINITY, archive SHA-256
+`8ee3372ddc0cf2a747fc26ce2d075a240ed6bfab151e63bc70109e8967f7ce6f`.
+Its upstream IC memory implementation and persisted formats remain upstream
+obligations; this export adds no unsafe code or copied implementation. The
+upstream `ic_principal` dependency remains its own type; no Platform Principal
+conversion is introduced. `make qualify-stable-structures` checks exact type
+identity, public iterator/error names, host reopen behavior, Wasm compilation,
+feature isolation and one selected upstream instance. Storage owns actual
+installed upgrade/rollback and published-consumer acceptance. Local tests do not
+establish those downstream gates.
+
 ## Storage synchronous system operations
 
 [Issue #6](https://github.com/dragginzgame/ic-platform/issues/6) requires raw

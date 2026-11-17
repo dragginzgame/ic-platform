@@ -5,6 +5,27 @@ Run the complete final-source gate once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Stable structures export release
+
+Select Platform 0.34.16 for [Platform #30](https://github.com/dragginzgame/ic-platform/issues/30).
+The optional `stable-structures` feature directly re-exports upstream 0.7.2 with
+unchanged collection/memory/iterator/error identities and persisted formats.
+Defaults remain empty; allocation, migration and installed consumer lifecycle
+acceptance remain with Storage. Other product groups retain their versions.
+
+Fresh registry review confirms Platform 0.34.15 as the published baseline,
+Stable Structures 0.7.2, Testkit 0.110.0, Host Process 0.81.0, Host Artifacts/FS
+0.80.3, Build 0.87.4 and Toko Tooling 0.45.0. Wire 0.24.4 is newer than the pinned
+Auth fixture's 0.24.2; defer that optional upgrade to Wire consumer maintenance,
+retaining the actual installed Auth checks for this release. No supplier upgrade
+is inferred from this bounded re-export request.
+
+Use the full clean-source qualification catalog with the pinned disposable
+Query/Blob sources, then main and annotated `platform-v0.34.16`, one supported
+publication attempt and independent registry archive/source readback. The
+focused host/Wasm and extracted-archive checks already pass. CI stays
+asynchronous; this supplier release does not establish Storage adoption.
+
 ## Tooling-only release-flow follow-up — 17 November 2026
 
 Remove `check-release-evidence` and the Types `publication-refusals` profile
