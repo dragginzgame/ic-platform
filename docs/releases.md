@@ -14,6 +14,39 @@ requires archive/source admission and independent registry checksum readback.
 Hosted CI remains asynchronous; siblings remain read-only. Existing unrelated
 lockfile supplier updates are preserved separately and excluded from this release.
 
+All three packages are published from clean source
+`4ed20435b632c108b21a08d3a4855b9c540b751a`; main and annotated
+`runtime-v0.23.17` were pushed atomically. Complete local catalog receipt:
+`target/release-qualification/1794928467194-400764/receipt.json`.
+Both lockfile audits found no known vulnerabilities using freshly prepared RustSec
+`233155b4025b854c68a4b199c0e32d7fd53291a2`. The pinned actual Auth installed
+fixture passed all five cases with Runtime 0.23.17.
+
+| Package | Independent registry archive SHA-256 | Dry run / single upload under target/publication |
+| --- | --- | --- |
+| ic-platform-runtime-guard 0.23.17 | `32124ec3fa34eb2a21a2818a8578757057d9fb2eb57f6355f73d925bc46e2258` | `check.selection.YPxT2X` / `publish.selection.ecvy89` |
+| ic-platform-macros 0.23.17 | `8b291d0610822352f1b69e21ec5669b2f2a56b5629c09fd719374b3b5ea9a74e` | `check.selection.4BImwS` / `publish.selection.Z4O8O6` |
+| ic-platform-runtime 0.23.17 | `dfc857c146215a6f2ae50e724c70b7afffaebeb407c54c283f6860357d5da439` | `check.selection.enqLz8` / `publish.selection.Jf60BE` |
+
+Each archive matches the sparse index, admitted archive and tagged VCS source.
+Extracted-archive all-feature native/Wasm Clippy, native tests and independent
+source provenance passed before each single upload. Combined readback:
+`target/deploy-runtime-02317/published.json`.
+
+The initial catalog attempt at `1794928361073-355406` refused the advanced
+sibling Query HEAD. The successful run used the existing disposable
+`QUERY_SOURCE=target/deploy-query-source` and `BLOB_SOURCE=target/blob-types-source`
+copies at their pinned revisions, with all required Query input hashes verified.
+No sibling checkout changed. The original root and qualification lockfile supplier
+updates remain outside the release and are restored with the new Runtime cohort.
+
+Post-push review confirmed unchanged production/test bodies, ordinary module
+discovery, empty defaults and exact support-package coupling. Hosted
+[CI](https://github.com/dragginzgame/ic-platform/actions/runs/44112948400) and
+[Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44112948614)
+were observed once in progress; neither was awaited or claimed passing. Native
+execution remains Linux evidence, and broader product/consumer gates remain separate.
+
 ## Compatible dependency requirements release
 
 Select Platform 0.34.12, Protocol 0.3.4 and coordinated Runtime/macros/guard

@@ -13,8 +13,8 @@ GitHub owns issue status; qualification documents retain source-bound evidence.
 ## Published scope
 
 The latest recorded release is Platform 0.34.13 / Protocol 0.3.5, alongside
-Types 0.21.2 and Runtime/macros/guard 0.23.16. See the
-[release and archive verification record](docs/releases.md#anonymous-transport-blob-codecs-and-qualification-refresh)
+Types 0.21.2 and Runtime/macros/guard 0.23.17. See the
+[release and archive verification record](docs/releases.md#runtime-test-layout-release)
 and independent [group changelogs](CHANGELOG.md). Private qualification packages
 remain outside product release groups. Publication does not establish every
 consumer's production migration or completion of the entire design.

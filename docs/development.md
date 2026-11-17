@@ -1,10 +1,10 @@
 # Development
 
 The current recorded published product versions are Types 0.21.2, Platform 0.34.13,
-Protocol 0.3.5, and Runtime/macros/guard 0.23.16. Qualification packages remain
+Protocol 0.3.5, and Runtime/macros/guard 0.23.17. Qualification packages remain
 private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.
-See the [latest release evidence](releases.md#anonymous-transport-blob-codecs-and-qualification-refresh).
+See the [latest release evidence](releases.md#runtime-test-layout-release).
 
 Qualification selects Testkit 0.108.0 and explicitly names two Platform
 roles: `candidate-platform` tests local source, while `published-platform`
