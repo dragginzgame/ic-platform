@@ -1,5 +1,21 @@
 # Initial crates.io deployment
 
+## Compatible dependency requirements release
+
+Select Platform 0.34.12, Protocol 0.3.4 and coordinated Runtime/macros/guard
+0.23.16. Product Types requirements now admit compatible `0.21.2` patches;
+Runtime macros and guard retain exact implementation coupling. Ordinary
+qualification uses compatible Host Process, Testkit, Types and WAT requirements
+with unchanged supplier lock selections. Explicit frozen comparisons stay pinned.
+Types 0.21.2 is unchanged and is not republished. Registry review on 2026-11-17
+confirmed the selected versions absent and their predecessors current.
+
+Run the complete local catalog at clean source, then deliver main with annotated
+`platform-v0.34.12`, `protocol-v0.3.4` and `runtime-v0.23.16` tags. Publish guard
+and macros before Runtime, followed by Protocol and Platform; independently
+verify every registry archive and its source. Keep CI asynchronous and sibling
+checkouts read-only.
+
 ## Capture hash promotion release
 
 Protocol 0.3.3 fixes the capture-status module-hash promotion incompatibility in

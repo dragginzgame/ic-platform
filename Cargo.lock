@@ -777,7 +777,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.11"
+version = "0.34.12"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -800,7 +800,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.15"
+version = "0.23.16"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -810,7 +810,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "crc32fast",
  "ic-platform-types",
@@ -822,7 +822,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.15"
+version = "0.23.16"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -832,7 +832,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.15"
+version = "0.23.16"
 dependencies = [
  "toko-tooling",
 ]

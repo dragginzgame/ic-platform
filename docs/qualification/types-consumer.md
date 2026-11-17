@@ -11,12 +11,14 @@ published test source is copied.
 ## Independent consumer
 
 `qualification/types-consumer` is a private 0.1.0 package outside product
-release groups. Its normal dependency selects the local Types path and exact
-0.21.2 version. The `candidate-types` alias distinguishes source selection, not
+release groups. Its normal dependency selects the local Types path with a
+compatible `0.21.2` requirement. The `candidate-types` alias distinguishes source selection, not
 a wrapper or a second identity in its production graph. Public assignments
 between directly imported Principal and Account.owner compile and execute.
 
-Registry Types 0.21.2 is a native-only development oracle. It is compared through
+Registry Types is a native-only development oracle with a compatible `0.21.2`
+requirement; the qualification lock currently selects 0.21.2. This ordinary
+compatibility comparison is not a frozen historical version selection. It is compared through
 bytes, text and JSON, never by pretending the two sources have the same Rust
 type. Native comparison covers all 30 Principal lengths, four subaccount states,
 every single-position `!` mutation of the resulting account text, and twelve

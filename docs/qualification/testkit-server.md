@@ -1,5 +1,12 @@
 # Latest Testkit and qualification server ownership
 
+Ordinary qualification uses compatible requirements for Host Process, Testkit,
+registry Types and WAT; `qualification/Cargo.lock` records the qualified versions
+and archive checksums. Checks run locked and do not implicitly upgrade them.
+Explicit frozen comparisons, including `published-platform` and historical
+consumer fixtures, retain their selected exact versions. The pinned PocketIC
+binary admission below is independent of these Cargo requirements.
+
 Qualification selects published Testkit 0.107.4 (archive SHA-256
 `8629db43fa7a3e3655184c6173a5ccdecf67a87d29f0c929228bec7f8a1c392b`).
 Its upstream PocketIC 16.1.0 client replaces the removed `pic` helpers. Fixtures

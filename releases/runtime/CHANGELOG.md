@@ -4,13 +4,22 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
-## Unreleased
+## [0.23.16] - 2026-11-17
+
+### 🔧 Changed
+
+- Allow compatible Types patches through `0.21.2` instead of `=0.21.2`.
+  Keep macros and the singleton guard exact-pinned at the coordinated 0.23.16
+  version; qualification still requires one resolved Types identity and executor.
 
 ### 🧪 Testing
 
+- Use compatible Host Process, Testkit, registry Types and WAT requirements in
+  ordinary qualification, preserving its lockfile selections. Explicit frozen
+  comparison inputs retain exact selections.
 - Adopt published Platform 0.34.11 in installed qualification and centralize
-  Host Process/tempfile selections in its workspace catalog. Product crates
-  are unchanged.
+  Host Process/tempfile selections in its workspace catalog. This qualification
+  cleanup does not change product behavior.
 
 ## [0.23.15] - 2026-11-17
 

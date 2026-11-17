@@ -3,6 +3,14 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.3.4] - 2026-11-17
+
+### 🔧 Changed
+
+- Allow compatible Types patches through `0.21.2` instead of `=0.21.2` in the
+  published dependency requirement. The qualified lock and canonical public
+  Principal/Account identity remain unchanged.
+
 ## [0.3.3] - 2026-11-17
 
 ### 🐛 Fixed

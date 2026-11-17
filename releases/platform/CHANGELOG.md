@@ -3,6 +3,14 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.12] - 2026-11-17
+
+### 🔧 Changed
+
+- Allow compatible Types patches through `0.21.2` instead of `=0.21.2` in the
+  published dependency requirement. Preserve the locked selection, empty defaults
+  and single canonical Types identity checks.
+
 ## [0.34.11] - 2026-11-17
 
 ### 🔧 Changed

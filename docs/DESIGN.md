@@ -57,6 +57,13 @@ Types owns a single canonical Rust Principal and Account identity across product
 
 Byte equality does not imply Cargo type identity. Record package name, version, source and resolved feature closure at every actual crossing. Do not combine a local Types package with a published Runtime that selects a different source identity and describe that as unified.
 
+Product dependencies use a compatible Types requirement (`0.21.2`, admitting
+`>=0.21.2, <0.22.0`); canonical identity is proved by the resolved Cargo graph,
+not by exact-pinning every consumer to one patch. Locks retain the qualified
+selection. Historical registry qualification oracles may pin their selected
+version exactly. Runtime's macros and singleton guard remain exact-version
+dependencies because they are implementation support packages released together.
+
 Initial experiments may depend on published Types. This is a dependency choice, not rewrite progress. Transfer source ownership only after choosing one publisher and qualifying the local cohort. Do not republish an unchanged Types package simply because it now resides in a new checkout.
 
 External SDK and certification types remain their admitted upstream types. Where native simulator and production identities necessarily differ, use one explicit, checked byte conversion at the boundary. No blanket conversions, certificate copying or new identity wrapper to hide incompatible supplier versions.
