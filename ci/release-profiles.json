@@ -5,7 +5,8 @@
     "lint-workflows",
     "check-protocol-graphs",
     "check-types-graphs",
-    "check-runtime-consumer-graph"
+    "check-runtime-consumer-graph",
+    "check-release-evidence"
   ],
   "protocol": [
     "lint-engine-request",

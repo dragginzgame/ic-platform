@@ -2,6 +2,12 @@
 
 override TOKO_TOOLING_ROOT := $(CURDIR)/vendor/toko-tooling
 FORMAT_RUST_ARGS := --extra-workspace qualification
+IC_TOOLS := icp
+LOCAL_TOOL_INSTALL_TARGETS += install-ic-tools
+LOCAL_TOOL_CHECK_TARGETS += ic-tools-check
+# Normal qualification always uses the admitted checkout-local executable.
+override ICP_CLI := $(CURDIR)/.tools/ic/bin/icp
+export ICP_CLI
 # Explicit independent product groups, published one package at a time.
 CARGO_PUBLISH_PACKAGES := ic-platform-types ic-platform-runtime-guard ic-platform-macros ic-platform-runtime ic-platform-protocol ic-platform
 CARGO_PUBLISH_REGISTRY := crates-io
@@ -411,7 +417,7 @@ check-types-publication:
 	node qualification/types-auth/publication-refusals.mjs
 
 .PHONY: qualify-release release-publication-admission
-qualify-release: qualification-tooling-check
+qualify-release: qualification-tooling-check ic-tools-check
 	node scripts/qualify-release.mjs
 
 release-publication-admission: qualification-tooling-check
@@ -516,7 +522,7 @@ qualify-caffeine: qualification-tooling-check
 	node qualification/engine-view-wasm.mjs caffeine
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features caffeine --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types)$$' --require ic-platform-types=1
 
-qualify-native-signed: qualification-tooling-check
+qualify-native-signed: qualification-tooling-check ic-tools-check
 	cargo test --offline --locked -p ic-platform --all-features native::
 	cargo clippy --offline --locked -p ic-platform --no-default-features --features native-signed --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --no-default-features --features native-signed --no-deps
@@ -550,3 +556,7 @@ qualify-sns-neurons: qualification-tooling-check
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features sns-neurons --bin sns-admission --release --target wasm32-unknown-unknown --target-dir target/engine-view-wasm/sns-neurons
 	node qualification/engine-view-wasm.mjs sns-neurons
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features sns-neurons --forbid-pattern '^(ic-platform-runtime|ic-agent|candid|ic-management-canister-types|num-bigint|sha2)$$' --require ic-platform-types=1
+
+.PHONY: check-release-evidence
+check-release-evidence: qualification-tooling-check
+	node --test scripts/tests/release-audit.test.mjs scripts/tests/qualification-wiring.test.mjs

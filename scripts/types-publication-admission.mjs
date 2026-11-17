@@ -1,4 +1,4 @@
-// Types-specific admission; Toko owns upload custody, source rechecks and recovery.
+// Types-specific admission; Toko Tooling owns upload custody, source rechecks and recovery.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';

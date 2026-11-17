@@ -5,7 +5,7 @@ current architecture and migration/qualification plan; earlier tentative drafts
 are superseded. Consult [consumer requirements](docs/requirements.md) before
 implementing or removing an affected surface.
 
-The maintainer has requested a ground-up rebuild and local Rust/Toko setup.
+The maintainer has requested a ground-up rebuild and local Rust/Toko Tooling setup.
 Proceed through real vertical slices under the design's acceptance gates.
 Prefer existing crate names when concept and functionality are retained; changes
 are allowed when the ownership boundary warrants them. Before creating a local
@@ -21,8 +21,8 @@ time rather than copying an old checkout's version. Private qualification packag
 also start at 0.1.0 and remain outside product release groups. Publisher selection
 and publication remain separate. A package move alone is not rewrite progress.
 
-This repository adopts the installed [Toko engineering baseline](TOKO-TOOLING.md)
-from published Toko 0.44.11 and its revision-bound specialist rules. Cargo.lock and
+This repository adopts the installed [Toko Tooling engineering baseline](TOKO-TOOLING.md)
+from published Toko Tooling 0.44.11 and its revision-bound specialist rules. Cargo.lock and
 `.toko-tooling.snapshot` bind the selection and installed bytes. Keep managed
 files intact; use the supported installer for updates. [Development commands](docs/development.md)
 describe the local Make interface and focused checks.

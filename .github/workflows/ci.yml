@@ -32,7 +32,7 @@ jobs:
         run: make check-secrets
       - name: Validate workflow
         if: ${{ !cancelled() }}
-        run: make lint-workflows
+        run: make lint-workflows check-release-evidence
 
       - name: Retain sanitized setup failure evidence
         if: ${{ failure() }}
@@ -107,6 +107,10 @@ jobs:
         run: make qualify-platform-observed
       - name: Check observed canister signatures
         run: make qualify-canister-signature-observed
+      - name: Check signed and anonymous original-request transport
+        run: make qualify-native-signed
+      - name: Check bounded Blob codecs on native and Wasm
+        run: make qualify-caffeine qualify-management-ledger
       - name: Check installed Runtime rollback
         run: make qualify-runtime-installed check-upgrade-tooling
       - name: Qualify public consumer and heap behavior

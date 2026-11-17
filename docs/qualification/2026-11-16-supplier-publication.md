@@ -4,7 +4,7 @@ All six crates are published from clean source
 `9dfdc0083fa5d6e56da7b90c04c20de4b2d3cc9f`. Annotated tags
 `types-v0.21.2`, `runtime-v0.23.13`, `protocol-v0.2.5` and
 `platform-v0.34.6` were pushed atomically with main. Each upload executed once
-through the supported Toko publication adapter, after a successful dry run and
+through the supported Toko Tooling publication adapter, after a successful dry run and
 source/archive admission. Hosted CI was not awaited.
 
 | Published package | Registry archive SHA-256 |
@@ -60,14 +60,14 @@ and Platform. Reproduction and retained attempts:
 The registry-backed actual Query fixture passes all 184 topology/CLI tests and
 strict Clippy; actual Auth passes all five installed tests. Metadata proves one
 canonical registry Types 0.21.2 and Platform 0.34.6, Protocol 0.2.5 for Query and
-Runtime 0.23.13 for Auth, with no Agent or legacy Platform edge. Toko is 0.44.9 in
+Runtime 0.23.13 for Auth, with no Agent or legacy Platform edge. Toko Tooling is 0.44.9 in
 both consumer graphs. Evidence and reproducible script:
 `target/registry-cohort/1794856730010/verified.json`.
 The independently authored Query schema fixture remains private, so this is
 registry product proof, not a claim that issue #10's portable fixture delivery
 is complete. All sibling working trees remain unchanged.
 
-The separately maintained browser-codec fixture also passes after adopting Toko
+The separately maintained browser-codec fixture also passes after adopting Toko Tooling
 0.44.9: eight Rust boundary tests and 37 retained browser frames, including
 detached buffers and redundant outer framing. Its explicitly frozen published
 Types 0.21.1/Wire 0.24.2 comparison selection is preserved. Evidence:

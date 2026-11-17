@@ -358,7 +358,7 @@ Create manifests only when a real vertical slice requires the package. Use four 
 
 Reuse published Types for early pure-code experiments where practical. Do not link a local Types source alongside a published Runtime cohort and silently convert between them. Bring local Runtime and Types together in one deliberately qualified dependency cohort when necessary.
 
-Select installed Shared/Toko entrypoints actually required by the repository. Preserve managed company files and the existing license source. Do not copy old release scripts merely to obtain a passing baseline.
+Select installed Shared/Toko Tooling entrypoints actually required by the repository. Preserve managed company files and the existing license source. Do not copy old release scripts merely to obtain a passing baseline.
 
 Before publishing any existing package from a new repository, designate one authoritative publisher. Keep publication disabled until that decision is made.
 
@@ -502,7 +502,7 @@ Map every old stage to its replacement or an explicit retirement reason. The old
 
 Current receipt admission explicitly checks retained evidence and source identity. Preserve those obligations while replacing its structure. [Existing admission gate](https://github.com/dragginzgame/ic-platform-legacy/blob/c24e3a59583eabcf5b6bb87987269c13a209a51f/scripts/release/validation-gate.sh).
 
-Do not activate cross-release proof reuse or group-scoped omissions until Shared supplies a supported contract and the new integration passes these tests. The supplied draft's Toko oracle-admission issue is a supplier dependency to recheck at implementation time; its current resolution was not established by this review. Do not widen local exceptions to conceal it.
+Do not activate cross-release proof reuse or group-scoped omissions until Shared supplies a supported contract and the new integration passes these tests. The supplied draft's Toko Tooling oracle-admission issue is a supplier dependency to recheck at implementation time; its current resolution was not established by this review. Do not widen local exceptions to conceal it.
 
 Exit gate: one authority defines required proof, and tampering or incomplete execution cannot admit a release.
 

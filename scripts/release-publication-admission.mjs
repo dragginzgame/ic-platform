@@ -1,5 +1,6 @@
 // Explicit receipt reuse; the shared runner still owns clean-source dispatch.
 import assert from 'node:assert/strict';
+import {validateReleaseAudit} from './release-audit.mjs';
 import { spawnSync } from 'node:child_process';
 import { readFileSync, mkdirSync, appendFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -22,7 +23,7 @@ assert.equal(receipt.catalog,hash(catalog));
 assert.equal(receipt.types_catalog,hash(readFileSync('ci/types-release-profiles.json')));
 assert.deepEqual(Object.keys(receipt.profiles).sort(),['types',...Object.keys(JSON.parse(catalog))].sort());
 for(const [name,digest] of Object.entries(receipt.profiles))assert.equal(hash(readFileSync(`${dirname(process.env.RELEASE_RECEIPT)}/${name}.log`)),digest);
-assert.equal(JSON.parse(readFileSync(`${dirname(process.env.RELEASE_RECEIPT)}/audit.json`)).vulnerabilities.found,false);
+validateReleaseAudit(receipt.audit, dirname(process.env.RELEASE_RECEIPT));
 const selection=process.env.CARGO_PUBLISH_SELECTION?.trim().split(/\s+/);
 assert.equal(selection?.length,1,'Publish one admitted package at a time in dependency order');
 const name=selection[0];

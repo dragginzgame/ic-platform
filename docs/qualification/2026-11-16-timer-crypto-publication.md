@@ -43,7 +43,7 @@ run before upload. Retained publication records:
 ## Supplier adoption and retained limits
 
 Testkit 0.107.1 and Host Process 0.80.2 were freshly checked against the registry
-and adopted. Toko 0.44.6 remains current. The [server contract](testkit-server.md)
+and adopted. Toko Tooling 0.44.6 remains current. The [server contract](testkit-server.md)
 records migration from removed Testkit lifecycle helpers, authenticated prepared
 assets, owned cleanup, deadlines and the private unpublished helper. All five
 actual Auth installed tests pass using the new Testkit selection. Frozen Auth

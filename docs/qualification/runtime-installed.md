@@ -29,7 +29,7 @@ The product catalog pins `thiserror = "=2.0.18"`, matching PocketIC 16.1.0, at
 the maintainer's direction. Product and qualification locks select that same
 version. Native adapter identities never cross into the canister graph; the
 driver passes raw bytes. There are only the product and qualification workspaces,
-with the same exact Toko version and shared formatting/dependency commands.
+with the same exact Toko Tooling version and shared formatting/dependency commands.
 
 Prepare locked sources with
 `cargo fetch --locked --manifest-path qualification/Cargo.toml`,

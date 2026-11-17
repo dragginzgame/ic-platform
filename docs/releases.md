@@ -96,7 +96,7 @@ execution remains Linux evidence; Backup adoption remains separate.
 ## Module layout release
 
 Select Platform 0.34.11, Protocol 0.3.2 and coordinated Runtime/macros/guard
-0.23.15 for the installed Toko module-layout rule. Thirteen source modules move
+0.23.15 for the installed Toko Tooling module-layout rule. Thirteen source modules move
 to `mod.rs` with byte-identical contents and unchanged public paths. Candidate
 qualification pins and locks follow the new versions; registry comparison
 suppliers stay pinned. Types 0.21.2 is unchanged and is not republished.
@@ -210,7 +210,7 @@ crossing checks. The [real-consumer proof](qualification/types-release.md) uses
 pinned Auth passive model source in an isolated workspace; it does not migrate
 Auth's working tree or claim full Auth application acceptance.
 
-The authenticated Toko 0.44.7 installation supplies publication selection,
+The authenticated Toko Tooling 0.44.7 installation supplies publication selection,
 retained attempts, source checks, release metadata checks and archive provenance.
 The generic release runner is not enabled. The first Types release uses an
 explicit reviewed commit and annotated `types-v0.21.1` tag, followed by the
@@ -298,7 +298,7 @@ installed and certificate checks. Hosted CI remains asynchronous.
 
 Registry review on 2026-11-16 confirmed the selected versions absent and current
 baselines Platform 0.34.4 / Protocol 0.2.3. Types 0.21.1 and Testkit 0.107.1 remain
-current. Toko 0.44.8 is newer than the installed, reviewed 0.44.7; its optional
+current. Toko Tooling 0.44.8 is newer than the installed, reviewed 0.44.7; its optional
 adoption is deferred outside this active release under the baseline's release
 latency rule. The existing thiserror hold and frozen Auth supplier selections
 remain unchanged. Newly added transport suppliers were reviewed at implementation
@@ -366,7 +366,7 @@ for source/tag identity, checksums, retained attempts and registry-backed Query/
 The 2026-11-16 deployment selects Platform 0.34.7, Protocol 0.2.6 and coordinated
 Runtime/macros/guard 0.23.14, after checking current registry baselines. Types
 0.21.2 is unchanged. Both workspaces and materialized candidate qualification
-consumers adopt Toko 0.44.11 through its supported installer/selection. The
+consumers adopt Toko Tooling 0.44.11 through its supported installer/selection. The
 reviewed tooling archive checksum is
 `7d16b815ae322ae3f88580ee6af1611bdafde08b77592cd886bfa0eece0f1be8`.
 
@@ -614,3 +614,26 @@ projections and qualification feature/dependency wiring found no further
 actionable issue. Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/44070190504)
 and [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44070190437)
 were observed once in progress; neither was awaited or claimed passing.
+
+## Release evidence maintenance
+
+The next collector uses Toko Tooling 0.44.11's isolated RustSec preparation helper and
+audits both lockfiles before the product catalog. Publication admission binds
+the revision sidecar, preparation log, report bytes and lock hashes, and refuses
+observations older than 24 hours. This replaces reliance on an ambient cached
+audit; it does not change the historical release evidence above.
+
+Focused maintenance checks passed on Linux: 18 receipt/tool-wiring tests,
+workflow lint, formatting, signed/anonymous installed transport and native/Wasm
+Blob codecs using this checkout's admitted ICP CLI 1.7.0. Both fresh lockfile
+audits found no known vulnerabilities at RustSec
+`233155b4025b854c68a4b199c0e32d7fd53291a2`; evidence is retained in
+`target/maintenance-audit/current-O8Jsu9/audit-receipt.json`.
+These checks do not establish a new full release catalog or hosted macOS result.
+
+The initial receipt implementation incorrectly expected cargo-audit's no-fetch
+JSON to contain a Git revision. The corrected implementation uses the verified
+preparation sidecar and has regression coverage. The upstream documentation gap
+is tracked in [Toko Tooling #388](https://github.com/dragginzgame/toko-tooling/issues/388).
+The missing local ICP setup and routine CI coverage were Platform integration
+omissions. Product crate contents and versions are unchanged by this maintenance.

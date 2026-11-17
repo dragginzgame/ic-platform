@@ -1,5 +1,6 @@
 // Retain complete local qualification bound to clean source and exact log bytes.
 import assert from 'node:assert/strict';
+import {qualifyAudit, validateReleaseAudit} from './release-audit.mjs';
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -27,6 +28,7 @@ const output = resolve(`target/release-qualification/${Date.now()}-${process.pid
 mkdirSync(output, {recursive:true});
 const receipt = { commit, catalog: hash(catalog), types_catalog: hash(typesCatalog), rust: run('rustc', ['-V']).trim(), profiles: {} };
 console.log(`Release qualification: ${output}`);
+receipt.audit = qualifyAudit(output);
 for (const [group, targets] of Object.entries(profiles)) {
   console.log(`Qualifying ${group}`);
   const result = spawnSync('make', targets, { encoding:'utf8', maxBuffer:64*1024*1024 });
@@ -36,7 +38,7 @@ for (const [group, targets] of Object.entries(profiles)) {
   assert.equal(result.status, 0, `${group} failed; inspect ${output}/${group}.log`);
   receipt.profiles[group] = hash(log);
 }
-writeFileSync(`${output}/audit.json`, run('cargo', ['audit', '--no-fetch', '--file', 'Cargo.lock', '--json']));
+validateReleaseAudit(receipt.audit, output);
 run('bash', ['vendor/toko-tooling/scripts/ci/check-release-source.sh']);
 assert.equal(run('git', ['rev-parse','HEAD']).trim(),commit);
 writeFileSync(`${output}/receipt.json`, JSON.stringify(receipt,null,2)+'\n');

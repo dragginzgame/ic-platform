@@ -1,11 +1,11 @@
 # Consumer requirements for the rebuild
 
-This initial contract/proof map implements [DESIGN.md](DESIGN.md), based on a
+This contract/proof map implements [DESIGN.md](DESIGN.md), based on a
 read-only Platform issue review on 2026-11-15. GitHub owns issue status and
 resolution history. This is not a complete consumer inventory or a duplicate
 issue tracker. No row establishes replacement qualification.
 
-Active follow-up for the two remaining old-repository issues now lives here:
+The two old-repository obligations were migrated to:
 [Registry settings #3](https://github.com/dragginzgame/ic-platform/issues/3)
 and [crypto/Agent advisory #4](https://github.com/dragginzgame/ic-platform/issues/4).
 Old #169 and #50 were closed as migrated at the maintainer's request; their
@@ -56,7 +56,7 @@ the declaration ergonomics contract: numeric labels, docs, visibility, attribute
 and derives without repeated field types. Preserve record/variant obligations as
 the surface grows; EngineView alone cannot prove general variant support.
 
-## Next Runtime release priority: Auth execution requirements
+## Auth execution requirements (implemented)
 
 The maintainer selected these gaps as the next Runtime release priority after
 Auth's review of Platform source `ea359de` and Runtime 0.23.9. They are retained
@@ -91,15 +91,18 @@ release admission and production migration remain separate. GitHub remains the i
 
 ## Scheduling and Canic Host migration requirements
 
-Scheduling source `170599fbf3e4fac51b09519645d8dc11d9633e4f` uses Timers 0.45.11
+The original Scheduling source `170599fbf3e4fac51b09519645d8dc11d9633e4f` used Timers 0.45.11
 and exact Runtime 0.22.5. The latter conflicts with the current executor singleton.
 The [timer contract](qualification/runtime-timers.md) records the new Runtime
 prerequisites, installed evidence and remaining real-consumer migration. Keep the
 singleton; do not resolve the conflict by allowing both executors.
 
 Read-only Canic source `e84702b3bdcf4eb209476aadd053df21f18dd8eb`,
-`crates/canic-host`, still requests the old Platform Agent and protocol features.
-Platform 0.34.3 does not provide those features. Retained calls are:
+`crates/canic-host`, originally requested the old Platform Agent and protocol features.
+That 0.34.3 gap is historical: the selected management/ledger codecs and
+prepared signed/anonymous transport are now published. See the
+[management mapping](qualification/canic-management.md) and
+[anonymous journey](qualification/anonymous-and-blob-codecs.md). Retained calls are:
 
 | Owner | Actual consumer obligation |
 | --- | --- |
@@ -108,27 +111,28 @@ Platform 0.34.3 does not provide those features. Retained calls are:
 | Protocol cycles ledger | Creation amount, timestamp, optional subnet selection and settings; all creation success/error results, particularly Duplicate with optional canister ID. A retained error does not authorize retry. |
 | Protocol/Types ledger boundary | ICRC account balance arguments, bounded arbitrary-natural balance/fee responses and ICP account identifiers using one canonical Principal/Account cohort. Keep absent subaccounts distinct from explicit zero bytes on the wire. |
 
-Fresh crates.io inspection on 16 November 2026 still selects Agent 0.49.3 as
+Fresh crates.io inspection on 17 November 2026 still selects Agent 0.49.3 as
 latest, with nonoptional elliptic-curve 0.13, k256 0.13.4 and p256 0.13.2 paths.
 The [current advisory](https://rustsec.org/advisories/RUSTSEC-2026-0387.html) still
 requires crypto-bigint >=0.7.6. Disabling Agent default features does not remove
 those paths. [Issue #4](https://github.com/dragginzgame/ic-platform/issues/4)
 therefore remains an admission blocker; no Agent dependency, incompatible
-override, fork or exemption was added. Protocol codecs are independent work,
-still required before Host migration, and must not introduce Agent or Runtime.
+override, fork or exemption was added. The published Protocol codecs are independent of this retained Agent obligation
+and introduce neither Agent nor Runtime.
 Actual Canic installed/native consumer qualification remains required.
 
 ## Canister-signature consumer
 
 For Auth's broader migration, [Platform #7](https://github.com/dragginzgame/ic-platform/issues/7)
 now has qualified local primitives, certified-issuer mappings, certificate
-construction and all five installed cases without legacy Platform. Published
-cohort delivery remains separate. See [Auth evidence](qualification/auth-crypto.md).
+construction and all five installed cases without legacy Platform. Platform
+0.34.5 subsequently passed the registry-only installed cohort; downstream
+production adoption remains separate. See [Auth evidence](qualification/auth-crypto.md).
 The separate [Wire/Types cohort issue #8](https://github.com/dragginzgame/ic-platform/issues/8)
 is resolved by published Wire 0.24.2/Types 0.21.1 with actual unchanged generator
 and retained browser-codec checks; see [cohort evidence](qualification/auth-wire.md).
 
-Current read-only inspection of ic-auth at `b78991e9833320692921bf766e51ad361c9c8c4d`
+The recorded read-only inspection of ic-auth at `b78991e9833320692921bf766e51ad361c9c8c4d`
 found its unchanged `crates/ic-auth/src/issuer_signature.rs` caller of
 `verify_canister_sig_with_time`. It owns protected issuer/seed, fixed-domain claims
 message framing, signature limits, root selection and signing-time freshness.
@@ -137,8 +141,9 @@ observed signatures for that domain; it preserves the caller's lack of delegatio
 freshness through an explicit separate full-range window. Source hashes,
 acceptance differences and remaining migration obligations are recorded in the
 [canister-signature contract](qualification/canister-signature.md).
-Actual Auth compilation/adoption, complete credential policy and Canic integration
-are not established. No sibling changes or consumer migration are included.
+This isolated adapter alone does not establish complete credential policy or
+Canic integration. Actual Auth compilation and installed fixture evidence are
+recorded separately in the linked Auth crypto qualification. No sibling changes or consumer migration are included.
 
 ## Other retained contracts
 
@@ -151,7 +156,7 @@ are not established. No sibling changes or consumer migration are included.
 | Canic endpoint composition, [#164](https://github.com/dragginzgame/ic-platform-legacy/issues/164) | Runtime | Guard and pre-copy admission before decoding, explicit codecs, one dispatch/reply owner and installed rollback/callback proof; no Wire-specific execution owner. |
 | Query certified classification, [#158](https://github.com/dragginzgame/ic-platform-legacy/issues/158) | Platform native | Actual upstream SubnetType identity, unknown strings and absent values; classification is not capacity or deployment permission. |
 | Crypto/Agent boundary, [#50](https://github.com/dragginzgame/ic-platform-legacy/issues/50) | Platform crypto/native | Recheck selected graphs and current advisory evidence before admission. Direct ECDSA correction alone does not resolve Agent/derivation paths. No in-house crypto, forced incompatible override or inherited risk acceptance. |
-| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko 0.44.9 through its authenticated installer; product acceptance remains separate. |
+| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko Tooling 0.44.11 through its authenticated installer; product acceptance remains separate. |
 
 The first projection must not import native/crypto dependencies to satisfy an
 unrelated row. Conversely, an isolated codec pass cannot qualify those rows.
@@ -187,7 +192,12 @@ passes for price rows, availability, page requests and fee/status observations.
 This includes 32-bit count overflow and large-natural conversion; installed IC
 execution and actual consumer adoption remain separate.
 
-## Evidence required before completing the first slice
+## Historical first-slice evidence and remaining design gates
+
+The following records the initial 15 November experiment, not the current
+dependency graph. Legacy decoder oracles were subsequently removed; current
+qualification uses independent schemas/literals and the registry-backed
+[Query corpus](qualification/query-hard-cut.md).
 
 The pinned old request/response implementation was inspected without copying
 source or tests. The initial package now implements request encoding and selected
@@ -242,8 +252,9 @@ separate authorization, it was applied to the real Query working tree and the
 same checks passed there. The change remains uncommitted/unpushed in Query;
 consumer delivery is not claimed.
 
-The first slice's full gate remains open: Query integration is applied locally,
-but consumer delivery, broader
+The initial local application was superseded by the registry-backed Query
+fixture and archive qualification linked above. That supplier evidence does not
+establish downstream delivery or the full design gate: broader
 numeric/Serde compatibility and physical allocation, instruction-count and Wasm
 performance thresholds have not yet been fully qualified. The private
 declaration supports required and strict optional fields, not a public generic
@@ -303,10 +314,14 @@ preserves strict content, original bytes and upstream request identity. Decoding
 never substitutes for direct-key policy, certificate authentication or recovery
 admission. Snapshot/status supply and installed recovery remain separate gates.
 
-The pending [snapshot/status protocol boundary](qualification/management-snapshots.md)
+The published [snapshot/status protocol boundary](qualification/management-snapshots.md)
 supplies Backup's finite management message profile with independent native/Wasm
-checks. Actual caller migration, installed recovery and publication are not
-established by these codec tests.
+checks. Backup subsequently reported its complete local production port and
+11 actual-IC journeys, including 20-MiB restore and offline recovery; see
+[#11 acceptance](https://github.com/dragginzgame/ic-platform/issues/11#issuecomment-6945392717).
+Remaining direct test-only Candid/SDK dependency cleanup does not invalidate
+that production evidence. Platform #11 is complete; the consumer fixture cleanup
+is retained in [Backup #2](https://github.com/dragginzgame/ic-backup/issues/2).
 Protocol 0.3.1 adds a separate minimal `CaptureStatus` projection and opt-in
 bounded response fixture construction for the supplier blockers in
 [Platform #11](https://github.com/dragginzgame/ic-platform/issues/11).
@@ -323,7 +338,7 @@ Full CLI custody/management migration remains separate. See the
 [contracts, evidence and remaining gates](qualification/blob-suppliers.md).
 
 The selected [management/ledger supplier](qualification/management-ledger.md) now
-implements Platform #20 locally, including provisional/ledger creation, controller
+supplies the published Platform #20 contract, including provisional/ledger creation, controller
 settings, exact install/upgrade arguments, complete duplicate/error outcomes and
 canonical balance/fee accounts. Production Canic migration remains separate.
 
@@ -352,4 +367,8 @@ Protocol's bounded execution-cycle charge projection, optional top-up argument
 decoder and opaque-success/typed-error classifier. Decode success establishes no
 credit or settlement. Independent native/Wasm and installed transport evidence
 is recorded in [the supplier qualification](qualification/anonymous-and-blob-codecs.md).
-Actual downstream migration and its installed acceptance remain consumer gates.
+Blob subsequently reported actual adoption and installed acceptance for these
+selected codecs; [#24](https://github.com/dragginzgame/ic-platform/issues/24)
+retains the closure evidence. Canic adoption of anonymous transport remains a
+separate consumer gate; its recorded local adoption and installed journey now
+close #25 without claiming downstream delivery.

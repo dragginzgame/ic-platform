@@ -80,6 +80,6 @@ Artifact paths use `engine-view-admission.wasm` in the same two target directori
 listed above. These hashes describe the current working sources and artifacts;
 they do not replace the earlier size-probe evidence.
 
-Toko 0.44.7 adoption moved the qualification package directly under
+Toko Tooling 0.44.7 adoption moved the qualification package directly under
 `qualification/`. Historical inventory hashes above remain bound to their
 original source revision and directory layout; current reproduction paths are updated.

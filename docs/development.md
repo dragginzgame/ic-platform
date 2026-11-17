@@ -1,20 +1,21 @@
 # Development
 
-The current published product versions are Types 0.21.1, Platform 0.34.5,
-Protocol 0.2.4, and Runtime/macros/guard 0.23.12. Qualification packages remain
+The current recorded published product versions are Types 0.21.2, Platform 0.34.13,
+Protocol 0.3.5, and Runtime/macros/guard 0.23.16. Qualification packages remain
 private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.
-See the [latest release evidence](qualification/2026-11-16-timer-crypto-publication.md).
+See the [latest release evidence](releases.md#anonymous-transport-blob-codecs-and-qualification-refresh).
 
-Qualification now selects Testkit 0.107.1 and explicitly names two Platform
-roles: `candidate-platform` tests the local 0.34.5 source, `published-platform`
-checks the prior registry 0.34.4 verifier independently. Legacy decoder
+Qualification selects Testkit 0.108.0 and explicitly names two Platform
+roles: `candidate-platform` tests local source, while `published-platform`
+checks the registry verifier. The qualification manifest and lock select their
+versions; equal version numbers do not merge their Cargo source identities. Legacy decoder
 oracles have been removed; qualification uses independent schemas and literal
 fixtures. The separately pinned Auth fixture
-also uses Testkit 0.107.1 with the current local Platform authentication and
+uses its recorded Testkit cohort with the local Platform authentication and
 construction APIs; all five installed cases pass without legacy Platform.
 
-`make qualify-platform-crypto` checks the local Platform 0.34.5 primitive
+`make qualify-platform-crypto` checks the local Platform primitive
 candidate and executes independent native/Wasm signature vectors.
 `make qualify-auth-crypto` checks pinned actual Auth Ed25519/root-delegation code;
 `make qualify-auth-wire` checks its generator with published Wire 0.24.2 and
@@ -110,7 +111,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko 0.44.7 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.44.11 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -121,17 +122,34 @@ make toko-tooling-check
 make deps-list
 ```
 
-Tool setup can download executables and populate Toko's per-user store. Checks
+Tool setup can download executables and populate Toko Tooling's per-user store. Checks
 are offline and do not install tools. Linux x86-64 and macOS ARM64/x86-64 are the
 intended development hosts. The initial focused suite passed on all three in
 [hosted run 43717278830](https://github.com/dragginzgame/ic-platform/actions/runs/43717278830)
 for source `08c72219ad6f261067c00eece9c8c71852e6b561`.
 
+Setup also installs and admits ICP CLI 1.7.0 from Toko Tooling's pinned tool catalog.
+`make qualify-native-signed` and `make qualify-release` check that tool before
+running; Make selects this checkout's `.tools/ic/bin/icp` through `ICP_CLI`.
+An ambient PATH executable or sibling checkout is not needed. Regular native CI
+runs the signed/anonymous installed journey and the native/Wasm Blob codec
+targets (`qualify-caffeine qualify-management-ledger`) on all three hosts.
+
+Release qualification prepares a fresh isolated RustSec database online with
+Toko Tooling's `prepare-rustsec-db.sh`, then audits both root and qualification lockfiles
+using `--no-fetch`. Failure to acquire or audit the database refuses qualification;
+there is no shared-cache fallback. The receipt binds the verified revision,
+preparation log, exact reports and lockfile hashes. Cargo-audit can emit null Git
+metadata with `--no-fetch`; the verified preparation sidecar supplies that identity.
+Publication requires unchanged evidence and an observation no older than 24 hours.
+Expired evidence requires fresh qualification. `make check-release-evidence`
+checks the receipt refusal cases and local tool/CI wiring.
+
 The initial [CI workflow](../.github/workflows/ci.yml) selects Ubuntu 24.04
 x86-64, macOS 15 ARM64 and macOS 15 Intel. These are the intended native
 qualification hosts, covered by the initial run above. Setup requires Bash,
 GNU Make, Git, Perl/core modules, curl, tar and SHA-256 utilities, plus Rustup and
-native compiler/linker prerequisites supplied by the hosted images. Toko installs
+native compiler/linker prerequisites supplied by the hosted images. Toko Tooling installs
 the selected jq/yq and other host tools before its toolchain-file preparer reads
 `rust-toolchain.toml`; the complete tool setup/check follows. Node is pinned in
 `.node-version` for standalone Wasm execution, with no npm packages required.
@@ -142,13 +160,13 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.7
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.11
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
 requirements. It covers the root and `qualification/Cargo.toml`, including the
 `runtime-installed` member. Both listing and updates use that same selection.
-For a deliberate Toko upgrade, review the new release, edit the exact root pin,
+For a deliberate Toko Tooling upgrade, review the new release, edit the exact root pin,
 update the lock, then run `make toko-tooling-preview` and `make toko-tooling-update`.
 Do not edit installed bytes or their receipt.
 
@@ -236,10 +254,10 @@ make fmt-check
 These select the Cloud Engine request encoder, not a full future Platform gate.
 `make fmt` uses the installed formatting tools for Rust and Cargo manifests.
 Run `make install-hooks` once per clone after preparing tools. This activates the
-canonical Toko pre-commit hook through repository-local Git configuration; the
+canonical Toko Tooling pre-commit hook through repository-local Git configuration; the
 installer refuses to replace existing hooks. The hook and `make fmt-check` use
 the same two-workspace formatting selection. Git configuration is local and
-must be set up again in a fresh checkout. Local Linux activation and the Toko
+must be set up again in a fresh checkout. Local Linux activation and the Toko Tooling
 consumer fixture passed automatic formatting/dependency sorting, partial-stage
 refusal, formatter-failure isolation and preservation of unrelated working edits.
 macOS hook behavior remains pending native evidence. Literal-frame unit tests stay with the product;
@@ -251,7 +269,7 @@ the separate public consumer proof lives under `qualification/`.
 one Candid text-vector argument. It preserves empty/Unicode/NUL/whitespace text
 and order, checks the complete frame size before output allocation, and reports
 typed output-limit/allocation failures. Request-count limits belong to the caller.
-The request-only production dependency graph is empty; the source-only Toko dev marker is not
+The request-only production dependency graph is empty; the source-only Toko Tooling dev marker is not
 compiled into the product. The default feature set is empty.
 
 The wire contract comes from the selected external method documented in
@@ -322,7 +340,7 @@ The qualification consumer additionally proves a direct public Principal type
 crossing and the JSON Serde shape. Native-only tests use independently authored upstream Candid
 schemas, literal expected values, fixed refusal classes and 189 retained mutation
 admission expectations. No legacy decoder is selected. Work counters remain
-implementation-specific. Local and registry Types both select 0.21.1; source
+implementation-specific. Local and registry Types select the versions in their workspace catalogs; source
 identity remains distinct and comparisons cross that boundary only through bytes,
 text or JSON. These focused checks do not establish full Query adoption.
 
@@ -388,7 +406,7 @@ its acceptance is undecided. No all-features build combines the two probe owners
 One independent Linux repository job owns the full-history Gitleaks scan and
 Actionlint/ShellCheck validation. It is outside the native matrix and runs even
 for docs changes. Reproduce with `make install-ci-tools`, then
-`make lint-workflows check-secrets`. Installation uses Toko's pinned CI catalog;
+`make lint-workflows check-secrets`. Installation uses Toko Tooling's pinned CI catalog;
 checks install nothing. The selected catalog provides these CI tools on Linux
 x86-64 only; native macOS jobs do not invoke them. Gitleaks scans committed Git
 history, not uncommitted files or ignored build output.
@@ -404,7 +422,7 @@ workflow definition is not a successful hosted run.
 
 ## Dependency boundary checks
 
-`make check-protocol-graphs` uses the installed Toko graph checker with locked,
+`make check-protocol-graphs` uses the installed Toko Tooling graph checker with locked,
 offline Cargo observations on `wasm32-unknown-unknown`. Override `GRAPH_TARGET`
 with an explicit target triple for native checks; CI also runs it with the host
 reported by `rustc -vV` on every matrix runner.
@@ -435,7 +453,7 @@ crypto or Runtime packages.
 The initial five selections passed on Linux x86-64 and Wasm in local checks. An
 intentionally restricted allowlist that excluded Types failed at the response
 selection with a Types dependency path, confirming the target propagates policy
-failures. Workflow lint, formatting and the 51-file Toko snapshot check passed.
+failures. Workflow lint, formatting and the 51-file Toko Tooling snapshot check passed.
 The same checks passed on both macOS architectures in the hosted run linked above.
 
 `make qualify-registry-settings` runs the selected protobuf projection's tests,
@@ -488,7 +506,7 @@ The [group policy](../ci/cargo-release-groups.json) records implemented product
 groups. Each primary package's literal `package.version` owns that group's
 version; there is no workspace version or shadow version file. The root
 [changelog](../CHANGELOG.md) is an index, and group notes live under
-`releases/<group>/CHANGELOG.md`, following the adopted Toko convention.
+`releases/<group>/CHANGELOG.md`, following the adopted Toko Tooling convention.
 
 Protocol currently owns `ic-platform-protocol` and its pending 0.2.0
 notes. Its earlier GitHub snapshots reused 0.1.0; the changelog records that
@@ -505,7 +523,7 @@ published baseline. Do not create placeholder packages.
 Qualification workspace members remain unpublished, outside the product policy,
 and independently versioned.
 
-`make deps-list` uses the installed Toko reader to display group membership.
+`make deps-list` uses the installed Toko Tooling reader to display group membership.
 Types records the `candidate-types` alias used by Runtime. Runtime records its
 `candidate-runtime-guard` and `candidate-macros` aliases; Protocol has no local
 catalog consumers. Do not add unused
@@ -514,7 +532,7 @@ catalog entries just to display membership; the JSON policy owns that mapping.
 This change establishes changelog ownership and inventory only. It installs no
 release or publication commands. Packages remain unpublished. Future execution
 must explicitly select `RELEASE_GROUP`, admit all required
-proof and qualify Toko's supported release adapter before release readiness can
+proof and qualify Toko Tooling's supported release adapter before release readiness can
 be claimed. Existing full release obligations remain open.
 
 ## Platform certificate boundary
@@ -596,9 +614,9 @@ run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
 require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
 prepares assets and `make runtime-server-check` verifies them without downloading.
 
-## Toko 0.44.9 adoption
+## Toko Tooling 0.44.11 adoption
 
-Both workspace catalogs/locks and the installed snapshot select published Toko
+Both workspace catalogs/locks and the installed snapshot select published Toko Tooling
 0.44.11. Its supported installer verified the registry source, installed managed
 files and admitted the existing host/Rust tools. This is a local tooling update,
 not a product release or a reason to repeat the complete release catalog.
@@ -606,8 +624,9 @@ not a product release or a reason to repeat the complete release catalog.
 The old fleet-wide thiserror hold is superseded. The current product catalog
 uses a compatible thiserror requirement; its lock selects 2.0.21. Qualification
 may still resolve 2.0.18 because published Types 0.21.1 and PocketIC constrain
-that graph. Types' pending 0.21.2 change removes its exact pin without changing
-its error API or encoded identities. Until that release, already-published
-Types 0.21.1 still has the immutable exact requirement. Root packaging of other
+that graph. Published Types 0.21.2 removes its exact pin without changing
+its error API or encoded identities. Already-published Types 0.21.1 retains
+its immutable exact requirement; the current qualification lock still selects
+thiserror 2.0.18. A compatible requirement does not force a lockfile upgrade. Root packaging of other
 crates against that old registry cohort is not evidence for the new selection;
 qualify their archive dependencies when preparing their next delivery.

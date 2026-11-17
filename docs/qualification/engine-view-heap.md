@@ -111,6 +111,6 @@ Product/profiler inventory SHA-256, using the same inventory command above:
 `271088254392ab36ebc50755ec909b97a510691946dc52ea984839d66ae1d6a5`.
 The product lock and compiler are unchanged from the earlier observation.
 
-Toko 0.44.7 adoption moved the qualification package directly under
+Toko Tooling 0.44.7 adoption moved the qualification package directly under
 `qualification/`. Historical inventory hashes above remain bound to their
 original source revision and directory layout; current reproduction paths are updated.

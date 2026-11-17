@@ -22,7 +22,7 @@ commit and package path before the next package was published.
 
 ## Tooling and qualification
 
-Toko 0.44.11 is installed with checksum
+Toko Tooling 0.44.11 is installed with checksum
 `7d16b815ae322ae3f88580ee6af1611bdafde08b77592cd886bfa0eece0f1be8`.
 Both workspaces and materialized candidate consumers select it; original archived
 source and frozen comparison cohorts remain unchanged. The supported installer
@@ -39,8 +39,8 @@ It binds compiler, both catalogs and every complete profile log. The retained
 release lock audit found no known vulnerabilities; existing unmaintained supplier
 notices remain. Native execution evidence is Linux, not macOS qualification.
 
-The earlier Toko 0.44.10 attempt stopped in the offline Auth fixture because its
-Cargo cache lacked the selected tooling archive. Toko 0.44.11 became available
+The earlier Toko Tooling 0.44.10 attempt stopped in the offline Auth fixture because its
+Cargo cache lacked the selected tooling archive. Toko Tooling 0.44.11 became available
 during that attempt; both workspaces adopted it, dependencies were fetched, and
 the entire catalog was rerun successfully at the final clean source.
 

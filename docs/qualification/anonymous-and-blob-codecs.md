@@ -1,9 +1,10 @@
 # Anonymous prepared transport and Blob qualification codecs
 
-Local candidates: Platform 0.34.13 and Protocol 0.3.5, based on delivered
-`e9cf54a`. The crates.io sparse index on 2026-11-17 confirmed baselines 0.34.12
-and 0.3.4 before version selection. This evidence is focused supplier qualification,
-not registry publication or downstream production migration.
+Platform 0.34.13 and Protocol 0.3.5 are published from
+`379789a1b9db1e9348a5673ed847896e5011f81c`; see the
+[archive and release evidence](../releases.md#anonymous-transport-blob-codecs-and-qualification-refresh).
+The original candidate selection used baselines 0.34.12/0.3.4 on 2026-11-17.
+Supplier publication remains distinct from downstream production delivery.
 
 ## Platform #25: explicit anonymous admission
 
@@ -34,8 +35,12 @@ and certificate verifier. There is no signer fallback, retry or expiry renewal.
   IDs, exact bytes, effective target, offline certificate replay and version
   advancement are asserted. Host Process bounds CLI execution and owns cleanup.
 
-Set `ICP_CLI` to an explicitly selected ICP CLI 1.7.0 executable (default `icp`).
-This Linux run used `/home/adam/projects/canic/.tools/ic/bin/icp` read-only;
+Normal setup now uses `make install-tools tools-check` to admit ICP CLI 1.7.0.
+`make qualify-native-signed` selects this checkout's `.tools/ic/bin/icp` and
+checks its admission before running. Regular CI includes this journey and the
+Blob native/Wasm targets on Linux and both macOS architectures.
+
+The original Linux run used `/home/adam/projects/canic/.tools/ic/bin/icp` read-only;
 the PATH binary was 1.6.0. The server was PocketIC 16.1.0, Testkit 0.107.4 and
 Host Process 0.80.4. The pre-existing Host Process lockfile update is preserved.
 No sibling checkout was edited. Actual Canic adoption, application approvals,
@@ -73,6 +78,15 @@ Independent schema declarations and the optional regeneration switches in the
 consumer tests establish provenance of the new Wasm vectors.
 
 These focused checks passed on Linux with Rust 1.100.0. They do not claim native
-macOS execution. Blob's production/qualification migration, actual capacity and
-enrollment suites, focused callback proof and removal of its two legacy graphs
-remain downstream gates; no sibling files or legacy dependencies were changed.
+macOS execution. Blob subsequently reported adoption of all three decoders,
+removal of its two legacy graphs, and passing capacity/enrollment, callback and
+offline checks; see [#24 closure evidence](https://github.com/dragginzgame/ic-platform/issues/24#issuecomment-6946453563).
+That consumer report does not establish downstream publication or macOS/browser
+qualification. Read-only review of Canic's 17 November acceptance record now
+confirms explicit signed/anonymous admission and installed deployment, replay,
+receipt recovery and same-canister upgrade; #25 is closed. Retained evidence is
+under Canic's `target/platform-testkit-refresh/` and `target/platform-cut/`.
+The latter journey passes in 8.13s. Those runs have their own recorded lock
+hashes; Canic's subsequent dirty working tree is not claimed freshly tested or
+published. Its base at review was `632e900485722bf87f5ca4c9464d47b985ad3339`.
+No sibling files were changed by this supplier work.
