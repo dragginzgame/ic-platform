@@ -584,3 +584,33 @@ Wire 0.24.3 is newer than the pinned Auth fixture selection 0.24.2. That
 optional supplier refresh is deferred to the next Wire consumer-maintenance
 boundary; this request selects Platform/Testkit, and the retained Wire cohort
 still requires its installed integration checks in the complete release catalog.
+
+Platform 0.34.13 and Protocol 0.3.5 are published from clean source
+`379789a1b9db1e9348a5673ed847896e5011f81c`, with main and annotated tags
+`platform-v0.34.13` / `protocol-v0.3.5` pushed atomically. The complete local
+catalog passed with Testkit 0.108.0 and the refreshed qualification cohort:
+`target/release-qualification/1794913066731-2706000/receipt.json`.
+The first attempt retained at `1794912773738-2643991` caught fixture-only native
+dependencies enabled in unrelated profiles. They are now optional under
+`native-signed`; the failed profile and anonymous fixture passed before the
+fresh complete catalog. The adapter has no partial-stage receipt recovery.
+
+| Package | Verified registry archive SHA-256 | Dry run / single upload under target/publication |
+| --- | --- | --- |
+| Protocol 0.3.5 | `a2ae9adc784809f210d491f301a9b4549bf619dbbeac835dc7c8d49d1eb152b0` | `check.selection.0vZTtw` / `publish.selection.mJMwHS` |
+| Platform 0.34.13 | `d890bfa81018e07fe2fb9f2621ee89c181bd061a2e98f4f979c599501f239dc1` | `check.selection.pitIw9` / `publish.selection.goTgUu` |
+
+Both registry archives match the admitted packages, sparse-index checksums and
+exact clean tagged VCS source. Extracted-archive all-feature native/Wasm Clippy
+and native tests passed. Combined readbacks are retained at
+`target/deploy-anonymous-blob/published.json`. The catalog's cached audit found
+no known vulnerabilities; an independent fresh RustSec audit also found none,
+using 1,527 advisories at `233155b4025b854c68a4b199c0e32d7fd53291a2`
+(`target/deploy-anonymous-blob/current-audit.json`). Native execution is Linux
+evidence, not new macOS qualification.
+
+Post-push review of anonymous admission, original-request binding, bounded Blob
+projections and qualification feature/dependency wiring found no further
+actionable issue. Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/44070190504)
+and [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44070190437)
+were observed once in progress; neither was awaited or claimed passing.
