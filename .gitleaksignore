@@ -7,3 +7,7 @@
 450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/blob-supplier/signed-client.rs:private-key:7
 450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/blob-supplier/signed-client.rs:private-key:8
 450f5cc03bf8cf4c513ecb3c4583364d5c3edcbf:qualification/platform-certificates/tests/native_signed.rs:private-key:15
+# Public synthetic secp256k1 fixture scalar: exactly 32 bytes of 0x07.
+# Only these two historical findings are exempt; no file/rule-wide suppression.
+e186c72c7c61bea42451cc515c54626ce96c3505:qualification/platform-certificates/src/bin/native-signed-installed.rs:private-key:63
+e186c72c7c61bea42451cc515c54626ce96c3505:qualification/platform-certificates/src/bin/native-signed-installed.rs:private-key:75

@@ -5,31 +5,20 @@ current architecture and migration/qualification plan; earlier tentative drafts
 are superseded. Consult [consumer requirements](docs/requirements.md) before
 implementing or removing an affected surface.
 
-The maintainer has requested a ground-up rebuild and local Rust/Toko Tooling setup.
-Proceed through real vertical slices under the design's acceptance gates.
-Prefer existing crate names when concept and functionality are retained; changes
-are allowed when the ownership boundary warrants them. Before creating a local
-package, check crates.io: use the next SemVer version for an existing package and
-0.1.0 for a new package. Breaking pre-1.0 contracts advance the minor version;
-compatible changes advance the patch. After a GitHub source snapshot, changes
-to a product crate require a new version for its next delivery, even while
-unpublished. Apply this to every product group, including Protocol and Types;
-unchanged groups retain their versions. Coordinate Runtime support packages
-with Runtime. Do not reuse a delivered version for changed crate contents.
-Check the published baseline at selection
-time rather than copying an old checkout's version. Private qualification packages
-also start at 0.1.0 and remain outside product release groups. Publisher selection
-and publication remain separate. A package move alone is not rewrite progress.
+Derive real implementation slices from the design's acceptance gates; do not
+restore predecessor architecture merely to satisfy old commands. Package identities
+and current versions belong in Cargo metadata and the group ledgers. Keep
+qualification packages private and outside product release groups.
 
 This repository adopts the installed [Toko Tooling engineering baseline](TOKO-TOOLING.md)
-from published Toko Tooling 0.44.11 and its revision-bound specialist rules. Cargo.lock and
+from published Toko Tooling 0.45.0 and its revision-bound specialist rules. Cargo.lock and
 `.toko-tooling.snapshot` bind the selection and installed bytes. Keep managed
 files intact; use the supported installer for updates. [Development commands](docs/development.md)
 describe the local Make interface and focused checks.
 
 The adoption applies common authorization, source-integrity, dependency and
-validation rules. Product architecture, empty defaults, unpublished package
-status and focused acceptance remain local choices. The workspace uses the
+validation rules. Product architecture, empty defaults, private qualification
+packages and focused acceptance remain local choices. The workspace uses the
 common lints and Rust 1.100.0 as required by the design. Unsafe code is denied
 workspace-wide and forbidden at the Types/Protocol crate roots and existing
 non-export qualification crate roots. The maintainer approved the IC-specific
@@ -44,97 +33,47 @@ does not establish product or native-host qualification.
 
 - Use ICP CLI (`icp`) exclusively for canister operations. Never invoke `dfx`
   or introduce commands, wrappers or fallbacks that use it.
-- Keep `../ic-platform` and every other sibling read-only unless separately authorized.
-- The maintainer separately authorized applying the six-file EngineView patch
-  to `../ic-query` and validating it. That local application is complete; it
-  grants no Query commit, push, publication or unrelated sibling-edit authority.
-- Preserve unique work here. The maintainer authorized source delivery and,
-  subsequently, starting crates.io deployment from public `dragginzgame/ic-platform`.
-  Release preparation and publication are authorized subject to the design's
-  existing acceptance gates; this does not waive qualification. Keep package
-  publication disabled until the selected release is admitted. Repository deletion
-  and sibling migration remain excluded. GitHub source delivery is not registry
-  publication. See the [initial release plan](docs/releases.md).
-- The maintainer approved releasing Types independently after its retained-contract,
-  packaged-crate and real-consumer qualification. Downstream production migration
-  remains a separate gate; this scoped sequencing choice does not waive Types
-  correctness, source integrity, host or publication evidence.
-- The maintainer subsequently authorized independent publication of the implemented
-  Platform, Protocol and Runtime scopes, including coordinated macros and guard.
-  Qualify locally and verify archives/source/registry evidence; do not wait for CI.
-  Keep production migrations and broader design qualification separate, with
-  experimental limitations explicit.
+- This checkout is the current Platform implementation. Sibling source remains
+  read-only unless separately authorized; historical source identities belong in
+  the design and qualification records, not a self-referencing sibling path.
+- Types, Protocol, Platform and Runtime products (including Runtime macros/guard)
+  are authorized for independent registry publication under their existing gates.
+  Qualify selected products and verify exact archives/source/registry evidence.
+  Consumer production migration and repository deletion remain outside that scope.
+  The earlier six-file Query application is completed historical work, not ongoing
+  sibling-edit authority. Current delivery is owned by [release guidance](docs/releases.md)
+  and [development commands](docs/development.md).
 - Create manifests only for real implementation slices. Do not add empty Cargo
   packages solely to select tooling; this restriction was explicitly reaffirmed.
-- Prioritize Auth's missing Runtime capabilities for the next Runtime release:
-  query/lifecycle exports, caller/canister identity and IC time, certification
-  publication/retrieval, and explicit guard/decode/encode/reply composition.
-  Follow the [consumer acceptance contract](docs/requirements.md#next-runtime-release-priority-auth-execution-requirements)
-  and qualify Auth's actual installed fixture. These are retained
-  requirements; do not replace their behavior with consumer compatibility shims.
-  Runtime 0.23.10 now passes the pinned actual Auth installed fixture; retain the
-  [scope and legacy crypto boundary](docs/qualification/runtime-auth.md).
-  Packaging and production migration remain separate admission gates.
-- Protocol 0.3.1 is published on crates.io. Its implemented scope includes bounded
-  request encoding, selected response projections and opt-in snapshot response
-  fixture construction; defaults remain empty. Preserve the independent schema,
-  native/Wasm and actual-consumer qualification in the separate private workspace.
-  See the [release evidence](docs/releases.md#backup-fixture-and-projection-release)
-  and [Query qualification scope](docs/qualification/query-hard-cut.md).
-  Supplier publication and isolated consumer qualification do not establish
-  downstream production migration or completion of the full design.
-- Maintain implemented product groups in `ci/cargo-release-groups.json` and their
-  notes in `releases/<group>/CHANGELOG.md`; root `CHANGELOG.md` is navigation only.
-  Types now implements Principal and Account/Subaccount, with its own group;
-  opt-in self-authentication and independent consumer qualification are present.
-  Actual production cohort migration remains pending.
-  Runtime now has call preparation, one-way submission and experimental awaited
-  transport using local Types, with an experimental method-attached executor.
-  Its group is separate. The [installed qualification](docs/qualification/runtime-installed.md)
-  covers rollback/cleanup, task ownership, refunds, resource refusals, bounded
-  uncertainty and draining callbacks before upgrade. Keep its remaining limits
-  explicit; passing these cases does not qualify the entire design.
-  The supported upgrade workflow is stop, wait for IC status Stopped, upgrade,
-  then start. Qualify this operational boundary; do not require live-call
-  reconstruction or add callback persistence, automatic cancellation/retries,
-  or a Runtime pre-upgrade guard. Operator tooling reports stages and refuses
-  installation unless stopped. Suspended futures and callback IDs stay heap-local.
-  Native-only WAT/Candid tools support independent fixtures and management calls;
-  keep them out of product graphs. Retained custody after failed cleanup remains
-  a separate obligation, not a reason to invent an upgrade recovery subsystem.
-  Keep child/migratory tasks outside this slice.
-  Its exact-version Cargo singleton guard is now implemented in the Runtime
-  group. The explicit-update macro implementation shares that group. Platform
-  0.34.3 has its own group, a strict untrusted certificate decoder and an opt-in
-  direct-root/single-delegation authentication path; follow its
-  [reuse and acceptance boundary](docs/qualification/platform-certificate.md).
-  Decode success must not imply authentication. Direct-root evidence requires
-  explicit root, target, time window and traversal limits. Delegated evidence also
-  checks subnet authority, complete selected ranges and a separate time window.
-  Keep nested-delegation refusal and bytewise range ordering; do not substitute
-  Principal's Rust ordering. Selected-subnet time must match the delegated subnet,
-  or require an independently trusted root-subnet binding without delegation.
-  Never substitute effective-canister authority for this subnet contract.
-  Keep fresh PocketIC observations and frozen public-API replay tests in the
-  qualification path. Independently observed mainnet direct-root and delegated certificates now pass
-  native/Wasm replay, including explicit root-subnet binding. Broader mainnet interoperability and production consumer proof remain
-  pending before the full authentication gate.
-  Protocol 0.2.2 now selects local Types 0.21.1 alongside Runtime. Preserve that
-  canonical source identity; registry Types is only a qualification oracle.
-  Query's older 0.1.x integration needs cohort migration before adoption.
-  Qualification stays outside product release groups.
-  The independently qualified releases are recorded in the
-  [publication evidence](docs/qualification/2026-11-16-publication.md); broader
-  product and production migration gates remain separate.
+- Before changing Runtime execution, read the [Auth consumer acceptance contract](docs/requirements.md#next-runtime-release-priority-auth-execution-requirements)
+  and [installed qualification](docs/qualification/runtime-installed.md). Preserve
+  entrypoints, caller/canister identity, IC time, certification, guard/frame/reply
+  composition, rollback, refunds, bounded uncertainty and callback ownership.
+  Current versions and completed witnesses belong in those records.
+- Maintain independent product groups and notes through `ci/cargo-release-groups.json`
+  and `releases/`; root changelog is navigation. Keep one canonical local Types
+  identity and the Runtime singleton/executor guard across the selected graph.
+- Upgrades stop the canister, wait for IC status Stopped, upgrade, then start.
+  Do not add live-call reconstruction, persisted callbacks, automatic cancellation
+  or retries, or a Runtime pre-upgrade guard. Suspended futures remain heap-local.
+  Failed cleanup retains its existing custody obligation.
+- Native WAT/Candid fixture tools remain outside product graphs. Protocol defaults
+  stay empty; decoding does not imply authentication. Certificate admission must
+  preserve explicit root, target, time and traversal limits, subnet authority,
+  complete ordered ranges and independently trusted root-subnet binding where needed.
+  Keep nested-delegation refusal and bytewise range ordering. Read the
+  [certificate contract](docs/qualification/platform-certificate.md) before changes.
+  Selected-subnet time must match its delegation; effective-canister authority
+  cannot substitute for subnet authority. Qualify fresh observations and frozen
+  public-API replay without treating them as complete production migration.
 - Keep the native heap profiler in its private qualification package. Allocation
   comparisons do not establish execution speed, Wasm size or macOS qualification;
   retain its preselected criteria and source-bound evidence.
 - Wasm size acceptance is undecided. The maintainer deferred contribution
   analysis; preserve the measurements without reinstating an unapproved
   zero-growth gate or weakening correctness/resource checks to reduce size.
-- Start with the EngineView/EngineSubnet projection and its consumer requirements.
-  Published Types may serve early experiments; do not count dependency reuse as
-  rewritten implementation.
+- Select further work from current consumer requirements. The original
+  EngineView/EngineSubnet bootstrap is historical, not a directive to restart it.
 - Preserve one canonical Principal/Account identity and one executor. Matching
   versions or bytes do not establish matching Cargo source/type identity. Qualify
   local Types/Runtime as one cohort before crossing their public type boundaries.

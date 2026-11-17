@@ -111,7 +111,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.44.11 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.45.0 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -160,15 +160,37 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.44.11
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.0
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
 requirements. It covers the root and `qualification/Cargo.toml`, including the
 `runtime-installed` member. Both listing and updates use that same selection.
-For a deliberate Toko Tooling upgrade, review the new release, edit the exact root pin,
+For a deliberate Toko Tooling upgrade, review the new release, edit both exact workspace pins,
 update the lock, then run `make toko-tooling-preview` and `make toko-tooling-update`.
 Do not edit installed bytes or their receipt.
+
+## CI graph and synthetic-key checks
+
+The native `engine-view-consumer` fixture intentionally uses Candid to construct
+independent reference schemas. Its explicit native-only graph allowance includes
+that oracle's dependencies. Marketplace therefore has two bigint identities on
+native (candidate plus oracle), but one on Wasm. Product and Wasm graph allowances
+remain unchanged; all paths still require one canonical local Types/Protocol
+identity. The graph-command regression checks all four CI target triples and
+refuses Agent, Runtime and unknown additions to the oracle allowance.
+
+The two secp256k1 PEM findings introduced in `e186c72` are public test material:
+the scalar is exactly 32 bytes of 0x07. `.gitleaksignore` records only the two
+exact historical fingerprints, alongside earlier Ed25519 fixture fingerprints.
+No operational key or file/rule-wide exemption is introduced. Full-history
+secret scanning remains enabled in both CI workflows.
+
+Local repair validation passed full-history scanning, all graph checks for
+Wasm/Linux/macOS ARM/macOS Intel target selections, 56 flow/wiring tests, actual
+marketplace qualification, formatting and workflow lint. Logs are retained under
+`target/ci-repair/`. macOS graph inspection from Linux is not native macOS
+execution; fresh hosted results require delivery of these local changes.
 
 ## Focused implementation checks
 
@@ -561,7 +583,8 @@ group is therefore not evidence that another catalog's checks are inapplicable.
 There is no new local diff classifier, cache, runner or metadata framework.
 Narrowing that gate would require a qualified input/impact policy using shared
 mechanics. This is an explicit retained-work disposition, not a claim of scoped
-product qualification. Published Toko Tooling 0.44.11 remains installed unchanged.
+product qualification. The flow was qualified on Toko Tooling 0.44.11; its subsequent 0.45.0 adoption
+is recorded below.
 
 Schema-2 receipts bind the complete ordered target list and one retained
 `qualification.log`, both catalog hashes, exact commit, compiler/host and the
@@ -706,10 +729,28 @@ run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
 require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
 prepares assets and `make runtime-server-check` verifies them without downloading.
 
-## Toko Tooling 0.44.11 adoption
+## Toko Tooling 0.45.0 adoption
 
-Both workspace catalogs/locks and the installed snapshot select published Toko Tooling
-0.44.11. Its supported installer verified the registry source, installed managed
+Both workspace catalogs and locks now select published Toko Tooling 0.45.0.
+The archive checksum is
+`3789a925c1165317eff84cc80436195b66c0478b0c2b441bc2f1a755caf6a23a`.
+The supported preview/update path selects the managed baseline and grouped Cargo
+projection helpers; host/Rust/IC tool pins are unchanged. Its consistent-flow
+policy matches the qualified Platform flow and the subsequent move of regression
+fixtures to affected tooling work/CI. The conservative complete product gate
+remains explicit until narrower reverse-consumer scope is qualified.
+
+This is tooling adoption, not new product or native-host qualification. Existing
+unrelated lock changes remain preserved. Review/install/check logs are retained
+under `target/tooling0450/`. Snapshot verification (86 files), installed host/Rust/IC
+tool admission, all 55 local flow/audit/wiring tests, formatting, workflow lint
+and read-only group planning for Types, Protocol, Runtime and Platform passed.
+No public product or downstream consumer release is claimed by this adoption.
+
+## Historical Toko Tooling 0.44.11 adoption
+
+At that adoption, both workspace catalogs/locks and the installed snapshot selected
+published Toko Tooling 0.44.11. Its supported installer verified the registry source, installed managed
 files and admitted the existing host/Rust tools. This is a local tooling update,
 not a product release or a reason to repeat the complete release catalog.
 
@@ -724,7 +765,7 @@ crates against that old registry cohort is not evidence for the new selection;
 qualify their archive dependencies when preparing their next delivery.
 
 
-## Testkit 0.109 qualification adoption
+## Historical Testkit 0.109 qualification adoption
 
 The qualification catalog and materialized Auth/Blob manifests select published
 Testkit 0.109.0. Its archive SHA-256 is
@@ -745,3 +786,36 @@ qualification and both materialized consumer locks resolve exactly Testkit
 0.109.0. Logs: `target/testkit109-consumers.log`, `target/testkit109-signed.log`
 and `target/testkit109-runtime.log`. The complete local release catalog subsequently
 passed. New macOS evidence and consumer production migration remain separate.
+
+
+## Testkit 0.110 and Host qualification adoption
+
+Registry freshness review selected Testkit 0.110.0, Host Process 0.81.0,
+Host Artifacts 0.80.3 and Host FS 0.80.3. Query's Host Text 0.77.2 remains
+current. The qualification catalog selects Testkit and Host Process; the
+materialized Auth, Blob and Storage manifests adopt their applicable suppliers.
+Auth also selects IC Build 0.87.4, whose Host Process 0.81 dependency removes
+its older transitive Process selection. Pinned source archives and sibling
+checkouts remain unchanged. General dependency refresh remains separate.
+
+The Testkit archive SHA-256 is
+`16709c74c5c169ea786224ea8e10a8b45446219000c18c441e8aa73bd1409252`;
+Host Process is
+`1b81431d49e906feee6812a4fa8539feea57803f9937b926472ae947fa9bf6c5`.
+Both downloaded archives matched the registry index. Existing synchronous
+process supervision requires no API changes; the new launch/completion API is
+not used. PocketIC client/server remain 16.1.0, qualification Testkit defaults
+remain disabled, and product dependency graphs are unchanged.
+
+Focused Linux validation passed server cleanup on success, command failure and
+invalid readiness; actual Auth installed tests; Blob signed, callback and
+enrollment journeys; signed/anonymous transport and post-expiry recovery;
+Runtime raw system operations; and Storage's selected Wasm compilation/Clippy.
+The 56 release-tooling regression tests, upgrade tooling, formatting and workflow
+lint also passed. Evidence is in `target/testkit110/qualification.log`,
+`target/testkit110/consumers.log` and `target/testkit110/auth-final.log`.
+Materialized locks confirm the selected suppliers. Storage's evidence remains
+compile-only; this does not establish production migration, new macOS execution
+or registry publication. This source delivery includes Toko Tooling 0.45.0 and the CI native-oracle
+graph/historical synthetic-key fixes. No product crate implementation changed;
+product versions and registry publications remain unchanged.

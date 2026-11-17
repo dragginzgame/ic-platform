@@ -1,7 +1,7 @@
 // Compile the pinned consumer through a reviewable migration patch; sibling is read-only.
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {mkdirSync,writeFileSync} from 'node:fs';
+import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {adoptTooling} from '../tooling-selection.mjs';
 const root=process.cwd(), source=resolve(process.env.STORAGE_SOURCE??'../ic-storage');
@@ -16,7 +16,13 @@ function run(command,args,cwd=destination) {
 run('git',['archive',`--output=${destination}/source.tar`,revision,'Cargo.toml','Cargo.lock','LICENSE.md','crates','qualification'],source);
 run('tar',['-xf','source.tar']);
 run('patch',['--batch','-p1','-i',resolve(root,'qualification/storage-runtime/migration.patch')]);
-for (const name of ['Cargo.toml','qualification/Cargo.toml']) adoptTooling(`${destination}/${name}`);
+for (const name of ['Cargo.toml','qualification/Cargo.toml']) {
+  const path = `${destination}/${name}`;
+  writeFileSync(path, readFileSync(path, 'utf8')
+    .replace('ic-host-artifacts = "0.80.1"', 'ic-host-artifacts = "0.80.3"')
+    .replace('ic-testkit = "0.106.0"', 'ic-testkit = "0.110.0"'));
+  adoptTooling(path);
+}
 const base=['--offline','--manifest-path','qualification/Cargo.toml','--target','wasm32-unknown-unknown'];
 run('cargo',['check',...base,'-p','ic-storage-rust-startup-probe','--features','managed-bench']);
 for(const [name,features,extra] of [

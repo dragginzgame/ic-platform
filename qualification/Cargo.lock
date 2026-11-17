@@ -220,9 +220,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
-version = "1.12.1"
+version = "1.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
+checksum = "776dfebd015e2d8732c684a2c71003674ccb49457b539b9e82151ba38e96dd7c"
 
 [[package]]
 name = "candid"
@@ -1072,9 +1072,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-process"
-version = "0.80.5"
+version = "0.81.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73930a7f8d56062e7fa5c8821b5259b355ea841e9137842644619bfbbe8927b2"
+checksum = "1b81431d49e906feee6812a4fa8539feea57803f9937b926472ae947fa9bf6c5"
 dependencies = [
  "errno",
  "libproc",
@@ -1095,20 +1095,6 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dcba0aa65357edaf6b76560212fb1fa62355767e46af172ffb0d233d37f99b2"
-dependencies = [
- "ic-certification",
- "ic-platform-types 0.21.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "ic-verify-bls-signature",
- "serde",
- "serde_cbor",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform"
 version = "0.34.15"
 dependencies = [
  "crypto-bigint",
@@ -1125,6 +1111,20 @@ dependencies = [
  "serde_cbor",
  "sha2 0.11.1",
  "spki",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.34.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70d95425a6f387880d21e9ce37e83ff6aea3fde380685f25573720231e71c30c"
+dependencies = [
+ "ic-certification",
+ "ic-platform-types 0.21.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-verify-bls-signature",
+ "serde",
+ "serde_cbor",
  "thiserror 2.0.18",
 ]
 
@@ -1189,9 +1189,9 @@ dependencies = [
 
 [[package]]
 name = "ic-testkit"
-version = "0.109.0"
+version = "0.110.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6405078e5332b34ab898d4c32c41f39b358655bb3d4aae508d3ff17f781cf66c"
+checksum = "16709c74c5c169ea786224ea8e10a8b45446219000c18c441e8aa73bd1409252"
 dependencies = [
  "pocket-ic",
 ]
@@ -2132,8 +2132,8 @@ dependencies = [
  "candid",
  "ic-certification",
  "ic-management-canister-types",
- "ic-platform 0.34.14",
  "ic-platform 0.34.15",
+ "ic-platform 0.34.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "ic-testkit",
  "tokio",
  "toko-tooling",
@@ -2836,9 +2836,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.44.11"
+version = "0.45.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d16b815ae322ae3f88580ee6af1611bdafde08b77592cd886bfa0eece0f1be8"
+checksum = "3789a925c1165317eff84cc80436195b66c0478b0c2b441bc2f1a755caf6a23a"
 
 [[package]]
 name = "tower"

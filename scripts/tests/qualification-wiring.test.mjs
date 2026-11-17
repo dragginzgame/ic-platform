@@ -36,3 +36,34 @@ test('normal Make ignores ambient ICP executable and admits the local pin', t =>
   assert.match(make, /qualify-native-signed:.*ic-tools-check/);
   assert.match(make, /qualify-release:.*ic-tools-check/);
 });
+
+test('actual protocol graph commands admit Candid only in the native oracle fixture', t => {
+  const directory = mkdtempSync(join(tmpdir(), 'platform-oracle-graph-'));
+  t.after(() => rmSync(directory, {recursive: true, force: true}));
+  const probe = join(directory, 'capture.cjs');
+  const log = join(directory, 'commands.jsonl');
+  const override = join(directory, 'override.mk');
+  writeFileSync(probe, `require('node:fs').appendFileSync(${JSON.stringify(log)}, JSON.stringify(process.argv.slice(2))+'\\n');\n`);
+  writeFileSync(override, 'qualification-tooling-check:\n\t@true\n');
+  for (const target of ['wasm32-unknown-unknown', 'x86_64-unknown-linux-gnu', 'aarch64-apple-darwin', 'x86_64-apple-darwin']) {
+    writeFileSync(log, '');
+    const result = spawnSync('make', ['--no-print-directory', '-f', 'Makefile', '-f', override,
+      'check-protocol-graphs', `GRAPH_TARGET=${target}`, `PROTOCOL_GRAPH_CHECK=${process.execPath} ${probe}`],
+    {encoding: 'utf8', timeout: 10000});
+    assert.equal(result.status, 0, result.stderr);
+    const commands = readFileSync(log, 'utf8').trim().split('\n').map(JSON.parse);
+    assert.equal(commands.length, 11);
+    for (const args of commands) {
+      const pkg = args[args.indexOf('--package') + 1];
+      const forbidden = new RegExp(args[args.indexOf('--forbid-pattern') + 1]);
+      const nativeOracle = pkg === 'engine-view-consumer' && !target.startsWith('wasm');
+      assert.equal(forbidden.test('candid'), !nativeOracle, `${target} ${pkg}`);
+      for (const excluded of ['ic-agent', 'ic-platform-runtime', 'unadmitted-oracle']) assert(forbidden.test(excluded));
+      if (pkg === 'engine-view-consumer') {
+        assert(args.includes('ic-platform-types=1'));
+        assert(args.includes('ic-platform-protocol=1'));
+        if (args.includes('marketplace')) assert(args.includes(`num-bigint=${nativeOracle ? 2 : 1}`));
+      }
+    }
+  }
+});

@@ -299,19 +299,27 @@ qualify-registry-runtime: qualification-tooling-check
 REGISTRY_GRAPH_PACKAGES := ic-platform-protocol|serde|serde_core|serde_derive|proc-macro2|quote|syn|unicode-ident
 PROTOCOL_GRAPH_PACKAGES := ic-platform-protocol|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident
 MARKETPLACE_GRAPH_PACKAGES := $(PROTOCOL_GRAPH_PACKAGES)|num-bigint|num-integer|num-traits|autocfg
+# The native comparison fixture intentionally exposes independent Candid schemas.
+# Its oracle graph is excluded on Wasm and never admitted into product graphs.
+CONSUMER_ORACLE_GRAPH_PACKAGES :=
+CONSUMER_MARKETPLACE_BIGINT_IDENTITIES := 1
+ifeq ($(findstring wasm,$(GRAPH_TARGET)),)
+CONSUMER_ORACLE_GRAPH_PACKAGES := |anyhow|ar_archive_writer|array-init|arrayvec|autocfg|binrw|binrw_derive|block-buffer|bytemuck|byteorder|candid|candid_derive|cc|cpufeatures|crypto-common|digest|either|find-msvc-tools|generic-array|hex|ic_principal|lazy_static|leb128|libc|memchr|num-bigint|num-integer|num-traits|object|paste|pretty|psm|sha2|shlex|stacker|typed-arena|typenum|unicode-width|version_check
+CONSUMER_MARKETPLACE_BIGINT_IDENTITIES := 2
+endif
 PROTOCOL_GRAPH_CHECK = perl "$(TOKO_TOOLING_ROOT)/scripts/ci/check-cargo-graph.pl" --target "$(GRAPH_TARGET)" --edges normal,build --explain
 .PHONY: check-protocol-graphs
 check-protocol-graphs: qualification-tooling-check
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features marketplace --forbid-pattern '^(?!(engine-view-wasm|$(MARKETPLACE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1 --require num-bigint=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine-marketplace --forbid-pattern '^(?!($(MARKETPLACE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require num-bigint=1
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --features marketplace --forbid-pattern '^(?!(engine-view-consumer|$(MARKETPLACE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1 --require num-bigint=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --features marketplace --forbid-pattern '^(?!(engine-view-consumer|$(MARKETPLACE_GRAPH_PACKAGES)$(CONSUMER_ORACLE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1 --require num-bigint=$(CONSUMER_MARKETPLACE_BIGINT_IDENTITIES)
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features registry-settings --forbid-pattern '^(?!(engine-view-wasm|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features registry-settings --forbid-pattern '^(?!($(REGISTRY_GRAPH_PACKAGES))$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --forbid-pattern '^(?!ic-platform-protocol$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine --forbid-pattern '^(?!ic-platform-protocol$$)'
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-protocol --no-default-features --features cloud-engine-response --forbid-pattern '^(?!($(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --features registry-settings --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES)$(CONSUMER_ORACLE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-consumer --features registry-settings --forbid-pattern '^(?!(engine-view-consumer|$(PROTOCOL_GRAPH_PACKAGES)$(CONSUMER_ORACLE_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package engine-view-wasm --no-default-features --features candidate --forbid-pattern '^(?!(engine-view-wasm|$(PROTOCOL_GRAPH_PACKAGES))$$)' --require ic-platform-types=1 --require ic-platform-protocol=1
 
 .PHONY: upgrade-help check-upgrade-tooling
