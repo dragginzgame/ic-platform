@@ -1,6 +1,6 @@
 # Development
 
-The current recorded published product versions are Types 0.21.2, Platform 0.34.13,
+The current recorded published product versions are Types 0.21.2, Platform 0.34.14,
 Protocol 0.3.5, and Runtime/macros/guard 0.23.17. Qualification packages remain
 private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.
@@ -642,14 +642,14 @@ surface requires no source changes in these callers; they do not exhaustively
 match `ControlError`. Existing held-reply behavior is qualified through Blob.
 PocketIC client/server remain 16.1.0, and Testkit defaults stay disabled in the
 qualification catalog. Historical fixture provenance remains unchanged.
-This scoped adoption does not select new product dependencies or change the
-pending Platform 0.34.14 publication boundary. Other supplier refreshes are
-deferred to their next dependency-maintenance review.
+Testkit remains a qualification dependency. The complete adoption is included in
+the published Platform 0.34.14 source; see the [release evidence](releases.md#exact-offline-signing-and-secp256k1-query-release)
+for the additional locked supplier selections admitted with this release.
 
 Focused Linux validation passed affected-package Clippy, actual installed Auth
 and Blob signed/callback/enrollment journeys, signed transport with both identity
 algorithms and post-expiry recovery, and Runtime raw system operations. Root
 qualification and both materialized consumer locks resolve exactly Testkit
 0.109.0. Logs: `target/testkit109-consumers.log`, `target/testkit109-signed.log`
-and `target/testkit109-runtime.log`. These are local qualification results;
-publication and new macOS evidence remain separate.
+and `target/testkit109-runtime.log`. The complete local release catalog subsequently
+passed. New macOS evidence and consumer production migration remain separate.

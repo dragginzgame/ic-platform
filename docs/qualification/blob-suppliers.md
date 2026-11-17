@@ -194,7 +194,7 @@ No sibling checkout was modified or tests executed there during this review.
 
 ## Secp256k1 signed queries — issue #28
 
-The compatible pending Platform 0.34.14 slice extends the existing
+The compatible published Platform 0.34.14 slice extends the existing
 `native-signed-secp256k1` feature with `Secp256k1Identity::from_pem` and
 `ReadClient::signed_query_secp256k1`. Input PEM bytes have an inclusive caller
 limit; upstream K256 accepts SEC1 and PKCS#8, validates curve/key material and
@@ -236,7 +236,8 @@ authority, freshness and resource regressions. The installed signed fixture adds
 secp256k1 echo and caller-identity queries on both direct-root and delegated
 subnets; the returned caller must equal the explicit key principal and differ
 from anonymous. Reproduce with the existing `qualify-native-signed` target.
-Publication and actual IC DB adoption remain separate from this local slice.
+Platform 0.34.14 is published with [archive verification](../releases.md#exact-offline-signing-and-secp256k1-query-release).
+Actual IC DB adoption remains separate from this supplier slice.
 
 Local Linux checks passed: 11 native unit tests (including PEM admission and
 shared response-authentication refusals), five HTTP transport/recovery regressions,

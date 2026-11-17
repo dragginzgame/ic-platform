@@ -16,6 +16,36 @@ copies, then deliver main and annotated `platform-v0.34.14`. Publish only Platfo
 through the supported adapter and independently verify its registry archive.
 Hosted CI remains asynchronous; Tooling/IC DB/Canic adoption stays separate.
 
+Platform 0.34.14 is published from clean source
+`e186c72c7c61bea42451cc515c54626ce96c3505`; main and annotated
+`platform-v0.34.14` were pushed atomically. The complete local catalog passed:
+`target/release-qualification/1794942693709-3663456/receipt.json`.
+Both lockfile audits found zero known vulnerabilities with freshly prepared
+RustSec `233155b4025b854c68a4b199c0e32d7fd53291a2`; informational maintenance
+advisories remain separate obligations in #27. Pinned Query/Blob copies were
+used, and no sibling checkout changed.
+
+Archive admission passed extracted-package all-feature native/Wasm Clippy,
+native tests and independently fetched source provenance. The dry run and single
+upload are retained under `target/publication/check.selection.MV9b3o` and
+`target/publication/publish.selection.ZZYW7l`. Independent registry readback
+matches the sparse index, admitted archive and tagged VCS source:
+`2dcba0aa65357edaf6b76560212fb1fa62355767e46af172ffb0d233d37f99b2`.
+Readback record: `target/deploy-platform-03414/published.json`.
+
+Post-push review confirmed exact caller-supplied expiry and arguments, a single
+request-status path, shared signature admission, empty defaults and unchanged
+other product versions. Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/44156804385)
+and [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44156804396)
+were observed once in progress; neither was awaited or claimed passing.
+Native execution is Linux evidence; new macOS and production-consumer proof
+remain separate.
+
+Next: Tooling #12 can adopt the published exact signer APIs and qualify provider
+selection/unlocking, followed by Canic #5 integration for Backup. IC DB can
+adopt secp256k1 signed queries and qualify removal of its direct Agent dependency.
+Platform #26 remains the release-flow review; upstream RustSec work stays in #27.
+
 ## Runtime test layout release
 
 Select coordinated Runtime/macros/guard 0.23.17 after registry review confirmed
