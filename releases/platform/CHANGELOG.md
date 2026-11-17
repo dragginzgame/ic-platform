@@ -3,6 +3,17 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.13] - 2026-11-17
+
+### ✨ Added
+
+- Add explicit anonymous prepared update and original-request status admission for
+  [Platform #25](https://github.com/dragginzgame/ic-platform/issues/25). Require the
+  anonymous sender and absence of every authentication field; signed admission
+  never falls back. Preserve original bytes, IDs, expiry, routing, bounded dispatch
+  and certificate verification. Qualify ICP CLI 1.7.0 create/install/stop/upgrade/
+  start and recovery alongside existing signed regressions.
+
 ## [0.34.12] - 2026-11-17
 
 ### 🔧 Changed

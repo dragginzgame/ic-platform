@@ -31,3 +31,11 @@ is no implicit polling, retry, renewal or root discovery. See the
 observation of controllers and hosting subnet, with original certificate bytes,
 explicit count/time/resource limits and the caller's admitted root-subnet binding.
 See the [Canic supplier contract](../../docs/qualification/canic-management.md).
+
+Explicit anonymous update/status preparation is available through
+`PreparedUpdate::from_anonymous_bytes` and
+`PreparedRequestStatus::from_anonymous_bytes` under `native-signed`. Both require
+the anonymous sender and all authentication fields absent. `from_bytes` remains
+signature-only; there is no fallback. `PreparedUpdate::authentication` identifies
+the admitted profile. Admission establishes no application authorization. See
+[anonymous qualification](../../docs/qualification/anonymous-and-blob-codecs.md).

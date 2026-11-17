@@ -40,7 +40,9 @@ no admission or authentication. See the
 
 `caffeine` supplies selected bounded callback, certificate-record and Cashier
 formats, arbitrary signed balances and optional natural top-up targets. The
-enrollment outer option has an explicit encoder. Application admission and
+enrollment outer option has explicit encoding and decoding. Top-up results
+validate and discard arbitrary success payloads, or return one of four typed
+errors. Application admission and
 settlement stay with the caller; see the
 [Blob supplier contract](../../docs/qualification/blob-suppliers.md).
 
@@ -56,3 +58,10 @@ settings updates; `CreationSettings` remains the distinct CMC schema. The
 `management` feature also encodes ordinary creation and chunked installs, while
 the shared status projection requires `version`. See the
 [retained-byte migration contract](../../docs/qualification/canic-management.md).
+
+`management::decode_canister_metrics` projects
+`cycles_consumed.instructions` as an arbitrary natural execution-cycle charge,
+not an instruction count or balance difference. Conversion and interpretation
+remain caller-owned. These and the top-up decoders enforce explicit byte, header,
+type, work, allocation, vector and skipping budgets. See
+[Blob codec qualification](../../docs/qualification/anonymous-and-blob-codecs.md).

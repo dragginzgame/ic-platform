@@ -306,6 +306,18 @@ fn frozen_caffeine_wasm_corpus() {
         std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../engine-view-wasm/fixtures");
     for (name, bytes) in [
         (
+            "caffeine-top-up.bin",
+            Encode!(&Some(TopUp {
+                target_balance: Some("340282366920938463463374607431768211456".parse().unwrap()),
+                account: Some(Principal::from_slice(&[42; 29]))
+            }))
+            .unwrap(),
+        ),
+        (
+            "caffeine-top-up-success.bin",
+            Encode!(&TopUpReply::Ok(vec![true, false])).unwrap(),
+        ),
+        (
             "caffeine-account.bin",
             Encode!(&account(
                 "-340282366920938463463374607431768211456000000000000000000000"
@@ -421,4 +433,203 @@ fn blob_independent_cashier_frames_and_owner_policy() {
     // Successful plain decoding must not rewrite fields into an admitted upload.
     assert_ne!(observed.method, "upload");
     assert_ne!(observed.blob_hash, format!("sha256:{}", "01".repeat(32)));
+}
+
+fn top_up_limits() -> Limits {
+    Limits {
+        bytes: 8192,
+        header: 2048,
+        types: 32,
+        work: 65536,
+        allocation: 65536,
+        vector: 8192,
+        skipping: 65536,
+    }
+}
+fn admission_boundaries<T: std::fmt::Debug>(
+    bytes: &[u8],
+    limits: Limits,
+    decode: fn(&[u8], Limits) -> Result<T, Error>,
+) {
+    decode(bytes, limits).unwrap();
+    for n in 0..bytes.len() {
+        assert!(decode(&bytes[..n], limits).is_err(), "truncation at {n}");
+    }
+    let mut trailing = bytes.to_vec();
+    trailing.push(0);
+    assert!(decode(&trailing, limits).is_err());
+    for dimension in 0..7 {
+        let set = |n| {
+            let mut l = limits;
+            match dimension {
+                0 => l.bytes = n,
+                1 => l.header = n,
+                2 => l.types = n,
+                3 => l.work = n,
+                4 => l.allocation = n,
+                5 => l.vector = n,
+                _ => l.skipping = n,
+            };
+            l
+        };
+        let mut low = 0;
+        let mut high = 65536;
+        while low < high {
+            let mid = low + (high - low) / 2;
+            if decode(bytes, set(mid)).is_ok() {
+                high = mid
+            } else {
+                low = mid + 1
+            }
+        }
+        decode(bytes, set(low)).unwrap();
+        if low > 0 {
+            assert!(
+                decode(bytes, set(low - 1)).is_err(),
+                "budget dimension {dimension}"
+            );
+        }
+    }
+}
+#[test]
+fn top_up_arguments_preserve_outer_and_field_options_and_arbitrary_naturals() {
+    let limits = Limits {
+        bytes: 1024,
+        header: 512,
+        types: 16,
+        work: 4096,
+        allocation: 4096,
+        vector: 1024,
+        skipping: 4096,
+    };
+    let owner = Principal::from_slice(&[42; 29]);
+    for target_balance in [
+        None,
+        Some(Nat::from(0u8)),
+        Some("340282366920938463463374607431768211456".parse().unwrap()),
+    ] {
+        for account in [None, Some(owner)] {
+            let value = Some(TopUp {
+                target_balance: target_balance.clone(),
+                account,
+            });
+            let bytes = Encode!(&value).unwrap();
+            let got = c::decode_top_up(&bytes, limits).unwrap().unwrap();
+            assert_eq!(
+                got.target_balance.map(|n| n.0.to_string()),
+                target_balance.as_ref().map(|n| n.0.to_string())
+            );
+            assert_eq!(
+                got.account.map(|p| p.as_slice().to_vec()),
+                account.map(|p| p.as_slice().to_vec())
+            );
+            admission_boundaries(&bytes, limits, c::decode_top_up);
+        }
+    }
+    assert!(
+        c::decode_top_up(
+            &Encode!(&TopUp {
+                target_balance: None,
+                account: None
+            })
+            .unwrap(),
+            limits
+        )
+        .is_err()
+    );
+    assert!(
+        c::decode_top_up(&Encode!(&None::<TopUp>).unwrap(), limits)
+            .unwrap()
+            .is_none()
+    );
+    assert!(c::decode_top_up(&Encode!().unwrap(), limits).is_err());
+    assert!(c::decode_top_up(&Encode!(&None::<TopUp>, &None::<TopUp>).unwrap(), limits).is_err());
+}
+#[derive(CandidType)]
+enum TopUpFailure {
+    NotAuthorized(Principal),
+    AccountBalanceOverflow,
+    InternalError(String),
+    TopUpWithoutCycles,
+}
+#[derive(CandidType)]
+enum TopUpReply<T: CandidType> {
+    Ok(T),
+    Err(TopUpFailure),
+}
+#[test]
+fn top_up_outcome_validates_opaque_success_and_typed_errors() {
+    let limits = top_up_limits();
+    for payload in [vec![], vec![true, false, true]] {
+        let bytes = Encode!(&TopUpReply::Ok(payload)).unwrap();
+        assert!(matches!(
+            c::decode_top_up_result(&bytes, limits).unwrap(),
+            c::TopUpResult::Ok(_)
+        ));
+        admission_boundaries(&bytes, limits, c::decode_top_up_result);
+    }
+    // A nested record is also valid opaque success; no schema interpretation escapes.
+    let bytes = Encode!(&TopUpReply::Ok(TopUp {
+        target_balance: Some(Nat::from(1u8)),
+        account: Some(Principal::anonymous())
+    }))
+    .unwrap();
+    admission_boundaries(&bytes, limits, c::decode_top_up_result);
+    let owner = Principal::from_slice(&[43; 29]);
+    for error in [
+        TopUpFailure::NotAuthorized(owner),
+        TopUpFailure::AccountBalanceOverflow,
+        TopUpFailure::InternalError("exact diagnostic".into()),
+        TopUpFailure::TopUpWithoutCycles,
+    ] {
+        let bytes = Encode!(&TopUpReply::<bool>::Err(error)).unwrap();
+        let got = c::decode_top_up_result(&bytes, limits).unwrap();
+        match got {
+            c::TopUpResult::Err(c::TopUpError::NotAuthorized(p)) => {
+                assert_eq!(p.as_slice(), owner.as_slice())
+            }
+            c::TopUpResult::Err(c::TopUpError::InternalError(text)) => {
+                assert_eq!(text, "exact diagnostic")
+            }
+            c::TopUpResult::Err(
+                c::TopUpError::AccountBalanceOverflow | c::TopUpError::TopUpWithoutCycles,
+            ) => {}
+            c::TopUpResult::Ok(_) => panic!("error changed into success"),
+        }
+        admission_boundaries(&bytes, limits, c::decode_top_up_result);
+    }
+    let mut malformed = Encode!(&TopUpReply::Ok(true)).unwrap();
+    *malformed.last_mut().unwrap() = 2; // Invalid bool in the discarded success.
+    assert!(c::decode_top_up_result(&malformed, limits).is_err());
+    assert!(
+        c::decode_top_up_result(
+            &Encode!(&ResultValue::Err(ProviderError::NotAuthorized(
+                "wrong type".into()
+            )))
+            .unwrap(),
+            limits
+        )
+        .is_err()
+    );
+    assert!(
+        c::decode_top_up_result(
+            &Encode!(&ResultValue::Err(ProviderError::Unknown(true))).unwrap(),
+            limits
+        )
+        .is_err()
+    );
+    assert!(c::decode_top_up_result(&Encode!().unwrap(), limits).is_err());
+    assert!(
+        c::decode_top_up_result(&Encode!(&TopUpReply::Ok(true), &false).unwrap(), limits).is_err()
+    );
+    let literal = include_str!("fixtures/top-up-without-cycles.hex").trim();
+    let bytes = (0..literal.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&literal[i..i + 2], 16).unwrap())
+        .collect::<Vec<_>>();
+    assert!(matches!(
+        c::decode_top_up_result(&bytes, limits).unwrap(),
+        c::TopUpResult::Err(c::TopUpError::TopUpWithoutCycles)
+    ));
+    admission_boundaries(&bytes, limits, c::decode_top_up_result);
 }

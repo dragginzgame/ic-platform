@@ -520,9 +520,10 @@ qualify-native-signed: qualification-tooling-check
 	cargo test --offline --locked -p ic-platform --all-features native::
 	cargo clippy --offline --locked -p ic-platform --no-default-features --features native-signed --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --offline --locked -p ic-platform --no-default-features --features native-signed --no-deps
-	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed-secp256k1 --test native_signed --bin native-signed-installed -- -D warnings
+	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed-secp256k1 --test native_signed --bin native-signed-installed --bin native-anonymous-installed -- -D warnings
 	cargo test --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed-secp256k1 --test native_signed
 	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed-secp256k1 --bin native-signed-installed
+	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features native-signed --bin native-anonymous-installed
 
 .PHONY: qualify-blob-suppliers
 qualify-blob-suppliers: qualification-tooling-check

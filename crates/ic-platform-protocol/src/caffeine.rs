@@ -2,7 +2,7 @@
 //!
 //! Decoding authenticates nothing. Callers check root syntax/length/count,
 //! certificate method/root equality and Cashier owner equality before effects.
-//! Top-up replies remain opaque; these formats establish no settlement outcome.
+//! Top-up success payloads remain opaque; these formats establish no settlement outcome.
 use crate::candid::encode::{Encode, Writer};
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
@@ -106,11 +106,11 @@ projection! {
 }
 projection! {
     /// `account_top_up_v1` argument. No reply or settlement interpretation.
-    encoding TopUpArgs {
+    both TopUpArgs {
         /// Explicit absence versus arbitrary natural balance target.
-        2_504_008_430 => target_balance: Option<Nat>,
+        2_504_008_430 => target_balance: Option<Nat> [strict_optional],
         /// Explicit absence versus canonical account.
-        2_707_029_165 => account: Option<Principal>,
+        2_707_029_165 => account: Option<Principal> [strict_optional],
     }
 }
 macro_rules! codec {
@@ -191,4 +191,59 @@ pub fn encode_top_up(
     maximum_bytes: usize,
 ) -> Result<Vec<u8>, EncodeError> {
     candid::encode::encode(&value, maximum_bytes)
+}
+
+impl TopUpArgs {
+    /// Encode the bare top-up record (without the outer option).
+    /// # Errors
+    /// Refuses oversized output or allocation failure.
+    pub fn encode(&self, maximum_bytes: usize) -> Result<Vec<u8>, EncodeError> {
+        candid::encode::encode(self, maximum_bytes)
+    }
+}
+/// Decode exactly one outer optional top-up record, retaining every option.
+/// # Errors
+/// Refuses incompatible, malformed, trailing or over-budget input.
+pub fn decode_top_up(bytes: &[u8], limits: Limits) -> Result<Option<TopUpArgs>, Error> {
+    candid::decode(bytes, limits)
+}
+/// Well-formed success payload, validated and discarded under traversal budgets.
+/// This carries no account, acceptance, credit or settlement evidence.
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct OpaqueTopUpSuccess;
+impl Decode for OpaqueTopUpSuccess {
+    const SCHEMA: Schema = Schema::Primitive(-16);
+    fn read(reader: &mut Reader<'_, '_>, id: i64) -> Result<Self, Error> {
+        reader.skip(id)?;
+        Ok(Self)
+    }
+}
+projection! {
+    /// Selected typed top-up refusals; unknown selected variants are refused.
+    enum TopUpError {
+        /// Returned unauthorized account identity; no authorization is inferred.
+        2_102_411_630 => NotAuthorized(Principal),
+        /// Account balance overflow.
+        3_638_018_673 => AccountBalanceOverflow,
+        /// Provider diagnostic text.
+        3_758_147_371 => InternalError(String),
+        /// No cycles supplied.
+        4_052_296_485 => TopUpWithoutCycles,
+    }
+}
+projection! {
+    /// Top-up ABI outcome only, with an opaque validated success payload.
+    enum TopUpResult {
+        /// Well-formed success, without interpretation of its payload.
+        17_724 => Ok(OpaqueTopUpSuccess),
+        /// Known typed provider refusal.
+        3_456_837 => Err(TopUpError),
+    }
+}
+/// Decode exactly one top-up result under explicit traversal and storage limits.
+/// # Errors
+/// Refuses unknown selected errors, malformed selected or skipped payloads,
+/// incorrect arity, trailing bytes and exhausted budgets.
+pub fn decode_top_up_result(bytes: &[u8], limits: Limits) -> Result<TopUpResult, Error> {
+    candid::decode(bytes, limits)
 }

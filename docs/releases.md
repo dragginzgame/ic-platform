@@ -560,3 +560,27 @@ was observed in progress and [Types qualification](https://github.com/dragginzga
 queued once; neither was awaited or claimed passing. Native execution remains
 Linux evidence; Canic adoption, its independent root-subnet admission and its
 installed recovery proof remain separate.
+
+## Anonymous transport, Blob codecs and qualification refresh
+
+Select Platform 0.34.13 and Protocol 0.3.5 for supplier issues #25 and #24.
+Qualification adopts registry Platform 0.34.12 and Testkit 0.108.0, including
+materialized Auth/Blob fixtures. Candidate Platform remains local 0.34.13.
+Testkit archive SHA-256: `6fa2e6157d27d15ba1bc93923adc3221e1c09f9f28ec2f8bdde09b04b528cf80`.
+Defaults remain empty; this refresh does not enable Testkit's optional server
+owner or CLI. Host Process 0.80.4 remains the preserved locked selection.
+
+Registry review on 2026-11-17 confirms Platform 0.34.12, Protocol 0.3.4,
+Types 0.21.2, Runtime 0.23.16, Host Process 0.80.4 and Toko Tooling 0.44.11.
+Types and Runtime product contents remain unchanged and are not republished.
+The existing complete local catalog, exact-source receipt, package admission
+and independent registry readback remain mandatory. Use the recorded pinned
+Query/Blob fixture sources, leaving siblings read-only. ICP CLI 1.7.0 is
+explicitly selected for the new installed anonymous journey. Hosted CI stays
+asynchronous. Downstream adoption remains separate; see
+[supplier scope and qualification](qualification/anonymous-and-blob-codecs.md).
+
+Wire 0.24.3 is newer than the pinned Auth fixture selection 0.24.2. That
+optional supplier refresh is deferred to the next Wire consumer-maintenance
+boundary; this request selects Platform/Testkit, and the retained Wire cohort
+still requires its installed integration checks in the complete release catalog.

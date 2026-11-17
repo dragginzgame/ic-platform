@@ -777,7 +777,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.12"
+version = "0.34.13"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -810,7 +810,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.3.4"
+version = "0.3.5"
 dependencies = [
  "crc32fast",
  "ic-platform-types",

@@ -307,3 +307,177 @@ fn superfluous_read_path(bytes: &[u8], update: &PreparedUpdate) -> bool {
     )
     .is_err()
 }
+
+#[test]
+fn anonymous_admission_is_explicit_exact_and_bound_to_original() {
+    use candidate_platform::native::{AuthenticationProfile, PreparedRequestStatus};
+    let target = Principal::from_slice(&[9]);
+    let envelope = ingress::Envelope {
+        content: ingress::Content::Call {
+            nonce: Some(vec![]),
+            ingress_expiry: 1,
+            sender: Principal::anonymous(),
+            canister_id: target,
+            method_name: "echo".into(),
+            arg: vec![42],
+            sender_info: None,
+        },
+        sender_pubkey: None,
+        sender_sig: None,
+        sender_delegation: None,
+    };
+    let bytes = ingress::encode_envelope(&envelope, 4096).unwrap();
+    let update = PreparedUpdate::from_anonymous_bytes(&bytes, target, bytes.len()).unwrap();
+    assert_eq!(update.authentication(), AuthenticationProfile::Anonymous);
+    assert_eq!(update.envelope_bytes(), bytes);
+    assert_eq!(update.expiry(), 1);
+    assert_eq!(update.recipient(), target);
+    assert_eq!(update.request_id(), &envelope.content.request_id().unwrap());
+    assert!(PreparedUpdate::from_bytes(&bytes, target, 4096).is_err());
+    assert!(PreparedUpdate::from_anonymous_bytes(&bytes, target, bytes.len() - 1).is_err());
+    let status = ingress::Envelope {
+        content: ingress::Content::ReadState {
+            sender: Principal::anonymous(),
+            ingress_expiry: 2,
+            paths: vec![vec![
+                b"request_status".to_vec(),
+                update.request_id().to_vec(),
+            ]],
+        },
+        sender_pubkey: None,
+        sender_sig: None,
+        sender_delegation: None,
+    };
+    let read = ingress::encode_envelope(&status, 4096).unwrap();
+    let prepared = PreparedRequestStatus::from_anonymous_bytes(&read, &update, read.len()).unwrap();
+    assert_eq!(prepared.envelope_bytes(), read);
+    assert_eq!(prepared.expiry(), 2);
+    assert!(PreparedRequestStatus::from_bytes(&read, &update, 4096).is_err());
+    assert!(PreparedRequestStatus::from_anonymous_bytes(&read, &update, read.len() - 1).is_err());
+    let (_, signed) = original();
+    assert!(PreparedUpdate::from_anonymous_bytes(signed.envelope_bytes(), target, 4096).is_err());
+    assert!(PreparedRequestStatus::from_anonymous_bytes(&read, &signed, 4096).is_err());
+    for index in 0..6 {
+        let mut bad = status.clone();
+        let ingress::Content::ReadState { sender, paths, .. } = &mut bad.content else {
+            unreachable!()
+        };
+        match index {
+            0 => *sender = target,
+            1 => paths.push(paths[0].clone()),
+            2 => paths[0][1][0] ^= 1,
+            3 => paths[0][0] = b"time".to_vec(),
+            4 => paths[0].push(vec![]),
+            _ => paths.clear(),
+        }
+        assert!(
+            PreparedRequestStatus::from_anonymous_bytes(
+                &ingress::encode_envelope(&bad, 4096).unwrap(),
+                &update,
+                4096
+            )
+            .is_err()
+        );
+    }
+    let mut wrong_sender = envelope.clone();
+    let ingress::Content::Call { sender, .. } = &mut wrong_sender.content else {
+        unreachable!()
+    };
+    *sender = target;
+    assert!(
+        PreparedUpdate::from_anonymous_bytes(
+            &ingress::encode_envelope(&wrong_sender, 4096).unwrap(),
+            target,
+            4096
+        )
+        .is_err()
+    );
+    for source in [envelope, status] {
+        // Present null is not absence for any authentication field.
+        for field in ["sender_pubkey", "sender_sig", "sender_delegation"] {
+            let serde_cbor::Value::Map(mut value) = serde_cbor::value::to_value(&source).unwrap()
+            else {
+                unreachable!()
+            };
+            value.insert(
+                serde_cbor::Value::Text(field.into()),
+                serde_cbor::Value::Null,
+            );
+            let null = serde_cbor::to_vec(&value).unwrap();
+            assert!(PreparedUpdate::from_anonymous_bytes(&null, target, 4096).is_err());
+            assert!(PreparedRequestStatus::from_anonymous_bytes(&null, &update, 4096).is_err());
+        }
+
+        for index in 0..3 {
+            let mut mixed = source.clone();
+            match index {
+                0 => mixed.sender_pubkey = Some(vec![]),
+                1 => mixed.sender_sig = Some(vec![]),
+                _ => mixed.sender_delegation = Some(vec![]),
+            }
+            let mixed = ingress::encode_envelope(&mixed, 4096).unwrap();
+            assert!(PreparedUpdate::from_anonymous_bytes(&mixed, target, 4096).is_err());
+            assert!(PreparedRequestStatus::from_anonymous_bytes(&mixed, &update, 4096).is_err());
+        }
+        let original = ingress::encode_envelope(&source, 4096).unwrap();
+        for n in 0..original.len() {
+            assert!(PreparedUpdate::from_anonymous_bytes(&original[..n], target, 4096).is_err());
+            assert!(
+                PreparedRequestStatus::from_anonymous_bytes(&original[..n], &update, 4096).is_err()
+            );
+        }
+        let mut trailing = original;
+        trailing.push(0);
+        assert!(PreparedUpdate::from_anonymous_bytes(&trailing, target, 4096).is_err());
+        assert!(PreparedRequestStatus::from_anonymous_bytes(&trailing, &update, 4096).is_err());
+    }
+}
+
+#[test]
+fn anonymous_dispatch_and_recovery_preserve_exact_bytes_without_retry() {
+    use candidate_platform::native::PreparedRequestStatus;
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    let target = Principal::from_slice(&[9]);
+    // Independent CBOR framing through serde's value encoder, not the product encoder.
+    let content = serde_cbor::value::to_value(ingress::Content::Call {
+        nonce: None,
+        ingress_expiry: 1,
+        sender: Principal::anonymous(),
+        canister_id: target,
+        method_name: "echo".into(),
+        arg: vec![],
+        sender_info: None,
+    })
+    .unwrap();
+    let bytes =
+        serde_cbor::to_vec(&std::collections::BTreeMap::from([("content", content)])).unwrap();
+    let update = PreparedUpdate::from_anonymous_bytes(&bytes, target, 4096).unwrap();
+    let (endpoint, task) = serve(b"HTTP/1.1 202 Accepted\r\nContent-Length: 0\r\n\r\n".to_vec());
+    assert!(matches!(
+        runtime.block_on(client(endpoint).dispatch(&update, time())),
+        Ok(Dispatch::Accepted)
+    ));
+    assert_eq!(task.join().unwrap().1, bytes);
+    let content = serde_cbor::value::to_value(ingress::Content::ReadState {
+        sender: Principal::anonymous(),
+        ingress_expiry: 2,
+        paths: vec![vec![
+            b"request_status".to_vec(),
+            update.request_id().to_vec(),
+        ]],
+    })
+    .unwrap();
+    let bytes =
+        serde_cbor::to_vec(&std::collections::BTreeMap::from([("content", content)])).unwrap();
+    let read = PreparedRequestStatus::from_anonymous_bytes(&bytes, &update, 4096).unwrap();
+    let (endpoint, task) = serve(b"HTTP/1.1 200 OK\r\nContent-Length: 1\r\n\r\n\xa0".to_vec());
+    assert!(
+        runtime
+            .block_on(client(endpoint).observe_prepared_request(&update, &read, time()))
+            .is_err()
+    );
+    assert_eq!(task.join().unwrap().1, bytes);
+}

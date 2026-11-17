@@ -233,3 +233,25 @@ projection! {
         3599109322 => sender_canister_version: Option<u64>,
     }
 }
+
+projection! {
+    /// Execution-cycle charges; this is neither instruction count nor balance loss.
+    ExecutionCharges {
+        /// Arbitrary natural cycles charged for instructions.
+        1_832_883_877 => instructions: Nat [required],
+    }
+}
+projection! {
+    /// Selected canister_metrics reply; unrelated metrics are validated and skipped.
+    CanisterMetrics {
+        /// Reported execution charges; callers own checked numeric conversion.
+        2_122_851_290 => cycles_consumed: ExecutionCharges [required],
+    }
+}
+/// Decode one management canister_metrics reply with explicit resource budgets.
+/// # Errors
+/// Refuses missing/incompatible fields, malformed skipped values, incorrect arity,
+/// trailing bytes and exhausted budgets.
+pub fn decode_canister_metrics(bytes: &[u8], limits: Limits) -> Result<CanisterMetrics, Error> {
+    candid::decode(bytes, limits)
+}

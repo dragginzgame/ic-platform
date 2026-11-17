@@ -11,9 +11,13 @@ license-file.workspace = true
 toko-tooling.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
+base64.workspace = true
 candid.workspace = true
+ic-host-process.workspace = true
 ic-platform-protocol = { workspace = true, optional = true, features = ["management"] }
 ic-testkit.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
 tokio.workspace = true
 wat.workspace = true
 
@@ -51,6 +55,11 @@ required-features = ["native-read"]
 [[bin]]
 name = "native-signed-installed"
 path = "src/bin/native-signed-installed.rs"
+required-features = ["native-signed"]
+
+[[bin]]
+name = "native-anonymous-installed"
+path = "src/bin/native-anonymous-installed.rs"
 required-features = ["native-signed"]
 
 [features]

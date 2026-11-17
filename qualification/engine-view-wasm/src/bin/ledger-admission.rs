@@ -2,6 +2,25 @@
 #![forbid(unsafe_code)]
 use ic_platform_protocol::{candid::Limits, ledger, management};
 fn main() {
+    let limits = Limits {
+        bytes: 4096,
+        header: 1024,
+        types: 32,
+        work: 16384,
+        allocation: 16384,
+        vector: 4096,
+        skipping: 16384,
+    };
+    let bytes = include_bytes!("../../fixtures/management-metrics.bin");
+    let metrics = management::decode_canister_metrics(bytes, limits).unwrap();
+    assert_eq!(
+        metrics.cycles_consumed.instructions.0.to_string(),
+        "340282366920938463463374607431768211456"
+    );
+    for end in 0..bytes.len() {
+        assert!(management::decode_canister_metrics(&bytes[..end], limits).is_err());
+    }
+
     let bytes = include_bytes!("../../fixtures/ledger-created.bin");
     let limits = Limits {
         bytes: bytes.len(),

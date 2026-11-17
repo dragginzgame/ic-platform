@@ -338,3 +338,18 @@ The [Canic management supplier contract](qualification/canic-management.md) cove
 settings, ordinary creation, chunked installation and required status version.
 CMC retains its separate nine-field encoding. Canic still owns explicit root-subnet
 admission, approval/retained-request binding and its actual migration/recovery proof.
+
+### Anonymous prepared transport and final Blob qualification codecs
+
+[Platform #25](https://github.com/dragginzgame/ic-platform/issues/25) requires
+explicit anonymous prepared updates and matching original-request status reads.
+Platform owns strict profile admission, byte custody, bounded single-attempt
+transport and certificate authentication; Canic retains approvals, trust-root
+selection and uncertain-operation custody. Signed admission cannot fall back.
+
+[Platform #24](https://github.com/dragginzgame/ic-platform/issues/24) requires
+Protocol's bounded execution-cycle charge projection, optional top-up argument
+decoder and opaque-success/typed-error classifier. Decode success establishes no
+credit or settlement. Independent native/Wasm and installed transport evidence
+is recorded in [the supplier qualification](qualification/anonymous-and-blob-codecs.md).
+Actual downstream migration and its installed acceptance remain consumer gates.

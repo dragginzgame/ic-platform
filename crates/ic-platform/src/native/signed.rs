@@ -1,5 +1,5 @@
 //! Explicit Ed25519 identity and original-request transport, with optional
-//! externally signed direct secp256k1 admission. No discovery,
+//! externally signed direct secp256k1 and explicit anonymous admission. No discovery,
 //! polling, renewal, redirect, proxy or retry is performed by these operations.
 use super::{ReadClient, ReadError, TimePolicy, authenticate_certificate};
 use crate::{
@@ -115,10 +115,35 @@ fn encode<T: Serialize>(value: &T, maximum: usize) -> Result<Vec<u8>, ReadError>
         ingress::EncodeError::Packet => ReadError::Packet,
     })
 }
-/// Immutable, signature-checked original update. Loading does not check expiry:
+/// Explicit admission profile. Anonymous admission establishes no authorization.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AuthenticationProfile {
+    /// Direct-key signature and sender binding were verified.
+    DirectSignature,
+    /// Anonymous sender with every authentication field absent.
+    Anonymous,
+}
+impl AuthenticationProfile {
+    fn verify(self, envelope: &Envelope, sender: Principal) -> Result<(), ReadError> {
+        match self {
+            Self::DirectSignature => verify_envelope(envelope, sender),
+            Self::Anonymous
+                if sender == Principal::anonymous()
+                    && envelope.sender_pubkey.is_none()
+                    && envelope.sender_sig.is_none()
+                    && envelope.sender_delegation.is_none() =>
+            {
+                Ok(())
+            }
+            Self::Anonymous => Err(ReadError::Packet),
+        }
+    }
+}
+/// Immutable, explicitly admitted original update. Loading does not check expiry:
 /// recovery must remain possible after the original ingress has expired.
 #[derive(Debug)]
 pub struct PreparedUpdate {
+    authentication: AuthenticationProfile,
     bytes: Vec<u8>,
     id: [u8; 32],
     expiry: u64,
@@ -138,6 +163,36 @@ impl PreparedUpdate {
         effective: Principal,
         maximum_bytes: usize,
     ) -> Result<Self, ReadError> {
+        Self::admit(
+            bytes,
+            effective,
+            maximum_bytes,
+            AuthenticationProfile::DirectSignature,
+        )
+    }
+    /// Admit an explicitly anonymous update, preserving its original bytes.
+    /// No authorization or freshness is inferred. Signed admission never falls back here.
+    /// # Errors
+    /// Refuses nonanonymous senders, any authentication field (including empty
+    /// values), sender info, malformed, trailing or oversized packets.
+    pub fn from_anonymous_bytes(
+        bytes: &[u8],
+        effective: Principal,
+        maximum_bytes: usize,
+    ) -> Result<Self, ReadError> {
+        Self::admit(
+            bytes,
+            effective,
+            maximum_bytes,
+            AuthenticationProfile::Anonymous,
+        )
+    }
+    fn admit(
+        bytes: &[u8],
+        effective: Principal,
+        maximum_bytes: usize,
+        authentication: AuthenticationProfile,
+    ) -> Result<Self, ReadError> {
         let envelope = ingress::decode_envelope(bytes, maximum_bytes)
             .map_err(|_| ReadError::Packet)?
             .value;
@@ -154,8 +209,9 @@ impl PreparedUpdate {
         if envelope.sender_delegation.is_some() || sender_info.is_some() {
             return Err(ReadError::Packet);
         }
-        verify_envelope(&envelope, sender)?;
+        authentication.verify(&envelope, sender)?;
         Ok(Self {
+            authentication,
             bytes: bytes.to_vec(),
             id: envelope
                 .content
@@ -166,6 +222,11 @@ impl PreparedUpdate {
             recipient: canister_id,
             effective,
         })
+    }
+    /// Profile used to admit this immutable request.
+    #[must_use]
+    pub const fn authentication(&self) -> AuthenticationProfile {
+        self.authentication
     }
     /// Exact original envelope bytes, including original CBOR framing.
     #[must_use]
@@ -182,12 +243,12 @@ impl PreparedUpdate {
     pub const fn expiry(&self) -> u64 {
         self.expiry
     }
-    /// Signed sender identity.
+    /// Admitted sender identity; consult the authentication profile.
     #[must_use]
     pub const fn sender(&self) -> Principal {
         self.sender
     }
-    /// Signed recipient (possibly the management canister).
+    /// Original recipient (possibly the management canister).
     #[must_use]
     pub const fn recipient(&self) -> Principal {
         self.recipient
@@ -233,7 +294,7 @@ fn verify_envelope(envelope: &Envelope, sender: Principal) -> Result<(), ReadErr
     Err(ReadError::Packet)
 }
 
-/// Signature-checked externally prepared status read for one original update.
+/// Explicitly admitted status read for one original update.
 /// No key custody, expiry renewal or network operation occurs on admission.
 #[derive(Debug)]
 pub struct PreparedRequestStatus {
@@ -255,6 +316,39 @@ impl PreparedRequestStatus {
         update: &PreparedUpdate,
         maximum_bytes: usize,
     ) -> Result<Self, ReadError> {
+        Self::admit(
+            bytes,
+            update,
+            maximum_bytes,
+            AuthenticationProfile::DirectSignature,
+        )
+    }
+    /// Admit an anonymous status read bound to an anonymously admitted update.
+    /// Preserves the original read expiry and bytes; makes no freshness claim.
+    /// # Errors
+    /// Refuses authentication fields, nonanonymous senders, profile mismatches,
+    /// extra/wrong paths, malformed, trailing or oversized packets.
+    pub fn from_anonymous_bytes(
+        bytes: &[u8],
+        update: &PreparedUpdate,
+        maximum_bytes: usize,
+    ) -> Result<Self, ReadError> {
+        Self::admit(
+            bytes,
+            update,
+            maximum_bytes,
+            AuthenticationProfile::Anonymous,
+        )
+    }
+    fn admit(
+        bytes: &[u8],
+        update: &PreparedUpdate,
+        maximum_bytes: usize,
+        authentication: AuthenticationProfile,
+    ) -> Result<Self, ReadError> {
+        if authentication != update.authentication {
+            return Err(ReadError::Packet);
+        }
         let envelope = ingress::decode_envelope(bytes, maximum_bytes)
             .map_err(|_| ReadError::Packet)?
             .value;
@@ -274,7 +368,7 @@ impl PreparedRequestStatus {
         {
             return Err(ReadError::Packet);
         }
-        verify_envelope(&envelope, sender)?;
+        authentication.verify(&envelope, sender)?;
         Ok(Self {
             bytes: bytes.to_vec(),
             id: update.id,

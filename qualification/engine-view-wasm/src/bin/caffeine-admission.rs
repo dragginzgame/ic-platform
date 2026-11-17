@@ -5,6 +5,57 @@ use ic_platform_protocol::{
     candid::{Error, Limits},
 };
 fn main() {
+    let limits = Limits {
+        bytes: 1024,
+        header: 512,
+        types: 16,
+        work: 4096,
+        allocation: 4096,
+        vector: 1024,
+        skipping: 4096,
+    };
+    let bytes = include_bytes!("../../fixtures/caffeine-top-up.bin");
+    let value = c::decode_top_up(bytes, limits).unwrap().unwrap();
+    assert_eq!(
+        value.target_balance.unwrap().0.to_string(),
+        "340282366920938463463374607431768211456"
+    );
+    assert_eq!(value.account.unwrap().as_slice(), &[42; 29]);
+    for end in 0..bytes.len() {
+        assert!(c::decode_top_up(&bytes[..end], limits).is_err());
+    }
+    let limits = Limits {
+        bytes: 8192,
+        header: 2048,
+        types: 32,
+        work: 65536,
+        allocation: 65536,
+        vector: 8192,
+        skipping: 65536,
+    };
+    let bytes = include_bytes!("../../fixtures/caffeine-top-up-success.bin");
+    assert!(matches!(
+        c::decode_top_up_result(bytes, limits).unwrap(),
+        c::TopUpResult::Ok(_)
+    ));
+    let mut malformed = bytes.to_vec();
+    *malformed.last_mut().unwrap() = 2;
+    assert!(c::decode_top_up_result(&malformed, limits).is_err());
+    let literal =
+        include_str!("../../../engine-view-consumer/tests/fixtures/top-up-without-cycles.hex")
+            .trim();
+    let bytes = (0..literal.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&literal[i..i + 2], 16).unwrap())
+        .collect::<Vec<_>>();
+    assert!(matches!(
+        c::decode_top_up_result(&bytes, limits).unwrap(),
+        c::TopUpResult::Err(c::TopUpError::TopUpWithoutCycles)
+    ));
+    for end in 0..bytes.len() {
+        assert!(c::decode_top_up_result(&bytes[..end], limits).is_err());
+    }
+
     let callback = Limits {
         bytes: 4096,
         header: 512,

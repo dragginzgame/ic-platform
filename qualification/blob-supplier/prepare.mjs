@@ -15,7 +15,7 @@ const archive=execFileSync('git',['archive',revision],{cwd:source,maxBuffer:64*1
 execFileSync('tar',['-x','-C',out],{input:archive});
 function edit(name,fn){const path=`${out}/${name}`;writeFileSync(path,fn(readFileSync(path,'utf8')))}
 for(const name of ['Cargo.toml','qualification/Cargo.toml'])edit(name,s=>{for(const p of ['ic-platform-types','ic-platform-runtime'])s=s.replace(p+' = { version = ',p+' = { path = "'+root+'/crates/'+p+'", version = ');return s;});
-edit('qualification/Cargo.toml',s=>s.replace('ic-platform = { version = "0.34.6",','ic-platform = { path = "'+root+'/crates/ic-platform", version = "0.34.6",').replace('ic-testkit = { version = "0.106.0",','ic-testkit = { version = "=0.107.4",'));
+edit('qualification/Cargo.toml',s=>s.replace('ic-platform = { version = "0.34.6",','ic-platform = { path = "'+root+'/crates/ic-platform", version = "0.34.6",').replace('ic-testkit = { version = "0.106.0",','ic-testkit = { version = "0.108.0",'));
 edit('qualification/ic-blob-storage-tests/Cargo.toml',s=>s.replace(/^ic-platform-legacy = .*\n/m,'').replace('features = ["ingress-packets"]','features = ["native-signed"]').replace('features = ["held-reply-fixtures"]','features = []'));
 const helper=readFileSync('qualification/blob-supplier/signed-client.rs','utf8');
 edit('qualification/ic-blob-storage-tests/tests/signed.rs',s=>{

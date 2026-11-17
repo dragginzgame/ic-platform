@@ -3,6 +3,17 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.3.5] - 2026-11-17
+
+### ✨ Added
+
+- Add bounded management execution-cycle charge decoding, outer optional top-up
+  argument decoding, and opaque-success/typed-error top-up result classification
+  for [Platform #24](https://github.com/dragginzgame/ic-platform/issues/24). Preserve
+  arbitrary naturals, option distinctions, canonical Principal identity and
+  resource budgets for selected and discarded payloads. These formats establish
+  no authorization, credit or settlement outcome.
+
 ## [0.3.4] - 2026-11-17
 
 ### 🔧 Changed

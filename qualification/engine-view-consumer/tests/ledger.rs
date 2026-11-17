@@ -539,3 +539,104 @@ fn retained_management_requests_match_legacy_bytes() {
     };
     frozen("update", &update.encode(4096).unwrap());
 }
+
+#[derive(CandidType)]
+struct ExecutionCharges {
+    instructions: Nat,
+    other: Vec<bool>,
+}
+#[derive(CandidType)]
+struct Metrics {
+    cycles_consumed: ExecutionCharges,
+    unrelated: String,
+}
+#[test]
+fn execution_charges_keep_arbitrary_naturals_and_bound_skipped_values() {
+    let limits = Limits {
+        bytes: 4096,
+        header: 1024,
+        types: 32,
+        work: 16384,
+        allocation: 16384,
+        vector: 4096,
+        skipping: 16384,
+    };
+    let value = Metrics {
+        cycles_consumed: ExecutionCharges {
+            instructions: "340282366920938463463374607431768211456".parse().unwrap(),
+            other: vec![true, false],
+        },
+        unrelated: "skipped metric".into(),
+    };
+    let bytes = candid::encode_one(value).unwrap();
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../engine-view-wasm/fixtures/management-metrics.bin");
+    if std::env::var_os("REGENERATE_METRICS_CORPUS").is_some() {
+        std::fs::write(&path, &bytes).unwrap();
+    }
+    assert_eq!(std::fs::read(path).unwrap(), bytes);
+    let got = management::decode_canister_metrics(&bytes, limits).unwrap();
+    assert_eq!(
+        got.cycles_consumed.instructions.0.to_string(),
+        "340282366920938463463374607431768211456"
+    );
+    assert!(
+        got.cycles_consumed
+            .instructions
+            .0
+            .to_string()
+            .parse::<u128>()
+            .is_err()
+    );
+    for n in 0..bytes.len() {
+        assert!(management::decode_canister_metrics(&bytes[..n], limits).is_err());
+    }
+    let mut invalid_skipped = bytes.clone();
+    let text = invalid_skipped
+        .windows(b"skipped metric".len())
+        .position(|w| w == b"skipped metric")
+        .unwrap();
+    invalid_skipped[text] = 255;
+    assert!(management::decode_canister_metrics(&invalid_skipped, limits).is_err());
+    let mut trailing = bytes.clone();
+    trailing.push(0);
+    assert!(management::decode_canister_metrics(&trailing, limits).is_err());
+    for dimension in 0..7 {
+        let set = |n| {
+            let mut l = limits;
+            match dimension {
+                0 => l.bytes = n,
+                1 => l.header = n,
+                2 => l.types = n,
+                3 => l.work = n,
+                4 => l.allocation = n,
+                5 => l.vector = n,
+                _ => l.skipping = n,
+            };
+            l
+        };
+        let (mut low, mut high) = (0, 16384);
+        while low < high {
+            let mid = low + (high - low) / 2;
+            if management::decode_canister_metrics(&bytes, set(mid)).is_ok() {
+                high = mid
+            } else {
+                low = mid + 1
+            }
+        }
+        management::decode_canister_metrics(&bytes, set(low)).unwrap();
+        if low > 0 {
+            assert!(management::decode_canister_metrics(&bytes, set(low - 1)).is_err());
+        }
+    }
+    assert!(
+        management::decode_canister_metrics(&candid::encode_args(()).unwrap(), limits).is_err()
+    );
+    assert!(
+        management::decode_canister_metrics(&candid::encode_args((1u64, 2u64)).unwrap(), limits)
+            .is_err()
+    );
+    assert!(
+        management::decode_canister_metrics(&candid::encode_one(1u64).unwrap(), limits).is_err()
+    );
+}
