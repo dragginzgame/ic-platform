@@ -4,6 +4,13 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.17] - 2026-11-17
+
+### 🧪 Testing
+
+- Separate the remaining inline Runtime tests and their reentrancy helper from
+  production source, preserving the existing completion-state coverage.
+
 ## [0.23.16] - 2026-11-17
 
 ### 🔧 Changed

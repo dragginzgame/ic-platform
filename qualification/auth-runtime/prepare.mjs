@@ -24,7 +24,7 @@ for (const name of ['ic-auth-certified-conformance','ic-auth-host-fixture','ic-a
     .replace('["certification-cbor", "ic-protocol-fixtures"]','["ecdsa", "certificate-construction", "certificate-fixture-signing", "canister-signature-authentication"]')
     .replace('["canister-sig-creation", "certification-cbor", "ed25519"]','["certificate-construction", "ed25519"]')
     .replace('["certification-cbor", "canister-sig-creation"]','["certificate-construction", "canister-signature-authentication"]'));
-edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.16",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
+edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.17",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
 edit('qualification/ic-auth-host-fixture/Cargo.toml',s=>s.replace('features = ["cdk"]','features = ["entrypoint-macros"]'));
 edit('qualification/Cargo.toml',s=>s.replace('ic-testkit = "0.106.0"', 'ic-testkit = "0.108.0"'));
 edit('qualification/ic-auth-host-conformance/Cargo.toml', s => s.replace('[dev-dependencies]', '[dev-dependencies]\nic-management-canister-types = "=0.8.0"'));

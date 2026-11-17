@@ -38,7 +38,7 @@ The exploratory call state machine was retired in Runtime 0.23.4. Its separate
 transport/future implementation tested itself and no longer supplied useful
 production regression coverage.
 
-The real CallFuture now uses private `call/state.rs` for waker replacement,
+The real CallFuture now uses private `call/state/mod.rs` for waker replacement,
 completion publication and retirement. Native tests exercise those exact
 functions, checking that Wake/Drop can reenter the completion mutex after it is
 released. They cover replacement, publication, abandonment and cleanup, plus

@@ -1,5 +1,19 @@
 # Initial crates.io deployment
 
+## Runtime test layout release
+
+Select coordinated Runtime/macros/guard 0.23.17 after registry review confirmed
+0.23.16 current and 0.23.17 absent on 2026-11-17. The final inline Runtime test
+and reentrancy helper move into a separate test module; implementation and test
+bodies remain unchanged. The patch identifies changed package contents, with no
+public API or execution-semantic change. Other product groups remain unchanged.
+
+Run the complete local catalog at clean source, deliver main and annotated
+`runtime-v0.23.17`, then publish guard and macros before Runtime. Each package
+requires archive/source admission and independent registry checksum readback.
+Hosted CI remains asynchronous; siblings remain read-only. Existing unrelated
+lockfile supplier updates are preserved separately and excluded from this release.
+
 ## Compatible dependency requirements release
 
 Select Platform 0.34.12, Protocol 0.3.4 and coordinated Runtime/macros/guard

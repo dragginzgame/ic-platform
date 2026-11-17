@@ -800,7 +800,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.16"
+version = "0.23.17"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -822,7 +822,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.16"
+version = "0.23.17"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-runtime-guard",
@@ -832,7 +832,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.16"
+version = "0.23.17"
 dependencies = [
  "toko-tooling",
 ]
