@@ -173,4 +173,5 @@ On 2026-11-17, `make qualify-management-snapshots` passed all 13 native cases,
 strict Clippy/Rustdoc, both dependency graph checks and Wasm replay (SHA-256
 `5301cfabece7eeeddb0371220734365674e8188e4b1d99243103c9a3a6a0e8ce`).
 All 42 Protocol unit tests and all-feature strict Clippy passed as well.
-Protocol 0.3.3 remains a local, unpublished candidate.
+Protocol 0.3.3 is published; see the
+[release and registry evidence](../releases.md#capture-hash-promotion-release).

@@ -16,6 +16,30 @@ the supported publication adapter and independent archive/source readback.
 Hosted CI remains asynchronous. Backup migration and installed acceptance stay
 separate from supplier publication; siblings remain read-only.
 
+Protocol 0.3.3 is now published from clean source
+`64897c9c522ab6730620985b6d58607d9c593903`. Main and annotated
+`protocol-v0.3.3` were pushed atomically. Complete local qualification passed
+once; receipt: `target/release-qualification/1794908767625-441680/receipt.json`.
+The refreshed RustSec database was
+`f1ef79c9372c776559b4d7e8fc4d413af5f807dc`; the root-lock audit found no known
+vulnerabilities. Existing informational unmaintained warnings remain recorded.
+
+Independent registry archive SHA-256:
+`4676f2fabfff6a9aab9d6cccdf2a5870059e88b21345bc1913818be621dc1f34`.
+It matches the sparse index, admitted local archive and exact clean tagged VCS
+source. Extracted-archive all-feature native/Wasm Clippy, native tests and fetched
+source provenance passed before the single upload. Retained dry run:
+`target/publication/check.selection.joMLmr`; upload:
+`target/publication/publish.selection.1UVe6f`; independent readback:
+`target/registry-readback/ic-platform-protocol-0.3.3/verified.json`.
+
+Post-push review confirmed capture-only promotion, pre-allocation byte-shape and
+size admission, unchanged upgrade-status semantics and original-byte regression
+evidence. Hosted [CI](https://github.com/dragginzgame/ic-platform/actions/runs/44059271760)
+and [Types qualification](https://github.com/dragginzgame/ic-platform/actions/runs/44059271726)
+were observed in progress once; neither was awaited or claimed passing. Native
+execution remains Linux evidence; Backup adoption remains separate.
+
 ## Module layout release
 
 Select Platform 0.34.11, Protocol 0.3.2 and coordinated Runtime/macros/guard
