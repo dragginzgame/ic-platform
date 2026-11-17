@@ -406,3 +406,158 @@ fn direct_secp256k1_external_profile_uses_upstream_verifier() {
         .is_err()
     );
 }
+
+#[cfg(feature = "native-signed-secp256k1")]
+#[test]
+fn secp256k1_pem_formats_bounds_and_identity() {
+    use k256::{elliptic_curve::sec1::ToSec1Point, pkcs8::EncodePrivateKey};
+    let key = k256::SecretKey::from_slice(&[7; 32]).unwrap();
+    let sec1 = key.to_sec1_pem(Default::default()).unwrap();
+    let pkcs8 = key.to_pkcs8_pem(Default::default()).unwrap();
+    let a = Secp256k1Identity::from_pem(&sec1, sec1.len()).unwrap();
+    let b = Secp256k1Identity::from_pem(&pkcs8, pkcs8.len()).unwrap();
+    assert_eq!(a.principal(), b.principal());
+    let der = [b"\x30\x56\x30\x10\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x05\x2b\x81\x04\x00\x0a\x03\x42\x00".as_slice(), key.public_key().to_sec1_point(false).as_bytes()].concat();
+    assert_eq!(a.principal(), Principal::self_authenticating(der));
+    assert!(matches!(
+        Secp256k1Identity::from_pem(&sec1, sec1.len() - 1),
+        Err(ReadError::ByteLimit)
+    ));
+    assert!(matches!(
+        Secp256k1Identity::from_pem("invalid", 4096),
+        Err(ReadError::Packet)
+    ));
+    let ed = SigningKey::from_bytes(&[9; 32])
+        .to_pkcs8_pem(Default::default())
+        .unwrap();
+    assert!(matches!(
+        Secp256k1Identity::from_pem(&ed, 4096),
+        Err(ReadError::Packet)
+    ));
+}
+
+#[test]
+fn exact_offline_ed25519_update_and_status() {
+    let identity = identity();
+    offline_signing_contract(
+        identity.principal(),
+        |args, limit| identity.prepare_update(args, limit),
+        |id, effective, expiry, limit| {
+            identity.prepare_request_status(id, effective, expiry, limit)
+        },
+    );
+}
+
+#[cfg(feature = "native-signed-secp256k1")]
+#[test]
+fn exact_offline_secp256k1_update_and_status() {
+    use k256::pkcs8::EncodePrivateKey;
+    let key = k256::SecretKey::from_slice(&[7; 32]).unwrap();
+    let pem = key.to_pkcs8_pem(Default::default()).unwrap();
+    let identity = Secp256k1Identity::from_pem(&pem, 4096).unwrap();
+    offline_signing_contract(
+        identity.principal(),
+        |args, limit| identity.prepare_update(args, limit),
+        |id, effective, expiry, limit| {
+            identity.prepare_request_status(id, effective, expiry, limit)
+        },
+    );
+}
+
+fn offline_signing_contract(
+    principal: Principal,
+    prepare: impl Fn(UpdateArgs<'_>, usize) -> Result<PreparedUpdate, ReadError>,
+    status: impl Fn([u8; 32], Principal, u64, usize) -> Result<PreparedRequestStatus, ReadError>,
+) {
+    let effective = Principal::from_slice(&[1]);
+    let args = UpdateArgs {
+        recipient: Principal::management_canister(),
+        effective,
+        method: "canister_status",
+        arg: b"\x00exact\xff",
+        expiry: 1_234_567_891,
+        nonce: Some(b""),
+    };
+    let update = prepare(args, 4096).unwrap();
+    assert_eq!(update.sender(), principal);
+    assert_eq!(update.expiry(), args.expiry);
+    let packet = ingress::decode_envelope(update.envelope_bytes(), 4096)
+        .unwrap()
+        .value;
+    let Content::Call {
+        nonce,
+        canister_id,
+        method_name,
+        arg,
+        ingress_expiry,
+        ..
+    } = packet.content
+    else {
+        panic!("expected call")
+    };
+    assert_eq!(nonce, Some(vec![]));
+    assert_eq!(canister_id, args.recipient);
+    assert_eq!(method_name, args.method);
+    assert_eq!(arg, args.arg);
+    assert_eq!(ingress_expiry, args.expiry);
+    let length = update.envelope_bytes().len();
+    assert_eq!(
+        prepare(args, length).unwrap().envelope_bytes(),
+        update.envelope_bytes()
+    );
+    assert!(matches!(
+        prepare(args, length - 1),
+        Err(ReadError::ByteLimit)
+    ));
+    let read_expiry = 9_876_543_219;
+    let read = status(*update.request_id(), effective, read_expiry, 4096).unwrap();
+    assert_eq!(read.expiry(), read_expiry);
+    assert_eq!(read.sender(), principal);
+    assert_eq!(read.request_id(), update.request_id());
+    assert_eq!(read.effective_canister(), effective);
+    let packet = ingress::decode_envelope(read.envelope_bytes(), 4096)
+        .unwrap()
+        .value;
+    let Content::ReadState {
+        paths,
+        sender,
+        ingress_expiry,
+    } = packet.content
+    else {
+        panic!("expected read state")
+    };
+    assert_eq!(
+        paths,
+        vec![vec![
+            b"request_status".to_vec(),
+            update.request_id().to_vec()
+        ]]
+    );
+    assert_eq!(sender, principal);
+    assert_eq!(ingress_expiry, read_expiry);
+    PreparedRequestStatus::from_bytes(read.envelope_bytes(), &update, 4096).unwrap();
+    let length = read.envelope_bytes().len();
+    assert_eq!(
+        status(*update.request_id(), effective, read_expiry, length)
+            .unwrap()
+            .envelope_bytes(),
+        read.envelope_bytes()
+    );
+    assert!(matches!(
+        status(*update.request_id(), effective, read_expiry, length - 1),
+        Err(ReadError::ByteLimit)
+    ));
+    let wrong = status([0; 32], effective, read_expiry, 4096).unwrap();
+    assert!(PreparedRequestStatus::from_bytes(wrong.envelope_bytes(), &update, 4096).is_err());
+    let wrong_key = SigningKey::from_bytes(&[8; 32])
+        .to_pkcs8_pem(Default::default())
+        .unwrap();
+    let wrong = Ed25519Identity::from_pem(&wrong_key, 4096)
+        .unwrap()
+        .prepare_request_status(*update.request_id(), effective, read_expiry, 4096)
+        .unwrap();
+    assert!(PreparedRequestStatus::from_bytes(wrong.envelope_bytes(), &update, 4096).is_err());
+    let mut corrupt = read.envelope_bytes().to_vec();
+    corrupt.pop();
+    assert!(PreparedRequestStatus::from_bytes(&corrupt, &update, 4096).is_err());
+}

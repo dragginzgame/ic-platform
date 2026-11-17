@@ -6,7 +6,7 @@ private and outside release groups. Publication covers implemented scopes;
 production migrations and broader design qualification remain separate.
 See the [latest release evidence](releases.md#runtime-test-layout-release).
 
-Qualification selects Testkit 0.108.0 and explicitly names two Platform
+Qualification selects Testkit 0.109.0 and explicitly names two Platform
 roles: `candidate-platform` tests local source, while `published-platform`
 checks the registry verifier. The qualification manifest and lock select their
 versions; equal version numbers do not merge their Cargo source identities. Legacy decoder
@@ -630,3 +630,26 @@ its immutable exact requirement; the current qualification lock still selects
 thiserror 2.0.18. A compatible requirement does not force a lockfile upgrade. Root packaging of other
 crates against that old registry cohort is not evidence for the new selection;
 qualify their archive dependencies when preparing their next delivery.
+
+
+## Testkit 0.109 qualification adoption
+
+The qualification catalog and materialized Auth/Blob manifests select published
+Testkit 0.109.0. Its archive SHA-256 is
+`6405078e5332b34ab898d4c32c41f39b358655bb3d4aae508d3ff17f781cf66c`,
+verified against the registry index. The new held-controller clock-step/error
+surface requires no source changes in these callers; they do not exhaustively
+match `ControlError`. Existing held-reply behavior is qualified through Blob.
+PocketIC client/server remain 16.1.0, and Testkit defaults stay disabled in the
+qualification catalog. Historical fixture provenance remains unchanged.
+This scoped adoption does not select new product dependencies or change the
+pending Platform 0.34.14 publication boundary. Other supplier refreshes are
+deferred to their next dependency-maintenance review.
+
+Focused Linux validation passed affected-package Clippy, actual installed Auth
+and Blob signed/callback/enrollment journeys, signed transport with both identity
+algorithms and post-expiry recovery, and Runtime raw system operations. Root
+qualification and both materialized consumer locks resolve exactly Testkit
+0.109.0. Logs: `target/testkit109-consumers.log`, `target/testkit109-signed.log`
+and `target/testkit109-runtime.log`. These are local qualification results;
+publication and new macOS evidence remain separate.

@@ -191,3 +191,118 @@ inferred. These results close the remaining Blob acceptance for Platform #17 and
 specified ICP envelopes; full Canic application delivery remains its own work.
 Backup's snapshot/recovery obligations in #11/#12 are not closed by Blob evidence.
 No sibling checkout was modified or tests executed there during this review.
+
+## Secp256k1 signed queries — issue #28
+
+The compatible pending Platform 0.34.14 slice extends the existing
+`native-signed-secp256k1` feature with `Secp256k1Identity::from_pem` and
+`ReadClient::signed_query_secp256k1`. Input PEM bytes have an inclusive caller
+limit; upstream K256 accepts SEC1 and PKCS#8, validates curve/key material and
+owns secret-key storage. K256 0.14.0 and elliptic-curve 0.14.3 are unchanged
+registry suppliers (Apache-2.0 OR MIT); only their upstream PEM feature is added.
+The existing crypto-bigint 0.7.11 security floor remains selected. No cryptographic
+algorithm or Agent implementation is copied.
+
+Identity uses the IC uncompressed secp256k1 SPKI representation and canonical
+self-authenticating Principal. Signing uses K256’s SHA-256 ECDSA operation on the
+original request-ID signable bytes, emitting the fixed-width signature. Ed25519
+and secp256k1 queries share one private request/envelope builder and the existing
+`query_content` authentication owner. Both retain explicit expiry, configured
+HTTP timeout and message limits, certificate/delegation time windows, node-key
+and routing authority, and request-bound response signatures. There is no
+anonymous fallback. Dropping the future retains the existing cancellation behavior.
+
+Consumer composition:
+
+```rust,ignore
+let identity = Secp256k1Identity::from_pem(&pem, 4096)?;
+let reply = tokio::time::timeout(
+    whole_operation_timeout,
+    client.signed_query_secp256k1(
+        &identity, canister, method, &arguments, expiry_ns, time_policy,
+    ),
+).await??;
+```
+
+Enable `native-signed-secp256k1`; import both types from `ic_platform::native`.
+The consumer still admits the endpoint, explicit trust root/root-subnet binding,
+application authorization and whole-operation deadline. Mainnet trust and explicit
+loopback-only development bootstrap remain IC DB decisions. Supplier tests do not
+claim IC DB/Canic migration, application authorization or unchanged backing proof.
+
+Unit coverage checks SEC1/PKCS#8 principal equivalence, exact/over PEM bounds and
+malformed/wrong-algorithm refusal, alongside existing request/response signature,
+authority, freshness and resource regressions. The installed signed fixture adds
+secp256k1 echo and caller-identity queries on both direct-root and delegated
+subnets; the returned caller must equal the explicit key principal and differ
+from anonymous. Reproduce with the existing `qualify-native-signed` target.
+Publication and actual IC DB adoption remain separate from this local slice.
+
+Local Linux checks passed: 11 native unit tests (including PEM admission and
+shared response-authentication refusals), five HTTP transport/recovery regressions,
+product all-feature and installed-fixture Clippy, native-signed-secp256k1 Rustdoc,
+and formatting. Installed direct/delegated echo and exact caller checks passed;
+log: `target/issue28-installed.log`. The HTTP fixture required loopback access;
+its initial sandbox-denied attempt is not a product failure. These checks use
+local source with the pre-existing supplier lock updates retained, not a published
+0.34.14 archive or a new macOS run.
+
+## Exact offline signer composition — issue #29
+
+Both explicit identity types now provide:
+
+- `prepare_update(UpdateArgs, maximum_bytes) -> PreparedUpdate`.
+- `prepare_request_status(request_id, effective, expiry_ns, maximum_bytes) -> PreparedRequestStatus`.
+
+Use `native-signed` for Ed25519 PKCS#8 PEM and `native-signed-secp256k1` for
+secp256k1 SEC1/PKCS#8 PEM. No other identity algorithm, encrypted identity format,
+delegation chain, key discovery or credential prompt is implemented. Tooling owns
+provider selection/unlocking and must preserve the operator’s actual principal;
+Canic and Backup retain approval, spending, dispatch and recovery policies.
+
+```rust,ignore
+let identity = Secp256k1Identity::from_pem(&explicit_pem, pem_byte_limit)?;
+let update = identity.prepare_update(update_args, envelope_byte_limit)?;
+// Persist/return exact bytes and public binding metadata for caller admission.
+let bytes = update.envelope_bytes();
+let status = identity.prepare_request_status(
+    *update.request_id(), update.effective_canister(), exact_status_expiry_ns,
+    envelope_byte_limit,
+)?;
+let read_bytes = status.envelope_bytes();
+```
+
+Status preparation also works from an original 32-byte request ID without the
+original envelope. The caller admits that ID and effective routing target.
+`PreparedRequestStatus` exposes `request_id`, `sender`, `effective_canister`,
+`expiry` and `envelope_bytes`. Its envelope contains exactly
+`[[b"request_status", original_request_id]]`; it adds no `time` path.
+The effective target is routing metadata, not part of signed read-state content.
+Preparation preserves absolute nanosecond expiry without consulting a clock,
+rounding, network operations, renewal or dispatch permission. Complete output is
+bounded by the existing counting serializer before allocation. Update fields
+retain their pre-copy aggregate bound, recipient/effective distinction and nonce
+absence versus empty presence. The existing strict signature and packet admission
+owners verify the constructed bytes; no separate CBOR or cryptography is added.
+
+Ed25519’s existing `prepare_update` and HTTP `observe_request` remain compatible;
+the latter retains its existing two-path query including `time`. The new offline
+status operation is deliberately exact-path. `observe_prepared_request` rechecks
+original-update sender/ID/routing bindings and submits only the separately admitted
+read. Status admission cannot establish that an update was approved or executed.
+
+Focused tests cover both algorithms, exact non-minute-aligned update/read expiry,
+nonce and method/argument fidelity, single-path reads, signature admission,
+wrong key/request binding, malformed bytes and exact/one-under envelope ceilings.
+Existing status refusal tests retain extra-path and signature coverage. Installed
+qualification separately dispatches each algorithm’s update, waits beyond its
+original expiry, then prepares and submits only a new exact-path status envelope;
+retained update bytes remain unchanged. Both direct-root and delegated subnets
+must return the original result. This is supplier proof, not completion of Tooling’s
+provider lifecycle or Canic/Backup adoption. Publication remains separate.
+
+Local Linux validation passed 13 native unit cases, strict all-feature and
+Ed25519-only Clippy, installed-fixture Clippy, Rustdoc and formatting. Installed
+post-expiry original-result lookup passed for both algorithms on both subnet
+profiles; retained log: `target/issue29-installed.log`. No new macOS execution,
+registry publication, encrypted-provider access or downstream adoption is claimed.

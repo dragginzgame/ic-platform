@@ -21,7 +21,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
  (import "ic0" "msg_reply" (func $reply))
  (import "ic0" "msg_arg_data_size" (func $size (result i32)))
  (import "ic0" "msg_arg_data_copy" (func $copy (param i32 i32 i32)))
+ (import "ic0" "msg_caller_size" (func $caller_size (result i32)))
+ (import "ic0" "msg_caller_copy" (func $caller_copy (param i32 i32 i32)))
  (memory (export "memory") 1)
+ (func (export "canister_query caller") (local $n i32) (local.set $n (call $caller_size)) (call $caller_copy (i32.const 0)(i32.const 0)(local.get $n)) (call $append (i32.const 0)(local.get $n))(call $reply))
  (func $echo (local $n i32) (local.set $n (call $size)) (call $copy (i32.const 0)(i32.const 0)(local.get $n)) (call $append (i32.const 0)(local.get $n))(call $reply))
  (export "canister_update echo" (func $echo)) (func (export "canister_query read_echo") (call $echo)))"#,
     )?;
@@ -55,6 +58,49 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
    }).await??;
    assert_eq!(observed.status(),&RequestStatus::Replied(b"exact original reply".to_vec()));assert_eq!(observed.request_id(),&id);assert_eq!(recovered.envelope_bytes(),bytes);
    assert_eq!(client.signed_query(&identity,target,"read_echo",b"signed query",now()+60_000_000_000,policy()).await?,b"signed query");
+   #[cfg(feature = "native-signed-secp256k1")]
+   {
+    let secp=candidate_platform::native::Secp256k1Identity::from_pem("-----BEGIN EC PRIVATE KEY-----\nMC4CAQEEIAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHoAcGBSuBBAAK\n-----END EC PRIVATE KEY-----\n",4096)?;
+    let caller=tokio::time::timeout(Duration::from_secs(20),client.signed_query_secp256k1(&secp,target,"caller",&[],now()+60_000_000_000,policy())).await??;
+    assert_eq!(caller,secp.principal().as_slice());
+    assert_ne!(caller,Principal::anonymous().as_slice());
+    assert_eq!(client.signed_query_secp256k1(&secp,target,"read_echo",b"secp256k1",now()+60_000_000_000,policy()).await?,b"secp256k1");
+   }
+   // Separately prepare status authorization after the original update expires.
+   // Neither algorithm may renew or resubmit the retained update.
+   for algorithm in 0..2 {
+    #[cfg(not(feature = "native-signed-secp256k1"))]
+    if algorithm == 1 { continue; }
+    #[cfg(feature = "native-signed-secp256k1")]
+    let secp=candidate_platform::native::Secp256k1Identity::from_pem("-----BEGIN EC PRIVATE KEY-----\nMC4CAQEEIAcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHoAcGBSuBBAAK\n-----END EC PRIVATE KEY-----\n",4096)?;
+    let original_expiry=now()+3_000_000_123;
+    let args=UpdateArgs{recipient:target,effective:target,method:"echo",arg:b"offline original",expiry:original_expiry,nonce:Some(b"offline-status")};
+    let original=if algorithm==0 { identity.prepare_update(args,4096)? } else {
+     #[cfg(feature = "native-signed-secp256k1")]
+     {secp.prepare_update(args,4096)?}
+     #[cfg(not(feature = "native-signed-secp256k1"))]
+     {unreachable!()}
+    };
+    let retained=original.envelope_bytes().to_vec();
+    client.dispatch(&original,policy()).await?;
+    tokio::time::sleep(Duration::from_nanos(original_expiry.saturating_sub(now())+100_000_000)).await;
+    assert!(now()>original.expiry());
+    let expiry=now()+60_000_000_123;
+    let status=if algorithm==0 {identity.prepare_request_status(*original.request_id(),target,expiry,4096)?} else {
+     #[cfg(feature = "native-signed-secp256k1")]
+     {secp.prepare_request_status(*original.request_id(),target,expiry,4096)?}
+     #[cfg(not(feature = "native-signed-secp256k1"))]
+     {unreachable!()}
+    };
+    assert_eq!(status.expiry(),expiry);
+    let decoded=candidate_platform::ingress::decode_envelope(status.envelope_bytes(),4096)?.value;
+    let candidate_platform::ingress::Content::ReadState{paths,..}=decoded.content else {panic!("not read state")};
+    assert_eq!(paths,vec![vec![b"request_status".to_vec(),original.request_id().to_vec()]]);
+    let observation=client.observe_prepared_request(&original,&status,policy()).await?;
+    assert_eq!(observation.status(),&RequestStatus::Replied(b"offline original".to_vec()));
+    assert_eq!(original.envelope_bytes(),retained);
+    println!("{target}: algorithm {algorithm} exact offline status lookup after update expiry passed");
+   }
    let metadata=client.read_canister(target,now()+60_000_000_000,policy(),10).await?;
    assert_eq!(metadata.canister(),target);assert_eq!(metadata.controllers(),[identity.principal()]);
    let expected=pic.get_subnet(candid::Principal::from_slice(target.as_slice())).await.ok_or("missing subnet")?;

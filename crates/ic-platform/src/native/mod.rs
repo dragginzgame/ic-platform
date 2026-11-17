@@ -1,5 +1,6 @@
 //! IC HTTP transport with explicit trust, limits and time. Anonymous reads are
 //! selected by `native-read`; `native-signed` adds explicit Ed25519 operations.
+//! `native-signed-secp256k1` also supplies explicit secp256k1 query identities.
 //! No Agent, root discovery, cache, retry or polling is selected.
 //! Dropping an operation drops its HTTP future; callers own whole-operation deadlines.
 use crate::certificate::{
@@ -14,6 +15,8 @@ pub use canister::{CanisterObservation, CanisterReadError};
 mod query;
 #[cfg(feature = "native-signed")]
 mod signed;
+#[cfg(feature = "native-signed-secp256k1")]
+pub use signed::Secp256k1Identity;
 #[cfg(feature = "native-signed")]
 pub use signed::{
     AuthenticationProfile, Dispatch, Ed25519Identity, PreparedRequestStatus, PreparedUpdate,

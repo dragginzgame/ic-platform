@@ -20,7 +20,7 @@ license-file = "../LICENSE.md"
 [workspace.dependencies]
 base64 = "0.23.1"
 candid = "0.10.40"
-candidate-platform = { package = "ic-platform", path = "../crates/ic-platform", version = "=0.34.13", default-features = false }
+candidate-platform = { package = "ic-platform", path = "../crates/ic-platform", version = "=0.34.14", default-features = false }
 candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.17", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "../crates/ic-platform-types", version = "0.21.2", default-features = false }
 dhat = "0.3.3"
@@ -30,7 +30,7 @@ ic-host-process = "0.80.3"
 ic-management-canister-types = "0.8.0"
 ic-platform-protocol = { path = "../crates/ic-platform-protocol", default-features = false, features = ["cloud-engine-response"] }
 ic-platform-types = { version = "0.21.2", default-features = false }
-ic-testkit = { version = "0.108.0", default-features = false }
+ic-testkit = { version = "0.109.0", default-features = false }
 published-platform = { package = "ic-platform", version = "0.34.12", default-features = false }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_cbor = "0.11.2"

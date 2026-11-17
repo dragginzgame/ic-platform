@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform"
-version = "0.34.13"
+version = "0.34.14"
 description = "Explicit IC certificate and authentication boundaries"
 edition.workspace = true
 rust-version.workspace = true
@@ -26,7 +26,7 @@ ingress-packets = [
     "dep:ic-transport-types",
     "dep:thiserror",
 ]
-native-signed-secp256k1 = ["native-signed", "ecdsa"]
+native-signed-secp256k1 = ["native-signed", "ecdsa", "k256/pem"]
 native-signed = [
     "native-read",
     "ingress-packets",

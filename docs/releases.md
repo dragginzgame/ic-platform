@@ -1,5 +1,21 @@
 # Initial crates.io deployment
 
+## Exact offline signing and secp256k1 query release
+
+Select Platform 0.34.14 for issues #28 and #29: explicit secp256k1 signed queries
+and exact offline update/status signing for both Ed25519 and secp256k1. Defaults
+remain empty; caller trust, expiry, approval and provider custody remain explicit.
+Testkit 0.109.0 is selected throughout qualification and materialized Auth/Blob
+fixtures. Existing locked Host Process 0.80.5, registry Platform 0.34.13 and
+zeroize 1.9.2 selections are included in the qualified source. Other product
+groups retain their versions.
+
+Registry review confirmed 0.34.13 current and 0.34.14 absent on 2026-11-17.
+Run the complete clean-source catalog with pinned Query/Blob qualification
+copies, then deliver main and annotated `platform-v0.34.14`. Publish only Platform
+through the supported adapter and independently verify its registry archive.
+Hosted CI remains asynchronous; Tooling/IC DB/Canic adoption stays separate.
+
 ## Runtime test layout release
 
 Select coordinated Runtime/macros/guard 0.23.17 after registry review confirmed

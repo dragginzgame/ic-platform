@@ -3,6 +3,25 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.14] - 2026-11-17
+
+### ➕ Added
+
+- Add exact offline update and single-path original-request status signing for
+  Ed25519 and secp256k1 for [#29 — Expose exact offline update and original-request status signing for external signer composition](https://github.com/dragginzgame/ic-platform/issues/29).
+  Preserve nanosecond expiry, original request IDs, sender identity and bounded
+  retained envelopes; key discovery and signer process policy stay with Tooling.
+
+- Supply bounded SEC1/PKCS#8 secp256k1 identities and authenticated signed queries
+  for [#28 — Supply bounded secp256k1 signed queries for IC DB migration](https://github.com/dragginzgame/ic-platform/issues/28).
+  Reuse upstream K256 signing and the existing certified node-key, response-signature,
+  time and resource checks. Consumer adoption remains separate.
+
+### 🧪 Testing
+
+- Adopt Testkit 0.109.0 throughout qualification, including materialized Auth and
+  Blob consumers, preserving the PocketIC 16.1.0 server selection.
+
 ## [0.34.13] - 2026-11-17
 
 ### ✨ Added

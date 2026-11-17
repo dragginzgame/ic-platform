@@ -1,5 +1,42 @@
 # Query hard-cut qualification
 
+## Actual Query delivery reconciled — 17 November 2026
+
+[Platform #4 — Complete Query’s hard cut from legacy Platform](https://github.com/dragginzgame/ic-platform/issues/4)
+is satisfied by the delivered supplier and actual consumer evidence. Read-only
+inspection of Query commit `d3d9ab97ef70e91c1a8c14adebbc94580fbdaf8e` confirms one
+registry Platform 0.34.13 / Protocol 0.3.5 / Types 0.21.2 cohort, without Agent,
+legacy Platform, legacy Types or private schema fixtures. Query has no direct
+Candid dependency; Platform’s upstream `ic-transport-types` retains its transitive
+Candid dependency. This distinction preserves the actual transport boundary.
+
+Published topology 0.110.1 and CLI 0.105.17 archives identify source commits
+`c6a50b70720dc5c04fea62a5e957017ae9a9567e` and
+`54f60a9b99e506b0fa1c59e9a5df988db259e88c`, respectively. Query’s
+[committed migration notes](https://github.com/dragginzgame/ic-query/blob/d3d9ab97ef70e91c1a8c14adebbc94580fbdaf8e/releases/topology/CHANGELOG.md)
+record the incompatible 0.108.0 identity/error migration, Canic rebuild/match
+updates, unchanged schema-1 reports and no retained-evidence reset.
+
+[Query CI run 44111256614](https://github.com/dragginzgame/ic-query/actions/runs/44111256614)
+passed at that inspected commit on Linux x86-64, macOS ARM64 and macOS Intel.
+Its native jobs execute strict Clippy, Rustdoc, tests and umbrella qualification.
+The [committed setup evidence](https://github.com/dragginzgame/ic-query/blob/d3d9ab97ef70e91c1a8c14adebbc94580fbdaf8e/docs/development/setup.md)
+also records registry-only package qualification and bounded live authenticated
+placement/progress observations. Offline CI does not constitute new live reads.
+
+A fresh audit of that committed Query lock found zero known vulnerabilities
+against RustSec `233155b4025b854c68a4b199c0e32d7fd53291a2`.
+Lock SHA-256: `1edfe39a9b5ddf46e77ded4dc15d7d41c62c4b19c008c3d4da34ce52b3910c6f`.
+Retained audit and downloaded archives: `target/query-issue-4/`.
+The previous Runtime release’s complete supplier catalog also passed at
+`4ed20435b632c108b21a08d3a4855b9c540b751a`; see [release evidence](../releases.md#runtime-test-layout-release).
+
+Query’s unrelated working-tree tooling changes were excluded from this review;
+no sibling files changed. The historical limitations below describe their dated
+runs and are superseded for actual Query delivery by this section. Retained Agent
+identity/derivation remediation belongs to [#27](https://github.com/dragginzgame/ic-platform/issues/27);
+IC DB’s signed-query request belongs to [#28](https://github.com/dragginzgame/ic-platform/issues/28).
+
 ## Portable registry-backed fixtures — 16 November 2026
 
 The [v1 corpus](../../qualification/query-hard-cut/portable/README.md) replaces the
@@ -145,7 +182,7 @@ or evidence that every design gate is complete.
 Fresh RustSec review used revision
 `02e2517f457a359fc6d3440ea4560c8ea188fee8`. Root, qualification and migrated Query
 locks had no known vulnerabilities. Existing unmaintained-package warnings are
-not suppressed. This does not clear issue #4's separate Agent signing/derivation
+not suppressed. This does not clear issue #27's separate Agent signing/derivation
 obligations: current ic-agent 0.49.3 still requires elliptic-curve 0.13,
 k256 0.13.4 and p256 0.13.2; ic-secp256k1 0.3.0 still requires k256 0.13.4.
 Those upstream paths remain blocked on a compatible correction. No fork,

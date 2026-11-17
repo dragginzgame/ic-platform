@@ -1,5 +1,5 @@
 //! Explicit Ed25519 identity and original-request transport, with optional
-//! externally signed direct secp256k1 and explicit anonymous admission. No discovery,
+//! secp256k1 queries, externally signed updates and explicit anonymous admission. No discovery,
 //! polling, renewal, redirect, proxy or retry is performed by these operations.
 use super::{ReadClient, ReadError, TimePolicy, authenticate_certificate};
 use crate::{
@@ -27,52 +27,84 @@ pub struct UpdateArgs<'a> {
     /// Optional nonce, preserving absence versus present empty bytes.
     pub nonce: Option<&'a [u8]>,
 }
-/// Caller-supplied Ed25519 key. It is never discovered or loaded from disk here.
-/// Secret storage is zeroized by the upstream signing key on drop.
-pub struct Ed25519Identity(SigningKey);
-impl Ed25519Identity {
-    /// Parse an explicit PKCS#8 Ed25519 PEM (BasicIdentity format), offline.
+/// Explicit secp256k1 identity for authenticated native queries.
+/// Parsing and signing use upstream RustCrypto; no key discovery is performed.
+#[cfg(feature = "native-signed-secp256k1")]
+pub struct Secp256k1Identity(k256::ecdsa::SigningKey);
+#[cfg(feature = "native-signed-secp256k1")]
+impl Secp256k1Identity {
+    /// Parse an explicit SEC1 or PKCS#8 secp256k1 PEM offline.
     /// # Errors
-    /// Refuses PEM exceeding the inclusive bound, another algorithm or invalid key.
+    /// Refuses input above the inclusive byte bound, malformed keys or other curves.
     pub fn from_pem(pem: &str, maximum_bytes: usize) -> Result<Self, ReadError> {
         if pem.len() > maximum_bytes {
             return Err(ReadError::ByteLimit);
         }
-        SigningKey::from_pkcs8_pem(pem)
-            .map(Self)
-            .map_err(|_| ReadError::Packet)
+        let key = k256::SecretKey::from_pem(pem).map_err(|_| ReadError::Packet)?;
+        Ok(Self(key.into()))
     }
     fn public_key(&self) -> Vec<u8> {
-        [
-            b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00".as_slice(),
-            &self.0.verifying_key().to_bytes(),
-        ]
-        .concat()
+        // IC self-authenticating secp256k1 identities use uncompressed SPKI.
+        [b"\x30\x56\x30\x10\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x05\x2b\x81\x04\x00\x0a\x03\x42\x00".as_slice(),
+         self.0.verifying_key().to_sec1_point(false).as_bytes()].concat()
     }
-    /// Offline canonical self-authenticating identity.
+    /// Canonical self-authenticating principal from the uncompressed public key.
     #[must_use]
     pub fn principal(&self) -> Principal {
         Principal::self_authenticating(self.public_key())
     }
+    /// Prepare an exact signed update offline, preserving routing and nonce.
+    /// # Errors
+    /// Refuses oversized fields/envelope or packet/signing admission failure.
+    pub fn prepare_update(
+        &self,
+        args: UpdateArgs<'_>,
+        maximum_bytes: usize,
+    ) -> Result<PreparedUpdate, ReadError> {
+        DirectSigner::Secp256k1(self).prepare_update(args, maximum_bytes)
+    }
+    /// Prepare exactly one original-request status path offline, with exact expiry.
+    /// The caller admits the original request ID and effective routing target.
+    /// # Errors
+    /// Refuses an envelope above the inclusive bound or signing/admission failure.
+    pub fn prepare_request_status(
+        &self,
+        request_id: [u8; 32],
+        effective: Principal,
+        expiry: u64,
+        maximum_bytes: usize,
+    ) -> Result<PreparedRequestStatus, ReadError> {
+        DirectSigner::Secp256k1(self).prepare_request_status(
+            request_id,
+            effective,
+            expiry,
+            maximum_bytes,
+        )
+    }
+}
+
+enum DirectSigner<'a> {
+    Ed25519(&'a Ed25519Identity),
+    #[cfg(feature = "native-signed-secp256k1")]
+    Secp256k1(&'a Secp256k1Identity),
+}
+impl DirectSigner<'_> {
+    fn principal(&self) -> Principal {
+        Principal::self_authenticating(self.public_key())
+    }
     fn envelope(&self, content: Content, maximum: usize) -> Result<Vec<u8>, ReadError> {
-        let signature = self
-            .0
-            .sign(&content.signable().map_err(|_| ReadError::Packet)?);
+        let signature = self.sign(&content.signable().map_err(|_| ReadError::Packet)?);
         encode(
             &Envelope {
                 content,
                 sender_pubkey: Some(self.public_key()),
-                sender_sig: Some(signature.to_bytes().to_vec()),
+                sender_sig: Some(signature),
                 sender_delegation: None,
             },
             maximum,
         )
     }
-    /// Prepare an exact signed update offline, with explicit expiry and nonce.
-    /// Recipient and effective routing target are intentionally distinct.
-    /// # Errors
-    /// Refuses oversized fields/envelope or packet/signing admission failure.
-    pub fn prepare_update(
+    fn prepare_update(
         &self,
         args: UpdateArgs<'_>,
         maximum_bytes: usize,
@@ -106,6 +138,111 @@ impl Ed25519Identity {
             maximum_bytes,
         )?;
         PreparedUpdate::from_bytes(&bytes, effective, maximum_bytes)
+    }
+    fn prepare_request_status(
+        &self,
+        id: [u8; 32],
+        effective: Principal,
+        expiry: u64,
+        maximum: usize,
+    ) -> Result<PreparedRequestStatus, ReadError> {
+        let sender = self.principal();
+        let bytes = self.envelope(
+            Content::ReadState {
+                sender,
+                ingress_expiry: expiry,
+                paths: vec![vec![b"request_status".to_vec(), id.to_vec()]],
+            },
+            maximum,
+        )?;
+        // Admit through the same strict packet and signature owner as retained reads.
+        PreparedRequestStatus::admit_binding(
+            &bytes,
+            id,
+            sender,
+            effective,
+            maximum,
+            AuthenticationProfile::DirectSignature,
+        )
+    }
+
+    fn public_key(&self) -> Vec<u8> {
+        match self {
+            Self::Ed25519(key) => key.public_key(),
+            #[cfg(feature = "native-signed-secp256k1")]
+            Self::Secp256k1(key) => key.public_key(),
+        }
+    }
+    fn sign(&self, message: &[u8]) -> Vec<u8> {
+        match self {
+            Self::Ed25519(key) => key.0.sign(message).to_bytes().to_vec(),
+            #[cfg(feature = "native-signed-secp256k1")]
+            Self::Secp256k1(key) => {
+                let signature: k256::ecdsa::Signature = key.0.sign(message);
+                signature.to_bytes().to_vec()
+            }
+        }
+    }
+}
+
+/// Caller-supplied Ed25519 key. It is never discovered or loaded from disk here.
+/// Secret storage is zeroized by the upstream signing key on drop.
+pub struct Ed25519Identity(SigningKey);
+impl Ed25519Identity {
+    /// Parse an explicit PKCS#8 Ed25519 PEM (BasicIdentity format), offline.
+    /// # Errors
+    /// Refuses PEM exceeding the inclusive bound, another algorithm or invalid key.
+    pub fn from_pem(pem: &str, maximum_bytes: usize) -> Result<Self, ReadError> {
+        if pem.len() > maximum_bytes {
+            return Err(ReadError::ByteLimit);
+        }
+        SigningKey::from_pkcs8_pem(pem)
+            .map(Self)
+            .map_err(|_| ReadError::Packet)
+    }
+    fn public_key(&self) -> Vec<u8> {
+        [
+            b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00".as_slice(),
+            &self.0.verifying_key().to_bytes(),
+        ]
+        .concat()
+    }
+    /// Offline canonical self-authenticating identity.
+    #[must_use]
+    pub fn principal(&self) -> Principal {
+        Principal::self_authenticating(self.public_key())
+    }
+    fn envelope(&self, content: Content, maximum: usize) -> Result<Vec<u8>, ReadError> {
+        DirectSigner::Ed25519(self).envelope(content, maximum)
+    }
+    /// Prepare an exact signed update offline, with explicit expiry and nonce.
+    /// Recipient and effective routing target are intentionally distinct.
+    /// # Errors
+    /// Refuses oversized fields/envelope or packet/signing admission failure.
+    pub fn prepare_update(
+        &self,
+        args: UpdateArgs<'_>,
+        maximum_bytes: usize,
+    ) -> Result<PreparedUpdate, ReadError> {
+        DirectSigner::Ed25519(self).prepare_update(args, maximum_bytes)
+    }
+    /// Prepare exactly one original-request status path offline, with exact expiry.
+    /// The caller admits the original request ID and effective routing target.
+    /// # Errors
+    /// Refuses an envelope above the inclusive bound or signing/admission failure.
+    pub fn prepare_request_status(
+        &self,
+        request_id: [u8; 32],
+        effective: Principal,
+        expiry: u64,
+        maximum_bytes: usize,
+    ) -> Result<PreparedRequestStatus, ReadError> {
+        DirectSigner::Ed25519(self).prepare_request_status(
+            request_id,
+            effective,
+            expiry,
+            maximum_bytes,
+        )
     }
 }
 // Packet construction has one bounded serializer shared with ingress admission.
@@ -349,6 +486,23 @@ impl PreparedRequestStatus {
         if authentication != update.authentication {
             return Err(ReadError::Packet);
         }
+        Self::admit_binding(
+            bytes,
+            update.id,
+            update.sender,
+            update.effective,
+            maximum_bytes,
+            authentication,
+        )
+    }
+    fn admit_binding(
+        bytes: &[u8],
+        id: [u8; 32],
+        expected_sender: Principal,
+        effective: Principal,
+        maximum_bytes: usize,
+        authentication: AuthenticationProfile,
+    ) -> Result<Self, ReadError> {
         let envelope = ingress::decode_envelope(bytes, maximum_bytes)
             .map_err(|_| ReadError::Packet)?
             .value;
@@ -360,22 +514,37 @@ impl PreparedRequestStatus {
         else {
             return Err(ReadError::Packet);
         };
-        if sender != update.sender
+        if sender != expected_sender
             || paths.len() != 1
             || paths[0].len() != 2
             || paths[0][0] != b"request_status"
-            || paths[0][1] != update.id
+            || paths[0][1] != id
         {
             return Err(ReadError::Packet);
         }
         authentication.verify(&envelope, sender)?;
         Ok(Self {
             bytes: bytes.to_vec(),
-            id: update.id,
+            id,
             sender,
-            effective: update.effective,
+            effective,
             expiry: ingress_expiry,
         })
+    }
+    /// Original request ID selected by this authorization.
+    #[must_use]
+    pub const fn request_id(&self) -> &[u8; 32] {
+        &self.id
+    }
+    /// Sender whose direct key signed this authorization.
+    #[must_use]
+    pub const fn sender(&self) -> Principal {
+        self.sender
+    }
+    /// Caller-selected HTTP routing target; not part of the signed read content.
+    #[must_use]
+    pub const fn effective_canister(&self) -> Principal {
+        self.effective
     }
     /// Exact retained signed read-state envelope, without re-encoding.
     #[must_use]
@@ -654,6 +823,50 @@ impl ReadClient {
         expiry: u64,
         time: TimePolicy,
     ) -> Result<Vec<u8>, ReadError> {
+        self.signed_query_with(
+            DirectSigner::Ed25519(identity),
+            canister,
+            method,
+            args,
+            expiry,
+            time,
+        )
+        .await
+    }
+    /// Execute one secp256k1-signed query with the same certified node authority,
+    /// response-signature, time and resource checks as `signed_query`.
+    /// Caller supplies expiry and bounds the whole operation; no anonymous fallback.
+    /// # Errors
+    /// Refuses oversized requests, transport, node authority/signature/time failures.
+    #[cfg(feature = "native-signed-secp256k1")]
+    pub async fn signed_query_secp256k1(
+        &self,
+        identity: &Secp256k1Identity,
+        canister: Principal,
+        method: &str,
+        args: &[u8],
+        expiry: u64,
+        time: TimePolicy,
+    ) -> Result<Vec<u8>, ReadError> {
+        self.signed_query_with(
+            DirectSigner::Secp256k1(identity),
+            canister,
+            method,
+            args,
+            expiry,
+            time,
+        )
+        .await
+    }
+    async fn signed_query_with(
+        &self,
+        identity: DirectSigner<'_>,
+        canister: Principal,
+        method: &str,
+        args: &[u8],
+        expiry: u64,
+        time: TimePolicy,
+    ) -> Result<Vec<u8>, ReadError> {
         if args
             .len()
             .checked_add(method.len())
@@ -662,8 +875,7 @@ impl ReadClient {
             return Err(ReadError::ByteLimit);
         }
         let content = ic_transport_types::EnvelopeContent::Query {
-            sender: identity
-                .principal()
+            sender: Principal::self_authenticating(identity.public_key())
                 .to_string()
                 .parse()
                 .map_err(|_| ReadError::Packet)?,
@@ -681,7 +893,7 @@ impl ReadClient {
         let envelope = ic_transport_types::Envelope {
             content: std::borrow::Cow::Borrowed(&content),
             sender_pubkey: Some(identity.public_key()),
-            sender_sig: Some(identity.0.sign(&id.signable()).to_bytes().to_vec()),
+            sender_sig: Some(identity.sign(&id.signable())),
             sender_delegation: None,
         };
         self.query_content(
