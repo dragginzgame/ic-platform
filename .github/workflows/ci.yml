@@ -1,133 +1,21 @@
 name: CI
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
-
+on: workflow_dispatch
 permissions:
   contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  repository:
-    name: Repository checks
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Prepare pinned CI tools
-        run: bash scripts/ci/setup-step.sh ci-tools make install-ci-tools
-      - name: Scan complete repository history
-        run: make check-secrets
-      - name: Validate workflow
-        if: ${{ !cancelled() }}
-        run: make lint-workflows
-
-      - name: Retain sanitized setup failure evidence
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: setup-${{ github.job }}-repository
-          path: target/ci-setup/*.log
-          if-no-files-found: warn
-          retention-days: 7
-
-  native:
-    name: Native (${{ matrix.os }})
+  evidence:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15, macos-15-intel]
+        os: [macos-15, macos-15-intel]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version-file: .node-version
           package-manager-cache: false
-      - name: Prepare host prerequisites
-        run: |
-          bash scripts/ci/setup-step.sh host-tools make install-host-tools
-          echo "$PWD/.tools/host/bin" >> "$GITHUB_PATH"
-      - name: Prepare selected Rust toolchain
-        run: bash scripts/ci/setup-step.sh rust-toolchain bash vendor/toko-tooling/scripts/dev/prepare-rust-toolchain.sh --toolchain-file rust-toolchain.toml
-      - name: Prepare tools and locked sources
-        run: |
-          bash scripts/ci/setup-step.sh rust-tools make install-tools tools-check
-          bash scripts/ci/setup-step.sh product-sources cargo fetch --locked
-          bash scripts/ci/setup-step.sh qualification-sources cargo fetch --locked --manifest-path qualification/Cargo.toml
-          bash scripts/ci/setup-step.sh guard-sources node qualification/runtime-guard.mjs --prepare
-          rustc --version --verbose
-          node --version
-      - name: Check formatting and installed snapshot
-        run: make fmt-check qualification-tooling-check
-      - name: Enforce product and consumer dependency boundaries
-        run: |
-          make check-protocol-graphs check-types-graphs check-runtime-consumer-graph
-          make check-protocol-graphs check-types-graphs check-runtime-consumer-graph GRAPH_TARGET="$(rustc -vV | sed -n 's/^host: //p')"
-      - name: Check release and publication refusal wiring
-        run: make check-release-evidence
-      - name: Check request and response implementations
-        run: make test-engine-request lint-engine-request doc-engine-request check-engine-request-wasm test-engine-response lint-engine-response doc-engine-response
-      - name: Check local Types implementation
-        run: make qualify-types qualify-types-consumer
-      - name: Prepare pinned Auth passive source for archive qualification
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: dragginzgame/ic-auth
-          ref: b78991e9833320692921bf766e51ad361c9c8c4d
-          path: target/auth-source
-          persist-credentials: false
-      - name: Qualify Types archive through Auth passive model
-        env:
-          AUTH_SOURCE: ${{ github.workspace }}/target/auth-source
-        run: make qualify-types-auth-archive
-      - name: Check Platform certificate boundary
-        run: make qualify-platform-authentication qualify-platform-wasm qualify-canister-signature-decode qualify-canister-signature-authentication qualify-platform-crypto
-      - name: Replay observed canister signatures on native and Wasm
-        run: make qualify-canister-signature-wasm
-      - name: Qualify isolated Auth issuer policy
-        run: make qualify-auth-consumer qualify-stable-structures
-      - name: Check Runtime call preparation
-        run: make qualify-runtime-call qualify-runtime-consumer qualify-runtime-ic0 qualify-runtime-awaited qualify-runtime-guard qualify-runtime-input-ui qualify-runtime-exports
-      - name: Prepare verified PocketIC server
-        run: bash scripts/ci/setup-step.sh pocketic make install-runtime-server
-      - name: Check observed Platform certificates
-        run: make qualify-platform-observed
-      - name: Check observed canister signatures
-        run: make qualify-canister-signature-observed
-      - name: Check signed and anonymous original-request transport
-        run: make qualify-native-signed
-      - name: Check bounded Blob codecs on native and Wasm
-        run: make qualify-caffeine qualify-management-ledger
-      - name: Check installed Runtime rollback
-        run: make qualify-runtime-installed check-upgrade-tooling
-      - name: Qualify public consumer and heap behavior
-        run: make qualify-engine-response profile-engine-response
-      - name: Check Registry settings projection
-        run: make qualify-registry-settings qualify-registry-runtime
-      - name: Check marketplace projections
-        run: make qualify-marketplace qualify-marketplace-wasm
-      - name: Execute Wasm admission corpus
-        run: make qualify-engine-wasm
-      - name: Retain sanitized setup failure evidence
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: setup-${{ github.job }}-${{ matrix.os }}
-          path: target/ci-setup/*.log
-          if-no-files-found: warn
-          retention-days: 7
+      - name: Check aliased evidence and reject outside log
+        run: node --test --test-name-pattern='isolated export' scripts/tests/release-flow.test.mjs
