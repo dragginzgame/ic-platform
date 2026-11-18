@@ -24,6 +24,7 @@ function probe({caller = [4], own = [1, 2], certificate = [8, 9], certificateSiz
     msg_caller_copy: copy('caller-copy', caller),
     canister_self_size() { events.push('own-size'); return own.length; },
     canister_self_copy: copy('own-copy', own),
+    stable64_size() { return 0n; }, // This probe installs no stable dispatch record.
     time() { return 0x123456789abcdef0n; },
     is_controller(pointer, size) {
       assert.deepEqual([...new Uint8Array(instance.exports.memory.buffer, pointer >>> 0, size)], caller);

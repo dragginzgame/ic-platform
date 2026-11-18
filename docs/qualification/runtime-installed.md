@@ -129,8 +129,7 @@ rolls back a trapping cleanup and takes no further action for that call. Runtime
 cannot commit retirement inside that failed execution. Keep user destructors
 small and nontrapping; application reconciliation must not infer remote failure
 or retry permission from a local trap. No automatic retry, deferred destructor
-queue or callback-recovery subsystem is introduced. Private registration
-accounting and the broader resource-retention assessment remain separate gates.
+queue or callback-recovery subsystem is introduced. The later [installed accounting run](#callback-reclamation-timer-dispatch-and-late-completion) measures the retained entries.
 
 ### Committed task observations
 
@@ -174,8 +173,7 @@ The handler completes and destroys its observer once. An eighth ordinary call
 then returns `[9]`; every prior task handle retains its expected state.
 
 This checks installed submission/drop behavior and continued execution with
-abandoned call interest. It does not directly count private callback registrations
-or prove their exact reclamation; that installed custody gate remains open.
+abandoned call interest. The later [installed accounting run](#callback-reclamation-timer-dispatch-and-late-completion) counts the entries after the abandoned response drains.
 
 ### Rejected completion and captured refunds
 
@@ -497,12 +495,88 @@ it introduces no Scheduling dependency, timer, retry decision, storage allocatio
 or persistence across upgrade. Actual timer-dispatch integration remains separate.
 The expanded installed corpus, host/Wasm Clippy and dependency checks passed.
 
+## Callback reclamation, timer dispatch and late completion
+
+The Linux PocketIC 16.1.0 run of `make qualify-runtime-installed` on 18 November
+2026 exercised the local Runtime 0.23.17 implementation. The ordinary fixture
+uses that implementation directly. For private accounting the same Make target
+also builds a separate Wasm from a copy of the working sources. Its added query
+reads the lengths of the real callback and executor maps. Both artifacts run
+through the installed driver. Measurement code lives in
+[the private build script](../../qualification/runtime-accounting.mjs) and
+[the driver](../../qualification/runtime-installed/src/accounting.rs).
+Only the instrumented artifact exposes the two counts. The units below are
+occupied entries. Heap capacity, allocator overhead and bytes captured by an
+arbitrary user future have no implied bound.
+
+| Installed observation | Callback entries | Executor tasks |
+| --- | ---: | ---: |
+| Fresh instance, ordinary reply, successful cleanup after callback trap, or submitted call dropped before peer reply and then drained | 0 | 0 |
+| First trapping destructor in cleanup, followed by an ordinary successful call | 1 | 1 |
+| Second trapping destructor, followed by a successful cleanup and another ordinary call | 2 | 2 |
+| Stop, observe Stopped, upgrade, start | 0 | 0 |
+
+The earlier weak-reference observations identify application data retained in a
+suspended handler. These counters locate the corresponding retained owners.
+Failed cleanup rolls back their removal. Repetition can accumulate live entries
+and captured application memory until the heap is replaced. A successful
+subsequent call releases its own entries. Consumers must design destructors to
+complete without trapping and retain uncertainty about the failed attempt.
+
+For the late-call case two independent ingress callers issue calls to distinct
+held peers on a different application subnet. Both peers report started and
+unfinished. The caller owns two tasks and two registrations before expiry.
+After a five-second advance within the ten-second window both remain. After
+expiry the bounded caller receives raw SYS_UNKNOWN (6) and the counts fall to
+one each. Releasing that peer permits its remote handler to finish while the
+other peer still reports unfinished and its caller still owns one slot and
+task. Only the second peer's release delivers its expected reply and returns
+both counts to zero. The driver observes these transitions without resubmission.
+
+The uninstrumented timer case commits a versioned three-byte record in
+fixture-owned stable memory before arming a real global timer. On successful
+reply the observed stage is complete. A resumed callback trap restores the
+submitted stage, with the public handle distinguishing committed cleanup from
+failed cleanup. An initial poll trap leaves the pre-dispatch stage and no
+handle, as does explicit disarming. A stopped upgrade migrates record schema
+1 to 2, preserving mode and stage while clearing the heap-only observations.
+The fixture supplies the schema and migration policy.
+
+### Consumer destructor review
+
+The installed test verifies reclamation after a callback trap when cleanup
+completes. A trap during cleanup rolls back the entire cleanup, including
+registry removal. Repeated retention in that case is a Runtime limitation.
+
+In the pinned Auth host fixture (`b78991e9833320692921bf766e51ad361c9c8c4d`),
+the receiver's `control` handler awaits `enrollment::refresh`. The mutable
+state borrow ends before the bounded call, the request bytes move into the call,
+and no application-defined destructor or lock guard spans that suspension.
+The injected metadata and entry traps execute in the resumed handler.
+The [Auth fixture preparation](../../qualification/auth-runtime/prepare.mjs)
+identifies the source revision and adapter.
+
+In Runtime, dropping a [call future](../../crates/ic-platform-runtime/src/call/future.rs)
+retires its shared state. The [state implementation](../../crates/ic-platform-runtime/src/call/state/mod.rs)
+releases the mutex before dropping the previous waker. During cleanup the
+[executor](../../crates/ic-platform-runtime/src/executor/mod.rs) releases its
+mutable borrow before dropping the handler. The installed callback and timer
+probes deliberately put assertions in destructors to exercise re-entry and
+cleanup failure.
+
+For each new consumer, inspect values and guards held across an awaited call,
+including their nested destructors. Keep cleanup work bounded. Check for
+panicking assertions or unwraps, conflicting state borrows and work that grows
+with application state. The [IC security guidance](https://docs.internetcomputer.org/guides/security/inter-canister-calls/)
+illustrates a small Rust guard that releases local bookkeeping in `Drop`.
+
 ## Remaining gates
 
-Handler retention after cleanup failure is now directly observed. Its broader
-resource-retention assessment, actual timer-dispatch integration,
-private callback reclamation accounting and broader late/deadline cases,
-application state/version-transition migration and the remaining context-isolation
-cases still need evidence. Live-call upgrade reconstruction is outside the
-supported contract, not an open Runtime implementation requirement.
-This is not an old/new performance comparison or proof of the full design gate.
+The installed cases above qualify the selected method-attached update and
+timer contracts. Repeated failed cleanup remains a resource-retention limitation.
+Application-specific memory bounds, Scheduling's production watchdog and
+dispatch migration, and consumer application schema migrations require their
+respective consumer evidence. Child and migratory tasks are outside the
+supported executor scope. The recorded deadline and context cases cover the
+specified interleaving on PocketIC. They establish neither arbitrary ordering
+coverage nor mainnet or native macOS execution.

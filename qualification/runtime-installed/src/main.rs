@@ -20,3 +20,6 @@ mod raw;
 
 #[cfg(not(target_family = "wasm"))]
 mod timer;
+
+#[cfg(not(target_family = "wasm"))]
+mod accounting;

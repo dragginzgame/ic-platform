@@ -253,6 +253,8 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(pic.update_call(canister, caller, "observe_dispatch", vec![]).await.unwrap(), vec![1, 1],
             "observing the peer reply is distinct from replying to the original caller");
         println!("manual reply omission passed: DidNotReply, Completed, released handler ownership");
+        let observed = std::fs::read("target/runtime-accounting/wasm32-unknown-unknown/release/runtime_rollback.wasm")?;
+        crate::accounting::verify(pic, &observed).await;
         owned.drop().await;
         println!("installed rollback passed: 7 immediate updates; 8 awaited calls with state/destructor/peer observations; callback/cleanup traps, dropped call interest, reply/rejection refunds, resource refusals, notify commit/rollback and subsequent success");
         Ok::<(), Box<dyn std::error::Error>>(())

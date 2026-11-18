@@ -46,7 +46,8 @@ Runtime qualification; the focused command does not run the unrelated suite.
 - Stop/observe-Stopped/upgrade/start clears heap-local observations and advances
   the canister version. No callback or future reconstruction is introduced.
 
-All five installed modes pass. Runtime's 21 native tests also pass, including
+All five installed modes pass, including the [stable dispatch record and schema
+transition](runtime-installed.md#callback-reclamation-timer-dispatch-and-late-completion). Runtime's 21 native tests also pass, including
 timer/update reply isolation and existing reentrancy/custody cases. Native and
 Wasm Clippy pass for the affected implementation and fixtures. These observations
 do not establish macOS execution or production Scheduling adoption.

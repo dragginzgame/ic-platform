@@ -159,6 +159,7 @@ qualify-runtime-timer: qualification-tooling-check runtime-server-check
 	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- timer
 
 qualify-runtime-installed: qualification-tooling-check runtime-server-check
+	$(ENGINE_WASM_ENV) node qualification/runtime-accounting.mjs
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --all-targets -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-rollback

@@ -43,6 +43,7 @@ fn before_upgrade((): ()) {
 #[candidate_runtime::post_upgrade(runtime = candidate_runtime, guard = admit, decode = unit,
     max_bytes = 0, on_error = fail)]
 fn after_upgrade((): ()) {
+    crate::timer::migrate_record();
     no_task();
     system::set_certified_data(&[9; 32]);
 }

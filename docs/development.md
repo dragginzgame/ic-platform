@@ -111,7 +111,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.45.3 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.45.7 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -160,7 +160,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.3
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.7
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -743,9 +743,17 @@ run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
 require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
 prepares assets and `make runtime-server-check` verifies them without downloading.
 
-## Toko Tooling 0.45.3 adoption
+## Toko Tooling 0.45.7 adoption
 
-The root and qualification workspaces select 0.45.3. The authenticated installer
+Both workspace manifests and locks select 0.45.7. The supported installer
+verified the registry checksum
+`81d14bd09e3a2cc71dc12c17af6221eeae4377030bee77848496d00eb7f505b7`.
+The update includes the macOS LOC launcher fix and shared Cargo checks that
+can fetch missing locked dependencies unless offline mode is selected.
+
+## Historical Toko Tooling 0.45.3 adoption
+
+The root and qualification workspaces selected 0.45.3. The authenticated installer
 verified the registry checksum
 `41141f3a04bea22cacdaa5e36774d69e1335f5461098311eb6bb2731ee113da5`.
 The reviewed snapshot updates the engineering baseline and shared release,

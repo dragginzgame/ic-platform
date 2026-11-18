@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {qualifyAudit, validateReleaseAudit} from './release-audit.mjs';
 import {spawnSync} from 'node:child_process';
-import {mkdirSync, readdirSync, readFileSync, writeFileSync} from 'node:fs';
+import {mkdirSync, realpathSync, readdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
@@ -82,8 +82,9 @@ function scopedRunEvidence(output) {
   const [target, result, , log] = timings[1].split('\t');
   assert.equal(target, 'qualify-stable-structures');
   assert.equal(result, 'PASS');
-  assert.equal(dirname(resolve(log)), resolve(dir));
-  return hash(readFileSync(log));
+  const stageLog = realpathSync.native(log);
+  assert.equal(dirname(stageLog), realpathSync.native(dir), 'stage log is outside the selected evidence directory');
+  return hash(readFileSync(stageLog));
 }
 
 // No cross-source cache: old receipts must be regenerated under this contract.

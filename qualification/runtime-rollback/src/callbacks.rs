@@ -494,3 +494,27 @@ async fn partial_refund_probe((mode, target): (u8, Principal)) {
     result.extend_from_slice(&trapped.refunded_cycles().unwrap().to_le_bytes());
     system::reply(&result).unwrap();
 }
+
+/// Share a held endpoint across two independent ingress calls, one with a deadline.
+#[candidate_runtime::update(runtime = candidate_runtime, name = "held_probe", guard = admit,
+    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+async fn held_probe((mode, peer): (u8, Principal)) {
+    assert!(mode <= 1);
+    let wait = if mode == 0 {
+        Wait::Bounded { seconds: 10 }
+    } else {
+        Wait::Unbounded
+    };
+    let completion = Call::new(peer, "hold_upgrade", wait)
+        .owned_args(system::canister_self().as_slice().to_vec())
+        .execute()
+        .await
+        .unwrap();
+    match completion.outcome() {
+        Outcome::OutcomeUnknown(error) => {
+            system::reply(&[u8::try_from(error.code()).unwrap()]).unwrap()
+        }
+        Outcome::Reply(bytes) => system::reply(bytes).unwrap(),
+        Outcome::Rejected(error) => panic!("unexpected held-call rejection: {error:?}"),
+    }
+}

@@ -21,6 +21,8 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
             let observed = pic.query_call(id, Principal::anonymous(), "timer_observe", vec![]).await.unwrap();
             assert_eq!(&observed[..3], &expected, "timer mode {mode}");
             assert!(u64::from_le_bytes(observed[3..].try_into().unwrap()) >= u64::from_le_bytes(version.as_slice().try_into().unwrap()));
+            let stage = [3, 2, 2, 1, 1][usize::from(mode)];
+            assert_eq!(pic.query_call(id, Principal::anonymous(), "timer_record", vec![]).await.unwrap(), [1, mode, stage]);
             // A timer task never consumes an unrelated update's reply authority.
             assert_eq!(pic.update_call(id, Principal::anonymous(), "timer_peer", vec![]).await.unwrap(), vec![42]);
             pic.stop_canister(id, None).await.unwrap();
@@ -28,6 +30,7 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
             pic.upgrade_canister(id, wasm.clone(), vec![], None).await.unwrap();
             pic.start_canister(id, None).await.unwrap();
             let after = pic.query_call(id, Principal::anonymous(), "timer_observe", vec![]).await.unwrap();
+            assert_eq!(pic.query_call(id, Principal::anonymous(), "timer_record", vec![]).await.unwrap(), [2, mode, stage]);
             assert_eq!(&after[..3], &[0,0,0]);
             assert!(u64::from_le_bytes(after[3..].try_into().unwrap()) > u64::from_le_bytes(version.try_into().unwrap()));
         }

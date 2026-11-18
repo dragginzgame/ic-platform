@@ -51,9 +51,13 @@ certification; consumers retain endpoint/root and whole-operation policy.
 
 Runtime's awaited executor remains an experimental, bounded contract. Installed
 checks cover callbacks, traps/cleanup, refunds, resource refusals, stale wakes,
-uncertain remote outcomes and stopped upgrades. Remaining limits include broader
-retention/reclamation accounting, timer-dispatch integration and context/late-call
-cases; see [remaining gates](docs/qualification/runtime-installed.md#remaining-gates).
+uncertain remote outcomes and stopped upgrades. After a callback trap, successful
+cleanup reclaimed both the callback entry and the executor task in the installed
+fixture. When cleanup itself trapped twice, two tasks and two entries remained
+until a stopped upgrade. Repeated failures can retain application data on the
+heap. The installed fixtures also cover a stable timer dispatch record and late
+peer completion overlapping a live call. See the
+[measurements and consumer destructor review](docs/qualification/runtime-installed.md#callback-reclamation-timer-dispatch-and-late-completion).
 Local handle termination does not establish remote rollback or cancellation.
 
 The supported upgrade workflow is **stop → wait for Stopped → upgrade → start**.
@@ -91,7 +95,7 @@ contribution analysis remains deferred. Required correctness checks stay intact.
 
 ## Development and delivery
 
-Rust 1.100.0 and Toko Tooling 0.45.3 are selected by the repository. Run
+Rust 1.100.0 and Toko Tooling 0.45.7 are selected by the repository. Run
 `make install-tools tools-check` for admitted tools, including checkout-local
 ICP CLI 1.7.0. Regular native CI includes signed/anonymous installed transport
 and Blob native/Wasm codecs on Linux and both macOS architectures. Configured

@@ -35,6 +35,10 @@ fn fail<T: std::fmt::Debug>(error: T) -> ! {
 #[candidate_runtime::update(runtime = candidate_runtime, name = "timer_arm", guard = admit,
     decode = decode, max_bytes = 1, encode = encode, on_error = fail)]
 fn arm(mode: u8) -> Vec<u8> {
+    // The arm update commits before the timer executes. One private stable page
+    // belongs to this single-attempt fixture. Byte 0 is its schema version.
+    assert_eq!(candidate_runtime::raw::stable64_grow(1), Some(0));
+    candidate_runtime::raw::stable64_write(0, &[1, mode, 1]);
     MODE.set(mode);
     let deadline = system::time().checked_add(1_000_000_000).unwrap();
     assert_eq!(system::global_timer_set(deadline), 0);
@@ -96,14 +100,37 @@ extern "C" fn timer() {
         assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));
         let _cleanup = Cleanup(mode == 2);
         assert_ne!(mode, 4, "initial timer poll trap");
+        candidate_runtime::raw::stable64_write(2, &[2]);
         let response = Call::new(system::canister_self(), "timer_peer", Wait::Unbounded)
             .execute()
             .await
             .unwrap();
         assert!(matches!(response.outcome(), Outcome::Reply(bytes) if bytes == &[42]));
         assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));
+        candidate_runtime::raw::stable64_write(2, &[3]);
         assert_eq!(mode, 0, "timer callback trap");
     })
     .unwrap();
     HANDLE.with(|slot| *slot.borrow_mut() = Some(handle));
+}
+
+#[candidate_runtime::query(runtime = candidate_runtime, name = "timer_record", guard = admit,
+    decode = empty, max_bytes = 0, encode = encode, on_error = fail)]
+fn record((): ()) -> Vec<u8> {
+    let mut bytes = vec![0; 3];
+    candidate_runtime::raw::stable64_read(0, &mut bytes);
+    bytes
+}
+
+/// Upgrade only the fixture-owned record. Keep its observed dispatch stage.
+pub(super) fn migrate_record() {
+    if candidate_runtime::raw::stable64_size() == 0 {
+        return;
+    }
+    let bytes = record(());
+    match bytes[0] {
+        1 => candidate_runtime::raw::stable64_write(0, &[2]),
+        2 => {}
+        version => panic!("unknown timer record version {version}"),
+    }
 }
