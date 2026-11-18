@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync, appendFileSync, copyFileSync, chmodSync} from 'node:fs';
+import {readdirSync, symlinkSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync, appendFileSync, copyFileSync, chmodSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
@@ -258,6 +258,19 @@ test('isolated export uses the shared runner and a mixed release range falls bac
   assert.equal(readFileSync(join(root, 'dispatch'), 'utf8'), 'stable\n');
   git('tag', '-a', 'platform-v0.34.17', '-m', 'candidate');
   validateQualificationReceipt(receipt, f.output, {...f, commit, rust: receipt.rust});
+  const aliasOutput = join(root, 'evidence-alias');
+  symlinkSync(f.output, aliasOutput, 'dir');
+  const validate = () => validateQualificationReceipt(receipt, aliasOutput, {...f, commit, rust: receipt.rust});
+  validate();
+  const run = readdirSync(f.output).find(name => name.startsWith('validation.'));
+  const timings = join(f.output, run, 'timings.tsv');
+  const original = readFileSync(timings, 'utf8');
+  const log = original.trimEnd().split('\t').at(-1);
+  const outside = join(f.output, 'outside.log');
+  copyFileSync(log, outside);
+  writeFileSync(timings, original.replace(log, outside));
+  assert.throws(validate, /outside the selected evidence directory/);
+  writeFileSync(timings, original);
   appendFileSync(join(f.output, 'plan.json'), ' ');
   assert.throws(() => validateQualificationReceipt(receipt, f.output, {...f, commit, rust: receipt.rust}));
   put('shared-input', 'unmapped');
