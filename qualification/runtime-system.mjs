@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 const wasm = readFileSync(new URL('../target/runtime-rollback/wasm32-unknown-unknown/release/runtime_rollback.wasm', import.meta.url));
 const module = new WebAssembly.Module(wasm);
+assert(!WebAssembly.Module.exports(module).some(({name}) => name === 'canister_query registry_size'));
 function probe({caller = [4], own = [1, 2], certificate = [8, 9], certificateSize = certificate?.length, method = 'canister_query system_observe', traps = false} = {}) {
   let instance;
   const events = [], reply = [];

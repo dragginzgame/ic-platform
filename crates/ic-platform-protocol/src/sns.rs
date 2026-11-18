@@ -1,13 +1,14 @@
 //! Selected SNS Governance neuron observations, without collection or entitlement policy.
 //! Decode success authenticates nothing. IDs, permission codes and amounts remain raw.
 pub use crate::candid::encode::EncodeError;
-use crate::candid::encode::{Encode, Writer};
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
+    encode::{Encode, Writer},
     projection::{absent, projection},
 };
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
+
 projection! {
     /// Raw neuron ID record; callers validate length and requested-ID equality.
     both NeuronId {
@@ -15,6 +16,7 @@ projection! {
         23515 => id: Vec<u8> [required],
     }
 }
+
 projection! {
     /// One get_neuron argument; absence is explicit.
     encoding GetNeuronArgs {
@@ -22,6 +24,7 @@ projection! {
         4246264679 => neuron_id: Option<NeuronId>,
     }
 }
+
 projection! {
     /// One list_neurons argument; pagination remains caller-owned.
     encoding ListNeuronsArgs {
@@ -33,6 +36,7 @@ projection! {
         4027886598 => start_page_at: Option<NeuronId>,
     }
 }
+
 projection! {
     /// Raw permission entry, including unknown signed codes.
     NeuronPermission {
@@ -42,6 +46,7 @@ projection! {
         2192336682 => permission_type: Vec<i32> [required],
     }
 }
+
 projection! {
     /// Distinct delay versus absolute dissolve time.
     enum DissolveState {
@@ -51,6 +56,7 @@ projection! {
         4238420994 => WhenDissolvedTimestampSeconds(u64),
     }
 }
+
 projection! {
     /// Selected raw neuron evidence; this is not a full neuron export.
     Neuron {
@@ -82,6 +88,7 @@ projection! {
         3439871066 => neuron_fees_e8s: u64 [required],
     }
 }
+
 projection! {
     /// Governance refusal, distinct from malformed input or missing result.
     GovernanceError {
@@ -91,6 +98,7 @@ projection! {
         3790638545 => error_type: i32 [required],
     }
 }
+
 projection! {
     /// Governance response result.
     enum GetNeuronResult {
@@ -100,6 +108,7 @@ projection! {
         2767950995 => Neuron(Neuron),
     }
 }
+
 projection! {
     /// Optional result; missing result remains None.
     GetNeuronResponse {
@@ -107,6 +116,7 @@ projection! {
         142895325 => result: Option<GetNeuronResult> [strict_optional],
     }
 }
+
 projection! {
     /// One bounded page; ordering and pagination consistency remain external.
     ListNeuronsResponse {
@@ -114,12 +124,14 @@ projection! {
         3923068064 => neurons: Vec<Neuron> [required],
     }
 }
+
 /// Decode exactly one GetNeuronResponse with explicit input, collection, work and storage limits.
 /// # Errors
 /// Refuses malformed, incompatible, truncated, trailing or over-budget input.
 pub fn decode_get_neuron(bytes: &[u8], limits: Limits) -> Result<GetNeuronResponse, Error> {
     candid::decode(bytes, limits)
 }
+
 /// Decode exactly one ListNeuronsResponse with explicit input, collection, work and storage limits.
 /// # Errors
 /// Refuses malformed, incompatible, truncated, trailing or over-budget input.

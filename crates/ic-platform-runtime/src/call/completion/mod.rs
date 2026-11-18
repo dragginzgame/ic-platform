@@ -1,5 +1,8 @@
 //! Owned response observations; construction does not authenticate their origin.
 
+#[cfg(test)]
+mod tests;
+
 use std::num::NonZeroU32;
 
 /// Known protocol classifications, without retry or settlement policy.
@@ -132,6 +135,3 @@ impl Completion {
         (self.outcome, self.refunded_cycles)
     }
 }
-
-#[cfg(test)]
-mod tests;

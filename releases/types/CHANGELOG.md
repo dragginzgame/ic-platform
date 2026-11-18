@@ -3,6 +3,12 @@
 Release group: `types`. Covered package: `ic-platform-types`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.21.3] - 2026-11-18
+
+### 🔧 Maintenance
+
+- Move Account and Principal tests to the top of their module declarations under the updated Rust layout policy.
+
 ## [0.21.2] - 2026-11-16
 
 ### 🩹 Fixed

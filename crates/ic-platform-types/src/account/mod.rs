@@ -3,6 +3,9 @@
 //! Logical identity uses an effective zero subaccount when the field is absent;
 //! serialization preserves whether that field was present.
 
+#[cfg(test)]
+mod tests;
+
 use crate::principal::{Principal, PrincipalError};
 use data_encoding::BASE32_NOPAD;
 use serde::{Deserialize, Serialize};
@@ -215,6 +218,3 @@ impl FromStr for Account {
         })
     }
 }
-
-#[cfg(test)]
-mod tests;

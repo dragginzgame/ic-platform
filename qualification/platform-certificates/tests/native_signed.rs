@@ -29,6 +29,7 @@ fn client(endpoint: String) -> ReadClient {
     })
     .unwrap()
 }
+
 fn time() -> TimePolicy {
     let w = TimeWindow {
         reference_ns: 100,
@@ -40,6 +41,7 @@ fn time() -> TimePolicy {
         delegation: w,
     }
 }
+
 fn original() -> (Ed25519Identity, PreparedUpdate) {
     let id = Ed25519Identity::from_pem(PEM, 4096).unwrap();
     let update = id
@@ -57,6 +59,7 @@ fn original() -> (Ed25519Identity, PreparedUpdate) {
         .unwrap();
     (id, update)
 }
+
 fn serve(reply: Vec<u8>) -> (String, std::thread::JoinHandle<(String, Vec<u8>)>) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let address = listener.local_addr().unwrap();
@@ -101,6 +104,7 @@ fn serve(reply: Vec<u8>) -> (String, std::thread::JoinHandle<(String, Vec<u8>)>)
     });
     (format!("http://{address}"), task)
 }
+
 #[test]
 fn exact_dispatch_no_retry_and_lost_response_stays_uncertain() {
     let rt = tokio::runtime::Builder::new_current_thread()
@@ -114,6 +118,7 @@ fn exact_dispatch_no_retry_and_lost_response_stays_uncertain() {
   let(header,body)=task.join().unwrap();assert!(header.starts_with(&format!("POST /api/v3/canister/{}/call ",update.effective_canister())));assert_eq!(body,update.envelope_bytes());
  }
 }
+
 #[test]
 fn post_expiry_recovery_only_sends_read_for_original_id() {
     let rt = tokio::runtime::Builder::new_current_thread()
@@ -294,6 +299,7 @@ fn retained_icp_status_recovers_in_fresh_process() {
         assert!(superfluous_read_path(status_bytes, &original));
     }
 }
+
 #[cfg(feature = "native-signed-secp256k1")]
 fn superfluous_read_path(bytes: &[u8], update: &PreparedUpdate) -> bool {
     let mut envelope = ingress::decode_envelope(bytes, 4096).unwrap().value;

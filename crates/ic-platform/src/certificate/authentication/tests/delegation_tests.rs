@@ -16,6 +16,7 @@ fn wire(node: &HashTreeNode) -> Value {
         HashTreeNode::Pruned(hash) => vec![integer(4), Value::Bytes(hash.to_vec())],
     })
 }
+
 fn certificate(tree: &HashTree, key: u8) -> Vec<u8> {
     let mut message = b"\x0dic-state-root".to_vec();
     message.extend_from_slice(&tree.digest());
@@ -24,6 +25,7 @@ fn certificate(tree: &HashTree, key: u8) -> Vec<u8> {
         &signer(key).sign(&message).serialize(),
     )
 }
+
 fn attach(mut outer: Vec<u8>, authority: &[u8], subnet: &[u8]) -> Vec<u8> {
     outer[0] = 0xa3;
     outer.extend_from_slice(b"\x6adelegation\xa2\x69subnet_id");
@@ -32,9 +34,11 @@ fn attach(mut outer: Vec<u8>, authority: &[u8], subnet: &[u8]) -> Vec<u8> {
     outer.extend_from_slice(&serde_cbor::to_vec(&Value::Bytes(authority.to_vec())).unwrap());
     outer
 }
+
 fn time(value: u8) -> HashTree {
     labeled(b"time".to_vec(), leaf(vec![value]))
 }
+
 fn legacy(ranges: &[u8], key: &[u8], timestamp: u8) -> HashTree {
     fork(
         labeled(
@@ -50,9 +54,11 @@ fn legacy(ranges: &[u8], key: &[u8], timestamp: u8) -> HashTree {
         time(timestamp),
     )
 }
+
 fn delegated(authority: &HashTree) -> Vec<u8> {
     attach(certificate(&time(10), 2), &certificate(authority, 1), &[1])
 }
+
 fn policy() -> TimePolicy {
     TimePolicy {
         certificate: window(),
@@ -63,6 +69,7 @@ fn policy() -> TimePolicy {
         },
     }
 }
+
 fn caps() -> VerificationLimits {
     VerificationLimits {
         tree_nodes: 100,
@@ -71,6 +78,7 @@ fn caps() -> VerificationLimits {
         canister_ranges: 2,
     }
 }
+
 fn check<'a>(
     bytes: &'a [u8],
     target: &[u8],
@@ -293,6 +301,7 @@ fn sharded(shards: HashTree) -> HashTree {
         ),
     )
 }
+
 #[test]
 fn selected_shard_cannot_fall_back_or_disagree_with_its_label() {
     let good = labeled(vec![2], leaf(RANGE.to_vec()));

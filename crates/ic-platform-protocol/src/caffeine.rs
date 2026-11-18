@@ -3,9 +3,9 @@
 //! Decoding authenticates nothing. Callers check root syntax/length/count,
 //! certificate method/root equality and Cashier owner equality before effects.
 //! Top-up success payloads remain opaque; these formats establish no settlement outcome.
-use crate::candid::encode::{Encode, Writer};
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
+    encode::{Encode, Writer},
     projection::{absent, projection},
 };
 pub use crate::candid::{Nat, encode::EncodeError};
@@ -30,6 +30,7 @@ projection! {
         278_101_296 => blob_hash: String [required],
     }
 }
+
 projection! {
     /// `account_info_get_v1` request, with canonical account identity.
     encoding AccountRequest {
@@ -37,6 +38,7 @@ projection! {
         2_707_029_165 => account: Principal,
     }
 }
+
 projection! {
     /// Provider-reported storage gauges; not availability or charge closure.
     Gauges {
@@ -50,6 +52,7 @@ projection! {
         2_947_807_759 => blob_size_bytes: u64 [required],
     }
 }
+
 projection! {
     /// Selected Cashier account observation; caller checks the requested owner.
     Account {
@@ -74,6 +77,7 @@ impl Decode for ErrorDetail {
         Ok(Self)
     }
 }
+
 projection! {
     /// Known Cashier refusals. Unknown selected variants are refused.
     enum AccountError {
@@ -95,6 +99,7 @@ projection! {
         4_052_296_485 => TopUpWithoutCycles,
     }
 }
+
 projection! {
     /// Exact selected result of `account_info_get_v1`.
     enum AccountResult {
@@ -104,6 +109,7 @@ projection! {
         3_456_837 => Err(AccountError),
     }
 }
+
 projection! {
     /// `account_top_up_v1` argument. No reply or settlement interpretation.
     both TopUpArgs {
@@ -121,6 +127,7 @@ macro_rules! codec {
         pub fn $decode(bytes: &[u8], limits: Limits) -> Result<$ty, Error> {
             candid::decode(bytes, limits)
         }
+
         #[doc = $doc]
         /// # Errors
         /// Refuses oversized output before allocation, or allocation failure.
@@ -129,6 +136,7 @@ macro_rules! codec {
         }
     };
 }
+
 codec!(
     decode_root,
     encode_root,
@@ -159,12 +167,14 @@ codec!(
 pub fn decode_account(bytes: &[u8], limits: Limits) -> Result<AccountResult, Error> {
     candid::decode(bytes, limits)
 }
+
 /// Decode an exact zero-argument acknowledgement.
 /// # Errors
 /// Refuses nonzero arity, malformed/trailing input or exhausted budgets.
 pub fn decode_empty(bytes: &[u8], limits: Limits) -> Result<(), Error> {
     candid::decode_empty(bytes, limits)
 }
+
 /// Encode an exact zero-argument acknowledgement.
 /// # Errors
 /// Refuses a ceiling shorter than the six-byte frame or allocation failure.
@@ -201,6 +211,7 @@ impl TopUpArgs {
         candid::encode::encode(self, maximum_bytes)
     }
 }
+
 /// Decode exactly one outer optional top-up record, retaining every option.
 /// # Errors
 /// Refuses incompatible, malformed, trailing or over-budget input.
@@ -218,6 +229,7 @@ impl Decode for OpaqueTopUpSuccess {
         Ok(Self)
     }
 }
+
 projection! {
     /// Selected typed top-up refusals; unknown selected variants are refused.
     enum TopUpError {
@@ -231,6 +243,7 @@ projection! {
         4_052_296_485 => TopUpWithoutCycles,
     }
 }
+
 projection! {
     /// Top-up ABI outcome only, with an opaque validated success payload.
     enum TopUpResult {
@@ -240,6 +253,7 @@ projection! {
         3_456_837 => Err(TopUpError),
     }
 }
+
 /// Decode exactly one top-up result under explicit traversal and storage limits.
 /// # Errors
 /// Refuses unknown selected errors, malformed selected or skipped payloads,

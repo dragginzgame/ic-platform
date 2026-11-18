@@ -2,6 +2,7 @@
 use crate::fixtures::{SubnetFrame, ViewFrame};
 use ::candid::Principal;
 use ic_platform_protocol::{candid, cloud_engine as new};
+
 fn limits() -> candid::Limits {
     candid::Limits {
         bytes: 512 * 1024,
@@ -13,6 +14,7 @@ fn limits() -> candid::Limits {
         skipping: 128 * 1024,
     }
 }
+
 #[test]
 fn independently_declared_records_preserve_all_selected_values() {
     let principals = [

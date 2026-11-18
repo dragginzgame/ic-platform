@@ -4,9 +4,9 @@
 //! caller's aggregate [`Limits`]. Transport, snapshot ownership, lifecycle,
 //! spending, hashes and capture/restore admission remain caller-owned.
 pub use crate::candid::encode::EncodeError;
-use crate::candid::encode::{Encode, Writer};
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
+    encode::{Encode, Writer},
     projection::{absent, projection},
 };
 use candidate_types::Principal;
@@ -19,6 +19,7 @@ projection! {
         1_313_628_723 => canister_id: Principal,
     }
 }
+
 projection! {
     /// `take_canister_snapshot` arguments with explicit optional presence.
     encoding TakeSnapshotArgs {
@@ -32,6 +33,7 @@ projection! {
         3_599_109_322 => sender_canister_version: Option<u64>,
     }
 }
+
 projection! {
     /// Exact target and snapshot for `read_canister_snapshot_metadata`.
     encoding SnapshotArgs {
@@ -41,6 +43,7 @@ projection! {
         4_045_790_262 => snapshot_id: Vec<u8>,
     }
 }
+
 projection! {
     /// `load_canister_snapshot`; execution and spending are caller-owned.
     encoding LoadSnapshotArgs {
@@ -64,6 +67,7 @@ projection! {
         3_949_555_199 => Running,
     }
 }
+
 projection! {
     /// Selected settings; unselected settings are validated and skipped.
     both ("management-snapshot-fixtures") Settings {
@@ -71,6 +75,7 @@ projection! {
         570_880_087 => controllers: Vec<Principal> [required, max = 10],
     }
 }
+
 projection! {
     /// Status projection that does not allocate discarded management fields.
     both ("management-snapshot-fixtures") CanisterStatus {
@@ -84,6 +89,7 @@ projection! {
         2_928_387_969 => module_hash: Option<Vec<u8>> [strict_optional, max = 32],
     }
 }
+
 projection! {
     /// Lifecycle/controller/module-hash projection for capture preconditions.
     /// Version and other unselected fields are validated under the skip budget.
@@ -97,6 +103,7 @@ projection! {
         2_928_387_969 => module_hash: Option<Vec<u8>> [known_optional_bytes, max = 32],
     }
 }
+
 /// Decode capture preconditions without requiring a version observation.
 /// Use [`decode_canister_status`] when an upgrade proof requires version.
 /// # Errors
@@ -116,6 +123,7 @@ projection! {
         3_569_147_778 => taken_at_timestamp: u64 [required],
     }
 }
+
 projection! {
     /// Exact returned snapshot bytes; no hash or requested-length claim.
     both ("management-snapshot-fixtures") SnapshotData {
@@ -123,6 +131,7 @@ projection! {
         1_170_392_685 => chunk: Vec<u8> [required, max = 1_048_576],
     }
 }
+
 projection! {
     /// Allocated snapshot identity; admission and spending stay with Backup.
     both ("management-snapshot-fixtures") SnapshotAllocation {
@@ -146,18 +155,21 @@ impl Decode for Inventory {
 pub fn decode_canister_status(bytes: &[u8], limits: Limits) -> Result<CanisterStatus, Error> {
     candid::decode(bytes, limits)
 }
+
 /// Decode one snapshot inventory, capped at 1,024 entries before allocation.
 /// # Errors
 /// Refuses malformed, incompatible, trailing or over-budget input.
 pub fn decode_list_snapshots(bytes: &[u8], limits: Limits) -> Result<Vec<Snapshot>, Error> {
     candid::decode::<Inventory>(bytes, limits).map(|value| value.0)
 }
+
 /// Decode the single snapshot returned by `take_canister_snapshot`.
 /// # Errors
 /// Refuses malformed, incompatible, trailing or over-budget input.
 pub fn decode_take_snapshot(bytes: &[u8], limits: Limits) -> Result<Snapshot, Error> {
     candid::decode(bytes, limits)
 }
+
 /// Decode exact snapshot data, capped at one MiB before allocation.
 /// # Errors
 /// Refuses malformed, incompatible, trailing or over-budget input. The complete
@@ -165,6 +177,7 @@ pub fn decode_take_snapshot(bytes: &[u8], limits: Limits) -> Result<Snapshot, Er
 pub fn decode_snapshot_data(bytes: &[u8], limits: Limits) -> Result<SnapshotData, Error> {
     candid::decode(bytes, limits)
 }
+
 /// Decode the allocated snapshot identifier without granting restore authority.
 /// # Errors
 /// Refuses malformed, incompatible, trailing or over-budget input.
@@ -199,6 +212,7 @@ macro_rules! float_bits {
         }
     };
 }
+
 float_bits!(Float32Bits, f32, -13);
 float_bits!(Float64Bits, f64, -14);
 /// Exact reserved provenance payload. Non-reserved payloads refuse decoding.
@@ -220,6 +234,7 @@ impl Encode for Reserved {
         Ok(())
     }
 }
+
 projection! {
     /// Snapshot global with exact numeric representation. V128 refuses values
     /// outside 128 bits without allocating an arbitrary magnitude.
@@ -236,6 +251,7 @@ projection! {
         1_311_016_833 => V128(u128),
     }
 }
+
 projection! {
     /// Snapshot provenance; payloads must be exactly Candid reserved.
     both ("management-snapshot-fixtures") enum SnapshotSource {
@@ -245,6 +261,7 @@ projection! {
         2_359_638_948 => TakenFromCanister(Reserved),
     }
 }
+
 projection! {
     /// Exact captured timer state, without scheduling policy.
     both enum Timer {
@@ -254,6 +271,7 @@ projection! {
         1_781_536_619 => Inactive,
     }
 }
+
 projection! {
     /// Captured low-Wasm-memory hook state.
     both enum LowMemoryHook {
@@ -265,6 +283,7 @@ projection! {
         3_870_990_435 => Ready,
     }
 }
+
 projection! {
     /// Raw chunk digest under the finite 32-byte profile; no authentication.
     both SnapshotChunk {
@@ -272,6 +291,7 @@ projection! {
         1_158_164_430 => hash: Vec<u8> [required, max = 32],
     }
 }
+
 projection! {
     /// Selected snapshot metadata. Missing optional fields, explicit known
     /// null/reserved absence and known value promotion are retained; incompatible
@@ -301,6 +321,7 @@ projection! {
         3_598_099_748 => wasm_memory_size: u64 [required],
     }
 }
+
 /// Decode snapshot metadata under the caller's aggregate limits and the finite
 /// field profile. Use zero skipped work to refuse unknown fields in Backup.
 /// # Errors
@@ -309,6 +330,7 @@ projection! {
 pub fn decode_snapshot_metadata(bytes: &[u8], limits: Limits) -> Result<SnapshotMetadata, Error> {
     candid::decode(bytes, limits)
 }
+
 projection! {
     /// Exact extent requested from a selected snapshot region.
     both Extent {
@@ -318,6 +340,7 @@ projection! {
         1_614_780_307 => offset: u64 [required],
     }
 }
+
 projection! {
     /// Exact write offset in a selected snapshot region.
     both Offset {
@@ -325,6 +348,7 @@ projection! {
         1_614_780_307 => offset: u64 [required],
     }
 }
+
 projection! {
     /// Read region or complete stored chunk; geometry admission is caller-owned.
     both enum ReadKind {
@@ -338,6 +362,7 @@ projection! {
         4_161_627_090 => WasmChunk(SnapshotChunk),
     }
 }
+
 projection! {
     /// Write region; exact chunk bytes are supplied separately.
     both enum WriteKind {
@@ -351,6 +376,7 @@ projection! {
         4_161_627_090 => WasmChunk,
     }
 }
+
 projection! {
     /// `read_canister_snapshot_data` arguments.
     encoding ReadDataArgs {
@@ -362,6 +388,7 @@ projection! {
         4_045_790_262 => snapshot_id: Vec<u8>,
     }
 }
+
 projection! {
     /// `upload_canister_snapshot_data` arguments.
     encoding UploadDataArgs {
@@ -375,6 +402,7 @@ projection! {
         4_045_790_262 => snapshot_id: Vec<u8>,
     }
 }
+
 projection! {
     /// `upload_canister_snapshot_metadata` arguments. Caller must explicitly
     /// admit every restored value; no missing global or timer default is invented.

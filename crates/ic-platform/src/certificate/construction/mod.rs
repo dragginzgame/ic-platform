@@ -1,5 +1,8 @@
 //! Explicit untrusted certificate construction for issuers and independent fixtures.
 //! Construction never supplies authenticated evidence or selects a trust root.
+#[cfg(test)]
+mod tests;
+
 use serde::Serialize;
 use std::io::{self, Write};
 
@@ -35,10 +38,12 @@ impl Write for Bounded {
         self.bytes.extend_from_slice(bytes);
         Ok(bytes.len())
     }
+
     fn flush(&mut self) -> io::Result<()> {
         Ok(())
     }
 }
+
 fn encode(value: &impl Serialize, maximum: usize) -> Result<Vec<u8>, ConstructionError> {
     let mut output = Bounded {
         bytes: Vec::new(),
@@ -130,6 +135,3 @@ pub fn canister_key_der(
     bytes.extend_from_slice(seed);
     Ok(bytes)
 }
-
-#[cfg(test)]
-mod tests;

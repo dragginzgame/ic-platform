@@ -1,5 +1,8 @@
 //! Strict decoding of untrusted certificate bytes, without authentication.
 
+#[cfg(test)]
+mod tests;
+
 #[cfg(feature = "certificate-authentication")]
 mod authentication;
 mod wire;
@@ -96,9 +99,6 @@ pub fn decode_certificate(
         certificate,
     })
 }
-
-#[cfg(test)]
-mod tests;
 
 #[cfg(feature = "canister-signature-decode")]
 mod canister_signature;

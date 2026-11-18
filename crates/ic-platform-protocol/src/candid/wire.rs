@@ -345,6 +345,7 @@ impl Reader<'_, '_> {
     pub(crate) fn limited_value<T: Decode>(&mut self, id: Id, maximum: usize) -> Result<T> {
         self.with_vector_limit(maximum, |reader| reader.value(id))
     }
+
     #[cfg(feature = "management-snapshots")]
     pub(crate) fn with_vector_limit<T>(
         &mut self,
@@ -357,6 +358,7 @@ impl Reader<'_, '_> {
         self.next_vector_limit = previous;
         result
     }
+
     #[cfg(any(
         feature = "cloud-engine-marketplace",
         feature = "registry-placement",
@@ -371,6 +373,7 @@ impl Reader<'_, '_> {
         let index = self.input.count()?;
         fields.get(index).copied().ok_or(Error::Malformed)
     }
+
     pub(crate) fn value<T: Decode>(&mut self, id: Id) -> Result<T> {
         self.input.charge(1)?;
         if id >= 0 {
@@ -652,6 +655,7 @@ macro_rules! fixed {
         }
     };
 }
+
 fixed!(u64, -8);
 fixed!(i64, -12);
 fixed!(f64, -14);

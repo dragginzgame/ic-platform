@@ -7,6 +7,9 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
+#[cfg(test)]
+mod tests;
+
 /// Checks that a Runtime compilation uses its coordinated guard version.
 ///
 /// Runtime invokes this in a const initializer with its package version. This
@@ -30,6 +33,3 @@ pub const fn assert_runtime_version(runtime: &str) {
         index += 1;
     }
 }
-
-#[cfg(test)]
-mod tests;

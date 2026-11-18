@@ -4,6 +4,12 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.18] - 2026-11-18
+
+### 🔧 Maintenance
+
+- Group Wasm entry admission in its own module and compile the installed accounting probe directly from the Runtime sources. The ordinary fixture checks that its export table omits the private accounting query.
+
 ## [0.23.17] - 2026-11-17
 
 ### 🧪 Testing

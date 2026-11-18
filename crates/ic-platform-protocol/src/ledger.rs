@@ -1,15 +1,17 @@
 //! Cycles-ledger creation and ICRC balance/fee formats, without transport.
 //! Duplicate, refusal and uncertain observations never authorize another operation.
-use crate::candid::encode::{Encode, Writer};
-use crate::candid::{
-    self, Decode, Error, Limits, Reader, Schema,
-    projection::{absent, projection},
-};
 pub use crate::candid::{Nat, encode::EncodeError};
-use crate::management::CreationSettings;
-use candidate_types::Account;
-use candidate_types::Principal;
+use crate::{
+    candid::{
+        self, Decode, Error, Limits, Reader, Schema,
+        encode::{Encode, Writer},
+        projection::{absent, projection},
+    },
+    management::CreationSettings,
+};
+use candidate_types::{Account, Principal};
 use serde::{Deserialize, Serialize};
+
 projection! {
     /// Explicit optional subnet filter.
     both SubnetFilter {
@@ -17,6 +19,7 @@ projection! {
         3816945308 => subnet_type: Option<String> [strict_optional],
     }
 }
+
 projection! {
     /// Explicit subnet selection.
     both ExplicitSubnet {
@@ -24,6 +27,7 @@ projection! {
         2584155869 => subnet: Principal [required],
     }
 }
+
 projection! {
     /// Caller-selected subnet authority; no discovery.
     both enum SubnetSelection {
@@ -33,6 +37,7 @@ projection! {
         3466300157 => Subnet(ExplicitSubnet),
     }
 }
+
 projection! {
     /// Explicit CMC creation settings.
     encoding CmcCreationArgs {
@@ -42,6 +47,7 @@ projection! {
         2336062691 => settings: Option<CreationSettings>,
     }
 }
+
 projection! {
     /// One cycles-ledger create_canister argument.
     encoding CreateCanisterArgs {
@@ -55,6 +61,7 @@ projection! {
         4132524221 => creation_args: Option<CmcCreationArgs>,
     }
 }
+
 projection! {
     /// Ledger-reported creation success.
      Created {
@@ -64,6 +71,7 @@ projection! {
         1313628723 => canister_id: Principal [required],
     }
 }
+
 projection! {
     /// Original transaction observation; not permission to allocate again.
      Duplicate {
@@ -73,6 +81,7 @@ projection! {
         1313628723 => canister_id: Option<Principal> [strict_optional],
     }
 }
+
 projection! {
     /// Ledger time refusal.
      Future {
@@ -80,6 +89,7 @@ projection! {
         2709806499 => ledger_time: u64 [required],
     }
 }
+
 projection! {
     /// Ledger balance refusal.
      InsufficientFunds {
@@ -87,6 +97,7 @@ projection! {
         596483356 => balance: Nat [required],
     }
 }
+
 projection! {
     /// Failed creation with explicit refund/fee observations.
      FailedToCreate {
@@ -98,6 +109,7 @@ projection! {
         3052565332 => fee_block: Option<Nat> [strict_optional],
     }
 }
+
 projection! {
     /// Unclassified ledger error.
      GenericError {
@@ -107,6 +119,7 @@ projection! {
         3601615940 => error_code: Nat [required],
     }
 }
+
 projection! {
     /// All selected create_canister errors; unknown selected variants refuse.
     enum CreateError {
@@ -126,6 +139,7 @@ projection! {
         4206284395 => InsufficientFunds(InsufficientFunds),
     }
 }
+
 projection! {
     /// Complete ledger success/refusal outcome.
     enum CreateResult {
@@ -135,12 +149,14 @@ projection! {
         3456837 => Err(CreateError),
     }
 }
+
 /// Decode one complete creation result with shared byte/work/storage budgets.
 /// # Errors
 /// Refuses malformed, unknown selected variants, trailing or over-budget input.
 pub fn decode_created(bytes: &[u8], limits: Limits) -> Result<CreateResult, Error> {
     candid::decode(bytes, limits)
 }
+
 /// Decode exactly one arbitrary Nat balance or fee.
 /// # Errors
 /// Refuses wrong arity/types, malformed, trailing or over-budget input.
@@ -157,6 +173,7 @@ impl Encode for Account {
         self.subaccount.write(writer)
     }
 }
+
 /// Encode one canonical ICRC account without erasing absent-versus-zero presence.
 /// # Errors
 /// Refuses complete output above the inclusive byte limit before allocation.
@@ -166,6 +183,7 @@ pub fn encode_balance_account(
 ) -> Result<Vec<u8>, EncodeError> {
     crate::candid::encode::encode(account, maximum_bytes)
 }
+
 /// Encode exact zero arguments for icrc1_fee.
 /// # Errors
 /// Refuses the complete output above the inclusive limit.
@@ -181,6 +199,7 @@ pub fn encode_fee_args(maximum_bytes: usize) -> Result<Vec<u8>, EncodeError> {
         Ok(bytes)
     }
 }
+
 /// ICP account identifier: CRC32 prefix and upstream SHA-224 domain digest.
 /// An absent subaccount and an explicit zero subaccount have the same ICP identity.
 #[must_use]
@@ -203,12 +222,14 @@ pub fn icp_account_identifier(account: &Account) -> [u8; 32] {
 pub fn encode_metadata_args(maximum_bytes: usize) -> Result<Vec<u8>, EncodeError> {
     encode_fee_args(maximum_bytes)
 }
+
 /// Decode exactly one nat8 decimals observation; no balance scaling is performed.
 /// # Errors
 /// Refuses wrong arity/type, malformed, trailing or over-budget input.
 pub fn decode_decimals(bytes: &[u8], limits: Limits) -> Result<u8, Error> {
     candid::decode(bytes, limits)
 }
+
 /// Decode exactly one symbol, charging its UTF-8 bytes before reserving storage.
 /// The caller's byte, work and logical-allocation ceilings bound the text.
 /// This observation is independent of a successful raw balance read.

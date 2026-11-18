@@ -11,6 +11,7 @@ struct Request {
 struct Response {
     subnet_id: Option<Principal>,
 }
+
 fn limits() -> Limits {
     Limits {
         bytes: 4096,
@@ -22,6 +23,7 @@ fn limits() -> Limits {
         skipping: 4096,
     }
 }
+
 #[test]
 fn upstream_schema_preserves_exact_principals_and_result_variants() {
     for bytes in [&[][..], &[4], &[7; 29]] {

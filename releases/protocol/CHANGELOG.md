@@ -3,6 +3,12 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.3.6] - 2026-11-18
+
+### 🔧 Maintenance
+
+- Group wire codec imports and organize projection macros and test declarations across the protocol modules.
+
 ## [0.3.5] - 2026-11-17
 
 ### ✨ Added

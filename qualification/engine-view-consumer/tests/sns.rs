@@ -78,6 +78,7 @@ struct GetResponse {
 struct ListResponse {
     neurons: Vec<Neuron>,
 }
+
 fn limits() -> Limits {
     Limits {
         bytes: 65536,
@@ -89,6 +90,7 @@ fn limits() -> Limits {
         skipping: 65536,
     }
 }
+
 fn neuron() -> Neuron {
     Neuron {
         id: Some(NeuronId { id: vec![255; 32] }),
@@ -125,6 +127,7 @@ fn neuron() -> Neuron {
         }),
     }
 }
+
 fn freeze(name: &str, bytes: &[u8]) {
     let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../engine-view-wasm/fixtures")
@@ -134,6 +137,7 @@ fn freeze(name: &str, bytes: &[u8]) {
     }
     assert_eq!(std::fs::read(path).unwrap(), bytes);
 }
+
 fn check_neuron(value: &sns::Neuron) {
     assert_eq!(value.id.as_ref().unwrap().id, vec![255; 32]);
     assert_eq!(value.permissions[0].principal, None);
@@ -156,6 +160,7 @@ fn check_neuron(value: &sns::Neuron) {
     assert_eq!(value.source_nns_neuron_id, Some(u64::MAX));
     assert_eq!(value.voting_power_percentage_multiplier, 999);
 }
+
 #[test]
 fn requests_match_independent_optional_record_schema() {
     for id in [None, Some(vec![]), Some(vec![255; 32]), Some(vec![1; 33])] {
@@ -191,6 +196,7 @@ fn requests_match_independent_optional_record_schema() {
         }
     }
 }
+
 #[test]
 fn success_errors_missing_and_raw_optionals_remain_distinct() {
     let bytes = candid::encode_one(GetResponse {
@@ -273,6 +279,7 @@ fn success_errors_missing_and_raw_optionals_remain_distinct() {
         None
     );
 }
+
 fn refused_prefixes(bytes: &[u8], decode: impl Fn(&[u8], Limits) -> Result<(), Error>) {
     for end in 0..bytes.len() {
         assert!(decode(&bytes[..end], limits()).is_err(), "prefix {end}");
@@ -316,6 +323,7 @@ fn refused_prefixes(bytes: &[u8], decode: impl Fn(&[u8], Limits) -> Result<(), E
         }
     }
 }
+
 #[test]
 fn budgets_wrong_types_arity_variants_and_malformed_fields_refuse() {
     let bytes = candid::encode_one(GetResponse {
@@ -383,6 +391,7 @@ fn budgets_wrong_types_arity_variants_and_malformed_fields_refuse() {
     bytes[i] = 255;
     assert!(sns::decode_get_neuron(&bytes, limits()).is_err());
 }
+
 #[test]
 fn display_metadata_is_independent_of_full_width_balances() {
     assert_eq!(ledger::encode_metadata_args(6).unwrap(), b"DIDL\0\0");

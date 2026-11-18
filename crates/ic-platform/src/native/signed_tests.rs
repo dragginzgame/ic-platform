@@ -1,19 +1,21 @@
-use super::signed::*;
-use super::*;
-use crate::certificate::{
-    TimeWindow,
-    construction::{Certificate, encode_certificate, fork, labeled, leaf},
+use super::{signed::*, *};
+use crate::{
+    certificate::{
+        TimeWindow,
+        construction::{Certificate, encode_certificate, fork, labeled, leaf},
+    },
+    ed25519::{Signer, SigningKey},
+    ingress::{self, Content},
 };
-use crate::ed25519::{Signer, SigningKey};
-use crate::ingress;
-use crate::ingress::Content;
 use ed25519_dalek::pkcs8::EncodePrivateKey;
 use ic_verify_bls_signature::PrivateKey;
+
 fn identity() -> Ed25519Identity {
     let key = SigningKey::from_bytes(&[9; 32]);
     let pem = key.to_pkcs8_pem(Default::default()).unwrap();
     Ed25519Identity::from_pem(&pem, 4096).unwrap()
 }
+
 fn update() -> PreparedUpdate {
     identity()
         .prepare_update(
@@ -29,6 +31,7 @@ fn update() -> PreparedUpdate {
         )
         .unwrap()
 }
+
 fn fixture() -> (ReadClient, PrivateKey, TimePolicy) {
     let mut raw = [0; 32];
     raw[31] = 1;
@@ -61,6 +64,7 @@ fn fixture() -> (ReadClient, PrivateKey, TimePolicy) {
         },
     )
 }
+
 fn proof(key: &PrivateKey, id: &[u8; 32], status: &[u8], reply: &[u8]) -> Vec<u8> {
     let tree = fork(
         labeled(
@@ -86,6 +90,7 @@ fn proof(key: &PrivateKey, id: &[u8; 32], status: &[u8], reply: &[u8]) -> Vec<u8
     )
     .unwrap()
 }
+
 #[test]
 fn offline_signing_and_exact_original_recovery() {
     let original = update();
@@ -129,6 +134,7 @@ fn offline_signing_and_exact_original_recovery() {
             .is_err()
     );
 }
+
 #[test]
 fn certified_original_status_is_bound_and_historical_policy_is_explicit() {
     let (client, key, time) = fixture();
@@ -316,6 +322,7 @@ fn status_envelope(update: &PreparedUpdate) -> ingress::Envelope {
         sender_delegation: None,
     }
 }
+
 fn sign_status(mut envelope: ingress::Envelope, seed: u8) -> Vec<u8> {
     let key = SigningKey::from_bytes(&[seed; 32]);
     envelope.sender_pubkey = Some(
@@ -332,6 +339,7 @@ fn sign_status(mut envelope: ingress::Envelope, seed: u8) -> Vec<u8> {
     );
     serde_cbor::to_vec(&envelope).unwrap()
 }
+
 #[test]
 fn external_status_admission_preserves_bytes_and_refuses_binding_changes() {
     let update = update();

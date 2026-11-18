@@ -2,6 +2,7 @@
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "raw-rand", not(target_family = "wasm")))]
 use ic_platform_protocol::raw_rand;
+
 #[test]
 fn canonical_management_schema_and_non_profile_refusals() {
     assert_eq!(

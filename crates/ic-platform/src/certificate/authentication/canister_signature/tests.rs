@@ -11,11 +11,13 @@ fn signing_key(n: u8) -> PrivateKey {
     bytes[31] = n;
     PrivateKey::deserialize(&bytes).unwrap()
 }
+
 fn root(n: u8) -> PreparedRootKey {
     let mut der = super::super::DER_PREFIX.to_vec();
     der.extend_from_slice(&signing_key(n).public_key().serialize());
     PreparedRootKey::from_der(&der).unwrap()
 }
+
 fn wire(tree: &HashTreeNode) -> Value {
     let values = match tree {
         HashTreeNode::Empty() => vec![Value::Integer(0)],
@@ -30,11 +32,13 @@ fn wire(tree: &HashTreeNode) -> Value {
     };
     Value::Array(values)
 }
+
 fn tagged(value: &Value) -> Vec<u8> {
     let mut bytes = vec![0xd9, 0xd9, 0xf7];
     bytes.extend_from_slice(&serde_cbor::to_vec(value).unwrap());
     bytes
 }
+
 fn cert(tree: &HashTree, signer: u8, authority: Option<Vec<u8>>) -> Vec<u8> {
     let mut input = b"\x0dic-state-root".to_vec();
     input.extend_from_slice(&tree.digest());
@@ -56,6 +60,7 @@ fn cert(tree: &HashTree, signer: u8, authority: Option<Vec<u8>>) -> Vec<u8> {
     }
     tagged(&Value::Map(fields))
 }
+
 fn witness(value: Vec<u8>) -> HashTree {
     labeled(
         b"sig".to_vec(),
@@ -65,6 +70,7 @@ fn witness(value: Vec<u8>) -> HashTree {
         ),
     )
 }
+
 fn envelope(witness: &HashTree, digest: [u8; 32], kind: Option<Option<&[u8]>>) -> Vec<u8> {
     let authority = kind.map(|kind| {
         let mut fields = fork(
@@ -105,6 +111,7 @@ fn envelope(witness: &HashTree, digest: [u8; 32], kind: Option<Option<&[u8]>>) -
         (Value::Text("tree".into()), wire(witness.as_ref())),
     ])))
 }
+
 fn policy() -> TimePolicy {
     let exact = |reference_ns| TimeWindow {
         reference_ns,
@@ -116,6 +123,7 @@ fn policy() -> TimePolicy {
         delegation: exact(5),
     }
 }
+
 fn limits() -> CanisterSignatureLimits {
     CanisterSignatureLimits {
         message_bytes: 7,
@@ -128,6 +136,7 @@ fn limits() -> CanisterSignatureLimits {
         },
     }
 }
+
 fn verify<'a>(
     bytes: &'a [u8],
     message: &'a [u8],
@@ -170,6 +179,7 @@ fn key_admission_is_bounded_canonical_and_preserves_identity() {
     maximum.push(0);
     assert!(CanisterSignatureKey::from_der(&maximum).is_err());
 }
+
 #[test]
 fn direct_and_delegated_evidence_bind_exact_inputs_and_distinct_times() {
     for kind in [
@@ -193,6 +203,7 @@ fn direct_and_delegated_evidence_bind_exact_inputs_and_distinct_times() {
         );
     }
 }
+
 #[test]
 fn wrong_message_seed_and_nonempty_or_unknown_witness_refuse() {
     let tree = witness(vec![]);
@@ -215,6 +226,7 @@ fn wrong_message_seed_and_nonempty_or_unknown_witness_refuse() {
         ));
     }
 }
+
 #[test]
 fn witness_digest_and_issuer_must_match_certified_data() {
     let tree = witness(vec![]);
@@ -238,6 +250,7 @@ fn witness_digest_and_issuer_must_match_certified_data() {
         ))
     ));
 }
+
 #[test]
 fn delegation_requires_certified_non_cloud_subnet_type() {
     for kind in [
@@ -256,6 +269,7 @@ fn delegation_requires_certified_non_cloud_subnet_type() {
         ));
     }
 }
+
 #[test]
 fn signing_and_delegation_windows_remain_independent() {
     let tree = witness(vec![]);
@@ -275,6 +289,7 @@ fn signing_and_delegation_windows_remain_independent() {
         ));
     }
 }
+
 #[test]
 fn resource_bounds_and_ambiguous_witnesses_refuse() {
     let tree = witness(vec![]);

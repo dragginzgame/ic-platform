@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use super::Completion;
 use std::{
     sync::{Arc, Mutex},
@@ -54,6 +57,3 @@ pub(super) fn publish(shared: &Shared, completion: Completion) {
     }
     drop(completion);
 }
-
-#[cfg(test)]
-mod tests;

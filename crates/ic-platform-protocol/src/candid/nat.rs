@@ -36,21 +36,26 @@ impl<'de> Deserialize<'de> for Nat {
             fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("a nonnegative integer, decimal string or natural-number limbs")
             }
+
             fn visit_u64<E: de::Error>(self, value: u64) -> Result<Nat, E> {
                 Ok(Nat::from(value))
             }
+
             fn visit_i64<E: de::Error>(self, value: i64) -> Result<Nat, E> {
                 u64::try_from(value).map(Nat::from).map_err(E::custom)
             }
+
             fn visit_str<E: de::Error>(self, value: &str) -> Result<Nat, E> {
                 value.parse().map_err(E::custom)
             }
+
             fn visit_byte_buf<E: de::Error>(self, bytes: Vec<u8>) -> Result<Nat, E> {
                 match bytes.split_first() {
                     Some((1, magnitude)) => Ok(Nat(BigUint::from_bytes_le(magnitude))),
                     _ => Err(E::custom("expected Candid natural tag 1")),
                 }
             }
+
             fn visit_seq<S: SeqAccess<'de>>(self, mut sequence: S) -> Result<Nat, S::Error> {
                 let mut words = Vec::new();
                 while let Some(word) = sequence.next_element::<u32>()? {

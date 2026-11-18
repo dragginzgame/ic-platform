@@ -12,15 +12,19 @@ thread_local! {
     static RELEASE: Cell<bool> = const { Cell::new(false) };
     static FINISHED: Cell<bool> = const { Cell::new(false) };
 }
+
+/// Admit every caller to this qualification fixture.
 fn admit() -> Result<(), u8> {
     Ok(())
 }
+
 fn principal(bytes: &[u8]) -> Result<Principal, u8> {
     if bytes.is_empty() {
         return Err(1);
     }
     Principal::try_from_slice(bytes).map_err(|_| 2)
 }
+
 fn pair(bytes: &[u8]) -> Result<(Principal, Principal), u8> {
     let (&len, bytes) = bytes.split_first().ok_or(1)?;
     let len = usize::from(len);
@@ -29,9 +33,11 @@ fn pair(bytes: &[u8]) -> Result<(Principal, Principal), u8> {
     }
     Ok((principal(&bytes[..len])?, principal(&bytes[len..])?))
 }
+
 fn empty(bytes: &[u8]) -> Result<(), u8> {
     if bytes.is_empty() { Ok(()) } else { Err(1) }
 }
+
 #[expect(
     clippy::needless_pass_by_value,
     reason = "Generated failure handler owns the error"
@@ -40,8 +46,16 @@ fn fail(error: UpdateError<u8, u8>) -> ! {
     panic!("upgrade admission: {error:?}")
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "upgrade_probe", guard = admit,
-    decode = pair, max_bytes = 59, on_error = fail, manual_reply)]
+/// Forward the held peer reply to the caller awaiting the upgrade probe.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "upgrade_probe",
+    guard = admit,
+    decode = pair,
+    max_bytes = 59,
+    on_error = fail,
+    manual_reply
+)]
 async fn upgrade_probe((peer, caller): (Principal, Principal)) {
     let completion = Call::new(peer, "hold_upgrade", Wait::Unbounded)
         .owned_args(caller.as_slice().to_vec())
@@ -54,8 +68,16 @@ async fn upgrade_probe((peer, caller): (Principal, Principal)) {
     system::reply(bytes).unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "hold_upgrade", guard = admit,
-    decode = principal, max_bytes = 29, on_error = fail, manual_reply)]
+/// Hold a remote call open until release or the fixture round-trip limit.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "hold_upgrade",
+    guard = admit,
+    decode = principal,
+    max_bytes = 29,
+    on_error = fail,
+    manual_reply
+)]
 async fn hold_upgrade(caller: Principal) {
     STARTED.with(|value| value.set(true));
     // Cross-subnet round trips leave the driver an observable pending ingress.
@@ -85,15 +107,31 @@ async fn hold_upgrade(caller: Principal) {
     .unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "release_upgrade", guard = admit,
-    decode = empty, max_bytes = 0, on_error = fail, manual_reply)]
+/// Release the pending remote handler.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "release_upgrade",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    on_error = fail,
+    manual_reply
+)]
 async fn release_upgrade((): ()) {
     RELEASE.with(|value| value.set(true));
     system::reply(b"released").unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "upgrade_status", guard = admit,
-    decode = empty, max_bytes = 0, on_error = fail, manual_reply)]
+/// Return the remote handler’s started and finished flags.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "upgrade_status",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    on_error = fail,
+    manual_reply
+)]
 async fn upgrade_status((): ()) {
     system::reply(&[
         u8::from(STARTED.with(Cell::get)),

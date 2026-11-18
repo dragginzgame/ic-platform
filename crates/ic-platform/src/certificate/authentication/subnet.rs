@@ -38,6 +38,7 @@ impl<'a> AuthenticatedSubnetTime<'a> {
             Source::Parsed(_) => None,
         }
     }
+
     /// The exact borrowed upstream certificate when using the parsed entry point.
     #[must_use]
     pub const fn certificate(&self) -> Option<&'a ic_certification::Certificate> {
@@ -46,26 +47,31 @@ impl<'a> AuthenticatedSubnetTime<'a> {
             Source::Encoded(_) => None,
         }
     }
+
     /// Explicit trusted root selected for this verification.
     #[must_use]
     pub const fn root_key_der(&self) -> &[u8; 133] {
         &self.root_der
     }
+
     /// Requested subnet, bound to delegated authority or the trusted root-subnet input.
     #[must_use]
     pub const fn subnet(&self) -> Principal {
         self.subnet
     }
+
     /// Raw signing-certificate Unix nanoseconds, never the delegation timestamp.
     #[must_use]
     pub const fn time_ns(&self) -> u64 {
         self.time_ns
     }
+
     /// Explicit signing-certificate window checked by the verifier.
     #[must_use]
     pub const fn time_window(&self) -> TimeWindow {
         self.window
     }
+
     /// Delegation window and timestamp, if delegated; separate from signing time.
     #[must_use]
     pub const fn delegation(&self) -> Option<(TimeWindow, u64)> {

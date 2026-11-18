@@ -16,6 +16,7 @@ fn g1_non_subgroup() -> [u8; 48] {
     bytes[0] = 0x80;
     bytes
 }
+
 fn g2_non_subgroup() -> [u8; 96] {
     let mut bytes = [0; 96];
     bytes[0] = 0x80;

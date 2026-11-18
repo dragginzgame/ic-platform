@@ -3,6 +3,7 @@ const FRAME: &[u8] = b"\xd9\xd9\xf7\xa2\x6bcertificate\x41\xff\x64tree\x81\x00";
 fn decode(bytes: &[u8]) -> Result<DecodedCanisterSignature<'_>, CanisterSignatureDecodeError> {
     decode_canister_signature(bytes, CertificateDecodeLimits { bytes: bytes.len() })
 }
+
 #[test]
 fn retains_original_and_opaque_certificate_without_authentication() {
     let value = decode(FRAME).unwrap();
@@ -18,6 +19,7 @@ fn retains_original_and_opaque_certificate_without_authentication() {
         .is_err()
     );
 }
+
 #[test]
 fn bounds_precede_tag_and_grammar_checks() {
     assert!(matches!(
@@ -44,6 +46,7 @@ fn bounds_precede_tag_and_grammar_checks() {
     trailing.push(0);
     assert!(decode(&trailing).is_err());
 }
+
 #[test]
 fn duplicate_unknown_and_wrong_payload_kinds_refuse() {
     assert!(decode(b"\xd9\xd9\xf7\x82\x40\x81\x00").is_err());

@@ -124,6 +124,7 @@ fn original() -> ic_transport_types::EnvelopeContent {
         sender_info: None,
     }
 }
+
 #[test]
 fn upstream_identity_exact_bytes_and_presence() {
     let original = original();
@@ -216,6 +217,7 @@ fn content_map() -> std::collections::BTreeMap<serde_cbor::Value, serde_cbor::Va
     };
     map
 }
+
 #[test]
 fn strict_content_refuses_unknown_duplicates_and_wrong_byte_kinds() {
     use serde_cbor::Value as V;

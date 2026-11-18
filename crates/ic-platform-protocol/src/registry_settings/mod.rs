@@ -3,6 +3,9 @@
 //! This allocation-free projection authenticates nothing and resolves no replica
 //! defaults. It consumes an already extracted SubnetRecord, not a Registry envelope.
 
+#[cfg(test)]
+mod tests;
+
 use serde::{Deserialize, Serialize};
 
 pub(crate) mod wire;
@@ -81,6 +84,7 @@ message! {
         9 => sev_enabled: Option<bool>,
     }
 }
+
 message! {
     /// Raw optional limits; absent and zero are retained independently.
     ResourceLimits {
@@ -94,6 +98,7 @@ message! {
         4 => maximum_query_walltime_seconds: Option<u64>,
     }
 }
+
 message! {
     /// Selected SubnetRecord settings, without transport or effective-value policy.
     SubnetSettings {
@@ -123,6 +128,3 @@ pub fn decode_subnet_settings(bytes: &[u8], limits: Limits) -> Result<SubnetSett
     let mut remaining = limits.fields;
     SubnetSettings::read(FieldValue::Bytes(bytes), &mut remaining)
 }
-
-#[cfg(test)]
-mod tests;

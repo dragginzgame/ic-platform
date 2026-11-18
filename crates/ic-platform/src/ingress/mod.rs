@@ -2,6 +2,9 @@
 //! sender, delegation or certificate. Original bytes remain available for replay.
 //! The inclusive input ceiling is checked before parsing; it is not a process
 //! heap or work quota. Serde CBOR's recursion ceiling remains enabled.
+#[cfg(test)]
+mod tests;
+
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 mod wire;
@@ -50,6 +53,7 @@ pub(crate) fn encode<T: Serialize>(value: &T, maximum: usize) -> Result<Vec<u8>,
             self.count = next;
             Ok(bytes.len())
         }
+
         fn flush(&mut self) -> std::io::Result<()> {
             Ok(())
         }
@@ -166,6 +170,7 @@ impl Content {
             .map(|id| *id)
             .map_err(|_| Error::RequestId)
     }
+
     /// Return the upstream request ID's domain-separated signing bytes.
     ///
     /// # Errors
@@ -330,6 +335,7 @@ fn decode<'a, T: serde::de::DeserializeOwned>(
         value,
     })
 }
+
 /// Admit exactly one call content map, retaining its original bytes.
 ///
 /// # Errors
@@ -341,6 +347,7 @@ pub fn decode_call_content(bytes: &[u8], maximum: usize) -> Result<Packet<'_, Co
     }
     Ok(packet)
 }
+
 /// Admit exactly one read-state content map.
 ///
 /// # Errors
@@ -355,6 +362,7 @@ pub fn decode_read_state_content(
     }
     Ok(packet)
 }
+
 /// Admit one authentication envelope without verifying it.
 ///
 /// # Errors
@@ -362,6 +370,7 @@ pub fn decode_read_state_content(
 pub fn decode_envelope(bytes: &[u8], maximum: usize) -> Result<Packet<'_, Envelope>, Error> {
     decode(bytes, maximum)
 }
+
 /// Admit one synchronous call response without authenticating its certificate.
 ///
 /// # Errors
@@ -372,6 +381,7 @@ pub fn decode_call_response(
 ) -> Result<Packet<'_, CallResponse>, Error> {
     decode(bytes, maximum)
 }
+
 /// Admit one read-state response without authenticating its certificate.
 ///
 /// # Errors
@@ -382,6 +392,3 @@ pub fn decode_read_state_response(
 ) -> Result<Packet<'_, ReadStateResponse>, Error> {
     decode(bytes, maximum)
 }
-
-#[cfg(test)]
-mod tests;

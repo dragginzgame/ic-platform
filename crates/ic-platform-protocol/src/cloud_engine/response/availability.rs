@@ -1,8 +1,10 @@
 //! Available-node evidence without pagination or interpretation policy.
 
 use super::marketplace::NodeType;
-use crate::candid::projection::{absent, projection};
-use crate::candid::{self, Decode, Error, Limits, Reader, Schema};
+use crate::candid::{
+    self, Decode, Error, Limits, Reader, Schema,
+    projection::{absent, projection},
+};
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
@@ -23,6 +25,7 @@ projection! {
         3_027_975_590 => sev_enabled: bool [required],
     }
 }
+
 projection! {
     /// One source page; equal versions do not establish an atomic inventory.
     AvailableNodesPage {
@@ -34,6 +37,7 @@ projection! {
         2_680_076_337 => nodes: Vec<AvailableNode> [required],
     }
 }
+
 projection! {
     /// Declared application errors; source text remains uninterpreted.
     enum EngineError {
@@ -57,6 +61,7 @@ projection! {
         3_929_426_986 => BadRequest(String),
     }
 }
+
 projection! {
     /// Lowercase wire/Serde result with strict present-page admission.
     enum AvailableNodesPageResult {

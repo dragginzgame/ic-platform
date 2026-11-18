@@ -28,9 +28,11 @@ fn hex(text: &str) -> Vec<u8> {
         .map(|v| u8::from_str_radix(v, 16).unwrap())
         .collect()
 }
+
 fn minimal() -> Vec<u8> {
     hex("44 49 44 4c 03 6d 01 6c 02 db b7 01 71 bb f8 fd ed 0f 02 6d 68 01 00 01 01 65 00")
 }
+
 fn full() -> Vec<u8> {
     hex("44 49 44 4c 08
         6d 01
@@ -49,6 +51,7 @@ fn full() -> Vec<u8> {
         01 00 00 00 00 00 00 00 80
         02 01 01 01 01 01 04")
 }
+
 fn decode(bytes: &[u8]) -> Result<Vec<EngineView>, Error> {
     decode_get_engine_views_response(bytes, limits())
 }

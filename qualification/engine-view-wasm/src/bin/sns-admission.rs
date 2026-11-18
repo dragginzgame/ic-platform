@@ -1,6 +1,7 @@
 //! Independent SNS and ICRC frames replayed without the native Candid oracle.
 #![forbid(unsafe_code)]
 use ic_platform_protocol::{candid::Limits, ledger, sns};
+
 fn main() {
     let bytes = include_bytes!("../../fixtures/sns-neuron.bin");
     let limits = Limits {

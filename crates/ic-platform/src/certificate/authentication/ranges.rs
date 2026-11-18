@@ -55,6 +55,7 @@ impl<'de> Visitor<'de> for Ranges<'_> {
     fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("bounded canister-range pairs")
     }
+
     fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<bool, A::Error> {
         if seq.size_hint().is_some_and(|n| n > self.maximum) {
             self.exceeded.set(true);
@@ -112,11 +113,13 @@ impl Visitor<'_> for PrincipalVisitor {
     fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("principal byte string of at most 29 bytes")
     }
+
     fn visit_bytes<E: de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
         Principal::try_from_slice(bytes)
             .map(PrincipalBytes)
             .map_err(E::custom)
     }
+
     fn visit_byte_buf<E: de::Error>(self, bytes: Vec<u8>) -> Result<Self::Value, E> {
         self.visit_bytes(&bytes)
     }

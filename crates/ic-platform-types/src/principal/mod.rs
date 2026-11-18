@@ -2,6 +2,9 @@
 //!
 //! Bytes remain opaque; callers own identity policy and authority decisions.
 
+#[cfg(test)]
+mod tests;
+
 use data_encoding::BASE32_NOPAD;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use std::{fmt, str::FromStr};
@@ -278,6 +281,7 @@ impl de::Visitor<'_> for PrincipalVisitor {
     fn visit_str<E: de::Error>(self, text: &str) -> Result<Principal, E> {
         Principal::from_text(text).map_err(E::custom)
     }
+
     fn visit_bytes<E: de::Error>(self, bytes: &[u8]) -> Result<Principal, E> {
         Principal::try_from_slice(bytes).map_err(E::custom)
     }
@@ -292,6 +296,3 @@ impl<'de> Deserialize<'de> for Principal {
         }
     }
 }
-
-#[cfg(test)]
-mod tests;

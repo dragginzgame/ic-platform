@@ -10,6 +10,7 @@ fn save<T: EncodeArgs>(name: &str, value: &T) {
     )
     .unwrap();
 }
+
 fn main() {
     let p = Principal::from_slice(&[9; 29]);
     for present in [false, true] {

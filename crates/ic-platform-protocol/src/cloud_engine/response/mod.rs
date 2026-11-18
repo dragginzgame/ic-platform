@@ -1,10 +1,14 @@
 //! Decode-only selected response records.
 
-use crate::candid::{self, Decode, Error, Limits, Reader, Schema};
+#[cfg(test)]
+mod tests;
+
+use crate::candid::{
+    self, Decode, Error, Limits, Reader, Schema,
+    projection::{absent, projection},
+};
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
-
-use crate::candid::projection::{absent, projection};
 
 projection! {
     /// Raw Registry-copy progress; no freshness or atomic snapshot is implied.
@@ -55,6 +59,7 @@ projection! {
         4_257_184_827 => node_ids: Vec<Principal> [required],
     }
 }
+
 projection! {
     /// Selected public engine view, with raw source presence and ordering retained.
     EngineView {
@@ -90,9 +95,6 @@ pub fn decode_get_engine_views_response(
 ) -> Result<Vec<EngineView>, Error> {
     candid::decode(bytes, limits)
 }
-
-#[cfg(test)]
-mod tests;
 
 #[cfg(feature = "cloud-engine-marketplace")]
 mod arguments;

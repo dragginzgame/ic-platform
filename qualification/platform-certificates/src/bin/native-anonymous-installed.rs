@@ -33,6 +33,7 @@ fn now() -> u64 {
     )
     .unwrap()
 }
+
 #[cfg(not(target_family = "wasm"))]
 fn time() -> TimePolicy {
     let window = TimeWindow {
@@ -48,6 +49,7 @@ fn time() -> TimePolicy {
         },
     }
 }
+
 #[cfg(not(target_family = "wasm"))]
 fn run(command: &mut Command) -> Result<Vec<u8>> {
     let mut output = Vec::new();
@@ -140,6 +142,7 @@ impl Cli {
         assert_eq!(read.envelope_bytes(), status);
         Ok((update, read))
     }
+
     async fn call(
         &self,
         client: &ReadClient,
@@ -190,6 +193,7 @@ impl Cli {
         }
     }
 }
+
 #[cfg(target_family = "wasm")]
 fn main() {}
 #[cfg(not(target_family = "wasm"))]

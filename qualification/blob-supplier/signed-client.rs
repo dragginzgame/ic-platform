@@ -10,10 +10,12 @@ fn identity(seed:u8)->Ed25519Identity {
     };
     Ed25519Identity::from_pem(pem,4096).unwrap()
 }
+
 fn principal(seed:u8)->Principal { identity(seed).principal() }
 fn client(url:&str,root:&[u8],root_subnet:Principal,seed:u8)->Client {
     Client{identity:identity(seed),transport:ReadClient::new(ReadConfig{endpoint:url.into(),root:PreparedRootKey::from_der(root).unwrap(),root_subnet,message_bytes:2*1024*1024,request_timeout:Duration::from_secs(10),verification:VerificationLimits{tree_nodes:4096,tree_depth:64,delegation_bytes:131072,canister_ranges:256}}).unwrap()}
 }
+
 fn now()->u64 {std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos().try_into().unwrap()}
 fn policy()->TimePolicy{let w=TimeWindow{reference_ns:now(),max_age_ns:300_000_000_000,max_future_skew_ns:30_000_000_000};TimePolicy{certificate:w,delegation:TimeWindow{max_age_ns:86_400_000_000_000,..w}}}
 impl Client {
@@ -27,5 +29,6 @@ impl Client {
    }
   }).await.unwrap()
  }
+
  async fn query(&self,target:Principal,method:&str,args:Vec<u8>)->Result<Vec<u8>,ReadError>{self.transport.signed_query(&self.identity,target,method,&args,now()+60_000_000_000,policy()).await}
 }

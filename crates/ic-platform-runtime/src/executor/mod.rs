@@ -3,6 +3,16 @@
 //! The manual update adapter is experimental. Export/context and installed
 //! rollback qualification remain required before production adoption.
 
+#[cfg(test)]
+mod tests;
+
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+mod wasm;
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub(crate) use wasm::{check_update_entry, enter_synchronous};
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub use wasm::{run_global_timer, run_update};
+
 use std::{
     cell::{Cell, RefCell},
     collections::BTreeMap,
@@ -76,6 +86,7 @@ impl Wake for Signal {
     fn wake(self: Arc<Self>) {
         self.wake_by_ref();
     }
+
     fn wake_by_ref(self: &Arc<Self>) {
         if self.live.load(Ordering::SeqCst) {
             self.ready.store(true, Ordering::SeqCst);
@@ -96,88 +107,9 @@ struct Executor {
     current: Option<TaskToken>,
     synchronous: bool,
 }
+
 thread_local! {
     static EXECUTOR: RefCell<Executor> = const { RefCell::new(Executor { last: 0, tasks: BTreeMap::new(), current: None, synchronous: false }) };
-}
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) struct SynchronousEntry;
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-impl Drop for SynchronousEntry {
-    fn drop(&mut self) {
-        EXECUTOR.with(|executor| executor.borrow_mut().synchronous = false);
-    }
-}
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) fn enter_synchronous() -> Result<SynchronousEntry, EntryError> {
-    EXECUTOR.with(|executor| {
-        let mut executor = executor.borrow_mut();
-        if executor.current.is_some() || executor.synchronous {
-            return Err(EntryError::NestedEntry);
-        }
-        executor.synchronous = true;
-        Ok(SynchronousEntry)
-    })
-}
-
-/// Enters one method-attached root future from a manual update entrypoint.
-///
-/// Call only from a canister update export. Non-replicated and nested entries
-/// refuse; replicated-query/export validation still belongs to the entrypoint
-/// layer and is not established by the replicated-execution flag alone. This
-/// adapter emits no reply automatically and exposes no method-context handle.
-///
-/// # Panics
-/// User polling or destruction may trap. Initial traps can prevent returning a
-/// handle; callback rollback and cleanup behavior require installed qualification.
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub fn run_update(future: impl Future<Output = ()> + 'static) -> Result<TaskHandle, EntryError> {
-    check_update_entry()?;
-    start(Box::pin(future))
-}
-
-/// Enters a root future from the caller-owned `canister_global_timer` export.
-///
-/// The task uses the same executor and callback custody as updates, but has no
-/// ordinary reply authority, including in resumed callbacks. It is attached to
-/// this timer invocation; it is neither a child task nor migratory work. Call
-/// once per root from that export, never from an update, query or lifecycle hook.
-/// The replicated-execution flag cannot authenticate the export kind; the export
-/// owner must enforce this entry contract. Runtime does not arm or rearm timers.
-///
-/// # Errors
-/// Refuses non-replicated execution, nested polling/destruction and exhausted
-/// task identifiers before admission. Dropping the handle does not cancel work.
-///
-/// # Panics
-/// User polling/destruction may trap. Initial traps can prevent returning a
-/// handle. A failed callback cleanup leaves `Running` as an uncertain observation,
-/// not permission to retry. The consumer owns its committed dispatch record.
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub fn run_global_timer(
-    future: impl Future<Output = ()> + 'static,
-) -> Result<TaskHandle, EntryError> {
-    check_update_entry()?;
-    start_root(Box::pin(future), false)
-}
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) fn check_update_entry() -> Result<(), EntryError> {
-    if !crate::call::replicated_execution() {
-        return Err(EntryError::NonReplicated);
-    }
-    EXECUTOR.with(|executor| {
-        let executor = executor.borrow();
-        if executor.current.is_some() || executor.synchronous {
-            Err(EntryError::NestedEntry)
-        } else if executor.last == u64::MAX {
-            Err(EntryError::Capacity)
-        } else {
-            Ok(())
-        }
-    })
 }
 
 fn start(future: UserFuture) -> Result<TaskHandle, EntryError> {
@@ -242,6 +174,13 @@ pub(crate) fn claim_reply() -> Result<(), ReplyError> {
         task.replied = true;
         Ok(())
     })
+}
+
+/// Returns occupied executor entries for the installed accounting fixture.
+#[cfg(ic_platform_qualification_accounting)]
+#[doc(hidden)]
+pub fn observed_tasks() -> usize {
+    EXECUTOR.with(|executor| executor.borrow().tasks.len())
 }
 
 struct ResetContext(Option<TaskToken>);
@@ -327,6 +266,3 @@ pub(crate) fn terminate(token: TaskToken) {
         task.status.set(TaskState::TerminatedByCleanup);
     }
 }
-
-#[cfg(test)]
-mod tests;

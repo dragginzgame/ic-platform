@@ -7,6 +7,9 @@
 //! allocation. Zero seed bytes are valid protocol data. Readiness, entropy mixing,
 //! transport, cycles, stale-result admission and retries remain consumer-owned.
 
+#[cfg(test)]
+mod tests;
+
 /// Management method name; no call is issued by this module.
 pub const METHOD: &str = "raw_rand";
 /// Canonical empty Candid argument tuple.
@@ -65,6 +68,3 @@ pub fn decode(bytes: &[u8], maximum_bytes: usize) -> Result<[u8; 32], Error> {
     seed.copy_from_slice(&bytes[10..]);
     Ok(seed)
 }
-
-#[cfg(test)]
-mod tests;

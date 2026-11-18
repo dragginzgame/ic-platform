@@ -1,5 +1,8 @@
 //! Certificate authentication with explicit roots, authority and time windows.
 
+#[cfg(test)]
+mod tests;
+
 #[cfg(feature = "canister-signature-authentication")]
 mod canister_signature;
 mod delegation;
@@ -220,36 +223,43 @@ impl<'a> AuthenticatedCertificate<'a> {
     pub const fn original_bytes(&self) -> &'a [u8] {
         self.decoded.original_bytes()
     }
+
     /// Immutable authenticated tree, with upstream lookup distinctions intact.
     #[must_use]
     pub const fn tree(&self) -> &ic_certification::HashTree {
         &self.decoded.certificate.tree
     }
+
     /// Exact root admitted for this verification, not a default network root.
     #[must_use]
     pub const fn root_key_der(&self) -> &[u8; 133] {
         &self.root_der
     }
+
     /// Target supplied for this verification and checked against delegated ranges.
     #[must_use]
     pub const fn effective_canister(&self) -> Principal {
         self.target
     }
+
     /// Explicit window checked against the authenticated timestamp.
     #[must_use]
     pub const fn time_window(&self) -> TimeWindow {
         self.window
     }
+
     /// Authenticated certificate time, in Unix nanoseconds.
     #[must_use]
     pub const fn time_ns(&self) -> u64 {
         self.time_ns
     }
+
     /// Authenticated subnet, delegation window and timestamp, if delegated.
     #[must_use]
     pub const fn delegation(&self) -> Option<(Principal, TimeWindow, u64)> {
         self.delegation
     }
+
     /// Surrender authenticated status and recover the immutable unverified wrapper.
     #[must_use]
     pub fn into_unverified(self) -> DecodedCertificate<'a> {
@@ -467,6 +477,3 @@ fn forest<'a>(
         HashTreeNode::Empty() | HashTreeNode::Pruned(_) => Ok(()),
     }
 }
-
-#[cfg(test)]
-mod tests;

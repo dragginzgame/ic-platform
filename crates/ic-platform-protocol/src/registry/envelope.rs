@@ -38,6 +38,7 @@ impl<'a> Field<'a> for GetValueResponse<'a> {
         Ok(())
     }
 }
+
 /// Decode an inline response with one aggregate field budget including its error.
 ///
 /// # Errors
@@ -75,6 +76,7 @@ pub fn decode_get_latest_version_response(bytes: &[u8], limits: Limits) -> Resul
     }
     Ok(result)
 }
+
 /// Decode subnet IDs as borrowed byte strings in source order, without identity admission.
 ///
 /// # Errors
@@ -97,6 +99,7 @@ pub fn decode_subnet_list(bytes: &[u8], limits: Limits) -> Result<Vec<&[u8]>, Er
     }
     Ok(result)
 }
+
 fn width(n: u64) -> usize {
     if n == 0 {
         1
@@ -104,6 +107,7 @@ fn width(n: u64) -> usize {
         usize::try_from(n.ilog2() / 7 + 1).expect("u64 width fits usize")
     }
 }
+
 fn integer(mut n: u64, output: &mut Vec<u8>) {
     while n >= 128 {
         output.push(n as u8 | 128);
@@ -111,6 +115,7 @@ fn integer(mut n: u64, output: &mut Vec<u8>) {
     }
     output.push(n as u8);
 }
+
 /// Encode a key and optional UInt64Value snapshot version with a preallocation bound.
 ///
 /// # Errors

@@ -1,3 +1,5 @@
+mod delegation_tests;
+
 use super::*;
 use crate::certificate::{CertificateDecodeLimits, decode_certificate};
 use ic_verify_bls_signature::PrivateKey;
@@ -7,11 +9,13 @@ fn signer(number: u8) -> PrivateKey {
     scalar[31] = number;
     PrivateKey::deserialize(&scalar).unwrap()
 }
+
 fn root(number: u8) -> PreparedRootKey {
     let mut der = DER_PREFIX.to_vec();
     der.extend_from_slice(&signer(number).public_key().serialize());
     PreparedRootKey::from_der(&der).unwrap()
 }
+
 fn window() -> TimeWindow {
     TimeWindow {
         reference_ns: 10,
@@ -19,6 +23,7 @@ fn window() -> TimeWindow {
         max_future_skew_ns: 1,
     }
 }
+
 fn limits() -> VerificationLimits {
     VerificationLimits {
         tree_nodes: 2,
@@ -27,6 +32,7 @@ fn limits() -> VerificationLimits {
         canister_ranges: 0,
     }
 }
+
 fn envelope(tree: &[u8], signature: &[u8]) -> Vec<u8> {
     let mut bytes = b"\xa2\x64tree".to_vec();
     bytes.extend_from_slice(tree);
@@ -35,9 +41,11 @@ fn envelope(tree: &[u8], signature: &[u8]) -> Vec<u8> {
     bytes.extend_from_slice(signature);
     bytes
 }
+
 fn signed(time: u8) -> Vec<u8> {
     signed_time(&[time])
 }
+
 fn signed_time(time: &[u8]) -> Vec<u8> {
     let tree = ic_certification::labeled(b"time".as_slice(), ic_certification::leaf(time));
     let mut message = b"\x0dic-state-root".to_vec();
@@ -47,6 +55,7 @@ fn signed_time(time: &[u8]) -> Vec<u8> {
     wire.extend_from_slice(time);
     envelope(&wire, &signer(1).sign(&message).serialize())
 }
+
 fn verify<'a>(
     bytes: &'a [u8],
     key: &PreparedRootKey,
@@ -300,8 +309,6 @@ fn signature_without_ic_state_root_domain_refuses() {
         VerifyError::Signature
     );
 }
-
-mod delegation_tests;
 
 #[test]
 fn subnet_root_binding_and_full_width_time_are_explicit() {

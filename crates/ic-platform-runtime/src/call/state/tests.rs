@@ -1,11 +1,10 @@
 use super::{Completion, Shared, State, publish, replace_waker, retire};
 use std::{
-    sync::atomic::{AtomicUsize, Ordering},
-    task::Wake,
-};
-use std::{
-    sync::{Arc, Mutex},
-    task::Waker,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicUsize, Ordering},
+    },
+    task::{Wake, Waker},
 };
 
 struct Reentrant {

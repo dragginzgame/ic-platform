@@ -20,26 +20,31 @@ impl SubnetObservation {
     pub fn certificate_bytes(&self) -> &[u8] {
         &self.certificate
     }
+
     /// Exact selected subnet identity, authenticated independently of effective canisters.
     #[must_use]
     pub const fn subnet(&self) -> Principal {
         self.subnet
     }
+
     /// Authenticated signing time in nanoseconds.
     #[must_use]
     pub const fn time_ns(&self) -> u64 {
         self.time_ns
     }
+
     /// Raw certified subnet type. Unknown strings remain visible; absence is None.
     #[must_use]
     pub fn subnet_type(&self) -> Option<&str> {
         self.kind.as_deref()
     }
+
     /// All four raw certified metrics, or None when the selected leaf is absent.
     #[must_use]
     pub const fn metrics(&self) -> Option<&SubnetMetrics> {
         self.metrics.as_ref()
     }
+
     /// Certified node key bytes; this is not application enrollment.
     pub fn node_keys(&self) -> impl Iterator<Item = (&[u8], &[u8])> {
         self.node_keys
@@ -72,6 +77,7 @@ impl ReadClient {
             .await?;
         self.admit_subnet(bytes, subnet, time)
     }
+
     pub(super) fn admit_subnet(
         &self,
         bytes: Vec<u8>,

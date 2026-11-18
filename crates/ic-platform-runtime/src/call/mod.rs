@@ -1,5 +1,8 @@
 //! One consuming request shape, with independent method and argument ownership.
 
+#[cfg(all(test, feature = "call"))]
+mod tests;
+
 #[cfg(feature = "call")]
 use candidate_types::Principal;
 #[cfg(feature = "call")]
@@ -17,18 +20,9 @@ pub use completion::{Completion, Outcome, RejectCode, Rejection};
 pub(crate) mod ic0;
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) use ic0::replicated_execution;
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) use ic0::read_args;
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) use ic0::reply;
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub(crate) use ic0::{
-    argument_size, certificate, certified_root, controller, principal, set_global_timer,
-    system_time, system_version, trap_message,
+    argument_size, certificate, certified_root, controller, principal, read_args,
+    replicated_execution, reply, set_global_timer, system_time, system_version, trap_message,
 };
 
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
@@ -50,6 +44,13 @@ mod registry;
 mod state;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use future::CallFuture;
+#[cfg(all(
+    feature = "call-ic0",
+    target_arch = "wasm32",
+    ic_platform_qualification_accounting
+))]
+#[doc(hidden)]
+pub use future::observed_count;
 
 /// The requested attachment plus the system cost cannot fit in u128.
 /// No call was submitted or cycles reserved by the observation.
@@ -181,6 +182,3 @@ impl<'m, 'a> Call<'m, 'a> {
         self.wait
     }
 }
-
-#[cfg(all(test, feature = "call"))]
-mod tests;

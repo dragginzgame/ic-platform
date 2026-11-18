@@ -3,6 +3,12 @@
 //! `native-signed-secp256k1` also supplies explicit secp256k1 query identities.
 //! No Agent, root discovery, cache, retry or polling is selected.
 //! Dropping an operation drops its HTTP future; callers own whole-operation deadlines.
+#[cfg(all(test, feature = "native-signed", feature = "certificate-construction"))]
+mod signed_tests;
+
+#[cfg(all(test, feature = "certificate-fixture-signing"))]
+mod canister_tests;
+
 use crate::certificate::{
     CertificateDecodeLimits, PreparedRootKey, TimePolicy, VerificationLimits, VerifyError,
     authenticate_certificate, authenticate_subnet_time, decode_certificate,
@@ -122,11 +128,13 @@ impl ReadClient {
             endpoint,
         })
     }
+
     /// Explicit selected trusted root; no network discovery.
     #[must_use]
     pub const fn root(&self) -> &PreparedRootKey {
         &self.config.root
     }
+
     async fn post(&self, path: &str, content: &EnvelopeContent) -> Result<Vec<u8>, ReadError> {
         let envelope = Envelope {
             content: Cow::Borrowed(content),
@@ -137,9 +145,11 @@ impl ReadClient {
         let body = envelope.encode_bytes();
         self.post_bytes(path, body).await
     }
+
     async fn post_bytes(&self, path: &str, body: Vec<u8>) -> Result<Vec<u8>, ReadError> {
         self.post_response(path, body).await.map(|(_, bytes)| bytes)
     }
+
     async fn post_response(
         &self,
         path: &str,
@@ -179,6 +189,7 @@ impl ReadClient {
         }
         Ok((status, bytes))
     }
+
     async fn state(
         &self,
         kind: &str,
@@ -204,6 +215,7 @@ impl ReadClient {
             serde_cbor::from_slice(&bytes).map_err(|_| ReadError::Packet)?;
         Ok(response.certificate)
     }
+
     fn decode<'a>(
         &self,
         bytes: &'a [u8],
@@ -216,9 +228,3 @@ impl ReadClient {
         )?)
     }
 }
-
-#[cfg(all(test, feature = "native-signed", feature = "certificate-construction"))]
-mod signed_tests;
-
-#[cfg(all(test, feature = "certificate-fixture-signing"))]
-mod canister_tests;

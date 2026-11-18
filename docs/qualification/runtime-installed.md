@@ -500,11 +500,11 @@ The expanded installed corpus, host/Wasm Clippy and dependency checks passed.
 The Linux PocketIC 16.1.0 run of `make qualify-runtime-installed` on 18 November
 2026 exercised the local Runtime 0.23.17 implementation. The ordinary fixture
 uses that implementation directly. For private accounting the same Make target
-also builds a separate Wasm from a copy of the working sources. Its added query
-reads the lengths of the real callback and executor maps. Both artifacts run
-through the installed driver. Measurement code lives in
-[the private build script](../../qualification/runtime-accounting.mjs) and
-[the driver](../../qualification/runtime-installed/src/accounting.rs).
+builds a second Wasm with `--cfg ic_platform_qualification_accounting` from
+the same working sources. Its query reads the lengths of the callback and
+executor maps. The [installed driver](../../qualification/runtime-installed/src/native/accounting.rs)
+checks both counts. The ordinary fixture also checks its export table for
+absence of the accounting query.
 Only the instrumented artifact exposes the two counts. The units below are
 occupied entries. Heap capacity, allocator overhead and bytes captured by an
 arbitrary user future have no implied bound.

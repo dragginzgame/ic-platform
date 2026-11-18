@@ -33,21 +33,25 @@ impl CanisterObservation {
     pub const fn canister(&self) -> Principal {
         self.canister
     }
+
     /// Delegated signing subnet, or the explicitly trusted root-subnet binding.
     #[must_use]
     pub const fn subnet(&self) -> Principal {
         self.subnet
     }
+
     /// Certified controller identities in their source order.
     #[must_use]
     pub fn controllers(&self) -> &[Principal] {
         &self.controllers
     }
+
     /// Exact original certificate bytes, retained for independent replay.
     #[must_use]
     pub fn certificate_bytes(&self) -> &[u8] {
         &self.certificate
     }
+
     /// Authenticated signing time under the supplied policy.
     #[must_use]
     pub const fn time_ns(&self) -> u64 {
@@ -90,6 +94,7 @@ impl ReadClient {
             .await?;
         self.admit_canister(bytes, canister, time, maximum_controllers)
     }
+
     pub(super) fn admit_canister(
         &self,
         bytes: Vec<u8>,
@@ -158,6 +163,7 @@ impl<'de> Visitor<'de> for Controllers<'_> {
     fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("bounded array of principal byte strings")
     }
+
     fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
         if seq.size_hint().is_some_and(|n| n > self.maximum) {
             *self.limit = true;
@@ -190,6 +196,7 @@ impl<'de> serde::Deserialize<'de> for Controller {
             fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 f.write_str("principal byte string")
             }
+
             fn visit_borrowed_bytes<E: serde::de::Error>(
                 self,
                 bytes: &'de [u8],

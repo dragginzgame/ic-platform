@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod tests;
+
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::collections::BTreeSet;
@@ -218,6 +221,3 @@ pub(super) fn expand_kind(
         }
     })
 }
-
-#[cfg(test)]
-mod tests;

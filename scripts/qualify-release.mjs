@@ -140,7 +140,7 @@ export function qualifyRelease({root = process.cwd(), output, execute = spawnSyn
   // One serial Make graph preserves prerequisites and runs shared phony targets
   // once. Parallel qualification can mutate shared fixture artifacts, so refuse
   // inherited parallel dispatch by explicitly selecting one job.
-  let command = 'make', args = ['--jobs=1', ...catalog.targets];
+  let command = 'make', args = ['--jobs=1', '--no-keep-going', ...catalog.targets];
   let env = process.env;
   const selection = group === 'platform' && stableSelection(root, commit);
   if (selection) {

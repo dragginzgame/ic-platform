@@ -13,27 +13,40 @@ thread_local! {
     static HANDLE: RefCell<Option<TaskHandle>> = const { RefCell::new(None) };
 }
 
+/// Admit every caller to this qualification fixture.
 fn admit() -> Result<(), u8> {
     Ok(())
 }
+
 fn decode(bytes: &[u8]) -> Result<u8, u8> {
     match bytes {
         [mode @ 0..=4] => Ok(*mode),
         _ => Err(1),
     }
 }
+
 fn empty(bytes: &[u8]) -> Result<(), u8> {
     if bytes.is_empty() { Ok(()) } else { Err(1) }
 }
+
 fn encode(bytes: Vec<u8>) -> Result<Vec<u8>, u8> {
     Ok(bytes)
 }
+
 fn fail<T: std::fmt::Debug>(error: T) -> ! {
     panic!("timer fixture: {error:?}")
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "timer_arm", guard = admit,
-    decode = decode, max_bytes = 1, encode = encode, on_error = fail)]
+/// Arm the fixture timer and persist its initial stage.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "timer_arm",
+    guard = admit,
+    decode = decode,
+    max_bytes = 1,
+    encode = encode,
+    on_error = fail
+)]
 fn arm(mode: u8) -> Vec<u8> {
     // The arm update commits before the timer executes. One private stable page
     // belongs to this single-attempt fixture. Byte 0 is its schema version.
@@ -48,8 +61,16 @@ fn arm(mode: u8) -> Vec<u8> {
     system::canister_version().to_le_bytes().to_vec()
 }
 
-#[candidate_runtime::query(runtime = candidate_runtime, name = "timer_observe", guard = admit,
-    decode = empty, max_bytes = 0, encode = encode, on_error = fail)]
+/// Read timer execution counters and the observed task state.
+#[candidate_runtime::query(
+    runtime = candidate_runtime,
+    name = "timer_observe",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
 fn observe((): ()) -> Vec<u8> {
     assert!(matches!(
         executor::run_global_timer(async { panic!("query must not poll") }),
@@ -68,8 +89,16 @@ fn observe((): ()) -> Vec<u8> {
     bytes
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "timer_peer", guard = admit,
-    decode = empty, max_bytes = 0, encode = encode, on_error = fail)]
+/// Return the payload awaited by the timer task.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "timer_peer",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
 fn peer((): ()) -> Vec<u8> {
     vec![42]
 }
@@ -114,8 +143,16 @@ extern "C" fn timer() {
     HANDLE.with(|slot| *slot.borrow_mut() = Some(handle));
 }
 
-#[candidate_runtime::query(runtime = candidate_runtime, name = "timer_record", guard = admit,
-    decode = empty, max_bytes = 0, encode = encode, on_error = fail)]
+/// Read the persisted timer schema, mode and stage.
+#[candidate_runtime::query(
+    runtime = candidate_runtime,
+    name = "timer_record",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
 fn record((): ()) -> Vec<u8> {
     let mut bytes = vec![0; 3];
     candidate_runtime::raw::stable64_read(0, &mut bytes);
@@ -133,4 +170,23 @@ pub(super) fn migrate_record() {
         2 => {}
         version => panic!("unknown timer record version {version}"),
     }
+}
+
+/// Returns callback and task occupancy as two little-endian Wasm32 counts.
+#[cfg(ic_platform_qualification_accounting)]
+#[candidate_runtime::query(
+    runtime = candidate_runtime,
+    name = "registry_size",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
+fn registry_size((): ()) -> Vec<u8> {
+    let mut counts = candidate_runtime::call::observed_count()
+        .to_le_bytes()
+        .to_vec();
+    counts.extend_from_slice(&candidate_runtime::executor::observed_tasks().to_le_bytes());
+    counts
 }

@@ -28,9 +28,11 @@ thread_local! {
     static DROPPED: Cell<u8> = const { Cell::new(0) };
 }
 
+/// Admit every caller to this qualification fixture.
 fn admit() -> Result<(), u8> {
     Ok(())
 }
+
 fn decode(bytes: &[u8]) -> Result<(u8, Principal), u8> {
     let (&mode, target) = bytes.split_first().ok_or(1)?;
     if mode > 6 || target.is_empty() {
@@ -38,9 +40,11 @@ fn decode(bytes: &[u8]) -> Result<(u8, Principal), u8> {
     }
     Ok((mode, Principal::try_from_slice(target).map_err(|_| 3)?))
 }
+
 fn empty(bytes: &[u8]) -> Result<(), u8> {
     if bytes.is_empty() { Ok(()) } else { Err(1) }
 }
+
 #[expect(
     clippy::needless_pass_by_value,
     reason = "Generated failure handlers own admission errors"
@@ -59,7 +63,7 @@ impl Drop for ObserveDrop {
         }
         // Re-enter the real adapter from user destruction. It must refuse
         // before invoking admission callbacks, without a RefCell borrow trap.
-        crate::exports::assert_entry_refusal(EntryError::NestedEntry);
+        super::exports::assert_entry_refusal(EntryError::NestedEntry);
         DROPPED.with(|value| value.set(value.get() + 1));
         assert!(!self.1, "trap-during-cleanup");
     }
@@ -171,8 +175,16 @@ async fn await_probe((mode, target): (u8, Principal)) {
     drop(orphan);
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "observe", guard = admit,
-    decode = empty, max_bytes = 0, on_error = fail, manual_reply)]
+/// Read the fixture’s committed counters and task outcomes.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "observe",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    on_error = fail,
+    manual_reply
+)]
 async fn observe((): ()) {
     let mut observation = vec![
         STARTED.with(Cell::get),
@@ -189,8 +201,16 @@ async fn observe((): ()) {
     system::reply(&observation).unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "observe_dispatch", guard = admit,
-    decode = empty, max_bytes = 0, on_error = fail, manual_reply)]
+/// Read the response-observed flag for each dispatched handler.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "observe_dispatch",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    on_error = fail,
+    manual_reply
+)]
 async fn observe_dispatch((): ()) {
     let records: Vec<u8> =
         DISPATCH.with(|records| records.borrow().iter().copied().map(u8::from).collect());
@@ -198,8 +218,16 @@ async fn observe_dispatch((): ()) {
 }
 
 // Weak records cannot themselves retain the handler-owned allocation.
-#[candidate_runtime::update(runtime = candidate_runtime, name = "observe_custody", guard = admit,
-    decode = empty, max_bytes = 0, on_error = fail, manual_reply)]
+/// Read retained handler ownership after completion or cleanup.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "observe_custody",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    on_error = fail,
+    manual_reply
+)]
 async fn observe_custody((): ()) {
     let counts: Vec<u8> = CUSTODY.with(|records| {
         records
@@ -213,8 +241,16 @@ async fn observe_custody((): ()) {
 
 // Keep the first completion alive across a different callback context. Neither
 // peer path accepts attached cycles, so both attachments must be returned.
-#[candidate_runtime::update(runtime = candidate_runtime, name = "refund_probe", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Observe the call result and cycles returned by the callback.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "refund_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn refund_probe((mode, target): (u8, Principal)) {
     assert!(mode <= 2);
     let reply_cycles = if mode == 2 { (1_u128 << 64) + 17 } else { 17 };
@@ -276,8 +312,16 @@ async fn refund_probe((mode, target): (u8, Principal)) {
     system::reply(&result).unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "resource_probe", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Exercise call resource refusals and report the result.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "resource_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn resource_probe((mode, target): (u8, Principal)) {
     assert_eq!(mode, 0);
     for attachment in [u128::MAX, 1_u128 << 100] {
@@ -328,8 +372,16 @@ async fn resource_probe((mode, target): (u8, Principal)) {
     system::reply(bytes).unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "notify_probe", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Exercise one-way submission across commit and rollback.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "notify_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn notify_probe((mode, target): (u8, Principal)) {
     assert!(mode <= 2);
     let peer_mode = if mode == 2 { 2 } else { 1 };
@@ -350,8 +402,16 @@ async fn notify_probe((mode, target): (u8, Principal)) {
     system::reply(bytes).unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "stale_probe", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Exercise a saved wake after its original task has retired.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "stale_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn stale_probe((mode, target): (u8, Principal)) {
     assert!(mode <= 1);
     if mode == 0 {
@@ -392,8 +452,16 @@ async fn stale_probe((mode, target): (u8, Principal)) {
     system::reply(&[CAPTURE_POLLS.with(Cell::get), polls, bytes[0]]).unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "bounded_probe", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Observe the selected bounded-wait outcome.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "bounded_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn bounded_probe((mode, target): (u8, Principal)) {
     assert!(mode <= 1);
     let seconds = if mode == 0 { 1 } else { 30 };
@@ -417,8 +485,16 @@ async fn bounded_probe((mode, target): (u8, Principal)) {
     }
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "submission_probe", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Fill the request queue and return its accepted count and refusal code.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "submission_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn submission_probe((mode, target): (u8, Principal)) {
     assert_eq!(mode, 0);
     for accepted in 0_u32..1024 {
@@ -450,10 +526,16 @@ async fn submission_probe((mode, target): (u8, Principal)) {
     panic!("bounded corpus did not reach system queue refusal");
 }
 
-// One extra inter-canister hop keeps this response pending when the caller's
-// first callback traps; the caller asserts that ordering before trapping.
-#[candidate_runtime::update(runtime = candidate_runtime, name = "delayed_reply", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Delay the peer response by one inter-canister hop so the first callback can trap.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "delayed_reply",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn delayed_reply((mode, target): (u8, Principal)) {
     assert_eq!(mode, 0);
     let completion = Call::new(target, "probe", Wait::Unbounded)
@@ -467,8 +549,16 @@ async fn delayed_reply((mode, target): (u8, Principal)) {
     system::reply(bytes).unwrap();
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "partial_refund_probe", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Observe the refund after partial cycle acceptance.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "partial_refund_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn partial_refund_probe((mode, target): (u8, Principal)) {
     assert_eq!(mode, 0);
     let accepted = Call::new(target, "accept", Wait::Unbounded)
@@ -496,8 +586,16 @@ async fn partial_refund_probe((mode, target): (u8, Principal)) {
 }
 
 /// Share a held endpoint across two independent ingress calls, one with a deadline.
-#[candidate_runtime::update(runtime = candidate_runtime, name = "held_probe", guard = admit,
-    decode = decode, max_bytes = 30, on_error = fail, manual_reply)]
+/// Await an independently releasable peer with the selected wait policy.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "held_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 30,
+    on_error = fail,
+    manual_reply
+)]
 async fn held_probe((mode, peer): (u8, Principal)) {
     assert!(mode <= 1);
     let wait = if mode == 0 {

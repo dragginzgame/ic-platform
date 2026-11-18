@@ -9,15 +9,18 @@ thread_local! {
     static COMMITTED: Cell<u8> = const { Cell::new(0) };
 }
 
+/// Admit every caller to this qualification fixture.
 fn admit() -> Result<(), u8> {
     Ok(())
 }
+
 fn decode(bytes: &[u8]) -> Result<u8, u8> {
     match bytes {
         [value @ 0..=3] => Ok(*value),
         _ => Err(1),
     }
 }
+
 #[expect(
     clippy::needless_pass_by_value,
     reason = "The generated admission callback owns its error"
@@ -26,8 +29,16 @@ fn fail(error: UpdateError<u8, u8>) -> ! {
     panic!("input refused: {error:?}")
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "probe", guard = admit,
-    decode = decode, max_bytes = 1, on_error = fail, manual_reply)]
+/// Observe update and reply rollback for the selected trap mode.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 1,
+    on_error = fail,
+    manual_reply
+)]
 async fn probe(mode: u8) {
     let before = COMMITTED.with(Cell::get);
     if mode != 0 {
@@ -60,8 +71,16 @@ pub extern "C" fn refuse_update() {
     // yields DidNotReply, distinct from a failed assertion's CanisterTrapped.
 }
 
-#[candidate_runtime::update(runtime = candidate_runtime, name = "nested_probe", guard = admit,
-    decode = decode, max_bytes = 1, on_error = fail, manual_reply)]
+/// Verify nested update refusal while an outer task owns the reply.
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "nested_probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 1,
+    on_error = fail,
+    manual_reply
+)]
 async fn nested_probe(mode: u8) {
     assert_eq!(mode, 0);
     assert_entry_refusal(EntryError::NestedEntry);

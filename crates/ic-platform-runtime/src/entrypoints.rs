@@ -4,8 +4,10 @@
 //! nested Runtime entry. Automatic replies require an explicit encoder.
 //! Applications retain authorization policy and explicit codec choice.
 
-use crate::executor::{self, EntryError, TaskHandle};
-use crate::system::{self, ArgumentTooLarge};
+use crate::{
+    executor::{self, EntryError, TaskHandle},
+    system::{self, ArgumentTooLarge},
+};
 use std::future::Future;
 
 /// The stage that refused entrypoint input, preserving its original error value.

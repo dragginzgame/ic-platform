@@ -20,9 +20,11 @@ fn limits() -> Limits {
         skipping: 65536,
     }
 }
+
 fn target() -> candidate_types::Principal {
     candidate_types::Principal::from_slice(&[255; 29])
 }
+
 fn verify_request<T: CandidType + for<'a> Deserialize<'a>>(
     encode: impl Fn(usize) -> Result<Vec<u8>, wire::EncodeError>,
 ) -> T {
@@ -31,6 +33,7 @@ fn verify_request<T: CandidType + for<'a> Deserialize<'a>>(
     assert_eq!(encode(bytes.len() - 1), Err(wire::EncodeError::OutputLimit));
     candid::decode_one(&bytes).unwrap()
 }
+
 #[test]
 fn management_request_arity_identity_option_presence_and_limits() {
     let value: oracle::CanisterIdRecord = verify_request(|max| {
@@ -69,6 +72,7 @@ fn management_request_arity_identity_option_presence_and_limits() {
     assert_eq!(parsed.snapshot_id, args.snapshot_id);
     assert_eq!(parsed.sender_canister_version, None);
 }
+
 #[test]
 fn data_regions_full_chunks_and_twenty_mebibyte_transfer() {
     for kind in [
@@ -149,6 +153,7 @@ fn data_regions_full_chunks_and_twenty_mebibyte_transfer() {
         );
     }
 }
+
 fn metadata() -> oracle::ReadCanisterSnapshotMetadataResult {
     oracle::ReadCanisterSnapshotMetadataResult {
         source: Some(oracle::SnapshotSource::TakenFromCanister(candid::Reserved)),
@@ -175,6 +180,7 @@ fn metadata() -> oracle::ReadCanisterSnapshotMetadataResult {
         on_low_wasm_memory_hook_status: Some(oracle::OnLowWasmMemoryHookStatus::Ready),
     }
 }
+
 #[test]
 fn metadata_retains_float_bits_globals_provenance_and_upload_shape() {
     let bytes = candid::encode_one(metadata()).unwrap();
@@ -242,6 +248,7 @@ struct StatusReply {
     settings: Settings,
     module_hash: Option<Vec<u8>>,
 }
+
 #[test]
 fn selected_status_skips_discarded_values_and_caps_fields() {
     for (count, hash, accepted) in [(10, 32, true), (11, 32, false), (10, 33, false)] {
@@ -269,6 +276,7 @@ fn selected_status_skips_discarded_values_and_caps_fields() {
         );
     }
 }
+
 #[test]
 fn independent_snapshot_and_allocation_fields_and_vector_limits() {
     for (count, id_length, accepted) in [(1024, 256, true), (1025, 1, false), (1, 257, false)] {
@@ -312,6 +320,7 @@ fn independent_snapshot_and_allocation_fields_and_vector_limits() {
         );
     }
 }
+
 #[test]
 fn metadata_field_caps_refuse_before_materializing_values() {
     for select in 0..4 {
@@ -391,6 +400,7 @@ struct PromotedMetadata<S: CandidType, G: CandidType> {
     taken_at_timestamp: u64,
     wasm_memory_size: u64,
 }
+
 fn promoted<S: CandidType, G: CandidType>(source: S, globals: Vec<G>) -> Vec<u8> {
     candid::encode_one(PromotedMetadata {
         source,
@@ -416,6 +426,7 @@ enum WrongSource {
 enum FutureSource {
     Future(candid::Reserved),
 }
+
 #[test]
 fn known_optional_promotion_never_hides_unknown_values_or_provenance() {
     let bytes = promoted(
@@ -473,6 +484,7 @@ struct InventoryExtra {
     taken_at_timestamp: u64,
     extra: Vec<u8>,
 }
+
 #[test]
 fn inventory_count_limit_does_not_become_a_nested_skip_limit() {
     let bytes = candid::encode_one(vec![InventoryExtra {
@@ -748,6 +760,7 @@ struct CaptureHash<T> {
     module_hash: T,
     version: u64,
 }
+
 fn capture_hash<T: CandidType>(hash: T) -> Vec<u8> {
     candid::encode_one(CaptureHash {
         status: Status::Stopped,

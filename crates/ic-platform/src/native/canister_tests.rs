@@ -6,11 +6,13 @@ use crate::certificate::{
     },
 };
 use ic_verify_bls_signature::PrivateKey;
+
 fn key(n: u8) -> PrivateKey {
     let mut bytes = [0; 32];
     bytes[31] = n;
     PrivateKey::deserialize(&bytes).unwrap()
 }
+
 fn policy() -> TimePolicy {
     let w = TimeWindow {
         reference_ns: 100,
@@ -22,6 +24,7 @@ fn policy() -> TimePolicy {
         delegation: w,
     }
 }
+
 fn client() -> ReadClient {
     ReadClient::new(ReadConfig {
         endpoint: "http://127.0.0.1:1".into(),
@@ -38,6 +41,7 @@ fn client() -> ReadClient {
     })
     .unwrap()
 }
+
 fn signed(tree: HashTree, signer: &PrivateKey, delegation: Option<Delegation>) -> Vec<u8> {
     let signature = signer
         .sign(&[b"\x0dic-state-root".as_slice(), &tree.digest()].concat())
@@ -53,6 +57,7 @@ fn signed(tree: HashTree, signer: &PrivateKey, delegation: Option<Delegation>) -
     )
     .unwrap()
 }
+
 fn proof(controllers: HashTree, delegated: bool, target: u8, range: u8) -> Vec<u8> {
     let tree = fork(
         labeled(b"canister".to_vec(), labeled(vec![target], controllers)),
@@ -92,9 +97,11 @@ fn proof(controllers: HashTree, delegated: bool, target: u8, range: u8) -> Vec<u
     });
     signed(tree, &key(if delegated { 2 } else { 1 }), delegation)
 }
+
 fn controllers(raw: Vec<u8>) -> HashTree {
     labeled(b"controllers".to_vec(), leaf(raw))
 }
+
 #[test]
 fn admitted_controllers_and_placement_retain_original_proof() {
     for delegated in [false, true] {
@@ -150,6 +157,7 @@ fn admitted_controllers_and_placement_retain_original_proof() {
         );
     }
 }
+
 #[test]
 fn missing_pruned_wrong_range_and_malformed_controller_leaves_refuse() {
     let c = client();
@@ -204,6 +212,7 @@ fn missing_pruned_wrong_range_and_malformed_controller_leaves_refuse() {
         Err(CanisterReadError::ControllerLimit)
     ));
 }
+
 #[test]
 fn canister_proof_input_and_tree_budgets_are_retained() {
     let bytes = proof(controllers(vec![0x81, 0x41, 1]), true, 7, 7);

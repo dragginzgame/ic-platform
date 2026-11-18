@@ -160,6 +160,7 @@ impl Fixture for f64 {
         self.to_bits().to_string().into()
     }
 }
+
 pub fn encode_fixture<T: Fixture>(value: &T, maximum: usize) -> Result<Vec<u8>, &'static str> {
     let bytes = frame(T::SCHEMA, &value.input());
     if bytes.len() > maximum {

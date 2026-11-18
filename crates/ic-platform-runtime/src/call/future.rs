@@ -19,6 +19,7 @@ struct Registration {
     shared: Shared,
     task: Option<TaskToken>,
 }
+
 thread_local! {
     static CALLBACKS: RefCell<Registry<Registration>> = const { RefCell::new(Registry::new()) };
 }
@@ -69,6 +70,12 @@ impl<'m, 'a> Call<'m, 'a> {
             terminal: false,
         }
     }
+}
+
+/// Returns occupied callback registrations for the installed accounting fixture.
+#[cfg(ic_platform_qualification_accounting)]
+pub fn observed_count() -> usize {
+    CALLBACKS.with(|registry| registry.borrow().len())
 }
 
 fn take(id: u32) -> Registration {

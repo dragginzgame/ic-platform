@@ -17,9 +17,9 @@ license-file = "LICENSE.md"
 
 [workspace.dependencies]
 # Production
-candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.17", default-features = false }
-candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.17", default-features = false }
-candidate-types = { package = "ic-platform-types", path = "crates/ic-platform-types", version = "0.21.2", default-features = false }
+candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.18", default-features = false }
+candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.18", default-features = false }
+candidate-types = { package = "ic-platform-types", path = "crates/ic-platform-types", version = "0.21.3", default-features = false }
 crc32fast = "1.5.5"
 crypto-bigint = { version = "0.7.11", default-features = false }
 curve25519-dalek = { version = "=5.0.0", default-features = false }
@@ -46,7 +46,7 @@ thiserror = "2.0.18"
 ic_bls12_381 = { version = "=0.10.1", default-features = false, features = ["groups"] }
 serde_json = "1.0.154"
 serde_test = "1.0.177"
-toko-tooling = "=0.45.7"
+toko-tooling = "=0.45.8"
 
 [workspace.lints.cargo]
 unused_dependencies = "deny"
@@ -56,6 +56,7 @@ missing_lints_inheritance = "deny"
 unknown_lints = "deny"
 
 [workspace.lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(ic_platform_qualification_accounting)'] }
 dead_code = "deny"
 unused_must_use = "deny"
 unfulfilled_lint_expectations = "deny"

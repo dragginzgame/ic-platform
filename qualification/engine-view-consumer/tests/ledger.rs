@@ -5,6 +5,7 @@ use candid::{CandidType, Nat, Principal};
 use ic_management_canister_types as management_schema;
 use ic_platform_protocol::{candid::Limits, ledger, management};
 use serde::Deserialize;
+
 fn limits() -> Limits {
     Limits {
         bytes: 2_100_000,
@@ -16,9 +17,11 @@ fn limits() -> Limits {
         skipping: 262_144,
     }
 }
+
 fn target() -> candidate_types::Principal {
     candidate_types::Principal::from_slice(&[9; 29])
 }
+
 fn request<T: CandidType + for<'a> Deserialize<'a>>(
     encode: impl Fn(usize) -> Result<Vec<u8>, management::EncodeError>,
 ) -> T {
@@ -30,6 +33,7 @@ fn request<T: CandidType + for<'a> Deserialize<'a>>(
     );
     candid::decode_one(&bytes).unwrap()
 }
+
 #[test]
 fn management_creation_settings_install_and_exact_bounds() {
     let create = management::ProvisionalCreateArgs {
@@ -154,6 +158,7 @@ struct Create {
     amount: Nat,
     creation_args: Option<Cmc>,
 }
+
 #[test]
 fn ledger_creation_preserves_subnet_options_and_wide_amounts() {
     for subaccount in [None, Some([0; 32]), Some([255; 32])] {
@@ -242,6 +247,7 @@ enum Failure {
         error_code: Nat,
     },
 }
+
 #[test]
 fn complete_ledger_outcomes_preserve_duplicates_and_refuse_malformed_frames() {
     let large: Nat = "340282366920938463463374607431768211456".parse().unwrap();
@@ -376,6 +382,7 @@ struct IcrcAccount {
     owner: Principal,
     subaccount: Option<Vec<u8>>,
 }
+
 #[test]
 fn canonical_accounts_amounts_and_icp_identity() {
     let mut identities = vec![];
@@ -550,6 +557,7 @@ struct Metrics {
     cycles_consumed: ExecutionCharges,
     unrelated: String,
 }
+
 #[test]
 fn execution_charges_keep_arbitrary_naturals_and_bound_skipped_values() {
     let limits = Limits {

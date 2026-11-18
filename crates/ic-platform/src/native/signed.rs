@@ -43,16 +43,19 @@ impl Secp256k1Identity {
         let key = k256::SecretKey::from_pem(pem).map_err(|_| ReadError::Packet)?;
         Ok(Self(key.into()))
     }
+
     fn public_key(&self) -> Vec<u8> {
         // IC self-authenticating secp256k1 identities use uncompressed SPKI.
         [b"\x30\x56\x30\x10\x06\x07\x2a\x86\x48\xce\x3d\x02\x01\x06\x05\x2b\x81\x04\x00\x0a\x03\x42\x00".as_slice(),
          self.0.verifying_key().to_sec1_point(false).as_bytes()].concat()
     }
+
     /// Canonical self-authenticating principal from the uncompressed public key.
     #[must_use]
     pub fn principal(&self) -> Principal {
         Principal::self_authenticating(self.public_key())
     }
+
     /// Prepare an exact signed update offline, preserving routing and nonce.
     /// # Errors
     /// Refuses oversized fields/envelope or packet/signing admission failure.
@@ -63,6 +66,7 @@ impl Secp256k1Identity {
     ) -> Result<PreparedUpdate, ReadError> {
         DirectSigner::Secp256k1(self).prepare_update(args, maximum_bytes)
     }
+
     /// Prepare exactly one original-request status path offline, with exact expiry.
     /// The caller admits the original request ID and effective routing target.
     /// # Errors
@@ -92,6 +96,7 @@ impl DirectSigner<'_> {
     fn principal(&self) -> Principal {
         Principal::self_authenticating(self.public_key())
     }
+
     fn envelope(&self, content: Content, maximum: usize) -> Result<Vec<u8>, ReadError> {
         let signature = self.sign(&content.signable().map_err(|_| ReadError::Packet)?);
         encode(
@@ -104,6 +109,7 @@ impl DirectSigner<'_> {
             maximum,
         )
     }
+
     fn prepare_update(
         &self,
         args: UpdateArgs<'_>,
@@ -139,6 +145,7 @@ impl DirectSigner<'_> {
         )?;
         PreparedUpdate::from_bytes(&bytes, effective, maximum_bytes)
     }
+
     fn prepare_request_status(
         &self,
         id: [u8; 32],
@@ -173,6 +180,7 @@ impl DirectSigner<'_> {
             Self::Secp256k1(key) => key.public_key(),
         }
     }
+
     fn sign(&self, message: &[u8]) -> Vec<u8> {
         match self {
             Self::Ed25519(key) => key.0.sign(message).to_bytes().to_vec(),
@@ -200,6 +208,7 @@ impl Ed25519Identity {
             .map(Self)
             .map_err(|_| ReadError::Packet)
     }
+
     fn public_key(&self) -> Vec<u8> {
         [
             b"\x30\x2a\x30\x05\x06\x03\x2b\x65\x70\x03\x21\x00".as_slice(),
@@ -207,14 +216,17 @@ impl Ed25519Identity {
         ]
         .concat()
     }
+
     /// Offline canonical self-authenticating identity.
     #[must_use]
     pub fn principal(&self) -> Principal {
         Principal::self_authenticating(self.public_key())
     }
+
     fn envelope(&self, content: Content, maximum: usize) -> Result<Vec<u8>, ReadError> {
         DirectSigner::Ed25519(self).envelope(content, maximum)
     }
+
     /// Prepare an exact signed update offline, with explicit expiry and nonce.
     /// Recipient and effective routing target are intentionally distinct.
     /// # Errors
@@ -226,6 +238,7 @@ impl Ed25519Identity {
     ) -> Result<PreparedUpdate, ReadError> {
         DirectSigner::Ed25519(self).prepare_update(args, maximum_bytes)
     }
+
     /// Prepare exactly one original-request status path offline, with exact expiry.
     /// The caller admits the original request ID and effective routing target.
     /// # Errors
@@ -245,6 +258,7 @@ impl Ed25519Identity {
         )
     }
 }
+
 // Packet construction has one bounded serializer shared with ingress admission.
 fn encode<T: Serialize>(value: &T, maximum: usize) -> Result<Vec<u8>, ReadError> {
     ingress::encode(value, maximum).map_err(|error| match error {
@@ -307,6 +321,7 @@ impl PreparedUpdate {
             AuthenticationProfile::DirectSignature,
         )
     }
+
     /// Admit an explicitly anonymous update, preserving its original bytes.
     /// No authorization or freshness is inferred. Signed admission never falls back here.
     /// # Errors
@@ -324,6 +339,7 @@ impl PreparedUpdate {
             AuthenticationProfile::Anonymous,
         )
     }
+
     fn admit(
         bytes: &[u8],
         effective: Principal,
@@ -360,42 +376,50 @@ impl PreparedUpdate {
             effective,
         })
     }
+
     /// Profile used to admit this immutable request.
     #[must_use]
     pub const fn authentication(&self) -> AuthenticationProfile {
         self.authentication
     }
+
     /// Exact original envelope bytes, including original CBOR framing.
     #[must_use]
     pub fn envelope_bytes(&self) -> &[u8] {
         &self.bytes
     }
+
     /// Original representation-independent request identity.
     #[must_use]
     pub const fn request_id(&self) -> &[u8; 32] {
         &self.id
     }
+
     /// Original expiry, never renewed by observation.
     #[must_use]
     pub const fn expiry(&self) -> u64 {
         self.expiry
     }
+
     /// Admitted sender identity; consult the authentication profile.
     #[must_use]
     pub const fn sender(&self) -> Principal {
         self.sender
     }
+
     /// Original recipient (possibly the management canister).
     #[must_use]
     pub const fn recipient(&self) -> Principal {
         self.recipient
     }
+
     /// Explicit HTTP route and certificate authority target.
     #[must_use]
     pub const fn effective_canister(&self) -> Principal {
         self.effective
     }
 }
+
 // Strict direct-key profiles; cryptographic verification remains upstream.
 fn verify_envelope(envelope: &Envelope, sender: Principal) -> Result<(), ReadError> {
     if envelope.sender_delegation.is_some() {
@@ -460,6 +484,7 @@ impl PreparedRequestStatus {
             AuthenticationProfile::DirectSignature,
         )
     }
+
     /// Independently admit a direct-signed status envelope for an approved request.
     /// Requires no private key or original update bytes. Verifies the signature,
     /// key/sender binding and exactly `request_status/<original_request_id>`.
@@ -486,6 +511,7 @@ impl PreparedRequestStatus {
             AuthenticationProfile::DirectSignature,
         )
     }
+
     /// Admit an anonymous status read bound to an anonymously admitted update.
     /// Preserves the original read expiry and bytes; makes no freshness claim.
     /// # Errors
@@ -503,6 +529,7 @@ impl PreparedRequestStatus {
             AuthenticationProfile::Anonymous,
         )
     }
+
     fn admit(
         bytes: &[u8],
         update: &PreparedUpdate,
@@ -521,6 +548,7 @@ impl PreparedRequestStatus {
             authentication,
         )
     }
+
     fn admit_binding(
         bytes: &[u8],
         id: [u8; 32],
@@ -557,26 +585,31 @@ impl PreparedRequestStatus {
             expiry: ingress_expiry,
         })
     }
+
     /// Original request ID selected by this authorization.
     #[must_use]
     pub const fn request_id(&self) -> &[u8; 32] {
         &self.id
     }
+
     /// Sender whose direct key signed this authorization.
     #[must_use]
     pub const fn sender(&self) -> Principal {
         self.sender
     }
+
     /// Caller-selected HTTP routing target; not part of the signed read content.
     #[must_use]
     pub const fn effective_canister(&self) -> Principal {
         self.effective
     }
+
     /// Exact retained signed read-state envelope, without re-encoding.
     #[must_use]
     pub fn envelope_bytes(&self) -> &[u8] {
         &self.bytes
     }
+
     /// Explicit expiry of this read authorization, independent of update expiry.
     #[must_use]
     pub const fn expiry(&self) -> u64 {
@@ -625,21 +658,25 @@ impl RequestObservation {
     pub fn certificate_bytes(&self) -> &[u8] {
         &self.certificate
     }
+
     /// Original request selected by this observation.
     #[must_use]
     pub const fn request_id(&self) -> &[u8; 32] {
         &self.id
     }
+
     /// Authenticated effective target.
     #[must_use]
     pub const fn effective_canister(&self) -> Principal {
         self.effective
     }
+
     /// Certified observation time.
     #[must_use]
     pub const fn time_ns(&self) -> u64 {
         self.time_ns
     }
+
     /// Authenticated selected outcome.
     #[must_use]
     pub const fn status(&self) -> &RequestStatus {
@@ -705,6 +742,7 @@ impl ReadClient {
             }),
         }
     }
+
     /// Observe the original ID once using a newly signed read-state request.
     /// `read_expiry` applies only to that read; the update is never renewed/sent.
     /// `time` admits current network evidence independently of original expiry.
@@ -741,6 +779,7 @@ impl ReadClient {
             .map_err(|_| ReadError::Packet)?;
         self.authenticate_request(update, &response.value.certificate, time)
     }
+
     /// Send an externally signed status read exactly once, without replacing it.
     /// Fresh authorization, expiry admission and subsequent reads remain caller-owned.
     /// Only the supplied original request is observed; this never dispatches it.
@@ -772,6 +811,7 @@ impl ReadClient {
             .map_err(|_| ReadError::Packet)?;
         self.authenticate_request(update, &response.value.certificate, time)
     }
+
     /// Replay an original proof offline under explicitly selected historical
     /// certificate/delegation time windows. No current-network freshness inferred.
     /// # Errors
@@ -835,6 +875,7 @@ impl ReadClient {
             status,
         })
     }
+
     /// Execute one explicitly signed query and authenticate its node signatures
     /// through the existing certified node-key/routing path. Caller bounds the
     /// whole operation in addition to the configured per-request timeout.
@@ -859,6 +900,7 @@ impl ReadClient {
         )
         .await
     }
+
     /// Execute one secp256k1-signed query with the same certified node authority,
     /// response-signature, time and resource checks as `signed_query`.
     /// Caller supplies expiry and bounds the whole operation; no anonymous fallback.
@@ -884,6 +926,7 @@ impl ReadClient {
         )
         .await
     }
+
     async fn signed_query_with(
         &self,
         identity: DirectSigner<'_>,
@@ -932,6 +975,7 @@ impl ReadClient {
         .await
     }
 }
+
 fn unsigned(bytes: &[u8]) -> Result<u64, ReadError> {
     let mut value = 0;
     for (index, byte) in bytes.iter().copied().enumerate() {

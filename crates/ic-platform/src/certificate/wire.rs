@@ -53,9 +53,11 @@ impl Visitor<'_> for ByteVisitor {
     fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("CBOR byte string")
     }
+
     fn visit_bytes<E: de::Error>(self, bytes: &[u8]) -> Result<Self::Value, E> {
         Ok(ByteString(bytes.to_vec()))
     }
+
     fn visit_byte_buf<E: de::Error>(self, bytes: Vec<u8>) -> Result<Self::Value, E> {
         Ok(ByteString(bytes))
     }
@@ -74,6 +76,7 @@ impl<'de> Visitor<'de> for TreeVisitor {
     fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("IC hash-tree array")
     }
+
     fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
         let tag: u64 = required(&mut seq)?;
         let tree = match tag {
@@ -99,6 +102,7 @@ impl<'de> Visitor<'de> for TreeVisitor {
         Ok(OwnedTree(tree))
     }
 }
+
 fn required<'de, A: SeqAccess<'de>, T: Deserialize<'de>>(seq: &mut A) -> Result<T, A::Error> {
     seq.next_element()?
         .ok_or_else(|| de::Error::custom("missing IC hash-tree element"))

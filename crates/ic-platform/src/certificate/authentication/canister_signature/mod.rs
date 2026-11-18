@@ -1,4 +1,7 @@
 //! Canister-key/witness composition; DER, hashing and BLS primitives stay upstream.
+#[cfg(test)]
+mod tests;
+
 use super::{
     Authority, PreparedRootKey, Principal, TimePolicy, TimeWindow, VerificationLimits, VerifyError,
     forest, verify_certificate,
@@ -45,16 +48,19 @@ impl<'a> CanisterSignatureKey<'a> {
             seed: &payload[usize::from(length)..],
         })
     }
+
     /// Exact original admitted DER.
     #[must_use]
     pub const fn as_der(&self) -> &'a [u8] {
         self.original
     }
+
     /// Issuer named by the key, not an application-approved identity.
     #[must_use]
     pub const fn issuer(&self) -> Principal {
         self.issuer
     }
+
     /// Opaque seed retained without normalization.
     #[must_use]
     pub const fn seed(&self) -> &'a [u8] {
@@ -131,31 +137,37 @@ impl<'a> AuthenticatedCanisterSignature<'a> {
     pub const fn original_bytes(&self) -> &'a [u8] {
         self.decoded.original_bytes()
     }
+
     /// Exact signed message, including any caller-selected domain prefix.
     #[must_use]
     pub const fn message(&self) -> &'a [u8] {
         self.message
     }
+
     /// Admitted key bound to this signature.
     #[must_use]
     pub const fn key(&self) -> CanisterSignatureKey<'a> {
         self.key
     }
+
     /// Explicit trust root used for this verification.
     #[must_use]
     pub const fn root_key_der(&self) -> &[u8; 133] {
         &self.root
     }
+
     /// Signing-certificate time in Unix nanoseconds, never delegation time.
     #[must_use]
     pub const fn time_ns(&self) -> u64 {
         self.time_ns
     }
+
     /// Inclusive signing-time window checked by the verifier.
     #[must_use]
     pub const fn time_window(&self) -> TimeWindow {
         self.window
     }
+
     /// Subnet, separate time window and timestamp of an authenticated delegation.
     #[must_use]
     pub const fn delegation(&self) -> Option<(Principal, TimeWindow, u64)> {
@@ -241,6 +253,3 @@ pub fn authenticate_canister_signature<'a>(
         delegation: verified.delegation,
     })
 }
-
-#[cfg(test)]
-mod tests;

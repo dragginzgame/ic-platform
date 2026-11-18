@@ -1,7 +1,9 @@
 //! Bounded selected request encoding; no service pagination or limit policy.
 
-use crate::candid::projection::projection;
-use crate::{candid::Nat, cloud_engine::EncodeError};
+use crate::{
+    candid::{Nat, projection::projection},
+    cloud_engine::EncodeError,
+};
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
@@ -61,6 +63,7 @@ impl ArgumentWriter {
         }
         Ok(())
     }
+
     fn advance(&mut self, count: usize) -> Result<(), EncodeError> {
         self.size = self
             .size
@@ -71,9 +74,11 @@ impl ArgumentWriter {
             })?;
         Ok(())
     }
+
     fn byte(&mut self, byte: u8) -> Result<(), EncodeError> {
         self.bytes(&[byte])
     }
+
     fn uleb(&mut self, mut value: usize) -> Result<(), EncodeError> {
         loop {
             let byte = (value & 127) as u8;

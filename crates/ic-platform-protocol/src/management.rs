@@ -1,8 +1,8 @@
 //! Bounded management creation, installation and controller settings.
 //! Authority, lifecycle, spending and retry decisions remain caller-owned.
-use crate::candid::encode::{Encode, Writer};
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
+    encode::{Encode, Writer},
     projection::{absent, projection},
 };
 pub use crate::candid::{Nat, encode::EncodeError};
@@ -11,6 +11,7 @@ pub use crate::management_snapshots::{
 };
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
+
 projection! {
     /// Explicit selected log access policy.
     both enum LogVisibility {
@@ -25,6 +26,7 @@ projection! {
         2235716810 => AllowedViewers(Vec<Principal>),
     }
 }
+
 projection! {
     /// Explicit environment entry.
     encoding EnvironmentVariable {
@@ -34,6 +36,7 @@ projection! {
         1224700491 => name: String,
     }
 }
+
 projection! {
     /// Nine-field CMC creation settings; not the management settings schema.
     #[derive(Default)]
@@ -58,6 +61,7 @@ projection! {
         4174053672 => compute_allocation: Option<Nat>,
     }
 }
+
 projection! {
     /// Explicit selected snapshot access policy.
     both enum SnapshotVisibility {
@@ -72,6 +76,7 @@ projection! {
         2235716810 => AllowedViewers(Vec<Principal>),
     }
 }
+
 projection! {
     /// Explicit selected status access policy.
     both enum StatusVisibility {
@@ -86,6 +91,7 @@ projection! {
         2235716810 => AllowedViewers(Vec<Principal>),
     }
 }
+
 projection! {
     /// Complete thirteen-field management settings; distinct from CMC.
     #[derive(Default)]
@@ -118,6 +124,7 @@ projection! {
         4174053672 => compute_allocation: Option<Nat>,
     }
 }
+
 projection! {
     /// One provisional_create_canister_with_cycles argument.
     encoding ProvisionalCreateArgs {
@@ -131,6 +138,7 @@ projection! {
         3599109322 => sender_canister_version: Option<u64>,
     }
 }
+
 projection! {
     /// One update_settings argument.
     encoding UpdateSettingsArgs {
@@ -142,6 +150,7 @@ projection! {
         3599109322 => sender_canister_version: Option<u64>,
     }
 }
+
 projection! {
     /// Explicit upgrade heap policy.
     both enum MemoryPersistence {
@@ -153,6 +162,7 @@ projection! {
         2871543860 => Replace,
     }
 }
+
 projection! {
     /// Explicit optional upgrade choices.
     both UpgradeFlags {
@@ -162,6 +172,7 @@ projection! {
         1539756096 => skip_pre_upgrade: Option<bool> [strict_optional],
     }
 }
+
 projection! {
     /// Installation mode; no implicit reinstall or fallback.
     both enum InstallMode {
@@ -176,6 +187,7 @@ projection! {
         2375734555 => Install,
     }
 }
+
 projection! {
     /// One install_code argument preserving exact Wasm and argument bytes.
     encoding InstallCodeArgs {
@@ -191,6 +203,7 @@ projection! {
         3599109322 => sender_canister_version: Option<u64>,
     }
 }
+
 projection! {
     /// Creation reply; identity does not establish authorization.
      CreatedCanister {
@@ -198,6 +211,7 @@ projection! {
         1313628723 => canister_id: Principal [required],
     }
 }
+
 /// Decode exactly one bounded canister-ID creation reply.
 /// # Errors
 /// Refuses malformed, incompatible, trailing or over-budget input.
@@ -214,6 +228,7 @@ projection! {
         3599109322 => sender_canister_version: Option<u64>,
     }
 }
+
 projection! {
     /// One install_chunked_code argument; chunk order and exact bytes are retained.
     encoding InstallChunkedCodeArgs {
@@ -241,6 +256,7 @@ projection! {
         1_832_883_877 => instructions: Nat [required],
     }
 }
+
 projection! {
     /// Selected canister_metrics reply; unrelated metrics are validated and skipped.
     CanisterMetrics {
@@ -248,6 +264,7 @@ projection! {
         2_122_851_290 => cycles_consumed: ExecutionCharges [required],
     }
 }
+
 /// Decode one management canister_metrics reply with explicit resource budgets.
 /// # Errors
 /// Refuses missing/incompatible fields, malformed skipped values, incorrect arity,

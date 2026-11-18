@@ -1,7 +1,9 @@
 //! Selected daily-price declarations; consumer interpretation stays outside codecs.
 
-use crate::candid::projection::{absent, projection};
-use crate::candid::{self, Decode, Error, Limits, Nat, Reader, Schema};
+use crate::candid::{
+    self, Decode, Error, Limits, Nat, Reader, Schema,
+    projection::{absent, projection},
+};
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
@@ -29,6 +31,7 @@ projection! {
         4_172_531_120 => Type4_5,
     }
 }
+
 projection! {
     /// Raw whole-cycle amounts per node per day, without tariff selection.
     Price {
@@ -38,6 +41,7 @@ projection! {
         3_039_038_447 => net_cycles: Nat [required],
     }
 }
+
 projection! {
     /// Public price scope and source observation, not a binding quote.
     PriceEntry {
@@ -53,6 +57,7 @@ projection! {
         3_364_572_809 => price: Price [required],
     }
 }
+
 projection! {
     /// One source declaration, with no key normalization or uniqueness policy.
     MarketplaceEntry {

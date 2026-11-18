@@ -26,7 +26,11 @@ function fixture(t, fault) {
   let checks = 0;
   const execute = (command, args, options) => {
     calls.push([command, args]);
-    if (command === 'make') return spawnSync(command, args, options);
+    if (command === 'make') {
+      // A parent make -k must not dispatch later release stages after a refusal.
+      const env = fault === 'protocol' ? {...process.env, ...options.env, MAKEFLAGS: 'k'} : options.env;
+      return spawnSync(command, args, {...options, env});
+    }
     if (command === 'bash') {
       if (args[0].endsWith('/check-make-execution.sh')) return spawnSync(command, [resolve(args[0])], options);
       checks++;

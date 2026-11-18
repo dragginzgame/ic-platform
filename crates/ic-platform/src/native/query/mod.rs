@@ -1,3 +1,6 @@
+#[cfg(all(test, feature = "certificate-construction"))]
+mod tests;
+
 use super::{
     EnvelopeContent, Principal, QueryResponse, ReadClient, ReadError, SubnetObservation,
     TimePolicy, authenticate_certificate,
@@ -46,6 +49,7 @@ impl ReadClient {
         self.query_content(canister, &content, expiry, time, None)
             .await
     }
+
     pub(super) async fn query_content(
         &self,
         canister: Principal,
@@ -81,6 +85,7 @@ impl ReadClient {
         admit_response(response, request_id, &nodes, time.certificate)
     }
 }
+
 fn admit_response(
     response: QueryResponse,
     request_id: ic_transport_types::RequestId,
@@ -135,6 +140,3 @@ fn admit_response(
         }),
     }
 }
-
-#[cfg(all(test, feature = "certificate-construction"))]
-mod tests;

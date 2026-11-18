@@ -1,4 +1,5 @@
 use super::*;
+
 fn limits() -> Limits {
     Limits {
         bytes: 65536,
@@ -7,6 +8,7 @@ fn limits() -> Limits {
         items: 128,
     }
 }
+
 #[test]
 fn literal_envelopes_preserve_presence_versions_and_application_errors() {
     let response = decode_get_value_response(&[16, 7, 26, 0, 40, 9], limits()).unwrap();
@@ -56,6 +58,7 @@ fn literal_envelopes_preserve_presence_versions_and_application_errors() {
         Err(Error::FieldLimit)
     );
 }
+
 #[test]
 fn requests_match_independent_protobuf_literals() {
     assert_eq!(
@@ -82,6 +85,7 @@ fn requests_match_independent_protobuf_literals() {
         );
     }
 }
+
 #[test]
 fn projections_keep_borrowed_presence_and_source_order() {
     let nodes = decode_subnet_list(&[18, 1, 4, 18, 0], limits()).unwrap();
@@ -114,6 +118,7 @@ fn projections_keep_borrowed_presence_and_source_order() {
         128
     );
 }
+
 #[test]
 fn repeated_and_unknown_fields_obey_all_budgets() {
     let bytes = [18, 1, 4, 18, 0];

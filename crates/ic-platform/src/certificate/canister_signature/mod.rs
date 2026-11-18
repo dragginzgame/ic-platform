@@ -1,4 +1,7 @@
 //! Untrusted canister-signature envelopes; authentication is a separate obligation.
+#[cfg(test)]
+mod tests;
+
 use super::CertificateDecodeLimits;
 
 /// An envelope refusal; successful decoding does not authenticate a signature.
@@ -87,6 +90,3 @@ pub fn decode_canister_signature(
         witness,
     })
 }
-
-#[cfg(test)]
-mod tests;

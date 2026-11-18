@@ -37,6 +37,7 @@ impl Drop for Server {
         }
     }
 }
+
 fn policy(seconds: u64) -> Policy {
     Policy {
         ownership: Ownership::Group,
@@ -46,9 +47,11 @@ fn policy(seconds: u64) -> Policy {
         elapsed: Duration::from_secs(seconds),
     }
 }
+
 fn output(_stream: Stream, bytes: &[u8]) -> io::Result<()> {
     io::stdout().write_all(bytes)
 }
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args_os().skip(1);
     let binary = args.next().ok_or("expected authenticated server binary")?;

@@ -26,6 +26,7 @@ fn config(endpoint: String) -> ReadConfig {
         },
     }
 }
+
 fn time() -> TimePolicy {
     let w = TimeWindow {
         reference_ns: 100,
@@ -37,6 +38,7 @@ fn time() -> TimePolicy {
         delegation: w,
     }
 }
+
 fn serve(reply: Vec<u8>) -> (String, std::thread::JoinHandle<()>) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let address = listener.local_addr().unwrap();
@@ -52,6 +54,7 @@ fn serve(reply: Vec<u8>) -> (String, std::thread::JoinHandle<()>) {
     });
     (format!("http://{address}"), task)
 }
+
 #[test]
 fn bounded_http_refuses_declared_and_streamed_oversize_before_certificate_admission() {
     let runtime = tokio::runtime::Builder::new_current_thread()
@@ -82,6 +85,7 @@ fn bounded_http_refuses_declared_and_streamed_oversize_before_certificate_admiss
     ));
     task.join().unwrap();
 }
+
 #[test]
 fn explicit_configuration_rejects_hidden_endpoint_components() {
     for endpoint in [

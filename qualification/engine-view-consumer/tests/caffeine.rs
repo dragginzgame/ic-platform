@@ -7,6 +7,7 @@ use ic_platform_protocol::{
     candid::{Error, Limits},
 };
 use serde::Deserialize;
+
 fn limits() -> Limits {
     Limits {
         bytes: 65_536,
@@ -57,6 +58,7 @@ enum ProviderError {
     NotAuthorized(String),
     Unknown(bool),
 }
+
 fn account(balance: &str) -> ResultValue {
     ResultValue::Ok(Account {
         account_owner_id: Principal::from_slice(&[1]),
@@ -70,6 +72,7 @@ fn account(balance: &str) -> ResultValue {
         last_charge_ts_ns: 42,
     })
 }
+
 #[test]
 fn independent_arguments_and_exact_output_admission() {
     let root = format!("sha256:{}", "01".repeat(32));
@@ -151,6 +154,7 @@ fn independent_arguments_and_exact_output_admission() {
         }
     }
 }
+
 #[test]
 fn arbitrary_signed_balances_and_known_errors() {
     for number in [
@@ -249,6 +253,7 @@ fn arbitrary_signed_balances_and_known_errors() {
         .is_err()
     );
 }
+
 #[test]
 fn callback_bounds_and_literals() {
     let bytes = c::encode_roots(&vec![vec![7; 32]; 2], 4096).unwrap();
@@ -446,6 +451,7 @@ fn top_up_limits() -> Limits {
         skipping: 65536,
     }
 }
+
 fn admission_boundaries<T: std::fmt::Debug>(
     bytes: &[u8],
     limits: Limits,
@@ -491,6 +497,7 @@ fn admission_boundaries<T: std::fmt::Debug>(
         }
     }
 }
+
 #[test]
 fn top_up_arguments_preserve_outer_and_field_options_and_arbitrary_naturals() {
     let limits = Limits {
@@ -557,6 +564,7 @@ enum TopUpReply<T: CandidType> {
     Ok(T),
     Err(TopUpFailure),
 }
+
 #[test]
 fn top_up_outcome_validates_opaque_success_and_typed_errors() {
     let limits = top_up_limits();

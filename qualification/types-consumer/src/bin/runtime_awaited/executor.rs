@@ -19,6 +19,7 @@ impl Drop for DropCheck {
         DROPS.with(|drops| drops.set(drops.get() + 1));
     }
 }
+
 fn start(method: &'static str) -> TaskHandle {
     run_update(async move {
         let _drop = DropCheck;
@@ -35,11 +36,13 @@ fn start(method: &'static str) -> TaskHandle {
     })
     .unwrap()
 }
+
 fn observe(expected: TaskState, drops: u32, completions: u32) {
     HANDLE.with(|handle| assert_eq!(handle.borrow().as_ref().unwrap().state(), expected));
     DROPS.with(|value| assert_eq!(value.get(), drops));
     COMPLETIONS.with(|value| assert_eq!(value.get(), completions));
 }
+
 pub(super) fn step(phase: u32) {
     match phase {
         0 => {

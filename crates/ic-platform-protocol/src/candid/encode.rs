@@ -42,6 +42,7 @@ impl Writer<'_> {
         }
         Ok(())
     }
+
     pub(crate) fn unsigned(&mut self, mut value: u64) -> Result<()> {
         loop {
             let byte = (value & 127) as u8;
@@ -52,6 +53,7 @@ impl Writer<'_> {
             }
         }
     }
+
     fn signed(&mut self, mut value: i64) -> Result<()> {
         loop {
             let byte = (value & 127) as u8;
@@ -98,6 +100,7 @@ impl<'a> Table<'a> {
         }
         Ok(index as i64)
     }
+
     fn header(&mut self, root: i64, writer: &mut Writer<'_>) -> Result<()> {
         writer.bytes(b"DIDL")?;
         writer.unsigned(self.used as u64)?;
@@ -130,6 +133,7 @@ impl<'a> Table<'a> {
         writer.signed(root)
     }
 }
+
 pub(crate) fn encode<T: Encode>(value: &T, maximum: usize) -> Result<Vec<u8>> {
     const {
         assert!(schema_valid(&T::SCHEMA));
@@ -204,6 +208,7 @@ macro_rules! integer {
         }
     };
 }
+
 integer!(i32, -11);
 #[cfg(feature = "sns-neurons")]
 integer!(u32, -7);

@@ -3,6 +3,12 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.17] - 2026-11-18
+
+### 🔧 Maintenance
+
+- Align certificate, ingress and native transport modules with the updated Rust layout policy.
+
 ## [0.34.16] - 2026-11-18
 
 ### ➕ Added

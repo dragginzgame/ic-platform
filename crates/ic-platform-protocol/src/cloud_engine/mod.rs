@@ -3,6 +3,9 @@
 //! The caller owns endpoint selection, identity, deadlines, request-count policy
 //! and interpretation. Encoding neither sends a request nor authenticates data.
 
+#[cfg(test)]
+mod tests;
+
 use std::fmt;
 
 /// A refusal to construct the complete request frame.
@@ -96,9 +99,6 @@ fn write_uleb(mut value: usize, output: &mut Vec<u8>) {
         }
     }
 }
-
-#[cfg(test)]
-mod tests;
 
 #[cfg(feature = "cloud-engine-response")]
 mod response;

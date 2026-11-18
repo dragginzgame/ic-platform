@@ -23,6 +23,7 @@ fn limits() -> VerificationLimits {
         canister_ranges: 256,
     }
 }
+
 fn policy(timestamp: u64) -> TimePolicy {
     let window = TimeWindow {
         reference_ns: timestamp,

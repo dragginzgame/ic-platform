@@ -1,5 +1,8 @@
 //! Non-recycled callback identities; values are returned before user destruction.
 
+#[cfg(test)]
+mod tests;
+
 use std::collections::BTreeMap;
 
 pub(super) struct Registry<T> {
@@ -27,10 +30,12 @@ impl<T> Registry<T> {
         Ok(id)
     }
 
+    #[cfg(ic_platform_qualification_accounting)]
+    pub(super) fn len(&self) -> usize {
+        self.entries.len()
+    }
+
     pub(super) fn take(&mut self, id: u32) -> Option<T> {
         self.entries.remove(&id)
     }
 }
-
-#[cfg(test)]
-mod tests;

@@ -70,6 +70,7 @@ struct PendingTask {
     polls: Rc<Cell<usize>>,
     handle: TaskHandle,
 }
+
 fn pending() -> PendingTask {
     let token = Rc::new(Cell::new(None));
     let wake = Rc::new(RefCell::new(None));

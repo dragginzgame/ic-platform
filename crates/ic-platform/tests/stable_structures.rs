@@ -11,6 +11,7 @@ fn upstream_identity_and_reopened_memory() {
     fn upstream_memory(memory: &impl ic_stable_structures::Memory) -> u64 {
         memory.size()
     }
+
     fn storable_contract<T: Storable>() -> storable::Bound {
         T::BOUND
     }

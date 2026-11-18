@@ -1,16 +1,16 @@
 use super::*;
-use crate::certificate::{
-    TimeWindow,
-    construction::{Certificate, encode_certificate, fork, labeled, leaf},
-};
-use crate::ed25519::{Signer, SigningKey};
 use crate::{
-    certificate::{PreparedRootKey, VerificationLimits, VerifyError},
+    certificate::{
+        PreparedRootKey, TimeWindow, VerificationLimits, VerifyError,
+        construction::{Certificate, encode_certificate, fork, labeled, leaf},
+    },
+    ed25519::{Signer, SigningKey},
     native::ReadConfig,
 };
 use ic_transport_types::{NodeSignature, ReplyResponse, RequestId};
 use ic_verify_bls_signature::PrivateKey;
 use std::time::Duration;
+
 fn fixtures() -> (
     ReadClient,
     SubnetObservation,
@@ -101,6 +101,7 @@ fn fixtures() -> (
     }
     (client, observation, response, id, time)
 }
+
 #[test]
 fn response_bytes_request_identity_time_and_node_authority_are_bound() {
     let (_, nodes, response, id, time) = fixtures();
@@ -138,6 +139,7 @@ fn response_bytes_request_identity_time_and_node_authority_are_bound() {
         ));
     }
 }
+
 #[test]
 fn selected_subnet_certificate_cannot_be_rebound_or_retimed() {
     let (client, nodes, _, _, time) = fixtures();

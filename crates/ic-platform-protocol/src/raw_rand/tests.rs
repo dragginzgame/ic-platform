@@ -1,4 +1,5 @@
 use super::{Error, decode, encode};
+
 #[test]
 fn canonical_profile_preserves_all_seed_bytes_and_exact_bounds() {
     assert_eq!(encode(6).unwrap(), b"DIDL\0\0");

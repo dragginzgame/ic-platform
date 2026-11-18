@@ -1,5 +1,6 @@
 use super::*;
 use crate::certificate::{CertificateDecodeLimits, decode_canister_signature, decode_certificate};
+
 #[test]
 fn tagged_construction_preserves_opaque_bytes_and_exact_limit() {
     let tree = labeled(b"time".to_vec(), leaf(vec![100]));
@@ -33,6 +34,7 @@ fn tagged_construction_preserves_opaque_bytes_and_exact_limit() {
         Err(ConstructionError::OutputLimit)
     ));
 }
+
 #[cfg(feature = "canister-signature-authentication")]
 #[test]
 fn key_framing_matches_literal_and_supported_boundaries() {

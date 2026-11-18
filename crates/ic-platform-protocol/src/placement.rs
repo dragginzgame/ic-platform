@@ -1,11 +1,14 @@
 //! Registry canister placement: explicit target encoding and bounded result decoding.
-use crate::candid::{
-    self, Decode, Error, Limits, Reader, Schema,
-    projection::{absent, projection},
+use crate::{
+    candid::{
+        self, Decode, Error, Limits, Reader, Schema,
+        projection::{absent, projection},
+    },
+    cloud_engine::EncodeError,
 };
-use crate::cloud_engine::EncodeError;
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
+
 projection! {
     /// A source lookup result, without a canister-existence or liveness claim.
     Placement {
@@ -13,6 +16,7 @@ projection! {
         1_097_286_461 => subnet_id: Option<Principal> [strict_optional],
     }
 }
+
 projection! {
     /// Application-level Registry result; wire errors are returned separately.
     enum PlacementResult {
@@ -22,6 +26,7 @@ projection! {
         3_456_837 => Err(String),
     }
 }
+
 /// Decode exactly one result with shared framing, traversal and allocation budgets.
 ///
 /// # Errors
@@ -32,6 +37,7 @@ pub fn decode_get_subnet_for_canister_response(
 ) -> Result<PlacementResult, Error> {
     candid::decode(bytes, limits)
 }
+
 /// Encode one record containing the exact selected canister principal as Some.
 ///
 /// # Errors

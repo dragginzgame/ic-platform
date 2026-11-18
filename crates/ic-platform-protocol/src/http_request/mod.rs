@@ -131,6 +131,7 @@ fn leb_size(mut value: usize) -> usize {
     }
     n
 }
+
 fn leb(mut value: usize, output: &mut Vec<u8>) {
     loop {
         let byte = (value & 127) as u8;

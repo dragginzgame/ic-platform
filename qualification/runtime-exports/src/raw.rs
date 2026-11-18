@@ -15,6 +15,7 @@ fn context_guard() {
     ic0::msg_reply_data_append(&[u8::from(replicated), CONTEXT_MUTATIONS.get()]);
     ic0::msg_reply();
 }
+
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -23,6 +24,7 @@ fn context_guard() {
 extern "C" fn context_query() {
     context_guard();
 }
+
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -44,6 +46,7 @@ fn caller() -> ([u8; 29], usize) {
     }
     (bytes, size)
 }
+
 fn observe() {
     let before = ic0::instruction_counter();
     let (bytes, size) = caller();

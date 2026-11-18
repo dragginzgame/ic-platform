@@ -2,6 +2,9 @@
 //! Unknown fields are framed and skipped. Selected singular duplicates refuse;
 //! an absent inline value differs from a present empty value. Chunk fetching and
 //! application error interpretation remain caller-owned.
+#[cfg(test)]
+mod tests;
+
 use crate::registry_settings::{
     self,
     wire::{FieldValue, Reader},
@@ -162,6 +165,7 @@ macro_rules! record {
         }
     }
 }
+
 record! {
     /// Raw source application error; a present empty error remains present.
     RegistryError {
@@ -173,6 +177,7 @@ record! {
         3 => key:&'a [u8],
     }
 }
+
 record! {
     /// Selected subnet configuration; node identities remain raw source bytes.
     SubnetRecord {
@@ -188,6 +193,7 @@ record! {
         28 => halt_at_cup_height:bool,
     }
 }
+
 record! {
     /// Selected node registration metadata.
     NodeRecord {
@@ -199,6 +205,7 @@ record! {
         17 => hostos_version_id:Option<&'a str>,
     }
 }
+
 record! {
     /// Selected operator/provider/data-center join fields.
     NodeOperatorRecord {
@@ -210,6 +217,7 @@ record! {
         4 => dc_id:&'a str,
     }
 }
+
 record! {
     /// Selected data-center source metadata, without identity or text policy.
     DataCenterRecord {
@@ -221,6 +229,7 @@ record! {
         3 => owner:&'a str,
     }
 }
+
 fn decode<'a, T: Field<'a>>(bytes: &'a [u8], limits: Limits) -> Result<T, Error> {
     if bytes.len() > limits.bytes {
         return Err(Error::ByteLimit);
@@ -245,6 +254,7 @@ macro_rules! decoder {
         }
     };
 }
+
 decoder!(decode_subnet_record, SubnetRecord);
 decoder!(decode_node_record, NodeRecord);
 decoder!(decode_node_operator_record, NodeOperatorRecord);
@@ -255,5 +265,3 @@ pub use envelope::{
     GetValueResponse, decode_get_latest_version_response, decode_get_value_response,
     decode_subnet_list, encode_get_value_request,
 };
-#[cfg(test)]
-mod tests;
