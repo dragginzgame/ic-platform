@@ -32,7 +32,7 @@ jobs:
         run: make check-secrets
       - name: Validate workflow
         if: ${{ !cancelled() }}
-        run: make lint-workflows check-release-evidence
+        run: make lint-workflows
 
       - name: Retain sanitized setup failure evidence
         if: ${{ failure() }}
@@ -78,6 +78,8 @@ jobs:
         run: |
           make check-protocol-graphs check-types-graphs check-runtime-consumer-graph
           make check-protocol-graphs check-types-graphs check-runtime-consumer-graph GRAPH_TARGET="$(rustc -vV | sed -n 's/^host: //p')"
+      - name: Check release and publication refusal wiring
+        run: make check-release-evidence
       - name: Check request and response implementations
         run: make test-engine-request lint-engine-request doc-engine-request check-engine-request-wasm test-engine-response lint-engine-response doc-engine-response
       - name: Check local Types implementation

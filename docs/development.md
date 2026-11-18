@@ -547,7 +547,7 @@ No private package or product version is introduced for this maintenance.
 | --- | --- | --- |
 | Development: the focused `make qualify-…` targets below | Platform's selected product/consumer contracts; leaf commands explicitly select packages, features and native/Wasm targets | Changed source, manifests/locks, fixture source and tool pins; run affected contracts during development |
 | Tooling wiring: `make check-release-evidence` | Local audit, collector, publication-admission and Make/CI integration refusals | Collector/admission scripts, audit policy, catalogs, Makefile, group policy and workflow wiring; affected tooling changes and repository CI; excluded from routine release qualification |
-| Repository CI: `.github/workflows/ci.yml`, `types-release.yml` | Supported Linux/macOS coverage and product/fixture guarantees | Each workflow's committed source and host/tool selections; CI remains asynchronous and is not a blocking local publication matrix |
+| Repository CI: `.github/workflows/ci.yml` | Supported Linux/macOS coverage and product/fixture guarantees | Each workflow's committed source and host/tool selections; CI remains asynchronous and is not a blocking local publication matrix |
 | Release: `make qualify-release` | Complete local source-bound catalog, fresh isolated RustSec audits of both locks | Clean exact commit, both catalogs, compiler/host, root and qualification locks and every fixture's pinned inputs; once per final source |
 | Publication: `make publish RELEASE_GROUP=… PACKAGE=… RELEASE_RECEIPT=…` | Shared adapter owns selection/dispatch/custody; Platform admits one package's source, registry destination and extracted archive | Exact receipt, package owner/version, clean source, local/remote annotated tag, fresh registry absence, packaged dependency graph and VCS provenance; fresh for each package/upload attempt |
 | Optional preflight: `make publish-check` with the same selections | Same admission plus Cargo dry run; no upload | Only when a separate preflight is useful; it is not a prerequisite of `publish` |
@@ -563,13 +563,13 @@ particular Blob supplier qualification, Types/Runtime crossing and graph checks
 now run once even when multiple owners require them. `test-native` is the common
 native unit prerequisite of both read and signed qualification; both entrypoints
 still run it when invoked independently. No tests are replaced with cache hits. The obsolete Types-only admission runner
-is retired; its entrypoint delegates to the general admission and its refusal
-target depends on the same local flow fixtures for affected tooling work and CI. The former assertion that only
+is retired; its admission entrypoint delegates to the general admission. Shared
+refusal tests run through `check-release-evidence` for affected tooling work and CI. The former assertion that only
 Types may be publishable is replaced by exact package/group admission.
 
 Run `make check-release-evidence` when changing collector/admission scripts,
 audit policy, release catalogs, Make wiring, group policy or workflow integration.
-Both CI workflows retain that coverage (Types through `check-types-publication`).
+Main CI runs that shared refusal coverage on Linux and both macOS architectures.
 Neither release catalog selects those regression fixtures: `qualify-release`
 still performs fresh real audits of both locks and validates their evidence;
 `publish` still performs fresh receipt/source/group/tag/registry/archive admission.
@@ -640,7 +640,8 @@ one native unit run and one flow/refusal invocation. Timings and full logs:
 
 All 54 focused flow/audit/wiring tests pass, including the two final shared
 execution-guard cases added after the full graph's 52-case fixture invocation.
-The retained `make check-types-publication` entrypoint passes all 54 as well.
+At that historical qualification, the `make check-types-publication` alias passed
+all 54 as well; the unused alias was subsequently retired under #31.
 Tests execute real Make and consumer admission processes in disposable roots;
 registry, package and provenance effects are simulated. They establish dispatch,
 refusal and fresh-run recovery behavior, not live upload or macOS proof.
@@ -837,3 +838,34 @@ tests and workflow lint. An extracted Cargo archive outside the workspace passed
 the public integration test and Wasm compilation with only `stable-structures`
 enabled. Logs are under `target/stable-structures/`. Publication is verified in the [release record](releases.md#stable-structures-export-release);
 Storage installed upgrade/rollback acceptance remains separate.
+
+
+## CI and tooling selection cleanup — Platform #31 and #32
+
+[Platform #31](https://github.com/dragginzgame/ic-platform/issues/31) removes the
+duplicate Types workflow and its unused `check-types-publication` alias. Main CI
+retains full-history secret scanning, workflow lint, pinned setup, formatting and
+snapshot checks, native/Wasm dependency graphs, Types/consumer qualification,
+pinned Auth archive qualification and canonical Runtime crossing on Linux and
+both macOS architectures. The shared `check-release-evidence` refusal suite now
+runs once per native host instead of also running in the repository job.
+The Types release obligation catalog remains in place.
+
+Before removal, GitHub reported main unprotected, no repository rulesets and no
+active branch rules; no required-status configuration change was necessary.
+Existing main-CI job names stay unchanged. Focused wiring tests guard the retained
+coverage; this cleanup makes no measured speedup or new hosted-matrix claim.
+
+[Platform #32](https://github.com/dragginzgame/ic-platform/issues/32) removes the
+unused formatting-hook and release-metadata exporter roots after tracing Make,
+CI, hooks, scripts, documented commands and companion references. The authenticated
+0.45.0 exporter received the complete retained source-relative entrypoint list.
+Its preview removes those two roots and five exclusively owned companions; the
+active pre-commit hook, grouped release helpers and package-provenance helper
+remain selected. No managed file was manually edited, and the tooling version is
+unchanged. Preview/install evidence is under `target/issues31-32/`.
+
+Focused validation passed all 57 release-tooling tests, workflow lint, formatting,
+snapshot verification (79 files), documentation file-link checks and
+`git diff --check`. The retained Types commands were compared with the removed
+workflow. No full product matrix was rerun for this orchestration cleanup.

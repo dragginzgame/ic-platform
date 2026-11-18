@@ -77,7 +77,7 @@ Canic also records local adoption and installed anonymous deployment/recovery/up
 acceptance, closing [#25](https://github.com/dragginzgame/ic-platform/issues/25).
 Its retained runs do not establish delivery or qualify subsequent working-tree changes.
 The old Agent identity/derivation crypto obligation remains tracked in
-[#4](https://github.com/dragginzgame/ic-platform/issues/4); an audited current
+[#27](https://github.com/dragginzgame/ic-platform/issues/27). An audited current
 Platform graph does not qualify those retained external paths.
 
 The source-review baseline is legacy commit

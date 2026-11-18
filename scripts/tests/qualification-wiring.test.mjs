@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {readFileSync, writeFileSync, mkdtempSync, rmSync} from 'node:fs';
+import {existsSync, readFileSync, writeFileSync, mkdtempSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
@@ -11,9 +11,11 @@ test('release flow regressions stay in CI and focused tooling checks, outside pr
   const targets = releaseCatalog().targets;
   assert(!targets.includes('check-release-evidence'));
   assert(!targets.includes('check-types-publication'));
-  assert.match(readFileSync('.github/workflows/ci.yml', 'utf8'), /run: make lint-workflows check-release-evidence/);
-  assert.match(readFileSync('.github/workflows/types-release.yml', 'utf8'), /run: make check-types-publication/);
-  assert.match(readFileSync('Makefile', 'utf8'), /^check-types-publication: check-release-evidence$/m);
+  const workflow = readFileSync('.github/workflows/ci.yml', 'utf8');
+  assert.match(workflow.split('  native:')[1], /run: make check-release-evidence/);
+  assert.equal((workflow.match(/run: make check-release-evidence/g) ?? []).length, 1);
+  assert(!existsSync('.github/workflows/types-release.yml'));
+  assert.doesNotMatch(readFileSync('Makefile', 'utf8'), /^check-types-publication:/m);
 });
 test('regular native CI selects the new owning checks on every host', () => {
   const workflow = readFileSync('.github/workflows/ci.yml', 'utf8').split('  native:')[1];
@@ -66,4 +68,31 @@ test('actual protocol graph commands admit Candid only in the native oracle fixt
       }
     }
   }
+});
+
+test('consolidated native CI retains Types and publication qualification on all hosts', () => {
+  const workflow = readFileSync('.github/workflows/ci.yml', 'utf8');
+  const native = workflow.split('  native:')[1];
+  assert.match(native, /\[ubuntu-24.04, macos-15, macos-15-intel\]/);
+  const makeTargets = new Set();
+  for (const line of native.split('\n')) {
+    const command = line.trim().match(/^(?:run:\s+)?make\s+([^#]+)/);
+    if (command) {
+      for (const arg of command[1].trim().split(/\s+/)) makeTargets.add(arg);
+    }
+  }
+  for (const target of ['fmt-check', 'qualification-tooling-check', 'check-protocol-graphs',
+    'check-types-graphs', 'check-runtime-consumer-graph', 'qualify-types',
+    'qualify-types-consumer', 'qualify-types-auth-archive', 'qualify-runtime-consumer',
+    'check-release-evidence']) {
+    assert(makeTargets.has(target), `missing ${target}`);
+  }
+  assert.match(native, /repository: dragginzgame\/ic-auth/);
+  assert.match(native, /ref: b78991e9833320692921bf766e51ad361c9c8c4d/);
+  assert.match(native, /AUTH_SOURCE:.*target\/auth-source/);
+  assert.match(native, /GRAPH_TARGET=.*rustc -vV/);
+  const repository = workflow.split('  native:')[0];
+  assert.match(repository, /fetch-depth: 0/);
+  assert.match(repository, /run: make check-secrets/);
+  assert.match(repository, /run: make lint-workflows/);
 });
