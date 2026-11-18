@@ -91,13 +91,13 @@ contribution analysis remains deferred. Required correctness checks stay intact.
 
 ## Development and delivery
 
-Rust 1.100.0 and Toko Tooling 0.45.0 are selected by the repository. Run
+Rust 1.100.0 and Toko Tooling 0.45.3 are selected by the repository. Run
 `make install-tools tools-check` for admitted tools, including checkout-local
 ICP CLI 1.7.0. Regular native CI includes signed/anonymous installed transport
 and Blob native/Wasm codecs on Linux and both macOS architectures. Configured
 coverage is not a claim that the latest hosted run passed.
 
-The complete local release catalog, clean-source receipt, packaged/archive
+The source-bound qualification plan, clean-source receipt, packaged/archive
 checks and registry readback remain required. Fresh isolated RustSec audits cover
 both lockfiles and bind their exact evidence into publication admission. See
 [development](docs/development.md) and [release evidence](docs/releases.md).

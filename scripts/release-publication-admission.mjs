@@ -17,6 +17,12 @@ const commit=run('git',['rev-parse','HEAD']).trim();
 validateQualificationReceipt(receipt, dirname(process.env.RELEASE_RECEIPT), {
   commit, rust: run('rustc',['-V']).trim(),
 });
+if (receipt.schema === 3) {
+  assert.equal(process.env.RELEASE_GROUP, receipt.group);
+  const {baseline, base} = receipt.selection;
+  const remote = run('git', ['ls-remote', '--exit-code', 'origin', `refs/tags/${baseline}^{}`]);
+  assert.equal(remote.trim().split(/\s+/)[0], base, 'scoped comparison baseline differs on origin');
+}
 const selection=process.env.CARGO_PUBLISH_SELECTION?.trim().split(/\s+/);
 assert.equal(selection?.length,1,'Publish one admitted package at a time in dependency order');
 const name=selection[0];

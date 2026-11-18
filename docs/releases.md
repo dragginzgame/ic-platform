@@ -1,7 +1,7 @@
 # Initial crates.io deployment
 
 Current delivery uses the [qualification/publication flow](development.md#qualification-and-publication-flow--platform-26).
-Run the complete final-source gate once and then the supported `publish` adapter
+Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 

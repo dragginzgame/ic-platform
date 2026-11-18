@@ -210,3 +210,59 @@ for (const mode of ['-n', '-i']) {
     assert(!existsSync(join(f.output, 'receipt.json')));
   });
 }
+
+test('isolated export uses the shared runner and a mixed release range falls back', t => {
+  const f = fixture(t);
+  const {root} = f;
+  function put(path, value) {
+    mkdirSync(join(root, path, '..'), {recursive: true});
+    writeFileSync(join(root, path), value);
+  }
+  function git(...args) {
+    const result = spawnSync('git', args, {cwd: root, encoding: 'utf8'});
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout.trim();
+  }
+  const catalog = JSON.parse(readFileSync(join(root, 'ci/release-profiles.json')));
+  catalog.platform.push('qualify-stable-structures');
+  put('ci/release-profiles.json', JSON.stringify(catalog));
+  appendFileSync(join(root, 'Makefile'), '\nqualify-stable-structures:\n\t@echo stable >> dispatch\n');
+  for (const file of ['Cargo.lock','qualification/Cargo.lock','scripts/qualify-release.mjs',
+    'crates/ic-platform/tests/stable_structures.rs']) put(file, 'fixture\n');
+  put('crates/ic-platform/Cargo.toml', 'version = "0.34.17"\n');
+  const lib = 'crates/ic-platform/src/lib.rs';
+  const alias = '#[cfg(feature = "stable-structures")]\npub use ic_stable_structures as stable_structures;\n';
+  put(lib, '\n' + alias);
+  const vendor = 'vendor/toko-tooling/scripts/ci';
+  for (const name of ['run-validation-targets.sh','check-make-execution.sh','verify-file-checksum.sh',
+    'validation-input-checkpoint.pl','release-validation-plan.pl','ValidationPlan.pm']) {
+    put(vendor + '/' + name, readFileSync(join(vendor, name)));
+  }
+  git('init', '-q');
+  git('config', 'user.email', 'fixture@example.invalid');
+  git('config', 'user.name', 'Fixture');
+  git('add', '.');
+  git('commit', '-qm', 'baseline');
+  git('tag', '-a', 'platform-v0.34.16', '-m', 'qualified baseline');
+  put(lib, '\n/// Storage collections.\n' + alias);
+  git('commit', '-qam', 'document isolated export');
+  const commit = git('rev-parse', 'HEAD');
+  const execute = (cmd, args, opts) => {
+    if (cmd === 'git' || args[0]?.endsWith('run-validation-targets.sh')) return spawnSync(cmd, args, opts);
+    return f.execute(cmd, args, opts);
+  };
+  const options = {...f, execute, group: 'platform'};
+  const receipt = qualifyRelease(options);
+  assert.equal(receipt.schema, 3);
+  assert.deepEqual(receipt.targets, ['qualify-stable-structures']);
+  assert.equal(readFileSync(join(root, 'dispatch'), 'utf8'), 'stable\n');
+  git('tag', '-a', 'platform-v0.34.17', '-m', 'candidate');
+  validateQualificationReceipt(receipt, f.output, {...f, commit, rust: receipt.rust});
+  appendFileSync(join(f.output, 'plan.json'), ' ');
+  assert.throws(() => validateQualificationReceipt(receipt, f.output, {...f, commit, rust: receipt.rust}));
+  put('shared-input', 'unmapped');
+  git('add', 'shared-input');
+  git('commit', '-qm', 'shared change');
+  const full = qualifyRelease({...options, output: join(root, 'mixed')});
+  assert.deepEqual(full.targets, releaseCatalog(root).targets);
+});

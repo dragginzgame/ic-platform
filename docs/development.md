@@ -111,7 +111,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.45.0 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.45.3 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -160,7 +160,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.0
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.3
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -548,7 +548,7 @@ No private package or product version is introduced for this maintenance.
 | Development: the focused `make qualify-…` targets below | Platform's selected product/consumer contracts; leaf commands explicitly select packages, features and native/Wasm targets | Changed source, manifests/locks, fixture source and tool pins; run affected contracts during development |
 | Tooling wiring: `make check-release-evidence` | Local audit, collector, publication-admission and Make/CI integration refusals | Collector/admission scripts, audit policy, catalogs, Makefile, group policy and workflow wiring; affected tooling changes and repository CI; excluded from routine release qualification |
 | Repository CI: `.github/workflows/ci.yml` | Supported Linux/macOS coverage and product/fixture guarantees | Each workflow's committed source and host/tool selections; CI remains asynchronous and is not a blocking local publication matrix |
-| Release: `make qualify-release` | Complete local source-bound catalog, fresh isolated RustSec audits of both locks | Clean exact commit, both catalogs, compiler/host, root and qualification locks and every fixture's pinned inputs; once per final source |
+| Release: `make qualify-release` | Source-bound qualification selection, fresh isolated RustSec audits of both locks | Clean exact commit, both catalogs, compiler/host, root and qualification locks and every fixture's pinned inputs; once per final source |
 | Publication: `make publish RELEASE_GROUP=… PACKAGE=… RELEASE_RECEIPT=…` | Shared adapter owns selection/dispatch/custody; Platform admits one package's source, registry destination and extracted archive | Exact receipt, package owner/version, clean source, local/remote annotated tag, fresh registry absence, packaged dependency graph and VCS provenance; fresh for each package/upload attempt |
 | Optional preflight: `make publish-check` with the same selections | Same admission plus Cargo dry run; no upload | Only when a separate preflight is useful; it is not a prerequisite of `publish` |
 | Recovery / readback | Shared attempt evidence plus independent registry reconciliation | Inspect intent/dispatch/status and remote index/archive/VCS evidence after uncertain upload; never automatically rerun an upload |
@@ -576,15 +576,28 @@ still performs fresh real audits of both locks and validates their evidence;
 Changing either catalog invalidates existing receipts. No audit or admission
 operation has been removed or replaced by CI success.
 
-The complete product gate is deliberately retained for every release group.
-The current catalogs do not declare complete file/feature/reverse-consumer input
-closures: actual Auth, Blob and Query fixtures cross owners. A selected publisher
-group is therefore not evidence that another catalog's checks are inapplicable.
-There is no new local diff classifier, cache, runner or metadata framework.
-Narrowing that gate would require a qualified input/impact policy using shared
-mechanics. This is an explicit retained-work disposition, not a claim of scoped
-product qualification. The flow was qualified on Toko Tooling 0.44.11; its subsequent 0.45.0 adoption
-is recorded below.
+For a Platform-only candidate, run `make qualify-release RELEASE_GROUP=platform`.
+The collector compares the clean commit with the preceding annotated Platform
+release tag, including every intervening commit's net changes. It excludes the
+candidate's tag so publication can reproduce the decision after tagging. A
+change confined to the existing stable-structures fixture or the trailing
+documented, feature-gated upstream alias in the crate root selects
+`qualify-stable-structures`. The shared validation-plan runner receives the full
+catalog roster with reasons, checks its input files and retains per-stage evidence.
+The focused target exercises the host contract, Wasm compilation, feature graph
+and empty defaults. Both lockfiles still receive fresh audits.
+
+Shared manifests, locks, CI, Make or catalog edits, other crate-root changes,
+unmapped paths, and missing or ambiguous baseline evidence take the full serial
+catalog path. A routine version bump touching these inputs also takes that path.
+The actual 0.34.16 introduction changed several shared files and remains a
+full-catalog case. An ungrouped invocation always qualifies the full catalog.
+
+A scoped schema-3 receipt binds the release group, baseline, changed paths,
+selected target, plan and policy hashes in addition to the source, catalogs,
+compiler, host, execution log and audits. Admission independently recomputes
+the selection and checks the baseline against the remote annotated tag before
+the fresh archive checks. A scoped receipt admits only Platform publication.
 
 Schema-2 receipts bind the complete ordered target list and one retained
 `qualification.log`, both catalog hashes, exact commit, compiler/host and the
@@ -730,9 +743,21 @@ run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
 require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
 prepares assets and `make runtime-server-check` verifies them without downloading.
 
-## Toko Tooling 0.45.0 adoption
+## Toko Tooling 0.45.3 adoption
 
-Both workspace catalogs and locks now select published Toko Tooling 0.45.0.
+The root and qualification workspaces select 0.45.3. The authenticated installer
+verified the registry checksum
+`41141f3a04bea22cacdaa5e36774d69e1335f5461098311eb6bb2731ee113da5`.
+The reviewed snapshot updates the engineering baseline and shared release,
+timing and publication helpers. The snapshot contains 79 files.
+The [qualification flow](#qualification-and-publication-flow--platform-26)
+describes the Platform-specific plan selection delivered with this update.
+The first qualifying scoped release will record its actual duration in
+`timings.json`; the previous full release took 259.40 seconds.
+
+## Historical Toko Tooling 0.45.0 adoption
+
+At that adoption, both workspace catalogs and locks selected published Toko Tooling 0.45.0.
 The archive checksum is
 `3789a925c1165317eff84cc80436195b66c0478b0c2b441bc2f1a755caf6a23a`.
 The supported preview/update path selects the managed baseline and grouped Cargo
