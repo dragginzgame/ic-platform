@@ -12,9 +12,9 @@ GitHub owns issue status; qualification documents retain source-bound evidence.
 
 ## Published scope
 
-The latest recorded release is Platform 0.34.16 / Protocol 0.3.5, alongside
-Types 0.21.2 and Runtime/macros/guard 0.23.17. See the
-[release and archive verification record](docs/releases.md#stable-structures-export-release)
+The latest recorded release is Platform 0.34.17 / Protocol 0.3.6, alongside
+Types 0.21.3 and Runtime/macros/guard 0.23.18. See the
+[release and archive verification record](docs/releases.md#toko-tooling-0458-and-rust-hygiene-release)
 and independent [group changelogs](CHANGELOG.md). Private qualification packages
 remain outside product release groups. Publication does not establish every
 consumer's production migration or completion of the entire design.
@@ -95,7 +95,7 @@ contribution analysis remains deferred. Required correctness checks stay intact.
 
 ## Development and delivery
 
-Rust 1.100.0 and Toko Tooling 0.45.8 are selected by the repository. Run
+Rust 1.100.0 and Toko Tooling 0.45.10 are selected by the repository. Run
 `make install-tools tools-check` for admitted tools, including checkout-local
 ICP CLI 1.7.0. Regular native CI includes signed/anonymous installed transport
 and Blob native/Wasm codecs on Linux and both macOS architectures. Configured

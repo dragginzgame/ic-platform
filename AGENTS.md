@@ -11,7 +11,7 @@ and current versions belong in Cargo metadata and the group ledgers. Keep
 qualification packages private and outside product release groups.
 
 This repository adopts the installed [Toko Tooling engineering baseline](TOKO-TOOLING.md)
-from published Toko Tooling 0.45.8 and its revision-bound specialist rules. Cargo.lock and
+from published Toko Tooling 0.45.10 and its revision-bound specialist rules. Cargo.lock and
 `.toko-tooling.snapshot` bind the selection and installed bytes. Keep managed
 files intact; use the supported installer for updates. [Development commands](docs/development.md)
 describe the local Make interface and focused checks.

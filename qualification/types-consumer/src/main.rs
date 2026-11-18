@@ -2,7 +2,7 @@
 
 //! Independent public identity consumer, also executed as standalone Wasm.
 
-#[cfg(all(test, not(target_family = "wasm")))]
+#[cfg(test)]
 mod tests;
 
 mod fixtures;

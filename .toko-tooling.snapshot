@@ -1,9 +1,9 @@
 # Toko Tooling snapshot v1
-# version	0.45.8
+# version	0.45.10
 # layout	vendor
 format	1
 source	https://crates.io/crates/toko-tooling
-revision	adbc76769b2231de6704851c363550ddc486bb6204a0f89c2ad365eb7cf740a3
+revision	690c847446a5edbf5e13c03996feee5a64daa4c28a9a1098ceb7d5ea64f820fc
 # entrypoint	TOKO-TOOLING.md
 # entrypoint	LICENSE.md
 # entrypoint	CONTRIBUTING.md
@@ -18,7 +18,8 @@ revision	adbc76769b2231de6704851c363550ddc486bb6204a0f89c2ad365eb7cf740a3
 # entrypoint	vendor/toko-tooling/scripts/ci/check-cargo-package-provenance.sh
 # entrypoint	vendor/toko-tooling/scripts/ci/check-release-source.sh
 # entrypoint	vendor/toko-tooling/scripts/ci/prepare-rustsec-db.sh
-file	4c030ec11d149d24ee0993f73a77cc6d190def7d13b791b395acb066f771a3f8	-	TOKO-TOOLING.md
+# entrypoint	vendor/toko-tooling/scripts/ci/SetupDiagnostics.pm
+file	3e02a3a58db59600b7e69fc817db56b1c9303c77549c4a8f48f66ea8a81b9b2c	-	TOKO-TOOLING.md
 file	3f2971bfefccf71cf4929cabd1fa000e0c7b3d4002b9a08ca58821ccb048c123	-	LICENSE.md
 file	0ae38d62c728fb06f1a2dd2325f99f2277bfdb0cd48ac6df49d4120c0bfe88bd	-	CONTRIBUTING.md
 file	e5be6f538ee619be119aef9b3fca9d156f35c08732d9775e4e2efd698db8cbd7	-	vendor/toko-tooling/make/consumer.mk
@@ -32,6 +33,7 @@ file	f83e4bd3143a04e954f77eb23d38b1924658aa298b0c1d3486748197861d696d	-	vendor/t
 file	b3764cf05af99fa9c2ad6f8cf8b84aa768bf10a99fd961875139c95f7d12e6cb	x	vendor/toko-tooling/scripts/ci/check-cargo-package-provenance.sh
 file	a3af7084956384262842be33100f91a22fdd82b0f91b6091a00e90f8726f67fe	x	vendor/toko-tooling/scripts/ci/check-release-source.sh
 file	771cc142805d6200caddd32a2f10783516fe297e4424c051ac92a40884607e5f	x	vendor/toko-tooling/scripts/ci/prepare-rustsec-db.sh
+file	b2d9df47c02f3eaf27dce1f7b9a688b554780610bb7b71c077dc55440c344db1	-	vendor/toko-tooling/scripts/ci/SetupDiagnostics.pm
 file	578a5f7217e378280fe378328d39e4b7dcea653bd868159b57362461bd4e8555	x	vendor/toko-tooling/scripts/ci/verify-file-checksum.sh
 file	aec8dfcff940adbf7ca69d0e9edb4cd31b65648e1deef299ffb194e94e64c536	x	vendor/toko-tooling/scripts/ci/verify-toko-tooling-snapshot.sh
 file	da86464696f4f600f034566cef732aa680dc9c577e534519c71ee3d07172a875	-	vendor/toko-tooling/scripts/dev/toko-tooling.sh

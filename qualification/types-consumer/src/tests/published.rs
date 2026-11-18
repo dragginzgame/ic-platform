@@ -2,11 +2,6 @@ use candidate_types::{Account, Principal};
 use ic_platform_types::{Account as PublishedAccount, Principal as PublishedPrincipal};
 
 #[test]
-fn literal_public_consumer() {
-    super::fixtures::check();
-}
-
-#[test]
 fn published_identity_compatibility() {
     for len in 0..=29 {
         let bytes: Vec<_> = (0..len).map(|i| (i * 13) as u8).collect();

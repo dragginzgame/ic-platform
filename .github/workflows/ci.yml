@@ -58,6 +58,8 @@ jobs:
         with:
           node-version-file: .node-version
           package-manager-cache: false
+      - name: Verify setup failure diagnostics
+        run: node scripts/ci/setup-step.test.mjs
       - name: Prepare host prerequisites
         run: |
           bash scripts/ci/setup-step.sh host-tools make install-host-tools
