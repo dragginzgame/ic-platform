@@ -5,6 +5,28 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Toko Tooling 0.45.8 and Rust hygiene release
+
+Published all six packages on 18 November 2026 from commit
+`2856344360e15e0bf8f7781842dbbe6e5c7cd8ef`. The four annotated group tags
+and main were pushed atomically. All 59 qualification targets passed in the
+full Linux run. Fresh audits of both lockfiles reported zero vulnerabilities.
+The 58 release-tooling regression tests also passed.
+
+Each registry archive matched the locally admitted archive, sparse-index
+checksum, tagged source commit and package path. Local evidence is in
+`target/release-qualification/1795033001411-4064011/receipt.json` and
+`target/hygiene-release/published.json`.
+
+| Package | Version | Registry SHA-256 |
+| --- | --- | --- |
+| ic-platform | 0.34.17 | `866eba5d2c1bf18457a3c2a5c1a306dab075626efbe9c83acf1eeb952d58a023` |
+| ic-platform-macros | 0.23.18 | `3255bda21deaeaf1998bf8fd8b187740f68bb1f20865ba2c9613f023e26ef7b2` |
+| ic-platform-protocol | 0.3.6 | `34a9e427266040f66a8a1734942cb8adecfeee30ad84e186bbe155ed5eafcae6` |
+| ic-platform-runtime | 0.23.18 | `b7381b5315043417fe9c309223c516f0c43a4c1c5dc5620726b72f1a4785746e` |
+| ic-platform-runtime-guard | 0.23.18 | `d55a56b4aa7dd39d2217d73481899f3b28bb00ca78670b3095917531dd316502` |
+| ic-platform-types | 0.21.3 | `1ebaae959b3a485c68803aa242a967568ed15411208670de5a858da84324dba0` |
+
 ## Stable structures export release
 
 Select Platform 0.34.16 for [Platform #30](https://github.com/dragginzgame/ic-platform/issues/30).
