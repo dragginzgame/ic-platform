@@ -5,6 +5,20 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Runtime 0.23.22 and Toko Tooling 0.45.19
+
+Published the Runtime group from tag `runtime-v0.23.22` at
+`4d48989b24bb36edda12af1f46f6d8eb1e0861de`. All 59 Linux qualification
+targets and 58 release-tooling regression tests passed. Fresh audits of both
+lockfiles found zero known vulnerabilities. The downloaded packages matched
+their admitted archives, registry checksums, source commit and package paths.
+
+| Package | Registry SHA-256 |
+| --- | --- |
+| ic-platform-runtime-guard | `18ad17c256b4079de3ea347710e6ee222a8481754641a748142c2c3a62b3ab12` |
+| ic-platform-macros | `8b3b45edad46665abedb5cead2c9ff983de108e6e1faab588e8906f655d32167` |
+| ic-platform-runtime | `49ac0af0e78945df40f85dc34a65e47b2a9acd9716354169ecfc1911c6923f2a` |
+
 ## Native Runtime and Protocol maintenance release
 
 Published Runtime 0.23.21 and Protocol 0.3.7 from
