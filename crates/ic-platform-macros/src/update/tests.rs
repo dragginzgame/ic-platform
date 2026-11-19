@@ -24,8 +24,8 @@ fn valid_update_generates_handler_and_fixed_export() {
     )
     .unwrap();
     let file: syn::File = syn::parse2(output).unwrap();
-    assert_eq!(file.items.len(), 2);
-    let syn::Item::Fn(wrapper) = &file.items[1] else {
+    assert_eq!(file.items.len(), 4);
+    let syn::Item::Fn(wrapper) = file.items.last().unwrap() else {
         panic!("expected wrapper")
     };
     assert!(wrapper.sig.inputs.is_empty());
@@ -148,7 +148,7 @@ fn cfg_is_forwarded_and_attribute_injection_refuses() {
     )
     .unwrap();
     let file: syn::File = syn::parse2(output).unwrap();
-    let syn::Item::Fn(wrapper) = &file.items[1] else {
+    let syn::Item::Fn(wrapper) = file.items.last().unwrap() else {
         panic!("expected wrapper")
     };
     assert_eq!(

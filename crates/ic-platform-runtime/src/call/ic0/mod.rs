@@ -56,7 +56,7 @@ unsafe extern "C" {
     unsafe_code,
     reason = "IC identity copies use initialized, size-checked Principal storage"
 )]
-pub(crate) fn principal(caller: bool) -> candidate_types::Principal {
+pub(crate) fn principal(caller: bool) -> ic_platform_types::Principal {
     let mut bytes = [0_u8; 29];
     // SAFETY: Both IC sizes are checked before copying into initialized memory.
     // No user code runs between observation and synchronous copy.
@@ -77,7 +77,7 @@ pub(crate) fn principal(caller: bool) -> candidate_types::Principal {
             }
         }
     }
-    candidate_types::Principal::from_slice(&bytes[..size as usize])
+    ic_platform_types::Principal::from_slice(&bytes[..size as usize])
 }
 
 #[cfg(feature = "call-ic0")]
@@ -113,7 +113,7 @@ pub(crate) fn argument_size() -> usize {
     unsafe_code,
     reason = "IC controller observation synchronously reads a valid Principal"
 )]
-pub(crate) fn controller(principal: &candidate_types::Principal) -> bool {
+pub(crate) fn controller(principal: &ic_platform_types::Principal) -> bool {
     // SAFETY: Valid bounded Principal bytes stay readable throughout the call.
     unsafe { is_controller(principal.as_slice().as_ptr() as u32, principal.len() as u32) != 0 }
 }

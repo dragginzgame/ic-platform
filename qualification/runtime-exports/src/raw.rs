@@ -3,20 +3,10 @@
 use candidate_runtime::raw as ic0;
 use std::cell::Cell;
 
-thread_local! { static VALUE: Cell<u8> = const { Cell::new(0) }; }
-thread_local! { static CONTEXT_MUTATIONS: Cell<u8> = const { Cell::new(0) }; }
-
-fn context_guard() {
-    let replicated = ic0::in_replicated_execution();
-    // Same ordering required by Entropy: context refusal precedes all custody
-    // mutation and call submission. No dummy root or transport is involved.
-    if replicated {
-        CONTEXT_MUTATIONS.set(CONTEXT_MUTATIONS.get() + 1);
-    }
-    ic0::msg_reply_data_append(&[u8::from(replicated), CONTEXT_MUTATIONS.get()]);
-    ic0::msg_reply();
-}
-
+// context_query
+// Report the execution context and mutation counter.
+// scope  : public
+// limits : none specified
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -26,6 +16,10 @@ extern "C" fn context_query() {
     context_guard();
 }
 
+// context_update
+// Increment the counter in replicated execution and report the context.
+// scope  : public
+// limits : none specified
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -35,31 +29,10 @@ extern "C" fn context_update() {
     context_guard();
 }
 
-fn caller() -> ([u8; 29], usize) {
-    let size = ic0::msg_caller_size();
-    assert!(size <= 29);
-    let mut bytes = [0; 29];
-    ic0::msg_caller_copy(&mut bytes[..size], 0);
-    if size > 0 {
-        let mut tail = [0; 29];
-        ic0::msg_caller_copy(&mut tail[..size - 1], 1);
-        assert_eq!(&tail[..size - 1], &bytes[1..size]);
-    }
-    (bytes, size)
-}
-
-fn observe() {
-    let before = ic0::instruction_counter();
-    let (bytes, size) = caller();
-    ic0::msg_reply_data_append(&[VALUE.get(), ic0::is_controller(&bytes[..size]) as u8]);
-    ic0::msg_reply_data_append(&bytes[..size]);
-    let after = ic0::instruction_counter();
-    assert!(after >= before);
-    ic0::msg_reply_data_append(&before.to_le_bytes());
-    ic0::msg_reply_data_append(&after.to_le_bytes());
-    ic0::msg_reply();
-}
-
+// query
+// Read the stored value, caller, controller flag and instruction counts.
+// scope  : public
+// limits : caller ID up to 29 bytes
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -69,6 +42,10 @@ extern "C" fn query() {
     observe();
 }
 
+// update_observe
+// Read the stored value, caller, controller flag and instruction counts in an update.
+// scope  : public
+// limits : caller ID up to 29 bytes
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -78,6 +55,10 @@ extern "C" fn update_observe() {
     observe();
 }
 
+// update
+// Exercise raw argument copying, mutation, replies and traps by mode.
+// scope  : public; mode 1 requires a controller
+// limits : mode 0 requires five input bytes
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -132,6 +113,10 @@ extern "C" fn update() {
     }
 }
 
+// initialize
+// Initialize the two-page stable memory fixture and heap value.
+// scope  : IC installation; controller required
+// limits : empty input
 #[expect(
     unsafe_code,
     reason = "Caller-owned lifecycle export in the approved fixture"
@@ -150,6 +135,10 @@ extern "C" fn initialize() {
     VALUE.set(7);
 }
 
+// before_upgrade
+// Write the heap value to stable memory.
+// scope  : IC pre-upgrade hook
+// limits : none specified
 #[expect(
     unsafe_code,
     reason = "Caller-owned lifecycle export in the approved fixture"
@@ -161,6 +150,10 @@ extern "C" fn before_upgrade() {
     let _ = caller();
 }
 
+// after_upgrade
+// Restore the heap value from stable memory.
+// scope  : IC post-upgrade hook
+// limits : empty input
 #[expect(
     unsafe_code,
     reason = "Caller-owned lifecycle export in the approved fixture"
@@ -175,6 +168,10 @@ extern "C" fn after_upgrade() {
     VALUE.set(value[0]);
 }
 
+// system_probe
+// Exercise stable memory and cycle accounting for the selected mode.
+// scope  : public
+// limits : requires a mode byte
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -232,6 +229,10 @@ extern "C" fn system_probe() {
     ic0::msg_reply();
 }
 
+// stable_observe
+// Read the stable page count and the three bytes across the first page boundary.
+// scope  : public
+// limits : none specified
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -242,5 +243,44 @@ extern "C" fn stable_observe() {
     let mut bytes = [0; 3];
     ic0::stable64_read(65535, &mut bytes);
     ic0::msg_reply_data_append(&bytes);
+    ic0::msg_reply();
+}
+
+thread_local! { static VALUE: Cell<u8> = const { Cell::new(0) }; }
+thread_local! { static CONTEXT_MUTATIONS: Cell<u8> = const { Cell::new(0) }; }
+
+fn context_guard() {
+    let replicated = ic0::in_replicated_execution();
+    // Same ordering required by Entropy: context refusal precedes all custody
+    // mutation and call submission. No dummy root or transport is involved.
+    if replicated {
+        CONTEXT_MUTATIONS.set(CONTEXT_MUTATIONS.get() + 1);
+    }
+    ic0::msg_reply_data_append(&[u8::from(replicated), CONTEXT_MUTATIONS.get()]);
+    ic0::msg_reply();
+}
+
+fn caller() -> ([u8; 29], usize) {
+    let size = ic0::msg_caller_size();
+    assert!(size <= 29);
+    let mut bytes = [0; 29];
+    ic0::msg_caller_copy(&mut bytes[..size], 0);
+    if size > 0 {
+        let mut tail = [0; 29];
+        ic0::msg_caller_copy(&mut tail[..size - 1], 1);
+        assert_eq!(&tail[..size - 1], &bytes[1..size]);
+    }
+    (bytes, size)
+}
+
+fn observe() {
+    let before = ic0::instruction_counter();
+    let (bytes, size) = caller();
+    ic0::msg_reply_data_append(&[VALUE.get(), ic0::is_controller(&bytes[..size]) as u8]);
+    ic0::msg_reply_data_append(&bytes[..size]);
+    let after = ic0::instruction_counter();
+    assert!(after >= before);
+    ic0::msg_reply_data_append(&before.to_le_bytes());
+    ic0::msg_reply_data_append(&after.to_le_bytes());
     ic0::msg_reply();
 }

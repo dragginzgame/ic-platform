@@ -177,14 +177,15 @@ pub(super) fn expand_kind(
     let wrapper = format_ident!(
         "__ic_platform_{}_{}",
         prefix,
-        plain.trim_start_matches("r#")
+        plain.trim_start_matches("r#"),
+        span = proc_macro2::Span::mixed_site()
     );
     let export_name = if lifecycle {
         format!("canister_{prefix}")
     } else {
         format!("canister_{prefix} {}", name.value())
     };
-    let export = LitStr::new(&export_name, name.span());
+    let export = LitStr::new(&export_name, proc_macro2::Span::mixed_site());
     let invocation = if lifecycle {
         let has_arguments = kind != Kind::PreUpgrade;
         quote!(#runtime::entrypoints::lifecycle(#maximum, #has_arguments, #guard, #decode, #handler))
@@ -203,14 +204,21 @@ pub(super) fn expand_kind(
             quote!(#runtime::entrypoints::update(#maximum, #guard, #decode, #invoke_handler, #encode, #on_error))
         }
     };
+    let gating = &gating;
+    // Keep dispatch and ABI wrapper names disjoint for handlers such as
+    // observe and observe_dispatch in the same module.
+    let dispatch = format_ident!(
+        "__ic_platform_dispatch_{}_{}",
+        prefix,
+        plain.trim_start_matches("r#"),
+        span = proc_macro2::Span::mixed_site()
+    );
     Ok(quote! {
         #function
         #(#gating)*
-        #[cfg(target_arch = "wasm32")]
-        #[doc(hidden)]
-        #[expect(unsafe_code, reason = "Generated IC entrypoint export with fixed ABI and explicit policies")]
-        #[unsafe(export_name = #export)]
-        pub extern "C" fn #wrapper() {
+        const _: fn() = #dispatch;
+        #(#gating)*
+        fn #dispatch() {
             match #invocation {
                 ::std::result::Result::Ok(_) => {},
                 ::std::result::Result::Err(error) => {
@@ -218,6 +226,14 @@ pub(super) fn expand_kind(
                     failure(error)
                 }
             }
+        }
+        #(#gating)*
+        #[cfg(target_arch = "wasm32")]
+        #[doc(hidden)]
+        #[expect(unsafe_code, reason = "Generated IC entrypoint export with fixed ABI and explicit policies")]
+        #[unsafe(export_name = #export)]
+        pub extern "C" fn #wrapper() {
+            #dispatch();
         }
     })
 }

@@ -29,7 +29,7 @@ const dependency=rt.dependencies.find(d=>d.name===gd.name);
 assert.equal(dependency.req,`=${gd.version}`);
 assert.equal(resolve(dependency.path),resolve(guard));
 assert.equal(dependency.optional,true);
-assert.ok(rt.features['call-ic0'].includes('dep:candidate-runtime-guard'));
+assert.ok(rt.features['call-ic0'].includes('dep:ic-platform-runtime-guard'));
 
 const scratch=mkdtempSync(join(tmpdir(),'ic-platform-guard-'));
 try {

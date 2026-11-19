@@ -2,36 +2,6 @@
 
 use candidate_runtime::{entrypoints, executor::EntryError, system};
 
-/// Admit every caller to this qualification fixture.
-fn admit() -> Result<(), u8> {
-    Ok(())
-}
-
-fn unit(bytes: &[u8]) -> Result<(), u8> {
-    if bytes.is_empty() { Ok(()) } else { Err(1) }
-}
-
-fn bytes(input: &[u8]) -> Result<Vec<u8>, u8> {
-    Ok(input.to_vec())
-}
-
-fn fail<T: std::fmt::Debug>(error: T) -> ! {
-    panic!("system fixture refused: {error:?}")
-}
-
-fn encode(value: Vec<u8>) -> Result<Vec<u8>, u8> {
-    Ok(value)
-}
-
-fn no_task() {
-    assert_eq!(system::reply(&[]), Err(system::ReplyError::NoActiveTask));
-    let nested = entrypoints::lifecycle(0, false, admit, unit, |()| panic!("nested lifecycle"));
-    assert!(matches!(
-        nested,
-        Err(entrypoints::UpdateError::Entry(EntryError::NestedEntry))
-    ));
-}
-
 // randomness
 // Return a 32-byte raw_rand reply or the four-byte synchronous refusal code.
 // scope  : public
@@ -56,7 +26,10 @@ async fn randomness((): ()) -> Vec<u8> {
     }
 }
 
-/// Set the initial certified root.
+// initialize
+// Set the initial certified root.
+// scope  : IC installation
+// limits : empty input
 #[candidate_runtime::init(
     runtime = candidate_runtime,
     guard = admit,
@@ -69,7 +42,10 @@ fn initialize((): ()) {
     system::set_certified_data(&[7; 32]);
 }
 
-/// Set the certified root for the pre-upgrade observation.
+// before_upgrade
+// Set the certified root for the pre-upgrade observation.
+// scope  : IC pre-upgrade hook
+// limits : empty input
 #[candidate_runtime::pre_upgrade(
     runtime = candidate_runtime,
     guard = admit,
@@ -82,7 +58,10 @@ fn before_upgrade((): ()) {
     system::set_certified_data(&[8; 32]);
 }
 
-/// Migrate the fixture timer record and set the upgraded certified root.
+// after_upgrade
+// Migrate the fixture timer record and set the upgraded certified root.
+// scope  : IC post-upgrade hook
+// limits : empty input
 #[candidate_runtime::post_upgrade(
     runtime = candidate_runtime,
     guard = admit,
@@ -96,7 +75,10 @@ fn after_upgrade((): ()) {
     system::set_certified_data(&[9; 32]);
 }
 
-/// Read caller, canister, time, controller and certificate observations.
+// observe
+// Read caller, canister, time, controller and certificate observations.
+// scope  : public
+// limits : empty input
 #[candidate_runtime::query(
     runtime = candidate_runtime,
     name = "system_observe",
@@ -141,7 +123,10 @@ fn observe((): ()) -> Vec<u8> {
     result
 }
 
-/// Publish a 32-byte certified root and return it.
+// publish
+// Publish a 32-byte certified root and return it.
+// scope  : public
+// limits : 32 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "system_set",
@@ -158,11 +143,10 @@ fn publish(root: Vec<u8>) -> Vec<u8> {
     root.to_vec()
 }
 
-fn refuse_encoding(_: Vec<u8>) -> Result<Vec<u8>, u8> {
-    Err(6)
-}
-
-/// Exercise rollback when the reply encoder refuses its result.
+// rollback_encoding
+// Exercise rollback when the reply encoder refuses its result.
+// scope  : public
+// limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "system_encode_refusal",
@@ -177,7 +161,10 @@ fn rollback_encoding((): ()) -> Vec<u8> {
     Vec::new()
 }
 
-/// Return the async handler result through the automatic reply encoder.
+// automatic_async
+// Return the async handler result through the automatic reply encoder.
+// scope  : public
+// limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "system_async",
@@ -189,4 +176,38 @@ fn rollback_encoding((): ()) -> Vec<u8> {
 )]
 async fn automatic_async((): ()) -> Vec<u8> {
     vec![42]
+}
+
+/// Admit every caller to this qualification fixture.
+fn admit() -> Result<(), u8> {
+    Ok(())
+}
+
+fn unit(bytes: &[u8]) -> Result<(), u8> {
+    if bytes.is_empty() { Ok(()) } else { Err(1) }
+}
+
+fn bytes(input: &[u8]) -> Result<Vec<u8>, u8> {
+    Ok(input.to_vec())
+}
+
+fn fail<T: std::fmt::Debug>(error: T) -> ! {
+    panic!("system fixture refused: {error:?}")
+}
+
+fn encode(value: Vec<u8>) -> Result<Vec<u8>, u8> {
+    Ok(value)
+}
+
+fn no_task() {
+    assert_eq!(system::reply(&[]), Err(system::ReplyError::NoActiveTask));
+    let nested = entrypoints::lifecycle(0, false, admit, unit, |()| panic!("nested lifecycle"));
+    assert!(matches!(
+        nested,
+        Err(entrypoints::UpdateError::Entry(EntryError::NestedEntry))
+    ));
+}
+
+fn refuse_encoding(_: Vec<u8>) -> Result<Vec<u8>, u8> {
+    Err(6)
 }

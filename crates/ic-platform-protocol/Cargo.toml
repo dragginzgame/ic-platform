@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-protocol"
-version = "0.3.6"
+version = "0.3.7"
 edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
@@ -14,26 +14,26 @@ description = "Bounded external protocol formats for IC Platform"
 ignored = ["toko-tooling"]
 
 [features]
-sns-neurons = ["dep:candidate-types", "dep:serde"]
+sns-neurons = ["dep:ic-platform-types", "dep:serde"]
 default = []
 management = ["management-snapshots", "management-chunks", "dep:num-bigint"]
 ledger = ["management", "dep:sha2", "dep:crc32fast"]
-caffeine = ["dep:candidate-types", "dep:serde", "dep:num-bigint"]
+caffeine = ["dep:ic-platform-types", "dep:serde", "dep:num-bigint"]
 raw-rand = []
-management-chunks = ["dep:candidate-types", "dep:serde"]
+management-chunks = ["dep:ic-platform-types", "dep:serde"]
 management-snapshot-fixtures = ["management-snapshots"]
-management-snapshots = ["dep:candidate-types", "dep:serde"]
+management-snapshots = ["dep:ic-platform-types", "dep:serde"]
 http-request = []
 cloud-engine = []
-cloud-engine-response = ["cloud-engine", "dep:candidate-types", "dep:serde"]
+cloud-engine-response = ["cloud-engine", "dep:ic-platform-types", "dep:serde"]
 cloud-engine-marketplace = ["cloud-engine-response", "dep:num-bigint"]
 registry-placement = ["cloud-engine-response"]
 registry = ["registry-settings"]
 registry-settings = ["dep:serde"]
 
 [dependencies]
-candidate-types = { workspace = true, optional = true }
 crc32fast = { workspace = true, optional = true }
+ic-platform-types = { workspace = true, optional = true }
 num-bigint = { workspace = true, optional = true }
 serde = { workspace = true, optional = true }
 sha2 = { workspace = true, optional = true }

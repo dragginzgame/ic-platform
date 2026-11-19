@@ -1,8 +1,6 @@
 //! One bounded management canister randomness request.
 
-#[cfg(any(test, target_arch = "wasm32"))]
 mod operation;
-#[cfg(target_arch = "wasm32")]
 pub use operation::request;
 
 use crate::call::{Rejection, SubmitError};

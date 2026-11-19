@@ -16,6 +16,9 @@ pub struct Submitted {
 /// IC context and request-limit violations may still trap at the system boundary.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SubmitError {
+    /// A native process has no IC execution in which to submit this request.
+    #[cfg(not(target_arch = "wasm32"))]
+    OutsideCanister,
     /// All non-reused callback identifiers for this instance have been issued.
     CallbackCapacity,
     /// System cost plus attachment cannot be represented by u128.

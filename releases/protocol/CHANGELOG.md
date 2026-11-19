@@ -3,6 +3,11 @@
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.3.7] - 2026-11-19
+
+Use the canonical Types dependency name across protocol codecs. The wire formats
+and public feature names are unchanged.
+
 ## [0.3.6] - 2026-11-18
 
 ### 🔧 Maintenance

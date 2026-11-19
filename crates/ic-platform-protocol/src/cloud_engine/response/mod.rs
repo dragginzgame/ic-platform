@@ -20,7 +20,7 @@ pub use availability::{
     AvailableNode, AvailableNodesPage, AvailableNodesPageResult, EngineError,
     decode_list_available_nodes_page_response,
 };
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 #[cfg(feature = "cloud-engine-marketplace")]
 pub use marketplace::{
     MarketplaceEntry, NodeType, Price, PriceEntry, decode_list_marketplace_prices_response,

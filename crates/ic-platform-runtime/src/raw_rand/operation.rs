@@ -1,6 +1,6 @@
 use super::{Error, wire};
 use crate::call::{Call, Completion, Outcome, SubmitError, Wait};
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 
 #[cfg(test)]
 #[path = "tests.rs"]
@@ -12,7 +12,6 @@ mod tests;
 /// # Errors
 /// Returns the submission, rejection, uncertain outcome or protocol error from
 /// this single attempt. No retry is performed.
-#[cfg(target_arch = "wasm32")]
 pub async fn request(wait_seconds: u32) -> Result<[u8; 32], Error> {
     let call = prepare(wait_seconds)?;
     finish(call.execute().await)

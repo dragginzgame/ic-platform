@@ -7,6 +7,153 @@ use candidate_runtime::{
 };
 use std::cell::{Cell, RefCell};
 
+// arm
+// Arm the fixture timer and persist its initial stage.
+// scope  : public
+// limits : one input byte maximum
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "timer_arm",
+    guard = admit,
+    decode = decode,
+    max_bytes = 1,
+    encode = encode,
+    on_error = fail
+)]
+fn arm(mode: u8) -> Vec<u8> {
+    // The arm update commits before the timer executes. One private stable page
+    // belongs to this single-attempt fixture. Byte 0 is its schema version.
+    assert_eq!(candidate_runtime::raw::stable64_grow(1), Some(0));
+    candidate_runtime::raw::stable64_write(0, &[1, mode, 1]);
+    MODE.set(mode);
+    let deadline = system::time().checked_add(1_000_000_000).unwrap();
+    assert_eq!(system::global_timer_set(deadline), 0);
+    if mode == 3 {
+        assert_eq!(system::global_timer_set(0), deadline);
+    }
+    system::canister_version().to_le_bytes().to_vec()
+}
+
+// observe
+// Read timer execution counters and the observed task state.
+// scope  : public
+// limits : empty input
+#[candidate_runtime::query(
+    runtime = candidate_runtime,
+    name = "timer_observe",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
+fn observe((): ()) -> Vec<u8> {
+    assert!(matches!(
+        executor::run_global_timer(async { panic!("query must not poll") }),
+        Err(EntryError::NonReplicated | EntryError::NestedEntry)
+    ));
+    let state = HANDLE.with(
+        |handle| match handle.borrow().as_ref().map(TaskHandle::state) {
+            None => 0,
+            Some(TaskState::Running) => 1,
+            Some(TaskState::Completed) => 2,
+            Some(TaskState::TerminatedByCleanup) => 3,
+        },
+    );
+    let mut bytes = vec![FIRED.get(), DROPPED.get(), state];
+    bytes.extend_from_slice(&system::canister_version().to_le_bytes());
+    bytes
+}
+
+// peer
+// Return the payload awaited by the timer task.
+// scope  : public
+// limits : empty input
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "timer_peer",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
+fn peer((): ()) -> Vec<u8> {
+    vec![42]
+}
+
+// timer
+// Dispatch the armed timer stage and record its observed task.
+// scope  : IC global timer
+// limits : none specified
+#[expect(
+    unsafe_code,
+    reason = "installed fixture owns the IC global timer export"
+)]
+#[unsafe(export_name = "canister_global_timer")]
+extern "C" fn timer() {
+    FIRED.set(FIRED.get() + 1);
+    assert_eq!(system::global_timer_set(0), 0);
+    let mode = MODE.get();
+    let handle = executor::run_global_timer(async move {
+        assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));
+        let _cleanup = Cleanup(mode == 2);
+        assert_ne!(mode, 4, "initial timer poll trap");
+        candidate_runtime::raw::stable64_write(2, &[2]);
+        let response = Call::new(system::canister_self(), "timer_peer", Wait::Unbounded)
+            .execute()
+            .await
+            .unwrap();
+        assert!(matches!(response.outcome(), Outcome::Reply(bytes) if bytes == &[42]));
+        assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));
+        candidate_runtime::raw::stable64_write(2, &[3]);
+        assert_eq!(mode, 0, "timer callback trap");
+    })
+    .unwrap();
+    HANDLE.with(|slot| *slot.borrow_mut() = Some(handle));
+}
+
+// record
+// Read the persisted timer schema, mode and stage.
+// scope  : public
+// limits : empty input
+#[candidate_runtime::query(
+    runtime = candidate_runtime,
+    name = "timer_record",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
+fn record((): ()) -> Vec<u8> {
+    let mut bytes = vec![0; 3];
+    candidate_runtime::raw::stable64_read(0, &mut bytes);
+    bytes
+}
+
+// registry_size
+// Returns callback and task occupancy as two little-endian Wasm32 counts.
+// scope  : public
+// limits : empty input
+#[cfg(ic_platform_qualification_accounting)]
+#[candidate_runtime::query(
+    runtime = candidate_runtime,
+    name = "registry_size",
+    guard = admit,
+    decode = empty,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
+fn registry_size((): ()) -> Vec<u8> {
+    let mut counts = candidate_runtime::call::observed_count()
+        .to_le_bytes()
+        .to_vec();
+    counts.extend_from_slice(&candidate_runtime::executor::observed_tasks().to_le_bytes());
+    counts
+}
+
 thread_local! {
     static MODE: Cell<u8> = const { Cell::new(0) };
     static FIRED: Cell<u8> = const { Cell::new(0) };
@@ -38,72 +185,6 @@ fn fail<T: std::fmt::Debug>(error: T) -> ! {
     panic!("timer fixture: {error:?}")
 }
 
-/// Arm the fixture timer and persist its initial stage.
-#[candidate_runtime::update(
-    runtime = candidate_runtime,
-    name = "timer_arm",
-    guard = admit,
-    decode = decode,
-    max_bytes = 1,
-    encode = encode,
-    on_error = fail
-)]
-fn arm(mode: u8) -> Vec<u8> {
-    // The arm update commits before the timer executes. One private stable page
-    // belongs to this single-attempt fixture. Byte 0 is its schema version.
-    assert_eq!(candidate_runtime::raw::stable64_grow(1), Some(0));
-    candidate_runtime::raw::stable64_write(0, &[1, mode, 1]);
-    MODE.set(mode);
-    let deadline = system::time().checked_add(1_000_000_000).unwrap();
-    assert_eq!(system::global_timer_set(deadline), 0);
-    if mode == 3 {
-        assert_eq!(system::global_timer_set(0), deadline);
-    }
-    system::canister_version().to_le_bytes().to_vec()
-}
-
-/// Read timer execution counters and the observed task state.
-#[candidate_runtime::query(
-    runtime = candidate_runtime,
-    name = "timer_observe",
-    guard = admit,
-    decode = empty,
-    max_bytes = 0,
-    encode = encode,
-    on_error = fail
-)]
-fn observe((): ()) -> Vec<u8> {
-    assert!(matches!(
-        executor::run_global_timer(async { panic!("query must not poll") }),
-        Err(EntryError::NonReplicated | EntryError::NestedEntry)
-    ));
-    let state = HANDLE.with(
-        |handle| match handle.borrow().as_ref().map(TaskHandle::state) {
-            None => 0,
-            Some(TaskState::Running) => 1,
-            Some(TaskState::Completed) => 2,
-            Some(TaskState::TerminatedByCleanup) => 3,
-        },
-    );
-    let mut bytes = vec![FIRED.get(), DROPPED.get(), state];
-    bytes.extend_from_slice(&system::canister_version().to_le_bytes());
-    bytes
-}
-
-/// Return the payload awaited by the timer task.
-#[candidate_runtime::update(
-    runtime = candidate_runtime,
-    name = "timer_peer",
-    guard = admit,
-    decode = empty,
-    max_bytes = 0,
-    encode = encode,
-    on_error = fail
-)]
-fn peer((): ()) -> Vec<u8> {
-    vec![42]
-}
-
 struct Cleanup(bool);
 impl Drop for Cleanup {
     fn drop(&mut self) {
@@ -117,49 +198,6 @@ impl Drop for Cleanup {
     }
 }
 
-#[expect(
-    unsafe_code,
-    reason = "installed fixture owns the IC global timer export"
-)]
-#[unsafe(export_name = "canister_global_timer")]
-extern "C" fn timer() {
-    FIRED.set(FIRED.get() + 1);
-    assert_eq!(system::global_timer_set(0), 0);
-    let mode = MODE.get();
-    let handle = executor::run_global_timer(async move {
-        assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));
-        let _cleanup = Cleanup(mode == 2);
-        assert_ne!(mode, 4, "initial timer poll trap");
-        candidate_runtime::raw::stable64_write(2, &[2]);
-        let response = Call::new(system::canister_self(), "timer_peer", Wait::Unbounded)
-            .execute()
-            .await
-            .unwrap();
-        assert!(matches!(response.outcome(), Outcome::Reply(bytes) if bytes == &[42]));
-        assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));
-        candidate_runtime::raw::stable64_write(2, &[3]);
-        assert_eq!(mode, 0, "timer callback trap");
-    })
-    .unwrap();
-    HANDLE.with(|slot| *slot.borrow_mut() = Some(handle));
-}
-
-/// Read the persisted timer schema, mode and stage.
-#[candidate_runtime::query(
-    runtime = candidate_runtime,
-    name = "timer_record",
-    guard = admit,
-    decode = empty,
-    max_bytes = 0,
-    encode = encode,
-    on_error = fail
-)]
-fn record((): ()) -> Vec<u8> {
-    let mut bytes = vec![0; 3];
-    candidate_runtime::raw::stable64_read(0, &mut bytes);
-    bytes
-}
-
 /// Upgrade only the fixture-owned record. Keep its observed dispatch stage.
 pub(super) fn migrate_record() {
     if candidate_runtime::raw::stable64_size() == 0 {
@@ -171,23 +209,4 @@ pub(super) fn migrate_record() {
         2 => {}
         version => panic!("unknown timer record version {version}"),
     }
-}
-
-/// Returns callback and task occupancy as two little-endian Wasm32 counts.
-#[cfg(ic_platform_qualification_accounting)]
-#[candidate_runtime::query(
-    runtime = candidate_runtime,
-    name = "registry_size",
-    guard = admit,
-    decode = empty,
-    max_bytes = 0,
-    encode = encode,
-    on_error = fail
-)]
-fn registry_size((): ()) -> Vec<u8> {
-    let mut counts = candidate_runtime::call::observed_count()
-        .to_le_bytes()
-        .to_vec();
-    counts.extend_from_slice(&candidate_runtime::executor::observed_tasks().to_le_bytes());
-    counts
 }

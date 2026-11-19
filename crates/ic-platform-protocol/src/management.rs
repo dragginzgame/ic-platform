@@ -10,7 +10,7 @@ pub use crate::candid::{Nat, encode::EncodeError};
 pub use crate::management_snapshots::{
     CanisterArgs, CanisterStatus, decode_canister_status, decode_empty_response,
 };
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {

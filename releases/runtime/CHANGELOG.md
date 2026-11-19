@@ -4,6 +4,12 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.21] - 2026-11-19
+
+Native actor builds can type-check handlers, IC observations and bounded calls.
+Polling an outbound call on a native host returns `SubmitError::OutsideCanister`.
+The IC entrypoints are exported on Wasm.
+
 ## [0.23.20] - 2026-11-19
 
 - Expose the raw-rand error type on both native and Wasm targets so native archive builds include its Protocol dependency. Call submission remains Wasm-only.
