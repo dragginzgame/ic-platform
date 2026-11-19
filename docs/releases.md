@@ -5,6 +5,21 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Runtime bounded raw_rand release
+
+Runtime 0.23.20 is the first published version with the opt-in bounded
+`raw-rand` operation for [issue #33](https://github.com/dragginzgame/ic-platform/issues/33).
+All 59 Linux qualification targets passed for tag `runtime-v0.23.20`
+at `b0e87d3ef76cffad6e317e3bbf60e25531b8a474`. Fresh audits covered
+both lockfiles. Each downloaded registry archive matched its admitted
+archive, sparse-index checksum, source commit and package path.
+
+| Package | Registry SHA-256 |
+| --- | --- |
+| ic-platform-runtime-guard | `817a7f408c0e9fe93df0b6bbb35a95be169d0dda2c4f1cf8434175d1379530a1` |
+| ic-platform-macros | `dc1dcbf39f447214602a6bad4c55b06e4e4641edc75164b2e6de8a66ceb71721` |
+| ic-platform-runtime | `fff03d6d6cb64dc07512368345b31afdbe78da3653762db594df4b0359b0ec5f` |
+
 ## Toko Tooling 0.45.8 and Rust hygiene release
 
 Published all six packages on 18 November 2026 from commit
