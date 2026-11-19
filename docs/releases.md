@@ -5,6 +5,16 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Platform 0.34.18
+
+Published `ic-platform` with canonical Types imports from tag `platform-v0.34.18`
+at `6927d99b5d586e54d2711ad9d1f34d0043ffcd02`. All 59 Linux qualification
+targets passed. Fresh audits of both lockfiles reported zero known vulnerabilities.
+The extracted crate passed native and Wasm Clippy and native tests. The downloaded
+archive matched the locally admitted archive, registry checksum, source commit
+and package path. Its SHA-256 is
+`b59c6bf641d9d87b4c7cac1012398998b1f4a6217b81bd580b3c84d421b43a2d`.
+
 ## Runtime bounded raw_rand release
 
 Runtime 0.23.20 is the first published version with the opt-in bounded
