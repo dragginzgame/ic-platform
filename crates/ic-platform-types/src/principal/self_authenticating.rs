@@ -14,6 +14,7 @@ impl Principal {
         let mut bytes = [0; Self::MAX_LENGTH_IN_BYTES];
         bytes[..digest.len()].copy_from_slice(&digest);
         bytes[28] = 2;
+
         Self::from_slice(&bytes)
     }
 }

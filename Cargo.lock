@@ -843,7 +843,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-types"
-version = "0.21.3"
+version = "0.21.4"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1269,9 +1269,9 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "pin-project-lite"
-version = "0.2.17"
+version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+checksum = "c938015719552d665fd0553b90d96cd7ff58e83e4c061ca99e6bb78865a72752"
 
 [[package]]
 name = "pkcs8"
@@ -1991,9 +1991,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.45.19"
+version = "0.45.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e43f1a0e1e4c04290daff05316f2ea21bbda86ebe8c1adf70605c6fd018be9e2"
+checksum = "af1ba8e16aaf1dae0951f08a228a4f00b928d09ff68997bd94ccc397ace5e4be"
 
 [[package]]
 name = "tower"

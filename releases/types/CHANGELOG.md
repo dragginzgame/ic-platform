@@ -3,6 +3,10 @@
 Release group: `types`. Covered package: `ic-platform-types`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.21.4] - 2026-11-19
+
+- Group the Principal and Account implementations and document the Principal Serde visitor.
+
 ## [0.21.3] - 2026-11-18
 
 ### 🔧 Maintenance

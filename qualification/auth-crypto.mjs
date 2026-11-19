@@ -25,7 +25,7 @@ function edit(name, transform) {
 }
 for (const name of ['Cargo.toml', 'qualification/Cargo.toml']) edit(name, text => text
   .replace('ic-platform = { version = "0.33.7",', `ic-platform = { path = ${JSON.stringify(`${root}/crates/ic-platform`)}, version = "=0.34.18",`)
-  .replace('ic-platform-types = { version = "0.20.4",', `ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.3",`)
+  .replace('ic-platform-types = { version = "0.20.4",', `ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.4",`)
   .replace('ic-wire = "0.24.1"', 'ic-wire = "=0.24.2"'));
 // Select the actual consumer's primitive and certified conformance packages.
 // Installed qualification uses the same patch in auth-runtime.

@@ -2,8 +2,8 @@ use candidate_runtime::{entrypoints::UpdateError, system};
 
 // echo
 // Reply with the admitted bytes.
-// scope  : public
-// limits : 4 input bytes maximum
+// guard  : admit accepts every caller
+// limits : request up to 4 bytes, reply echoes the admitted bytes
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "echo",
@@ -19,8 +19,8 @@ async fn echo(input: Vec<u8>) {
 
 // denied
 // Exercise unconditional refusal before handler execution.
-// scope  : all callers refused
-// limits : 4 input bytes maximum
+// guard  : deny refuses all callers
+// limits : request up to 4 bytes, no reply
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "denied",
@@ -36,8 +36,7 @@ async fn denied(_input: Vec<u8>) {
 
 // disabled
 // Exercise removal of an export disabled by cfg.
-// scope  : disabled at compile time
-// limits : 4 input bytes maximum
+// limits : request up to 4 bytes, no exported reply
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "disabled",
@@ -54,8 +53,7 @@ async fn disabled(_input: Missing) {
 
 // conditional
 // Exercise removal of an export disabled by cfg_attr.
-// scope  : disabled at compile time
-// limits : 4 input bytes maximum
+// limits : request up to 4 bytes, no exported reply
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "conditional",

@@ -11,38 +11,19 @@ use data_encoding::BASE32_NOPAD;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use std::{fmt, str::FromStr};
 
+///
+/// Principal
 /// An opaque IC identity containing at most 29 significant bytes.
 ///
 /// Ordering compares length first, then bytes. Binary Serde includes only the
 /// significant bytes; human-readable Serde uses canonical Principal text.
 /// Deserialization accepts string or byte callbacks, but not numeric sequences.
+///
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Principal {
     len: u8,
     bytes: [u8; 29],
-}
-
-/// A failed Principal byte or text admission.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, thiserror::Error)]
-pub enum PrincipalError {
-    /// A binary identity exceeds 29 bytes.
-    #[error("Bytes is longer than 29 bytes.")]
-    BytesTooLong(),
-    /// Text does not contain a valid unpadded Base32 payload.
-    #[error("Text must be in valid Base32 encoding.")]
-    InvalidBase32(),
-    /// Decoded text is shorter than its four-byte checksum.
-    #[error("Text is too short.")]
-    TextTooShort(),
-    /// Text exceeds its admission bound or encodes too many payload bytes.
-    #[error("Text is too long.")]
-    TextTooLong(),
-    /// The supplied checksum differs from the checksum of the identity bytes.
-    #[error("CRC32 check sequence doesn't match with calculated from Principal bytes.")]
-    CheckSequenceNotMatch(),
-    /// The identity is valid but its text has noncanonical dash positions.
-    #[error("Text should be separated by - (dash) every 5 characters: expected \"{0}\"")]
-    AbnormalGrouped(Principal),
 }
 
 impl Principal {
@@ -91,6 +72,7 @@ impl Principal {
             principal.bytes[index] = slice[index];
             index += 1;
         }
+
         Ok(principal)
     }
 
@@ -141,6 +123,7 @@ impl Principal {
         {
             return Err(PrincipalError::AbnormalGrouped(principal));
         }
+
         Ok(principal)
     }
 
@@ -148,6 +131,7 @@ impl Principal {
     #[must_use]
     pub fn to_text(&self) -> String {
         let mut text = [0_u8; Self::MAX_LENGTH_IN_TEXT];
+
         self.write_text(&mut text).to_owned()
     }
 
@@ -199,14 +183,32 @@ impl Principal {
             output[written] = byte.to_ascii_lowercase();
             written += 1;
         }
+
         // The supplier emits ASCII Base32 digits; inserted dashes are ASCII too.
         std::str::from_utf8(&output[..written]).expect("Base32 text is ASCII")
+    }
+}
+
+impl AsRef<[u8]> for Principal {
+    fn as_ref(&self) -> &[u8] {
+        self.as_slice()
+    }
+}
+
+impl<'de> Deserialize<'de> for Principal {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        if deserializer.is_human_readable() {
+            deserializer.deserialize_str(PrincipalVisitor)
+        } else {
+            deserializer.deserialize_bytes(PrincipalVisitor)
+        }
     }
 }
 
 impl fmt::Display for Principal {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut text = [0_u8; Self::MAX_LENGTH_IN_TEXT];
+
         formatter.write_str(self.write_text(&mut text))
     }
 }
@@ -219,9 +221,15 @@ impl FromStr for Principal {
     }
 }
 
-impl AsRef<[u8]> for Principal {
-    fn as_ref(&self) -> &[u8] {
-        self.as_slice()
+impl Serialize for Principal {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        if serializer.is_human_readable() {
+            let mut text = [0_u8; Self::MAX_LENGTH_IN_TEXT];
+
+            serializer.serialize_str(self.write_text(&mut text))
+        } else {
+            serializer.serialize_bytes(self.as_slice())
+        }
     }
 }
 
@@ -257,16 +265,10 @@ impl TryFrom<&[u8]> for Principal {
     }
 }
 
-impl Serialize for Principal {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        if serializer.is_human_readable() {
-            let mut text = [0_u8; Self::MAX_LENGTH_IN_TEXT];
-            serializer.serialize_str(self.write_text(&mut text))
-        } else {
-            serializer.serialize_bytes(self.as_slice())
-        }
-    }
-}
+///
+/// PrincipalVisitor
+/// Admits Principal text and bytes during Serde deserialization.
+///
 
 struct PrincipalVisitor;
 
@@ -286,12 +288,25 @@ impl de::Visitor<'_> for PrincipalVisitor {
     }
 }
 
-impl<'de> Deserialize<'de> for Principal {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        if deserializer.is_human_readable() {
-            deserializer.deserialize_str(PrincipalVisitor)
-        } else {
-            deserializer.deserialize_bytes(PrincipalVisitor)
-        }
-    }
+/// A failed Principal byte or text admission.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, thiserror::Error)]
+pub enum PrincipalError {
+    /// A binary identity exceeds 29 bytes.
+    #[error("Bytes is longer than 29 bytes.")]
+    BytesTooLong(),
+    /// Text does not contain a valid unpadded Base32 payload.
+    #[error("Text must be in valid Base32 encoding.")]
+    InvalidBase32(),
+    /// Decoded text is shorter than its four-byte checksum.
+    #[error("Text is too short.")]
+    TextTooShort(),
+    /// Text exceeds its admission bound or encodes too many payload bytes.
+    #[error("Text is too long.")]
+    TextTooLong(),
+    /// The supplied checksum differs from the checksum of the identity bytes.
+    #[error("CRC32 check sequence doesn't match with calculated from Principal bytes.")]
+    CheckSequenceNotMatch(),
+    /// The identity is valid but its text has noncanonical dash positions.
+    #[error("Text should be separated by - (dash) every 5 characters: expected \"{0}\"")]
+    AbnormalGrouped(Principal),
 }
