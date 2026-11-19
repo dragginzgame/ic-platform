@@ -12,8 +12,8 @@ GitHub owns issue status; qualification documents retain source-bound evidence.
 
 ## Published scope
 
-The latest recorded release is Platform 0.34.18 / Protocol 0.3.6, alongside
-Types 0.21.3 and Runtime/macros/guard 0.23.20. See the
+The latest recorded release is Platform 0.34.18 / Protocol 0.3.7, alongside
+Types 0.21.3 and Runtime/macros/guard 0.23.21. See the
 [release and archive verification record](docs/releases.md)
 and independent [group changelogs](CHANGELOG.md). Private qualification packages
 remain outside product release groups. Publication does not establish every

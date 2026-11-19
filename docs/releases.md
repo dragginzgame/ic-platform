@@ -5,6 +5,22 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Native Runtime and Protocol maintenance release
+
+Published Runtime 0.23.21 and Protocol 0.3.7 from
+`757ab85f83d6f9b3b2df93eb2394a40ae3dc856f` with Toko Tooling 0.45.18.
+All 59 Linux qualification targets and 58 release-tooling regression tests
+passed. Fresh audits of both lockfiles found zero known vulnerabilities.
+Each downloaded crate matched its admitted archive, registry checksum,
+source commit and package path.
+
+| Package | Version | Registry SHA-256 |
+| --- | --- | --- |
+| ic-platform-protocol | 0.3.7 | `0d8b8e67643b3107f060b90f85d7e51ea136d4e498e791e090c4810434bab545` |
+| ic-platform-runtime-guard | 0.23.21 | `2af39e5414cf5bd599774d7e8e072bc7a773ce4ece50f9e29fc9a9e56d520162` |
+| ic-platform-macros | 0.23.21 | `0809c6a90943bd695a56928c383308a39c21da0445518f4e0a3789f39f82f0fe` |
+| ic-platform-runtime | 0.23.21 | `e9b373427677f7e0077cf0b80dc13121d9abda8fd2fbf17cbe638c25b4fc22f7` |
+
 ## Platform 0.34.18
 
 Published `ic-platform` with canonical Types imports from tag `platform-v0.34.18`
