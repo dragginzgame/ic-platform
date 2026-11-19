@@ -1,6 +1,5 @@
 //! Consuming one-way submission; no executor or Rust callback registration.
 
-use super::{Call, ic0};
 use std::num::NonZeroU32;
 
 /// A locally queued one-way call, conditional on the enclosing execution commit.
@@ -32,7 +31,8 @@ pub enum SubmitError {
     Refused(NonZeroU32),
 }
 
-impl Call<'_, '_> {
+#[cfg(target_arch = "wasm32")]
+impl super::Call<'_, '_> {
     /// Consumes this request and synchronously queues one one-way call.
     ///
     /// No executor, Rust callback, cleanup registration or future is created.
@@ -49,7 +49,7 @@ impl Call<'_, '_> {
     /// limits, or a cycle balance change that prevents cycle attachment.
     pub fn notify(self) -> Result<Submitted, SubmitError> {
         self.check_balance()?;
-        match NonZeroU32::new(ic0::enqueue_oneway(&self)) {
+        match NonZeroU32::new(super::ic0::enqueue_oneway(&self)) {
             Some(code) => Err(SubmitError::Refused(code)),
             None => Ok(Submitted { _private: () }),
         }
@@ -59,7 +59,7 @@ impl Call<'_, '_> {
         let required = self
             .required_cycles()
             .map_err(|_| SubmitError::CostOverflow)?;
-        let available = ic0::liquid_balance();
+        let available = super::ic0::liquid_balance();
         if available < required {
             return Err(SubmitError::InsufficientBalance {
                 available,

@@ -95,7 +95,7 @@ contribution analysis remains deferred. Required correctness checks stay intact.
 
 ## Development and delivery
 
-Rust 1.100.0 and Toko Tooling 0.45.15 are selected by the repository. Run
+Rust 1.100.0 and Toko Tooling 0.45.16 are selected by the repository. Run
 `make install-tools tools-check` for admitted tools, including checkout-local
 ICP CLI 1.7.0. Regular native CI includes signed/anonymous installed transport
 and Blob native/Wasm codecs on Linux and both macOS architectures. Configured

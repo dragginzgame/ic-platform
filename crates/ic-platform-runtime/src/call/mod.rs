@@ -19,7 +19,7 @@ mod registry;
     all(feature = "call-ic0", target_arch = "wasm32")
 ))]
 mod state;
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+#[cfg(feature = "call-ic0")]
 mod submission;
 #[cfg(all(test, feature = "call"))]
 mod tests;
@@ -44,12 +44,12 @@ pub(crate) use ic0::{
 };
 #[cfg(feature = "call")]
 use std::borrow::Cow;
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+#[cfg(feature = "call-ic0")]
 pub use submission::{SubmitError, Submitted};
 
 /// The requested attachment plus the system cost cannot fit in u128.
 /// No call was submitted or cycles reserved by the observation.
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+#[cfg(feature = "call-ic0")]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct CostOverflow;
 

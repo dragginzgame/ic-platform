@@ -3,25 +3,6 @@
 use super::{EXECUTOR, EntryError, TaskHandle, start, start_root};
 use std::future::Future;
 
-pub(crate) struct SynchronousEntry;
-
-impl Drop for SynchronousEntry {
-    fn drop(&mut self) {
-        EXECUTOR.with(|executor| executor.borrow_mut().synchronous = false);
-    }
-}
-
-pub(crate) fn enter_synchronous() -> Result<SynchronousEntry, EntryError> {
-    EXECUTOR.with(|executor| {
-        let mut executor = executor.borrow_mut();
-        if executor.current.is_some() || executor.synchronous {
-            return Err(EntryError::NestedEntry);
-        }
-        executor.synchronous = true;
-        Ok(SynchronousEntry)
-    })
-}
-
 /// Enters one method-attached root future from a manual update entrypoint.
 ///
 /// Call only from a canister update export. Non-replicated and nested entries

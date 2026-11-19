@@ -10,6 +10,30 @@ use std::{
 };
 
 #[test]
+fn synchronous_entry_excludes_nested_work_until_drop() {
+    let scope = super::enter_synchronous().unwrap();
+    assert!(matches!(
+        super::enter_synchronous(),
+        Err(EntryError::NestedEntry)
+    ));
+    assert!(matches!(
+        start(Box::pin(async {})),
+        Err(EntryError::NestedEntry)
+    ));
+    drop(scope);
+
+    let handle = start(Box::pin(async {
+        assert!(matches!(
+            super::enter_synchronous(),
+            Err(EntryError::NestedEntry)
+        ));
+    }))
+    .unwrap();
+    assert_eq!(handle.state(), TaskState::Completed);
+    assert!(super::enter_synchronous().is_ok());
+}
+
+#[test]
 fn timer_root_never_gains_method_reply_authority() {
     let polls = Rc::new(Cell::new(0));
     let observed = Rc::clone(&polls);

@@ -21,7 +21,7 @@ use std::{
     task::{Context, Wake, Waker},
 };
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) use wasm::{check_update_entry, enter_synchronous};
+pub(crate) use wasm::check_update_entry;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use wasm::{run_global_timer, run_update};
 
@@ -109,6 +109,25 @@ struct Executor {
 
 thread_local! {
     static EXECUTOR: RefCell<Executor> = const { RefCell::new(Executor { last: 0, tasks: BTreeMap::new(), current: None, synchronous: false }) };
+}
+
+pub(crate) struct SynchronousEntry;
+
+impl Drop for SynchronousEntry {
+    fn drop(&mut self) {
+        EXECUTOR.with(|executor| executor.borrow_mut().synchronous = false);
+    }
+}
+
+pub(crate) fn enter_synchronous() -> Result<SynchronousEntry, EntryError> {
+    EXECUTOR.with(|executor| {
+        let mut executor = executor.borrow_mut();
+        if executor.current.is_some() || executor.synchronous {
+            return Err(EntryError::NestedEntry);
+        }
+        executor.synchronous = true;
+        Ok(SynchronousEntry)
+    })
 }
 
 fn start(future: UserFuture) -> Result<TaskHandle, EntryError> {

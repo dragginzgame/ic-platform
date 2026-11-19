@@ -111,7 +111,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.45.15 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.45.16 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -160,7 +160,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.15
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.16
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -743,9 +743,28 @@ run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
 require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
 prepares assets and `make runtime-server-check` verifies them without downloading.
 
-## Toko Tooling 0.45.15 adoption
+## Toko Tooling 0.45.16 adoption
 
-Both workspaces pin 0.45.15. Protocol’s macro-defined types carry named
+The runtime call receipts and submission errors compile on both targets with
+`call-ic0`. Only the submission methods call the Wasm IC0 ABI. Native
+`call` tests also exercise the callback registry, state and executor. Compiling
+these private internals into the supported native library without their IC0
+caller fails its warnings-as-errors check on unused registry and task code.
+Synchronous entry exclusion uses that same executor state on both targets.
+The Wasm adapter owns the IC replicated-execution query. Generated IC exports
+reference that adapter and the IC0 system APIs, which the native linker cannot
+supply. Native consumer tests still compile their ordinary Rust handlers.
+
+The optional certificate fixture signing re-export compiles on both targets.
+The installed anonymous transport probe invokes ICP CLI and PocketIC, so its
+host process and HTTP implementation share one native module boundary.
+Engine View’s independent Candid schemas and heap profiler remain native
+fixtures. Their Wasm consumer graph checks exclude Candid and the profiler,
+while portable identity and Serde assertions also compile for Wasm.
+
+## Historical Toko Tooling 0.45.15 adoption
+
+Both workspaces selected 0.45.15. Protocol’s macro-defined types carry named
 documentation blocks that expand onto the generated structs and enums.
 CI setup drops lines containing labelled payloads
 from failure reports. The setup fixture checks console output, saved evidence
