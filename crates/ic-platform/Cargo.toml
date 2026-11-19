@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform"
-version = "0.34.17"
+version = "0.34.18"
 description = "Explicit IC certificate and authentication boundaries"
 edition.workspace = true
 rust-version.workspace = true
@@ -17,7 +17,7 @@ ignored = ["toko-tooling", "crypto-bigint"]
 default = []
 stable-structures = ["dep:ic-stable-structures"]
 ingress-packets = [
-    "dep:candidate-types",
+    "dep:ic-platform-types",
     "dep:serde",
     "dep:serde_bytes",
     "dep:serde_cbor",
@@ -30,7 +30,7 @@ native-signed = [
     "ingress-packets",
     "ed25519-dalek/pem",
     "ed25519-dalek/zeroize",
-    "candidate-types/principal-self-authenticating",
+    "ic-platform-types/principal-self-authenticating",
 ]
 native-read = [
     "certificate-authentication",
@@ -40,7 +40,7 @@ native-read = [
 ]
 certificate-construction = [
     "certificate-decode",
-    "dep:candidate-types",
+    "dep:ic-platform-types",
     "dep:serde_bytes",
     "ic-certification/serde",
 ]
@@ -57,16 +57,16 @@ canister-signature-authentication = [
     "dep:spki",
 ]
 
-certificate-authentication = ["certificate-decode", "dep:candidate-types", "dep:ic-verify-bls-signature"]
+certificate-authentication = ["certificate-decode", "dep:ic-platform-types", "dep:ic-verify-bls-signature"]
 
 [dependencies]
-candidate-types = { workspace = true, optional = true }
 # Security floor for K256's compatible transitive graph (RUSTSEC-2026-0387).
 # This deliberately constrains resolution without copying or calling arithmetic.
 crypto-bigint = { workspace = true, optional = true }
 curve25519-dalek = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true, optional = true }
 ic-certification = { workspace = true, optional = true }
+ic-platform-types = { workspace = true, optional = true }
 ic-stable-structures = { workspace = true, optional = true }
 ic-verify-bls-signature = { workspace = true, optional = true }
 k256 = { workspace = true, optional = true }

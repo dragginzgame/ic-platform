@@ -7,7 +7,7 @@
 mod tests;
 mod wire;
 
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 use serde::{Deserialize, Serialize};
 
 /// Offline envelope construction failure, without a partial output.

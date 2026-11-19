@@ -39,13 +39,13 @@ fn tagged_construction_preserves_opaque_bytes_and_exact_limit() {
 #[test]
 fn key_framing_matches_literal_and_supported_boundaries() {
     use crate::certificate::CanisterSignatureKey;
-    let key = canister_key_der(candidate_types::Principal::from_slice(&[1]), b"s").unwrap();
+    let key = canister_key_der(ic_platform_types::Principal::from_slice(&[1]), b"s").unwrap();
     assert_eq!(
         key,
         b"\x30\x14\x30\x0c\x06\x0a\x2b\x06\x01\x04\x01\x83\xb8\x43\x01\x02\x03\x04\x00\x01\x01\x73"
     );
     for n in [0, 1, 29] {
-        let issuer = candidate_types::Principal::from_slice(&vec![1; n]);
+        let issuer = ic_platform_types::Principal::from_slice(&vec![1; n]);
         let seed = vec![9; 109 - n];
         let der = canister_key_der(issuer, &seed).unwrap();
         let key = CanisterSignatureKey::from_der(&der).unwrap();

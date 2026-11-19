@@ -2,12 +2,12 @@
 #![cfg(feature = "certificate-authentication")]
 #![forbid(unsafe_code)]
 
-use candidate_types::Principal;
 use ic_bls12_381::{G1Affine, G2Affine};
 use ic_platform::certificate::{
     CertificateDecodeLimits, PreparedRootKey, TimePolicy, TimeWindow, VerificationLimits,
     VerifyError, authenticate_certificate, authenticate_subnet_time, decode_certificate,
 };
+use ic_platform_types::Principal;
 
 // Small canonical compressed x coordinates. All point decoding and subgroup
 // classification stay upstream; no curve arithmetic or copied upstream vectors.

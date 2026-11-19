@@ -1096,6 +1096,20 @@ dependencies = [
 [[package]]
 name = "ic-platform"
 version = "0.34.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "866eba5d2c1bf18457a3c2a5c1a306dab075626efbe9c83acf1eeb952d58a023"
+dependencies = [
+ "ic-certification",
+ "ic-platform-types 0.21.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-verify-bls-signature",
+ "serde",
+ "serde_cbor",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.34.18"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -1111,20 +1125,6 @@ dependencies = [
  "serde_cbor",
  "sha2 0.11.1",
  "spki",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform"
-version = "0.34.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "866eba5d2c1bf18457a3c2a5c1a306dab075626efbe9c83acf1eeb952d58a023"
-dependencies = [
- "ic-certification",
- "ic-platform-types 0.21.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "ic-verify-bls-signature",
- "serde",
- "serde_cbor",
  "thiserror 2.0.18",
 ]
 
@@ -1785,7 +1785,7 @@ dependencies = [
  "candid",
  "ic-certification",
  "ic-host-process",
- "ic-platform 0.34.17",
+ "ic-platform 0.34.18",
  "ic-platform-protocol",
  "ic-platform-types 0.21.3",
  "ic-testkit",
@@ -2134,7 +2134,7 @@ dependencies = [
  "ic-certification",
  "ic-management-canister-types",
  "ic-platform 0.34.17",
- "ic-platform 0.34.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.34.18",
  "ic-testkit",
  "tokio",
  "toko-tooling",

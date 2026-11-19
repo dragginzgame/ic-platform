@@ -3,6 +3,10 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.18] - 2026-11-19
+
+- Use the canonical `ic-platform-types` dependency name in certificate, ingress and native transport code. Existing feature names and the public Types identity are preserved.
+
 ## [0.34.17] - 2026-11-18
 
 ### 🔧 Maintenance

@@ -7,9 +7,9 @@ use crate::{
     ed25519::{Signature, Signer, SigningKey, VerifyingKey},
     ingress::{self, Content, Envelope},
 };
-use candidate_types::Principal;
 use ed25519_dalek::pkcs8::DecodePrivateKey;
 use ic_certification::LookupResult;
+use ic_platform_types::Principal;
 use serde::Serialize;
 
 /// Explicit original update fields; construction performs no network activity.

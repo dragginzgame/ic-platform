@@ -27,6 +27,7 @@ data-encoding = "2.11.0"
 ed25519-dalek = { version = "=3.0.0", default-features = false }
 ic-certification = { version = "=3.2.0", default-features = false }
 ic-platform-protocol = { path = "crates/ic-platform-protocol", version = "0.3.6", default-features = false }
+ic-platform-types = { path = "crates/ic-platform-types", version = "0.21.3", default-features = false }
 ic-stable-structures = { version = "0.7.2", default-features = false }
 ic-transport-types = "0.49.3"
 ic-verify-bls-signature = { version = "=0.6.0", default-features = false, features = ["alloc"] }

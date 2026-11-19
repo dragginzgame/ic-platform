@@ -9,13 +9,13 @@ mod subnet;
 mod tests;
 
 use super::DecodedCertificate;
-use candidate_types::Principal;
 #[cfg(feature = "canister-signature-authentication")]
 pub use canister_signature::{
     AuthenticatedCanisterSignature, CanisterSignatureKey, CanisterSignatureLimits,
     CanisterSignatureVerifyError, authenticate_canister_signature,
 };
 use ic_certification::{HashTreeNode, LookupResult};
+use ic_platform_types::Principal;
 use ic_verify_bls_signature::{PublicKey, Signature};
 pub use subnet::{
     AuthenticatedSubnetTime, authenticate_subnet_time, authenticate_subnet_time_from_certificate,

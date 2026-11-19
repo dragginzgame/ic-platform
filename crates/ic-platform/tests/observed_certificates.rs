@@ -2,12 +2,12 @@
 #![cfg(feature = "certificate-authentication")]
 #![forbid(unsafe_code)]
 
-use candidate_types::Principal;
 use ic_certification::LookupResult;
 use ic_platform::certificate::{
     CertificateDecodeLimits, PreparedRootKey, TimePolicy, TimeWindow, VerificationLimits,
     VerifyError, authenticate_certificate, authenticate_direct_certificate, decode_certificate,
 };
+use ic_platform_types::Principal;
 
 const ROOT: &[u8] = include_bytes!("fixtures/root.der");
 const DIRECT: &[u8] = include_bytes!("fixtures/direct.cbor");
