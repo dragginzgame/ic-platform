@@ -25,6 +25,9 @@ pub(crate) use wasm::check_update_entry;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use wasm::{run_global_timer, run_update};
 
+#[cfg(all(feature = "call-ic0", not(target_arch = "wasm32")))]
+pub use crate::native::run_update;
+
 pub use crate::execution_types::{EntryError, ReplyError, TaskHandle, TaskState};
 
 #[derive(Clone, Copy, PartialEq, Eq)]

@@ -4,6 +4,23 @@ This probe runs the candidate's update adapters in PocketIC 16.1.0 on
 application subnets. It covers immediate update rollback and two resumed-handler
 trap/cleanup paths plus a trapping cleanup, not the complete Runtime acceptance gate.
 
+## Native management and Entropy callers
+
+`make qualify-runtime-ic0` runs the public `management_context` consumer on the
+native host and type-checks the same seven calls for Wasm. Native task admission
+returns `NonReplicated` without polling. Balance, page count, version and both
+pricing operations require a canister. The real IC implementations retain the
+installed raw, timer and call qualification.
+
+For [#34](https://github.com/dragginzgame/ic-platform/issues/34), disposable
+copies of the Canic and Entropy working trees based on `1a7dd271` and `aca4c6be`
+selected the local Platform cohort and exposed the affected handlers and
+dependencies on both targets. Canic Management checked with all features,
+including Backup, and its Store maintenance module. Entropy's buffered adapter
+and HTTP probe checked on native Linux and Wasm. Its native tests exercised
+refusal before source custody and cancellation. These were supplier checks with
+local dependency and module substitutions.
+
 ## Supported upgrade contract
 
 Use the IC stop/drain/upgrade/start workflow. Only `Stopped`, not `Stopping`,

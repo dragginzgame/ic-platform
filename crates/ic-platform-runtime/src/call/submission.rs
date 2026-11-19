@@ -1,5 +1,9 @@
 //! Consuming one-way submission; no executor or Rust callback registration.
 
+#[cfg(target_arch = "wasm32")]
+use super::ic0::cost;
+#[cfg(not(target_arch = "wasm32"))]
+use crate::native::cost;
 use std::num::NonZeroU32;
 
 /// A locally queued one-way call, conditional on the enclosing execution commit.
@@ -34,11 +38,10 @@ pub enum SubmitError {
     Refused(NonZeroU32),
 }
 
-#[cfg(target_arch = "wasm32")]
 impl super::Call<'_, '_> {
     /// Observes the current system cost plus the requested cycle attachment.
     ///
-    /// Available only with `call-ic0` on wasm32. This reads cost in an IC
+    /// Available with `call-ic0`. This reads cost in an IC
     /// execution context; it does not submit, reserve cycles, validate the
     /// endpoint, or guarantee the observation remains current. Inputs must meet
     /// the system's method/payload limits for the estimate to be meaningful.
@@ -47,13 +50,16 @@ impl super::Call<'_, '_> {
     /// Returns [`super::CostOverflow`] if the sum cannot be represented.
     ///
     /// # Panics
-    /// The IC traps if invoked in an execution context that disallows `cost_call`.
+    /// Panics outside a canister. The IC traps in contexts that disallow `cost_call`.
     pub fn required_cycles(&self) -> Result<u128, super::CostOverflow> {
-        super::ic0::cost(self.method.len(), self.args.len())
+        cost(self.method.len(), self.args.len())
             .checked_add(self.cycles)
             .ok_or(super::CostOverflow)
     }
+}
 
+#[cfg(target_arch = "wasm32")]
+impl super::Call<'_, '_> {
     /// Consumes this request and synchronously queues one one-way call.
     ///
     /// No executor, Rust callback, cleanup registration or future is created.

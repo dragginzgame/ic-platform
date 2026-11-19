@@ -124,6 +124,13 @@ Tool checks verify the installed executables. Ordinary Cargo checks and publicat
 can fetch missing locked dependencies. To run offline, first prepare the locked
 sources and invoke Make with `CARGO_NET_OFFLINE=true`.
 
+The missing-dependency check for [#35](https://github.com/dragginzgame/ic-platform/issues/35)
+used a disposable Cargo home prepared with `cargo fetch --locked`. With the
+locked `crc32fast` 1.5.5 archive and extracted source withheld from that cache,
+`CARGO_NET_OFFLINE=true make qualify-runtime-call` refused the missing download.
+The same target with ordinary Cargo settings retrieved 1.5.5 and passed its
+native and Wasm checks. Both runs used the same workspace lock.
+
 Linux x86-64 and macOS ARM64/x86-64 are the intended development hosts. The initial focused suite passed on all three in
 [hosted run 43717278830](https://github.com/dragginzgame/ic-platform/actions/runs/43717278830)
 for source `08c72219ad6f261067c00eece9c8c71852e6b561`.

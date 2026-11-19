@@ -4,6 +4,10 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.23] - 2026-11-19
+
+- Expose management observations, call and HTTP pricing, replicated-execution detection, and update-task admission to native consumers. Outside a canister, IC observations and pricing panic, replicated-execution detection returns false, and update-task admission returns `NonReplicated` before polling.
+
 ## [0.23.22] - 2026-11-19
 
 - Use ordinary Rust module discovery for the raw-rand operation tests.

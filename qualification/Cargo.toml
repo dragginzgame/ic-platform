@@ -21,7 +21,7 @@ license-file = "../LICENSE.md"
 base64 = "0.23.1"
 candid = "0.10.40"
 candidate-platform = { package = "ic-platform", path = "../crates/ic-platform", version = "=0.34.18", default-features = false }
-candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.22", default-features = false }
+candidate-runtime = { package = "ic-platform-runtime", path = "../crates/ic-platform-runtime", version = "=0.23.23", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "../crates/ic-platform-types", version = "0.21.4", default-features = false }
 dhat = "0.3.3"
 engine-view-consumer = { path = "engine-view-consumer" }

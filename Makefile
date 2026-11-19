@@ -130,6 +130,8 @@ lint-runtime-ic0: qualification-tooling-check
 	cargo clippy --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --all-targets --target wasm32-unknown-unknown -- -D warnings
 
 qualify-runtime-ic0: lint-runtime-ic0
+	cargo test --locked -p ic-platform-runtime --features call-ic0,system-raw --test management_context
+	cargo check --locked -p ic-platform-runtime --features call-ic0,system-raw --test management_context --target wasm32-unknown-unknown
 	RUSTDOCFLAGS='-D warnings' cargo doc --locked -p ic-platform-runtime --features call-ic0 --target wasm32-unknown-unknown --no-deps
 	$(ENGINE_WASM_ENV) cargo build --locked --manifest-path qualification/Cargo.toml -p types-consumer --features runtime-ic0 --release --target wasm32-unknown-unknown --target-dir target/types-wasm/runtime-ic0
 	node qualification/runtime-ic0.mjs

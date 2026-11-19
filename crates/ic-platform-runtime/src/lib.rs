@@ -35,6 +35,7 @@ pub mod raw_rand;
 #[cfg(all(feature = "call-ic0", not(target_arch = "wasm32"), not(test)))]
 pub mod executor {
     pub use crate::execution_types::{EntryError, ReplyError, TaskHandle, TaskState};
+    pub use crate::native::run_update;
 }
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub mod system;

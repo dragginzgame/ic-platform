@@ -60,6 +60,15 @@ pub mod system {
         requires_canister()
     }
 
+    /// Returns the installed canister version.
+    ///
+    /// # Panics
+    /// A native process has no installed canister.
+    #[must_use]
+    pub fn canister_version() -> u64 {
+        requires_canister()
+    }
+
     /// # Panics
     /// A native process has no installed controller set.
     #[must_use]
@@ -74,10 +83,37 @@ pub mod system {
     }
 }
 
-/// IC argument operations. Calling these outside a canister panics.
+/// Raw IC observations available with the system-raw feature.
 #[cfg(feature = "system-raw")]
 pub mod raw {
     use super::requires_canister;
+
+    /// A native process is outside replicated IC execution.
+    #[must_use]
+    pub fn in_replicated_execution() -> bool {
+        false
+    }
+
+    /// # Panics
+    /// A native process has no liquid cycle balance.
+    #[must_use]
+    pub fn liquid_cycle_balance() -> u128 {
+        requires_canister()
+    }
+
+    /// # Panics
+    /// A native process has no IC stable memory.
+    #[must_use]
+    pub fn stable64_size() -> u64 {
+        requires_canister()
+    }
+
+    /// # Panics
+    /// HTTP pricing requires an IC execution context.
+    #[must_use]
+    pub fn cost_http_request_v1(_request_bytes: u64, _maximum_response_bytes: u64) -> u128 {
+        requires_canister()
+    }
 
     /// # Panics
     /// A native process has no IC message argument.
@@ -91,6 +127,11 @@ pub mod raw {
     pub fn msg_arg_data_copy(_destination: &mut [u8], _offset: usize) {
         requires_canister()
     }
+}
+
+#[cfg(feature = "call-ic0")]
+pub(crate) fn cost(_method_bytes: usize, _argument_bytes: usize) -> u128 {
+    requires_canister()
 }
 
 #[cfg(feature = "call-ic0")]
@@ -125,3 +166,14 @@ mod transport {
 }
 #[cfg(feature = "call-ic0")]
 pub use transport::CallFuture;
+
+#[cfg(feature = "call-ic0")]
+/// Refuses a method-attached task outside replicated IC execution.
+///
+/// # Errors
+/// Returns `NonReplicated` before polling the future or allocating a task.
+pub fn run_update(
+    _future: impl std::future::Future<Output = ()> + 'static,
+) -> Result<crate::execution_types::TaskHandle, crate::execution_types::EntryError> {
+    Err(crate::execution_types::EntryError::NonReplicated)
+}

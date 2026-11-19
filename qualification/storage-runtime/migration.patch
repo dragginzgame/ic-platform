@@ -5,7 +5,7 @@
  [workspace.dependencies]
  ic-host-artifacts = "0.80.1"
 -ic-platform-runtime = { version = "0.22.5", default-features = false }
-+ic-platform-runtime = { path = "../../../crates/ic-platform-runtime", version = "=0.23.22", default-features = false }
++ic-platform-runtime = { path = "../../../crates/ic-platform-runtime", version = "=0.23.23", default-features = false }
  ic-storage = "0.74.1"
  ic-storage-native = { path = "../crates/ic-storage-native" }
  ic-storage-native-feasibility = { path = "ic-storage-native-feasibility" }

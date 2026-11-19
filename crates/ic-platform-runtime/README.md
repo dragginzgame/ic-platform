@@ -30,3 +30,9 @@ current-controller checks, raw append/reply, byte traps and `instruction_counter
 The IC enforces contexts and bounds. Use one reply owner per call; do not mix raw
 replies with automatic or executor-managed replies. See the
 [Storage migration and qualification](https://github.com/dragginzgame/ic-platform/blob/main/docs/qualification/runtime-storage.md).
+
+Native management and Entropy handlers can use the same Runtime signatures as
+Wasm. On native hosts `raw::in_replicated_execution()` returns false and
+`executor::run_update` returns `EntryError::NonReplicated` before polling.
+Reading the liquid cycle balance, stable page count, or canister version, and
+pricing a prepared call or HTTP request, panic outside an IC execution context.
