@@ -8,7 +8,7 @@
 
 #[cfg(feature = "call")]
 pub mod call;
-#[cfg(all(not(feature = "call"), feature = "system-raw", target_arch = "wasm32"))]
+#[cfg(all(not(feature = "call"), feature = "system-raw"))]
 mod call;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub mod entrypoints;

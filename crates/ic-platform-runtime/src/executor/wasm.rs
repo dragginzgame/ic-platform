@@ -1,6 +1,7 @@
 //! Entry admission for replicated Wasm callbacks and synchronous exports.
 
 use super::{EXECUTOR, EntryError, TaskHandle, start, start_root};
+use crate::call::ic0;
 use std::future::Future;
 
 /// Enters one method-attached root future from a manual update entrypoint.
@@ -43,7 +44,7 @@ pub fn run_global_timer(
 }
 
 pub(crate) fn check_update_entry() -> Result<(), EntryError> {
-    if !crate::call::replicated_execution() {
+    if !ic0::replicated_execution() {
         return Err(EntryError::NonReplicated);
     }
     EXECUTOR.with(|executor| {

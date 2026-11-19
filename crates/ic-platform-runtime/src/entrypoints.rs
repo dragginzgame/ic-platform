@@ -5,6 +5,7 @@
 //! Applications retain authorization policy and explicit codec choice.
 
 use crate::{
+    call::ic0,
     executor::{self, EntryError, TaskHandle},
     system::{self, ArgumentTooLarge},
 };
@@ -95,7 +96,7 @@ pub fn query<T, R, G, D, E>(
     let _scope = executor::enter_synchronous().map_err(EndpointError::Entry)?;
     let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
     let bytes = encode(handler(input)).map_err(EndpointError::Encode)?;
-    crate::call::reply(&bytes);
+    ic0::reply(&bytes);
     Ok(())
 }
 

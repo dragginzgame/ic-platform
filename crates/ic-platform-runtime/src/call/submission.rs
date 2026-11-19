@@ -33,6 +33,24 @@ pub enum SubmitError {
 
 #[cfg(target_arch = "wasm32")]
 impl super::Call<'_, '_> {
+    /// Observes the current system cost plus the requested cycle attachment.
+    ///
+    /// Available only with `call-ic0` on wasm32. This reads cost in an IC
+    /// execution context; it does not submit, reserve cycles, validate the
+    /// endpoint, or guarantee the observation remains current. Inputs must meet
+    /// the system's method/payload limits for the estimate to be meaningful.
+    ///
+    /// # Errors
+    /// Returns [`super::CostOverflow`] if the sum cannot be represented.
+    ///
+    /// # Panics
+    /// The IC traps if invoked in an execution context that disallows `cost_call`.
+    pub fn required_cycles(&self) -> Result<u128, super::CostOverflow> {
+        super::ic0::cost(self.method.len(), self.args.len())
+            .checked_add(self.cycles)
+            .ok_or(super::CostOverflow)
+    }
+
     /// Consumes this request and synchronously queues one one-way call.
     ///
     /// No executor, Rust callback, cleanup registration or future is created.

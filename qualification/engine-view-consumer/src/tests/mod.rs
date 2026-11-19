@@ -1,5 +1,6 @@
 #[cfg(not(target_family = "wasm"))]
 mod comparison;
+mod engine_frames;
 #[cfg(feature = "marketplace")]
 mod marketplace;
 mod observations;
@@ -15,6 +16,18 @@ use ic_platform_protocol::{
     candid::Limits,
     cloud_engine::{EngineView, decode_get_engine_views_response},
 };
+
+fn engine_view_limits() -> Limits {
+    Limits {
+        bytes: 512 * 1024,
+        header: 64 * 1024,
+        types: 256,
+        work: 2_000_000,
+        allocation: 4 * 1024 * 1024,
+        vector: 1024,
+        skipping: 128 * 1024,
+    }
+}
 
 #[test]
 fn public_projection_preserves_principal_identity_and_serde_shape() {

@@ -1,5 +1,6 @@
 //! Small reviewed IC system operations, independent of codecs and authorization.
 
+use crate::call::ic0;
 pub use crate::executor::ReplyError;
 
 /// Observes raw argument length without copying, for explicit pre-copy guards.
@@ -7,7 +8,7 @@ pub use crate::executor::ReplyError;
 /// Valid only in argument-capable IC contexts; system context violations trap.
 #[must_use]
 pub fn argument_size() -> usize {
-    crate::call::argument_size()
+    ic0::argument_size()
 }
 
 /// The current message's caller, in the canonical Types identity.
@@ -16,13 +17,13 @@ pub fn argument_size() -> usize {
 /// or an invalid system Principal length trap. This does not authorize the caller.
 #[must_use]
 pub fn caller() -> candidate_types::Principal {
-    crate::call::principal(true)
+    ic0::principal(true)
 }
 
 /// This canister's identity, in the canonical Types identity.
 #[must_use]
 pub fn canister_self() -> candidate_types::Principal {
-    crate::call::principal(false)
+    ic0::principal(false)
 }
 
 /// IC-provided time in nanoseconds since the Unix epoch for this execution.
@@ -31,7 +32,7 @@ pub fn canister_self() -> candidate_types::Principal {
 /// still require authentication before a remote consumer trusts the observation.
 #[must_use]
 pub fn time() -> u64 {
-    crate::call::system_time()
+    ic0::system_time()
 }
 
 /// Whether the supplied Principal is a controller at this execution's state.
@@ -39,7 +40,7 @@ pub fn time() -> u64 {
 /// The caller owns the decision to use this observation for authorization.
 #[must_use]
 pub fn is_controller(principal: &candidate_types::Principal) -> bool {
-    crate::call::controller(principal)
+    ic0::controller(principal)
 }
 
 /// Publishes exactly one 32-byte certification root in an allowed IC context.
@@ -47,7 +48,7 @@ pub fn is_controller(principal: &candidate_types::Principal) -> bool {
 /// This changes certified data only if the execution commits. IC context
 /// violations trap; Runtime neither constructs witnesses nor chooses a hash.
 pub fn set_certified_data(root: &[u8; 32]) {
-    crate::call::certified_root(root);
+    ic0::certified_root(root);
 }
 
 /// Sets the IC global timer to an absolute timestamp in nanoseconds since Unix epoch.
@@ -63,7 +64,7 @@ pub fn set_certified_data(root: &[u8; 32]) {
     reason = "arming or disarming is the operation; observing the previous deadline is optional"
 )]
 pub fn global_timer_set(timestamp: u64) -> u64 {
-    crate::call::set_global_timer(timestamp)
+    ic0::set_global_timer(timestamp)
 }
 
 /// Observes the monotonically increasing IC canister version.
@@ -77,7 +78,7 @@ pub fn global_timer_set(timestamp: u64) -> u64 {
 /// The IC traps in contexts where version observation is forbidden.
 #[must_use]
 pub fn canister_version() -> u64 {
-    crate::call::system_version()
+    ic0::system_version()
 }
 
 /// An available certificate exceeds the caller's pre-allocation byte allowance.
@@ -101,7 +102,7 @@ pub struct CertificateTooLarge {
 /// # Panics
 /// An allocation failure or invalid IC execution context can trap.
 pub fn data_certificate(maximum: usize) -> Result<Option<Vec<u8>>, CertificateTooLarge> {
-    crate::call::certificate(maximum)
+    ic0::certificate(maximum)
 }
 
 /// Traps this execution with an explicit caller-supplied diagnostic.
@@ -109,7 +110,7 @@ pub fn data_certificate(maximum: usize) -> Result<Option<Vec<u8>>, CertificateTo
 /// The IC rolls back this execution's state changes; earlier messages and
 /// remote effects are not rolled back. This is not a reject reply or retry.
 pub fn trap(message: &str) -> ! {
-    crate::call::trap_message(message)
+    ic0::trap_message(message)
 }
 
 /// Sends exact raw reply bytes once from the current live update task.
@@ -133,7 +134,7 @@ pub fn trap(message: &str) -> ! {
 /// trap. Installed reply/rollback qualification remains pending.
 pub fn reply(bytes: &[u8]) -> Result<(), ReplyError> {
     crate::executor::claim_reply()?;
-    crate::call::reply(bytes);
+    ic0::reply(bytes);
     Ok(())
 }
 
@@ -164,5 +165,5 @@ pub struct ArgumentTooLarge {
 /// System context violations or an allocation failure can trap. This function
 /// does not turn traps into successful admission or an encoded error response.
 pub fn read_args(maximum: usize) -> Result<Vec<u8>, ArgumentTooLarge> {
-    crate::call::read_args(maximum)
+    ic0::read_args(maximum)
 }

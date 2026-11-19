@@ -37,11 +37,6 @@ pub use future::CallFuture;
 ))]
 #[doc(hidden)]
 pub use future::observed_count;
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) use ic0::{
-    argument_size, certificate, certified_root, controller, principal, read_args,
-    replicated_execution, reply, set_global_timer, system_time, system_version, trap_message,
-};
 #[cfg(feature = "call")]
 use std::borrow::Cow;
 #[cfg(feature = "call-ic0")]
@@ -100,25 +95,6 @@ impl<'m> Call<'m, 'static> {
 
 #[cfg(feature = "call")]
 impl<'m, 'a> Call<'m, 'a> {
-    /// Observes the current system cost plus the requested cycle attachment.
-    ///
-    /// Available only with `call-ic0` on wasm32. This reads cost in an IC
-    /// execution context; it does not submit, reserve cycles, validate the
-    /// endpoint, or guarantee the observation remains current. Inputs must meet
-    /// the system's method/payload limits for the estimate to be meaningful.
-    ///
-    /// # Errors
-    /// Returns [`CostOverflow`] if the sum cannot be represented.
-    ///
-    /// # Panics
-    /// The IC traps if invoked in an execution context that disallows `cost_call`.
-    #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-    pub fn required_cycles(&self) -> Result<u128, CostOverflow> {
-        ic0::cost(self.method.len(), self.args.len())
-            .checked_add(self.cycles)
-            .ok_or(CostOverflow)
-    }
-
     /// Replaces the argument storage with a borrow, consuming this request.
     pub fn args<'b>(self, bytes: &'b [u8]) -> Call<'m, 'b> {
         Call {
