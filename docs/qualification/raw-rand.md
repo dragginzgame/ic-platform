@@ -21,7 +21,7 @@ supplier. The raw-rand-only product graph has no dependencies.
 
 ## Bounded Runtime operation (issue #33)
 
-The planned first registry release is `ic-platform-runtime` 0.23.19 with the
+The planned first registry release is `ic-platform-runtime` 0.23.20 with the
 `raw-rand` feature. Published 0.23.18 lacks the operation. From an update
 task, call `ic_platform_runtime::raw_rand::request(wait_seconds).await` to
 receive `Result<[u8; 32], ic_platform_runtime::raw_rand::Error>`. Pass the
