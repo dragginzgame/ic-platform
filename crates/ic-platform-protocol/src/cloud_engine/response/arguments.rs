@@ -8,7 +8,11 @@ use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {
+    ///
+    /// ListAvailableNodesPageArgs
     /// Raw caller-selected arguments for one available-node page query.
+    ///
+
     arguments ListAvailableNodesPageArgs {
         /// Optional arbitrary natural, without enforcing service page-size policy.
         1_963_007_803 => limit: Option<Nat>,

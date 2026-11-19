@@ -14,15 +14,15 @@ engine-view-consumer.workspace = true
 ic-platform-protocol.workspace = true
 serde.workspace = true
 
-[target.'cfg(any())'.dev-dependencies]
-toko-tooling.workspace = true
-
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
 [features]
 marketplace = ["ic-platform-protocol/cloud-engine-marketplace"]
 registry-settings = ["ic-platform-protocol/registry-settings"]
+
+[dev-dependencies]
+toko-tooling.workspace = true
 
 [lints]
 workspace = true

@@ -1,4 +1,5 @@
 //! Canister-key/witness composition; DER, hashing and BLS primitives stay upstream.
+
 #[cfg(test)]
 mod tests;
 

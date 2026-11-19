@@ -1,4 +1,5 @@
 //! Installed synchronous exports without any executor or generated entrypoint.
+
 use candid::Principal;
 use ic_management_canister_types::{CanisterSettings, CanisterStatusType};
 use ic_testkit::pocket_ic::{PocketIcBuilder, nonblocking::PocketIc};

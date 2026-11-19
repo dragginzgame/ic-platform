@@ -1,6 +1,7 @@
 #![forbid(unsafe_code)]
 
 //! Literal management frames on the Wasm pointer-width boundary.
+
 use ic_platform_protocol::raw_rand::{Error, decode, encode};
 
 fn main() {

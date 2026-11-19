@@ -1,4 +1,5 @@
 #![deny(unsafe_code)]
+
 mod support;
 
 #[candidate_runtime::update(

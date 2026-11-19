@@ -3,6 +3,7 @@
 //! Decoding authenticates nothing. Callers check root syntax/length/count,
 //! certificate method/root equality and Cashier owner equality before effects.
 //! Top-up success payloads remain opaque; these formats establish no settlement outcome.
+
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
     encode::{Encode, Writer},
@@ -22,7 +23,11 @@ impl std::fmt::Display for Int {
 }
 
 projection! {
+    ///
+    /// CertificateReply
     /// Plain provider reply; this is not an IC certificate or acceptance proof.
+    ///
+
     both CertificateReply {
         /// Caller must require its expected operation, normally `upload`.
         156_956_385 => method: String [required],
@@ -32,7 +37,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// AccountRequest
     /// `account_info_get_v1` request, with canonical account identity.
+    ///
+
     encoding AccountRequest {
         /// Exact account to inspect.
         2_707_029_165 => account: Principal,
@@ -40,7 +49,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// Gauges
     /// Provider-reported storage gauges; not availability or charge closure.
+    ///
+
     Gauges {
         /// Reported chunk bytes.
         390_851_327 => chunk_size_bytes: u64 [required],
@@ -54,7 +67,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// Account
     /// Selected Cashier account observation; caller checks the requested owner.
+    ///
+
     Account {
         /// Exact returned owner.
         52_836_537 => account_owner_id: Principal [required],
@@ -79,7 +96,11 @@ impl Decode for ErrorDetail {
 }
 
 projection! {
+    ///
+    /// AccountError
     /// Known Cashier refusals. Unknown selected variants are refused.
+    ///
+
     enum AccountError {
         /// No such account.
         566_069_724 => AccountNotFound,
@@ -101,7 +122,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// AccountResult
     /// Exact selected result of `account_info_get_v1`.
+    ///
+
     enum AccountResult {
         /// Account observation.
         17_724 => Ok(Account),
@@ -111,7 +136,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// TopUpArgs
     /// `account_top_up_v1` argument. No reply or settlement interpretation.
+    ///
+
     both TopUpArgs {
         /// Explicit absence versus arbitrary natural balance target.
         2_504_008_430 => target_balance: Option<Nat> [strict_optional],
@@ -231,7 +260,11 @@ impl Decode for OpaqueTopUpSuccess {
 }
 
 projection! {
+    ///
+    /// TopUpError
     /// Selected typed top-up refusals; unknown selected variants are refused.
+    ///
+
     enum TopUpError {
         /// Returned unauthorized account identity; no authorization is inferred.
         2_102_411_630 => NotAuthorized(Principal),
@@ -245,7 +278,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// TopUpResult
     /// Top-up ABI outcome only, with an opaque validated success payload.
+    ///
+
     enum TopUpResult {
         /// Well-formed success, without interpretation of its payload.
         17_724 => Ok(OpaqueTopUpSuccess),

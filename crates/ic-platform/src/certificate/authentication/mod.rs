@@ -1,26 +1,25 @@
 //! Certificate authentication with explicit roots, authority and time windows.
 
-#[cfg(test)]
-mod tests;
-
 #[cfg(feature = "canister-signature-authentication")]
 mod canister_signature;
 mod delegation;
 mod ranges;
 mod subnet;
+#[cfg(test)]
+mod tests;
+
+use super::DecodedCertificate;
+use candidate_types::Principal;
 #[cfg(feature = "canister-signature-authentication")]
 pub use canister_signature::{
     AuthenticatedCanisterSignature, CanisterSignatureKey, CanisterSignatureLimits,
     CanisterSignatureVerifyError, authenticate_canister_signature,
 };
+use ic_certification::{HashTreeNode, LookupResult};
+use ic_verify_bls_signature::{PublicKey, Signature};
 pub use subnet::{
     AuthenticatedSubnetTime, authenticate_subnet_time, authenticate_subnet_time_from_certificate,
 };
-
-use super::DecodedCertificate;
-use candidate_types::Principal;
-use ic_certification::{HashTreeNode, LookupResult};
-use ic_verify_bls_signature::{PublicKey, Signature};
 
 // Exact IC BLS SubjectPublicKeyInfo framing; no general ASN.1 parser is needed.
 const DER_PREFIX: &[u8; 37] = b"\x30\x81\x82\x30\x1d\x06\x0d\x2b\x06\x01\x04\x01\x82\xdc\x7c\x05\x03\x01\x02\x01\x06\x0c\x2b\x06\x01\x04\x01\x82\xdc\x7c\x05\x03\x02\x01\x03\x61\x00";

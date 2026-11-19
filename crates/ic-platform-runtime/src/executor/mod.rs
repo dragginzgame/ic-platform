@@ -5,13 +5,8 @@
 
 #[cfg(test)]
 mod tests;
-
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 mod wasm;
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) use wasm::{check_update_entry, enter_synchronous};
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub use wasm::{run_global_timer, run_update};
 
 use std::{
     cell::{Cell, RefCell},
@@ -25,6 +20,10 @@ use std::{
     },
     task::{Context, Wake, Waker},
 };
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub(crate) use wasm::{check_update_entry, enter_synchronous};
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub use wasm::{run_global_timer, run_update};
 
 /// Current local task observation, committed only with the enclosing execution.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

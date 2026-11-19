@@ -9,7 +9,11 @@ use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {
+    ///
+    /// AvailableNode
     /// Selected candidate node; eligibility is not a reservation or liveness claim.
+    ///
+
     AvailableNode {
         /// Raw data-center scope; absent differs from present empty text.
         22_399 => dc: Option<String> [strict_optional],
@@ -27,7 +31,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// AvailableNodesPage
     /// One source page; equal versions do not establish an atomic inventory.
+    ///
+
     AvailableNodesPage {
         /// Raw continuation cursor; caller owns traversal and cycle checks.
         1_224_901_875 => next: Option<Principal> [strict_optional],
@@ -39,7 +47,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// EngineError
     /// Declared application errors; source text remains uninterpreted.
+    ///
+
     enum EngineError {
         /// Source internal error detail.
         36_184_925 => Internal(String),
@@ -63,7 +75,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// AvailableNodesPageResult
     /// Lowercase wire/Serde result with strict present-page admission.
+    ///
+
     enum AvailableNodesPageResult {
         /// None means Registry copy unready; an empty page remains Some.
         #[serde(rename = "ok")]

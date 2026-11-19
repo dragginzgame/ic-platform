@@ -1,4 +1,7 @@
 //! Independent upstream schemas and fixed admission cases.
+
+mod resources;
+
 use crate::fixtures::{SubnetFrame, ViewFrame};
 use ::candid::Principal;
 use ic_platform_protocol::{candid, cloud_engine as new};
@@ -165,8 +168,6 @@ fn retained_mutation_admission_is_explicit() {
         );
     }
 }
-
-mod resources;
 
 #[test]
 fn empty_vectors_have_value_based_admission() {

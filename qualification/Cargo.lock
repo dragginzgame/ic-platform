@@ -226,9 +226,9 @@ checksum = "776dfebd015e2d8732c684a2c71003674ccb49457b539b9e82151ba38e96dd7c"
 
 [[package]]
 name = "candid"
-version = "0.10.40"
+version = "0.10.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eabf7c87ac020b0d9e07b02b63e6a109224044a524ce5b7ce98307bc5ea4d7e1"
+checksum = "a253dd9596f4b17d3fab70379d4a6b421a996b2e556f2389fdd18d1d988ff733"
 dependencies = [
  "anyhow",
  "binrw",
@@ -249,9 +249,9 @@ dependencies = [
 
 [[package]]
 name = "candid_derive"
-version = "0.10.40"
+version = "0.10.41"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6d61cd9491fc0ef12a5d2106b742e0e166026afc9e20cadd82d3f1e695cf7fc"
+checksum = "48fb0884cb905b01bc3e7566e3d01f33cace6779b76384f70aea8552cef6a942"
 dependencies = [
  "lazy_static",
  "proc-macro2",
@@ -1072,9 +1072,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-process"
-version = "0.81.0"
+version = "0.81.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b81431d49e906feee6812a4fa8539feea57803f9937b926472ae947fa9bf6c5"
+checksum = "7550c8620d49b27325f8892de9988bc1b958f8d1e1de8e4cd35e5de547d985a8"
 dependencies = [
  "errno",
  "libproc",
@@ -1095,20 +1095,6 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70d95425a6f387880d21e9ce37e83ff6aea3fde380685f25573720231e71c30c"
-dependencies = [
- "ic-certification",
- "ic-platform-types 0.21.2",
- "ic-verify-bls-signature",
- "serde",
- "serde_cbor",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform"
 version = "0.34.17"
 dependencies = [
  "crypto-bigint",
@@ -1125,6 +1111,20 @@ dependencies = [
  "serde_cbor",
  "sha2 0.11.1",
  "spki",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.34.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "866eba5d2c1bf18457a3c2a5c1a306dab075626efbe9c83acf1eeb952d58a023"
+dependencies = [
+ "ic-certification",
+ "ic-platform-types 0.21.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-verify-bls-signature",
+ "serde",
+ "serde_cbor",
  "thiserror 2.0.18",
 ]
 
@@ -1163,9 +1163,7 @@ version = "0.23.18"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.21.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b08201b2ebbb9a9f0e1c8ee2854f48ff3f68a777c441147273c600bf6723d7d"
+version = "0.21.3"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1178,6 +1176,8 @@ dependencies = [
 [[package]]
 name = "ic-platform-types"
 version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1ebaae959b3a485c68803aa242a967568ed15411208670de5a858da84324dba0"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1189,9 +1189,9 @@ dependencies = [
 
 [[package]]
 name = "ic-testkit"
-version = "0.110.0"
+version = "0.110.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16709c74c5c169ea786224ea8e10a8b45446219000c18c441e8aa73bd1409252"
+checksum = "052af01be87faebce4477a8dcad538601bb2cec70cd8eee13dad4412cc389963"
 dependencies = [
  "pocket-ic",
 ]
@@ -2005,9 +2005,9 @@ checksum = "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
 
 [[package]]
 name = "rand_pcg"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "caa0f4137e1c0a72f4c651489402276c8e8e1cf081f3b0ba156d2cbeef09e86a"
+checksum = "eb95882a1e14462c69aea9984bb261293ccfe6022ef8de0eda18bd5afb0052df"
 dependencies = [
  "rand_core 0.10.1",
 ]
@@ -2023,9 +2023,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.13.1"
+version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d"
+checksum = "9807af0e638c12e753aa1b4e601791bf2a8f71274023c8bbeec12fc149950857"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2035,9 +2035,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.18"
+version = "0.4.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2"
+checksum = "41d60ef07df457506a0a1a2073112eb4aae5733dbd2813c3da77d1b0fd441158"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2046,9 +2046,9 @@ dependencies = [
 
 [[package]]
 name = "regex-syntax"
-version = "0.8.11"
+version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
+checksum = "d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6"
 
 [[package]]
 name = "reqwest"
@@ -2132,8 +2132,8 @@ dependencies = [
  "candid",
  "ic-certification",
  "ic-management-canister-types",
- "ic-platform 0.34.15",
  "ic-platform 0.34.17",
+ "ic-platform 0.34.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "ic-testkit",
  "tokio",
  "toko-tooling",
@@ -2549,9 +2549,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.16.5"
+version = "1.16.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46"
+checksum = "3244542535d5de959d90ec55d1b5ff0fd2bb7b1310223907d5f11932847f7b59"
 
 [[package]]
 name = "socket2"
@@ -2836,9 +2836,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.45.10"
+version = "0.45.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "690c847446a5edbf5e13c03996feee5a64daa4c28a9a1098ceb7d5ea64f820fc"
+checksum = "047d160b116c300b7dfadae595c5c7b1f184257937b7d8541b1abc3aac6b6a52"
 
 [[package]]
 name = "tower"
@@ -2996,8 +2996,8 @@ name = "types-consumer"
 version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
- "ic-platform-types 0.21.2",
  "ic-platform-types 0.21.3",
+ "ic-platform-types 0.21.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json",
  "toko-tooling",
 ]

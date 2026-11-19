@@ -1,6 +1,3 @@
-use super::{EngineView, decode_get_engine_views_response};
-use crate::candid::{Error, Limits};
-
 #[cfg(feature = "cloud-engine-marketplace")]
 mod arguments;
 #[cfg(feature = "cloud-engine-marketplace")]
@@ -8,6 +5,9 @@ mod availability;
 #[cfg(feature = "cloud-engine-marketplace")]
 mod marketplace;
 mod observations;
+
+use super::{EngineView, decode_get_engine_views_response};
+use crate::candid::{Error, Limits};
 
 fn limits() -> Limits {
     Limits {

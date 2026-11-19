@@ -1,6 +1,7 @@
 //! Independent Candid schemas for the pinned SNS neuron and ICRC display boundary.
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "sns-neurons", not(target_family = "wasm")))]
+
 use candid::{CandidType, Nat, Principal};
 use ic_platform_protocol::{
     candid::{Error, Limits},

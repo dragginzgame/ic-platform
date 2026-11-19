@@ -1,5 +1,6 @@
 //! ICP CLI anonymous preparation and installed original-request recovery.
 #![forbid(unsafe_code)]
+
 #[cfg(not(target_family = "wasm"))]
 use {
     base64::{Engine, prelude::BASE64_STANDARD},
@@ -21,6 +22,7 @@ use {
         time::{Duration, SystemTime, UNIX_EPOCH},
     },
 };
+
 #[cfg(not(target_family = "wasm"))]
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 #[cfg(not(target_family = "wasm"))]

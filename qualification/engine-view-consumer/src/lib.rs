@@ -2,6 +2,10 @@
 
 //! Independent compile/execution fixture for the public response projection.
 
+/// Independently declared schemas for native qualification only.
+#[cfg(not(target_family = "wasm"))]
+#[doc(hidden)]
+pub mod fixtures;
 #[cfg(test)]
 mod tests;
 
@@ -13,8 +17,3 @@ use ic_platform_protocol::cloud_engine::EngineView;
 pub fn selected_subnet(view: &EngineView) -> Option<Principal> {
     view.subnet_id
 }
-
-/// Independently declared schemas for native qualification only.
-#[cfg(not(target_family = "wasm"))]
-#[doc(hidden)]
-pub mod fixtures;

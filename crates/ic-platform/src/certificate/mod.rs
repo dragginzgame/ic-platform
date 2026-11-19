@@ -1,16 +1,29 @@
 //! Strict decoding of untrusted certificate bytes, without authentication.
 
-#[cfg(test)]
-mod tests;
-
 #[cfg(feature = "certificate-authentication")]
 mod authentication;
+#[cfg(feature = "canister-signature-decode")]
+mod canister_signature;
+#[cfg(feature = "certificate-construction")]
+pub mod construction;
+#[cfg(test)]
+mod tests;
 mod wire;
+
+#[cfg(feature = "canister-signature-authentication")]
+pub use authentication::{
+    AuthenticatedCanisterSignature, CanisterSignatureKey, CanisterSignatureLimits,
+    CanisterSignatureVerifyError, authenticate_canister_signature,
+};
 #[cfg(feature = "certificate-authentication")]
 pub use authentication::{
     AuthenticatedCertificate, AuthenticatedSubnetTime, PreparedRootKey, TimePolicy, TimeWindow,
     VerificationLimits, VerifyError, authenticate_certificate, authenticate_direct_certificate,
     authenticate_subnet_time, authenticate_subnet_time_from_certificate,
+};
+#[cfg(feature = "canister-signature-decode")]
+pub use canister_signature::{
+    CanisterSignatureDecodeError, DecodedCanisterSignature, decode_canister_signature,
 };
 
 /// Explicit input bound, checked before decoding or allocating decoded fields.
@@ -99,19 +112,3 @@ pub fn decode_certificate(
         certificate,
     })
 }
-
-#[cfg(feature = "canister-signature-decode")]
-mod canister_signature;
-#[cfg(feature = "canister-signature-decode")]
-pub use canister_signature::{
-    CanisterSignatureDecodeError, DecodedCanisterSignature, decode_canister_signature,
-};
-
-#[cfg(feature = "canister-signature-authentication")]
-pub use authentication::{
-    AuthenticatedCanisterSignature, CanisterSignatureKey, CanisterSignatureLimits,
-    CanisterSignatureVerifyError, authenticate_canister_signature,
-};
-
-#[cfg(feature = "certificate-construction")]
-pub mod construction;

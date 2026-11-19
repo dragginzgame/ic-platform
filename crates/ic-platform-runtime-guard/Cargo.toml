@@ -11,14 +11,14 @@ documentation = "https://docs.rs/ic-platform-runtime-guard"
 readme = "README.md"
 links = "ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md"
 
-[target.'cfg(any())'.dev-dependencies]
-toko-tooling.workspace = true
-
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
 [features]
 default = []
+
+[dev-dependencies]
+toko-tooling.workspace = true
 
 [lints]
 workspace = true

@@ -555,12 +555,6 @@ impl Decode for String {
         Ok(result)
     }
 }
-#[cfg(any(
-    feature = "cloud-engine-marketplace",
-    feature = "management-snapshots",
-    feature = "caffeine",
-    feature = "sns-neurons"
-))]
 impl Decode for () {
     const SCHEMA: Schema = Schema::Primitive(-1);
     fn read(_: &mut Reader<'_, '_>, id: Id) -> Result<Self> {
@@ -621,12 +615,6 @@ impl Decode for bool {
         reader.input.boolean()
     }
 }
-#[cfg(any(
-    feature = "management-chunks",
-    feature = "management-snapshots",
-    feature = "caffeine",
-    feature = "sns-neurons"
-))]
 impl Decode for u8 {
     const SCHEMA: Schema = Schema::Primitive(-5);
     fn read(reader: &mut Reader<'_, '_>, id: Id) -> Result<Self> {
@@ -657,10 +645,13 @@ macro_rules! fixed {
 }
 
 fixed!(u64, -8);
+
 fixed!(i64, -12);
+
 fixed!(f64, -14);
-#[cfg(any(feature = "management-snapshots", feature = "sns-neurons"))]
+
 fixed!(i32, -11);
+
 #[cfg(feature = "management-snapshots")]
 fixed!(f32, -13);
 

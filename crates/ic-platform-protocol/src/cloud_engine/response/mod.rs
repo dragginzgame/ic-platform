@@ -1,5 +1,11 @@
 //! Decode-only selected response records.
 
+#[cfg(feature = "cloud-engine-marketplace")]
+mod arguments;
+#[cfg(feature = "cloud-engine-marketplace")]
+mod availability;
+#[cfg(feature = "cloud-engine-marketplace")]
+mod marketplace;
 #[cfg(test)]
 mod tests;
 
@@ -7,11 +13,26 @@ use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
     projection::{absent, projection},
 };
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use arguments::{ListAvailableNodesPageArgs, encode_list_available_nodes_page_args};
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use availability::{
+    AvailableNode, AvailableNodesPage, AvailableNodesPageResult, EngineError,
+    decode_list_available_nodes_page_response,
+};
 use candidate_types::Principal;
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use marketplace::{
+    MarketplaceEntry, NodeType, Price, PriceEntry, decode_list_marketplace_prices_response,
+};
 use serde::{Deserialize, Serialize};
 
 projection! {
+    ///
+    /// RegistryCopyStatus
     /// Raw Registry-copy progress; no freshness or atomic snapshot is implied.
+    ///
+
     RegistryCopyStatus {
         /// Reported latest version.
         1_432_552_775 => latest: u64 [required],
@@ -47,7 +68,11 @@ pub fn decode_registry_copy_status_response(
 }
 
 projection! {
+    ///
+    /// EngineSubnet
     /// Selected Registry-copy subnet fields; decoding establishes no authenticity.
+    ///
+
     EngineSubnet {
         /// Raw configured version text, including the empty standard-version marker.
         1_133_613_777 => replica_version: String [required],
@@ -61,7 +86,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// EngineView
     /// Selected public engine view, with raw source presence and ordering retained.
+    ///
+
     EngineView {
         /// Opaque engine ID, without normalization or consumer admission.
         23_515 => id: String [required],
@@ -95,21 +124,3 @@ pub fn decode_get_engine_views_response(
 ) -> Result<Vec<EngineView>, Error> {
     candid::decode(bytes, limits)
 }
-
-#[cfg(feature = "cloud-engine-marketplace")]
-mod arguments;
-#[cfg(feature = "cloud-engine-marketplace")]
-mod availability;
-#[cfg(feature = "cloud-engine-marketplace")]
-pub use arguments::{ListAvailableNodesPageArgs, encode_list_available_nodes_page_args};
-#[cfg(feature = "cloud-engine-marketplace")]
-mod marketplace;
-#[cfg(feature = "cloud-engine-marketplace")]
-pub use availability::{
-    AvailableNode, AvailableNodesPage, AvailableNodesPageResult, EngineError,
-    decode_list_available_nodes_page_response,
-};
-#[cfg(feature = "cloud-engine-marketplace")]
-pub use marketplace::{
-    MarketplaceEntry, NodeType, Price, PriceEntry, decode_list_marketplace_prices_response,
-};

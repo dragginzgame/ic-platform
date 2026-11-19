@@ -1,5 +1,6 @@
 //! Independent creation reply replay and resource refusals on wasm32.
 #![forbid(unsafe_code)]
+
 use ic_platform_protocol::{candid::Limits, ledger, management};
 
 fn main() {

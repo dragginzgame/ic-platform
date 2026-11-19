@@ -1,11 +1,11 @@
 //! Public local Types/Runtime crossing without an executor or IC imports.
 
+#[cfg(all(feature = "runtime-ic0", target_arch = "wasm32"))]
+mod ic0;
+
 use candidate_runtime::call::{Call, Completion, Outcome, RejectCode, Wait};
 use candidate_types::{Account, Principal};
 use std::num::NonZeroU32;
-
-#[cfg(all(feature = "runtime-ic0", target_arch = "wasm32"))]
-mod ic0;
 
 pub fn check() {
     #[cfg(all(feature = "runtime-ic0", target_arch = "wasm32"))]

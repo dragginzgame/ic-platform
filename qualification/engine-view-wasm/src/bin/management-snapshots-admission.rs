@@ -1,9 +1,11 @@
 #![forbid(unsafe_code)]
 //! Replay independent management metadata and refusals on 32-bit Wasm.
+
 use ic_platform_protocol::{
     candid::{Error, Limits},
     management_snapshots as wire,
 };
+
 fn main() {
     capture_hash_promotion();
     let limits = Limits {

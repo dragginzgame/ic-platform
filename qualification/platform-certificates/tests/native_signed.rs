@@ -1,6 +1,7 @@
 //! Fault-injected single-attempt signed transport and original-request recovery.
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "native-signed", not(target_family = "wasm")))]
+
 use candidate_platform::{
     certificate::{PreparedRootKey, TimePolicy, TimeWindow, VerificationLimits},
     ingress,
@@ -12,6 +13,7 @@ use std::{
     net::TcpListener,
     time::Duration,
 };
+
 const PEM: &str = "-----BEGIN PRIVATE KEY-----\nMC4CAQAwBQYDK2VwBCIEIAkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJ\n-----END PRIVATE KEY-----\n";
 fn client(endpoint: String) -> ReadClient {
     ReadClient::new(ReadConfig {

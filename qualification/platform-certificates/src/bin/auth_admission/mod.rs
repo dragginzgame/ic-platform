@@ -2,6 +2,9 @@
 //!
 //! Only the issuer-signature component is modeled. Complete claims admission,
 //! root authorization, receiver budgets and Canic endpoints remain outside it.
+
+pub(super) mod tests;
+
 use candidate_platform::certificate::{
     CanisterSignatureKey, CanisterSignatureLimits, CanisterSignatureVerifyError,
     CertificateDecodeLimits, PreparedRootKey, TimePolicy, TimeWindow, VerificationLimits,
@@ -9,8 +12,6 @@ use candidate_platform::certificate::{
 };
 use candidate_types::Principal;
 use sha2::{Digest, Sha256};
-
-pub(super) mod tests;
 
 // An explicit consumer compatibility choice: preserve Auth's lack of delegation
 // freshness policy. Auth applies its own signing freshness after authentication.

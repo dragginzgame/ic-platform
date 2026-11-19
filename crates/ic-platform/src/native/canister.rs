@@ -1,4 +1,5 @@
 //! Certified canister facts; endpoint admission and lifecycle policy stay external.
+
 use super::{Principal, ReadClient, ReadError, TimePolicy, authenticate_certificate};
 use ic_certification::LookupResult;
 use serde::de::{DeserializeSeed, Error as _, SeqAccess, Visitor};

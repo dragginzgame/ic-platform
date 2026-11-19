@@ -1,4 +1,5 @@
 #![deny(unsafe_code)]
+
 mod support;
 
 fn fail(_: candidate_runtime::entrypoints::UpdateError<u8, u8>) {}

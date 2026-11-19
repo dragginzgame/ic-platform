@@ -1,4 +1,5 @@
 use super::*;
+
 const FRAME: &[u8] = b"\xd9\xd9\xf7\xa2\x6bcertificate\x41\xff\x64tree\x81\x00";
 fn decode(bytes: &[u8]) -> Result<DecodedCanisterSignature<'_>, CanisterSignatureDecodeError> {
     decode_canister_signature(bytes, CertificateDecodeLimits { bytes: bytes.len() })

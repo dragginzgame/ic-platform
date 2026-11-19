@@ -1,4 +1,5 @@
 #![deny(unsafe_code)]
+
 mod support;
 
 fn decode(_: u64) -> Result<Vec<u8>, u8> {

@@ -1,6 +1,7 @@
 //! Stream the selected certified range list without allocating a list of principals.
 //! Adapted from ic-platform c24e3a59583eabcf5b6bb87987269c13a209a51f.
 //! Toko Studios Network Licence 1.0; provenance in the certificate qualification record.
+
 use super::{Principal, VerifyError as Error};
 use serde::{
     Deserialize, Deserializer,

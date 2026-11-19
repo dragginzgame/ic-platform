@@ -1,6 +1,6 @@
-use ic_platform_protocol::candid::Nat;
-
 mod availability;
+
+use ic_platform_protocol::candid::Nat;
 
 #[test]
 fn natural_json_forms_preserve_exact_values_and_refuse_bad_inputs() {

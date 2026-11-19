@@ -27,13 +27,14 @@ try {
   const marker = 'synthetic-setup-fixture-value';
   const redacted = run('redacted', [
     'echo "$FIXTURE_ACCESS_KEY"', 'echo "prefix-${FIXTURE_ACCESS_KEY}-suffix"',
+    `echo '{"payload":"synthetic-json-body"}'`, 'echo "Payload: synthetic-text-body"',
     'echo "Bearer opaque"', 'echo "/asset?signature=opaque"', 'echo "HTTP 503"', 'exit 23',
   ].join('\n'), {FIXTURE_ACCESS_KEY: marker});
   assert.equal(redacted.status, 23);
-  for (const text of [redacted.stdout, log('redacted')]) {
+  for (const text of [redacted.stdout + redacted.stderr, log('redacted')]) {
     assert.match(text, /HTTP 503/);
     assert(!text.includes(marker));
-    assert.doesNotMatch(text, /Bearer opaque|signature=opaque/);
+    assert.doesNotMatch(text, /Bearer opaque|signature=opaque|synthetic-(?:json|text)-body/);
   }
 
   assert.equal(run('empty', 'exit 9').status, 9);
@@ -41,10 +42,13 @@ try {
   assert.equal(run('bounded', "yes 'failure' | head -n 20000; exit 8").status, 8);
   assert(Buffer.byteLength(log('bounded')) < 34000);
 
-  symlinkSync(join(cwd, 'outside'), join(evidence, 'refused.log'));
+  const outside = join(cwd, 'outside');
+  writeFileSync(outside, 'original');
+  symlinkSync(outside, join(evidence, 'refused.log'));
   const refused = run('refused', 'echo failure; exit 19');
   assert.equal(refused.status, 19);
   assert.match(refused.stderr, /refused symlink/);
+  assert.equal(readFileSync(outside, 'utf8'), 'original');
   assert.equal(run('success', 'exit 0').status, 0);
   console.log('Setup diagnostics passed');
 } finally {

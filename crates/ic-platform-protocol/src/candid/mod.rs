@@ -3,18 +3,28 @@
 //! This is not a general-purpose Candid API. Decoding authenticates nothing.
 
 #[cfg(any(
+    feature = "management-snapshots",
+    feature = "caffeine",
+    feature = "sns-neurons"
+))]
+pub(crate) mod encode;
+#[cfg(any(
     feature = "cloud-engine-marketplace",
     feature = "caffeine",
     feature = "management"
 ))]
 mod nat;
+pub(crate) mod projection;
 mod wire;
+
 #[cfg(any(
     feature = "cloud-engine-marketplace",
     feature = "caffeine",
     feature = "management"
 ))]
 pub use nat::Nat;
+#[cfg(any(feature = "management-snapshots", feature = "caffeine"))]
+pub(crate) use wire::decode_empty;
 pub(crate) use wire::{Decode, Reader, Schema};
 #[cfg(feature = "management-snapshots")]
 pub(crate) use wire::{KnownElements, KnownOptional};
@@ -76,13 +86,3 @@ impl std::error::Error for Error {}
 pub(crate) fn decode<T: Decode>(input: &[u8], limits: Limits) -> Result<T, Error> {
     wire::decode(input, limits)
 }
-
-#[cfg(any(
-    feature = "management-snapshots",
-    feature = "caffeine",
-    feature = "sns-neurons"
-))]
-pub(crate) mod encode;
-#[cfg(any(feature = "management-snapshots", feature = "caffeine"))]
-pub(crate) use wire::decode_empty;
-pub(crate) mod projection;

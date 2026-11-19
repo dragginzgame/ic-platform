@@ -1,4 +1,5 @@
 //! Narrow fixture encoders. These create wire observations, never trusted evidence.
+
 use super::{
     CanisterStatus, CaptureStatus, Snapshot, SnapshotAllocation, SnapshotData, SnapshotMetadata,
 };

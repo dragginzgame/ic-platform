@@ -1,14 +1,14 @@
 //! Explicit untrusted certificate construction for issuers and independent fixtures.
 //! Construction never supplies authenticated evidence or selects a trust root.
+
 #[cfg(test)]
 mod tests;
-
-use serde::Serialize;
-use std::io::{self, Write};
 
 pub use ic_certification::{
     Certificate, Delegation, HashTree, LookupResult, empty, fork, labeled, leaf, pruned,
 };
+use serde::Serialize;
+use std::io::{self, Write};
 
 /// Construction refusal with no partial output.
 #[derive(Debug, thiserror::Error)]

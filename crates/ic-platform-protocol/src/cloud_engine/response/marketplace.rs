@@ -8,7 +8,11 @@ use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {
+    ///
+    /// NodeType
     /// Raw source class, without an inferred hardware or capacity specification.
+    ///
+
     #[derive(Copy)]
     enum NodeType {
         /// Unnumbered type4 class.
@@ -33,7 +37,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// Price
     /// Raw whole-cycle amounts per node per day, without tariff selection.
+    ///
+
     Price {
         /// Source gross daily cycles; never recalculated with a newer fee.
         2_625_678_760 => gross_cycles: Nat [required],
@@ -43,7 +51,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// PriceEntry
     /// Public price scope and source observation, not a binding quote.
+    ///
+
     PriceEntry {
         /// Data-center scope; absent differs from present empty text.
         22_399 => dc: Option<String> [strict_optional],
@@ -59,7 +71,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// MarketplaceEntry
     /// One source declaration, with no key normalization or uniqueness policy.
+    ///
+
     MarketplaceEntry {
         /// Opaque source key.
         5_343_647 => key: String [required],

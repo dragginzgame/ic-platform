@@ -1,4 +1,5 @@
 //! Registry canister placement: explicit target encoding and bounded result decoding.
+
 use crate::{
     candid::{
         self, Decode, Error, Limits, Reader, Schema,
@@ -10,7 +11,11 @@ use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {
+    ///
+    /// Placement
     /// A source lookup result, without a canister-existence or liveness claim.
+    ///
+
     Placement {
         /// Missing subnet remains distinct from Registry rejection or malformed input.
         1_097_286_461 => subnet_id: Option<Principal> [strict_optional],
@@ -18,7 +23,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// PlacementResult
     /// Application-level Registry result; wire errors are returned separately.
+    ///
+
     enum PlacementResult {
         /// Successful lookup, possibly without a subnet.
         17_724 => Ok(Placement),

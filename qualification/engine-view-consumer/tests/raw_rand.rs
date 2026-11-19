@@ -1,6 +1,7 @@
 //! Independent upstream Candid producer checks for the IC management raw_rand profile.
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "raw-rand", not(target_family = "wasm")))]
+
 use ic_platform_protocol::raw_rand;
 
 #[test]

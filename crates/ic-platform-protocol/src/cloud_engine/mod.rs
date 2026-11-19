@@ -3,9 +3,23 @@
 //! The caller owns endpoint selection, identity, deadlines, request-count policy
 //! and interpretation. Encoding neither sends a request nor authenticates data.
 
+#[cfg(feature = "cloud-engine-response")]
+mod response;
 #[cfg(test)]
 mod tests;
 
+#[cfg(feature = "cloud-engine-marketplace")]
+pub use response::{
+    AvailableNode, AvailableNodesPage, AvailableNodesPageResult, EngineError,
+    ListAvailableNodesPageArgs, MarketplaceEntry, NodeType, Price, PriceEntry,
+    decode_list_available_nodes_page_response, decode_list_marketplace_prices_response,
+    encode_list_available_nodes_page_args,
+};
+#[cfg(feature = "cloud-engine-response")]
+pub use response::{
+    EngineSubnet, EngineView, RegistryCopyStatus, decode_get_engine_views_response,
+    decode_get_network_fee_response, decode_registry_copy_status_response,
+};
 use std::fmt;
 
 /// A refusal to construct the complete request frame.
@@ -99,22 +113,6 @@ fn write_uleb(mut value: usize, output: &mut Vec<u8>) {
         }
     }
 }
-
-#[cfg(feature = "cloud-engine-response")]
-mod response;
-#[cfg(feature = "cloud-engine-response")]
-pub use response::{
-    EngineSubnet, EngineView, RegistryCopyStatus, decode_get_engine_views_response,
-    decode_get_network_fee_response, decode_registry_copy_status_response,
-};
-
-#[cfg(feature = "cloud-engine-marketplace")]
-pub use response::{
-    AvailableNode, AvailableNodesPage, AvailableNodesPageResult, EngineError,
-    ListAvailableNodesPageArgs, MarketplaceEntry, NodeType, Price, PriceEntry,
-    decode_list_available_nodes_page_response, decode_list_marketplace_prices_response,
-    encode_list_available_nodes_page_args,
-};
 
 /// Encode the external service's zero-argument Candid frame.
 ///

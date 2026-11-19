@@ -1,6 +1,7 @@
 //! Independent selected Caffeine wire qualification.
 #![cfg(feature = "caffeine")]
 #![forbid(unsafe_code)]
+
 use candid::{CandidType, Decode, Encode, Int, Nat, Principal};
 use ic_platform_protocol::{
     caffeine as c,

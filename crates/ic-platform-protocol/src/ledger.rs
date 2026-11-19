@@ -1,5 +1,6 @@
 //! Cycles-ledger creation and ICRC balance/fee formats, without transport.
 //! Duplicate, refusal and uncertain observations never authorize another operation.
+
 pub use crate::candid::{Nat, encode::EncodeError};
 use crate::{
     candid::{
@@ -13,7 +14,11 @@ use candidate_types::{Account, Principal};
 use serde::{Deserialize, Serialize};
 
 projection! {
+    ///
+    /// SubnetFilter
     /// Explicit optional subnet filter.
+    ///
+
     both SubnetFilter {
         /// Absent or exact subnet type.
         3816945308 => subnet_type: Option<String> [strict_optional],
@@ -21,7 +26,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// ExplicitSubnet
     /// Explicit subnet selection.
+    ///
+
     both ExplicitSubnet {
         /// Requested subnet.
         2584155869 => subnet: Principal [required],
@@ -29,7 +38,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// SubnetSelection
     /// Caller-selected subnet authority; no discovery.
+    ///
+
     both enum SubnetSelection {
         /// A selected filter.
         3116995544 => Filter(SubnetFilter),
@@ -39,7 +52,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// CmcCreationArgs
     /// Explicit CMC creation settings.
+    ///
+
     encoding CmcCreationArgs {
         /// Optional subnet selection.
         1337893162 => subnet_selection: Option<SubnetSelection>,
@@ -49,7 +66,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// CreateCanisterArgs
     /// One cycles-ledger create_canister argument.
+    ///
+
     encoding CreateCanisterArgs {
         /// Optional exact 32-byte source subaccount.
         1835347746 => from_subaccount: Option<[u8; 32]>,
@@ -63,7 +84,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// Created
     /// Ledger-reported creation success.
+    ///
+
      Created {
         /// Ledger block identity.
         430475981 => block_id: Nat [required],
@@ -73,7 +98,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// Duplicate
     /// Original transaction observation; not permission to allocate again.
+    ///
+
      Duplicate {
         /// Original block.
         326934155 => duplicate_of: Nat [required],
@@ -83,7 +112,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// Future
     /// Ledger time refusal.
+    ///
+
      Future {
         /// Reported ledger time.
         2709806499 => ledger_time: u64 [required],
@@ -91,7 +124,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// InsufficientFunds
     /// Ledger balance refusal.
+    ///
+
      InsufficientFunds {
         /// Reported balance.
         596483356 => balance: Nat [required],
@@ -99,7 +136,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// FailedToCreate
     /// Failed creation with explicit refund/fee observations.
+    ///
+
      FailedToCreate {
         /// Exact diagnostic.
         1932118984 => error: String [required],
@@ -111,7 +152,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// GenericError
     /// Unclassified ledger error.
+    ///
+
      GenericError {
         /// Exact diagnostic.
         2584819143 => message: String [required],
@@ -121,7 +166,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// CreateError
     /// All selected create_canister errors; unknown selected variants refuse.
+    ///
+
     enum CreateError {
         /// Other error.
         260448849 => GenericError(GenericError),
@@ -141,7 +190,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// CreateResult
     /// Complete ledger success/refusal outcome.
+    ///
+
     enum CreateResult {
         /// Reported success.
         17724 => Ok(Created),

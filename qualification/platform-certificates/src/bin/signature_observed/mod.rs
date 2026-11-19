@@ -1,4 +1,5 @@
 //! Native simulator adapter; no candidate code constructs or signs the witness.
+
 use candidate_platform::certificate::{
     CanisterSignatureKey, CanisterSignatureLimits, CertificateDecodeLimits, PreparedRootKey,
     TimePolicy, TimeWindow, VerificationLimits, authenticate_canister_signature,

@@ -1,4 +1,5 @@
 //! Timer roots exercise the same callback cleanup owner as update roots.
+
 use candidate_runtime::{
     call::{Call, Outcome, Wait},
     executor::{self, EntryError, TaskHandle, TaskState},

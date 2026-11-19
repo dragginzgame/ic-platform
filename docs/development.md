@@ -111,7 +111,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.45.10 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.45.15 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -160,7 +160,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.10
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.15
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -743,9 +743,23 @@ run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
 require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
 prepares assets and `make runtime-server-check` verifies them without downloading.
 
-## Toko Tooling 0.45.10 adoption
+## Toko Tooling 0.45.15 adoption
 
-Both workspaces select 0.45.10. CI setup uses the installed
+Both workspaces pin 0.45.15. Protocol’s macro-defined types carry named
+documentation blocks that expand onto the generated structs and enums.
+CI setup drops lines containing labelled payloads
+from failure reports. The setup fixture checks console output, saved evidence
+and the original exit status.
+
+Packages inherit the tooling marker under ordinary development dependencies.
+Four private qualification binaries use the supported always-false target table
+because Cargo 1.100 reports the marker as unused during their test builds:
+`engine-view-wasm`, `platform-qualification-server`, `runtime-installed` and
+`types-consumer`.
+
+## Historical Toko Tooling 0.45.10 adoption
+
+Both workspaces selected 0.45.10. CI setup uses the installed
 `SetupDiagnostics.pm` helper to drain command output, redact sensitive values
 and retain a bounded failure report with the original exit status. The Types
 consumer compiles its literal identity test on native and Wasm targets. Its

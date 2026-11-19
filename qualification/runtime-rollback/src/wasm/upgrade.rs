@@ -1,4 +1,5 @@
 //! Bounded peer handshake for observing a stop/drain before caller upgrade.
+
 use candidate_runtime::{
     call::{Call, Outcome, Wait},
     entrypoints::UpdateError,

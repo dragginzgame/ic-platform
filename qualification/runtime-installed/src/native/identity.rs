@@ -1,4 +1,5 @@
 //! Independently authenticate Runtime's actual certification-root publication.
+
 use candid::Principal;
 use candidate_platform::certificate::{
     CertificateDecodeLimits, PreparedRootKey, TimePolicy, TimeWindow, VerificationLimits,

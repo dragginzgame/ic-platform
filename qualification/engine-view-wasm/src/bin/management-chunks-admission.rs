@@ -1,9 +1,11 @@
 #![forbid(unsafe_code)]
 //! Literal chunk replies and resource ceilings on 32-bit Wasm.
+
 use ic_platform_protocol::{
     candid::{Error, Limits},
     management_chunks as chunks,
 };
+
 fn main() {
     let limits = Limits {
         bytes: 65_536,

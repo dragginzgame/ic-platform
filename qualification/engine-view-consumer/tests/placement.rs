@@ -1,8 +1,10 @@
 //! Independent upstream schema qualification for Registry placement.
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "registry", not(target_family = "wasm")))]
+
 use candid::{CandidType, Deserialize, Principal};
 use ic_platform_protocol::{candid::Limits, placement::*};
+
 #[derive(CandidType, Deserialize)]
 struct Request {
     principal: Option<Principal>,

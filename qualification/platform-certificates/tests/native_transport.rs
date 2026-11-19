@@ -1,6 +1,7 @@
 //! Independent local HTTP fault injection for the anonymous native client.
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "native-read", not(target_family = "wasm")))]
+
 use candidate_platform::{
     certificate::{PreparedRootKey, TimePolicy, TimeWindow, VerificationLimits},
     native::{ReadClient, ReadConfig, ReadError},
@@ -11,6 +12,7 @@ use std::{
     net::TcpListener,
     time::Duration,
 };
+
 fn config(endpoint: String) -> ReadConfig {
     ReadConfig {
         endpoint,

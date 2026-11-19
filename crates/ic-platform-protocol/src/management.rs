@@ -1,5 +1,6 @@
 //! Bounded management creation, installation and controller settings.
 //! Authority, lifecycle, spending and retry decisions remain caller-owned.
+
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
     encode::{Encode, Writer},
@@ -13,7 +14,11 @@ use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {
+    ///
+    /// LogVisibility
     /// Explicit selected log access policy.
+    ///
+
     both enum LogVisibility {
         /// Controllers only.
         #[serde(rename = "controllers")]
@@ -28,7 +33,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// EnvironmentVariable
     /// Explicit environment entry.
+    ///
+
     encoding EnvironmentVariable {
         /// Exact value.
         834174833 => value: String,
@@ -38,7 +47,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// CreationSettings
     /// Nine-field CMC creation settings; not the management settings schema.
+    ///
+
     #[derive(Default)]
     encoding CreationSettings {
         /// Freezing threshold.
@@ -63,7 +76,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// SnapshotVisibility
     /// Explicit selected snapshot access policy.
+    ///
+
     both enum SnapshotVisibility {
         /// Controllers only.
         #[serde(rename = "controllers")]
@@ -78,7 +95,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// StatusVisibility
     /// Explicit selected status access policy.
+    ///
+
     both enum StatusVisibility {
         /// Controllers only.
         #[serde(rename = "controllers")]
@@ -93,7 +114,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// CanisterSettings
     /// Complete thirteen-field management settings; distinct from CMC.
+    ///
+
     #[derive(Default)]
     encoding CanisterSettings {
         /// Freezing threshold.
@@ -126,7 +151,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// ProvisionalCreateArgs
     /// One provisional_create_canister_with_cycles argument.
+    ///
+
     encoding ProvisionalCreateArgs {
         /// Selected creation settings.
         2336062691 => settings: Option<CanisterSettings>,
@@ -140,7 +169,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// UpdateSettingsArgs
     /// One update_settings argument.
+    ///
+
     encoding UpdateSettingsArgs {
         /// Exact target.
         1313628723 => canister_id: Principal,
@@ -152,7 +185,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// MemoryPersistence
     /// Explicit upgrade heap policy.
+    ///
+
     both enum MemoryPersistence {
         /// Keep the heap.
         #[serde(rename = "keep")]
@@ -164,7 +201,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// UpgradeFlags
     /// Explicit optional upgrade choices.
+    ///
+
     both UpgradeFlags {
         /// Absent versus explicit heap choice.
         793490780 => wasm_memory_persistence: Option<MemoryPersistence> [strict_optional],
@@ -174,7 +215,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// InstallMode
     /// Installation mode; no implicit reinstall or fallback.
+    ///
+
     both enum InstallMode {
         /// Explicit reinstall.
         #[serde(rename = "reinstall")]
@@ -189,7 +234,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// InstallCodeArgs
     /// One install_code argument preserving exact Wasm and argument bytes.
+    ///
+
     encoding InstallCodeArgs {
         /// Exact initialization/upgrade argument bytes.
         4849238 => arg: Vec<u8>,
@@ -205,7 +254,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// CreatedCanister
     /// Creation reply; identity does not establish authorization.
+    ///
+
      CreatedCanister {
         /// Returned canonical identity.
         1313628723 => canister_id: Principal [required],
@@ -220,7 +273,11 @@ pub fn decode_created(bytes: &[u8], limits: Limits) -> Result<CreatedCanister, E
 }
 
 projection! {
+    ///
+    /// CreateCanisterArgs
     /// One ordinary create_canister argument; attached cycles remain Runtime-owned.
+    ///
+
     encoding CreateCanisterArgs {
         /// Explicit settings; optional presence is preserved.
         2336062691 => settings: Option<CanisterSettings>,
@@ -230,7 +287,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// InstallChunkedCodeArgs
     /// One install_chunked_code argument; chunk order and exact bytes are retained.
+    ///
+
     encoding InstallChunkedCodeArgs {
         /// Exact initialization or upgrade argument bytes.
         4849238 => arg: Vec<u8>,
@@ -250,7 +311,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// ExecutionCharges
     /// Execution-cycle charges; this is neither instruction count nor balance loss.
+    ///
+
     ExecutionCharges {
         /// Arbitrary natural cycles charged for instructions.
         1_832_883_877 => instructions: Nat [required],
@@ -258,7 +323,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// CanisterMetrics
     /// Selected canister_metrics reply; unrelated metrics are validated and skipped.
+    ///
+
     CanisterMetrics {
         /// Reported execution charges; callers own checked numeric conversion.
         2_122_851_290 => cycles_consumed: ExecutionCharges [required],

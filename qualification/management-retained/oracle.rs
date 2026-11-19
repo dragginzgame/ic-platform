@@ -3,6 +3,7 @@ use ic_platform::{
     candid_codec::arguments::{EncodeArgs, encode_args},
     management_canister_types as m,
 };
+
 fn save<T: EncodeArgs>(name: &str, value: &T) {
     std::fs::write(
         format!("qualification/engine-view-wasm/fixtures/root-{name}.bin"),

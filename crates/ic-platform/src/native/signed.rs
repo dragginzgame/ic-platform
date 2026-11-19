@@ -1,6 +1,7 @@
 //! Explicit Ed25519 identity and original-request transport, with optional
 //! secp256k1 queries, externally signed updates and explicit anonymous admission. No discovery,
 //! polling, renewal, redirect, proxy or retry is performed by these operations.
+
 use super::{ReadClient, ReadError, TimePolicy, authenticate_certificate};
 use crate::{
     ed25519::{Signature, Signer, SigningKey, VerifyingKey},

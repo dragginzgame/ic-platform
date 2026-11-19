@@ -1,6 +1,7 @@
 //! Original upstream management schemas independently check the owned wire mappings.
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "management-snapshots", not(target_family = "wasm")))]
+
 use candid::{CandidType, Principal};
 use ic_management_canister_types as oracle;
 use ic_platform_protocol::{

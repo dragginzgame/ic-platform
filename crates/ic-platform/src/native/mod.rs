@@ -3,24 +3,25 @@
 //! `native-signed-secp256k1` also supplies explicit secp256k1 query identities.
 //! No Agent, root discovery, cache, retry or polling is selected.
 //! Dropping an operation drops its HTTP future; callers own whole-operation deadlines.
-#[cfg(all(test, feature = "native-signed", feature = "certificate-construction"))]
-mod signed_tests;
 
+mod canister;
 #[cfg(all(test, feature = "certificate-fixture-signing"))]
 mod canister_tests;
+mod query;
+#[cfg(feature = "native-signed")]
+mod signed;
+#[cfg(all(test, feature = "native-signed", feature = "certificate-construction"))]
+mod signed_tests;
+mod subnet;
 
 use crate::certificate::{
     CertificateDecodeLimits, PreparedRootKey, TimePolicy, VerificationLimits, VerifyError,
     authenticate_certificate, authenticate_subnet_time, decode_certificate,
 };
 use candidate_types::Principal;
-use ic_transport_types::{Envelope, EnvelopeContent, QueryResponse, ReadStateResponse};
-use std::{borrow::Cow, collections::BTreeMap, time::Duration};
-mod canister;
 pub use canister::{CanisterObservation, CanisterReadError};
-mod query;
-#[cfg(feature = "native-signed")]
-mod signed;
+pub use ic_transport_types::SubnetMetrics;
+use ic_transport_types::{Envelope, EnvelopeContent, QueryResponse, ReadStateResponse};
 #[cfg(feature = "native-signed-secp256k1")]
 pub use signed::Secp256k1Identity;
 #[cfg(feature = "native-signed")]
@@ -28,8 +29,7 @@ pub use signed::{
     AuthenticationProfile, Dispatch, Ed25519Identity, PreparedRequestStatus, PreparedUpdate,
     RequestObservation, RequestStatus, UpdateArgs,
 };
-mod subnet;
-pub use ic_transport_types::SubnetMetrics;
+use std::{borrow::Cow, collections::BTreeMap, time::Duration};
 pub use subnet::SubnetObservation;
 
 /// Explicit per-request limits and trust inputs. The caller admits the endpoint/root.

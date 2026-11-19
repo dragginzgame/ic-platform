@@ -2,15 +2,14 @@
 //!
 //! Bytes remain opaque; callers own identity policy and authority decisions.
 
+#[cfg(feature = "principal-self-authenticating")]
+mod self_authenticating;
 #[cfg(test)]
 mod tests;
 
 use data_encoding::BASE32_NOPAD;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use std::{fmt, str::FromStr};
-
-#[cfg(feature = "principal-self-authenticating")]
-mod self_authenticating;
 
 /// An opaque IC identity containing at most 29 significant bytes.
 ///

@@ -6,9 +6,6 @@ edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
 
-[target.'cfg(any())'.dev-dependencies]
-toko-tooling.workspace = true
-
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 candid.workspace = true
 serde.workspace = true
@@ -41,6 +38,7 @@ ic-platform-protocol.workspace = true
 [dev-dependencies]
 candidate-runtime = { workspace = true, features = ["call"] }
 serde_json.workspace = true
+toko-tooling.workspace = true
 
 [lints]
 workspace = true

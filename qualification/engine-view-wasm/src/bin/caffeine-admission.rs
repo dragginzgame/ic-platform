@@ -1,9 +1,11 @@
 //! Frozen independent Caffeine frames executed on 32-bit Wasm.
 #![forbid(unsafe_code)]
+
 use ic_platform_protocol::{
     caffeine as c,
     candid::{Error, Limits},
 };
+
 fn main() {
     let limits = Limits {
         bytes: 1024,

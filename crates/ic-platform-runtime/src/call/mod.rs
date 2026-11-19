@@ -1,37 +1,14 @@
 //! One consuming request shape, with independent method and argument ownership.
 
-#[cfg(all(test, feature = "call"))]
-mod tests;
-
-#[cfg(feature = "call")]
-use candidate_types::Principal;
-#[cfg(feature = "call")]
-use std::borrow::Cow;
-
 #[cfg(feature = "call")]
 mod completion;
-#[cfg(feature = "call")]
-pub use completion::{Completion, Outcome, RejectCode, Rejection};
-
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+mod future;
 #[cfg(all(
     any(feature = "call-ic0", feature = "system-raw"),
     target_arch = "wasm32"
 ))]
 pub(crate) mod ic0;
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub(crate) use ic0::{
-    argument_size, certificate, certified_root, controller, principal, read_args,
-    replicated_execution, reply, set_global_timer, system_time, system_version, trap_message,
-};
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-mod submission;
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-pub use submission::{SubmitError, Submitted};
-
-#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
-mod future;
 #[cfg(any(
     all(test, feature = "call"),
     all(feature = "call-ic0", target_arch = "wasm32")
@@ -43,6 +20,15 @@ mod registry;
 ))]
 mod state;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+mod submission;
+#[cfg(all(test, feature = "call"))]
+mod tests;
+
+#[cfg(feature = "call")]
+use candidate_types::Principal;
+#[cfg(feature = "call")]
+pub use completion::{Completion, Outcome, RejectCode, Rejection};
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use future::CallFuture;
 #[cfg(all(
     feature = "call-ic0",
@@ -51,6 +37,15 @@ pub use future::CallFuture;
 ))]
 #[doc(hidden)]
 pub use future::observed_count;
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub(crate) use ic0::{
+    argument_size, certificate, certified_root, controller, principal, read_args,
+    replicated_execution, reply, set_global_timer, system_time, system_version, trap_message,
+};
+#[cfg(feature = "call")]
+use std::borrow::Cow;
+#[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
+pub use submission::{SubmitError, Submitted};
 
 /// The requested attachment plus the system cost cannot fit in u128.
 /// No call was submitted or cycles reserved by the observation.

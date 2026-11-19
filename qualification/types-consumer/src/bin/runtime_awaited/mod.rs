@@ -1,3 +1,8 @@
+mod executor;
+mod handoff;
+mod interleaved;
+mod update;
+
 use candidate_runtime::call::{Call, CallFuture, Completion, Outcome, SubmitError, Wait};
 use candidate_types::Principal;
 use std::{
@@ -11,11 +16,6 @@ use std::{
     },
     task::{Context, Poll, Wake, Waker},
 };
-
-mod executor;
-mod handoff;
-mod interleaved;
-mod update;
 
 thread_local! {
     static PHASE: Cell<u32> = const { Cell::new(0) };

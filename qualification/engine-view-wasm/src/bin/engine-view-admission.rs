@@ -2,14 +2,14 @@
 
 //! Executed Wasm admission corpus, separate from the fixed size probe.
 
-#[cfg(not(feature = "candidate"))]
-compile_error!("select candidate");
-
 #[cfg(feature = "candidate")]
 use ic_platform_protocol::{
     candid::{Error, Limits},
     cloud_engine as engine,
 };
+
+#[cfg(not(feature = "candidate"))]
+compile_error!("select candidate");
 
 fn limits() -> Limits {
     Limits {

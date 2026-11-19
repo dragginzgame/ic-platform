@@ -1,4 +1,5 @@
 //! A narrow authenticated signing-time projection for a caller-selected subnet.
+
 use super::{
     Authority, DecodedCertificate, PreparedRootKey, Principal, TimePolicy, TimeWindow,
     VerificationLimits, VerifyError, verify_certificate,

@@ -2,12 +2,18 @@
 //! Unknown fields are framed and skipped. Selected singular duplicates refuse;
 //! an absent inline value differs from a present empty value. Chunk fetching and
 //! application error interpretation remain caller-owned.
+
+mod envelope;
 #[cfg(test)]
 mod tests;
 
 use crate::registry_settings::{
     self,
     wire::{FieldValue, Reader},
+};
+pub use envelope::{
+    GetValueResponse, decode_get_latest_version_response, decode_get_value_response,
+    decode_subnet_list, encode_get_value_request,
 };
 
 /// Aggregate limits for one projection and its selected nested messages.
@@ -167,7 +173,11 @@ macro_rules! record {
 }
 
 record! {
+    ///
+    /// RegistryError
     /// Raw source application error; a present empty error remains present.
+    ///
+
     RegistryError {
         /// Signed enum value, including unknown values.
         1 => code:i32,
@@ -179,7 +189,11 @@ record! {
 }
 
 record! {
+    ///
+    /// SubnetRecord
     /// Selected subnet configuration; node identities remain raw source bytes.
+    ///
+
     SubnetRecord {
         /// Registered members in source order.
         3 => membership:Vec<&'a [u8]>,
@@ -195,7 +209,11 @@ record! {
 }
 
 record! {
+    ///
+    /// NodeRecord
     /// Selected node registration metadata.
+    ///
+
     NodeRecord {
         /// Raw operator principal bytes.
         15 => node_operator_id:&'a [u8],
@@ -207,7 +225,11 @@ record! {
 }
 
 record! {
+    ///
+    /// NodeOperatorRecord
     /// Selected operator/provider/data-center join fields.
+    ///
+
     NodeOperatorRecord {
         /// Raw operator principal bytes.
         1 => node_operator_principal_id:&'a [u8],
@@ -219,7 +241,11 @@ record! {
 }
 
 record! {
+    ///
+    /// DataCenterRecord
     /// Selected data-center source metadata, without identity or text policy.
+    ///
+
     DataCenterRecord {
         /// Source identifier.
         1 => id:&'a str,
@@ -256,12 +282,9 @@ macro_rules! decoder {
 }
 
 decoder!(decode_subnet_record, SubnetRecord);
-decoder!(decode_node_record, NodeRecord);
-decoder!(decode_node_operator_record, NodeOperatorRecord);
-decoder!(decode_data_center_record, DataCenterRecord);
 
-mod envelope;
-pub use envelope::{
-    GetValueResponse, decode_get_latest_version_response, decode_get_value_response,
-    decode_subnet_list, encode_get_value_request,
-};
+decoder!(decode_node_record, NodeRecord);
+
+decoder!(decode_node_operator_record, NodeOperatorRecord);
+
+decoder!(decode_data_center_record, DataCenterRecord);

@@ -1,4 +1,5 @@
 //! Exact occupied callback slots in a separately instrumented installed artifact.
+
 use candid::Principal;
 use ic_management_canister_types::CanisterStatusType;
 use ic_testkit::pocket_ic::{ErrorCode, nonblocking::PocketIc};

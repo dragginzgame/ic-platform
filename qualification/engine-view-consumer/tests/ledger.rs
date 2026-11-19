@@ -1,6 +1,7 @@
 //! Independent upstream Candid/management schemas for selected Host operations.
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "ledger", not(target_family = "wasm")))]
+
 use candid::{CandidType, Nat, Principal};
 use ic_management_canister_types as management_schema;
 use ic_platform_protocol::{candid::Limits, ledger, management};

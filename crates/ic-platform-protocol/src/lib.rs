@@ -10,10 +10,6 @@
 
 #[cfg(feature = "caffeine")]
 pub mod caffeine;
-
-#[cfg(feature = "cloud-engine")]
-pub mod cloud_engine;
-
 #[cfg(any(
     feature = "cloud-engine-response",
     feature = "management-chunks",
@@ -22,32 +18,25 @@ pub mod cloud_engine;
     feature = "sns-neurons"
 ))]
 pub mod candid;
-
-#[cfg(feature = "management-snapshots")]
-pub mod management_snapshots;
-
-#[cfg(feature = "management-chunks")]
-pub mod management_chunks;
-
-#[cfg(feature = "registry-settings")]
-pub mod registry_settings;
-
+#[cfg(feature = "cloud-engine")]
+pub mod cloud_engine;
 #[cfg(feature = "http-request")]
 pub mod http_request;
-
-#[cfg(feature = "registry")]
-pub mod registry;
-
-#[cfg(feature = "registry-placement")]
-pub mod placement;
-
-#[cfg(feature = "raw-rand")]
-pub mod raw_rand;
-
 #[cfg(feature = "ledger")]
 pub mod ledger;
 #[cfg(feature = "management")]
 pub mod management;
-
+#[cfg(feature = "management-chunks")]
+pub mod management_chunks;
+#[cfg(feature = "management-snapshots")]
+pub mod management_snapshots;
+#[cfg(feature = "registry-placement")]
+pub mod placement;
+#[cfg(feature = "raw-rand")]
+pub mod raw_rand;
+#[cfg(feature = "registry")]
+pub mod registry;
+#[cfg(feature = "registry-settings")]
+pub mod registry_settings;
 #[cfg(feature = "sns-neurons")]
 pub mod sns;

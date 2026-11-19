@@ -1,7 +1,7 @@
-use candidate_types::{Account, Principal};
-
 #[cfg(feature = "runtime-call")]
 mod runtime;
+
+use candidate_types::{Account, AccountError, Principal, PrincipalError};
 
 pub fn check() {
     #[cfg(feature = "runtime-call")]
@@ -22,8 +22,14 @@ pub fn check() {
             assert_eq!(decoded.subaccount, subaccount);
         }
     }
-    assert!(Principal::try_from_slice(&[0; 30]).is_err());
-    assert!("aaaaa-aa-nygwkoy.2".parse::<Account>().is_err());
+    assert_eq!(
+        Principal::try_from_slice(&[0; 30]),
+        Err(PrincipalError::BytesTooLong())
+    );
+    assert_eq!(
+        "aaaaa-aa-nygwkoy.2".parse::<Account>(),
+        Err(AccountError::InvalidChecksum)
+    );
     assert_eq!(
         "aaaaa-aa-nygwkoy.1"
             .parse::<Account>()

@@ -1,7 +1,9 @@
 //! Replay-only Query test data; regeneration belongs to Platform qualification.
+
 use ic_platform_protocol::candid::Nat;
 use ic_platform_types::Principal;
 use serde::{Deserialize, Serialize};
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SubnetFrame {
     pub replica_version: String,

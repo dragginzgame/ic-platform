@@ -1,4 +1,7 @@
 //! Independent native Candid schemas; no product projection macros are reused.
+
+/// Upstream schema codec for isolated real-consumer qualification only.
+pub use candid;
 use candid::{CandidType, Deserialize, Nat, Principal};
 use serde::Serialize;
 
@@ -103,8 +106,6 @@ pub enum PageResult {
     Err(EngineError),
 }
 
-/// Upstream schema codec for isolated real-consumer qualification only.
-pub use candid;
 /// Encode an independent fixture and refuse a fixture exceeding its selected size.
 /// This is fixture setup, not a product allocation-bound claim.
 ///

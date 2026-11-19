@@ -1,4 +1,5 @@
 //! Private strict map/byte adapters; no generic public codec surface.
+
 use super::SignedDelegation;
 use candidate_types::Principal;
 use serde::{

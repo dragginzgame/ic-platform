@@ -1,3 +1,14 @@
+#[cfg(not(target_family = "wasm"))]
+mod comparison;
+#[cfg(feature = "marketplace")]
+mod marketplace;
+mod observations;
+#[cfg(not(target_family = "wasm"))]
+mod query_fixtures;
+#[cfg(feature = "registry-settings")]
+mod registry_settings;
+mod serde;
+
 use super::selected_subnet;
 use candidate_types::Principal;
 use ic_platform_protocol::{
@@ -41,17 +52,3 @@ fn public_projection_preserves_principal_identity_and_serde_shape() {
     let from_json: EngineView = serde_json::from_value(expected).unwrap();
     assert_eq!(from_json, view);
 }
-
-#[cfg(not(target_family = "wasm"))]
-mod comparison;
-
-mod serde;
-
-#[cfg(feature = "marketplace")]
-mod marketplace;
-mod observations;
-
-#[cfg(not(target_family = "wasm"))]
-mod query_fixtures;
-#[cfg(feature = "registry-settings")]
-mod registry_settings;

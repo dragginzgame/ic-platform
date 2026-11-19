@@ -2,10 +2,9 @@
 
 //! Independent public identity consumer, also executed as standalone Wasm.
 
+mod fixtures;
 #[cfg(test)]
 mod tests;
-
-mod fixtures;
 
 fn main() {
     fixtures::check();

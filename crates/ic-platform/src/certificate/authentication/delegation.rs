@@ -1,4 +1,5 @@
 //! One root-signed delegation and complete selected canister-range authority.
+
 use super::{
     Authority, PreparedRootKey, Principal, TimeWindow, VerificationLimits, VerifyError,
     checked_time, forest, ranges, verify_signature,

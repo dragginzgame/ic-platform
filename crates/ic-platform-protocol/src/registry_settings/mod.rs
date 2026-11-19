@@ -5,10 +5,9 @@
 
 #[cfg(test)]
 mod tests;
+pub(crate) mod wire;
 
 use serde::{Deserialize, Serialize};
-
-pub(crate) mod wire;
 use wire::{FieldValue, Read, Reader};
 
 /// Mandatory limits shared by the outer record and all selected nested messages.
@@ -76,7 +75,11 @@ macro_rules! message {
 }
 
 message! {
+    ///
+    /// SubnetFeatures
     /// Raw configured features; no execution or attestation claim is implied.
+    ///
+
     SubnetFeatures {
         /// Proto3 default is false when absent within a present message.
         3 => http_requests: bool,
@@ -86,7 +89,11 @@ message! {
 }
 
 message! {
+    ///
+    /// ResourceLimits
     /// Raw optional limits; absent and zero are retained independently.
+    ///
+
     ResourceLimits {
         /// Configured state-size bytes.
         1 => maximum_state_size: Option<u64>,
@@ -100,7 +107,11 @@ message! {
 }
 
 message! {
+    ///
+    /// SubnetSettings
     /// Selected SubnetRecord settings, without transport or effective-value policy.
+    ///
+
     SubnetSettings {
         /// Absent differs from a present empty feature message.
         23 => features: Option<SubnetFeatures>,

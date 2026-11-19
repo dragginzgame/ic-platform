@@ -1,4 +1,5 @@
 //! Independent producer for the versioned, replay-only Query corpus.
+
 use crate::fixtures::{
     FullViewFrame, MarketplaceEntry, PageArgs, PageResult, Placement, RegistryCopyStatus,
 };

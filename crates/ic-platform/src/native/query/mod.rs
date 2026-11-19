@@ -7,6 +7,7 @@ use super::{
 };
 use crate::ed25519::{Signature, VerifyingKey};
 use std::collections::BTreeSet;
+
 impl ReadClient {
     /// Execute one anonymous query and authenticate every response node signature.
     /// Routing authority comes from a canister-scoped certificate's root-certified

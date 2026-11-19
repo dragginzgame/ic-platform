@@ -1,5 +1,6 @@
 //! Private, two-pass writer for explicitly selected declarations. The first
 //! pass admits the complete output before reserving any output storage.
+
 use super::wire::{Schema, schema_valid};
 use candidate_types::Principal;
 
@@ -210,9 +211,12 @@ macro_rules! integer {
 }
 
 integer!(i32, -11);
+
 #[cfg(feature = "sns-neurons")]
 integer!(u32, -7);
+
 integer!(i64, -12);
+
 impl Encode for bool {
     const SCHEMA: Schema = Schema::Primitive(-2);
     fn write(&self, writer: &mut Writer<'_>) -> Result<()> {

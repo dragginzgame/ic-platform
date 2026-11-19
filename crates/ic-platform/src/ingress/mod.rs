@@ -2,12 +2,13 @@
 //! sender, delegation or certificate. Original bytes remain available for replay.
 //! The inclusive input ceiling is checked before parsing; it is not a process
 //! heap or work quota. Serde CBOR's recursion ceiling remains enabled.
+
 #[cfg(test)]
 mod tests;
+mod wire;
 
 use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
-mod wire;
 
 /// Offline envelope construction failure, without a partial output.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]

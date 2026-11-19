@@ -1,6 +1,7 @@
 //! Independent upstream management schemas and hostile input/budget checks.
 #![forbid(unsafe_code)]
 #![cfg(all(feature = "management-chunks", not(target_family = "wasm")))]
+
 use candidate_types::Principal;
 use ic_management_canister_types::{CanisterIdRecord, ChunkHash, UploadChunkArgs};
 use ic_platform_protocol::{

@@ -1,4 +1,5 @@
 //! Independent installed system and generated endpoint probe for Auth's requirements.
+
 use candidate_runtime::{entrypoints, executor::EntryError, system};
 
 /// Admit every caller to this qualification fixture.

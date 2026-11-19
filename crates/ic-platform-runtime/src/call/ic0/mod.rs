@@ -1,5 +1,8 @@
 //! Reviewed wasm32 IC0 imports. No raw ownership pointers cross this boundary.
 
+#[cfg(feature = "system-raw")]
+pub mod synchronous;
+
 #[cfg(feature = "call-ic0")]
 #[expect(
     unsafe_code,
@@ -345,6 +348,3 @@ pub(super) fn cost(method_bytes: usize, argument_bytes: usize) -> u128 {
     }
     u128::from_le_bytes(output)
 }
-
-#[cfg(feature = "system-raw")]
-pub mod synchronous;

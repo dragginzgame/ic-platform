@@ -6,9 +6,6 @@ edition.workspace = true
 rust-version.workspace = true
 license-file.workspace = true
 
-[target.'cfg(any())'.dev-dependencies]
-toko-tooling.workspace = true
-
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 candidate-runtime.workspace = true
 
@@ -25,6 +22,9 @@ crate-type = ["cdylib", "rlib"]
 default = ["generated"]
 generated = ["candidate-runtime/entrypoint-macros"]
 raw = ["candidate-runtime/system-raw"]
+
+[dev-dependencies]
+toko-tooling.workspace = true
 
 [lints]
 workspace = true

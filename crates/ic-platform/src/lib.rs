@@ -7,24 +7,19 @@
 
 #[cfg(feature = "certificate-decode")]
 pub mod certificate;
-
-#[cfg(feature = "ed25519")]
-pub mod ed25519;
-
 #[cfg(feature = "ecdsa")]
 pub mod ecdsa;
-
+#[cfg(feature = "ed25519")]
+pub mod ed25519;
 /// Upstream BLS signing types for explicitly selected native fixtures.
 #[cfg(all(feature = "certificate-fixture-signing", not(target_family = "wasm")))]
 pub mod fixture_signing {
     pub use ic_verify_bls_signature::PrivateKey;
 }
-
-#[cfg(all(feature = "native-read", not(target_family = "wasm")))]
-pub mod native;
-
 #[cfg(all(feature = "ingress-packets", not(target_family = "wasm")))]
 pub mod ingress;
+#[cfg(all(feature = "native-read", not(target_family = "wasm")))]
+pub mod native;
 
 /// Upstream stable collections and memory traits, without wrappers or format changes.
 /// Callers own memory allocation, layout, migrations and upgrade policy.

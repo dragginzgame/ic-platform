@@ -10,9 +10,6 @@ repository = "https://github.com/dragginzgame/ic-platform"
 documentation = "https://docs.rs/ic-platform"
 readme = "README.md"
 
-[target.'cfg(any())'.dev-dependencies]
-toko-tooling.workspace = true
-
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling", "crypto-bigint"]
 
@@ -86,6 +83,7 @@ reqwest = { workspace = true, optional = true }
 
 [dev-dependencies]
 ic_bls12_381.workspace = true
+toko-tooling.workspace = true
 
 [lints]
 workspace = true

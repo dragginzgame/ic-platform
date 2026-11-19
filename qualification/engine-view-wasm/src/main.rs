@@ -2,11 +2,11 @@
 
 //! Matched standalone decoder probe; not an IC canister or deployment artifact.
 
-#[cfg(not(feature = "candidate"))]
-compile_error!("select candidate");
-
 #[cfg(feature = "candidate")]
 use ic_platform_protocol::{candid::Limits, cloud_engine as engine};
+
+#[cfg(not(feature = "candidate"))]
+compile_error!("select candidate");
 
 fn main() {
     // Independent literal: one view with id="x" and an empty node list.

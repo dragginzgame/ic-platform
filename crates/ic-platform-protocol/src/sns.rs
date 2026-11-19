@@ -1,5 +1,6 @@
 //! Selected SNS Governance neuron observations, without collection or entitlement policy.
 //! Decode success authenticates nothing. IDs, permission codes and amounts remain raw.
+
 pub use crate::candid::encode::EncodeError;
 use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
@@ -10,7 +11,11 @@ use candidate_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {
+    ///
+    /// NeuronId
     /// Raw neuron ID record; callers validate length and requested-ID equality.
+    ///
+
     both NeuronId {
         /// Exact ID bytes; no 32-byte or ownership assumption.
         23515 => id: Vec<u8> [required],
@@ -18,7 +23,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// GetNeuronArgs
     /// One get_neuron argument; absence is explicit.
+    ///
+
     encoding GetNeuronArgs {
         /// Requested optional ID.
         4246264679 => neuron_id: Option<NeuronId>,
@@ -26,7 +35,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// ListNeuronsArgs
     /// One list_neurons argument; pagination remains caller-owned.
+    ///
+
     encoding ListNeuronsArgs {
         /// Optional selected principal, without an ownership inference.
         1213075014 => of_principal: Option<Principal>,
@@ -38,7 +51,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// NeuronPermission
     /// Raw permission entry, including unknown signed codes.
+    ///
+
     NeuronPermission {
         /// Optional principal; absence does not create a default identity.
         302796462 => principal: Option<Principal> [strict_optional],
@@ -48,7 +65,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// DissolveState
     /// Distinct delay versus absolute dissolve time.
+    ///
+
     enum DissolveState {
         /// Raw delay in seconds.
         1620537965 => DissolveDelaySeconds(u64),
@@ -58,7 +79,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// Neuron
     /// Selected raw neuron evidence; this is not a full neuron export.
+    ///
+
     Neuron {
         /// Optional returned ID.
         23515 => id: Option<NeuronId> [strict_optional],
@@ -90,7 +115,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// GovernanceError
     /// Governance refusal, distinct from malformed input or missing result.
+    ///
+
     GovernanceError {
         /// Exact bounded diagnostic text.
         1389388560 => error_message: String [required],
@@ -100,7 +129,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// GetNeuronResult
     /// Governance response result.
+    ///
+
     enum GetNeuronResult {
         /// Governance refused the observation.
         106380200 => Error(GovernanceError),
@@ -110,7 +143,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// GetNeuronResponse
     /// Optional result; missing result remains None.
+    ///
+
     GetNeuronResponse {
         /// Absent or explicitly returned result.
         142895325 => result: Option<GetNeuronResult> [strict_optional],
@@ -118,7 +155,11 @@ projection! {
 }
 
 projection! {
+    ///
+    /// ListNeuronsResponse
     /// One bounded page; ordering and pagination consistency remain external.
+    ///
+
     ListNeuronsResponse {
         /// Raw returned neurons in source order.
         3923068064 => neurons: Vec<Neuron> [required],

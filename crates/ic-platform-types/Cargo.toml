@@ -11,9 +11,6 @@ documentation = "https://docs.rs/ic-platform-types"
 readme = "README.md"
 include = ["src/**", "README.md", "Cargo.toml"]
 
-[target.'cfg(any())'.dev-dependencies]
-toko-tooling.workspace = true
-
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
 
@@ -32,6 +29,7 @@ thiserror.workspace = true
 [dev-dependencies]
 serde_json.workspace = true
 serde_test.workspace = true
+toko-tooling.workspace = true
 
 [lints]
 workspace = true
