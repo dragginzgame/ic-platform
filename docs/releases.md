@@ -5,6 +5,21 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Runtime 0.23.23
+
+Published the native management and Entropy APIs for
+[issue #34](https://github.com/dragginzgame/ic-platform/issues/34) at tag
+`runtime-v0.23.23`, commit `da089aa4caa13672dd15fb4e2ad08d1cd8c139d8`.
+All 59 Linux qualification targets passed. Fresh audits of both lockfiles
+found zero known vulnerabilities. Each downloaded crate matched its admitted
+archive, registry checksum, source commit and package path.
+
+| Package | Registry SHA-256 |
+| --- | --- |
+| ic-platform-runtime-guard | `618ab93ebd31bc39ead315250d0983925898f96b0525c7f895722e43d6c576dd` |
+| ic-platform-macros | `cdb5bb90ce8e9bfb8896cca41bda386799bfd5b189f0373027728f5a0e31b810` |
+| ic-platform-runtime | `882feebba07b8aa72b36e16b097e7cf974237848c93716516c8927c85e601b7e` |
+
 ## Types 0.21.4
 
 Published `ic-platform-types` from tag `types-v0.21.4` at
