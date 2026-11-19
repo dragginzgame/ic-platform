@@ -5,6 +5,15 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Types 0.21.4
+
+Published `ic-platform-types` from tag `types-v0.21.4` at
+`dd4d65a9b82374993a23d277d546ac55144b7209` with Toko Tooling 0.45.21.
+All 59 Linux qualification targets and 58 release-tooling regression tests passed.
+Fresh audits covered both lockfiles. The downloaded crate matched its admitted
+archive, registry checksum, source commit and package path. Its SHA-256 is
+`986979a988616a18e4e4e85bebe838a3142192e54290fcdabbffa1e5c441953b`.
+
 ## Runtime 0.23.22 and Toko Tooling 0.45.19
 
 Published the Runtime group from tag `runtime-v0.23.22` at
