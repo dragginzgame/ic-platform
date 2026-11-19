@@ -17,15 +17,12 @@ construction APIs; all five installed cases pass without legacy Platform.
 
 `make qualify-platform-crypto` checks the local Platform primitive
 candidate and executes independent native/Wasm signature vectors.
-`make qualify-auth-crypto` checks pinned actual Auth Ed25519/root-delegation code;
-`make qualify-auth-wire` checks its generator with published Wire 0.24.2 and
-Types 0.21.1. Both archive `AUTH_SOURCE` (default `../ic-auth`) without modifying
-it. The Wire check requires that consumer's installed TypeScript tool and fetches
-a pinned historical oracle when absent. `make qualify-query-settings` freezes
-and tests current `QUERY_SOURCE` (default `../ic-query`) read-only, recording dirty
-source separately from HEAD. These consumer commands are focused qualification,
-not sibling adoption or publication. See [crypto evidence](qualification/auth-crypto.md)
-and [Wire evidence](qualification/auth-wire.md).
+`make qualify-auth-crypto` archives `AUTH_SOURCE` (default `../ic-auth`) and
+checks pinned Auth Ed25519 and root-delegation code. `make qualify-query-settings`
+freezes and tests `QUERY_SOURCE` (default `../ic-query`) read-only, recording
+dirty source separately from HEAD. See the [crypto evidence](qualification/auth-crypto.md).
+Auth runs its current browser codec and generated-client checks in
+[Auth CI](https://github.com/dragginzgame/ic-auth/blob/811bc8119e8b6295741ecb33a13fdeff33b2322e/.github/workflows/ci.yml#L113).
 
 Prefer existing names for retained concepts. Check crates.io when introducing
 each package: select its next SemVer version if it already exists, otherwise

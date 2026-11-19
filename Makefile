@@ -401,7 +401,7 @@ qualify-auth-consumer: qualification-tooling-check
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p platform-certificates --features auth-consumer --bin auth-admission --release --target wasm32-unknown-unknown --target-dir target/platform-certificate-wasm
 	node qualification/platform-certificate-wasm.mjs auth-admission
 
-.PHONY: qualify-platform-crypto qualify-auth-crypto qualify-auth-wire qualify-query-settings
+.PHONY: qualify-platform-crypto qualify-auth-crypto qualify-query-settings
 qualify-platform-crypto: qualification-tooling-check
 	cargo clippy --offline --locked -p ic-platform --no-default-features --features ed25519,ecdsa --all-targets -- -D warnings
 	cargo clippy --offline --locked -p ic-platform --no-default-features --features ed25519,ecdsa --target wasm32-unknown-unknown -- -D warnings
@@ -414,9 +414,6 @@ qualify-platform-crypto: qualification-tooling-check
 
 qualify-auth-crypto:
 	node qualification/auth-crypto.mjs
-
-qualify-auth-wire:
-	node qualification/auth-wire.mjs
 
 qualify-query-settings:
 	node qualification/query-settings.mjs
