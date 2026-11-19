@@ -74,7 +74,7 @@ if (mode === 'setup') {
   check();
   if (mode === 'run') {
     assert(command.length, 'missing qualification command');
-    const result = spawnSync('cargo', ['run','--offline','--locked','--manifest-path','qualification/Cargo.toml','-p','platform-qualification-server','--',binary,...command], {stdio:'inherit'});
+    const result = spawnSync('cargo', ['run','--locked','--manifest-path','qualification/Cargo.toml','-p','platform-qualification-server','--',binary,...command], {stdio:'inherit'});
     assert.ifError(result.error);
     assert.equal(result.status, 0, 'qualification supervisor failed');
   }

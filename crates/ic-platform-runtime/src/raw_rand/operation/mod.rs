@@ -3,7 +3,6 @@ use crate::call::{Call, Completion, Outcome, SubmitError, Wait};
 use ic_platform_types::Principal;
 
 #[cfg(test)]
-#[path = "tests.rs"]
 mod tests;
 
 /// Request exactly 32 bytes from the management canister with zero attached cycles.

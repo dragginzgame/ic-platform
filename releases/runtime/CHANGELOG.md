@@ -4,6 +4,11 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.22] - 2026-11-19
+
+- Use ordinary Rust module discovery for the raw-rand operation tests.
+- Adopt Toko Tooling 0.45.19 for development and publication.
+
 ## [0.23.21] - 2026-11-19
 
 Native actor builds can type-check handlers, IC observations and bounded calls.

@@ -30,7 +30,7 @@ const policy=JSON.parse(readFileSync('ci/cargo-release-groups.json'));
 const groups=policy.groups.filter(group=>group.members.includes(name));
 assert.equal(groups.length,1,'package must have exactly one release owner');
 assert.equal(process.env.RELEASE_GROUP,groups[0].name,'select the package release group explicitly');
-const metadata=JSON.parse(run('cargo',['metadata','--locked','--offline','--format-version','1']));
+const metadata=JSON.parse(run('cargo',['metadata','--locked','--format-version','1']));
 const product=metadata.packages.find(p=>p.name===name && metadata.workspace_members.includes(p.id));
 assert(product);assert.deepEqual(product.publish,['crates-io']);assert.deepEqual(product.features.default,[]);
 assert.equal(product.repository,'https://github.com/dragginzgame/ic-platform');

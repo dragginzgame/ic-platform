@@ -108,7 +108,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.45.18 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.45.19 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -119,9 +119,12 @@ make toko-tooling-check
 make deps-list
 ```
 
-Tool setup can download executables and populate Toko Tooling's per-user store. Checks
-are offline and do not install tools. Linux x86-64 and macOS ARM64/x86-64 are the
-intended development hosts. The initial focused suite passed on all three in
+Tool setup can download executables and populate Toko Tooling's per-user store.
+Tool checks verify the installed executables. Ordinary Cargo checks and publication
+can fetch missing locked dependencies. To run offline, first prepare the locked
+sources and invoke Make with `CARGO_NET_OFFLINE=true`.
+
+Linux x86-64 and macOS ARM64/x86-64 are the intended development hosts. The initial focused suite passed on all three in
 [hosted run 43717278830](https://github.com/dragginzgame/ic-platform/actions/runs/43717278830)
 for source `08c72219ad6f261067c00eece9c8c71852e6b561`.
 
@@ -157,7 +160,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.18
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.19
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
