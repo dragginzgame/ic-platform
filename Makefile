@@ -159,13 +159,14 @@ qualify-runtime-timer: qualification-tooling-check runtime-server-check
 	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- timer
 
 qualify-runtime-installed: qualification-tooling-check runtime-server-check
+	cargo test --offline --locked -p ic-platform-runtime --features raw-rand raw_rand::
 	$(ENGINE_WASM_ENV) CARGO_ENCODED_RUSTFLAGS=--cfg=ic_platform_qualification_accounting cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-accounting
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
 	cargo clippy --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --all-targets -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --offline --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-rollback
 	node qualification/runtime-system.mjs
 	node qualification/server.mjs run cargo run --offline --locked --manifest-path qualification/Cargo.toml -p runtime-installed
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-rollback --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-rollback|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-rollback --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-rollback|ic-platform-protocol|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-protocol=1 --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
 
 .PHONY: qualify-runtime-guard
 qualify-runtime-guard: qualification-tooling-check

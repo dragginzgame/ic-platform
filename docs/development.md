@@ -108,7 +108,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.45.16 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.45.18 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -157,7 +157,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.16
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.18
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -740,7 +740,17 @@ run through `node qualification/server.mjs run COMMAND ...`; direct fixture runs
 require an explicitly owned `POCKET_IC_SERVER_URL`. `make install-runtime-server`
 prepares assets and `make runtime-server-check` verifies them without downloading.
 
-## Toko Tooling 0.45.16 adoption
+## Toko Tooling 0.45.18 adoption
+
+The Runtime qualification canisters group handlers ahead of their helpers and
+document each handler’s access policy and input bounds. Raw and generated IC
+exports are qualified through `make qualify-runtime-raw` and
+`make qualify-runtime-exports`. The installed rollback fixture builds the
+ordinary and accounting variants and checks their Wasm export tables. The
+export UI check also builds the generated handlers natively. Its ABI wrappers require
+Wasm, and the raw fixture calls the actual IC0 operations.
+
+## Historical Toko Tooling 0.45.16 adoption
 
 The runtime call receipts and submission errors compile on both targets with
 `call-ic0`. Only the submission methods call the Wasm IC0 ABI. Native

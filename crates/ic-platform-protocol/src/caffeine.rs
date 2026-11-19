@@ -10,7 +10,7 @@ use crate::candid::{
     projection::{absent, projection},
 };
 pub use crate::candid::{Nat, encode::EncodeError};
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 use serde::{Deserialize, Serialize};
 
 /// Arbitrary signed cycle balance, backed by the maintained upstream integer.

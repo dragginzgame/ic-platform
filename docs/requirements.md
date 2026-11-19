@@ -156,7 +156,7 @@ recorded separately in the linked Auth crypto qualification. No sibling changes 
 | Canic endpoint composition, [#164](https://github.com/dragginzgame/ic-platform-legacy/issues/164) | Runtime | Guard and pre-copy admission before decoding, explicit codecs, one dispatch/reply owner and installed rollback/callback proof; no Wire-specific execution owner. |
 | Query certified classification, [#158](https://github.com/dragginzgame/ic-platform-legacy/issues/158) | Platform native | Actual upstream SubnetType identity, unknown strings and absent values; classification is not capacity or deployment permission. |
 | Crypto/Agent boundary, [#50](https://github.com/dragginzgame/ic-platform-legacy/issues/50) | Platform crypto/native | Recheck selected graphs and current advisory evidence before admission. Direct ECDSA correction alone does not resolve Agent/derivation paths. No in-house crypto, forced incompatible override or inherited risk acceptance. |
-| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko Tooling 0.45.16 through its authenticated installer; product acceptance remains separate. |
+| Tooling/compiler adoption, [#157](https://github.com/dragginzgame/ic-platform-legacy/issues/157) | Repository tooling | Retain Rust 1.100.0, common lints and shared dependency commands. This checkout selects published Toko Tooling 0.45.18 through its authenticated installer; product acceptance remains separate. |
 
 The first projection must not import native/crypto dependencies to satisfy an
 unrelated row. Conversely, an isolated codec pass cannot qualify those rows.
@@ -325,6 +325,9 @@ Runtime APIs. Installed supplier proof does not replace actual Scheduling timer,
 once/watchdog and upgrade qualification. The [raw_rand contract](qualification/raw-rand.md)
 maps Entropy's fixed seed framing and explicit version-one HTTP cost/encoding
 requirements without moving source custody, retry or mixing policy into Platform.
+For [issue #33](https://github.com/dragginzgame/ic-platform/issues/33), Runtime
+owns the opt-in bounded management call used by DB, Entropy and Canic. Protocol
+owns its passive codec. Each consumer supplies its wait and retains seed custody.
 
 Wasm Store's [management chunk-cache contract](qualification/management-chunks.md)
 assigns bounded request/hash-record codecs to Protocol while leaving cache

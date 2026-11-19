@@ -5,7 +5,7 @@ use crate::{
         EncodeError, ListAvailableNodesPageArgs, encode_list_available_nodes_page_args as encode,
     },
 };
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 
 // One record and three option table entries, labels independently hashed from
 // limit/start/rejoining. These fixtures never use the production declaration.

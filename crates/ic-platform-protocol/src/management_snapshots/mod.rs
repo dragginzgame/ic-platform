@@ -16,7 +16,7 @@ use crate::candid::{
     encode::{Encode, Writer},
     projection::{absent, projection},
 };
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {

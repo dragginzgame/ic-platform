@@ -4,6 +4,18 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [Unreleased]
+
+- Add the opt-in `raw-rand` management operation for DB, Entropy and Canic.
+  `raw_rand::request(wait_seconds)` makes one bounded zero-attachment call and
+  returns 32 verified-length bytes or a typed transport or framing error.
+
+Native actor builds can type-check ordinary handlers, IC identity and ingress
+observations, and bounded calls. Observing an IC message or invoking an
+entrypoint outside a canister panics before application callbacks. Polling an
+outbound request returns `SubmitError::OutsideCanister` without submission.
+Only Wasm exports the IC ABI.
+
 ## [0.23.18] - 2026-11-18
 
 ### 🔧 Maintenance

@@ -4,7 +4,7 @@ use crate::{
     candid::{Nat, projection::projection},
     cloud_engine::EncodeError,
 };
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {

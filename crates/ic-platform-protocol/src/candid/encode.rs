@@ -2,7 +2,7 @@
 //! pass admits the complete output before reserving any output storage.
 
 use super::wire::{Schema, schema_valid};
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 
 /// Complete output admission failure.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

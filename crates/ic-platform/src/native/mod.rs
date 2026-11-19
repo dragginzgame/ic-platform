@@ -18,8 +18,8 @@ use crate::certificate::{
     CertificateDecodeLimits, PreparedRootKey, TimePolicy, VerificationLimits, VerifyError,
     authenticate_certificate, authenticate_subnet_time, decode_certificate,
 };
-use candidate_types::Principal;
 pub use canister::{CanisterObservation, CanisterReadError};
+use ic_platform_types::Principal;
 pub use ic_transport_types::SubnetMetrics;
 use ic_transport_types::{Envelope, EnvelopeContent, QueryResponse, ReadStateResponse};
 #[cfg(feature = "native-signed-secp256k1")]

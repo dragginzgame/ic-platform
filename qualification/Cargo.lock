@@ -1072,9 +1072,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-process"
-version = "0.81.1"
+version = "0.81.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7550c8620d49b27325f8892de9988bc1b958f8d1e1de8e4cd35e5de547d985a8"
+checksum = "14eb81da7376ef220b5c3c1ba231f5e129de622bea47b977bd734357c2571102"
 dependencies = [
  "errno",
  "libproc",
@@ -1116,9 +1116,9 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.17"
+version = "0.34.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "866eba5d2c1bf18457a3c2a5c1a306dab075626efbe9c83acf1eeb952d58a023"
+checksum = "b59c6bf641d9d87b4c7cac1012398998b1f4a6217b81bd580b3c84d421b43a2d"
 dependencies = [
  "ic-certification",
  "ic-platform-types 0.21.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1153,6 +1153,7 @@ name = "ic-platform-runtime"
 version = "0.23.18"
 dependencies = [
  "ic-platform-macros",
+ "ic-platform-protocol",
  "ic-platform-runtime-guard",
  "ic-platform-types 0.21.3",
 ]
@@ -1189,9 +1190,9 @@ dependencies = [
 
 [[package]]
 name = "ic-testkit"
-version = "0.110.1"
+version = "0.110.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "052af01be87faebce4477a8dcad538601bb2cec70cd8eee13dad4412cc389963"
+checksum = "a099c0ffe0b615664ad66484e4796e09a574a91153635c93dfa8fc37cec60f31"
 dependencies = [
  "pocket-ic",
 ]
@@ -2133,7 +2134,7 @@ dependencies = [
  "ic-certification",
  "ic-management-canister-types",
  "ic-platform 0.34.17",
- "ic-platform 0.34.17 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.34.18",
  "ic-testkit",
  "tokio",
  "toko-tooling",
@@ -2836,9 +2837,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.45.16"
+version = "0.45.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2095850545e0fd3c5580fab610cab78561242fc09c74221e27f3e7f654d5776"
+checksum = "d24c2c13aacee2afda27e77ed8d6c13ff5ad383e08a2f80645561b2a9f935b11"
 
 [[package]]
 name = "tower"

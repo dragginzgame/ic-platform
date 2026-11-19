@@ -7,7 +7,7 @@ use crate::candid::{
     self, Decode, Error, Limits, Reader, Schema,
     projection::{absent, projection},
 };
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 use serde::{Deserialize, Serialize};
 
 projection! {

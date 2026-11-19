@@ -25,53 +25,7 @@ pub(crate) use wasm::check_update_entry;
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
 pub use wasm::{run_global_timer, run_update};
 
-/// Current local task observation, committed only with the enclosing execution.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum TaskState {
-    /// No completion or successful cleanup has committed for this task.
-    ///
-    /// A trapping cleanup can roll back to this state even after the IC has
-    /// finished handling the response. It does not guarantee another poll.
-    Running,
-    /// The future completed and its destruction returned successfully.
-    Completed,
-    /// Cleanup retired the task and its destruction returned successfully.
-    TerminatedByCleanup,
-}
-
-/// Read-only task observation. Dropping a handle does not cancel a task.
-#[derive(Clone)]
-pub struct TaskHandle(Rc<Cell<TaskState>>);
-impl TaskHandle {
-    /// Observes current local state, not remote effects or final settlement.
-    ///
-    /// `Running` can survive a cleanup trap; it is not a liveness signal or
-    /// permission to retry the remote operation.
-    #[must_use]
-    pub fn state(&self) -> TaskState {
-        self.0.get()
-    }
-}
-
-/// Refusal before admitting a new root task.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum EntryError {
-    /// Non-replicated execution cannot enter a root-task adapter.
-    NonReplicated,
-    /// A task is already being polled or destroyed in this entry.
-    NestedEntry,
-    /// The instance exhausted its non-recycled task identifiers.
-    Capacity,
-}
-
-/// Refusal to issue a reply through the current executor task.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum ReplyError {
-    /// No live method task owns reply authority, including timer roots and cleanup.
-    NoActiveTask,
-    /// This task already used its ordinary reply authority.
-    AlreadyReplied,
-}
+pub use crate::execution_types::{EntryError, ReplyError, TaskHandle, TaskState};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) struct TaskToken(u64);

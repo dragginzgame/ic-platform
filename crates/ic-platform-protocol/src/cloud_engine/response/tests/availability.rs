@@ -6,7 +6,7 @@ use crate::{
         decode_list_available_nodes_page_response as decode,
     },
 };
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 
 // Independently assembled from #166's selected IDL, including unselected IP text.
 const HEADER: &str = "44 49 44 4c 09 6b 02 9c c2 01 01 e5 8e b4 02 08 6e 02 6c 03 f3 89 8a c8 04 03 d6 ee f5 a0 06 78 b1 f0 fa fd 09 04 6e 68 6d 05 6c 07 ff ae 01 06 d7 fa 89 89 01 07 b8 aa cc b7 01 68 b1 e2 e7 99 02 68 a4 b7 cc a3 04 68 a6 fb ec a3 0b 7e 9c cc b3 f7 0f 71 6e 71 6b 06 ba e0 ad d6 01 7f ac 8b cf c5 0f 7f ad 8b cf c5 0f 7f ae 8b cf c5 0f 7f af 8b cf c5 0f 7f b0 8b cf c5 0f 7f 6b 09 dd c6 a0 11 71 ec ea a7 7f 71 cc ce f0 c6 06 71 bd b1 98 ef 06 71 cf a0 de f2 06 7f d4 b4 c5 9a 09 7f f4 f6 d8 a2 09 7f e1 8b d8 8a 0c 7f aa 98 d9 d1 0e 71 01 00";

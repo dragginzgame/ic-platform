@@ -8,46 +8,10 @@ use candidate_runtime::{
 use candidate_types::Principal;
 use std::cell::Cell;
 
-thread_local! {
-    static STARTED: Cell<bool> = const { Cell::new(false) };
-    static RELEASE: Cell<bool> = const { Cell::new(false) };
-    static FINISHED: Cell<bool> = const { Cell::new(false) };
-}
-
-/// Admit every caller to this qualification fixture.
-fn admit() -> Result<(), u8> {
-    Ok(())
-}
-
-fn principal(bytes: &[u8]) -> Result<Principal, u8> {
-    if bytes.is_empty() {
-        return Err(1);
-    }
-    Principal::try_from_slice(bytes).map_err(|_| 2)
-}
-
-fn pair(bytes: &[u8]) -> Result<(Principal, Principal), u8> {
-    let (&len, bytes) = bytes.split_first().ok_or(1)?;
-    let len = usize::from(len);
-    if len > bytes.len() {
-        return Err(2);
-    }
-    Ok((principal(&bytes[..len])?, principal(&bytes[len..])?))
-}
-
-fn empty(bytes: &[u8]) -> Result<(), u8> {
-    if bytes.is_empty() { Ok(()) } else { Err(1) }
-}
-
-#[expect(
-    clippy::needless_pass_by_value,
-    reason = "Generated failure handler owns the error"
-)]
-fn fail(error: UpdateError<u8, u8>) -> ! {
-    panic!("upgrade admission: {error:?}")
-}
-
-/// Forward the held peer reply to the caller awaiting the upgrade probe.
+// upgrade_probe
+// Forward the held peer reply to the caller awaiting the upgrade probe.
+// scope  : public
+// limits : 59 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "upgrade_probe",
@@ -69,7 +33,10 @@ async fn upgrade_probe((peer, caller): (Principal, Principal)) {
     system::reply(bytes).unwrap();
 }
 
-/// Hold a remote call open until release or the fixture round-trip limit.
+// hold_upgrade
+// Hold a remote call open until release or the fixture round-trip limit.
+// scope  : public
+// limits : 29 input bytes maximum; at most 128 round trips
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "hold_upgrade",
@@ -108,7 +75,10 @@ async fn hold_upgrade(caller: Principal) {
     .unwrap();
 }
 
-/// Release the pending remote handler.
+// release_upgrade
+// Release the pending remote handler.
+// scope  : public
+// limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "release_upgrade",
@@ -123,7 +93,10 @@ async fn release_upgrade((): ()) {
     system::reply(b"released").unwrap();
 }
 
-/// Return the remote handler’s started and finished flags.
+// upgrade_status
+// Return the remote handler’s started and finished flags.
+// scope  : public
+// limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
     name = "upgrade_status",
@@ -139,4 +112,43 @@ async fn upgrade_status((): ()) {
         u8::from(FINISHED.with(Cell::get)),
     ])
     .unwrap();
+}
+
+thread_local! {
+    static STARTED: Cell<bool> = const { Cell::new(false) };
+    static RELEASE: Cell<bool> = const { Cell::new(false) };
+    static FINISHED: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Admit every caller to this qualification fixture.
+fn admit() -> Result<(), u8> {
+    Ok(())
+}
+
+fn principal(bytes: &[u8]) -> Result<Principal, u8> {
+    if bytes.is_empty() {
+        return Err(1);
+    }
+    Principal::try_from_slice(bytes).map_err(|_| 2)
+}
+
+fn pair(bytes: &[u8]) -> Result<(Principal, Principal), u8> {
+    let (&len, bytes) = bytes.split_first().ok_or(1)?;
+    let len = usize::from(len);
+    if len > bytes.len() {
+        return Err(2);
+    }
+    Ok((principal(&bytes[..len])?, principal(&bytes[len..])?))
+}
+
+fn empty(bytes: &[u8]) -> Result<(), u8> {
+    if bytes.is_empty() { Ok(()) } else { Err(1) }
+}
+
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Generated failure handler owns the error"
+)]
+fn fail(error: UpdateError<u8, u8>) -> ! {
+    panic!("upgrade admission: {error:?}")
 }

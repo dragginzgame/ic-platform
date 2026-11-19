@@ -1,7 +1,7 @@
 //! Private strict map/byte adapters; no generic public codec surface.
 
 use super::SignedDelegation;
-use candidate_types::Principal;
+use ic_platform_types::Principal;
 use serde::{
     Deserialize, Deserializer, Serialize, Serializer,
     de::{self, MapAccess, Visitor, value::MapAccessDeserializer},

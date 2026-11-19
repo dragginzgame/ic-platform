@@ -8,6 +8,11 @@ claim completion of the full Platform rebuild or migrate applications.
 
 See the [design and qualification records](https://github.com/dragginzgame/ic-platform/tree/main/docs).
 
+With the `raw-rand` feature, `raw_rand::request(wait_seconds).await` requests
+32 bytes from the management canister. The call uses the supplied bounded wait
+and attaches zero cycles. Its error preserves submission refusal, rejection,
+uncertain outcome or malformed framing.
+
 Caller-owned global timer exports can enter `executor::run_global_timer` through
 the same executor, with no ordinary reply authority. `system::global_timer_set`
 and `system::canister_version` expose IC operations; scheduling remains with the

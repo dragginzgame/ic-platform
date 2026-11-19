@@ -99,7 +99,7 @@ pub fn encode_canister_signature(
 /// # Errors
 /// Refuses a seed/issuer combination outside the verifier's 20–129 byte boundary.
 pub fn canister_key_der(
-    issuer: candidate_types::Principal,
+    issuer: ic_platform_types::Principal,
     seed: &[u8],
 ) -> Result<Vec<u8>, ConstructionError> {
     let payload = 1usize

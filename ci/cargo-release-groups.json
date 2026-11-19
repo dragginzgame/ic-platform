@@ -7,7 +7,7 @@
       "version": "package",
       "members": ["ic-platform-protocol"],
       "changelog": "releases/protocol/CHANGELOG.md",
-      "dependencies": []
+      "dependencies": ["ic-platform-protocol"]
     },
     {
       "name": "types",
@@ -15,7 +15,7 @@
       "version": "package",
       "members": ["ic-platform-types"],
       "changelog": "releases/types/CHANGELOG.md",
-      "dependencies": ["candidate-types"]
+      "dependencies": ["ic-platform-types"]
     },
     {
       "name": "runtime",
@@ -23,7 +23,7 @@
       "version": "package",
       "members": ["ic-platform-runtime", "ic-platform-runtime-guard", "ic-platform-macros"],
       "changelog": "releases/runtime/CHANGELOG.md",
-      "dependencies": ["candidate-runtime-guard", "candidate-macros"]
+      "dependencies": ["ic-platform-runtime-guard", "ic-platform-macros"]
     },
     {
       "name": "platform",

@@ -4,11 +4,9 @@
 //! nested Runtime entry. Automatic replies require an explicit encoder.
 //! Applications retain authorization policy and explicit codec choice.
 
-use crate::{
-    call::ic0,
-    executor::{self, EntryError, TaskHandle},
-    system::{self, ArgumentTooLarge},
-};
+use crate::execution_types::{ArgumentTooLarge, EntryError, ReplyError, TaskHandle};
+#[cfg(target_arch = "wasm32")]
+use crate::{call::ic0, executor, system};
 use std::future::Future;
 
 /// The stage that refused entrypoint input, preserving its original error value.
@@ -41,15 +39,23 @@ pub enum AdmissionError<G, D> {
 ///
 /// # Panics
 /// User closures may panic. Argument capture may trap for an invalid IC context
-/// or allocation failure; see [`system::read_args`].
+/// or allocation failure; see [`crate::system::read_args`].
 pub fn prepare<T, G, D>(
     maximum: usize,
     guard: impl FnOnce() -> Result<(), G>,
     decode: impl FnOnce(&[u8]) -> Result<T, D>,
 ) -> Result<T, AdmissionError<G, D>> {
-    guard().map_err(AdmissionError::Guard)?;
-    let bytes = system::read_args(maximum).map_err(AdmissionError::Arguments)?;
-    decode(&bytes).map_err(AdmissionError::Decode)
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (maximum, guard, decode);
+        crate::native::requires_canister()
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        guard().map_err(AdmissionError::Guard)?;
+        let bytes = system::read_args(maximum).map_err(AdmissionError::Arguments)?;
+        decode(&bytes).map_err(AdmissionError::Decode)
+    }
 }
 
 /// Refusal before the manual update handler starts.
@@ -71,7 +77,7 @@ pub enum EndpointError<G, D, E> {
     /// The caller-selected response encoder refused; no reply bytes were appended.
     Encode(E),
     /// A handler already consumed the update task's reply authority.
-    Reply(system::ReplyError),
+    Reply(ReplyError),
 }
 
 /// Runs one synchronous query with explicit input and response policies.
@@ -93,11 +99,19 @@ pub fn query<T, R, G, D, E>(
     handler: impl FnOnce(T) -> R,
     encode: impl FnOnce(R) -> Result<Vec<u8>, E>,
 ) -> Result<(), EndpointError<G, D, E>> {
-    let _scope = executor::enter_synchronous().map_err(EndpointError::Entry)?;
-    let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
-    let bytes = encode(handler(input)).map_err(EndpointError::Encode)?;
-    ic0::reply(&bytes);
-    Ok(())
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (maximum, guard, decode, handler, encode);
+        crate::native::requires_canister()
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        let _scope = executor::enter_synchronous().map_err(EndpointError::Entry)?;
+        let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
+        let bytes = encode(handler(input)).map_err(EndpointError::Encode)?;
+        ic0::reply(&bytes);
+        Ok(())
+    }
 }
 
 /// Runs one synchronous lifecycle handler without reply or async task authority.
@@ -119,15 +133,23 @@ pub fn lifecycle<T, G, D>(
     decode: impl FnOnce(&[u8]) -> Result<T, D>,
     handler: impl FnOnce(T),
 ) -> Result<(), UpdateError<G, D>> {
-    let _scope = executor::enter_synchronous().map_err(UpdateError::Entry)?;
-    let input = if has_arguments {
-        prepare(maximum, guard, decode).map_err(UpdateError::Admission)?
-    } else {
-        guard().map_err(|e| UpdateError::Admission(AdmissionError::Guard(e)))?;
-        decode(&[]).map_err(|e| UpdateError::Admission(AdmissionError::Decode(e)))?
-    };
-    handler(input);
-    Ok(())
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (maximum, has_arguments, guard, decode, handler);
+        crate::native::requires_canister()
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        let _scope = executor::enter_synchronous().map_err(UpdateError::Entry)?;
+        let input = if has_arguments {
+            prepare(maximum, guard, decode).map_err(UpdateError::Admission)?
+        } else {
+            guard().map_err(|e| UpdateError::Admission(AdmissionError::Guard(e)))?;
+            decode(&[]).map_err(|e| UpdateError::Admission(AdmissionError::Decode(e)))?
+        };
+        handler(input);
+        Ok(())
+    }
 }
 
 /// Starts one update task and encodes/replies after the handler completes.
@@ -158,19 +180,27 @@ where
     E: 'static,
     F: Future<Output = R> + 'static,
 {
-    executor::check_update_entry().map_err(EndpointError::Entry)?;
-    let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
-    executor::run_update(async move {
-        let result = handler(input).await;
-        let bytes = match encode(result) {
-            Ok(bytes) => bytes,
-            Err(error) => on_error(EndpointError::Encode(error)),
-        };
-        if let Err(error) = system::reply(&bytes) {
-            on_error(EndpointError::Reply(error));
-        }
-    })
-    .map_err(EndpointError::Entry)
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (maximum, guard, decode, handler, encode, on_error);
+        crate::native::requires_canister()
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        executor::check_update_entry().map_err(EndpointError::Entry)?;
+        let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
+        executor::run_update(async move {
+            let result = handler(input).await;
+            let bytes = match encode(result) {
+                Ok(bytes) => bytes,
+                Err(error) => on_error(EndpointError::Encode(error)),
+            };
+            if let Err(error) = system::reply(&bytes) {
+                on_error(EndpointError::Reply(error));
+            }
+        })
+        .map_err(EndpointError::Entry)
+    }
 }
 
 /// Admits input and starts one update task with caller-owned manual reply policy.
@@ -204,7 +234,15 @@ where
     T: 'static,
     F: Future<Output = ()> + 'static,
 {
-    executor::check_update_entry().map_err(UpdateError::Entry)?;
-    let input = prepare(maximum, guard, decode).map_err(UpdateError::Admission)?;
-    executor::run_update(async move { handler(input).await }).map_err(UpdateError::Entry)
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (maximum, guard, decode, handler);
+        crate::native::requires_canister()
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        executor::check_update_entry().map_err(UpdateError::Entry)?;
+        let input = prepare(maximum, guard, decode).map_err(UpdateError::Admission)?;
+        executor::run_update(async move { handler(input).await }).map_err(UpdateError::Entry)
+    }
 }

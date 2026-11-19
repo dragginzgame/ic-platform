@@ -16,13 +16,13 @@ pub fn argument_size() -> usize {
 /// Observe before awaiting when the original caller is needed. Context violations
 /// or an invalid system Principal length trap. This does not authorize the caller.
 #[must_use]
-pub fn caller() -> candidate_types::Principal {
+pub fn caller() -> ic_platform_types::Principal {
     ic0::principal(true)
 }
 
 /// This canister's identity, in the canonical Types identity.
 #[must_use]
-pub fn canister_self() -> candidate_types::Principal {
+pub fn canister_self() -> ic_platform_types::Principal {
     ic0::principal(false)
 }
 
@@ -39,7 +39,7 @@ pub fn time() -> u64 {
 ///
 /// The caller owns the decision to use this observation for authorization.
 #[must_use]
-pub fn is_controller(principal: &candidate_types::Principal) -> bool {
+pub fn is_controller(principal: &ic_platform_types::Principal) -> bool {
     ic0::controller(principal)
 }
 
@@ -138,14 +138,7 @@ pub fn reply(bytes: &[u8]) -> Result<(), ReplyError> {
     Ok(())
 }
 
-/// The current message exceeds the caller's raw argument-byte allowance.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct ArgumentTooLarge {
-    /// Exact message size reported by the system.
-    pub actual: usize,
-    /// Caller-selected maximum, inclusive.
-    pub maximum: usize,
-}
+pub use crate::execution_types::ArgumentTooLarge;
 
 /// Copies the current message's raw arguments after checking their byte length.
 ///

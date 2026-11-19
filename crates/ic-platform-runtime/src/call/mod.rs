@@ -24,8 +24,8 @@ mod submission;
 #[cfg(all(test, feature = "call"))]
 mod tests;
 
-#[cfg(feature = "call")]
-use candidate_types::Principal;
+#[cfg(all(feature = "call-ic0", not(target_arch = "wasm32")))]
+pub use crate::native::CallFuture;
 #[cfg(feature = "call")]
 pub use completion::{Completion, Outcome, RejectCode, Rejection};
 #[cfg(all(feature = "call-ic0", target_arch = "wasm32"))]
@@ -37,6 +37,8 @@ pub use future::CallFuture;
 ))]
 #[doc(hidden)]
 pub use future::observed_count;
+#[cfg(feature = "call")]
+use ic_platform_types::Principal;
 #[cfg(feature = "call")]
 use std::borrow::Cow;
 #[cfg(feature = "call-ic0")]

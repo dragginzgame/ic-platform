@@ -43,6 +43,35 @@ function probe({caller = [4], own = [1, 2], certificate = [8, 9], certificateSiz
       events.push('root');
     },
   });
+  if (method === 'canister_update randomness') {
+    // A zero cost and balance permit a zero-attachment submission. The default
+    // import handler rejects cycle attachment; the event list also detects retries.
+    Object.assign(ic0, {
+      in_replicated_execution: () => 1,
+      cost_call(methodSize, argsSize, dst) {
+        assert.equal(methodSize, 8n);
+        assert.equal(argsSize, 6n);
+        new Uint8Array(instance.exports.memory.buffer, dst >>> 0, 16).fill(0);
+      },
+      canister_liquid_cycle_balance128(dst) {
+        new Uint8Array(instance.exports.memory.buffer, dst >>> 0, 16).fill(0);
+      },
+      call_new(_target, targetSize, methodPtr, methodSize) {
+        assert.equal(targetSize, 0);
+        const bytes = new Uint8Array(instance.exports.memory.buffer, methodPtr >>> 0, methodSize);
+        assert.equal(new TextDecoder().decode(bytes), 'raw_rand');
+        events.push('new');
+      },
+      call_on_cleanup() {},
+      call_with_best_effort_response(seconds) { assert.equal(seconds, 10); events.push('wait'); },
+      call_data_append(ptr, size) {
+        const bytes = new Uint8Array(instance.exports.memory.buffer, ptr >>> 0, size);
+        assert.deepEqual([...bytes], [68, 73, 68, 76, 0, 0]);
+        events.push('request');
+      },
+      call_perform() { events.push('perform'); return 17; },
+    });
+  }
   instance = new WebAssembly.Instance(module, {ic0});
   assert.equal(instance.exports[method].length, 0);
   if (traps) assert.throws(() => instance.exports[method](), WebAssembly.RuntimeError);
@@ -62,4 +91,7 @@ assert.equal(oversized.at(-1), 'cert-size'); assert(!oversized.includes('cert-co
 for (const method of ['canister_init','canister_pre_upgrade','canister_post_upgrade']) {
   assert.deepEqual(probe({method}).events, method === 'canister_pre_upgrade' ? ['root'] : ['args-size','root']);
 }
-console.log(JSON.stringify({admission:'passed',cases:10,sha256:createHash('sha256').update(wasm).digest('hex')}));
+const refused = probe({method:'canister_update randomness'});
+assert.deepEqual(refused.events, ['args-size','new','wait','request','perform','append','reply']);
+assert.deepEqual(refused.reply, [17,0,0,0]);
+console.log(JSON.stringify({admission:'passed',cases:11,sha256:createHash('sha256').update(wasm).digest('hex')}));

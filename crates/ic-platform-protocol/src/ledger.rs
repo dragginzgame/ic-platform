@@ -10,7 +10,7 @@ use crate::{
     },
     management::CreationSettings,
 };
-use candidate_types::{Account, Principal};
+use ic_platform_types::{Account, Principal};
 use serde::{Deserialize, Serialize};
 
 projection! {

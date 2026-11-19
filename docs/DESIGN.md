@@ -47,6 +47,11 @@ Runtime's macro package and guard are implementation support packages, released 
 
 Dependencies point toward Types. Protocol has **no Runtime dependency**, including optional endpoint adapters. An endpoint composes an explicit Protocol decoder with Runtime's codec-agnostic entrypoint. This is a stronger boundary than the original proposal.
 
+Runtime’s optional `raw-rand` operation composes the existing call primitive
+with Protocol’s passive raw_rand codec. Only that feature selects Protocol.
+The executor and entrypoint generator continue to accept raw bytes and explicit
+codecs.
+
 Platform has no Protocol or Runtime dependency. Native packet code may use its certificate parser and upstream native transport identities; it must not pull in external Candid DTOs. If a shared native format genuinely requires both owners, compose them in the consuming application first.
 
 Browser remains a separate ESM package. Qualification remains a private workspace with no reverse production dependency. Do not create packages merely to hold tooling or accommodate a preferred directory diagram.
