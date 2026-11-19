@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform-runtime"
-version = "0.23.18"
+version = "0.23.19"
 description = "Explicit call ownership for the IC Platform replacement"
 edition.workspace = true
 rust-version.workspace = true
@@ -16,6 +16,7 @@ ignored = ["toko-tooling"]
 [features]
 default = []
 system-raw = []
+raw-rand = ["call-ic0", "dep:ic-platform-protocol", "ic-platform-protocol/raw-rand"]
 call = ["dep:candidate-types"]
 call-ic0 = ["call", "dep:candidate-runtime-guard"]
 entrypoint-macros = ["call-ic0", "dep:candidate-macros"]
@@ -24,6 +25,7 @@ entrypoint-macros = ["call-ic0", "dep:candidate-macros"]
 candidate-macros = { workspace = true, optional = true }
 candidate-runtime-guard = { workspace = true, optional = true }
 candidate-types = { workspace = true, optional = true }
+ic-platform-protocol = { workspace = true, optional = true }
 
 [dev-dependencies]
 toko-tooling.workspace = true

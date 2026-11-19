@@ -19,7 +19,27 @@ header mutation, wrong vector length/type, surplus argument, trailing byte and
 one-byte-too-small allowance. Upstream Candid is only a native qualification
 supplier. The raw-rand-only product graph has no dependencies.
 
-## Entropy migration mapping
+## Bounded Runtime operation (issue #33)
+
+The planned first registry release is `ic-platform-runtime` 0.23.19 with the
+`raw-rand` feature. Published 0.23.18 lacks the operation. From an update
+task, call `ic_platform_runtime::raw_rand::request(wait_seconds).await` to
+receive `Result<[u8; 32], ic_platform_runtime::raw_rand::Error>`. Pass the
+consumer’s existing wait (10 seconds in DB, 300 seconds in Entropy, or the
+selected value in Canic). Runtime submits once to the management principal,
+attaches zero cycles and uses Protocol’s six-byte request and 42-byte reply
+profile. Submission errors, rejections, uncertain outcomes and wire errors
+have distinct variants. Callers retain custody, buffering and retry policy.
+
+`make qualify-runtime-installed` checks the request fields, decoding and
+transport refusals. Its Wasm host observes the management target, canonical
+request, bounded wait and single submission, then returns refusal 17 and
+checks that the caller receives that code. A separate installed Wasm canister
+executes the operation against PocketIC’s management canister. The installed check accepts any
+correctly framed 32-byte result, including all zeroes. The passive codec is
+qualified independently by `make qualify-raw-rand`.
+
+## Historical Entropy migration mapping
 
 Read-only Entropy baseline `cbb6a152116f3c716758a677e111cb4d2c49f50c` uses the old
 Platform `raw_rand` facade. Its source should import `ic_platform_protocol::raw_rand`,

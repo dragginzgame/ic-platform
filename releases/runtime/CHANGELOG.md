@@ -4,6 +4,12 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.19] - 2026-11-19
+
+- Add the opt-in `raw-rand` management operation. On wasm32,
+  `raw_rand::request(wait_seconds)` makes one bounded zero-attachment call
+  and returns 32 bytes or a typed transport or framing error.
+
 ## [0.23.18] - 2026-11-18
 
 ### 🔧 Maintenance

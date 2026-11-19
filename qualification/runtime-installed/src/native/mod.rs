@@ -40,6 +40,11 @@ async fn verify_installed() -> Result<(), Box<dyn std::error::Error>> {
     pic.add_cycles(canister, 1_u128 << 80).await;
     pic.install_canister(canister, wasm.clone(), vec![], None)
         .await;
+    let random = pic
+        .update_call(canister, Principal::anonymous(), "randomness", vec![])
+        .await
+        .unwrap();
+    assert_eq!(random.len(), 32, "installed management raw_rand reply");
     identity::verify(pic, canister, [7; 32]).await;
     assert_eq!(
         pic.update_call(canister, Principal::anonymous(), "system_set", vec![11; 32])

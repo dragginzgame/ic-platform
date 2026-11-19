@@ -32,6 +32,30 @@ fn no_task() {
     ));
 }
 
+// randomness
+// Return a 32-byte raw_rand reply or the four-byte synchronous refusal code.
+// scope  : public
+// limits : empty input; ten-second bounded wait
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "randomness",
+    guard = admit,
+    decode = unit,
+    max_bytes = 0,
+    encode = encode,
+    on_error = fail
+)]
+async fn randomness((): ()) -> Vec<u8> {
+    use candidate_runtime::{call::SubmitError, raw_rand};
+    match raw_rand::request(10).await {
+        Ok(seed) => seed.to_vec(),
+        Err(raw_rand::Error::Submission(SubmitError::Refused(code))) => {
+            code.get().to_le_bytes().to_vec()
+        }
+        Err(error) => panic!("unexpected raw_rand failure: {error:?}"),
+    }
+}
+
 /// Set the initial certified root.
 #[candidate_runtime::init(
     runtime = candidate_runtime,

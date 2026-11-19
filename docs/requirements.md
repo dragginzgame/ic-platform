@@ -325,6 +325,9 @@ Runtime APIs. Installed supplier proof does not replace actual Scheduling timer,
 once/watchdog and upgrade qualification. The [raw_rand contract](qualification/raw-rand.md)
 maps Entropy's fixed seed framing and explicit version-one HTTP cost/encoding
 requirements without moving source custody, retry or mixing policy into Platform.
+For [issue #33](https://github.com/dragginzgame/ic-platform/issues/33), Runtime
+owns the opt-in bounded management call used by DB, Entropy and Canic. Protocol
+owns its passive codec. Each consumer supplies its wait and retains seed custody.
 
 Wasm Store's [management chunk-cache contract](qualification/management-chunks.md)
 assigns bounded request/hash-record codecs to Protocol while leaving cache

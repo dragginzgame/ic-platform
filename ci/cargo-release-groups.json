@@ -7,7 +7,7 @@
       "version": "package",
       "members": ["ic-platform-protocol"],
       "changelog": "releases/protocol/CHANGELOG.md",
-      "dependencies": []
+      "dependencies": ["ic-platform-protocol"]
     },
     {
       "name": "types",

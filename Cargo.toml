@@ -17,8 +17,8 @@ license-file = "LICENSE.md"
 
 [workspace.dependencies]
 # Production
-candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.18", default-features = false }
-candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.18", default-features = false }
+candidate-macros = { package = "ic-platform-macros", path = "crates/ic-platform-macros", version = "=0.23.19", default-features = false }
+candidate-runtime-guard = { package = "ic-platform-runtime-guard", path = "crates/ic-platform-runtime-guard", version = "=0.23.19", default-features = false }
 candidate-types = { package = "ic-platform-types", path = "crates/ic-platform-types", version = "0.21.3", default-features = false }
 crc32fast = "1.5.5"
 crypto-bigint = { version = "0.7.11", default-features = false }
@@ -26,6 +26,7 @@ curve25519-dalek = { version = "=5.0.0", default-features = false }
 data-encoding = "2.11.0"
 ed25519-dalek = { version = "=3.0.0", default-features = false }
 ic-certification = { version = "=3.2.0", default-features = false }
+ic-platform-protocol = { path = "crates/ic-platform-protocol", version = "0.3.6", default-features = false }
 ic-stable-structures = { version = "0.7.2", default-features = false }
 ic-transport-types = "0.49.3"
 ic-verify-bls-signature = { version = "=0.6.0", default-features = false, features = ["alloc"] }
