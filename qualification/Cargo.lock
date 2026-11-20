@@ -1072,9 +1072,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-process"
-version = "0.81.3"
+version = "0.81.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b9e94a55e898dc6d6df8b156dd183eb299f136e8f848f139fbfd6151f0e02ed"
+checksum = "11ea739ab482b78e71f7f044c8ea29e5225c3b2e751375cf20591de0489bb980"
 dependencies = [
  "errno",
  "libproc",
@@ -1190,9 +1190,9 @@ dependencies = [
 
 [[package]]
 name = "ic-testkit"
-version = "0.110.3"
+version = "0.110.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b04e07e411ea98842fedb02173150d51869c9c4a6c105dede249369322d7b2c"
+checksum = "5617b2cbdc7adf055c6c7f4bdcbca8ad0ef5b367b65996acda10cad7fb79bb13"
 dependencies = [
  "pocket-ic",
 ]

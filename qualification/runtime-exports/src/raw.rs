@@ -5,8 +5,7 @@ use std::cell::Cell;
 
 // context_query
 // Report the execution context and mutation counter.
-// scope  : public
-// limits : none specified
+// limits : Ignores input. Replies with 2 bytes.
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -18,8 +17,7 @@ extern "C" fn context_query() {
 
 // context_update
 // Increment the counter in replicated execution and report the context.
-// scope  : public
-// limits : none specified
+// limits : Ignores input. Replies with 2 bytes.
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -31,8 +29,7 @@ extern "C" fn context_update() {
 
 // query
 // Read the stored value, caller, controller flag and instruction counts.
-// scope  : public
-// limits : caller ID up to 29 bytes
+// limits : Ignores input. Reply is 18 bytes plus the caller ID (0–29 bytes).
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -44,8 +41,7 @@ extern "C" fn query() {
 
 // update_observe
 // Read the stored value, caller, controller flag and instruction counts in an update.
-// scope  : public
-// limits : caller ID up to 29 bytes
+// limits : Ignores input. Reply is 18 bytes plus the caller ID (0–29 bytes).
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -56,9 +52,9 @@ extern "C" fn update_observe() {
 }
 
 // update
-// Exercise raw argument copying, mutation, replies and traps by mode.
-// scope  : public; mode 1 requires a controller
-// limits : mode 0 requires five input bytes
+// Exercise raw argument copying, mutation, replies and traps. Mode 1 requires a controller.
+// limits : Empty input replies empty. Mode 0 requires 5 bytes total and echoes the last 4.
+//          Other modes ignore trailing input. Mode 1 replies empty on success. Modes 2–8 and unknown modes trap.
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -114,9 +110,8 @@ extern "C" fn update() {
 }
 
 // initialize
-// Initialize the two-page stable memory fixture and heap value.
-// scope  : IC installation; controller required
-// limits : empty input
+// Require a controller, then initialize the two-page stable memory fixture and heap value.
+// limits : Requires empty input. No reply.
 #[expect(
     unsafe_code,
     reason = "Caller-owned lifecycle export in the approved fixture"
@@ -137,8 +132,7 @@ extern "C" fn initialize() {
 
 // before_upgrade
 // Write the heap value to stable memory.
-// scope  : IC pre-upgrade hook
-// limits : none specified
+// limits : Takes no arguments. No reply.
 #[expect(
     unsafe_code,
     reason = "Caller-owned lifecycle export in the approved fixture"
@@ -152,8 +146,7 @@ extern "C" fn before_upgrade() {
 
 // after_upgrade
 // Restore the heap value from stable memory.
-// scope  : IC post-upgrade hook
-// limits : empty input
+// limits : Requires empty input. No reply.
 #[expect(
     unsafe_code,
     reason = "Caller-owned lifecycle export in the approved fixture"
@@ -170,8 +163,8 @@ extern "C" fn after_upgrade() {
 
 // system_probe
 // Exercise stable memory and cycle accounting for the selected mode.
-// scope  : public
-// limits : requires a mode byte
+// limits : Reads the first byte and ignores trailing input. Mode 0 replies with 8 bytes, mode 4 replies empty,
+//          and modes 5–7 reply with 16 bytes. Empty input and all other modes trap.
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -231,8 +224,7 @@ extern "C" fn system_probe() {
 
 // stable_observe
 // Read the stable page count and the three bytes across the first page boundary.
-// scope  : public
-// limits : none specified
+// limits : Ignores input. Replies with 11 bytes (8 for the page count and 3 from stable memory).
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
