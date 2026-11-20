@@ -9,7 +9,7 @@ use std::cell::{Cell, RefCell};
 
 // arm
 // Arm the fixture timer and persist its initial stage.
-// scope  : public
+// guard  : admit always succeeds
 // limits : one input byte maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -36,7 +36,7 @@ fn arm(mode: u8) -> Vec<u8> {
 
 // observe
 // Read timer execution counters and the observed task state.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::query(
     runtime = candidate_runtime,
@@ -67,7 +67,7 @@ fn observe((): ()) -> Vec<u8> {
 
 // peer
 // Return the payload awaited by the timer task.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -84,7 +84,6 @@ fn peer((): ()) -> Vec<u8> {
 
 // timer
 // Dispatch the armed timer stage and record its observed task.
-// scope  : IC global timer
 // limits : none specified
 #[expect(
     unsafe_code,
@@ -95,27 +94,31 @@ extern "C" fn timer() {
     FIRED.set(FIRED.get() + 1);
     assert_eq!(system::global_timer_set(0), 0);
     let mode = MODE.get();
+
     let handle = executor::run_global_timer(async move {
         assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));
         let _cleanup = Cleanup(mode == 2);
         assert_ne!(mode, 4, "initial timer poll trap");
         candidate_runtime::raw::stable64_write(2, &[2]);
+
         let response = Call::new(system::canister_self(), "timer_peer", Wait::Unbounded)
             .execute()
             .await
             .unwrap();
+
         assert!(matches!(response.outcome(), Outcome::Reply(bytes) if bytes == &[42]));
         assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));
         candidate_runtime::raw::stable64_write(2, &[3]);
         assert_eq!(mode, 0, "timer callback trap");
     })
     .unwrap();
+
     HANDLE.with(|slot| *slot.borrow_mut() = Some(handle));
 }
 
 // record
 // Read the persisted timer schema, mode and stage.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::query(
     runtime = candidate_runtime,
@@ -134,7 +137,7 @@ fn record((): ()) -> Vec<u8> {
 
 // registry_size
 // Returns callback and task occupancy as two little-endian Wasm32 counts.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[cfg(ic_platform_qualification_accounting)]
 #[candidate_runtime::query(
@@ -185,7 +188,13 @@ fn fail<T: std::fmt::Debug>(error: T) -> ! {
     panic!("timer fixture: {error:?}")
 }
 
+///
+/// Cleanup
+/// Records timer task destruction and optionally traps during cleanup.
+///
+
 struct Cleanup(bool);
+
 impl Drop for Cleanup {
     fn drop(&mut self) {
         assert_eq!(system::reply(&[]), Err(ReplyError::NoActiveTask));

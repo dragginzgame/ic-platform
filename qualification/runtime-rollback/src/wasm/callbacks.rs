@@ -21,7 +21,7 @@ use std::{
 // exports. The generated wrapper intentionally drops it.
 // tracked_await_probe
 // Start a call and retain its handle for subsequent ownership checks.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum; at most eight retained handles
 #[expect(
     unsafe_code,
@@ -41,7 +41,7 @@ pub extern "C" fn tracked_await_probe() {
 
 // observe
 // Read the fixture’s committed counters and task outcomes.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -70,7 +70,7 @@ async fn observe((): ()) {
 
 // observe_dispatch
 // Read the response-observed flag for each dispatched handler.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -89,7 +89,7 @@ async fn observe_dispatch((): ()) {
 
 // observe_custody
 // Read retained handler ownership after completion or cleanup.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -113,7 +113,7 @@ async fn observe_custody((): ()) {
 
 // refund_probe
 // Observe the call result and cycles returned by the callback.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -128,16 +128,11 @@ async fn refund_probe((mode, target): (u8, Principal)) {
     assert!(mode <= 2);
     let reply_cycles = if mode == 2 { (1_u128 << 64) + 17 } else { 17 };
     let reject_cycles = if mode == 2 { (1_u128 << 65) + 29 } else { 29 };
+
     let mut first = Call::new(target, "probe", Wait::Unbounded)
         .owned_args(vec![0])
         .cycles(reply_cycles)
         .execute();
-    struct ObservedWake(AtomicBool);
-    impl Wake for ObservedWake {
-        fn wake(self: Arc<Self>) {
-            self.0.store(true, Ordering::SeqCst);
-        }
-    }
     let observed = Arc::new(ObservedWake(AtomicBool::new(false)));
     let early = if mode == 0 {
         Some((&mut first).await.unwrap())
@@ -150,14 +145,17 @@ async fn refund_probe((mode, target): (u8, Principal)) {
                 .poll(&mut Context::from_waker(&waker))
                 .is_pending()
         );
+
         None
     };
+
     let rejected = Call::new(target, "probe", Wait::Unbounded)
         .owned_args(vec![2])
         .cycles(reject_cycles)
         .execute()
         .await
         .unwrap();
+
     let reply = early.unwrap_or_else(|| {
         assert!(
             observed.0.load(Ordering::SeqCst),
@@ -168,8 +166,10 @@ async fn refund_probe((mode, target): (u8, Principal)) {
         else {
             panic!("published completion must be ready without another callback")
         };
+
         completion.unwrap()
     });
+
     let Outcome::Rejected(error) = rejected.outcome() else {
         panic!("peer trap must be an ordinary rejected completion")
     };
@@ -179,6 +179,7 @@ async fn refund_probe((mode, target): (u8, Principal)) {
     assert_eq!(rejected.refunded_cycles(), Some(reject_cycles));
     assert_eq!(reply.refunded_cycles(), Some(reply_cycles));
     assert!(matches!(reply.outcome(), Outcome::Reply(bytes) if bytes == &[9]));
+
     let mut result = reply.refunded_cycles().unwrap().to_le_bytes().to_vec();
     result.extend_from_slice(&rejected.refunded_cycles().unwrap().to_le_bytes());
     result.push(5);
@@ -187,7 +188,7 @@ async fn refund_probe((mode, target): (u8, Principal)) {
 
 // resource_probe
 // Exercise call resource refusals and report the result.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -250,7 +251,7 @@ async fn resource_probe((mode, target): (u8, Principal)) {
 
 // notify_probe
 // Exercise one-way submission across commit and rollback.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -283,7 +284,7 @@ async fn notify_probe((mode, target): (u8, Principal)) {
 
 // stale_probe
 // Exercise a saved wake after its original task has retired.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -336,7 +337,7 @@ async fn stale_probe((mode, target): (u8, Principal)) {
 
 // bounded_probe
 // Observe the selected bounded-wait outcome.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -372,7 +373,7 @@ async fn bounded_probe((mode, target): (u8, Principal)) {
 
 // submission_probe
 // Fill the request queue and return its accepted count and refusal code.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -416,7 +417,7 @@ async fn submission_probe((mode, target): (u8, Principal)) {
 
 // delayed_reply
 // Delay the peer response by one inter-canister hop so the first callback can trap.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -442,7 +443,7 @@ async fn delayed_reply((mode, target): (u8, Principal)) {
 
 // partial_refund_probe
 // Observe the refund after partial cycle acceptance.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -481,7 +482,7 @@ async fn partial_refund_probe((mode, target): (u8, Principal)) {
 
 // held_probe
 // Await an independently releasable peer with the selected wait policy.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 30 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -549,14 +550,35 @@ fn fail(error: UpdateError<u8, u8>) -> ! {
     panic!("admission refused: {error:?}")
 }
 
+///
+/// ObservedWake
+/// Records whether the first completion woke its waiter before the delayed poll.
+///
+
+struct ObservedWake(AtomicBool);
+
+impl Wake for ObservedWake {
+    fn wake(self: Arc<Self>) {
+        self.0.store(true, Ordering::SeqCst);
+    }
+}
+
+///
+/// ObserveDrop
+/// Checks reply authority and nested entry while the suspended task is dropped.
+///
+
 struct ObserveDrop(Option<ReplyError>, bool, Rc<()>);
+
 impl Drop for ObserveDrop {
     fn drop(&mut self) {
         assert_eq!(Rc::strong_count(&self.2), 1);
+
         // On cleanup the restored suspended future cannot claim reply authority.
         if let Some(expected) = self.0 {
             assert_eq!(system::reply(b"destructor"), Err(expected));
         }
+
         // Re-enter the real adapter from user destruction. It must refuse
         // before invoking admission callbacks, without a RefCell borrow trap.
         super::exports::assert_entry_refusal(EntryError::NestedEntry);

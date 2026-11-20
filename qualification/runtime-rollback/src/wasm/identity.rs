@@ -4,7 +4,7 @@ use candidate_runtime::{entrypoints, executor::EntryError, system};
 
 // randomness
 // Return a 32-byte raw_rand reply or the four-byte synchronous refusal code.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input; ten-second bounded wait
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -28,7 +28,7 @@ async fn randomness((): ()) -> Vec<u8> {
 
 // initialize
 // Set the initial certified root.
-// scope  : IC installation
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::init(
     runtime = candidate_runtime,
@@ -44,7 +44,7 @@ fn initialize((): ()) {
 
 // before_upgrade
 // Set the certified root for the pre-upgrade observation.
-// scope  : IC pre-upgrade hook
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::pre_upgrade(
     runtime = candidate_runtime,
@@ -60,7 +60,7 @@ fn before_upgrade((): ()) {
 
 // after_upgrade
 // Migrate the fixture timer record and set the upgraded certified root.
-// scope  : IC post-upgrade hook
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::post_upgrade(
     runtime = candidate_runtime,
@@ -77,7 +77,7 @@ fn after_upgrade((): ()) {
 
 // observe
 // Read caller, canister, time, controller and certificate observations.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::query(
     runtime = candidate_runtime,
@@ -125,7 +125,7 @@ fn observe((): ()) -> Vec<u8> {
 
 // publish
 // Publish a 32-byte certified root and return it.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 32 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -145,7 +145,7 @@ fn publish(root: Vec<u8>) -> Vec<u8> {
 
 // rollback_encoding
 // Exercise rollback when the reply encoder refuses its result.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -163,7 +163,7 @@ fn rollback_encoding((): ()) -> Vec<u8> {
 
 // automatic_async
 // Return the async handler result through the automatic reply encoder.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,

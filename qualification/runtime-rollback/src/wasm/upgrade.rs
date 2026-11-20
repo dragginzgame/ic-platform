@@ -10,7 +10,7 @@ use std::cell::Cell;
 
 // upgrade_probe
 // Forward the held peer reply to the caller awaiting the upgrade probe.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 59 input bytes maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -35,7 +35,7 @@ async fn upgrade_probe((peer, caller): (Principal, Principal)) {
 
 // hold_upgrade
 // Hold a remote call open until release or the fixture round-trip limit.
-// scope  : public
+// guard  : admit always succeeds
 // limits : 29 input bytes maximum; at most 128 round trips
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -77,7 +77,7 @@ async fn hold_upgrade(caller: Principal) {
 
 // release_upgrade
 // Release the pending remote handler.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -95,7 +95,7 @@ async fn release_upgrade((): ()) {
 
 // upgrade_status
 // Return the remote handler’s started and finished flags.
-// scope  : public
+// guard  : admit always succeeds
 // limits : empty input
 #[candidate_runtime::update(
     runtime = candidate_runtime,

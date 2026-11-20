@@ -106,16 +106,14 @@ jobs:
         run: make qualify-runtime-call qualify-runtime-consumer qualify-runtime-ic0 qualify-runtime-awaited qualify-runtime-guard qualify-runtime-input-ui qualify-runtime-exports
       - name: Prepare verified PocketIC server
         run: bash scripts/ci/setup-step.sh pocketic make install-runtime-server
-      - name: Check observed Platform certificates
-        run: make qualify-platform-observed
+      - name: Check observed Platform certificates and installed Runtime rollback
+        run: make qualify-platform-observed qualify-runtime-installed check-upgrade-tooling
       - name: Check observed canister signatures
         run: make qualify-canister-signature-observed
       - name: Check signed and anonymous original-request transport
         run: make qualify-native-signed
       - name: Check bounded Blob codecs on native and Wasm
         run: make qualify-caffeine qualify-management-ledger
-      - name: Check installed Runtime rollback
-        run: make qualify-runtime-installed check-upgrade-tooling
       - name: Qualify public consumer and heap behavior
         run: make qualify-engine-response profile-engine-response
       - name: Check Registry settings projection

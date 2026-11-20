@@ -7,7 +7,7 @@ use std::cell::Cell;
 
 // probe
 // Observe update and reply rollback for the selected trap mode.
-// scope  : public
+// guard  : admit always succeeds
 // limits : one input byte maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
@@ -31,7 +31,6 @@ async fn probe(mode: u8) {
 
 // refuse_update
 // Check that update admission refuses a query and return without replying.
-// scope  : public
 // limits : none specified
 #[expect(
     unsafe_code,
@@ -46,7 +45,7 @@ pub extern "C" fn refuse_update() {
 
 // nested_probe
 // Verify nested update refusal while an outer task owns the reply.
-// scope  : public
+// guard  : admit always succeeds
 // limits : one input byte maximum
 #[candidate_runtime::update(
     runtime = candidate_runtime,
