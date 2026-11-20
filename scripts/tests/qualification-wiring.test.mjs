@@ -96,3 +96,27 @@ test('consolidated native CI retains Types and publication qualification on all 
   assert.match(repository, /run: make check-secrets/);
   assert.match(repository, /run: make lint-workflows/);
 });
+
+test('CI and qualification leave Cargo network mode to the caller', t => {
+  assert.doesNotMatch(readFileSync('.github/workflows/ci.yml', 'utf8'), /CARGO_NET_OFFLINE|--offline|--frozen/);
+  const directory = mkdtempSync(join(tmpdir(), 'platform-cargo-network-'));
+  t.after(() => rmSync(directory, {recursive: true, force: true}));
+  const capture = join(directory, 'invocation.json');
+  writeFileSync(join(directory, 'cargo'), `#!/usr/bin/env node
+require('node:fs').writeFileSync(process.env.CARGO_CAPTURE, JSON.stringify({
+  mode: process.env.CARGO_NET_OFFLINE, args: process.argv.slice(2)
+}));
+process.exit(42);
+`, {mode: 0o755});
+  for (const mode of [undefined, 'true', 'false']) {
+    const env = {...process.env, PATH: directory + ':' + process.env.PATH, CARGO_CAPTURE: capture};
+    if (mode === undefined) delete env.CARGO_NET_OFFLINE;
+    else env.CARGO_NET_OFFLINE = mode;
+    const result = spawnSync(process.execPath, ['qualification/types-auth/qualify.mjs'], {env, encoding: 'utf8'});
+    assert.equal(result.status, 1, result.stderr);
+    assert.match(result.stderr, /failed \(42\)/);
+    const invocation = JSON.parse(readFileSync(capture, 'utf8'));
+    assert.equal(invocation.mode, mode);
+    assert.deepEqual(invocation.args, ['metadata', '--locked', '--no-deps', '--format-version', '1']);
+  }
+});

@@ -261,9 +261,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.11.2"
+version = "1.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33ef9e3e8154a45c7a95cff4c1299702106ad94062d7bb85fdc5d3a5afd91d45"
+checksum = "02f0e023adb368345ce0ca6cdfc0f24a06554468d0e8503e14a0841de79bfa69"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -1096,6 +1096,20 @@ dependencies = [
 [[package]]
 name = "ic-platform"
 version = "0.34.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b59c6bf641d9d87b4c7cac1012398998b1f4a6217b81bd580b3c84d421b43a2d"
+dependencies = [
+ "ic-certification",
+ "ic-platform-types 0.21.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-verify-bls-signature",
+ "serde",
+ "serde_cbor",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.34.19"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -1111,20 +1125,6 @@ dependencies = [
  "serde_cbor",
  "sha2 0.11.1",
  "spki",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform"
-version = "0.34.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b59c6bf641d9d87b4c7cac1012398998b1f4a6217b81bd580b3c84d421b43a2d"
-dependencies = [
- "ic-certification",
- "ic-platform-types 0.21.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "ic-verify-bls-signature",
- "serde",
- "serde_cbor",
  "thiserror 2.0.18",
 ]
 
@@ -1783,12 +1783,14 @@ version = "0.1.0"
 dependencies = [
  "base64 0.23.1",
  "candid",
+ "ed25519-dalek",
  "ic-certification",
  "ic-host-process",
- "ic-platform 0.34.18",
+ "ic-platform 0.34.19",
  "ic-platform-protocol",
  "ic-platform-types 0.21.4",
  "ic-testkit",
+ "k256",
  "serde_cbor",
  "serde_json",
  "sha2 0.11.1",
@@ -2134,7 +2136,7 @@ dependencies = [
  "ic-certification",
  "ic-management-canister-types",
  "ic-platform 0.34.18",
- "ic-platform 0.34.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.34.19",
  "ic-testkit",
  "tokio",
  "toko-tooling",
@@ -2837,9 +2839,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.45.21"
+version = "0.45.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af1ba8e16aaf1dae0951f08a228a4f00b928d09ff68997bd94ccc397ace5e4be"
+checksum = "34f25161ac689c2204ba923e506286b8dd06d0490d2f4143f1cd2e606e2c6067"
 
 [[package]]
 name = "tower"

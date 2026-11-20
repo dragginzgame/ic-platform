@@ -108,7 +108,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.45.21 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.45.23 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -122,7 +122,10 @@ make deps-list
 Tool setup can download executables and populate Toko Tooling's per-user store.
 Tool checks verify the installed executables. Ordinary Cargo checks and publication
 can fetch missing locked dependencies. To run offline, first prepare the locked
-sources and invoke Make with `CARGO_NET_OFFLINE=true`.
+sources and invoke Make with `CARGO_NET_OFFLINE=true`. CI and qualification
+drivers pass the caller’s network setting through to Cargo. The wiring test
+exercises unset, true and false settings at the Types/Auth Cargo subprocess
+([#36](https://github.com/dragginzgame/ic-platform/issues/36)).
 
 The missing-dependency check for [#35](https://github.com/dragginzgame/ic-platform/issues/35)
 used a disposable Cargo home prepared with `cargo fetch --locked`. With the
@@ -167,12 +170,19 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.21
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.45.23
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
 requirements. It covers the root and `qualification/Cargo.toml`, including the
 `runtime-installed` member. Both listing and updates use that same selection.
+
+Runtime requires the matching macros and singleton guard
+([#37](https://github.com/dragginzgame/ic-platform/issues/37)). When bumping the Runtime
+group, update the two exact values in `ci/dependency-pinning-exceptions.json`
+alongside the workspace requirements. The private qualification crates inherit
+their own workspace version and select candidate products by local path.
+
 For a deliberate Toko Tooling upgrade, review the new release, edit both exact workspace pins,
 update the lock, then run `make toko-tooling-preview` and `make toko-tooling-update`.
 Do not edit installed bytes or their receipt.
@@ -190,6 +200,8 @@ refuses Agent, Runtime and unknown additions to the oracle allowance.
 The two secp256k1 PEM findings introduced in `e186c72` are public test material:
 the scalar is exactly 32 bytes of 0x07. `.gitleaksignore` records only the two
 exact historical fingerprints, alongside earlier Ed25519 fixture fingerprints.
+The installed signed-ingress probe now constructs both test keys from their
+repeated-byte seeds and exercises PEM import for both signing algorithms.
 No operational key or file/rule-wide exemption is introduced. Full-history
 secret scanning remains enabled in both CI workflows.
 
@@ -229,10 +241,8 @@ out-of-order task completion and multiple outstanding calls across cleanup. See 
 does not simulate or prove replica rollback.
 
 `make qualify-runtime-guard` tests guard version admission and five valid/two
-conflicting Cargo graphs offline. On a fresh cache, first run
-`node qualification/runtime-guard.mjs --prepare` after fetching both workspace
-locks; this fetches the exact published 0.22.5 guard used as a conflict oracle.
-CI performs this preparation explicitly. See the
+conflicting Cargo graphs. The published guard at 0.22.5 is the conflict oracle.
+For an explicitly offline run, first warm the cache with the same target. See the
 [guard qualification boundary](qualification/runtime-guard.md).
 
 `make qualify-runtime-input-ui` checks owned/static update inputs and explicit
@@ -426,7 +436,7 @@ runs. Actions are pinned to reviewed release commit SHAs, permissions are limite
 to reading repository contents, and checkout does not persist credentials. No
 publication, release, deployment or write-token step is present.
 
-Each native host prepares locked sources before running offline Make checks:
+Each native host prepares locked sources before running Make checks:
 formatting/snapshot admission, request/response tests and lints/docs, portable
 consumer qualification, heap profiling and executed Wasm admission. The fixed
 size comparison remains an explicit informational target outside required CI;
@@ -451,8 +461,8 @@ workflow definition is not a successful hosted run.
 
 ## Dependency boundary checks
 
-`make check-protocol-graphs` uses the installed Toko Tooling graph checker with locked,
-offline Cargo observations on `wasm32-unknown-unknown`. Override `GRAPH_TARGET`
+`make check-protocol-graphs` uses the installed Toko Tooling graph checker with locked
+Cargo observations on `wasm32-unknown-unknown`. Override `GRAPH_TARGET`
 with an explicit target triple for native checks; CI also runs it with the host
 reported by `rustc -vV` on every matrix runner.
 

@@ -16,5 +16,5 @@ publish = false
 [dependencies]
 ic-platform = { version = "=0.33.7", default-features = false, features = ["management-canister-types", "cycles-ledger-types"] }
 `);
-execFileSync('cargo',['run','--locked','--offline','--manifest-path',`${out}/Cargo.toml`],{stdio:'inherit'});
+execFileSync('cargo',['run','--locked','--manifest-path',`${out}/Cargo.toml`],{stdio:'inherit'});
 console.log('Review the root-*.bin diff; then run make qualify-management-ledger qualify-management-snapshots.');

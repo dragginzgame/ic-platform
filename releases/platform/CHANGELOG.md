@@ -3,6 +3,11 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.34.19] - 2026-11-20
+
+- Allow compatible crypto and certificate dependency versions while preserving the qualified lockfile selections. [#37](https://github.com/dragginzgame/ic-platform/issues/37)
+- Adopt Toko Tooling 0.45.23 and inherit the caller’s Cargo network settings in CI and qualification. [#36](https://github.com/dragginzgame/ic-platform/issues/36)
+
 ## [0.34.18] - 2026-11-19
 
 - Use the canonical `ic-platform-types` dependency name in certificate, ingress and native transport code. Existing feature names and the public Types identity are preserved.

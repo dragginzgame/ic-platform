@@ -71,8 +71,6 @@ jobs:
           bash scripts/ci/setup-step.sh rust-tools make install-tools tools-check
           bash scripts/ci/setup-step.sh product-sources cargo fetch --locked
           bash scripts/ci/setup-step.sh qualification-sources cargo fetch --locked --manifest-path qualification/Cargo.toml
-          bash scripts/ci/setup-step.sh guard-sources node qualification/runtime-guard.mjs --prepare
-          echo "CARGO_NET_OFFLINE=true" >> "$GITHUB_ENV"
           rustc --version --verbose
           node --version
       - name: Check formatting and installed snapshot

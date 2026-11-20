@@ -27,12 +27,12 @@ try {
     writeFileSync(manifest, `[workspace]\n[package]\nname="runtime-ui-probe"\nversion="0.1.0"\nedition="2024"\npublish=false\n[lib]\n${group.command === 'build' ? 'crate-type=["cdylib"]\n' : ''}path=${JSON.stringify(source)}\n[features]\nraw=[]\n[dependencies]\n${group.alias}={package="ic-platform-runtime",path=${JSON.stringify(join(root, 'crates/ic-platform-runtime'))},default-features=false,features=["${group.feature}"]}\n[lints.rust]\nunsafe_code="deny"\nunfulfilled_lint_expectations="deny"\n`);
     if (selection === 'exports' && expected === null) {
       // Compile the generated handlers without the raw IC0 fixture on the host.
-      const host = spawnSync('cargo', ['build', '--offline', '--manifest-path', manifest,
+      const host = spawnSync('cargo', ['build', '--manifest-path', manifest,
         '--target-dir', join(root, 'target/runtime-exports-ui')], {encoding: 'utf8', timeout: 60000});
       assert.ifError(host.error);
       assert.equal(host.status, 0, host.stderr);
     }
-    const result = spawnSync('cargo', [group.command, '--offline', '--manifest-path', manifest, '--target', 'wasm32-unknown-unknown', '--target-dir', join(root, `target/runtime-${selection}-ui`), '--message-format=json'], { encoding: 'utf8', timeout: 60000, maxBuffer: 8 * 1024 * 1024 });
+    const result = spawnSync('cargo', [group.command, '--manifest-path', manifest, '--target', 'wasm32-unknown-unknown', '--target-dir', join(root, `target/runtime-${selection}-ui`), '--message-format=json'], { encoding: 'utf8', timeout: 60000, maxBuffer: 8 * 1024 * 1024 });
     assert.ifError(result.error);
     assert.equal(result.signal, null);
     const records = result.stdout.trim().split('\n').filter(Boolean).map(line => JSON.parse(line));

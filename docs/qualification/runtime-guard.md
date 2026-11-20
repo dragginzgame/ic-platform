@@ -45,9 +45,9 @@ published 0.22.5, and IC0 Runtime plus a second source at the same version.
 Independent positive controls prevent missing sources or invalid manifests
 from masquerading as singleton rejection.
 
-Normal probes are offline. Explicit `--prepare` permits Cargo to fetch the exact
-published guard control; it does not refresh workspace locks. CI prepares this
-oracle after ordinary locked source fetches, then runs the offline checks.
+The probes inherit Cargo’s network mode. On a cold cache Cargo may fetch the
+published guard control. The probes resolve their graphs in temporary directories.
+The existing `--prepare` invocation runs the same checks.
 
 Local Rust 1.100.0 / Linux / Node 24.21.0 passed all guard probes and tests,
 25 Runtime tests, existing Wasm ABI corpora, dependency graphs, formatting,

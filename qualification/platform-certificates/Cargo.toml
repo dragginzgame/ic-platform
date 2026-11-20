@@ -1,6 +1,6 @@
 [package]
 name = "platform-certificates"
-version = "0.1.0"
+version.workspace = true
 publish = false
 default-run = "platform-certificates"
 edition.workspace = true
@@ -49,9 +49,10 @@ path = "src/bin/native-anonymous-installed.rs"
 required-features = ["native-signed"]
 
 [features]
-native-signed-secp256k1 = ["native-signed", "candidate-platform/native-signed-secp256k1"]
+native-signed-secp256k1 = ["native-signed", "dep:k256", "candidate-platform/native-signed-secp256k1"]
 native-signed = [
     "dep:base64",
+    "dep:ed25519-dalek",
     "dep:ic-host-process",
     "dep:serde_json",
     "dep:tempfile",
@@ -74,9 +75,11 @@ canister-signature = [
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 base64 = { workspace = true, optional = true }
 candid.workspace = true
+ed25519-dalek = { workspace = true, optional = true }
 ic-host-process = { workspace = true, optional = true }
 ic-platform-protocol = { workspace = true, optional = true, features = ["management"] }
 ic-testkit.workspace = true
+k256 = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 tempfile = { workspace = true, optional = true }
 tokio.workspace = true

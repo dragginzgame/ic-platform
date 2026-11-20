@@ -23,7 +23,7 @@ for (const name of ['Cargo.toml','qualification/Cargo.toml']) {
     .replace('ic-testkit = "0.106.0"', 'ic-testkit = "0.110.0"'));
   adoptTooling(path);
 }
-const base=['--offline','--manifest-path','qualification/Cargo.toml','--target','wasm32-unknown-unknown'];
+const base=['--manifest-path','qualification/Cargo.toml','--target','wasm32-unknown-unknown'];
 run('cargo',['check',...base,'-p','ic-storage-rust-startup-probe','--features','managed-bench']);
 for(const [name,features,extra] of [
   ['ic-storage-rust-startup-probe','managed-bench',[]],

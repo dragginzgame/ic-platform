@@ -10,10 +10,10 @@ const root=fileURLToPath(new URL('..',import.meta.url));
 const runtime=join(root,'crates/ic-platform-runtime');
 const guard=join(root,'crates/ic-platform-runtime-guard');
 const links='ic-cdk async executor, see https://github.com/dfinity/cdk-rs/blob/links-pin/TROUBLESHOOTING.md';
+// Existing --prepare callers run the same graph checks and inherit Cargo's network mode.
 assert.ok(process.argv.length <= 3 && [undefined,'--prepare'].includes(process.argv[2]),'expected optional --prepare');
-const prepare=process.argv[2]==='--prepare';
-function cargo(manifest, args=[], offline=true) {
-  const result=spawnSync('cargo',['metadata',...(offline?['--offline']:[]),'--format-version','1','--manifest-path',manifest,...args],{encoding:'utf8',timeout:60000,maxBuffer:8*1024*1024});
+function cargo(manifest, args=[]) {
+  const result=spawnSync('cargo',['metadata','--format-version','1','--manifest-path',manifest,...args],{encoding:'utf8',timeout:60000,maxBuffer:8*1024*1024});
   assert.ifError(result.error);
   assert.equal(result.signal,null);
   return result;
@@ -33,14 +33,14 @@ assert.ok(rt.features['call-ic0'].includes('dep:ic-platform-runtime-guard'));
 
 const scratch=mkdtempSync(join(tmpdir(),'ic-platform-guard-'));
 try {
-  function probe(name,deps,offline=true) {
+  function probe(name,deps) {
     const directory=join(scratch,name,'runtime-guard-probe');
     mkdirSync(directory,{recursive:true});
     const manifest=join(directory,'Cargo.toml');
     // Cargo metadata needs a target. Reference the guard's real source; no
     // Rust source generation or compilation is involved in these graph probes.
     writeFileSync(manifest,`[workspace]\n[package]\nname="runtime-guard-probe"\nversion="0.1.0"\nedition="2024"\npublish=false\n[lib]\npath=${JSON.stringify(join(guard,'src/lib.rs'))}\n[dependencies]\n${deps}\n`);
-    return cargo(manifest,[],offline);
+    return cargo(manifest);
   }
   const candidate=features=>`candidate = { package="ic-platform-runtime", path=${JSON.stringify(runtime)}, default-features=false, features=${JSON.stringify(features)} }`;
   const old='old_guard = { package="ic-platform-runtime-guard", version="=0.22.5", default-features=false }';
@@ -53,9 +53,7 @@ try {
     const guards=node.deps.filter(d=>metadata.packages.find(p=>p.id===d.pkg)?.name===gd.name);
     assert.equal(guards.length,features.includes('call-ic0')?1:0);
   }
-  // Explicit preparation may fetch only the exact published baseline. Normal
-  // qualification is entirely offline and never refreshes workspace locks.
-  const oldOnly=probe('published-control',old,!prepare);
+  const oldOnly=probe('published-control',old);
   assert.equal(oldOnly.status,0,oldOnly.stderr);
   function conflict(result) {
     assert.notEqual(result.status,0,'mixed executors unexpectedly resolved');

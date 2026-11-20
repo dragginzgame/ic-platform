@@ -14,16 +14,16 @@ function candidateSource(){
 }
 const candidate=candidateSource();
 run('node',['qualification/blob-supplier/prepare.mjs']);
-run('cargo',['build','--offline','--manifest-path',`${source}/Cargo.toml`,'-p','ic-blob-storage-canister','--target','wasm32-unknown-unknown','--release','--target-dir',build]);
+run('cargo',['build','--manifest-path',`${source}/Cargo.toml`,'-p','ic-blob-storage-canister','--target','wasm32-unknown-unknown','--release','--target-dir',build]);
 const manifest=['--manifest-path',`${source}/qualification/Cargo.toml`];
-run('cargo',['build','--offline',...manifest,'-p','ic-blob-storage-callback-probe','-p','ic-blob-storage-enrollment-probe','--target','wasm32-unknown-unknown','--release','--target-dir',build]);
+run('cargo',['build',...manifest,'-p','ic-blob-storage-callback-probe','-p','ic-blob-storage-enrollment-probe','--target','wasm32-unknown-unknown','--release','--target-dir',build]);
 const selection=[...manifest,'-p','ic-blob-storage-tests','--test','signed','--test','callback_core','--test','enrollment_supplier','--target-dir',native];
-run('cargo',['clippy','--offline','--locked',...selection,'--','-D','warnings']);
-run('cargo',['clippy','--offline','--locked',...manifest,'-p','ic-blob-storage-callback-probe','-p','ic-blob-storage-enrollment-probe','--lib','--target','wasm32-unknown-unknown','--target-dir',build,'--','-D','warnings']);
+run('cargo',['clippy','--locked',...selection,'--','-D','warnings']);
+run('cargo',['clippy','--locked',...manifest,'-p','ic-blob-storage-callback-probe','-p','ic-blob-storage-enrollment-probe','--lib','--target','wasm32-unknown-unknown','--target-dir',build,'--','-D','warnings']);
 const artifact=name=>`${build}/wasm32-unknown-unknown/release/${name}.wasm`;
 const env={BLOB_WASM:artifact('ic_blob_storage_canister'),BLOB_CALLBACK_PROBE:artifact('ic_blob_storage_callback_probe'),BLOB_ENROLLMENT_PROBE:artifact('ic_blob_storage_enrollment_probe')};
-run('node',['qualification/server.mjs','run','cargo','test','--offline','--locked',...selection,'--','--nocapture'],env);
-const tree=run('cargo',['tree','--offline','--locked',...manifest,'-p','ic-blob-storage-tests','--target','x86_64-unknown-linux-gnu','--edges','normal,build,dev','--prefix','none']);
+run('node',['qualification/server.mjs','run','cargo','test','--locked',...selection,'--','--nocapture'],env);
+const tree=run('cargo',['tree','--locked',...manifest,'-p','ic-blob-storage-tests','--target','x86_64-unknown-linux-gnu','--edges','normal,build,dev','--prefix','none']);
 assert(!/^ic-agent /m.test(tree),'old Agent fallback entered selected caller graph');
 assert(!/^ic-platform v0\.33\./m.test(tree),'old Platform fallback entered selected caller graph');
 const hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
