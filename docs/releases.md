@@ -5,6 +5,16 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Platform 0.34.19
+
+Published `ic-platform` from tag `platform-v0.34.19` at
+`7d9c3616ceb3e2d752ba44ff9b1abb3db2176273` with Toko Tooling 0.45.23.
+All 59 Linux qualification targets passed and fresh RustSec audits found zero
+known vulnerabilities in both lockfiles. The downloaded crate matched the
+admitted archive byte for byte. Its registry SHA-256 was
+`6372d2e30ba4e84ff47824dd1a4542e88215a18890afd9804fed99525bc35962`,
+and its VCS record identified the tagged commit and `crates/ic-platform`.
+
 ## Runtime 0.23.23
 
 Published the native management and Entropy APIs for
