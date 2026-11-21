@@ -649,3 +649,60 @@ fn execution_charges_keep_arbitrary_naturals_and_bound_skipped_values() {
         management::decode_canister_metrics(&candid::encode_one(1u64).unwrap(), limits).is_err()
     );
 }
+
+#[test]
+fn status_requires_both_balance_and_snapshot_evidence() {
+    #[derive(CandidType)]
+    struct Status<C, M> {
+        cycles: C,
+        memory_metrics: M,
+        unrelated: bool,
+    }
+    #[derive(CandidType)]
+    struct Memory<N> {
+        snapshots_size: N,
+    }
+    for (balance, snapshots) in [("0", "1"), ("340282366920938463463374607431768211456", "0")] {
+        let bytes = candid::encode_one(Status {
+            cycles: balance.parse::<Nat>().unwrap(),
+            memory_metrics: Memory {
+                snapshots_size: snapshots.parse::<Nat>().unwrap(),
+            },
+            unrelated: true,
+        })
+        .unwrap();
+        let got = management::decode_canister_resources(&bytes, limits()).unwrap();
+        assert_eq!(got.cycles.0.to_string(), balance);
+        assert_eq!(got.memory_metrics.snapshots_size.0.to_string(), snapshots);
+        for end in 0..bytes.len() {
+            assert!(management::decode_canister_resources(&bytes[..end], limits()).is_err());
+        }
+    }
+    for invalid in [
+        candid::encode_one(Status {
+            cycles: Nat::from(100u64),
+            memory_metrics: (),
+            unrelated: true,
+        })
+        .unwrap(),
+        candid::encode_one(Status {
+            cycles: Nat::from(100u64),
+            memory_metrics: Memory {
+                snapshots_size: "0",
+            },
+            unrelated: true,
+        })
+        .unwrap(),
+        candid::encode_one(Status {
+            cycles: "100",
+            memory_metrics: Memory {
+                snapshots_size: Nat::from(0u64),
+            },
+            unrelated: true,
+        })
+        .unwrap(),
+        candid::encode_one(()).unwrap(),
+    ] {
+        assert!(management::decode_canister_resources(&invalid, limits()).is_err());
+    }
+}

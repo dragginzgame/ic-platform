@@ -341,3 +341,36 @@ projection! {
 pub fn decode_canister_metrics(bytes: &[u8], limits: Limits) -> Result<CanisterMetrics, Error> {
     candid::decode(bytes, limits)
 }
+
+projection! {
+    ///
+    /// SnapshotMemory
+    /// Selected memory usage from the management status observation.
+    ///
+
+    SnapshotMemory {
+        /// Bytes occupied by snapshots at the observed version.
+        1_777_917_585 => snapshots_size: Nat [required],
+    }
+}
+
+projection! {
+    ///
+    /// CanisterResources
+    /// Selected resource fields from one canister_status response.
+    ///
+
+    CanisterResources {
+        /// Snapshot usage from the same observation.
+        58_798_021 => memory_metrics: SnapshotMemory [required],
+        /// Remaining cycle balance.
+        2_190_693_645 => cycles: Nat [required],
+    }
+}
+
+/// Decode balance and snapshot usage without narrowing either natural.
+/// # Errors
+/// Refuses missing or incompatible fields, malformed input and exhausted budgets.
+pub fn decode_canister_resources(bytes: &[u8], limits: Limits) -> Result<CanisterResources, Error> {
+    candid::decode(bytes, limits)
+}

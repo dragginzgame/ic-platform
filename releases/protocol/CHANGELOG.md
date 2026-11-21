@@ -1,5 +1,10 @@
 # Protocol changelog
 
+## 0.3.8
+
+The management projection reads cycle balance and snapshot memory usage from the
+same bounded canister status response. Both are required arbitrary naturals.
+
 Release group: `protocol`. Covered package: `ic-platform-protocol`.
 Return to the [group index](../../CHANGELOG.md).
 

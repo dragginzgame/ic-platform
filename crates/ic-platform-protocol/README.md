@@ -53,6 +53,10 @@ metadata calls and bounded symbol/decimals decoding alongside canonical Account
 and arbitrary-Nat balance support. See the
 [SNS and ICRC supplier contract](../../docs/qualification/sns-neurons.md).
 
+With `management`, `decode_canister_resources` reads the required natural-valued
+`cycles` and `memory_metrics.snapshots_size` from a bounded `canister_status`
+response. Callers can check controllers and module evidence on the same bytes.
+
 Protocol 0.3 uses `management::CanisterSettings` for management creation and
 settings updates; `CreationSettings` remains the distinct CMC schema. The
 `management` feature also encodes ordinary creation and chunked installs, while
