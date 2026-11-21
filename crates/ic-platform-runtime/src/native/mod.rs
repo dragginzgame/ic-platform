@@ -12,7 +12,9 @@ pub(crate) fn requires_canister() -> ! {
 /// IC message observations. Calling these outside a canister panics.
 #[cfg(feature = "call-ic0")]
 pub mod system {
+    pub use self::time as now;
     use super::requires_canister;
+    pub use crate::clock::{now_millis, now_secs};
     pub use crate::execution_types::{ArgumentTooLarge, ReplyError};
     use ic_platform_types::Principal;
 

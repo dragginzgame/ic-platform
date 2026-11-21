@@ -21,6 +21,8 @@ pub mod call;
 #[cfg(all(not(feature = "call"), feature = "system-raw"))]
 mod call;
 #[cfg(feature = "call-ic0")]
+mod clock;
+#[cfg(feature = "call-ic0")]
 pub mod entrypoints;
 #[cfg(any(feature = "call-ic0", all(test, feature = "call")))]
 mod execution_types;

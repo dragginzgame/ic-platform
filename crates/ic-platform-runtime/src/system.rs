@@ -1,6 +1,8 @@
 //! Small reviewed IC system operations, independent of codecs and authorization.
 
+pub use self::time as now;
 use crate::call::ic0;
+pub use crate::clock::{now_millis, now_secs};
 pub use crate::executor::ReplyError;
 
 /// Observes raw argument length without copying, for explicit pre-copy guards.

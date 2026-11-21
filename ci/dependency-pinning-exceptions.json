@@ -3,7 +3,7 @@
     "file": "Cargo.toml",
     "rule": "cargo-exact",
     "subject": "ic-platform-macros",
-    "value": "=0.23.23",
+    "value": "=0.23.24",
     "reason": "Runtime re-exports macros that generate entrypoint adapters against the matching Runtime API. The two ship in the same release group.",
     "evidence": "ci/cargo-release-groups.json"
   },
@@ -11,7 +11,7 @@
     "file": "Cargo.toml",
     "rule": "cargo-exact",
     "subject": "ic-platform-runtime-guard",
-    "value": "=0.23.23",
+    "value": "=0.23.24",
     "reason": "The call-ic0 feature requires the matching singleton executor guard. The qualification probe checks its exact version requirement and rejects conflicting executors.",
     "evidence": "qualification/runtime-guard.mjs"
   }

@@ -96,7 +96,11 @@ fn observe((): ()) -> Vec<u8> {
     result.extend_from_slice(own.as_slice());
     result.push(caller.len() as u8);
     result.extend_from_slice(caller.as_slice());
-    result.extend_from_slice(&system::time().to_le_bytes());
+    let nanos = system::now();
+    assert_eq!(system::time(), nanos);
+    assert_eq!(system::now_millis(), nanos / 1_000_000);
+    assert_eq!(system::now_secs(), nanos / 1_000_000_000);
+    result.extend_from_slice(&nanos.to_le_bytes());
     result.push(u8::from(system::is_controller(&caller)));
     match system::data_certificate(1_048_576).unwrap() {
         None => result.push(0),

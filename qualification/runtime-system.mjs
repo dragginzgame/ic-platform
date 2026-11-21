@@ -5,8 +5,8 @@ import {createHash} from 'node:crypto';
 const wasm = readFileSync(new URL('../target/runtime-rollback/wasm32-unknown-unknown/release/runtime_rollback.wasm', import.meta.url));
 const module = new WebAssembly.Module(wasm);
 assert(!WebAssembly.Module.exports(module).some(({name}) => name === 'canister_query registry_size'));
-function probe({caller = [4], own = [1, 2], certificate = [8, 9], certificateSize = certificate?.length, method = 'canister_query system_observe', traps = false} = {}) {
-  let instance;
+function probe({clock = 0x123456789abcdef0n, caller = [4], own = [1, 2], certificate = [8, 9], certificateSize = certificate?.length, method = 'canister_query system_observe', traps = false} = {}) {
+  let instance, clockReads = 0;
   const events = [], reply = [];
   const copy = (name, bytes) => (pointer, offset, size) => {
     events.push(name);
@@ -26,7 +26,7 @@ function probe({caller = [4], own = [1, 2], certificate = [8, 9], certificateSiz
     canister_self_size() { events.push('own-size'); return own.length; },
     canister_self_copy: copy('own-copy', own),
     stable64_size() { return 0n; }, // This probe installs no stable dispatch record.
-    time() { return 0x123456789abcdef0n; },
+    time() { clockReads++; return clock; },
     is_controller(pointer, size) {
       assert.deepEqual([...new Uint8Array(instance.exports.memory.buffer, pointer >>> 0, size)], caller);
       return 1;
@@ -76,7 +76,16 @@ function probe({caller = [4], own = [1, 2], certificate = [8, 9], certificateSiz
   assert.equal(instance.exports[method].length, 0);
   if (traps) assert.throws(() => instance.exports[method](), WebAssembly.RuntimeError);
   else assert.equal(instance.exports[method](), undefined);
-  return {events, reply};
+  return {events, reply, clockReads};
+}
+// system_observe reads now, time, now_millis and now_secs once each. Its
+// assertions compare all four views before it replies with the original nanos.
+const clocks = [0n, 999_999n, 1_000_000n, 1_000_001n, 999_999_999n,
+  1_000_000_000n, 1_000_000_001n, (1n << 64n) - 1n];
+for (const clock of clocks) {
+  const {reply, clockReads} = probe({clock, caller: [], own: []});
+  assert.equal(clockReads, 4);
+  assert.equal(Buffer.from(reply).readBigUInt64LE(2), clock);
 }
 const normal = probe();
 assert.deepEqual(normal.events, ['args-size','caller-size','caller-copy','own-size','own-copy','present','cert-size','cert-copy','present','cert-size','cert-copy','present','cert-size','append','reply']);
@@ -94,4 +103,4 @@ for (const method of ['canister_init','canister_pre_upgrade','canister_post_upgr
 const refused = probe({method:'canister_update randomness'});
 assert.deepEqual(refused.events, ['args-size','new','wait','request','perform','append','reply']);
 assert.deepEqual(refused.reply, [17,0,0,0]);
-console.log(JSON.stringify({admission:'passed',cases:11,sha256:createHash('sha256').update(wasm).digest('hex')}));
+console.log(JSON.stringify({admission:'passed',cases:11 + clocks.length,sha256:createHash('sha256').update(wasm).digest('hex')}));
