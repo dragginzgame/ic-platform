@@ -5,6 +5,15 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Protocol 0.3.8
+
+Published `ic-platform-protocol` from tag `protocol-v0.3.8` at
+`4ac08dd8ddd502e6a5a90410f00af9e3ea0dc5cd`. All 59 Linux qualification
+targets passed. The downloaded registry archive matched the admitted package
+and identified the tagged commit and `crates/ic-platform-protocol` in its VCS
+record. Registry SHA-256 was
+`ac5afafd05512480789ef66466bf5c6e9b63d84e47760bed5fa8ead8c59b7cd3`.
+
 ## Runtime 0.23.24
 
 Published the IC clock helpers for [#38](https://github.com/dragginzgame/ic-platform/issues/38)
