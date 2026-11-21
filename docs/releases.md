@@ -5,6 +5,20 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Runtime 0.23.24
+
+Published the IC clock helpers for [#38](https://github.com/dragginzgame/ic-platform/issues/38)
+from tag `runtime-v0.23.24` at `2161df497774d1d0d2d30b60027c7357c4a8c63b`.
+All 59 Linux qualification targets passed. Fresh RustSec audits of both lockfiles
+found zero known vulnerabilities. Each downloaded archive matched its admitted
+bytes, registry checksum, tagged commit and package path.
+
+| Package | Registry SHA-256 |
+| --- | --- |
+| ic-platform-runtime-guard | `e3c30cb68abdd77889c2273094f3c5e9b1c343fd3fbfed97fad2e2d9aa8568f0` |
+| ic-platform-macros | `6d56705faf76bf52f293449e2d31306f55b5be8f88fad3468e388fef52c64a80` |
+| ic-platform-runtime | `b8538fe1bdaff5b5ae6196118a29bb42859aa16858485a7cf4b66b7c958561e6` |
+
 ## Platform 0.34.19
 
 Published `ic-platform` from tag `platform-v0.34.19` at
