@@ -5,6 +5,22 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Runtime 0.23.25
+
+Published the same-subnet creation fee and incoming cycle APIs from
+[tag `runtime-v0.23.25`](https://github.com/dragginzgame/ic-platform/tree/runtime-v0.23.25)
+at `4eb8002987d90030851efa49cd1a9194804e1106` with Toko Tooling 0.46.1.
+All 59 Linux release targets passed, including the installed payment, refund,
+replay and rollback checks. Fresh RustSec audits of both lockfiles found zero
+known vulnerabilities. Each downloaded archive matched its local package,
+registry checksum, tagged commit and package path.
+
+| Package | Registry SHA-256 |
+| --- | --- |
+| ic-platform-runtime-guard | `bb6f6ef72ea4f7db0eb9dd5484d385ec21654103e852cecaaffd8acaad24f872` |
+| ic-platform-macros | `44735718678dc109c06671ac4036a62053f6190c6010dd608d5c1e7a197014fa` |
+| ic-platform-runtime | `186742997b9845806c447b095aa4358231ad2daf6963736a5767b005c17ccf5e` |
+
 ## Protocol 0.3.8
 
 Published `ic-platform-protocol` from tag `protocol-v0.3.8` at
