@@ -104,6 +104,27 @@ pub mod raw {
     }
 
     /// # Panics
+    /// Creation pricing requires an IC execution context.
+    #[must_use]
+    pub fn cost_create_canister() -> u128 {
+        requires_canister()
+    }
+
+    /// # Panics
+    /// A native process has no incoming IC cycles.
+    #[must_use]
+    pub fn msg_cycles_available() -> u128 {
+        requires_canister()
+    }
+
+    /// # Panics
+    /// A native process cannot accept IC cycles.
+    #[must_use]
+    pub fn msg_cycles_accept(_maximum: u128) -> u128 {
+        requires_canister()
+    }
+
+    /// # Panics
     /// A native process has no IC stable memory.
     #[must_use]
     pub fn stable64_size() -> u64 {

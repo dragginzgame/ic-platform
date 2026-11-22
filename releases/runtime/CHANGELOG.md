@@ -4,6 +4,13 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.25] - 2026-11-22
+
+- Adopt Toko Tooling 0.46.1 for development and release qualification.
+
+- Read the current same-subnet canister creation fee with `raw::cost_create_canister()`, including a zero fee. [ic-platform#39](https://github.com/dragginzgame/ic-platform/issues/39)
+- Inspect incoming cycles with `raw::msg_cycles_available()` and accept up to a caller-selected maximum with `raw::msg_cycles_accept(maximum)`. The return value is the amount the IC accepted. [ic-platform#41](https://github.com/dragginzgame/ic-platform/issues/41)
+
 ## [0.23.24] - 2026-11-21
 
 - Read IC execution time in native Unix nanoseconds with `system::now()`, or in whole milliseconds and seconds with `now_millis()` and `now_secs()`. [#38](https://github.com/dragginzgame/ic-platform/issues/38)

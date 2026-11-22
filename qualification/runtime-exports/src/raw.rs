@@ -164,7 +164,7 @@ extern "C" fn after_upgrade() {
 // system_probe
 // Exercise stable memory and cycle accounting for the selected mode.
 // limits : Reads the first byte and ignores trailing input. Mode 0 replies with 8 bytes, mode 4 replies empty,
-//          and modes 5–7 reply with 16 bytes. Empty input and all other modes trap.
+//          and modes 5–8 and 11–12 reply with 16 bytes. Modes 9–10 process one payment, returning 48 bytes or trapping.
 #[expect(
     unsafe_code,
     reason = "Caller-owned IC export in the approved export fixture"
@@ -217,6 +217,28 @@ extern "C" fn system_probe() {
             assert!(ic0::cost_http_request_v1(64, 512) > cost);
             ic0::msg_reply_data_append(&cost.to_le_bytes());
         }
+        8 => ic0::msg_reply_data_append(&ic0::cost_create_canister().to_le_bytes()),
+        9 | 10 => {
+            let available = ic0::msg_cycles_available();
+            let debit = if RECEIPT.get() == 0 {
+                (1u128 << 64) + 5
+            } else {
+                0
+            };
+            assert!(available >= debit);
+            let accepted = ic0::msg_cycles_accept(debit);
+            assert_eq!(accepted, debit);
+            RECEIPT.set(RECEIPT.get() + accepted);
+            assert_eq!(ic0::msg_cycles_available(), available - accepted);
+            if mode[0] == 10 {
+                ic0::trap(b"rollback allocation receipt");
+            }
+            for value in [available, accepted, RECEIPT.get()] {
+                ic0::msg_reply_data_append(&value.to_le_bytes());
+            }
+        }
+        11 => ic0::msg_reply_data_append(&RECEIPT.get().to_le_bytes()),
+        12 => ic0::msg_reply_data_append(&ic0::msg_cycles_accept(u128::MAX).to_le_bytes()),
         _ => ic0::trap(b"unknown system mode"),
     }
     ic0::msg_reply();
@@ -238,6 +260,7 @@ extern "C" fn stable_observe() {
     ic0::msg_reply();
 }
 
+thread_local! { static RECEIPT: Cell<u128> = const { Cell::new(0) }; }
 thread_local! { static VALUE: Cell<u8> = const { Cell::new(0) }; }
 thread_local! { static CONTEXT_MUTATIONS: Cell<u8> = const { Cell::new(0) }; }
 

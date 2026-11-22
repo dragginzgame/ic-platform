@@ -4,9 +4,9 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 const wasm=readFileSync(new URL('../target/runtime-raw/wasm32-unknown-unknown/release/runtime_exports.wasm',import.meta.url));
 const module=new WebAssembly.Module(wasm);
-const names=['msg_arg_data_size','msg_arg_data_copy','msg_caller_size','msg_caller_copy','is_controller','msg_reply_data_append','msg_reply','trap','performance_counter','stable64_size','stable64_grow','stable64_read','stable64_write','canister_liquid_cycle_balance128','cycles_burn128','cost_http_request','in_replicated_execution'];
+const names=['msg_arg_data_size','msg_arg_data_copy','msg_caller_size','msg_caller_copy','is_controller','msg_reply_data_append','msg_reply','trap','performance_counter','stable64_size','stable64_grow','stable64_read','stable64_write','canister_liquid_cycle_balance128','cycles_burn128','cost_http_request','cost_create_canister','msg_cycles_available128','msg_cycles_accept128','in_replicated_execution'];
 assert.deepEqual(WebAssembly.Module.imports(module).map(i=>`${i.module}/${i.kind}/${i.name}`).sort(), names.map(n=>`ic0/function/${n}`).sort());
-function run(data,method='canister_update probe',caller=[4]) {
+function run(data,method='canister_update probe',caller=[4], fee=0n) {
   let instance,done=false,counter=0n;
   const events=[],reply=[];
   const memory=(p,n)=>new Uint8Array(instance.exports.memory.buffer,p>>>0,n>>>0);
@@ -33,6 +33,13 @@ function run(data,method='canister_update probe',caller=[4]) {
     stable64_read(){throw new Error('unselected stable read');},
     stable64_write(){throw new Error('unselected stable write');},
     canister_liquid_cycle_balance128(){throw new Error('unselected balance');},
+    cost_create_canister(p){
+      const out=new DataView(instance.exports.memory.buffer,p>>>0,16);
+      out.setBigUint64(0,fee,true);
+      out.setBigUint64(8,fee>>64n,true);
+    },
+    msg_cycles_available128(){throw new Error('unselected incoming balance');},
+    msg_cycles_accept128(){throw new Error('unselected acceptance');},
     cycles_burn128(){throw new Error('unselected burn');},
     cost_http_request(){throw new Error('unselected cost');},
     performance_counter(kind){assert.equal(kind,0);return ++counter;},
@@ -56,4 +63,11 @@ for(const caller of [[],[4],Array(29).fill(255)]) {
 }
 assert.deepEqual(run([], 'canister_query context').reply, [0,0]);
 assert.deepEqual(run([], 'canister_update context_update').reply, [1,1]);
-console.log(JSON.stringify({admission:'passed',imports:names.length,cases:14,sha256:createHash('sha256').update(wasm).digest('hex')}));
+for (const fee of [0n, (1n << 100n) + 23n]) {
+  const result=run([8], 'canister_update system_probe', [4], fee);
+  assert.equal(result.failure,undefined);
+  const bytes=Buffer.from(result.reply);
+  assert.equal(bytes.length,16);
+  assert.equal(bytes.readBigUInt64LE() + (bytes.readBigUInt64LE(8) << 64n),fee);
+}
+console.log(JSON.stringify({admission:'passed',imports:names.length,cases:16,sha256:createHash('sha256').update(wasm).digest('hex')}));

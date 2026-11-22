@@ -214,6 +214,10 @@ unsafe extern "C" {
     #[link_name = "stable64_write"]
     fn stable_write(offset: u64, src: u64, size: u64);
     fn canister_liquid_cycle_balance128(dst: u32);
+    #[link_name = "cost_create_canister"]
+    fn create_cost(dst: u32);
+    fn msg_cycles_available128(dst: u32);
+    fn msg_cycles_accept128(high: u64, low: u64, dst: u32);
     fn cycles_burn128(high: u64, low: u64, dst: u32);
     fn cost_http_request(request_size: u64, maximum_response_size: u64, dst: u32);
 }
@@ -301,6 +305,64 @@ pub fn liquid_cycle_balance() -> u128 {
     let mut bytes = [0; 16];
     // SAFETY: IC synchronously writes exactly sixteen bytes and retains no pointer.
     unsafe { canister_liquid_cycle_balance128(bytes.as_mut_ptr() as u32) }
+    u128::from_le_bytes(bytes)
+}
+
+/// Returns the current IC fee for creating a canister on this subnet.
+///
+/// # Panics
+/// Invalid IC execution contexts trap.
+#[must_use]
+#[expect(
+    unsafe_code,
+    reason = "IC writes one u128 into initialized local storage"
+)]
+pub fn cost_create_canister() -> u128 {
+    let mut bytes = [0; 16];
+    // SAFETY: The synchronous import writes sixteen bytes and retains no pointer.
+    unsafe { create_cost(bytes.as_mut_ptr() as u32) }
+
+    u128::from_le_bytes(bytes)
+}
+
+/// Returns the cycles still available to accept from the current message.
+///
+/// # Panics
+/// Invalid IC execution contexts trap.
+#[must_use]
+#[expect(
+    unsafe_code,
+    reason = "IC writes one u128 into initialized local storage"
+)]
+pub fn msg_cycles_available() -> u128 {
+    let mut bytes = [0; 16];
+    // SAFETY: The synchronous import writes sixteen bytes and retains no pointer.
+    unsafe { msg_cycles_available128(bytes.as_mut_ptr() as u32) }
+
+    u128::from_le_bytes(bytes)
+}
+
+/// Accepts up to `maximum` incoming cycles and returns the amount actually accepted.
+/// Acceptance commits with the enclosing message execution.
+///
+/// # Panics
+/// Invalid IC execution contexts trap.
+#[must_use]
+#[expect(
+    unsafe_code,
+    reason = "IC writes one u128 into initialized local storage"
+)]
+pub fn msg_cycles_accept(maximum: u128) -> u128 {
+    let mut bytes = [0; 16];
+    // SAFETY: The synchronous import writes sixteen bytes and retains no pointer.
+    unsafe {
+        msg_cycles_accept128(
+            (maximum >> 64) as u64,
+            maximum as u64,
+            bytes.as_mut_ptr() as u32,
+        )
+    }
+
     u128::from_le_bytes(bytes)
 }
 

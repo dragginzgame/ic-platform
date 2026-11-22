@@ -920,9 +920,9 @@ checksum = "1b43ede17f21864e81be2fa654110bf1e793774238d86ef8555c37e6519c0403"
 
 [[package]]
 name = "hashbrown"
-version = "0.17.1"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
+checksum = "735eaa21a6a5ffb2e84362faaeb90c05ba8e19797ca30428478cb6ea3a4921bc"
 
 [[package]]
 name = "heck"
@@ -1130,7 +1130,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.24"
+version = "0.23.25"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1150,7 +1150,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.24"
+version = "0.23.25"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-protocol",
@@ -1160,7 +1160,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.24"
+version = "0.23.25"
 
 [[package]]
 name = "ic-platform-types"
@@ -2839,9 +2839,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.46.0"
+version = "0.46.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4601d2785aaa14e01fd8656d6b3a57653337b214e027810c953595f1d91d6a8d"
+checksum = "ac71f9087f21831b7c4c278dddb72ef2b7c081ebf008de62173eeab182a1c216"
 
 [[package]]
 name = "tower"

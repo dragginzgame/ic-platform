@@ -5,6 +5,26 @@ boundary for Scheduling issues [#14](https://github.com/dragginzgame/ic-platform
 and [#15](https://github.com/dragginzgame/ic-platform/issues/15).
 No allocator, checkpoint format, timer policy or executor is added.
 
+## Canic allocation payments
+
+With `system-raw`, `raw::cost_create_canister()` reads the current same-subnet
+creation fee as a `u128`. In a receiving update, `raw::msg_cycles_available()`
+reads the remaining attachment and `raw::msg_cycles_accept(maximum)` returns
+the amount the IC accepted. All three operations are synchronous. Native builds
+expose the same signatures and panic when called outside an IC execution.
+Canic owns quote retention, authorization, allocation IDs, replay and receipts.
+
+In `make qualify-runtime-raw`, a separate WAT canister reads the creation fee
+directly on the same PocketIC application subnet and acts as payer. With
+`2^64 + 17` attached, the receiver accepts `2^64 + 5`, records that amount,
+and the payer observes a refund of 12. Replaying the payment accepts zero and
+refunds the entire attachment. Trapping after acceptance and the receipt write
+refunds the full attachment and leaves the receipt empty. A separate request
+for `u128::MAX` returns the full attachment as its actual accepted amount.
+The standalone ABI check also exercises zero and high-bit creation fees.
+See [ic-platform#39](https://github.com/dragginzgame/ic-platform/issues/39)
+and [ic-platform#41](https://github.com/dragginzgame/ic-platform/issues/41).
+
 ## Published replicated-execution observation
 
 [Issue #19](https://github.com/dragginzgame/ic-platform/issues/19), discovered during

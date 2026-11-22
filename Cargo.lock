@@ -803,7 +803,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.24"
+version = "0.23.25"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -825,7 +825,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.24"
+version = "0.23.25"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-protocol",
@@ -836,7 +836,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.24"
+version = "0.23.25"
 dependencies = [
  "toko-tooling",
 ]
@@ -1991,9 +1991,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.46.0"
+version = "0.46.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4601d2785aaa14e01fd8656d6b3a57653337b214e027810c953595f1d91d6a8d"
+checksum = "ac71f9087f21831b7c4c278dddb72ef2b7c081ebf008de62173eeab182a1c216"
 
 [[package]]
 name = "tower"

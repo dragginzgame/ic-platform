@@ -26,6 +26,62 @@ async fn observe(pic: &PocketIc, id: Principal, sender: Principal, value: u8, co
     }
 }
 
+async fn verify_allocation(pic: &PocketIc, receiver: Principal) {
+    let caller = Principal::anonymous();
+    let payer = pic.create_canister().await;
+    pic.add_cycles(payer, 1u128 << 70).await;
+    let wasm = wat::parse_str(include_str!("../../allocation-payer.wat")).unwrap();
+    pic.install_canister(payer, wasm, vec![], None).await;
+
+    let fee = pic.update_call(payer, caller, "fee", vec![]).await.unwrap();
+    assert_eq!(fee.len(), 16);
+    assert_eq!(
+        pic.update_call(receiver, caller, "system_probe", vec![8])
+            .await
+            .unwrap(),
+        fee
+    );
+
+    let attached = (1u128 << 64) + 17;
+    let debit = (1u128 << 64) + 5;
+    let pay = |mode| {
+        pic.update_call(
+            payer,
+            caller,
+            "pay",
+            [&[mode], receiver.as_slice()].concat(),
+        )
+    };
+    let trapped = pay(10).await.unwrap();
+    assert_eq!(&trapped[..16], attached.to_le_bytes());
+    assert!(
+        std::str::from_utf8(&trapped[16..])
+            .unwrap()
+            .contains("rollback allocation receipt")
+    );
+    assert_eq!(
+        pic.update_call(receiver, caller, "system_probe", vec![11])
+            .await
+            .unwrap(),
+        0u128.to_le_bytes()
+    );
+
+    for accepted in [debit, 0] {
+        let expected = [attached - accepted, attached, accepted, debit];
+        assert_eq!(
+            pay(9).await.unwrap(),
+            expected.map(u128::to_le_bytes).concat()
+        );
+    }
+    assert_eq!(
+        pay(12).await.unwrap(),
+        [0, attached].map(u128::to_le_bytes).concat()
+    );
+    println!(
+        "same-subnet creation fee, incoming cycles, partial refund, replay and receipt rollback passed"
+    );
+}
+
 pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wasm =
         std::fs::read("target/runtime-raw/wasm32-unknown-unknown/release/runtime_exports.wasm")?;
@@ -45,6 +101,7 @@ pub(super) fn run() -> Result<(), Box<dyn std::error::Error>> {
         assert_eq!(replicated_query[0],1, "replicated query must follow the IC observation");
         assert_eq!(pic.query_call(id, original, "stable_observe", vec![]).await.unwrap(), [2u64.to_le_bytes().as_slice(), &[0,0,0]].concat());
         assert_eq!(pic.update_call(id, original, "system_probe", vec![0]).await.unwrap(), 2u64.to_le_bytes());
+        verify_allocation(pic, id).await;
         let before_burn = pic.cycle_balance(id).await;
         assert!(pic.update_call(id, original, "system_probe", vec![1]).await.is_err());
         let after_burn = pic.cycle_balance(id).await;

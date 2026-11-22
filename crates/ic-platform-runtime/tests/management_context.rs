@@ -18,6 +18,9 @@ fn outside_canister_refuses_before_observation_or_task_poll() {
     let call = Call::new(Principal::management_canister(), "status", Wait::Unbounded);
     let price_call = || -> Result<u128, CostOverflow> { call.required_cycles() };
 
+    assert!(catch_unwind(raw::cost_create_canister).is_err());
+    assert!(catch_unwind(raw::msg_cycles_available).is_err());
+    assert!(catch_unwind(|| raw::msg_cycles_accept(0)).is_err());
     assert!(catch_unwind(balance).is_err());
     assert!(catch_unwind(pages).is_err());
     assert!(catch_unwind(version).is_err());
