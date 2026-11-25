@@ -5,6 +5,26 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Types 0.21.5, Protocol 0.3.10, Runtime 0.23.27 and Platform 0.35.1
+
+Published the six crates from commit `02f3f9d42ad6e191523eb4ae947e129f5b564450`
+with Toko Tooling 0.46.4. All 58 Linux qualification targets passed. Fresh
+RustSec audits found zero known vulnerabilities in both lockfiles. Each download
+matched the local archive, registry checksum, tagged commit and package path.
+[Types tag](https://github.com/dragginzgame/ic-platform/tree/types-v0.21.5) ·
+[Protocol tag](https://github.com/dragginzgame/ic-platform/tree/protocol-v0.3.10) ·
+[Runtime tag](https://github.com/dragginzgame/ic-platform/tree/runtime-v0.23.27) ·
+[Platform tag](https://github.com/dragginzgame/ic-platform/tree/platform-v0.35.1)
+
+| Package | Version | Registry SHA-256 |
+| --- | --- | --- |
+| ic-platform-types | 0.21.5 | `81810d3daa26f7ee13ed687d3f093f18bda2127bba5210a81fabae7a075e1b3f` |
+| ic-platform-protocol | 0.3.10 | `6d88dd91d78fd1ad65f86f5becfa44f996df85fbfd32c7368de4f99c1736555a` |
+| ic-platform-runtime-guard | 0.23.27 | `26753889d6a2849a9844bef6064dbccfda89e8d76b4fbd7cc5eb6a34c4c79268` |
+| ic-platform-macros | 0.23.27 | `3f481b3acededb6eddaa46d7780983123e1fff15d2f5b2931658a88cd74ac758` |
+| ic-platform-runtime | 0.23.27 | `54d94d66be307c67deb2063d1e735e781e614a26d8ec0f13ba97092a03ebb788` |
+| ic-platform | 0.35.1 | `897a2b545078b7ca4cb3432819afa35161864647537b049f31fc70e5b6dcd61d` |
+
 ## Platform 0.35.0 and Runtime 0.23.26
 
 Published both groups from commit `473711acb7fc7c2e63681d7ee4ecf49983ba4f02`
