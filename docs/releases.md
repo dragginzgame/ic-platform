@@ -5,6 +5,29 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Platform 0.35.0 and Runtime 0.23.26
+
+Published both groups from commit `473711acb7fc7c2e63681d7ee4ecf49983ba4f02`
+with Toko Tooling 0.46.3. Platform removes its stable-structures export.
+Runtime adds the [ingress inspection hook](qualification/runtime-inspection.md)
+for [Platform #42](https://github.com/dragginzgame/ic-platform/issues/42).
+[Platform tag](https://github.com/dragginzgame/ic-platform/tree/platform-v0.35.0) ·
+[Runtime tag](https://github.com/dragginzgame/ic-platform/tree/runtime-v0.23.26)
+
+All 58 Linux qualification targets passed. Fresh RustSec audits found zero known
+vulnerabilities in both lockfiles. The installed ingress probe admitted a
+controller call, refused three ingress messages at submission, and received an
+inter-canister reply from the same method refused for ingress. All four
+downloads matched the local archives, registry checksums and tagged source.
+The Platform registry entry has no stable-structures feature or dependency.
+
+| Package | Version | Registry SHA-256 |
+| --- | --- | --- |
+| ic-platform-runtime-guard | 0.23.26 | `756ea3b8e5fcdbe314217689484bbfa01efaef453575d2ec41995aa4327e1a4c` |
+| ic-platform-macros | 0.23.26 | `fb105486a41e3433f26e033575db4c99a0893ac7986b56cb9a80e0f56c1092bb` |
+| ic-platform-runtime | 0.23.26 | `79d2ead82503ba05e1267836ca0c00440abe01351c188918d3c8aa605d0d7f2e` |
+| ic-platform | 0.35.0 | `431a2f96f8214218d7a91e5f62c37d262fd1669be2fcc159decf4d931bb8ca7b` |
+
 ## Protocol 0.3.9
 
 Published `ic-platform-protocol` from
