@@ -5,6 +5,17 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Protocol 0.3.9
+
+Published `ic-platform-protocol` from
+[tag `protocol-v0.3.9`](https://github.com/dragginzgame/ic-platform/tree/protocol-v0.3.9)
+at `dc32cfa401f844df76ec75f60347b42102362a5a` with Toko Tooling 0.46.3.
+All 59 Linux qualification targets passed. Fresh RustSec audits of both
+lockfiles found zero known vulnerabilities. The downloaded crate matched the
+local package byte for byte, and its VCS record identified the tagged commit
+and `crates/ic-platform-protocol`. The crates.io index and downloaded archive
+agreed on SHA-256 `dcee9139af57d3c82c5f25016e89dd79a30d5701c82a400ef22add04b9193b41`.
+
 ## Runtime 0.23.25
 
 Published the same-subnet creation fee and incoming cycle APIs from
