@@ -1,6 +1,6 @@
 [package]
 name = "ic-platform"
-version = "0.35.0"
+version = "0.35.1"
 description = "Explicit IC certificate and authentication boundaries"
 edition.workspace = true
 rust-version.workspace = true

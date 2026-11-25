@@ -779,7 +779,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.35.0"
+version = "0.35.1"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -802,7 +802,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.26"
+version = "0.23.27"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -812,7 +812,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.3.9"
+version = "0.3.10"
 dependencies = [
  "crc32fast",
  "ic-platform-types",
@@ -824,7 +824,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.26"
+version = "0.23.27"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-protocol",
@@ -835,14 +835,14 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.26"
+version = "0.23.27"
 dependencies = [
  "toko-tooling",
 ]
 
 [[package]]
 name = "ic-platform-types"
-version = "0.21.4"
+version = "0.21.5"
 dependencies = [
  "crc32fast",
  "data-encoding",
@@ -1981,9 +1981,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.46.3"
+version = "0.46.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f6d677af6c5ed88e3ba9ccf4d7b0c2eaad5f0fc49f0ad5b697e412ea4be600e"
+checksum = "d3889bff0f8ff6dc8c80b161c908f4b598125b55bf55f18146471f9ac3294cff"
 
 [[package]]
 name = "tower"

@@ -15,7 +15,7 @@ function run(command, args, cwd, env = process.env) {
 const directory = run('node', ['qualification/auth-runtime/prepare.mjs'], root);
 console.log(`Pinned consumer: ${directory}`);
 const metadata = JSON.parse(run('cargo', ['metadata', '--manifest-path', 'qualification/Cargo.toml', '--format-version=1'], directory));
-for (const [name,version] of [['ic-platform','0.35.0'],['ic-platform-types','0.21.4'],['ic-platform-runtime','0.23.26']]) {
+for (const [name,version] of [['ic-platform','0.35.1'],['ic-platform-types','0.21.5'],['ic-platform-runtime','0.23.27']]) {
   const packages = metadata.packages.filter(p => p.name === name);
   assert.equal(packages.length,1,`one canonical ${name}`);
   assert.equal(packages[0].version,version);
@@ -38,6 +38,6 @@ writeFileSync(`${directory}/verified.json`,JSON.stringify({
   source:JSON.parse(readFileSync(`${directory}/source.json`)),
   patchSha256:hash(`${root}/qualification/auth-crypto/consumer.patch`),
   lockSha256:hash(`${directory}/qualification/Cargo.lock`),
-  packages:{platform:'0.35.0',types:'0.21.4',runtime:'0.23.26'},tests,status:'passed',
+  packages:{platform:'0.35.1',types:'0.21.5',runtime:'0.23.27'},tests,status:'passed',
 },null,2)+'\n');
 console.log(tests);

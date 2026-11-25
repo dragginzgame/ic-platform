@@ -13,10 +13,10 @@ run('tar',['-xf',`${output}/auth.tar`,'-C',output]);
 run('git',['apply',`--directory=${relative(root,output)}`,`${root}/qualification/auth-runtime/testkit.patch`],root);
 run('git',['apply',`--directory=${relative(root,output)}`,`${root}/qualification/auth-crypto/consumer.patch`],root);
 const edit=(path,fn)=>{const file=`${output}/${path}`;writeFileSync(file,fn(readFileSync(file,'utf8')));};
-edit('Cargo.toml',s=>s.replace('ic-platform-types = { version = "0.20.4",',`ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.4",`));
+edit('Cargo.toml',s=>s.replace('ic-platform-types = { version = "0.20.4",',`ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.5",`));
 for (const name of ['Cargo.toml','qualification/Cargo.toml']) edit(name,s=>s
   .replace('ic-platform = { version = "0.33.7",', `ic-platform = { path = ${JSON.stringify(`${root}/crates/ic-platform`)},`)
-  .replace('ic-platform-types = { version = "0.20.4",', `ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.4",`)
+  .replace('ic-platform-types = { version = "0.20.4",', `ic-platform-types = { path = ${JSON.stringify(`${root}/crates/ic-platform-types`)}, version = "=0.21.5",`)
   .replace('ic-wire = "0.24.1"', 'ic-wire = "=0.24.2"'));
 edit('crates/ic-auth/Cargo.toml',s=>s.replace('ic-platform/signature-verification','ic-platform/canister-signature-authentication'));
 for (const name of ['ic-auth-certified-conformance','ic-auth-host-fixture','ic-auth-host-conformance'])
@@ -24,7 +24,7 @@ for (const name of ['ic-auth-certified-conformance','ic-auth-host-fixture','ic-a
     .replace('["certification-cbor", "ic-protocol-fixtures"]','["ecdsa", "certificate-construction", "certificate-fixture-signing", "canister-signature-authentication"]')
     .replace('["canister-sig-creation", "certification-cbor", "ed25519"]','["certificate-construction", "ed25519"]')
     .replace('["certification-cbor", "canister-sig-creation"]','["certificate-construction", "canister-signature-authentication"]'));
-edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.26",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
+edit('qualification/Cargo.toml',s=>s.replace('ic-platform-runtime = { version = "0.22.5",',`ic-platform-runtime = { path = ${JSON.stringify(`${root}/crates/ic-platform-runtime`)}, version = "=0.23.27",`).replace('unsafe_code = "forbid"','unsafe_code = "deny"'));
 edit('qualification/ic-auth-host-fixture/Cargo.toml',s=>s.replace('features = ["cdk"]','features = ["entrypoint-macros"]'));
 edit('qualification/Cargo.toml',s=>s.replace('ic-build = "0.87.3"', 'ic-build = "0.87.4"').replace('ic-host-process = "0.80.2"', 'ic-host-process = "0.81.0"').replace('ic-host-artifacts = "0.80.1"', 'ic-host-artifacts = "0.80.3"').replace('ic-host-fs = "0.80.1"', 'ic-host-fs = "0.80.3"').replace('ic-testkit = "0.106.0"', 'ic-testkit = "0.110.0"'));
 edit('qualification/ic-auth-host-conformance/Cargo.toml', s => s.replace('[dev-dependencies]', '[dev-dependencies]\nic-management-canister-types = "=0.8.0"'));
