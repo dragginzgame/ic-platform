@@ -160,7 +160,7 @@ qualify-runtime-timer: qualification-tooling-check runtime-server-check
 	$(ENGINE_WASM_ENV) cargo build --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-rollback
 	node qualification/server.mjs run cargo run --locked --manifest-path qualification/Cargo.toml -p runtime-installed -- timer
 
-qualify-runtime-installed: qualification-tooling-check runtime-server-check
+qualify-runtime-installed: qualification-tooling-check runtime-server-check build-runtime-exports
 	cargo test --locked -p ic-platform-runtime --features raw-rand raw_rand::
 	$(ENGINE_WASM_ENV) CARGO_ENCODED_RUSTFLAGS=--cfg=ic_platform_qualification_accounting cargo build --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-accounting
 	cargo clippy --locked --manifest-path qualification/Cargo.toml -p runtime-installed --all-targets -- -D warnings
@@ -182,15 +182,17 @@ qualify-runtime-guard: qualification-tooling-check
 qualify-runtime-input-ui: qualification-tooling-check
 	node qualification/runtime-ui.mjs input
 
-.PHONY: qualify-runtime-exports
-qualify-runtime-exports: qualification-tooling-check
+.PHONY: build-runtime-exports qualify-runtime-exports
+build-runtime-exports: qualification-tooling-check
+	$(ENGINE_WASM_ENV) cargo build --locked --manifest-path qualification/Cargo.toml -p runtime-exports --target wasm32-unknown-unknown --release --target-dir target/runtime-exports
+
+qualify-runtime-exports: build-runtime-exports
 	cargo test --locked -p ic-platform-macros
 	cargo clippy --locked -p ic-platform-macros --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --locked -p ic-platform-macros --no-deps
 	cargo clippy --locked -p ic-platform-runtime --features entrypoint-macros --all-targets --target wasm32-unknown-unknown -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --locked -p ic-platform-runtime --features entrypoint-macros --target wasm32-unknown-unknown --no-deps
 	cargo clippy --locked --manifest-path qualification/Cargo.toml -p runtime-exports --target wasm32-unknown-unknown --all-targets -- -D warnings
-	$(ENGINE_WASM_ENV) cargo build --locked --manifest-path qualification/Cargo.toml -p runtime-exports --target wasm32-unknown-unknown --release --target-dir target/runtime-exports
 	node qualification/runtime-exports.mjs
 	node qualification/runtime-ui.mjs exports
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-exports --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-exports|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
@@ -567,12 +569,3 @@ qualify-sns-neurons: qualification-tooling-check
 .PHONY: check-release-evidence
 check-release-evidence: qualification-tooling-check
 	node --test scripts/tests/release-audit.test.mjs scripts/tests/qualification-wiring.test.mjs scripts/tests/release-flow.test.mjs
-
-.PHONY: qualify-stable-structures
-qualify-stable-structures: qualification-tooling-check
-	cargo test --locked -p ic-platform --no-default-features --features stable-structures --test stable_structures
-	cargo clippy --locked -p ic-platform --no-default-features --features stable-structures --test stable_structures -- -D warnings
-	cargo clippy --locked -p ic-platform --no-default-features --features stable-structures --test stable_structures --target wasm32-unknown-unknown -- -D warnings
-	RUSTDOCFLAGS='-D warnings' cargo doc --locked -p ic-platform --no-default-features --features stable-structures --no-deps
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --no-default-features --features stable-structures --require ic-stable-structures=1 --forbid ic-platform-runtime --forbid ic-platform-protocol
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --no-default-features --forbid-pattern '^(?!ic-platform$$)'

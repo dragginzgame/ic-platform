@@ -1,4 +1,4 @@
-use super::expand;
+use super::{Kind, expand, expand_kind};
 use proc_macro2::TokenStream;
 use quote::quote;
 
@@ -12,6 +12,39 @@ fn options() -> TokenStream {
         on_error = fail,
         manual_reply
     )
+}
+
+#[test]
+fn inspection_requires_explicit_bound_and_synchronous_metadata_handler() {
+    let handler = quote!(
+        fn inspect(message: Inspection<'_>) -> InspectionDecision {}
+    );
+    for args in [
+        quote!(runtime = renamed),
+        quote!(runtime = renamed, max_method_bytes = 8, name = "inspect"),
+        quote!(runtime = renamed, max_method_bytes = 8, decode = decode),
+        quote!(runtime = renamed, max_method_bytes = 8, manual_reply),
+    ] {
+        assert!(expand_kind(args, handler.clone(), Kind::InspectMessage).is_err());
+    }
+    assert!(
+        expand_kind(
+            quote!(runtime = renamed, max_method_bytes = 8),
+            quote!(
+                async fn inspect(message: Inspection<'_>) -> InspectionDecision {}
+            ),
+            Kind::InspectMessage,
+        )
+        .is_err()
+    );
+    assert!(
+        expand_kind(
+            quote!(runtime = renamed, max_method_bytes = 8),
+            handler,
+            Kind::InspectMessage,
+        )
+        .is_ok()
+    );
 }
 
 #[test]

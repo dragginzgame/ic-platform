@@ -89,6 +89,16 @@ surfaces and passes the actual pinned Auth installed fixture; see the
 [source and boundary evidence](qualification/runtime-auth.md). Packaged-cohort
 release admission and production migration remain separate. GitHub remains the issue tracker.
 
+## Wasm Store ingress inspection
+
+[Platform #42](https://github.com/dragginzgame/ic-platform/issues/42) supplies
+the synchronous ingress hook for [Wasm Store #8](https://github.com/dragginzgame/ic-wasm-store/issues/8).
+The Runtime adapter bounds the method-name copy and exposes caller identity and
+argument size. Acceptance is explicit. The hook leaves the payload unread.
+Store owns its ingress policy, including any external installer identities,
+and retains handler authorization, payload limits and grant validation for
+all calls. See the [Runtime inspection contract](qualification/runtime-inspection.md).
+
 ## Scheduling and Canic Host migration requirements
 
 The original Scheduling source `170599fbf3e4fac51b09519645d8dc11d9633e4f` used Timers 0.45.11
@@ -287,24 +297,11 @@ nor the absence of Agent from this product graph qualifies those consumer paths.
 
 ## Storage stable collection types
 
-[Issue #30](https://github.com/dragginzgame/ic-platform/issues/30) requires the
-optional `stable-structures` feature and `ic_platform::stable_structures` export
-on host and Wasm. Re-export upstream 0.7.2 directly, preserving `Memory`,
-`VectorMemory`, `Storable`, `storable`, map/set/cell/vector/heap/log, iterator and
-log write-error identities. Defaults remain empty. Platform does not implement
-collections, memory allocation, stable-data migration or upgrade policy.
-
-The admitted reuse is the unmodified Apache-2.0 crate `ic-stable-structures`
-0.7.2 from DFINITY, archive SHA-256
-`8ee3372ddc0cf2a747fc26ce2d075a240ed6bfab151e63bc70109e8967f7ce6f`.
-Its upstream IC memory implementation and persisted formats remain upstream
-obligations; this export adds no unsafe code or copied implementation. The
-upstream `ic_principal` dependency remains its own type; no Platform Principal
-conversion is introduced. `make qualify-stable-structures` checks exact type
-identity, public iterator/error names, host reopen behavior, Wasm compilation,
-feature isolation and one selected upstream instance. Storage owns actual
-installed upgrade/rollback and published-consumer acceptance. Local tests do not
-establish those downstream gates.
+Consumers now select their stable collection supplier directly. Storage owns
+memory allocation, persisted format compatibility and installed upgrade and
+rollback acceptance. The maintainer retired Platform's export after the
+published 0.34 line fulfilled [Platform #30](https://github.com/dragginzgame/ic-platform/issues/30).
+See the [historical supplier qualification](releases.md#stable-structures-export-release).
 
 ## Storage synchronous system operations
 

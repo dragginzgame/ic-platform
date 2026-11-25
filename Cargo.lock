@@ -779,14 +779,13 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.19"
+version = "0.35.0"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
  "ed25519-dalek",
  "ic-certification",
  "ic-platform-types",
- "ic-stable-structures",
  "ic-transport-types",
  "ic-verify-bls-signature",
  "ic_bls12_381",
@@ -803,7 +802,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-macros"
-version = "0.23.25"
+version = "0.23.26"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -825,7 +824,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.25"
+version = "0.23.26"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-protocol",
@@ -836,7 +835,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.25"
+version = "0.23.26"
 dependencies = [
  "toko-tooling",
 ]
@@ -854,15 +853,6 @@ dependencies = [
  "sha2 0.11.1",
  "thiserror 2.0.21",
  "toko-tooling",
-]
-
-[[package]]
-name = "ic-stable-structures"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ee3372ddc0cf2a747fc26ce2d075a240ed6bfab151e63bc70109e8967f7ce6f"
-dependencies = [
- "ic_principal",
 ]
 
 [[package]]

@@ -4,6 +4,15 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.26] - 2026-11-25
+
+### ➕ Added
+
+- Add a synchronous `#[inspect_message]` hook with bounded method names,
+  caller identity, argument size and explicit acceptance for
+  [Platform #42 — Expose ingress message inspection and explicit acceptance](https://github.com/dragginzgame/ic-platform/issues/42).
+  Runtime leaves the argument payload unread during inspection.
+
 ## [0.23.25] - 2026-11-22
 
 - Adopt Toko Tooling 0.46.1 for development and release qualification.

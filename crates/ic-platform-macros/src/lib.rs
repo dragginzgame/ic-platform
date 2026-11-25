@@ -41,6 +41,21 @@ pub fn query(
         .into()
 }
 
+/// Exports the synchronous `canister_inspect_message` hook on wasm32.
+///
+/// Requires `runtime = path` and `max_method_bytes = integer`. The handler
+/// receives one Runtime `Inspection<'_>` and returns `InspectionDecision`.
+/// Only an explicit acceptance decision admits the ingress message.
+#[proc_macro_attribute]
+pub fn inspect_message(
+    args: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    update::expand_kind(args.into(), item.into(), update::Kind::InspectMessage)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+
 /// Exports a synchronous init handler with one explicitly decoded input.
 ///
 /// Requires `runtime`, `guard`, `decode`, `max_bytes`, and `on_error` paths/options.

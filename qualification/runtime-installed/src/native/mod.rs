@@ -2,6 +2,7 @@ mod accounting;
 mod callbacks;
 mod cross_subnet;
 mod identity;
+mod inspection;
 mod raw;
 mod timer;
 mod upgrade;
@@ -36,6 +37,7 @@ async fn verify_installed() -> Result<(), Box<dyn std::error::Error>> {
         .build_async()
         .await;
     let pic = &owned;
+    inspection::verify(pic, &wasm).await?;
     let canister = pic.create_canister().await;
     pic.add_cycles(canister, 1_u128 << 80).await;
     pic.install_canister(canister, wasm.clone(), vec![], None)

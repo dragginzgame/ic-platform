@@ -45,7 +45,7 @@ pub mod system;
 #[cfg(all(feature = "system-raw", target_arch = "wasm32"))]
 pub use call::ic0::synchronous as raw;
 #[cfg(feature = "entrypoint-macros")]
-pub use ic_platform_macros::{init, post_upgrade, pre_upgrade, query, update};
+pub use ic_platform_macros::{init, inspect_message, post_upgrade, pre_upgrade, query, update};
 
 #[cfg(feature = "call-ic0")]
 const _: () = ic_platform_runtime_guard::assert_runtime_version(env!("CARGO_PKG_VERSION"));

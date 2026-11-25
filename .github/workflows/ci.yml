@@ -101,7 +101,7 @@ jobs:
       - name: Replay observed canister signatures on native and Wasm
         run: make qualify-canister-signature-wasm
       - name: Qualify isolated Auth issuer policy
-        run: make qualify-auth-consumer qualify-stable-structures
+        run: make qualify-auth-consumer
       - name: Check Runtime call preparation
         run: make qualify-runtime-call qualify-runtime-consumer qualify-runtime-ic0 qualify-runtime-awaited qualify-runtime-guard qualify-runtime-input-ui qualify-runtime-exports
       - name: Prepare verified PocketIC server

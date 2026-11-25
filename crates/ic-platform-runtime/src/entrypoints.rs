@@ -9,6 +9,85 @@ use crate::execution_types::{ArgumentTooLarge, EntryError, ReplyError, TaskHandl
 use crate::{call::ic0, executor, system};
 use std::future::Future;
 
+///
+/// Inspection
+/// Metadata available to an ingress inspection handler before induction.
+///
+
+#[derive(Clone, Copy, Debug)]
+pub struct Inspection<'a> {
+    method_name: &'a str,
+    caller: ic_platform_types::Principal,
+    argument_size: usize,
+}
+
+impl Inspection<'_> {
+    /// Requested method name, after the configured byte bound and UTF-8 check.
+    #[must_use]
+    pub const fn method_name(&self) -> &str {
+        self.method_name
+    }
+
+    /// Caller of the ingress message.
+    #[must_use]
+    pub const fn caller(&self) -> ic_platform_types::Principal {
+        self.caller
+    }
+
+    /// Size of the argument payload in bytes. Runtime does not copy it.
+    #[must_use]
+    pub const fn argument_size(&self) -> usize {
+        self.argument_size
+    }
+}
+
+///
+/// InspectionDecision
+/// The application's decision for the ingress message under inspection.
+///
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InspectionDecision {
+    /// Explicitly request ingress acceptance.
+    Accept,
+    /// Leave the message unaccepted.
+    Reject,
+}
+
+/// Runs an ingress inspection hook with an inclusive method-name byte limit.
+///
+/// Use only from `canister_inspect_message`. An over-limit or invalid UTF-8
+/// method name leaves the message unaccepted without invoking the handler.
+/// Runtime passes metadata only and calls the IC acceptance import once on
+/// [`InspectionDecision::Accept`]. Queries and inter-canister calls skip the
+/// hook. Keep authorization and payload limits in the ordinary handler.
+///
+/// # Panics
+/// The IC may trap on context violations. User code may also trap.
+#[cfg(target_arch = "wasm32")]
+pub fn inspect_message(
+    max_method_bytes: usize,
+    handler: impl FnOnce(Inspection<'_>) -> InspectionDecision,
+) {
+    let Ok(_scope) = executor::enter_synchronous() else {
+        return;
+    };
+    let Some(method_name) = ic0::inspect_method_name(max_method_bytes) else {
+        return;
+    };
+    let Ok(method_name) = std::str::from_utf8(&method_name) else {
+        return;
+    };
+    let decision = handler(Inspection {
+        method_name,
+        caller: system::caller(),
+        argument_size: system::argument_size(),
+    });
+    if decision == InspectionDecision::Accept {
+        ic0::accept_ingress();
+    }
+}
+
 /// The stage that refused entrypoint input, preserving its original error value.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AdmissionError<G, D> {

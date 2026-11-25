@@ -24,6 +24,13 @@ Certificate retrieval does not authenticate evidence. Queries and lifecycle
 handlers are synchronous; automatic updates use the existing executor. Codecs,
 guards and non-returning error handlers are explicit application choices.
 
+With `entrypoint-macros`, `#[inspect_message(runtime = ..., max_method_bytes = ...)]`
+exports a synchronous ingress hook. Its handler receives the bounded UTF-8
+method name, caller and argument byte count, then returns
+`InspectionDecision::Accept` or `InspectionDecision::Reject`. The hook leaves
+payload bytes in the IC. Keep authorization and input limits in ordinary
+handlers because queries and inter-canister calls skip ingress inspection.
+
 For caller-owned synchronous Wasm exports, `system-raw` exposes `raw` with no
 production dependencies or executor. It supplies argument/caller byte copying,
 current-controller checks, raw append/reply, byte traps and `instruction_counter()`.

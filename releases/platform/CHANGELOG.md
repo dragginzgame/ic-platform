@@ -3,6 +3,15 @@
 Release group: `platform`. Covered package: `ic-platform`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.35.0] - 2026-11-25
+
+### ⚠️ Breaking
+
+- Remove the `stable-structures` feature and `ic_platform::stable_structures`
+  re-export. Consumers that still use these types can depend directly on
+  `ic-stable-structures` and import from `ic_stable_structures`.
+  [Platform #30 — Restore the optional stable-structures re-export](https://github.com/dragginzgame/ic-platform/issues/30) records the original export.
+
 ## [0.34.19] - 2026-11-20
 
 - Allow compatible crypto and certificate dependency versions while preserving the qualified lockfile selections. [#37](https://github.com/dragginzgame/ic-platform/issues/37)

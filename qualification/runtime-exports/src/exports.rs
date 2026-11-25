@@ -1,4 +1,22 @@
-use candidate_runtime::{entrypoints::UpdateError, system};
+use candidate_runtime::{
+    entrypoints::{Inspection, InspectionDecision, UpdateError},
+    system,
+};
+
+// inspect
+// Admit small echo ingress from a canister controller.
+// limits : method name up to 4 bytes, request at most 4 bytes
+#[candidate_runtime::inspect_message(runtime = candidate_runtime, max_method_bytes = 4)]
+fn inspect(message: Inspection<'_>) -> InspectionDecision {
+    if message.method_name() == "echo"
+        && message.argument_size() <= 4
+        && system::is_controller(&message.caller())
+    {
+        InspectionDecision::Accept
+    } else {
+        InspectionDecision::Reject
+    }
+}
 
 // echo
 // Reply with the admitted bytes.
@@ -14,6 +32,22 @@ use candidate_runtime::{entrypoints::UpdateError, system};
     manual_reply
 )]
 async fn echo(input: Vec<u8>) {
+    system::reply(&input).unwrap();
+}
+
+// probe
+// Echo bytes on the inter-canister lane.
+// limits : request up to 4 bytes, reply echoes the admitted bytes
+#[candidate_runtime::update(
+    runtime = candidate_runtime,
+    name = "probe",
+    guard = admit,
+    decode = decode,
+    max_bytes = 4,
+    on_error = fail,
+    manual_reply
+)]
+async fn probe(input: Vec<u8>) {
     system::reply(&input).unwrap();
 }
 

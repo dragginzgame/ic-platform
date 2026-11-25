@@ -1096,6 +1096,20 @@ dependencies = [
 [[package]]
 name = "ic-platform"
 version = "0.34.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6372d2e30ba4e84ff47824dd1a4542e88215a18890afd9804fed99525bc35962"
+dependencies = [
+ "ic-certification",
+ "ic-platform-types 0.21.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-verify-bls-signature",
+ "serde",
+ "serde_cbor",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.35.0"
 dependencies = [
  "crypto-bigint",
  "curve25519-dalek",
@@ -1115,22 +1129,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ic-platform"
-version = "0.34.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6372d2e30ba4e84ff47824dd1a4542e88215a18890afd9804fed99525bc35962"
-dependencies = [
- "ic-certification",
- "ic-platform-types 0.21.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "ic-verify-bls-signature",
- "serde",
- "serde_cbor",
- "thiserror 2.0.18",
-]
-
-[[package]]
 name = "ic-platform-macros"
-version = "0.23.25"
+version = "0.23.26"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1150,7 +1150,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime"
-version = "0.23.25"
+version = "0.23.26"
 dependencies = [
  "ic-platform-macros",
  "ic-platform-protocol",
@@ -1160,7 +1160,7 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-runtime-guard"
-version = "0.23.25"
+version = "0.23.26"
 
 [[package]]
 name = "ic-platform-types"
@@ -1786,7 +1786,7 @@ dependencies = [
  "ed25519-dalek",
  "ic-certification",
  "ic-host-process",
- "ic-platform 0.34.19",
+ "ic-platform 0.35.0",
  "ic-platform-protocol",
  "ic-platform-types 0.21.4",
  "ic-testkit",
@@ -2136,7 +2136,7 @@ dependencies = [
  "ic-certification",
  "ic-management-canister-types",
  "ic-platform 0.34.19",
- "ic-platform 0.34.19 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-platform 0.35.0",
  "ic-testkit",
  "tokio",
  "toko-tooling",

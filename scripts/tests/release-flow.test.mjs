@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {readdirSync, symlinkSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync, appendFileSync, copyFileSync, chmodSync} from 'node:fs';
+import {mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync, appendFileSync, copyFileSync, chmodSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
@@ -70,11 +70,12 @@ for (const fault of ['dirty', 'audit', 'protocol', 'changed']) {
     assert.equal(qualifyRelease(recovered).schema, 2);
   });
 }
-for (const fault of ['legacy', 'source', 'compiler', 'host', 'catalog', 'types', 'targets', 'log', 'missing-log']) {
+for (const fault of ['legacy', 'retired-schema', 'source', 'compiler', 'host', 'catalog', 'types', 'targets', 'log', 'missing-log']) {
   test(`publication receipt rejects ${fault} changes`, t => {
     const f = fixture(t);
     const receipt = qualifyRelease(f);
     if (fault === 'legacy') delete receipt.schema;
+    if (fault === 'retired-schema') receipt.schema = 3;
     if (fault === 'source') receipt.commit = 'b'.repeat(40);
     if (fault === 'compiler') receipt.rust = 'other';
     if (fault === 'host') receipt.host = 'other';
@@ -214,72 +215,3 @@ for (const mode of ['-n', '-i']) {
     assert(!existsSync(join(f.output, 'receipt.json')));
   });
 }
-
-test('isolated export uses the shared runner and a mixed release range falls back', t => {
-  const f = fixture(t);
-  const {root} = f;
-  function put(path, value) {
-    mkdirSync(join(root, path, '..'), {recursive: true});
-    writeFileSync(join(root, path), value);
-  }
-  function git(...args) {
-    const result = spawnSync('git', args, {cwd: root, encoding: 'utf8'});
-    assert.equal(result.status, 0, result.stderr);
-    return result.stdout.trim();
-  }
-  const catalog = JSON.parse(readFileSync(join(root, 'ci/release-profiles.json')));
-  catalog.platform.push('qualify-stable-structures');
-  put('ci/release-profiles.json', JSON.stringify(catalog));
-  appendFileSync(join(root, 'Makefile'), '\nqualify-stable-structures:\n\t@echo stable >> dispatch\n');
-  for (const file of ['Cargo.lock','qualification/Cargo.lock','scripts/qualify-release.mjs',
-    'crates/ic-platform/tests/stable_structures.rs']) put(file, 'fixture\n');
-  put('crates/ic-platform/Cargo.toml', 'version = "0.34.17"\n');
-  const lib = 'crates/ic-platform/src/lib.rs';
-  const alias = '#[cfg(feature = "stable-structures")]\npub use ic_stable_structures as stable_structures;\n';
-  put(lib, '\n' + alias);
-  const vendor = 'vendor/toko-tooling/scripts/ci';
-  for (const name of ['run-validation-targets.sh','check-make-execution.sh','verify-file-checksum.sh',
-    'validation-input-checkpoint.pl','release-validation-plan.pl','ValidationPlan.pm']) {
-    put(vendor + '/' + name, readFileSync(join(vendor, name)));
-  }
-  git('init', '-q');
-  git('config', 'user.email', 'fixture@example.invalid');
-  git('config', 'user.name', 'Fixture');
-  git('add', '.');
-  git('commit', '-qm', 'baseline');
-  git('tag', '-a', 'platform-v0.34.16', '-m', 'qualified baseline');
-  put(lib, '\n/// Storage collections.\n' + alias);
-  git('commit', '-qam', 'document isolated export');
-  const commit = git('rev-parse', 'HEAD');
-  const execute = (cmd, args, opts) => {
-    if (cmd === 'git' || args[0]?.endsWith('run-validation-targets.sh')) return spawnSync(cmd, args, opts);
-    return f.execute(cmd, args, opts);
-  };
-  const options = {...f, execute, group: 'platform'};
-  const receipt = qualifyRelease(options);
-  assert.equal(receipt.schema, 3);
-  assert.deepEqual(receipt.targets, ['qualify-stable-structures']);
-  assert.equal(readFileSync(join(root, 'dispatch'), 'utf8'), 'stable\n');
-  git('tag', '-a', 'platform-v0.34.17', '-m', 'candidate');
-  validateQualificationReceipt(receipt, f.output, {...f, commit, rust: receipt.rust});
-  const aliasOutput = join(root, 'evidence-alias');
-  symlinkSync(f.output, aliasOutput, 'dir');
-  const validate = () => validateQualificationReceipt(receipt, aliasOutput, {...f, commit, rust: receipt.rust});
-  validate();
-  const run = readdirSync(f.output).find(name => name.startsWith('validation.'));
-  const timings = join(f.output, run, 'timings.tsv');
-  const original = readFileSync(timings, 'utf8');
-  const log = original.trimEnd().split('\t').at(-1);
-  const outside = join(f.output, 'outside.log');
-  copyFileSync(log, outside);
-  writeFileSync(timings, original.replace(log, outside));
-  assert.throws(validate, /outside the selected evidence directory/);
-  writeFileSync(timings, original);
-  appendFileSync(join(f.output, 'plan.json'), ' ');
-  assert.throws(() => validateQualificationReceipt(receipt, f.output, {...f, commit, rust: receipt.rust}));
-  put('shared-input', 'unmapped');
-  git('add', 'shared-input');
-  git('commit', '-qm', 'shared change');
-  const full = qualifyRelease({...options, output: join(root, 'mixed')});
-  assert.deepEqual(full.targets, releaseCatalog(root).targets);
-});

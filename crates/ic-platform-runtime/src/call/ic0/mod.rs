@@ -32,6 +32,9 @@ unsafe extern "C" {
     fn msg_reject_msg_copy(dst: u32, offset: u32, size: u32);
     fn msg_arg_data_size() -> u32;
     fn msg_arg_data_copy(dst: u32, offset: u32, size: u32);
+    fn msg_method_name_size() -> u32;
+    fn msg_method_name_copy(dst: u32, offset: u32, size: u32);
+    fn accept_message();
     fn msg_cycles_refunded128(dst: u32);
     fn in_replicated_execution() -> u32;
     fn msg_reply_data_append(src: u32, size: u32);
@@ -106,6 +109,35 @@ pub(crate) fn system_version() -> u64 {
 pub(crate) fn argument_size() -> usize {
     // SAFETY: Scalar-only observation; context violations trap.
     unsafe { msg_arg_data_size() as usize }
+}
+
+#[cfg(feature = "call-ic0")]
+#[expect(
+    unsafe_code,
+    reason = "IC method-name copy uses initialized storage bounded before allocation"
+)]
+pub(crate) fn inspect_method_name(maximum: usize) -> Option<Vec<u8>> {
+    // SAFETY: The size observation takes no pointers. The IC enforces context.
+    let size = unsafe { msg_method_name_size() } as usize;
+    if size > maximum {
+        return None;
+    }
+    let mut bytes = Vec::new();
+    bytes.try_reserve_exact(size).ok()?;
+    bytes.resize(size, 0);
+    if size != 0 {
+        // SAFETY: The live, initialized buffer has exactly the observed length.
+        unsafe { msg_method_name_copy(bytes.as_mut_ptr() as u32, 0, size as u32) };
+    }
+
+    Some(bytes)
+}
+
+#[cfg(feature = "call-ic0")]
+#[expect(unsafe_code, reason = "IC ingress acceptance takes no pointers")]
+pub(crate) fn accept_ingress() {
+    // SAFETY: There are no memory operands. The IC enforces context and uniqueness.
+    unsafe { accept_message() };
 }
 
 #[cfg(feature = "call-ic0")]

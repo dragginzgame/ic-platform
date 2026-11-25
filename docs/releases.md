@@ -171,6 +171,8 @@ checksum, tagged source commit and package path. Local evidence is in
 Select Platform 0.34.16 for [Platform #30](https://github.com/dragginzgame/ic-platform/issues/30).
 The optional `stable-structures` feature directly re-exports upstream 0.7.2 with
 unchanged collection/memory/iterator/error identities and persisted formats.
+The unmodified upstream crate uses Apache-2.0. Its archive SHA-256 was
+`8ee3372ddc0cf2a747fc26ce2d075a240ed6bfab151e63bc70109e8967f7ce6f`.
 Defaults remain empty; allocation, migration and installed consumer lifecycle
 acceptance remain with Storage. Other product groups retain their versions.
 
@@ -186,6 +188,12 @@ Query/Blob sources, then main and annotated `platform-v0.34.16`, one supported
 publication attempt and independent registry archive/source readback. The
 focused host/Wasm and extracted-archive checks already pass. CI stays
 asynchronous; this supplier release does not establish Storage adoption.
+
+The focused Linux run checked upstream type identity, host memory reopen, Wasm
+Clippy, documentation and dependency graphs. All 75 Platform feature tests,
+12 doctests and 56 release-tooling regressions passed alongside workflow lint.
+An extracted archive passed the integration test and Wasm compilation.
+Focused logs were recorded under `target/stable-structures/`.
 
 Platform 0.34.16 is published from clean source
 `a8cd1b8218175a1f345740a0b2e110d06ebdbd0c`, with main and annotated

@@ -590,39 +590,15 @@ Main CI runs that shared refusal coverage on Linux and both macOS architectures.
 Neither release catalog selects those regression fixtures: `qualify-release`
 still performs fresh real audits of both locks and validates their evidence;
 `publish` still performs fresh receipt/source/group/tag/registry/archive admission.
-Changing either catalog invalidates existing receipts. No audit or admission
-operation has been removed or replaced by CI success.
+Changing either catalog invalidates existing receipts.
 
-For a Platform-only candidate, run `make qualify-release RELEASE_GROUP=platform`.
-The collector compares the clean commit with the preceding annotated Platform
-release tag, including every intervening commit's net changes. It excludes the
-candidate's tag so publication can reproduce the decision after tagging. A
-change confined to the existing stable-structures fixture or the trailing
-documented, feature-gated upstream alias in the crate root selects
-`qualify-stable-structures`. The shared validation-plan runner receives the full
-catalog roster with reasons, checks its input files and retains per-stage evidence.
-The focused target exercises the host contract, Wasm compilation, feature graph
-and empty defaults. Both lockfiles still receive fresh audits.
-
-Shared manifests, locks, CI, Make or catalog edits, other crate-root changes,
-unmapped paths, and missing or ambiguous baseline evidence take the full serial
-catalog path. A routine version bump touching these inputs also takes that path.
-The actual 0.34.16 introduction changed several shared files and remains a
-full-catalog case. An ungrouped invocation always qualifies the full catalog.
-
-A scoped schema-3 receipt binds the release group, baseline, changed paths,
-selected target, plan and policy hashes in addition to the source, catalogs,
-compiler, host, execution log and audits. Admission independently recomputes
-the selection and checks the baseline against the remote annotated tag before
-the fresh archive checks. A scoped receipt admits only Platform publication.
-
+`make qualify-release` runs the full serial catalog for every candidate.
 Schema-2 receipts bind the complete ordered target list and one retained
 `qualification.log`, both catalog hashes, exact commit, compiler/host and the
 existing fresh audit evidence. The collector writes a receipt only after success
 and final clean-source admission. `timings.json` records audit, qualification and
-total elapsed time; timings are observations, never authority. Old schema-1
-receipts remain historical evidence but cannot admit publication under the new
-flow. Changed source/catalog/compiler/host, missing/tampered logs or invalid audit
+total elapsed time. Schema-1 and scoped schema-3 receipts are historical.
+Changed source/catalog/compiler/host, missing/tampered logs or invalid audit
 evidence require a fresh full run; there is no partial-success resume.
 
 Workspace and extracted-archive checks remain distinct: Cargo normalizes package
@@ -927,24 +903,6 @@ compile-only; this does not establish production migration, new macOS execution
 or registry publication. This source delivery includes Toko Tooling 0.45.0 and the CI native-oracle
 graph/historical synthetic-key fixes. No product crate implementation changed;
 product versions and registry publications remain unchanged.
-
-
-## Stable structures export — Platform #30
-
-Platform 0.34.16 adds `stable-structures`, re-exporting the unmodified
-upstream 0.7.2 crate as `ic_platform::stable_structures`. See the
-[consumer contract and provenance](requirements.md#storage-stable-collection-types).
-`make qualify-stable-structures` is in native CI and the Platform release catalog.
-It checks the requested public names and upstream identity, host memory reopen,
-Wasm Clippy, documentation, singleton upstream resolution and dependency-free
-defaults. Allocation and migration remain consumer policy.
-
-Local Linux qualification passed the focused target for native and Wasm graphs,
-all Platform feature tests (75 tests plus 12 doctests), all 56 release-tooling
-tests and workflow lint. An extracted Cargo archive outside the workspace passed
-the public integration test and Wasm compilation with only `stable-structures`
-enabled. Logs are under `target/stable-structures/`. Publication is verified in the [release record](releases.md#stable-structures-export-release);
-Storage installed upgrade/rollback acceptance remains separate.
 
 
 ## CI and tooling selection cleanup — Platform #31 and #32

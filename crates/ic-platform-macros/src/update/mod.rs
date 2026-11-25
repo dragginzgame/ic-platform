@@ -16,6 +16,7 @@ struct Options {
     guard: Option<Path>,
     decode: Option<Path>,
     maximum: Option<LitInt>,
+    max_method_bytes: Option<LitInt>,
     on_error: Option<Path>,
     manual: bool,
     encode: Option<Path>,
@@ -32,6 +33,7 @@ pub(super) enum Kind {
     Init,
     PreUpgrade,
     PostUpgrade,
+    InspectMessage,
 }
 
 pub(super) fn expand(args: TokenStream, item: TokenStream) -> syn::Result<TokenStream> {
@@ -59,6 +61,7 @@ pub(super) fn expand_kind(
             "guard" => options.guard = Some(meta.value()?.parse()?),
             "decode" => options.decode = Some(meta.value()?.parse()?),
             "max_bytes" => options.maximum = Some(meta.value()?.parse()?),
+            "max_method_bytes" => options.max_method_bytes = Some(meta.value()?.parse()?),
             "on_error" => options.on_error = Some(meta.value()?.parse()?),
             "manual_reply" => options.manual = true,
             "encode" => options.encode = Some(meta.value()?.parse()?),
@@ -85,7 +88,11 @@ pub(super) fn expand_kind(
     {
         return Err(syn::Error::new(
             signature.span(),
-            "update requires a safe async nongeneric function with one decoded argument",
+            if kind == Kind::InspectMessage {
+                "inspection requires a safe synchronous nongeneric function with one metadata argument"
+            } else {
+                "update requires a safe async nongeneric function with one decoded argument"
+            },
         ));
     }
     if (options.manual || lifecycle)
@@ -129,6 +136,44 @@ pub(super) fn expand_kind(
     }
     let span = signature.ident.span();
     let runtime = required(options.runtime, "runtime", span)?;
+    if kind == Kind::InspectMessage {
+        if options.name.is_some()
+            || options.guard.is_some()
+            || options.decode.is_some()
+            || options.maximum.is_some()
+            || options.on_error.is_some()
+            || options.manual
+            || options.encode.is_some()
+        {
+            return Err(syn::Error::new(
+                span,
+                "inspection only accepts runtime and max_method_bytes",
+            ));
+        }
+        let maximum = required(options.max_method_bytes, "max_method_bytes", span)?;
+        let handler = &signature.ident;
+        let wrapper = export_wrapper(
+            &function,
+            &gating,
+            "inspect_message",
+            "canister_inspect_message",
+            &quote!(#runtime::entrypoints::inspect_message(#maximum, #handler);),
+        );
+        return Ok(quote! {
+            #function
+            #(#gating)*
+            const _: fn(#runtime::entrypoints::Inspection<'_>) -> #runtime::entrypoints::InspectionDecision = #handler;
+            #(#gating)*
+            const _: usize = #maximum;
+            #wrapper
+        });
+    }
+    if let Some(maximum) = options.max_method_bytes {
+        return Err(syn::Error::new(
+            maximum.span(),
+            "max_method_bytes is exclusive to inspection",
+        ));
+    }
     let name = if lifecycle {
         if options.name.is_some() {
             return Err(syn::Error::new(span, "lifecycle exports have fixed names"));
@@ -166,26 +211,19 @@ pub(super) fn expand_kind(
         ));
     }
     let handler = &signature.ident;
-    let plain = handler.to_string();
     let prefix = match kind {
         Kind::Update => "update",
         Kind::Query => "query",
         Kind::Init => "init",
         Kind::PreUpgrade => "pre_upgrade",
         Kind::PostUpgrade => "post_upgrade",
+        Kind::InspectMessage => unreachable!("inspection expanded above"),
     };
-    let wrapper = format_ident!(
-        "__ic_platform_{}_{}",
-        prefix,
-        plain.trim_start_matches("r#"),
-        span = proc_macro2::Span::mixed_site()
-    );
     let export_name = if lifecycle {
         format!("canister_{prefix}")
     } else {
         format!("canister_{prefix} {}", name.value())
     };
-    let export = LitStr::new(&export_name, proc_macro2::Span::mixed_site());
     let invocation = if lifecycle {
         let has_arguments = kind != Kind::PreUpgrade;
         quote!(#runtime::entrypoints::lifecycle(#maximum, #has_arguments, #guard, #decode, #handler))
@@ -210,8 +248,15 @@ pub(super) fn expand_kind(
     let dispatch = format_ident!(
         "__ic_platform_dispatch_{}_{}",
         prefix,
-        plain.trim_start_matches("r#"),
+        handler.to_string().trim_start_matches("r#"),
         span = proc_macro2::Span::mixed_site()
+    );
+    let wrapper = export_wrapper(
+        &function,
+        gating,
+        prefix,
+        &export_name,
+        &quote!(#dispatch();),
     );
     Ok(quote! {
         #function
@@ -227,13 +272,34 @@ pub(super) fn expand_kind(
                 }
             }
         }
+        #wrapper
+    })
+}
+
+fn export_wrapper(
+    function: &ItemFn,
+    gating: &[&syn::Attribute],
+    prefix: &str,
+    export_name: &str,
+    body: &TokenStream,
+) -> TokenStream {
+    let plain = function.sig.ident.to_string();
+    let wrapper = format_ident!(
+        "__ic_platform_{}_{}",
+        prefix,
+        plain.trim_start_matches("r#"),
+        span = proc_macro2::Span::mixed_site()
+    );
+    let export = LitStr::new(export_name, proc_macro2::Span::mixed_site());
+
+    quote! {
         #(#gating)*
         #[cfg(target_arch = "wasm32")]
         #[doc(hidden)]
         #[expect(unsafe_code, reason = "Generated IC entrypoint export with fixed ABI and explicit policies")]
         #[unsafe(export_name = #export)]
         pub extern "C" fn #wrapper() {
-            #dispatch();
+            #body
         }
-    })
+    }
 }
