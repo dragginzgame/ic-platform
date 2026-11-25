@@ -4,7 +4,18 @@
 //! pricing version, or explicitly selected version one. URL bytes are preserved,
 //! not parsed, normalized or authorized.
 
+// Ten Candid table entries: blob, opt blob, opt nat64, variant {get:null},
+// header record, vec header, opt empty, opt bool, opt nat32, request record.
+// The request's fields are ordered by Candid field hash, not source spelling.
+// A GET-only variant is a subtype of the management method variant; opt empty
+// represents the absent transform without importing a function/Principal type.
+const HEADER: &[u8] = b"DIDL\x0a\x6d\x7b\x6e\x00\x6e\x78\x6b\x01\x96\x81\xba\x02\x7f\x6c\x02\xf1\xfe\xe1\x8d\x03\x71\xcb\xe4\xfd\xc7\x04\x71\x6d\x04\x6e\x6f\x6e\x7e\x6e\x79\x6c\x08\xef\xd6\xe4\x02\x71\xe1\xed\xeb\x4a\x03\xe8\xd6\xd8\x93\x01\x02\xa2\xf5\xed\x88\x04\x01\xec\xda\xcc\xac\x04\x06\xc6\xa4\xa1\x98\x06\x05\x90\xf8\xf6\xfc\x09\x07\x9f\xc5\x93\xca\x0f\x08\x01\x09";
+
+///
+/// EncodeError
 /// Failure to construct the entire Candid request argument.
+///
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EncodeError {
     /// The complete message exceeds the inclusive output allowance.
@@ -15,6 +26,7 @@ pub enum EncodeError {
     /// Output storage could not be reserved.
     Allocation,
 }
+
 impl std::fmt::Display for EncodeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -23,14 +35,8 @@ impl std::fmt::Display for EncodeError {
         }
     }
 }
-impl std::error::Error for EncodeError {}
 
-// Ten Candid table entries: blob, opt blob, opt nat64, variant {get:null},
-// header record, vec header, opt empty, opt bool, opt nat32, request record.
-// The request's fields are ordered by Candid field hash, not source spelling.
-// A GET-only variant is a subtype of the management method variant; opt empty
-// represents the absent transform without importing a function/Principal type.
-const HEADER: &[u8] = b"DIDL\x0a\x6d\x7b\x6e\x00\x6e\x78\x6b\x01\x96\x81\xba\x02\x7f\x6c\x02\xf1\xfe\xe1\x8d\x03\x71\xcb\xe4\xfd\xc7\x04\x71\x6d\x04\x6e\x6f\x6e\x7e\x6e\x79\x6c\x08\xef\xd6\xe4\x02\x71\xe1\xed\xeb\x4a\x03\xe8\xd6\xd8\x93\x01\x02\xa2\xf5\xed\x88\x04\x01\xec\xda\xcc\xac\x04\x06\xc6\xa4\xa1\x98\x06\x05\x90\xf8\xf6\xfc\x09\x07\x9f\xc5\x93\xca\x0f\x08\x01\x09";
+impl std::error::Error for EncodeError {}
 
 /// Encodes exactly one management HTTP GET request argument.
 ///
@@ -83,12 +89,11 @@ fn encode_get(
     max_bytes: usize,
 ) -> Result<Vec<u8>, EncodeError> {
     let refused = EncodeError::OutputLimit { max_bytes };
-    // method index, Some(response limit)+nat64, body tag, transform tag,
-    // header count, Some(replication)+bool, pricing tag = 16 bytes.
-    let mut size = HEADER
-        .len()
-        .checked_add(if pricing_v1 { 20 } else { 16 })
-        .ok_or(refused)?;
+    let pricing = pricing_v1.then_some(1u32.to_le_bytes());
+    // Fixed bytes cover the method index, response limit, body and transform
+    // tags, header count, replication flag, and pricing tag.
+    let fixed_size = 16 + pricing.as_ref().map_or(0, |bytes| bytes.len());
+    let mut size = HEADER.len().checked_add(fixed_size).ok_or(refused)?;
     for amount in [leb_size(url.len()), url.len()] {
         size = size.checked_add(amount).ok_or(refused)?;
     }
@@ -101,6 +106,7 @@ fn encode_get(
     if size > max_bytes {
         return Err(refused);
     }
+
     let mut output = Vec::new();
     output
         .try_reserve_exact(size)
@@ -115,11 +121,12 @@ fn encode_get(
         leb(body.len(), &mut output);
         output.extend_from_slice(body);
     }
-    output.extend_from_slice(&[0, 0, 1, u8::from(replicated), u8::from(pricing_v1)]);
-    if pricing_v1 {
-        output.extend_from_slice(&1u32.to_le_bytes());
+    output.extend_from_slice(&[0, 0, 1, u8::from(replicated), u8::from(pricing.is_some())]);
+    if let Some(pricing) = pricing {
+        output.extend_from_slice(&pricing);
     }
     debug_assert_eq!(size, output.len());
+
     Ok(output)
 }
 
@@ -129,6 +136,7 @@ fn leb_size(mut value: usize) -> usize {
         n += 1;
         value >>= 7;
     }
+
     n
 }
 

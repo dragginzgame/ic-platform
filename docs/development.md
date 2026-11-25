@@ -1,12 +1,10 @@
 # Development
 
-The current recorded published product versions are Types 0.21.2, Platform 0.34.15,
-Protocol 0.3.5, and Runtime/macros/guard 0.23.17. Qualification packages remain
-private and outside release groups. Publication covers implemented scopes;
-production migrations and broader design qualification remain separate.
-See the [latest release evidence](releases.md#runtime-test-layout-release).
+See the [release evidence](releases.md) for the latest published product versions.
+Qualification packages remain private and outside release groups. Publication covers
+implemented scopes. Production migrations and broader design qualification remain separate.
 
-Qualification selects Testkit 0.109.0 and explicitly names two Platform
+Qualification selects Testkit through `qualification/Cargo.lock` and names two Platform
 roles: `candidate-platform` tests local source, while `published-platform`
 checks the registry verifier. The qualification manifest and lock select their
 versions; equal version numbers do not merge their Cargo source identities. Legacy decoder
@@ -108,7 +106,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.46.1 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.46.3 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -170,7 +168,7 @@ dependencies. A dash means no release group has been configured. Use Cargo's
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.46.1
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.46.3
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
@@ -183,9 +181,11 @@ group, update the two exact values in `ci/dependency-pinning-exceptions.json`
 alongside the workspace requirements. The private qualification crates inherit
 their own workspace version and select candidate products by local path.
 
-For a deliberate Toko Tooling upgrade, review the new release, edit both exact workspace pins,
-update the lock, then run `make toko-tooling-preview` and `make toko-tooling-update`.
-Do not edit installed bytes or their receipt.
+For a deliberate Toko Tooling upgrade, review the published release, edit both exact
+workspace pins and update both lockfiles with the selected dependency command above.
+Run `make toko-tooling-preview` and `make toko-tooling-update`, then verify the installed
+snapshot and both workspace selections with `make qualification-tooling-check`.
+The exporter owns the installed files and receipt.
 
 ## CI graph and synthetic-key checks
 

@@ -11,7 +11,7 @@ and current versions belong in Cargo metadata and the group ledgers. Keep
 qualification packages private and outside product release groups.
 
 This repository adopts the installed [Toko Tooling engineering baseline](TOKO-TOOLING.md)
-from published Toko Tooling 0.46.1 and its revision-bound specialist rules. Cargo.lock and
+from published Toko Tooling 0.46.3 and its revision-bound specialist rules. Cargo.lock and
 `.toko-tooling.snapshot` bind the selection and installed bytes. Keep managed
 files intact; use the supported installer for updates. [Development commands](docs/development.md)
 describe the local Make interface and focused checks.
@@ -45,7 +45,7 @@ does not establish product or native-host qualification.
   and [development commands](docs/development.md).
 - Create manifests only for real implementation slices. Do not add empty Cargo
   packages solely to select tooling; this restriction was explicitly reaffirmed.
-- Before changing Runtime execution, read the [Auth consumer acceptance contract](docs/requirements.md#next-runtime-release-priority-auth-execution-requirements)
+- Before changing Runtime execution, read the [Auth consumer acceptance contract](docs/requirements.md#auth-execution-requirements-implemented)
   and [installed qualification](docs/qualification/runtime-installed.md). Preserve
   entrypoints, caller/canister identity, IC time, certification, guard/frame/reply
   composition, rollback, refunds, bounded uncertainty and callback ownership.

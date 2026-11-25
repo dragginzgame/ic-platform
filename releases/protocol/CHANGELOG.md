@@ -1,5 +1,12 @@
 # Protocol changelog
 
+## [0.3.9] - 2026-11-25
+
+### 🔧 Maintenance
+
+- Use the same encoded pricing field for HTTP request sizing and output.
+- Derive the `raw_rand` frame size and seed offset from its canonical header and seed length.
+
 ## 0.3.8
 
 The management projection reads cycle balance and snapshot memory usage from the

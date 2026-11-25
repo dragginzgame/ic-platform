@@ -16,8 +16,15 @@ pub const METHOD: &str = "raw_rand";
 const ARGUMENTS: &[u8] = b"DIDL\0\0";
 /// Canonical selected producer header, excluding the vector length.
 const HEADER: &[u8] = b"DIDL\x01\x6d\x7b\x01\x00";
+const SEED_BYTES: u8 = 32;
+const SEED_OFFSET: usize = HEADER.len() + 1;
+const REPLY_BYTES: usize = SEED_OFFSET + SEED_BYTES as usize;
 
+///
+/// Error
 /// Refusal without partial seed output or allocation.
+///
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
     /// Caller-selected complete byte allowance was exceeded.
@@ -27,11 +34,13 @@ pub enum Error {
     /// The complete reply does not contain exactly the required 32-byte vector.
     Length,
 }
+
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "raw_rand protocol refusal: {self:?}")
     }
 }
+
 impl std::error::Error for Error {}
 
 /// Borrows the exact empty argument frame after checking the complete byte bound.
@@ -55,16 +64,18 @@ pub fn decode(bytes: &[u8], maximum_bytes: usize) -> Result<[u8; 32], Error> {
     if bytes.len() > maximum_bytes {
         return Err(Error::ByteLimit);
     }
-    if bytes.len() != 42 {
+    if bytes.len() != REPLY_BYTES {
         return Err(Error::Length);
     }
     if !bytes.starts_with(HEADER) {
         return Err(Error::Framing);
     }
-    if bytes[9] != 32 {
+    if bytes[HEADER.len()] != SEED_BYTES {
         return Err(Error::Length);
     }
-    let mut seed = [0; 32];
-    seed.copy_from_slice(&bytes[10..]);
+
+    let mut seed = [0; SEED_BYTES as usize];
+    seed.copy_from_slice(&bytes[SEED_OFFSET..]);
+
     Ok(seed)
 }
