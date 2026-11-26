@@ -1,7 +1,16 @@
 //! Independent creation reply replay and resource refusals on wasm32.
 #![forbid(unsafe_code)]
 
-use ic_platform_protocol::{candid::Limits, ledger, management};
+use ic_platform_protocol::{
+    candid::{Error, Limits},
+    ledger::{
+        self,
+        top_up::{
+            self, Icrc1TransferError, Icrc1TransferResult, NotifyTopUpError, NotifyTopUpResult,
+        },
+    },
+    management,
+};
 
 fn main() {
     let limits = Limits {
@@ -61,6 +70,7 @@ fn main() {
         },
         limits,
     );
+    replay_top_up_frames(limits);
     let args = management::InstallCodeArgs {
         mode: management::InstallMode::Upgrade(None),
         canister_id: value.canister_id,
@@ -71,6 +81,62 @@ fn main() {
     let encoded = args.encode(4096).unwrap();
     assert_eq!(args.encode(encoded.len()).unwrap(), encoded);
     assert!(args.encode(encoded.len() - 1).is_err());
+}
+
+fn replay_top_up_frames(limits: Limits) {
+    let large = "340282366920938463463374607431768211456";
+    let duplicate = include_bytes!("../../fixtures/top-up-transfer-duplicate.bin");
+    let exact = Limits {
+        bytes: duplicate.len(),
+        ..limits
+    };
+    let Icrc1TransferResult::Err(Icrc1TransferError::Duplicate(original)) =
+        top_up::decode_icrc1_transfer(duplicate, exact).unwrap()
+    else {
+        panic!("expected original transfer block")
+    };
+    assert_eq!(original.duplicate_of.0.to_string(), large);
+    assert_eq!(
+        top_up::decode_icrc1_transfer(
+            duplicate,
+            Limits {
+                bytes: duplicate.len() - 1,
+                ..limits
+            }
+        ),
+        Err(Error::Limit)
+    );
+
+    let credited = include_bytes!("../../fixtures/top-up-notify-credited.bin");
+    let refunded = include_bytes!("../../fixtures/top-up-notify-refunded.bin");
+    for bytes in [credited.as_slice(), refunded.as_slice()] {
+        let exact = Limits {
+            bytes: bytes.len(),
+            ..limits
+        };
+        match top_up::decode_notify_top_up(bytes, exact).unwrap() {
+            NotifyTopUpResult::Ok(cycles) => {
+                assert_eq!(bytes, credited);
+                assert_eq!(cycles.0.to_string(), large);
+            }
+            NotifyTopUpResult::Err(NotifyTopUpError::Refunded(refund)) => {
+                assert_eq!(bytes, refunded);
+                assert_eq!(refund.block_index, Some(u64::MAX));
+                assert_eq!(refund.reason, "payment returned");
+            }
+            result => panic!("unexpected notification outcome: {result:?}"),
+        }
+        assert_eq!(
+            top_up::decode_notify_top_up(
+                bytes,
+                Limits {
+                    bytes: bytes.len() - 1,
+                    ..limits
+                }
+            ),
+            Err(Error::Limit)
+        );
+    }
 }
 
 fn retained_root_frames(

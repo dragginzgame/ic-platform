@@ -1,5 +1,14 @@
 # Protocol changelog
 
+## [0.3.11] - 2026-11-26
+
+### ➕ Added
+
+- Encode reproducible ICP top-up transfers and CMC notifications. Bounded
+  decoders preserve the original duplicate block, credits, refunds, other
+  refusals and unknown variant labels.
+  [Platform #43 — Expose bounded ICP transfer and NNS CMC notify_top_up codecs](https://github.com/dragginzgame/ic-platform/issues/43)
+
 ## [0.3.9] - 2026-11-25
 
 ### 🔧 Maintenance

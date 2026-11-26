@@ -6,8 +6,9 @@ implemented scopes. Production migrations and broader design qualification remai
 
 Qualification selects Testkit through `qualification/Cargo.lock` and names two Platform
 roles: `candidate-platform` tests local source, while `published-platform`
-checks the registry verifier. The qualification manifest and lock select their
-versions; equal version numbers do not merge their Cargo source identities. Legacy decoder
+checks the registry verifier from the 0.35 line. The qualification manifest
+and lock select their versions. The verifiers exchange certificate and principal
+bytes across their distinct Cargo source identities. Legacy decoder
 oracles have been removed; qualification uses independent schemas and literal
 fixtures. The separately pinned Auth fixture
 uses its recorded Testkit cohort with the local Platform authentication and
@@ -106,7 +107,7 @@ IC stop/drain/upgrade/start semantics through PocketIC. CI runs both.
 ## Setup and dependencies
 
 Use Rust 1.100.0 with rustfmt, Clippy and `wasm32-unknown-unknown`, as selected in
-`rust-toolchain.toml`. Toko Tooling 0.46.4 is selected exactly by Cargo and installed via
+`rust-toolchain.toml`. Toko Tooling 0.46.5 is selected exactly by Cargo and installed via
 its authenticated exporter. Root company files and `vendor/toko-tooling/` are
 managed; consumer commands live in the root Makefile.
 
@@ -162,18 +163,18 @@ the selected jq/yq and other host tools before its toolchain-file preparer reads
 `rust-toolchain.toml`; the complete tool setup/check follows. Node is pinned in
 `.node-version` for standalone Wasm execution, with no npm packages required.
 
-`deps-list` lists workspace packages, versions and release groups, not transitive
-dependencies. A dash means no release group has been configured. Use Cargo's
-`tree --locked` with the relevant target/features to inspect a dependency graph.
+`make deps-list` lists product workspace packages, versions and release groups.
+Add `DEPENDENCY_MANIFEST=qualification/Cargo.toml` to include qualification
+packages. A dash means the package has no release group. Use Cargo's
+`tree --locked` with the relevant target and features to inspect a dependency graph.
 
 ```sh
 # Networked, deliberate lockfile update; optional package/version selection:
-make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.46.4
+make deps-update DEPENDENCY_PACKAGE=toko-tooling DEPENDENCY_PRECISE=0.46.5
 ```
 
 Without selectors, `deps-update` updates all dependencies within the declared
-requirements. It covers the root and `qualification/Cargo.toml`, including the
-`runtime-installed` member. Both listing and updates use that same selection.
+requirements in both workspaces, including the `runtime-installed` member.
 
 Runtime requires the matching macros and singleton guard
 ([#37](https://github.com/dragginzgame/ic-platform/issues/37)). When bumping the Runtime
@@ -342,8 +343,8 @@ compiles the portable consumer tests for Wasm. It does not
 execute Wasm or prove installed-canister/macOS behavior. `qualification/` owns
 its manifest, lockfile and target directory, has no release group and is excluded
 from product membership. Product code has no reverse qualification dependency.
-`make deps-list`, `make deps-update` and formatting cover both workspaces,
-including the installed-runtime driver.
+`make deps-update` and formatting cover both workspaces. Include qualification
+packages in the listing with `make deps-list DEPENDENCY_MANIFEST=qualification/Cargo.toml`.
 
 The selected decoder requires exactly one vector result. Unknown fields are
 validated and skipped without retaining their values. It accepts the standard

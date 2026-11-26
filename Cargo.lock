@@ -464,7 +464,7 @@ dependencies = [
  "curve25519-dalek",
  "ed25519",
  "serde",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "signature",
  "subtle",
  "zeroize",
@@ -794,7 +794,7 @@ dependencies = [
  "serde",
  "serde_bytes",
  "serde_cbor",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "spki",
  "thiserror 2.0.21",
  "toko-tooling",
@@ -812,13 +812,13 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.3.10"
+version = "0.3.11"
 dependencies = [
  "crc32fast",
  "ic-platform-types",
  "num-bigint 0.5.1",
  "serde",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "toko-tooling",
 ]
 
@@ -850,7 +850,7 @@ dependencies = [
  "serde_bytes",
  "serde_json",
  "serde_test",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "thiserror 2.0.21",
  "toko-tooling",
 ]
@@ -1109,7 +1109,7 @@ dependencies = [
  "ecdsa",
  "elliptic-curve",
  "primeorder",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "wnaf",
 ]
 
@@ -1759,9 +1759,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.11.1"
+version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19"
+checksum = "5b0e5c7d67bc53f435386b2130fdc900488c5703770f6d8a4633060e34288a27"
 dependencies = [
  "cfg-if",
  "cpufeatures 0.3.1",
@@ -1981,9 +1981,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.46.4"
+version = "0.46.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3889bff0f8ff6dc8c80b161c908f4b598125b55bf55f18146471f9ac3294cff"
+checksum = "038380e2f80a7301dee19c19e2afd38a0bfbbfc41b447a1c81178afc1de94bc7"
 
 [[package]]
 name = "tower"

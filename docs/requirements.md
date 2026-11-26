@@ -121,6 +121,13 @@ prepared signed/anonymous transport are now published. See the
 | Protocol cycles ledger | Creation amount, timestamp, optional subnet selection and settings; all creation success/error results, particularly Duplicate with optional canister ID. A retained error does not authorize retry. |
 | Protocol/Types ledger boundary | ICRC account balance arguments, bounded arbitrary-natural balance/fee responses and ICP account identifiers using one canonical Principal/Account cohort. Keep absent subaccounts distinct from explicit zero bytes on the wire. |
 
+[Platform #43](https://github.com/dragginzgame/ic-platform/issues/43) adds the
+[ICP transfer and CMC notification codecs](qualification/management-ledger.md#icp-and-cmc-top-up)
+needed by Toko. Preserve the original transfer fields, the ledger block
+reported by success or Duplicate, and distinct CMC credit, processing, refusal,
+refund and unknown outcomes. Toko retains transport, spending authority,
+journaling, replay decisions and installed acceptance.
+
 Fresh crates.io inspection on 17 November 2026 still selects Agent 0.49.3 as
 latest, with nonoptional elliptic-curve 0.13, k256 0.13.4 and p256 0.13.2 paths.
 The [current advisory](https://rustsec.org/advisories/RUSTSEC-2026-0387.html) still

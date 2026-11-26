@@ -53,6 +53,11 @@ metadata calls and bounded symbol/decimals decoding alongside canonical Account
 and arbitrary-Nat balance support. See the
 [SNS and ICRC supplier contract](../../docs/qualification/sns-neurons.md).
 
+The `ledger::top_up` module encodes exact-fee, timestamped ICP transfers with
+eight-byte memos and CMC notifications of the original payment block. Bounded
+decoders distinguish duplicates, refunds, other reported refusals and unknown
+variants. See the [top-up codec contract](../../docs/qualification/management-ledger.md#icp-and-cmc-top-up).
+
 With `management`, `decode_canister_resources` reads the required natural-valued
 `cycles` and `memory_metrics.snapshots_size` from a bounded `canister_status`
 response. Callers can check controllers and module evidence on the same bytes.

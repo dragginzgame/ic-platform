@@ -39,6 +39,41 @@ Nat; no u64/u128 narrowing occurs. Duplicate retains both its block and optional
 canister ID. FailedToCreate retains optional fee/refund blocks and diagnostic.
 None of these observations establishes settlement or authorizes another create.
 
+## ICP and CMC top-up
+
+For [Platform #43](https://github.com/dragginzgame/ic-platform/issues/43),
+`ledger::top_up::Icrc1TransferArgs` encodes the selected ICP payment profile.
+Keep the source subaccount, destination Account, amount, exact fee, eight-byte
+memo and original timestamp to reproduce the bytes. Fee, memo and timestamp
+are always present on the wire. Use the selected CMC as the Account owner with
+the beneficiary's length-prefixed `top_up_subaccount` and `TOP_UP_MEMO`.
+
+`decode_icrc1_transfer` retains arbitrary-natural block indexes, including the
+original block reported by Duplicate. `NotifyTopUpArgs` takes the original
+block converted without truncation to the CMC's required `nat64`, plus the
+same beneficiary. `decode_notify_top_up` retains arbitrary-natural credited
+cycles, Processing, original refund-block presence, invalid or old payment
+details and the CMC's other diagnostic. Both decoders report unrecognized
+variant labels only after bounded traversal of their payload. Callers can
+retain the input bytes for diagnostics. Transport, authorization, journaling
+and replay decisions belong to the caller.
+
+The reference schemas were written independently from the
+[ICP ledger Candid interface](https://github.com/dfinity/ic/blob/ef7a6f9df22d2232ea3833de144428d30df814ef/rs/ledger_suite/icp/ledger.did)
+and [CMC interface](https://github.com/dfinity/ic/blob/ef7a6f9df22d2232ea3833de144428d30df814ef/rs/nns/cmc/cmc.did).
+The memo and account layout follow the
+[CMC memo value](https://github.com/dfinity/ic/blob/ef7a6f9df22d2232ea3833de144428d30df814ef/rs/nns/cmc/src/lib.rs),
+[CMC memo byte order](https://github.com/dfinity/ic/blob/ef7a6f9df22d2232ea3833de144428d30df814ef/rs/nns/cmc/src/main.rs)
+and [ICP subaccount format](https://github.com/dfinity/ic/blob/ef7a6f9df22d2232ea3833de144428d30df814ef/rs/ledger_suite/icp/src/account_identifier.rs).
+
+`make qualify-management-ledger` checks the new arguments and all known
+outcomes with native Candid. The new cases cover exact and one-byte-short
+limits, every truncated reply prefix, trailing bytes, and budgeted skipping
+of unknown variants. Standalone Wasm replays three frozen native-Candid vectors
+for Duplicate, credited cycles and refund. The test inputs use public example
+principals and synthetic transaction data. Installed Toko acceptance remains
+with the consumer.
+
 ## Provenance and independent qualification
 
 Declarations were independently expressed from the selected external schemas;

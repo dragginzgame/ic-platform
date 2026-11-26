@@ -275,10 +275,10 @@ impl<T: Encode> Encode for &T {
 }
 
 #[cfg(feature = "ledger")]
-impl Encode for [u8; 32] {
+impl<const N: usize> Encode for [u8; N] {
     const SCHEMA: Schema = Schema::Vector(&Schema::Primitive(-5));
     fn write(&self, writer: &mut Writer<'_>) -> Result<()> {
-        writer.unsigned(32)?;
+        writer.unsigned(N as u64)?;
         writer.bytes(self)
     }
 }

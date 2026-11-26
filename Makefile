@@ -23,7 +23,8 @@ types-publication-admission: qualification-tooling-check
 .PHONY: help test-engine-request lint-engine-request doc-engine-request check-engine-request-wasm
 help:
 	@printf '%s\n' \
-	  'deps-list              List local packages and versions (offline)' \
+	  'deps-list              List root packages and versions (offline)' \
+	  '                       Add DEPENDENCY_MANIFEST=qualification/Cargo.toml to include qualification' \
 	  'deps-update            Update Cargo locks; optional DEPENDENCY_PACKAGE / DEPENDENCY_PRECISE' \
 	  'install-tools          Prepare the selected Toko host and Rust tools' \
 	  'tools-check            Check prepared tools without installing' \
@@ -548,8 +549,8 @@ qualify-blob-suppliers: qualification-tooling-check
 qualify-management-ledger: qualification-tooling-check
 	cargo clippy --locked -p ic-platform-protocol --no-default-features --features ledger --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --locked -p ic-platform-protocol --no-default-features --features ledger --no-deps
-	cargo clippy --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features ledger --test ledger -- -D warnings
-	cargo test --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features ledger --test ledger
+	cargo clippy --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features ledger --test ledger --test top_up -- -D warnings
+	cargo test --locked --manifest-path qualification/Cargo.toml -p engine-view-consumer --features ledger --test ledger --test top_up
 	cargo clippy --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features ledger --bin ledger-admission -- -D warnings
 	$(ENGINE_WASM_ENV) cargo build --locked --manifest-path qualification/Cargo.toml -p engine-view-wasm --features ledger --bin ledger-admission --release --target wasm32-unknown-unknown --target-dir target/engine-view-wasm/ledger
 	node qualification/engine-view-wasm.mjs ledger

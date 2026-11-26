@@ -111,17 +111,28 @@ macro_rules! projection {
     (@read $reader:ident, $wire:ident, $name:ident, $variant:ident, $ty:ty) => {
         Ok($name::$variant($reader.value::<$ty>($wire)?))
     };
-    ($(#[$meta:meta])* enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident $(($ty:ty))?),+ $(,)? }) => {
+    (@unknown $reader:ident, $wire:ident, $label:ident) => { Err(Error::Type) };
+    (@unknown $reader:ident, $wire:ident, $label:ident, $unknown:ident) => {{
+        $reader.skip($wire)?;
+        Ok(Self::$unknown($label))
+    }};
+    ($(#[$meta:meta])* $(open $unknown:ident)? enum $name:ident { $($(#[$variant_meta:meta])* $label:literal => $variant:ident $(($ty:ty))?),+ $(,)? }) => {
         $(#[$meta])*
         #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-        pub enum $name { $($(#[$variant_meta])* $variant $(($ty))?,)+ }
+        pub enum $name {
+            $($(#[$variant_meta])* $variant $(($ty))?,)+
+            $(
+                /// Unrecognized selected variant, identified by its wire label.
+                $unknown(u32),
+            )?
+        }
         impl Decode for $name {
             const SCHEMA: Schema = Schema::Variant(&[$(($label, &projection!(@schema $($ty)?))),+]);
             fn read(reader: &mut Reader<'_, '_>, id: i64) -> Result<Self, Error> {
                 let (label, wire) = reader.variant(id)?;
                 match label {
                     $($label => projection!(@read reader, wire, $name, $variant $(, $ty)?),)+
-                    _ => Err(Error::Type),
+                    _ => projection!(@unknown reader, wire, label $(, $unknown)?),
                 }
             }
         }

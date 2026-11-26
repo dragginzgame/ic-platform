@@ -42,6 +42,10 @@ server setup, offline admission and managed process teardown. The driver owns
 one instance with four canisters on two application subnets and explicitly closes it after the checks. Failure drops the owned
 server, stopping its disposable instance. No public network canisters are used.
 
+The certification witness verifies the same captured bytes through both the
+local candidate and registry Platform 0.35.1. Each verifier builds its own
+Principal and trust inputs from bytes using its Cargo source identity.
+
 The product catalog pins `thiserror = "=2.0.18"`, matching PocketIC 16.1.0, at
 the maintainer's direction. Product and qualification locks select that same
 version. Native adapter identities never cross into the canister graph; the

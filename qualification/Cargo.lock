@@ -598,7 +598,7 @@ dependencies = [
  "curve25519-dalek",
  "ed25519",
  "serde",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "signature",
  "subtle",
  "zeroize",
@@ -1072,9 +1072,9 @@ dependencies = [
 
 [[package]]
 name = "ic-host-process"
-version = "0.81.4"
+version = "0.81.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11ea739ab482b78e71f7f044c8ea29e5225c3b2e751375cf20591de0489bb980"
+checksum = "fd610ee00fe545a9af9fa8b14fc9085ac0cfbe720f82e13046bb31e9f49a37b8"
 dependencies = [
  "errno",
  "libproc",
@@ -1095,20 +1095,6 @@ dependencies = [
 
 [[package]]
 name = "ic-platform"
-version = "0.34.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6372d2e30ba4e84ff47824dd1a4542e88215a18890afd9804fed99525bc35962"
-dependencies = [
- "ic-certification",
- "ic-platform-types 0.21.4",
- "ic-verify-bls-signature",
- "serde",
- "serde_cbor",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform"
 version = "0.35.1"
 dependencies = [
  "crypto-bigint",
@@ -1123,8 +1109,22 @@ dependencies = [
  "serde",
  "serde_bytes",
  "serde_cbor",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "spki",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ic-platform"
+version = "0.35.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "897a2b545078b7ca4cb3432819afa35161864647537b049f31fc70e5b6dcd61d"
+dependencies = [
+ "ic-certification",
+ "ic-platform-types 0.21.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ic-verify-bls-signature",
+ "serde",
+ "serde_cbor",
  "thiserror 2.0.18",
 ]
 
@@ -1139,13 +1139,13 @@ dependencies = [
 
 [[package]]
 name = "ic-platform-protocol"
-version = "0.3.10"
+version = "0.3.11"
 dependencies = [
  "crc32fast",
  "ic-platform-types 0.21.5",
  "num-bigint 0.5.1",
  "serde",
- "sha2 0.11.1",
+ "sha2 0.11.2",
 ]
 
 [[package]]
@@ -1164,35 +1164,35 @@ version = "0.23.27"
 
 [[package]]
 name = "ic-platform-types"
-version = "0.21.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "986979a988616a18e4e4e85bebe838a3142192e54290fcdabbffa1e5c441953b"
-dependencies = [
- "crc32fast",
- "data-encoding",
- "serde",
- "serde_bytes",
- "sha2 0.11.1",
- "thiserror 2.0.18",
-]
-
-[[package]]
-name = "ic-platform-types"
 version = "0.21.5"
 dependencies = [
  "crc32fast",
  "data-encoding",
  "serde",
  "serde_bytes",
- "sha2 0.11.1",
+ "sha2 0.11.2",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ic-platform-types"
+version = "0.21.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81810d3daa26f7ee13ed687d3f093f18bda2127bba5210a81fabae7a075e1b3f"
+dependencies = [
+ "crc32fast",
+ "data-encoding",
+ "serde",
+ "serde_bytes",
+ "sha2 0.11.2",
  "thiserror 2.0.18",
 ]
 
 [[package]]
 name = "ic-testkit"
-version = "0.110.4"
+version = "0.110.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5617b2cbdc7adf055c6c7f4bdcbca8ad0ef5b367b65996acda10cad7fb79bb13"
+checksum = "f72c4ef2bc7cb1244d20e10d64416b8d8da4c5afda5018c476ae8253a75aadc6"
 dependencies = [
  "pocket-ic",
 ]
@@ -1461,7 +1461,7 @@ dependencies = [
  "ecdsa",
  "elliptic-curve",
  "primeorder",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "wnaf",
 ]
 
@@ -1793,7 +1793,7 @@ dependencies = [
  "k256",
  "serde_cbor",
  "serde_json",
- "sha2 0.11.1",
+ "sha2 0.11.2",
  "tempfile",
  "tokio",
  "toko-tooling",
@@ -2135,8 +2135,8 @@ dependencies = [
  "candid",
  "ic-certification",
  "ic-management-canister-types",
- "ic-platform 0.34.19",
  "ic-platform 0.35.1",
+ "ic-platform 0.35.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ic-testkit",
  "tokio",
  "toko-tooling",
@@ -2466,9 +2466,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.11.1"
+version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19"
+checksum = "5b0e5c7d67bc53f435386b2130fdc900488c5703770f6d8a4633060e34288a27"
 dependencies = [
  "cfg-if",
  "cpufeatures 0.3.1",
@@ -2839,9 +2839,9 @@ dependencies = [
 
 [[package]]
 name = "toko-tooling"
-version = "0.46.4"
+version = "0.46.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3889bff0f8ff6dc8c80b161c908f4b598125b55bf55f18146471f9ac3294cff"
+checksum = "038380e2f80a7301dee19c19e2afd38a0bfbbfc41b447a1c81178afc1de94bc7"
 
 [[package]]
 name = "tower"
@@ -2999,8 +2999,8 @@ name = "types-consumer"
 version = "0.1.0"
 dependencies = [
  "ic-platform-runtime",
- "ic-platform-types 0.21.4",
  "ic-platform-types 0.21.5",
+ "ic-platform-types 0.21.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json",
  "toko-tooling",
 ]

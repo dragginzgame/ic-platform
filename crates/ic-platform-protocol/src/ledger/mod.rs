@@ -1,5 +1,7 @@
-//! Cycles-ledger creation and ICRC balance/fee formats, without transport.
+//! ICP and cycles-ledger formats, without transport.
 //! Duplicate, refusal and uncertain observations never authorize another operation.
+
+pub mod top_up;
 
 pub use crate::candid::{Nat, encode::EncodeError};
 use crate::{
