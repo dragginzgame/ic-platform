@@ -59,3 +59,48 @@ release-group inventory and all eleven existing Protocol graph selections pass.
 An explicit Cargo tree observation of local Types on Wasm contains only CRC32,
 Base32, Serde and error-derive suppliers and their build closure. There is no
 Protocol, Runtime or second Types identity in that selected production graph.
+
+## Runtime text size and compatibility — 2026-11-26
+
+Types now uses a bounded unpadded Base32 codec for Principal text and Account
+checksums. Principal parsing checks dash positions after checksum validation.
+The published Types 0.21.5 comparison covers all 30 admitted byte lengths and
+all 32 substitutions for the final symbol at each length, alongside mixed
+grouping, ASCII case and length refusals. The all-features product Wasm graph
+contains no `data-encoding`. The optional native transport still brings it in
+via `ic-transport-types`, `candid` and `ic_principal`. Native qualification
+oracles also retain their published dependencies.
+
+The native consumer test also compares formatting and parsing directly with
+DFINITY's `ic_principal` 0.1.5 for four byte patterns at every length, uppercase
+forms, every final-symbol substitution and representative malformed text.
+Types retains its existing early 63-byte cap and checks exact error variants
+against published Types. Account tests exercise the accepted and refused text
+examples in the [ICRC-1 specification](https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-1/TextualEncoding.md#examples).
+
+The same private `runtime-exports` query was built against the Types source at
+`4e64ee076be68e98ddd5dd297acc99d04e698cf5` and against the candidate. Node
+24.21.0 supplied runtime IC argument bytes to both queries and checked canonical
+replies for minimum and maximum lengths, uppercase text and a canister ID. Both
+modules refused malformed grouping, trailing bits, checksum and oversized text.
+
+| Build | Module bytes | Code section payload bytes | SHA-256 |
+| --- | ---: | ---: | --- |
+| Before | 110,118 | 87,921 | `c1904eac891707064537be551b04e3530979751c901c880227f6c2e1e923cbc2` |
+| After | 46,215 | 26,102 | `48b7b778c4688c420714556f071f91392ba87652113089b0bdb66767a439bc3e` |
+
+Build the same fixture with Rust 1.100.0 in each source state, carrying the
+fixture and its qualification lock entry into the baseline. Set `selection` to
+`before` or `after` before invoking Cargo.
+
+```sh
+CARGO_PROFILE_RELEASE_OPT_LEVEL=z CARGO_PROFILE_RELEASE_LTO=fat \
+CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1 CARGO_PROFILE_RELEASE_STRIP=symbols \
+cargo build --locked --manifest-path qualification/Cargo.toml -p runtime-exports \
+  --no-default-features --features principal-text --target wasm32-unknown-unknown \
+  --release --target-dir "target/principal-text-$selection"
+
+node qualification/principal-text-wasm.mjs \
+  target/principal-text-before/wasm32-unknown-unknown/release/runtime_exports.wasm \
+  target/principal-text-after/wasm32-unknown-unknown/release/runtime_exports.wasm
+```

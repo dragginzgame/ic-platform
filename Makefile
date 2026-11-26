@@ -86,7 +86,7 @@ qualify-runtime-call: toko-tooling-check
 	RUSTDOCFLAGS='-D warnings' cargo doc --locked -p ic-platform-runtime --features call --no-deps
 	cargo check --locked -p ic-platform-runtime --features call --tests --target wasm32-unknown-unknown
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-runtime --no-default-features --forbid-pattern '^(?!ic-platform-runtime$$)'
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-runtime --no-default-features --features call --forbid-pattern '^(?!(ic-platform-runtime|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-types=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform-runtime --no-default-features --features call --forbid-pattern '^(?!(ic-platform-runtime|ic-platform-types|cfg-if|crc32fast|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-types=1
 
 .PHONY: qualify-types
 qualify-types: toko-tooling-check
@@ -109,7 +109,7 @@ qualify-types-consumer: qualification-tooling-check
 	$(ENGINE_WASM_ENV) cargo build --locked --manifest-path qualification/Cargo.toml -p types-consumer --features self-authentication --release --target wasm32-unknown-unknown --target-dir target/types-wasm/self-authentication
 	node qualification/types-wasm.mjs
 
-TYPES_CONSUMER_PACKAGES := types-consumer|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|serde_json|itoa|memchr|zmij
+TYPES_CONSUMER_PACKAGES := types-consumer|ic-platform-types|cfg-if|crc32fast|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|serde_json|itoa|memchr|zmij
 
 .PHONY: qualify-types-auth-archive
 qualify-types-auth-archive: qualification-tooling-check
@@ -169,7 +169,7 @@ qualify-runtime-installed: qualification-tooling-check runtime-server-check buil
 	$(ENGINE_WASM_ENV) cargo build --locked --manifest-path qualification/Cargo.toml -p runtime-rollback --target wasm32-unknown-unknown --release --target-dir target/runtime-rollback
 	node qualification/runtime-system.mjs
 	node qualification/server.mjs run cargo run --locked --manifest-path qualification/Cargo.toml -p runtime-installed
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-rollback --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-rollback|ic-platform-protocol|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-protocol=1 --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-rollback --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-rollback|ic-platform-protocol|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-protocol=1 --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
 
 .PHONY: qualify-runtime-guard
 qualify-runtime-guard: qualification-tooling-check
@@ -196,7 +196,7 @@ qualify-runtime-exports: build-runtime-exports
 	cargo clippy --locked --manifest-path qualification/Cargo.toml -p runtime-exports --target wasm32-unknown-unknown --all-targets -- -D warnings
 	node qualification/runtime-exports.mjs
 	node qualification/runtime-ui.mjs exports
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-exports --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-exports|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package runtime-exports --target wasm32-unknown-unknown --forbid-pattern '^(?!(runtime-exports|ic-platform-runtime|ic-platform-runtime-guard|ic-platform-macros|ic-platform-types|cfg-if|crc32fast|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident)$$)' --require ic-platform-runtime=1 --require ic-platform-runtime-guard=1 --require ic-platform-macros=1 --require ic-platform-types=1
 
 check-types-graphs: qualification-tooling-check
 	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)/qualification" --package types-consumer --no-default-features --forbid-pattern '^(?!($(TYPES_CONSUMER_PACKAGES))$$)' --require ic-platform-types=1
@@ -304,14 +304,14 @@ qualify-registry-runtime: qualification-tooling-check
 	node qualification/engine-view-wasm.mjs registry
 
 REGISTRY_GRAPH_PACKAGES := ic-platform-protocol|serde|serde_core|serde_derive|proc-macro2|quote|syn|unicode-ident
-PROTOCOL_GRAPH_PACKAGES := ic-platform-protocol|ic-platform-types|cfg-if|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident
+PROTOCOL_GRAPH_PACKAGES := ic-platform-protocol|ic-platform-types|cfg-if|crc32fast|serde|serde_core|serde_derive|serde_bytes|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident
 MARKETPLACE_GRAPH_PACKAGES := $(PROTOCOL_GRAPH_PACKAGES)|num-bigint|num-integer|num-traits|autocfg
 # The native comparison fixture intentionally exposes independent Candid schemas.
 # Its oracle graph is excluded on Wasm and never admitted into product graphs.
 CONSUMER_ORACLE_GRAPH_PACKAGES :=
 CONSUMER_MARKETPLACE_BIGINT_IDENTITIES := 1
 ifeq ($(findstring wasm,$(GRAPH_TARGET)),)
-CONSUMER_ORACLE_GRAPH_PACKAGES := |anyhow|ar_archive_writer|array-init|arrayvec|autocfg|binrw|binrw_derive|block-buffer|bytemuck|byteorder|candid|candid_derive|cc|cpufeatures|crypto-common|digest|either|find-msvc-tools|generic-array|hex|ic_principal|lazy_static|leb128|libc|memchr|num-bigint|num-integer|num-traits|object|paste|pretty|psm|sha2|shlex|stacker|typed-arena|typenum|unicode-width|version_check
+CONSUMER_ORACLE_GRAPH_PACKAGES := |anyhow|ar_archive_writer|array-init|arrayvec|autocfg|binrw|binrw_derive|block-buffer|bytemuck|byteorder|candid|candid_derive|cc|cpufeatures|crypto-common|data-encoding|digest|either|find-msvc-tools|generic-array|hex|ic_principal|lazy_static|leb128|libc|memchr|num-bigint|num-integer|num-traits|object|paste|pretty|psm|sha2|shlex|stacker|typed-arena|typenum|unicode-width|version_check
 CONSUMER_MARKETPLACE_BIGINT_IDENTITIES := 2
 endif
 PROTOCOL_GRAPH_CHECK = perl "$(TOKO_TOOLING_ROOT)/scripts/ci/check-cargo-graph.pl" --target "$(GRAPH_TARGET)" --edges normal,build --explain
@@ -352,7 +352,7 @@ qualify-platform-authentication: qualify-platform-certificate
 	cargo clippy --locked -p ic-platform --features certificate-authentication --all-targets -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --locked -p ic-platform --features certificate-authentication --no-deps
 	cargo clippy --locked -p ic-platform --features certificate-authentication --all-targets --target wasm32-unknown-unknown -- -D warnings
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --features certificate-authentication --forbid-pattern '^(?!(ic-platform|ic-platform-types|ic-certification|ic-verify-bls-signature|ic_bls12_381|ff|group|pairing|rand_core|subtle|lazy_static|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|serde_cbor|half|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|hex|sha2|digest|block-buffer|crypto-common|generic-array|typenum|version_check|cfg-if|cpufeatures|libc)$$)' --require ic-platform-types=1 --require ic-certification=1 --require ic-verify-bls-signature=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --features certificate-authentication --forbid-pattern '^(?!(ic-platform|ic-platform-types|ic-certification|ic-verify-bls-signature|ic_bls12_381|ff|group|pairing|rand_core|subtle|lazy_static|crc32fast|serde|serde_core|serde_derive|serde_bytes|serde_cbor|half|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|hex|sha2|digest|block-buffer|crypto-common|generic-array|typenum|version_check|cfg-if|cpufeatures|libc)$$)' --require ic-platform-types=1 --require ic-certification=1 --require ic-verify-bls-signature=1
 
 .PHONY: qualify-platform-observed
 qualify-platform-observed: qualification-tooling-check runtime-server-check
@@ -382,7 +382,7 @@ qualify-canister-signature-authentication: toko-tooling-check
 	cargo clippy --locked -p ic-platform --features canister-signature-authentication --all-targets -- -D warnings
 	cargo clippy --locked -p ic-platform --features canister-signature-authentication --all-targets --target wasm32-unknown-unknown -- -D warnings
 	RUSTDOCFLAGS='-D warnings' cargo doc --locked -p ic-platform --features canister-signature-authentication --no-deps
-	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --features canister-signature-authentication --forbid-pattern '^(?!(ic-platform|ic-platform-types|ic-certification|ic-verify-bls-signature|ic_bls12_381|ff|group|pairing|rand_core|subtle|lazy_static|crc32fast|data-encoding|serde|serde_core|serde_derive|serde_bytes|serde_cbor|half|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|hex|sha2|digest|block-buffer|crypto-common|generic-array|typenum|version_check|cfg-if|cpufeatures|libc|spki|der|const-oid|hybrid-array)$$)' --require ic-platform-types=1 --require ic-certification=1 --require ic-verify-bls-signature=1 --require spki=1
+	$(PROTOCOL_GRAPH_CHECK) --consumer "$(CURDIR)" --package ic-platform --features canister-signature-authentication --forbid-pattern '^(?!(ic-platform|ic-platform-types|ic-certification|ic-verify-bls-signature|ic_bls12_381|ff|group|pairing|rand_core|subtle|lazy_static|crc32fast|serde|serde_core|serde_derive|serde_bytes|serde_cbor|half|thiserror|thiserror-impl|proc-macro2|quote|syn|unicode-ident|hex|sha2|digest|block-buffer|crypto-common|generic-array|typenum|version_check|cfg-if|cpufeatures|libc|spki|der|const-oid|hybrid-array)$$)' --require ic-platform-types=1 --require ic-certification=1 --require ic-verify-bls-signature=1 --require spki=1
 
 .PHONY: qualify-canister-signature-observed
 qualify-canister-signature-observed: qualification-tooling-check runtime-server-check

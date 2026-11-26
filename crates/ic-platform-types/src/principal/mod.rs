@@ -7,7 +7,7 @@ mod self_authenticating;
 #[cfg(test)]
 mod tests;
 
-use data_encoding::BASE32_NOPAD;
+use crate::base32;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use std::{fmt, str::FromStr};
 
@@ -86,24 +86,12 @@ impl Principal {
             return Err(PrincipalError::TextTooLong());
         }
 
-        let mut symbols = [0_u8; Self::MAX_LENGTH_IN_TEXT];
-        let mut symbol_count = 0;
-        for byte in text.bytes() {
-            if byte != b'-' {
-                symbols[symbol_count] = byte.to_ascii_uppercase();
-                symbol_count += 1;
-            }
-        }
-        let decoded_len = BASE32_NOPAD
-            .decode_len(symbol_count)
-            .map_err(|_| PrincipalError::InvalidBase32())?;
         // At most 63 Base32 digits fit the text bound: floor(63 * 5 / 8) = 39.
         // Keeping the full decoded bound lets us distinguish an oversized
         // payload from invalid Base32, before examining its checksum.
         let mut decoded = [0_u8; 39];
-        let used = BASE32_NOPAD
-            .decode_mut(&symbols[..symbol_count], &mut decoded[..decoded_len])
-            .map_err(|_| PrincipalError::InvalidBase32())?;
+        let used =
+            base32::decode_dashed(text, &mut decoded).ok_or(PrincipalError::InvalidBase32())?;
         if used < 4 {
             return Err(PrincipalError::TextTooShort());
         }
@@ -116,10 +104,11 @@ impl Principal {
         }
 
         let principal = Self::from_slice(payload);
-        let mut canonical = [0_u8; Self::MAX_LENGTH_IN_TEXT];
-        if !principal
-            .write_text(&mut canonical)
-            .eq_ignore_ascii_case(text)
+        if text.ends_with('-')
+            || text
+                .bytes()
+                .enumerate()
+                .any(|(index, byte)| (byte == b'-') != (index % 6 == 5))
         {
             return Err(PrincipalError::AbnormalGrouped(principal));
         }
@@ -164,27 +153,25 @@ impl Principal {
     ///
     /// # Panics
     ///
-    /// Panics if the Base32 supplier violates its ASCII output contract.
+    /// Panics if the internal formatter emits invalid UTF-8.
     pub fn write_text<'a>(&self, output: &'a mut [u8; Self::MAX_LENGTH_IN_TEXT]) -> &'a str {
         let mut checked = [0_u8; 4 + Self::MAX_LENGTH_IN_BYTES];
         checked[..4].copy_from_slice(&crc32fast::hash(self.as_slice()).to_be_bytes());
         let checked_len = 4 + usize::from(self.len);
         checked[4..checked_len].copy_from_slice(self.as_slice());
 
-        let encoded_len = BASE32_NOPAD.encode_len(checked_len);
         let mut encoded = [0_u8; 53];
-        BASE32_NOPAD.encode_mut(&checked[..checked_len], &mut encoded[..encoded_len]);
+        let encoded_len = base32::encode(&checked[..checked_len], &mut encoded);
         let mut written = 0;
         for (index, byte) in encoded[..encoded_len].iter().enumerate() {
             if index != 0 && index % 5 == 0 {
                 output[written] = b'-';
                 written += 1;
             }
-            output[written] = byte.to_ascii_lowercase();
+            output[written] = *byte;
             written += 1;
         }
 
-        // The supplier emits ASCII Base32 digits; inserted dashes are ASCII too.
         std::str::from_utf8(&output[..written]).expect("Base32 text is ASCII")
     }
 }

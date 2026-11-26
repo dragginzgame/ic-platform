@@ -93,6 +93,38 @@ fn literal_text_and_caller_storage() {
 }
 
 #[test]
+fn icrc1_text_examples() {
+    // https://github.com/dfinity/ICRC-1/blob/main/standards/ICRC-1/TextualEncoding.md#examples
+    let owner_text = "k2t6j-2nvnp-4zjm3-25dtz-6xhaa-c7boj-5gayf-oj3xs-i43lp-teztq-6ae";
+    let owner = Principal::from_text(owner_text).unwrap();
+    let mut one = [0; 32];
+    one[31] = 1;
+    let increasing = std::array::from_fn(|index| (index + 1) as u8);
+    for (suffix, subaccount) in [
+        ("", None),
+        ("-6cc627i.1", Some(one)),
+        (
+            "-dfxgiyy.102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20",
+            Some(increasing),
+        ),
+    ] {
+        let text = format!("{owner_text}{suffix}");
+        let parsed = text.parse::<Account>().unwrap();
+        assert_eq!(parsed.owner, owner);
+        assert_eq!(parsed.subaccount, subaccount);
+        assert_eq!(Account { owner, subaccount }.to_string(), text);
+    }
+    for suffix in ["-q6bn32y.", "-6cc627i.01", ".1"] {
+        assert!(format!("{owner_text}{suffix}").parse::<Account>().is_err());
+    }
+    assert!(
+        "k2t6j2nvnp4zjm3-25dtz6xhaac7boj5gayfoj3xs-i43lp-teztq-6ae"
+            .parse::<Account>()
+            .is_err()
+    );
+}
+
+#[test]
 fn malformed_text_keeps_refusal_precedence() {
     for (text, error) in [
         ("x".repeat(137), AccountError::TextTooLong),

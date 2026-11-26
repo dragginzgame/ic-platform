@@ -6,8 +6,10 @@
 #[cfg(test)]
 mod tests;
 
-use crate::principal::{Principal, PrincipalError};
-use data_encoding::BASE32_NOPAD;
+use crate::{
+    base32,
+    principal::{Principal, PrincipalError},
+};
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
@@ -193,8 +195,8 @@ fn checksum(owner: &Principal, subaccount: &Subaccount) -> [u8; 7] {
     payload[owner_len..owner_len + 32].copy_from_slice(subaccount);
     let crc = crc32fast::hash(&payload[..owner_len + 32]).to_be_bytes();
     let mut symbols = [0_u8; 7];
-    BASE32_NOPAD.encode_mut(&crc, &mut symbols);
-    symbols.make_ascii_lowercase();
+    let written = base32::encode(&crc, &mut symbols);
+    debug_assert_eq!(written, symbols.len());
 
     symbols
 }

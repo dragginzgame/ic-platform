@@ -1,4 +1,6 @@
 #[cfg(not(target_family = "wasm"))]
+mod dfinity;
+#[cfg(not(target_family = "wasm"))]
 mod published;
 
 #[test]

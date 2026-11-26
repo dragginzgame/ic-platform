@@ -100,6 +100,11 @@ fn principal_refusals_match_published_typed_contract() {
         compare(&text);
         compare(&text.to_uppercase());
         compare(&text.replace('-', ""));
+        let mut changed = text.as_bytes().to_vec();
+        for last_symbol in *b"abcdefghijklmnopqrstuvwxyz234567" {
+            changed[text.len() - 1] = last_symbol;
+            compare(std::str::from_utf8(&changed).unwrap());
+        }
         for end in 0..text.len() {
             compare(&text[..end]);
             for replacement in *b"az0!-" {

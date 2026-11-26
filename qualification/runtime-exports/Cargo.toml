@@ -8,6 +8,7 @@ license-file.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 candidate-runtime.workspace = true
+candidate-types = { workspace = true, optional = true }
 
 [package.metadata.cargo-machete]
 ignored = ["toko-tooling"]
@@ -22,6 +23,7 @@ crate-type = ["cdylib", "rlib"]
 default = ["generated"]
 generated = ["candidate-runtime/entrypoint-macros"]
 raw = ["candidate-runtime/system-raw"]
+principal-text = ["generated", "dep:candidate-types"]
 
 [dev-dependencies]
 toko-tooling.workspace = true

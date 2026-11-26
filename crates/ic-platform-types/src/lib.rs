@@ -8,6 +8,7 @@
 #![forbid(unsafe_code)]
 
 pub mod account;
+mod base32;
 pub mod principal;
 
 pub use account::{Account, AccountError, DEFAULT_SUBACCOUNT, Subaccount};

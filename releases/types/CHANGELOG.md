@@ -3,6 +3,14 @@
 Release group: `types`. Covered package: `ic-platform-types`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.21.6] - 2026-11-26
+
+### 🚀 Performance
+
+- Remove `data-encoding` from Types with a bounded Base32 codec shared by
+  Principal text and Account checksums. Preserve canonical output and typed
+  Principal parse errors. [#44 — Reduce the Wasm footprint of Principal text parsing and formatting](https://github.com/dragginzgame/ic-platform/issues/44)
+
 ## [0.21.4] - 2026-11-19
 
 - Group the Principal and Account implementations and document the Principal Serde visitor.

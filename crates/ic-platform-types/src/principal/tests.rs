@@ -74,7 +74,7 @@ fn text_refusals_keep_their_distinct_meanings() {
         assert_eq!(Principal::from_text(&text), Err(error), "{text:?}");
     }
     // Valid Base32 carrying thirty identity bytes must refuse before checksum.
-    let text = data_encoding::BASE32_NOPAD.encode(&[0; 34]);
+    let text = "a".repeat(55);
     assert_eq!(
         Principal::from_text(text),
         Err(PrincipalError::TextTooLong())

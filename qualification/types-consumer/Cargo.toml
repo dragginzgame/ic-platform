@@ -8,6 +8,7 @@ license-file.workspace = true
 
 [target.'cfg(not(target_family = "wasm"))'.dev-dependencies]
 ic-platform-types.workspace = true
+ic_principal.workspace = true
 
 [target.'cfg(any())'.dev-dependencies]
 toko-tooling.workspace = true
