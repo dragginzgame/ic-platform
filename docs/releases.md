@@ -5,6 +5,19 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Protocol 0.3.11
+
+Published the bounded ICP transfer and CMC notification codecs for
+[Platform #43](https://github.com/dragginzgame/ic-platform/issues/43) from
+`00c209d679667c9c16b8427ce3ffa075a60e3278` with Toko Tooling 0.46.5.
+All 58 Linux qualification targets passed, including the native Candid and
+Wasm codec checks and installed verification against registry Platform 0.35.1.
+Fresh RustSec audits found zero known vulnerabilities in both lockfiles.
+The downloaded archive matched the local package, registry checksum, tagged
+source and package path. Registry SHA-256 was
+`fbbc0ec85800bfaeb3d2483433c4d26d02d46702573b9b71e0a5ba05cec1ccdb`.
+[Protocol tag](https://github.com/dragginzgame/ic-platform/tree/protocol-v0.3.11)
+
 ## Types 0.21.5, Protocol 0.3.10, Runtime 0.23.27 and Platform 0.35.1
 
 Published the six crates from commit `02f3f9d42ad6e191523eb4ae947e129f5b564450`
