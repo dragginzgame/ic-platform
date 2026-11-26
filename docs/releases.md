@@ -5,6 +5,29 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Types 0.21.6
+
+Published the bounded Base32 codec for Principal text and Account checksums
+from `6f2b2669a068d1d3ea71afec0b551997945c4aef` with Toko Tooling 0.46.5.
+All 58 Linux release qualification targets passed, including direct comparisons
+with DFINITY's Principal implementation and the ICRC-1 Account examples. Fresh
+RustSec audits reported zero known vulnerabilities in both lockfiles.
+[#44 — Reduce the Wasm footprint of Principal text parsing and formatting](https://github.com/dragginzgame/ic-platform/issues/44)
+
+The registry archive matched the locally packaged bytes, registry checksum,
+tagged commit and `crates/ic-platform-types` source path. The registry entry has
+no `data-encoding` dependency. Its SHA-256 is
+`4f6c4c1f4cd93bf0143623ad199f705151a9508c746ad9dbed3eda4972f5d14f`.
+[Types tag](https://github.com/dragginzgame/ic-platform/tree/types-v0.21.6)
+
+The private qualification manifest pins the prior Types release at 0.21.5 so
+the regression comparison keeps exercising the original codec.
+
+The Principal query rebuilt from the release commit measured 46,215 module
+bytes and 26,102 code section payload bytes. Its SHA-256 is
+`e80869588b94cbcec34ad409e199e418e91cf5c048c2378568377260977098be`.
+[Runtime text size and compatibility](qualification/types-principal.md#runtime-text-size-and-compatibility--2026-11-26)
+
 ## Protocol 0.3.11
 
 Published the bounded ICP transfer and CMC notification codecs for
