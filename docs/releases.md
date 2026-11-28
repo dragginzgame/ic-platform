@@ -5,6 +5,21 @@ Run final-source qualification once and then the supported `publish` adapter
 once per package; `publish-check` is an optional separate preflight. Historical
 dry-run/upload records below describe the commands actually used at the time.
 
+## Runtime 0.23.28
+
+Published the automatic update wrapper cleanup from
+[the Runtime 0.23.28 tag](https://github.com/dragginzgame/ic-platform/tree/runtime-v0.23.28).
+All 58 Linux release qualification targets passed with Rust 1.100.0.
+Fresh RustSec audits found zero known vulnerabilities in both lockfiles.
+Each registry download matched its local archive, registry checksum and tagged
+source commit.
+
+| Package | Registry SHA-256 |
+|---|---|
+| ic-platform-runtime-guard | `36b681d1078a9cd00a34a7573a7535864acdc38cf3c956e94f6575d58f987121` |
+| ic-platform-macros | `5b383f7936bcc264a763f207d3cc74ee59418417fe32e232a928870d1b5ce85d` |
+| ic-platform-runtime | `551f3e159be2a705e5582a9f16fa097b836d3537972ab310e797d633a693c47d` |
+
 ## Types 0.21.6
 
 Published the bounded Base32 codec for Principal text and Account checksums
