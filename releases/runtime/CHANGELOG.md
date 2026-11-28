@@ -4,6 +4,14 @@ Release group: `runtime`. Covered packages: `ic-platform-runtime` and, from
 0.23.3, `ic-platform-runtime-guard` and `ic-platform-macros`.
 Return to the [group index](../../CHANGELOG.md).
 
+## [0.23.28] - 2026-11-28
+
+### ⚡ Performance
+
+- Reduce generated Wasm for automatic updates. Synchronous handlers run directly
+  inside the update task, and synchronous and asynchronous handlers share reply
+  completion.
+
 ## [0.23.26] - 2026-11-25
 
 ### ➕ Added

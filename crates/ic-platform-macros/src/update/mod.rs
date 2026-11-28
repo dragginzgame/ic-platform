@@ -234,12 +234,12 @@ pub(super) fn expand_kind(
         if kind == Kind::Query {
             quote!(#runtime::entrypoints::query(#maximum, #guard, #decode, #handler, #encode))
         } else {
-            let invoke_handler = if signature.asyncness.is_some() {
-                quote!(#handler)
+            let dispatch = if signature.asyncness.is_some() {
+                quote!(#runtime::entrypoints::update)
             } else {
-                quote!(|input| async move { #handler(input) })
+                quote!(#runtime::entrypoints::update_sync)
             };
-            quote!(#runtime::entrypoints::update(#maximum, #guard, #decode, #invoke_handler, #encode, #on_error))
+            quote!(#dispatch(#maximum, #guard, #decode, #handler, #encode, #on_error))
         }
     };
     let gating = &gating;

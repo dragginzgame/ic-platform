@@ -1,5 +1,5 @@
 use candidate_runtime::{
-    entrypoints::{Inspection, InspectionDecision, UpdateError},
+    entrypoints::{Inspection, InspectionDecision},
     system,
 };
 
@@ -45,10 +45,10 @@ async fn echo(input: Vec<u8>) {
     decode = decode,
     max_bytes = 4,
     on_error = fail,
-    manual_reply
+    encode = Ok::<Vec<u8>, u8>
 )]
-async fn probe(input: Vec<u8>) {
-    system::reply(&input).unwrap();
+fn probe(input: Vec<u8>) -> Vec<u8> {
+    input
 }
 
 // denied
@@ -120,10 +120,6 @@ fn decode(bytes: &[u8]) -> Result<Vec<u8>, u8> {
     }
 }
 
-#[expect(
-    clippy::needless_pass_by_value,
-    reason = "Generated failure callbacks receive ownership of the typed admission error"
-)]
-fn fail(error: UpdateError<u8, u8>) -> ! {
+fn fail(error: impl core::fmt::Debug) -> ! {
     panic!("admission refused: {error:?}")
 }

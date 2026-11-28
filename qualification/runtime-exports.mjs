@@ -55,6 +55,10 @@ run('canister_update echo',[1,2,3,4,5],true,true,['context','size']);
 run('canister_update echo',[255],true,true,['context','size','copy']);
 run('canister_update echo',[1],false,true,['context']);
 
+run('canister_update probe',[0,128,254],true,false,['context','size','copy','context','append','reply']);
+run('canister_update probe',[255],true,true,['context','size','copy']);
+run('canister_update probe',[1],false,true,['context']);
+
 const inspect='canister_inspect_message';
 const metadata=['method size','method copy','caller size','caller copy','size'];
 run(inspect,[0,1,2,3],false,false,[...metadata,'controller','accept'],{method:Buffer.from('echo')});
@@ -63,4 +67,4 @@ run(inspect,[0,1,2,3,4],false,false,metadata,{method:Buffer.from('echo')});
 run(inspect,[0],false,false,metadata,{method:Buffer.from('drop')});
 run(inspect,[0],false,false,['method size'],{method:Buffer.from('probe')});
 run(inspect,[0],false,false,['method size','method copy'],{method:[255]});
-console.log(JSON.stringify({admission:'passed',exports:4,cases:12,sha256:createHash('sha256').update(bytes).digest('hex'),node:process.version}));
+console.log(JSON.stringify({admission:'passed',exports:4,cases:15,sha256:createHash('sha256').update(bytes).digest('hex'),node:process.version}));

@@ -270,15 +270,54 @@ where
         let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
         executor::run_update(async move {
             let result = handler(input).await;
-            let bytes = match encode(result) {
-                Ok(bytes) => bytes,
-                Err(error) => on_error(EndpointError::Encode(error)),
-            };
-            if let Err(error) = system::reply(&bytes) {
-                on_error(EndpointError::Reply(error));
-            }
+            finish_update(encode(result), on_error);
         })
         .map_err(EndpointError::Entry)
+    }
+}
+
+/// Run a synchronous update handler under the normal update task.
+#[doc(hidden)]
+pub fn update_sync<T, R, G, D, E>(
+    maximum: usize,
+    guard: impl FnOnce() -> Result<(), G>,
+    decode: impl FnOnce(&[u8]) -> Result<T, D>,
+    handler: impl FnOnce(T) -> R + 'static,
+    encode: impl FnOnce(R) -> Result<Vec<u8>, E> + 'static,
+    on_error: fn(EndpointError<G, D, E>) -> !,
+) -> Result<TaskHandle, EndpointError<G, D, E>>
+where
+    T: 'static,
+    G: 'static,
+    D: 'static,
+    E: 'static,
+{
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = (maximum, guard, decode, handler, encode, on_error);
+        crate::native::requires_canister()
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        executor::check_update_entry().map_err(EndpointError::Entry)?;
+        let input = prepare(maximum, guard, decode).map_err(EndpointError::Admission)?;
+        executor::run_update(async move {
+            finish_update(encode(handler(input)), on_error);
+        })
+        .map_err(EndpointError::Entry)
+    }
+}
+
+// Keep the reply and typed failure path shared across endpoint futures.
+#[cfg(target_arch = "wasm32")]
+#[inline(never)]
+fn finish_update<G, D, E>(encoded: Result<Vec<u8>, E>, on_error: fn(EndpointError<G, D, E>) -> !) {
+    let bytes = match encoded {
+        Ok(bytes) => bytes,
+        Err(error) => on_error(EndpointError::Encode(error)),
+    };
+    if let Err(error) = system::reply(&bytes) {
+        on_error(EndpointError::Reply(error));
     }
 }
 
